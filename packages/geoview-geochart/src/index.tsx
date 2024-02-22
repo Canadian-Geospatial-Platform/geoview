@@ -56,6 +56,9 @@ class GeoChartFooterPlugin extends FooterPlugin {
     },
   });
 
+  /**
+   * Overrides the addition of the GeoChart Footer Plugin to make sure to set the chart configs into the store.
+   */
   onAdd(): void {
     // Initialize the store with geochart provided configuration
     GeochartEventProcessor.setGeochartCharts(this.pluginProps.mapId, this.configObj.charts);
@@ -64,6 +67,10 @@ class GeoChartFooterPlugin extends FooterPlugin {
     super.onAdd();
   }
 
+  /**
+   * Overrides the creation of the content properties of this GeoChart Footer Plugin.
+   * @returns {TypeTabs} The TypeTabs for the GeoChart Footer Plugin
+   */
   onCreateContentProps(): TypeTabs {
     // Create element
     const content = <GeoChartPanel mapId={this.pluginProps.mapId} />;
@@ -77,6 +84,10 @@ class GeoChartFooterPlugin extends FooterPlugin {
     };
   }
 
+  /**
+   * Overrides when the plugin is selected in the Footer Bar.
+   * @returns {TypeTabs} The TypeTabs for the GeoChart Footer Plugin
+   */
   onSelected(): void {
     // Call parent
     super.onSelected();

@@ -67,6 +67,11 @@
     </div>
     <div id="mapWM3" class="geoview-map" data-lang="en" data-config-url="./configs/package-swiper3-config.json"></div>
     <p>Configuration with supported layers type (WMS, XYZ, WFS, GeoJSON, OGC Feature API and GeoCore)</p>
+    <input id="mapWM3Input" placeholder="Type a layer path" />
+    <button onclick="addSwiper()">Add swiper functionality</button>
+    <button onclick="removeSwiper()">Remove swiper functionality</button>
+    <button onclick="removeSwiperAll()">Remove all swiper functionalities</button>
+    <ul><li>swipe0/toner</li><li>swipe1/msi-94-or-more</li><li>swipe4/polygons.json</li><li>swipe5/ec-msc:CURRENT_CONDITIONS</li><li>swipe6/lakes</li><li>rcs.ccc75c12-5acc-4a6a-959f-ef6f621147b9.en/0</li></ul>
     <hr />
 
     <script src="codedoc.js"></script>
@@ -79,6 +84,19 @@
         createConfigSnippet();
         createCodeSnippet();
       });
+
+      function addSwiper() {
+        cgpv.api.maps['mapWM3'].plugins['swiper'].activateForLayer(document.getElementById('mapWM3Input').value);
+      }
+
+      function removeSwiper() {
+        cgpv.api.maps['mapWM3'].plugins['swiper'].deActivateForLayer(document.getElementById('mapWM3Input').value);
+      }
+
+      function removeSwiperAll() {
+        cgpv.api.maps['mapWM3'].plugins['swiper'].deActivateAll();
+      }
+
       window.setInterval(() => {
         const displayField1 = document.getElementById('HUC3-state');
         const geoviewLayers = cgpv.api.getFeatureInfoLayerSet('mapWM3').resultsSet;

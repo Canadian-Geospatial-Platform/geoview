@@ -6,6 +6,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
 import { DataTableProcessor } from '@/api/event-processors/event-processor-children/data-table-processor';
+import { SwiperEventProcessor } from './event-processor-children/swiper-event-processor';
 
 // core
 const appEventProcessor = new AppEventProcessor();
@@ -17,6 +18,7 @@ const dataTableProcessor = new DataTableProcessor();
 // packages
 const timeSliderEventProcessor = new TimeSliderEventProcessor();
 const geochartEventProcessor = new GeochartEventProcessor();
+const swiperEventProcessor = new SwiperEventProcessor();
 
 export function initializeEventProcessors(store: GeoviewStoreType) {
   // core stores
@@ -30,6 +32,7 @@ export function initializeEventProcessors(store: GeoviewStoreType) {
   // TODO: Change this check for something more generic that checks in appBar too
   if (store.getState().mapConfig!.footerBar?.tabs.core.includes('time-slider')) timeSliderEventProcessor.initialize(store);
   if (store.getState().mapConfig!.footerBar?.tabs.core.includes('geochart')) geochartEventProcessor.initialize(store);
+  if (store.getState().mapConfig!.corePackages?.includes('swiper')) swiperEventProcessor.initialize(store);
 }
 
 export function destroyEventProcessors(store: GeoviewStoreType) {
@@ -44,4 +47,5 @@ export function destroyEventProcessors(store: GeoviewStoreType) {
   // TODO: Change this check for something more generic that checks in appBar too
   if (store.getState().mapConfig!.footerBar?.tabs.core.includes('time-slider')) timeSliderEventProcessor.destroy();
   if (store.getState().mapConfig!.footerBar?.tabs.core.includes('geochart')) geochartEventProcessor.destroy();
+  if (store.getState().mapConfig!.corePackages?.includes('swiper')) swiperEventProcessor.destroy();
 }

@@ -1,93 +1,20 @@
 import Draggable from 'react-draggable';
 
-import { RefObject, useAppDisplayLanguageById } from 'geoview-core';
-
+import { RefObject } from 'geoview-core';
+import { MapViewer } from 'geoview-core/src/geo/map/map-viewer';
+import { useSwiperLayerPaths } from 'geoview-core/src/core/stores/store-interface-and-intial-values/swiper-state';
 import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
-import { EVENT_NAMES } from 'geoview-core/src/api/events/event-types';
-import { PayloadBaseClass, TypeResultsSet, payloadIsLayerSetUpdated } from 'geoview-core/src/api/events/payloads';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
 import { getRenderPixel } from 'ol/render';
-import Map from 'ol/Map';
 import RenderEvent from 'ol/render/Event';
 import BaseLayer from 'ol/layer/Base';
-import { VectorImage } from 'ol/layer';
-import VectorSource from 'ol/source/Vector';
 import { EventTypes } from 'ol/Observable';
 import BaseEvent from 'ol/events/Event';
 
 import debounce from 'lodash/debounce';
 
-const sxClasses = {
-  layerSwipe: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-  },
-
-  handle: {
-    backgroundColor: 'rgba(50,50,50,0.75)',
-    color: '#fff',
-    width: '24px',
-    height: '24px',
-  },
-
-  bar: {
-    position: 'absolute',
-    backgroundColor: 'rgba(50,50,50,0.75)',
-    zIndex: 151,
-    boxSizing: 'content-box',
-    margin: 0,
-    padding: '0!important',
-  },
-
-  vertical: {
-    width: '8px',
-    height: '100%',
-    cursor: 'col-resize',
-    top: '0px!important',
-
-    '& .handleContainer': {
-      position: 'relative',
-      width: '58px',
-      height: '24px',
-      zIndex: 1,
-      top: '50%',
-      left: '-25px',
-
-      '& .handleR': {
-        transform: 'rotate(90deg)',
-        float: 'right',
-      },
-
-      '& .handleL': {
-        transform: 'rotate(90deg)',
-        float: 'left',
-      },
-    },
-  },
-
-  horizontal: {
-    width: '100%',
-    height: '8px',
-    cursor: 'col-resize',
-    left: '0px!important',
-
-    '& .handleContainer': {
-      position: 'relative',
-      height: '58px',
-      width: '24px',
-      zIndex: 1,
-      left: '50%',
-      top: '-24px',
-
-      '& .handleL': {
-        verticalAlign: 'top',
-        marginBottom: '8px',
-      },
-    },
-  },
-};
+import { sxClasses } from './swiper-style';
 
 type SwiperProps = {
   mapId: string;
@@ -104,65 +31,53 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
   const { cgpv } = window;
   const { api, ui, react } = cgpv;
-  const { useEffect, useState, useRef } = react;
-
+  const { useEffect, useState, useRef, useCallback } = react;
   const { Box, Tooltip, HandleIcon } = ui.elements;
+  const { orientation } = config;
+  const mapViewer = api.maps[mapId] as MapViewer;
 
-  const [map] = useState<Map>(api.maps[mapId].map);
-  const mapSize = useRef<number[]>(map?.getSize() || [0, 0]);
-  const defaultX = mapSize.current[0] / 2;
-  const defaultY = mapSize.current[1] / 2;
-  const [olLayers, setOlLayers] = useState<BaseLayer[]>([]);
-
-  const [orientation] = useState(config.orientation);
-
+  const mapSize = useRef<number[]>(mapViewer.map?.getSize() || [0, 0]);
   const swiperValue = useRef(50);
   const swiperRef = useRef<HTMLElement>();
 
-  // Get store value
-  const displayLanguage = useAppDisplayLanguageById(mapId);
+  const [olLayers, setOlLayers] = useState<BaseLayer[]>([]);
+  const [xPosition, setXPosition] = useState(mapSize.current[0] / 2);
+  const [yPosition, setYPosition] = useState(mapSize.current[1] / 2);
 
-  /**
-   * Sort layers to only include those that are loaded
-   * @param {TypeResultsSet} resultsSets The resulstSet from the layer set
-   *
-   * @returns {string[]} array of IDs for layers that are loaded on the map
-   */
-  function sortLayerIds(resultsSets: TypeResultsSet) {
-    const layerIds: string[] = [];
-    Object.keys(resultsSets).forEach((result) => {
-      if (resultsSets[result].layerStatus === 'loaded') layerIds.push(result.split('/')[0]);
-    });
-    return layerIds;
-  }
-
-  const [layersIds, setLayersIds] = useState<string[]>(sortLayerIds(api.getLegendsLayerSet(mapId).resultsSet));
+  // Get store values
+  const layerPaths = useSwiperLayerPaths();
 
   /**
    * Pre compose, Pre render event callback
    * @param {Event | BaseEvent} event The pre compose, pre render event
    */
-  function prerender(event: Event | BaseEvent) {
-    const evt = event as RenderEvent;
-    const ctx: CanvasRenderingContext2D = evt.context! as CanvasRenderingContext2D;
-    const width = ((mapSize.current[0] + 6) * swiperValue.current) / 100;
-    const height = ((mapSize.current[1] + 6) * swiperValue.current) / 100;
+  const prerender = useCallback(
+    (event: Event | BaseEvent) => {
+      // Log
+      logger.logTraceUseCallback('GEOVIEW-SWIPER - prerender', event);
 
-    const tl = getRenderPixel(evt, [0, 0]);
-    const tr = orientation === 'vertical' ? getRenderPixel(evt, [width, 0]) : getRenderPixel(evt, [mapSize.current[0], 0]);
-    const bl = orientation === 'vertical' ? getRenderPixel(evt, [0, mapSize.current[1]]) : getRenderPixel(evt, [0, height]);
-    const br =
-      orientation === 'vertical' ? getRenderPixel(evt, [width, mapSize.current[1]]) : getRenderPixel(evt, [mapSize.current[0], height]);
+      const evt = event as RenderEvent;
+      const ctx: CanvasRenderingContext2D = evt.context! as CanvasRenderingContext2D;
+      const width = ((mapSize.current[0] + 6) * swiperValue.current) / 100;
+      const height = ((mapSize.current[1] + 6) * swiperValue.current) / 100;
 
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(tl[0], tl[1]);
-    ctx.lineTo(bl[0], bl[1]);
-    ctx.lineTo(br[0], br[1]);
-    ctx.lineTo(tr[0], tr[1]);
-    ctx.closePath();
-    ctx.clip();
-  }
+      const tl = getRenderPixel(evt, [0, 0]);
+      const tr = orientation === 'vertical' ? getRenderPixel(evt, [width, 0]) : getRenderPixel(evt, [mapSize.current[0], 0]);
+      const bl = orientation === 'vertical' ? getRenderPixel(evt, [0, mapSize.current[1]]) : getRenderPixel(evt, [0, height]);
+      const br =
+        orientation === 'vertical' ? getRenderPixel(evt, [width, mapSize.current[1]]) : getRenderPixel(evt, [mapSize.current[0], height]);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(tl[0], tl[1]);
+      ctx.lineTo(bl[0], bl[1]);
+      ctx.lineTo(br[0], br[1]);
+      ctx.lineTo(tr[0], tr[1]);
+      ctx.closePath();
+      ctx.clip();
+    },
+    [orientation]
+  );
 
   /**
    * Post compose, Post render event callback
@@ -203,84 +118,20 @@ export function Swiper(props: SwiperProps): JSX.Element {
    */
   const onStop = debounce(() => {
     // get map size
-    mapSize.current = map.getSize() || [0, 0];
+    mapSize.current = mapViewer.map.getSize() || [0, 0];
     const size = orientation === 'vertical' ? mapSize.current[0] : mapSize.current[1];
     const position = orientation === 'vertical' ? getSwiperStyle()[0] : getSwiperStyle()[1];
     swiperValue.current = (position / size) * 100;
 
-    // force VectorImage to refresh
+    // Update the position
+    if (orientation === 'vertical') setXPosition(position);
+    if (orientation === 'vertical') setYPosition(position);
+
+    // Force refresh
     olLayers.forEach((layer: BaseLayer) => {
-      if (layer !== null && typeof (layer as VectorImage<VectorSource>).getImageRatio === 'function') layer.changed();
+      layer.changed();
     });
-
-    map.render();
   }, 100);
-
-  /**
-   * Set the prerender and postrender events
-   *
-   * @param {string} layer the layer name
-   */
-  const setRenderEvents = (layer: string) => {
-    const { geoviewLayers } = api.maps[mapId].layer;
-    const olLayer = geoviewLayers[layer].olLayers;
-    setOlLayers((prevArray: BaseLayer[]) => [...prevArray, olLayer!]);
-    olLayer?.on(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
-    olLayer?.on(['postcompose' as EventTypes, 'postrender' as EventTypes], postcompose);
-    // force VectorImage to refresh
-    if (olLayer !== null && typeof (olLayer as VectorImage<VectorSource>).getImageRatio === 'function') olLayer?.changed();
-  };
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('GEOVIEW-SWIPER - layersIds.displayLanguage', layersIds, displayLanguage);
-
-    // set listener for layers in config array
-    const { geoviewLayers } = api.maps[mapId].layer;
-    layersIds.forEach((layer: string) => {
-      setRenderEvents(layer);
-    });
-
-    return () => {
-      layersIds.forEach((layer: string) => {
-        if (geoviewLayers[layer] !== undefined) {
-          const olLayer = geoviewLayers[layer].olLayers;
-          olLayer?.un(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
-          olLayer?.un(['postcompose' as EventTypes, 'postrender' as EventTypes], postcompose);
-
-          // empty layers array
-          setOlLayers([]);
-        }
-      });
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layersIds, displayLanguage]);
-
-  // Update layer list if a layer loads late
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('GEOVIEW-SWIPER - layersIds', layersIds);
-
-    const layerSetUpdatedHandler = (payload: PayloadBaseClass) => {
-      // Log
-      logger.logTraceCoreAPIEvent('GEOVIEW-SWIPER - layerSetUpdatedHandler', payload);
-
-      if (payloadIsLayerSetUpdated(payload) && payload.resultsSet[payload.layerPath]?.layerStatus === 'loaded') {
-        const layerId = payload.layerPath.split('/')[0];
-        const ids = [...layersIds];
-        if (ids.indexOf(layerId) === -1 && config.layers.includes(layerId)) {
-          ids.push(layerId);
-          setLayersIds(ids);
-        }
-      }
-    };
-
-    api.event.on(EVENT_NAMES.LAYER_SET.UPDATED, layerSetUpdatedHandler, `${mapId}/LegendsLayerSet`);
-    return () => {
-      api.event.off(EVENT_NAMES.LAYER_SET.UPDATED, mapId, layerSetUpdatedHandler);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layersIds]);
 
   /**
    * Update swiper and layers from keyboard CTRL + Arrow key
@@ -309,36 +160,135 @@ export function Swiper(props: SwiperProps): JSX.Element {
     }
   }, 100);
 
-  // set listener for the focus in on swiper bar when on WCAG mode
-  // unset listener when focus is out of swiper bar
-  swiperRef?.current?.addEventListener('focusin', () => {
-    if (document.getElementById(mapId)!.classList.contains('map-focus-trap')) {
-      swiperRef?.current?.addEventListener('keydown', updateSwiper);
-    }
-  });
-  swiperRef?.current?.addEventListener('focusout', () => {
-    swiperRef?.current?.removeEventListener('keydown', updateSwiper);
-  });
+  /**
+   * Attaches necessary swiper events to the given layer path layer
+   * @param {string} layerPath The layer path of the layer to attach swiping events to
+   */
+  const attachLayerEventsOnPath = useCallback(
+    async (layerPath: string) => {
+      try {
+        // Get the layer at the layer path
+        const olLayer = await mapViewer.layer.getLayerByLayerPathAsync(layerPath);
+        if (olLayer) {
+          // Set the OL layers
+          setOlLayers((prevArray: BaseLayer[]) => [...prevArray, olLayer]);
 
-  return (
-    <Box sx={sxClasses.layerSwipe}>
-      <Draggable
-        axis={orientation === 'vertical' ? 'x' : 'y'}
-        bounds="parent"
-        defaultPosition={{ x: orientation === 'vertical' ? defaultX : 0, y: orientation === 'vertical' ? 0 : defaultY }}
-        onStop={() => onStop()}
-        onDrag={() => onStop()}
-        nodeRef={swiperRef as RefObject<HTMLElement>}
-      >
-        <Box sx={[orientation === 'vertical' ? sxClasses.vertical : sxClasses.horizontal, sxClasses.bar]} tabIndex={0} ref={swiperRef}>
-          <Tooltip title={getLocalizedMessage(mapId, 'swiper.tooltip')}>
-            <Box className="handleContainer">
-              <HandleIcon sx={sxClasses.handle} className="handleL" />
-              <HandleIcon sx={sxClasses.handle} className="handleR" />
-            </Box>
-          </Tooltip>
-        </Box>
-      </Draggable>
-    </Box>
+          // Wire events on the layer
+          olLayer.on(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
+          olLayer.on(['postcompose' as EventTypes, 'postrender' as EventTypes], postcompose);
+
+          // Force refresh
+          olLayer.changed();
+        } else {
+          // Log
+          logger.logError('SWIPER - Failed to find layer to attach layer events', layerPath);
+        }
+      } catch (error) {
+        // Log
+        logger.logError('SWIPER - Failed to attach layer events', mapViewer.layer?.geoviewLayers, layerPath, error);
+      }
+    },
+    [mapViewer, prerender]
   );
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('GEOVIEW-SWIPER - layerPaths', layerPaths);
+
+    // For each layer path
+    layerPaths.forEach((layerPath: string) => {
+      // Wire events on the layer path
+      attachLayerEventsOnPath(layerPath);
+    });
+
+    return () => {
+      // Log
+      logger.logTraceUseEffectUnmount('GEOVIEW-SWIPER - layerPaths', layerPaths);
+
+      // set listener for layers in config array
+      layerPaths.forEach((layerPath: string) => {
+        try {
+          // Get the layer at the layer path
+          const olLayer = mapViewer.layer.getLayerByLayerPath(layerPath);
+          if (olLayer) {
+            // Unwire the events on the layer
+            olLayer.un(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
+            olLayer.un(['postcompose' as EventTypes, 'postrender' as EventTypes], postcompose);
+
+            // Force refresh
+            olLayer.changed();
+          } else {
+            // Log
+            logger.logError('SWIPER - Failed to find layer to un-attach layer events', layerPath);
+          }
+        } catch (error) {
+          // Log
+          logger.logError('SWIPER - Failed to un-attach layer events', layerPath, error);
+        }
+      });
+
+      // Empty layers array
+      setOlLayers([]);
+    };
+  }, [mapViewer, layerPaths, attachLayerEventsOnPath, prerender]);
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('GEOVIEW-SWIPER - mount', mapId);
+
+    // Grab reference
+    const theSwiper = swiperRef?.current;
+
+    const handleFocusIn = () => {
+      // set listener for the focus in on swiper bar when on WCAG mode
+      if (document.getElementById(mapId)!.classList.contains('map-focus-trap')) {
+        theSwiper?.addEventListener('keydown', updateSwiper);
+      }
+    };
+
+    const handleFocusOut = () => {
+      // unset listener when focus is out of swiper bar
+      theSwiper?.removeEventListener('keydown', updateSwiper);
+    };
+
+    // Wire events
+    theSwiper?.addEventListener('focusin', handleFocusIn);
+    theSwiper?.addEventListener('focusout', handleFocusOut);
+
+    return () => {
+      // Log
+      logger.logTraceUseEffectUnmount('GEOVIEW-SWIPER - unmount', mapId);
+
+      // Unwire events
+      theSwiper?.removeEventListener('focusout', handleFocusOut);
+      theSwiper?.removeEventListener('focusin', handleFocusIn);
+    };
+  }, [mapId, updateSwiper]);
+
+  // If any layer paths
+  if (layerPaths.length > 0) {
+    // Use a swiper
+    return (
+      <Box sx={sxClasses.layerSwipe}>
+        <Draggable
+          axis={orientation === 'vertical' ? 'x' : 'y'}
+          bounds="parent"
+          defaultPosition={{ x: orientation === 'vertical' ? xPosition : 0, y: orientation === 'vertical' ? 0 : yPosition }}
+          onStop={() => onStop()}
+          onDrag={() => onStop()}
+          nodeRef={swiperRef as RefObject<HTMLElement>}
+        >
+          <Box sx={[orientation === 'vertical' ? sxClasses.vertical : sxClasses.horizontal, sxClasses.bar]} tabIndex={0} ref={swiperRef}>
+            <Tooltip title={getLocalizedMessage(mapId, 'swiper.tooltip')}>
+              <Box className="handleContainer">
+                <HandleIcon sx={sxClasses.handle} className="handleL" />
+                <HandleIcon sx={sxClasses.handle} className="handleR" />
+              </Box>
+            </Tooltip>
+          </Box>
+        </Draggable>
+      </Box>
+    );
+  }
+  return <Box />;
 }
