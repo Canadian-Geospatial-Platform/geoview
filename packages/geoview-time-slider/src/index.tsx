@@ -1,4 +1,4 @@
-import { AnySchemaObject, api, Cast, toJsonObject, TypeJsonObject, TypeTabs } from 'geoview-core';
+import { AnySchemaObject, api, Cast, TimeDimension, toJsonObject, TypeJsonObject, TypeTabs } from 'geoview-core';
 import { TimeSliderIcon } from 'geoview-core/src/ui';
 import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
 
@@ -100,26 +100,25 @@ class TimeSliderPlugin extends FooterPlugin {
     // Set custom time dimension if applicable
     this.configObj.sliders.forEach((obj: SliderProps) => {
       if (obj.temporalDimension) {
-        api.maps[this.pluginProps.mapId].layer.geoviewLayer(obj.layerPaths[0]).setTemporalDimension(
-          obj.layerPaths[0],
-          {
-            ...obj.temporalDimension,
-          },
-          true
-        );
+        const timeDimension: TimeDimension = {
+          field: obj.temporalDimension.field,
+          default: obj.temporalDimension.default,
+          unitSymbol: obj.temporalDimension.unitSymbol,
+          nearestValues: obj.temporalDimension.nearestValues,
+          range: api.dateUtilities.createRangeOGC(obj.temporalDimension.range as unknown as string),
+          singleHandle: obj.temporalDimension.singleHandle,
+        };
+        api.maps[this.pluginProps.mapId].layer.geoviewLayer(obj.layerPaths[0]).setTemporalDimension(obj.layerPaths[0], timeDimension);
       }
+
       // Set override default value under time dimension if applicable
       if (obj.defaultValue) {
         const layerPath = obj.layerPaths[0];
         const timeDimension = api.maps[this.pluginProps.mapId].layer.geoviewLayer(layerPath).layerTemporalDimension[layerPath];
-        api.maps[this.pluginProps.mapId].layer.geoviewLayer(layerPath).setTemporalDimension(
-          layerPath,
-          {
-            ...timeDimension,
-            default: obj.defaultValue,
-          },
-          false
-        );
+        api.maps[this.pluginProps.mapId].layer.geoviewLayer(layerPath).setTemporalDimension(layerPath, {
+          ...timeDimension,
+          default: obj.defaultValue,
+        });
       }
     });
 
