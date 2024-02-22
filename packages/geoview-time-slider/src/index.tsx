@@ -100,9 +100,24 @@ class TimeSliderPlugin extends FooterPlugin {
     // Set custom time dimension if applicable
     this.configObj.sliders.forEach((obj: SliderProps) => {
       if (obj.temporalDimension) {
-        api.maps[this.pluginProps.mapId].layer
-          .geoviewLayer(obj.layerPaths[0])
-          .setTemporalDimension(obj.layerPaths[0], obj.temporalDimension);
+        api.maps[this.pluginProps.mapId].layer.geoviewLayer(obj.layerPaths[0]).setTemporalDimension(obj.layerPaths[0], {
+            ...obj.temporalDimension,
+          },
+          true
+        );
+      }
+      // Set override default value under time dimension if applicable
+      if (obj.defaultValue) {
+        const layerPath = obj.layerPaths[0];
+        const timeDimension = api.maps[this.pluginProps.mapId].layer.geoviewLayer(layerPath).layerTemporalDimension[layerPath];
+        api.maps[this.pluginProps.mapId].layer.geoviewLayer(layerPath).setTemporalDimension(
+          layerPath,
+          {
+            ...timeDimension,
+            default: obj.defaultValue,
+          },
+          false
+        );
       }
     });
 
