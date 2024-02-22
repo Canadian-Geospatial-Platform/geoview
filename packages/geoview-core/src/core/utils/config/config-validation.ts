@@ -717,7 +717,8 @@ export class ConfigValidation {
         if (typeof config === 'object') {
           Object.keys(config).forEach((key) => {
             if (!key.startsWith('_') && typeof config[key] === 'object') {
-              logger.logDebug(`Key=${key}`, config[key]);
+              // Leaving the commented line here in case a developer needs to quickly uncomment it again to troubleshoot
+              // logger.logDebug(`Key=${key}`, config[key]);
               if (config?.[key]?.en || config?.[key]?.fr)
                 this.SynchronizeLocalizedString(Cast<TypeLocalizedString>(config[key]), sourceKey, destinationKey);
               // Avoid the 'geoviewLayerConfig' and 'parentLayerConfig' properties because they loop on themself and cause a
