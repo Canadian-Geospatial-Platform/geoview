@@ -11,7 +11,7 @@ export type PluginGeoChartConfig<TType extends ChartType> = {
  * Definition of options for each type of chart used for by the plugin.
  */
 export type GeoViewGeoChartConfig<TType extends ChartType> = GeoChartConfig<TType> & {
-  layers?: GeoViewGeoChartConfigLayer[];
+  layers: GeoViewGeoChartConfigLayer[];
 };
 
 /**

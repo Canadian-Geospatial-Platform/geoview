@@ -52,6 +52,7 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element {
   const { overviewMap } = props;
 
   const { t } = useTranslation<string>();
+  const tooltipAndAria = t('mapctrl.overviewmap.toggle')!;
 
   // internal state
   const [status, setStatus] = useState(true);
@@ -70,6 +71,7 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element {
       const button = (divRef.current as HTMLElement).closest('button') as HTMLButtonElement;
 
       if (button) {
+        button.setAttribute('aria-label', tooltipAndAria);
         // listen to toggle event
         button.addEventListener('click', () => {
           const isCollapsed = overviewMap.getCollapsed();
@@ -95,7 +97,7 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element {
   }, []);
 
   return (
-    <Tooltip title={t('mapctrl.overviewmap.toggle')!}>
+    <Tooltip title={tooltipAndAria}>
       <div ref={divRef} className={classes.toggleBtnContainer}>
         <div
           className={`${classes.toggleBtn} ${!status ? classes.minimapOpen : classes.minimapClosed}`}

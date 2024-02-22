@@ -38,7 +38,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       (cur, prev) => {
         if (cur !== prev) {
           // Log (too annoying, already have trace in EVENT_MAP_LOADED handler that works well)
-          // logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - mapLoaded (changed)', cur);
+          // logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - mapLoaded (changed)', mapId, cur);
 
           api.event.emit(mapPayload(EVENT_NAMES.MAP.EVENT_MAP_LOADED, mapId, store.getState().mapState.mapElement!));
         }
@@ -51,7 +51,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       (cur, prev) => {
         if (cur !== prev) {
           // Log (too annoying, already have trace in EVENT_MAP_MOVE_END handler that works well)
-          // logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - centerCoordinates (changed)', cur);
+          // logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - centerCoordinates (changed)', mapId, cur);
 
           api.event.emit(lngLatPayload(EVENT_NAMES.MAP.EVENT_MAP_MOVE_END, mapId, cur));
         }
@@ -63,7 +63,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       (cur, prev) => {
         if (cur! && cur !== prev) {
           // Log (too annoying, already have trace in EVENT_MAP_POINTER_MOVE handler that works well)
-          // logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - pointerPosition (changed)', cur);
+          // logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - pointerPosition (changed)', mapId, cur);
 
           api.event.emit(mapMouseEventPayload(EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE, mapId, cur));
         }
@@ -75,7 +75,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       (cur, prev) => {
         if (cur! && cur !== prev) {
           // Log (this event is raised, and we currently have no handles for it, by design)
-          logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - currentProjection (changed)', cur);
+          logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - currentProjection (changed)', mapId, cur);
 
           api.event.emit(mapViewProjectionPayload(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId, cur!));
         }
@@ -87,7 +87,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       (cur, prev) => {
         if (cur && cur !== prev) {
           // Log (too annoying, already have trace in EVENT_MAP_SINGLE_CLICK handler that works well)
-          // logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - currentProjection (changed)', cur);
+          // logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - currentProjection (changed)', mapId, cur);
 
           api.event.emit(mapMouseEventPayload(EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK, mapId, cur));
         }
@@ -99,7 +99,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       (cur, prev) => {
         if (cur! && cur !== prev) {
           // Log
-          logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - zoom (changed)', cur);
+          logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - zoom (changed)', mapId, cur);
 
           api.event.emit(numberPayload(EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END, mapId, cur));
         }
@@ -113,7 +113,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       (state) => state.mapState.highlightedFeatures,
       (curFeatures, prevFeatures) => {
         // Log
-        logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - highlightedFeatures', curFeatures);
+        logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - highlightedFeatures', mapId, curFeatures);
 
         if (curFeatures.length === 0) api.maps[mapId].layer.featureHighlight.removeHighlight('all');
         else {
@@ -137,7 +137,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       (state) => state.mapState.selectedFeatures,
       (curFeatures, prevFeatures) => {
         // Log
-        logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - selectedFeatures', curFeatures);
+        logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - selectedFeatures', mapId, curFeatures);
 
         // TODO: on reload, layer object is undefined, need to test for now and solve in #1580
         if (curFeatures.length === 0 && api.maps[mapId].layer !== undefined) api.maps[mapId].layer.featureHighlight.resetAnimation('all');
@@ -162,7 +162,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       (state) => state.layerState.legendLayers,
       (cur) => {
         // Log
-        logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - legendLayers', cur);
+        logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - legendLayers', mapId, cur);
 
         const orderedLayerPaths = MapEventProcessor.evaluateLayerPathsFromLegendsArray(cur);
         const prevLayerOrder = [...store.getState().mapState.layerOrder];

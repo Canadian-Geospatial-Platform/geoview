@@ -32,23 +32,21 @@ export function IconButton(props: TypeIconButtonProps): JSX.Element {
 
   return (
     <Tooltip title={t((tooltip as string) || '') as string} placement={tooltipPlacement} TransitionComponent={Fade}>
-      <span>
-        <MaterialIconButton
-          id={id}
-          sx={sx}
-          aria-label={ariaLabel}
-          style={style}
-          className={className}
-          onClick={onClick}
-          tabIndex={tabIndex}
-          size={size}
-          ref={iconRef}
-          disabled={disabled}
-          color={color}
-        >
-          {children && children}
-        </MaterialIconButton>
-      </span>
+      <MaterialIconButton
+        id={id}
+        sx={sx}
+        aria-label={(t(ariaLabel as string) || t(tooltip as string)) as string}
+        style={style}
+        className={className}
+        onClick={onClick}
+        tabIndex={tabIndex}
+        size={size}
+        ref={iconRef}
+        disabled={disabled}
+        color={color}
+      >
+        {children && children}
+      </MaterialIconButton>
     </Tooltip>
   );
 }
