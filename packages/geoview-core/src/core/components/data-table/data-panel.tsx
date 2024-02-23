@@ -98,14 +98,20 @@ export function Datapanel({ fullWidth }: DataPanelType) {
   const isMapFilteredSelectedForLayer = (layerPath: string): boolean => !!mapFiltered[layerPath] && !!rowsFiltered[layerPath];
 
   /**
-   * Get number of features of a layer with filtered or selected layer.
+   * Get number of features of a layer with filtered or selected layer or unknown when data table is loaded.
    * @param {string} layerPath the path of the layer
    * @returns
    */
   const getFeaturesOfLayer = (layerPath: string): string => {
-    return rowsFiltered && rowsFiltered[layerPath]
-      ? `${rowsFiltered[layerPath]} ${t('dataTable.featureFiltered')}`
-      : `${orderedLayerData?.find((layer) => layer.layerPath === layerPath)?.features?.length ?? 0} ${t('dataTable.features')}`;
+    if (rowsFiltered && rowsFiltered[layerPath]) {
+      return `${rowsFiltered[layerPath]} ${t('dataTable.featureFiltered')}`;
+    }
+    let featureStr = t('dataTable.noFeatures');
+    const features = orderedLayerData?.find((layer) => layer.layerPath === layerPath)?.features?.length ?? 0;
+    if (features > 0) {
+      featureStr = `${features} ${t('dataTable.features')}`;
+    }
+    return featureStr;
   };
 
   /**
@@ -127,16 +133,33 @@ export function Datapanel({ fullWidth }: DataPanelType) {
    * Checks if layer is disabled when layer is selected and features have null value.
    * @returns bool
    */
-  const isLayerDisabled = useMemo(
-    () => () => !!orderedLayerData.find((layer) => layer.layerPath === selectedLayerPath && layer.features === null),
-    [orderedLayerData, selectedLayerPath]
-  );
+  const isLayerDisabled = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DATA-PANEL - isLayerDisabled', selectedLayerPath);
+
+    return () => !!orderedLayerData.find((layer) => layer.layerPath === selectedLayerPath && layer.features === null);
+  }, [orderedLayerData, selectedLayerPath]);
+
+  /**
+   * Checks if selected layer has features.
+   */
+  const isSelectedLayerHasFeatures = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DATA-PANEL - isSelectedLayerHasFeatures', selectedLayerPath);
+
+    return () => orderedLayerData.find((layer) => layer.layerPath === selectedLayerPath && layer?.features?.length);
+  }, [selectedLayerPath, orderedLayerData]);
 
   /**
    * Checks if all layers have no features like features are empty array.
    * @returns
    */
-  const isAllLayersNoFeatures = useMemo(() => () => orderedLayerData.every((layers) => !layers?.features?.length), [orderedLayerData]);
+  const isAllLayersNoFeatures = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DATA-PANEL - isAllLayersNoFeatures');
+
+    return () => orderedLayerData.every((layers) => !layers?.features?.length);
+  }, [orderedLayerData]);
 
   useEffect(() => {
     // Log
@@ -180,6 +203,7 @@ export function Datapanel({ fullWidth }: DataPanelType) {
       {!isLoading &&
         selectedTab === TABS.DATA_TABLE &&
         !isLayerDisabled() &&
+        isSelectedLayerHasFeatures() &&
         orderedLayerData.map((data) => (
           <Box key={data.layerPath}>
             {data.layerPath === selectedLayerPath ? (
@@ -191,7 +215,7 @@ export function Datapanel({ fullWidth }: DataPanelType) {
         ))}
 
       {/* show data table instructions when all layers has no features */}
-      {((!isLoading && isAllLayersNoFeatures()) || isLayerDisabled()) && (
+      {((!isLoading && isAllLayersNoFeatures()) || isLayerDisabled() || selectedLayerPath === '') && (
         <Paper sx={{ padding: '2rem' }}>
           <Typography variant="h3" gutterBottom sx={sxClasses.dataTableInstructionsTitle}>
             {t('dataTable.dataTableInstructions')}
