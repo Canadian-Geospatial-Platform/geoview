@@ -35,7 +35,17 @@ export const LAYER_STATUS = {
   LOADING: 'loading',
   LOADED: 'loaded',
   ERROR: 'error',
-};
+} as const;
 
 export const ARROW_KEY_CODES: string[] = ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLefts'];
 export const ARROW_KEYS_WITH_SPACE: string[] = [...ARROW_KEY_CODES, 'Space'];
+
+export const TABS = {
+  LEGEND: 'legend',
+  DETAILS: 'details',
+  LAYERS: 'layers',
+  DATA_TABLE: 'data-table',
+  GUIDE: 'guide',
+  TIME_SLIDER: 'time-slider',
+  GEO_CHART: 'geochart',
+} as const;

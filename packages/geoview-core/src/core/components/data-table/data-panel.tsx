@@ -16,7 +16,7 @@ import {
 import { LayerListEntry, useFooterPanelHeight, Layout } from '../common';
 import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
-import { LAYER_STATUS, TypeFieldEntry, TypeLayerData } from '@/app';
+import { LAYER_STATUS, TABS, TypeFieldEntry, TypeLayerData } from '@/app';
 import { getSxClasses } from './data-table-style';
 
 export interface MappedLayerDataType extends TypeLayerData {
@@ -127,8 +127,16 @@ export function Datapanel({ fullWidth }: DataPanelType) {
    * Checks if layer is disabled when layer is selected and features have null value.
    * @returns bool
    */
-  const isLayerDisabled = (): boolean =>
-    !!orderedLayerData.find((layer) => layer.layerPath === selectedLayerPath && layer.features === null);
+  const isLayerDisabled = useMemo(
+    () => () => !!orderedLayerData.find((layer) => layer.layerPath === selectedLayerPath && layer.features === null),
+    [orderedLayerData, selectedLayerPath]
+  );
+
+  /**
+   * Checks if all layers have no features like features are empty array.
+   * @returns
+   */
+  const isAllLayersNoFeatures = useMemo(() => () => orderedLayerData.every((layers) => !layers?.features?.length), [orderedLayerData]);
 
   useEffect(() => {
     // Log
@@ -140,6 +148,18 @@ export function Datapanel({ fullWidth }: DataPanelType) {
     }, 100);
     return () => clearTimeout(clearLoading);
   }, [isLoading, selectedLayerPath]);
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DATA-PANEL - unmount', selectedLayerPath);
+
+    // NOTE: Reason for not using component unmount, because we are not mounting and unmounting components
+    // when we switch tabs.
+    if (selectedTab !== TABS.DATA_TABLE) {
+      setSelectedLayerPath('');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTab]);
 
   return (
     <Layout
@@ -158,7 +178,8 @@ export function Datapanel({ fullWidth }: DataPanelType) {
       {isLoading && <Skeleton variant="rounded" width="100%" height={400} />}
 
       {!isLoading &&
-        selectedTab === 'data-table' &&
+        selectedTab === TABS.DATA_TABLE &&
+        !isLayerDisabled() &&
         orderedLayerData.map((data) => (
           <Box key={data.layerPath}>
             {data.layerPath === selectedLayerPath ? (
@@ -170,7 +191,7 @@ export function Datapanel({ fullWidth }: DataPanelType) {
         ))}
 
       {/* show data table instructions when all layers has no features */}
-      {((!isLoading && orderedLayerData.every((layers) => !layers?.features?.length)) || isLayerDisabled()) && (
+      {((!isLoading && isAllLayersNoFeatures()) || isLayerDisabled()) && (
         <Paper sx={{ padding: '2rem' }}>
           <Typography variant="h3" gutterBottom sx={sxClasses.dataTableInstructionsTitle}>
             {t('dataTable.dataTableInstructions')}
