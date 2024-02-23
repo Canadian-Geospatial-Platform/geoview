@@ -170,7 +170,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     }
     if (layer.layerStatus === 'error') {
       return (
-        <IconButton edge="end" size="small" onClick={handleReloadLayer} tooltip="layers.reloadLayer"  className="style1">
+        <IconButton edge="end" size="small" onClick={handleReloadLayer} tooltip="layers.reloadLayer" className="style1">
           <RestartAltIcon />
         </IconButton>
       );
@@ -185,13 +185,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     }
 
     return (
-      <IconButton
-        edge="end"
-        size="small"
-        onClick={() => handleToggleVisibility()}
-        tooltip="layers.toggleVisibility"
-        className="style1"
-      >
+      <IconButton edge="end" size="small" onClick={() => handleToggleVisibility()} tooltip="layers.toggleVisibility" className="style1">
         {(() => {
           if (layer.isVisible === 'no') return <VisibilityOffOutlinedIcon />;
           return <VisibilityOutlinedIcon />;

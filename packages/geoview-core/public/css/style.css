@@ -212,3 +212,9 @@ table.state {
 .config-json-valid {
   color: green
 }
+
+@media only screen and (max-width: 767px) {
+  body {
+    padding: 2px; /* Adjust the value as needed */
+  }
+}

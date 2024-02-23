@@ -237,7 +237,8 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
                 color: `${geoViewColors.bgColor.dark[450]}`,
               },
             },
-            '&.style3': { //used for app-bar buttons
+            '&.style3': {
+              // used for app-bar buttons
               backgroundColor: `tranparent`,
               border: `2px solid transparent`,
               color: `${geoViewColors.primary.main}`,
@@ -250,7 +251,7 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
               '&:disabled': {
                 color: `${geoViewColors.bgColor.dark[450]}`,
               },
-            }
+            },
           },
         },
       },

@@ -65,7 +65,7 @@ function ReorderLayersList({ mapId, title, layerIds, setReorderLayersVisible, se
   return (
     <>
       <Box sx={{ display: 'flex', justifyContent: 'end', zIndex: 2 }}>
-        <IconButton className='style3' onClick={() => setReorderLayersVisible(false)}>
+        <IconButton className="style3" onClick={() => setReorderLayersVisible(false)}>
           <CloseIcon />
         </IconButton>
       </Box>
