@@ -446,7 +446,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
             </Box>
           )}
           {!memoSelectedLayerDataFeatures && (
-            <Paper sx={{ padding: '2rem' }}>
+            <Paper sx={{ padding: '2rem' }} className="bordered">
               <Typography variant="h3" gutterBottom sx={sxClasses.detailsInstructionsTitle}>
                 {t('details.detailsInstructions')}
               </Typography>

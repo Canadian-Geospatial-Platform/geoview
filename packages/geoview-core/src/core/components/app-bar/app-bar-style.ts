@@ -40,6 +40,7 @@ export const getSxClasses = (theme: Theme) => ({
     height: 44,
     width: 44,
     transition: 'background-color 0.3s ease-in-out',
+    border: `2px solid transparent`,
     '&:hover': {
       backgroundColor: theme.palette.geoViewColor.primary.light[100],
       color: theme.palette.geoViewColor.primary.light[700],
@@ -53,8 +54,9 @@ export const getSxClasses = (theme: Theme) => ({
       color: theme.palette.geoViewColor.primary.light[700],
     },
     '&.active': {
-      backgroundColor: theme.palette.geoViewColor.primary.light[100],
-      color: theme.palette.background.paper,
+      border: `2px solid ${theme.palette.geoViewColor.primary.light[100]}`,
+      backgroundColor: 'transparent',
+      color: theme.palette.geoViewColor.primary.light[100],
     },
     '& .MuiSvgIcon-root': {
       height: 20,

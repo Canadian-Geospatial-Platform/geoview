@@ -224,7 +224,7 @@ export function Appbar(): JSX.Element {
           <Box>
             <List sx={sxClasses.appBarList}>
               <ListItem>
-                <Geolocator sx={sxClasses.appBarButton} />
+                <Geolocator />
               </ListItem>
             </List>
           </Box>
@@ -275,7 +275,7 @@ export function Appbar(): JSX.Element {
           <Box>
             <List sx={sxClasses.appBarList}>
               <ListItem>
-                <ExportButton className={` ${activeModalId ? 'export' : ''}`} />
+                <ExportButton className={` style3 ${activeModalId ? 'active' : ''}`} />
               </ListItem>
             </List>
           </Box>

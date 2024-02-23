@@ -48,6 +48,10 @@ export const getSxClasses = (theme: Theme) => ({
       overflow: 'hidden',
     },
 
+    '& .layerTitle > .MuiListItemText-secondary': {
+      color: theme.palette.geoViewColor.textColor.light[400],
+    },
+
     '& .MuiListItemText-root': {
       marginLeft: '12px',
     },

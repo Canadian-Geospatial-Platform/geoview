@@ -172,7 +172,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     }
     if (layer.layerStatus === 'error') {
       return (
-        <IconButton edge="end" size="small" onClick={handleReloadLayer} tooltip="layers.reloadLayer">
+        <IconButton edge="end" size="small" onClick={handleReloadLayer} tooltip="layers.reloadLayer" className="style1">
           <RestartAltIcon />
         </IconButton>
       );
@@ -187,14 +187,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     }
 
     return (
-      <IconButton
-        color="primary"
-        edge="end"
-        size="small"
-        onClick={() => handleToggleVisibility()}
-        tooltip="layers.toggleVisibility"
-        className="style1"
-      >
+      <IconButton edge="end" size="small" onClick={() => handleToggleVisibility()} tooltip="layers.toggleVisibility" className="style1">
         {(() => {
           if (!getVisibilityFromOrderedLayerInfo(layer.layerPath)) return <VisibilityOffOutlinedIcon />;
           return <VisibilityOutlinedIcon />;
@@ -245,13 +238,17 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   function getContainerClass() {
     const result: string[] = ['layerItemContainer', layer.layerStatus ?? ''];
 
+    if (depth === 0) {
+      result.push('bordered');
+    }
+
     // if layer has selected child but its not itself selected
     if (layerChildIsSelected && !layerIsSelected && !isGroupOpen) {
-      result.push('selectedLayer');
+      result.push('selectedLayer bordered-primary');
     }
 
     if (layerIsSelected) {
-      result.push('selectedLayer');
+      result.push('selectedLayer bordered-primary');
     }
 
     if (isDragging) {
@@ -262,7 +259,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   }
 
   return (
-    <Box className={getContainerClass()}>
+    <Box className={getContainerClass()} data-layer-depth={depth}>
       <ListItem key={layer.layerName} divider>
         <ListItemButton selected={layerIsSelected || (layerChildIsSelected && !isGroupOpen)}>
           <LayerIcon layer={layer} />

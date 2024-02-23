@@ -17,11 +17,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { payloadIsAButtonPanel, ButtonPanelPayload, PayloadBaseClass } from '@/api/events/payloads';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
-import {
-  useUIActiveFocusItem,
-  useUIMapInfoExpanded,
-  useUINavbarComponents,
-} from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIMapInfoExpanded, useUINavbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -41,7 +37,6 @@ export function Navbar(): JSX.Element {
 
   // get the expand or collapse from store
   const mapInfoExpanded = useUIMapInfoExpanded();
-  const activeModalId = useUIActiveFocusItem().activeElementId;
   const navBarComponents = useUINavbarComponents();
 
   // #region REACT HOOKS
@@ -181,7 +176,7 @@ export function Navbar(): JSX.Element {
           {navBarComponents.includes('fullscreen') && <Fullscreen />}
           {navBarComponents.includes('location') && <Location />}
           {navBarComponents.includes('home') && <Home />}
-          {navBarComponents.includes('export') && <ExportButton className={`${sxClasses.navButton} ${activeModalId ? 'export' : ''}`} />}
+          {navBarComponents.includes('export') && <ExportButton sxDetails={sxClasses.navButton} />}
         </ButtonGroup>
       </Box>
     </Box>
