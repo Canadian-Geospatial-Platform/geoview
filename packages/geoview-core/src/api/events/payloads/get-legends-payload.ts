@@ -170,8 +170,7 @@ export class GetLegendsPayload extends PayloadBaseClass {
    * Static method used to create a get legends payload that will run a get legend on the specified layer path.
    *
    * @param {string | null} handlerName the handler name
-   * @param {string} layerPath layer path to query
-   * the set.
+   * @param {string} layerPath layer path to query the set.
    *
    * @returns {TypeQueryLegendPayload} the queryLegendPayload object created
    */

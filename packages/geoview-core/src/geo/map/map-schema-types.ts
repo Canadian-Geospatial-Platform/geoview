@@ -69,6 +69,12 @@ export type TypeLayerInitialSettings = {
   maxZoom?: number;
   /** A CSS class name to set to the layer element. */
   className?: string;
+  /** Is the layer removable. */
+  removable?: true;
+  /** Is the layer hoverable. */
+  hoverable?: true;
+  /** Is the layer queryable. */
+  queryable?: true;
 };
 
 /** ******************************************************************************************************************************
