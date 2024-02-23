@@ -2,7 +2,7 @@ import { ReactNode, memo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { Box, ChevronRightIcon, IconButton, List, ListItem, ListItemButton, ListItemIcon, Paper, Tooltip, Typography } from '@/ui';
-import { IconStack, TypeLayerStatus, TypeQueryStatus } from '@/app';
+import { IconStack, TypeArrayOfFeatureInfoEntries, TypeLayerStatus, TypeQueryStatus } from '@/app';
 
 import { getSxClasses } from './layer-list-style';
 
@@ -15,6 +15,7 @@ export interface LayerListEntry {
   mapFilteredIcon?: ReactNode;
   tooltip?: ReactNode;
   numOffeatures?: number;
+  features?: TypeArrayOfFeatureInfoEntries;
 }
 
 interface LayerListProps {
@@ -77,32 +78,18 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
   const renderLayerStatus = () => {
     switch (layer.layerStatus) {
       case 'error':
-        return (
-          <Box sx={{ display: 'flex', alignContent: 'center' }}>
-            <Typography component="p" variant="subtitle1" noWrap>
-              {t('legend.layerError')}
-            </Typography>
-          </Box>
-        );
+        return t('legend.layerError');
 
       default:
         switch (layer.queryStatus) {
           case 'init':
           case 'processing':
-            return (
-              <Box sx={{ display: 'flex', alignContent: 'center' }}>
-                <Typography component="p" variant="subtitle1" noWrap>
-                  {`${t('layers.querying')}...`}
-                </Typography>
-              </Box>
-            );
+            return `${t('layers.querying')}...`;
           default:
             return (
-              <Box sx={{ display: 'flex', alignContent: 'center' }}>
-                <Typography component="p" variant="subtitle1" noWrap>
-                  {layer.layerFeatures}
-                </Typography>
-              </Box>
+              <>
+                {layer.layerFeatures} {layer?.mapFilteredIcon ?? ''}
+              </>
             );
         }
     }
@@ -112,7 +99,11 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
     return (
       <Box sx={sxClasses.listPrimaryText}>
         <Typography className="layerTitle">{layer.layerName}</Typography>
-        {renderLayerStatus()}
+        <Box display="flex" alignContent="center">
+          <Typography component="p" variant="subtitle1" noWrap display="flex">
+            {renderLayerStatus()}
+          </Typography>
+        </Box>
       </Box>
     );
   };
@@ -143,7 +134,12 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
       <Tooltip title={layer.tooltip} placement="top" arrow>
         <Box>
           <ListItem disablePadding>
-            <ListItemButton selected={isSelected} disabled={layer?.numOffeatures === 0} onClick={() => onListItemClick(layer)}>
+            <ListItemButton
+              selected={isSelected}
+              // disable when layer features has null value.
+              disabled={layer?.numOffeatures === 0 || layer?.features === null}
+              onClick={() => onListItemClick(layer)}
+            >
               {renderLayerIcon()}
               {renderLayerBody()}
               <Box

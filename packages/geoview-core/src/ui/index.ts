@@ -30,6 +30,7 @@ export * from './paper/paper';
 export * from './popover/popover';
 export * from './select/custom-select';
 export * from './select/select';
+export * from './skeleton/skeleton';
 export * from './slider/slider-base';
 export * from './slider/slider';
 export * from './snackbar/snackbar';
