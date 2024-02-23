@@ -11,6 +11,7 @@ import {
   useDetailsStoreActions,
   useDetailsStoreAllFeaturesDataArray,
   useMapVisibleLayers,
+  useUIActiveFooterBarTabId,
 } from '@/core/stores';
 import { LayerListEntry, useFooterPanelHeight, Layout } from '../common';
 import { logger } from '@/core/utils/logger';
@@ -45,6 +46,7 @@ export function Datapanel({ fullWidth }: DataPanelType) {
   const visibleLayers = useMapVisibleLayers();
   const { setSelectedLayerPath } = useDataTableStoreActions();
   const { triggerGetAllFeatureInfo } = useDetailsStoreActions();
+  const selectedTab = useUIActiveFooterBarTabId();
 
   // Custom hook for calculating the height of footer panel
   const { tableHeight } = useFooterPanelHeight({ footerPanelTab: 'data-table' });
@@ -149,19 +151,16 @@ export function Datapanel({ fullWidth }: DataPanelType) {
       {isLoading && <Skeleton variant="rounded" width="100%" height={400} />}
 
       {!isLoading &&
-        orderedLayerData
-          .filter(({ features }) => !!features?.length)
-          .map((data) => (
-            <Box key={data.layerPath}>
-              {data.layerPath === selectedLayerPath ? (
-                <Box>
-                  <DataTable data={data} layerPath={data.layerPath} tableHeight={tableHeight} />
-                </Box>
-              ) : (
-                <Box />
-              )}
-            </Box>
-          ))}
+        selectedTab === 'data-table' &&
+        orderedLayerData.map((data) => (
+          <Box key={data.layerPath}>
+            {data.layerPath === selectedLayerPath ? (
+              <DataTable data={data} layerPath={data.layerPath} tableHeight={tableHeight} />
+            ) : (
+              <Box />
+            )}
+          </Box>
+        ))}
 
       {/* show data table instructions when all layers has no features */}
       {((!isLoading && orderedLayerData.every((layers) => !layers?.features?.length)) || isLayerDisabled()) && (
