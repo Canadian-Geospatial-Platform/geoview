@@ -244,13 +244,11 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
 
     // if layer has selected child but its not itself selected
     if (layerChildIsSelected && !layerIsSelected && !isGroupOpen) {
-      result.push('selectedLayer');
-      result.push('bordered-primary');
+      result.push('selectedLayer bordered-primary');
     }
 
     if (layerIsSelected) {
-      result.push('selectedLayer');
-      result.push('bordered-primary');
+      result.push('selectedLayer bordered-primary');
     }
 
     if (isDragging) {
