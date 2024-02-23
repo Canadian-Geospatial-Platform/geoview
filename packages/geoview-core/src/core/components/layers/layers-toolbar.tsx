@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Box, AddCircleOutlineIcon, ButtonGroup, DeleteOutlineIcon, HandleIcon, Tooltip, VisibilityOutlinedIcon } from '@/ui';
-import { useLayerStoreActions, useLayersDisplayState } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerStoreActions, useLayerDisplayState } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeLayersViewDisplayState } from './types';
 import { logger } from '@/core/utils/logger';
 
@@ -25,7 +25,7 @@ function ResponsiveButton(props: ResponsiveButtonProps): JSX.Element {
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
 
   // access store
-  const displayState = useLayersDisplayState();
+  const displayState = useLayerDisplayState();
   const { setDisplayState } = useLayerStoreActions();
 
   const handleSetDisplayState = (dispState: TypeLayersViewDisplayState): void => {

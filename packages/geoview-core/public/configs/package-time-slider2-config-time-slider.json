@@ -10,9 +10,16 @@
         "en": "Custom description",
         "fr": "Descriptif personnalisé"
       },
-      "locked": true,
-      "reversed": true,
-      "defaultValue": ""
+      "locked": false,
+      "reversed": false,
+      "temporalDimension": {
+        "field": "time_slider_date",
+        "default": ["1940-01-01T05:00:00Z", "1960-01-01T05:00:00Z"],
+        "unitSymbol": "",
+        "range": "1900-01-01T05:00:00Z/2000-01-01T05:00:00Z/P1Y",
+        "nearestValues": "absolute",
+        "singleHandle": false
+      }
     },
     {
       "layerPaths": ["wmsLYR1-spatiotemporel/RADAR_1KM_RSNO"],
@@ -26,10 +33,11 @@
       },
       "locked": true,
       "reversed": true,
-      "defaultValue": ""
+      "defaultValue": "2024-02-21T14:54:00Z"
     },
     {
-      "layerPaths": ["MSI/msi-94-or-more"]
+      "layerPaths": ["MSI/msi-94-or-more"],
+      "defaultValue": "2011-08-15T00:00:00Z"
     }
   ],
   "suportedLanguages": ["en", "fr"]

@@ -53,7 +53,8 @@
               <a href="#HLCONF2">2. Load with wrong JSON object</a><br />
               <a href="#HLCONF3">3. Load with bad config values</a><br />
               <a href="#HLCONF4">4. Load layers with bad config values</a><br />
-              <a href="#HLCONF5">5. Load config from URL params</a><br />
+              <a href="#HLCONF5A">5.A Load config from URL params</a><br />
+              <a href="#HLCONF5B">5.B Load config from div params</a><br />
               <a href="#HLCONF6">6. Load config from file</a><br />
               <a href="#HLCONF7">7. Load config from function call</a><br />
             </td>
@@ -184,13 +185,45 @@
     <hr />
 
     <div class="map-title-holder">
-      <h4 id="HLCONF5">5. Load config from URL params</h4>
+      <h4 id="HLCONF5A">5.A. Load config from URL params</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <div id="CONF5" class="geoview-map" data-lang="en" data-shared="true"></div>
+    <div id="CONF5A" class="geoview-map" data-lang="en" data-shared="true"></div>
     <p>
-      This map loads it's configurations from the URL parameters by providing <strong>data-shared</strong>. If
-      <strong>data-config</strong> is provided then it will override all loaded config from parameters.
+      This map loads it's configurations from the URL parameters by providing a <strong>data-shared</strong> attribute. If a
+      <strong>data-config</strong> attribute was also provided then the later will have its configuration overriden with config from url parameters.
+    </p>
+    <hr />
+
+    <div class="map-title-holder">
+      <h4 id="HLCONF5B">5.B. Load config from div params</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div id="CONF5B" class="geoview-map" data-config="{
+      'map': {
+        'interaction': 'dynamic',
+        'viewSettings': {
+          'zoom': 4,
+          'center': [-100, 40],
+          'projection': 3857
+        },
+        'basemapOptions': {
+          'basemapId': 'transport',
+          'shaded': false,
+          'labeled': true
+        },
+        'listOfGeoviewLayerConfig': []
+      },
+      'components': ['overview-map'],
+      'corePackages': [],
+      'suportedLanguages': ['en', 'fr']
+    }"
+      data-lang="en"
+      data-geocore-keys="12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9"
+      data-geocore-endpoint="https://geocore-stage.api.geo.ca">
+    </div>
+    <p>
+      This map loads it's configurations from the div parameters by providing a <strong>data-geocore-keys</strong> and optionally a <strong>data-geocore-endpoint</strong>.
     </p>
     <hr />
 

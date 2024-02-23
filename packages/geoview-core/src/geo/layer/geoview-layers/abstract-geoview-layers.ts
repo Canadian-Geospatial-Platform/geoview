@@ -1500,6 +1500,17 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
+   * Set the layerTemporalDimension for the layer identified by specified layerPath.
+   *
+   * @param {string} layerPath The layer path to the layer's configuration affected by the change.
+   * @param {TimeDimension} temporalDimension The value to assign to the layer temporal dimension property.
+   */
+  setTemporalDimension(layerPath: string, temporalDimension: TimeDimension): void {
+    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
+    this.layerTemporalDimension[layerPath] = temporalDimension;
+  }
+
+  /** ***************************************************************************************************************************
    * Get the bounds of the layer represented in the layerConfig pointed to by the cached layerPath, returns updated bounds
    *
    * @param {Extent | undefined} bounds The current bounding box to be adjusted.

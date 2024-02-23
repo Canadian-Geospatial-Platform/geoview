@@ -10,8 +10,8 @@ import {
   useDataTableStoreSelectedLayerPath,
   useDetailsStoreActions,
   useDetailsStoreAllFeaturesDataArray,
-  useMapVisibleLayers,
   useUIActiveFooterBarTabId,
+  useMapOrderedLayerInfo,
 } from '@/core/stores';
 import { LayerListEntry, useFooterPanelHeight, Layout } from '../common';
 import { logger } from '@/core/utils/logger';
@@ -43,10 +43,10 @@ export function Datapanel({ fullWidth }: DataPanelType) {
   const selectedLayerPath = useDataTableStoreSelectedLayerPath();
   const mapFiltered = useDataTableStoreMapFilteredRecord();
   const rowsFiltered = useDataTableStoreRowsFiltered();
-  const visibleLayers = useMapVisibleLayers();
   const { setSelectedLayerPath } = useDataTableStoreActions();
   const { triggerGetAllFeatureInfo } = useDetailsStoreActions();
   const selectedTab = useUIActiveFooterBarTabId();
+  const orderedLayerInfo = useMapOrderedLayerInfo();
 
   // Custom hook for calculating the height of footer panel
   const { tableHeight } = useFooterPanelHeight({ footerPanelTab: 'data-table' });
@@ -58,10 +58,17 @@ export function Datapanel({ fullWidth }: DataPanelType) {
    * Order the layers by visible layer order.
    */
   const orderedLayerData = useMemo(() => {
+    const visibleLayers = orderedLayerInfo
+      .map((layerInfo) => {
+        if (layerInfo.visible) return layerInfo.layerPath;
+        return undefined;
+      })
+      .filter((layerPath) => layerPath !== undefined);
+
     return visibleLayers
       .map((layerPath) => mappedLayerData.filter((data) => data.layerPath === layerPath)[0])
       .filter((layer) => layer !== undefined);
-  }, [mappedLayerData, visibleLayers]);
+  }, [mappedLayerData, orderedLayerInfo]);
 
   /**
    * Update local states when layer is changed from layer list.
@@ -72,7 +79,7 @@ export function Datapanel({ fullWidth }: DataPanelType) {
       setSelectedLayerPath(_layer.layerPath);
       setIsLoading(true);
 
-      // trigger the fetching of the features when not available OR when layer status is error
+      // trigger the fetching of the features when not available OR when layer status is in error
       if (
         !orderedLayerData.filter((layers) => layers.layerPath === _layer.layerPath && !!layers?.features?.length).length ||
         _layer.layerStatus === LAYER_STATUS.ERROR
