@@ -370,7 +370,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
             component="img"
             alt={feature.featureIcon.toDataURL().toString()}
             src={feature.featureIcon.toDataURL().toString()}
-            sx={sxClasses.iconImage}
+            className="layer-icon"
           />
         ),
         ZOOM: (

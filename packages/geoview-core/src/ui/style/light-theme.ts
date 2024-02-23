@@ -5,6 +5,6 @@ export const lightThemeColors: IGeoViewColors = {
   ...defaultGeoViewColors,
 
   bgColor: new GeoViewColorClass('#F9F9F9'),
-  primary: new GeoViewColorClass('#AA4A44'),
+  primary: new GeoViewColorClass('#0066CC'),
   textColor: new GeoViewColorClass('#000000'),
 };

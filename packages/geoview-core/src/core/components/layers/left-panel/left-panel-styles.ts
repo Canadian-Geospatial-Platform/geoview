@@ -63,8 +63,6 @@ export const getSxClasses = (theme: Theme) => ({
         alignItems: 'center',
 
         '& .MuiIconButton-root': {
-          color: `${theme.palette.geoViewColor.primary.main} !important`,
-          background: `${theme.palette.geoViewColor.bgColor.dark[100]} !important`,
           margin: '0px 5px',
         },
       },

@@ -7,6 +7,7 @@ import { useGeoViewMapId } from '@/app';
  */
 interface ExportProps {
   className?: string;
+  sxDetails?: object;
 }
 
 /**
@@ -15,7 +16,7 @@ interface ExportProps {
  * @returns {JSX.Element} the export button
  */
 export default function ExportButton(props: ExportProps): JSX.Element {
-  const { className } = props;
+  const { className, sxDetails } = props;
 
   // get store function
   const mapId = useGeoViewMapId();
@@ -27,8 +28,8 @@ export default function ExportButton(props: ExportProps): JSX.Element {
       tooltip="appbar.export"
       tooltipPlacement="bottom-end"
       onClick={() => openModal({ activeElementId: 'export', callbackElementId: `${mapId}-export-btn` })}
+      sx={sxDetails}
       className={className}
-      color="primary"
     >
       <DownloadIcon />
     </IconButton>

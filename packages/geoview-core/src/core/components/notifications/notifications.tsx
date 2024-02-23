@@ -84,7 +84,7 @@ export default function Notifications(): JSX.Element {
       <Box sx={sxClasses.notificationItem} key={index}>
         <Box>{getNotificationIcon(notification)}</Box>
         <Box sx={{ flexGrow: 1 }}>{notification.message}</Box>
-        <IconButton onClick={() => handleRemoveNotificationClick(notification)}>
+        <IconButton className="style3" onClick={() => handleRemoveNotificationClick(notification)}>
           <CloseIcon />
         </IconButton>
       </Box>
@@ -99,7 +99,7 @@ export default function Notifications(): JSX.Element {
           tooltip="appbar.notifications"
           tooltipPlacement="bottom-end"
           onClick={handleOpenPopover}
-          className={open ? 'style1' : ''}
+          className={`style3 ${open ? 'active' : ''}`}
           color="primary"
         >
           <NotificationsIcon />
