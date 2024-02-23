@@ -5,6 +5,7 @@ export const getSxClasses = (theme: Theme) => ({
     color: 'text.primary',
     width: '100%',
     padding: '8px',
+    paddingRight: '14px !important',
     overflowY: 'auto',
     // layer title
     '& .MuiListItemText-primary': {
@@ -17,42 +18,10 @@ export const getSxClasses = (theme: Theme) => ({
       whiteSpace: 'nowrap',
     },
 
-    '& .layerItemContainer': {
-      background: `${theme.palette.geoViewColor.bgColor.light[600]} 0% 0% no-repeat padding-box`,
-      borderRadius: '5px',
-      marginBottom: '1rem',
+    '& .layer-panel': {
 
       '& .MuiListItemText-root': {
         marginLeft: '12px',
-      },
-
-      // for selected layer
-      '&.selectedLayer': {
-        borderColor: theme.palette.geoViewColor.primary.main,
-        borderWidth: '2px',
-        borderStyle: 'solid',
-      },
-
-      '&.dragging': {
-        backgroundcolor: theme.palette.geoViewColor.primary.dark[600],
-        cursor: 'grab',
-        userSelect: 'none',
-      },
-
-      // for handling layer status
-      '&.error': {
-        background: theme.palette.geoViewColor.error.light[400],
-        '& .MuiListItemText-secondary': {
-          fontWeight: 'bold',
-          color: theme.palette.geoViewColor.error.main,
-        },
-      },
-      '&.loading, &.processing': {
-        background: theme.palette.geoViewColor.info.light[600],
-        '& .MuiListItemText-secondary': {
-          fontWeight: 'bold',
-          color: theme.palette.geoViewColor.info.main,
-        },
       },
 
       // styling right icons

@@ -36,25 +36,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
   const sxClasses = getSxClasses(theme);
   const { t } = useTranslation<string>();
 
-  const renderLayerBackground = () => {
-    switch (layer.layerStatus) {
-      case 'error':
-        return sxClasses.backgroundError;
-
-      default:
-        break; // Continue with query status logic
-    }
-
-    switch (layer.queryStatus) {
-      case 'init':
-      case 'processing':
-        return sxClasses.backgroundProcessing;
-      case 'error':
-        return sxClasses.backgroundError;
-      default:
-        return sxClasses.default;
-    }
-  };
+  const isDisabled = layer.numOffeatures === 0;
 
   const renderLayerIcon = () => {
     switch (layer.layerStatus) {
@@ -124,26 +106,33 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
 
       default:
         return (
-          <IconButton edge="end" size="small" className="style1">
+          <IconButton edge="end" size="small" className="style1" disabled={isDisabled}>
             <ChevronRightIcon />
           </IconButton>
         );
     }
   };
 
+  function getContainerClass() {
+    const result: string[] = ['layer-panel', 'bordered', layer.layerStatus ?? ''];
+
+    // if layer has selected child but its not itself selected
+    if (isSelected) {
+      result.push('selectedLayer bordered-primary');
+    }
+
+    return result.join(' ');
+  }
+
   return (
     <Paper
-      sx={{
-        ...sxClasses.paper,
-        border: isSelected ? sxClasses.borderWithIndex : sxClasses.borderNone,
-        backgroundColor: renderLayerBackground(),
-      }}
-      className="bordered"
+      sx={{ marginBottom: '1rem' }}
+      className={getContainerClass()}
     >
       <Tooltip title={layer.tooltip} placement="top" arrow>
         <Box>
           <ListItem disablePadding>
-            <ListItemButton selected={isSelected} disabled={layer?.numOffeatures === 0} onClick={() => onListItemClick(layer)}>
+            <ListItemButton selected={isSelected} disabled={isDisabled} onClick={() => onListItemClick(layer)}>
               {renderLayerIcon()}
               {renderLayerBody()}
               <Box

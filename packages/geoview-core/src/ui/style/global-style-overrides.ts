@@ -1,6 +1,54 @@
 import { IGeoViewColors } from './types';
 
 export const globalStyleOverrides = (geoViewColors: IGeoViewColors) => ({
+  "*::-webkit-scrollbar": {
+    width: "8px"
+  },
+  "*::-webkit-scrollbar-track": {
+    background: geoViewColors.bgColor.darken(0.5, 0.5)
+  },
+  "*::-webkit-scrollbar-thumb": {
+    background: geoViewColors.bgColor.darken(0.5),
+    borderRadius: "5px"
+  },
+  '.layer-panel': {
+      background: `${geoViewColors.bgColor.light[600]} 0% 0% no-repeat padding-box`,
+      borderRadius: '5px',
+      marginBottom: '1rem',
+
+      '& .MuiListItemButton-root': {
+        backgroundColor: 'transparent !important'
+      },
+
+      // for selected layer
+      '&.selectedLayer, &.selected': {
+        borderColor: geoViewColors.primary.main,
+        borderWidth: '2px',
+        borderStyle: 'solid',
+      },
+      //when layer is dragging
+      '&.dragging': {
+        backgroundcolor: geoViewColors.primary.dark[600],
+        cursor: 'grab',
+        userSelect: 'none',
+      },
+      // for handling layer status
+      '&.error': {
+        background: geoViewColors.error.light[400],
+        '& .MuiListItemText-secondary': {
+          fontWeight: 'bold',
+          color: geoViewColors.error.main,
+        },
+      },
+      // for handling loading layer status
+      '&.loading, &.processing': {
+        background: geoViewColors.info.light[600],
+        '& .MuiListItemText-secondary': {
+          fontWeight: 'bold',
+          color: geoViewColors.info.main,
+        },
+      },
+  },
   '.layer-icon': {
     padding: 3,
     borderRadius: 0,

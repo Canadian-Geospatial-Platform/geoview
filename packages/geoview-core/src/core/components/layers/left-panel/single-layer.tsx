@@ -236,7 +236,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   }
 
   function getContainerClass() {
-    const result: string[] = ['layerItemContainer', layer.layerStatus ?? ''];
+    const result: string[] = ['layer-panel ', layer.layerStatus ?? ''];
 
     if (depth === 0) {
       result.push('bordered');

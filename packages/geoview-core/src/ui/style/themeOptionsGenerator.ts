@@ -221,6 +221,7 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
               },
               '&:disabled': {
                 color: `${geoViewColors.bgColor.dark[450]}`,
+                backgroundColor: 'transparent'
               },
             },
             '&.style2': {
