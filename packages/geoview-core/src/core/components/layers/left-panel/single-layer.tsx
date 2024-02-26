@@ -28,7 +28,7 @@ import { useDataTableStoreMapFilteredRecord } from '@/core/stores/store-interfac
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { DeleteUndoButton } from './delete-undo-button';
 import { LayersList } from './layers-list';
-import { LayerIcon } from '../layer-icon';
+import { LayerIcon } from '../../common/layer-icon';
 import { logger } from '@/core/utils/logger';
 
 interface SingleLayerProps {

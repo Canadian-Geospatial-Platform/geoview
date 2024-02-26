@@ -37,16 +37,16 @@ export const globalStyleOverrides = (geoViewColors: IGeoViewColors) => ({
       userSelect: 'none',
     },
     // for handling layer status
-    '&.error': {
-      background: geoViewColors.error.light[400],
+    '&.error, &.query-error': {
+      background: geoViewColors.error.lighten(0.7, 0.6),
       '& .MuiListItemText-secondary': {
         fontWeight: 'bold',
         color: geoViewColors.error.main,
       },
     },
     // for handling loading layer status
-    '&.loading, &.processing': {
-      background: geoViewColors.info.light[600],
+    '&.loading, &.processing, &.query-processing': {
+      background: geoViewColors.info.lighten(0.7, 0.6),
       '& .MuiListItemText-secondary': {
         fontWeight: 'bold',
         color: geoViewColors.info.main,

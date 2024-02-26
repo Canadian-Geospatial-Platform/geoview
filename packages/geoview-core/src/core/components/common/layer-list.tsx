@@ -2,9 +2,10 @@ import { ReactNode, memo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { Box, ChevronRightIcon, IconButton, List, ListItem, ListItemButton, ListItemIcon, Paper, Tooltip, Typography } from '@/ui';
-import { IconStack, TypeArrayOfFeatureInfoEntries, TypeLayerStatus, TypeQueryStatus } from '@/app';
+import { TypeArrayOfFeatureInfoEntries, TypeLayerStatus, TypeQueryStatus } from '@/app';
 
 import { getSxClasses } from './layer-list-style';
+import { LayerIcon } from './layer-icon';
 
 export interface LayerListEntry {
   layerName: string;
@@ -49,7 +50,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
         if (layer.layerPath) {
           return (
             <ListItemIcon>
-              <IconStack layerPath={layer.layerPath} />
+              <LayerIcon layer={layer} />
             </ListItemIcon>
           );
         }
@@ -67,6 +68,8 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
           case 'init':
           case 'processing':
             return `${t('layers.querying')}...`;
+            case 'error':
+              return t('legend.layerError');
           default:
             return (
               <>
@@ -105,7 +108,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
   };
 
   function getContainerClass() {
-    const result: string[] = ['layer-panel', 'bordered', layer.layerStatus ?? ''];
+    const result: string[] = ['layer-panel', 'bordered', layer.layerStatus ?? '', `query-${layer.queryStatus}`];
 
     // if layer has selected child but its not itself selected
     if (isSelected) {
