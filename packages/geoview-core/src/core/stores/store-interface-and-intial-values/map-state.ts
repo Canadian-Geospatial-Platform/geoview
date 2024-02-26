@@ -65,6 +65,7 @@ export interface IMapState {
   scale: TypeScaleInfo;
   selectedFeatures: Array<TypeFeatureInfoEntry>;
   size: [number, number];
+  visibleLayers: string[];
   zoom: number;
 
   setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
@@ -109,6 +110,7 @@ export interface IMapState {
     setProjection: (projectionCode: TypeValidMapProjectionCodes, view: View) => void;
     setQueryable: (layerPath: string, queryable: boolean) => void;
     setRotation: (degree: number) => void;
+    setVisibleLayers: (newOrder: string[]) => void;
     setZoom: (zoom: number, duration?: number) => void;
     showClickMarker: (marker: TypeClickMarker) => void;
     transformPoints: (coords: Coordinate[], outputProjection: number) => Coordinate[];
@@ -151,6 +153,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     scale: { lineWidth: '', labelGraphic: '', labelNumeric: '' } as TypeScaleInfo,
     selectedFeatures: [],
     size: [0, 0] as [number, number],
+    visibleLayers: [],
     zoom: 0,
 
     // initialize default stores section from config information when store receive configuration file
@@ -548,6 +551,14 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         // State is set by the map state store event 'onMapRotation'
         get().mapState.mapElement!.getView().animate({ rotation: degree });
       },
+      setVisibleLayers: (newOrder: string[]) => {
+        set({
+          mapState: {
+            ...get().mapState,
+            visibleLayers: newOrder,
+          },
+        });
+      },
       setZoom: (zoom: number, duration?: number) => {
         // set ol map zoom
         // State is set by the map state store event 'onMapZoomEnd'
@@ -627,6 +638,7 @@ export const useMapRotation = () => useStore(useGeoViewStore(), (state) => state
 export const useMapSelectedFeatures = () => useStore(useGeoViewStore(), (state) => state.mapState.selectedFeatures);
 export const useMapScale = () => useStore(useGeoViewStore(), (state) => state.mapState.scale);
 export const useMapSize = () => useStore(useGeoViewStore(), (state) => state.mapState.size);
+export const useMapVisibleLayers = () => useStore(useGeoViewStore(), (state) => state.mapState.visibleLayers);
 export const useMapZoom = () => useStore(useGeoViewStore(), (state) => state.mapState.zoom);
 
 export const useMapStoreActions = () => useStore(useGeoViewStore(), (state) => state.mapState.actions);

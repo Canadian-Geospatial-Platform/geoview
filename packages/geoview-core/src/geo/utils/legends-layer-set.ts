@@ -125,7 +125,9 @@ export class LegendsLayerSet extends LayerSet {
           const { layerPath } = payload;
           if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerPath) === -1) {
             const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
-            if (layerConfig.parentLayerConfig) {
+            if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerPath.split('.')[1]) !== -1) {
+              MapEventProcessor.replaceOrderedLayerInfo(this.mapId, layerConfig, layerPath.split('.')[1]);
+            } else if (layerConfig.parentLayerConfig) {
               const parentLayerPathArray = layerPath.split('/');
               parentLayerPathArray.pop();
               const parentLayerPath = parentLayerPathArray.join('/');
