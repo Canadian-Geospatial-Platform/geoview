@@ -61,13 +61,20 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
 
     actions: {
       addNotification: (notif: NotificationDetailsType) => {
+        const curNotifications = get().appState.notifications;
+        // if the notification already exist, we increment the count
+        const existingNotif = curNotifications.find((item) => (item.message === notif.message && item.notificationType === notif.notificationType));
+         //existingNotif ? existingNotif.count + 1 : 1;
+        if(!existingNotif) {
+          curNotifications.push({ key: notif.key, notificationType: notif.notificationType, message: notif.message, count: 1 });
+        } else {
+          existingNotif.count += 1;
+        }
+
         set({
           appState: {
             ...get().appState,
-            notifications: [
-              ...get().appState.notifications,
-              { key: notif.key, notificationType: notif.notificationType, message: notif.message },
-            ],
+            notifications: [ ...curNotifications ],
           },
         });
       },

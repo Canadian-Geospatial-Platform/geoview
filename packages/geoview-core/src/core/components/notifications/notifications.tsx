@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
+import { useTheme } from '@mui/material/styles';
 import {
   Box,
   Popover,
@@ -14,16 +14,18 @@ import {
   Badge,
   Typography,
 } from '@/ui';
-import { sxClasses } from './notifications-style';
+import { getSxClasses } from './notifications-style';
 import { useAppNotifications, useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewMapId } from '@/app';
 import { logger } from '@/core/utils/logger';
+import _ from 'lodash';
 
 export type NotificationDetailsType = {
   key: string;
   notificationType: NotificationType;
   message: string;
   description?: string;
+  count: number;
 };
 
 export type NotificationType = 'success' | 'error' | 'info' | 'warning';
@@ -38,6 +40,8 @@ export default function Notifications(): JSX.Element {
   logger.logTraceRender('components/notifications/notifications');
 
   const { t } = useTranslation<string>();
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   const mapId = useGeoViewMapId();
   const mapElem = document.getElementById(`shell-${mapId}`);
@@ -47,8 +51,9 @@ export default function Notifications(): JSX.Element {
 
   // get values from the store
   const notifications = useAppNotifications();
+
   const { removeNotification } = useAppStoreActions();
-  const notificationsCount = notifications.length;
+  const notificationsCount = _.sumBy(notifications, (n) => n.count);
 
   // handle open/close
   const open = Boolean(anchorEl);
@@ -83,8 +88,15 @@ export default function Notifications(): JSX.Element {
     return (
       <Box sx={sxClasses.notificationItem} key={index}>
         <Box>{getNotificationIcon(notification)}</Box>
-        <Box sx={{ flexGrow: 1 }}>{notification.message}</Box>
-        <IconButton className="style3" onClick={() => handleRemoveNotificationClick(notification)}>
+        <Box sx={{ flexGrow: 1, fontSize: '0.9em', color: theme.palette.geoViewColor.textColor.light[250] }}>
+          <span>{notification.message}</span>
+        </Box>
+        {notification.count > 1 ? (
+          <Box>
+            <Box sx={sxClasses.notificationsCount}>{notification.count}</Box>
+          </Box>
+        ) : null}
+        <IconButton onClick={() => handleRemoveNotificationClick(notification)}>
           <CloseIcon />
         </IconButton>
       </Box>
@@ -121,11 +133,8 @@ export default function Notifications(): JSX.Element {
         container={mapElem}
       >
         <Box sx={sxClasses.notificationPanel}>
-          <Typography component="div">{t('appbar.notifications')}</Typography>
-          <Typography component="div">
-            <hr />
-          </Typography>
-          <Box sx={{ overflowY: 'auto' }}>
+          <Typography component="h3" sx={sxClasses.notificationsTitle}>{t('appbar.notifications')}</Typography>
+          <Box sx={sxClasses.notificationsList}>
             {notifications.length > 0 ? (
               notifications.map((notification, index) => renderNotification(notification, index))
             ) : (

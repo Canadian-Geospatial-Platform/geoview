@@ -1,16 +1,20 @@
 import { IGeoViewColors } from './types';
 
 export const globalStyleOverrides = (geoViewColors: IGeoViewColors) => ({
+  /* Scrollbar */
   "*::-webkit-scrollbar": {
     width: "8px"
   },
   "*::-webkit-scrollbar-track": {
-    background: geoViewColors.bgColor.darken(0.5, 0.5)
+    background: geoViewColors.bgColor.darken(0.5, 0.5),
+    borderRadius: "5px"
   },
   "*::-webkit-scrollbar-thumb": {
     background: geoViewColors.bgColor.darken(0.5),
     borderRadius: "5px"
   },
+
+  /* Layer Panel */
   '.layer-panel': {
       background: `${geoViewColors.bgColor.light[600]} 0% 0% no-repeat padding-box`,
       borderRadius: '5px',
