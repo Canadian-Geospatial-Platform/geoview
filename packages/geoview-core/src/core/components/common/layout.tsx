@@ -95,7 +95,7 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
       <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
         {!fullWidth && (
           <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlarged}>
-            {!!layerList.length && <LayerTitle>{t('general.layers')}</LayerTitle>}
+            {null}
           </ResponsiveGrid.Left>
         )}
         <ResponsiveGrid.Right isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlarged} fullWidth={fullWidth}>

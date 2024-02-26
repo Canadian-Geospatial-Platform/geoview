@@ -177,7 +177,7 @@ export function Datapanel() {
     <Box sx={sxClasses.dataPanel}>
       <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
         <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlargeDataTable}>
-          {!!orderedLayerData?.length && <LayerTitle>{t('general.layers')}</LayerTitle>}
+          {null}
         </ResponsiveGrid.Left>
         <ResponsiveGrid.Right isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlargeDataTable}>
           <Box
