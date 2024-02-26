@@ -359,7 +359,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
           <div style={{ textAlign: 'center', paddingTop: '20px' }}>
             {!singleHandle && (
               <IconButton
-                className='style1'
+                className="style1"
                 aria-label={returnLockTooltip()}
                 tooltip={returnLockTooltip()}
                 tooltipPlacement="top"
@@ -369,7 +369,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               </IconButton>
             )}
             <IconButton
-            className='style1'
+              className="style1"
               aria-label={getLocalizedMessage(mapId, 'timeSlider.slider.back') as string}
               tooltip="timeSlider.slider.back"
               tooltipPlacement="top"
@@ -379,7 +379,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               <ArrowLeftIcon />
             </IconButton>
             <IconButton
-              className='style1'
+              className="style1"
               aria-label={
                 isPlaying
                   ? (getLocalizedMessage(mapId, 'timeSlider.slider.pauseAnimation') as string)
@@ -393,7 +393,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               {!isPlaying ? <PlayArrowIcon /> : <PauseIcon />}
             </IconButton>
             <IconButton
-              className='style1'
+              className="style1"
               aria-label={getLocalizedMessage(mapId, 'timeSlider.slider.forward') as string}
               tooltip="timeSlider.slider.forward"
               tooltipPlacement="top"
@@ -403,7 +403,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               <ArrowRightIcon />
             </IconButton>
             <IconButton
-              className='style1'
+              className="style1"
               aria-label={getLocalizedMessage(mapId, 'timeSlider.slider.changeDirection') as string}
               tooltip="timeSlider.slider.changeDirection"
               tooltipPlacement="top"
