@@ -11,6 +11,7 @@ export const getSxClasses = (theme: Theme) => ({
     marginLeft: '15px',
     backgroundColor: theme.palette.geoViewColor.bgColor.main,
     borderRadius: '5px',
+    boxShadow: 2,
   },
   notificationsTitle: {
     fontSize: '17px',

@@ -15,7 +15,7 @@ export const globalStyleOverrides = (geoViewColors: IGeoViewColors) => ({
   },
 
   /* Layer Panel */
-  '.layer-panel': {
+  '.layer-panel[data-layer-depth="0"], .layer-panel:not([data-layer-depth])': {
     background: `${geoViewColors.bgColor.light[600]} 0% 0% no-repeat padding-box`,
     borderRadius: '5px',
     marginBottom: '1rem',
