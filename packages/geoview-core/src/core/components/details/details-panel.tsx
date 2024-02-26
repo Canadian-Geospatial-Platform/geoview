@@ -412,7 +412,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
                       tooltip="details.clearAllfeatures"
                       tooltipPlacement="top"
                       onClick={() => handleClearAllHighlights()}
-                      className='style1'
+                      className="style1"
                       disabled={checkedFeatures.length === 0}
                     >
                       <LayersClearOutlinedIcon />
