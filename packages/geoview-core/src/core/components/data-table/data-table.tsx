@@ -409,12 +409,12 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
     },
     renderToolbarInternalActions: ({ table }) => (
       <Box>
-        <MRTToggleFiltersButton table={table} />
+        <MRTToggleFiltersButton className='style1' table={table} />
         <FilterMap layerPath={layerPath} />
-        <MRTShowHideColumnsButton table={table} />
-        <MRTToggleDensePaddingButton table={table} />
-        <MRTFullScreenToggleButton table={table} />
-        <ExportButton rows={rows} columns={columns}>
+        <MRTShowHideColumnsButton className='style1' table={table} />
+        <MRTToggleDensePaddingButton className='style1' table={table} />
+        <MRTFullScreenToggleButton className='style1'  table={table} />
+        <ExportButton  rows={rows} columns={columns}>
           <JSONExportButton features={data.features as TypeFeatureInfoEntry[]} layerPath={layerPath} />
         </ExportButton>
       </Box>

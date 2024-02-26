@@ -130,7 +130,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
               className="layerTitle"
               secondary={getSecondaryText()}
             />
-            <IconButton sx={{ marginBottom: '20px' }} color="primary" edge="end" size="small" tooltip="layers.toggleCollapse">
+            <IconButton sx={{ marginBottom: '20px' }} className="style1" edge="end" size="small" tooltip="layers.toggleCollapse">
               {isGroupOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
             </IconButton>
           </>

@@ -20,6 +20,7 @@ import { getSxClasses } from './notifications-style';
 import { useAppNotifications, useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewMapId } from '@/app';
 import { logger } from '@/core/utils/logger';
+import { ClickAwayListener } from '@mui/material';
 
 export type NotificationDetailsType = {
   key: string;
@@ -63,6 +64,12 @@ export default function Notifications(): JSX.Element {
     setOpen(!open);
   };
 
+  const handleClickAway = () => {
+    if(open) {
+      setOpen(false);
+    }
+  }
+
   /**
    * Remove a notification
    */
@@ -104,6 +111,9 @@ export default function Notifications(): JSX.Element {
 
   return (
     <>
+    <ClickAwayListener mouseEvent="onMouseDown"
+  touchEvent="onTouchStart" onClickAway={handleClickAway}>
+      <div>
       <Badge badgeContent={notificationsCount} color="error">
         <IconButton
           id="notification"
@@ -118,6 +128,7 @@ export default function Notifications(): JSX.Element {
       </Badge>
 
       <Popper open={open} anchorEl={anchorEl} placement="right-end" container={mapElem}>
+      
         <Paper sx={sxClasses.notificationPanel}>
           <Typography component="h3" sx={sxClasses.notificationsTitle}>
             {t('appbar.notifications')}
@@ -133,6 +144,8 @@ export default function Notifications(): JSX.Element {
           </Box>
         </Paper>
       </Popper>
+      </div>
+      </ClickAwayListener>
     </>
   );
 }
