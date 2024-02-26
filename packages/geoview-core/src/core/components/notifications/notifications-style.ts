@@ -31,8 +31,11 @@ export const getSxClasses = (theme: Theme) => ({
     flexDirection: 'row',
     alignItems: 'center',
     gap: '8px',
-    borderBottom: '1px solid #474747',
     padding: '10px 15px',
+
+    '&:not(:last-child)': {
+      borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[300]}`
+    },
 
     '& .MuiIconButton-root': {
       color: theme.palette.geoViewColor.textColor.lighten(0.2, 0.4),

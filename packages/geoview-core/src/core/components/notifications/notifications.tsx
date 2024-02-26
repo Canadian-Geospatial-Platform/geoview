@@ -49,6 +49,7 @@ export default function Notifications(): JSX.Element {
 
   // internal state
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [open, setOpen] = useState(false);
 
   // get values from the store
   const notifications = useAppNotifications();
@@ -57,9 +58,9 @@ export default function Notifications(): JSX.Element {
   const notificationsCount = _.sumBy(notifications, (n) => n.count);
 
   // handle open/close
-  const open = Boolean(anchorEl);
   const handleOpenPopover = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
+    setOpen(!open);
   };
 
   /**
@@ -125,7 +126,7 @@ export default function Notifications(): JSX.Element {
             {notifications.length > 0 ? (
               notifications.map((notification, index) => renderNotification(notification, index))
             ) : (
-              <Typography component="div">{t('appbar.no_notifications_available')}</Typography>
+              <Typography component="div" sx={{padding:"10px 15px"}}>{t('appbar.no_notifications_available')}</Typography>
             )}
           </Box>
         </Paper>

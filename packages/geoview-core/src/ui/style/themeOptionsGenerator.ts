@@ -210,7 +210,7 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
         styleOverrides: {
           root: {
             '&.style1': {
-              backgroundColor: `${geoViewColors.bgColor.dark[100]}`,
+              backgroundColor: 'transparent',
               border: `3px solid transparent`,
               color: `${geoViewColors.primary.main}`,
               '&:hover, &:active, &.active': {
