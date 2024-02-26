@@ -123,5 +123,6 @@ export const useDetailsStoreCheckedFeatures = () => useStore(useGeoViewStore(), 
 export const useDetailsStoreLayerDataArray = () => useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArray);
 export const useDetailsStoreLayerDataArrayBatch = () => useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArrayBatch);
 export const useDetailsStoreSelectedLayerPath = () => useStore(useGeoViewStore(), (state) => state.detailsState.selectedLayerPath);
+export const useDetailsStoreAllFeaturesDataArray = () => useStore(useGeoViewStore(), (state) => state.detailsState.allFeaturesDataArray);
 
 export const useDetailsStoreActions = () => useStore(useGeoViewStore(), (state) => state.detailsState.actions);

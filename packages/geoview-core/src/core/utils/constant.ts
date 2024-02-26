@@ -27,5 +27,25 @@ export const OL_OVERVIEWMAP_SIZE = {
   height: '150px',
 };
 
+export const LAYER_STATUS = {
+  REGISTERED: 'registered',
+  NEW_INSTANCE: 'newInstance',
+  PROCESSING: 'processing',
+  PROCESSED: 'processed',
+  LOADING: 'loading',
+  LOADED: 'loaded',
+  ERROR: 'error',
+} as const;
+
 export const ARROW_KEY_CODES: string[] = ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLefts'];
 export const ARROW_KEYS_WITH_SPACE: string[] = [...ARROW_KEY_CODES, 'Space'];
+
+export const TABS = {
+  LEGEND: 'legend',
+  DETAILS: 'details',
+  LAYERS: 'layers',
+  DATA_TABLE: 'data-table',
+  GUIDE: 'guide',
+  TIME_SLIDER: 'time-slider',
+  GEO_CHART: 'geochart',
+} as const;

@@ -201,7 +201,10 @@
     "features": "Item(s)",
     "featureFiltered": "Item filtrée(s)",
     "images": "Images",
-    "close": "Fermer"
+    "close": "Fermer",
+    "dataTableInstructions": "Instructions relatives aux tableaux de données",
+    "selectVisbleLayer": "Cliquez sur une couche pour afficher le tableau de données",
+    "noFeatures": "inconnue..."
   },
   "geochart": {
     "noChartAvailable": "Cliquez sur la couche de carte avec le graphique"

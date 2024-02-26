@@ -4,7 +4,6 @@ export const getSxClasses = (theme: Theme) => ({
   dataPanel: { background: theme.palette.geoViewColor.bgColor.main, paddingBottom: '1rem' },
   gridContainer: { paddingLeft: '1rem', paddingRight: '1rem' },
   selectedRows: {
-    backgroundColor: theme.palette.geoViewColor.white,
     transition: 'box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
     fontWeight: 400,
     fontSize: '0.875rem',
@@ -12,7 +11,6 @@ export const getSxClasses = (theme: Theme) => ({
     letterSpacing: '0.01071em',
     display: 'flex',
     padding: '6px',
-    color: 'rgb(1, 67, 97)',
   },
   selectedRowsDirection: {
     display: 'flex',
@@ -66,5 +64,13 @@ export const getSxClasses = (theme: Theme) => ({
         },
       },
     },
+  },
+  dataTableInstructionsTitle: {
+    fontSize: theme.palette.geoViewFontSize.lg,
+    fontWeight: '600',
+    lineHeight: '1.5em',
+  },
+  dataTableInstructionsBody: {
+    fontSize: theme.palette.geoViewFontSize.sm,
   },
 });

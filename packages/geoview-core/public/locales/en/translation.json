@@ -201,7 +201,10 @@
     "features": "feature(s)",
     "featureFiltered": "features filtered",
     "images": "Images",
-    "close": "Close"
+    "close": "Close",
+    "dataTableInstructions": "Data Table Instructions",
+    "selectVisbleLayer": "Click on a layer to view the data table",
+    "noFeatures": "unknown..."
   },
   "geoChart": {
     "noChartAvailable": "Click on the map layer with chart"

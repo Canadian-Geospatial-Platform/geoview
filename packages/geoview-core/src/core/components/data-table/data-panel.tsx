@@ -1,57 +1,62 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { Box, CircularProgress, FilterAltIcon } from '@/ui';
-import MapDataTable from './data-table';
-import { getSxClasses } from './data-table-style';
+import { Box, FilterAltIcon, Paper, Skeleton, Typography } from '@/ui';
+import DataTable from './data-table';
 import {
   useDataTableStoreActions,
-  useDataTableStoreIsEnlargeDataTable,
   useDataTableStoreMapFilteredRecord,
   useDataTableStoreRowsFiltered,
   useDataTableStoreSelectedLayerPath,
-  useDetailsStoreLayerDataArray,
+  useDetailsStoreActions,
+  useDetailsStoreAllFeaturesDataArray,
+  useUIActiveFooterBarTabId,
   useMapOrderedLayerInfo,
 } from '@/core/stores';
-import { ResponsiveGrid, EnlargeButton, CloseButton, LayerList, LayerListEntry, LayerTitle, useFooterPanelHeight } from '../common';
+import { LayerListEntry, useFooterPanelHeight, Layout } from '../common';
 import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
-import { TypeFieldEntry, TypeLayerData } from '@/app';
+import { LAYER_STATUS, TABS, TypeFieldEntry, TypeLayerData } from '@/app';
+import { getSxClasses } from './data-table-style';
 
 export interface MappedLayerDataType extends TypeLayerData {
   fieldInfos: Record<string, TypeFieldEntry | undefined>;
 }
 
+interface DataPanelType {
+  fullWidth?: boolean;
+}
 /**
  * Build Data panel from map.
  * @return {ReactElement} Data table as react element.
  */
 
-export function Datapanel() {
+export function Datapanel({ fullWidth }: DataPanelType) {
   const { t } = useTranslation();
   const theme = useTheme();
-
-  // TODO: Update layer data from store when available.
-  const layerData = useDetailsStoreLayerDataArray();
-
   const sxClasses = getSxClasses(theme);
 
+  const layerData = useDetailsStoreAllFeaturesDataArray();
+
   const [isLoading, setIsLoading] = useState(false);
-  const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
 
   const selectedLayerPath = useDataTableStoreSelectedLayerPath();
-  const isEnlargeDataTable = useDataTableStoreIsEnlargeDataTable();
   const mapFiltered = useDataTableStoreMapFilteredRecord();
   const rowsFiltered = useDataTableStoreRowsFiltered();
+  const { setSelectedLayerPath } = useDataTableStoreActions();
+  const { triggerGetAllFeatureInfo } = useDetailsStoreActions();
+  const selectedTab = useUIActiveFooterBarTabId();
   const orderedLayerInfo = useMapOrderedLayerInfo();
-  const { setSelectedLayerPath, setIsEnlargeDataTable } = useDataTableStoreActions();
 
   // Custom hook for calculating the height of footer panel
-  const { leftPanelRef, rightPanelRef, panelTitleRef, tableHeight } = useFooterPanelHeight({ footerPanelTab: 'data-table' });
+  const { tableHeight } = useFooterPanelHeight({ footerPanelTab: 'data-table' });
 
   // Create columns for data table.
   const mappedLayerData = useFeatureFieldInfos(layerData);
 
+  /**
+   * Order the layers by visible layer order.
+   */
   const orderedLayerData = useMemo(() => {
     const visibleLayers = orderedLayerInfo
       .map((layerInfo) => {
@@ -65,13 +70,24 @@ export function Datapanel() {
       .filter((layer) => layer !== undefined);
   }, [mappedLayerData, orderedLayerInfo]);
 
+  /**
+   * Update local states when layer is changed from layer list.
+   * @param {LayerListEntry} layer layer from layer list is selected.
+   */
   const handleLayerChange = useCallback(
     (_layer: LayerListEntry) => {
       setSelectedLayerPath(_layer.layerPath);
       setIsLoading(true);
-      setIsLayersPanelVisible(true);
+
+      // trigger the fetching of the features when not available OR when layer status is in error
+      if (
+        !orderedLayerData.filter((layers) => layers.layerPath === _layer.layerPath && !!layers?.features?.length).length ||
+        _layer.layerStatus === LAYER_STATUS.ERROR
+      ) {
+        triggerGetAllFeatureInfo(_layer.layerPath, 'all');
+      }
     },
-    [setSelectedLayerPath]
+    [orderedLayerData, setSelectedLayerPath, triggerGetAllFeatureInfo]
   );
 
   /**
@@ -79,17 +95,23 @@ export function Datapanel() {
    * @param {string} layerPath The path of the layer
    * @returns boolean
    */
-  const isMapFilteredSelectedForLayer = (layerPath: string): boolean => !!mapFiltered[layerPath];
+  const isMapFilteredSelectedForLayer = (layerPath: string): boolean => !!mapFiltered[layerPath] && !!rowsFiltered[layerPath];
 
   /**
-   * Get number of features of a layer with filtered or selected layer.
+   * Get number of features of a layer with filtered or selected layer or unknown when data table is loaded.
    * @param {string} layerPath the path of the layer
    * @returns
    */
   const getFeaturesOfLayer = (layerPath: string): string => {
-    return rowsFiltered && rowsFiltered[layerPath]
-      ? `${rowsFiltered[layerPath]} ${t('dataTable.featureFiltered')}`
-      : `${orderedLayerData?.find((layer) => layer.layerPath === layerPath)?.features?.length ?? 0} ${t('dataTable.features')}`;
+    if (rowsFiltered && rowsFiltered[layerPath]) {
+      return `${rowsFiltered[layerPath]} ${t('dataTable.featureFiltered')}`;
+    }
+    let featureStr = t('dataTable.noFeatures');
+    const features = orderedLayerData?.find((layer) => layer.layerPath === layerPath)?.features?.length ?? 0;
+    if (features > 0) {
+      featureStr = `${features} ${t('dataTable.features')}`;
+    }
+    return featureStr;
   };
 
   /**
@@ -98,7 +120,7 @@ export function Datapanel() {
    * @param {string} layerPath the path of the layer.
    * @returns
    */
-  const getLayerTooltip = (layerName: string, layerPath: string): React.ReactNode => {
+  const getLayerTooltip = (layerName: string, layerPath: string): ReactNode => {
     return (
       <Box sx={{ display: 'flex', alignContent: 'center', '& svg ': { width: '0.75em', height: '0.75em' } }}>
         {`${layerName}, ${getFeaturesOfLayer(layerPath)}`}
@@ -108,47 +130,36 @@ export function Datapanel() {
   };
 
   /**
-   * Render group layers as list.
-   *
-   * @returns JSX.Element
+   * Checks if layer is disabled when layer is selected and features have null value.
+   * @returns bool
    */
-  const renderList = useCallback(
-    () => {
-      // Log
-      logger.logTraceUseCallback(
-        'data-panel.renderList',
-        selectedLayerPath,
-        isEnlargeDataTable,
-        mapFiltered,
-        rowsFiltered,
-        orderedLayerData
-      );
+  const isLayerDisabled = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DATA-PANEL - isLayerDisabled', selectedLayerPath);
 
-      // TODO: Fix the layerStatus and queryStatus below when refactoring will be done for the data-panel (parallel development happening, not doing it now)
-      return (
-        <LayerList
-          layerList={orderedLayerData
-            .filter(({ features }) => !!features?.length)
-            .map((layer) => ({
-              layerName: layer.layerName ?? '',
-              layerPath: layer.layerPath,
-              layerStatus: 'loaded',
-              queryStatus: 'processed',
-              layerFeatures: getFeaturesOfLayer(layer.layerPath),
-              tooltip: getLayerTooltip(layer.layerName ?? '', layer.layerPath),
-              mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerPath) && (
-                <FilterAltIcon sx={{ color: theme.palette.geoViewColor.grey.main }} />
-              ),
-            }))}
-          isEnlarged={isEnlargeDataTable}
-          selectedLayerPath={selectedLayerPath}
-          onListItemClick={handleLayerChange}
-        />
-      );
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedLayerPath, isEnlargeDataTable, mapFiltered, rowsFiltered, orderedLayerData]
-  );
+    return () => !!orderedLayerData.find((layer) => layer.layerPath === selectedLayerPath && layer.features === null);
+  }, [orderedLayerData, selectedLayerPath]);
+
+  /**
+   * Checks if selected layer has features.
+   */
+  const isSelectedLayerHasFeatures = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DATA-PANEL - isSelectedLayerHasFeatures', selectedLayerPath);
+
+    return () => orderedLayerData.find((layer) => layer.layerPath === selectedLayerPath && layer?.features?.length);
+  }, [selectedLayerPath, orderedLayerData]);
+
+  /**
+   * Checks if all layers have no features like features are empty array.
+   * @returns
+   */
+  const isAllLayersNoFeatures = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DATA-PANEL - isAllLayersNoFeatures');
+
+    return () => orderedLayerData.every((layers) => !layers?.features?.length);
+  }, [orderedLayerData]);
 
   useEffect(() => {
     // Log
@@ -157,78 +168,67 @@ export function Datapanel() {
     // TODO: Get rid of this setTimeout of 1 second?
     const clearLoading = setTimeout(() => {
       setIsLoading(false);
-    }, 1000);
+    }, 100);
     return () => clearTimeout(clearLoading);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, selectedLayerPath]);
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('DATA-PANEL - set selected layer when component mounts', orderedLayerData[0].layerPath);
+    logger.logTraceUseEffect('DATA-PANEL - unmount', selectedLayerPath);
 
-    setSelectedLayerPath(orderedLayerData[0].layerPath);
+    // NOTE: Reason for not using component unmount, because we are not mounting and unmounting components
+    // when we switch tabs.
+    if (selectedTab !== TABS.DATA_TABLE) {
+      setSelectedLayerPath('');
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [selectedTab]);
 
-  // TODO: Use the correct layer title in the title below
-  // TO.DOCONT: Dropped out when reworking the layer index/layer path indexing and not adjusted as parallel development happening on this component
-  // TODO: Reuse the Layout common component to render the layers list on the left and the right panel (like Details, Geochart, Timeslider panels)
   return (
-    <Box sx={sxClasses.dataPanel}>
-      <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
-        <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlargeDataTable}>
-          {null}
-        </ResponsiveGrid.Left>
-        <ResponsiveGrid.Right isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlargeDataTable}>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              [theme.breakpoints.up('md')]: { justifyContent: 'right' },
-              [theme.breakpoints.down('md')]: { justifyContent: 'space-between' },
-            }}
-          >
-            {!isLoading && (
-              <LayerTitle hideTitle>{orderedLayerData.find((layer) => layer.layerPath === selectedLayerPath)?.layerName ?? ''}</LayerTitle>
+    <Layout
+      selectedLayerPath={selectedLayerPath || ''}
+      layerList={orderedLayerData.map((layer) => ({
+        ...layer,
+        layerFeatures: getFeaturesOfLayer(layer.layerPath),
+        tooltip: getLayerTooltip(layer.layerName ?? '', layer.layerPath),
+        mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerPath) && (
+          <FilterAltIcon sx={{ color: theme.palette.geoViewColor.grey.main }} />
+        ),
+      }))}
+      onLayerListClicked={handleLayerChange}
+      fullWidth={fullWidth}
+    >
+      {isLoading && <Skeleton variant="rounded" width="100%" height={400} />}
+
+      {!isLoading &&
+        selectedTab === TABS.DATA_TABLE &&
+        !isLayerDisabled() &&
+        isSelectedLayerHasFeatures() &&
+        orderedLayerData.map((data) => (
+          <Box key={data.layerPath}>
+            {data.layerPath === selectedLayerPath ? (
+              <DataTable data={data} layerPath={data.layerPath} tableHeight={tableHeight} />
+            ) : (
+              <Box />
             )}
-
-            <Box>
-              <EnlargeButton isEnlarged={isEnlargeDataTable} onSetIsEnlarged={setIsEnlargeDataTable} />
-              {!isLoading && (
-                <CloseButton onSetIsLayersPanelVisible={setIsLayersPanelVisible} isLayersPanelVisible={isLayersPanelVisible} />
-              )}
-            </Box>
           </Box>
-        </ResponsiveGrid.Right>
-      </ResponsiveGrid.Root>
-      <ResponsiveGrid.Root>
-        <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlargeDataTable} ref={leftPanelRef}>
-          {renderList()}
-        </ResponsiveGrid.Left>
-        <ResponsiveGrid.Right isEnlarged={isEnlargeDataTable} isLayersPanelVisible={isLayersPanelVisible} ref={rightPanelRef}>
-          <CircularProgress
-            isLoaded={!isLoading}
-            sx={{
-              backgroundColor: 'inherit',
-            }}
-          />
+        ))}
 
-          {!isLoading &&
-            orderedLayerData
-              .filter(({ features }) => !!features?.length)
-              .map((data) => (
-                <Box key={data.layerPath}>
-                  {data.layerPath === selectedLayerPath ? (
-                    <Box>
-                      <MapDataTable data={data} layerPath={data.layerPath} tableHeight={tableHeight} />
-                    </Box>
-                  ) : (
-                    <Box />
-                  )}
-                </Box>
-              ))}
-        </ResponsiveGrid.Right>
-      </ResponsiveGrid.Root>
-    </Box>
+      {/* show data table instructions when all layers has no features */}
+      {((!isLoading && isAllLayersNoFeatures()) || isLayerDisabled() || selectedLayerPath === '') && (
+        <Paper sx={{ padding: '2rem' }}>
+          <Typography variant="h3" gutterBottom sx={sxClasses.dataTableInstructionsTitle}>
+            {t('dataTable.dataTableInstructions')}
+          </Typography>
+          <Typography component="p" sx={sxClasses.dataTableInstructionsBody}>
+            {t('dataTable.selectVisbleLayer')}
+          </Typography>
+        </Paper>
+      )}
+    </Layout>
   );
 }
+
+Datapanel.defaultProps = {
+  fullWidth: false,
+};
