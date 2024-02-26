@@ -12,6 +12,7 @@ import {
 } from 'geoview-core';
 
 import { sxClasses } from './layers-list.style';
+
 /**
  * interface for the layers list properties in layers panel
  */
