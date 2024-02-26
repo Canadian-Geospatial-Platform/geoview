@@ -8,13 +8,6 @@ import { AbstractEventProcessor } from '../abstract-event-processor';
  * Event processor focusing on interacting with the swiper state in the store.
  */
 export class SwiperEventProcessor extends AbstractEventProcessor {
-  // **********************************************************
-  // Static functions for Typescript files to access store actions
-  // **********************************************************
-  //! Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
-  //! Some action does state modifications AND map actions.
-  //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
-
   /**
    * Overrides initialization of the Swiper Event Processor
    * @param {GeoviewStoreType} store The store associated with the Swiper Event Processor
@@ -49,6 +42,13 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
     return [unsubLayerRemoved];
   }
 
+  // **********************************************************
+  // Static functions for Typescript files to access store actions
+  // **********************************************************
+  //! Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
+  //! Some action does state modifications AND map actions.
+  //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+
   /**
    * Shortcut to get the Swiper state for a given map id
    * @param {string} mapId The mapId
@@ -78,7 +78,7 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Adds a swipe functionality to the specified map id and layer path
+   * Adds a swiper functionality to the specified map id and layer path
    * @param {string} mapId The map ID
    * @param {string} layerPath The layer path
    */
@@ -108,7 +108,7 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Removes a swipe functionality for the specified map id and layer path
+   * Removes a swiper functionality for the specified map id and layer path
    * @param {string} mapId The map ID
    * @param {string} layerPath The layer path
    */
@@ -141,7 +141,7 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Removes the swipe functionality for all layer paths
+   * Removes the swiper functionality for all layer paths
    * @param {string} mapId The map ID
    */
   static removeAll(mapId: string) {

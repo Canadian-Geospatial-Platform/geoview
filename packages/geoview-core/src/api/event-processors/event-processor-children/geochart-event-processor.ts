@@ -10,22 +10,6 @@ import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '.
  * Event processor focusing on interacting with the geochart state in the store.
  */
 export class GeochartEventProcessor extends AbstractEventProcessor {
-  // **********************************************************
-  // Static functions for Typescript files to access store actions
-  // **********************************************************
-  //! Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
-  //! Some action does state modifications AND map actions.
-  //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
-
-  // #region
-  // Holds the list of layer data arrays being buffered in the propagation process for the batch
-  static batchedPropagationLayerDataArray: BatchedPropagationLayerDataArrayByMap = {};
-
-  // The time delay between propagations in the batch layer data array.
-  // The longer the delay, the more the layers will have a chance to get in a loaded state before changing the layerDataArray.
-  // The longer the delay, the longer it'll take to update the UI. The delay can be bypassed using the layer path bypass method.
-  static timeDelayBetweenPropagationsForBatch = 2000;
-
   /**
    * Overrides initialization of the GeoChart Event Processor
    * @param {GeoviewStoreType} store The store associated with the GeoChart Event Processor
@@ -66,6 +50,22 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
 
     return [unsubLayerRemoved, layerDataArrayUpdate];
   }
+
+  // **********************************************************
+  // Static functions for Typescript files to access store actions
+  // **********************************************************
+  //! Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
+  //! Some action does state modifications AND map actions.
+  //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+
+  // #region
+  // Holds the list of layer data arrays being buffered in the propagation process for the batch
+  static batchedPropagationLayerDataArray: BatchedPropagationLayerDataArrayByMap = {};
+
+  // The time delay between propagations in the batch layer data array.
+  // The longer the delay, the more the layers will have a chance to get in a loaded state before changing the layerDataArray.
+  // The longer the delay, the longer it'll take to update the UI. The delay can be bypassed using the layer path bypass method.
+  static timeDelayBetweenPropagationsForBatch = 2000;
 
   /**
    * Shortcut to get the Geochart state for a given map id
