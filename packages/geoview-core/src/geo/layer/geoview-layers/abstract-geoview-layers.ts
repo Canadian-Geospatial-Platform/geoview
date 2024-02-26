@@ -962,7 +962,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param {TypeBaseLayerEntryConfig} layerConfig The layer config to register.
    */
-  registerToLayerSets(layerConfig: TypeBaseLayerEntryConfig) {
+  registerToLayerSets(layerConfig: TypeBaseLayerEntryConfig): void {
     const { layerPath } = layerConfig;
     if (!this.registerToLayerSetListenerFunctions[layerPath]) this.registerToLayerSetListenerFunctions[layerPath] = {};
 
@@ -1038,7 +1038,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param {TypeBaseLayerEntryConfig} layerConfig The layer entry to register.
    */
-  unregisterFromLayerSets(layerConfig: TypeBaseLayerEntryConfig) {
+  unregisterFromLayerSets(layerConfig: TypeBaseLayerEntryConfig): void {
     const { layerPath } = layerConfig;
     api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'remove'));
 

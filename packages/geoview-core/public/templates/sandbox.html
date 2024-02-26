@@ -143,7 +143,7 @@
       <a class="ref-link" href="#top">Top</a>
     </div>
     <div id="mapSection">
-      <div id="sandboxMap" class="" data-lang="en"></div>
+      <div id="sandboxMap"></div>
     </div>
     <p>This map loads it's configurations from the text area.</p>
     <hr />
@@ -194,11 +194,17 @@
       // add an event listener when a button is clicked
       createMapButton.addEventListener('click', function (e) {
         // delete old map
-        const mapDiv = cgpv.api.maps['sandboxMap'].remove(false);
-        mapDiv.classList.remove('geoview-map');
+        cgpv.api.maps['sandboxMap'].remove(true);
+
+        // create new map in a new dom node (fix react warning)
+        const newDiv = document.createElement('div');
+        const a = document.createAttribute("id");
+        a.value = "sandboxMap";
+        newDiv.setAttributeNode(a);
+        document.getElementById('mapSection').appendChild(newDiv);
 
         // create map
-        setTimeout(() => cgpv.api.createMapFromConfig('sandboxMap', document.getElementById('configGeoview').value), 1000);
+        setTimeout(() => cgpv.api.createMapFromConfig('sandboxMap', document.getElementById('configGeoview').value), 300);
       });
 
       // Editor script section===================================================================================================

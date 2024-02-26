@@ -187,36 +187,85 @@ export class MapViewer {
   }
 
   /**
-   * Function called when the map has been rendered and ready to be customized
+   * Function called to monitor when the map is actually ready.
+   * Important: This function is also responsible for calling the MapEventProcessor.setMapLoaded after 1 second has ellapsed.
    */
-  mapReady(): void {
+  mapReady(): Promise<void> {
     // Log Marker Start
     logger.logMarkerStart(`mapReady-${this.mapId}`);
 
-    const layerInterval = setInterval(() => {
-      // Log
-      logger.logTraceDetailed('map-viewer.mapReady?', this.mapId);
+    return new Promise<void>((resolve) => {
+      // Start an interval checker
+      const mapInterval = setInterval(() => {
+        if (this.layer?.geoviewLayers) {
+          const { geoviewLayers } = this.layer;
+          let allGeoviewLayerReady =
+            this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
+          Object.keys(geoviewLayers).forEach((geoviewLayerId) => {
+            const layerIsReady = geoviewLayers[geoviewLayerId].allLayerStatusAreIn(['processed', 'error', 'loaded']);
+            if (!layerIsReady) logger.logTraceDetailed('map-viewer.mapReady? geoview layer not ready, waiting...', geoviewLayerId);
+            allGeoviewLayerReady &&= layerIsReady;
+          });
+          if (allGeoviewLayerReady) {
+            // Clear interval
+            clearInterval(mapInterval);
 
-      if (this.layer?.geoviewLayers) {
-        const { geoviewLayers } = this.layer;
-        let allGeoviewLayerReady =
-          this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
-        Object.keys(geoviewLayers).forEach((geoviewLayerId) => {
-          const layerIsReady = geoviewLayers[geoviewLayerId].allLayerStatusAreIn(['processed', 'error', 'loaded']);
-          logger.logTraceDetailed('map-viewer.mapReady? geoview layer ready?', geoviewLayerId, layerIsReady);
-          allGeoviewLayerReady &&= layerIsReady;
-        });
-        if (allGeoviewLayerReady) {
-          // Log
-          logger.logInfo('Map is ready', this.mapId);
-          logger.logMarkerCheck(`mapReady-${this.mapId}`, 'for map to be ready');
-          // ! We added processed to layers check so this map loaded event is fired faster
-          // TODO: solve this without using a timeout...
-          setTimeout(() => MapEventProcessor.setMapLoaded(this.mapId), 1000);
-          clearInterval(layerInterval);
+            // Log
+            logger.logInfo('Map is ready', this.mapId);
+            logger.logMarkerCheck(`mapReady-${this.mapId}`, 'for map to be ready');
+
+            // Resolve the promise
+            resolve();
+
+            // ! We added processed to layers check so this map loaded event is fired faster
+            // TODO: solve this without using a timeout...
+            setTimeout(() => MapEventProcessor.setMapLoaded(this.mapId), 1000);
+          }
         }
-      }
-    }, 250);
+      }, 250);
+    });
+  }
+
+  /**
+   * Function called to monitor when the layers result sets are actually ready
+   */
+  layerResultSetReady(): Promise<void> {
+    // Start another interval checker
+    return new Promise<void>((resolve) => {
+      const layersInterval = setInterval(() => {
+        if (api.maps[this.mapId].layer) {
+          // Check if all registered layers have their results set
+          let allGood = true;
+          Object.entries(api.maps[this.mapId].layer.registeredLayers).forEach(([layerPath, registeredLayer]) => {
+            // If not queryable, don't expect a result set
+            if (!registeredLayer.source?.featureInfo?.queryable) return;
+
+            const resultSet = api.getFeatureInfoLayerSet(this.mapId).resultsSet;
+            const layerResultSetReady = Object.keys(resultSet).includes(layerPath);
+            if (!layerResultSetReady) {
+              logger.logTraceDetailed('map-viewer.mapReady? layer set not ready, waiting...', layerPath);
+              allGood = false;
+            }
+          });
+
+          // If all good
+          if (allGood) {
+            // Clear interval
+            clearInterval(layersInterval);
+
+            // How many layers resultset?
+            const resultSetCount = Object.keys(api.getFeatureInfoLayerSet(this.mapId).resultsSet).length;
+
+            // Log
+            logger.logInfo(`All (${resultSetCount}) Layers ResultSet are ready`, this.mapId);
+            logger.logMarkerCheck(`mapReady-${this.mapId}`, `for all (${resultSetCount}) Layers ResultSet to be ready`);
+
+            // Resolve the promise
+            resolve();
+          }
+        }
+      }, 250);
+    });
   }
 
   /**
