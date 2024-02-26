@@ -415,11 +415,11 @@ export function AddNewLayer(): JSX.Element {
       const geoCoreGeoviewLayerInstance = new GeoCore(mapId);
       const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(layerURL);
       if (layers.length === 1) {
-        if (layers[0].length === 1) {
-          setLayerName(layers[0][0].geoviewLayerName!.en! as string);
-          setLayerEntries(layers[0]);
+        if (layers.length === 1) {
+          setLayerName(layers[0].geoviewLayerName!.en! as string);
+          setLayerEntries(layers);
         } else {
-          setLayerList(layers[0]);
+          setLayerList(layers);
         }
       }
     } catch (err) {

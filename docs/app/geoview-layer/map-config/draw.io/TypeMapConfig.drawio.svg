@@ -1097,7 +1097,7 @@
                                 <div style="line-height: 19px;">
                                     <div style="line-height: 19px;">
                                         <b>
-                                            TypeGeocoreLayerEntryConfig
+                                            TypeGeoCoreLayerEntryConfig
                                         </b>
                                     </div>
                                 </div>
@@ -1106,7 +1106,7 @@
                     </div>
                 </foreignObject>
                 <text x="636" y="980" fill="#000000" font-family="Helvetica" font-size="14px" text-anchor="middle">
-                    TypeGeocoreLayerEntryConfig
+                    TypeGeoCoreLayerEntryConfig
                 </text>
             </switch>
         </g>

@@ -416,15 +416,20 @@ export class MapEventProcessor extends AbstractEventProcessor {
    *
    * @param {string} mapId The ID of the map to add the layer to.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The config of the layer to add.
+   * @param {string} layerPathToReplace The layerPath of the info to replace.
    * @return {void}
    */
-  static replaceOrderedLayerInfo(mapId: string, geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig): void {
+  static replaceOrderedLayerInfo(
+    mapId: string,
+    geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig,
+    layerPathToReplace?: string
+  ): void {
     const { orderedLayerInfo } = this.getMapStateProtected(mapId);
     const layerPath = (geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId
       ? `${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}/${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}`
       : (geoviewLayerConfig as TypeLayerEntryConfig).layerPath;
-    const index = this.getMapIndexFromOrderedLayerInfo(mapId, layerPath);
-    const replacedLayers = orderedLayerInfo.filter((layerInfo) => layerInfo.layerPath.startsWith(layerPath));
+    const index = this.getMapIndexFromOrderedLayerInfo(mapId, layerPathToReplace || layerPath);
+    const replacedLayers = orderedLayerInfo.filter((layerInfo) => layerInfo.layerPath.startsWith(layerPathToReplace || layerPath));
     const newOrderedLayerInfo = api.maps[mapId].layer.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
     orderedLayerInfo.splice(index, replacedLayers.length, ...newOrderedLayerInfo);
     this.setMapOrderedLayerInfo(mapId, orderedLayerInfo);
