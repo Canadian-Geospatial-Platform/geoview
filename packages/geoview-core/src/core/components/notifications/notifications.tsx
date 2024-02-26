@@ -126,7 +126,9 @@ export default function Notifications(): JSX.Element {
             {notifications.length > 0 ? (
               notifications.map((notification, index) => renderNotification(notification, index))
             ) : (
-              <Typography component="div" sx={{padding:"10px 15px"}}>{t('appbar.no_notifications_available')}</Typography>
+              <Typography component="div" sx={{ padding: '10px 15px' }}>
+                {t('appbar.no_notifications_available')}
+              </Typography>
             )}
           </Box>
         </Paper>

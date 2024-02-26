@@ -34,7 +34,7 @@ export const getSxClasses = (theme: Theme) => ({
     padding: '10px 15px',
 
     '&:not(:last-child)': {
-      borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[300]}`
+      borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[300]}`,
     },
 
     '& .MuiIconButton-root': {
