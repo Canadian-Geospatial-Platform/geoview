@@ -68,8 +68,8 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
           case 'init':
           case 'processing':
             return `${t('layers.querying')}...`;
-            case 'error':
-              return t('legend.layerError');
+          case 'error':
+            return t('legend.layerError');
           default:
             return (
               <>

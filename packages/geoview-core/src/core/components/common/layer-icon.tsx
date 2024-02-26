@@ -11,7 +11,11 @@ export function LayerIcon({ layer }: LayerIconProps): JSX.Element {
   if (layer.layerStatus === 'error' || ('queryStatus' in layer && layer.queryStatus === 'error')) {
     return <ErrorIcon color="error" />;
   }
-  if (layer.layerStatus === 'processing' || layer.layerStatus === 'loading' || ('queryStatus' in layer && layer.queryStatus === 'processing')) {
+  if (
+    layer.layerStatus === 'processing' ||
+    layer.layerStatus === 'loading' ||
+    ('queryStatus' in layer && layer.queryStatus === 'processing')
+  ) {
     return (
       <Box sx={{ padding: '5px', marginRight: '10px' }}>
         <CircularProgressBase size={20} />
