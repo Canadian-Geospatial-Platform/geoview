@@ -48,6 +48,7 @@ export abstract class AbstractEventProcessor {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
+    // Here, `store` is unused, but used in inherited classes, so the eslint-disable should be kept
     // This method should be overriden to initialize and return a list of subscribtions so that they can be destroyed later
     return undefined;
   }

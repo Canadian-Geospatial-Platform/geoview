@@ -10,22 +10,6 @@ import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '.
  * Event processor focusing on interacting with the geochart state in the store.
  */
 export class GeochartEventProcessor extends AbstractEventProcessor {
-  // **********************************************************
-  // Static functions for Typescript files to access store actions
-  // **********************************************************
-  //! Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
-  //! Some action does state modifications AND map actions.
-  //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
-
-  // #region
-  // Holds the list of layer data arrays being buffered in the propagation process for the batch
-  static batchedPropagationLayerDataArray: BatchedPropagationLayerDataArrayByMap = {};
-
-  // The time delay between propagations in the batch layer data array.
-  // The longer the delay, the more the layers will have a chance to get in a loaded state before changing the layerDataArray.
-  // The longer the delay, the longer it'll take to update the UI. The delay can be bypassed using the layer path bypass method.
-  static timeDelayBetweenPropagationsForBatch = 2000;
-
   /**
    * Overrides initialization of the GeoChart Event Processor
    * @param {GeoviewStoreType} store The store associated with the GeoChart Event Processor
@@ -47,9 +31,6 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
           if (prevOrderedLayerPaths.includes(layerPath) && !curOrderedLayerPaths.includes(layerPath)) {
             // Remove it
             GeochartEventProcessor.removeGeochartChart(store.getState().mapId, layerPath);
-
-            // Log
-            logger.logDebug('Removed GeoChart configs for layer path:', layerPath);
           }
         });
       }
@@ -69,6 +50,22 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
 
     return [unsubLayerRemoved, layerDataArrayUpdate];
   }
+
+  // **********************************************************
+  // Static functions for Typescript files to access store actions
+  // **********************************************************
+  //! Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
+  //! Some action does state modifications AND map actions.
+  //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+
+  // #region
+  // Holds the list of layer data arrays being buffered in the propagation process for the batch
+  static batchedPropagationLayerDataArray: BatchedPropagationLayerDataArrayByMap = {};
+
+  // The time delay between propagations in the batch layer data array.
+  // The longer the delay, the more the layers will have a chance to get in a loaded state before changing the layerDataArray.
+  // The longer the delay, the longer it'll take to update the UI. The delay can be bypassed using the layer path bypass method.
+  static timeDelayBetweenPropagationsForBatch = 2000;
 
   /**
    * Shortcut to get the Geochart state for a given map id
@@ -95,17 +92,22 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
     const chartData: GeoChartStoreByLayerPath = {};
 
     // Loop on the charts
+    const layerPaths: string[] = [];
     charts.forEach((chartInfo) => {
       // For each layer path
       chartInfo.layers.forEach((layer) => {
         // Get the layer path
         const layerPath = layer.layerId;
         chartData[layerPath] = chartInfo;
+        layerPaths.push(layerPath);
       });
     });
 
     // set store charts config
     this.getGeochartState(mapId)?.actions.setGeochartCharts(chartData);
+
+    // Log
+    logger.logInfo('Added GeoChart configs for layer paths:', layerPaths);
 
     // TODO: Also update the layer array in other store state to inform the later has a geochart attached to it (when code is done over there)?
   }
@@ -127,6 +129,9 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
 
     // Update the layer data array in the store
     this.getGeochartState(mapId)!.actions.setGeochartCharts({ ...this.getGeochartState(mapId)?.geochartChartsConfig, ...toAdd });
+
+    // Log
+    logger.logInfo('Added GeoChart configs for layer path:', layerPath);
 
     // TODO: Also update the layer array in other store state to inform the later has a geochart attached to it (when code is done over there)?
   }
@@ -152,6 +157,9 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
 
       // Update the layer data array in the store
       this.getGeochartState(mapId)!.actions.setGeochartCharts({ ...chartConfigs });
+
+      // Log
+      logger.logInfo('Removed GeoChart configs for layer path:', layerPath);
 
       // TODO: Also update the layer array in other store state to inform the later has a geochart attached to it (when code is done over there)?
     }

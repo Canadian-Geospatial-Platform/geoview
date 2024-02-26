@@ -1,12 +1,13 @@
 /* eslint-disable no-console */
 import { TypeDisplayLanguage, TypeListOfLayerEntryConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { CONST_LAYER_ENTRY_TYPE, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { logger } from '@/core/utils/logger';
+
 import { TypeMapFeaturesConfig } from '../../types/global-types';
 import { ConfigValidation } from './config-validation';
 import { InlineDivConfigReader } from './reader/div-config-reader';
 import { JsonConfigReader } from './reader/json-config-reader';
 import { URLmapConfigReader } from './reader/url-config-reader';
-import { logger } from '@/core/utils/logger';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
