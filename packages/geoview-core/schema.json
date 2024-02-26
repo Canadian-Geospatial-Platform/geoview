@@ -1110,7 +1110,7 @@
       },
       "required": ["schemaTag", "entryType", "layerId"]
     },
-    "TypeGeocoreLayerEntryConfig": {
+    "TypeGeoCoreLayerEntryConfig": {
       "additionalProperties": false,
       "type": "object",
       "description": "Layer where configration is extracted by a configuration snippet stored on a server. The server configuration will handle bilangual informations.",
@@ -1221,7 +1221,7 @@
           "$ref": "#/definitions/TypeTileLayerEntryConfig"
         },
         {
-          "$ref": "#/definitions/TypeGeocoreLayerEntryConfig"
+          "$ref": "#/definitions/TypeGeoCoreLayerEntryConfig"
         }
       ]
     },
@@ -1396,7 +1396,7 @@
             "$ref": "#/definitions/TypeLayerGroupEntryConfig"
           },
           {
-            "$ref": "#/definitions/TypeGeocoreLayerEntryConfig"
+            "$ref": "#/definitions/TypeGeoCoreLayerEntryConfig"
           }
         ]
       }

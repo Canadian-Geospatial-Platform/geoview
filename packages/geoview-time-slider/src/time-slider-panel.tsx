@@ -1,7 +1,7 @@
 import { useTheme } from '@mui/material/styles';
-import { TypeOrderedLayerInfo, TypeWindow, getLocalizedMessage } from 'geoview-core';
+import { TypeWindow, getLocalizedMessage } from 'geoview-core';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
-import { useMapOrderedLayerInfo, useTimeSliderLayers } from 'geoview-core/src/core/stores';
+import { useMapVisibleLayers, useTimeSliderLayers } from 'geoview-core/src/core/stores';
 import { Paper, Typography } from 'geoview-core/src/ui';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
@@ -33,7 +33,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const [selectedLayerPath, setSelectedLayerPath] = useState<string>();
 
   // get values from store
-  const orderedLayerInfo = useMapOrderedLayerInfo() as TypeOrderedLayerInfo[];
+  const visibleLayers = useMapVisibleLayers() as string[];
   const timeSliderLayers = useTimeSliderLayers();
 
   /**
@@ -53,13 +53,6 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     // Log
     logger.logTraceUseMemo('TIME-SLIDER-PANEL - memoLayersList', timeSliderLayers);
 
-    const visibleLayers = orderedLayerInfo
-      .map((layerInfo) => {
-        if (layerInfo.visible) return layerInfo.layerPath;
-        return undefined;
-      })
-      .filter((layerPath) => layerPath !== undefined);
-
     // Return the layers
     return visibleLayers
       .map((layerPath) => {
@@ -75,7 +68,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
           queryStatus: 'processed',
         } as LayerListEntry;
       });
-  }, [orderedLayerInfo, timeSliderLayers]);
+  }, [visibleLayers, timeSliderLayers]);
 
   useEffect(() => {
     // Log
