@@ -101,7 +101,7 @@ async function renderMap(mapElement: Element): Promise<void> {
     reactRoot[mapId] = createRoot(mapElement!);
     addReloadListener(mapId);
 
-    // TODO: Refactor #1810 - Activate <React.StrictMode>
+    // TODO: Refactor #1810 - Activate <React.StrictMode> here or in app-start.tsx?
     reactRoot[mapId].render(<AppStart mapFeaturesConfig={configObj} />);
     // reactRoot[mapId].render(
     //   <React.StrictMode>
