@@ -13,6 +13,8 @@ import {
   NotificationsIcon,
   Badge,
   Typography,
+  Popper,
+  Paper,
 } from '@/ui';
 import { getSxClasses } from './notifications-style';
 import { useAppNotifications, useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -118,21 +120,13 @@ export default function Notifications(): JSX.Element {
         </IconButton>
       </Badge>
 
-      <Popover
+      <Popper
         open={open}
         anchorEl={anchorEl}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
-        }}
-        onClose={handleClosePopover}
+        placement='right-end'
         container={mapElem}
       >
-        <Box sx={sxClasses.notificationPanel}>
+        <Paper sx={sxClasses.notificationPanel}>
           <Typography component="h3" sx={sxClasses.notificationsTitle}>{t('appbar.notifications')}</Typography>
           <Box sx={sxClasses.notificationsList}>
             {notifications.length > 0 ? (
@@ -141,8 +135,8 @@ export default function Notifications(): JSX.Element {
               <Typography component="div">{t('appbar.no_notifications_available')}</Typography>
             )}
           </Box>
-        </Box>
-      </Popover>
+        </Paper>
+      </Popper>
     </>
   );
 }

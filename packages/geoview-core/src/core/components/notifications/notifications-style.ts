@@ -8,6 +8,9 @@ export const getSxClasses = (theme: Theme) => ({
     maxHeight: '500px',
     overflowY: 'hidden',
     gap: '8px',
+    marginLeft: '15px',
+    backgroundColor: theme.palette.geoViewColor.bgColor.main,
+    borderRadius: '5px',
   },
   notificationsTitle: {
     fontSize: '17px',
