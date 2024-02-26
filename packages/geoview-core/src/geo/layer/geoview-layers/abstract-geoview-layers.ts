@@ -249,7 +249,7 @@ export const CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<TypeGeoviewLayerType, string> 
   esriFeature: 'TypeVectorLayerEntryConfig',
   esriImage: 'TypeEsriImageLayerEntryConfig',
   GeoJSON: 'TypeVectorLayerEntryConfig',
-  geoCore: 'TypeGeocoreLayerEntryConfig',
+  geoCore: 'TypeGeoCoreLayerEntryConfig',
   GeoPackage: 'TypeVectorLayerEntryConfig',
   xyzTiles: 'TypeTileLayerEntryConfig',
   vectorTiles: 'TypeTileLayerEntryConfig',

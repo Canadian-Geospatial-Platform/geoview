@@ -11,7 +11,7 @@ import {
   useDetailsStoreActions,
   useDetailsStoreAllFeaturesDataArray,
   useUIActiveFooterBarTabId,
-  useMapOrderedLayerInfo,
+  useMapVisibleLayers,
 } from '@/core/stores';
 import { LayerListEntry, useFooterPanelHeight, Layout } from '../common';
 import { logger } from '@/core/utils/logger';
@@ -46,7 +46,7 @@ export function Datapanel({ fullWidth }: DataPanelType) {
   const { setSelectedLayerPath } = useDataTableStoreActions();
   const { triggerGetAllFeatureInfo } = useDetailsStoreActions();
   const selectedTab = useUIActiveFooterBarTabId();
-  const orderedLayerInfo = useMapOrderedLayerInfo();
+  const visibleLayers = useMapVisibleLayers();
 
   // Custom hook for calculating the height of footer panel
   const { tableHeight } = useFooterPanelHeight({ footerPanelTab: 'data-table' });
@@ -58,17 +58,10 @@ export function Datapanel({ fullWidth }: DataPanelType) {
    * Order the layers by visible layer order.
    */
   const orderedLayerData = useMemo(() => {
-    const visibleLayers = orderedLayerInfo
-      .map((layerInfo) => {
-        if (layerInfo.visible) return layerInfo.layerPath;
-        return undefined;
-      })
-      .filter((layerPath) => layerPath !== undefined);
-
     return visibleLayers
       .map((layerPath) => mappedLayerData.filter((data) => data.layerPath === layerPath)[0])
       .filter((layer) => layer !== undefined);
-  }, [mappedLayerData, orderedLayerInfo]);
+  }, [mappedLayerData, visibleLayers]);
 
   /**
    * Update local states when layer is changed from layer list.

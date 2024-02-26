@@ -157,7 +157,8 @@
       "loadfailed": "Le chargement de la couche [__param__] a échoué sur la carte __param__.",
       "notfound": "La sous couche __param__ de la couche GeoView __param__ n'existe pas sur le sereur",
       "createtwice": "On ne peut exécuter deux fois la méthode createGeoViewRasterLayers pour la carte __param__",
-      "usedtwice": "Utilisation en double de l'identifiant de couche geoview [__param__] sur la carte __param__"
+      "usedtwice": "Utilisation en double de l'identifiant de couche geoview [__param__] sur la carte __param__",
+      "multipleUUID": "Les couches GeoCore ne peuvent avoir qu'un seul UUID GeoCore par couche."
     },
     "schema": {
       "notFound": "Une erreur de schéma a été trouvée, vérifiez la console pour voir ce qui ne va pas.",
