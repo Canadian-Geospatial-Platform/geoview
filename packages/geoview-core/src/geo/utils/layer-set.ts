@@ -136,7 +136,9 @@ export class LayerSet {
                 api.event.emit(
                   LayerSetPayload.createLayerSetUpdatedPayload(`${mapId}/LegendsLayerSetStatusChanged`, this.resultsSet, layerPath)
                 );
-              if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerPath) === -1) {
+              if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerPath.split('.')[1]) !== -1) {
+                MapEventProcessor.replaceOrderedLayerInfo(this.mapId, layerConfig, layerPath.split('.')[1]);
+              } else if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerPath) === -1) {
                 if (layerConfig.parentLayerConfig) {
                   const parentLayerPathArray = layerPath.split('/');
                   parentLayerPathArray.pop();

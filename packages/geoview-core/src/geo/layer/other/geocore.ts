@@ -10,7 +10,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
-  TypeGeocoreLayerEntryConfig,
+  TypeGeoCoreLayerEntryConfig,
   TypeListOfGeoviewLayerConfig,
   TypeLocalizedString,
   layerEntryIsGroupLayer,
@@ -21,11 +21,11 @@ import { CONST_LAYER_TYPES, TypeGeoviewLayerType } from '../geoview-layers/abstr
 
 export interface TypeGeoCoreLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'geoCore';
-  listOfLayerEntryConfig: TypeGeocoreLayerEntryConfig[];
+  listOfLayerEntryConfig: TypeGeoCoreLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TypeGeocoreLayerEntryConfig if the geoviewLayerType attribute of
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeGeoCoreLayerEntryConfig if the geoviewLayerType attribute of
  * the verifyIfGeoViewEntry.geoviewLayerConfig attribute is GEOCORE. The type ascention applies only to the true block of the if
  * clause that use this function.
  *
@@ -34,7 +34,7 @@ export interface TypeGeoCoreLayerConfig extends Omit<TypeGeoviewLayerConfig, 'li
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const geoviewEntryIsGeocore = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeGeocoreLayerEntryConfig => {
+export const geoviewEntryIsGeoCore = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeGeoCoreLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.GEOCORE;
 };
 
@@ -81,12 +81,12 @@ export class GeoCore {
       geoviewLayerId: generateId(),
       geoviewLayerType: 'geoCore',
       listOfLayerEntryConfig: [
-        new TypeGeocoreLayerEntryConfig({
+        new TypeGeoCoreLayerEntryConfig({
           schemaTag: 'geoCore' as TypeGeoviewLayerType,
           entryType: 'geoCore' as TypeLayerEntryType,
           layerId: uuid,
-        } as TypeGeocoreLayerEntryConfig),
-      ] as TypeGeocoreLayerEntryConfig[],
+        } as TypeGeoCoreLayerEntryConfig),
+      ] as TypeGeoCoreLayerEntryConfig[],
     } as TypeGeoCoreLayerConfig;
   }
 
@@ -107,7 +107,7 @@ export class GeoCore {
   /**
    * Gets GeoView layer configurations list from the UUIDs of the list of layer entry configurations.
    *
-   * @param {TypeGeocoreLayerEntryConfig} geocoreLayerConfig the layer configuration
+   * @param {TypeGeoCoreLayerEntryConfig} geocoreLayerConfig the layer configuration
    * @returns {Promise<TypeListOfGeoviewLayerConfig>} list of layer configurations to add to the map
    */
   async createLayers(geocoreLayerConfig: TypeGeoCoreLayerConfig): Promise<TypeListOfGeoviewLayerConfig[]> {
@@ -161,11 +161,11 @@ export class GeoCore {
   /**
    * Copies the config settings over the geocore values (config values have priority).
    *
-   * @param {TypeGeocoreLayerEntryConfig} geocoreLayerEntryConfig The config file settings
+   * @param {TypeGeoCoreLayerEntryConfig} geocoreLayerEntryConfig The config file settings
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The settings returned by the geocore service
    */
   private copyConfigSettingsOverGeocoreSettings(
-    geocoreLayerEntryConfig: TypeGeocoreLayerEntryConfig,
+    geocoreLayerEntryConfig: TypeGeoCoreLayerEntryConfig,
     geoviewLayerConfig: TypeGeoviewLayerConfig
   ) {
     if (geocoreLayerEntryConfig.geocoreLayerName)
