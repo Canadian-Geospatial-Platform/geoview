@@ -22,8 +22,8 @@ export const getSxClasses = (theme: Theme) => ({
     marginBottom: '10px',
   },
   notificationsList: {
-    overflowY: 'auto', 
-    padding: '0px 0px 10px 0px'
+    overflowY: 'auto',
+    padding: '0px 0px 10px 0px',
   },
   notificationItem: {
     display: 'flex',
@@ -38,16 +38,16 @@ export const getSxClasses = (theme: Theme) => ({
       '&:hover': {
         color: theme.palette.geoViewColor.textColor.lighten(0.2, 0.6),
       },
-    }
+    },
   },
   notificationsCount: {
-    backgroundColor: theme.palette.geoViewColor.bgColor.dark[800], 
-    color: theme.palette.geoViewColor.bgColor.light[800], 
+    backgroundColor: theme.palette.geoViewColor.bgColor.dark[800],
+    color: theme.palette.geoViewColor.bgColor.light[800],
     fontSize: '12px',
     borderRadius: '10px',
     height: '20px',
     width: '40px',
     textAlign: 'center',
     lineHeight: '20px',
-  }
+  },
 });

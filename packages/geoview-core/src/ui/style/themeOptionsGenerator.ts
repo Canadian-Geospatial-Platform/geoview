@@ -194,7 +194,7 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
         styleOverrides: {
           root: {
             borderRadius: 5,
-            borderWith: '1px',
+            borderWidth: '1px',
             borderColor: geoViewColors.bgColor.darken(0.5, 0.5),
             borderStyle: 'solid',
             boxShadow: `0px 12px 9px -13px ${geoViewColors.bgColor.darken(0.2, 0.5)}`,
@@ -221,7 +221,7 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
               },
               '&:disabled': {
                 color: `${geoViewColors.bgColor.dark[450]}`,
-                backgroundColor: 'transparent'
+                backgroundColor: 'transparent',
               },
             },
             '&.style2': {

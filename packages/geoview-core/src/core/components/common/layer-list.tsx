@@ -116,10 +116,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
   }
 
   return (
-    <Paper
-      sx={{ marginBottom: '1rem' }}
-      className={getContainerClass()}
-    >
+    <Paper sx={{ marginBottom: '1rem' }} className={getContainerClass()}>
       <Tooltip title={layer.tooltip} placement="top" arrow>
         <Box>
           <ListItem disablePadding>

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
+import _ from 'lodash';
 import {
   Box,
-  Popover,
   InfoIcon,
   ErrorIcon,
   WarningIcon,
@@ -20,7 +20,6 @@ import { getSxClasses } from './notifications-style';
 import { useAppNotifications, useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewMapId } from '@/app';
 import { logger } from '@/core/utils/logger';
-import _ from 'lodash';
 
 export type NotificationDetailsType = {
   key: string;
@@ -61,9 +60,6 @@ export default function Notifications(): JSX.Element {
   const open = Boolean(anchorEl);
   const handleOpenPopover = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
-  };
-  const handleClosePopover = () => {
-    setAnchorEl(null);
   };
 
   /**
@@ -120,14 +116,11 @@ export default function Notifications(): JSX.Element {
         </IconButton>
       </Badge>
 
-      <Popper
-        open={open}
-        anchorEl={anchorEl}
-        placement='right-end'
-        container={mapElem}
-      >
+      <Popper open={open} anchorEl={anchorEl} placement="right-end" container={mapElem}>
         <Paper sx={sxClasses.notificationPanel}>
-          <Typography component="h3" sx={sxClasses.notificationsTitle}>{t('appbar.notifications')}</Typography>
+          <Typography component="h3" sx={sxClasses.notificationsTitle}>
+            {t('appbar.notifications')}
+          </Typography>
           <Box sx={sxClasses.notificationsList}>
             {notifications.length > 0 ? (
               notifications.map((notification, index) => renderNotification(notification, index))

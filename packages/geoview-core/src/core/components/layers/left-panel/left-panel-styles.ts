@@ -19,7 +19,6 @@ export const getSxClasses = (theme: Theme) => ({
     },
 
     '& .layer-panel': {
-
       '& .MuiListItemText-root': {
         marginLeft: '12px',
       },
