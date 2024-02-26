@@ -526,7 +526,7 @@ export class Layer {
    *
    * @returns {BaseLayer | LayerGroup} Returns the OpenLayer layer associated to the layer path.
    */
-  getLayerByLayerPath = (layerPath: string): BaseLayer | LayerGroup => {
+  getOLLayerByLayerPath = (layerPath: string): BaseLayer | LayerGroup => {
     // Return the olLayer object from the registered layers
     const olLayer = api.maps[this.mapId].layer.registeredLayers[layerPath]?.olLayer;
     if (olLayer) return olLayer;
@@ -536,12 +536,12 @@ export class Layer {
   /**
    * Asynchronously returns the OpenLayer layer associated to a specific layer path.
    * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
-   * Note this function uses the 'Async' suffix to differentiate it from 'getLayerByLayerPath'.
+   * Note this function uses the 'Async' suffix to differentiate it from 'getOLLayerByLayerPath'.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
    * @returns {BaseLayer | LayerGroup} Returns the OpenLayer layer associated to the layer path.
    */
-  getLayerByLayerPathAsync = async (layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer | LayerGroup> => {
+  getOLLayerByLayerPathAsync = async (layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer | LayerGroup> => {
     // Make sure the open layer has been created, sometimes it can still be in the process of being created
     const promisedLayer = await whenThisThen(
       () => {

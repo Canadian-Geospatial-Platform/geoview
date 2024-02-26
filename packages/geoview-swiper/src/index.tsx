@@ -67,14 +67,15 @@ class SwiperPlugin extends MapPlugin {
    * @param {string} layerPath The layer path to activate swiper functionality
    */
   activateForLayer = (layerPath: string) => {
-    // Check if the layer exists on the map
-    const layer = this.map().layer.getLayerByLayerPath(layerPath);
-    if (layer) {
+    try {
+      // Check if the layer exists on the map
+      this.map().layer.getOLLayerByLayerPath(layerPath);
+
       // Add the layer path
       SwiperEventProcessor.addLayerPath(this.pluginProps.mapId, layerPath);
-    } else {
+    } catch (error) {
       // Log
-      logger.logError(`Couldn't find the layer with layer path ${layerPath}`);
+      logger.logError(error);
     }
   };
 
