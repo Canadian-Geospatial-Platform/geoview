@@ -15,6 +15,7 @@ import { IUIState, initializeUIState } from './store-interface-and-intial-values
 
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
+import { serializeTypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
 
 export type TypeSetStore = (
   partial: IGeoviewState | Partial<IGeoviewState> | ((state: IGeoviewState) => IGeoviewState | Partial<IGeoviewState>),
@@ -48,9 +49,26 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) => 
   return {
     mapConfig: undefined,
     setMapConfig: (config: TypeMapFeaturesConfig) => {
+      // Log
+      logger.logDebug('Sending the map config to the store...');
+
       // ! this is a copy of the original map configuration, no modifications is allowed
       // ? this configuration is use to reload the map
-      set({ mapConfig: cloneDeep(config), mapId: config.mapId });
+      const clonedConfig = cloneDeep(config);
+
+      // Serialize the configuration so that it goes in the store without any mutable class instances
+      // TODO: Refactor - A better approach would be to not be using class instances for configuration level objects.
+      // TODO: Indeed, using classes such as `OLLayer` in a low-level configuration class makes the configuration class hard to scale and port.
+      // TODO: Configurations should be as losely coupled as possible.
+      for (let i = 0; i < (clonedConfig.map?.listOfGeoviewLayerConfig?.length || 0); i++) {
+        // Serialize the GeoviewLayerConfig
+        const serialized = serializeTypeGeoviewLayerConfig(clonedConfig.map!.listOfGeoviewLayerConfig![i]);
+
+        // Reassign
+        clonedConfig.map.listOfGeoviewLayerConfig![i] = serialized as never;
+      }
+
+      set({ mapConfig: clonedConfig, mapId: config.mapId });
 
       // initialize default stores section from config information
       get().appState.setDefaultConfigValues(config);

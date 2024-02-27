@@ -10,7 +10,7 @@ import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-
 import { TypeMapMouseInfo } from '@/api/events/payloads';
 import { createLocalizedString } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { Cast } from '@/core/types/cgpv-types';
+import { Cast, TypeJsonValue } from '@/core/types/cgpv-types';
 import { api } from '@/app';
 
 /** ******************************************************************************************************************************
@@ -662,6 +662,8 @@ export class ConfigBaseClass {
   /** Layer entry data type. This element is part of the schema. */
   entryType?: TypeLayerEntryType;
 
+  // TODO: There shouldn't be a coupling to a `AbstractGeoViewLayer` inside a Configuration class.
+  // TO.DOCONT: That logic should be elsewhere so that the Configuration class remains portable and immutable.
   /** The geoview layer instance that contains this layer configuration. */
   geoviewLayerInstance?: AbstractGeoViewLayer;
 
@@ -678,12 +680,16 @@ export class ConfigBaseClass {
    * metadata. */
   isMetadataLayerGroup?: boolean;
 
+  // TODO: There shouldn't be a coupling to a `TypeLayerGroupEntryConfig` inside a Configuration class.
+  // TO.DOCONT: That logic should be elsewhere so that the Configuration class remains portable and immutable.
   /** It is used to link the layer entry config to the parent's layer config. */
   parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
 
   /** The layer path to this instance. */
   protected _layerPath = '';
 
+  // TODO: There shouldn't be a coupling to a `BaseLayer` (OpenLayer!) inside a Configuration class.
+  // TO.DOCONT: That logic should be elsewhere so that the Configuration class remains portable and immutable.
   /** This property is used to link the displayed layer to its layer entry config. it is not part of the schema. */
   protected _olLayer: BaseLayer | LayerGroup | null = null;
 
@@ -768,15 +774,43 @@ export class ConfigBaseClass {
    *
    * @returns {AbstractGeoViewLayer} Returns the geoview instance associated to the layer path.
    */
+  // TODO: Check - Is this still used? Remove it and favor the homonymous method in `layer`?
   geoviewLayer(layerPath?: string): AbstractGeoViewLayer {
     this.geoviewLayerInstance!.layerPathAssociatedToTheGeoviewLayer = layerPath || this.layerPath;
     return this.geoviewLayerInstance!;
+  }
+
+  /**
+   * Serializes the ConfigBaseClass class
+   * @returns {TypeJsonValue} The serialized ConfigBaseClass
+   */
+  serialize(): TypeJsonValue {
+    // Redirect
+    return this.onSerialize();
+  }
+
+  /**
+   * Overridable function to serialize a ConfigBaseClass
+   * @returns {TypeJsonValue} The serialized ConfigBaseClass
+   */
+  onSerialize(): TypeJsonValue {
+    return {
+      layerIdExtension: this.layerIdExtension,
+      schemaTag: this.schemaTag,
+      entryType: this.entryType,
+      layerStatus: this.layerStatus,
+      layerPhase: this.layerPhase,
+      isMetadataLayerGroup: this.isMetadataLayerGroup,
+    } as unknown as TypeJsonValue;
   }
 }
 
 /** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map.
  */
+// TODO: Refactor - If we do keep them as class, we should rename this to remove the 'Type' prefix in the name which is confusing.
+// TO.DOCONT: It will help clarify things, because there are types that are extending this class too. Ref. the mutable issue we had with store.
+// TO.DOCONT: Same TODO for all siblings and children.
 export abstract class TypeBaseLayerEntryConfig extends ConfigBaseClass {
   /** The ending element of the layer configuration path. */
   layerIdExtension?: string | undefined = undefined;
@@ -873,6 +907,32 @@ export abstract class TypeBaseLayerEntryConfig extends ConfigBaseClass {
     // Update registration based on metadata that were read since the first registration.
     this.geoviewLayerInstance?.registerToLayerSets(this);
     this.geoviewLayerInstance?.setVisible(this.initialSettings?.visible !== 'no', this.layerPath);
+  }
+
+  /**
+   * Serializes the TypeBaseLayerEntryConfig class
+   * @returns {TypeJsonValue} The serialized TypeBaseLayerEntryConfig
+   */
+  serialize(): TypeJsonValue {
+    // Redirect
+    return this.onSerialize();
+  }
+
+  /**
+   * Overrides the serialization of the mother class
+   * @returns {TypeJsonValue} The serialized TypeBaseLayerEntryConfig
+   */
+  onSerialize(): TypeJsonValue {
+    // Call parent
+    const serialized = super.onSerialize() as unknown as TypeBaseLayerEntryConfig;
+
+    // Copy values
+    serialized.layerIdExtension = this.layerIdExtension;
+    serialized.layerName = this.layerName;
+    serialized.initialSettings = this.initialSettings;
+
+    // Return it
+    return serialized as unknown as TypeJsonValue;
   }
 }
 
@@ -1603,6 +1663,38 @@ export type TypeGeoviewLayerConfig = {
   initialSettings?: TypeLayerInitialSettings;
   /** The layer entries to use from the GeoView layer. */
   listOfLayerEntryConfig: TypeListOfLayerEntryConfig;
+};
+
+/**
+ * Temporary? function to serialize a geoview layer configuration to be able to send it to the store
+ * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The geoviewlayer config to serialize
+ * @returns TypeJsonValue The serialized config as pure JSON
+ */
+export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: TypeGeoviewLayerConfig): TypeJsonValue => {
+  // TODO: Create a 'serialize()' function inside `TypeGeoviewLayerConfig` when/if it's transformed to a class.
+  // TO.DOCONT: and copy this code in deleting this function here. For now, this explicit workaround function is necessary.
+  const serializedGeoviewLayerConfig = {
+    geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
+    geoviewLayerName: geoviewLayerConfig.geoviewLayerName,
+    metadataAccessPath: geoviewLayerConfig.metadataAccessPath,
+    geoviewLayerType: geoviewLayerConfig.geoviewLayerType,
+    serviceDateFormat: geoviewLayerConfig.serviceDateFormat,
+    externalDateFormat: geoviewLayerConfig.externalDateFormat,
+    initialSettingss: geoviewLayerConfig.initialSettings,
+    listOfLayerEntryConfig: [],
+  } as TypeGeoviewLayerConfig;
+
+  // Loop on the LayerEntryConfig to serialize further
+  for (let j = 0; j < (geoviewLayerConfig.listOfLayerEntryConfig?.length || 0); j++) {
+    // Serialize the TypeLayerEntryConfig
+    const serializedLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[j].serialize();
+
+    // Store
+    serializedGeoviewLayerConfig.listOfLayerEntryConfig.push(serializedLayerEntryConfig as never);
+  }
+
+  // Return it
+  return serializedGeoviewLayerConfig as never;
 };
 
 /** ******************************************************************************************************************************

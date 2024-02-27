@@ -365,7 +365,13 @@ export abstract class AbstractGeoViewLayer {
       ? api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.serviceDateFormat)
       : undefined;
     this.externalFragmentsOrder = api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.externalDateFormat);
+
+    // TODO: Refactor - This assignation logic in the api...geoviewLayers array should be outside of a constructor logic.
+    // TO.DOCONT: If this was written to make sure all created geoview layers, anywhere, automatically appear in the api array, then
+    // TO.DOCONT: I'd suggest having that logic elsewhere and allow the devs/framework to create geoview layers, by code, that do not
+    // TO.DOCONT: necessarily jump in an api array and possibly affect other code just because an object was instanciated.
     api.maps[mapId].layer.geoviewLayers[this.geoviewLayerId] = this;
+
     this.setListOfLayerEntryConfig(mapLayerConfig, mapLayerConfig.listOfLayerEntryConfig);
   }
 
