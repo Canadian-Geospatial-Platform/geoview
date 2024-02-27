@@ -1,4 +1,5 @@
-import { Input, styled } from '@mui/material';
+import { Input, styled, InputProps } from '@mui/material';
+import { Theme } from '@mui/material/styles';
 
 export const sxClasses = {
   root: {
@@ -90,4 +91,4 @@ export const StyledInputField = styled(Input)(({ theme }) => ({
     transition: theme.transitions.create('width'),
     width: '100%',
   },
-})) as unknown as typeof Input;
+})) as React.ComponentType<InputProps & { theme?: Theme }>;
