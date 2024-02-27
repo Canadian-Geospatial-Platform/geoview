@@ -247,7 +247,7 @@ export function Appbar(): JSX.Element {
                         aria-label={buttonPanel.button.tooltip}
                         tooltip={buttonPanel.button.tooltip}
                         tooltipPlacement="right"
-                        className={`${sxClasses.appBarButton} ${selectedAppBarButtonId === buttonPanel.button.id ? 'active' : ''}`}
+                        className={`style3 ${selectedAppBarButtonId === buttonPanel.button.id ? 'active' : ''}`}
                         size="small"
                         onClick={() => {
                           if (!buttonPanel.panel?.status) {

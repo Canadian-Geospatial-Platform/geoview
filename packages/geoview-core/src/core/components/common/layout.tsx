@@ -1,5 +1,4 @@
 import { useState, useCallback, type ReactNode } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Box } from '@/ui';
 import { logger } from '@/core/utils/logger';
@@ -23,8 +22,6 @@ interface LayoutProps {
 }
 
 export function Layout({ children, layerList, selectedLayerPath, onLayerListClicked, onIsEnlargeClicked, fullWidth }: LayoutProps) {
-  const { t } = useTranslation<string>();
-
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
@@ -95,7 +92,7 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
       <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
         {!fullWidth && (
           <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlarged}>
-            {!!layerList.length && <LayerTitle>{t('general.layers')}</LayerTitle>}
+            {null}
           </ResponsiveGrid.Left>
         )}
         <ResponsiveGrid.Right isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlarged} fullWidth={fullWidth}>

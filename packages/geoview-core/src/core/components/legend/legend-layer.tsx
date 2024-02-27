@@ -17,7 +17,7 @@ import {
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { useMapStoreActions } from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
-import { LayerIcon } from '../layers/layer-icon';
+import { LayerIcon } from '../common/layer-icon';
 import { logger } from '@/core/utils/logger';
 
 interface LegendLayerProps {
@@ -130,7 +130,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
               className="layerTitle"
               secondary={getSecondaryText()}
             />
-            <IconButton sx={{ marginBottom: '20px' }} color="primary" edge="end" size="small" tooltip="layers.toggleCollapse">
+            <IconButton sx={{ marginBottom: '20px' }} className="style1" edge="end" size="small" tooltip="layers.toggleCollapse">
               {isGroupOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
             </IconButton>
           </>

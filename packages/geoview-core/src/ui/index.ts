@@ -46,3 +46,4 @@ export * from './text-field/text-field';
 export * from './toolbar/toolbar';
 export * from './tooltip/tooltip';
 export * from './typography/typography';
+export * from './popper/popper';
