@@ -4,15 +4,15 @@
 function listenToLegendLayerSetChanges(elementId, handlerName) {
   const mapId = handlerName.split('/')[0];
   cgpv.api.event.on(
-    cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
+    cgpv.api.eventNames.LAYER_SET.UPDATED,
     (payload) => {
       const outputHeader =
         '<table class="state"><tr class="state"><th class="state">Name</th><th class="state">Phase</th><th class="state">Status</th></tr>';
       const displayField = document.getElementById(elementId);
-      const { resultsSet } = payload;
-      const output = Object.keys(resultsSet).reduce((outputValue, layerPath) => {
-        const layerName = resultsSet[layerPath]?.layerName || '';
-        const { layerStatus } = resultsSet[layerPath];
+      const { resultSet } = payload;
+      const output = Object.keys(resultSet).reduce((outputValue, layerPath) => {
+        const layerName = resultSet[layerPath]?.layerName || '';
+        const { layerStatus } = resultSet[layerPath];
         const { layerPhase } = cgpv.api.maps[mapId].layer.registeredLayers[layerPath];
         return `${outputValue}<tr class="state"><td class="state">${layerName}</td><td class="state">${layerPhase}</td><td class="state">${layerStatus}</td></tr>`;
       }, outputHeader);
@@ -44,17 +44,17 @@ const addBoundsPolygon = (mapId, bbox) => {
 };
 
 // ==========================================================================================================================
-const createInfoTable = (mapId, resultsSetId, resultsSet, eventType) => {
+const createInfoTable = (mapId, resultSetId, resultSet, eventType) => {
   if (!['click', 'all-features'].includes(eventType)) return;
-  const infoTable = document.getElementById(`${resultsSetId}-${eventType}`);
+  const infoTable = document.getElementById(`${resultSetId}-${eventType}`);
   infoTable.textContent = '';
   const oldContent = document.getElementById(`layer${mapId.slice(-1)}-${eventType}-info`);
   if (oldContent) oldContent.remove();
   const content = document.createElement('div');
   content.id = `layer${mapId.slice(-1)}-${eventType}-info`;
   infoTable.appendChild(content);
-  Object.keys(resultsSet).forEach((layerPath) => {
-    const activeResultSet = resultsSet[layerPath];
+  Object.keys(resultSet).forEach((layerPath) => {
+    const activeResultSet = resultSet[layerPath];
     const layerData = activeResultSet.data[eventType].features;
 
     // Header of the layer
@@ -442,7 +442,7 @@ const createTableOfFilter = (mapId) => {
 };
 
 // ==========================================================================================================================
-function displayLegend(layerSetId, resultsSet) {
+function displayLegend(layerSetId, resultSet) {
   const addHeader = (title, container) => {
     const tableHeader = document.createElement('th');
     tableHeader.style = 'text-align: center; vertical-align: middle;';
@@ -468,8 +468,8 @@ function displayLegend(layerSetId, resultsSet) {
   table.style = 'width:50%';
   legendTable.appendChild(table);
   let createHeader = true;
-  Object.keys(resultsSet).forEach((layerPath) => {
-    const activeResultSet = resultsSet[layerPath];
+  Object.keys(resultSet).forEach((layerPath) => {
+    const activeResultSet = resultSet[layerPath];
     if (createHeader) {
       createHeader = false;
       const tableRow1 = document.createElement('tr');

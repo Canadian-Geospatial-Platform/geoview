@@ -263,7 +263,7 @@
 
       const LegendLayerSet = cgpv.api.getLegendsLayerSet('CSV1');
       cgpv.api.event.on(
-        cgpv.api.eventNames.GET_LEGENDS.LEGENDS_LAYERSET_UPDATED,
+        cgpv.api.eventNames.GET_LEGENDS.LEGEND_LAYERSET_UPDATED,
         (payload) => {
           const { resultSets } = payload;
           if (resultSets) displayLegend('LegendsId1', resultSets);

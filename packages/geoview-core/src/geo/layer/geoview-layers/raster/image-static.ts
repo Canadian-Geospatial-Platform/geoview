@@ -204,14 +204,14 @@ export class ImageStatic extends AbstractGeoViewRaster {
         if (!layerConfig.listOfLayerEntryConfig.length) {
           this.layerLoadError.push({
             layer: layerPath,
-            consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
+            loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.setLayerStatus('error', layerPath);
+          layerConfig.layerStatus = 'error';
           return;
         }
       }
 
-      this.setLayerStatus('processing', layerPath);
+      layerConfig.layerStatus = 'processing';
 
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) return;
@@ -224,9 +224,9 @@ export class ImageStatic extends AbstractGeoViewRaster {
         if (!foundEntry) {
           this.layerLoadError.push({
             layer: layerPath,
-            consoleMessage: `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
+            loggerMessage: `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          this.setLayerStatus('error', layerPath);
+          layerConfig.layerStatus = 'error';
           return;
         }
         return;
@@ -246,6 +246,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
   processOneLayerEntry(layerConfig: TypeImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+    super.processOneLayerEntry(layerConfig);
     const { layerPath } = layerConfig;
     this.setLayerPhase('processOneLayerEntry', layerPath);
 
@@ -271,8 +272,8 @@ export class ImageStatic extends AbstractGeoViewRaster {
     if (layerConfig.initialSettings?.maxZoom !== undefined) staticImageOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
     if (layerConfig.initialSettings?.minZoom !== undefined) staticImageOptions.minZoom = layerConfig.initialSettings?.minZoom;
     if (layerConfig.initialSettings?.opacity !== undefined) staticImageOptions.opacity = layerConfig.initialSettings?.opacity;
-    if (layerConfig.initialSettings?.visible !== undefined)
-      staticImageOptions.visible = layerConfig.initialSettings?.visible === 'yes' || layerConfig.initialSettings?.visible === 'always';
+    // ! IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
+    // !            in the 'loading' state if the flag value is 'no'.
 
     layerConfig.olLayerAndLoadEndListeners = {
       olLayer: new ImageLayer(staticImageOptions),

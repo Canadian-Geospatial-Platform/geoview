@@ -193,7 +193,7 @@ export class MapViewer {
 
                 MapEventProcessor.setLayerZIndices(this.mapId);
                 // If metadata are processed
-                if (geoviewLayer.allLayerStatusAreIn(['processed', 'loading', 'loaded', 'error'])) {
+                if (geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('processed')) {
                   api.event.emit(GeoViewLayerPayload.createTestGeoviewLayersPayload('run cgpv.init callback?'));
                 }
               }
@@ -214,7 +214,7 @@ export class MapViewer {
   mapIsReady(): boolean {
     if (this.layer === undefined) return false;
     return !Object.keys(this.layer.geoviewLayers).find((geoviewLayerId) => {
-      return !this.layer.geoviewLayers[geoviewLayerId].allLayerStatusAreIn(['loaded', 'error']);
+      return !this.layer.geoviewLayers[geoviewLayerId].allLayerStatusAreGreaterThanOrEqualTo('loaded');
     });
   }
 
@@ -234,7 +234,7 @@ export class MapViewer {
         let allGeoviewLayerReady =
           this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
         Object.keys(geoviewLayers).forEach((geoviewLayerId) => {
-          const layerIsReady = geoviewLayers[geoviewLayerId].allLayerStatusAreIn(['processed', 'error', 'loaded']);
+          const layerIsReady = geoviewLayers[geoviewLayerId].allLayerStatusAreGreaterThanOrEqualTo('processed');
           logger.logTraceDetailed('map-viewer.mapReady? geoview layer ready?', geoviewLayerId, layerIsReady);
           allGeoviewLayerReady &&= layerIsReady;
         });
