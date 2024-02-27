@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Popper as MaterialPopper, PopperProps } from '@mui/material';
 
 interface EnhancedPopperProps extends PopperProps {
+  // eslint-disable-next-line react/require-default-props
   onClose?: () => void;
 }
 

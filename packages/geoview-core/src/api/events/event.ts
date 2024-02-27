@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 import EventEmitter from 'eventemitter3';
 
 import { EventStringId } from './event-types';
@@ -12,7 +11,7 @@ type TypeEventNode = {
   once: boolean;
 };
 
-interface TypeEventEmitter extends EventEmitter {
+interface IEventEmitter extends EventEmitter {
   _events: Record<string, TypeEventNode | TypeEventNode[]>;
   _eventsCount: number;
 }
@@ -25,13 +24,13 @@ interface TypeEventEmitter extends EventEmitter {
  */
 export class Event {
   // event emitter object, used to handle emitting/subscribing to events
-  eventEmitter: TypeEventEmitter;
+  eventEmitter: IEventEmitter;
 
   /**
    * Initiate the event emitter
    */
   constructor() {
-    this.eventEmitter = new EventEmitter() as TypeEventEmitter;
+    this.eventEmitter = new EventEmitter() as IEventEmitter;
   }
 
   /**
@@ -86,6 +85,7 @@ export class Event {
    * @param {string} eventTypeToKeep the handler name prefix composed of handlerNamePrefix/eventTypeToKeep to keep
    */
   offAll = (handlerNamePrefix: string, eventTypeToKeep?: string): void => {
+    // eslint-disable-next-line no-underscore-dangle
     (Object.keys(this.eventEmitter._events) as EventStringId[]).forEach((eventNameId) => {
       if (eventNameId.startsWith(handlerNamePrefix)) {
         if (eventTypeToKeep) {
