@@ -99,11 +99,11 @@
 
       window.setInterval(() => {
         const displayField1 = document.getElementById('HUC3-state');
-        const geoviewLayers = cgpv.api.getFeatureInfoLayerSet('mapWM3').resultsSet;
-        if (geoviewLayers) {
-          const output = Object.keys(geoviewLayers).reduce((outputValue, layerId) => {
-            const { layerPhase, layerStatus } = geoviewLayers[layerId];
-            return `${outputValue}${layerId.split('/')[layerId.split('/').length - 1]} - status: ${layerStatus}, phase: ${layerPhase}, `;
+        const featureInfoLayerSet = cgpv.api.getFeatureInfoLayerSet('mapWM3').resultSet;
+        if (featureInfoLayerSet) {
+          const output = Object.keys(featureInfoLayerSet).reduce((outputValue, layerId) => {
+            const { layerStatus } = featureInfoLayerSet[layerId];
+            return `${outputValue}${layerId.split('/')[layerId.split('/').length - 1]} - status: ${layerStatus}, `;
           }, '(');
           displayField1.textContent = output && output !== '(' ? `${output.slice(0, -2)})` : '(undefined)';
         } else displayField1.textContent = '(undefined)';

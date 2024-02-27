@@ -12,7 +12,7 @@ export function useLegendHelpers() {
   const { mapId } = store.getState();
 
   function populateLegendStoreWithFakeData() {
-    const legendInfo = api.getLegendsLayerSet(mapId).resultsSet;
+    const legendInfo = api.getLegendsLayerSet(mapId).resultSet;
     // console.log('I got here ', legendInfo, _.keys(legendInfo));
     const keys = _.keys(legendInfo);
 
@@ -68,7 +68,6 @@ export function useLegendHelpers() {
         layerName: 'TEST--TestLayer1',
         type: 'GeoJSON',
         layerStatus: 'loaded',
-        layerPhase: 'processed',
         querySent: true,
         children: [],
         items: layerItems,
@@ -80,7 +79,6 @@ export function useLegendHelpers() {
         layerName: 'TEST--Layer with groups',
         type: 'GeoJSON',
         layerStatus: 'loaded',
-        layerPhase: 'processed',
         querySent: true,
         children: [],
         items: [],
@@ -92,7 +90,6 @@ export function useLegendHelpers() {
         layerName: 'TEST--chrisparentlayer1',
         type: 'GeoJSON',
         layerStatus: 'loaded',
-        layerPhase: 'processed',
         querySent: true,
         children: [
           {
@@ -102,7 +99,6 @@ export function useLegendHelpers() {
             layerName: 'TEST--chrisparentchild1',
             type: 'GeoJSON',
             layerStatus: 'loaded',
-            layerPhase: 'processed',
             querySent: true,
             children: [
               {
@@ -112,7 +108,6 @@ export function useLegendHelpers() {
                 layerName: 'TEST--chris parent child2',
                 type: 'GeoJSON',
                 layerStatus: 'error',
-                layerPhase: 'processed',
                 querySent: true,
                 children: [],
                 items: layerItems,
@@ -124,7 +119,6 @@ export function useLegendHelpers() {
                 layerName: 'TEST--chris parent child25555',
                 type: 'GeoJSON',
                 layerStatus: 'processing',
-                layerPhase: 'processed',
                 querySent: true,
                 children: [],
                 items: layerItems,
@@ -136,7 +130,6 @@ export function useLegendHelpers() {
                 layerName: 'TEST--chris parent child3',
                 type: 'GeoJSON',
                 layerStatus: 'newInstance',
-                layerPhase: 'processed',
                 querySent: true,
                 children: [],
                 items: layerItems,
@@ -151,7 +144,6 @@ export function useLegendHelpers() {
             layerName: 'TEST--chirslyerss',
             type: 'GeoJSON',
             layerStatus: 'loaded',
-            layerPhase: 'processed',
             querySent: true,
             children: [],
             items: layerItems,
@@ -163,7 +155,6 @@ export function useLegendHelpers() {
             layerName: 'TEST--chris-child32edd',
             type: 'GeoJSON',
             layerStatus: 'loaded',
-            layerPhase: 'processed',
             querySent: true,
             children: [],
             items: layerItems,

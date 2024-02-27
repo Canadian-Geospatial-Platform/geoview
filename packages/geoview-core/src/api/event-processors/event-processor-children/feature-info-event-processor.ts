@@ -1,5 +1,5 @@
 import { GeoviewStoreType, IFeatureInfoState } from '@/core/stores';
-import { TypeFeatureInfoResultsSet, EventType, TypeLayerData, TypeArrayOfLayerData } from '@/api/events/payloads/get-feature-info-payload';
+import { TypeFeatureInfoResultSet, EventType, TypeLayerData, TypeArrayOfLayerData } from '@/api/events/payloads/get-feature-info-payload';
 import { logger } from '@/core/utils/logger';
 
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '../abstract-event-processor';
@@ -157,9 +157,9 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId The map identifier of the modified result set.
    * @param {string} layerPath The layer path that has changed.
    * @param {EventType} eventType The event type that triggered the layer set update.
-   * @param {TypeFeatureInfoResultsSet} resultsSet The resul sets associated to the map.
+   * @param {TypeFeatureInfoResultSet} resultSet The resul sets associated to the map.
    */
-  static propagateFeatureInfoToStore(mapId: string, layerPath: string, eventType: EventType, resultsSet: TypeFeatureInfoResultsSet) {
+  static propagateFeatureInfoToStore(mapId: string, layerPath: string, eventType: EventType, resultSet: TypeFeatureInfoResultSet) {
     // The feature info state
     const featureInfoState = this.getFeatureInfoState(mapId);
 
@@ -170,7 +170,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
        */
       const layerDataArray = [...featureInfoState.layerDataArray];
       if (!layerDataArray.find((layerEntry) => layerEntry.layerPath === layerPath))
-        layerDataArray.push(resultsSet?.[layerPath]?.data.click as TypeLayerData);
+        layerDataArray.push(resultSet?.[layerPath]?.data.click as TypeLayerData);
       const atLeastOneFeature = layerDataArray.find((layerEntry) => !!layerEntry.features?.length) || false;
 
       // Update the layer data array in the store, all the time, for all statuses
@@ -191,7 +191,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
        */
       const hoverDataArray = [...featureInfoState.hoverDataArray];
       if (!hoverDataArray.find((layerEntry) => layerEntry.layerPath === layerPath)) {
-        hoverDataArray.push(resultsSet?.[layerPath]?.data.hover as TypeLayerData);
+        hoverDataArray.push(resultSet?.[layerPath]?.data.hover as TypeLayerData);
         featureInfoState.actions.setHoverDataArray(hoverDataArray);
       }
     } else if (eventType === 'all-features') {
@@ -200,7 +200,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
        */
       const allFeaturesDataArray = [...featureInfoState.allFeaturesDataArray];
       if (!allFeaturesDataArray.find((layerEntry) => layerEntry.layerPath === layerPath)) {
-        allFeaturesDataArray.push(resultsSet?.[layerPath]?.data['all-features'] as TypeLayerData);
+        allFeaturesDataArray.push(resultSet?.[layerPath]?.data['all-features'] as TypeLayerData);
         featureInfoState.actions.setAllFeaturesDataArray(allFeaturesDataArray);
       }
     }
