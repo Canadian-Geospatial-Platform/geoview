@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Typography, Box, Link, Theme, SvgIcon, ClickAwayListener, Paper } from '@mui/material';
+import { Typography, Box, Link, Theme, SvgIcon, Paper } from '@mui/material';
 
 import { GITHUB_REPO, GEO_URL_TEXT } from '@/core/utils/constant';
 import { GeoCaIcon, IconButton, Popper } from '@/ui';
@@ -70,8 +70,7 @@ export default function Version(): JSX.Element {
   };
 
   return (
-    <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
-      <div>
+      <>
         <IconButton
           id="version-button"
           tooltip="appbar.version"
@@ -84,7 +83,7 @@ export default function Version(): JSX.Element {
           </SvgIcon>
         </IconButton>
 
-        <Popper sx={{ zIndex: '150' }} open={open} anchorEl={anchorEl} placement="right-end" container={mapElem}>
+        <Popper open={open} anchorEl={anchorEl} placement="right-end" container={mapElem} onClose={handleClickAway}>
           <Paper sx={sxClasses.versionInfoPanel}>
             <Typography sx={sxClasses.versionsInfoTitle} component="h3">
               {t('appbar.version')}
@@ -105,7 +104,6 @@ export default function Version(): JSX.Element {
             </Box>
           </Paper>
         </Popper>
-      </div>
-    </ClickAwayListener>
+      </>
   );
 }
