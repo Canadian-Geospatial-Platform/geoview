@@ -1,14 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-param-reassign */
+// We have many reassing for node-layerConfig. We keep it global...
 import { asArray, asString } from 'ol/color';
-import { Text, Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon } from 'ol/style';
-import { Geometry, LineString, MultiLineString, Point, MultiPoint, Polygon, MultiPolygon } from 'ol/geom';
+import { Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon } from 'ol/style';
+import { Geometry, LineString, Point, Polygon } from 'ol/geom';
 import Icon, { Options as IconOptions } from 'ol/style/Icon';
 import { Options as CircleOptions } from 'ol/style/Circle';
 import { Options as RegularShapeOptions } from 'ol/style/RegularShape';
 import { Options as StrokeOptions } from 'ol/style/Stroke';
 import { Options as FillOptions } from 'ol/style/Fill';
-import { Options as TextOptions } from 'ol/style/Text';
 import Feature from 'ol/Feature';
 import { toContext } from 'ol/render';
 import { Size } from 'ol/size';
@@ -42,8 +41,6 @@ import {
   isClassBreakStyleConfig,
   TypeUniqueValueStyleConfig,
   TypeClassBreakStyleConfig,
-  TypeBaseSourceVectorInitialConfig,
-  layerEntryIsVector,
 } from '../map/map-schema-types';
 import {
   binaryKeywors,
@@ -57,9 +54,9 @@ import {
   operatorPriority,
   unaryKeywords,
 } from './geoview-renderer-types';
-import { Layer } from '../layer/layer';
 import { TypeVectorLayerStyles } from '../layer/geoview-layers/abstract-geoview-layers';
 import { api } from '@/app';
+import { logger } from '@/core/utils/logger';
 
 type TypeStyleProcessor = (
   styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
@@ -212,9 +209,8 @@ export class GeoviewRenderer {
       image
         .decode()
         .then(() => resolve(image))
-        .catch((reason) => {
-          // eslint-disable-next-line no-console
-          console.log('GeoviewRenderer.loadImage(src) - Error while loading the src image =', src);
+        .catch((error) => {
+          logger.logError('GeoviewRenderer.loadImage(src) - Error while loading the src image =', src, error);
           resolve(null);
         });
     });
@@ -246,8 +242,7 @@ export class GeoviewRenderer {
       }
       return null;
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log(error);
+      logger.logError(`Error creating incon canvas for pointStyle`, error);
       return null;
     }
   }
@@ -334,7 +329,8 @@ export class GeoviewRenderer {
         ],
       ])
     );
-    const test = context.getImageData(0, 0, drawingCanvas.width, drawingCanvas.height);
+
+    context.getImageData(0, 0, drawingCanvas.width, drawingCanvas.height);
     return drawingCanvas;
   }
 
@@ -373,8 +369,7 @@ export class GeoviewRenderer {
       });
       return layerStyles;
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log(error);
+      logger.logError('Error processing array of point styles', error);
       return {} as TypeVectorLayerStyles;
     }
   }
@@ -421,8 +416,7 @@ export class GeoviewRenderer {
       layerStyles.Point!.arrayOfCanvas = [];
       return await this.processArrayOfPointStyleConfig(layerStyles, arrayOfPointStyleConfig!);
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log(error);
+      logger.logError('Error getPointStyle sub routine', error);
       return {} as TypeVectorLayerStyles;
     }
   }
@@ -578,7 +572,7 @@ export class GeoviewRenderer {
   ): Promise<HTMLCanvasElement | undefined> {
     const promisedCanvas = new Promise<HTMLCanvasElement | undefined>((resolve) => {
       const geometryType = getGeometryType(feature);
-      const { style, source } = layerConfig as TypeVectorLayerEntryConfig;
+      const { style } = layerConfig as TypeVectorLayerEntryConfig;
       // Get the style accordingly to its type and geometry.
       if (style![geometryType] !== undefined) {
         const styleSettings = style![geometryType]!;
@@ -1094,8 +1088,7 @@ export class GeoviewRenderer {
           // eslint-disable-next-line eqeqeq
           isEqual = feature.get(fieldName) == uniqueValueStyleInfo[i].values[j];
           if (isEqual && j + 1 === fields.length) return i;
-          // eslint-disable-next-line no-console
-        } else console.log(`Can not find field ${fields[j]}`);
+        } else logger.logWarning(`Renderer searchUniqueValueEntry. Can not find field ${fields[j]}`);
       }
     }
     return undefined;
@@ -1357,8 +1350,7 @@ export class GeoviewRenderer {
       layerConfig.style[geometryType] = styleSettings;
       return layerConfig.style;
     }
-    // eslint-disable-next-line no-console
-    console.log(`Geometry type ${geometryType} is not supported by the GeoView viewer.`);
+    logger.logError(`Geometry type ${geometryType} is not supported by the GeoView viewer.`);
     return undefined;
   }
 

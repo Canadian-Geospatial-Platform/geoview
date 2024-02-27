@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+// We have many reassing for layer-layerConfig. We keep it global...
 import axios from 'axios';
 
 import ImageLayer from 'ol/layer/Image';

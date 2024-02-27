@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+// We have many reassing for layerPath-sourceOptions. We keep it global...
 import Feature from 'ol/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';

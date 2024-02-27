@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable block-scoped-var, no-var, vars-on-top, no-param-reassign */
+/* eslint-disable no-param-reassign */
+// We have many reassing for layerConfig. We keep it global...
 // eslint-disable-next-line max-classes-per-file
 import TileLayer from 'ol/layer/Tile';
 import { Options as TileOptions } from 'ol/layer/BaseTile';
@@ -19,11 +19,9 @@ import {
   layerEntryIsGroupLayer,
   TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
-import { getLocalizedValue, getMinOrMaxExtents, getXMLHttpRequest } from '@/core/utils/utilities';
+import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
 import { Cast, toJsonObject } from '@/core/types/global-types';
 import { api } from '@/app';
-import { Layer } from '../../layer';
-import { LayerSetPayload } from '@/api/events/payloads';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.

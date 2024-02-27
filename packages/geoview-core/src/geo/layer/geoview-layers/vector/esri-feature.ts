@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+// We have many reassing for sourceOptions. We keep it global...
 // eslint-disable-next-line max-classes-per-file
 import { Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';

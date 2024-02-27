@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars, no-console */
-/* eslint-disable block-scoped-var, no-var, vars-on-top, no-param-reassign */
+/* eslint-disable no-param-reassign */
+// We have many reassing for layerPath-layerConfig. We keep it global...
 import axios from 'axios';
 
 import ImageLayer from 'ol/layer/Image';
@@ -19,9 +19,8 @@ import {
 } from '@/geo/map/map-schema-types';
 import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
 import { api } from '@/app';
-import { Layer } from '../../layer';
-import { LayerSetPayload } from '@/api/events/payloads';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { logger } from '@/core/utils/logger';
 
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'imageStatic';
@@ -113,7 +112,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
     const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
       const readImage = (blob: Blob): Promise<string | ArrayBuffer | null> =>
         // eslint-disable-next-line @typescript-eslint/no-shadow
-        new Promise((resolve, reject) => {
+        new Promise((resolve) => {
           const reader = new FileReader();
           reader.onloadend = () => resolve(reader.result);
           reader.onerror = () => resolve(null);
@@ -130,7 +129,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
           .then((response) => {
             resolve(readImage(Cast<Blob>(response.data)));
           })
-          .catch((error) => resolve(null));
+          .catch(() => resolve(null));
       } else resolve(null);
     });
     return promisedImage;
@@ -182,7 +181,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
       };
       return legend;
     } catch (error) {
-      console.log(error);
+      logger.logError(`Error getting legend for ${layerPath}`, error);
       return null;
     }
   }
