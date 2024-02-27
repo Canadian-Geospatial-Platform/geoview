@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
+import { FocusTrap } from '@mui/base/FocusTrap';
 import _ from 'lodash';
 import { ClickAwayListener } from '@mui/material';
 import {
@@ -41,6 +42,8 @@ export default function Notifications(): JSX.Element {
   // Log
   logger.logTraceRender('components/notifications/notifications');
 
+  const notifiRef = useRef<HTMLButtonElement>(null);
+
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
@@ -60,15 +63,15 @@ export default function Notifications(): JSX.Element {
 
   // handle open/close
   const handleOpenPopover = (event: React.MouseEvent<HTMLButtonElement>) => {
+    // if (open) {
+    //   console.log('hereeee');
+    //   notifiRef.current.focus();
+    // }
     setAnchorEl(event.currentTarget);
     setOpen(!open);
   };
 
-  const handleClickAway = () => {
-    if (open) {
-      setOpen(false);
-    }
-  };
+  const handleClickAway = () => open && setOpen(false);
 
   /**
    * Remove a notification
@@ -109,7 +112,17 @@ export default function Notifications(): JSX.Element {
     );
   }
 
+  useEffect(() => {
+    if (!open) {
+      // set focus on close button on panel open
+      if (notifiRef && notifiRef.current) {
+        (notifiRef.current as HTMLElement).focus();
+      }
+    }
+  }, [open]);
+
   return (
+    // <FocusTrap open>
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
       <div>
         <Badge badgeContent={notificationsCount} color="error">
@@ -124,24 +137,38 @@ export default function Notifications(): JSX.Element {
             <NotificationsIcon />
           </IconButton>
         </Badge>
-
-        <Popper open={open} anchorEl={anchorEl} placement="right-end" onClose={handleClickAway} container={mapElem}>
-          <Paper sx={sxClasses.notificationPanel}>
-            <Typography component="h3" sx={sxClasses.notificationsTitle}>
-              {t('appbar.notifications')}
-            </Typography>
-            <Box sx={sxClasses.notificationsList}>
-              {notifications.length > 0 ? (
-                notifications.map((notification, index) => renderNotification(notification, index))
-              ) : (
-                <Typography component="div" sx={{ padding: '10px 15px' }}>
-                  {t('appbar.no_notifications_available')}
+        <FocusTrap open={open}>
+          <Popper open={open} anchorEl={anchorEl} placement="right-end" onClose={handleClickAway} container={mapElem}>
+            <Paper sx={sxClasses.notificationPanel}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[300]}}`,
+                }}
+              >
+                <Typography component="h3" sx={sxClasses.notificationsTitle}>
+                  {t('appbar.notifications')}
                 </Typography>
-              )}
-            </Box>
-          </Paper>
-        </Popper>
+                <IconButton sx={{ paddingBottom: '10px' }} onClick={handleClickAway} autoFocus>
+                  <CloseIcon />
+                </IconButton>
+              </Box>
+              <Box sx={sxClasses.notificationsList}>
+                {notifications.length > 0 ? (
+                  notifications.map((notification, index) => renderNotification(notification, index))
+                ) : (
+                  <Typography component="div" sx={{ padding: '10px 15px' }}>
+                    {t('appbar.no_notifications_available')}
+                  </Typography>
+                )}
+              </Box>
+            </Paper>
+          </Popper>
+        </FocusTrap>
       </div>
     </ClickAwayListener>
+    // </FocusTrap>
   );
 }

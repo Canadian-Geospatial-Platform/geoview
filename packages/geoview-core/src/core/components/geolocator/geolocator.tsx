@@ -1,11 +1,11 @@
-import { ChangeEvent, useCallback, useRef, useState } from 'react';
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import debounce from 'lodash/debounce';
 import { useTheme } from '@mui/material';
 import { CloseIcon, SearchIcon, AppBar, Box, Divider, IconButton, ProgressBar, Toolbar } from '@/ui';
 import { StyledInputField, sxClasses } from './geolocator-style';
 import { OL_ZOOM_DURATION } from '@/core/utils/constant';
-import { useUIAppbarGeolocatorActive } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIAppbarGeolocatorActive, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useAppGeolocatorServiceURL, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { GeolocatorResult } from './geolocator-result';
 import { logger } from '@/core/utils/logger';
@@ -41,8 +41,10 @@ export function Geolocator() {
 
   // set the active (visible) or not active (hidden) from geolocator button click
   const active = useUIAppbarGeolocatorActive();
+  const { setGeolocatorActive } = useUIStoreActions();
 
   const urlRef = useRef<string>(`${geolocatorServiceURL}&lang=${displayLanguage}`);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   /**
    * Checks if search term is decimal degree coordinate and return geo list item.
@@ -110,6 +112,7 @@ export function Geolocator() {
    */
   const resetSearch = useCallback(() => {
     setIsSearchInputVisible(false);
+    setGeolocatorActive(false);
     setSearchValue('');
     setData(undefined);
   }, []);
@@ -148,6 +151,29 @@ export function Geolocator() {
     }
   };
 
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      setGeolocatorActive(false);
+    }
+  };
+
+  useEffect(() => {
+    if (searchInputRef.current && active) {
+      searchInputRef.current?.click();
+    }
+    setSearchValue(active ? searchValue : '');
+
+    if (active) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active]);
+
   return (
     <Box sx={sxClasses.root} visibility={active ? 'visible' : 'hidden'} id="geolocator-search">
       <Box sx={sxClasses.geolocator}>
@@ -166,21 +192,18 @@ export function Geolocator() {
                 getGeolocations(searchValue);
               }}
             >
-              {isSearchInputVisible && (
-                <StyledInputField placeholder={t('geolocator.search')!} autoFocus onChange={onChange} value={searchValue} />
-              )}
+              <StyledInputField ref={searchInputRef} placeholder={t('geolocator.search')!} onChange={onChange} value={searchValue} />
 
               <Box sx={{ display: 'flex', marginLeft: 'auto', alignItems: 'center' }}>
                 <IconButton
+                  tabIndex={0}
                   size="small"
                   edge="end"
                   color="inherit"
                   sx={{ mr: 4 }}
                   disabled={isSearchInputVisible && !searchValue.length}
                   onClick={() => {
-                    if (!isSearchInputVisible) {
-                      setIsSearchInputVisible(true);
-                    } else if (searchValue.length) {
+                    if (searchValue.length) {
                       doRequest.cancel();
                       getGeolocations(searchValue);
                     }
@@ -191,7 +214,7 @@ export function Geolocator() {
                 {isSearchInputVisible && (
                   <>
                     <Divider orientation="vertical" variant="middle" flexItem />
-                    <IconButton size="small" edge="end" color="inherit" sx={{ mr: 2, ml: 4 }} onClick={resetSearch}>
+                    <IconButton tabIndex={0} size="small" edge="end" color="inherit" sx={{ mr: 2, ml: 4 }} onClick={resetSearch}>
                       <CloseIcon fontSize={theme.palette.geoViewFontSize.sm} />
                     </IconButton>
                   </>
