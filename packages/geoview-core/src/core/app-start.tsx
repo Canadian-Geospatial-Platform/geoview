@@ -50,7 +50,7 @@ function AppStart(props: AppStartProps): JSX.Element {
     // Log
     logger.logTraceUseMemo('APP-START - mapContextValue', mapId);
 
-    return { mapId: mapId as string };
+    return { mapId };
   }, [mapId]);
 
   //! get store values by id because context is not set.... it is the only 2 atomic selector by id
