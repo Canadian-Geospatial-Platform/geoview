@@ -1,4 +1,3 @@
-/* eslint-disable no-plusplus */
 import { useState, useEffect } from 'react';
 
 import { useTheme } from '@mui/material/styles';

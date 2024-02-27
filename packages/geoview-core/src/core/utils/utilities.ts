@@ -1,8 +1,4 @@
 import { MutableRefObject } from 'react';
-/* eslint-disable no-param-reassign */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-console */
-/* eslint-disable no-underscore-dangle */
 import { Root, createRoot } from 'react-dom/client';
 
 import i18n from 'i18next';
@@ -64,7 +60,8 @@ export function generateId(id?: string | null): string {
  * @param {NotificationType} type optional, the type of message (info, success, warning, error), info by default
  * @param {string} message optional, the message string
  */
-function _addNotification(mapId: string, type: NotificationType = 'info', message = '') {
+// eslint-disable-next-line no-underscore-dangle, default-param-last
+function _addNotification(mapId: string, type: NotificationType = 'info', message: string) {
   const notification = {
     key: generateId(),
     notificationType: type,
@@ -130,6 +127,7 @@ export function addNotificationError(mapId: string, message: string) {
  * @param {string} message the snackbar message
  * @param {TypeJsonObject} button optional snackbar button
  */
+// eslint-disable-next-line no-underscore-dangle
 function _showSnackbarMessage(mapId: string, type: SnackbarType, message: string, button?: TypeJsonObject) {
   api.event.emit(snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, type, message, button));
 }
@@ -387,6 +385,7 @@ export function removeCommentsFromJSON(config: string): string {
  * @param {string} configObjStr Map config to parse
  * @returns {any} cleaned and parsed config object
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function parseJSONConfig(configObjStr: string): any {
   // remove CR and LF from the map config
   let jsonString = configObjStr.replace(/(\r\n|\n|\r)/gm, '');
@@ -466,9 +465,8 @@ export function exportPNG(mapId: string): void {
       element.setAttribute('href', image);
       element.setAttribute('download', filename);
       element.click();
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(`Error: ${err}`);
+    } catch (error) {
+      logger.logError(`Error trying to export PNG.`, error);
     }
   });
   document.body.style.cursor = 'auto';
@@ -580,9 +578,11 @@ export function stringify(str: unknown): unknown | string {
  * @param timeout the duration in milliseconds until the task is aborted
  * @param checkFrequency the frequency in milliseconds to callback for a check (defaults to 100 milliseconds)
  */
+// eslint-disable-next-line no-underscore-dangle
 function _whenThisThenThat<T>(
   checkCallback: () => T,
   doCallback: (value: T) => void,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   failCallback: (reason?: any) => void,
   startDate: Date,
   timeout: number,
@@ -618,12 +618,15 @@ function _whenThisThenThat<T>(
 export function whenThisThenThat<T>(
   checkCallback: () => T,
   doCallback: (value: T) => void,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   failCallback: (reason?: any) => void,
   timeout?: number,
   checkFrequency?: number
 ): void {
   const startDate = new Date();
+  // eslint-disable-next-line no-param-reassign
   if (!checkFrequency) checkFrequency = 100; // Check every 100 milliseconds by default
+  // eslint-disable-next-line no-param-reassign
   if (!timeout) timeout = 10000; // Timeout after 10 seconds by default
   _whenThisThenThat(checkCallback, doCallback, failCallback, startDate, timeout, checkFrequency);
 }

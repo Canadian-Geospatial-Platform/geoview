@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 import EventEmitter from 'eventemitter3';
 
 import { EventStringId } from './event-types';
@@ -86,6 +85,7 @@ export class Event {
    * @param {string} eventTypeToKeep the handler name prefix composed of handlerNamePrefix/eventTypeToKeep to keep
    */
   offAll = (handlerNamePrefix: string, eventTypeToKeep?: string): void => {
+    // eslint-disable-next-line no-underscore-dangle
     (Object.keys(this.eventEmitter._events) as EventStringId[]).forEach((eventNameId) => {
       if (eventNameId.startsWith(handlerNamePrefix)) {
         if (eventTypeToKeep) {

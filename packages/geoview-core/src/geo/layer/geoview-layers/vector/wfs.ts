@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+// We have many reassing for sourceOptions-layerConfig. We keep it global...
 // eslint-disable-next-line max-classes-per-file
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { WFS as FormatWFS } from 'ol/format';

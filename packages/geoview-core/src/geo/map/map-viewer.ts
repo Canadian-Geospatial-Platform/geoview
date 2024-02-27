@@ -1,8 +1,6 @@
 import { Root } from 'react-dom/client';
 
 import { i18n } from 'i18next';
-/* eslint-disable global-require */
-/* eslint-disable @typescript-eslint/no-var-requires */
 
 import OLMap from 'ol/Map';
 import View, { FitOptions, ViewOptions } from 'ol/View';

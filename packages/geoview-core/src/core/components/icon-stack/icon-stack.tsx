@@ -1,5 +1,3 @@
-/* eslint-disable no-nested-ternary */
-/* eslint-disable react/require-default-props */
 import React from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Box, IconButton, BrowserNotSupportedIcon } from '@/ui';
@@ -29,6 +27,8 @@ export function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIcon
   const numOfIcons: number | undefined = iconData?.length;
 
   const iconStackContent = () => {
+    // TODO: refactor - try to remove the nested ternary to simplify reading
+    // eslint-disable-next-line no-nested-ternary
     return numOfIcons === 1 ? (
       <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={iconImage === 'no data' ? undefined : onIconClick}>
         {iconImage === 'no data' ? (
@@ -39,7 +39,8 @@ export function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIcon
           </Box>
         )}
       </IconButton>
-    ) : numOfIcons && numOfIcons > 0 ? (
+    ) : // eslint-disable-next-line no-nested-ternary
+    numOfIcons && numOfIcons > 0 ? (
       <Box tabIndex={0} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyPress={(e) => onStackIconClick?.(e)}>
         <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1}>
           <Box sx={sxClasses.legendIconTransparent}>

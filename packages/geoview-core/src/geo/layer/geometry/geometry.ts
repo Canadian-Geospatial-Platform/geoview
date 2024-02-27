@@ -589,8 +589,7 @@ export class Geometry {
       geometryGroup.vectorLayer.getSource()?.addFeature(geometry);
       geometryGroup.vectorLayer.changed();
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error);
+      logger.logError(`Error adding geometry to group ${geometryGroupId}`, error);
     }
   };
 

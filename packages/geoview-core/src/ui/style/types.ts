@@ -1,5 +1,4 @@
 // Can populate using https://www.htmlcsscolor.com/hex/F1F2F5
-/* eslint-disable no-underscore-dangle */
 import { darken, lighten, alpha } from '@mui/material';
 import _ from 'lodash';
 
@@ -36,6 +35,7 @@ export class GeoViewColorClass {
     return colorRegex.test(color);
   }
 
+  // eslint-disable-next-line no-underscore-dangle
   _main(opacity = 1): string {
     return alpha(this.main, opacity);
   }

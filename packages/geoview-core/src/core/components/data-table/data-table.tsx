@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useCallback, useEffect, useMemo, useRef, useState, memo, ReactNode, isValidElement } from 'react';
 
 import { useTranslation } from 'react-i18next';
@@ -15,7 +14,6 @@ import { MRT_Localization_EN as MRTLocalizationEN } from 'material-react-table/l
 
 import { Extent } from 'ol/extent'; // only for typing
 
-import { darken } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { HtmlToReact } from '@/core/containers/html-to-react';
 
@@ -42,7 +40,7 @@ import {
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
-import { AbstractGeoViewVector, TypeLayerEntryConfig, api, TypeFieldEntry, TypeFeatureInfoEntry, isImage, EsriDynamic } from '@/app';
+import { TypeFeatureInfoEntry, api, isImage } from '@/app';
 import { getSxClasses } from './data-table-style';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
@@ -161,8 +159,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
     try {
       rowVirtualizerInstanceRef.current?.scrollToIndex?.(0);
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error);
+      logger.logError('Data table error on sorting action', error);
     }
   }, [sorting]);
 

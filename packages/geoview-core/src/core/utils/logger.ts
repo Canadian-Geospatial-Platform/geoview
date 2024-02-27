@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+// console is use at 3 places (error, warn, info). We keep it global...
 import { isArray } from 'lodash';
 import { getItemAsNumber, getItemAsNumberOrNumberArraySetValue } from './localStorage';
 

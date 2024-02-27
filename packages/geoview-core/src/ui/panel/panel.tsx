@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable react/jsx-no-useless-fragment */
-/* eslint-disable no-nested-ternary */
 import { useRef, useState, useEffect, useCallback, ReactNode, KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import FocusTrap from 'focus-trap-react';
@@ -335,6 +332,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
                   </IconButton>
                 </>
               ) : (
+                // eslint-disable-next-line react/jsx-no-useless-fragment
                 <></>
               )
             }

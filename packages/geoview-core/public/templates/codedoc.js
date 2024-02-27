@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+// Many functions name needs the eslint escape no-unused-vars. It is the reason why we keep it global...
 function sleep(milliseconds) {
   const date = Date.now();
   let currentDate = null;

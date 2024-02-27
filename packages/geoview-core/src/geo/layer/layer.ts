@@ -300,7 +300,6 @@ export class Layer {
       getLocalizedMessage(this.mapId, 'validation.layer.usedtwice')
     );
     showError(this.mapId, message);
-
     // Log
     logger.logError(`Duplicate use of geoview layer identifier ${geoviewLayerConfig.geoviewLayerId} on map ${this.mapId}`);
   }

@@ -1,5 +1,7 @@
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+// cgpv is not define, it is part of window object, we escape the no-undef globally...
+// Many functions name needs the eslint escape no-unused-vars. It is the reason why we keep it global...
 // ==========================================================================================================================
 function listenToLegendLayerSetChanges(elementId, handlerName) {
   const mapId = handlerName.split('/')[0];

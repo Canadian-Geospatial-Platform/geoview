@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+// We have many reassing for layerPath-layerConfig. We keep it global...
 import { ImageArcGISRest } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
@@ -32,6 +33,7 @@ import {
 } from '../esri-layer-common';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
+import { logger } from '@/core/utils/logger';
 
 export interface TypeEsriImageLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'esriImage';
@@ -189,8 +191,7 @@ export class EsriImage extends AbstractGeoViewRaster {
       };
       return legend;
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log(error);
+      logger.logError(`Get Legend for ${layerPath} error`, error);
       return null;
     }
   }
