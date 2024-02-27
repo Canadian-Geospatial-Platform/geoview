@@ -51,7 +51,9 @@ The `LOG_TRACE` functions are used when the developer wants to view the call sta
 
 Typically, to debug an application, the developer should use `logger.logDebug()` and when they are done, they should remove the line after some time. The line can be committed and remain in the code for a while, but they aren't meant to stay forever.
 
-A neat feature of the `logger` is also the possibility to log using timing markers. Call `logMarkerStart` to start a timer using a key and then call `logMarkerCheck` and provide the same key to log the time span between 'now' and the 'start' time.
+A neat feature of the `logger` is the possibility to log using timing markers. Call `logMarkerStart` to start a timer using a key and then call `logMarkerCheck` and provide the same key to log the time span between 'now' and the 'start' time.
+
+Another neat feature of the `logger` is the possibility to track objects and log when they changed. Call `logTrackerStart` to start an interval timer which constantly tracks object value. Remember to call `logTrackerStop` to stop tracking.
 
 ## Characteristics to know when using `useWhatChanged` ##
 
