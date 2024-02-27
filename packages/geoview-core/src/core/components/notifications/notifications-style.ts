@@ -12,6 +12,7 @@ export const getSxClasses = (theme: Theme) => ({
     backgroundColor: theme.palette.geoViewColor.bgColor.light[200],
     borderRadius: '5px',
     boxShadow: 2,
+    padding: '10px',
   },
   notificationsTitle: {
     fontSize: '15px',
@@ -23,7 +24,7 @@ export const getSxClasses = (theme: Theme) => ({
   },
   notificationsList: {
     overflowY: 'auto',
-    padding: '0px 10px 10px 10px',
+    padding: '0px 0px 10px 0px',
   },
   notificationItem: {
     display: 'flex',

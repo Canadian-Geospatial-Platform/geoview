@@ -52,6 +52,7 @@ export default function Version(): JSX.Element {
       boxShadow: 2,
       marginLeft: '15px',
       zIndex: 300,
+      padding: '10px',
       '& a': {
         color: (theme: Theme) =>
           theme.palette.mode === 'light' ? theme.palette.secondary.contrastText : theme.palette.geoViewColor.primary.light[300],
