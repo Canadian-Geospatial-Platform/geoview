@@ -210,6 +210,7 @@ export class GeoPackage extends AbstractGeoViewVector {
    *
    * @returns {Promise<BaseLayer | null>} The promise that the layers were processed.
    */
+  // TODO: Question - Is this function still used or should it be removed in favor of the mother class implementation?
   processListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer | null> {
     this.setLayerPhase('processListOfLayerEntryConfig');
     const promisedListOfLayerEntryProcessed = new Promise<BaseLayer | null>((resolve) => {
