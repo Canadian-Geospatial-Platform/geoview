@@ -2,9 +2,10 @@ import { ReactNode, memo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { Box, ChevronRightIcon, IconButton, List, ListItem, ListItemButton, ListItemIcon, Paper, Tooltip, Typography } from '@/ui';
-import { IconStack, TypeArrayOfFeatureInfoEntries, TypeLayerStatus, TypeQueryStatus } from '@/app';
+import { TypeArrayOfFeatureInfoEntries, TypeLayerStatus, TypeQueryStatus } from '@/app';
 
 import { getSxClasses } from './layer-list-style';
+import { LayerIcon } from './layer-icon';
 
 export interface LayerListEntry {
   layerName: string;
@@ -37,25 +38,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
   const sxClasses = getSxClasses(theme);
   const { t } = useTranslation<string>();
 
-  const renderLayerBackground = () => {
-    switch (layer.layerStatus) {
-      case 'error':
-        return sxClasses.backgroundError;
-
-      default:
-        break; // Continue with query status logic
-    }
-
-    switch (layer.queryStatus) {
-      case 'init':
-      case 'processing':
-        return sxClasses.backgroundProcessing;
-      case 'error':
-        return sxClasses.backgroundError;
-      default:
-        return sxClasses.default;
-    }
-  };
+  const isDisabled = layer.numOffeatures === 0;
 
   const renderLayerIcon = () => {
     switch (layer.layerStatus) {
@@ -67,7 +50,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
         if (layer.layerPath) {
           return (
             <ListItemIcon>
-              <IconStack layerPath={layer.layerPath} />
+              <LayerIcon layer={layer} />
             </ListItemIcon>
           );
         }
@@ -85,6 +68,8 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
           case 'init':
           case 'processing':
             return `${t('layers.querying')}...`;
+          case 'error':
+            return t('legend.layerError');
           default:
             return (
               <>
@@ -115,22 +100,26 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
 
       default:
         return (
-          <IconButton edge="end" size="small" className="style1">
+          <IconButton edge="end" size="small" className="style1" disabled={isDisabled}>
             <ChevronRightIcon />
           </IconButton>
         );
     }
   };
 
+  function getContainerClass() {
+    const result: string[] = ['layer-panel', 'bordered', layer.layerStatus ?? '', `query-${layer.queryStatus}`];
+
+    // if layer has selected child but its not itself selected
+    if (isSelected) {
+      result.push('selectedLayer bordered-primary');
+    }
+
+    return result.join(' ');
+  }
+
   return (
-    <Paper
-      sx={{
-        ...sxClasses.paper,
-        border: isSelected ? sxClasses.borderWithIndex : sxClasses.borderNone,
-        backgroundColor: renderLayerBackground(),
-      }}
-      className="bordered"
-    >
+    <Paper sx={{ marginBottom: '1rem' }} className={getContainerClass()}>
       <Tooltip title={layer.tooltip} placement="top" arrow>
         <Box>
           <ListItem disablePadding>

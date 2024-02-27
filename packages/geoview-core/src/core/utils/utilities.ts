@@ -69,6 +69,7 @@ function _addNotification(mapId: string, type: NotificationType = 'info', messag
     key: generateId(),
     notificationType: type,
     message,
+    count: 1,
   };
 
   // ? Need to do lazy import, if not viewer crashes (AppEventProcessor.addAppNotification(mapId, notification));

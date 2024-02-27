@@ -412,6 +412,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
                       tooltip="details.clearAllfeatures"
                       tooltipPlacement="top"
                       onClick={() => handleClearAllHighlights()}
+                      className="style1"
                       disabled={checkedFeatures.length === 0}
                     >
                       <LayersClearOutlinedIcon />
@@ -426,6 +427,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
                       tooltipPlacement="top"
                       onClick={() => handleFeatureNavigateChange(-1)}
                       disabled={currentFeatureIndex <= 0}
+                      className="style1"
                     >
                       <ArrowBackIosOutlinedIcon />
                     </IconButton>
@@ -436,6 +438,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
                       tooltipPlacement="top"
                       onClick={() => handleFeatureNavigateChange(1)}
                       disabled={!memoSelectedLayerData?.features || currentFeatureIndex + 1 >= memoSelectedLayerData!.features!.length}
+                      className="style1"
                     >
                       <ArrowForwardIosOutlinedIcon />
                     </IconButton>

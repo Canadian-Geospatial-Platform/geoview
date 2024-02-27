@@ -125,7 +125,7 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
               sx={sxClasses.selectFeatureCheckbox}
             />
           </Tooltip>
-          <IconButton color="primary" onClick={(e) => handleZoomIn(e)}>
+          <IconButton color="primary" onClick={(e) => handleZoomIn(e)} className="style1">
             <Tooltip title={t('details.zoomTo')} placement="top" enterDelay={1000}>
               <ZoomInSearchIcon />
             </Tooltip>

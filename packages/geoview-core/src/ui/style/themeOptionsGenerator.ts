@@ -194,7 +194,7 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
         styleOverrides: {
           root: {
             borderRadius: 5,
-            borderWith: '1px',
+            borderWidth: '1px',
             borderColor: geoViewColors.bgColor.darken(0.5, 0.5),
             borderStyle: 'solid',
             boxShadow: `0px 12px 9px -13px ${geoViewColors.bgColor.darken(0.2, 0.5)}`,
@@ -210,17 +210,18 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
         styleOverrides: {
           root: {
             '&.style1': {
-              backgroundColor: `${geoViewColors.bgColor.dark[100]}`,
+              backgroundColor: 'transparent',
               border: `3px solid transparent`,
               color: `${geoViewColors.primary.main}`,
               '&:hover, &:active, &.active': {
-                backgroundColor: `${geoViewColors.bgColor.light[100]}`,
+                backgroundColor: `${geoViewColors.bgColor.dark[100]}`,
                 border: `3px solid ${geoViewColors.primary.light[500]}`,
                 color: `${geoViewColors.primary.dark[100]}`,
                 boxShadow: 1,
               },
               '&:disabled': {
                 color: `${geoViewColors.bgColor.dark[450]}`,
+                backgroundColor: 'transparent',
               },
             },
             '&.style2': {

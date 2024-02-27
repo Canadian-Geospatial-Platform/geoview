@@ -80,7 +80,7 @@ function ExportButton({ rows, columns, children }: ExportButtonProps): JSX.Eleme
 
   return (
     <>
-      <IconButton onClick={handleClick}>
+      <IconButton onClick={handleClick} className="style1">
         <Tooltip title={t('dataTable.exportBtn')} placement="bottom" enterDelay={100}>
           <DownloadIcon />
         </Tooltip>
