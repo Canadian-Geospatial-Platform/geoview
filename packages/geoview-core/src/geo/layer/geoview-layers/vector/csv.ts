@@ -143,18 +143,11 @@ export class CSV extends AbstractGeoViewVector {
   /** ***************************************************************************************************************************
    * Metadata is processed when parsing the file.
    *
-   * ! This routine must imperatively ends with layerConfig.layerStatus = 'processed' or 'error' if an error happens.
-   *
    * @param {VectorLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
   protected processLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
-    // When we get here, we know that the metadata (if the service provide some) are processed.
-    // We need to signal to the layer sets that the 'processed' phase is done. Be aware that the
-    // layerStatus setter is doing a lot of things behind the scene.
-    layerConfig.layerStatus = 'processed';
-
     return Promise.resolve(layerConfig);
   }
 
