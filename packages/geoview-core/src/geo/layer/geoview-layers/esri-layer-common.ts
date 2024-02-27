@@ -61,8 +61,8 @@ export async function commonfetchServiceMetadata(this: EsriDynamic | EsriFeature
 export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFeature, listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
   this.setLayerPhase('validateListOfLayerEntryConfig');
   listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig, i) => {
-    const { layerPath } = layerConfig;
     if (layerConfig.layerStatus === 'error') return;
+    const { layerPath } = layerConfig;
 
     if (layerEntryIsGroupLayer(layerConfig)) {
       this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
@@ -72,8 +72,8 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
           loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
         });
         layerConfig.layerStatus = 'error';
-        return;
       }
+      return;
     }
 
     layerConfig.layerStatus = 'processing';
@@ -101,7 +101,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
       return;
     }
 
-    if (this.metadata!.layers[esriIndex].type === 'Group Layer') {
+    if (this.metadata!.layers[esriIndex]?.subLayerIds?.length) {
       // We will create dynamically a group layer.
       const newListOfLayerEntryConfig: TypeListOfLayerEntryConfig = [];
       // Group layer are not registered to layer sets.
@@ -221,24 +221,30 @@ export function commonProcessTemporalDimension(
  * This method verifies if the layer is queryable and sets the outfields and aliasFields of the source feature info.
  *
  * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
- * @param {string} capabilities The capabilities that will say if the layer is queryable.
- * @param {string} nameField The display field associated to the layer.
- * @param {string} geometryFieldName The field name of the geometry property.
- * @param {TypeJsonArray} fields An array of field names and its aliases.
- * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
+ * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
  */
 export function commonProcessFeatureInfoConfig(
   this: EsriDynamic | EsriFeature | EsriImage,
-  capabilities: string,
-  nameField: string,
-  geometryFieldName: string,
-  fields: TypeJsonArray,
   layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
 ) {
-  if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: capabilities.includes('Query') };
-  MapEventProcessor.setMapLayerQueryable(this.mapId, layerConfig.layerPath, layerConfig.source.featureInfo.queryable);
+  const { layerPath } = layerConfig;
+  const layerMetadata = this.layerMetadata[layerPath];
+  const queryable = (layerMetadata.capabilities as string).includes('Query');
+  if (layerConfig.source.featureInfo) {
+    // if queryable flag is undefined, set it accordingly to what is specified in the metadata
+    if (layerConfig.source.featureInfo.queryable === undefined) layerConfig.source.featureInfo.queryable = queryable;
+    // else the queryable flag comes from the user config.
+    else if (layerConfig.source.featureInfo.queryable && !layerMetadata.fields && layerMetadata.type !== 'Group Layer') {
+      layerConfig.layerStatus = 'error';
+      throw new Error(
+        `The config whose layer path is ${layerPath} cannot set a layer as queryable because it does not have field definitions`
+      );
+    }
+  } else layerConfig.source.featureInfo = layerConfig.isMetadataLayerGroup ? { queryable: false } : { queryable };
+  MapEventProcessor.setMapLayerQueryable(this.mapId, layerPath, layerConfig.source.featureInfo.queryable);
+
   // dynamic group layer doesn't have fields definition
-  if (!layerConfig.isMetadataLayerGroup) {
+  if (layerMetadata.type !== 'Group Layer') {
     // Process undefined outfields or aliasFields ('' = false and !'' = true). Also, if en is undefined, then fr is also undefined.
     // when en and fr are undefined, we set both en and fr to the same value.
     if (!layerConfig.source.featureInfo.outfields?.en || !layerConfig.source.featureInfo.aliasFields?.en) {
@@ -249,8 +255,8 @@ export function commonProcessFeatureInfoConfig(
         layerConfig.source.featureInfo.fieldTypes = '';
       }
       if (processAliasFields) layerConfig.source.featureInfo.aliasFields = { en: '' };
-      fields.forEach((fieldEntry) => {
-        if (fieldEntry.name === geometryFieldName) return;
+      (layerMetadata.fields as TypeJsonArray).forEach((fieldEntry) => {
+        if (fieldEntry.name === layerMetadata.geometryField.name) return;
         if (processOutField) {
           layerConfig.source.featureInfo!.outfields!.en = `${layerConfig.source.featureInfo!.outfields!.en}${fieldEntry.name},`;
           const fieldType = commonGetFieldType.call(this, fieldEntry.name as string, layerConfig);
@@ -268,12 +274,13 @@ export function commonProcessFeatureInfoConfig(
       layerConfig.source.featureInfo!.aliasFields!.fr = layerConfig.source.featureInfo!.aliasFields?.en;
     }
     if (!layerConfig.source.featureInfo.nameField)
-      if (nameField)
+      if (layerMetadata.displayField) {
+        const nameField = layerMetadata.displayField as string;
         layerConfig.source.featureInfo.nameField = {
           en: nameField,
           fr: nameField,
         };
-      else {
+      } else {
         const en =
           layerConfig.source.featureInfo!.outfields!.en?.split(',')[0] || layerConfig.source.featureInfo!.outfields!.fr?.split(',')[0];
         const fr = en;
@@ -285,23 +292,17 @@ export function commonProcessFeatureInfoConfig(
 /** ***************************************************************************************************************************
  * This method set the initial settings based on the service metadata. Priority is given to the layer configuration.
  *
- * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
- * @param {boolean} visibility The metadata initial visibility of the layer.
- * @param {number} minScale The metadata minScale of the layer.
- * @param {number} maxScale The metadata maxScale of the layer.
- * @param {TypeJsonObject} extent The metadata layer extent.
- * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
+ * @param {EsriDynamic | EsriFeature | EsriImage} this The ESRI layer instance pointer.
+ * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
  */
 export function commonProcessInitialSettings(
   this: EsriDynamic | EsriFeature | EsriImage,
-  visibility: boolean,
-  minScale: number,
-  maxScale: number,
-  extent: TypeJsonObject,
   layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
 ) {
   // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-  if (layerConfig.initialSettings?.visible === undefined) layerConfig.initialSettings!.visible = visibility ? 'yes' : 'no';
+  const layerMetadata = this.layerMetadata[layerConfig.layerPath];
+  if (layerConfig.initialSettings?.visible === undefined)
+    layerConfig.initialSettings!.visible = layerMetadata.defaultVisibility ? 'yes' : 'no';
   // ! TODO: The solution implemented in the following two lines is not right. scale and zoom are not the same things.
   // ! if (layerConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerConfig.initialSettings.minZoom = minScale;
   // ! if (layerConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerConfig.initialSettings.maxZoom = maxScale;
@@ -313,7 +314,12 @@ export function commonProcessInitialSettings(
     );
 
   if (!layerConfig.initialSettings?.bounds) {
-    const layerExtent = [extent.xmin, extent.ymin, extent.xmax, extent.ymax] as Extent;
+    const layerExtent = [
+      layerMetadata.extent.xmin,
+      layerMetadata.extent.ymin,
+      layerMetadata.extent.xmax,
+      layerMetadata.extent.ymax,
+    ] as Extent;
     layerConfig.initialSettings!.bounds = layerExtent;
   }
 }
@@ -322,9 +328,7 @@ export function commonProcessInitialSettings(
  * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
  * initial settings, fields and aliases).
  *
- * ! This routine must imperatively ends with layerConfig.layerStatus = 'processed' or 'error' if an error happens.
- *
- * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
+ * @param {EsriDynamic | EsriFeature | EsriImage} this The ESRI layer instance pointer.
  * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
  *
  * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
@@ -342,11 +346,9 @@ export async function commonProcessLayerMetadata(
     queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
     try {
       const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=pjson`);
-      // layers must have a fields attribute except if it is an metadata layer group.
-      if (!data?.fields && !(layerConfig as GroupLayerEntryConfig).isMetadataLayerGroup && layerConfig.schemaTag !== 'esriImage') {
+      if (data?.error) {
         layerConfig.layerStatus = 'error';
-        if (data?.error) throw new Error(`Error code = ${data.error.code}, ${data.error.message}`);
-        else throw new Error(`Despite a return code of 200, no fields was returned with this query (${queryUrl}?f=pjson)`);
+        throw new Error(`Error code = ${data.error.code}, ${data.error.message}`);
       }
       this.layerMetadata[layerPath] = data;
       if (geoviewEntryIsEsriDynamic(layerConfig) || geoviewEntryIsEsriFeature(layerConfig)) {
@@ -354,27 +356,10 @@ export async function commonProcessLayerMetadata(
           const renderer = Cast<EsriBaseRenderer>(data.drawingInfo?.renderer);
           if (renderer) layerConfig.style = getStyleFromEsriRenderer(renderer);
         }
-        this.processFeatureInfoConfig(
-          data.capabilities as string,
-          data.displayField as string,
-          data.geometryField.name as string,
-          data.fields as TypeJsonArray,
-          layerConfig
-        );
-        this.processInitialSettings(
-          data.defaultVisibility as boolean,
-          data.minScale as number,
-          data.maxScale as number,
-          data.extent,
-          layerConfig
-        );
+        this.processFeatureInfoConfig(layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig);
+        this.processInitialSettings(layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig);
         commonProcessTemporalDimension.call(this, data.timeInfo as TypeJsonObject, layerConfig);
       }
-
-      // When we get here, we know that the metadata (if the service provide some) are processed.
-      // We need to signal to the layer sets that the 'processed' phase is done. Be aware that the
-      // layerStatus setter is doing a lot of things behind the scene.
-      layerConfig.layerStatus = 'processed';
     } catch (error) {
       layerConfig.layerStatus = 'error';
       logger.logError('Error in commonProcessLayerMetadata', layerConfig, error);

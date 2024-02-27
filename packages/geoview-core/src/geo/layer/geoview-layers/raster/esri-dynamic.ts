@@ -40,7 +40,7 @@ import {
   commonValidateListOfLayerEntryConfig,
 } from '../esri-layer-common';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonObject } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-feature-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-dynamic-layer-entry-config';
@@ -191,40 +191,20 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * This method verifies if the layer is queryable and sets the outfields and aliasFields of the source feature info.
    *
-   * @param {string} capabilities The capabilities that will say if the layer is queryable.
-   * @param {string} nameField The display field associated to the layer.
-   * @param {string} geometryFieldName The field name of the geometry property.
-   * @param {TypeJsonArray} fields An array of field names and its aliases.
-   * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
+   * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
    */
-  processFeatureInfoConfig = (
-    capabilities: string,
-    nameField: string,
-    geometryFieldName: string,
-    fields: TypeJsonArray,
-    layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig // TODO: why feature layer is dynamic config not in common
-  ) => {
-    commonProcessFeatureInfoConfig.call(this, capabilities, nameField, geometryFieldName, fields, layerConfig);
+  processFeatureInfoConfig = (layerConfig: EsriDynamicLayerEntryConfig) => {
+    commonProcessFeatureInfoConfig.call(this, layerConfig);
   };
 
   /** ***************************************************************************************************************************
    * This method set the initial settings based on the service metadata. Priority is given to the layer configuration.
    *
-   * @param {string} mapId The map identifier.
-   * @param {boolean} visibility The metadata initial visibility of the layer.
-   * @param {number} minScale The metadata minScale of the layer.
-   * @param {number} maxScale The metadata maxScale of the layer.
-   * @param {TypeJsonObject} extent The metadata layer extent.
-   * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
+   * @param {EsriDynamic} this The ESRI layer instance pointer.
+   * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
    */
-  processInitialSettings(
-    visibility: boolean,
-    minScale: number,
-    maxScale: number,
-    extent: TypeJsonObject,
-    layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig // TODO: why feature layer is dynamic config not in common
-  ) {
-    commonProcessInitialSettings.call(this, visibility, minScale, maxScale, extent, layerConfig);
+  processInitialSettings(layerConfig: EsriDynamicLayerEntryConfig) {
+    commonProcessInitialSettings.call(this, layerConfig);
   }
 
   /** ***************************************************************************************************************************

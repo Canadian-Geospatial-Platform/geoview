@@ -29,11 +29,9 @@ import {
   commonProcessTemporalDimension,
 } from '../esri-layer-common';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonObject } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
-import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-feature-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-image-layer-entry-config';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-dynamic-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validationClasses/abstract-base-layer-entry-config';
 
 export interface TypeEsriImageLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
@@ -256,42 +254,20 @@ export class EsriImage extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * This method verifies if the layer is queryable and sets the outfields and aliasFields of the source feature info.
    *
-   * @param {string} capabilities The capabilities that will say if the layer is queryable.
-   * @param {string} nameField The display field associated to the layer.
-   * @param {string} geometryFieldName The field name of the geometry property.
-   * @param {TypeJsonArray} fields An array of field names and its aliases.
-   * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
+   * @param {TypeEsriImageLayerEntryConfig} layerConfig The layer entry to configure.
    */
-  // TODO: see why we have dynamic and inage in a feature class... we have many in all esri files
-  // TO.DOCONT: reason - This was just so that I could reuse common methods in the image layers
-  // TO.DOCONT: If a function needs ore then one type, it should be in the common file. Only class type should be in classes
-  processFeatureInfoConfig = (
-    capabilities: string,
-    nameField: string,
-    geometryFieldName: string,
-    fields: TypeJsonArray,
-    layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
-  ) => {
-    commonProcessFeatureInfoConfig.call(this, capabilities, nameField, geometryFieldName, fields, layerConfig);
+  processFeatureInfoConfig = (layerConfig: EsriImageLayerEntryConfig) => {
+    commonProcessFeatureInfoConfig.call(this, layerConfig);
   };
 
   /** ***************************************************************************************************************************
    * This method set the initial settings based on the service metadata. Priority is given to the layer configuration.
    *
-   * @param {boolean} visibility The metadata initial visibility of the layer.
-   * @param {number} minScale The metadata minScale of the layer.
-   * @param {number} maxScale The metadata maxScale of the layer.
-   * @param {TypeJsonObject} extent The metadata layer extent.
-   * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
+   * @param {EsriImage} this The ESRI layer instance pointer.
+   * @param {TypeEsriImageLayerEntryConfig} layerConfig The layer entry to configure.
    */
-  processInitialSettings(
-    visibility: boolean,
-    minScale: number,
-    maxScale: number,
-    extent: TypeJsonObject,
-    layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
-  ) {
-    commonProcessInitialSettings.call(this, visibility, minScale, maxScale, extent, layerConfig);
+  processInitialSettings(layerConfig: EsriImageLayerEntryConfig) {
+    commonProcessInitialSettings.call(this, layerConfig);
   }
 
   /** ***************************************************************************************************************************

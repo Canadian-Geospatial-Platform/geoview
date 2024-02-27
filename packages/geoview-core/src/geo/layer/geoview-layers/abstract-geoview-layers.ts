@@ -570,7 +570,7 @@ export abstract class AbstractGeoViewLayer {
     this.setLayerPhase('getAdditionalServiceDefinition');
     try {
       await this.fetchServiceMetadata();
-      if (this.listOfLayerEntryConfig.length) this.validateAndExtractLayerMetadata();
+      if (this.listOfLayerEntryConfig.length) await this.validateAndExtractLayerMetadata();
     } catch (error) {
       // Log
       logger.logError(error);
@@ -650,6 +650,11 @@ export abstract class AbstractGeoViewLayer {
           const message = `Error while loading layer path "${layerConfig.layerPath})" on map "${this.mapId}"`;
           this.layerLoadError.push({ layer: layerConfig.layerPath, loggerMessage: message });
           throw new Error(message);
+        } else {
+          // When we get here, we know that the metadata (if the service provide some) are processed.
+          // We need to signal to the layer sets that the 'processed' phase is done. Be aware that the
+          // layerStatus setter is doing a lot of things behind the scene.
+          layerConfig.layerStatus = 'processed';
         }
       });
     } catch (error) {
@@ -671,6 +676,7 @@ export abstract class AbstractGeoViewLayer {
     try {
       await this.processLayerMetadata(layerConfig);
       await this.processListOfLayerEntryMetadata(layerConfig.listOfLayerEntryConfig!);
+      layerConfig.layerStatus = 'processed';
       return layerConfig;
     } catch (error) {
       // Log
@@ -683,8 +689,6 @@ export abstract class AbstractGeoViewLayer {
    * This method is used to process the layer's metadata. It will fill the empty outfields and aliasFields properties of the
    * layer's configuration when applicable.
    *
-   * ! This routine must imperatively ends with layerConfig.layerStatus = 'processed' or 'error' if an error happens.
-   *
    * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
@@ -692,10 +696,6 @@ export abstract class AbstractGeoViewLayer {
   protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     if (!layerConfig.source) layerConfig.source = {};
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: false };
-    // When we get here, we know that the metadata (if the service provide some) are processed.
-    // We need to signal to the layer sets that the 'processed' phase is done. Be aware that the
-    // layerStatus setter is doing a lot of things behind the scene.
-    layerConfig.layerStatus = 'processed';
 
     return Promise.resolve(layerConfig);
   }
