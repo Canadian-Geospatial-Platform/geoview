@@ -125,8 +125,7 @@ export class GeoCore {
     const uuid = layerConfig.layerId;
 
     try {
-      // Get the GV config from UUID and await even if within loop
-      // eslint-disable-next-line no-await-in-loop
+      // Get the GV config from UUID and await
       const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(url, lang, [uuid]);
 
       // For each found layer associated with the Geocore UUIDs

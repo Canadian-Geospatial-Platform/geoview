@@ -14,7 +14,6 @@ import {
 } from '@/geo';
 import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import { api, getLocalizedValue, ILayerState } from '@/app';
-import { logger } from '@/core/utils/logger';
 
 import { AbstractEventProcessor } from '../abstract-event-processor';
 
@@ -27,13 +26,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
 
   // #region
-  // Indicate if the processor has been propagated once yet
-  private static propagatedOnce = false;
-
-  // The time delay before selecting a layer in the store upon first legend propagation.
-  // The longer the delay, the more chances layers will be loaded state at the time of picking a layer to be selected.
-  // The longer the delay, the later a layer will be selected in the store upon initial propagation.
-  private static timeDelayBeforeSelectingLayerInStore = 2000;
 
   /**
    * Shortcut to get the Layer state for a given map id
@@ -217,26 +209,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
     // Update the legend layers with the updated array, triggering the subscribe
     this.getLayerState(mapId).actions.setLegendLayers(layers);
-
-    // Check if this is an initial load
-    if (!LegendEventProcessor.propagatedOnce) {
-      // Flag so this is only executed once after initial load
-      LegendEventProcessor.propagatedOnce = true;
-
-      // TODO: The selected layer issue will be tackle ASAP in a next PR
-      // Find the layers that are processed
-      const validFirstLayer = layers.find((layer) => {
-        return layer.layerStatus === 'processed';
-      });
-
-      // If found a valid first layer to select
-      if (validFirstLayer) {
-        // Set the selected layer path in the store
-        this.getLayerState(mapId).actions.setSelectedLayerPath(validFirstLayer.layerPath);
-        // Log
-        logger.logDebug(`Selected layer ${validFirstLayer.layerPath}`);
-      }
-    }
   }
   // #endregion
 
