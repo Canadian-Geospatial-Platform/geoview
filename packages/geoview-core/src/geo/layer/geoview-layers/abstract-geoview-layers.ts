@@ -362,7 +362,43 @@ export abstract class AbstractGeoViewLayer {
       ? api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.serviceDateFormat)
       : undefined;
     this.externalFragmentsOrder = api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.externalDateFormat);
+
+    // TODO: Refactor - This assignation logic in the api...geoviewLayers array should be outside of a constructor logic.
+    // TO.DOCONT: If this was written to make sure all created geoview layers, anywhere, automatically appear in the api array, then
+    // TO.DOCONT: I'd suggest having that logic elsewhere and allow the devs/framework to create geoview layers, by code, that do not
+    // TO.DOCONT: necessarily jump in an api array and possibly affect other code just because an object was instanciated.
     api.maps[mapId].layer.geoviewLayers[this.geoviewLayerId] = this;
+
+    // TODO: Refactor - This call to `setListOfLayerEntryConfig` does a lot more than a simple 'setter' and should be outside of a constructor logic.
+    // TO.DOCONT: The function should be renamed and a lot more documentation should be associated with the function to detail what it does.
+    // TO.DOCONT: Notably important is what it does when there's a least one `mapLayerConfig.listOfLayerEntryConfig`(!). After a quick read, it does the following:
+    // TO.DOCONT: 1- Sets the `this.listOfLayerEntryConfig`to the provided `mapLayerConfig.listOfLayerEntryConfig` OR
+    // TO.DOCONT:    if there's more than 1 `mapLayerConfig.listOfLayerEntryConfig` it creates a new `TypeLayerGroupEntryConfig` class
+    // TO.DOCONT:    and then it loops on each `mapLayerConfig.listOfLayerEntryConfig` to set the parentLayerConfig.
+    // TO.DOCONT: 2- Then, it calls `initRegisteredLayers` which loops on the `mapLayerConfig.listOfLayerEntryConfig` to attach the
+    // TO.DOCONT:    layerConfig.geoviewLayerInstance property to a reference of `this` (also coupling it with the `api...layer`)
+    // TO.DOCONT: 3- Then, it calls `registerLayerConfig` on each `mapLayerConfig.listOfLayerEntryConfig` which attaches the
+    // TO.DOCONT:    (api...layer.registeredLayers[this.layerPath] as ConfigBaseClass) to each `mapLayerConfig.listOfLayerEntryConfig`
+    // TO.DOCONT: 4- Then, it calls `(this.geoviewLayerInstance as AbstractGeoViewLayer).registerToLayerSets` on `this` (which is
+    // TO.DOCONT:    technically still being constructed at this point) and wires a series of event handlers on the `api.event`
+    // TO.DOCONT: Note 1, the `registerToLayerSets` is also called via other patterns like via `processListOfLayerEntryConfig` which is
+    // TO.DOCONT: also a function processing the `listOfLayerEntryConfig`, making it difficult to know where the code must be modified to edit the behavior.
+    // TO.DOCONT: Indeed, on one hand, some processing on the `listOfLayerEntryConfig` is done as part of the constructor and on the other hand via
+    // TO.DOCONT: a function such as `createGeoViewLayers`, adding to the confusion.
+    // TO.DOCONT: Note 2, `setlistOfLayerEntryConfig` launches a series of api.event which continues executing long after the call
+    // TO.DOCONT: to `setlistOfLayerEntryConfig` has returned and the propagation to the store happen in parallel with other code being executed inside
+    // TO.DOCONT: functions such as `createGeoViewLayers`.
+    // TO.DOCONT: Note 3, to be confirmed, it's possible the information being propagated to the store during this execution will vary depending on the time
+    // TO.DOCONT: the propagation happens and the state of the mutating layerConfig object.
+    // TO.DOCONT: Note 4, the `setListOfLayerEntryConfig` is also manually called in `add-new-layer` which overrides the listOfLayerEntryConfig set
+    // TO.DOCONT: in the constructor (maybe that's by-design here, but is confusing, because that's possibly doubling (unless all correctly bypassed?)
+    // TO.DOCONT: the raising and handling of api.events and also slowing down the code). Furthermore, in another place in in `add-new-layer`
+    // TO.DOCONT: when going through the steps to add a layer, a new layer instance is created, triggering
+    // TO.DOCONT: this `setListOfLayerEntryConfig` line below, but because the `mapLayerConfig.listOfLayerEntryConfig` is an empty array it seems to
+    // TO.DOCONT: save the situation of not hitting the `initRegisteredLayers` line in `setListOfLayerEntryConfig` and attach multiple api.events.
+    // TO.DOCONT: That's a relief, because the user can move through the steps and create multiple instances of layers to validate them and even
+    // TO.DOCONT: cancel the addition. If that's by design, it should be clarified. Hopefully nobody in code creates a layer with a
+    // TO.DOCONT: `mapLayerConfig.listOfLayerEntryConfig` already set and cancels though(!)
     this.setListOfLayerEntryConfig(mapLayerConfig, mapLayerConfig.listOfLayerEntryConfig);
   }
 
