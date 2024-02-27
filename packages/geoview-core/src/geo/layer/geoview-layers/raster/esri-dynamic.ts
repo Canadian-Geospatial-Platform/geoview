@@ -145,7 +145,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     if (!this.metadata!.supportsDynamicLayers) {
       this.layerLoadError.push({
         layer: layerConfig.layerPath,
-        consoleMessage: `Layer ${layerConfig.layerPath} of map ${this.mapId} does not support dynamic layers.`,
+        loggerMessage: `Layer ${layerConfig.layerPath} of map ${this.mapId} does not support dynamic layers.`,
       });
       return true;
     }
@@ -247,6 +247,9 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
   protected processOneLayerEntry(layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+    // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
+    // !            layerStatus values is correctly sequenced.
+    super.processOneLayerEntry(layerConfig);
     const { layerPath } = layerConfig;
     this.setLayerPhase('processOneLayerEntry', layerPath);
     const sourceOptions: SourceOptions = {};

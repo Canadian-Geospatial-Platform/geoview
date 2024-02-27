@@ -10,7 +10,7 @@ import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-
 import { TypeMapMouseInfo } from '@/api/events/payloads';
 import { createLocalizedString } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { Cast } from '@/core/types/cgpv-types';
+import { Cast, LayerSetPayload } from '@/core/types/cgpv-types';
 import { api } from '@/app';
 
 /** ******************************************************************************************************************************
@@ -502,7 +502,7 @@ export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'vector-heatmap' | '
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const layerEntryIsGroupLayer = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeLayerGroupEntryConfig => {
+export const layerEntryIsGroupLayer = (verifyIfLayer: ConfigBaseClass): verifyIfLayer is TypeLayerGroupEntryConfig => {
   return verifyIfLayer?.entryType === 'group';
 };
 
@@ -665,9 +665,6 @@ export class ConfigBaseClass {
   /** The geoview layer instance that contains this layer configuration. */
   geoviewLayerInstance?: AbstractGeoViewLayer;
 
-  /** It is used to identified unprocessed layers and shows the final layer state */
-  layerStatus?: TypeLayerStatus;
-
   /** It is used to identified the process phase of the layer */
   layerPhase?: string;
 
@@ -686,6 +683,22 @@ export class ConfigBaseClass {
 
   /** This property is used to link the displayed layer to its layer entry config. it is not part of the schema. */
   protected _olLayer: BaseLayer | LayerGroup | null = null;
+
+  /** It is used to identified unprocessed layers and shows the final layer state */
+  protected _layerStatus: TypeLayerStatus = 'newInstance';
+
+  protected layerStatusWeight = {
+    newInstance: 10,
+    registered: 20,
+    processing: 30,
+    processed: 40,
+    loading: 50,
+    loaded: 60,
+    error: 70,
+  };
+
+  /** Flag indicating that the loaded signal arrived before the processed one */
+  protected waitForProcessedBeforeSendingLoaded = false;
 
   /**
    * The class constructor.
@@ -746,6 +759,46 @@ export class ConfigBaseClass {
   }
 
   /**
+   * The layerId getter method for the ConfigBaseClass class and its descendant classes.
+   */
+  get layerStatus() {
+    return this._layerStatus;
+  }
+
+  /**
+   * The layerStatus setter method for the ConfigBaseClass class and its descendant classes.
+   * @param {string} newLayerStatus The new layerId value.
+   */
+  set layerStatus(newLayerStatus: TypeLayerStatus) {
+    if (
+      newLayerStatus === 'loaded' &&
+      !layerEntryIsGroupLayer(this) &&
+      !this.IsGreaterThanOrEqualTo('loading') &&
+      !this.waitForProcessedBeforeSendingLoaded
+    ) {
+      this.waitForProcessedBeforeSendingLoaded = true;
+      return;
+    }
+    if (!this.IsGreaterThanOrEqualTo(newLayerStatus)) {
+      this._layerStatus = newLayerStatus;
+      // TODO: layerPhase property will be removed soon. We must not use it anymore.
+      this.geoviewLayerInstance!.setLayerPhase(newLayerStatus, this.layerPath);
+      api.event.emit(
+        // TODO: Change createLayerSetChangeLayerStatusPayload events for a direct function call.
+        LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.geoviewLayerInstance!.mapId, this.layerPath, newLayerStatus)
+      );
+    }
+    if (newLayerStatus === 'processed' && this.waitForProcessedBeforeSendingLoaded) this.layerStatus = 'loaded';
+
+    if (
+      this._layerStatus === 'loaded' &&
+      this.parentLayerConfig &&
+      this.geoviewLayerInstance!.allLayerStatusAreGreaterThanOrEqualTo('loaded', [this.parentLayerConfig as TypeLayerGroupEntryConfig])
+    )
+      (this.parentLayerConfig as TypeLayerGroupEntryConfig).layerStatus = 'loaded';
+  }
+
+  /**
    * Register the layer identifier. Duplicate identifier are not allowed.
    *
    * @returns {boolean} Returns false if the layer configuration can't be registered.
@@ -755,9 +808,9 @@ export class ConfigBaseClass {
     const { registeredLayers } = api.maps[this.geoviewLayerInstance!.mapId].layer;
     if (registeredLayers[this.layerPath]) return false;
     (registeredLayers[this.layerPath] as ConfigBaseClass) = this;
-    if (!this.layerStatus) this.geoviewLayerInstance!.setLayerStatus('registered', this.layerPath);
     if (this.entryType !== 'group')
       (this.geoviewLayerInstance as AbstractGeoViewLayer).registerToLayerSets(Cast<TypeBaseLayerEntryConfig>(this));
+    this.layerStatus = 'registered';
     return true;
   }
 
@@ -771,6 +824,18 @@ export class ConfigBaseClass {
   geoviewLayer(layerPath?: string): AbstractGeoViewLayer {
     this.geoviewLayerInstance!.layerPathAssociatedToTheGeoviewLayer = layerPath || this.layerPath;
     return this.geoviewLayerInstance!;
+  }
+
+  /**
+   * This method compares the internal layer status of the config with the layer status passed as a parameter and it
+   * returns true if the internal value is greater or equal to the value of the parameter.
+   *
+   * @param {TypeLayerStatus} layerStatus The layer status to compare with the internal value of the config.
+   *
+   * @returns {boolean} Returns true if the internal value is greater or equal than the value of the parameter.
+   */
+  IsGreaterThanOrEqualTo(layerStatus: TypeLayerStatus): boolean {
+    return this.layerStatusWeight[this.layerStatus] >= this.layerStatusWeight[layerStatus];
   }
 }
 
@@ -830,12 +895,12 @@ export abstract class TypeBaseLayerEntryConfig extends ConfigBaseClass {
         const loadEndListener = () => {
           this.loadedFunction();
           this.geoviewLayerInstance!.setLayerPhase('loaded', this.layerPath);
-          this.geoviewLayerInstance!.setLayerStatus('loaded', this.layerPath);
+          this.layerStatus = 'loaded';
           this._olLayer!.get('source').un(`${loadEndListenerType}loaderror`, loadErrorListener);
         };
 
         loadErrorListener = () => {
-          this.geoviewLayerInstance!.setLayerStatus('error', this.layerPath);
+          this.layerStatus = 'error';
           this._olLayer!.get('source').un(`${loadEndListenerType}loadend`, loadEndListener);
         };
 
@@ -873,6 +938,8 @@ export abstract class TypeBaseLayerEntryConfig extends ConfigBaseClass {
     // Update registration based on metadata that were read since the first registration.
     this.geoviewLayerInstance?.registerToLayerSets(this);
     this.geoviewLayerInstance?.setVisible(this.initialSettings?.visible !== 'no', this.layerPath);
+    if (this._layerStatus === 'loaded')
+      api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.geoviewLayerInstance!.mapId, this.layerPath, 'loaded'));
   }
 }
 
@@ -1320,12 +1387,6 @@ export class TypeTileLayerEntryConfig extends TypeBaseLayerEntryConfig {
  */
 export class TypeGeocoreLayerEntryConfig extends ConfigBaseClass {
   /** This attribute from ConfigBaseClass is not used by groups. */
-  declare layerStatus: never;
-
-  /** This attribute from ConfigBaseClass is not used by groups. */
-  declare layerPhase: never;
-
-  /** This attribute from ConfigBaseClass is not used by groups. */
   declare isMetadataLayerGroup: never;
 
   /** Tag used to link the entry to a specific schema. */
@@ -1401,12 +1462,6 @@ export type TypeSourceGeocoreConfig = {
  * Type used to define a layer group.
  */
 export class TypeLayerGroupEntryConfig extends ConfigBaseClass {
-  /** This attribute from ConfigBaseClass is not used by groups. */
-  declare layerStatus: never;
-
-  /** This attribute from ConfigBaseClass is not used by groups. */
-  declare layerPhase: never;
-
   /** Tag used to link the entry to a specific schema is not used by groups. */
   declare schemaTag: never;
 

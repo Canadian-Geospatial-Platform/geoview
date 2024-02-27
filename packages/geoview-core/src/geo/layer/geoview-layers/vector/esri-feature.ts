@@ -160,7 +160,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     if (this.metadata!.layers[esriIndex].type !== 'Feature Layer') {
       this.layerLoadError.push({
         layer: layerConfig.layerPath,
-        consoleMessage: `LayerId ${layerConfig.layerPath} of map ${this.mapId} is not a feature layer`,
+        loggerMessage: `LayerId ${layerConfig.layerPath} of map ${this.mapId} is not a feature layer`,
       });
       return true;
     }

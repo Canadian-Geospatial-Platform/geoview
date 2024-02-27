@@ -6,12 +6,7 @@ import { EventStringId } from '../event-types';
  */
 
 /** Valid keys for the GET_FEATURE_INFO category */
-export type GetFeatureInfoEventKey =
-  | 'QUERY_LAYER'
-  | 'ALL_QUERIES_DONE'
-  | 'GET_ALL_LAYER_FEATURES'
-  | 'QUERY_RESULT'
-  | 'FEATURE_INFO_LAYERSET_UPDATED';
+export type GetFeatureInfoEventKey = 'QUERY_LAYER' | 'ALL_QUERIES_DONE' | 'QUERY_ALL_FEATURES' | 'QUERY_RESULT';
 
 /** Record that associates GET_FEATURE_INFO's event keys to their event string id */
 export const GET_FEATURE_INFO: Record<GetFeatureInfoEventKey, EventStringId> = {
@@ -28,15 +23,10 @@ export const GET_FEATURE_INFO: Record<GetFeatureInfoEventKey, EventStringId> = {
   /**
    * Event triggered when a user needs to get all features information for alayer on the map
    */
-  GET_ALL_LAYER_FEATURES: 'get_feature_info/get_all_layer_features',
+  QUERY_ALL_FEATURES: 'get_feature_info/query_all_features',
 
   /**
    * Event triggered to send the result of the query
    */
   QUERY_RESULT: 'get_feature_info/query_result',
-
-  /**
-   * Event triggered to send the result of the query
-   */
-  FEATURE_INFO_LAYERSET_UPDATED: 'get_feature_info/feature_info_layerset_updated',
 };

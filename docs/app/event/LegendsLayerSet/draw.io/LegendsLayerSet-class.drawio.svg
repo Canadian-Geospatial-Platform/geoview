@@ -134,7 +134,7 @@
                                 </div>
                                 <div style="font-family: Consolas, &quot;Courier New&quot;, monospace; line-height: 19px; font-size: 11px;">
                                     <font style="font-size: 11px;">
-                                        + ResultsSet: TypeLegendResultSet
+                                        + ResultSet: TypeLegendResultSet
                                     </font>
                                 </div>
                             </div>
@@ -186,7 +186,7 @@
                                 </div>
                                 <div style="font-family: Consolas, &quot;Courier New&quot;, monospace; line-height: 19px; font-size: 11px;">
                                     <font style="font-size: 11px;">
-                                        + ResultsSet: Record&lt;string, any&gt;
+                                        + ResultSet: Record&lt;string, any&gt;
                                     </font>
                                 </div>
                                 <div style="font-family: Consolas, &quot;Courier New&quot;, monospace; line-height: 19px; font-size: 11px;">
@@ -226,7 +226,7 @@
                                                 layerSetId,
                                             </span>
                                             <span style="background-color: initial;">
-                                                ResultsSet,
+                                                ResultSet,
                                             </span>
                                         </font>
                                     </font>
@@ -261,7 +261,7 @@
                                                 layerSetId,
                                             </span>
                                             <span style="background-color: initial;">
-                                                ResultsSet,
+                                                ResultSet,
                                             </span>
                                             <br/>
                                         </font>
@@ -279,7 +279,7 @@
                     </div>
                 </foreignObject>
                 <text x="318" y="215" fill="#000000" font-family="Helvetica" font-size="12px">
-                    + constructor (mapId, layerSetId, ResultsSet,...
+                    + constructor (mapId, layerSetId, ResultSet,...
                 </text>
             </switch>
         </g>
