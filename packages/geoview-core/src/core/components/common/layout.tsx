@@ -11,7 +11,6 @@ import { LayerTitle } from './layer-title';
 import { EnlargeButton } from './enlarge-button';
 import { CloseButton } from './close-button';
 import { useFooterPanelHeight } from './use-footer-panel-height';
-import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 interface LayoutProps {
   children?: ReactNode;
@@ -30,7 +29,6 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
 
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
   const [isEnlarged, setIsEnlarged] = useState(false);
-  const isMapFullScreen = useAppFullscreenActive();
 
   // Custom hook for calculating the height of footer panel
   const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'default' });
@@ -126,7 +124,7 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
       </ResponsiveGrid.Root>
       <ResponsiveGrid.Root>
         <ResponsiveGrid.Left
-          {...(!isMapFullScreen && !fullWidth && { ref: leftPanelRef })}
+          {...(!fullWidth && { ref: leftPanelRef })}
           isEnlarged={isEnlarged}
           isLayersPanelVisible={isLayersPanelVisible}
           fullWidth={fullWidth}
@@ -134,7 +132,7 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
           {renderLayerList()}
         </ResponsiveGrid.Left>
         <ResponsiveGrid.Right
-          {...(!isMapFullScreen && !fullWidth && { ref: rightPanelRef })}
+          {...(!fullWidth && { ref: rightPanelRef })}
           isEnlarged={isEnlarged}
           isLayersPanelVisible={isLayersPanelVisible}
           fullWidth={fullWidth}

@@ -15,6 +15,7 @@ interface IMapDataTableStateActions {
   setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
   setLayersData: (layers: TypeArrayOfLayerData) => void;
   applyMapFilters: (filterStrings: string) => void;
+  setTableHeight: (tableHeight: number) => void;
 }
 export interface IMapDataTableState {
   columnFiltersRecord: Record<string, MRTColumnFiltersState>;
@@ -25,6 +26,7 @@ export interface IMapDataTableState {
   selectedLayerPath: string;
   toolbarRowSelectedMessageRecord: Record<string, string>;
   layersData: TypeArrayOfLayerData;
+  tableHeight: number;
   actions: IMapDataTableStateActions;
 }
 
@@ -37,6 +39,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IMa
     rowSelectionsRecord: {},
     selectedLayerPath: '',
     toolbarRowSelectedMessageRecord: {},
+    tableHeight: 600,
     layersData: [],
 
     // #region ACTIONS
@@ -110,6 +113,14 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IMa
         const layerPath = get().dataTableState.selectedLayerPath;
         DataTableProcessor.applyFilters(get().mapId, layerPath, filterStrings, !!get().dataTableState.mapFilteredRecord[layerPath]);
       },
+      setTableHeight: (tableHeight: number): void => {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            tableHeight,
+          },
+        });
+      },
     },
     // #endregion ACTIONS
   } as IMapDataTableState;
@@ -134,6 +145,7 @@ export const useDataTableStoreRowsFiltered = (): Record<string, number> =>
   useStore(useGeoViewStore(), (state) => state.dataTableState.rowsFilteredRecord);
 export const useDatatableStoreLayersData = (): TypeArrayOfLayerData =>
   useStore(useGeoViewStore(), (state) => state.dataTableState.layersData);
+export const useDatatableStoreTableHeight = (): number => useStore(useGeoViewStore(), (state) => state.dataTableState.tableHeight);
 
 export const useDataTableStoreActions = (): IMapDataTableStateActions =>
   useStore(useGeoViewStore(), (state) => state.dataTableState.actions);

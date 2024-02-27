@@ -18,13 +18,15 @@ export const getSxClasses = (theme: Theme) => ({
     fontWeight: '600',
   },
   rightPanelContainer: {
+    maxHeight: '600px',
+    overflowY: 'auto',
     border: `2px solid ${theme.palette.geoViewColor.primary.main}`,
     borderRadius: '5px',
     color: theme.palette.geoViewColor.textColor.main,
   },
   rightPanelBtnHolder: {
     marginTop: '20px',
-    marginBottom: '9px',
+    paddingBottom: '9px',
     boxShadow: `0px 12px 9px -13px ${theme.palette.geoViewColor.bgColor.dark[200]}`,
   },
   featureInfoListContainer: {
