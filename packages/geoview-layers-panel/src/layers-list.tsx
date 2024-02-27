@@ -1,4 +1,3 @@
-/* eslint-disable react/no-array-index-key */
 import {
   TypeJsonValue,
   TypeJsonArray,
@@ -340,6 +339,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                 </Tooltip>
               </Box>
               {(layerLegend[layer.geoviewLayerId] as TypeJsonArray).map((subLayer, index: number) => (
+                // eslint-disable-next-line react/no-array-index-key
                 <Box key={index}>
                   {subLayer!.legend && (
                     <Box sx={sxClasses.legendSubLayerGroup}>
@@ -366,6 +366,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                   {subLayer.drawingInfo?.renderer.type === 'uniqueValue' &&
                     subLayer.drawingInfo.renderer.uniqueValueInfos[0].symbol.imageData &&
                     (subLayer.drawingInfo.renderer.uniqueValueInfos as TypeJsonArray).map((uniqueValue, i: number) => (
+                      // eslint-disable-next-line react/no-array-index-key
                       <Box key={i} sx={sxClasses.layerItemText}>
                         <img alt="Layer Legend" src={`data:${uniqueValue.symbol.contentType};base64,${uniqueValue.symbol.imageData}`} />
                         {uniqueValue.label as string}
@@ -373,6 +374,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                     ))}
                   {subLayer.legend &&
                     (subLayer.legend as TypeJsonArray).map((uniqueValue, i: number) => (
+                      // eslint-disable-next-line react/no-array-index-key
                       <Box key={i} sx={sxClasses.layerItemText}>
                         <img alt="Layer Legend" src={`data:${uniqueValue.contentType};base64,${uniqueValue.imageData}`} />
                         {(uniqueValue.label || subLayer.layerName) as string}

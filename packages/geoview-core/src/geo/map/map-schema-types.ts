@@ -1,4 +1,5 @@
 /* eslint-disable no-underscore-dangle */
+// We use _ for layerPAtha nd olLayer all over the file. We keep it global...
 /* eslint-disable max-classes-per-file */
 import { Extent } from 'ol/extent';
 import BaseLayer from 'ol/layer/Base';

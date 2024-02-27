@@ -1,4 +1,3 @@
-/* eslint-disable prefer-destructuring */
 import dayjs, { Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import duration from 'dayjs/plugin/duration';
@@ -530,6 +529,7 @@ export class DateMgt {
         inputFragments[TIME] = 3;
         outputFragments[TIME] = 3;
         // Get time zone.
+        // eslint-disable-next-line prefer-destructuring
         separators[TIME_ZONE] = timeString.split(/[+-]/)[1];
       }
 

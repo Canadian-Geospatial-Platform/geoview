@@ -1,4 +1,3 @@
-/* eslint-disable react/require-default-props */
 import React, { useState, ReactNode, memo, useEffect } from 'react';
 import Markdown from 'markdown-to-jsx';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +18,7 @@ interface GuideListItem extends LayerListEntry {
 }
 
 interface GuidePanelType {
+  // eslint-disable-next-line react/require-default-props
   fullWidth?: boolean;
 }
 

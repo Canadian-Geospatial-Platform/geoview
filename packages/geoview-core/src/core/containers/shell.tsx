@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-props-no-spreading */
 import { useEffect, useState, useCallback, Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 

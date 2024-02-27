@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+// We have many reassing for layerPath-layerConfig. We keep it global...
 import { ImageArcGISRest } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';

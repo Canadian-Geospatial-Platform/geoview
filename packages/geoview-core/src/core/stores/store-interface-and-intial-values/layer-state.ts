@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-/* eslint-disable no-restricted-syntax */
+// this esLint is used in many places for findLayerByPath function. It is why we keep it global...
 import { useStore } from 'zustand';
 import _ from 'lodash';
 
@@ -267,6 +267,8 @@ function setOpacityInLayerAndChildren(layer: TypeLegendLayer, opacity: number, m
 }
 
 function findLayerByPath(layers: TypeLegendLayer[], layerPath: string): TypeLegendLayer | undefined {
+  // TODO: refactor - iterators/generators require regenerator-runtime, which is too heavyweight for this guide to allow them. Separately, loops should be avoided in favor of array iterations
+  // eslint-disable-next-line no-restricted-syntax
   for (const l of layers) {
     if (layerPath === l.layerPath) {
       return l;
@@ -287,6 +289,8 @@ function deleteSingleLayer(layers: TypeLegendLayer[], layerPath: string) {
   if (indexToDelete >= 0) {
     layers.splice(indexToDelete, 1);
   } else {
+    // TODO: refactor - iterators/generators require regenerator-runtime, which is too heavyweight for this guide to allow them. Separately, loops should be avoided in favor of array iterations
+    // eslint-disable-next-line no-restricted-syntax
     for (const l of layers) {
       if (l.children && l.children.length > 0) {
         deleteSingleLayer(l.children, layerPath);

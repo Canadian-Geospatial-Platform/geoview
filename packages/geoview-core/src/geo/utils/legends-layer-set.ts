@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { EVENT_NAMES } from '@/api/events/event-types';
 import {
   GetLegendsPayload,

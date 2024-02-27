@@ -607,8 +607,7 @@
 //     layerConfig.style[geometryType] = styleSettings;
 //     return layerConfig.style;
 //   }
-//   // eslint-disable-next-line no-console
-//   console.log(`Geometry type ${geometryType} is not supported by the GeoView viewer.`);
+//   logger.logError(`Geometry type ${geometryType} is not supported by the GeoView viewer.`);
 //   return undefined;
 // }
 

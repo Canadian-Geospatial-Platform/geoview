@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { TypeDisplayLanguage, TypeListOfLayerEntryConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { CONST_LAYER_ENTRY_TYPE, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { logger } from '@/core/utils/logger';

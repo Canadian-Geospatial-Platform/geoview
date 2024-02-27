@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 import { useState } from 'react';
 
 import { useTheme } from '@mui/material/styles';
