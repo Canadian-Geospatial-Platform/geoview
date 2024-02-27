@@ -1,4 +1,5 @@
-/* eslint-disable no-console, no-underscore-dangle, no-param-reassign */
+/* eslint-disable no-underscore-dangle, no-param-reassign */
+// We have a lot of private function with dangle nad many reassigne. We keep it global...
 import { Extent } from 'ol/extent';
 
 import Ajv from 'ajv';

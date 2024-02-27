@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+// this utility file uses console to show react hooks. Not mean tu use the logger. We keep it global...
 import { useEffect, useRef } from 'react';
 
 // Indicates if currently logging useWhatChanged

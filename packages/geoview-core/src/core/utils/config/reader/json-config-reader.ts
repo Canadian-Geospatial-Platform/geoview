@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 

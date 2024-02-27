@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-param-reassign */
+// We have many reassing for layerPath-layerConfig. We keep it global..
 import BaseLayer from 'ol/layer/Base';
 import Collection from 'ol/Collection';
 import { Coordinate } from 'ol/coordinate';
@@ -8,8 +8,6 @@ import { Extent } from 'ol/extent';
 import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
 import Feature from 'ol/Feature';
 
-import cloneDeep from 'lodash/cloneDeep';
-
 import {
   generateId,
   getLocalizedValue,
@@ -17,7 +15,6 @@ import {
   showError,
   replaceParams,
   getLocalizedMessage,
-  whenThisThen,
   createLocalizedString,
 } from '@/core/utils/utilities';
 import {
@@ -30,15 +27,12 @@ import {
   TypeStyleConfig,
   TypeLayerGroupEntryConfig,
   TypeVectorLayerEntryConfig,
-  layerEntryIsVector,
   TypeLayerEntryType,
   TypeOgcWmsLayerEntryConfig,
   TypeEsriDynamicLayerEntryConfig,
-  TypeBaseSourceVectorInitialConfig,
   TypeLayerInitialSettings,
   TypeLayerStatus,
   TypeStyleGeometry,
-  ConfigBaseClass,
 } from '@/geo/map/map-schema-types';
 import {
   codedValueType,
@@ -57,10 +51,8 @@ import {
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
-import { Layer } from '@/geo/layer/layer';
 import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
 import { TypeEventHandlerFunction } from '@/api/events/event';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 
 export type TypeLegend = {
@@ -909,7 +901,7 @@ export abstract class AbstractGeoViewLayer {
 
   protected getAllFeatureInfo(layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
     // Log
-    logger.logError('getAllFeatureInfo is not implemented!');
+    logger.logError(`getAllFeatureInfo is not implemented! for ${layerPath}`);
     return Promise.resolve(null);
   }
 
@@ -925,7 +917,7 @@ export abstract class AbstractGeoViewLayer {
 
   protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
     // Log
-    logger.logError('getFeatureInfoAtPixel is not implemented!');
+    logger.logError(`getFeatureInfoAtPixel is not implemented! for ${layerPath} - ${location}`);
     return Promise.resolve(null);
   }
 
@@ -941,7 +933,7 @@ export abstract class AbstractGeoViewLayer {
 
   protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
     // Log
-    logger.logError('getFeatureInfoAtCoordinate is not implemented!');
+    logger.logError(`getFeatureInfoAtCoordinate is not implemented! for ${layerPath} - ${location}`);
     return Promise.resolve(null);
   }
 
@@ -957,7 +949,7 @@ export abstract class AbstractGeoViewLayer {
 
   protected getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
     // Log
-    logger.logError('getFeatureInfoAtLongLat is not implemented!');
+    logger.logError(`getFeatureInfoAtLongLat is not implemented! for ${layerPath} - ${location}`);
     return Promise.resolve(null);
   }
 
@@ -973,7 +965,7 @@ export abstract class AbstractGeoViewLayer {
 
   protected getFeatureInfoUsingBBox(location: Coordinate[], layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
     // Log
-    logger.logError('getFeatureInfoUsingBBox is not implemented!');
+    logger.logError(`getFeatureInfoUsingBBox is not implemented! for ${layerPath} - ${location}`);
     return Promise.resolve(null);
   }
 
@@ -989,7 +981,7 @@ export abstract class AbstractGeoViewLayer {
 
   protected getFeatureInfoUsingPolygon(location: Coordinate[], layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
     // Log
-    logger.logError('getFeatureInfoUsingPolygon is not implemented!');
+    logger.logError(`getFeatureInfoUsingPolygon is not implemented! for ${layerPath} - ${location}`);
     return Promise.resolve(null);
   }
 
@@ -1191,6 +1183,7 @@ export abstract class AbstractGeoViewLayer {
    */
 
   protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
+    logger.logInfo(`getFieldDomain is not implemented! for ${fieldName} - ${layerConfig}`);
     return null;
   }
 
@@ -1204,6 +1197,7 @@ export abstract class AbstractGeoViewLayer {
    */
 
   protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
+    logger.logInfo(`getFieldType is not implemented! for ${fieldName} - ${layerConfig}`);
     return 'string';
   }
 

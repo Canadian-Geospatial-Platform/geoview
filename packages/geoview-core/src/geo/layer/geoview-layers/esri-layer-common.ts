@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars, no-param-reassign */
+/* eslint-disable no-param-reassign */
+// We have many reassing for layerPath-layerConfig. We keep it global..
 import axios from 'axios';
 import { Extent } from 'ol/extent';
 
@@ -15,21 +16,13 @@ import {
 } from '@/geo/map/map-schema-types';
 import { getLocalizedValue, getXMLHttpRequest } from '@/core/utils/utilities';
 import { api } from '@/app';
-import { Layer } from '../layer';
 import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
 import { EsriFeature, geoviewEntryIsEsriFeature, TypeEsriFeatureLayerEntryConfig } from './vector/esri-feature';
 import { EsriBaseRenderer, getStyleFromEsriRenderer } from '../../renderer/esri-renderer';
 import { TimeDimensionESRI } from '@/core/utils/date-mgt';
-import {
-  codedValueType,
-  rangeDomainType,
-  LayerSetPayload,
-  TypeFeatureInfoEntry,
-  TypeFeatureInfoEntryPartial,
-  TypeFieldEntry,
-} from '@/api/events/payloads';
+import { codedValueType, rangeDomainType, TypeFeatureInfoEntryPartial, TypeFieldEntry } from '@/api/events/payloads';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { EsriImage, layerConfigIsEsriImage } from './raster/esri-image';
+import { EsriImage } from './raster/esri-image';
 import { logger } from '@/core/utils/logger';
 
 /** ***************************************************************************************************************************
