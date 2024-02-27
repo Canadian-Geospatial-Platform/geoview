@@ -23,7 +23,7 @@ export const getSxClasses = (theme: Theme) => ({
   },
   notificationsList: {
     overflowY: 'auto',
-    padding: '0px 0px 10px 0px',
+    padding: '0px 10px 10px 10px',
   },
   notificationItem: {
     display: 'flex',
