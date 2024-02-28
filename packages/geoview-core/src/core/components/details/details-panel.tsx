@@ -14,7 +14,7 @@ import {
 import { TypeFeatureInfoEntry, TypeLayerData, TypeGeometry, TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import {
   useMapStoreActions,
-  useMapOrderedLayerInfo,
+  useMapVisibleLayers,
   useDetailsStoreActions,
   useDetailsStoreCheckedFeatures,
   useDetailsStoreLayerDataArrayBatch,
@@ -48,7 +48,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
   const selectedLayerPath = useDetailsStoreSelectedLayerPath();
   const arrayOfLayerDataBatch = useDetailsStoreLayerDataArrayBatch();
   const checkedFeatures = useDetailsStoreCheckedFeatures();
-  const orderedLayerInfo = useMapOrderedLayerInfo();
+  const visibleLayers = useMapVisibleLayers();
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
   const { addSelectedFeature, removeSelectedFeature } = useMapStoreActions();
 
@@ -122,16 +122,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
    */
   const memoLayersList = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('DETAILS-PANEL - memoLayersList', orderedLayerInfo, arrayOfLayerDataBatch);
-
-    const visibleLayers = orderedLayerInfo
-      .map((layerInfo) => {
-        if (layerInfo.visible) return layerInfo.layerPath;
-        return undefined;
-      })
-      .filter((layerPath) => layerPath !== undefined);
-
-    if (!visibleLayers.includes(selectedLayerPath)) setSelectedLayerPath('');
+    logger.logTraceUseMemo('DETAILS-PANEL - memoLayersList', visibleLayers, arrayOfLayerDataBatch);
 
     // Set the layers list
     const layerListEntries = visibleLayers
@@ -151,7 +142,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
       );
     if (!layerListEntries.length) setSelectedLayerPath('');
     return layerListEntries;
-  }, [orderedLayerInfo, arrayOfLayerDataBatch, selectedLayerPath, setSelectedLayerPath, getNumFeaturesLabel]);
+  }, [visibleLayers, arrayOfLayerDataBatch, setSelectedLayerPath, getNumFeaturesLabel]);
 
   /**
    * Memoizes the selected layer for the LayerList component.

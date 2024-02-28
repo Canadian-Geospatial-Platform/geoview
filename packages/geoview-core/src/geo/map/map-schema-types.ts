@@ -611,7 +611,7 @@ export const layerEntryIsRasterTile = (verifyIfLayer: TypeLayerEntryConfig): ver
 };
 
 /** ******************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TypeGeocoreLayerEntryConfig if the entryType attribute of
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeGeoCoreLayerEntryConfig if the entryType attribute of
  * the verifyIfLayer parameter is 'geocore'. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
@@ -619,7 +619,7 @@ export const layerEntryIsRasterTile = (verifyIfLayer: TypeLayerEntryConfig): ver
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const layerEntryIsGeocore = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeGeocoreLayerEntryConfig => {
+export const layerEntryIsGeocore = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeGeoCoreLayerEntryConfig => {
   return verifyIfLayer?.entryType === ('geoCore' as TypeLayerEntryType);
 };
 
@@ -1385,7 +1385,7 @@ export class TypeTileLayerEntryConfig extends TypeBaseLayerEntryConfig {
  * Type used to define a GeoView layer where configration is extracted by a configuration snippet stored on a server. The server
  * configuration will handle bilangual informations.
  */
-export class TypeGeocoreLayerEntryConfig extends ConfigBaseClass {
+export class TypeGeoCoreLayerEntryConfig extends ConfigBaseClass {
   /** This attribute from ConfigBaseClass is not used by groups. */
   declare isMetadataLayerGroup: never;
 
@@ -1418,9 +1418,9 @@ export class TypeGeocoreLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * The class constructor.
-   * @param {TypeGeocoreLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+   * @param {TypeGeoCoreLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: TypeGeocoreLayerEntryConfig) {
+  constructor(layerConfig: TypeGeoCoreLayerEntryConfig) {
     super(layerConfig);
     Object.assign(this, layerConfig);
   }
@@ -1531,7 +1531,7 @@ export type TypeLayerEntryConfig =
   | TypeImageStaticLayerEntryConfig
   | TypeTileLayerEntryConfig
   | TypeLayerGroupEntryConfig
-  | TypeGeocoreLayerEntryConfig;
+  | TypeGeoCoreLayerEntryConfig;
 
 /** ******************************************************************************************************************************
  * List of layers. Corresponds to the layerList defined in the schema.
