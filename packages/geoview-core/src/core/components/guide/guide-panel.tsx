@@ -116,7 +116,6 @@ export function GuidePanel({ fullWidth }: GuidePanelType): JSX.Element {
       });
     }
   });
-  console.log('leftPanelItemKeys', helpItems);
 
   const handleGuideItemClick = (layer: LayerListEntry) => {
     const index: number = helpItems.findIndex((item) => item.layerName === layer.layerName);
