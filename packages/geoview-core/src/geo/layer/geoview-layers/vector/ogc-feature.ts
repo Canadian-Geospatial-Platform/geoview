@@ -1,6 +1,5 @@
 /* eslint-disable no-param-reassign */
 // We have many reassing for sourceOptions-layerConfig. We keep it global...
-// eslint-disable-next-line max-classes-per-file
 import axios from 'axios';
 
 import { Options as SourceOptions } from 'ol/source/Vector';
@@ -21,43 +20,21 @@ import {
   layerEntryIsGroupLayer,
   TypeBaseLayerEntryConfig,
   TypeBaseSourceVectorInitialConfig,
-  TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
 
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
+import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validationClasses/ogc-layer-entry-config';
 
 export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'featureAPI';
 }
 
-export class TypeOgcFeatureLayerEntryConfig extends TypeVectorLayerEntryConfig {
-  declare source: TypeSourceOgcFeatureInitialConfig;
-
-  /**
-   * The class constructor.
-   * @param {TypeOgcFeatureLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
-   */
-  constructor(layerConfig: TypeOgcFeatureLayerEntryConfig) {
-    super(layerConfig);
-    Object.assign(this, layerConfig);
-
-    // Attribute 'style' must exist in layerConfig even if it is undefined
-    if (!('style' in this)) this.style = undefined;
-    // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
-    // Value for this.source.format can only be featureAPI.
-    if (!this.source) this.source = { format: 'featureAPI' };
-    if (!this?.source?.format) this.source.format = 'featureAPI';
-    if (!this.source.dataAccessPath) this.source.dataAccessPath = { ...this.geoviewLayerConfig.metadataAccessPath } as TypeLocalizedString;
-    if (!this.source.dataProjection) this.source.dataProjection = 'EPSG:4326';
-  }
-}
-
 export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
   geoviewLayerType: 'ogcFeature';
-  listOfLayerEntryConfig: TypeOgcFeatureLayerEntryConfig[];
+  listOfLayerEntryConfig: OgcFeatureLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
@@ -88,7 +65,7 @@ export const geoviewLayerIsOgcFeature = (verifyIfGeoViewLayer: AbstractGeoViewLa
 };
 
 /** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TypeOgcFeatureLayerEntryConfig if the geoviewLayerType attribute
+ * type guard function that redefines a TypeLayerEntryConfig as a OgcFeatureLayerEntryConfig if the geoviewLayerType attribute
  * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is OGC_FEATURE. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
@@ -99,7 +76,7 @@ export const geoviewLayerIsOgcFeature = (verifyIfGeoViewLayer: AbstractGeoViewLa
  */
 export const geoviewEntryIsOgcFeature = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is TypeOgcFeatureLayerEntryConfig => {
+): verifyIfGeoViewEntry is OgcFeatureLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE;
 };
 

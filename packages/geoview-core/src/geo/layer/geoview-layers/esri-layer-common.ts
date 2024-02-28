@@ -17,13 +17,14 @@ import {
 import { getLocalizedValue, getXMLHttpRequest } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
-import { EsriFeature, geoviewEntryIsEsriFeature, TypeEsriFeatureLayerEntryConfig } from './vector/esri-feature';
+import { EsriFeature, geoviewEntryIsEsriFeature } from './vector/esri-feature';
 import { EsriBaseRenderer, getStyleFromEsriRenderer } from '../../renderer/esri-renderer';
 import { TimeDimensionESRI } from '@/core/utils/date-mgt';
 import { codedValueType, rangeDomainType, TypeFeatureInfoEntryPartial, TypeFieldEntry } from '@/api/events/payloads';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { EsriImage } from './raster/esri-image';
 import { logger } from '@/core/utils/logger';
+import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-feature-layer-entry-config';
 
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
@@ -126,7 +127,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
       (this.metadata!.layers[esriIndex].subLayerIds as TypeJsonArray).forEach((layerId) => {
         const subLayerEntryConfig: TypeLayerEntryConfig = geoviewEntryIsEsriDynamic(layerConfig)
           ? new TypeEsriDynamicLayerEntryConfig(layerConfig as TypeEsriDynamicLayerEntryConfig)
-          : new TypeEsriFeatureLayerEntryConfig(layerConfig as TypeEsriFeatureLayerEntryConfig);
+          : new EsriFeatureLayerEntryConfig(layerConfig as EsriFeatureLayerEntryConfig);
         subLayerEntryConfig.parentLayerConfig = groupLayerConfig;
         subLayerEntryConfig.layerId = `${layerId}`;
         subLayerEntryConfig.layerName = {
@@ -206,12 +207,12 @@ export function commonGetFieldDomain(
  *
  * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
  * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
- * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
+ * @param {EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
  */
 export function commonProcessTemporalDimension(
   this: EsriDynamic | EsriFeature | EsriImage,
   esriTimeDimension: TypeJsonObject,
-  layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig
+  layerConfig: EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig
 ) {
   if (esriTimeDimension !== undefined) {
     this.layerTemporalDimension[layerConfig.layerPath] = api.dateUtilities.createDimensionFromESRI(
@@ -228,7 +229,7 @@ export function commonProcessTemporalDimension(
  * @param {string} nameField The display field associated to the layer.
  * @param {string} geometryFieldName The field name of the geometry property.
  * @param {TypeJsonArray} fields An array of field names and its aliases.
- * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
+ * @param {EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
  */
 export function commonProcessFeatureInfoConfig(
   this: EsriDynamic | EsriFeature | EsriImage,
@@ -236,7 +237,7 @@ export function commonProcessFeatureInfoConfig(
   nameField: string,
   geometryFieldName: string,
   fields: TypeJsonArray,
-  layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig
+  layerConfig: EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig
 ) {
   if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: capabilities.includes('Query') };
   MapEventProcessor.setMapLayerQueryable(this.mapId, layerConfig.layerPath, layerConfig.source.featureInfo.queryable);
@@ -293,7 +294,7 @@ export function commonProcessFeatureInfoConfig(
  * @param {number} minScale The metadata minScale of the layer.
  * @param {number} maxScale The metadata maxScale of the layer.
  * @param {TypeJsonObject} extent The metadata layer extent.
- * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
+ * @param {EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
  */
 export function commonProcessInitialSettings(
   this: EsriDynamic | EsriFeature | EsriImage,
@@ -301,7 +302,7 @@ export function commonProcessInitialSettings(
   minScale: number,
   maxScale: number,
   extent: TypeJsonObject,
-  layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig
+  layerConfig: EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig
 ) {
   // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
   if (layerConfig.initialSettings?.visible === undefined) layerConfig.initialSettings!.visible = visibility ? 'yes' : 'no';

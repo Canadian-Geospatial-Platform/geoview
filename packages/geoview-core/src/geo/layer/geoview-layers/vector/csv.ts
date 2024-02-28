@@ -1,6 +1,5 @@
 /* eslint-disable no-param-reassign */
 // We have many reassing for sourceOptions-layerConfig. We keep it global...
-// eslint-disable-next-line max-classes-per-file
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { GeoJSON as FormatGeoJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
@@ -20,75 +19,25 @@ import {
   layerEntryIsGroupLayer,
   TypeBaseSourceVectorInitialConfig,
   TypeBaseLayerEntryConfig,
-  TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
 import { addNotificationError, getLocalizedValue } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
+import { CsvLayerEntryConfig } from '@/core/utils/config/validationClasses/csv-layer-entry-config';
 
 export interface TypeSourceCSVInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'CSV';
   separator?: ',';
 }
 
-export class TypeCsvLayerEntryConfig extends TypeVectorLayerEntryConfig {
-  declare source: TypeSourceCSVInitialConfig;
-
-  // character separating values in csv file
-  valueSeparator? = ',';
-
-  /**
-   * The class constructor.
-   * @param {TypeCsvLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
-   */
-  constructor(layerConfig: TypeCsvLayerEntryConfig) {
-    super(layerConfig);
-    Object.assign(this, layerConfig);
-
-    if (!this.geoviewLayerConfig.metadataAccessPath && !this.source?.dataAccessPath) {
-      throw new Error(
-        `dataAccessPath is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} of type CSV when the metadataAccessPath is undefined.`
-      );
-    }
-    // Default value for this.entryType is vector
-    if (this.entryType === undefined) this.entryType = 'vector';
-    // Attribute 'style' must exist in layerConfig even if it is undefined
-    if (!('style' in this)) this.style = undefined;
-    // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the CSV layer to it
-    // and place the layerId at the end of it.
-    // Value for this.source.format can only be CSV.
-    if (!this.source) this.source = { format: 'CSV', separator: ',' };
-    if (!this.source.format) this.source.format = 'CSV';
-    if (!this.source.separator) this.source.separator = ',';
-    if (!this.source.dataAccessPath) {
-      let { en, fr } = this.geoviewLayerConfig.metadataAccessPath!;
-      en = en!.split('/').length > 1 ? en!.split('/').slice(0, -1).join('/') : './';
-      fr = fr!.split('/').length > 1 ? fr!.split('/').slice(0, -1).join('/') : './';
-      this.source.dataAccessPath = { en, fr } as TypeLocalizedString;
-    }
-    if (
-      !(this.source.dataAccessPath!.en?.startsWith('blob') && !this.source.dataAccessPath!.en?.endsWith('/')) &&
-      !this.source.dataAccessPath!.en?.toUpperCase().endsWith('.CSV')
-    ) {
-      this.source.dataAccessPath!.en = this.source.dataAccessPath!.en!.endsWith('/')
-        ? `${this.source.dataAccessPath!.en}${this.layerId}`
-        : `${this.source.dataAccessPath!.en}/${this.layerId}`;
-      this.source.dataAccessPath!.fr = this.source.dataAccessPath!.fr!.endsWith('/')
-        ? `${this.source.dataAccessPath!.fr}${this.layerId}`
-        : `${this.source.dataAccessPath!.fr}/${this.layerId}`;
-    }
-    if (!this.source.dataProjection) this.source.dataProjection = 'EPSG:4326';
-  }
-}
-
 export interface TypeCSVLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'CSV';
-  listOfLayerEntryConfig: TypeCsvLayerEntryConfig[];
+  listOfLayerEntryConfig: CsvLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeCSVLayerConfig if the geoviewLayerType attribute of the
+ * type guard function that redefines a CsvLayerEntryConfig as a TypeCSVLayerConfig if the geoviewLayerType attribute of the
  * verifyIfLayer parameter is CSV. The type ascention applies only to the true block of the if clause that use this
  * function.
  *
@@ -123,7 +72,7 @@ export const geoviewLayerIsCSV = (verifyIfGeoViewLayer: AbstractGeoViewLayer): v
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const geoviewEntryIsCSV = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeCsvLayerEntryConfig => {
+export const geoviewEntryIsCSV = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is CsvLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.CSV;
 };
 
