@@ -38,7 +38,14 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
   const sxClasses = getSxClasses(theme);
   const { t } = useTranslation<string>();
 
-  const isDisabled = layer.numOffeatures === 0;
+  const isDisabled = layer?.numOffeatures === 0 || layer?.features === null;
+
+  const isLoading =
+    layer?.numOffeatures === 0 ||
+    layer?.features === null ||
+    layer.queryStatus === 'processing' ||
+    layer.layerStatus === 'loading' ||
+    layer.layerStatus === 'processing';
 
   const renderLayerIcon = () => {
     switch (layer.layerStatus) {
@@ -126,7 +133,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
             <ListItemButton
               selected={isSelected}
               // disable when layer features has null value.
-              disabled={layer?.numOffeatures === 0 || layer?.features === null}
+              disabled={isDisabled || isLoading}
               onClick={() => onListItemClick(layer)}
             >
               {renderLayerIcon()}

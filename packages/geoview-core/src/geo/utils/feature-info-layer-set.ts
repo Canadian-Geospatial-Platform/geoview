@@ -113,7 +113,22 @@ export class FeatureInfoLayerSet extends LayerSet {
       // if layer's status flag exists and is different than the new one
       if (this.resultSet?.[layerPath]?.layerStatus && this.resultSet?.[layerPath]?.layerStatus !== layerStatus) {
         if (layerStatus === 'error') delete this.resultSet[layerPath];
-        else super.changeLayerStatusListenerFunctions(payload);
+        else {
+          const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
+          super.changeLayerStatusListenerFunctions(payload);
+          if (this?.resultSet?.[layerPath]?.data?.click) {
+            this.resultSet[layerPath].data.click!.layerStatus = layerStatus;
+            FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerConfig.layerPath, 'click', this.resultSet);
+          }
+          if (this?.resultSet?.[layerPath]?.data?.hover) {
+            this.resultSet[layerPath].data.hover!.layerStatus = layerStatus;
+            FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerConfig.layerPath, 'hover', this.resultSet);
+          }
+          if (this?.resultSet?.[layerPath]?.data?.['all-features']) {
+            this.resultSet[layerPath].data['all-features']!.layerStatus = layerStatus;
+            FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerConfig.layerPath, 'all-features', this.resultSet);
+          }
+        }
       }
     }
   }

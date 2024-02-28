@@ -1005,7 +1005,7 @@ export abstract class AbstractGeoViewLayer {
     }
 
     if (!this.registerToLayerSetListenerFunctions[layerPath].queryLayer) {
-      if ('featureInfo' in layerConfig.source! && layerConfig.source.featureInfo?.queryable) {
+      if (layerConfig?.source?.featureInfo?.queryable) {
         // Listen to events that request to query a layer and return the resultset to the requester.
         this.registerToLayerSetListenerFunctions[layerPath].queryLayer = async (payload) => {
           // Log
