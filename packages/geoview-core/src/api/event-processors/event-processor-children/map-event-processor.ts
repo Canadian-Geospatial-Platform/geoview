@@ -199,8 +199,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // TODO: destroy events on map destruction
     map.on('change:size', store.getState().mapState.events.onMapChangeSize);
     map.on('moveend', store.getState().mapState.events.onMapMoveEnd);
-    map.on('pointermove', store.getState().mapState.events.onMapPointerMove);
-    map.on('singleclick', store.getState().mapState.events.onMapSingleClick);
+
+    // If not on a static map, wire handlers on pointermove and singleclick
+    if (store.getState().mapState.interaction !== 'static') {
+      map.on('pointermove', store.getState().mapState.events.onMapPointerMove);
+      map.on('singleclick', store.getState().mapState.events.onMapSingleClick);
+    }
+
     map.getView().on('change:resolution', store.getState().mapState.events.onMapZoomEnd);
     map.getView().on('change:rotation', store.getState().mapState.events.onMapRotation);
 
