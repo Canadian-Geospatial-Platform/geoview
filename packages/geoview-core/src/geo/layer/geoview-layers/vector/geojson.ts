@@ -1,6 +1,5 @@
 /* eslint-disable no-param-reassign */
 // We have many reassing for sourceOptions-layerConfig. We keep it global...
-// eslint-disable-next-line max-classes-per-file
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { GeoJSON as FormatGeoJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
@@ -25,62 +24,15 @@ import { getLocalizedValue } from '@/core/utils/utilities';
 import { Cast, toJsonObject } from '@/core/types/global-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { api } from '@/app';
+import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validationClasses/geojson-layer-entry-config';
 
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'GeoJSON';
 }
 
-export class TypeGeoJSONLayerEntryConfig extends TypeVectorLayerEntryConfig {
-  declare source: TypeSourceGeoJSONInitialConfig;
-
-  /**
-   * The class constructor.
-   * @param {TypeGeoJSONLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
-   */
-  constructor(layerConfig: TypeGeoJSONLayerEntryConfig) {
-    super(layerConfig);
-    Object.assign(this, layerConfig);
-
-    if (!this.geoviewLayerConfig.metadataAccessPath && !this.source?.dataAccessPath) {
-      throw new Error(
-        `dataAccessPath is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} of type GeoJSON when the metadataAccessPath is undefined.`
-      );
-    }
-    // Default value for this.entryType is vector
-    if (this.entryType === undefined) this.entryType = 'vector';
-    // Attribute 'style' must exist in layerConfig even if it is undefined
-    if (!('style' in this)) this.style = undefined;
-    // Value for this.source.format can only be GeoJSON.
-    if (!this.source) this.source = { format: 'GeoJSON' };
-    if (!this.source.format) this.source.format = 'GeoJSON';
-    // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it
-    // and place the layerId at the end of it.
-    if (!this.source.dataAccessPath) {
-      let { en, fr } = this.geoviewLayerConfig.metadataAccessPath!;
-      // Remove the metadata file name and keep only the path to the directory where the metadata resides
-      en = en!.split('/').length > 1 ? en!.split('/').slice(0, -1).join('/') : './';
-      fr = fr!.split('/').length > 1 ? fr!.split('/').slice(0, -1).join('/') : './';
-      this.source.dataAccessPath = { en, fr } as TypeLocalizedString;
-    }
-    if (
-      !(this.source.dataAccessPath!.en?.startsWith('blob') && !this.source.dataAccessPath!.en?.endsWith('/')) &&
-      !this.source.dataAccessPath!.en?.toUpperCase().endsWith('.JSON' || '.GEOJSON') &&
-      !this.source.dataAccessPath!.en?.toUpperCase().endsWith('=JSON') // Doesn't work if included in above line
-    ) {
-      this.source.dataAccessPath!.en = this.source.dataAccessPath!.en!.endsWith('/')
-        ? `${this.source.dataAccessPath!.en}${this.layerId}`
-        : `${this.source.dataAccessPath!.en}/${this.layerId}`;
-      this.source.dataAccessPath!.fr = this.source.dataAccessPath!.fr!.endsWith('/')
-        ? `${this.source.dataAccessPath!.fr}${this.layerId}`
-        : `${this.source.dataAccessPath!.fr}/${this.layerId}`;
-    }
-    if (!this.source.dataProjection) this.source.dataProjection = 'EPSG:4326';
-  }
-}
-
 export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'GeoJSON';
-  listOfLayerEntryConfig: TypeGeoJSONLayerEntryConfig[];
+  listOfLayerEntryConfig: GeoJSONLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
@@ -110,7 +62,7 @@ export const geoviewLayerIsGeoJSON = (verifyIfGeoViewLayer: AbstractGeoViewLayer
 };
 
 /** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TypeGeoJSONLayerEntryConfig if the geoviewLayerType attribute of
+ * type guard function that redefines a TypeLayerEntryConfig as a GeoJSONLayerEntryConfig if the geoviewLayerType attribute of
  * the verifyIfGeoViewEntry.geoviewLayerConfig attribute is GEOJSON. The type ascention applies only to the true block of the if
  * clause that use this function.
  *
@@ -119,7 +71,7 @@ export const geoviewLayerIsGeoJSON = (verifyIfGeoViewLayer: AbstractGeoViewLayer
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const geoviewEntryIsGeoJSON = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeGeoJSONLayerEntryConfig => {
+export const geoviewEntryIsGeoJSON = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is GeoJSONLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
 };
 

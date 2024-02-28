@@ -1,6 +1,5 @@
 /* eslint-disable no-param-reassign */
 // We have many reassing for layerConfig. We keep it global...
-// eslint-disable-next-line max-classes-per-file
 import TileLayer from 'ol/layer/Tile';
 import { Options as TileOptions } from 'ol/layer/BaseTile';
 import XYZ, { Options as SourceOptions } from 'ol/source/XYZ';
@@ -13,7 +12,6 @@ import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-
 import {
   TypeLayerEntryConfig,
   TypeSourceTileInitialConfig,
-  TypeTileLayerEntryConfig,
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
@@ -23,6 +21,7 @@ import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
 import { Cast, toJsonObject } from '@/core/types/global-types';
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validationClasses/xyz-layer-entry-config';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
 // TODO: Implement method to validate XYZ tile service
@@ -35,29 +34,9 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 
 export type TypeSourceImageXYZTilesInitialConfig = TypeSourceTileInitialConfig;
 
-export class TypeXYZTilesLayerEntryConfig extends TypeTileLayerEntryConfig {
-  declare source: TypeSourceImageXYZTilesInitialConfig;
-
-  /**
-   * The class constructor.
-   * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
-   */
-  constructor(layerConfig: TypeXYZTilesLayerEntryConfig) {
-    super(layerConfig);
-    Object.assign(this, layerConfig);
-
-    /** layerConfig.source.dataAccessPath is mandatory. */
-    if (!this.source.dataAccessPath) {
-      throw new Error(
-        `source.dataAccessPath on layer entry ${this.layerPath} is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} of type ${this.geoviewLayerConfig.geoviewLayerType}`
-      );
-    }
-  }
-}
-
 export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'xyzTiles';
-  listOfLayerEntryConfig: TypeXYZTilesLayerEntryConfig[];
+  listOfLayerEntryConfig: XYZTilesLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
@@ -87,7 +66,7 @@ export const geoviewLayerIsXYZTiles = (verifyIfGeoViewLayer: AbstractGeoViewLaye
 };
 
 /** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TypeXYZTilesLayerEntryConfig if the geoviewLayerType attribute
+ * type guard function that redefines a TypeLayerEntryConfig as a XYZTilesLayerEntryConfig if the geoviewLayerType attribute
  * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is XYZ_TILES. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
@@ -96,9 +75,7 @@ export const geoviewLayerIsXYZTiles = (verifyIfGeoViewLayer: AbstractGeoViewLaye
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const geoviewEntryIsXYZTiles = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is TypeXYZTilesLayerEntryConfig => {
+export const geoviewEntryIsXYZTiles = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is XYZTilesLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES;
 };
 
@@ -192,11 +169,11 @@ export class XYZTiles extends AbstractGeoViewRaster {
   /** ****************************************************************************************************************************
    * This method creates a GeoView XYZTiles layer using the definition provided in the layerConfig parameter.
    *
-   * @param {TypeXYZTilesLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @param {XYZTilesLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  protected processOneLayerEntry(layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected processOneLayerEntry(layerConfig: XYZTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // !            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
@@ -252,7 +229,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
    */
   protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     if (this.metadata) {
-      const metadataLayerConfigFound = Cast<TypeXYZTilesLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig).find(
+      const metadataLayerConfigFound = Cast<XYZTilesLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig).find(
         (metadataLayerConfig) => metadataLayerConfig.layerId === layerConfig.layerId
       );
       // metadataLayerConfigFound can not be undefined because we have already validated the config exist
