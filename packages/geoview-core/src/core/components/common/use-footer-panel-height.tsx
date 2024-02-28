@@ -43,7 +43,6 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
       const leftPanelHeight = (window.screen.height * footerPanelResizeValue) / 100 - panelTitleHeight - firstChildHeight;
 
       leftPanelRef.current.style.maxHeight = `${leftPanelHeight}px`;
-      leftPanelRef.current.style.height = `${leftPanelHeight}px`;
       leftPanelRef.current.style.overflow = 'auto';
       leftPanelRef.current.style.paddingBottom = '24px';
 
@@ -61,7 +60,6 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
     // reset the footer panel after map is not in fullscreen.
     if (!isMapFullScreen && leftPanelRef.current) {
       leftPanelRef.current.style.maxHeight = `${defaultHeight}px`;
-      leftPanelRef.current.style.height = `${defaultHeight}px`;
       leftPanelRef.current.style.overflow = 'auto';
       if (activeFooterBarTabId === 'data-table') {
         setTableHeight(defaultHeight);

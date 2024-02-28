@@ -2,8 +2,6 @@ import { useState, useCallback, type ReactNode } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Box } from '@/ui';
 import { logger } from '@/core/utils/logger';
-
-import { getSxClasses } from './layout-style';
 import { LayerList, LayerListEntry } from './layer-list';
 import { ResponsiveGrid } from './responsive-grid';
 import { LayerTitle } from './layer-title';
@@ -22,7 +20,6 @@ interface LayoutProps {
 
 export function Layout({ children, layerList, selectedLayerPath, onLayerListClicked, onIsEnlargeClicked, fullWidth }: LayoutProps) {
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
 
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
   const [isEnlarged, setIsEnlarged] = useState(false);
@@ -86,7 +83,7 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
   }
 
   return (
-    <Box sx={sxClasses.detailsContainer}>
+    <Box>
       <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
         {!fullWidth && (
           <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlarged}>
