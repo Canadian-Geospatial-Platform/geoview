@@ -288,6 +288,7 @@ export function FooterBar(): JSX.Element | null {
       const theSelectedPlugin = api.maps[mapId].plugins[selectedTab];
 
       // A bit hacky, but not much other choice for now...
+      // ? unknown type cannot be use, need to escape
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (typeof (theSelectedPlugin as any).onSelected === 'function') {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

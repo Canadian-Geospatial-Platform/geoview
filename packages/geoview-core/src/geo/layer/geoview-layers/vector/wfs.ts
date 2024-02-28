@@ -20,43 +20,21 @@ import {
   layerEntryIsGroupLayer,
   TypeBaseSourceVectorInitialConfig,
   TypeBaseLayerEntryConfig,
-  TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
 
 import { getLocalizedValue, getXMLHttpRequest, xmlToJson, findPropertyNameByRegex } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
+import { WfsLayerEntryConfig } from '@/core/utils/config/validationClasses/wfs-layer-entry-config';
 
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'WFS';
 }
 
-export class TypeWfsLayerEntryConfig extends TypeVectorLayerEntryConfig {
-  declare source: TypeSourceWFSVectorInitialConfig;
-
-  /**
-   * The class constructor.
-   * @param {TypeWfsLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
-   */
-  constructor(layerConfig: TypeWfsLayerEntryConfig) {
-    super(layerConfig);
-    Object.assign(this, layerConfig);
-
-    // Attribute 'style' must exist in layerConfig even if it is undefined
-    if (!('style' in this)) this.style = undefined;
-    // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
-    // Value for this.source.format can only be WFS.
-    if (!this.source) this.source = { format: 'WFS' };
-    if (!this.source.format) this.source.format = 'WFS';
-    if (!this.source.dataAccessPath) this.source.dataAccessPath = { ...this.geoviewLayerConfig.metadataAccessPath } as TypeLocalizedString;
-    if (!this.source.dataProjection) this.source.dataProjection = 'EPSG:4326';
-  }
-}
-
 export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geoviewLayerType'> {
   geoviewLayerType: 'ogcWfs';
-  listOfLayerEntryConfig: TypeWfsLayerEntryConfig[];
+  listOfLayerEntryConfig: WfsLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
@@ -169,9 +147,10 @@ export class WFS extends AbstractGeoViewVector {
               this.version = (capabilitiesObject as TypeJsonObject)['@attributes'].version as string;
               resolve();
             }
-          }) // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          })
           .catch((reason) => {
             this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
+            logger.logError('Unableto fetch metadata', this.metadataAccessPath, reason);
             resolve();
           });
       } else {
@@ -275,7 +254,6 @@ export class WFS extends AbstractGeoViewVector {
         }
       }
 
-      // eslint-disable-next-line prettier/prettier
       const describeFeatureUrl = `${queryUrl}?service=WFS&request=DescribeFeatureType&version=${
         this.version
       }&outputFormat=${encodeURIComponent(outputFormat as string)}&typeName=${layerConfig.layerId}`;

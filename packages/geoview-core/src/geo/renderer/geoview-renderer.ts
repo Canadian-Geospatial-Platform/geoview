@@ -1085,6 +1085,7 @@ export class GeoviewRenderer {
           return key.toLowerCase() === fields[j].toLowerCase();
         });
         if (fieldName) {
+          // TODO: info - explain why we need to use == instead of ===
           // eslint-disable-next-line eqeqeq
           isEqual = feature.get(fieldName) == uniqueValueStyleInfo[i].values[j];
           if (isEqual && j + 1 === fields.length) return i;

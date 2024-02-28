@@ -28,6 +28,7 @@ type RenderFooterContentProps = {
   allTabs: TypeValidFooterBarTabsCoreProps | undefined;
 };
 
+// TODO: refactor - can we get rid of the warning?
 // eslint-disable-next-line react/display-name
 const RenderFooterContentInRightPanel = memo(({ footerContenKeys, footerContentKeyValues, allTabs }: RenderFooterContentProps) => {
   return (
