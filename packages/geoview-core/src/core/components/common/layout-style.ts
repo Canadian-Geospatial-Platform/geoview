@@ -66,7 +66,7 @@ export const getSxClasses = (theme: Theme) => ({
     marginBottom: '9px',
     boxShadow: `0px 12px 9px -13px ${theme.palette.geoViewColor.bgColor.dark[200]}`,
   },
-  gridContainer: { paddingLeft: '1rem', paddingRight: '1rem' },
+  gridContainer: { paddingLeft: '1rem', paddingRight: '1rem', overflowY: 'auto' },
   listPrimaryText: {
     marginLeft: '0.62rem',
     minWidth: '0',

@@ -109,7 +109,7 @@ const ResponsiveGridRightPanel = forwardRef(
         {...getRightPanelSize(fullWidth, isLayersPanelVisible, isEnlarged)}
         sx={{
           position: 'relative',
-          [theme.breakpoints.up('md')]: { paddingLeft: '1rem' },
+          [theme.breakpoints.up('md')]: { paddingLeft: '1rem', overflowY: 'auto' },
           ...(!fullWidth && { [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'none' : 'block' } }),
           ...(fullWidth && { display: !isLayersPanelVisible ? 'none' : 'block' }),
           ...sxProps,
