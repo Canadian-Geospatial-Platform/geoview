@@ -1,6 +1,5 @@
 /* eslint-disable no-param-reassign */
 // We have many reassing for sourceOptions. We keep it global...
-// eslint-disable-next-line max-classes-per-file
 import { Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { EsriJSON } from 'ol/format';
@@ -11,13 +10,11 @@ import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-lay
 
 import {
   TypeLayerEntryConfig,
-  TypeVectorLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   TypeEsriDynamicLayerEntryConfig,
   TypeBaseLayerEntryConfig,
-  TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
 
 import { getLocalizedValue } from '@/core/utils/utilities';
@@ -34,39 +31,15 @@ import {
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { codedValueType, rangeDomainType } from '@/api/events/payloads';
+import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-feature-layer-entry-config';
 
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'EsriJSON';
 }
 
-export class TypeEsriFeatureLayerEntryConfig extends TypeVectorLayerEntryConfig {
-  declare source: TypeSourceEsriFeatureInitialConfig;
-
-  /**
-   * The class constructor.
-   * @param {TypeEsriFeatureLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
-   */
-  constructor(layerConfig: TypeEsriFeatureLayerEntryConfig) {
-    super(layerConfig);
-    Object.assign(this, layerConfig);
-
-    if (Number.isNaN(this.layerId)) {
-      throw new Error(`The layer entry with layerId equal to ${this.layerPath} must be an integer string`);
-    }
-    // Attribute 'style' must exist in layerConfig even if it is undefined
-    if (!('style' in this)) this.style = undefined;
-    // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it
-    // and place the layerId at the end of it.
-    // Value for this.source.format can only be EsriJSON.
-    if (!this.source) this.source = { format: 'EsriJSON' };
-    if (!this.source.format) this.source.format = 'EsriJSON';
-    if (!this.source.dataAccessPath) this.source.dataAccessPath = { ...this.geoviewLayerConfig.metadataAccessPath } as TypeLocalizedString;
-  }
-}
-
 export interface TypeEsriFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'esriFeature';
-  listOfLayerEntryConfig: TypeEsriFeatureLayerEntryConfig[];
+  listOfLayerEntryConfig: EsriFeatureLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
@@ -96,7 +69,7 @@ export const geoviewLayerIsEsriFeature = (verifyIfGeoViewLayer: AbstractGeoViewL
 };
 
 /** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TypeEsriFeatureLayerEntryConfig if the geoviewLayerType
+ * type guard function that redefines a TypeLayerEntryConfig as a EsriFeatureLayerEntryConfig if the geoviewLayerType
  * attribute of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is ESRI_FEATURE. The type ascention applies only to the true
  * block of the if clause that use this function.
  *
@@ -107,7 +80,7 @@ export const geoviewLayerIsEsriFeature = (verifyIfGeoViewLayer: AbstractGeoViewL
  */
 export const geoviewEntryIsEsriFeature = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is TypeEsriFeatureLayerEntryConfig => {
+): verifyIfGeoViewEntry is EsriFeatureLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE;
 };
 
@@ -195,11 +168,11 @@ export class EsriFeature extends AbstractGeoViewVector {
   /** ***************************************************************************************************************************
    * This method will create a Geoview temporal dimension if it exist in the service metadata
    * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
-   * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
+   * @param {EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
    */
   protected processTemporalDimension(
     esriTimeDimension: TypeJsonObject,
-    layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
+    layerConfig: EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
   ) {
     return commonProcessTemporalDimension.call(this, esriTimeDimension, layerConfig);
   }
@@ -211,14 +184,14 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {string} nameField The display field associated to the layer.
    * @param {string} geometryFieldName The field name of the geometry property.
    * @param {TypeJsonArray} fields An array of field names and its aliases.
-   * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
+   * @param {EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
    */
   processFeatureInfoConfig = (
     capabilities: string,
     nameField: string,
     geometryFieldName: string,
     fields: TypeJsonArray,
-    layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
+    layerConfig: EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
   ) => {
     return commonProcessFeatureInfoConfig.call(this, capabilities, nameField, geometryFieldName, fields, layerConfig);
   };
@@ -231,14 +204,14 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {number} minScale The metadata minScale of the layer.
    * @param {number} maxScale The metadata maxScale of the layer.
    * @param {TypeJsonObject} extent The metadata layer extent.
-   * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
+   * @param {EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
    */
   processInitialSettings(
     visibility: boolean,
     minScale: number,
     maxScale: number,
     extent: TypeJsonObject,
-    layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
+    layerConfig: EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
   ) {
     return commonProcessInitialSettings.call(this, visibility, minScale, maxScale, extent, layerConfig);
   }

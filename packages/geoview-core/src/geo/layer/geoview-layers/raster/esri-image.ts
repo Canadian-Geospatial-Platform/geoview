@@ -22,7 +22,7 @@ import {
   TypeBaseLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
 import { codedValueType, rangeDomainType } from '@/api/events/payloads';
-import { TypeEsriFeatureLayerEntryConfig, api } from '@/app';
+import { api } from '@/app';
 import {
   commonGetFieldDomain,
   commonGetFieldType,
@@ -34,6 +34,7 @@ import {
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
+import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-feature-layer-entry-config';
 
 export interface TypeEsriImageLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'esriImage';
@@ -261,14 +262,14 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {string} nameField The display field associated to the layer.
    * @param {string} geometryFieldName The field name of the geometry property.
    * @param {TypeJsonArray} fields An array of field names and its aliases.
-   * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig} layerConfig The layer entry to configure.
+   * @param {EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig} layerConfig The layer entry to configure.
    */
   processFeatureInfoConfig = (
     capabilities: string,
     nameField: string,
     geometryFieldName: string,
     fields: TypeJsonArray,
-    layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig
+    layerConfig: EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig // TODO: see why we have dynamic and inage in a feature class...
   ) => {
     commonProcessFeatureInfoConfig.call(this, capabilities, nameField, geometryFieldName, fields, layerConfig);
   };
@@ -280,14 +281,14 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {number} minScale The metadata minScale of the layer.
    * @param {number} maxScale The metadata maxScale of the layer.
    * @param {TypeJsonObject} extent The metadata layer extent.
-   * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig} layerConfig The layer entry to configure.
+   * @param {EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig} layerConfig The layer entry to configure.
    */
   processInitialSettings(
     visibility: boolean,
     minScale: number,
     maxScale: number,
     extent: TypeJsonObject,
-    layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig
+    layerConfig: EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig
   ) {
     commonProcessInitialSettings.call(this, visibility, minScale, maxScale, extent, layerConfig);
   }

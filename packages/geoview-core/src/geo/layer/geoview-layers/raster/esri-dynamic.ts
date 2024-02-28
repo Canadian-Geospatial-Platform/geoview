@@ -14,7 +14,6 @@ import Geometry from 'ol/geom/Geometry';
 import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeEsriFeatureLayerEntryConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
@@ -44,6 +43,7 @@ import {
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
+import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-feature-layer-entry-config';
 
 export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'esriDynamic';
@@ -179,11 +179,11 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * This method will create a Geoview temporal dimension if it exist in the service metadata
    * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
-   * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
+   * @param {EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
    */
   protected processTemporalDimension(
     esriTimeDimension: TypeJsonObject,
-    layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
+    layerConfig: EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
   ) {
     commonProcessTemporalDimension.call(this, esriTimeDimension, layerConfig);
   }
@@ -195,14 +195,14 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {string} nameField The display field associated to the layer.
    * @param {string} geometryFieldName The field name of the geometry property.
    * @param {TypeJsonArray} fields An array of field names and its aliases.
-   * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
+   * @param {EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
    */
   processFeatureInfoConfig = (
     capabilities: string,
     nameField: string,
     geometryFieldName: string,
     fields: TypeJsonArray,
-    layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
+    layerConfig: EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
   ) => {
     commonProcessFeatureInfoConfig.call(this, capabilities, nameField, geometryFieldName, fields, layerConfig);
   };
@@ -215,14 +215,14 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {number} minScale The metadata minScale of the layer.
    * @param {number} maxScale The metadata maxScale of the layer.
    * @param {TypeJsonObject} extent The metadata layer extent.
-   * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
+   * @param {EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
    */
   processInitialSettings(
     visibility: boolean,
     minScale: number,
     maxScale: number,
     extent: TypeJsonObject,
-    layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
+    layerConfig: EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
   ) {
     commonProcessInitialSettings.call(this, visibility, minScale, maxScale, extent, layerConfig);
   }

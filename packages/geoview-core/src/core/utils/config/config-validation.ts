@@ -10,15 +10,15 @@ import defaultsDeep from 'lodash/defaultsDeep';
 import { TypeBasemapId, TypeBasemapOptions, VALID_BASEMAP_ID } from '@/geo/layer/basemap/basemap-types';
 import { geoviewEntryIsWMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { geoviewEntryIsImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
-import { TypeXYZTilesLayerEntryConfig, geoviewEntryIsXYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
-import { TypeVectorTilesLayerEntryConfig, geoviewEntryIsVectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
+import { geoviewEntryIsXYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
+import { geoviewEntryIsVectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { geoviewEntryIsEsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
-import { TypeEsriFeatureLayerEntryConfig, geoviewEntryIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import { geoviewEntryIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { geoviewEntryIsWFS } from '@/geo/layer/geoview-layers/vector/wfs';
-import { TypeOgcFeatureLayerEntryConfig, geoviewEntryIsOgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
-import { TypeGeoJSONLayerEntryConfig, geoviewEntryIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
-import { TypeCsvLayerEntryConfig, geoviewEntryIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
-import { TypeGeoPackageLayerEntryConfig, geoviewEntryIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
+import { geoviewEntryIsOgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
+import { geoviewEntryIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
+import { geoviewEntryIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
+import { geoviewEntryIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
 import {
   layerEntryIsGroupLayer,
   TypeGeoviewLayerConfig,
@@ -48,6 +48,13 @@ import { CONFIG_GEOCORE_URL, CONFIG_GEOLOCATOR_URL } from '@/app';
 import { generateId, replaceParams, getLocalizedMessage, showError } from '../utilities';
 import schema from '../../../../schema.json';
 import { WfsLayerEntryConfig } from './validationClasses/wfs-layer-entry-config';
+import { OgcFeatureLayerEntryConfig } from './validationClasses/ogc-layer-entry-config';
+import { CsvLayerEntryConfig } from './validationClasses/csv-layer-entry-config';
+import { VectorTilesLayerEntryConfig } from './validationClasses/vector-tiles-layer-entry-config';
+import { GeoJSONLayerEntryConfig } from './validationClasses/geojson-layer-entry-config';
+import { EsriFeatureLayerEntryConfig } from './validationClasses/esri-feature-layer-entry-config';
+import { GeoPackageLayerEntryConfig } from './validationClasses/geopackage-layer-config-entry';
+import { XYZTilesLayerEntryConfig } from './validationClasses/xyz-layer-entry-config';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -600,6 +607,7 @@ export class ConfigValidation {
         layerConfig.parentLayerConfig?.initialSettings || layerConfig.geoviewLayerConfig?.initialSettings
       );
 
+      // ? some validation are type as other are classes
       if (layerEntryIsGroupLayer(layerConfig)) {
         // We must set the parents of all elements in the group.
         this.recursivelySetChildParent(geoviewLayerConfig, [layerConfig], parentLayerConfig);
@@ -611,25 +619,25 @@ export class ConfigValidation {
       } else if (geoviewEntryIsImageStatic(layerConfig)) {
         listOfLayerEntryConfig[i] = new TypeImageStaticLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsXYZTiles(layerConfig)) {
-        listOfLayerEntryConfig[i] = new TypeXYZTilesLayerEntryConfig(layerConfig);
+        listOfLayerEntryConfig[i] = new XYZTilesLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsVectorTiles(layerConfig)) {
-        listOfLayerEntryConfig[i] = new TypeVectorTilesLayerEntryConfig(layerConfig);
+        listOfLayerEntryConfig[i] = new VectorTilesLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsEsriDynamic(layerConfig)) {
         listOfLayerEntryConfig[i] = new TypeEsriDynamicLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsEsriFeature(layerConfig)) {
-        listOfLayerEntryConfig[i] = new TypeEsriFeatureLayerEntryConfig(layerConfig);
+        listOfLayerEntryConfig[i] = new EsriFeatureLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsEsriImage(layerConfig)) {
         listOfLayerEntryConfig[i] = new TypeEsriImageLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsWFS(layerConfig)) {
         listOfLayerEntryConfig[i] = new WfsLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsOgcFeature(layerConfig)) {
-        listOfLayerEntryConfig[i] = new TypeOgcFeatureLayerEntryConfig(layerConfig);
+        listOfLayerEntryConfig[i] = new OgcFeatureLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsGeoPackage(layerConfig)) {
-        listOfLayerEntryConfig[i] = new TypeGeoPackageLayerEntryConfig(layerConfig);
+        listOfLayerEntryConfig[i] = new GeoPackageLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsGeoJSON(layerConfig)) {
-        listOfLayerEntryConfig[i] = new TypeGeoJSONLayerEntryConfig(layerConfig);
+        listOfLayerEntryConfig[i] = new GeoJSONLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsCSV(layerConfig)) {
-        listOfLayerEntryConfig[i] = new TypeCsvLayerEntryConfig(layerConfig);
+        listOfLayerEntryConfig[i] = new CsvLayerEntryConfig(layerConfig);
       }
     });
   }
