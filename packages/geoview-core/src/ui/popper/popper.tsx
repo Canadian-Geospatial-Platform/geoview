@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react/function-component-definition */
 import React, { useEffect, useRef } from 'react';
 import { Popper as MaterialPopper, PopperProps } from '@mui/material';
 
@@ -12,8 +12,7 @@ interface EnhancedPopperProps extends PopperProps {
  * @param {EnhancedPopperProps} props popover properties
  * @returns {JSX.Element} returns popover component
  */
-export const Popper: React.FC<EnhancedPopperProps> = (props) => {
-  const { open, anchorEl, onClose, ...restProps } = props;
+export const Popper: React.FC<EnhancedPopperProps> = ({ open, onClose, ...restProps }) => {
   const popperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -40,5 +39,5 @@ export const Popper: React.FC<EnhancedPopperProps> = (props) => {
     };
   }, [open, onClose]);
 
-  return <MaterialPopper sx={{ zIndex: '150' }} ref={popperRef} {...props} />;
+  return <MaterialPopper sx={{ zIndex: '150' }} {...restProps} open={open} ref={popperRef} />;
 };

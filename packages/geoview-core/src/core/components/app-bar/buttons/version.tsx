@@ -70,40 +70,40 @@ export default function Version(): JSX.Element {
   };
 
   return (
-      <>
-        <IconButton
-          id="version-button"
-          tooltip="appbar.version"
-          tooltipPlacement="bottom-end"
-          onClick={handleClick}
-          className={`style3 ${open ? 'active' : ''}`}
-        >
-          <SvgIcon viewBox="-4 -2 38 36">
-            <GeoCaIcon />
-          </SvgIcon>
-        </IconButton>
+    <>
+      <IconButton
+        id="version-button"
+        tooltip="appbar.version"
+        tooltipPlacement="bottom-end"
+        onClick={handleClick}
+        className={`style3 ${open ? 'active' : ''}`}
+      >
+        <SvgIcon viewBox="-4 -2 38 36">
+          <GeoCaIcon />
+        </SvgIcon>
+      </IconButton>
 
-        <Popper open={open} anchorEl={anchorEl} placement="right-end" container={mapElem} onClose={handleClickAway}>
-          <Paper sx={sxClasses.versionInfoPanel}>
-            <Typography sx={sxClasses.versionsInfoTitle} component="h3">
-              {t('appbar.version')}
+      <Popper open={open} anchorEl={anchorEl} placement="right-end" container={mapElem} onClose={handleClickAway}>
+        <Paper sx={sxClasses.versionInfoPanel}>
+          <Typography sx={sxClasses.versionsInfoTitle} component="h3">
+            {t('appbar.version')}
+          </Typography>
+          <Box sx={{ padding: '10px' }}>
+            <Typography component="div">
+              <Link rel="noopener" href={GEO_URL_TEXT.url} target="_black">
+                {GEO_URL_TEXT.text}
+              </Link>
             </Typography>
-            <Box sx={{ padding: '10px' }}>
-              <Typography component="div">
-                <Link rel="noopener" href={GEO_URL_TEXT.url} target="_black">
-                  {GEO_URL_TEXT.text}
-                </Link>
-              </Typography>
-              <Typography component="div">
-                <Link rel="noopener" href={GITHUB_REPO} target="_black">
-                  {t('appbar.repoLink')}
-                </Link>
-              </Typography>
-              <Typography component="div">{`v.${__VERSION__.major}.${__VERSION__.minor}.${__VERSION__.patch}`}</Typography>
-              <Typography component="div">{new Date(__VERSION__.timestamp).toLocaleDateString()}</Typography>
-            </Box>
-          </Paper>
-        </Popper>
-      </>
+            <Typography component="div">
+              <Link rel="noopener" href={GITHUB_REPO} target="_black">
+                {t('appbar.repoLink')}
+              </Link>
+            </Typography>
+            <Typography component="div">{`v.${__VERSION__.major}.${__VERSION__.minor}.${__VERSION__.patch}`}</Typography>
+            <Typography component="div">{new Date(__VERSION__.timestamp).toLocaleDateString()}</Typography>
+          </Box>
+        </Paper>
+      </Popper>
+    </>
   );
 }

@@ -40,9 +40,12 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
 
   const isDisabled = layer?.numOffeatures === 0 || layer?.features === null;
 
-  const isLoading = layer?.numOffeatures === 0 || layer?.features === null 
-              || layer.queryStatus === 'processing' || layer.layerStatus === 'loading' 
-              || layer.layerStatus === 'processing';
+  const isLoading =
+    layer?.numOffeatures === 0 ||
+    layer?.features === null ||
+    layer.queryStatus === 'processing' ||
+    layer.layerStatus === 'loading' ||
+    layer.layerStatus === 'processing';
 
   const renderLayerIcon = () => {
     switch (layer.layerStatus) {
