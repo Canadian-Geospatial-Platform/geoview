@@ -32,15 +32,15 @@ type RenderFooterContentProps = {
 const RenderFooterContentInRightPanel = memo(({ footerContenKeys, footerContentKeyValues, allTabs }: RenderFooterContentProps) => {
   return (
     <List>
-      {footerContenKeys.map((footerKey: string) => {
-        return (
-          allTabs?.includes(footerKey as TypeValidFooterBarTabsCoreProps[number]) && (
+      {footerContenKeys
+        .filter((footerKey) => allTabs?.includes(footerKey as TypeValidFooterBarTabsCoreProps[number]))
+        .map((footerKey) => {
+          return (
             <ListItem key={footerKey}>
               <Markdown options={{ wrapper: 'article' }}>{footerContentKeyValues[footerKey]}</Markdown>
             </ListItem>
-          )
-        );
-      })}
+          );
+        })}
     </List>
   );
 });
@@ -58,7 +58,9 @@ export function GuidePanel({ fullWidth }: GuidePanelType): JSX.Element {
 
   // get store config for footer bar
   const footerBarConfig = useGeoViewConfig()?.footerBar;
-  const allTabs: TypeValidFooterBarTabsCoreProps | undefined = footerBarConfig?.tabs.core;
+  const appbarConfig = useGeoViewConfig()?.appBar;
+  const allTabs: TypeValidFooterBarTabsCoreProps | undefined =
+    footerBarConfig?.tabs.core || (appbarConfig?.tabs.core as unknown as TypeValidFooterBarTabsCoreProps);
 
   // fetch the content of general guide items with custom hook
   const mdFilePath = './locales/markdown/general-content.md';
@@ -114,6 +116,7 @@ export function GuidePanel({ fullWidth }: GuidePanelType): JSX.Element {
       });
     }
   });
+  console.log('leftPanelItemKeys', helpItems);
 
   const handleGuideItemClick = (layer: LayerListEntry) => {
     const index: number = helpItems.findIndex((item) => item.layerName === layer.layerName);
