@@ -99,7 +99,7 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
   }, [checkedFeatures, feature]); // ! Check if feature is necessary in this dependency array? If so explain it in comment? Should be featurUid?
 
   return (
-    <Paper sx={{ boxShadow: 'none', border: 'none' }}>
+    <Paper sx={{ boxShadow: 'none', border: 'none', paddingTop: '0.5rem' }}>
       <Box
         sx={{
           p: '0 20px 10px 20px',

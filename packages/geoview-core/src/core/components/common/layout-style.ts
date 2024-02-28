@@ -1,10 +1,6 @@
 import { Theme } from '@mui/material/styles';
 
 export const getSxClasses = (theme: Theme) => ({
-  detailsContainer: {
-    background: theme.palette.geoViewColor.bgColor.main,
-    paddingBottom: '1rem',
-  },
   panelHeaders: {
     fontSize: theme.palette.geoViewFontSize.lg,
     fontWeight: '600',

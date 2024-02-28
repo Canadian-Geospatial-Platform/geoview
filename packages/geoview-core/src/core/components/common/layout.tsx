@@ -2,15 +2,12 @@ import { useState, useCallback, type ReactNode } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Box } from '@/ui';
 import { logger } from '@/core/utils/logger';
-
-import { getSxClasses } from './layout-style';
 import { LayerList, LayerListEntry } from './layer-list';
 import { ResponsiveGrid } from './responsive-grid';
 import { LayerTitle } from './layer-title';
 import { EnlargeButton } from './enlarge-button';
 import { CloseButton } from './close-button';
 import { useFooterPanelHeight } from './use-footer-panel-height';
-import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 interface LayoutProps {
   children?: ReactNode;
@@ -23,11 +20,9 @@ interface LayoutProps {
 
 export function Layout({ children, layerList, selectedLayerPath, onLayerListClicked, onIsEnlargeClicked, fullWidth }: LayoutProps) {
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
 
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
   const [isEnlarged, setIsEnlarged] = useState(false);
-  const isMapFullScreen = useAppFullscreenActive();
 
   // Custom hook for calculating the height of footer panel
   const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'default' });
@@ -88,7 +83,7 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
   }
 
   return (
-    <Box sx={sxClasses.detailsContainer}>
+    <Box>
       <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
         {!fullWidth && (
           <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlarged}>
@@ -123,7 +118,7 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
       </ResponsiveGrid.Root>
       <ResponsiveGrid.Root>
         <ResponsiveGrid.Left
-          {...(!isMapFullScreen && !fullWidth && { ref: leftPanelRef })}
+          {...(!fullWidth && { ref: leftPanelRef })}
           isEnlarged={isEnlarged}
           isLayersPanelVisible={isLayersPanelVisible}
           fullWidth={fullWidth}
@@ -131,7 +126,7 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
           {renderLayerList()}
         </ResponsiveGrid.Left>
         <ResponsiveGrid.Right
-          {...(!isMapFullScreen && !fullWidth && { ref: rightPanelRef })}
+          {...(!fullWidth && { ref: rightPanelRef })}
           isEnlarged={isEnlarged}
           isLayersPanelVisible={isLayersPanelVisible}
           fullWidth={fullWidth}

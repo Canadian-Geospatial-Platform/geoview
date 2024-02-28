@@ -1,8 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIActiveFooterBarTabId, useUIFooterPanelResizeValue } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useDetailsStoreLayerDataArray } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import {
+  useDetailsStoreAllFeaturesDataArray,
+  useDetailsStoreLayerDataArray,
+} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { logger } from '@/core/utils/logger';
+import { useDataTableStoreActions } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 
 interface UseFooterPanelHeightType {
   footerPanelTab: 'layers' | 'details' | 'data-table' | 'legend' | 'default' | 'guide';
@@ -18,18 +22,18 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
   const rightPanelRef = useRef<HTMLDivElement>(null);
   const panelTitleRef = useRef<HTMLDivElement>(null);
 
-  const [tableHeight, setTableHeight] = useState<number>(600);
-
   const isMapFullScreen = useAppFullscreenActive();
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
   const activeFooterBarTabId = useUIActiveFooterBarTabId();
   const arrayOfLayerData = useDetailsStoreLayerDataArray();
+  const allFeaturesLayerData = useDetailsStoreAllFeaturesDataArray();
+  const { setTableHeight } = useDataTableStoreActions();
 
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('USE-FOOTER-PANEL-HEIGHT - footerPanelResizeValue', footerPanelResizeValue, isMapFullScreen);
 
-    const defaultHeight = 700;
+    const defaultHeight = 600;
 
     if (leftPanelRef.current && isMapFullScreen && (activeFooterBarTabId === footerPanelTab || footerPanelTab === 'default')) {
       const panelTitleHeight = panelTitleRef.current?.clientHeight ?? 0;
@@ -39,22 +43,16 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
       const leftPanelHeight = (window.screen.height * footerPanelResizeValue) / 100 - panelTitleHeight - firstChildHeight;
 
       leftPanelRef.current.style.maxHeight = `${leftPanelHeight}px`;
-      leftPanelRef.current.style.height = `${leftPanelHeight}px`;
       leftPanelRef.current.style.overflow = 'auto';
       leftPanelRef.current.style.paddingBottom = '24px';
 
-      if (footerPanelTab === 'data-table') {
+      if (activeFooterBarTabId === 'data-table') {
         setTableHeight(leftPanelHeight - 10);
       } else {
-        let rightPanel;
-        if (footerPanelTab === 'details') {
-          rightPanel = (rightPanelRef.current?.firstElementChild ?? null) as HTMLElement | null;
-        } else if (footerPanelTab === 'layers' || footerPanelTab === 'default') {
-          rightPanel = (rightPanelRef.current?.firstElementChild?.firstElementChild ?? null) as HTMLElement | null;
-        }
+        const rightPanel = (rightPanelRef.current?.firstElementChild ?? null) as HTMLElement | null;
+
         if (rightPanel) {
           rightPanel.style.maxHeight = `${leftPanelHeight}px`;
-          rightPanel.style.overflow = `auto`;
           rightPanel.style.paddingBottom = `24px`;
         }
       }
@@ -63,23 +61,25 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
     if (!isMapFullScreen && leftPanelRef.current) {
       leftPanelRef.current.style.maxHeight = `${defaultHeight}px`;
       leftPanelRef.current.style.overflow = 'auto';
-      if (footerPanelTab === 'data-table') {
+      if (activeFooterBarTabId === 'data-table') {
         setTableHeight(defaultHeight);
       } else {
-        let rightPanel;
-        if (footerPanelTab === 'details') {
-          rightPanel = (rightPanelRef.current?.firstElementChild ?? null) as HTMLElement | null;
-        } else if (footerPanelTab === 'layers' || footerPanelTab === 'default') {
-          rightPanel = (rightPanelRef.current?.firstElementChild?.firstElementChild ?? null) as HTMLElement | null;
-        }
+        const rightPanel = (rightPanelRef.current?.firstElementChild ?? null) as HTMLElement | null;
 
         if (rightPanel) {
           rightPanel.style.maxHeight = `${defaultHeight}px`;
-          rightPanel.style.overflow = `auto`;
         }
       }
     }
-  }, [footerPanelResizeValue, isMapFullScreen, activeFooterBarTabId, footerPanelTab, arrayOfLayerData]);
+  }, [
+    footerPanelResizeValue,
+    isMapFullScreen,
+    activeFooterBarTabId,
+    footerPanelTab,
+    arrayOfLayerData,
+    allFeaturesLayerData,
+    setTableHeight,
+  ]);
 
-  return { leftPanelRef, rightPanelRef, panelTitleRef, tableHeight };
+  return { leftPanelRef, rightPanelRef, panelTitleRef };
 }
