@@ -24,14 +24,7 @@ export function TabPanel(props: TypeTabPanelProps): JSX.Element {
   const { children, value, index, ...other } = props;
 
   return (
-    <Box
-      role="tabpanel"
-      hidden={value !== index}
-      id={`${`simple-tabpanel`}-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-      sx={{ paddingBottom: '1rem' }}
-    >
+    <Box role="tabpanel" hidden={value !== index} id={`${`simple-tabpanel`}-${index}`} aria-labelledby={`simple-tab-${index}`} {...other}>
       <FocusTrapElement id={`panel-${index}`} content={children} />
     </Box>
   );
