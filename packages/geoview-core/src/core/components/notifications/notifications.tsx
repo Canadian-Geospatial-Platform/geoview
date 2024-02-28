@@ -125,7 +125,7 @@ export default function Notifications(): JSX.Element {
           </IconButton>
         </Badge>
 
-        <Popper open={open} anchorEl={anchorEl} placement="right-end" container={mapElem}>
+        <Popper open={open} anchorEl={anchorEl} placement="right-end" onClose={handleClickAway} container={mapElem}>
           <Paper sx={sxClasses.notificationPanel}>
             <Typography component="h3" sx={sxClasses.notificationsTitle}>
               {t('appbar.notifications')}

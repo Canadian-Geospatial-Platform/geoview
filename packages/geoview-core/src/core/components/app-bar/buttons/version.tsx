@@ -84,7 +84,7 @@ export default function Version(): JSX.Element {
           </SvgIcon>
         </IconButton>
 
-        <Popper sx={{ zIndex: '150' }} open={open} anchorEl={anchorEl} placement="right-end" container={mapElem}>
+        <Popper sx={{ zIndex: '150' }} open={open} anchorEl={anchorEl} placement="right-end" onClose={handleClickAway} container={mapElem}>
           <Paper sx={sxClasses.versionInfoPanel}>
             <Typography sx={sxClasses.versionsInfoTitle} component="h3">
               {t('appbar.version')}
