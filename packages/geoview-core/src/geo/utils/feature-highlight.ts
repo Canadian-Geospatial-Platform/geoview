@@ -56,7 +56,6 @@ export class FeatureHighlight {
 
   constructor(mapId: string) {
     this.mapId = mapId;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     this.overlayLayer = new VectorLayer({ source: this.animationSource, map: api.maps[this.mapId].map });
   }
 

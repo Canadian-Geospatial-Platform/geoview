@@ -14,7 +14,7 @@ import { TypeXYZTilesLayerEntryConfig, geoviewEntryIsXYZTiles } from '@/geo/laye
 import { TypeVectorTilesLayerEntryConfig, geoviewEntryIsVectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { geoviewEntryIsEsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { TypeEsriFeatureLayerEntryConfig, geoviewEntryIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
-import { TypeWfsLayerEntryConfig, geoviewEntryIsWFS } from '@/geo/layer/geoview-layers/vector/wfs';
+import { geoviewEntryIsWFS } from '@/geo/layer/geoview-layers/vector/wfs';
 import { TypeOgcFeatureLayerEntryConfig, geoviewEntryIsOgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { TypeGeoJSONLayerEntryConfig, geoviewEntryIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { TypeCsvLayerEntryConfig, geoviewEntryIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
@@ -47,6 +47,7 @@ import { CONFIG_GEOCORE_URL, CONFIG_GEOLOCATOR_URL } from '@/app';
 
 import { generateId, replaceParams, getLocalizedMessage, showError } from '../utilities';
 import schema from '../../../../schema.json';
+import { WfsLayerEntryConfig } from './validationClasses/wfs-layer-entry-config';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -346,13 +347,12 @@ export class ConfigValidation {
    * @param {AnyValidateFunction<unknown>} validate The Ajv validator.
    * @param {any} objectAffected Object that was validated.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private printSchemaError(validate: AnyValidateFunction<unknown>, objectAffected: any) {
+  private printSchemaError(validate: AnyValidateFunction<unknown>, objectAffected: unknown) {
     for (let i = 0; i < validate.errors!.length; i += 1) {
       const error = validate.errors![i];
       const { instancePath } = error;
       const path = instancePath.split('/');
-      let node = objectAffected;
+      let node = objectAffected as TypeJsonObject;
       for (let j = 1; j < path.length; j += 1) {
         node = node[path[j]];
       }
@@ -621,7 +621,7 @@ export class ConfigValidation {
       } else if (geoviewEntryIsEsriImage(layerConfig)) {
         listOfLayerEntryConfig[i] = new TypeEsriImageLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsWFS(layerConfig)) {
-        listOfLayerEntryConfig[i] = new TypeWfsLayerEntryConfig(layerConfig);
+        listOfLayerEntryConfig[i] = new WfsLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsOgcFeature(layerConfig)) {
         listOfLayerEntryConfig[i] = new TypeOgcFeatureLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsGeoPackage(layerConfig)) {

@@ -591,7 +591,6 @@ export class GeoPackage extends AbstractGeoViewVector {
     // !            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
     const promisedLayers = new Promise<BaseLayer | LayerGroup | null>((resolve) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       this.extractGeopackageData(layerConfig).then(([layers, slds]) => {
         if (layers.length === 1) {
           this.processOneGeopackageLayer(layerConfig, layers[0], slds).then((baseLayer) => {

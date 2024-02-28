@@ -877,6 +877,7 @@ export class WMS extends AbstractGeoViewRaster {
       const styleLegends: TypeWmsLegendStyle[] = [];
       if (this.WMSStyles.length > 1) {
         for (let i = 0; i < this.WMSStyles.length; i++) {
+          // TODO: refactor - does this await in a loop may haev an impact on performance?
           // eslint-disable-next-line no-await-in-loop
           const styleLegend = await this.getStyleLegend(layerConfig!, i);
           styleLegends.push(styleLegend);

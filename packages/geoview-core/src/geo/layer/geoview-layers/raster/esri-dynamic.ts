@@ -141,8 +141,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {boolean} true if an error is detected.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig, esriIndex: number): boolean {
+  esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig): boolean {
     if (!this.metadata!.supportsDynamicLayers) {
       this.layerLoadError.push({
         layer: layerConfig.layerPath,

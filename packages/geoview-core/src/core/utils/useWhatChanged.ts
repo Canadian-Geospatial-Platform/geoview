@@ -45,12 +45,13 @@ function stringifyValue(dependencyItem: unknown): string | unknown {
 
 /**
  * Helper function to create a hook on a hot reference
- * @param value any The value to hook in a reference
+ * @param {unknown} value any The value to hook in a reference
  * @returns ref The reference to the value
  */
+// ? unknown type cannot be use, need to escape
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function useHotRefs(value: any) {
-  const fnRef = useRef(value);
+function useHotRefs(value: unknown): any {
+  const fnRef = useRef<unknown>(value);
   useEffect(() => {
     fnRef.current = value;
   });

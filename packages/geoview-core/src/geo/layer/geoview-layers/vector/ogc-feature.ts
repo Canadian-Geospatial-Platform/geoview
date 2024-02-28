@@ -158,9 +158,10 @@ export class OgcFeature extends AbstractGeoViewVector {
           .then((response) => {
             this.metadata = response.data;
             resolve();
-          }) // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          })
           .catch((reason) => {
             this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
+            logger.logError('Unable to fetch metadata', this.metadataAccessPath, reason);
             resolve();
           });
       } else {

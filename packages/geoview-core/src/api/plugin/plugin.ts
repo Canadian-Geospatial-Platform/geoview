@@ -30,6 +30,7 @@ export class Plugin {
    *
    * @param {string} pluginId the package id to load
    */
+  // ? unknown type cannot be use, need to escape. Creates problems in fotter-bar.tsx
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   loadScript = (pluginId: string): Promise<any> => {
     return new Promise((resolve, reject) => {
@@ -105,6 +106,7 @@ export class Plugin {
       if (constructor) {
         // create new instance of the plugin. Here we must type the constructor variable to any
         // in order to cancel the "'new' expression, whose target lacks a construct signature" error message
+        // ? unknown type cannot be use, need to escape
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         plugin = new (constructor as any)(pluginId, props);
       }
