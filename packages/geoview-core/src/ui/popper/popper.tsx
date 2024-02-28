@@ -30,5 +30,5 @@ export const Popper: React.FC<EnhancedPopperProps> = ({ open, onClose, ...restPr
     };
   }, [open, onClose]);
 
-  return <MaterialPopper sx={{ zIndex: '150' }} {...restProps} open={open} ref={popperRef} />;
+  return <MaterialPopper sx={{ zIndex: '2000' }} {...restProps} open={open} ref={popperRef} />;
 };

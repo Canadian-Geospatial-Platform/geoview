@@ -51,7 +51,6 @@ export default function Version(): JSX.Element {
       borderRadius: '5px',
       boxShadow: 2,
       marginLeft: '15px',
-      zIndex: 300,
       padding: '10px',
       '& a': {
         color: (theme: Theme) =>
@@ -84,7 +83,7 @@ export default function Version(): JSX.Element {
           </SvgIcon>
         </IconButton>
 
-        <Popper sx={{ zIndex: '150' }} open={open} anchorEl={anchorEl} placement="right-end" onClose={handleClickAway} container={mapElem}>
+        <Popper open={open} anchorEl={anchorEl} placement="right-end" onClose={handleClickAway} container={mapElem}>
           <Paper sx={sxClasses.versionInfoPanel}>
             <Typography sx={sxClasses.versionsInfoTitle} component="h3">
               {t('appbar.version')}
