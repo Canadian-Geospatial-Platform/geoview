@@ -6,9 +6,6 @@ export const getSxClasses = (theme: Theme) => ({
     display: 'flex',
     flexDirection: 'column',
   },
-  containerHeight: {
-    height: 700,
-  },
   title: {
     textAlign: 'left',
     fontWeight: '600',

@@ -401,7 +401,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
           fullWidth={fullWidth}
         >
           {memoSelectedLayerDataFeatures && (
-            <Box sx={sxClasses.rightPanelContainer}>
+            <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer, maxHeight: '600px' }}>
               <Grid container sx={sxClasses.rightPanelBtnHolder}>
                 <Grid item xs={6}>
                   <Box style={{ marginLeft: '22px' }}>
