@@ -269,7 +269,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
-    // The line below uses var because a var declaration has a wider scope than a let declaration.
+    // ? The line below uses var because a var declaration has a wider scope than a let declaration.
     // eslint-disable-next-line no-var
     var vectorSource: VectorSource<Feature>;
     sourceOptions.url = getLocalizedValue(layerConfig.source!.dataAccessPath!, this.mapId);

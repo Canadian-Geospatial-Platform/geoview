@@ -28,8 +28,7 @@ export type TypeMapState = {
 /** ******************************************************************************************************************************
  *  Definition of the post settings type needed when the GeoView GeoJSON layers need to use a POST instead of a GET.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type TypePostSettings = { header?: Record<string, string>; data: any };
+export type TypePostSettings = { header?: Record<string, string>; data: unknown };
 
 /** ******************************************************************************************************************************
  *  Definition of a bilingual string.

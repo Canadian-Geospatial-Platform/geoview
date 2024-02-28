@@ -54,7 +54,6 @@ export function AddNewLayer(): JSX.Element {
 
   const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, ESRI_IMAGE, GEOJSON, GEOPACKAGE, WMS, WFS, OGC_FEATURE, XYZ_TILES, GEOCORE } = CONST_LAYER_TYPES;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [geoviewLayerInstance, setGeoviewLayerInstance] = useState<AbstractGeoViewLayer | undefined>();
   const [activeStep, setActiveStep] = useState(0);
   const [layerURL, setLayerURL] = useState('');
@@ -1006,6 +1005,7 @@ export function AddNewLayer(): JSX.Element {
    * @param param0 specify if button is first or last in the list
    * @returns {JSX.Element} React component
    */
+  // TODO: refactor - remove the unstable nested component
   // eslint-disable-next-line react/no-unstable-nested-components
   function NavButtons({ isFirst = false, isLast = false, handleNext }: ButtonPropsLayerPanel): JSX.Element {
     return isLoading ? (
@@ -1150,6 +1150,7 @@ export function AddNewLayer(): JSX.Element {
                       options={layerList as TypeListOfLayerEntryConfig}
                       getOptionLabel={(option) => `${option.layerName!.en} (${option.layerId})`}
                       renderOption={(props, option) => <span {...props}>{option.layerName!.en}</span>}
+                      // ? unknown type cannot be use, need to escape
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       onChange={handleSelectLayer as any}
                       renderInput={(params) => <TextField {...params} label={t('layers.layerSelect')} />}
@@ -1164,6 +1165,7 @@ export function AddNewLayer(): JSX.Element {
                       options={layerList as TypeListOfGeoviewLayerConfig}
                       getOptionLabel={(option) => `${option.geoviewLayerName!.en} (${option.geoviewLayerId})`}
                       renderOption={(props, option) => <span {...props}>{option.geoviewLayerName!.en}</span>}
+                      // ? unknown type cannot be use, need to escape
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       onChange={handleSelectLayer as any}
                       renderInput={(params) => <TextField {...params} label={t('layers.layerSelect')} />}

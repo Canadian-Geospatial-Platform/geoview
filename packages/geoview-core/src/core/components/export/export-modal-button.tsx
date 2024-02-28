@@ -7,6 +7,7 @@ import { useGeoViewMapId } from '@/app';
  */
 interface ExportProps {
   className?: string;
+  // eslint-disable-next-line react/require-default-props
   sxDetails?: object;
 }
 

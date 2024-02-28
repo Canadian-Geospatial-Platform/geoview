@@ -132,6 +132,7 @@ export function Map(): JSX.Element {
   }, [initMap]);
 
   return (
+    // ? the map is focusable and needs to be tabbable for keyboard navigation
     /* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */
     <Box id={`mapbox-${mapId}`} ref={mapElement as MutableRefObject<HTMLDivElement>} sx={sxClasses.mapContainer} tabIndex={0}>
       {mapLoaded && (

@@ -386,6 +386,7 @@ export class Geometry {
 
     marker.setStyle(
       new Style({
+        // ? unknown type cannot be use, need to escape
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         image: new Icon(markerOptions.style as any),
       })

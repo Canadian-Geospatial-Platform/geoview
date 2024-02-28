@@ -57,9 +57,7 @@ const useManageArrow = () => {
       }; // original numbers
       if (screenNorthPoint[0] < 2400 && screenNorthPoint[1] > -1300 && -screenNorthPoint[1] < 3000) {
         // more precise
-        // eslint-disable-next-line prefer-destructuring
-        triangle.x = screenNorthPoint[0];
-        triangle.y = -screenNorthPoint[1];
+        [triangle.x, triangle.y] = screenNorthPoint;
         triangle.m = -1;
       }
 
