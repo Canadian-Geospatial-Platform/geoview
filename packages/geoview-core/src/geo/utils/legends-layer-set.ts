@@ -10,7 +10,7 @@ import {
   payloadIsLayerSetChangeLayerStatus,
   payloadIsLayerSetUpdated,
 } from '@/api/events/payloads';
-import { api } from '@/app';
+import { TypeBaseLayerEntryConfig, api } from '@/app';
 import { LayerSet } from './layer-set';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { logger } from '@/core/utils/logger';
@@ -75,6 +75,9 @@ export class LegendsLayerSet extends LayerSet {
         if (layerExists && ['processed', 'loaded'].includes(layerStatus) && this.resultSet?.[layerPath]?.querySent === false) {
           api.event.emit(GetLegendsPayload.createQueryLegendPayload(`${this.mapId}/${layerPath}`, layerPath));
           this.resultSet[layerPath].querySent = true;
+          // config file could not determine if the layer is queryable, can it be done using the metadata? let's try
+          const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
+          layerConfig.geoviewLayerInstance?.registerToLayerSets(layerConfig as TypeBaseLayerEntryConfig);
         }
         if (layerExists || layerStatus === 'loaded')
           LegendEventProcessor.propagateLegendToStore(this.mapId, layerPath, this.resultSet[layerPath]);
@@ -91,7 +94,7 @@ export class LegendsLayerSet extends LayerSet {
       EVENT_NAMES.GET_LEGENDS.LEGEND_INFO,
       (payload) => {
         // Log
-        logger.logTraceCoreAPIEvent('legends-layer-set - GET_LEGENDS.LEGEND_INFO', this.mapId, payload);
+        logger.logTraceCoreAPIEvent('LEGENDS-LAYER-SET - GET_LEGENDS.LEGEND_INFO', this.mapId, payload);
 
         if (payloadIsLegendInfo(payload)) {
           const { layerPath, legendInfo } = payload;
@@ -116,7 +119,7 @@ export class LegendsLayerSet extends LayerSet {
       EVENT_NAMES.LAYER_SET.UPDATED,
       (payload) => {
         // Log
-        logger.logTraceCoreAPIEvent('legends-layer-set - LAYER_SET.UPDATED', this.mapId, payload);
+        logger.logTraceCoreAPIEvent('LEGENDS-LAYER-SET - LAYER_SET.UPDATED', this.mapId, payload);
 
         if (payloadIsLayerSetUpdated(payload)) {
           const { layerPath } = payload;
