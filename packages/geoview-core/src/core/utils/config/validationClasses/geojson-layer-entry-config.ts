@@ -1,7 +1,8 @@
 import { TypeSourceGeoJSONInitialConfig } from '@/geo/layer/geoview-layers/vector/geojson';
-import { TypeLocalizedString, TypeVectorLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { TypeLocalizedString } from '@/geo/map/map-schema-types';
+import { VectorLayerEntryConfig } from './vector-layer-entry-config';
 
-export class GeoJSONLayerEntryConfig extends TypeVectorLayerEntryConfig {
+export class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
   declare source: TypeSourceGeoJSONInitialConfig;
 
   /**

@@ -15,16 +15,16 @@ import {
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
-  TypeImageStaticLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
 import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
+import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validationClasses/image-static-layer-entry-config';
 
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'imageStatic';
-  listOfLayerEntryConfig: TypeImageStaticLayerEntryConfig[];
+  listOfLayerEntryConfig: ImageStaticLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
@@ -53,7 +53,7 @@ export const geoviewLayerIsImageStatic = (verifyIfGeoViewLayer: AbstractGeoViewL
 };
 
 /** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TypeImageStaticLayerEntryConfig if the geoviewLayerType attribute of the
+ * type guard function that redefines a TypeLayerEntryConfig as a ImageStaticLayerEntryConfig if the geoviewLayerType attribute of the
  * verifyIfGeoViewEntry.geoviewLayerConfig attribute is ImageStatic. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
@@ -64,7 +64,7 @@ export const geoviewLayerIsImageStatic = (verifyIfGeoViewLayer: AbstractGeoViewL
  */
 export const geoviewEntryIsImageStatic = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is TypeImageStaticLayerEntryConfig => {
+): verifyIfGeoViewEntry is ImageStaticLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.IMAGE_STATIC;
 };
 
@@ -104,11 +104,11 @@ export class ImageStatic extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * Get the legend image of a layer.
    *
-   * @param {TypeImageStaticLayerEntryConfig} layerConfig layer configuration.
+   * @param {ImageStaticLayerEntryConfig} layerConfig layer configuration.
    *
    * @returns {blob} image blob
    */
-  private getLegendImage(layerConfig: TypeImageStaticLayerEntryConfig): Promise<string | ArrayBuffer | null> {
+  private getLegendImage(layerConfig: ImageStaticLayerEntryConfig): Promise<string | ArrayBuffer | null> {
     const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
       const readImage = (blob: Blob): Promise<string | ArrayBuffer | null> =>
         // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -145,7 +145,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    */
   async getLegend(layerPath: string): Promise<TypeLegend | null> {
     try {
-      const layerConfig = this.getLayerConfig(layerPath) as TypeImageStaticLayerEntryConfig | undefined | null;
+      const layerConfig = this.getLayerConfig(layerPath) as ImageStaticLayerEntryConfig | undefined | null;
       if (!layerConfig) return null;
 
       const legendImage = await this.getLegendImage(layerConfig!);
@@ -240,11 +240,11 @@ export class ImageStatic extends AbstractGeoViewRaster {
   /** ****************************************************************************************************************************
    * This method creates a GeoView Image Static layer using the definition provided in the layerConfig parameter.
    *
-   * @param {TypeImageStaticLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @param {ImageStaticLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  processOneLayerEntry(layerConfig: TypeImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  processOneLayerEntry(layerConfig: ImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     super.processOneLayerEntry(layerConfig);
     const { layerPath } = layerConfig;
     this.setLayerPhase('processOneLayerEntry', layerPath);

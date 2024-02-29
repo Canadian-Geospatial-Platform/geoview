@@ -1,7 +1,8 @@
 import { TypeSourceWFSVectorInitialConfig } from '@/geo/layer/geoview-layers/vector/wfs';
-import { TypeVectorLayerEntryConfig, TypeLocalizedString } from '@/geo/map/map-schema-types';
+import { TypeLocalizedString } from '@/geo/map/map-schema-types';
+import { VectorLayerEntryConfig } from './vector-layer-entry-config';
 
-export class WfsLayerEntryConfig extends TypeVectorLayerEntryConfig {
+export class WfsLayerEntryConfig extends VectorLayerEntryConfig {
   declare source: TypeSourceWFSVectorInitialConfig;
 
   /**

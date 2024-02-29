@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-// We have many reassing for sourceOptions-layerConfig. We keep it global...
+// We have many reassign for sourceOptions-layerConfig. We keep it global...
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { GeoJSON as FormatGeoJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
@@ -11,13 +11,11 @@ import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-lay
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
-  TypeVectorLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
   TypeBaseSourceVectorInitialConfig,
-  TypeBaseLayerEntryConfig,
   TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
 import { getLocalizedValue } from '@/core/utils/utilities';
@@ -25,6 +23,8 @@ import { Cast, toJsonObject } from '@/core/types/global-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { api } from '@/app';
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validationClasses/geojson-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/core/utils/config/validationClasses/vector-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validationClasses/abstract-base-layer-entry-config';
 
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'GeoJSON';
@@ -153,13 +153,13 @@ export class GeoJSON extends AbstractGeoViewVector {
    *
    * ! This routine must imperatively ends with layerConfig.layerStatus = 'processed' or 'error' if an error happens.
    *
-   * @param {TypeVectorLayerEntryConfig} layerConfig The layer entry configuration to process.
+   * @param {VectorLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerConfig: TypeVectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected processLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     if (this.metadata) {
-      const metadataLayerList = Cast<TypeVectorLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
+      const metadataLayerList = Cast<VectorLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
       const layerMetadataFound = metadataLayerList.find(
         (layerMetadata) => layerMetadata.layerId === layerConfig.layerId && layerMetadata.layerIdExtension === layerConfig.layerIdExtension
       );
@@ -206,14 +206,14 @@ export class GeoJSON extends AbstractGeoViewVector {
   /** ***************************************************************************************************************************
    * Create a source configuration for the vector layer.
    *
-   * @param {TypeBaseLayerEntryConfig} layerConfig The layer entry configuration.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
    * @param {SourceOptions} sourceOptions The source options (default: {}).
    * @param {ReadOptions} readOptions The read options (default: {}).
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
   protected createVectorSource(
-    layerConfig: TypeBaseLayerEntryConfig,
+    layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {

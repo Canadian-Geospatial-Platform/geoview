@@ -277,6 +277,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
     if (data.setEntries) data.setEntries(entries);
   };
 
+  // TODO: refactor - remove comment in tsx for production build facebook/create-react-app#9507
   return (
     <Box sx={sxClasses.layersContainer}>
       {Object.values(layers).map((layer) => (

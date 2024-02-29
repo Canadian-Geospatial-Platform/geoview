@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-// We have many reassing for layerConfig. We keep it global...
+// We have many reassign for layerConfig. We keep it global...
 import TileLayer from 'ol/layer/Tile';
 import { Options as TileOptions } from 'ol/layer/BaseTile';
 import XYZ, { Options as SourceOptions } from 'ol/source/XYZ';

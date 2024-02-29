@@ -1,14 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 
 import { TypeJsonObject, TypeJsonArray } from '@/core/types/global-types';
-import {
-  TypeEsriDynamicLayerEntryConfig,
-  TypeImageStaticLayerEntryConfig,
-  TypeListOfGeoviewLayerConfig,
-  TypeOfServer,
-  TypeOgcWmsLayerEntryConfig,
-  TypeTileGrid,
-} from '@/geo/map/map-schema-types';
+import { TypeListOfGeoviewLayerConfig, TypeOfServer, TypeTileGrid } from '@/geo/map/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeEsriDynamicLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { TypeEsriFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
@@ -29,6 +22,9 @@ import { GeoJSONLayerEntryConfig } from '../validationClasses/geojson-layer-entr
 import { EsriFeatureLayerEntryConfig } from '../validationClasses/esri-feature-layer-entry-config';
 import { GeoPackageLayerEntryConfig } from '../validationClasses/geopackage-layer-config-entry';
 import { XYZTilesLayerEntryConfig } from '../validationClasses/xyz-layer-entry-config';
+import { ImageStaticLayerEntryConfig } from '../validationClasses/image-static-layer-entry-config';
+import { OgcWmsLayerEntryConfig } from '../validationClasses/ogc-wms-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from '../validationClasses/esri-dynamic-layer-entry-config';
 
 // The GeoChart Json object coming out of the GeoCore response
 export type GeoChartGeoCoreConfig = TypeJsonObject & {
@@ -92,8 +88,8 @@ export class UUIDmapConfigReader {
               geoviewLayerType: 'esriDynamic',
               listOfLayerEntryConfig: [],
             };
-            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): TypeEsriDynamicLayerEntryConfig => {
-              const esriDynamicLayerEntryConfig = new TypeEsriDynamicLayerEntryConfig({
+            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): EsriDynamicLayerEntryConfig => {
+              const esriDynamicLayerEntryConfig = new EsriDynamicLayerEntryConfig({
                 geoviewLayerConfig,
                 schemaTag: 'esriDynamic',
                 entryType: 'raster-image',
@@ -101,7 +97,7 @@ export class UUIDmapConfigReader {
                 source: {
                   dataAccessPath: createLocalizedString(url as string),
                 },
-              } as TypeEsriDynamicLayerEntryConfig);
+              } as EsriDynamicLayerEntryConfig);
               return esriDynamicLayerEntryConfig;
             });
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
@@ -160,8 +156,8 @@ export class UUIDmapConfigReader {
               geoviewLayerType: 'ogcWms',
               listOfLayerEntryConfig: [],
             };
-            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): TypeOgcWmsLayerEntryConfig => {
-              const wmsLayerEntryConfig = new TypeOgcWmsLayerEntryConfig({
+            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): OgcWmsLayerEntryConfig => {
+              const wmsLayerEntryConfig = new OgcWmsLayerEntryConfig({
                 geoviewLayerConfig,
                 schemaTag: 'ogcWms',
                 entryType: 'raster-image',
@@ -170,7 +166,7 @@ export class UUIDmapConfigReader {
                   dataAccessPath: createLocalizedString(url as string),
                   serverType: (serverType === undefined ? 'mapserver' : serverType) as TypeOfServer,
                 },
-              } as TypeOgcWmsLayerEntryConfig);
+              } as OgcWmsLayerEntryConfig);
               return wmsLayerEntryConfig;
             });
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
@@ -313,15 +309,15 @@ export class UUIDmapConfigReader {
               geoviewLayerType: 'imageStatic',
               listOfLayerEntryConfig: [],
             };
-            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): TypeImageStaticLayerEntryConfig => {
-              const imageStaticLayerEntryConfig = new TypeImageStaticLayerEntryConfig({
+            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): ImageStaticLayerEntryConfig => {
+              const imageStaticLayerEntryConfig = new ImageStaticLayerEntryConfig({
                 schemaTag: 'imageStatic',
                 entryType: 'raster-image',
                 layerId: `${item.id}`,
                 source: {
                   dataAccessPath: createLocalizedString(url as string),
                 },
-              } as TypeImageStaticLayerEntryConfig);
+              } as ImageStaticLayerEntryConfig);
               return imageStaticLayerEntryConfig;
             });
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
