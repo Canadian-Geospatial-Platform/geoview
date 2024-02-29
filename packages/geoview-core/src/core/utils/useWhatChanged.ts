@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-// this utility file uses console to show react hooks. Not mean tu use the logger. We keep it global...
 import { useEffect, useRef } from 'react';
 
 // Indicates if currently logging useWhatChanged
@@ -58,6 +56,11 @@ function useHotRefs(value: unknown): any {
   return fnRef;
 }
 
+function writeConsole(...messages: unknown[]): void {
+  // eslint-disable-next-line no-console
+  console.log(...messages);
+}
+
 /**
  * Exposes a function to help debug react hooks and their dependencies
  * @param hookId string An indentifier for the given hook
@@ -79,8 +82,8 @@ export const useWhatChanged = (hookId: string, dependency?: unknown[], dependenc
 
   // Logs footer information
   function logFooter() {
-    console.log(`%c----- END SECTION -----`, `background: ${backgroundColorRef.current}; color: white; font-size: 10px`, '\n');
-    console.log('\n');
+    writeConsole(`%c----- END SECTION -----`, `background: ${backgroundColorRef.current}; color: white; font-size: 10px`, '\n');
+    writeConsole('\n');
   }
 
   // Logs header information
@@ -94,8 +97,8 @@ export const useWhatChanged = (hookId: string, dependency?: unknown[], dependenc
     isBlankArrayAsDependency?: boolean;
   }) {
     if (CURRENT_ACTIVE) {
-      console.log(`%c----- START SECTION -----`, `background: ${backgroundColorRef.current}; color: white; font-size: 10px`, '\n');
-      console.log(
+      writeConsole(`%c----- START SECTION -----`, `background: ${backgroundColorRef.current}; color: white; font-size: 10px`, '\n');
+      writeConsole(
         `%c ${whatChangedHookCountRef.current} ${hookId || ''}`,
         `background: ${backgroundColorRef.current}; color: white; font-size: 10px`,
         '👇🏾',
@@ -170,7 +173,7 @@ export const useWhatChanged = (hookId: string, dependency?: unknown[], dependenc
       });
 
       if (!isBlankArrayAsDependency) {
-        console.table(whatChanged);
+        writeConsole(whatChanged);
         logFooter();
       }
     }

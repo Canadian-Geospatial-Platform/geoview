@@ -10,9 +10,7 @@ import {
   GeoJSON,
   GeoPackage,
   TypeEsriDynamicLayerConfig,
-  TypeEsriDynamicLayerEntryConfig,
   TypeEsriFeatureLayerConfig,
-  TypeEsriImageLayerEntryConfig,
   TypeGeoJSONLayerConfig,
   TypeGeoPackageLayerConfig,
   TypeGeoviewLayerConfig,
@@ -20,7 +18,6 @@ import {
   TypeLayerEntryConfig,
   TypeListOfGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
-  TypeOgcWmsLayerEntryConfig,
   TypeXYZTilesConfig,
   XYZTiles,
 } from '@/geo';
@@ -43,6 +40,9 @@ import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validationClasses/g
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-feature-layer-entry-config';
 import { GeoPackageLayerEntryConfig } from '@/core/utils/config/validationClasses/geopackage-layer-config-entry';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validationClasses/xyz-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-dynamic-layer-entry-config';
+import { EsriImageLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-image-layer-entry-config';
+import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validationClasses/ogc-wms-layer-entry-config';
 
 type EsriOptions = {
   err: string;
@@ -230,7 +230,7 @@ export function AddNewLayer(): JSX.Element {
       // query layers are not sent, as not all services support asking for multiple layers
       const wmsGeoviewLayerConfig = {
         geoviewLayerType: WMS,
-        listOfLayerEntryConfig: [] as TypeOgcWmsLayerEntryConfig[],
+        listOfLayerEntryConfig: [] as OgcWmsLayerEntryConfig[],
         metadataAccessPath: createLocalizedString(accessPath),
       } as TypeWMSLayerConfig;
       const wmsGeoviewLayerInstance = new WmsGeoviewClass(mapId, wmsGeoviewLayerConfig);
@@ -250,7 +250,7 @@ export function AddNewLayer(): JSX.Element {
       supportedProj = wmsMetadata.Capability.Layer.CRS as string[];
       if (!supportedProj.includes(proj)) throw new Error('proj');
 
-      const layers: TypeOgcWmsLayerEntryConfig[] = [];
+      const layers: OgcWmsLayerEntryConfig[] = [];
 
       const hasChildLayers = (layer: TypeJsonObject) => {
         if (layer.Layer && (layer.Layer as TypeJsonArray).length > 0) {
@@ -261,11 +261,11 @@ export function AddNewLayer(): JSX.Element {
           for (let i = 0; i < paramLayers.length; i++) {
             if ((layer.Name as string) === paramLayers[i])
               layers.push(
-                new TypeOgcWmsLayerEntryConfig({
+                new OgcWmsLayerEntryConfig({
                   geoviewLayerConfig: wmsGeoviewLayerConfig,
                   layerId: layer.Name as string,
                   layerName: createLocalizedString(layer.Title as string),
-                } as TypeOgcWmsLayerEntryConfig)
+                } as OgcWmsLayerEntryConfig)
               );
           }
         }
@@ -444,7 +444,7 @@ export function AddNewLayer(): JSX.Element {
         type === ESRI_DYNAMIC
           ? ({
               geoviewLayerType: type,
-              listOfLayerEntryConfig: [] as TypeEsriDynamicLayerEntryConfig[],
+              listOfLayerEntryConfig: [] as EsriDynamicLayerEntryConfig[],
               metadataAccessPath: createLocalizedString(layerURL),
             } as TypeEsriDynamicLayerConfig)
           : ({
@@ -469,11 +469,11 @@ export function AddNewLayer(): JSX.Element {
             type === ESRI_DYNAMIC
               ? (esriMetadata.layers as TypeJsonArray).map(
                   (aLayer) =>
-                    new TypeEsriDynamicLayerEntryConfig({
+                    new EsriDynamicLayerEntryConfig({
                       geoviewLayerConfig: esriGeoviewLayerConfig,
                       layerId: aLayer.id as string,
                       layerName: createLocalizedString(aLayer.name as string),
-                    } as TypeEsriDynamicLayerEntryConfig)
+                    } as EsriDynamicLayerEntryConfig)
                 )
               : (esriMetadata.layers as TypeJsonArray).map(
                   (aLayer) =>
@@ -493,10 +493,10 @@ export function AddNewLayer(): JSX.Element {
           setLayerName(esriMetadata.name as string);
           setLayerEntries([
             type === ESRI_DYNAMIC
-              ? new TypeEsriDynamicLayerEntryConfig({
+              ? new EsriDynamicLayerEntryConfig({
                   layerId: esriMetadata.id as string,
                   layerName: createLocalizedString(esriMetadata.name as string),
-                } as TypeEsriDynamicLayerEntryConfig)
+                } as EsriDynamicLayerEntryConfig)
               : new EsriFeatureLayerEntryConfig({
                   layerId: esriMetadata.id as string,
                   layerName: createLocalizedString(esriMetadata.name as string),
@@ -522,7 +522,7 @@ export function AddNewLayer(): JSX.Element {
     try {
       const esriImageGeoviewLayerConfig = {
         geoviewLayerType: ESRI_IMAGE,
-        listOfLayerEntryConfig: [] as TypeEsriImageLayerEntryConfig[],
+        listOfLayerEntryConfig: [] as EsriImageLayerEntryConfig[],
         metadataAccessPath: createLocalizedString(layerURL),
       } as TypeEsriImageLayerConfig;
       const esriImageGeoviewLayerInstance = new EsriImage(mapId, esriImageGeoviewLayerConfig);
@@ -531,7 +531,7 @@ export function AddNewLayer(): JSX.Element {
       setGeoviewLayerInstance(esriImageGeoviewLayerInstance);
       await esriImageGeoviewLayerInstance.createGeoViewLayers();
       const layers = [
-        new TypeEsriImageLayerEntryConfig({
+        new EsriImageLayerEntryConfig({
           geoviewLayerConfig: esriImageGeoviewLayerConfig,
           layerId: esriImageGeoviewLayerConfig.geoviewLayerId,
           layerName: createLocalizedString(
@@ -540,7 +540,7 @@ export function AddNewLayer(): JSX.Element {
           source: {
             dataAccessPath: createLocalizedString(layerURL),
           },
-        } as TypeEsriImageLayerEntryConfig),
+        } as EsriImageLayerEntryConfig),
       ];
       setLayerName(layers[0].layerName!.en!);
       setLayerEntries([layers[0]]);

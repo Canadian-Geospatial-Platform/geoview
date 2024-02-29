@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-// all lines below (3-8) needs the eslint escape no-var-requires. It is the reason why we keep it global...
+// All lines below (3-8) needs the eslint escape no-var-requires.
+// It is a file for the buid and constant, they are reuse later in the file. It is the reason why we keep it global...
 const TerserPlugin = require('terser-webpack-plugin');
 const { merge } = require('webpack-merge');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');

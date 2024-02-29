@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-// console is use at 3 places (error, warn, info). We keep it global...
 import { isArray } from 'lodash';
 import { getItemAsNumber, getItemAsNumberOrNumberArraySetValue } from './localStorage';
 
@@ -400,6 +398,7 @@ export class ConsoleLogger {
    */
   logLevel = (level: number, header: string, color: keyof ColorCode, ...messages: unknown[]): void => {
     // If the configured logging level accepts to log the given level
+    // eslint-disable-next-line no-console
     if (this.checkLevel(level)) console.log(`%c${formatTime(new Date())} ${header}`, `color: ${color}`, ...messages);
   };
 
@@ -411,6 +410,7 @@ export class ConsoleLogger {
    */
   warnLevel = (level: number, ...messages: unknown[]): void => {
     // If the configured logging level accepts to log the given level
+    // eslint-disable-next-line no-console
     if (this.checkLevel(level)) console.warn(`${formatTime(new Date())}`, ...messages);
   };
 
@@ -422,6 +422,7 @@ export class ConsoleLogger {
    */
   errorLevel = (level: number, ...messages: unknown[]): void => {
     // If the configured logging level accepts to log the given level
+    // eslint-disable-next-line no-console
     if (this.checkLevel(level)) console.error(`${formatTime(new Date())}`, ...messages);
   };
 }

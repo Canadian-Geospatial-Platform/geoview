@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-// We have many reassing for layerPath-sourceOptions. We keep it global...
+// We have many reassign for layerPath-sourceOptions. We keep it global...
 import Feature from 'ol/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
@@ -15,12 +15,10 @@ import { Pixel } from 'ol/pixel';
 
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
-  TypeBaseLayerEntryConfig,
   TypeBaseSourceVectorInitialConfig,
   TypeLayerEntryConfig,
   TypeListOfLayerEntryConfig,
   TypeLocalizedString,
-  TypeVectorLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
 import { Cast, api } from '@/app';
 import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
@@ -29,6 +27,8 @@ import { NodeType } from '@/geo/renderer/geoview-renderer-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { CSV } from './csv';
+import { VectorLayerEntryConfig } from '@/core/utils/config/validationClasses/vector-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validationClasses/abstract-base-layer-entry-config';
 
 /* *******************************************************************************************************************************
  * AbstractGeoViewVector types
@@ -86,27 +86,27 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
    */
-  protected processOneLayerEntry(layerConfig: TypeBaseLayerEntryConfig): Promise<BaseLayer | null> {
+  protected processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | null> {
     // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // !            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
     this.setLayerPhase('processOneLayerEntry', layerConfig.layerPath);
     const vectorSource = this.createVectorSource(layerConfig);
-    const vectorLayer = this.createVectorLayer(layerConfig as TypeVectorLayerEntryConfig, vectorSource);
+    const vectorLayer = this.createVectorLayer(layerConfig as VectorLayerEntryConfig, vectorSource);
     return Promise.resolve(vectorLayer);
   }
 
   /** ***************************************************************************************************************************
    * Create a source configuration for the vector layer.
    *
-   * @param {TypeBaseLayerEntryConfig} layerConfig The layer entry configuration.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
    * @param {SourceOptions} sourceOptions The source options (default: { strategy: all }).
    * @param {ReadOptions} readOptions The read options (default: {}).
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
   protected createVectorSource(
-    layerConfig: TypeBaseLayerEntryConfig,
+    layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
@@ -143,7 +143,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           if (layerConfig.schemaTag === 'CSV') {
             features = (api.maps[this.mapId].layer.geoviewLayer(layerPath) as CSV).convertCsv(
               xhr.responseText,
-              layerConfig as TypeVectorLayerEntryConfig
+              layerConfig as VectorLayerEntryConfig
             );
           } else {
             features = vectorSource.getFormat()!.readFeatures(xhr.responseText, {
@@ -205,12 +205,12 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * Create a vector layer. The layer has in its properties a reference to the layer configuration used at creation time.
    * The layer entry configuration keeps a reference to the layer in the olLayer attribute.
    *
-   * @param {TypeBaseLayerEntryConfig} layerConfig The layer entry configuration used by the source.
+   * @param {VectorLayerEntryConfig} layerConfig The layer entry configuration used by the source.
    * @param {VectorSource<Feature>} vectorSource The source configuration for the vector layer.
    *
    * @returns {VectorLayer<VectorSource>} The vector layer created.
    */
-  protected createVectorLayer(layerConfig: TypeVectorLayerEntryConfig, vectorSource: VectorSource<Feature>): VectorLayer<VectorSource> {
+  protected createVectorLayer(layerConfig: VectorLayerEntryConfig, vectorSource: VectorSource<Feature>): VectorLayer<VectorSource> {
     const { layerPath } = layerConfig;
     this.setLayerPhase('createVectorLayer');
 
@@ -255,9 +255,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     try {
       // Get the layer config in a loaded phase
-      const layerConfig = this.getLayerConfig(layerPath) as TypeVectorLayerEntryConfig;
+      const layerConfig = this.getLayerConfig(layerPath) as VectorLayerEntryConfig;
       const features = (layerConfig.olLayer as VectorLayer<VectorSource>).getSource()!.getFeatures();
-      const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig as TypeVectorLayerEntryConfig);
+      const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig as VectorLayerEntryConfig);
       return arrayOfFeatureInfoEntries;
     } catch (error) {
       // Log
@@ -278,7 +278,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     try {
       // Get the layer config in a loaded phase
-      const layerConfig = this.getLayerConfig(layerPath) as TypeVectorLayerEntryConfig;
+      const layerConfig = this.getLayerConfig(layerPath) as VectorLayerEntryConfig;
       const layerFilter = (layer: BaseLayer) => {
         const layerSource = layer.get('layerConfig')?.source;
         const configSource = layerConfig?.source;
@@ -286,7 +286,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       };
       const { map } = api.maps[this.mapId];
       const features = map.getFeaturesAtPixel(location, { hitTolerance: 4, layerFilter });
-      return await this.formatFeatureInfoResult(features as Feature[], layerConfig as TypeVectorLayerEntryConfig);
+      return await this.formatFeatureInfoResult(features as Feature[], layerConfig as VectorLayerEntryConfig);
     } catch (error) {
       // Log
       logger.logError('abstract-geoview-vector.getFeatureInfoAtPixel()\n', error);
@@ -435,7 +435,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       filter = parameter1;
     }
 
-    const layerConfig = this.getLayerConfig(layerPath) as TypeVectorLayerEntryConfig;
+    const layerConfig = this.getLayerConfig(layerPath) as VectorLayerEntryConfig;
     if (!layerConfig) {
       // ! Things important to know about the applyViewFilter usage:
       logger.logError(

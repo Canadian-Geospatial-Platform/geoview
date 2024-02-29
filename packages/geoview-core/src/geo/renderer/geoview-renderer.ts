@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-// We have many reassing for node-layerConfig. We keep it global...
+// We have many reassign for node-layerConfig. We keep it global...
 import { asArray, asString } from 'ol/color';
 import { Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon } from 'ol/style';
 import { Geometry, LineString, Point, Polygon } from 'ol/geom';
@@ -31,9 +31,6 @@ import {
   TypeStyleSettings,
   TypeSymbol,
   TypeUniqueValueStyleInfo,
-  TypeVectorLayerEntryConfig,
-  TypeVectorTileLayerEntryConfig,
-  TypeBaseLayerEntryConfig,
   TypeStyleConfig,
   TypeKindOfVectorSettings,
   isSimpleStyleConfig,
@@ -57,6 +54,9 @@ import {
 import { TypeVectorLayerStyles } from '../layer/geoview-layers/abstract-geoview-layers';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
+import { VectorLayerEntryConfig } from '@/core/utils/config/validationClasses/vector-layer-entry-config';
+import { VectorTileLayerEntryConfig } from '../layer/geoview-layers/raster/abstract-tile-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validationClasses/abstract-base-layer-entry-config';
 
 type TypeStyleProcessor = (
   styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
@@ -424,12 +424,12 @@ export class GeoviewRenderer {
   /** ***************************************************************************************************************************
    * This method gets the legend styles used by the the layer as specified by the style configuration.
    *
-   * @param {TypeBaseLayerEntryConfig & {style: TypeStyleConfig;}} layerConfig The layer configuration.
+   * @param {AbstractBaseLayerEntryConfig & {style: TypeStyleConfig;}} layerConfig The layer configuration.
    *
    * @returns {Promise<TypeVectorLayerStyles>} A promise that the layer styles are processed.
    */
   async getLegendStyles(
-    layerConfig: TypeBaseLayerEntryConfig & {
+    layerConfig: AbstractBaseLayerEntryConfig & {
       style: TypeStyleConfig;
     }
   ): Promise<TypeVectorLayerStyles> {
@@ -528,20 +528,20 @@ export class GeoviewRenderer {
    * create it using the default style strategy.
    *
    * @param {Feature} feature The feature that need its style to be defined.
-   * @param {TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig} layerConfig The layer
+   * @param {AbstractBaseLayerEntryConfig | VectorTileLayerEntryConfig | VectorLayerEntryConfig} layerConfig The layer
    * entry config that may have a style configuration for the feature. If style does not exist for the geometryType, create it.
    *
    * @returns {Style | undefined} The style applied to the feature or undefined if not found.
    */
   getFeatureStyle(
     feature: Feature,
-    layerConfig: TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
+    layerConfig: AbstractBaseLayerEntryConfig | VectorTileLayerEntryConfig | VectorLayerEntryConfig
   ): Style | undefined {
     const geometryType = getGeometryType(feature);
     // If style does not exist for the geometryType, create it.
-    let { style } = layerConfig as TypeVectorLayerEntryConfig;
+    let { style } = layerConfig as VectorLayerEntryConfig;
     if (style === undefined || style[geometryType] === undefined)
-      style = this.createDefaultStyle(geometryType, layerConfig as TypeVectorLayerEntryConfig);
+      style = this.createDefaultStyle(geometryType, layerConfig as VectorLayerEntryConfig);
     // Get the style accordingly to its type and geometry.
     if (style![geometryType] !== undefined) {
       const styleSettings = style![geometryType]!;
@@ -561,18 +561,18 @@ export class GeoviewRenderer {
    * This method gets the canvas icon from the style of the feature using the layer entry config.
    *
    * @param {Feature} feature The feature that need its canvas icon to be defined.
-   * @param {TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig} layerConfig The layer
+   * @param {AbstractBaseLayerEntryConfig | VectorTileLayerEntryConfig | VectorLayerEntryConfig} layerConfig The layer
    * entry config that may have a style configuration for the feature.
    *
    * @returns {Promise<HTMLCanvasElement | undefined>} The canvas icon associated to the feature or undefined if not found.
    */
   getFeatureCanvas(
     feature: Feature,
-    layerConfig: TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
+    layerConfig: AbstractBaseLayerEntryConfig | VectorTileLayerEntryConfig | VectorLayerEntryConfig
   ): Promise<HTMLCanvasElement | undefined> {
     const promisedCanvas = new Promise<HTMLCanvasElement | undefined>((resolve) => {
       const geometryType = getGeometryType(feature);
-      const { style } = layerConfig as TypeVectorLayerEntryConfig;
+      const { style } = layerConfig as VectorLayerEntryConfig;
       // Get the style accordingly to its type and geometry.
       if (style![geometryType] !== undefined) {
         const styleSettings = style![geometryType]!;
@@ -1306,13 +1306,13 @@ export class GeoviewRenderer {
    * Create a default style to use with a vector feature that has no style configuration.
    *
    * @param {TypeStyleGeometry} geometryType The type of geometry (Point, LineString, Polygon).
-   * @param {TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig} layerConfig the layer entry config to configure.
+   * @param {VectorTileLayerEntryConfig | VectorLayerEntryConfig} layerConfig the layer entry config to configure.
    *
    * @returns {TypeStyleConfig | undefined} The Style configurationcreated. Undefined if unable to create it.
    */
   private createDefaultStyle(
     geometryType: TypeStyleGeometry,
-    layerConfig: TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
+    layerConfig: VectorTileLayerEntryConfig | VectorLayerEntryConfig
   ): TypeStyleConfig | undefined {
     if (layerConfig.style === undefined) layerConfig.style = {};
     const label = getLocalizedValue(layerConfig.layerName, this.mapId) || layerConfig.layerId;

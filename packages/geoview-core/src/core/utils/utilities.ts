@@ -401,6 +401,7 @@ export function parseJSONConfig(configObjStr: string): unknown {
  * @param {string} configString String configuration
  * @returns {TypeMapFeaturesConfig} A valid configuration object
  */
+// TODO: refactor - this function is only used by sandbox html page. If not needed aymore, move to html page or code files for demo.
 export function getValidConfigFromString(configString: string, mapDiv: HTMLElement): TypeMapFeaturesConfig {
   const configObjString = removeCommentsFromJSON(configString);
   const parsedMapConfig = parseJSONConfig(configObjString);
