@@ -218,6 +218,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
                 value={value}
                 onChange={(e) => updateTabPanel(e.target.value as number)}
                 MenuProps={{ container: mapElem }}
+                variant="outlined"
               />
             </Box>
           )}
