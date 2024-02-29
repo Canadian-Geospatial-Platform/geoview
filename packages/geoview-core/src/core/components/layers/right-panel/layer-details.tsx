@@ -61,6 +61,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const selectedLayer = layersData.find((_layer) => _layer.layerPath === layerDetails?.layerPath);
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('LAYER DETAILS', selectedLayer, layerDetails);
+
+    // set the timer to fetch the features of layer when layer is selected.
     let timer: NodeJS.Timeout;
     if (!selectedLayer) {
       setIsDatatableVisible(true);
