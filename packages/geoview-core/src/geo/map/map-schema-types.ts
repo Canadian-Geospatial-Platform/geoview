@@ -9,7 +9,7 @@ import { TypeBasemapOptions } from '@/geo/layer/basemap/basemap-types';
 import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeMapMouseInfo } from '@/api/events/payloads';
 import { logger } from '@/core/utils/logger';
-import { Cast, LayerSetPayload, TypeJsonValue } from '@/core/types/cgpv-types';
+import { Cast, LayerSetPayload } from '@/core/types/cgpv-types';
 import { api } from '@/app';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validationClasses/image-static-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validationClasses/abstract-base-layer-entry-config';
