@@ -16,7 +16,6 @@ import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-
 import {
   TypeLayerEntryConfig,
   TypeSourceTileInitialConfig,
-  TypeTileLayerEntryConfig,
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
@@ -29,13 +28,15 @@ import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validationClasses/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
+import { TileLayerEntryConfig } from '@/core/utils/config/validationClasses/tile-layer-entry-config';
 
 // TODO: Implement method to validate Vector Tiles service
 // TODO: Add more customization (minZoom, maxZoom, TMS)
 
 export type TypeSourceVectorTilesInitialConfig = TypeSourceTileInitialConfig;
 
-// export class TypeVectorTilesLayerEntryConfig extends TypeTileLayerEntryConfig {
+// TODO: do we need dead code
+// export class TypeVectorTilesLayerEntryConfig extends TileLayerEntryConfig {
 //   declare source: TypeSourceVectorTilesInitialConfig;
 
 //   tileGrid!: TypeTileGrid;
@@ -234,11 +235,11 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
-   * @param {TypeTileLayerEntryConfig} layerConfig The layer entry configuration to process.
+   * @param {TileLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerConfig: TypeTileLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected processLayerMetadata(layerConfig: TileLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     const promiseOfExecution = new Promise<TypeLayerEntryConfig>((resolve) => {
       if (!this.metadata) resolve(layerConfig);
       else {

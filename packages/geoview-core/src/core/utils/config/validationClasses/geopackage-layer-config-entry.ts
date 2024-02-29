@@ -1,7 +1,8 @@
 import { TypeSourceGeoPackageInitialConfig } from '@/geo/layer/geoview-layers/vector/geopackage';
-import { TypeLocalizedString, TypeVectorLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { TypeLocalizedString } from '@/geo/map/map-schema-types';
+import { VectorLayerEntryConfig } from './vector-layer-entry-config';
 
-export class GeoPackageLayerEntryConfig extends TypeVectorLayerEntryConfig {
+export class GeoPackageLayerEntryConfig extends VectorLayerEntryConfig {
   declare source: TypeSourceGeoPackageInitialConfig;
 
   /**

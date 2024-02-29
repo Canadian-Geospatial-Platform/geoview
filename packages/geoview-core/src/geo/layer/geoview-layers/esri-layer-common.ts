@@ -5,15 +5,7 @@ import { Extent } from 'ol/extent';
 
 import cloneDeep from 'lodash/cloneDeep';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
-import {
-  layerEntryIsGroupLayer,
-  TypeBaseLayerEntryConfig,
-  TypeEsriDynamicLayerEntryConfig,
-  TypeEsriImageLayerEntryConfig,
-  TypeLayerEntryConfig,
-  TypeLayerGroupEntryConfig,
-  TypeListOfLayerEntryConfig,
-} from '@/geo/map/map-schema-types';
+import { layerEntryIsGroupLayer, TypeLayerEntryConfig, TypeListOfLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { getLocalizedValue, getXMLHttpRequest } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
@@ -25,6 +17,10 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { EsriImage } from './raster/esri-image';
 import { logger } from '@/core/utils/logger';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-feature-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validationClasses/abstract-base-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-dynamic-layer-entry-config';
+import { EsriImageLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-image-layer-entry-config';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validationClasses/group-layer-entry-config';
 
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
@@ -70,7 +66,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
 
     if (layerEntryIsGroupLayer(layerConfig)) {
       this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
-      if (!(layerConfig as TypeLayerGroupEntryConfig).listOfLayerEntryConfig.length) {
+      if (!(layerConfig as GroupLayerEntryConfig).listOfLayerEntryConfig.length) {
         this.layerLoadError.push({
           layer: layerPath,
           loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
@@ -109,8 +105,8 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
       // We will create dynamically a group layer.
       const newListOfLayerEntryConfig: TypeListOfLayerEntryConfig = [];
       // Group layer are not registered to layer sets.
-      if (this.registerToLayerSetListenerFunctions[layerPath]) this.unregisterFromLayerSets(layerConfig as TypeBaseLayerEntryConfig);
-      const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(cloneDeep(layerConfig));
+      if (this.registerToLayerSetListenerFunctions[layerPath]) this.unregisterFromLayerSets(layerConfig as AbstractBaseLayerEntryConfig);
+      const switchToGroupLayer = Cast<GroupLayerEntryConfig>(cloneDeep(layerConfig));
       switchToGroupLayer.entryType = 'group';
       switchToGroupLayer.layerName = {
         en: this.metadata!.layers[esriIndex].name as string,
@@ -118,7 +114,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
       };
       switchToGroupLayer.isMetadataLayerGroup = true;
       switchToGroupLayer.listOfLayerEntryConfig = newListOfLayerEntryConfig;
-      const groupLayerConfig = new TypeLayerGroupEntryConfig(switchToGroupLayer as TypeLayerGroupEntryConfig);
+      const groupLayerConfig = new GroupLayerEntryConfig(switchToGroupLayer as GroupLayerEntryConfig);
       // Replace the old version of the layer with the new layer group
       listOfLayerEntryConfig[i] = groupLayerConfig;
       // Don't forget to replace the old version in registeredLayers
@@ -126,7 +122,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
 
       (this.metadata!.layers[esriIndex].subLayerIds as TypeJsonArray).forEach((layerId) => {
         const subLayerEntryConfig: TypeLayerEntryConfig = geoviewEntryIsEsriDynamic(layerConfig)
-          ? new TypeEsriDynamicLayerEntryConfig(layerConfig as TypeEsriDynamicLayerEntryConfig)
+          ? new EsriDynamicLayerEntryConfig(layerConfig as EsriDynamicLayerEntryConfig)
           : new EsriFeatureLayerEntryConfig(layerConfig as EsriFeatureLayerEntryConfig);
         subLayerEntryConfig.parentLayerConfig = groupLayerConfig;
         subLayerEntryConfig.layerId = `${layerId}`;
@@ -207,12 +203,12 @@ export function commonGetFieldDomain(
  *
  * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
  * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
- * @param {EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
+ * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig The layer entry to configure
  */
 export function commonProcessTemporalDimension(
   this: EsriDynamic | EsriFeature | EsriImage,
   esriTimeDimension: TypeJsonObject,
-  layerConfig: EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig
+  layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
 ) {
   if (esriTimeDimension !== undefined) {
     this.layerTemporalDimension[layerConfig.layerPath] = api.dateUtilities.createDimensionFromESRI(
@@ -229,7 +225,7 @@ export function commonProcessTemporalDimension(
  * @param {string} nameField The display field associated to the layer.
  * @param {string} geometryFieldName The field name of the geometry property.
  * @param {TypeJsonArray} fields An array of field names and its aliases.
- * @param {EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
+ * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
  */
 export function commonProcessFeatureInfoConfig(
   this: EsriDynamic | EsriFeature | EsriImage,
@@ -237,7 +233,7 @@ export function commonProcessFeatureInfoConfig(
   nameField: string,
   geometryFieldName: string,
   fields: TypeJsonArray,
-  layerConfig: EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig
+  layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
 ) {
   if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: capabilities.includes('Query') };
   MapEventProcessor.setMapLayerQueryable(this.mapId, layerConfig.layerPath, layerConfig.source.featureInfo.queryable);
@@ -294,7 +290,7 @@ export function commonProcessFeatureInfoConfig(
  * @param {number} minScale The metadata minScale of the layer.
  * @param {number} maxScale The metadata maxScale of the layer.
  * @param {TypeJsonObject} extent The metadata layer extent.
- * @param {EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
+ * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
  */
 export function commonProcessInitialSettings(
   this: EsriDynamic | EsriFeature | EsriImage,
@@ -302,7 +298,7 @@ export function commonProcessInitialSettings(
   minScale: number,
   maxScale: number,
   extent: TypeJsonObject,
-  layerConfig: EsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig
+  layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
 ) {
   // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
   if (layerConfig.initialSettings?.visible === undefined) layerConfig.initialSettings!.visible = visibility ? 'yes' : 'no';
@@ -347,7 +343,7 @@ export async function commonProcessLayerMetadata(
     try {
       const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=pjson`);
       // layers must have a fields attribute except if it is an metadata layer group.
-      if (!data?.fields && !(layerConfig as TypeLayerGroupEntryConfig).isMetadataLayerGroup && layerConfig.schemaTag !== 'esriImage') {
+      if (!data?.fields && !(layerConfig as GroupLayerEntryConfig).isMetadataLayerGroup && layerConfig.schemaTag !== 'esriImage') {
         layerConfig.layerStatus = 'error';
         if (data?.error) throw new Error(`Error code = ${data.error.code}, ${data.error.message}`);
         else throw new Error(`Despite a return code of 200, no fields was returned with this query (${queryUrl}?f=pjson)`);

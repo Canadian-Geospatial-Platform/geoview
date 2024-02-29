@@ -1,7 +1,8 @@
 import { TypeSourceCSVInitialConfig } from '@/geo/layer/geoview-layers/vector/csv';
-import { TypeVectorLayerEntryConfig, TypeLocalizedString } from '@/geo/map/map-schema-types';
+import { TypeLocalizedString } from '@/geo/map/map-schema-types';
+import { VectorLayerEntryConfig } from './vector-layer-entry-config';
 
-export class CsvLayerEntryConfig extends TypeVectorLayerEntryConfig {
+export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
   declare source: TypeSourceCSVInitialConfig;
 
   // character separating values in csv file
