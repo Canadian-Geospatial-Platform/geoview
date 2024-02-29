@@ -501,23 +501,26 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
       // Check if filterValue is of type array because columnfilters return array with min and max.
       if (Array.isArray(filterValue)) {
         let numQuery = '';
-        const minValue = Number(filterValue[0]);
-        const maxValue = Number(filterValue[1]);
-
-        const numOpr = tableState?.columnFilterFns[filterId] as string;
-
-        const numFilter = NUMBER_FILTER[numOpr] ?? '=';
+        const minValue = filterValue[0] === '' ? undefined : Number(filterValue[0]);
+        const maxValue = filterValue[1] === '' ? undefined : Number(filterValue[1]);
+        const inclusive = tableState?.columnFilterFns[filterId] === 'betweenInclusive' ? '=' : '';
 
         if (minValue && maxValue) {
-          const opr2 = numFilter === '>' ? '<' : '<=';
-          numQuery = `${filterId} ${numFilter} ${filterValue[0]} and ${filterId} ${opr2} ${filterValue[1]}`;
+          numQuery = `${filterId} >${inclusive} ${minValue} and ${filterId} <${inclusive} ${maxValue}`;
         } else if (minValue) {
-          numQuery = `${filterId} ${numFilter} ${filterValue[0]}`;
+          numQuery = `${filterId} >${inclusive} ${minValue}`;
         } else if (maxValue) {
-          numQuery = `${filterId} ${numFilter} ${filterValue[1]}`;
+          numQuery = `${filterId} <${inclusive} ${maxValue}`;
         }
         return numQuery;
       }
+
+      if (!Number.isNaN(Number(filterValue))) {
+        return `${filterId} ${NUMBER_FILTER[tableState?.columnFilterFns[filterId]]} ${Number(filterValue)}`;
+      }
+
+      if (tableState?.columnFilterFns[filterId] === 'empty') return `${filterId} is null`;
+      if (tableState?.columnFilterFns[filterId] === 'notEmpty') return `${filterId} is not null`;
 
       // Check filter value is of type date,
       if (typeof filterValue === 'object' && filterValue) {
@@ -527,8 +530,8 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
         const formattedDate = date.slice(0, -1);
         return `${filterId} ${dateFilter.replace('value', formattedDate)}`;
       }
-      const operator = tableState?.columnFilterFns[filterId] ?? 'contains';
 
+      const operator = tableState?.columnFilterFns[filterId] ?? 'contains';
       const strFilter = STRING_FILTER[operator] as string;
 
       return `${strFilter.replace('filterId', filterId).replace('value', filterValue as string)}`;
