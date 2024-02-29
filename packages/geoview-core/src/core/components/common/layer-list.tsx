@@ -1,6 +1,7 @@
 import { ReactNode, memo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
+import { animated, useSpring } from '@react-spring/web';
 import { Box, ChevronRightIcon, IconButton, List, ListItem, ListItemButton, ListItemIcon, Paper, Tooltip, Typography } from '@/ui';
 import { TypeArrayOfFeatureInfoEntries, TypeLayerStatus, TypeQueryStatus } from '@/app';
 
@@ -31,9 +32,10 @@ interface LayerListItemProps {
   layer: LayerListEntry;
   isEnlarged: boolean;
   onListItemClick: (layer: LayerListEntry) => void;
+  layerIndex: number;
 }
 
-const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListItemClick, isEnlarged }: LayerListItemProps) {
+const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListItemClick, isEnlarged, layerIndex }: LayerListItemProps) {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
   const { t } = useTranslation<string>();
@@ -121,12 +123,19 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
     if (isSelected) {
       result.push('selectedLayer bordered-primary');
     }
-
     return result.join(' ');
   }
 
+  const listItemSpring = useSpring({
+    delay: layerIndex * 150,
+    from: { opacity: 0.1 },
+    to: { opacity: 1 },
+  });
+
+  const AnimatedPaper = animated(Paper);
+
   return (
-    <Paper sx={{ marginBottom: '1rem' }} className={getContainerClass()}>
+    <AnimatedPaper sx={{ marginBottom: '1rem' }} style={listItemSpring} className={getContainerClass()}>
       <Tooltip title={layer.tooltip} placement="top" arrow>
         <Box>
           <ListItem disablePadding>
@@ -156,7 +165,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
           </ListItem>
         </Box>
       </Tooltip>
-    </Paper>
+    </AnimatedPaper>
   );
 });
 
@@ -177,7 +186,7 @@ export function LayerList({ layerList, isEnlarged, selectedLayerPath, onListItem
   return (
     <List sx={sxClasses.list}>
       {!!layerList.length &&
-        layerList.map((layer) => (
+        layerList.map((layer, ind) => (
           <LayerListItem
             key={layer.layerPath}
             // Reason:- (layer?.numOffeatures ?? 1) > 0
@@ -187,6 +196,7 @@ export function LayerList({ layerList, isEnlarged, selectedLayerPath, onListItem
             isEnlarged={isEnlarged}
             layer={layer}
             onListItemClick={onListItemClick}
+            layerIndex={ind}
           />
         ))}
       {!layerList.length && (
@@ -194,6 +204,7 @@ export function LayerList({ layerList, isEnlarged, selectedLayerPath, onListItem
           key="dummyPath"
           isSelected={false}
           isEnlarged
+          layerIndex={0}
           layer={
             {
               layerPath: '',

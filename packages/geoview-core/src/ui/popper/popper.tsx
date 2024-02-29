@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Popper as MaterialPopper, PopperProps } from '@mui/material';
+import { animated, useSpring, easings } from '@react-spring/web';
 
 interface EnhancedPopperProps extends PopperProps {
   onClose?: () => void;
@@ -30,5 +31,11 @@ export const Popper: React.FC<EnhancedPopperProps> = ({ open, onClose, ...restPr
     };
   }, [open, onClose]);
 
-  return <MaterialPopper sx={{ zIndex: '2000' }} {...restProps} open={open} ref={popperRef} />;
+  const springProps = useSpring({
+    config: { duration: 500, easing: easings.easeInExpo },
+    opacity: open ? 1 : 0,
+  });
+  const AnimatedPopper = animated(MaterialPopper);
+
+  return <AnimatedPopper sx={{ zIndex: '2000' }} style={springProps} {...restProps} open={open} ref={popperRef} />;
 };

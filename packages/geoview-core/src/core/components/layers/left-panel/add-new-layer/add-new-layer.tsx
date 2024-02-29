@@ -1,6 +1,20 @@
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Autocomplete, Box, Button, ButtonGroup, CircularProgressBase, FileUploadIcon, Paper, Select, Stepper, TextField } from '@/ui';
+import {
+  Autocomplete,
+  Box,
+  Button,
+  ButtonGroup,
+  CheckBoxIcon,
+  CheckBoxOutlineBlankIcon,
+  Checkbox,
+  CircularProgressBase,
+  FileUploadIcon,
+  Paper,
+  Select,
+  Stepper,
+  TextField,
+} from '@/ui';
 import {
   AbstractGeoViewLayer,
   CONST_LAYER_TYPES,
@@ -1026,6 +1040,11 @@ export function AddNewLayer(): JSX.Element {
     );
   }
 
+  const uncheckedIcon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+  const checkedIcon = <CheckBoxIcon fontSize="small" />;
+
+  console.log('layersList ', layerList);
+
   return (
     <Paper sx={{ padding: '20px', gap: '8' }}>
       <Stepper
@@ -1146,10 +1165,16 @@ export function AddNewLayer(): JSX.Element {
                       fullWidth
                       multiple={isMultiple()}
                       disableClearable={!isMultiple()}
+                      disableCloseOnSelect
                       id="service-layer-label"
                       options={layerList as TypeListOfLayerEntryConfig}
                       getOptionLabel={(option) => `${option.layerName!.en} (${option.layerId})`}
-                      renderOption={(props, option) => <span {...props}>{option.layerName!.en}</span>}
+                      renderOption={(props, option, { selected }) => (
+                        <li {...props}>
+                          <Checkbox icon={uncheckedIcon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={selected} />
+                          {option.layerName!.en}
+                        </li>
+                      )}
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       onChange={handleSelectLayer as any}
                       renderInput={(params) => <TextField {...params} label={t('layers.layerSelect')} />}
@@ -1163,7 +1188,13 @@ export function AddNewLayer(): JSX.Element {
                       id="service-layer-label"
                       options={layerList as TypeListOfGeoviewLayerConfig}
                       getOptionLabel={(option) => `${option.geoviewLayerName!.en} (${option.geoviewLayerId})`}
-                      renderOption={(props, option) => <span {...props}>{option.geoviewLayerName!.en}</span>}
+                      disableCloseOnSelect
+                      renderOption={(props, option, { selected }) => (
+                        <li {...props}>
+                          <Checkbox icon={uncheckedIcon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={selected} />
+                          {option.geoviewLayerName!.en}
+                        </li>
+                      )}
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       onChange={handleSelectLayer as any}
                       renderInput={(params) => <TextField {...params} label={t('layers.layerSelect')} />}

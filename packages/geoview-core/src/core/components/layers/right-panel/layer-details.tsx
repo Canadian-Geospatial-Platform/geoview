@@ -7,7 +7,7 @@ import { getSxClasses } from './layer-details-style';
 import {
   Box,
   CheckBoxIcon,
-  CheckBoxOutineBlankIcon,
+  CheckBoxOutlineBlankIcon,
   IconButton,
   Paper,
   Typography,
@@ -105,7 +105,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
     return (
       <IconButton color="primary" onClick={() => toggleItemVisibility(layerDetails.layerPath, item.geometryType, item.name)}>
-        {item.isVisible === 'yes' ? <CheckBoxIcon /> : <CheckBoxOutineBlankIcon />}
+        {item.isVisible === 'yes' ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
       </IconButton>
     );
   }
@@ -123,7 +123,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
     return (
       <IconButton color="primary" onClick={() => setAllItemsVisibility(layerDetails.layerPath, !allItemsChecked() ? 'yes' : 'no')}>
-        {allItemsChecked() ? <CheckBoxIcon /> : <CheckBoxOutineBlankIcon />}
+        {allItemsChecked() ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
       </IconButton>
     );
   }
