@@ -45,11 +45,19 @@ export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: TypeGeoviewL
 
   // Loop on the LayerEntryConfig to serialize further
   for (let j = 0; j < (geoviewLayerConfig.listOfLayerEntryConfig?.length || 0); j++) {
-    // Serialize the TypeLayerEntryConfig
-    const serializedLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[j].serialize();
+    // TODO: Check - #1883 why some don't have the serialize funcion in here!? Maybe a Type vs Class thing!?
+    // Got to check if serialize exists, because some aren't classes!? Making it as any for now, as we can't trust it
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((geoviewLayerConfig.listOfLayerEntryConfig[j] as any).serialize) {
+      // Serialize the TypeLayerEntryConfig
+      const serializedLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[j].serialize();
 
-    // Store
-    serializedGeoviewLayerConfig.listOfLayerEntryConfig.push(serializedLayerEntryConfig as never);
+      // Store as serialized
+      serializedGeoviewLayerConfig.listOfLayerEntryConfig.push(serializedLayerEntryConfig as never);
+    } else {
+      // Store as is for now
+      serializedGeoviewLayerConfig.listOfLayerEntryConfig.push(geoviewLayerConfig.listOfLayerEntryConfig[j]);
+    }
   }
 
   // Return it
@@ -532,7 +540,7 @@ export class ConfigBaseClass {
    *
    * @returns {AbstractGeoViewLayer} Returns the geoview instance associated to the layer path.
    */
-  // TODO: Check - Is this still used? Remove it and favor the homonymous method in `layer`?ru
+  // TODO: Check - Is this still used? Remove it and favor the homonymous method in `layer`?
   geoviewLayer(layerPath?: string): AbstractGeoViewLayer {
     this.geoviewLayerInstance!.layerPathAssociatedToTheGeoviewLayer = layerPath || this.layerPath;
     return this.geoviewLayerInstance!;
