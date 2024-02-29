@@ -50,7 +50,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
   const checkedFeatures = useDetailsStoreCheckedFeatures();
   const visibleLayers = useMapVisibleLayers();
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
-  const { addSelectedFeature, removeSelectedFeature } = useMapStoreActions();
+  const { addHighlightedFeature, removeHighlightedFeature } = useMapStoreActions();
 
   // #region USE STATE SECTION ****************************************************************************************
 
@@ -96,10 +96,10 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
 
       // Clear any feature that's not currently checked
       arrayToClear?.forEach((feature) => {
-        if (!isFeatureInCheckedFeatures(feature)) removeSelectedFeature(feature);
+        if (!isFeatureInCheckedFeatures(feature)) removeHighlightedFeature(feature);
       });
     },
-    [isFeatureInCheckedFeatures, removeSelectedFeature]
+    [isFeatureInCheckedFeatures, removeHighlightedFeature]
   );
 
   /**
@@ -188,18 +188,18 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
       }
 
       // If found, remove it
-      if (currentFeature && !isFeatureInCheckedFeatures(currentFeature)) removeSelectedFeature(currentFeature);
+      if (currentFeature && !isFeatureInCheckedFeatures(currentFeature)) removeHighlightedFeature(currentFeature);
 
       // Get the next feature navigating to
       const nextFeature = memoSelectedLayerData?.features?.[newIndex];
 
       // If found, add it
-      if (nextFeature) addSelectedFeature(nextFeature);
+      if (nextFeature) addHighlightedFeature(nextFeature);
 
       // Update the current feature index
       setCurrentFeatureIndex(newIndex);
     },
-    [memoSelectedLayerData, isFeatureInCheckedFeatures, removeSelectedFeature, addSelectedFeature]
+    [memoSelectedLayerData, isFeatureInCheckedFeatures, removeHighlightedFeature, addHighlightedFeature]
   );
 
   /**
@@ -212,11 +212,11 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
     logger.logTraceUseEffect('DETAILS-PANEL - memoLayersList changed', memoLayersList);
 
     // Clear all
-    removeSelectedFeature('all');
+    removeHighlightedFeature('all');
 
     // Unselect the layer path if no more layers in the list
     if (!memoLayersList.length) setSelectedLayerPath('');
-  }, [memoLayersList, setSelectedLayerPath, removeSelectedFeature]);
+  }, [memoLayersList, setSelectedLayerPath, removeHighlightedFeature]);
 
   /**
    * Effect used when the layers list changes.
@@ -232,14 +232,14 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
 
     // If any features
     if (memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length) {
-      addSelectedFeature(memoSelectedLayerDataFeatures[currentFeatureIndex]);
+      addHighlightedFeature(memoSelectedLayerDataFeatures[currentFeatureIndex]);
     }
   }, [
     memoLayersList,
     memoSelectedLayerDataFeatures,
     currentFeatureIndex,
-    addSelectedFeature,
-    removeSelectedFeature,
+    addHighlightedFeature,
+    removeHighlightedFeature,
     clearHighlightsUnchecked,
   ]);
 
@@ -306,11 +306,11 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
    */
   const handleClearAllHighlights = () => {
     // clear all highlights from features on the map in all layers
-    removeSelectedFeature('all');
+    removeHighlightedFeature('all');
     // clear checked features array
     removeCheckedFeature('all');
     // add the highlight to the current feature
-    addSelectedFeature(memoSelectedLayerData?.features?.[currentFeatureIndex] as TypeFeatureInfoEntry);
+    addHighlightedFeature(memoSelectedLayerData?.features?.[currentFeatureIndex] as TypeFeatureInfoEntry);
   };
 
   /**

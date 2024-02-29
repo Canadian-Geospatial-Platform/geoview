@@ -467,21 +467,21 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
     addAnimationRowIds.forEach((idx) => {
       const feature = data?.features ? data.features[idx] : null;
 
-      if (feature && mapFilteredRecord[layerPath]) {
+      if (feature) {
         addHighlightedFeature(feature);
       }
     });
     const removeAnimationRowIds = difference(rowSelectionRef.current, selectedRows);
     removeAnimationRowIds.forEach((idx) => {
       const feature = data?.features ? data.features[idx] : null;
-      if (feature && mapFilteredRecord[layerPath]) {
+      if (feature) {
         removeHighlightedFeature(feature);
       }
     });
 
     rowSelectionRef.current = selectedRows;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rowSelection, mapFilteredRecord]);
+  }, [rowSelection]);
 
   /**
    * Convert the filter list from the Column Filter state to filter the map.

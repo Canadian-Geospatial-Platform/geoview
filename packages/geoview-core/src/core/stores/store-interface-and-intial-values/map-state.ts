@@ -15,7 +15,7 @@ import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 
 import { TypeBasemapOptions, TypeMapFeaturesConfig, TypeValidMapProjectionCodes } from '@/core/types/global-types';
 import { TypeFeatureInfoEntry, TypeGeometry, TypeMapMouseInfo } from '@/api/events/payloads';
-import { TypeInteraction, TypeVisibilityFlags } from '@/geo/map/map-schema-types';
+import { TypeInteraction, TypeVisibilityFlags, TypeHighlightColors } from '@/geo/map/map-schema-types';
 import { TypeClickMarker, api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
@@ -48,6 +48,7 @@ export interface IMapState {
   clickMarker: TypeClickMarker | undefined;
   currentProjection: TypeValidMapProjectionCodes;
   fixNorth: boolean;
+  highlightColor?: TypeHighlightColors;
   highlightedFeatures: Array<TypeFeatureInfoEntry>;
   interaction: TypeInteraction;
   mapElement?: OLMap;
@@ -63,7 +64,6 @@ export interface IMapState {
   pointerPosition?: TypeMapMouseInfo;
   rotation: number;
   scale: TypeScaleInfo;
-  selectedFeatures: Array<TypeFeatureInfoEntry>;
   size: [number, number];
   visibleLayers: string[];
   zoom: number;
@@ -81,7 +81,6 @@ export interface IMapState {
 
   actions: {
     addHighlightedFeature: (feature: TypeFeatureInfoEntry) => void;
-    addSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
     createBaseMapFromOptions: () => void;
     createEmptyBasemap: () => TileLayer<XYZ>;
     getAlwaysVisibleFromOrderedLayerInfo: (layerPath: string) => boolean;
@@ -92,7 +91,6 @@ export interface IMapState {
     hideClickMarker: () => void;
     highlightBBox: (extent: Extent, isLayerHighlight?: boolean) => void;
     removeHighlightedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
-    removeSelectedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
     reorderLayer: (layerPath: string, move: number) => void;
     setAttribution: (attribution: string[]) => void;
     setClickCoordinates: () => void;
@@ -151,7 +149,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     pointerPosition: undefined,
     rotation: 0,
     scale: { lineWidth: '', labelGraphic: '', labelNumeric: '' } as TypeScaleInfo,
-    selectedFeatures: [],
     size: [0, 0] as [number, number],
     visibleLayers: [],
     zoom: 0,
@@ -164,6 +161,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           basemapOptions: geoviewConfig.map.basemapOptions,
           centerCoordinates: geoviewConfig.map.viewSettings.center as Coordinate,
           currentProjection: geoviewConfig.map.viewSettings.projection as TypeValidMapProjectionCodes,
+          highlightColor: geoviewConfig.map.highlightColor || 'black',
           interaction: geoviewConfig.map.interaction || 'dynamic',
           mapExtent: geoviewConfig.map.viewSettings.extent,
           northArrow: geoviewConfig.components!.indexOf('north-arrow') > -1 || false,
@@ -321,16 +319,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           });
         }
       },
-      addSelectedFeature: (feature: TypeFeatureInfoEntry) => {
-        if (feature.geoviewLayerType !== 'ogcWms') {
-          set({
-            mapState: {
-              ...get().mapState,
-              selectedFeatures: [...get().mapState.selectedFeatures, feature],
-            },
-          });
-        }
-      },
       createBaseMapFromOptions: () => {
         MapEventProcessor.resetBasemap(get().mapId);
       },
@@ -378,22 +366,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
                 feature === 'all'
                   ? []
                   : get().mapState.highlightedFeatures.filter(
-                      (featureInfoEntry: TypeFeatureInfoEntry) =>
-                        (featureInfoEntry.geometry as TypeGeometry).ol_uid !== (feature.geometry as TypeGeometry).ol_uid
-                    ),
-            },
-          });
-        }
-      },
-      removeSelectedFeature: (feature: TypeFeatureInfoEntry | 'all') => {
-        if (feature === 'all' || feature.geoviewLayerType !== 'ogcWms') {
-          set({
-            mapState: {
-              ...get().mapState,
-              selectedFeatures:
-                feature === 'all'
-                  ? []
-                  : get().mapState.selectedFeatures.filter(
                       (featureInfoEntry: TypeFeatureInfoEntry) =>
                         (featureInfoEntry.geometry as TypeGeometry).ol_uid !== (feature.geometry as TypeGeometry).ol_uid
                     ),
@@ -626,6 +598,7 @@ export const useMapElement = () => useStore(useGeoViewStore(), (state) => state.
 export const useMapExtent = () => useStore(useGeoViewStore(), (state) => state.mapState.mapExtent);
 export const useMapFixNorth = () => useStore(useGeoViewStore(), (state) => state.mapState.fixNorth);
 export const useMapInteraction = () => useStore(useGeoViewStore(), (state) => state.mapState.interaction);
+export const useMapHiglightColor = () => useStore(useGeoViewStore(), (state) => state.mapState.highlightColor);
 export const useMapLoaded = () => useStore(useGeoViewStore(), (state) => state.mapState.mapLoaded);
 export const useMapNorthArrow = () => useStore(useGeoViewStore(), (state) => state.mapState.northArrow);
 export const useMapNorthArrowElement = () => useStore(useGeoViewStore(), (state) => state.mapState.northArrowElement);
@@ -635,7 +608,6 @@ export const useMapOverviewMapHideZoom = () => useStore(useGeoViewStore(), (stat
 export const useMapPointerPosition = () => useStore(useGeoViewStore(), (state) => state.mapState.pointerPosition);
 export const useMapProjection = () => useStore(useGeoViewStore(), (state) => state.mapState.currentProjection);
 export const useMapRotation = () => useStore(useGeoViewStore(), (state) => state.mapState.rotation);
-export const useMapSelectedFeatures = () => useStore(useGeoViewStore(), (state) => state.mapState.selectedFeatures);
 export const useMapScale = () => useStore(useGeoViewStore(), (state) => state.mapState.scale);
 export const useMapSize = () => useStore(useGeoViewStore(), (state) => state.mapState.size);
 export const useMapVisibleLayers = () => useStore(useGeoViewStore(), (state) => state.mapState.visibleLayers);

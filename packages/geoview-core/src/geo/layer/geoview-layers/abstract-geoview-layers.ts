@@ -951,7 +951,7 @@ export abstract class AbstractGeoViewLayer {
 
   protected getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
     // Log
-    logger.logError(`getFeatureInfoAtLongLat is not implemented! for ${layerPath} - ${location}`);
+    logger.logError(`getFeatureInfoAtLongLat is not implemented for ${layerPath} - ${location}!`);
     return Promise.resolve(null);
   }
 

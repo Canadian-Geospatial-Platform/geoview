@@ -149,13 +149,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // Checks for changes to selected features and updates highlights
     const unsubMapSelectedFeatures = store.subscribe(
-      (state) => state.mapState.selectedFeatures,
+      (state) => state.mapState.highlightedFeatures,
       (curFeatures, prevFeatures) => {
         // Log
         logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - selectedFeatures', mapId, curFeatures);
 
         // TODO: on reload, layer object is undefined, need to test for now and solve in #1580
-        if (curFeatures.length === 0 && api.maps[mapId].layer !== undefined) api.maps[mapId].layer.featureHighlight.resetAnimation('all');
+        if (curFeatures.length === 0 && api.maps[mapId].layer !== undefined) api.maps[mapId].layer.featureHighlight.removeHighlight('all');
         else {
           const curFeatureUids = curFeatures.map((feature) => (feature.geometry as TypeGeometry).ol_uid);
           const prevFeatureUids = prevFeatures.map((feature) => (feature.geometry as TypeGeometry).ol_uid);
@@ -165,9 +165,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
           const removedFeatures = prevFeatures.filter(
             (feature: TypeFeatureInfoEntry) => !curFeatureUids.includes((feature.geometry as TypeGeometry).ol_uid)
           );
-          for (let i = 0; i < newFeatures.length; i++) api.maps[mapId].layer.featureHighlight.selectFeature(newFeatures[i]);
+          for (let i = 0; i < newFeatures.length; i++) api.maps[mapId].layer.featureHighlight.highlightFeature(newFeatures[i]);
           for (let i = 0; i < removedFeatures.length; i++)
-            api.maps[mapId].layer.featureHighlight.resetAnimation((removedFeatures[i].geometry as TypeGeometry).ol_uid);
+            api.maps[mapId].layer.featureHighlight.removeHighlight((removedFeatures[i].geometry as TypeGeometry).ol_uid);
         }
       }
     );
@@ -324,6 +324,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static getBasemapOptions(mapId: string): TypeBasemapOptions {
     return this.getMapStateProtected(mapId).basemapOptions;
+  }
+
+  static getMapHighlightColor(mapId: string): string | undefined {
+    return this.getMapStateProtected(mapId).highlightColor;
   }
 
   static clickMarkerIconHide(mapId: string): void {

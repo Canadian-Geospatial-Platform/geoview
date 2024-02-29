@@ -42,9 +42,8 @@
           <tr>
             <td>
               <a href="#HLYR1">1. Vector Tiles Layers (3978)</a><br />
-              <a href="#HLYR2">2. Vector Tiles Layers (3857)</a><br />
-              <a href="#HLYR3">3. Vector Tiles olms library no GeoView</a><br />
-              <a href="#HLYR4">4. Vector Tiles Layers (3978) - with footer bar</a><br />
+              <a href="#HLYR3">2. Vector Tiles olms library no GeoView</a><br />
+              <a href="#HLYR4">3. Vector Tiles Layers (3978) - with footer bar</a><br />
             </td>
           </tr>
         </tbody>
@@ -102,68 +101,13 @@
           'suportedLanguages': ['en']
         }"
     ></div>
-    <p>This map has a Vector Tiles layer added from configuration. Projection is 3978 as for metadata but there is zoom and label problems.</p>
+    <p>This map has a Vector Tiles layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="LYR1CS" class="panel"></pre>
     <hr />
 
     <div class="map-title-holder">
-      <h4 id="HLYR2">2. Vector Tiles Layers - no declutter</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
-    <button class="collapsible active">Map Status Flags</button>
-    <pre id="HLYR2-state" class="panel map-title-holder"></pre>
-    <div
-      id="LYR2"
-      class="geoview-map"
-      data-lang="en"
-      data-config="{
-          'map': {
-            'interaction': 'dynamic',
-            'viewSettings': {
-              'zoom': 4,
-              'center': [-100, 60],
-              'projection': 3978
-            },
-            'basemapOptions': {
-              'basemapId': 'nogeom',
-              'shaded': false,
-              'labeled': false
-            },
-            'listOfGeoviewLayerConfig': [
-              {
-                'geoviewLayerId': 'vectorTilesLYR2',
-                'geoviewLayerName': {
-                  'en': 'new basemap'
-                },
-                'geoviewLayerType': 'vectorTiles',
-                'metadataAccessPath': { 'en': 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/' },
-                'listOfLayerEntryConfig': [
-                  {
-                    'layerId': 'toner',
-                    'initialSettings': { 'minZoom': 3, 'maxZoom': 18 },
-                    'source': {
-                      'dataAccessPath': {
-                        'en': 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/tile/{z}/{y}/{x}.pbf'
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          'components': [],
-          'corePackages': [],
-          'theme': 'dark',
-          'suportedLanguages': ['en']
-        }"
-    ></div>
-    <p>This map has a Vector Tiles layer added from configuration. Declutter is set to false for this vector tile layer.</p>
-    <pre id="LYR2CS" class="panel"></pre>
-    <hr />
-
-    <div class="map-title-holder">
-      <h4 id="HLYR3">3. Vector Tiles olms library no GeoView</h4>
+      <h4 id="HLYR3">2. Vector Tiles olms library no GeoView</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <button class="collapsible active">Map Status Flags</button>
@@ -176,7 +120,7 @@
     <pre id="codeSnippet" class="panel"></pre>
 
     <div class="map-title-holder">
-      <h4 id="HLYR4">4. Vector Tiles Layers (3978) - with footer bar</h4>
+      <h4 id="HLYR4">3. Vector Tiles Layers (3978) - with footer bar</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <button class="collapsible active">Map Status Flags</button>
