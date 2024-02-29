@@ -18,7 +18,7 @@ import {
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { logger } from '../../logger';
-import { LayerSetPayload, api } from '@/app';
+import { LayerSetPayload, TypeJsonValue, api } from '@/app';
 
 /** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map.
@@ -121,5 +121,31 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     this.geoviewLayerInstance?.setVisible(this.initialSettings?.visible !== 'no', this.layerPath);
     if (this._layerStatus === 'loaded')
       api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.geoviewLayerInstance!.mapId, this.layerPath, 'loaded'));
+  }
+
+  /**
+   * Serializes the TypeBaseLayerEntryConfig class
+   * @returns {TypeJsonValue} The serialized TypeBaseLayerEntryConfig
+   */
+  serialize(): TypeJsonValue {
+    // Redirect
+    return this.onSerialize();
+  }
+
+  /**
+   * Overrides the serialization of the mother class
+   * @returns {TypeJsonValue} The serialized TypeBaseLayerEntryConfig
+   */
+  onSerialize(): TypeJsonValue {
+    // Call parent
+    const serialized = super.onSerialize() as unknown as AbstractBaseLayerEntryConfig;
+
+    // Copy values
+    serialized.layerIdExtension = this.layerIdExtension;
+    serialized.layerName = this.layerName;
+    serialized.initialSettings = this.initialSettings;
+
+    // Return it
+    return serialized as unknown as TypeJsonValue;
   }
 }
