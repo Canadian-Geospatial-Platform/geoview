@@ -30,7 +30,7 @@ export class Plugin {
    *
    * @param {string} pluginId the package id to load
    */
-  // ? unknown type cannot be use, need to escape. Creates problems in fotter-bar.tsx
+  // ? unknown type cannot be use, need to escape. Creates problems in footer-bar.tsx
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   loadScript = (pluginId: string): Promise<any> => {
     return new Promise((resolve, reject) => {

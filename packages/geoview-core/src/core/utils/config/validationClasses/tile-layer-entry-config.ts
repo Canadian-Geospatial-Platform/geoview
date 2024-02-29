@@ -1,0 +1,29 @@
+import { TypeLayerEntryType, TypeSourceTileInitialConfig } from '@/geo/map/map-schema-types';
+import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
+
+/** ******************************************************************************************************************************
+ * Type used to define a GeoView image layer to display on the map.
+ */
+export class TileLayerEntryConfig extends AbstractBaseLayerEntryConfig {
+  /** Layer entry data type. */
+  entryType = 'raster-tile' as TypeLayerEntryType;
+
+  /** Initial settings to apply to the GeoView image layer source at creation time. */
+  declare source?: TypeSourceTileInitialConfig;
+
+  /**
+   * The class constructor.
+   * @param {TileLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+   */
+  constructor(layerConfig: TileLayerEntryConfig) {
+    super(layerConfig);
+    Object.assign(this, layerConfig);
+  }
+
+  /**
+   * Method to execute when the layer is loaded.
+   */
+  loadedFunction() {
+    super.loadedFunction();
+  }
+}

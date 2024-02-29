@@ -285,6 +285,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     if (closeBtnRef && closeBtnRef.current) if (button.visible) Cast<HTMLElement>(closeBtnRef.current).focus();
   }, [button, closeBtnRef]);
 
+  // TODO: refactor - remove comment in tsx for production build facebook/create-react-app#9507
   return (
     <Box sx={panelContainerStyles}>
       <FocusTrap

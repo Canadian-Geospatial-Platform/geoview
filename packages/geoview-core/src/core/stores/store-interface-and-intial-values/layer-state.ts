@@ -8,15 +8,11 @@ import { FitOptions } from 'ol/View';
 import { useGeoViewStore } from '../stores-managers';
 import { TypeLayersViewDisplayState, TypeLegendLayer } from '@/core/components/layers/types';
 import { TypeGetStore, TypeSetStore } from '../geoview-store';
-import {
-  TypeClassBreakStyleConfig,
-  TypeStyleGeometry,
-  TypeUniqueValueStyleConfig,
-  TypeVectorLayerEntryConfig,
-} from '@/geo/map/map-schema-types';
+import { TypeClassBreakStyleConfig, TypeStyleGeometry, TypeUniqueValueStyleConfig } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewVector, api } from '@/app';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { VectorLayerEntryConfig } from '@/core/utils/config/validationClasses/vector-layer-entry-config';
 
 export interface ILayerState {
   highlightedLayer: string;
@@ -132,7 +128,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       toggleItemVisibility: (layerPath: string, geometryType: TypeStyleGeometry, itemName: string) => {
         const curLayers = get().layerState.legendLayers;
 
-        const registeredLayer = api.maps[get().mapId].layer.registeredLayers[layerPath] as TypeVectorLayerEntryConfig;
+        const registeredLayer = api.maps[get().mapId].layer.registeredLayers[layerPath] as VectorLayerEntryConfig;
         const layer = findLayerByPath(curLayers, layerPath);
         if (layer) {
           _.each(layer.items, (item) => {
@@ -179,7 +175,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         MapEventProcessor.setOrToggleMapVisibilty(get().mapId, layerPath, visibility);
         const curLayers = get().layerState.legendLayers;
 
-        const registeredLayer = api.maps[get().mapId].layer.registeredLayers[layerPath] as TypeVectorLayerEntryConfig;
+        const registeredLayer = api.maps[get().mapId].layer.registeredLayers[layerPath] as VectorLayerEntryConfig;
         const layer = findLayerByPath(curLayers, layerPath);
         if (layer) {
           _.each(layer.items, (item) => {

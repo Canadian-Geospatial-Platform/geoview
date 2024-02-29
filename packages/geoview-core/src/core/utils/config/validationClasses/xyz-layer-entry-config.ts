@@ -1,7 +1,7 @@
 import { TypeSourceImageXYZTilesInitialConfig } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
-import { TypeTileLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { TileLayerEntryConfig } from './tile-layer-entry-config';
 
-export class XYZTilesLayerEntryConfig extends TypeTileLayerEntryConfig {
+export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
   declare source: TypeSourceImageXYZTilesInitialConfig;
 
   /**

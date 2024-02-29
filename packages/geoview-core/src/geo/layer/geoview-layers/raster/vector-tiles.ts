@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-// We have many reassing for layerPath-layerConfig. We keep it global...
+// We have many reassign for layerPath-layerConfig. We keep it global...
 import View from 'ol/View';
 import Map from 'ol/Map';
 import TileLayer from 'ol/layer/Tile';
@@ -16,7 +16,6 @@ import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-
 import {
   TypeLayerEntryConfig,
   TypeSourceTileInitialConfig,
-  TypeTileLayerEntryConfig,
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
@@ -29,33 +28,12 @@ import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validationClasses/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
+import { TileLayerEntryConfig } from '@/core/utils/config/validationClasses/tile-layer-entry-config';
 
 // TODO: Implement method to validate Vector Tiles service
 // TODO: Add more customization (minZoom, maxZoom, TMS)
 
 export type TypeSourceVectorTilesInitialConfig = TypeSourceTileInitialConfig;
-
-// export class TypeVectorTilesLayerEntryConfig extends TypeTileLayerEntryConfig {
-//   declare source: TypeSourceVectorTilesInitialConfig;
-
-//   tileGrid!: TypeTileGrid;
-
-//   /**
-//    * The class constructor.
-//    * @param {TypeVectorTilesLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
-//    */
-//   constructor(layerConfig: TypeVectorTilesLayerEntryConfig) {
-//     super(layerConfig);
-//     Object.assign(this, layerConfig);
-
-//     /** layerConfig.source.dataAccessPath is mandatory. */
-//     if (!layerConfig.source!.dataAccessPath) {
-//       throw new Error(
-//         `source.dataAccessPath on layer entry ${this.layerPath} is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} of type ${this.geoviewLayerConfig.geoviewLayerType}`
-//       );
-//     }
-//   }
-// }
 
 export interface TypeVectorTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'vectorTiles';
@@ -173,96 +151,105 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
   protected processOneLayerEntry(layerConfig: VectorTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
-    const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
-      const { layerPath } = layerConfig;
-      this.setLayerPhase('processOneLayerEntry', layerPath);
-      const sourceOptions: SourceOptions = {
-        url: getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId),
+    // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
+    // !            layerStatus values is correctly sequenced.
+    super.processOneLayerEntry(layerConfig);
+    const { layerPath } = layerConfig;
+    this.setLayerPhase('processOneLayerEntry', layerPath);
+    const sourceOptions: SourceOptions = {
+      url: getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId),
+    };
+
+    if (
+      this.metadata?.tileInfo?.spatialReference?.wkid &&
+      MapEventProcessor.getMapState(this.mapId).currentProjection !== this.metadata.tileInfo.spatialReference.wkid
+    ) {
+      showError(this.mapId, `Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
+      logger.logError(`Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
+      layerConfig.layerStatus = 'error';
+      return Promise.resolve(null);
+    }
+
+    if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
+
+    if (layerConfig.source.tileGrid) {
+      const tileGridOptions: TileGridOptions = {
+        origin: layerConfig.source.tileGrid?.origin,
+        resolutions: layerConfig.source.tileGrid?.resolutions as number[],
       };
-      if (
-        this.metadata?.tileInfo?.spatialReference?.wkid &&
-        MapEventProcessor.getMapState(this.mapId).currentProjection !== this.metadata.tileInfo.spatialReference.wkid
-      ) {
-        showError(this.mapId, `Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
-        logger.logError(`Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
-        layerConfig.layerStatus = 'error';
-        resolve(null);
-      } else if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
-      if (layerConfig.source.tileGrid) {
-        const tileGridOptions: TileGridOptions = {
-          origin: layerConfig.source.tileGrid?.origin,
-          resolutions: layerConfig.source.tileGrid?.resolutions as number[],
-        };
-        if (layerConfig.source.tileGrid?.tileSize) tileGridOptions.tileSize = layerConfig.source.tileGrid?.tileSize;
-        if (layerConfig.source.tileGrid?.extent) tileGridOptions.extent = layerConfig.source.tileGrid?.extent;
-        sourceOptions.tileGrid = new TileGrid(tileGridOptions);
-      }
+      if (layerConfig.source.tileGrid?.tileSize) tileGridOptions.tileSize = layerConfig.source.tileGrid?.tileSize;
+      if (layerConfig.source.tileGrid?.extent) tileGridOptions.extent = layerConfig.source.tileGrid?.extent;
+      sourceOptions.tileGrid = new TileGrid(tileGridOptions);
+    }
 
-      // TODO: The following line cause an error now.
-      // sourceOptions.format = new MVT();
-      sourceOptions.projection = `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`;
-      sourceOptions.tileGrid = new TileGrid(layerConfig.source!.tileGrid!);
-      const tileLayerOptions: TileOptions<VectorTileSource> = { source: new VectorTileSource(sourceOptions) };
-      // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-      if (layerConfig.initialSettings?.className !== undefined) tileLayerOptions.className = layerConfig.initialSettings?.className;
-      if (layerConfig.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerConfig.initialSettings?.extent;
-      if (layerConfig.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
-      if (layerConfig.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerConfig.initialSettings?.minZoom;
-      if (layerConfig.initialSettings?.opacity !== undefined) tileLayerOptions.opacity = layerConfig.initialSettings?.opacity;
-      if (layerConfig.initialSettings?.visible !== undefined) tileLayerOptions.visible = layerConfig.initialSettings?.visible !== 'no';
+    // TODO: The following line cause an error now.
+    // sourceOptions.format = new MVT();
+    sourceOptions.projection = `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`;
+    sourceOptions.tileGrid = new TileGrid(layerConfig.source!.tileGrid!);
+    const tileLayerOptions: TileOptions<VectorTileSource> = { source: new VectorTileSource(sourceOptions) };
+    // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+    if (layerConfig.initialSettings?.className !== undefined) tileLayerOptions.className = layerConfig.initialSettings?.className;
+    if (layerConfig.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerConfig.initialSettings?.extent;
+    if (layerConfig.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
+    if (layerConfig.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerConfig.initialSettings?.minZoom;
+    if (layerConfig.initialSettings?.opacity !== undefined) tileLayerOptions.opacity = layerConfig.initialSettings?.opacity;
+    // ! IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
+    // !            in the 'loading' state if the flag value is 'no'.
 
-      // TODO remove after demoing
-      // ! Humm! Have we done the demo?
-      const declutter = this.mapId !== 'LYR2';
-      layerConfig.olLayerAndLoadEndListeners = {
-        olLayer: new VectorTileLayer({ ...tileLayerOptions, declutter }),
-        loadEndListenerType: 'tile',
-      };
-      layerConfig.geoviewLayerInstance = this;
-      if (this.metadata?.defaultStyles)
-        applyStyle(
-          layerConfig.olLayer as VectorTileLayer,
-          `${getLocalizedValue(this.metadataAccessPath, this.mapId)}${this.metadata.defaultStyles}/root.json`
-        );
+    // TODO remove after demoing
+    // ! Humm! Have we done the demo?
+    const declutter = this.mapId !== 'LYR2';
+    layerConfig.olLayerAndLoadEndListeners = {
+      olLayer: new VectorTileLayer({ ...tileLayerOptions, declutter }),
+      loadEndListenerType: 'tile',
+    };
 
-      resolve(layerConfig.olLayer);
-    });
-    return promisedVectorLayer;
+    layerConfig.geoviewLayerInstance = this;
+    if (this.metadata?.defaultStyles)
+      applyStyle(
+        layerConfig.olLayer as VectorTileLayer,
+        `${getLocalizedValue(this.metadataAccessPath, this.mapId)}${this.metadata.defaultStyles}/root.json`
+      );
+
+    return Promise.resolve(layerConfig.olLayer);
   }
 
   /** ***************************************************************************************************************************
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
-   * @param {TypeTileLayerEntryConfig} layerConfig The layer entry configuration to process.
+   *  ! This routine must imperatively ends with layerConfig.layerStatus = 'processed' or 'error' if an error happens.
+   *
+   * @param {TileLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerConfig: TypeTileLayerEntryConfig): Promise<TypeLayerEntryConfig> {
-    const promiseOfExecution = new Promise<TypeLayerEntryConfig>((resolve) => {
-      if (!this.metadata) resolve(layerConfig);
-      else {
-        const { tileInfo } = this.metadata;
-        const extent = this.metadata.fullExtent;
-        const newTileGrid: TypeTileGrid = {
-          extent: [extent.xmin as number, extent.ymin as number, extent.xmax as number, extent.ymax as number],
-          origin: [tileInfo.origin.x as number, tileInfo.origin.y as number],
-          resolutions: (tileInfo.lods as Array<TypeJsonObject>).map(({ resolution }) => resolution as number),
-          tileSize: [tileInfo.rows as number, tileInfo.cols as number],
-        };
-        layerConfig.source!.tileGrid = newTileGrid;
+  protected processLayerMetadata(layerConfig: TileLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+    if (this.metadata) {
+      const { tileInfo } = this.metadata;
+      const extent = this.metadata.fullExtent;
+      const newTileGrid: TypeTileGrid = {
+        extent: [extent.xmin as number, extent.ymin as number, extent.xmax as number, extent.ymax as number],
+        origin: [tileInfo.origin.x as number, tileInfo.origin.y as number],
+        resolutions: (tileInfo.lods as Array<TypeJsonObject>).map(({ resolution }) => resolution as number),
+        tileSize: [tileInfo.rows as number, tileInfo.cols as number],
+      };
+      layerConfig.source!.tileGrid = newTileGrid;
 
-        if (layerConfig.initialSettings?.extent)
-          layerConfig.initialSettings.extent = api.projection.transformExtent(
-            layerConfig.initialSettings.extent,
-            'EPSG:4326',
-            `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
-          );
+      if (layerConfig.initialSettings?.extent)
+        layerConfig.initialSettings.extent = api.projection.transformExtent(
+          layerConfig.initialSettings.extent,
+          'EPSG:4326',
+          `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
+        );
+    }
 
-        resolve(layerConfig);
-      }
-    });
-    return promiseOfExecution;
+    // When we get here, we know that the metadata (if the service provide some) are processed.
+    // We need to signal to the layer sets that the 'processed' phase is done. Be aware that the
+    // layerStatus setter is doing a lot of things behind the scene.
+    layerConfig.layerStatus = 'processed';
+
+    return Promise.resolve(layerConfig);
   }
 
   /** ***************************************************************************************************************************
