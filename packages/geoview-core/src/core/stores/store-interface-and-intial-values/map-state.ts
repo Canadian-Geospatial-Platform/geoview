@@ -15,7 +15,7 @@ import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 
 import { TypeBasemapOptions, TypeMapFeaturesConfig, TypeValidMapProjectionCodes } from '@/core/types/global-types';
 import { TypeFeatureInfoEntry, TypeGeometry, TypeMapMouseInfo } from '@/api/events/payloads';
-import { TypeInteraction, TypeVisibilityFlags, TypeHighlightColors } from '@/geo/map/map-schema-types';
+import { TypeInteraction, TypeHighlightColors } from '@/geo/map/map-schema-types';
 import { TypeClickMarker, api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
@@ -95,12 +95,13 @@ export interface IMapState {
     setAttribution: (attribution: string[]) => void;
     setClickCoordinates: () => void;
     setFixNorth: (ifFix: boolean) => void;
+    setHighlightColor: (color: TypeHighlightColors) => void;
     setHoverable: (layerPath: string, hoverable: boolean) => void;
     setInteraction: (interaction: TypeInteraction) => void;
     setMapElement: (mapElem: OLMap) => void;
     setMapKeyboardPanInteractions: (panDelta: number) => void;
     setOrderedLayerInfo: (newOrderedLayerInfo: Array<TypeOrderedLayerInfo>) => void;
-    setOrToggleLayerVisibility: (layerPath: string, newValue?: TypeVisibilityFlags) => void;
+    setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean) => void;
     setOverlayClickMarker: (overlay: Overlay) => void;
     setOverlayClickMarkerRef: (htmlRef: HTMLElement) => void;
     setOverlayNorthMarker: (overlay: Overlay) => void;
@@ -417,6 +418,14 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           },
         });
       },
+      setHighlightColor: (color: TypeHighlightColors) => {
+        set({
+          mapState: {
+            ...get().mapState,
+            highlightColor: color,
+          },
+        });
+      },
       setHoverable: (layerPath: string, hoverable: boolean) => {
         const curLayerInfo = get().mapState.orderedLayerInfo;
         const layerInfo = curLayerInfo.find((info) => info.layerPath === layerPath);
@@ -548,16 +557,35 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       },
       setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean): void => {
         const curOrderedLayerInfo = get().mapState.orderedLayerInfo;
+        const layerVisibility = get().mapState.actions.getVisibilityFromOrderedLayerInfo(layerPath);
         const layerInfos = curOrderedLayerInfo.filter((info) => info.layerPath.startsWith(layerPath));
+        const parentLayerPathArray = layerPath.split('/');
+        parentLayerPathArray.pop();
+        const parentLayerPath = parentLayerPathArray.join('/');
+        const parentLayerInfo = curOrderedLayerInfo.find((info) => info.layerPath === parentLayerPath);
+
         layerInfos.forEach((layerInfo) => {
           if (layerInfo && !layerInfo.alwaysVisible) {
             // eslint-disable-next-line no-param-reassign
-            if (newValue) layerInfo!.visible = newValue;
-            // eslint-disable-next-line no-param-reassign
-            else layerInfo!.visible = !layerInfo.visible;
+            layerInfo!.visible = newValue || !layerVisibility;
+            api.maps[get().mapId].layer.geoviewLayer(layerInfo.layerPath).setVisible(layerInfo.visible, layerInfo.layerPath);
           }
         });
-        if (!layerInfos[0].alwaysVisible) api.maps[get().mapId].layer.geoviewLayer(layerPath).setVisible(layerInfos[0].visible, layerPath);
+
+        if (parentLayerInfo !== undefined) {
+          const parentLayerVisibility = get().mapState.actions.getVisibilityFromOrderedLayerInfo(parentLayerPath);
+          if ((!layerVisibility || newValue) && parentLayerVisibility === false) {
+            if (parentLayerInfo) {
+              parentLayerInfo.visible = true;
+              api.maps[get().mapId].layer.geoviewLayer(parentLayerPath).setVisible(true, parentLayerPath);
+            }
+          }
+          const children = curOrderedLayerInfo.filter(
+            (info) => info.layerPath.startsWith(parentLayerPath) && info.layerPath !== parentLayerPath
+          );
+          if (!children.some((child) => child.visible === true)) get().mapState.actions.setOrToggleLayerVisibility(parentLayerPath, false);
+        }
+
         set({
           mapState: {
             ...get().mapState,
