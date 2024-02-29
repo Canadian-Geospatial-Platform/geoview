@@ -12,6 +12,7 @@ import { Extent } from 'ol/extent';
 import olms, { applyStyle } from 'ol-mapbox-style';
 
 import Feature from 'ol/Feature';
+import { MVT } from 'ol/format';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
@@ -183,8 +184,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
       sourceOptions.tileGrid = new TileGrid(tileGridOptions);
     }
 
-    // TODO: The following line cause an error now.
-    // sourceOptions.format = new MVT();
+    sourceOptions.format = new MVT();
     sourceOptions.projection = `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`;
     sourceOptions.tileGrid = new TileGrid(layerConfig.source!.tileGrid!);
     const tileLayerOptions: TileOptions<VectorTileSource> = { source: new VectorTileSource(sourceOptions) };
@@ -197,19 +197,19 @@ export class VectorTiles extends AbstractGeoViewRaster {
     // ! IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
     // !            in the 'loading' state if the flag value is 'no'.
 
-    // TODO remove after demoing
-    // ! Humm! Have we done the demo?
-    const declutter = this.mapId !== 'LYR2';
     layerConfig.olLayerAndLoadEndListeners = {
-      olLayer: new VectorTileLayer({ ...tileLayerOptions, declutter }),
+      olLayer: new VectorTileLayer({ ...tileLayerOptions, declutter: false }),
       loadEndListenerType: 'tile',
     };
+
+    const resolutions = (layerConfig.olLayer as VectorTileLayer).getSource()?.getTileGrid()?.getResolutions();
 
     layerConfig.geoviewLayerInstance = this;
     if (this.metadata?.defaultStyles)
       applyStyle(
         layerConfig.olLayer as VectorTileLayer,
-        `${getLocalizedValue(this.metadataAccessPath, this.mapId)}${this.metadata.defaultStyles}/root.json`
+        `${getLocalizedValue(this.metadataAccessPath, this.mapId)}${this.metadata.defaultStyles}/root.json`,
+        { resolutions: resolutions?.length ? resolutions : [] }
       );
 
     return Promise.resolve(layerConfig.olLayer);
