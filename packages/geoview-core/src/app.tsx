@@ -139,8 +139,7 @@ export async function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig:
     // Render the map
     await renderMap(mapDiv);
   } else {
-    // eslint-disable-next-line no-console
-    console.warn(`Div with id ${mapDiv.id} has a class 'geoview-map' and should be initialized via a cgpv.init() call.`);
+    logger.logWarning(`Div with id ${mapDiv.id} has a class 'geoview-map' and should be initialized via a cgpv.init() call.`);
   }
 }
 

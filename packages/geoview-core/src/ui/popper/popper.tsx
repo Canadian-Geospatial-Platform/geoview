@@ -3,6 +3,7 @@ import { Popper as MaterialPopper, PopperProps } from '@mui/material';
 import { animated, useSpring, easings } from '@react-spring/web';
 
 interface EnhancedPopperProps extends PopperProps {
+  // eslint-disable-next-line react/require-default-props
   onClose?: () => void;
 }
 

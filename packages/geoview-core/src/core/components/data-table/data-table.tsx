@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useCallback, useEffect, useMemo, useRef, useState, memo, ReactNode, isValidElement } from 'react';
 
 import { useTranslation } from 'react-i18next';
@@ -15,7 +14,6 @@ import { MRT_Localization_EN as MRTLocalizationEN } from 'material-react-table/l
 
 import { Extent } from 'ol/extent'; // only for typing
 
-import { darken } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { HtmlToReact } from '@/core/containers/html-to-react';
 
@@ -42,7 +40,7 @@ import {
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
-import { AbstractGeoViewVector, TypeLayerEntryConfig, api, TypeFieldEntry, TypeFeatureInfoEntry, isImage, EsriDynamic } from '@/app';
+import { TypeFeatureInfoEntry, api, isImage } from '@/app';
 import { getSxClasses } from './data-table-style';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
@@ -161,8 +159,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
     try {
       rowVirtualizerInstanceRef.current?.scrollToIndex?.(0);
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error);
+      logger.logError('Data table error on sorting action', error);
     }
   }, [sorting]);
 
@@ -501,23 +498,26 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
       // Check if filterValue is of type array because columnfilters return array with min and max.
       if (Array.isArray(filterValue)) {
         let numQuery = '';
-        const minValue = Number(filterValue[0]);
-        const maxValue = Number(filterValue[1]);
-
-        const numOpr = tableState?.columnFilterFns[filterId] as string;
-
-        const numFilter = NUMBER_FILTER[numOpr] ?? '=';
+        const minValue = filterValue[0] === '' ? undefined : Number(filterValue[0]);
+        const maxValue = filterValue[1] === '' ? undefined : Number(filterValue[1]);
+        const inclusive = tableState?.columnFilterFns[filterId] === 'betweenInclusive' ? '=' : '';
 
         if (minValue && maxValue) {
-          const opr2 = numFilter === '>' ? '<' : '<=';
-          numQuery = `${filterId} ${numFilter} ${filterValue[0]} and ${filterId} ${opr2} ${filterValue[1]}`;
+          numQuery = `${filterId} >${inclusive} ${minValue} and ${filterId} <${inclusive} ${maxValue}`;
         } else if (minValue) {
-          numQuery = `${filterId} ${numFilter} ${filterValue[0]}`;
+          numQuery = `${filterId} >${inclusive} ${minValue}`;
         } else if (maxValue) {
-          numQuery = `${filterId} ${numFilter} ${filterValue[1]}`;
+          numQuery = `${filterId} <${inclusive} ${maxValue}`;
         }
         return numQuery;
       }
+
+      if (!Number.isNaN(Number(filterValue))) {
+        return `${filterId} ${NUMBER_FILTER[tableState?.columnFilterFns[filterId]]} ${Number(filterValue)}`;
+      }
+
+      if (tableState?.columnFilterFns[filterId] === 'empty') return `${filterId} is null`;
+      if (tableState?.columnFilterFns[filterId] === 'notEmpty') return `${filterId} is not null`;
 
       // Check filter value is of type date,
       if (typeof filterValue === 'object' && filterValue) {
@@ -527,8 +527,8 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
         const formattedDate = date.slice(0, -1);
         return `${filterId} ${dateFilter.replace('value', formattedDate)}`;
       }
-      const operator = tableState?.columnFilterFns[filterId] ?? 'contains';
 
+      const operator = tableState?.columnFilterFns[filterId] ?? 'contains';
       const strFilter = STRING_FILTER[operator] as string;
 
       return `${strFilter.replace('filterId', filterId).replace('value', filterValue as string)}`;

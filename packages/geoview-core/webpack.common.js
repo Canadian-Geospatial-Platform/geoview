@@ -1,5 +1,6 @@
-/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable @typescript-eslint/no-var-requires */
+// all lines below (3-10) needs the eslint escape no-var-requires.
+// It is a file for the buid and constant, they are reuse later in the file. It is the reason why we keep it global...
 const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');

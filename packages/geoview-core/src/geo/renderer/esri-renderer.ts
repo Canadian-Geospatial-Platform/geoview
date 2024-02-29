@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { asString } from 'ol/color';
 import {
   isFilledPolygonVectorConfig,
@@ -21,6 +20,7 @@ import {
   TypeUniqueValueStyleConfig,
   TypeUniqueValueStyleInfo,
 } from '../map/map-schema-types';
+import { logger } from '@/core/utils/logger';
 
 /*
  * This file contains a partial implementation of the ESRI renderer types.
@@ -267,7 +267,7 @@ function convertLineStyle(lineStyle: EsriLineStyle): TypeLineStyle {
     case 'esriSLSSolid':
       return 'solid';
     default: {
-      console.log(`Handling of ESRI renderer line style '${lineStyle}' is not coded, 'solid' will be used instead.`);
+      logger.logInfo(`Handling of ESRI renderer line style '${lineStyle}' is not coded, 'solid' will be used instead.`);
       return 'solid';
     }
   }
@@ -299,7 +299,7 @@ function convertFillStyle(fillStyle: EsriFillStyle): TypeFillStyle {
     case 'esriSFSVertical':
       return 'vertical';
     default: {
-      console.log(`Handling of ESRI renderer fill style '${fillStyle}' is not coded, 'solid' will be used instead.`);
+      logger.logInfo(`Handling of ESRI renderer fill style '${fillStyle}' is not coded, 'solid' will be used instead.`);
       return 'solid';
     }
   }
@@ -327,7 +327,7 @@ function convertSymbolStyle(symbolStyle: EsriSymbolStyle): TypeSymbol {
     case 'esriSMSX':
       return 'X';
     default: {
-      console.log(`Handling of ESRI renderer symbol style '${symbolStyle}' is not coded, 'circle' will be used instead.`);
+      logger.logInfo(`Handling of ESRI renderer symbol style '${symbolStyle}' is not coded, 'circle' will be used instead.`);
       return 'circle';
     }
   }
@@ -413,7 +413,7 @@ function convertSymbol(symbol: EsriSymbol): TypeKindOfVectorSettings | undefined
       };
       return iconSymbolVectorConfig;
     }
-    console.log(`Handling of ESRI renderer symbol '${symbol}' is not coded, default GeoView settings will be used instead.`);
+    logger.logInfo(`Handling of ESRI renderer symbol '${symbol}' is not coded, default GeoView settings will be used instead.`);
   }
   return undefined;
 }
@@ -564,6 +564,6 @@ export function getStyleFromEsriRenderer(renderer: EsriBaseRenderer): TypeStyleC
   if (esriRendererIsUniqueValue(renderer)) return processUniqueValueRenderer(renderer);
   if (esriRendererIsSimple(renderer)) return processSimpleRenderer(renderer);
   if (esriRendererIsClassBreaks(renderer)) return processClassBreakRenderer(renderer);
-  console.log(`Handling of ESRI renderer '${renderer.type}' is not coded, default GeoView settings will be used instead.`);
+  logger.logInfo(`Handling of ESRI renderer '${renderer.type}' is not coded, default GeoView settings will be used instead.`);
   return undefined;
 }

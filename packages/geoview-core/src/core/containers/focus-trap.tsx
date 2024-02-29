@@ -172,7 +172,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   return (
     <Modal
-      container={document.getElementById(focusTrapId)}
+      container={document.getElementById(focusTrapId)!}
       mapId={focusTrapId}
       open={open}
       aria-labelledby="wcag-dialog-title"

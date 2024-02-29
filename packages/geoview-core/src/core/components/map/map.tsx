@@ -129,9 +129,11 @@ export function Map(): JSX.Element {
 
     // Init the map on first render
     initMap();
-  }, [initMap]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // We don't want to add a dependency here, because we only want this execution path to be executed on original mount of the map. Never again afterwards as it causes duplications of Views.
 
   return (
+    // ? the map is focusable and needs to be tabbable for keyboard navigation
     /* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */
     <Box id={`mapbox-${mapId}`} ref={mapElement as MutableRefObject<HTMLDivElement>} sx={sxClasses.mapContainer} tabIndex={0}>
       {mapLoaded && (

@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+// We have many reassign for layer-layerConfig. We keep it global...
 import axios from 'axios';
 
 import ImageLayer from 'ol/layer/Image';
@@ -28,19 +29,19 @@ import {
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
-  TypeLayerGroupEntryConfig,
-  TypeBaseLayerEntryConfig,
-  TypeOgcWmsLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
 import { TypeFeatureInfoEntry, TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import { getLocalizedValue, getMinOrMaxExtents, xmlToJson, showError, replaceParams, getLocalizedMessage } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
+import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validationClasses/ogc-wms-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validationClasses/abstract-base-layer-entry-config';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validationClasses/group-layer-entry-config';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'ogcWms';
-  listOfLayerEntryConfig: TypeOgcWmsLayerEntryConfig[];
+  listOfLayerEntryConfig: OgcWmsLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
@@ -69,7 +70,7 @@ export const geoviewLayerIsWMS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): v
 };
 
 /** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TypeOgcWmsLayerEntryConfig if the geoviewLayerType attribute of the
+ * type guard function that redefines a TypeLayerEntryConfig as a OgcWmsLayerEntryConfig if the geoviewLayerType attribute of the
  * verifyIfGeoViewEntry.geoviewLayerConfig attribute is WMS. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
@@ -78,7 +79,7 @@ export const geoviewLayerIsWMS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): v
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const geoviewEntryIsWMS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeOgcWmsLayerEntryConfig => {
+export const geoviewEntryIsWMS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is OgcWmsLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.WMS;
 };
 
@@ -385,7 +386,7 @@ export class WMS extends AbstractGeoViewRaster {
         return;
       }
 
-      if ((layerConfig as TypeBaseLayerEntryConfig).layerStatus !== 'error') {
+      if ((layerConfig as AbstractBaseLayerEntryConfig).layerStatus !== 'error') {
         layerConfig.layerStatus = 'processing';
 
         const layerFound = this.getLayerMetadataEntry(layerConfig.layerId!);
@@ -399,7 +400,7 @@ export class WMS extends AbstractGeoViewRaster {
         }
 
         if ('Layer' in layerFound) {
-          this.createGroupLayer(layerFound, layerConfig as TypeBaseLayerEntryConfig);
+          this.createGroupLayer(layerFound, layerConfig as AbstractBaseLayerEntryConfig);
           return;
         }
 
@@ -416,9 +417,9 @@ export class WMS extends AbstractGeoViewRaster {
    * This method create recursively dynamic group layers from the service metadata.
    *
    * @param {TypeJsonObject} layer The dynamic group layer metadata.
-   * @param {TypeBaseLayerEntryConfig} layerConfig The layer configurstion associated to the dynamic group.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer configurstion associated to the dynamic group.
    */
-  private createGroupLayer(layer: TypeJsonObject, layerConfig: TypeBaseLayerEntryConfig) {
+  private createGroupLayer(layer: TypeJsonObject, layerConfig: AbstractBaseLayerEntryConfig) {
     const { layerPath } = layerConfig;
     const newListOfLayerEntryConfig: TypeListOfLayerEntryConfig = [];
     const arrayOfLayerMetadata = Array.isArray(layer.Layer) ? layer.Layer : ([layer.Layer] as TypeJsonArray);
@@ -427,7 +428,7 @@ export class WMS extends AbstractGeoViewRaster {
       // Log for pertinent debugging purposes
       logger.logTraceCore('WMS - createGroupLayer', 'Cloning the layer config', layerConfig.layerPath);
       const subLayerEntryConfig: TypeLayerEntryConfig = cloneDeep(layerConfig);
-      subLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerConfig);
+      subLayerEntryConfig.parentLayerConfig = Cast<GroupLayerEntryConfig>(layerConfig);
       subLayerEntryConfig.layerId = subLayer.Name as string;
       subLayerEntryConfig.layerName = {
         en: subLayer.Title as string,
@@ -438,7 +439,7 @@ export class WMS extends AbstractGeoViewRaster {
     });
 
     if (this.registerToLayerSetListenerFunctions[layerPath]) this.unregisterFromLayerSets(layerConfig);
-    const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerConfig);
+    const switchToGroupLayer = Cast<GroupLayerEntryConfig>(layerConfig);
     switchToGroupLayer.entryType = 'group';
     switchToGroupLayer.layerName = {
       en: layer.Title as string,
@@ -479,11 +480,11 @@ export class WMS extends AbstractGeoViewRaster {
   /** ****************************************************************************************************************************
    * This method creates a GeoView WMS layer using the definition provided in the layerConfig parameter.
    *
-   * @param {TypeBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
    * @returns {TypeBaseRasterLayer | null} The GeoView raster layer that has been created.
    */
-  protected processOneLayerEntry(layerConfig: TypeBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // !            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
@@ -616,9 +617,9 @@ export class WMS extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * This method will create a Geoview temporal dimension if it existds in the service metadata
    * @param {TypeJsonObject} wmsTimeDimension The WMS time dimension object
-   * @param {TypeOgcWmsLayerEntryConfig} layerConfig The layer entry to configure
+   * @param {OgcWmsLayerEntryConfig} layerConfig The layer entry to configure
    */
-  protected processTemporalDimension(wmsTimeDimension: TypeJsonObject, layerConfig: TypeOgcWmsLayerEntryConfig) {
+  protected processTemporalDimension(wmsTimeDimension: TypeJsonObject, layerConfig: OgcWmsLayerEntryConfig) {
     if (wmsTimeDimension !== undefined) {
       this.layerTemporalDimension[layerConfig.layerPath] = api.dateUtilities.createDimensionFromOGC(wmsTimeDimension);
     }
@@ -665,7 +666,7 @@ export class WMS extends AbstractGeoViewRaster {
   protected async getFeatureInfoAtLongLat(lnglat: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
     try {
       // Get the layer config in a loaded phase
-      const layerConfig = this.getLayerConfig(layerPath) as TypeOgcWmsLayerEntryConfig;
+      const layerConfig = this.getLayerConfig(layerPath) as OgcWmsLayerEntryConfig;
       if (!this.getVisible(layerPath)) return [];
 
       const viewResolution = api.maps[this.mapId].getView().getResolution() as number;
@@ -737,12 +738,12 @@ export class WMS extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * Get the legend image URL of a layer from the capabilities. Return null if it does not exist.
    *
-   * @param {TypeOgcWmsLayerEntryConfig} layerConfig layer configuration.
+   * @param {OgcWmsLayerEntryConfig} layerConfig layer configuration.
    * @param {string} style the style to get the url for
    *
    * @returns {TypeJsonObject | null} URL of a Legend image in png format or null
    */
-  private getLegendUrlFromCapabilities(layerConfig: TypeOgcWmsLayerEntryConfig, chosenStyle?: string): TypeJsonObject | null {
+  private getLegendUrlFromCapabilities(layerConfig: OgcWmsLayerEntryConfig, chosenStyle?: string): TypeJsonObject | null {
     const layerCapabilities = this.getLayerMetadataEntry(layerConfig.layerId);
     if (Array.isArray(layerCapabilities?.Style)) {
       let legendStyle;
@@ -771,12 +772,12 @@ export class WMS extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * Get the legend image of a layer.
    *
-   * @param {TypeOgcWmsLayerEntryConfig} layerConfig layer configuration.
+   * @param {OgcWmsLayerEntryConfig} layerConfig layer configuration.
    * @param {striung} chosenStyle Style to get the legend image for.
    *
    * @returns {blob} image blob
    */
-  private getLegendImage(layerConfig: TypeOgcWmsLayerEntryConfig, chosenStyle?: string): Promise<string | ArrayBuffer | null> {
+  private getLegendImage(layerConfig: OgcWmsLayerEntryConfig, chosenStyle?: string): Promise<string | ArrayBuffer | null> {
     const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
       const readImage = (blob: Blob): Promise<string | ArrayBuffer | null> =>
         new Promise((resolveImage) => {
@@ -814,12 +815,12 @@ export class WMS extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * Get the legend info of a style.
    *
-   * @param {TypeOgcWmsLayerEntryConfig} layerConfig layer configuration.
+   * @param {OgcWmsLayerEntryConfig} layerConfig layer configuration.
    * @param {number} position index number of style to get
    *
    * @returns {Promise<TypeWmsLegendStylel>} The legend of the style.
    */
-  private async getStyleLegend(layerConfig: TypeOgcWmsLayerEntryConfig, position: number): Promise<TypeWmsLegendStyle> {
+  private async getStyleLegend(layerConfig: OgcWmsLayerEntryConfig, position: number): Promise<TypeWmsLegendStyle> {
     try {
       const chosenStyle: string | undefined = this.WMSStyles[position];
       let styleLegend: TypeWmsLegendStyle;
@@ -869,13 +870,20 @@ export class WMS extends AbstractGeoViewRaster {
   async getLegend(layerPath: string): Promise<TypeLegend | null> {
     try {
       // Get the layer config in a loaded phase
-      const layerConfig = this.getLayerConfig(layerPath) as TypeOgcWmsLayerEntryConfig;
+      const layerConfig = this.getLayerConfig(layerPath) as OgcWmsLayerEntryConfig;
 
       let legend: TypeWmsLegend;
       const legendImage = await this.getLegendImage(layerConfig!);
       const styleLegends: TypeWmsLegendStyle[] = [];
       if (this.WMSStyles.length > 1) {
         for (let i = 0; i < this.WMSStyles.length; i++) {
+          // TODO: refactor - does this await in a loop may haev an impact on performance?
+          // TO.DOCONT: In this case here, when glancing at the code, the only reason to await would be if the order that the styleLegend
+          // TO.DOCONT: get added to the styleLegends array MUST be the same order as they are in the WMSStyles array (as in they are 2 arrays with same indexes pointers).
+          // TO.DOCONT: Without the await, WMSStyles[2] stuff could be associated with something in styleLegends[1] position for example (1<>2).
+          // TO.DOCONT: If we remove the await, be mindful of that (maybe add this remark in the TODO?).
+          // TO.DOCONT: In any case, I'd suggest to remove the await indeed, for performance, and rewrite the code to make it work (probably not 2 distinct arrays).
+          // TODO: refactor - never call an explicit function with an index counter. this.WMSStyles[i] should be sent to the getStyleLegend function instead of doing the this.WMSStyles[i] in the latter. Would read a lot better and more easily reused.
           // eslint-disable-next-line no-await-in-loop
           const styleLegend = await this.getStyleLegend(layerConfig!, i);
           styleLegends.push(styleLegend);
@@ -920,14 +928,14 @@ export class WMS extends AbstractGeoViewRaster {
    * Translate the get feature information result set to the TypeArrayOfFeatureInfoEntries used by GeoView.
    *
    * @param {TypeJsonObject} featureMember An object formatted using the query syntax.
-   * @param {TypeOgcWmsLayerEntryConfig} layerConfig The layer configuration.
+   * @param {OgcWmsLayerEntryConfig} layerConfig The layer configuration.
    * @param {Coordinate} clickCoordinate The coordinate where the user has clicked.
    *
    * @returns {TypeArrayOfFeatureInfoEntries} The feature info table.
    */
   private formatWmsFeatureInfoResult(
     featureMember: TypeJsonObject,
-    layerConfig: TypeOgcWmsLayerEntryConfig,
+    layerConfig: OgcWmsLayerEntryConfig,
     clickCoordinate: Coordinate
   ): TypeArrayOfFeatureInfoEntries {
     const featureInfo = layerConfig?.source?.featureInfo;
@@ -1009,7 +1017,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {string} layerPath The layer path to the layer's configuration.
    */
   setWmsStyle(wmsStyleId: string, layerPath: string) {
-    const layerConfig = this.getLayerConfig(layerPath) as TypeOgcWmsLayerEntryConfig | undefined | null;
+    const layerConfig = this.getLayerConfig(layerPath) as OgcWmsLayerEntryConfig | undefined | null;
     // TODO: Verify if we can apply more than one style at the same time since the parameter name is STYLES
     if (layerConfig?.olLayer) (layerConfig.olLayer as ImageLayer<ImageWMS>).getSource()?.updateParams({ STYLES: wmsStyleId });
   }
@@ -1085,7 +1093,7 @@ export class WMS extends AbstractGeoViewRaster {
       filter = parameter1;
     }
 
-    const layerConfig = this.getLayerConfig(layerPath) as TypeOgcWmsLayerEntryConfig;
+    const layerConfig = this.getLayerConfig(layerPath) as OgcWmsLayerEntryConfig;
     if (!layerConfig) {
       // ! Things important to know about the applyViewFilter usage:
       logger.logError(

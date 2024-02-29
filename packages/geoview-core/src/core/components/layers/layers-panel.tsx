@@ -52,9 +52,10 @@ export function LayersPanel() {
       return <LayerDetails layerDetails={selectedLayer} />;
     }
     if (displayState === 'remove') {
+      // TODO: refactor - remove the need for markup and danger Eslint
       const markup = { __html: t('layers.removeLayerDescription') };
-      /* eslint-disable react/no-danger */
       return (
+        // eslint-disable-next-line react/no-danger
         <Paper sx={{ padding: '20px' }}>
           <h3>{t('layers.removingLayers')}</h3>
           <Box sx={{ display: 'flex', flexDirection: 'row', gap: '2', alignItems: 'center' }}>
@@ -62,7 +63,10 @@ export function LayersPanel() {
               <DeleteOutlineIcon color="error" />
             </IconButton>
             <Box>
-              <div dangerouslySetInnerHTML={markup} />
+              {
+                /* eslint-disable-next-line react/no-danger */
+                <div dangerouslySetInnerHTML={markup} />
+              }
             </Box>
           </Box>
         </Paper>
@@ -74,7 +78,10 @@ export function LayersPanel() {
         <Paper sx={{ padding: '20px' }}>
           <h3>{t('layers.reArrangeLayers')}</h3>
           <Box sx={sxClasses.buttonDescriptionContainer}>
-            <div dangerouslySetInnerHTML={markup} />
+            {
+              /* eslint-disable-next-line react/no-danger */
+              <div dangerouslySetInnerHTML={markup} />
+            }
           </Box>
         </Paper>
       );
@@ -85,11 +92,13 @@ export function LayersPanel() {
         <Paper sx={{ padding: '20px' }}>
           <h3>{t('layers.addingNewLayer')}</h3>
           <Box sx={sxClasses.buttonDescriptionContainer}>
-            <div dangerouslySetInnerHTML={markup} />
+            {
+              /* eslint-disable-next-line react/no-danger */
+              <div dangerouslySetInnerHTML={markup} />
+            }
           </Box>
         </Paper>
       );
-      /* eslint-disable react/no-danger */
     }
 
     return null;

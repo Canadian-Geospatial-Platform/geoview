@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-// eslint-disable-next-line max-classes-per-file
+// We have many reassign for sourceOptions-layerConfig. We keep it global...
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { WKB as FormatWKB } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
@@ -17,70 +17,30 @@ import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-lay
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
-  TypeVectorLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
-  TypeBaseLayerEntryConfig,
-  TypeLayerGroupEntryConfig,
   TypeSimpleSymbolVectorConfig,
   TypeStrokeSymbolConfig,
   TypeLineStringVectorConfig,
   TypePolygonVectorConfig,
   TypeFillStyle,
-  TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
 import { createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { GeoPackageLayerEntryConfig } from '@/core/utils/config/validationClasses/geopackage-layer-config-entry';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validationClasses/abstract-base-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/core/utils/config/validationClasses/vector-layer-entry-config';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validationClasses/group-layer-entry-config';
 
 export interface TypeSourceGeoPackageInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'GeoPackage';
 }
 
-export class TypeGeoPackageLayerEntryConfig extends TypeVectorLayerEntryConfig {
-  declare source: TypeSourceGeoPackageInitialConfig;
-
-  /**
-   * The class constructor.
-   * @param {TypeGeoPackageLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
-   */
-  constructor(layerConfig: TypeGeoPackageLayerEntryConfig) {
-    super(layerConfig);
-    Object.assign(this, layerConfig);
-
-    // Default value for this.entryType is vector
-    if (this.entryType === undefined) this.entryType = 'vector';
-    // Attribute 'style' must exist in layerConfig even if it is undefined
-    if (!('style' in this)) this.style = undefined;
-    // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
-    // Value for this.source.format can only be GeoPackage.
-    if (!this.source) this.source = { format: 'GeoPackage' };
-    if (!this.source.format) this.source.format = 'GeoPackage';
-    if (!this.source.dataAccessPath) {
-      let { en, fr } = this.geoviewLayerConfig.metadataAccessPath!;
-      en = en!.split('/').length > 1 ? en!.split('/').slice(0, -1).join('/') : './';
-      fr = fr!.split('/').length > 1 ? fr!.split('/').slice(0, -1).join('/') : './';
-      this.source.dataAccessPath = { en, fr } as TypeLocalizedString;
-    }
-    if (
-      !(this.source.dataAccessPath!.en?.startsWith('blob') && !this.source.dataAccessPath!.en?.endsWith('/')) &&
-      !this.source.dataAccessPath!.en?.toLowerCase().endsWith('.gpkg')
-    ) {
-      this.source.dataAccessPath!.en = this.source.dataAccessPath!.en!.endsWith('/')
-        ? `${this.source.dataAccessPath!.en}${this.layerId}`
-        : `${this.source.dataAccessPath!.en}/${this.layerId}`;
-      this.source.dataAccessPath!.fr = this.source.dataAccessPath!.fr!.endsWith('/')
-        ? `${this.source.dataAccessPath!.fr}${this.layerId}`
-        : `${this.source.dataAccessPath!.fr}/${this.layerId}`;
-    }
-    if (!this?.source?.dataProjection) this.source.dataProjection = 'EPSG:4326';
-  }
-}
-
 export interface TypeGeoPackageLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
   geoviewLayerType: 'GeoPackage';
-  listOfLayerEntryConfig: TypeGeoPackageLayerEntryConfig[];
+  listOfLayerEntryConfig: GeoPackageLayerEntryConfig[];
 }
 
 interface sldsInterface {
@@ -127,7 +87,7 @@ export const geoviewLayerIsGeoPackage = (verifyIfGeoViewLayer: AbstractGeoViewLa
 };
 
 /** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TypeGeoPackageLayerEntryConfig if the geoviewLayerType attribute
+ * type guard function that redefines a TypeLayerEntryConfig as a GeoPackageLayerEntryConfig if the geoviewLayerType attribute
  * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is GEOPACKAGE. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
@@ -138,7 +98,7 @@ export const geoviewLayerIsGeoPackage = (verifyIfGeoViewLayer: AbstractGeoViewLa
  */
 export const geoviewEntryIsGeoPackage = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is TypeGeoPackageLayerEntryConfig => {
+): verifyIfGeoViewEntry is GeoPackageLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.GEOPACKAGE;
 };
 
@@ -210,6 +170,7 @@ export class GeoPackage extends AbstractGeoViewVector {
    *
    * @returns {Promise<BaseLayer | null>} The promise that the layers were processed.
    */
+  // TODO: Question - Is this function still used or should it be removed in favor of the mother class implementation?
   processListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer | null> {
     this.setLayerPhase('processListOfLayerEntryConfig');
     const promisedListOfLayerEntryProcessed = new Promise<BaseLayer | null>((resolve) => {
@@ -252,7 +213,7 @@ export class GeoPackage extends AbstractGeoViewVector {
               }
             });
           } else {
-            this.processOneLayerEntry(layerConfig as TypeBaseLayerEntryConfig).then((layers) => {
+            this.processOneLayerEntry(layerConfig as AbstractBaseLayerEntryConfig).then((layers) => {
               if (layers) {
                 layerGroup!.getLayers().push(layers);
                 layerConfig.layerStatus = 'processed';
@@ -269,7 +230,7 @@ export class GeoPackage extends AbstractGeoViewVector {
         if (layerGroup) resolve(layerGroup);
         // Single non-group config
       } else {
-        this.processOneLayerEntry(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig, layerGroup).then((layer) => {
+        this.processOneLayerEntry(listOfLayerEntryConfig[0] as AbstractBaseLayerEntryConfig, layerGroup).then((layer) => {
           if (layer) {
             listOfLayerEntryConfig[0].layerStatus = 'processed';
             resolve(layer);
@@ -290,12 +251,12 @@ export class GeoPackage extends AbstractGeoViewVector {
   /** ***************************************************************************************************************************
    * Create a source configuration for the vector layer.
    *
-   * @param {TypeBaseLayerEntryConfig} layerConfig The layer entry configuration.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
    * @param {SourceOptions} sourceOptions The source options (default: {}).
    * @param {ReadOptions} readOptions The read options (default: {}).
    */
   protected extractGeopackageData(
-    layerConfig: TypeBaseLayerEntryConfig,
+    layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
   ): Promise<[layerData[], sldsInterface]> {
@@ -406,20 +367,20 @@ export class GeoPackage extends AbstractGeoViewVector {
   /** ***************************************************************************************************************************
    * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
    *
-   * @param {TypeLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    * @param {string | number | Uint8Array} sld The SLD style associated with the layer
    *
    * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
    */
-  protected processGeopackageStyle(layerConfig: TypeBaseLayerEntryConfig, sld: string | number | Uint8Array): void {
+  protected processGeopackageStyle(layerConfig: AbstractBaseLayerEntryConfig, sld: string | number | Uint8Array): void {
     // Extract layer styles if they exist
     const { rules } = SLDReader.Reader(sld).layers[0].styles[0].featuretypestyles[0];
-    if ((layerConfig as TypeVectorLayerEntryConfig).style === undefined) (layerConfig as TypeVectorLayerEntryConfig).style = {};
+    if ((layerConfig as VectorLayerEntryConfig).style === undefined) (layerConfig as VectorLayerEntryConfig).style = {};
 
     for (let i = 0; i < rules.length; i++) {
       Object.keys(rules[i]).forEach((key) => {
         // Polygon style
-        if (key.toLowerCase() === 'polygonsymbolizer' && !(layerConfig as TypeVectorLayerEntryConfig).style!.Polygon) {
+        if (key.toLowerCase() === 'polygonsymbolizer' && !(layerConfig as VectorLayerEntryConfig).style!.Polygon) {
           const polyStyles = rules[i].polygonsymbolizer[0];
           let color: string | undefined;
           let graphicSize: number | undefined;
@@ -483,9 +444,9 @@ export class GeoPackage extends AbstractGeoViewVector {
             paternWidth: patternWidth || 1,
             fillStyle: fillStyle || 'solid',
           };
-          (layerConfig as TypeVectorLayerEntryConfig).style!.Polygon = { styleType: 'simple', settings: styles };
+          (layerConfig as VectorLayerEntryConfig).style!.Polygon = { styleType: 'simple', settings: styles };
           // LineString style
-        } else if (key.toLowerCase() === 'linesymbolizer' && !(layerConfig as TypeVectorLayerEntryConfig).style!.LineString) {
+        } else if (key.toLowerCase() === 'linesymbolizer' && !(layerConfig as VectorLayerEntryConfig).style!.LineString) {
           const lineStyles = rules[i].linesymbolizer[0];
 
           const stroke: TypeStrokeSymbolConfig = {};
@@ -495,9 +456,9 @@ export class GeoPackage extends AbstractGeoViewVector {
           }
 
           const styles: TypeLineStringVectorConfig = { type: 'lineString', stroke };
-          (layerConfig as TypeVectorLayerEntryConfig).style!.LineString = { styleType: 'simple', settings: styles };
+          (layerConfig as VectorLayerEntryConfig).style!.LineString = { styleType: 'simple', settings: styles };
           // Point style
-        } else if (key.toLowerCase() === 'pointsymbolizer' && !(layerConfig as TypeVectorLayerEntryConfig).style!.Point) {
+        } else if (key.toLowerCase() === 'pointsymbolizer' && !(layerConfig as VectorLayerEntryConfig).style!.Point) {
           const { graphic } = rules[i].pointsymbolizer[0];
 
           let offset: [number, number] | null = null;
@@ -535,7 +496,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                 if (graphic.mark.stroke.styling?.strokeWidth) stroke.width = graphic.mark.stroke.styling.strokeWidth;
               }
 
-              (layerConfig as TypeVectorLayerEntryConfig).style!.Point = { styleType: 'simple', settings: styles };
+              (layerConfig as VectorLayerEntryConfig).style!.Point = { styleType: 'simple', settings: styles };
             }
           }
         }
@@ -546,13 +507,13 @@ export class GeoPackage extends AbstractGeoViewVector {
   /** ***************************************************************************************************************************
    * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
    *
-   * @param {TypeLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @param {AbstractLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    * @param {sldsInterface} sld The SLD style associated with the layers geopackage, if any
    *
    * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
    */
   protected processOneGeopackageLayer(
-    layerConfig: TypeBaseLayerEntryConfig,
+    layerConfig: AbstractBaseLayerEntryConfig,
     layerInfo: layerData,
     sld?: sldsInterface
   ): Promise<BaseLayer | null> {
@@ -567,10 +528,10 @@ export class GeoPackage extends AbstractGeoViewVector {
 
     if (layerInfo.properties) {
       const { properties } = layerInfo;
-      this.processFeatureInfoConfig(properties as TypeJsonObject, layerConfig as TypeVectorLayerEntryConfig);
+      this.processFeatureInfoConfig(properties as TypeJsonObject, layerConfig as VectorLayerEntryConfig);
     }
 
-    const vectorLayer = this.createVectorLayer(layerConfig as TypeVectorLayerEntryConfig, source);
+    const vectorLayer = this.createVectorLayer(layerConfig as VectorLayerEntryConfig, source);
     layerConfig.layerStatus = 'processed';
 
     return Promise.resolve(vectorLayer);
@@ -579,17 +540,16 @@ export class GeoPackage extends AbstractGeoViewVector {
   /** ***************************************************************************************************************************
    * This method creates all layers from a single geopackage.
    *
-   * @param {TypeLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    * @param {LayerGroup} layerGroup Optional layer group for multiple layers.
    *
    * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
    */
-  protected processOneLayerEntry(layerConfig: TypeBaseLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer | null> {
+  protected processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer | null> {
     // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // !            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
     const promisedLayers = new Promise<BaseLayer | LayerGroup | null>((resolve) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       this.extractGeopackageData(layerConfig).then(([layers, slds]) => {
         if (layers.length === 1) {
           this.processOneGeopackageLayer(layerConfig, layers[0], slds).then((baseLayer) => {
@@ -611,15 +571,15 @@ export class GeoPackage extends AbstractGeoViewVector {
           (layerConfig as TypeLayerEntryConfig).listOfLayerEntryConfig = [];
           const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings!);
           for (let i = 0; i < layers.length; i++) {
-            const newLayerEntryConfig = cloneDeep(layerConfig) as TypeBaseLayerEntryConfig;
+            const newLayerEntryConfig = cloneDeep(layerConfig) as AbstractBaseLayerEntryConfig;
             newLayerEntryConfig.layerId = layers[i].name;
             newLayerEntryConfig.layerName = createLocalizedString(layers[i].name);
             newLayerEntryConfig.entryType = 'vector';
-            newLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerConfig);
+            newLayerEntryConfig.parentLayerConfig = Cast<GroupLayerEntryConfig>(layerConfig);
 
             this.processOneGeopackageLayer(newLayerEntryConfig, layers[i], slds).then((baseLayer) => {
               if (baseLayer) {
-                (layerConfig as unknown as TypeLayerGroupEntryConfig).listOfLayerEntryConfig!.push(newLayerEntryConfig);
+                (layerConfig as unknown as GroupLayerEntryConfig).listOfLayerEntryConfig!.push(newLayerEntryConfig);
                 newLayerGroup.getLayers().push(baseLayer);
                 layerConfig.layerStatus = 'processed';
               } else {
@@ -644,9 +604,9 @@ export class GeoPackage extends AbstractGeoViewVector {
    * This method sets the outfields and aliasFields of the source feature info.
    *
    * @param {TypeJsonArray} fields An array of field names and its aliases.
-   * @param {TypeVectorLayerEntryConfig} layerConfig The vector layer entry to configure.
+   * @param {VectorLayerEntryConfig} layerConfig The vector layer entry to configure.
    */
-  private processFeatureInfoConfig(fields: TypeJsonObject, layerConfig: TypeVectorLayerEntryConfig) {
+  private processFeatureInfoConfig(fields: TypeJsonObject, layerConfig: VectorLayerEntryConfig) {
     if (!layerConfig.source) layerConfig.source = {};
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
     // Process undefined outfields or aliasFields ('' = false and !'' = true). Also, if en is undefined, then fr is also undefined.

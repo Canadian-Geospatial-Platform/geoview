@@ -619,7 +619,7 @@
                                         <br/>
                                     </span>
                                     <span style="text-align: right;">
-                                        TypeLayerEntryConfig = TypeBaseLayerEntryConfig and its descendants
+                                        TypeLayerEntryConfig = AbstractBaseLayerEntryConfig and its descendants
                                     </span>
                                     <span style="font-family: Consolas, &quot;Courier New&quot;, monospace;">
                                         <br/>
@@ -1169,7 +1169,7 @@
                                 <span style="text-align: left;">
                                     <font style="font-size: 14px;">
                                         <b>
-                                            TypeBaseLayerEntryConfig
+                                            AbstractBaseLayerEntryConfig
                                         </b>
                                     </font>
                                 </span>
@@ -1178,7 +1178,7 @@
                     </div>
                 </foreignObject>
                 <text x="611" y="540" fill="#000000" font-family="Helvetica" font-size="14px" text-anchor="middle">
-                    TypeBaseLayerEntryConfig
+                    AbstractBaseLayerEntryConfig
                 </text>
             </switch>
         </g>

@@ -1,8 +1,4 @@
 import { MutableRefObject } from 'react';
-/* eslint-disable no-param-reassign */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-console */
-/* eslint-disable no-underscore-dangle */
 import { Root, createRoot } from 'react-dom/client';
 
 import i18n from 'i18next';
@@ -64,7 +60,8 @@ export function generateId(id?: string | null): string {
  * @param {NotificationType} type optional, the type of message (info, success, warning, error), info by default
  * @param {string} message optional, the message string
  */
-function _addNotification(mapId: string, type: NotificationType = 'info', message = '') {
+// eslint-disable-next-line no-underscore-dangle, default-param-last
+function _addNotification(mapId: string, type: NotificationType = 'info', message: string) {
   const notification = {
     key: generateId(),
     notificationType: type,
@@ -130,6 +127,7 @@ export function addNotificationError(mapId: string, message: string) {
  * @param {string} message the snackbar message
  * @param {TypeJsonObject} button optional snackbar button
  */
+// eslint-disable-next-line no-underscore-dangle
 function _showSnackbarMessage(mapId: string, type: SnackbarType, message: string, button?: TypeJsonObject) {
   api.event.emit(snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, type, message, button));
 }
@@ -387,7 +385,7 @@ export function removeCommentsFromJSON(config: string): string {
  * @param {string} configObjStr Map config to parse
  * @returns {any} cleaned and parsed config object
  */
-export function parseJSONConfig(configObjStr: string): any {
+export function parseJSONConfig(configObjStr: string): unknown {
   // remove CR and LF from the map config
   let jsonString = configObjStr.replace(/(\r\n|\n|\r)/gm, '');
   // replace apostrophes not preceded by a backslash with quotes
@@ -403,12 +401,13 @@ export function parseJSONConfig(configObjStr: string): any {
  * @param {string} configString String configuration
  * @returns {TypeMapFeaturesConfig} A valid configuration object
  */
+// TODO: refactor - this function is only used by sandbox html page. If not needed aymore, move to html page or code files for demo.
 export function getValidConfigFromString(configString: string, mapDiv: HTMLElement): TypeMapFeaturesConfig {
   const configObjString = removeCommentsFromJSON(configString);
   const parsedMapConfig = parseJSONConfig(configObjString);
   // create a new config for this map element
   const config = new Config(mapDiv!);
-  return config.getValidMapConfig(parsedMapConfig);
+  return config.getValidMapConfig(parsedMapConfig as TypeMapFeaturesConfig);
 }
 
 /**
@@ -422,10 +421,7 @@ export function exportPNG(mapId: string): void {
   map.once('rendercomplete', () => {
     const mapCanvas = document.createElement('canvas');
     const size = map.getSize();
-    // eslint-disable-next-line prefer-destructuring
-    mapCanvas.width = size![0];
-    // eslint-disable-next-line prefer-destructuring
-    mapCanvas.height = size![1];
+    [mapCanvas.width, mapCanvas.height] = size!;
     const mapContext = mapCanvas.getContext('2d');
     Array.prototype.forEach.call(map.getViewport().querySelectorAll('.ol-layer canvas, canvas.ol-layer'), (canvas) => {
       if (canvas.width > 0) {
@@ -466,9 +462,8 @@ export function exportPNG(mapId: string): void {
       element.setAttribute('href', image);
       element.setAttribute('download', filename);
       element.click();
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(`Error: ${err}`);
+    } catch (error) {
+      logger.logError(`Error trying to export PNG.`, error);
     }
   });
   document.body.style.cursor = 'auto';
@@ -507,13 +502,13 @@ export const isVectorLayer = (layer: AbstractGeoViewLayer): boolean => {
  * @returns {TypeJsonObject | undefined} the object if it exist or undefined
  */
 export const findPropertyNameByRegex = (objectItem: TypeJsonObject, regex: RegExp): TypeJsonObject | undefined => {
-  // eslint-disable-next-line no-restricted-syntax
-  for (const key in objectItem) {
-    if (key.match(regex)) {
-      return objectItem[key] as TypeJsonObject;
-    }
-  }
-  return undefined;
+  const query = new RegExp(regex, 'i');
+  const valueKey = Object.keys(objectItem).find((q) => {
+    return query.test(q);
+  });
+  const valueObject = valueKey !== undefined ? objectItem[valueKey] : undefined;
+
+  return valueObject;
 };
 
 /**
@@ -573,17 +568,18 @@ export function stringify(str: unknown): unknown | string {
  * This function is recursive and checks for a validity of something via the checkCallback() until it's found or until the timer runs out.
  * When the check callback returns true (or some found object), the doCallback() function is called with the found information.
  * If checkCallback wasn't found and timer expired, the failCallback() function is called.
- * @param checkCallback the function executed to verify a particular condition until it's passed
- * @param doCallback the function executed when checkCallback returns true or some object
- * @param failCallback the function executed when checkCallback has failed for too long (went over the timeout)
- * @param startDate the initial date this task was started
- * @param timeout the duration in milliseconds until the task is aborted
- * @param checkFrequency the frequency in milliseconds to callback for a check (defaults to 100 milliseconds)
+ * @param {function} checkCallback the function executed to verify a particular condition until it's passed
+ * @param {function} doCallback the function executed when checkCallback returns true or some object
+ * @param {function} failCallback the function executed when checkCallback has failed for too long (went over the timeout)
+ * @param {Date} startDate the initial date this task was started
+ * @param {number} timeout the duration in milliseconds until the task is aborted
+ * @param {number} checkFrequency the frequency in milliseconds to callback for a check (defaults to 100 milliseconds)
  */
+// eslint-disable-next-line no-underscore-dangle
 function _whenThisThenThat<T>(
   checkCallback: () => T,
   doCallback: (value: T) => void,
-  failCallback: (reason?: any) => void,
+  failCallback: (reason?: unknown) => void,
   startDate: Date,
   timeout: number,
   checkFrequency: number
@@ -609,22 +605,20 @@ function _whenThisThenThat<T>(
  * This generic function checks for a validity of something via the checkCallback() until it's found or until the timer runs out.
  * When the check callback returns true (or some found object), the doCallback() function is called with the found information.
  * If checkCallback wasn't found and timer expired, the failCallback() function is called.
- * @param checkCallback the function executed to verify a particular condition until it's passed
- * @param doCallback the function executed when checkCallback returns true or some object
- * @param failCallback the function executed when checkCallback has failed for too long (went over the timeout)
- * @param timeout the duration in milliseconds until the task is aborted (defaults to 10 seconds)
- * @param checkFrequency the frequency in milliseconds to callback for a check (defaults to 100 milliseconds)
+ * @param {function} checkCallback the function executed to verify a particular condition until it's passed
+ * @param {function} doCallback the function executed when checkCallback returns true or some object
+ * @param {function} failCallback the function executed when checkCallback has failed for too long (went over the timeout)
+ * @param {number} timeout the duration in milliseconds until the task is aborted (defaults to 10 seconds)
+ * @param {number} checkFrequency the frequency in milliseconds to callback for a check (defaults to 100 milliseconds)
  */
 export function whenThisThenThat<T>(
   checkCallback: () => T,
   doCallback: (value: T) => void,
-  failCallback: (reason?: any) => void,
-  timeout?: number,
-  checkFrequency?: number
+  failCallback: (reason?: unknown) => void,
+  timeout = 10000,
+  checkFrequency = 100
 ): void {
   const startDate = new Date();
-  if (!checkFrequency) checkFrequency = 100; // Check every 100 milliseconds by default
-  if (!timeout) timeout = 10000; // Timeout after 10 seconds by default
   _whenThisThenThat(checkCallback, doCallback, failCallback, startDate, timeout, checkFrequency);
 }
 

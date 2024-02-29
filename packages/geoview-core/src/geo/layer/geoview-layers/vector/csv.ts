@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-// eslint-disable-next-line max-classes-per-file
+// We have many reassign for sourceOptions-layerConfig. We keep it global...
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { GeoJSON as FormatGeoJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
@@ -12,82 +12,32 @@ import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-lay
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
-  TypeVectorLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
   TypeBaseSourceVectorInitialConfig,
-  TypeBaseLayerEntryConfig,
-  TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
 import { addNotificationError, getLocalizedValue } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
+import { CsvLayerEntryConfig } from '@/core/utils/config/validationClasses/csv-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/core/utils/config/validationClasses/vector-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validationClasses/abstract-base-layer-entry-config';
 
 export interface TypeSourceCSVInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'CSV';
   separator?: ',';
 }
 
-export class TypeCsvLayerEntryConfig extends TypeVectorLayerEntryConfig {
-  declare source: TypeSourceCSVInitialConfig;
-
-  // character separating values in csv file
-  valueSeparator? = ',';
-
-  /**
-   * The class constructor.
-   * @param {TypeCsvLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
-   */
-  constructor(layerConfig: TypeCsvLayerEntryConfig) {
-    super(layerConfig);
-    Object.assign(this, layerConfig);
-
-    if (!this.geoviewLayerConfig.metadataAccessPath && !this.source?.dataAccessPath) {
-      throw new Error(
-        `dataAccessPath is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} of type CSV when the metadataAccessPath is undefined.`
-      );
-    }
-    // Default value for this.entryType is vector
-    if (this.entryType === undefined) this.entryType = 'vector';
-    // Attribute 'style' must exist in layerConfig even if it is undefined
-    if (!('style' in this)) this.style = undefined;
-    // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the CSV layer to it
-    // and place the layerId at the end of it.
-    // Value for this.source.format can only be CSV.
-    if (!this.source) this.source = { format: 'CSV', separator: ',' };
-    if (!this.source.format) this.source.format = 'CSV';
-    if (!this.source.separator) this.source.separator = ',';
-    if (!this.source.dataAccessPath) {
-      let { en, fr } = this.geoviewLayerConfig.metadataAccessPath!;
-      en = en!.split('/').length > 1 ? en!.split('/').slice(0, -1).join('/') : './';
-      fr = fr!.split('/').length > 1 ? fr!.split('/').slice(0, -1).join('/') : './';
-      this.source.dataAccessPath = { en, fr } as TypeLocalizedString;
-    }
-    if (
-      !(this.source.dataAccessPath!.en?.startsWith('blob') && !this.source.dataAccessPath!.en?.endsWith('/')) &&
-      !this.source.dataAccessPath!.en?.toUpperCase().endsWith('.CSV')
-    ) {
-      this.source.dataAccessPath!.en = this.source.dataAccessPath!.en!.endsWith('/')
-        ? `${this.source.dataAccessPath!.en}${this.layerId}`
-        : `${this.source.dataAccessPath!.en}/${this.layerId}`;
-      this.source.dataAccessPath!.fr = this.source.dataAccessPath!.fr!.endsWith('/')
-        ? `${this.source.dataAccessPath!.fr}${this.layerId}`
-        : `${this.source.dataAccessPath!.fr}/${this.layerId}`;
-    }
-    if (!this.source.dataProjection) this.source.dataProjection = 'EPSG:4326';
-  }
-}
-
 export interface TypeCSVLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'CSV';
-  listOfLayerEntryConfig: TypeCsvLayerEntryConfig[];
+  listOfLayerEntryConfig: CsvLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeCSVLayerConfig if the geoviewLayerType attribute of the
+ * type guard function that redefines a CsvLayerEntryConfig as a TypeCSVLayerConfig if the geoviewLayerType attribute of the
  * verifyIfLayer parameter is CSV. The type ascention applies only to the true block of the if clause that use this
  * function.
  *
@@ -122,7 +72,7 @@ export const geoviewLayerIsCSV = (verifyIfGeoViewLayer: AbstractGeoViewLayer): v
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const geoviewEntryIsCSV = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeCsvLayerEntryConfig => {
+export const geoviewEntryIsCSV = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is CsvLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.CSV;
 };
 
@@ -195,11 +145,11 @@ export class CSV extends AbstractGeoViewVector {
    *
    * ! This routine must imperatively ends with layerConfig.layerStatus = 'processed' or 'error' if an error happens.
    *
-   * @param {TypeVectorLayerEntryConfig} layerConfig The layer entry configuration to process.
+   * @param {VectorLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerConfig: TypeVectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected processLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     // When we get here, we know that the metadata (if the service provide some) are processed.
     // We need to signal to the layer sets that the 'processed' phase is done. Be aware that the
     // layerStatus setter is doing a lot of things behind the scene.
@@ -234,14 +184,9 @@ export class CSV extends AbstractGeoViewVector {
    * @param {string[]} headers An array of field names.
    * @param {string[]} firstRow The first row of data.
    * @param {number[]} lonLatIndices The index of lon and lat in the array.
-   * @param {TypeVectorLayerEntryConfig} layerConfig The vector layer entry to configure.
+   * @param {VectorLayerEntryConfig} layerConfig The vector layer entry to configure.
    */
-  private processFeatureInfoConfig(
-    headers: string[],
-    firstRow: string[],
-    lonLatIndices: number[],
-    layerConfig: TypeVectorLayerEntryConfig
-  ) {
+  private processFeatureInfoConfig(headers: string[], firstRow: string[], lonLatIndices: number[], layerConfig: VectorLayerEntryConfig) {
     if (!layerConfig.source) layerConfig.source = {};
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
     // Process undefined outfields or aliasFields ('' = false and !'' = true). Also, if en is undefined, then fr is also undefined.
@@ -285,11 +230,11 @@ export class CSV extends AbstractGeoViewVector {
    * Converts csv text to feature array.
    *
    * @param {string} csvData The data from the .csv file.
-   * @param {TypeVectorLayerEntryConfig} layerConfig The config of the layer.
+   * @param {VectorLayerEntryConfig} layerConfig The config of the layer.
    *
    * @returns {Feature[]} The array of features.
    */
-  convertCsv(csvData: string, layerConfig: TypeVectorLayerEntryConfig): Feature[] | null {
+  convertCsv(csvData: string, layerConfig: VectorLayerEntryConfig): Feature[] | null {
     const inProjection: ProjectionLike = layerConfig.source!.dataProjection || 'EPSG:4326';
     const outProjection: ProjectionLike = `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`;
     const latList = ['latitude', 'lat', 'y', 'ycoord', 'latitude/latitude', 'latitude / latitude'];
@@ -336,14 +281,14 @@ export class CSV extends AbstractGeoViewVector {
   /** ***************************************************************************************************************************
    * Create a source configuration for the vector layer.
    *
-   * @param {TypeBaseLayerEntryConfig} layerConfig The layer entry configuration.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
    * @param {SourceOptions} sourceOptions The source options (default: {}).
    * @param {ReadOptions} readOptions The read options (default: {}).
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
   protected createVectorSource(
-    layerConfig: TypeBaseLayerEntryConfig,
+    layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {

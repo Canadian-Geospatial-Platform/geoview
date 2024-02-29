@@ -1,4 +1,6 @@
-/* eslint-disable no-console, no-underscore-dangle, no-param-reassign */
+/* eslint-disable no-underscore-dangle, no-param-reassign */
+// We have a lot of private function with functions with dangle and many reassigns. We keep it global...
+// TODO: refactor - clean the code to minimize esLint warning
 import { Extent } from 'ol/extent';
 
 import Ajv from 'ajv';
@@ -9,15 +11,15 @@ import defaultsDeep from 'lodash/defaultsDeep';
 import { TypeBasemapId, TypeBasemapOptions, VALID_BASEMAP_ID } from '@/geo/layer/basemap/basemap-types';
 import { geoviewEntryIsWMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { geoviewEntryIsImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
-import { TypeXYZTilesLayerEntryConfig, geoviewEntryIsXYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
-import { TypeVectorTilesLayerEntryConfig, geoviewEntryIsVectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
+import { geoviewEntryIsXYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
+import { geoviewEntryIsVectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { geoviewEntryIsEsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
-import { TypeEsriFeatureLayerEntryConfig, geoviewEntryIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
-import { TypeWfsLayerEntryConfig, geoviewEntryIsWFS } from '@/geo/layer/geoview-layers/vector/wfs';
-import { TypeOgcFeatureLayerEntryConfig, geoviewEntryIsOgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
-import { TypeGeoJSONLayerEntryConfig, geoviewEntryIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
-import { TypeCsvLayerEntryConfig, geoviewEntryIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
-import { TypeGeoPackageLayerEntryConfig, geoviewEntryIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
+import { geoviewEntryIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import { geoviewEntryIsWFS } from '@/geo/layer/geoview-layers/vector/wfs';
+import { geoviewEntryIsOgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
+import { geoviewEntryIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
+import { geoviewEntryIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
+import { geoviewEntryIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
 import {
   layerEntryIsGroupLayer,
   TypeGeoviewLayerConfig,
@@ -27,16 +29,11 @@ import {
   TypeValidMapProjectionCodes,
   TypeValidVersions,
   TypeListOfLayerEntryConfig,
-  TypeLayerGroupEntryConfig,
   VALID_DISPLAY_LANGUAGE,
   VALID_PROJECTION_CODES,
   VALID_VERSIONS,
   TypeListOfGeoviewLayerConfig,
   TypeListOfLocalizedLanguages,
-  TypeEsriDynamicLayerEntryConfig,
-  TypeOgcWmsLayerEntryConfig,
-  TypeImageStaticLayerEntryConfig,
-  TypeEsriImageLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
 import { Cast, toJsonObject, TypeJsonObject, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { CONST_GEOVIEW_SCHEMA_BY_TYPE, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -46,6 +43,19 @@ import { CONFIG_GEOCORE_URL, CONFIG_GEOLOCATOR_URL } from '@/app';
 
 import { generateId, replaceParams, getLocalizedMessage, showError } from '../utilities';
 import schema from '../../../../schema.json';
+import { WfsLayerEntryConfig } from './validationClasses/wfs-layer-entry-config';
+import { OgcFeatureLayerEntryConfig } from './validationClasses/ogc-layer-entry-config';
+import { CsvLayerEntryConfig } from './validationClasses/csv-layer-entry-config';
+import { VectorTilesLayerEntryConfig } from './validationClasses/vector-tiles-layer-entry-config';
+import { GeoJSONLayerEntryConfig } from './validationClasses/geojson-layer-entry-config';
+import { EsriFeatureLayerEntryConfig } from './validationClasses/esri-feature-layer-entry-config';
+import { GeoPackageLayerEntryConfig } from './validationClasses/geopackage-layer-config-entry';
+import { XYZTilesLayerEntryConfig } from './validationClasses/xyz-layer-entry-config';
+import { OgcWmsLayerEntryConfig } from './validationClasses/ogc-wms-layer-entry-config';
+import { ImageStaticLayerEntryConfig } from './validationClasses/image-static-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from './validationClasses/esri-dynamic-layer-entry-config';
+import { EsriImageLayerEntryConfig } from './validationClasses/esri-image-layer-entry-config';
+import { GroupLayerEntryConfig } from './validationClasses/group-layer-entry-config';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -345,13 +355,12 @@ export class ConfigValidation {
    * @param {AnyValidateFunction<unknown>} validate The Ajv validator.
    * @param {any} objectAffected Object that was validated.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private printSchemaError(validate: AnyValidateFunction<unknown>, objectAffected: any) {
+  private printSchemaError(validate: AnyValidateFunction<unknown>, objectAffected: unknown) {
     for (let i = 0; i < validate.errors!.length; i += 1) {
       const error = validate.errors![i];
       const { instancePath } = error;
       const path = instancePath.split('/');
-      let node = objectAffected;
+      let node = objectAffected as TypeJsonObject;
       for (let j = 1; j < path.length; j += 1) {
         node = node[path[j]];
       }
@@ -580,13 +589,13 @@ export class ConfigValidation {
    * Process recursively the layer entries to create layers and layer groups.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to adjust and validate.
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entry configurations to process.
-   * @param {TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig} parentLayerConfig The parent layer configuration of all the
+   * @param {TypeGeoviewLayerConfig | GroupLayerEntryConfig} parentLayerConfig The parent layer configuration of all the
    * layer entry configurations found in the list of layer entries.
    */
   private processLayerEntryConfig(
     geoviewLayerConfig: TypeGeoviewLayerConfig,
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
-    parentLayerConfig?: TypeLayerGroupEntryConfig
+    parentLayerConfig?: GroupLayerEntryConfig
   ) {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig, i: number) => {
       // links the entry to its GeoView layer config.
@@ -602,33 +611,33 @@ export class ConfigValidation {
       if (layerEntryIsGroupLayer(layerConfig)) {
         // We must set the parents of all elements in the group.
         this.recursivelySetChildParent(geoviewLayerConfig, [layerConfig], parentLayerConfig);
-        const parent = new TypeLayerGroupEntryConfig(layerConfig);
+        const parent = new GroupLayerEntryConfig(layerConfig);
         listOfLayerEntryConfig[i] = parent;
         this.processLayerEntryConfig(geoviewLayerConfig, parent.listOfLayerEntryConfig, parent);
       } else if (geoviewEntryIsWMS(layerConfig)) {
-        listOfLayerEntryConfig[i] = new TypeOgcWmsLayerEntryConfig(layerConfig);
+        listOfLayerEntryConfig[i] = new OgcWmsLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsImageStatic(layerConfig)) {
-        listOfLayerEntryConfig[i] = new TypeImageStaticLayerEntryConfig(layerConfig);
+        listOfLayerEntryConfig[i] = new ImageStaticLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsXYZTiles(layerConfig)) {
-        listOfLayerEntryConfig[i] = new TypeXYZTilesLayerEntryConfig(layerConfig);
+        listOfLayerEntryConfig[i] = new XYZTilesLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsVectorTiles(layerConfig)) {
-        listOfLayerEntryConfig[i] = new TypeVectorTilesLayerEntryConfig(layerConfig);
+        listOfLayerEntryConfig[i] = new VectorTilesLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsEsriDynamic(layerConfig)) {
-        listOfLayerEntryConfig[i] = new TypeEsriDynamicLayerEntryConfig(layerConfig);
+        listOfLayerEntryConfig[i] = new EsriDynamicLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsEsriFeature(layerConfig)) {
-        listOfLayerEntryConfig[i] = new TypeEsriFeatureLayerEntryConfig(layerConfig);
+        listOfLayerEntryConfig[i] = new EsriFeatureLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsEsriImage(layerConfig)) {
-        listOfLayerEntryConfig[i] = new TypeEsriImageLayerEntryConfig(layerConfig);
+        listOfLayerEntryConfig[i] = new EsriImageLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsWFS(layerConfig)) {
-        listOfLayerEntryConfig[i] = new TypeWfsLayerEntryConfig(layerConfig);
+        listOfLayerEntryConfig[i] = new WfsLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsOgcFeature(layerConfig)) {
-        listOfLayerEntryConfig[i] = new TypeOgcFeatureLayerEntryConfig(layerConfig);
+        listOfLayerEntryConfig[i] = new OgcFeatureLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsGeoPackage(layerConfig)) {
-        listOfLayerEntryConfig[i] = new TypeGeoPackageLayerEntryConfig(layerConfig);
+        listOfLayerEntryConfig[i] = new GeoPackageLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsGeoJSON(layerConfig)) {
-        listOfLayerEntryConfig[i] = new TypeGeoJSONLayerEntryConfig(layerConfig);
+        listOfLayerEntryConfig[i] = new GeoJSONLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsCSV(layerConfig)) {
-        listOfLayerEntryConfig[i] = new TypeCsvLayerEntryConfig(layerConfig);
+        listOfLayerEntryConfig[i] = new CsvLayerEntryConfig(layerConfig);
       }
     });
   }
@@ -637,13 +646,13 @@ export class ConfigValidation {
    * Process recursively the layer entries to set the parents of each entries.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration.
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entry configurations to process.
-   * @param {TypeLayerGroupEntryConfig} parentLayerConfig The parent layer configuration of all the
+   * @param {GroupLayerEntryConfig} parentLayerConfig The parent layer configuration of all the
    * layer configurations found in the list of layer entries.
    */
   private recursivelySetChildParent(
     geoviewLayerConfig: TypeGeoviewLayerConfig,
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
-    parentLayerConfig?: TypeLayerGroupEntryConfig
+    parentLayerConfig?: GroupLayerEntryConfig
   ) {
     listOfLayerEntryConfig.forEach((layerConfig) => {
       layerConfig.parentLayerConfig = parentLayerConfig;

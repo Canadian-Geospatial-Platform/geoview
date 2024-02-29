@@ -1,27 +1,30 @@
 import axios, { AxiosResponse } from 'axios';
 
 import { TypeJsonObject, TypeJsonArray } from '@/core/types/global-types';
-import {
-  TypeEsriDynamicLayerEntryConfig,
-  TypeImageStaticLayerEntryConfig,
-  TypeListOfGeoviewLayerConfig,
-  TypeOfServer,
-  TypeOgcWmsLayerEntryConfig,
-  TypeTileGrid,
-} from '@/geo/map/map-schema-types';
+import { TypeListOfGeoviewLayerConfig, TypeOfServer, TypeTileGrid } from '@/geo/map/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeEsriDynamicLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
-import { TypeEsriFeatureLayerConfig, TypeEsriFeatureLayerEntryConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import { TypeEsriFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { TypeImageStaticLayerConfig } from '@/geo/layer/geoview-layers/raster/image-static';
 import { TypeWMSLayerConfig } from '@/geo/layer/geoview-layers/raster/wms';
-import { TypeWFSLayerConfig, TypeWfsLayerEntryConfig } from '@/geo/layer/geoview-layers/vector/wfs';
-import { TypeOgcFeatureLayerConfig, TypeOgcFeatureLayerEntryConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
-import { TypeGeoJSONLayerConfig, TypeGeoJSONLayerEntryConfig } from '@/geo/layer/geoview-layers/vector/geojson';
-import { TypeGeoPackageLayerConfig, TypeGeoPackageLayerEntryConfig } from '@/geo/layer/geoview-layers/vector/geopackage';
-import { TypeXYZTilesConfig, TypeXYZTilesLayerEntryConfig } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
-import { TypeVectorTilesConfig, TypeVectorTilesLayerEntryConfig } from '@/geo/layer/geoview-layers/raster/vector-tiles';
+import { TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
+import { TypeOgcFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
+import { TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
+import { TypeGeoPackageLayerConfig } from '@/geo/layer/geoview-layers/vector/geopackage';
+import { TypeXYZTilesConfig } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
+import { TypeVectorTilesConfig } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { createLocalizedString } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
+import { WfsLayerEntryConfig } from '../validationClasses/wfs-layer-entry-config';
+import { OgcFeatureLayerEntryConfig } from '../validationClasses/ogc-layer-entry-config';
+import { VectorTilesLayerEntryConfig } from '../validationClasses/vector-tiles-layer-entry-config';
+import { GeoJSONLayerEntryConfig } from '../validationClasses/geojson-layer-entry-config';
+import { EsriFeatureLayerEntryConfig } from '../validationClasses/esri-feature-layer-entry-config';
+import { GeoPackageLayerEntryConfig } from '../validationClasses/geopackage-layer-config-entry';
+import { XYZTilesLayerEntryConfig } from '../validationClasses/xyz-layer-entry-config';
+import { ImageStaticLayerEntryConfig } from '../validationClasses/image-static-layer-entry-config';
+import { OgcWmsLayerEntryConfig } from '../validationClasses/ogc-wms-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from '../validationClasses/esri-dynamic-layer-entry-config';
 
 // The GeoChart Json object coming out of the GeoCore response
 export type GeoChartGeoCoreConfig = TypeJsonObject & {
@@ -85,8 +88,8 @@ export class UUIDmapConfigReader {
               geoviewLayerType: 'esriDynamic',
               listOfLayerEntryConfig: [],
             };
-            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): TypeEsriDynamicLayerEntryConfig => {
-              const esriDynamicLayerEntryConfig = new TypeEsriDynamicLayerEntryConfig({
+            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): EsriDynamicLayerEntryConfig => {
+              const esriDynamicLayerEntryConfig = new EsriDynamicLayerEntryConfig({
                 geoviewLayerConfig,
                 schemaTag: 'esriDynamic',
                 entryType: 'raster-image',
@@ -94,7 +97,7 @@ export class UUIDmapConfigReader {
                 source: {
                   dataAccessPath: createLocalizedString(url as string),
                 },
-              } as TypeEsriDynamicLayerEntryConfig);
+              } as EsriDynamicLayerEntryConfig);
               return esriDynamicLayerEntryConfig;
             });
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
@@ -108,8 +111,8 @@ export class UUIDmapConfigReader {
                 geoviewLayerType: 'esriFeature',
                 listOfLayerEntryConfig: [],
               };
-              geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): TypeEsriFeatureLayerEntryConfig => {
-                const esriFeatureLayerEntryConfig = new TypeEsriFeatureLayerEntryConfig({
+              geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): EsriFeatureLayerEntryConfig => {
+                const esriFeatureLayerEntryConfig = new EsriFeatureLayerEntryConfig({
                   geoviewLayerConfig,
                   schemaTag: 'esriFeature',
                   entryType: 'vector',
@@ -118,7 +121,7 @@ export class UUIDmapConfigReader {
                     format: 'EsriJSON',
                     dataAccessPath: createLocalizedString(url as string),
                   },
-                } as TypeEsriFeatureLayerEntryConfig);
+                } as EsriFeatureLayerEntryConfig);
                 return esriFeatureLayerEntryConfig;
               });
               listOfGeoviewLayerConfig.push(geoviewLayerConfig);
@@ -131,8 +134,8 @@ export class UUIDmapConfigReader {
               geoviewLayerType: 'esriFeature',
               listOfLayerEntryConfig: [],
             };
-            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): TypeEsriFeatureLayerEntryConfig => {
-              const esriFeatureLayerEntryConfig = new TypeEsriFeatureLayerEntryConfig({
+            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): EsriFeatureLayerEntryConfig => {
+              const esriFeatureLayerEntryConfig = new EsriFeatureLayerEntryConfig({
                 geoviewLayerConfig,
                 schemaTag: 'esriFeature',
                 entryType: 'vector',
@@ -141,7 +144,7 @@ export class UUIDmapConfigReader {
                   format: 'EsriJSON',
                   dataAccessPath: createLocalizedString(url as string),
                 },
-              } as TypeEsriFeatureLayerEntryConfig);
+              } as EsriFeatureLayerEntryConfig);
               return esriFeatureLayerEntryConfig;
             });
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
@@ -153,8 +156,8 @@ export class UUIDmapConfigReader {
               geoviewLayerType: 'ogcWms',
               listOfLayerEntryConfig: [],
             };
-            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): TypeOgcWmsLayerEntryConfig => {
-              const wmsLayerEntryConfig = new TypeOgcWmsLayerEntryConfig({
+            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): OgcWmsLayerEntryConfig => {
+              const wmsLayerEntryConfig = new OgcWmsLayerEntryConfig({
                 geoviewLayerConfig,
                 schemaTag: 'ogcWms',
                 entryType: 'raster-image',
@@ -163,7 +166,7 @@ export class UUIDmapConfigReader {
                   dataAccessPath: createLocalizedString(url as string),
                   serverType: (serverType === undefined ? 'mapserver' : serverType) as TypeOfServer,
                 },
-              } as TypeOgcWmsLayerEntryConfig);
+              } as OgcWmsLayerEntryConfig);
               return wmsLayerEntryConfig;
             });
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
@@ -175,8 +178,8 @@ export class UUIDmapConfigReader {
               geoviewLayerType: 'ogcWfs',
               listOfLayerEntryConfig: [],
             };
-            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): TypeWfsLayerEntryConfig => {
-              const wfsLayerEntryConfig = new TypeWfsLayerEntryConfig({
+            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): WfsLayerEntryConfig => {
+              const wfsLayerEntryConfig = new WfsLayerEntryConfig({
                 geoviewLayerConfig,
                 schemaTag: 'ogcWfs',
                 entryType: 'vector',
@@ -186,7 +189,7 @@ export class UUIDmapConfigReader {
                   strategy: 'all',
                   dataAccessPath: createLocalizedString(url as string),
                 },
-              } as TypeWfsLayerEntryConfig);
+              } as WfsLayerEntryConfig);
               return wfsLayerEntryConfig;
             });
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
@@ -198,8 +201,8 @@ export class UUIDmapConfigReader {
               geoviewLayerType: 'ogcFeature',
               listOfLayerEntryConfig: [],
             };
-            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): TypeOgcFeatureLayerEntryConfig => {
-              const ogcFeatureLayerEntryConfig = new TypeOgcFeatureLayerEntryConfig({
+            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): OgcFeatureLayerEntryConfig => {
+              const ogcFeatureLayerEntryConfig = new OgcFeatureLayerEntryConfig({
                 geoviewLayerConfig,
                 schemaTag: 'ogcFeature',
                 entryType: 'vector',
@@ -208,7 +211,7 @@ export class UUIDmapConfigReader {
                   format: 'featureAPI',
                   dataAccessPath: createLocalizedString(url as string),
                 },
-              } as TypeOgcFeatureLayerEntryConfig);
+              } as OgcFeatureLayerEntryConfig);
               return ogcFeatureLayerEntryConfig;
             });
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
@@ -220,8 +223,8 @@ export class UUIDmapConfigReader {
               geoviewLayerType: 'GeoJSON',
               listOfLayerEntryConfig: [],
             };
-            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): TypeGeoJSONLayerEntryConfig => {
-              const geoJSONLayerEntryConfig = new TypeGeoJSONLayerEntryConfig({
+            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): GeoJSONLayerEntryConfig => {
+              const geoJSONLayerEntryConfig = new GeoJSONLayerEntryConfig({
                 geoviewLayerConfig,
                 schemaTag: 'GeoJSON',
                 entryType: 'vector',
@@ -230,7 +233,7 @@ export class UUIDmapConfigReader {
                   format: 'GeoJSON',
                   dataAccessPath: createLocalizedString(url as string),
                 },
-              } as TypeGeoJSONLayerEntryConfig);
+              } as GeoJSONLayerEntryConfig);
               return geoJSONLayerEntryConfig;
             });
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
@@ -242,8 +245,8 @@ export class UUIDmapConfigReader {
               geoviewLayerType: 'xyzTiles',
               listOfLayerEntryConfig: [],
             };
-            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): TypeXYZTilesLayerEntryConfig => {
-              const xyzTilesLayerEntryConfig = new TypeXYZTilesLayerEntryConfig({
+            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): XYZTilesLayerEntryConfig => {
+              const xyzTilesLayerEntryConfig = new XYZTilesLayerEntryConfig({
                 geoviewLayerConfig,
                 schemaTag: 'xyzTiles',
                 entryType: 'raster-tile',
@@ -251,7 +254,7 @@ export class UUIDmapConfigReader {
                 source: {
                   dataAccessPath: createLocalizedString(url as string),
                 },
-              } as TypeXYZTilesLayerEntryConfig);
+              } as XYZTilesLayerEntryConfig);
               return xyzTilesLayerEntryConfig;
             });
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
@@ -263,8 +266,8 @@ export class UUIDmapConfigReader {
               geoviewLayerType: 'vectorTiles',
               listOfLayerEntryConfig: [],
             };
-            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): TypeVectorTilesLayerEntryConfig => {
-              const vectorTilesLayerEntryConfig = new TypeVectorTilesLayerEntryConfig({
+            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): VectorTilesLayerEntryConfig => {
+              const vectorTilesLayerEntryConfig = new VectorTilesLayerEntryConfig({
                 schemaTag: 'vectorTiles',
                 entryType: 'raster-tile',
                 layerId: `${item.id}`,
@@ -272,7 +275,7 @@ export class UUIDmapConfigReader {
                 source: {
                   dataAccessPath: createLocalizedString(url as string),
                 },
-              } as TypeVectorTilesLayerEntryConfig);
+              } as VectorTilesLayerEntryConfig);
               return vectorTilesLayerEntryConfig;
             });
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
@@ -284,8 +287,8 @@ export class UUIDmapConfigReader {
               geoviewLayerType: 'GeoPackage',
               listOfLayerEntryConfig: [],
             };
-            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): TypeGeoPackageLayerEntryConfig => {
-              const geoPackageLayerEntryConfig = new TypeGeoPackageLayerEntryConfig({
+            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): GeoPackageLayerEntryConfig => {
+              const geoPackageLayerEntryConfig = new GeoPackageLayerEntryConfig({
                 geoviewLayerConfig,
                 schemaTag: 'GeoPackage',
                 entryType: 'vector',
@@ -294,7 +297,7 @@ export class UUIDmapConfigReader {
                   format: 'GeoPackage',
                   dataAccessPath: createLocalizedString(url as string),
                 },
-              } as TypeGeoPackageLayerEntryConfig);
+              } as GeoPackageLayerEntryConfig);
               return geoPackageLayerEntryConfig;
             });
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
@@ -306,15 +309,15 @@ export class UUIDmapConfigReader {
               geoviewLayerType: 'imageStatic',
               listOfLayerEntryConfig: [],
             };
-            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): TypeImageStaticLayerEntryConfig => {
-              const imageStaticLayerEntryConfig = new TypeImageStaticLayerEntryConfig({
+            geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): ImageStaticLayerEntryConfig => {
+              const imageStaticLayerEntryConfig = new ImageStaticLayerEntryConfig({
                 schemaTag: 'imageStatic',
                 entryType: 'raster-image',
                 layerId: `${item.id}`,
                 source: {
                   dataAccessPath: createLocalizedString(url as string),
                 },
-              } as TypeImageStaticLayerEntryConfig);
+              } as ImageStaticLayerEntryConfig);
               return imageStaticLayerEntryConfig;
             });
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);

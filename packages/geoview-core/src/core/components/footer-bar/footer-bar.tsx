@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import { MutableRefObject, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { camelCase } from 'lodash';
 import { useTheme } from '@mui/material/styles';
@@ -289,6 +288,7 @@ export function FooterBar(): JSX.Element | null {
       const theSelectedPlugin = api.maps[mapId].plugins[selectedTab];
 
       // A bit hacky, but not much other choice for now...
+      // ? unknown type cannot be use, need to escape
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (typeof (theSelectedPlugin as any).onSelected === 'function') {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -400,30 +400,10 @@ export function FooterBar(): JSX.Element | null {
 
   // Handle focus using dynamic focus button
   const handleDynamicFocus = () => {
-    const mapIdDiv = document.getElementById(mapId);
-
-    if (mapIdDiv) {
-      if (isFocusToMap) {
-        // scroll to map
-        window.scrollTo({
-          top: mapIdDiv.offsetTop - 30,
-          behavior: 'smooth',
-        });
-        setIsFocusToMap(false);
-      } else {
-        const focusButtonId = document.getElementById(`map-${mapId}`);
-        if (focusButtonId) {
-          const targetY = focusButtonId.getBoundingClientRect().bottom + window.pageYOffset - 70;
-          // scroll to footer
-          window.scrollTo({
-            top: targetY,
-            behavior: 'smooth',
-          });
-        }
-
-        setIsFocusToMap(true);
-      }
-    }
+    const shell = document.getElementById(`shell-${mapId}`);
+    const block = isFocusToMap ? 'start' : 'end';
+    shell?.scrollIntoView({ behavior: 'smooth', block });
+    setIsFocusToMap(!isFocusToMap);
   };
 
   return footerBarTabs.length > 0 ? (
@@ -431,7 +411,7 @@ export function FooterBar(): JSX.Element | null {
       ref={tabsContainerRef as MutableRefObject<HTMLDivElement>}
       sx={sxClasses.tabsContainer}
       className="tabsContainer"
-      id="tabsContainer"
+      id={`${mapId}-tabsContainer`}
     >
       <Tabs
         activeTrap={activeTrapGeoView}
