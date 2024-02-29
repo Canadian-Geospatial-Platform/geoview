@@ -4,7 +4,7 @@ import { ChartType, SchemaValidator } from 'geochart';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
 import { TypeLayerData, TypeArrayOfLayerData } from 'geoview-core/src/api/events/payloads/get-feature-info-payload';
 import { Typography } from 'geoview-core/src/ui/typography/typography';
-import { Paper } from 'geoview-core/src/ui';
+import { Box, Paper } from 'geoview-core/src/ui';
 import {
   useMapVisibleLayers,
   useGeochartConfigs,
@@ -216,14 +216,17 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
           onLayerListClicked={handleLayerChange}
           onIsEnlargeClicked={handleIsEnlargeClicked}
         >
-          {selectedLayerPath &&
-            Object.entries(configObj).map(([layerPath, layerChartConfig], index) => {
-              const sx: React.CSSProperties = { position: 'absolute', top: '-5000px' };
-              if (layerPath === selectedLayerPath) {
-                sx.top = '0px';
-              }
-              return renderChart(layerChartConfig as GeoViewGeoChartConfig<ChartType>, sx, index.toString());
-            })}
+          {selectedLayerPath && (
+            <Box>
+              {Object.entries(configObj).map(([layerPath, layerChartConfig], index) => {
+                const sx: React.CSSProperties = { position: 'absolute', top: '-5000px' };
+                if (layerPath === selectedLayerPath) {
+                  sx.top = '5px';
+                }
+                return renderChart(layerChartConfig as GeoViewGeoChartConfig<ChartType>, sx, index.toString());
+              })}
+            </Box>
+          )}
           {!selectedLayerPath && (
             <Paper sx={{ padding: '2rem' }}>
               <Typography variant="h3" gutterBottom sx={sxClasses.geochartInstructionsTitle}>
