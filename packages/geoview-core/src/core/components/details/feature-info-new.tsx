@@ -1,4 +1,3 @@
-/* eslint-disable react/require-default-props */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getCenter } from 'ol/extent';

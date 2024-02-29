@@ -1,5 +1,4 @@
 /* eslint-disable react/require-default-props */
-/* eslint-disable react/jsx-props-no-spreading */
 import React, { ReactNode } from 'react';
 
 import { useTheme } from '@mui/material/styles';

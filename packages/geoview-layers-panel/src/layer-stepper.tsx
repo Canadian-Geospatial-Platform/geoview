@@ -826,6 +826,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @param param0 specify if button is first or last in the list
    * @returns {JSX.Element} React component
    */
+  // TODO: refactor - see if we can get rid of the unstable nested component
   // eslint-disable-next-line react/no-unstable-nested-components
   function NavButtons({ isFirst = false, isLast = false, handleNext }: ButtonPropsLayerPanel): JSX.Element {
     return isLoading ? (

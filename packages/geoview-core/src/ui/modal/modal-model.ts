@@ -85,7 +85,6 @@ export class ModalModel {
     if (typeof this.header?.actions === 'object') {
       this.header?.actions?.push(action);
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.header!.actions = [action];
     }
 
@@ -101,7 +100,6 @@ export class ModalModel {
     if (typeof this.header?.actions === 'object') {
       this.footer?.actions?.push(action);
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.footer!.actions = [action];
     }
     this.reRender();

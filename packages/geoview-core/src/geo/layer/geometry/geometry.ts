@@ -386,6 +386,7 @@ export class Geometry {
 
     marker.setStyle(
       new Style({
+        // ? unknown type cannot be use, need to escape
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         image: new Icon(markerOptions.style as any),
       })
@@ -589,8 +590,7 @@ export class Geometry {
       geometryGroup.vectorLayer.getSource()?.addFeature(geometry);
       geometryGroup.vectorLayer.changed();
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error);
+      logger.logError(`Error adding geometry to group ${geometryGroupId}`, error);
     }
   };
 

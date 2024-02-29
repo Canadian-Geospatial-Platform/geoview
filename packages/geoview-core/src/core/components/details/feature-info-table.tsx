@@ -1,4 +1,3 @@
-/* eslint-disable react/no-array-index-key */
 import { useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
@@ -130,6 +129,7 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
             color: index % 2 > 0 ? theme.palette.geoViewColor.bgColor.darken(0.9) : '',
             marginBottom: '20px',
           }}
+          // eslint-disable-next-line react/no-array-index-key
           key={index}
         >
           <Grid item xs="auto" sx={{ fontWeight: 'bold', width: '80% !important' }}>

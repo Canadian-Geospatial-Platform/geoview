@@ -1,5 +1,4 @@
 /* eslint-disable react/require-default-props */
-/* eslint-disable react/prop-types */
 import { useState, useEffect, useCallback, Fragment, CSSProperties, ReactNode } from 'react';
 
 import { useTranslation } from 'react-i18next';
@@ -50,6 +49,12 @@ interface TypeDialogProps extends Omit<DialogProps, 'title'> {
 
   // id of the map that is using this modal
   mapId: string;
+
+  container?: Element;
+  open: boolean;
+  fullScreen?: boolean;
+  'aria-labelledby'?: string;
+  'aria-describedby'?: string;
 }
 
 /**

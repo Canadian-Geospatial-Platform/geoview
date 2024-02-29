@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { TypeJsonValue, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { getLocalizedMessage, isJsonString, removeCommentsFromJSON, replaceParams, showError } from '../../utilities';
 import { logger } from '@/core/utils/logger';

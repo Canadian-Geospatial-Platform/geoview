@@ -158,9 +158,9 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     logger.logWarning('reloading layer not implemented...');
   };
 
+  // TODO: refactor - this button function does nothing as it is the whole container that can be draggable
   const handleReArrangeLayer = () => {
-    // eslint-disable-next-line no-console
-    console.log('re-arrange layer');
+    logger.logWarning('re-arrange layer');
   };
 
   function renderEditModeButtons() {

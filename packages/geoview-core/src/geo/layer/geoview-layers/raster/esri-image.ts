@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+// We have many reassign for layerPath-layerConfig. We keep it global...
 import { ImageArcGISRest } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
@@ -13,15 +14,12 @@ import {
   TypeGeoviewLayerConfig,
   TypeUniqueValueStyleConfig,
   TypeListOfLayerEntryConfig,
-  TypeEsriDynamicLayerEntryConfig,
   layerEntryIsGroupLayer,
-  TypeEsriImageLayerEntryConfig,
   TypeUniqueValueStyleInfo,
   TypeStyleConfig,
-  TypeBaseLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
 import { codedValueType, rangeDomainType } from '@/api/events/payloads';
-import { TypeEsriFeatureLayerEntryConfig, api } from '@/app';
+import { api } from '@/app';
 import {
   commonGetFieldDomain,
   commonGetFieldType,
@@ -32,10 +30,15 @@ import {
 } from '../esri-layer-common';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
+import { logger } from '@/core/utils/logger';
+import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-feature-layer-entry-config';
+import { EsriImageLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-image-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-dynamic-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validationClasses/abstract-base-layer-entry-config';
 
 export interface TypeEsriImageLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'esriImage';
-  listOfLayerEntryConfig: TypeEsriImageLayerEntryConfig[];
+  listOfLayerEntryConfig: EsriImageLayerEntryConfig[];
 }
 
 interface TypeEsriImageLayerLegend {
@@ -85,7 +88,7 @@ export const geoviewLayerIsEsriImage = (verifyIfGeoViewLayer: AbstractGeoViewLay
 };
 
 /** ******************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TypeEsriImageLayerEntryConfig if the geoviewLayerType attribute
+ * type guard function that redefines a TypeLayerEntryConfig as a EsriImageLayerEntryConfig if the geoviewLayerType attribute
  * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is ESRI_IMAGE. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
@@ -94,9 +97,7 @@ export const geoviewLayerIsEsriImage = (verifyIfGeoViewLayer: AbstractGeoViewLay
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const geoviewEntryIsEsriImage = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is TypeEsriImageLayerEntryConfig => {
+export const geoviewEntryIsEsriImage = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is EsriImageLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_IMAGE;
 };
 
@@ -130,7 +131,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    */
   async getLegend(layerPath: string): Promise<TypeLegend | null> {
     try {
-      const layerConfig = this.getLayerConfig(layerPath) as TypeEsriImageLayerEntryConfig | undefined | null;
+      const layerConfig = this.getLayerConfig(layerPath) as EsriImageLayerEntryConfig | undefined | null;
       if (!layerConfig) return null;
       const legendUrl = `${getLocalizedValue(layerConfig.geoviewLayerConfig.metadataAccessPath, this.mapId)}/legend?f=pjson`;
       const response = await fetch(legendUrl);
@@ -182,15 +183,14 @@ export class EsriImage extends AbstractGeoViewRaster {
         layerName: layerConfig?.layerName,
         styleConfig,
         legend: await api.maps[this.mapId].geoviewRenderer.getLegendStyles(
-          layerConfig as TypeBaseLayerEntryConfig & {
+          layerConfig as AbstractBaseLayerEntryConfig & {
             style: TypeStyleConfig;
           }
         ),
       };
       return legend;
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log(error);
+      logger.logError(`Get Legend for ${layerPath} error`, error);
       return null;
     }
   }
@@ -247,9 +247,9 @@ export class EsriImage extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * This method will create a Geoview temporal dimension if it exist in the service metadata
    * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
-   * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig} layerConfig The layer entry to configure
+   * @param {EsriImageLayerEntryConfig} layerConfig The layer entry to configure
    */
-  protected processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: TypeEsriImageLayerEntryConfig) {
+  protected processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: EsriImageLayerEntryConfig) {
     commonProcessTemporalDimension.call(this, esriTimeDimension, layerConfig);
   }
 
@@ -260,14 +260,17 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {string} nameField The display field associated to the layer.
    * @param {string} geometryFieldName The field name of the geometry property.
    * @param {TypeJsonArray} fields An array of field names and its aliases.
-   * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig} layerConfig The layer entry to configure.
+   * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
    */
+  // TODO: see why we have dynamic and inage in a feature class... we have many in all esri files
+  // TO.DOCONT: reason - This was just so that I could reuse common methods in the image layers
+  // TO.DOCONT: If a function needs ore then one type, it should be in the common file. Only class type should be in classes
   processFeatureInfoConfig = (
     capabilities: string,
     nameField: string,
     geometryFieldName: string,
     fields: TypeJsonArray,
-    layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig
+    layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
   ) => {
     commonProcessFeatureInfoConfig.call(this, capabilities, nameField, geometryFieldName, fields, layerConfig);
   };
@@ -279,14 +282,14 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {number} minScale The metadata minScale of the layer.
    * @param {number} maxScale The metadata maxScale of the layer.
    * @param {TypeJsonObject} extent The metadata layer extent.
-   * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig} layerConfig The layer entry to configure.
+   * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
    */
   processInitialSettings(
     visibility: boolean,
     minScale: number,
     maxScale: number,
     extent: TypeJsonObject,
-    layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig
+    layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
   ) {
     commonProcessInitialSettings.call(this, visibility, minScale, maxScale, extent, layerConfig);
   }
@@ -306,11 +309,11 @@ export class EsriImage extends AbstractGeoViewRaster {
   /** ****************************************************************************************************************************
    * This method creates a GeoView Esri Image layer using the definition provided in the layerConfig parameter.
    *
-   * @param {TypeEsriImageLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @param {EsriImageLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  protected processOneLayerEntry(layerConfig: TypeEsriImageLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected processOneLayerEntry(layerConfig: EsriImageLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // !            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);

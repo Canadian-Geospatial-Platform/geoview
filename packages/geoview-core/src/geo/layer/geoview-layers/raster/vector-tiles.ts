@@ -1,69 +1,43 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable block-scoped-var, no-var, vars-on-top, no-param-reassign */
-// eslint-disable-next-line max-classes-per-file
+/* eslint-disable no-param-reassign */
+// We have many reassign for layerPath-layerConfig. We keep it global...
 import View from 'ol/View';
 import Map from 'ol/Map';
 import TileLayer from 'ol/layer/Tile';
 import VectorTileLayer from 'ol/layer/VectorTile';
 import { Options as TileOptions } from 'ol/layer/BaseTile';
 import VectorTileSource, { Options as SourceOptions } from 'ol/source/VectorTile';
-import { MVT } from 'ol/format';
 import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
 import { Extent } from 'ol/extent';
 
-import olms, { apply, applyStyle, addMapboxLayer } from 'ol-mapbox-style';
+import olms, { applyStyle } from 'ol-mapbox-style';
 
-import defaultsDeep from 'lodash/defaultsDeep';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
   TypeSourceTileInitialConfig,
-  TypeTileLayerEntryConfig,
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
   TypeLocalizedString,
   TypeTileGrid,
 } from '@/geo/map/map-schema-types';
-import { getLocalizedValue, getMinOrMaxExtents, getXMLHttpRequest, showError } from '@/core/utils/utilities';
-import { Cast, TypeJsonObject, toJsonObject } from '@/core/types/global-types';
+import { getLocalizedValue, getMinOrMaxExtents, showError } from '@/core/utils/utilities';
+import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { api } from '@/app';
-import { Layer } from '../../layer';
-import { LayerSetPayload } from '@/api/events/payloads';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validationClasses/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
+import { TileLayerEntryConfig } from '@/core/utils/config/validationClasses/tile-layer-entry-config';
 
 // TODO: Implement method to validate Vector Tiles service
 // TODO: Add more customization (minZoom, maxZoom, TMS)
 
 export type TypeSourceVectorTilesInitialConfig = TypeSourceTileInitialConfig;
 
-export class TypeVectorTilesLayerEntryConfig extends TypeTileLayerEntryConfig {
-  declare source: TypeSourceVectorTilesInitialConfig;
-
-  tileGrid!: TypeTileGrid;
-
-  /**
-   * The class constructor.
-   * @param {TypeVectorTilesLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
-   */
-  constructor(layerConfig: TypeVectorTilesLayerEntryConfig) {
-    super(layerConfig);
-    Object.assign(this, layerConfig);
-
-    /** layerConfig.source.dataAccessPath is mandatory. */
-    if (!layerConfig.source!.dataAccessPath) {
-      throw new Error(
-        `source.dataAccessPath on layer entry ${this.layerPath} is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} of type ${this.geoviewLayerConfig.geoviewLayerType}`
-      );
-    }
-  }
-}
-
 export interface TypeVectorTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'vectorTiles';
-  listOfLayerEntryConfig: TypeVectorTilesLayerEntryConfig[];
+  listOfLayerEntryConfig: VectorTilesLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
@@ -93,7 +67,7 @@ export const geoviewLayerIsVectorTiles = (verifyIfGeoViewLayer: AbstractGeoViewL
 };
 
 /** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TypeVectorTilesLayerEntryConfig if the geoviewLayerType attribute
+ * type guard function that redefines a TypeLayerEntryConfig as a VectorTilesLayerEntryConfig if the geoviewLayerType attribute
  * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is VECTOR_TILES. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
@@ -104,7 +78,7 @@ export const geoviewLayerIsVectorTiles = (verifyIfGeoViewLayer: AbstractGeoViewL
  */
 export const geoviewEntryIsVectorTiles = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is TypeVectorTilesLayerEntryConfig => {
+): verifyIfGeoViewEntry is VectorTilesLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.VECTOR_TILES;
 };
 
@@ -172,11 +146,11 @@ export class VectorTiles extends AbstractGeoViewRaster {
   /** ****************************************************************************************************************************
    * This method creates a GeoView VectorTiles layer using the definition provided in the layerConfig parameter.
    *
-   * @param {TypeVectorTilesLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @param {VectorTilesLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  protected processOneLayerEntry(layerConfig: TypeVectorTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected processOneLayerEntry(layerConfig: VectorTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // !            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
@@ -246,11 +220,11 @@ export class VectorTiles extends AbstractGeoViewRaster {
    *
    *  ! This routine must imperatively ends with layerConfig.layerStatus = 'processed' or 'error' if an error happens.
    *
-   * @param {TypeTileLayerEntryConfig} layerConfig The layer entry configuration to process.
+   * @param {TileLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerConfig: TypeTileLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected processLayerMetadata(layerConfig: TileLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     if (this.metadata) {
       const { tileInfo } = this.metadata;
       const extent = this.metadata.fullExtent;

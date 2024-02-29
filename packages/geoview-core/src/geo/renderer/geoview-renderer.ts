@@ -1,14 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-param-reassign */
+// We have many reassign for node-layerConfig. We keep it global...
 import { asArray, asString } from 'ol/color';
-import { Text, Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon } from 'ol/style';
-import { Geometry, LineString, MultiLineString, Point, MultiPoint, Polygon, MultiPolygon } from 'ol/geom';
+import { Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon } from 'ol/style';
+import { Geometry, LineString, Point, Polygon } from 'ol/geom';
 import Icon, { Options as IconOptions } from 'ol/style/Icon';
 import { Options as CircleOptions } from 'ol/style/Circle';
 import { Options as RegularShapeOptions } from 'ol/style/RegularShape';
 import { Options as StrokeOptions } from 'ol/style/Stroke';
 import { Options as FillOptions } from 'ol/style/Fill';
-import { Options as TextOptions } from 'ol/style/Text';
 import Feature from 'ol/Feature';
 import { toContext } from 'ol/render';
 import { Size } from 'ol/size';
@@ -32,9 +31,6 @@ import {
   TypeStyleSettings,
   TypeSymbol,
   TypeUniqueValueStyleInfo,
-  TypeVectorLayerEntryConfig,
-  TypeVectorTileLayerEntryConfig,
-  TypeBaseLayerEntryConfig,
   TypeStyleConfig,
   TypeKindOfVectorSettings,
   isSimpleStyleConfig,
@@ -42,8 +38,6 @@ import {
   isClassBreakStyleConfig,
   TypeUniqueValueStyleConfig,
   TypeClassBreakStyleConfig,
-  TypeBaseSourceVectorInitialConfig,
-  layerEntryIsVector,
 } from '../map/map-schema-types';
 import {
   binaryKeywors,
@@ -57,9 +51,12 @@ import {
   operatorPriority,
   unaryKeywords,
 } from './geoview-renderer-types';
-import { Layer } from '../layer/layer';
 import { TypeVectorLayerStyles } from '../layer/geoview-layers/abstract-geoview-layers';
 import { api } from '@/app';
+import { logger } from '@/core/utils/logger';
+import { VectorLayerEntryConfig } from '@/core/utils/config/validationClasses/vector-layer-entry-config';
+import { VectorTileLayerEntryConfig } from '../layer/geoview-layers/raster/abstract-tile-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validationClasses/abstract-base-layer-entry-config';
 
 type TypeStyleProcessor = (
   styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
@@ -212,9 +209,8 @@ export class GeoviewRenderer {
       image
         .decode()
         .then(() => resolve(image))
-        .catch((reason) => {
-          // eslint-disable-next-line no-console
-          console.log('GeoviewRenderer.loadImage(src) - Error while loading the src image =', src);
+        .catch((error) => {
+          logger.logError('GeoviewRenderer.loadImage(src) - Error while loading the src image =', src, error);
           resolve(null);
         });
     });
@@ -246,8 +242,7 @@ export class GeoviewRenderer {
       }
       return null;
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log(error);
+      logger.logError(`Error creating incon canvas for pointStyle`, error);
       return null;
     }
   }
@@ -334,7 +329,8 @@ export class GeoviewRenderer {
         ],
       ])
     );
-    const test = context.getImageData(0, 0, drawingCanvas.width, drawingCanvas.height);
+
+    context.getImageData(0, 0, drawingCanvas.width, drawingCanvas.height);
     return drawingCanvas;
   }
 
@@ -373,8 +369,7 @@ export class GeoviewRenderer {
       });
       return layerStyles;
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log(error);
+      logger.logError('Error processing array of point styles', error);
       return {} as TypeVectorLayerStyles;
     }
   }
@@ -421,8 +416,7 @@ export class GeoviewRenderer {
       layerStyles.Point!.arrayOfCanvas = [];
       return await this.processArrayOfPointStyleConfig(layerStyles, arrayOfPointStyleConfig!);
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log(error);
+      logger.logError('Error getPointStyle sub routine', error);
       return {} as TypeVectorLayerStyles;
     }
   }
@@ -430,12 +424,12 @@ export class GeoviewRenderer {
   /** ***************************************************************************************************************************
    * This method gets the legend styles used by the the layer as specified by the style configuration.
    *
-   * @param {TypeBaseLayerEntryConfig & {style: TypeStyleConfig;}} layerConfig The layer configuration.
+   * @param {AbstractBaseLayerEntryConfig & {style: TypeStyleConfig;}} layerConfig The layer configuration.
    *
    * @returns {Promise<TypeVectorLayerStyles>} A promise that the layer styles are processed.
    */
   async getLegendStyles(
-    layerConfig: TypeBaseLayerEntryConfig & {
+    layerConfig: AbstractBaseLayerEntryConfig & {
       style: TypeStyleConfig;
     }
   ): Promise<TypeVectorLayerStyles> {
@@ -534,20 +528,20 @@ export class GeoviewRenderer {
    * create it using the default style strategy.
    *
    * @param {Feature} feature The feature that need its style to be defined.
-   * @param {TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig} layerConfig The layer
+   * @param {AbstractBaseLayerEntryConfig | VectorTileLayerEntryConfig | VectorLayerEntryConfig} layerConfig The layer
    * entry config that may have a style configuration for the feature. If style does not exist for the geometryType, create it.
    *
    * @returns {Style | undefined} The style applied to the feature or undefined if not found.
    */
   getFeatureStyle(
     feature: Feature,
-    layerConfig: TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
+    layerConfig: AbstractBaseLayerEntryConfig | VectorTileLayerEntryConfig | VectorLayerEntryConfig
   ): Style | undefined {
     const geometryType = getGeometryType(feature);
     // If style does not exist for the geometryType, create it.
-    let { style } = layerConfig as TypeVectorLayerEntryConfig;
+    let { style } = layerConfig as VectorLayerEntryConfig;
     if (style === undefined || style[geometryType] === undefined)
-      style = this.createDefaultStyle(geometryType, layerConfig as TypeVectorLayerEntryConfig);
+      style = this.createDefaultStyle(geometryType, layerConfig as VectorLayerEntryConfig);
     // Get the style accordingly to its type and geometry.
     if (style![geometryType] !== undefined) {
       const styleSettings = style![geometryType]!;
@@ -567,18 +561,18 @@ export class GeoviewRenderer {
    * This method gets the canvas icon from the style of the feature using the layer entry config.
    *
    * @param {Feature} feature The feature that need its canvas icon to be defined.
-   * @param {TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig} layerConfig The layer
+   * @param {AbstractBaseLayerEntryConfig | VectorTileLayerEntryConfig | VectorLayerEntryConfig} layerConfig The layer
    * entry config that may have a style configuration for the feature.
    *
    * @returns {Promise<HTMLCanvasElement | undefined>} The canvas icon associated to the feature or undefined if not found.
    */
   getFeatureCanvas(
     feature: Feature,
-    layerConfig: TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
+    layerConfig: AbstractBaseLayerEntryConfig | VectorTileLayerEntryConfig | VectorLayerEntryConfig
   ): Promise<HTMLCanvasElement | undefined> {
     const promisedCanvas = new Promise<HTMLCanvasElement | undefined>((resolve) => {
       const geometryType = getGeometryType(feature);
-      const { style, source } = layerConfig as TypeVectorLayerEntryConfig;
+      const { style } = layerConfig as VectorLayerEntryConfig;
       // Get the style accordingly to its type and geometry.
       if (style![geometryType] !== undefined) {
         const styleSettings = style![geometryType]!;
@@ -1091,11 +1085,11 @@ export class GeoviewRenderer {
           return key.toLowerCase() === fields[j].toLowerCase();
         });
         if (fieldName) {
+          // TODO: info - explain why we need to use == instead of ===
           // eslint-disable-next-line eqeqeq
           isEqual = feature.get(fieldName) == uniqueValueStyleInfo[i].values[j];
           if (isEqual && j + 1 === fields.length) return i;
-          // eslint-disable-next-line no-console
-        } else console.log(`Can not find field ${fields[j]}`);
+        } else logger.logWarning(`Renderer searchUniqueValueEntry. Can not find field ${fields[j]}`);
       }
     }
     return undefined;
@@ -1312,13 +1306,13 @@ export class GeoviewRenderer {
    * Create a default style to use with a vector feature that has no style configuration.
    *
    * @param {TypeStyleGeometry} geometryType The type of geometry (Point, LineString, Polygon).
-   * @param {TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig} layerConfig the layer entry config to configure.
+   * @param {VectorTileLayerEntryConfig | VectorLayerEntryConfig} layerConfig the layer entry config to configure.
    *
    * @returns {TypeStyleConfig | undefined} The Style configurationcreated. Undefined if unable to create it.
    */
   private createDefaultStyle(
     geometryType: TypeStyleGeometry,
-    layerConfig: TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
+    layerConfig: VectorTileLayerEntryConfig | VectorLayerEntryConfig
   ): TypeStyleConfig | undefined {
     if (layerConfig.style === undefined) layerConfig.style = {};
     const label = getLocalizedValue(layerConfig.layerName, this.mapId) || layerConfig.layerId;
@@ -1357,8 +1351,7 @@ export class GeoviewRenderer {
       layerConfig.style[geometryType] = styleSettings;
       return layerConfig.style;
     }
-    // eslint-disable-next-line no-console
-    console.log(`Geometry type ${geometryType} is not supported by the GeoView viewer.`);
+    logger.logError(`Geometry type ${geometryType} is not supported by the GeoView viewer.`);
     return undefined;
   }
 
