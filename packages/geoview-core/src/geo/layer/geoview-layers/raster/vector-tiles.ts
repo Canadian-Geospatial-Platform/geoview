@@ -197,8 +197,11 @@ export class VectorTiles extends AbstractGeoViewRaster {
     // ! IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
     // !            in the 'loading' state if the flag value is 'no'.
 
+    // TODO remove after demoing again
+    const declutter = this.mapId !== 'LYR2';
+
     layerConfig.olLayerAndLoadEndListeners = {
-      olLayer: new VectorTileLayer({ ...tileLayerOptions, declutter: false }),
+      olLayer: new VectorTileLayer({ ...tileLayerOptions, declutter }),
       loadEndListenerType: 'tile',
     };
 

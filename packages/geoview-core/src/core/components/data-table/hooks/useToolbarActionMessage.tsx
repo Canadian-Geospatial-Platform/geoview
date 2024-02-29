@@ -13,7 +13,6 @@ interface UseSelectedRowMessageProps {
   data: MappedLayerDataType;
   layerPath: string;
   tableInstance: MRTTableInstance<ColumnsType>;
-  rowSelection: Record<number, boolean>;
   columnFilters: MRTColumnFiltersState;
 }
 
@@ -22,10 +21,9 @@ interface UseSelectedRowMessageProps {
  * @param {MappedLayerDataType} data data to be rendered inside data table
  * @param {string} layerPath key of the layer selected.
  * @param {MRTTableInstance} tableInstance  object of the data table.
- * @param {Object} rowSelection selected rows by the user
  * @param {MRTColumnFiltersState} columnFilters column filters set by the user on the table.
  */
-export function useToolbarActionMessage({ data, rowSelection, columnFilters, layerPath, tableInstance }: UseSelectedRowMessageProps) {
+export function useToolbarActionMessage({ data, columnFilters, layerPath, tableInstance }: UseSelectedRowMessageProps) {
   const { t } = useTranslation();
 
   // get store values
@@ -36,14 +34,10 @@ export function useToolbarActionMessage({ data, rowSelection, columnFilters, lay
   // show row selected message in the toolbar.
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('USETOOLBARACTIONMESSAGE - rowSelection', rowSelection);
+    logger.logTraceUseEffect('USETOOLBARACTIONMESSAGE - rowSelection');
 
     let message = toolbarRowSelectedMessageRecord[layerPath] ?? '';
-    if (Object.keys(rowSelection).length && tableInstance) {
-      message = t('dataTable.rowsSelected')
-        .replace('{rowsSelected}', Object.keys(rowSelection).length.toString())
-        .replace('{totalRows}', tableInstance.getFilteredRowModel().rows.length.toString());
-    } else if (tableInstance && tableInstance.getFilteredRowModel().rows.length !== data.features?.length) {
+    if (tableInstance && tableInstance.getFilteredRowModel().rows.length !== data.features?.length) {
       message = t('dataTable.rowsFiltered')
         .replace('{rowsFiltered}', tableInstance.getFilteredRowModel().rows.length.toString())
         .replace('{totalRows}', data.features?.length.toString() ?? '');
@@ -53,7 +47,7 @@ export function useToolbarActionMessage({ data, rowSelection, columnFilters, lay
 
     setToolbarRowSelectedMessageEntry(message, layerPath);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rowSelection, data.features]);
+  }, [data.features]);
 
   // show row filtered message in the toolbar.
   useEffect(() => {

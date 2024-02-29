@@ -18,11 +18,11 @@ import {
 } from '@/app';
 import {
   TypeGeoviewLayerConfig,
+  TypeHighlightColors,
   TypeInteraction,
   TypeLayerEntryConfig,
   TypeMapState,
   TypeValidMapProjectionCodes,
-  TypeVisibilityFlags,
 } from '@/geo/map/map-schema-types';
 import {
   mapPayload,
@@ -147,28 +147,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
       }
     );
 
-    // Checks for changes to selected features and updates highlights
-    const unsubMapSelectedFeatures = store.subscribe(
-      (state) => state.mapState.highlightedFeatures,
-      (curFeatures, prevFeatures) => {
-        // Log
-        logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - selectedFeatures', mapId, curFeatures);
-
-        // TODO: on reload, layer object is undefined, need to test for now and solve in #1580
-        if (curFeatures.length === 0 && api.maps[mapId].layer !== undefined) api.maps[mapId].layer.featureHighlight.removeHighlight('all');
-        else {
-          const curFeatureUids = curFeatures.map((feature) => (feature.geometry as TypeGeometry).ol_uid);
-          const prevFeatureUids = prevFeatures.map((feature) => (feature.geometry as TypeGeometry).ol_uid);
-          const newFeatures = curFeatures.filter(
-            (feature: TypeFeatureInfoEntry) => !prevFeatureUids.includes((feature.geometry as TypeGeometry).ol_uid)
-          );
-          const removedFeatures = prevFeatures.filter(
-            (feature: TypeFeatureInfoEntry) => !curFeatureUids.includes((feature.geometry as TypeGeometry).ol_uid)
-          );
-          for (let i = 0; i < newFeatures.length; i++) api.maps[mapId].layer.featureHighlight.highlightFeature(newFeatures[i]);
-          for (let i = 0; i < removedFeatures.length; i++)
-            api.maps[mapId].layer.featureHighlight.removeHighlight((removedFeatures[i].geometry as TypeGeometry).ol_uid);
-        }
+    const unsubMapHighlightColor = store.subscribe(
+      (state) => state.mapState.highlightColor,
+      (curColor, prevColor) => {
+        const acceptedColors = ['black', 'white', 'red', 'green'];
+        if (curColor !== prevColor && curColor !== undefined && acceptedColors.includes(curColor))
+          api.maps[mapId].layer.featureHighlight.changeHighlightColor(curColor);
+        else logger.logError('Ineligible color - must be one of white, black, red, or green');
       }
     );
     // #endregion FEATURE SELECTION
@@ -198,7 +183,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       unsubMapCenterCoord,
       unsubMapPointerPosition,
       unsubMapProjection,
-      unsubMapSelectedFeatures,
+      unsubMapHighlightColor,
       unsubOrderedLayerInfo,
       unsubMapZoom,
       unsubMapSingleClick,
@@ -423,6 +408,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return this.getMapStateProtected(mapId).actions.getVisibilityFromOrderedLayerInfo(layerPath);
   }
 
+  static setMapHighlightColor(mapId: string, color: TypeHighlightColors): void {
+    this.getMapStateProtected(mapId).actions.setHighlightColor(color);
+  }
+
   static setMapLayerHoverable(mapId: string, layerPath: string, hoverable: boolean): void {
     this.getMapStateProtected(mapId).actions.setHoverable(layerPath, hoverable);
   }
@@ -435,7 +424,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapStateProtected(mapId).actions.setQueryable(layerPath, queryable);
   }
 
-  static setOrToggleMapVisibilty(mapId: string, layerPath: string, newValue?: TypeVisibilityFlags): void {
+  static setOrToggleMapVisibility(mapId: string, layerPath: string, newValue?: boolean): void {
     this.getMapStateProtected(mapId).actions.setOrToggleLayerVisibility(layerPath, newValue);
   }
 
