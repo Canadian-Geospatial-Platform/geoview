@@ -30,7 +30,11 @@ import { DeleteUndoButton } from './delete-undo-button';
 import { LayersList } from './layers-list';
 import { LayerIcon } from '../../common/layer-icon';
 import { logger } from '@/core/utils/logger';
-import { LAYER_STATUS, useDetailsStoreActions, useDetailsStoreAllFeaturesDataArray } from '@/app';
+import {
+  useDetailsStoreActions,
+  useDetailsStoreAllFeaturesDataArray,
+} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { LAYER_STATUS } from '@/core/utils/constant';
 
 interface SingleLayerProps {
   layer: TypeLegendLayer;
