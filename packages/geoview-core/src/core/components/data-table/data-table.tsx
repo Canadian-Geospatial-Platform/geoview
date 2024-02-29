@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useRef, useState, memo, ReactNode, isV
 import { useTranslation } from 'react-i18next';
 import debounce from 'lodash/debounce';
 import startCase from 'lodash/startCase';
-import { difference } from 'lodash';
 
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -48,7 +47,7 @@ import {
   useDataTableStoreMapFilteredRecord,
   useDataTableStoreToolbarRowSelectedMessageRecord,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { useLightBox, useSelectedRows, useFilterRows, useToolbarActionMessage } from './hooks';
+import { useLightBox, useFilterRows, useToolbarActionMessage } from './hooks';
 import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from '@/core/utils/logger';
 import { MappedLayerDataType } from './data-panel';
@@ -125,7 +124,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
   const sxClasses = getSxClasses(sxtheme);
 
   // get store actions and values
-  const { addHighlightedFeature, removeHighlightedFeature, zoomToExtent } = useMapStoreActions();
+  const { zoomToExtent } = useMapStoreActions();
   const { applyMapFilters } = useDataTableStoreActions();
   const language = useAppDisplayLanguage();
 
@@ -143,11 +142,8 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
 
   const [sorting, setSorting] = useState<MRTSortingState>([]);
 
-  const rowSelectionRef = useRef<Array<number>>([]);
-
   // #region REACT CUSTOM HOOKS
   const { initLightBox, LightBoxComponent } = useLightBox();
-  const { rowSelection, setRowSelection } = useSelectedRows({ layerPath });
   const { columnFilters, setColumnFilters } = useFilterRows({ layerPath });
   // #endregion
 
@@ -350,9 +346,12 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
    * @param {Extent} extent feature exten
    *
    */
-  const handleZoomIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, extent: Extent) => {
-    zoomToExtent(extent);
-  };
+  const handleZoomIn = useCallback(
+    (extent: Extent) => {
+      zoomToExtent(extent);
+    },
+    [zoomToExtent]
+  );
 
   /**
    * Build Rows for datatable
@@ -374,26 +373,23 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
           />
         ),
         ZOOM: (
-          <IconButton color="primary" onClick={(e) => handleZoomIn(e, feature.extent!)}>
+          <IconButton color="primary" onClick={() => handleZoomIn(feature.extent!)}>
             <ZoomInSearchIcon />
           </IconButton>
         ),
         ...feature.fieldInfo,
       };
     }) as unknown as ColumnsType[];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [data.features, handleZoomIn]);
 
   const useTable = useMaterialReactTable({
     columns,
     data: rows,
     enableGlobalFilter: false,
-    enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
     enableDensityToggle: true,
     onDensityChange: setDensity,
     initialState: { showColumnFilters: !!columnFilters.length },
-    state: { sorting, columnFilters, rowSelection, density, columnPinning: { left: ['ICON', 'ZOOM'] } },
+    state: { sorting, columnFilters, density, columnPinning: { left: ['ICON', 'ZOOM'] } },
     enableColumnFilterModes: true,
     enableColumnPinning: true,
     onSortingChange: setSorting,
@@ -455,33 +451,6 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
       }),
     },
   });
-
-  // add/remove hightlight feature when row is selected/unselected.
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('DATA-TABLE - rowSelection', rowSelection);
-
-    const selectedRows = Object.keys(rowSelection).map((key) => Number(key));
-    const addAnimationRowIds = difference(selectedRows, rowSelectionRef.current);
-
-    addAnimationRowIds.forEach((idx) => {
-      const feature = data?.features ? data.features[idx] : null;
-
-      if (feature) {
-        addHighlightedFeature(feature);
-      }
-    });
-    const removeAnimationRowIds = difference(rowSelectionRef.current, selectedRows);
-    removeAnimationRowIds.forEach((idx) => {
-      const feature = data?.features ? data.features[idx] : null;
-      if (feature) {
-        removeHighlightedFeature(feature);
-      }
-    });
-
-    rowSelectionRef.current = selectedRows;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rowSelection]);
 
   /**
    * Convert the filter list from the Column Filter state to filter the map.
@@ -572,7 +541,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
   }, [mapFilteredRecord[layerPath]]);
 
   // set toolbar custom action message in store.
-  useToolbarActionMessage({ data, rowSelection, columnFilters, layerPath, tableInstance: useTable });
+  useToolbarActionMessage({ data, columnFilters, layerPath, tableInstance: useTable });
 
   return (
     <Box sx={sxClasses.dataTableWrapper}>

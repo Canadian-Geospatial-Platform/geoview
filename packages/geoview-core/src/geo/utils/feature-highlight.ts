@@ -6,8 +6,9 @@ import { LineString, MultiLineString, MultiPoint, MultiPolygon, Point, Polygon }
 import { Extent, getCenter } from 'ol/extent';
 import { getUid } from 'ol';
 import { fromExtent } from 'ol/geom/Polygon';
-import { Coordinate, TypeFeatureInfoEntry, api } from '@/app';
+import { Coordinate, TypeFeatureInfoEntry, TypeHighlightColors, api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { logger } from '@/core/utils/logger';
 
 /** *****************************************************************************************************************************
  * A class to handle highlighting of features
@@ -47,20 +48,37 @@ export class FeatureHighlight {
     this.mapId = mapId;
     this.overlayLayer = new VectorLayer({ source: this.highlighSource, map: api.maps[this.mapId].map });
     if (MapEventProcessor.getMapHighlightColor(this.mapId) !== undefined)
-      this.highlightColor = MapEventProcessor.getMapHighlightColor(this.mapId) as string;
+      this.changeHighlightColor(MapEventProcessor.getMapHighlightColor(this.mapId) as TypeHighlightColors);
+  }
+
+  /**
+   * Change the highlight color
+   *
+   * @param {TypeHighlightColor} color the new color
+   */
+  changeHighlightColor(color: TypeHighlightColors) {
+    this.highlightColor = color;
     if (this.highlightColor === 'white') {
       this.highlightFill.setColor([255, 255, 255, 0.3]);
       this.highlightStyle.setStroke(new Stroke({ color: 'white', width: 1.25 }));
       this.highlightStyle.setFill(this.highlightFill);
+      MapEventProcessor.setMapHighlightColor(this.mapId, 'white');
     } else if (this.highlightColor === 'red') {
       this.highlightFill.setColor([255, 0, 0, 0.3]);
       this.highlightStyle.setStroke(new Stroke({ color: 'red', width: 1.25 }));
       this.highlightStyle.setFill(this.highlightFill);
+      MapEventProcessor.setMapHighlightColor(this.mapId, 'red');
     } else if (this.highlightColor === 'green') {
       this.highlightFill.setColor([0, 255, 255, 0.3]);
       this.highlightStyle.setStroke(new Stroke({ color: 'green', width: 1.25 }));
       this.highlightStyle.setFill(this.highlightFill);
-    }
+      MapEventProcessor.setMapHighlightColor(this.mapId, 'green');
+    } else if (this.highlightColor === 'black') {
+      this.highlightFill.setColor([0, 0, 0, 0.3]);
+      this.highlightStyle.setStroke(new Stroke({ color: 'black', width: 1.25 }));
+      this.highlightStyle.setFill(this.highlightFill);
+      MapEventProcessor.setMapHighlightColor(this.mapId, 'black');
+    } else logger.logError('Ineligible color - must be one of white, black, red, or green');
   }
 
   /**
