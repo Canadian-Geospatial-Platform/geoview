@@ -41,4 +41,5 @@ export default function ExportButton(props: ExportProps): JSX.Element {
  */
 ExportButton.defaultProps = {
   className: '',
+  sxDetails: undefined,
 };
