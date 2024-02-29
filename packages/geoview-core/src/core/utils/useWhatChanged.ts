@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { useEffect, useRef } from 'react';
 
 // Indicates if currently logging useWhatChanged
@@ -44,16 +43,22 @@ function stringifyValue(dependencyItem: unknown): string | unknown {
 
 /**
  * Helper function to create a hook on a hot reference
- * @param value any The value to hook in a reference
+ * @param {unknown} value any The value to hook in a reference
  * @returns ref The reference to the value
  */
+// ? unknown type cannot be use, need to escape
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function useHotRefs(value: any) {
-  const fnRef = useRef(value);
+function useHotRefs(value: unknown): any {
+  const fnRef = useRef<unknown>(value);
   useEffect(() => {
     fnRef.current = value;
   });
   return fnRef;
+}
+
+function writeConsole(...messages: unknown[]): void {
+  // eslint-disable-next-line no-console
+  console.log(...messages);
 }
 
 /**
@@ -77,8 +82,8 @@ export const useWhatChanged = (hookId: string, dependency?: unknown[], dependenc
 
   // Logs footer information
   function logFooter() {
-    console.log(`%c----- END SECTION -----`, `background: ${backgroundColorRef.current}; color: white; font-size: 10px`, '\n');
-    console.log('\n');
+    writeConsole(`%c----- END SECTION -----`, `background: ${backgroundColorRef.current}; color: white; font-size: 10px`, '\n');
+    writeConsole('\n');
   }
 
   // Logs header information
@@ -92,8 +97,8 @@ export const useWhatChanged = (hookId: string, dependency?: unknown[], dependenc
     isBlankArrayAsDependency?: boolean;
   }) {
     if (CURRENT_ACTIVE) {
-      console.log(`%c----- START SECTION -----`, `background: ${backgroundColorRef.current}; color: white; font-size: 10px`, '\n');
-      console.log(
+      writeConsole(`%c----- START SECTION -----`, `background: ${backgroundColorRef.current}; color: white; font-size: 10px`, '\n');
+      writeConsole(
         `%c ${whatChangedHookCountRef.current} ${hookId || ''}`,
         `background: ${backgroundColorRef.current}; color: white; font-size: 10px`,
         '👇🏾',
@@ -168,7 +173,7 @@ export const useWhatChanged = (hookId: string, dependency?: unknown[], dependenc
       });
 
       if (!isBlankArrayAsDependency) {
-        console.table(whatChanged);
+        writeConsole(whatChanged);
         logFooter();
       }
     }

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { EVENT_NAMES } from '@/api/events/event-types';
 import {
   GetLegendsPayload,
@@ -10,11 +9,12 @@ import {
   payloadIsLayerSetChangeLayerStatus,
   payloadIsLayerSetUpdated,
 } from '@/api/events/payloads';
-import { TypeBaseLayerEntryConfig, api } from '@/app';
+import { api } from '@/app';
 import { LayerSet } from './layer-set';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { logger } from '@/core/utils/logger';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validationClasses/abstract-base-layer-entry-config';
 
 type TypeLegendsLayerSetInstance = { [mapId: string]: LegendsLayerSet };
 
@@ -77,7 +77,7 @@ export class LegendsLayerSet extends LayerSet {
           this.resultSet[layerPath].querySent = true;
           // config file could not determine if the layer is queryable, can it be done using the metadata? let's try
           const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
-          layerConfig.geoviewLayerInstance?.registerToLayerSets(layerConfig as TypeBaseLayerEntryConfig);
+          layerConfig.geoviewLayerInstance?.registerToLayerSets(layerConfig as AbstractBaseLayerEntryConfig);
         }
         if (layerExists || layerStatus === 'loaded')
           LegendEventProcessor.propagateLegendToStore(this.mapId, layerPath, this.resultSet[layerPath]);

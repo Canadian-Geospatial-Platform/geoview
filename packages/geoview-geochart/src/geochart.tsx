@@ -82,7 +82,6 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
    * Handles when the chart must be redrawn.
    * @param e PayloadBaseClassChart The empty event payload
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleChartRedraw = (e: PayloadBaseClassChart): void => {
     // Log
     logger.logTraceCoreAPIEvent('GEOVIEW-GEOCHART - handleChartRedraw', e);

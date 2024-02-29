@@ -104,7 +104,7 @@ From [abstract-geoview-layers](../../packages/geoview-core/src/geo/layer/geoview
 protected abstract fetchServiceMetadata(): Promise<void>;
 protected abstract validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig;
 protected abstract processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<void>;
-protected abstract processOneLayerEntry(layerConfig: TypeBaseLayerEntryConfig): Promise<BaseLayer | null>;
+protected abstract processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | null>;
 protected abstract getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;
 protected abstract getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;
 protected abstract getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;

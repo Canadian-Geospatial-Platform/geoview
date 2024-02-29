@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect } from 'react';
 import { Popover as MaterialPopover, PopoverProps } from '@mui/material';
 import { ARROW_KEYS_WITH_SPACE } from '@/core/utils/constant';

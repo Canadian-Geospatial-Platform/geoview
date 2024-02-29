@@ -14,8 +14,7 @@ const validEvents: EventStringId[] = [
 export type TypeResultSetEntry = {
   layerName?: string;
   layerStatus: TypeLayerStatus;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: any;
+  data: unknown;
 };
 
 export type TypeResultSet = {

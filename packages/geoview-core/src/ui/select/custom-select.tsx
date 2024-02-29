@@ -1,5 +1,6 @@
 /* eslint-disable react/require-default-props */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
+// TODO: refactor - 10 any values are define in this file...
 import { useState, CSSProperties } from 'react';
 
 import {
@@ -93,23 +94,29 @@ export function CustomSelect(props: TypeCustomSelectProps): JSX.Element {
     callBack(multipleValue);
   }
 
-  const isGrouped = selectItems.some((item: any) => item.category);
+  const isGrouped = selectItems.some((item: Record<string, TypeSelectItems> | Record<string, TypeItemProps>) => item.category);
 
   const isDefault = !isGrouped
-    ? selectItems.some((item: any) => item.default)
-    : selectItems.some((item: any) => item.items.some((selectItem: any) => selectItem.default));
+    ? selectItems.some((item: Record<string, TypeSelectItems> | Record<string, TypeItemProps>) => item.default)
+    : selectItems.some((item: Record<string, TypeSelectItems> | Record<string, TypeItemProps>) =>
+        (item.items as unknown as Record<string, TypeSelectItems>[] | Record<string, TypeItemProps>[]).some(
+          (selectItem: Record<string, TypeSelectItems> | Record<string, TypeItemProps>) => selectItem.default
+        )
+      );
 
   if (isGrouped) {
-    selectItems.forEach((item: any) => {
-      item.items.forEach((selectItem: any) => {
-        if (value) return;
-        if (selectItem.default) setValue(selectItem.value);
-      });
+    selectItems.forEach((item: Record<string, TypeSelectItems> | Record<string, TypeItemProps>) => {
+      (item.items as unknown as Record<string, TypeSelectItems>[] | Record<string, TypeItemProps>[]).forEach(
+        (selectItem: Record<string, TypeSelectItems> | Record<string, TypeItemProps>) => {
+          if (value) return;
+          if (selectItem.default) setValue(selectItem.value as unknown as string);
+        }
+      );
     });
   } else {
-    selectItems.forEach((item: any) => {
+    selectItems.forEach((item: Record<string, TypeSelectItems> | Record<string, TypeItemProps>) => {
       if (value) return;
-      if (item.default) setValue(item.value);
+      if (item.default) setValue(item.value as unknown as string);
     });
   }
 
@@ -131,15 +138,18 @@ export function CustomSelect(props: TypeCustomSelectProps): JSX.Element {
         displayEmpty
       >
         {isGrouped
-          ? selectItems.map((item: any) => {
+          ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            selectItems.map((item: any) => {
               const options: JSX.Element[] = [];
               if (item.category) options.push(<ListSubheader>{item.category ? item.category : 'Others'}</ListSubheader>);
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               item.items.forEach((selectItem: any) => {
                 options.push(<MenuItem value={selectItem.value}>{selectItem.value}</MenuItem>);
               });
               return options;
             })
-          : selectItems.map((item: any) => (
+          : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            selectItems.map((item: any) => (
               <MenuItem key={item.id} value={item.value}>
                 {item.value}
               </MenuItem>

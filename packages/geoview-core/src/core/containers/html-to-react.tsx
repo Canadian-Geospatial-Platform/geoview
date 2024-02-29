@@ -1,4 +1,3 @@
-/* eslint-disable react/require-default-props */
 import { CSSProperties, ReactNode } from 'react';
 import parse from 'html-react-parser';
 
@@ -7,8 +6,11 @@ import parse from 'html-react-parser';
  */
 interface HtmlToReactProps {
   htmlContent: string;
+  // eslint-disable-next-line react/require-default-props
   className?: string;
+  // eslint-disable-next-line react/require-default-props
   style?: CSSProperties;
+  // eslint-disable-next-line react/require-default-props
   extraOptions?: Record<string, unknown>;
 }
 

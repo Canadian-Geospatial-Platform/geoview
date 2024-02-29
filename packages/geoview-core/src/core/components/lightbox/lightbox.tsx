@@ -2,11 +2,8 @@ import { useState, useEffect } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-// eslint-disable-next-line import/no-extraneous-dependencies
 import Lightbox from 'yet-another-react-lightbox';
-// eslint-disable-next-line import/no-unresolved
 import Download from 'yet-another-react-lightbox/plugins/download';
-// eslint-disable-next-line import/no-extraneous-dependencies, import/no-unresolved
 import 'yet-another-react-lightbox/styles.css';
 
 import { CloseIcon, ArrowRightIcon, ArrowLeftIcon, DownloadIcon, Tooltip } from '@/ui';

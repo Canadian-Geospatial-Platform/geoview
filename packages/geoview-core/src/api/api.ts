@@ -189,8 +189,7 @@ export class API {
       // Init by function call
       initMapDivFromFunctionCall(mapDiv, mapConfig);
     } else {
-      // eslint-disable-next-line no-console
-      console.error(`Div with id ${divId} does not exist`);
+      logger.logError(`Div with id ${divId} does not exist`);
     }
   };
 }

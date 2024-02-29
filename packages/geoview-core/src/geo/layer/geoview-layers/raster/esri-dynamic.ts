@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+// We have many reassign for layerPath-layerConfig. We keep it global...
 import { ImageArcGISRest } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
@@ -13,7 +14,6 @@ import Geometry from 'ol/geom/Geometry';
 import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeEsriFeatureLayerEntryConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
@@ -24,7 +24,6 @@ import {
   TypeClassBreakStyleConfig,
   isSimpleStyleConfig,
   TypeListOfLayerEntryConfig,
-  TypeEsriDynamicLayerEntryConfig,
   TypeFeatureInfoLayerConfig,
   TypeVisibilityFlags,
 } from '@/geo/map/map-schema-types';
@@ -43,10 +42,12 @@ import {
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
+import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-feature-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-dynamic-layer-entry-config';
 
 export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'esriDynamic';
-  listOfLayerEntryConfig: TypeEsriDynamicLayerEntryConfig[];
+  listOfLayerEntryConfig: EsriDynamicLayerEntryConfig[];
 }
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
@@ -79,7 +80,7 @@ export const geoviewLayerIsEsriDynamic = (verifyIfGeoViewLayer: AbstractGeoViewL
 };
 
 /** ******************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TypeEsriDynamicLayerEntryConfig if the geoviewLayerType attribute
+ * type guard function that redefines a TypeLayerEntryConfig as a EsriDynamicLayerEntryConfig if the geoviewLayerType attribute
  * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is ESRI_DYNAMIC. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
@@ -90,7 +91,7 @@ export const geoviewLayerIsEsriDynamic = (verifyIfGeoViewLayer: AbstractGeoViewL
  */
 export const geoviewEntryIsEsriDynamic = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is TypeEsriDynamicLayerEntryConfig => {
+): verifyIfGeoViewEntry is EsriDynamicLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 };
 
@@ -140,8 +141,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {boolean} true if an error is detected.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig, esriIndex: number): boolean {
+  esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig): boolean {
     if (!this.metadata!.supportsDynamicLayers) {
       this.layerLoadError.push({
         layer: layerConfig.layerPath,
@@ -179,11 +179,11 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * This method will create a Geoview temporal dimension if it exist in the service metadata
    * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
-   * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
+   * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
    */
   protected processTemporalDimension(
     esriTimeDimension: TypeJsonObject,
-    layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
+    layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig // TODO: why feature layer is dynamic config not in common
   ) {
     commonProcessTemporalDimension.call(this, esriTimeDimension, layerConfig);
   }
@@ -195,14 +195,14 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {string} nameField The display field associated to the layer.
    * @param {string} geometryFieldName The field name of the geometry property.
    * @param {TypeJsonArray} fields An array of field names and its aliases.
-   * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
+   * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
    */
   processFeatureInfoConfig = (
     capabilities: string,
     nameField: string,
     geometryFieldName: string,
     fields: TypeJsonArray,
-    layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
+    layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig // TODO: why feature layer is dynamic config not in common
   ) => {
     commonProcessFeatureInfoConfig.call(this, capabilities, nameField, geometryFieldName, fields, layerConfig);
   };
@@ -215,14 +215,14 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {number} minScale The metadata minScale of the layer.
    * @param {number} maxScale The metadata maxScale of the layer.
    * @param {TypeJsonObject} extent The metadata layer extent.
-   * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
+   * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
    */
   processInitialSettings(
     visibility: boolean,
     minScale: number,
     maxScale: number,
     extent: TypeJsonObject,
-    layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
+    layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig // TODO: why feature layer is dynamic config not in common
   ) {
     commonProcessInitialSettings.call(this, visibility, minScale, maxScale, extent, layerConfig);
   }
@@ -242,11 +242,11 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   /** ****************************************************************************************************************************
    * This method creates a GeoView EsriDynamic layer using the definition provided in the layerConfig parameter.
    *
-   * @param {TypeEsriDynamicLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @param {EsriDynamicLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  protected processOneLayerEntry(layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected processOneLayerEntry(layerConfig: EsriDynamicLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // !            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
@@ -329,7 +329,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   protected async getFeatureInfoAtLongLat(lnglat: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
     try {
       // Get the layer config in a loaded phase
-      const layerConfig = (await this.getLayerConfig(layerPath)) as TypeEsriDynamicLayerEntryConfig;
+      const layerConfig = (await this.getLayerConfig(layerPath)) as EsriDynamicLayerEntryConfig;
       if (!this.getVisible(layerPath)) return [];
       if (!layerConfig.source?.featureInfo?.queryable) return [];
 
@@ -563,7 +563,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    */
   getViewFilter(layerPath: string): string {
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
-    const layerConfig = this.getLayerConfig(layerPath) as TypeEsriDynamicLayerEntryConfig;
+    const layerConfig = this.getLayerConfig(layerPath) as EsriDynamicLayerEntryConfig;
     const layerFilter = layerConfig.olLayer?.get('layerFilter');
 
     if (layerConfig?.style) {
@@ -787,7 +787,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       filter = parameter1;
     }
 
-    const layerConfig = this.getLayerConfig(layerPath) as TypeEsriDynamicLayerEntryConfig;
+    const layerConfig = this.getLayerConfig(layerPath) as EsriDynamicLayerEntryConfig;
     if (!layerConfig) {
       // ! Things important to know about the applyViewFilter usage:
       logger.logError(

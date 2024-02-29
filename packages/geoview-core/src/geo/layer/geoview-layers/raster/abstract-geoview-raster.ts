@@ -1,11 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeLayerEntryConfig, TypeListOfLayerEntryConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
-import { api } from '@/app';
-import { logger } from '@/core/utils/logger';
 
 /** *****************************************************************************************************************************
  * AbstractGeoViewRaster types

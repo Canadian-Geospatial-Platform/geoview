@@ -1,4 +1,3 @@
-/* eslint-disable react/require-default-props */
 import { CardMedia as MaterialCardMedia, CardMediaProps } from '@mui/material';
 
 /**
@@ -6,7 +5,9 @@ import { CardMedia as MaterialCardMedia, CardMediaProps } from '@mui/material';
  */
 interface TypeCardMediaProps extends CardMediaProps {
   alt: string;
+  // eslint-disable-next-line react/require-default-props
   click?(): void;
+  // eslint-disable-next-line react/require-default-props
   keyDown?(e: unknown): void;
 }
 
