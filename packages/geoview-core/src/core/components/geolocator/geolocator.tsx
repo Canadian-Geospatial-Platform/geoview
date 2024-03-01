@@ -1,9 +1,10 @@
-import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useCallback, useEffect, useRef, useState, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import debounce from 'lodash/debounce';
 import { CloseIcon, SearchIcon, AppBar, Box, Divider, IconButton, ProgressBar, Toolbar } from '@/ui';
+import { FocusTrapElement } from '@/core/components/common/focus-trap-element';
 import { StyledInputField, sxClasses } from './geolocator-style';
-import { OL_ZOOM_DURATION } from '@/core/utils/constant';
+import { OL_ZOOM_DURATION, ARROW_KEY_CODES } from '@/core/utils/constant';
 import { useUIAppbarGeolocatorActive, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useAppGeolocatorServiceURL, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { GeolocatorResult } from './geolocator-result';
@@ -112,6 +113,11 @@ export function Geolocator() {
     if (event.key === 'Escape') {
       setGeolocatorActive(false);
     }
+
+    if (ARROW_KEY_CODES.includes(event.code)) {
+      // TODO stop moving the map here
+      event.preventDefault();
+    }
   };
 
   useEffect(() => {
@@ -131,20 +137,18 @@ export function Geolocator() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
 
-  return (
+  const searchPanelContent: ReactNode = (
     <Box sx={sxClasses.root} visibility={active ? 'visible' : 'hidden'} id="geolocator-search">
       <Box sx={sxClasses.geolocator}>
         <AppBar position="static">
           <Toolbar
             variant="dense"
-            // attach event handler to toolbar when search input is hidden.
             {...(!isSearchInputVisible && { onClick: () => setIsSearchInputVisible(true) })}
             sx={{ cursor: !isSearchInputVisible ? 'pointer' : 'default' }}
           >
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                // cancel the debounce fn, when enter key clicked before wait time.
                 doRequest.cancel();
                 getGeolocations(searchValue);
               }}
@@ -193,4 +197,6 @@ export function Geolocator() {
       )}
     </Box>
   );
+
+  return <FocusTrapElement id="search-panel" basic active={active} content={searchPanelContent} />;
 }
