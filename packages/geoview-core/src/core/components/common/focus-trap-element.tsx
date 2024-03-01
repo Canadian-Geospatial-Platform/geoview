@@ -1,3 +1,4 @@
+/* eslint-disable react/require-default-props */
 import { ReactNode, useEffect } from 'react';
 
 import { useTranslation } from 'react-i18next';
@@ -11,6 +12,8 @@ import { logger } from '@/core/utils/logger';
 type FocusTrapElementProps = {
   id: string;
   content: ReactNode;
+  basic?: boolean;
+  active?: boolean;
 };
 
 /**
@@ -19,7 +22,7 @@ type FocusTrapElementProps = {
  * @returns {JSX.Element} the geolocator button
  */
 export function FocusTrapElement(props: FocusTrapElementProps): JSX.Element {
-  const { id, content } = props;
+  const { id, content, basic = false, active = false } = props;
 
   const { t } = useTranslation<string>();
 
@@ -54,19 +57,23 @@ export function FocusTrapElement(props: FocusTrapElementProps): JSX.Element {
   // #endregion
 
   return (
-    <FocusTrap open={id === focusItem.activeElementId}>
-      <Box>
-        <Button
-          id={`${id}-exit-btn`}
-          type="text"
-          autoFocus
-          onClick={handleClose}
-          sx={{ display: activeTrapGeoView ? 'block' : 'none', width: '95%', margin: '10px auto' }}
-        >
-          {t('general.exit')}
-        </Button>
-        {content}
-      </Box>
+    <FocusTrap open={basic ? active : id === focusItem.activeElementId}>
+      {!basic ? (
+        <Box>
+          <Button
+            id={`${id}-exit-btn`}
+            type="text"
+            autoFocus
+            onClick={handleClose}
+            sx={{ display: activeTrapGeoView ? 'block' : 'none', width: '95%', margin: '10px auto' }}
+          >
+            {t('general.exit')}
+          </Button>
+          {content}
+        </Box>
+      ) : (
+        <Box>{content}</Box>
+      )}
     </FocusTrap>
   );
 }
