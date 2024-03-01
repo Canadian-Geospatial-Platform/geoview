@@ -11,7 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "geoview-core": "workspace:~0.1.0",
-    "@mui/material": "^5.14.6"
+    "@mui/material": "^5.15.11"
   },
   "devDependencies": {
     "@babel/core": "^7.17.0",

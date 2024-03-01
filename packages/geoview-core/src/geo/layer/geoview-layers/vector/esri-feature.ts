@@ -239,7 +239,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    */
   protected createVectorSource(
     layerConfig: AbstractBaseLayerEntryConfig,
-    sourceOptions: SourceOptions = {},
+    sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
     // ? The line below uses var because a var declaration has a wider scope than a let declaration.

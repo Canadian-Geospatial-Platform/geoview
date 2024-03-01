@@ -257,7 +257,7 @@ export class GeoPackage extends AbstractGeoViewVector {
    */
   protected extractGeopackageData(
     layerConfig: AbstractBaseLayerEntryConfig,
-    sourceOptions: SourceOptions = {},
+    sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
   ): Promise<[layerData[], sldsInterface]> {
     const promisedGeopackageData = new Promise<[layerData[], sldsInterface]>((resolve) => {

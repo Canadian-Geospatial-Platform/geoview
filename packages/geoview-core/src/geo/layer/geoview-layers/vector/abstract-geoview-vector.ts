@@ -107,7 +107,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   protected createVectorSource(
     layerConfig: AbstractBaseLayerEntryConfig,
-    sourceOptions: SourceOptions = {},
+    sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
     const { layerPath } = layerConfig;

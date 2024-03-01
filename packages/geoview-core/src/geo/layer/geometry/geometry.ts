@@ -449,7 +449,7 @@ export class Geometry {
     geometryGroupId: string,
     options?: {
       vectorLayerOptions?: VectorLayerOptions<VectorSource>;
-      vectorSourceOptions?: VectorSourceOptions;
+      vectorSourceOptions?: VectorSourceOptions<Feature>;
     }
   ): FeatureCollection {
     const geometryGroupOptions = options || {};
