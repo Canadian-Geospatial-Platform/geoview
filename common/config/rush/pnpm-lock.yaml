@@ -132,21 +132,6 @@ importers:
         specifier: ^11.11.0
         version: 11.11.0(@emotion/react@11.11.4)(@types/react@18.2.61)(react@18.2.0)
       '@mui/base':
-<<<<<<< HEAD
-        specifier: 5.0.0-beta.24
-        version: 5.0.0-beta.24(@types/react@18.2.61)(react-dom@18.2.0)(react@18.2.0)
-      '@mui/icons-material':
-        specifier: ^5.14.6
-        version: 5.15.11(@mui/material@5.15.11)(@types/react@18.2.61)(react@18.2.0)
-      '@mui/material':
-        specifier: ^5.14.6
-        version: 5.15.11(@emotion/react@11.11.4)(@emotion/styled@11.11.0)(@types/react@18.2.61)(react-dom@18.2.0)(react@18.2.0)
-      '@mui/styles':
-        specifier: ^5.14.6
-        version: 5.15.11(@types/react@18.2.61)(react@18.2.0)
-      '@mui/system':
-        specifier: ^5.14.6
-=======
         specifier: 5.0.0-beta.37
         version: 5.0.0-beta.37(@types/react@18.2.61)(react-dom@18.2.0)(react@18.2.0)
       '@mui/icons-material':
@@ -160,7 +145,6 @@ importers:
         version: 5.15.11(@types/react@18.2.61)(react@18.2.0)
       '@mui/system':
         specifier: ^5.15.11
->>>>>>> dbd0331426 (core(build): Upgrade to ol 9 and latest mui)
         version: 5.15.11(@emotion/react@11.11.4)(@emotion/styled@11.11.0)(@types/react@18.2.61)(react@18.2.0)
       '@mui/x-date-pickers':
         specifier: ^6.13.0
@@ -214,24 +198,14 @@ importers:
         specifier: ~7.4.0
         version: 7.4.1(react@18.2.0)
       material-react-table:
-<<<<<<< HEAD
-        specifier: ~2.4.1
-        version: 2.4.1(@emotion/react@11.11.4)(@emotion/styled@11.11.0)(@mui/icons-material@5.15.11)(@mui/material@5.15.11)(@mui/x-date-pickers@6.19.5)(react-dom@18.2.0)(react@18.2.0)
-=======
         specifier: ~2.12.1
         version: 2.12.1(@emotion/react@11.11.4)(@emotion/styled@11.11.0)(@mui/icons-material@5.15.11)(@mui/material@5.15.11)(@mui/x-date-pickers@6.19.5)(react-dom@18.2.0)(react@18.2.0)
->>>>>>> dbd0331426 (core(build): Upgrade to ol 9 and latest mui)
       ol:
         specifier: ^9.0.0
         version: 9.0.0
       ol-mapbox-style:
-<<<<<<< HEAD
-        specifier: ^12.0.0
-        version: 12.2.1(ol@8.2.0)
-=======
         specifier: ^12.2.1
         version: 12.2.1(ol@9.0.0)
->>>>>>> dbd0331426 (core(build): Upgrade to ol 9 and latest mui)
       proj4:
         specifier: ^2.7.5
         version: 2.10.0
@@ -513,15 +487,11 @@ importers:
   ../../packages/geoview-geochart:
     dependencies:
       '@mui/material':
-<<<<<<< HEAD
-        specifier: ^5.14.6
-=======
         specifier: ^5.15.11
->>>>>>> dbd0331426 (core(build): Upgrade to ol 9 and latest mui)
         version: 5.15.11(@emotion/react@11.11.4)(@emotion/styled@11.11.0)(@types/react@18.2.61)(react-dom@18.2.0)(react@18.2.0)
       geochart:
         specifier: Canadian-Geospatial-Platform/geochart#develop
-        version: github.com/Canadian-Geospatial-Platform/geochart/e549f6b624d27c998b7b43969b2e57bca4ab6c94(@types/react@18.2.61)
+        version: github.com/Canadian-Geospatial-Platform/geochart/b31d278747633beeafc274c4740d22665928cc45(@types/react@18.2.61)
       geoview-core:
         specifier: workspace:~0.1.0
         version: link:../geoview-core
@@ -742,11 +712,7 @@ importers:
   ../../packages/geoview-time-slider:
     dependencies:
       '@mui/material':
-<<<<<<< HEAD
-        specifier: ^5.14.6
-=======
         specifier: ^5.15.11
->>>>>>> dbd0331426 (core(build): Upgrade to ol 9 and latest mui)
         version: 5.15.11(@emotion/react@11.11.4)(@emotion/styled@11.11.0)(@types/react@18.2.61)(react-dom@18.2.0)(react@18.2.0)
       geoview-core:
         specifier: workspace:~0.1.0
@@ -820,12 +786,12 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
-  /@ampproject/remapping@2.2.1:
-    resolution: {integrity: sha512-lFMjJTrFL3j7L9yBxwYfCq2k6qqwHyzuUl/XBnif78PWTJYyL/dfowQHWE3sp6U6ZzqWiiIZnpTMO96zhkjwtg==}
+  /@ampproject/remapping@2.3.0:
+    resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
     dependencies:
-      '@jridgewell/gen-mapping': 0.3.4
-      '@jridgewell/trace-mapping': 0.3.23
+      '@jridgewell/gen-mapping': 0.3.5
+      '@jridgewell/trace-mapping': 0.3.24
     dev: true
 
   /@babel/cli@7.23.9(@babel/core@7.24.0):
@@ -836,7 +802,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.24.0
-      '@jridgewell/trace-mapping': 0.3.23
+      '@jridgewell/trace-mapping': 0.3.24
       commander: 4.1.1
       convert-source-map: 2.0.0
       fs-readdir-recursive: 1.1.0
@@ -864,7 +830,7 @@ packages:
     resolution: {integrity: sha512-fQfkg0Gjkza3nf0c7/w6Xf34BW4YvzNfACRLmmb7XRLa6XHdR+K9AlJlxneFfWYf6uhOzuzZVTjF/8KfndZANw==}
     engines: {node: '>=6.9.0'}
     dependencies:
-      '@ampproject/remapping': 2.2.1
+      '@ampproject/remapping': 2.3.0
       '@babel/code-frame': 7.23.5
       '@babel/generator': 7.23.6
       '@babel/helper-compilation-targets': 7.23.6
@@ -902,8 +868,8 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/types': 7.24.0
-      '@jridgewell/gen-mapping': 0.3.4
-      '@jridgewell/trace-mapping': 0.3.23
+      '@jridgewell/gen-mapping': 0.3.5
+      '@jridgewell/trace-mapping': 0.3.24
       jsesc: 2.5.2
     dev: true
 
@@ -2725,13 +2691,13 @@ packages:
       chalk: 4.1.2
     dev: true
 
-  /@jridgewell/gen-mapping@0.3.4:
-    resolution: {integrity: sha512-Oud2QPM5dHviZNn4y/WhhYKSXksv+1xLEIsNrAbGcFzUN3ubqWRFT5gwPchNc5NuzILOU4tPBDTZ4VwhL8Y7cw==}
+  /@jridgewell/gen-mapping@0.3.5:
+    resolution: {integrity: sha512-IzL8ZoEDIBRWEzlCcRhOaCupYyN5gdIK+Q6fbFdPDg6HqX6jpkItn7DFIpW9LQzXG6Df9sA7+OKnq0qlz/GaQg==}
     engines: {node: '>=6.0.0'}
     dependencies:
       '@jridgewell/set-array': 1.2.1
       '@jridgewell/sourcemap-codec': 1.4.15
-      '@jridgewell/trace-mapping': 0.3.23
+      '@jridgewell/trace-mapping': 0.3.24
     dev: true
 
   /@jridgewell/resolve-uri@3.1.2:
@@ -2747,16 +2713,16 @@ packages:
   /@jridgewell/source-map@0.3.5:
     resolution: {integrity: sha512-UTYAUj/wviwdsMfzoSJspJxbkH5o1snzwX0//0ENX1u/55kkZZkcTZP6u9bwKGkv+dkk9at4m1Cpt0uY80kcpQ==}
     dependencies:
-      '@jridgewell/gen-mapping': 0.3.4
-      '@jridgewell/trace-mapping': 0.3.23
+      '@jridgewell/gen-mapping': 0.3.5
+      '@jridgewell/trace-mapping': 0.3.24
     dev: true
 
   /@jridgewell/sourcemap-codec@1.4.15:
     resolution: {integrity: sha512-eF2rxCRulEKXHTRiDrDy6erMYWqNw4LPdQ8UQA4huuxaQsVeRPFl2oM8oDGxMFhJUWZf9McpLtJasDDZb/Bpeg==}
     dev: true
 
-  /@jridgewell/trace-mapping@0.3.23:
-    resolution: {integrity: sha512-9/4foRoUKp8s96tSkh8DlAAc5A0Ty8vLXld+l9gjKKY6ckwI8G15f0hskGmuLZu78ZlGa1vtsfOa+lnB4vG6Jg==}
+  /@jridgewell/trace-mapping@0.3.24:
+    resolution: {integrity: sha512-+VaWXDa6+l6MhflBvVXjIEAzb59nQ2JUK3bwRp2zRpPtU+8TFRy9Gg/5oIcNlkEL5PGlBFGfemUVvIgLnTzq7Q==}
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.4.15
@@ -2797,35 +2763,6 @@ packages:
     resolution: {integrity: sha512-HPnRdYO0WjFjRTSwO3frz1wKaU649OBFPX3Zo/2WZvuRi6zMiRGui8SnPQiQABgqCf8YikDe5t3HViTVw1WUzA==}
     dev: false
 
-<<<<<<< HEAD
-  /@mui/base@5.0.0-beta.24(@types/react@18.2.61)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-bKt2pUADHGQtqWDZ8nvL2Lvg2GNJyd/ZUgZAJoYzRgmnxBL9j36MSlS3+exEdYkikcnvVafcBtD904RypFKb0w==}
-=======
-  /@mui/base@5.0.0-beta.37(@types/react@18.2.61)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-/o3anbb+DeCng8jNsd3704XtmmLDZju1Fo8R2o7ugrVtPQ/QpcqddwKNzKPZwa0J5T8YNW3ZVuHyQgbTnQLisQ==}
->>>>>>> dbd0331426 (core(build): Upgrade to ol 9 and latest mui)
-    engines: {node: '>=12.0.0'}
-    peerDependencies:
-      '@types/react': ^17.0.0 || ^18.0.0
-      react: ^17.0.0 || ^18.0.0
-      react-dom: ^17.0.0 || ^18.0.0
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-    dependencies:
-      '@babel/runtime': 7.24.0
-      '@floating-ui/react-dom': 2.0.8(react-dom@18.2.0)(react@18.2.0)
-      '@mui/types': 7.2.13(@types/react@18.2.61)
-      '@mui/utils': 5.15.11(@types/react@18.2.61)(react@18.2.0)
-      '@popperjs/core': 2.11.8
-      '@types/react': 18.2.61
-      clsx: 2.1.0
-      prop-types: 15.8.1
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-    dev: false
-
-<<<<<<< HEAD
   /@mui/base@5.0.0-beta.37(@types/react@18.2.61)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-/o3anbb+DeCng8jNsd3704XtmmLDZju1Fo8R2o7ugrVtPQ/QpcqddwKNzKPZwa0J5T8YNW3ZVuHyQgbTnQLisQ==}
     engines: {node: '>=12.0.0'}
@@ -2853,12 +2790,6 @@ packages:
     resolution: {integrity: sha512-JVrJ9Jo4gyU707ujnRzmE8ABBWpXd6FwL9GYULmwZRtfPg89ggXs/S3MStQkpJ1JRWfdLL6S5syXmgQGq5EDAw==}
     dev: false
 
-=======
-  /@mui/core-downloads-tracker@5.15.11:
-    resolution: {integrity: sha512-JVrJ9Jo4gyU707ujnRzmE8ABBWpXd6FwL9GYULmwZRtfPg89ggXs/S3MStQkpJ1JRWfdLL6S5syXmgQGq5EDAw==}
-    dev: false
-
->>>>>>> dbd0331426 (core(build): Upgrade to ol 9 and latest mui)
   /@mui/icons-material@5.15.11(@mui/material@5.15.11)(@types/react@18.2.61)(react@18.2.0):
     resolution: {integrity: sha512-R5ZoQqnKpd+5Ew7mBygTFLxgYsQHPhgR3TDXSgIHYIjGzYuyPLmGLSdcPUoMdi6kxiYqHlpPj4NJxlbaFD0UHA==}
     engines: {node: '>=12.0.0'}
@@ -3081,11 +3012,7 @@ packages:
       '@babel/runtime': 7.24.0
       '@emotion/react': 11.11.4(@types/react@18.2.61)(react@18.2.0)
       '@emotion/styled': 11.11.0(@emotion/react@11.11.4)(@types/react@18.2.61)(react@18.2.0)
-<<<<<<< HEAD
-      '@mui/base': 5.0.0-beta.24(@types/react@18.2.61)(react-dom@18.2.0)(react@18.2.0)
-=======
       '@mui/base': 5.0.0-beta.37(@types/react@18.2.61)(react-dom@18.2.0)(react@18.2.0)
->>>>>>> dbd0331426 (core(build): Upgrade to ol 9 and latest mui)
       '@mui/material': 5.15.11(@emotion/react@11.11.4)(@emotion/styled@11.11.0)(@types/react@18.2.61)(react-dom@18.2.0)(react@18.2.0)
       '@mui/system': 5.15.11(@emotion/react@11.11.4)(@emotion/styled@11.11.0)(@types/react@18.2.61)(react@18.2.0)
       '@mui/utils': 5.15.11(@types/react@18.2.61)(react@18.2.0)
@@ -3112,11 +3039,7 @@ packages:
       eslint-scope: 5.1.1
     dev: true
 
-<<<<<<< HEAD
-  /@nieuwlandgeo/sldreader@0.3.1(ol@8.2.0):
-=======
   /@nieuwlandgeo/sldreader@0.3.1(ol@9.0.0):
->>>>>>> dbd0331426 (core(build): Upgrade to ol 9 and latest mui)
     resolution: {integrity: sha512-gP1dw7ftVT34L6nv8dDtERNIJYENwe2I37Vwdm3NQH+KKHDk7vwrTANxvgKgbNybMXHF29jvI97Z/bkZYBqdxQ==}
     peerDependencies:
       ol: '>= 5.3.0'
@@ -3169,68 +3092,36 @@ packages:
       '@sinonjs/commons': 1.8.6
     dev: true
 
-<<<<<<< HEAD
-  /@tanstack/match-sorter-utils@8.11.3:
-    resolution: {integrity: sha512-2XVYTN6fLFyeIPywDL/HGKIQce3V6oUch1FHweGwxruPKEXip6Z9qg+zWZwNE26WG6CktqJh6NqTq90a42jeEw==}
-=======
   /@tanstack/match-sorter-utils@8.11.8:
     resolution: {integrity: sha512-3VPh0SYMGCa5dWQEqNab87UpCMk+ANWHDP4ALs5PeEW9EpfTAbrezzaOk/OiM52IESViefkoAOYuxdoa04p6aA==}
->>>>>>> dbd0331426 (core(build): Upgrade to ol 9 and latest mui)
     engines: {node: '>=12'}
     dependencies:
       remove-accents: 0.4.2
     dev: false
 
-<<<<<<< HEAD
-  /@tanstack/react-table@8.11.3(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-Gwwm7po1MaObBguw69L+UiACkaj+eOtThQEArj/3fmUwMPiWaJcXvNG2X5Te5z2hg0HMx8h0T0Q7p5YmQlTUfw==}
-=======
   /@tanstack/react-table@8.13.2(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-b6mR3mYkjRtJ443QZh9sc7CvGTce81J35F/XMr0OoWbx0KIM7TTTdyNP2XKObvkLpYnLpCrYDwI3CZnLezWvpg==}
->>>>>>> dbd0331426 (core(build): Upgrade to ol 9 and latest mui)
     engines: {node: '>=12'}
     peerDependencies:
       react: '>=16'
       react-dom: '>=16'
     dependencies:
-<<<<<<< HEAD
-      '@tanstack/table-core': 8.11.3
-=======
       '@tanstack/table-core': 8.13.2
->>>>>>> dbd0331426 (core(build): Upgrade to ol 9 and latest mui)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-<<<<<<< HEAD
-  /@tanstack/react-virtual@3.0.1(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-IFOFuRUTaiM/yibty9qQ9BfycQnYXIDHGP2+cU+0LrFFGNhVxCXSQnaY6wkX8uJVteFEBjUondX0Hmpp7TNcag==}
-=======
   /@tanstack/react-virtual@3.1.3(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-YCzcbF/Ws/uZ0q3Z6fagH+JVhx4JLvbSflgldMgLsuvB8aXjZLLb3HvrEVxY480F9wFlBiXlvQxOyXb5ENPrNA==}
->>>>>>> dbd0331426 (core(build): Upgrade to ol 9 and latest mui)
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
-<<<<<<< HEAD
-      '@tanstack/virtual-core': 3.0.0
-=======
       '@tanstack/virtual-core': 3.1.3
->>>>>>> dbd0331426 (core(build): Upgrade to ol 9 and latest mui)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-<<<<<<< HEAD
-  /@tanstack/table-core@8.11.3:
-    resolution: {integrity: sha512-nkcFIL696wTf1QMvhGR7dEg60OIRwEZm1OqFTYYDTRc4JOWspgrsJO3IennsOJ7ptumHWLDjV8e5BjPkZcSZAQ==}
-    engines: {node: '>=12'}
-    dev: false
-
-  /@tanstack/virtual-core@3.0.0:
-    resolution: {integrity: sha512-SYXOBTjJb05rXa2vl55TTwO40A6wKu0R5i1qQwhJYNDIqaIGF7D0HsLw+pJAyi2OvntlEIVusx3xtbbgSUi6zg==}
-=======
   /@tanstack/table-core@8.13.2:
     resolution: {integrity: sha512-/2saD1lWBUV6/uNAwrsg2tw58uvMJ07bO2F1IWMxjFRkJiXKQRuc3Oq2aufeobD3873+4oIM/DRySIw7+QsPPw==}
     engines: {node: '>=12'}
@@ -3238,7 +3129,6 @@ packages:
 
   /@tanstack/virtual-core@3.1.3:
     resolution: {integrity: sha512-Y5B4EYyv1j9V8LzeAoOVeTg0LI7Fo5InYKgAjkY1Pu9GjtUwX/EKxNcU7ng3sKr99WEf+bPTcktAeybyMOYo+g==}
->>>>>>> dbd0331426 (core(build): Upgrade to ol 9 and latest mui)
     dev: false
 
   /@tootallnate/once@1.1.2:
@@ -3596,13 +3486,8 @@ packages:
     resolution: {integrity: sha512-bTHG8fcxEqv1M9+TD14P8ok8hjxoOCkfKc8XXLaaD05kI7ohpeI956jtDOD3XHKBQrlyPughUtzm1jtVhHpA5Q==}
     dev: true
 
-<<<<<<< HEAD
   /@types/uglify-js@3.17.5:
     resolution: {integrity: sha512-TU+fZFBTBcXj/GpDpDaBmgWk/gn96kMZ+uocaFUlV2f8a6WdMzzI44QBCmGcCiYR0Y6ZlNRiyUyKKt5nl/lbzQ==}
-=======
-  /@types/uglify-js@3.17.4:
-    resolution: {integrity: sha512-Hm/T0kV3ywpJyMGNbsItdivRhYNCQQf1IIsYsXnoVPES4t+FMLyDe0/K+Ea7ahWtMtSNb22ZdY7MIyoD9rqARg==}
->>>>>>> dbd0331426 (core(build): Upgrade to ol 9 and latest mui)
     dependencies:
       source-map: 0.6.1
     dev: true
@@ -3620,11 +3505,7 @@ packages:
     dependencies:
       '@types/node': 20.11.24
       '@types/tapable': 1.0.12
-<<<<<<< HEAD
       '@types/uglify-js': 3.17.5
-=======
-      '@types/uglify-js': 3.17.4
->>>>>>> dbd0331426 (core(build): Upgrade to ol 9 and latest mui)
       '@types/webpack-sources': 3.2.3
       anymatch: 3.1.3
       source-map: 0.6.1
@@ -4485,11 +4366,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001591
-<<<<<<< HEAD
       electron-to-chromium: 1.4.689
-=======
-      electron-to-chromium: 1.4.688
->>>>>>> dbd0331426 (core(build): Upgrade to ol 9 and latest mui)
       node-releases: 2.0.14
       update-browserslist-db: 1.0.13(browserslist@4.23.0)
     dev: true
@@ -5187,13 +5064,8 @@ packages:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
     dev: true
 
-<<<<<<< HEAD
   /electron-to-chromium@1.4.689:
     resolution: {integrity: sha512-GatzRKnGPS1go29ep25reM94xxd1Wj8ritU0yRhCJ/tr1Bg8gKnm6R9O/yPOhGQBoLMZ9ezfrpghNaTw97C/PQ==}
-=======
-  /electron-to-chromium@1.4.688:
-    resolution: {integrity: sha512-3/tHg2ChPF00eukURIB8cSVt3/9oeS1oTUIEt3ivngBInUaEcBhG2VdyEDejhwQdR6SLqaiEAEc0dHS0V52pOw==}
->>>>>>> dbd0331426 (core(build): Upgrade to ol 9 and latest mui)
     dev: true
 
   /email-addresses@3.1.0:
@@ -7792,13 +7664,8 @@ packages:
     hasBin: true
     dev: true
 
-<<<<<<< HEAD
-  /material-react-table@2.4.1(@emotion/react@11.11.4)(@emotion/styled@11.11.0)(@mui/icons-material@5.15.11)(@mui/material@5.15.11)(@mui/x-date-pickers@6.19.5)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-ftqw8kCSg4SFJArOu86dwTFUtpSBQ3pI3FD8iu6WZNQfMDkyfJkLHp5m9qYdukoFEqx356uWOKd2XrSxqvn+Wg==}
-=======
   /material-react-table@2.12.1(@emotion/react@11.11.4)(@emotion/styled@11.11.0)(@mui/icons-material@5.15.11)(@mui/material@5.15.11)(@mui/x-date-pickers@6.19.5)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-nqILE26I/6/UfiILEc7mnVhIoVdG78qvkav85dcbn5BbNXkAJeA57Slut50eYytd7aQHCbaq9MoLvsVeO1yaIw==}
->>>>>>> dbd0331426 (core(build): Upgrade to ol 9 and latest mui)
     engines: {node: '>=16'}
     peerDependencies:
       '@emotion/react': '>=11.11'
@@ -7806,28 +7673,17 @@ packages:
       '@mui/icons-material': '>=5.11'
       '@mui/material': '>=5.13'
       '@mui/x-date-pickers': '>=6.15.0'
-<<<<<<< HEAD
-      react: '>=18.0'
-      react-dom: '>=18.0'
-=======
       react: '>=17.0'
       react-dom: '>=17.0'
->>>>>>> dbd0331426 (core(build): Upgrade to ol 9 and latest mui)
     dependencies:
       '@emotion/react': 11.11.4(@types/react@18.2.61)(react@18.2.0)
       '@emotion/styled': 11.11.0(@emotion/react@11.11.4)(@types/react@18.2.61)(react@18.2.0)
       '@mui/icons-material': 5.15.11(@mui/material@5.15.11)(@types/react@18.2.61)(react@18.2.0)
       '@mui/material': 5.15.11(@emotion/react@11.11.4)(@emotion/styled@11.11.0)(@types/react@18.2.61)(react-dom@18.2.0)(react@18.2.0)
       '@mui/x-date-pickers': 6.19.5(@emotion/react@11.11.4)(@emotion/styled@11.11.0)(@mui/material@5.15.11)(@mui/system@5.15.11)(@types/react@18.2.61)(dayjs@1.11.10)(react-dom@18.2.0)(react@18.2.0)
-<<<<<<< HEAD
-      '@tanstack/match-sorter-utils': 8.11.3
-      '@tanstack/react-table': 8.11.3(react-dom@18.2.0)(react@18.2.0)
-      '@tanstack/react-virtual': 3.0.1(react-dom@18.2.0)(react@18.2.0)
-=======
       '@tanstack/match-sorter-utils': 8.11.8
       '@tanstack/react-table': 8.13.2(react-dom@18.2.0)(react@18.2.0)
       '@tanstack/react-virtual': 3.1.3(react-dom@18.2.0)(react@18.2.0)
->>>>>>> dbd0331426 (core(build): Upgrade to ol 9 and latest mui)
       highlight-words: 1.2.2
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -8096,11 +7952,7 @@ packages:
     resolution: {integrity: sha512-PX1wu0AmAdPqOL1mWhqmlOd8kOIZQwGZw6rh7uby9fTc5lhaOWFLX3I6R1hrF9k3zUY40e6igsLGkDXK92LJNg==}
     dev: true
 
-<<<<<<< HEAD
-  /ol-mapbox-style@12.2.1(ol@8.2.0):
-=======
   /ol-mapbox-style@12.2.1(ol@9.0.0):
->>>>>>> dbd0331426 (core(build): Upgrade to ol 9 and latest mui)
     resolution: {integrity: sha512-soh8x+8CwlA+e3fd8grotA4XXnm0DSWnpzu5Ef3aEQwpM1o2OfoGPSk/hpjhXL5kFUm79pEyiONTw+kdth2FEQ==}
     peerDependencies:
       ol: '>=9.0.0 || >=9.0.0-dev.0 <9.0.0 || =9.0.0-dev || >=8.0.0 <=8.2.0 || >=7.0.0 <=7.5.2'
@@ -8110,13 +7962,8 @@ packages:
       ol: 9.0.0
     dev: false
 
-<<<<<<< HEAD
-  /ol@8.2.0:
-    resolution: {integrity: sha512-/m1ddd7Jsp4Kbg+l7+ozR5aKHAZNQOBAoNZ5pM9Jvh4Etkf0WGkXr9qXd7PnhmwiC1Hnc2Toz9XjCzBBvexfXw==}
-=======
   /ol@9.0.0:
     resolution: {integrity: sha512-+nYHZYbHrRUTDJ8ryxXPdDoAiaT6Zea02cocmGqsJXs4Oac1fYC9EbTIU2Y7803QcmG3u2MR88RxbksBvK+ZfQ==}
->>>>>>> dbd0331426 (core(build): Upgrade to ol 9 and latest mui)
     dependencies:
       color-rgba: 3.0.0
       color-space: 2.0.1
@@ -9579,7 +9426,7 @@ packages:
       uglify-js:
         optional: true
     dependencies:
-      '@jridgewell/trace-mapping': 0.3.23
+      '@jridgewell/trace-mapping': 0.3.24
       jest-worker: 27.5.1
       schema-utils: 3.3.0
       serialize-javascript: 6.0.2
@@ -10422,9 +10269,9 @@ packages:
       react: 18.2.0
       use-sync-external-store: 1.2.0(react@18.2.0)
 
-  github.com/Canadian-Geospatial-Platform/geochart/e549f6b624d27c998b7b43969b2e57bca4ab6c94(@types/react@18.2.61):
-    resolution: {tarball: https://codeload.github.com/Canadian-Geospatial-Platform/geochart/tar.gz/e549f6b624d27c998b7b43969b2e57bca4ab6c94}
-    id: github.com/Canadian-Geospatial-Platform/geochart/e549f6b624d27c998b7b43969b2e57bca4ab6c94
+  github.com/Canadian-Geospatial-Platform/geochart/b31d278747633beeafc274c4740d22665928cc45(@types/react@18.2.61):
+    resolution: {tarball: https://codeload.github.com/Canadian-Geospatial-Platform/geochart/tar.gz/b31d278747633beeafc274c4740d22665928cc45}
+    id: github.com/Canadian-Geospatial-Platform/geochart/b31d278747633beeafc274c4740d22665928cc45
     name: geoview-geochart
     version: 0.1.0
     dependencies:
