@@ -1,5 +1,6 @@
 import { Ref, forwardRef } from 'react';
 import { ButtonGroup as MaterialButtonGroup, ButtonGroupProps } from '@mui/material';
+import { animated, useSpring, easings } from '@react-spring/web';
 
 /**
  * Create a customized Material UI button group
@@ -11,10 +12,18 @@ import { ButtonGroup as MaterialButtonGroup, ButtonGroupProps } from '@mui/mater
 function ButtonGroupElement(props: ButtonGroupProps, ref: Ref<HTMLDivElement>): JSX.Element {
   const { children, ...otherProps } = props;
 
+  const fadeIn = useSpring({
+    config: { duration: 500, easing: easings.easeOutExpo },
+    from: { opacity: 0 },
+    to: { opacity: 1 },
+  });
+  const AnimatedButtonGroup = animated(MaterialButtonGroup);
+
+
   return (
-    <MaterialButtonGroup {...otherProps} ref={ref}>
+    <AnimatedButtonGroup {...otherProps} ref={ref}>
       {children && children}
-    </MaterialButtonGroup>
+    </AnimatedButtonGroup>
   );
 }
 

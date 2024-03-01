@@ -10,7 +10,7 @@ export function Paper(props: PaperProps): JSX.Element {
   const fadeIn = useSpring({
     config: { duration: 500, easing: easings.easeInExpo },
     from: { opacity: 0 },
-    to: { opacity: 1 }
+    to: { opacity: 1 },
   });
   const AnimatedPaper = animated(MaterialPaper);
 

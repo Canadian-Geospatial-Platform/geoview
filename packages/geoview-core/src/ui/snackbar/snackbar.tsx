@@ -9,6 +9,7 @@ import { Cast } from '@/core/types/global-types';
 import { PayloadBaseClass, payloadIsASnackbarMessage } from '@/api/events/payloads';
 import { SnackbarType } from '@/api/events/payloads/snackbar-message-payload';
 import { logger } from '@/core/utils/logger';
+import { animated, useSpring, easings } from '@react-spring/web';
 
 /**
  * Snackbar properties interface
@@ -99,8 +100,16 @@ export function Snackbar(props: SnackBarProps): JSX.Element {
     };
   }, [mapId]);
 
+  const fadeIn = useSpring({
+    config: { duration: 500, easing: easings.easeOutExpo },
+    from: { opacity: 0 },
+    to: { opacity: 1 },
+  });
+  const AnimatedSnackbar = animated(MaterialSnackbar);
+
   return (
-    <MaterialSnackbar
+    <AnimatedSnackbar
+      style={fadeIn}
       sx={{
         position: 'absolute',
         bottom: '40px!important',
@@ -115,6 +124,6 @@ export function Snackbar(props: SnackBarProps): JSX.Element {
         {message}
         {button !== undefined && button}
       </Alert>
-    </MaterialSnackbar>
+    </AnimatedSnackbar>
   );
 }

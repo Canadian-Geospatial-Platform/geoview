@@ -19,6 +19,7 @@ import { CloseIcon, IconButton } from '..';
 import { PayloadBaseClass, payloadIsAModal } from '@/api/events/payloads';
 import { getSxClasses } from './modal-style';
 import { logger } from '@/core/utils/logger';
+import { animated, useSpring, easings } from '@react-spring/web';
 
 /**
  * Customized Material UI Dialog Properties
@@ -107,6 +108,13 @@ export function Modal(props: TypeDialogProps): JSX.Element {
     });
   }, []);
 
+  const fadeIn = useSpring({
+    config: { duration: 500, easing: easings.easeOutExpo },
+    from: { opacity: 0 },
+    to: { opacity: 1 },
+  });
+  const AnimatedDialog = animated(Dialog);
+
   /**
    * to return the updated / newly-created modal
    *
@@ -122,7 +130,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
       },
       // eslint-disable-next-line react/no-unused-prop-types
     })(({ classes }: { classes: ClassNameMap }) => (
-      <Dialog
+      <AnimatedDialog
         open={openEvent}
         onClose={modal.close}
         container={document.querySelector(`#${modal.mapId}`)}
@@ -189,7 +197,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
             }) || null}
           </DialogActions>
         ) : null}
-      </Dialog>
+      </AnimatedDialog>
     ));
 
     return <CustomDialog />;
@@ -254,6 +262,9 @@ export function Modal(props: TypeDialogProps): JSX.Element {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [updateModal, createdModal]);
+
+
+  
 
   return (
     createdModal || (

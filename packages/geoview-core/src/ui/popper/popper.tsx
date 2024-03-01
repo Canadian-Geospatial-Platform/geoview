@@ -33,7 +33,7 @@ export const Popper: React.FC<EnhancedPopperProps> = ({ open, onClose, ...restPr
   }, [open, onClose]);
 
   const springProps = useSpring({
-    config: { duration: 500, easing: easings.easeInExpo },
+    config: { duration: 250, easing: easings.easeInExpo },
     opacity: open ? 1 : 0,
   });
   const AnimatedPopper = animated(MaterialPopper);
