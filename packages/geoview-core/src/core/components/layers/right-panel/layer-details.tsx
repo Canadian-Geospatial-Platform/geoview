@@ -63,7 +63,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('LAYER DETAILS', selectedLayer, layerDetails);
-
+    // TODO: refactor - remove timer!
     // Reason for timer:- when layer detail component is loaded, behind the scene we send query to fetch the features.
     // After component is rendered and fetching features is done, eventhough store is update, it never re rendered this component
     // thats why we need to update the state so that layers data is fetched again from store.

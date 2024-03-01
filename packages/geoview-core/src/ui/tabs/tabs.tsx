@@ -213,12 +213,12 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
                 formControlProps={{ size: 'small' }}
                 id="footerBarDropdown"
                 fullWidth
+                variant="standard"
                 inputLabel={{ id: 'footerBarDropdownLabel' }}
                 menuItems={mobileTabsDropdownValues}
                 value={value}
                 onChange={(e: SelectChangeEvent<unknown>) => updateTabPanel(e.target.value as number)}
                 MenuProps={{ container: mapElem }}
-                variant="outlined"
               />
             </Box>
           )}

@@ -2,6 +2,7 @@
 // ? we escape all private attribute in this file
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
+
 import {
   ConfigBaseClass,
   TypeBaseSourceVectorInitialConfig,
@@ -72,22 +73,28 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
       if (loadEndListenerType) {
         let loadErrorListener: () => void;
 
+        // TODO: Can we manage this in callback or promises?
+        // migration to OpenLayers 9.0.0 seems to restrict access to key elements
         // Definition of the load end listener functions
         const loadEndListener = () => {
           this.loadedFunction();
           this.geoviewLayerInstance!.setLayerPhase('loaded', this.layerPath);
           this.layerStatus = 'loaded';
-          this._olLayer!.get('source').un(`${loadEndListenerType}loaderror`, loadErrorListener);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (this._olLayer! as any).get('source').un(`${loadEndListenerType}loaderror`, loadErrorListener);
         };
 
         loadErrorListener = () => {
           this.layerStatus = 'error';
-          this._olLayer!.get('source').un(`${loadEndListenerType}loadend`, loadEndListener);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (this._olLayer! as any).get('source').un(`${loadEndListenerType}loadend`, loadEndListener);
         };
 
         // Activation of the load end listeners
-        this._olLayer!.get('source').once(`${loadEndListenerType}loaderror`, loadErrorListener);
-        this._olLayer!.get('source').once(`${loadEndListenerType}loadend`, loadEndListener);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (this._olLayer! as any).get('source').once(`${loadEndListenerType}loaderror`, loadErrorListener);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (this._olLayer! as any).get('source').once(`${loadEndListenerType}loadend`, loadEndListener);
       } else logger.logError(`Provision of a load end listener type is mandatory for layer path "${this.layerPath}".`);
     }
   }
