@@ -64,7 +64,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     // Log
     logger.logTraceUseEffect('LAYER DETAILS', selectedLayer, layerDetails);
 
-    // set the timer to fetch the features of layer when layer is selected.
+    // Reason for timer:- when layer detail component is loaded, behind the scene we send query to fetch the features.
+    // After component is rendered and fetching features is done, eventhough store is update, it never re rendered this component
+    // thats why we need to update the state so that layers data is fetched again from store.
     let timer: NodeJS.Timeout;
     if (!selectedLayer) {
       setIsDatatableVisible(true);
