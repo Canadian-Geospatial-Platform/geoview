@@ -40,12 +40,3 @@ export const useRotate = (config?: SpringConfig): SpringValues => {
     to: { transform: 'rotate(360deg)' },
   });
 };
-
-// Color Change animation
-export const useColorChange = (config?: SpringConfig): SpringValues => {
-  return useSpring({
-    config: { ...commonConfig, ...config },
-    from: { backgroundColor: 'red' },
-    to: { backgroundColor: 'blue' },
-  });
-};

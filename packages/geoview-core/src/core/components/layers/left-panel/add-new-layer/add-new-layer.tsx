@@ -1044,8 +1044,6 @@ export function AddNewLayer(): JSX.Element {
   const uncheckedIcon = <CheckBoxOutlineBlankIcon fontSize="small" />;
   const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
-  console.log('layersList ', layerList);
-
   return (
     <Paper sx={{ padding: '20px', gap: '8' }}>
       <Stepper
