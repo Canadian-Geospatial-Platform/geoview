@@ -218,8 +218,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
-   *  ! This routine must imperatively ends with layerConfig.layerStatus = 'processed' or 'error' if an error happens.
-   *
    * @param {TileLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
@@ -243,12 +241,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
           `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
         );
     }
-
-    // When we get here, we know that the metadata (if the service provide some) are processed.
-    // We need to signal to the layer sets that the 'processed' phase is done. Be aware that the
-    // layerStatus setter is doing a lot of things behind the scene.
-    layerConfig.layerStatus = 'processed';
-
     return Promise.resolve(layerConfig);
   }
 

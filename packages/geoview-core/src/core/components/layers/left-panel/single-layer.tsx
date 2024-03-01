@@ -31,6 +31,11 @@ import { DeleteUndoButton } from './delete-undo-button';
 import { LayersList } from './layers-list';
 import { LayerIcon } from '../../common/layer-icon';
 import { logger } from '@/core/utils/logger';
+import {
+  useDetailsStoreActions,
+  useDetailsStoreAllFeaturesDataArray,
+} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { LAYER_STATUS } from '@/core/utils/constant';
 
 interface SingleLayerProps {
   layer: TypeLegendLayer;
@@ -52,6 +57,9 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   const selectedLayerPath = useLayerSelectedLayerPath();
   const displayState = useLayerDisplayState();
   const mapFiltered = useDataTableStoreMapFilteredRecord();
+  const layerData = useDetailsStoreAllFeaturesDataArray();
+
+  const { triggerGetAllFeatureInfo } = useDetailsStoreActions();
 
   // if any of the chiild layers is selected return true
   const isLayerChildSelected = (startingLayer: TypeLegendLayer): boolean => {
@@ -138,6 +146,13 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
         setGroupOpen(true);
       }
       setIsLayersListPanelVisible(true);
+      // trigger the fetching of the features when not available OR when layer status is in error
+      if (
+        !layerData.filter((layers) => layers.layerPath === layer.layerPath && !!layers?.features?.length).length ||
+        layer.layerStatus === LAYER_STATUS.ERROR
+      ) {
+        triggerGetAllFeatureInfo(layer.layerPath, 'all');
+      }
     }
   };
 

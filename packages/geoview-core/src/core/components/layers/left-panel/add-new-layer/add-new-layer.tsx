@@ -1138,6 +1138,7 @@ export function AddNewLayer(): JSX.Element {
                     inputLabel={{
                       id: 'service-type-label',
                     }}
+                    variant="standard"
                     menuItems={layerOptions.map(([value, label]) => ({
                       key: value,
                       item: {
