@@ -8,6 +8,7 @@ import withStyles from '@mui/styles/withStyles';
 import { useTheme } from '@mui/material/styles';
 import { Box, Dialog, DialogActions, DialogContent, DialogProps, DialogTitle } from '@mui/material';
 
+import { animated } from '@react-spring/web';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { HtmlToReact } from '@/core/containers/html-to-react';
 
@@ -19,7 +20,7 @@ import { CloseIcon, IconButton } from '..';
 import { PayloadBaseClass, payloadIsAModal } from '@/api/events/payloads';
 import { getSxClasses } from './modal-style';
 import { logger } from '@/core/utils/logger';
-import { animated, useSpring, easings } from '@react-spring/web';
+import { useFadeIn } from '@/core/utils/useSpringAnimations';
 
 /**
  * Customized Material UI Dialog Properties
@@ -108,11 +109,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
     });
   }, []);
 
-  const fadeIn = useSpring({
-    config: { duration: 500, easing: easings.easeOutExpo },
-    from: { opacity: 0 },
-    to: { opacity: 1 },
-  });
+  const fadeInAnimation = useFadeIn();
   const AnimatedDialog = animated(Dialog);
 
   /**
@@ -134,6 +131,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
         open={openEvent}
         onClose={modal.close}
         container={document.querySelector(`#${modal.mapId}`)}
+        style={fadeInAnimation}
         sx={sxClasses.dialog}
         className={`${className && className}`}
         classes={{
@@ -262,9 +260,6 @@ export function Modal(props: TypeDialogProps): JSX.Element {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [updateModal, createdModal]);
-
-
-  
 
   return (
     createdModal || (
