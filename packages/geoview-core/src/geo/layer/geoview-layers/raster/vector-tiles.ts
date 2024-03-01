@@ -11,6 +11,7 @@ import { Extent } from 'ol/extent';
 
 import olms, { applyStyle } from 'ol-mapbox-style';
 
+import Feature from 'ol/Feature';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
@@ -156,7 +157,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     super.processOneLayerEntry(layerConfig);
     const { layerPath } = layerConfig;
     this.setLayerPhase('processOneLayerEntry', layerPath);
-    const sourceOptions: SourceOptions = {
+    const sourceOptions: SourceOptions<Feature> = {
       url: getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId),
     };
 

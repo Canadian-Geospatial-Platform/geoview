@@ -17,13 +17,14 @@ import { getSxClasses } from './select-style';
 /**
  * Custom MUI Select properties
  */
-interface TypeSelectProps extends SelectProps {
+type TypeSelectProps = SelectProps & {
+  labelId?: string;
   mapId?: string;
   fullWidth?: boolean;
   menuItems: TypeMenuItemProps[];
   inputLabel: InputLabelProps;
   formControlProps?: FormControlProps;
-}
+};
 
 /**
  * Menu Item properties

@@ -289,7 +289,7 @@ export class CSV extends AbstractGeoViewVector {
    */
   protected createVectorSource(
     layerConfig: AbstractBaseLayerEntryConfig,
-    sourceOptions: SourceOptions = {},
+    sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
     readOptions.dataProjection = (layerConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;

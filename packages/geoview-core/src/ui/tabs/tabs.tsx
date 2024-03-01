@@ -1,7 +1,7 @@
 import { SyntheticEvent, ReactNode, useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, TabsProps, TabProps, BoxProps, Box } from '@mui/material';
+import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, TabsProps, TabProps, BoxProps, Box, SelectChangeEvent } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { HtmlToReact } from '@/core/containers/html-to-react';
 import { logger } from '@/core/utils/logger';
@@ -213,10 +213,11 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
                 formControlProps={{ size: 'small' }}
                 id="footerBarDropdown"
                 fullWidth
+                variant="standard"
                 inputLabel={{ id: 'footerBarDropdownLabel' }}
                 menuItems={mobileTabsDropdownValues}
                 value={value}
-                onChange={(e) => updateTabPanel(e.target.value as number)}
+                onChange={(e: SelectChangeEvent<unknown>) => updateTabPanel(e.target.value as number)}
                 MenuProps={{ container: mapElem }}
               />
             </Box>

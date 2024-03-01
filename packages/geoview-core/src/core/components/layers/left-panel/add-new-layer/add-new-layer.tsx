@@ -1116,6 +1116,7 @@ export function AddNewLayer(): JSX.Element {
                     value={layerType}
                     onChange={handleSelectType}
                     label={t('layers.service')}
+                    variant="standard"
                     inputLabel={{
                       id: 'service-type-label',
                     }}
