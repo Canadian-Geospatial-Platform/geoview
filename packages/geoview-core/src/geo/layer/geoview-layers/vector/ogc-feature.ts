@@ -235,11 +235,6 @@ export class OgcFeature extends AbstractGeoViewVector {
           this.processFeatureInfoConfig(queryResult.data.properties, layerConfig);
         }
       }
-
-      // When we get here, we know that the metadata (if the service provide some) are processed.
-      // We need to signal to the layer sets that the 'processed' phase is done. Be aware that the
-      // layerStatus setter is doing a lot of things behind the scene.
-      layerConfig.layerStatus = 'processed';
     } catch (error) {
       logger.logError(`Error processing layer metadata for layer path "${layerConfig.layerPath}`, error);
       layerConfig.layerStatus = 'error';

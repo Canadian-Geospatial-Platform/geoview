@@ -265,6 +265,8 @@ function convertLineStyle(lineStyle: EsriLineStyle): TypeLineStyle {
     case 'esriSLSShortDashDotDot':
       return 'shortDash-dot-dot';
     case 'esriSLSSolid':
+    case null:
+    case undefined:
       return 'solid';
     default: {
       logger.logInfo(`Handling of ESRI renderer line style '${lineStyle}' is not coded, 'solid' will be used instead.`);
@@ -341,7 +343,8 @@ function convertSymbolStyle(symbolStyle: EsriSymbolStyle): TypeSymbol {
  * @returns {string} The Geoview color corresponding to the ESRI color.
  */
 function convertEsriColor(color: TypeEsriColor): string {
-  return asString([color[0], color[1], color[2], color[3] / 255]);
+  if (color) return asString([color[0], color[1], color[2], color[3] / 255]);
+  return 'rgba(0,0,0,0)';
 }
 
 /** *****************************************************************************************************************************
@@ -362,11 +365,11 @@ function convertSymbol(symbol: EsriSymbol): TypeKindOfVectorSettings | undefined
       const simpleSymbolVectorConfig: TypeSimpleSymbolVectorConfig = {
         type: 'simpleSymbol',
         rotation: symbol.angle !== undefined ? symbol.angle : 0,
-        color: convertEsriColor(symbol.color),
+        color: convertEsriColor(symbol?.color),
         stroke: {
-          color: convertEsriColor(symbol.outline.color),
-          lineStyle: convertLineStyle(symbol.outline.style ? symbol.outline.style : 'esriSLSSolid'),
-          width: symbol.outline.width,
+          color: convertEsriColor(symbol?.outline?.color),
+          lineStyle: convertLineStyle(symbol?.outline?.style),
+          width: symbol?.outline?.width ?? 0,
         },
         size: symbol.size * 0.667,
         symbol: convertSymbolStyle(symbol.style),
@@ -378,9 +381,9 @@ function convertSymbol(symbol: EsriSymbol): TypeKindOfVectorSettings | undefined
       const lineSymbolVectorConfig: TypeLineStringVectorConfig = {
         type: 'lineString',
         stroke: {
-          color: convertEsriColor(symbol.color),
-          lineStyle: convertLineStyle(symbol.style ? symbol.style : 'esriSLSSolid'),
-          width: symbol.width,
+          color: convertEsriColor(symbol?.color),
+          lineStyle: convertLineStyle(symbol?.style),
+          width: symbol?.width ?? 0,
         },
       };
       return lineSymbolVectorConfig;
@@ -388,11 +391,11 @@ function convertSymbol(symbol: EsriSymbol): TypeKindOfVectorSettings | undefined
     if (isEsriSimpleFillSymbol(symbol)) {
       const polygonVectorConfig: TypePolygonVectorConfig = {
         type: 'filledPolygon',
-        color: convertEsriColor(symbol.color),
+        color: convertEsriColor(symbol?.color),
         stroke: {
-          color: convertEsriColor(symbol.outline.color),
-          lineStyle: convertLineStyle(symbol.outline.style ? symbol.outline.style : 'esriSLSSolid'),
-          width: symbol.outline.width,
+          color: convertEsriColor(symbol?.outline?.color),
+          lineStyle: convertLineStyle(symbol?.outline?.style),
+          width: symbol?.outline?.width ?? 0,
         },
         fillStyle: convertFillStyle(symbol.style),
       };
