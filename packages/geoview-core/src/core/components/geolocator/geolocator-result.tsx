@@ -156,6 +156,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               inputLabel={{ id: 'geolocationProvinceFilter' }}
               menuItems={provinces}
               disabled={!geoLocationData.length}
+              variant="standard"
             />
           </Box>
           <Box sx={{ flexGrow: 2, paddingRight: '8px', maxWidth: 150 }}>
@@ -170,6 +171,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               inputLabel={{ id: 'geolocationCategoryFilter' }}
               menuItems={categories}
               disabled={!geoLocationData.length}
+              variant="standard"
             />
           </Box>
           <Box>

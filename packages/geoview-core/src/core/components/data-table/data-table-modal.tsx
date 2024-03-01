@@ -19,7 +19,7 @@ import { useLayerSelectedLayerPath } from '@/core/stores/store-interface-and-int
 import { FieldInfos } from './data-table';
 import { getSxClasses } from './data-table-style';
 import { logger } from '@/core/utils/logger';
-import { useDetailsStoreLayerDataArray } from '@/core/stores';
+import { useDetailsStoreAllFeaturesDataArray } from '@/core/stores';
 import { useFeatureFieldInfos } from './hooks';
 
 interface ColumnsType {
@@ -46,8 +46,7 @@ export default function DataTableModal(): JSX.Element {
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const selectedLayer = useLayerSelectedLayerPath();
 
-  // TODO:: update when correct data is available, mean time we will be using details store data.
-  const layersData = useDetailsStoreLayerDataArray();
+  const layersData = useDetailsStoreAllFeaturesDataArray();
 
   // Create columns for data table.
   const mappedLayerData = useFeatureFieldInfos(layersData);
@@ -107,7 +106,10 @@ export default function DataTableModal(): JSX.Element {
           if (isValidElement(row[key])) {
             return row[key];
           }
-          return row[key].value ?? '';
+          if (typeof row[key]?.value === 'string' || typeof row[key]?.value === 'number') {
+            return row[key]?.value ?? '';
+          }
+          return '';
         },
         header: value?.alias ?? '',
         Cell: ({ cell }) => getCellValue(cell.getValue() as string),
@@ -148,7 +150,7 @@ export default function DataTableModal(): JSX.Element {
   return (
     <Dialog open={activeModalId === 'layerDatatable'} onClose={closeModal} maxWidth="xl">
       <DialogTitle>{`${t('legend.tableDetails')} ${layer?.layerName ?? selectedLayer}`}</DialogTitle>
-      <DialogContent>
+      <DialogContent sx={{ overflow: 'hidden' }}>
         {isLoading && (
           <Box sx={{ minHeight: '300px', minWidth: '450px', position: 'relative' }}>
             <CircularProgress

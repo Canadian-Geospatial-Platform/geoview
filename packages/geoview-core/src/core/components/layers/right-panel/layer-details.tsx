@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import _ from 'lodash';
@@ -23,7 +23,13 @@ import {
   ListItem,
   List,
 } from '@/ui';
-import { useLayerHighlightedLayer, useLayerStoreActions, useUIStoreActions, useMapStoreActions } from '@/core/stores';
+import {
+  useLayerHighlightedLayer,
+  useLayerStoreActions,
+  useUIStoreActions,
+  useMapStoreActions,
+  useDetailsStoreAllFeaturesDataArray,
+} from '@/core/stores';
 import { generateId } from '@/core/utils/utilities';
 import { LayerIcon } from '../../common/layer-icon';
 import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-control';
@@ -44,11 +50,36 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
+  const [isDataTableVisible, setIsDatatableVisible] = useState(false);
+
   // get store actions
   const highlightedLayer = useLayerHighlightedLayer();
   const { setAllItemsVisibility, toggleItemVisibility, setHighlightLayer, zoomToLayerExtent, getLayerBounds } = useLayerStoreActions();
   const { openModal } = useUIStoreActions();
   const { getAlwaysVisibleFromOrderedLayerInfo } = useMapStoreActions();
+  const layersData = useDetailsStoreAllFeaturesDataArray();
+  const selectedLayer = layersData.find((_layer) => _layer.layerPath === layerDetails?.layerPath);
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('LAYER DETAILS', selectedLayer, layerDetails);
+
+    // Reason for timer:- when layer detail component is loaded, behind the scene we send query to fetch the features.
+    // After component is rendered and fetching features is done, eventhough store is update, it never re rendered this component
+    // thats why we need to update the state so that layers data is fetched again from store.
+    let timer: NodeJS.Timeout;
+    if (!selectedLayer) {
+      setIsDatatableVisible(true);
+    } else {
+      timer = setTimeout(() => {
+        setIsDatatableVisible(true);
+      }, 100);
+    }
+    return () => {
+      setIsDatatableVisible(false);
+      if (timer) clearTimeout(timer);
+    };
+  }, [layersData, layerDetails, selectedLayer]);
 
   const handleZoomTo = () => {
     zoomToLayerExtent(layerDetails.layerPath);
@@ -177,7 +208,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   function renderLayerButtons() {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px' }}>
-        {layerDetails.items.length > 0 && (
+        {isDataTableVisible && selectedLayer?.features?.length && (
           <IconButton id="table-details" tooltip="legend.tableDetails" className="style1" onClick={handleOpenTable}>
             <TableViewIcon />
           </IconButton>

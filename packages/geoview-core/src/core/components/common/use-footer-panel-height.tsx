@@ -7,6 +7,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { logger } from '@/core/utils/logger';
 import { useDataTableStoreActions } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { TABS } from '@/app';
 
 interface UseFooterPanelHeightType {
   footerPanelTab: 'layers' | 'details' | 'data-table' | 'legend' | 'default' | 'guide';
@@ -46,11 +47,14 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
       leftPanelRef.current.style.overflow = 'auto';
       leftPanelRef.current.style.paddingBottom = '24px';
 
-      if (activeFooterBarTabId === 'data-table') {
+      if (activeFooterBarTabId === TABS.DATA_TABLE) {
         setTableHeight(leftPanelHeight - 10);
+      } else if (activeFooterBarTabId === TABS.GEO_CHART && rightPanelRef.current) {
+        rightPanelRef.current.style.maxHeight = `${leftPanelHeight}px`;
+        rightPanelRef.current.style.overflowY = footerPanelResizeValue !== 100 ? 'auto' : 'visible';
+        rightPanelRef.current.style.paddingBottom = `24px`;
       } else {
         const rightPanel = (rightPanelRef.current?.firstElementChild ?? null) as HTMLElement | null;
-
         if (rightPanel) {
           rightPanel.style.maxHeight = `${leftPanelHeight}px`;
           rightPanel.style.paddingBottom = `24px`;
@@ -61,11 +65,13 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
     if (!isMapFullScreen && leftPanelRef.current) {
       leftPanelRef.current.style.maxHeight = `${defaultHeight}px`;
       leftPanelRef.current.style.overflow = 'auto';
-      if (activeFooterBarTabId === 'data-table') {
+      if (activeFooterBarTabId === TABS.DATA_TABLE) {
         setTableHeight(defaultHeight);
+      } else if (activeFooterBarTabId === TABS.GEO_CHART && rightPanelRef.current) {
+        rightPanelRef.current.style.maxHeight = `${defaultHeight}px`;
+        rightPanelRef.current.style.overflowY = 'auto';
       } else {
         const rightPanel = (rightPanelRef.current?.firstElementChild ?? null) as HTMLElement | null;
-
         if (rightPanel) {
           rightPanel.style.maxHeight = `${defaultHeight}px`;
         }
