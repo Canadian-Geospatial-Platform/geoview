@@ -105,6 +105,40 @@ export function Appbar(): JSX.Element {
     [setButtonPanelGroups]
   );
 
+  const handleButtonClicked = useCallback(
+    (groupName: string, buttonId: string) => {
+      const buttonPanel = buttonPanelGroups[groupName][buttonId];
+
+      if (!buttonPanel.panel?.status) {
+        // Open it
+        setButtonPanelGroups((prevState) => {
+          return {
+            ...prevState,
+            [groupName]: {
+              ...prevState[groupName],
+              [buttonId]: {
+                ...prevState[groupName][buttonId],
+                status: true,
+              },
+            },
+          };
+        });
+
+        // buttonPanel.panel?.open();
+
+        if (buttonPanel.panel && buttonPanel.groupName) {
+          // eslint-disable-next-line no-param-reassign
+          buttonPanel.panel.content = panels[buttonPanel.groupName].content;
+        }
+        setSelectedAppbarButtonId(buttonPanel?.button?.id ?? '');
+      } else {
+        buttonPanel.panel?.close();
+        setSelectedAppbarButtonId('');
+      }
+    },
+    [buttonPanelGroups, panels]
+  );
+
   const appBarPanelCloseListenerFunction = () => {
     // Log
     logger.logTraceCoreAPIEvent('APP-BAR - appBarPanelCloseListenerFunction');
@@ -249,18 +283,7 @@ export function Appbar(): JSX.Element {
                         tooltipPlacement="right"
                         className={`style3 ${selectedAppBarButtonId === buttonPanel.button.id ? 'active' : ''}`}
                         size="small"
-                        onClick={() => {
-                          if (!buttonPanel.panel?.status) {
-                            buttonPanel.panel?.open();
-                            if (buttonPanel.panel && buttonPanel.groupName) {
-                              buttonPanel.panel.content = panels[buttonPanel.groupName].content;
-                            }
-                            setSelectedAppbarButtonId(buttonPanel?.button?.id ?? '');
-                          } else {
-                            buttonPanel.panel?.close();
-                            setSelectedAppbarButtonId('');
-                          }
-                        }}
+                        onClick={() => handleButtonClicked(groupName, buttonPanel.button.id!)}
                       >
                         {buttonPanel.button.children}
                       </IconButton>

@@ -70,10 +70,6 @@ export class PanelApi {
 
     // close all other panels
     this.closeAll();
-
-    api.event.emit(
-      PanelPayload.withButtonIdAndType(EVENT_NAMES.PANEL.EVENT_PANEL_OPEN, `${this.mapId}/${this.buttonId}`, this.buttonId, this.type!)
-    );
   };
 
   /**

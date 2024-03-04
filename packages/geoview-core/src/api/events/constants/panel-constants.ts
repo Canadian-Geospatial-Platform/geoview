@@ -7,7 +7,6 @@ import { EventStringId } from '../event-types';
 
 /** Valid keys for the PANEL category */
 export type PanelEventKey =
-  | 'EVENT_PANEL_OPEN'
   | 'EVENT_PANEL_CLOSE'
   | 'EVENT_PANEL_CLOSE_ALL'
   | 'EVENT_PANEL_ADD_ACTION'
@@ -16,11 +15,6 @@ export type PanelEventKey =
 
 /** Record that associates PANEL's event keys to their event string id */
 export const PANEL: Record<PanelEventKey, EventStringId> = {
-  /**
-   * Event triggered when a request is made to open a panel
-   */
-  EVENT_PANEL_OPEN: 'panel/open',
-
   /**
    * Event triggered when a request is made to close a panel
    */

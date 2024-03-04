@@ -5,7 +5,6 @@ import { EventStringId, EVENT_NAMES } from '../event-types';
 
 /** Valid events that can create PanelPayload */
 const validEvents: EventStringId[] = [
-  EVENT_NAMES.PANEL.EVENT_PANEL_OPEN,
   EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE,
   EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE_ALL,
   EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION,
@@ -14,11 +13,7 @@ const validEvents: EventStringId[] = [
 ];
 
 /** Valid events that can create PanelWithAButtonIdAndTypePayload  */
-const validEvents4ButtonIdAndType: EventStringId[] = [
-  EVENT_NAMES.PANEL.EVENT_PANEL_OPEN,
-  EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE,
-  EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE_ALL,
-];
+const validEvents4ButtonIdAndType: EventStringId[] = [EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE_ALL];
 
 /** Valid events that can create PanelAndActionPayload  */
 const validEvents4Action: EventStringId[] = [EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION, EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION];
