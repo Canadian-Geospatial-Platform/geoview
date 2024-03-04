@@ -35,7 +35,7 @@ export type TypePanelProps = {
   content?: ReactNode;
   /** Custom panel styles */
   panelStyles?: PanelStyles;
-  /** Handler callback triggered when a panel is fully opened */
+  /** callback triggered when a panel is fully opened */
   onPanelOpened?: () => void;
 };
 
@@ -101,7 +101,7 @@ export interface ButtonPropsLayerPanel {
 export type TypeButtonPanel = {
   /** Panel identifier. */
   buttonPanelId: string;
-  /** Pasnel API. */
+  /** Panel API. */
   panel?: PanelApi;
   /** Button used by the panel. */
   button: TypeIconButtonProps;

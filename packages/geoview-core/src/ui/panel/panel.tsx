@@ -11,13 +11,7 @@ import { HtmlToReact } from '@/core/containers/html-to-react';
 import { api, useGeoViewMapId, useUIActiveTrapGeoView } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { IconButton, CloseIcon, PanelApi, Box } from '..';
-import {
-  payloadIsAPanelAction,
-  payloadIsAPanelContent,
-  payloadHasAButtonIdAndType,
-  inKeyfocusPayload,
-  PayloadBaseClass,
-} from '@/api/events/payloads';
+import { payloadIsAPanelAction, PayloadBaseClass } from '@/api/events/payloads';
 import { logger } from '@/core/utils/logger';
 
 import { TypeIconButtonProps } from '../icon-button/icon-button-types';
@@ -28,9 +22,10 @@ import { getSxClasses } from './panel-style';
  */
 type TypePanelAppProps = {
   panel: PanelApi;
-  //   panelOpen: boolean;
   button: TypeIconButtonProps;
 
+  // Callback when the user clicked the general close button
+  onGeneralCloseClicked?: () => void;
   // Callback when the panel has completed opened (and transitioned in)
   onPanelOpened?: () => void;
   // Callback when the panel has been closed
@@ -44,8 +39,8 @@ type TypePanelAppProps = {
  * @returns {JSX.Element} the created Panel element
  */
 export function Panel(props: TypePanelAppProps): JSX.Element {
-  const { panel, button, onPanelOpened, onPanelClosed } = props;
-  const { panelStyles } = panel;
+  const { panel, button, onPanelOpened, onPanelClosed, onGeneralCloseClicked } = props;
+  const { status: open, panelStyles } = panel;
 
   const mapId = useGeoViewMapId();
 
@@ -58,16 +53,14 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   // internal state
   // set the active trap value for FocusTrap
   const activeTrapGeoView = useUIActiveTrapGeoView();
-  const [panelStatus, setPanelStatus] = useState(false);
   const [actionButtons, setActionButtons] = useState<JSX.Element[] & ReactNode[]>([]);
-  const [, updatePanelContent] = useState(0);
   const panelRef = useRef<HTMLButtonElement>(null);
   const panelHeader = useRef<HTMLButtonElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const panelWidth = panel?.width ?? 350;
   const panelContainerStyles = {
     ...(panelStyles?.panelContainer && { ...panelStyles.panelContainer }),
-    width: panelStatus ? panelWidth : 0,
+    width: open ? panelWidth : 0,
     maxWidth: 400,
     [theme.breakpoints.down('sm')]: {
       width: 'calc(100% - 64px)',
@@ -77,105 +70,6 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     position: 'absolute',
     left: '64px',
     height: '100%',
-  };
-
-  /**
-   * function that causes rerender when changing panel content
-   */
-  const updateComponent = useCallback(() => {
-    // Log
-    logger.logTraceUseCallback('UI.PANEL - updateComponent');
-
-    updatePanelContent((count) => count + 1);
-  }, []);
-
-  /**
-   * Close the panel
-   */
-  const closePanel = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('UI.PANEL - closePanel');
-
-    const buttonElement = document.getElementById(mapId)?.querySelector(`#${button.id}`);
-
-    if (buttonElement) {
-      // put back focus on calling button
-      document.getElementById(button.id!)?.focus();
-    } else {
-      const mapCont = api.maps[mapId].map.getTargetElement();
-      mapCont.focus();
-
-      // if in focus trap mode, trigger the event
-      if (mapCont.closest('.geoview-map')?.classList.contains('map-focus-trap')) {
-        mapCont.classList.add('keyboard-focus');
-        api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, `map-${mapId}`));
-      }
-    }
-
-    setPanelStatus(false);
-
-    // Closed
-    onPanelClosed?.();
-  }, [mapId, button, onPanelClosed]);
-
-  const panelChangeContentListenerFunction = useCallback(
-    (payload: PayloadBaseClass) => {
-      // Log
-      logger.logTraceCoreAPIEvent('UI.PANEL - panelChangeContentListenerFunction', payload);
-
-      if (payloadIsAPanelContent(payload)) {
-        // set focus on close button on panel content change
-        setTimeout(() => {
-          if (closeBtnRef && closeBtnRef.current) (closeBtnRef.current as HTMLElement).focus();
-        }, 100);
-
-        if (payload.buttonId === button.id!) {
-          updateComponent();
-        }
-      }
-    },
-    [button, updateComponent]
-  );
-
-  const openPanelListenerFunction = useCallback(
-    (payload: PayloadBaseClass) => {
-      // Log
-      logger.logTraceCoreAPIEvent('UI.PANEL - openPanelListenerFunction', payload);
-
-      if (payloadHasAButtonIdAndType(payload)) {
-        // set focus on close button on panel open
-        setPanelStatus(true);
-
-        if (onPanelOpened) {
-          // Wait the transition period (+50 ms just to be sure of shenanigans)
-          setTimeout(() => {
-            onPanelOpened();
-          }, theme.transitions.duration.standard + 50);
-        }
-
-        if (closeBtnRef && closeBtnRef.current) {
-          (closeBtnRef.current as HTMLElement).focus();
-        }
-      }
-    },
-    [onPanelOpened, theme]
-  );
-
-  const closePanelListenerFunction = useCallback(
-    (payload: PayloadBaseClass) => {
-      // Log
-      logger.logTraceCoreAPIEvent('UI.PANEL - closePanelListenerFunction', payload);
-
-      if (payloadHasAButtonIdAndType(payload)) closePanel();
-    },
-    [closePanel]
-  );
-
-  const closeAllPanelListenerFunction = (payload: PayloadBaseClass) => {
-    // Log
-    logger.logTraceCoreAPIEvent('UI.PANEL - closeAllPanelListenerFunction', payload);
-
-    if (payloadHasAButtonIdAndType(payload)) setPanelStatus(false);
   };
 
   const panelAddActionListenerFunction = useCallback(
@@ -236,22 +130,29 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('UI.PANEL - mount');
+    logger.logTraceUseEffect('UI.PANEL - open');
 
-    // if the panel was still open on reload then close it
-    if (panel.status) {
-      panel.closeAll();
-      setPanelStatus(true);
+    if (open) {
+      // set focus on close button on panel open
+      if (closeBtnRef && closeBtnRef.current) {
+        (closeBtnRef.current as HTMLElement).focus();
+      }
+
+      // Wait the transition period (+50 ms just to be sure of shenanigans)
+      setTimeout(() => {
+        onPanelOpened?.();
+      }, theme.transitions.duration.standard + 50);
+    } else {
+      // Wait the transition period (+50 ms just to be sure of shenanigans)
+      setTimeout(() => {
+        onPanelClosed?.();
+      }, theme.transitions.duration.standard + 50);
     }
+  }, [open, theme.transitions.duration.standard, onPanelOpened, onPanelClosed]);
 
-    // listen to open panel to activate focus trap and focus on close
-    api.event.on(EVENT_NAMES.PANEL.EVENT_PANEL_OPEN, openPanelListenerFunction, `${mapId}/${button.id!}`);
-
-    // listen to panel close
-    api.event.on(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, closePanelListenerFunction, `${mapId}/${button.id!}`);
-
-    // listen to close all panels
-    api.event.on(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE_ALL, closeAllPanelListenerFunction, `${mapId}/${button.id!}`);
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('UI.PANEL - mount');
 
     // listen to add action button event
     api.event.on(EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION, panelAddActionListenerFunction, `${mapId}/${button.id!}`);
@@ -259,41 +160,17 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     // listen to remove action button event
     api.event.on(EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION, panelRemoveActionListenerFunction, `${mapId}/${button.id!}`);
 
-    // listen to change panel content and rerender right after the panel has been created
-    api.event.on(EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT, panelChangeContentListenerFunction, `${mapId}/${button.id!}`);
-
     return () => {
-      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT, `${mapId}/${button.id!}`, panelChangeContentListenerFunction);
       api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION, `${mapId}/${button.id!}`, panelRemoveActionListenerFunction);
       api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION, `${mapId}/${button.id!}`, panelAddActionListenerFunction);
-      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE_ALL, `${mapId}/${button.id!}`, closeAllPanelListenerFunction);
-      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, `${mapId}/${button.id!}`, closePanelListenerFunction);
-      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_OPEN, `${mapId}/${button.id!}`, openPanelListenerFunction);
     };
-  }, [
-    mapId,
-    button.id,
-    panel,
-    openPanelListenerFunction,
-    closePanelListenerFunction,
-    panelAddActionListenerFunction,
-    panelChangeContentListenerFunction,
-    panelRemoveActionListenerFunction,
-  ]);
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('UI.PANEL - button', button);
-
-    // set focus on close button on panel open
-    if (closeBtnRef && closeBtnRef.current) if (button.visible) Cast<HTMLElement>(closeBtnRef.current).focus();
-  }, [button, closeBtnRef]);
+  }, [mapId, button.id, panel, panelAddActionListenerFunction, panelRemoveActionListenerFunction]);
 
   // TODO: refactor - remove comment in tsx for production build facebook/create-react-app#9507
   return (
     <Box sx={panelContainerStyles}>
       <FocusTrap
-        active={activeTrapGeoView && panelStatus}
+        active={activeTrapGeoView && open}
         focusTrapOptions={{
           escapeDeactivates: false,
           clickOutsideDeactivates: true,
@@ -302,13 +179,13 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
         <Card
           sx={{
             ...sxClasses.panelContainer,
-            display: panelStatus ? 'block' : 'none',
+            display: open ? 'block' : 'none',
             ...(panelStyles?.panelCard && { ...panelStyles.panelCard }),
           }}
           ref={panelRef as React.MutableRefObject<null>}
           onKeyDown={(e: KeyboardEvent) => {
             if (e.key === 'Escape') {
-              panel.close();
+              onGeneralCloseClicked?.();
             }
           }}
           {...{ 'data-id': button.id }}
@@ -321,7 +198,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
               component: 'h2',
             }}
             action={
-              panelStatus ? (
+              open ? (
                 <>
                   {actionButtons}
                   <IconButton
@@ -329,7 +206,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
                     tooltipPlacement="right"
                     aria-label={t('general.close')!}
                     size="small"
-                    onClick={panel.close}
+                    onClick={() => onGeneralCloseClicked?.()}
                     iconRef={closeBtnRef}
                     className="cgpv-panel-close"
                   >
@@ -358,4 +235,5 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
 Panel.defaultProps = {
   onPanelOpened: null,
   onPanelClosed: null,
+  onGeneralCloseClicked: null,
 };
