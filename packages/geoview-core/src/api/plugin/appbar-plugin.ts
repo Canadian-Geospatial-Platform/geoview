@@ -72,14 +72,11 @@ export abstract class AppBarPlugin extends AbstractPlugin {
     // Create panel props
     this.panelProps = this.onCreateContentProps();
 
+    // Create content
+    this.panelProps.content = this.onCreateContent();
+
     // Create a new button panel on the app-bar
     this.buttonPanel = this.map()?.appBarButtons.createAppbarPanel(this.buttonProps!, this.panelProps, null) || undefined;
-
-    // Create content
-    const content = this.onCreateContent();
-
-    // Set panel content
-    this.buttonPanel?.panel?.changeContent(content);
   }
 
   /**
