@@ -4,22 +4,10 @@ import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId, EVENT_NAMES } from '../event-types';
 
 /** Valid events that can create PanelPayload */
-const validEvents: EventStringId[] = [
-  EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE,
-  EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE_ALL,
-  EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION,
-  EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION,
-  EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT,
-];
-
-/** Valid events that can create PanelWithAButtonIdAndTypePayload  */
-const validEvents4ButtonIdAndType: EventStringId[] = [EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE_ALL];
+const validEvents: EventStringId[] = [EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION, EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION];
 
 /** Valid events that can create PanelAndActionPayload  */
 const validEvents4Action: EventStringId[] = [EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION, EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION];
-
-/** Valid events that can create PanelAndContentPayload  */
-const validEvents4Content: EventStringId[] = [EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT];
 
 /** Type used to define an action button  */
 export type TypeActionButton = {
@@ -27,18 +15,6 @@ export type TypeActionButton = {
   title?: string;
   children?: string | React.ReactElement | Element;
   action?: () => void;
-};
-
-/**
- * type guard function that redefines a PayloadBaseClass as a PanelWithAButtonIdAndTypePayload
- * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export const payloadHasAButtonIdAndType = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is PanelWithAButtonIdAndTypePayload => {
-  return validEvents4ButtonIdAndType.includes(verifyIfPayload?.event);
 };
 
 /**
@@ -74,18 +50,6 @@ export interface PanelAndActionPayload extends PanelPayload {
   // action button configuration
   actionButton: TypeActionButton;
 }
-
-/**
- * type guard function that redefines a PayloadBaseClass as a PanelAndContentPayload
- * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export const payloadIsAPanelContent = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is PanelAndContentPayload => {
-  return validEvents4Content.includes(verifyIfPayload?.event);
-};
 
 /**
  * Additional attributes needed to define a PanelAndContentPayload
@@ -144,7 +108,6 @@ export class PanelPayload extends PayloadBaseClass {
     buttonId: string,
     type: string
   ): PanelWithAButtonIdAndTypePayload => {
-    if (!validEvents4ButtonIdAndType.includes(event)) throw new Error(`PanelPayload can't use withButtonIdAndType for ${event}`);
     const panelWithAButtonIdAndTypePayload = new PanelPayload(event, handlerName) as PanelWithAButtonIdAndTypePayload;
     panelWithAButtonIdAndTypePayload.buttonId = buttonId;
     panelWithAButtonIdAndTypePayload.type = type;
@@ -190,7 +153,6 @@ export class PanelPayload extends PayloadBaseClass {
     buttonId: string,
     content: ReactNode
   ): PanelAndContentPayload => {
-    if (!validEvents4Content.includes(event)) throw new Error(`PanelPayload can't use withButtonIdAndContent for ${event}`);
     const panelAndContentPayload = new PanelPayload(event, handlerName) as PanelAndContentPayload;
     panelAndContentPayload.buttonId = buttonId;
     panelAndContentPayload.content = content;

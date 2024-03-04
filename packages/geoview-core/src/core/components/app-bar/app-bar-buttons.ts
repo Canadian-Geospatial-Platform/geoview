@@ -39,16 +39,6 @@ export class AppbarButtons {
   private createDefaultButtonPanels = () => {
     // create default group for app-bar button panels
     this.buttons.default = {};
-
-    // TODO: do not keep, just proof of concept
-    // this.createAppbarPanel(
-    //   {
-    //     ...DefaultPanel.button,
-    //     tooltip: "Default",
-    //   },
-    //   DefaultPanel.panel,
-    //   "default"
-    // );
   };
 
   /**

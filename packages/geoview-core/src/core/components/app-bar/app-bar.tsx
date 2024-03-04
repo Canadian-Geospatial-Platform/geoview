@@ -7,7 +7,7 @@ import { Box, List, ListItem, Panel, IconButton, TypeIconButtonProps, SchoolIcon
 import { AbstractPlugin, TypeJsonObject, TypeJsonValue, api, toJsonObject, useGeoViewMapId } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
-import { payloadIsAButtonPanel, ButtonPanelPayload, PayloadBaseClass } from '@/api/events/payloads';
+import { payloadIsAButtonPanel, ButtonPanelPayload, PayloadBaseClass, inKeyfocusPayload } from '@/api/events/payloads';
 import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 
 import ExportButton from '@/core/components/export/export-modal-button';
@@ -61,12 +61,29 @@ export function Appbar(): JSX.Element {
   // #region REACT HOOKS
 
   const panels = useMemo(() => {
+    // TODO: Refactor - We should find a way to make this 'dictionary of supported components' dynamic.
     return {
       legend: { icon: <HubOutlinedIcon />, content: <Legend fullWidth /> },
       guide: { icon: <SchoolIcon />, content: <GuidePanel fullWidth /> },
       details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel fullWidth /> },
     } as unknown as Record<string, GroupPanelType>;
   }, []);
+
+  const findGroupName = useCallback(
+    (buttonId: string): string | undefined => {
+      let groupName: string | undefined;
+      Object.entries(buttonPanelGroups).forEach(([buttonPanelGroupName, buttonPanelGroup]) => {
+        if (!groupName) {
+          if (Object.keys(buttonPanelGroup).includes(buttonId)) {
+            // Found it
+            groupName = buttonPanelGroupName;
+          }
+        }
+      });
+      return groupName;
+    },
+    [buttonPanelGroups]
+  );
 
   const addButtonPanel = useCallback(
     (payload: ButtonPanelPayload) => {
@@ -105,46 +122,120 @@ export function Appbar(): JSX.Element {
     [setButtonPanelGroups]
   );
 
-  const handleButtonClicked = useCallback(
-    (groupName: string, buttonId: string) => {
-      const buttonPanel = buttonPanelGroups[groupName][buttonId];
+  const openClosePanelByIdState = useCallback(
+    (buttonId: string, groupName: string | undefined, status: boolean) => {
+      // Read the group name
+      const theGroupName = groupName || findGroupName(buttonId);
+      if (!theGroupName) return;
 
-      if (!buttonPanel.panel?.status) {
-        // Open it
-        setButtonPanelGroups((prevState) => {
+      // Open or Close it
+      setButtonPanelGroups((prevState) => {
+        // Check if doing it
+        const doIt = !!(
+          prevState[theGroupName] &&
+          prevState[theGroupName][buttonId] &&
+          prevState[theGroupName][buttonId].panel &&
+          prevState[theGroupName][buttonId].panel?.status !== status
+        );
+
+        // If is open/closed right now
+        if (doIt) {
           return {
             ...prevState,
-            [groupName]: {
-              ...prevState[groupName],
+            [theGroupName]: {
+              ...prevState[theGroupName],
               [buttonId]: {
-                ...prevState[groupName][buttonId],
-                status: true,
+                ...prevState[theGroupName][buttonId],
+                panel: {
+                  ...prevState[theGroupName][buttonId].panel!,
+                  status,
+                },
               },
             },
           };
-        });
-
-        // buttonPanel.panel?.open();
-
-        if (buttonPanel.panel && buttonPanel.groupName) {
-          // eslint-disable-next-line no-param-reassign
-          buttonPanel.panel.content = panels[buttonPanel.groupName].content;
         }
-        setSelectedAppbarButtonId(buttonPanel?.button?.id ?? '');
-      } else {
-        buttonPanel.panel?.close();
-        setSelectedAppbarButtonId('');
-      }
+
+        // Leave as-is
+        return prevState;
+      });
     },
-    [buttonPanelGroups, panels]
+    [findGroupName]
   );
 
-  const appBarPanelCloseListenerFunction = () => {
-    // Log
-    logger.logTraceCoreAPIEvent('APP-BAR - appBarPanelCloseListenerFunction');
+  const closePanelById = useCallback(
+    (buttonId: string, groupName: string | undefined) => {
+      // Read the group name
+      const theGroupName = groupName || findGroupName(buttonId);
 
-    setSelectedAppbarButtonId('');
-  };
+      // Close the panel
+      openClosePanelByIdState(buttonId, theGroupName, false);
+      setSelectedAppbarButtonId('');
+
+      const buttonElement = buttonId && document.getElementById(mapId)?.querySelector(`#${buttonId}`);
+
+      if (buttonElement) {
+        // put back focus on calling button
+        document.getElementById(buttonId)?.focus();
+      } else {
+        const mapCont = api.maps[mapId].map.getTargetElement();
+        mapCont.focus();
+
+        // if in focus trap mode, trigger the event
+        if (mapCont.closest('.geoview-map')?.classList.contains('map-focus-trap')) {
+          mapCont.classList.add('keyboard-focus');
+          api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, `map-${mapId}`));
+        }
+      }
+    },
+    [findGroupName, mapId, openClosePanelByIdState]
+  );
+
+  const closeAll = useCallback(() => {
+    // For each group
+    Object.entries(buttonPanelGroups).forEach(([buttonPanelGroupName, buttonPanelGroup]) => {
+      // For each button
+      Object.keys(buttonPanelGroup).forEach((buttonId) => {
+        // Close it
+        closePanelById(buttonId, buttonPanelGroupName);
+      });
+    });
+  }, [buttonPanelGroups, closePanelById]);
+
+  const openPanelById = useCallback(
+    (buttonId: string, groupName: string | undefined) => {
+      // Read the group name
+      const theGroupName = groupName || findGroupName(buttonId);
+
+      // Close any already opened panels
+      closeAll();
+
+      // Open the panel
+      openClosePanelByIdState(buttonId, theGroupName, true);
+      setSelectedAppbarButtonId(buttonId);
+    },
+    [closeAll, findGroupName, openClosePanelByIdState]
+  );
+
+  const handleButtonClicked = useCallback(
+    (buttonId: string, groupName: string) => {
+      // Get the button panel
+      const buttonPanel = buttonPanelGroups[groupName][buttonId];
+
+      if (!buttonPanel.panel?.status) {
+        // Redirect
+        openPanelById(buttonId, groupName);
+      } else {
+        // Redirect
+        closePanelById(buttonId, groupName);
+      }
+    },
+    [buttonPanelGroups, closePanelById, openPanelById]
+  );
+
+  const handleGeneralCloseClicked = useCallback(() => {
+    // Close it
+    closePanelById(selectedAppBarButtonId, undefined);
+  }, [selectedAppBarButtonId, closePanelById]);
 
   useEffect(() => {
     // Log
@@ -170,13 +261,9 @@ export function Appbar(): JSX.Element {
     // listen on panel removal
     api.event.on(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, appBarPanelRemoveListenerFunction, mapId);
 
-    // listen on panel close
-    api.event.on(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, appBarPanelCloseListenerFunction, `${mapId}/${selectedAppBarButtonId}`);
-
     return () => {
       api.event.off(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, mapId, appBarPanelCreateListenerFunction);
       api.event.off(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, mapId, appBarPanelRemoveListenerFunction);
-      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, mapId, appBarPanelCloseListenerFunction);
     };
   }, [addButtonPanel, mapId, removeButtonPanel, selectedAppBarButtonId]);
   // #endregion
@@ -187,9 +274,8 @@ export function Appbar(): JSX.Element {
     // TODO: remove active footerTab Id and create new one for appbar id.
     // open appbar detail drawer when click on map.
     if (activeFooterTabId === 'details' && buttonPanelGroups?.details?.AppbarPanelButtonDetails?.panel) {
-      buttonPanelGroups.details.AppbarPanelButtonDetails.panel.open();
-      buttonPanelGroups.details.AppbarPanelButtonDetails.panel.content = panels.details.content;
-      setSelectedAppbarButtonId(buttonPanelGroups.details.AppbarPanelButtonDetails?.button?.id ?? '');
+      // Open it
+      openPanelById(buttonPanelGroups?.details?.AppbarPanelButtonDetails?.button?.id || '', undefined);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeFooterTabId]);
@@ -238,7 +324,7 @@ export function Appbar(): JSX.Element {
           type: 'app-bar',
           title: capitalize(tab),
           icon: panels[tab].icon,
-          content: '',
+          content: panels[tab].content,
           width: 400,
           panelStyles: {
             panelCardContent: { padding: '0' },
@@ -283,7 +369,7 @@ export function Appbar(): JSX.Element {
                         tooltipPlacement="right"
                         className={`style3 ${selectedAppBarButtonId === buttonPanel.button.id ? 'active' : ''}`}
                         size="small"
-                        onClick={() => handleButtonClicked(groupName, buttonPanel.button.id!)}
+                        onClick={() => handleButtonClicked(buttonPanel.button.id!, groupName)}
                       >
                         {buttonPanel.button.children}
                       </IconButton>
@@ -331,6 +417,7 @@ export function Appbar(): JSX.Element {
                   button={buttonPanel.button}
                   onPanelOpened={buttonPanel.onPanelOpened}
                   onPanelClosed={hideClickMarker}
+                  onGeneralCloseClicked={handleGeneralCloseClicked}
                 />
               ) : null;
             })}

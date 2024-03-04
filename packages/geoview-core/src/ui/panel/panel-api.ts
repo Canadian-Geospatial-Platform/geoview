@@ -63,70 +63,6 @@ export class PanelApi {
   }
 
   /**
-   * Trigger an event to open the panel
-   */
-  open = (): void => {
-    this.status = true;
-
-    // close all other panels
-    this.closeAll();
-  };
-
-  /**
-   * Close all other panels
-   */
-  closeAll = (): void => {
-    if (this.type === 'app-bar') {
-      Object.keys(api.maps[this.mapId].appBarButtons.buttons).forEach((groupName: string) => {
-        // get button panels from group
-        const buttonPanels = api.maps[this.mapId].appBarButtons.buttons[groupName];
-
-        // get all button panels in each group
-        Object.keys(buttonPanels).forEach((buttonPanelId) => {
-          const buttonPanel = buttonPanels[buttonPanelId];
-
-          if (this.buttonId !== buttonPanel.buttonPanelId) {
-            buttonPanel.panel?.closeAllPanels();
-          }
-        });
-      });
-    } else if (this.type === 'nav-bar') {
-      Object.keys(api.maps[this.mapId].navBarButtons.buttons).forEach((groupName: string) => {
-        // get button panels from group
-        const buttonPanels = api.maps[this.mapId].navBarButtons.buttons[groupName];
-
-        // get all button panels in each group
-        Object.keys(buttonPanels).forEach((buttonPanelId) => {
-          const buttonPanel = buttonPanels[buttonPanelId];
-
-          if (this.buttonId !== buttonPanel.buttonPanelId) {
-            buttonPanel.panel?.closeAllPanels();
-          }
-        });
-      });
-    }
-  };
-
-  /**
-   * Trigger an event to close the panel
-   */
-  close = (): void => {
-    this.status = false;
-
-    api.event.emit(
-      PanelPayload.withButtonIdAndType(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, `${this.mapId}/${this.buttonId}`, this.buttonId, this.type!)
-    );
-  };
-
-  closeAllPanels = (): void => {
-    this.status = false;
-
-    api.event.emit(
-      PanelPayload.withButtonIdAndType(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE_ALL, `${this.mapId}/${this.buttonId}`, this.buttonId, this.type!)
-    );
-  };
-
-  /**
    * Add a new action button to the header of the panel before the close button
    *
    * @param {string} actionButtonId an id for the new action button to be used later to delete this button
@@ -159,27 +95,27 @@ export class PanelApi {
     return this;
   };
 
-  /**
-   * Change the content of the panel
-   *
-   * @param {ReactNode} content the content to update to
-   *
-   * @returns {Panel} this panel
-   */
-  changeContent = (content: ReactNode): PanelApi => {
-    this.content = content;
+  // /**
+  //  * Change the content of the panel
+  //  *
+  //  * @param {ReactNode} content the content to update to
+  //  *
+  //  * @returns {Panel} this panel
+  //  */
+  // changeContent = (content: ReactNode): PanelApi => {
+  //   this.content = content;
 
-    api.event.emit(
-      PanelPayload.withButtonIdAndContent(
-        EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT,
-        `${this.mapId}/${this.buttonId}`,
-        this.buttonId,
-        content
-      )
-    );
+  //   api.event.emit(
+  //     PanelPayload.withButtonIdAndContent(
+  //       EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT,
+  //       `${this.mapId}/${this.buttonId}`,
+  //       this.buttonId,
+  //       content
+  //     )
+  //   );
 
-    return this;
-  };
+  //   return this;
+  // };
 
   /**
    * Remove action button
