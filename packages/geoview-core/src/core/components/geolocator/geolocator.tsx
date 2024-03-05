@@ -154,9 +154,10 @@ export function Geolocator() {
       setGeolocatorActive(false);
     }
 
-    if (ARROW_KEY_CODES.includes(event.code)) {
+    if (ARROW_KEY_CODES.includes(event.code as string)) {
       // TODO stop moving the map here
       event.preventDefault();
+      event.stopPropagation();
     }
   };
 

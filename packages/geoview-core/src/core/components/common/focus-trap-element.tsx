@@ -1,4 +1,3 @@
-/* eslint-disable react/require-default-props */
 import { ReactNode, useEffect } from 'react';
 
 import { useTranslation } from 'react-i18next';
@@ -22,7 +21,8 @@ type FocusTrapElementProps = {
  * @returns {JSX.Element} the geolocator button
  */
 export function FocusTrapElement(props: FocusTrapElementProps): JSX.Element {
-  const { id, content, basic = false, active = false } = props;
+  // We can set basic to be true if we don't have to have Exit button and enabling "open" props in focus trap is based on "active" props
+  const { id, content, basic, active } = props;
 
   const { t } = useTranslation<string>();
 
@@ -57,7 +57,7 @@ export function FocusTrapElement(props: FocusTrapElementProps): JSX.Element {
   // #endregion
 
   return (
-    <FocusTrap open={basic ? active : id === focusItem.activeElementId}>
+    <FocusTrap open={basic ? (active as boolean) : id === focusItem.activeElementId}>
       {!basic ? (
         <Box>
           <Button
@@ -77,3 +77,8 @@ export function FocusTrapElement(props: FocusTrapElementProps): JSX.Element {
     </FocusTrap>
   );
 }
+
+FocusTrapElement.defaultProps = {
+  basic: false,
+  active: false,
+};
