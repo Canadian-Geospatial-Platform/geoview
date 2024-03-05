@@ -1,7 +1,10 @@
 import EventEmitter from 'eventemitter3';
 
-import { EventStringId } from './event-types';
+import { EVENT_NAMES, EventStringId } from './event-types';
 import { PayloadBaseClass } from './payloads/payload-base-class';
+import { ButtonPanelPayload, buttonPanelPayload, inKeyfocusPayload, payloadIsAButtonPanel, payloadIsAInKeyfocus } from './payloads';
+import { logger } from '@/core/utils/logger';
+import { TypeButtonPanel } from '@/core/types/global-types';
 
 export type TypeEventHandlerFunction = (payload: PayloadBaseClass) => void;
 
@@ -112,4 +115,158 @@ export class Event {
     const eventName = `${handlerName ? `${handlerName}/` : ''}${event}`;
     this.eventEmitter.emit(eventName, { ...payload, handlerName }, handlerName);
   };
+
+  // #region Specialized events
+
+  // --- EVENT_APPBAR_PANEL_CREATE ------------------------------------------------------------------------------------
+
+  emitCreateAppBarPanel = (mapId: string, buttonId: string, group: string, buttonPanel: TypeButtonPanel) => {
+    // Emit
+    this.emit(buttonPanelPayload(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, mapId, buttonId, group, buttonPanel));
+  };
+
+  onCreateAppBarPanel = (mapId: string, callback: (buttonPanel: ButtonPanelPayload) => void) => {
+    // Wire
+    this.on(
+      EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE,
+      (payload: PayloadBaseClass<EventStringId>) => {
+        // Log
+        logger.logTraceCoreAPIEvent('APPBAR.EVENT_APPBAR_PANEL_CREATE', payload);
+
+        // Payload check, likely unecessary, check later..
+        if (payloadIsAButtonPanel(payload)) {
+          // Sure callback
+          callback(payload as ButtonPanelPayload);
+        }
+      },
+      mapId
+    );
+  };
+
+  offCreateAppBarPanel = (mapId: string, callback: (buttonPanel: ButtonPanelPayload) => void) => {
+    // Unwire
+    this.off(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, mapId, callback as TypeEventHandlerFunction);
+  };
+
+  // --- EVENT_APPBAR_PANEL_REMOVE ------------------------------------------------------------------------------------
+
+  emitRemoveAppBarPanel = (mapId: string, buttonId: string, group: string, buttonPanel: TypeButtonPanel) => {
+    // Emit
+    this.emit(buttonPanelPayload(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, mapId, buttonId, group, buttonPanel));
+  };
+
+  onRemoveAppBarPanel = (mapId: string, callback: (buttonPanel: ButtonPanelPayload) => void) => {
+    // Wire
+    this.on(
+      EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE,
+      (payload: PayloadBaseClass<EventStringId>) => {
+        // Log
+        logger.logTraceCoreAPIEvent('APPBAR.EVENT_APPBAR_PANEL_REMOVE', payload);
+
+        // Payload check, likely unecessary, check later..
+        if (payloadIsAButtonPanel(payload)) {
+          // Sure callback
+          callback(payload as ButtonPanelPayload);
+        }
+      },
+      mapId
+    );
+  };
+
+  offRemoveAppBarPanel = (mapId: string, callback: (buttonPanel: ButtonPanelPayload) => void) => {
+    // Unwire
+    this.off(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, mapId, callback as TypeEventHandlerFunction);
+  };
+
+  // --- EVENT_NAVBAR_BUTTON_PANEL_CREATE -----------------------------------------------------------------------------
+
+  emitCreateNavBarPanel = (mapId: string, buttonId: string, group: string, buttonPanel: TypeButtonPanel) => {
+    // Emit
+    this.emit(buttonPanelPayload(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE, mapId, buttonId, group, buttonPanel));
+  };
+
+  onCreateNavBarPanel = (mapId: string, callback: (buttonPanel: ButtonPanelPayload) => void) => {
+    // Wire
+    this.on(
+      EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE,
+      (payload: PayloadBaseClass<EventStringId>) => {
+        // Log
+        logger.logTraceCoreAPIEvent('NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE', payload);
+
+        // Payload check, likely unecessary, check later..
+        if (payloadIsAButtonPanel(payload)) {
+          // Sure callback
+          callback(payload as ButtonPanelPayload);
+        }
+      },
+      mapId
+    );
+  };
+
+  offCreateNavBarPanel = (mapId: string, callback: (buttonPanel: ButtonPanelPayload) => void) => {
+    // Unwire
+    this.off(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE, mapId, callback as TypeEventHandlerFunction);
+  };
+
+  // --- EVENT_NAVBAR_BUTTON_PANEL_REMOVE -----------------------------------------------------------------------------
+
+  emitRemoveNavBarPanel = (mapId: string, buttonId: string, group: string, buttonPanel: TypeButtonPanel) => {
+    // Emit
+    this.emit(buttonPanelPayload(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, mapId, buttonId, group, buttonPanel));
+  };
+
+  onRemoveNavBarPanel = (mapId: string, callback: (buttonPanel: ButtonPanelPayload) => void) => {
+    // Wire
+    this.on(
+      EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE,
+      (payload: PayloadBaseClass<EventStringId>) => {
+        // Log
+        logger.logTraceCoreAPIEvent('NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE', payload);
+
+        // Payload check, likely unecessary, check later..
+        if (payloadIsAButtonPanel(payload)) {
+          // Sure callback
+          callback(payload as ButtonPanelPayload);
+        }
+      },
+      mapId
+    );
+  };
+
+  offRemoveNavBarPanel = (mapId: string, callback: (buttonPanel: ButtonPanelPayload) => void) => {
+    // Unwire
+    this.off(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, mapId, callback as TypeEventHandlerFunction);
+  };
+
+  // --- EVENT_MAP_IN_KEYFOCUS ---------------------------------------------------------------------------------------
+
+  emitMapInKeyFocus = (mapId: string) => {
+    // Emit
+    this.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, `map-${mapId}`));
+  };
+
+  onMapInKeyFocus = (mapId: string, callback: () => void) => {
+    // Wire
+    this.on(
+      EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS,
+      (payload: PayloadBaseClass<EventStringId>) => {
+        // Log
+        logger.logTraceCoreAPIEvent('MAP.EVENT_MAP_IN_KEYFOCUS', payload);
+
+        // Payload check, likely unecessary, check later..
+        if (payloadIsAInKeyfocus(payload)) {
+          // Sure callback
+          callback();
+        }
+      },
+      mapId
+    );
+  };
+
+  offMapInKeyFocus = (mapId: string, callback: () => void) => {
+    // Unwire
+    this.off(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId, callback as TypeEventHandlerFunction);
+  };
+
+  // #endregion
 }

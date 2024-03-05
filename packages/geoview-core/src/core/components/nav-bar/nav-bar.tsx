@@ -13,8 +13,7 @@ import Location from './buttons/location';
 
 import { api, useGeoViewMapId } from '@/app';
 import { Panel, ButtonGroup, IconButton, Box } from '@/ui';
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { payloadIsAButtonPanel, ButtonPanelPayload, PayloadBaseClass } from '@/api/events/payloads';
+import { ButtonPanelPayload } from '@/api/events/payloads';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
 import { helpCloseAll, helpClosePanelById, helpOpenPanelById } from '../app-bar/app-bar-helper';
@@ -41,8 +40,12 @@ export function Navbar(): JSX.Element {
   const navBarComponents = useUINavbarComponents();
 
   // #region REACT HOOKS
+
   const closePanelById = useCallback(
     (buttonId: string, groupName: string | undefined) => {
+      // Log
+      logger.logTraceUseCallback('NAV-BAR - closePanelById', buttonId);
+
       // Redirect to helper
       helpClosePanelById(mapId, buttonPanelGroups, buttonId, groupName, setButtonPanelGroups);
     },
@@ -50,12 +53,18 @@ export function Navbar(): JSX.Element {
   );
 
   const closeAll = useCallback(() => {
+    // Log
+    logger.logTraceUseCallback('NAV-BAR - closeAll');
+
     // Redirect to helper
     helpCloseAll(buttonPanelGroups, closePanelById);
   }, [buttonPanelGroups, closePanelById]);
 
   const openPanelById = useCallback(
     (buttonId: string, groupName: string | undefined) => {
+      // Log
+      logger.logTraceUseCallback('NAV-BAR - openPanelById', buttonId);
+
       // Redirect to helper
       helpOpenPanelById(buttonPanelGroups, buttonId, groupName, setButtonPanelGroups, closeAll);
     },
@@ -64,6 +73,9 @@ export function Navbar(): JSX.Element {
 
   const handleButtonClicked = useCallback(
     (buttonId: string, groupName: string) => {
+      // Log
+      logger.logTraceUseCallback('NAV-BAR - handleButtonClicked', buttonId);
+
       // Get the button panel
       const buttonPanel = buttonPanelGroups[groupName][buttonId];
 
@@ -78,8 +90,11 @@ export function Navbar(): JSX.Element {
     [buttonPanelGroups, closePanelById, openPanelById]
   );
 
-  const addButtonPanel = useCallback(
+  const handleAddButtonPanel = useCallback(
     (payload: ButtonPanelPayload) => {
+      // Log
+      logger.logTraceUseCallback('NAV-BAR - handleAddButtonPanel', payload);
+
       setButtonPanelGroups({
         ...buttonPanelGroups,
         [payload.appBarGroupName]: {
@@ -91,8 +106,11 @@ export function Navbar(): JSX.Element {
     [buttonPanelGroups]
   );
 
-  const removeButtonPanel = useCallback(
+  const handleRemoveButtonPanel = useCallback(
     (payload: ButtonPanelPayload) => {
+      // Log
+      logger.logTraceUseCallback('NAV-BAR - handleRemoveButtonPanel', payload);
+
       setButtonPanelGroups((prevState) => {
         const state = { ...prevState };
         const group = state[payload.appBarGroupName];
@@ -107,31 +125,21 @@ export function Navbar(): JSX.Element {
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('NAV-BAR - addButtonPanel', mapId);
+    logger.logTraceUseEffect('NAV-BAR - mount', mapId);
 
-    const navbarBtnPanelCreateListenerFunction = (payload: PayloadBaseClass) => {
-      // Log
-      logger.logTraceCoreAPIEvent('NAV-BAR - navbarBtnPanelCreateListenerFunction', payload);
-
-      if (payloadIsAButtonPanel(payload)) addButtonPanel(payload);
-    };
     // listen to new nav-bar panel creation
-    api.event.on(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE, navbarBtnPanelCreateListenerFunction, mapId);
+    api.event.onCreateNavBarPanel(mapId, handleAddButtonPanel);
 
-    const navbarBtnPanelRemoveListenerFunction = (payload: PayloadBaseClass) => {
-      // Log
-      logger.logTraceCoreAPIEvent('NAV-BAR - navbarBtnPanelRemoveListenerFunction', payload);
-
-      if (payloadIsAButtonPanel(payload)) removeButtonPanel(payload);
-    };
     // listen to new nav-bar panel removal
-    api.event.on(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, navbarBtnPanelRemoveListenerFunction, mapId);
+    api.event.onRemoveNavBarPanel(mapId, handleRemoveButtonPanel);
 
     return () => {
-      api.event.off(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE, mapId, navbarBtnPanelCreateListenerFunction);
-      api.event.off(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, mapId, navbarBtnPanelRemoveListenerFunction);
+      // Unwire events
+      api.event.offCreateNavBarPanel(mapId, handleAddButtonPanel);
+      api.event.offRemoveNavBarPanel(mapId, handleRemoveButtonPanel);
     };
-  }, [addButtonPanel, mapId, removeButtonPanel]);
+  }, [mapId, handleAddButtonPanel, handleRemoveButtonPanel]);
+
   // #endregion
 
   return (
