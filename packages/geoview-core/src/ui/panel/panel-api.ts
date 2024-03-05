@@ -1,8 +1,5 @@
 import { createElement, ReactNode } from 'react';
 
-import { api } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { PanelPayload, TypeActionButton } from '@/api/events/payloads';
 import { generateId } from '@/core/utils/utilities';
 import { PanelStyles, TypePanelProps } from './panel-types';
 
@@ -61,81 +58,4 @@ export class PanelApi {
     this.width = panel.width || 350;
     this.panelStyles = panel.panelStyles ?? {};
   }
-
-  /**
-   * Add a new action button to the header of the panel before the close button
-   *
-   * @param {string} actionButtonId an id for the new action button to be used later to delete this button
-   * @param {string} title the title of the action button, will display in the tooltip
-   * @param {string | ReactElement | Element} children the icon of the action button
-   * @param {Function} action a function that will be triggered when clicking this action
-   * @returns {Panel} the panel
-   */
-  addActionButton = (
-    actionButtonId: string,
-    title: string,
-    children: string | React.ReactElement | Element,
-    action: () => void
-  ): PanelApi => {
-    const actionButton: TypeActionButton = {
-      actionButtonId: `${this.buttonId}_${actionButtonId}`,
-      title,
-      children,
-      action,
-    };
-    api.event.emit(
-      PanelPayload.withButtonIdAndActionButton(
-        EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION,
-        `${this.mapId}/${this.buttonId}`,
-        this.buttonId,
-        actionButton
-      )
-    );
-
-    return this;
-  };
-
-  // /**
-  //  * Change the content of the panel
-  //  *
-  //  * @param {ReactNode} content the content to update to
-  //  *
-  //  * @returns {Panel} this panel
-  //  */
-  // changeContent = (content: ReactNode): PanelApi => {
-  //   this.content = content;
-
-  //   api.event.emit(
-  //     PanelPayload.withButtonIdAndContent(
-  //       EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT,
-  //       `${this.mapId}/${this.buttonId}`,
-  //       this.buttonId,
-  //       content
-  //     )
-  //   );
-
-  //   return this;
-  // };
-
-  /**
-   * Remove action button
-   *
-   * @param {string} actionButtonId the id of the action button to be removed
-   * @returns {Panel} this panel
-   */
-  removeActionButton = (actionButtonId: string): PanelApi => {
-    const actionButton: TypeActionButton = {
-      actionButtonId: `${this.buttonId}_${actionButtonId}`,
-    };
-    api.event.emit(
-      PanelPayload.withButtonIdAndActionButton(
-        EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION,
-        `${this.mapId}/${this.buttonId}`,
-        this.buttonId,
-        actionButton
-      )
-    );
-
-    return this;
-  };
 }

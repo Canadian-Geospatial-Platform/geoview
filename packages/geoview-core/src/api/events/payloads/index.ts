@@ -25,7 +25,6 @@ export * from './map-payload';
 export * from './map-view-projection-payload';
 export * from './modal-payload';
 export * from './number-payload';
-export * from './panel-payload';
 export * from './payload-base-class';
 export * from './slider-payload';
 export * from './snackbar-message-payload';
