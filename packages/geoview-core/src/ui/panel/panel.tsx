@@ -8,7 +8,7 @@ import CardContent from '@mui/material/CardContent';
 import { useTheme } from '@mui/material/styles';
 import { HtmlToReact } from '@/core/containers/html-to-react';
 import { useUIActiveTrapGeoView } from '@/app';
-import { IconButton, CloseIcon, PanelApi, Box } from '..';
+import { IconButton, CloseIcon, Box, TypePanelProps } from '..';
 import { logger } from '@/core/utils/logger';
 
 import { TypeIconButtonProps } from '../icon-button/icon-button-types';
@@ -17,8 +17,8 @@ import { getSxClasses } from './panel-style';
 /**
  * Interface for panel properties
  */
-type TypePanelAppProps = {
-  panel: PanelApi;
+export type TypePanelAppProps = {
+  panel: TypePanelProps;
   button: TypeIconButtonProps;
 
   // Callback when the user clicked the general close button
@@ -66,62 +66,6 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     left: '64px',
     height: '100%',
   };
-
-  // const panelAddActionListenerFunction = useCallback(
-  //   (payload: PayloadBaseClass) => {
-  //     // Log
-  //     logger.logTraceCoreAPIEvent('UI.PANEL - panelAddActionListenerFunction', payload);
-
-  //     if (payloadIsAPanelAction(payload)) {
-  //       if (payload.buttonId === button.id!) {
-  //         const { actionButton } = payload;
-
-  //         setActionButtons((prev) => [
-  //           ...prev,
-  //           <IconButton
-  //             key={actionButton.actionButtonId}
-  //             tooltip={actionButton.title}
-  //             tooltipPlacement="right"
-  //             id={actionButton.actionButtonId}
-  //             aria-label={actionButton.title}
-  //             onClick={Cast<React.MouseEventHandler>(actionButton.action)}
-  //             size="small"
-  //           >
-  //             {typeof actionButton.children === 'string' ? (
-  //               <HtmlToReact
-  //                 style={{
-  //                   display: 'flex',
-  //                 }}
-  //                 htmlContent={actionButton.children}
-  //               />
-  //             ) : (
-  //               (actionButton.children as ReactNode)
-  //             )}
-  //           </IconButton>,
-  //         ]);
-  //       }
-  //     }
-  //   },
-  //   [button.id]
-  // );
-
-  // const panelRemoveActionListenerFunction = useCallback(
-  //   (payload: PayloadBaseClass) => {
-  //     // Log
-  //     logger.logTraceCoreAPIEvent('UI.PANEL - panelRemoveActionListenerFunction', payload);
-
-  //     if (payloadIsAPanelAction(payload)) {
-  //       if (payload.buttonId === button.id!) {
-  //         setActionButtons((list) =>
-  //           list.filter((item) => {
-  //             return item.props.id !== payload.actionButton.actionButtonId;
-  //           })
-  //         );
-  //       }
-  //     }
-  //   },
-  //   [button]
-  // );
 
   useEffect(() => {
     // Log
@@ -172,7 +116,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
           <CardHeader
             sx={panelStyles?.panelCardHeader ? { ...panelStyles.panelCardHeader } : {}}
             ref={panelHeader}
-            title={t(panel.title)}
+            title={t(panel.title as string)}
             titleTypographyProps={{
               component: 'h2',
             }}

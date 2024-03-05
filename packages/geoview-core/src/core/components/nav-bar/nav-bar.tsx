@@ -17,6 +17,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { payloadIsAButtonPanel, ButtonPanelPayload, PayloadBaseClass } from '@/api/events/payloads';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
+import { helpCloseAll, helpClosePanelById, helpOpenPanelById } from '../app-bar/app-bar-helper';
 import { useUIMapInfoExpanded, useUINavbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
 
@@ -40,6 +41,43 @@ export function Navbar(): JSX.Element {
   const navBarComponents = useUINavbarComponents();
 
   // #region REACT HOOKS
+  const closePanelById = useCallback(
+    (buttonId: string, groupName: string | undefined) => {
+      // Redirect to helper
+      helpClosePanelById(mapId, buttonPanelGroups, buttonId, groupName, setButtonPanelGroups);
+    },
+    [buttonPanelGroups, mapId]
+  );
+
+  const closeAll = useCallback(() => {
+    // Redirect to helper
+    helpCloseAll(buttonPanelGroups, closePanelById);
+  }, [buttonPanelGroups, closePanelById]);
+
+  const openPanelById = useCallback(
+    (buttonId: string, groupName: string | undefined) => {
+      // Redirect to helper
+      helpOpenPanelById(buttonPanelGroups, buttonId, groupName, setButtonPanelGroups, closeAll);
+    },
+    [buttonPanelGroups, closeAll]
+  );
+
+  const handleButtonClicked = useCallback(
+    (buttonId: string, groupName: string) => {
+      // Get the button panel
+      const buttonPanel = buttonPanelGroups[groupName][buttonId];
+
+      if (!buttonPanel.panel?.status) {
+        // Redirect
+        openPanelById(buttonId, groupName);
+      } else {
+        // Redirect
+        closePanelById(buttonId, groupName);
+      }
+    },
+    [buttonPanelGroups, closePanelById, openPanelById]
+  );
+
   const addButtonPanel = useCallback(
     (payload: ButtonPanelPayload) => {
       setButtonPanelGroups({
@@ -150,13 +188,7 @@ export function Navbar(): JSX.Element {
                         tooltip={buttonPanel.button.tooltip}
                         tooltipPlacement={buttonPanel.button.tooltipPlacement}
                         sx={sxClasses.navButton}
-                        onClick={() => {
-                          if (!buttonPanel.panel?.status) {
-                            buttonPanel.panel?.open();
-                          } else {
-                            buttonPanel.panel?.close();
-                          }
-                        }}
+                        onClick={() => handleButtonClicked(buttonPanel.button.id!, groupName)}
                       >
                         {buttonPanel.button.children}
                       </IconButton>
