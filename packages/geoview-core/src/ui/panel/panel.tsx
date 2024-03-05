@@ -48,7 +48,6 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   // internal state
   // set the active trap value for FocusTrap
   const activeTrapGeoView = useUIActiveTrapGeoView();
-  // const [actionButtons, setActionButtons] = useState<JSX.Element[] & ReactNode[]>([]);
   const panelRef = useRef<HTMLButtonElement>(null);
   const panelHeader = useRef<HTMLButtonElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);

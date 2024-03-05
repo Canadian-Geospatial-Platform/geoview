@@ -1,11 +1,9 @@
 import { api } from '@/app';
 
-import { EVENT_NAMES } from '@/api/events/event-types';
-
-import { generateId } from '../../utils/utilities';
-import { buttonPanelPayload } from '@/api/events/payloads';
 import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
+
+import { generateId } from '../../utils/utilities';
 
 /**
  * Class to manage buttons on the nav-bar
@@ -63,7 +61,7 @@ export class NavbarButtons {
   ): TypeButtonPanel | null => {
     if (buttonProps) {
       // generate an id if not provided
-      const buttonId = generateId(buttonProps.id);
+      const buttonPanelId = generateId(buttonProps.id);
 
       // if group was not specified then add button panels to the default group
       const group = groupName || 'default';
@@ -75,22 +73,22 @@ export class NavbarButtons {
 
       const button: TypeIconButtonProps = {
         ...buttonProps,
-        id: buttonId,
+        id: buttonPanelId,
         visible: !buttonProps.visible ? true : buttonProps.visible,
       };
 
       const buttonPanel: TypeButtonPanel = {
-        buttonPanelId: buttonId,
+        buttonPanelId,
         button,
         panel: panelProps,
         groupName: group,
       };
 
       // add the new button panel to the correct group
-      if (group !== '__proto__' && buttonId !== '__proto__') this.buttons[group][buttonId] = buttonPanel;
+      if (group !== '__proto__' && buttonPanelId !== '__proto__') this.buttons[group][buttonPanelId] = buttonPanel;
 
       // trigger an event that a new button or button panel has been created to update the state and re-render
-      api.event.emit(buttonPanelPayload(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE, this.mapId, buttonId, group, buttonPanel));
+      api.event.emitCreateNavBarPanel(this.mapId, buttonPanelId, group, buttonPanel);
 
       return buttonPanel;
     }
@@ -160,9 +158,7 @@ export class NavbarButtons {
       delete group[buttonPanelId];
 
       // trigger an event that a button or panel has been removed to update the state and re-render
-      api.event.emit(
-        buttonPanelPayload(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, this.mapId, buttonPanelId, groupName, group[buttonPanelId])
-      );
+      api.event.emitRemoveNavBarPanel(this.mapId, buttonPanelId, groupName, group[buttonPanelId]);
     });
   };
 }
