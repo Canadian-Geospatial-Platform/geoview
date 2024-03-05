@@ -68,6 +68,16 @@ export const sxClasses = {
 };
 
 export const sxClassesList = {
+  listStyle: {
+    fontSize: '0.875rem',
+    '& .list-title': {
+      '>div': {
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+      },
+    },
+  },
   main: {
     whiteSpace: 'nowrap',
     overflow: 'hidden',
@@ -75,7 +85,6 @@ export const sxClassesList = {
     '& span': {
       fontSize: '0.75rem',
       ':first-of-type': {
-        fontWeight: 'bold',
         fontSize: '0.875rem',
       },
     },

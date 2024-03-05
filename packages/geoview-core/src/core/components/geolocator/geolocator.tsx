@@ -96,7 +96,8 @@ export function Geolocator() {
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     setSearchValue(value);
-    if (value.length) {
+    // do fetch request when user enter alteast 3 characters. #1826
+    if (value.length >= 3) {
       debouncedRequest(value);
     }
     // clear geo list when search term cleared from input field.
