@@ -90,7 +90,7 @@ function AppStart(props: AppStartProps): JSX.Element {
         <MapContext.Provider value={mapContextValue}>
           <ThemeProvider theme={getTheme(theme)}>
             {/* <StrictMode> */}
-            <Shell shellId={mapId as string} />
+            <Shell shellId={mapId} />
             {/* </StrictMode> */}
           </ThemeProvider>
         </MapContext.Provider>
