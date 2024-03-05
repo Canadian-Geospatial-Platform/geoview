@@ -11,7 +11,6 @@ import { MAP } from './constants/map-constants';
 import { FEATURE_HIGHLIGHT } from './constants/feature-highlight-constants';
 import { MODAL } from './constants/modal-constants';
 import { NAVBAR } from './constants/nav-bar-constants';
-import { PANEL } from './constants/panel-constants';
 import { SLIDER } from './constants/slider-constants';
 import { SNACKBAR } from './constants/snackbar-constants';
 
@@ -32,7 +31,6 @@ export const EVENT_NAMES = {
   FEATURE_HIGHLIGHT,
   MODAL,
   NAVBAR,
-  PANEL,
   SLIDER,
   SNACKBAR,
 };
