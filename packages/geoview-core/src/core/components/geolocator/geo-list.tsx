@@ -44,7 +44,7 @@ const transformListTitle = (_title: string, _searchValue: string, province: stri
   const searchValue = _searchValue.toUpperCase();
   const idx = title.indexOf(searchValue);
   if (!searchValue || idx === -1) {
-    return _title; // bail early
+    return _title;
   }
   const len = searchValue.length;
   return (
