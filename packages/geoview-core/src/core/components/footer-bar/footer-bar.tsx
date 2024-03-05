@@ -4,8 +4,7 @@ import { useTheme } from '@mui/material/styles';
 
 import { Box, IconButton, Tabs, TypeTabs, MoveDownRoundedIcon, MoveUpRoundedIcon } from '@/ui';
 import { api, useGeoViewMapId } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { FooterBarPayload, PayloadBaseClass, payloadIsAFooterBar } from '@/api/events/payloads';
+import { FooterBarPayload } from '@/api/events/payloads';
 import { getSxClasses } from './footer-bar-style';
 import { ResizeFooterPanel } from '../resize-footer-panel/resize-footer-panel';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -166,7 +165,7 @@ export function FooterBar(): JSX.Element | null {
   /**
    * Add a tab
    */
-  const addTab = useCallback(
+  const handleAddTab = useCallback(
     (payload: FooterBarPayload) => {
       // Log
       logger.logTraceUseCallback('FOOTER-BAR - addTab', payload);
@@ -180,7 +179,7 @@ export function FooterBar(): JSX.Element | null {
   /**
    * Remove a tab
    */
-  const removeTab = useCallback((payload: FooterBarPayload) => {
+  const handleRemoveTab = useCallback((payload: FooterBarPayload) => {
     // Log
     logger.logTraceUseCallback('FOOTER-BAR - removeTab', payload);
 
@@ -265,22 +264,6 @@ export function FooterBar(): JSX.Element | null {
     setActiveFooterBarTab(tab.id);
   };
 
-  const eventFooterBarCreateListenerFunction = (payload: PayloadBaseClass) => {
-    // Log
-    logger.logTraceCoreAPIEvent('FOOTER-BAR - eventFooterBarCreateListenerFunction', payload);
-
-    if (payloadIsAFooterBar(payload)) {
-      addTab(payload);
-    }
-  };
-
-  const eventFooterBarRemoveListenerFunction = (payload: PayloadBaseClass) => {
-    // Log
-    logger.logTraceCoreAPIEvent('FOOTER-BAR - eventFooterBarRemoveListenerFunction', payload);
-
-    if (payloadIsAFooterBar(payload)) removeTab(payload);
-  };
-
   useEffect(() => {
     // If clicked on a tab with a plugin
     if (api.maps[mapId].plugins[selectedTab]) {
@@ -302,20 +285,20 @@ export function FooterBar(): JSX.Element | null {
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('FOOTER-BAR - addTab | removeTab', mapId);
+    logger.logTraceUseEffect('FOOTER-BAR - mount', mapId);
 
     // listen to new tab creation
-    api.event.on(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_CREATE, eventFooterBarCreateListenerFunction, mapId);
+    api.event.onCreateFooterBarPanel(mapId, handleAddTab);
 
     // listen on tab removal
-    api.event.on(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_REMOVE, eventFooterBarRemoveListenerFunction, mapId);
+    api.event.onRemoveFooterBarPanel(mapId, handleRemoveTab);
 
     return () => {
-      api.event.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_CREATE, mapId, eventFooterBarCreateListenerFunction);
-      api.event.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_REMOVE, mapId, eventFooterBarRemoveListenerFunction);
+      // Unwire
+      api.event.offCreateFooterBarPanel(mapId, handleAddTab);
+      api.event.offRemoveFooterBarPanel(mapId, handleRemoveTab);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [addTab, mapId, removeTab]);
+  }, [mapId, handleAddTab, handleRemoveTab]);
 
   /**
    * Update map and footer panel height when switch to fullscreen
