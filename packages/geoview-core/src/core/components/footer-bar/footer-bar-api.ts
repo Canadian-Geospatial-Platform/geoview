@@ -1,12 +1,9 @@
 import { api } from '@/app';
 
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { sanitizeHtmlContent } from '../../utils/utilities';
-
-import { footerBarPayload } from '@/api/events/payloads';
-
 import { TypeTabs } from '@/ui/tabs/tabs';
 import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
+
+import { sanitizeHtmlContent } from '../../utils/utilities';
 
 /**
  * API to manage tabs on the tabs component
@@ -50,7 +47,7 @@ export class FooterBarApi {
         this.tabs.push(tabProps);
 
         // trigger an event that a new tab has been created
-        api.event.emit(footerBarPayload(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_CREATE, this.mapId, tabProps));
+        api.event.emitCreateFooterBarPanel(this.mapId, tabProps);
       }
     }
   };
@@ -69,7 +66,7 @@ export class FooterBarApi {
       this.tabs = this.tabs.filter((tab) => tab.id !== id);
 
       // trigger an event that a tab has been removed
-      api.event.emit(footerBarPayload(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_REMOVE, this.mapId, tabToRemove));
+      api.event.emitRemoveFooterBarPanel(this.mapId, tabToRemove);
     }
   };
 

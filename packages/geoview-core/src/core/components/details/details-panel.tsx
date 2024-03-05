@@ -140,9 +140,8 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
             tooltip: `${layer!.layerName}, ${getNumFeaturesLabel(layer!)}`,
           } as LayerListEntry)
       );
-    if (!layerListEntries.length) setSelectedLayerPath('');
     return layerListEntries;
-  }, [visibleLayers, arrayOfLayerDataBatch, setSelectedLayerPath, getNumFeaturesLabel]);
+  }, [visibleLayers, arrayOfLayerDataBatch, getNumFeaturesLabel]);
 
   /**
    * Memoizes the selected layer for the LayerList component.
@@ -214,7 +213,10 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
 
     // Clear all
     removeSelectedFeature('all');
-  }, [memoLayersList, removeSelectedFeature]);
+
+    // Unselect the layer path if no more layers in the list
+    if (!memoLayersList.length) setSelectedLayerPath('');
+  }, [memoLayersList, setSelectedLayerPath, removeSelectedFeature]);
 
   /**
    * Effect used when the layers list changes.
@@ -330,13 +332,10 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
    *
    * @param {LayerListEntry} layerEntry The data of the newly selected layer
    */
-  const handleLayerChange = useCallback(
-    (layerEntry: LayerListEntry): void => {
-      // Set the selected layer path in the store which will in turn trigger the store listeners on this component
-      setSelectedLayerPath(layerEntry.layerPath);
-    },
-    [setSelectedLayerPath]
-  );
+  const handleLayerChange = (layerEntry: LayerListEntry): void => {
+    // Set the selected layer path in the store which will in turn trigger the store listeners on this component
+    setSelectedLayerPath(layerEntry.layerPath);
+  };
 
   // #endregion
 
@@ -388,7 +387,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
         <Layout
           selectedLayerPath={selectedLayerPath || ''}
           layerList={memoLayersList}
-          onLayerListClicked={handleLayerChange}
+          onLayerListClicked={(layerEntry) => handleLayerChange(layerEntry)}
           fullWidth={fullWidth}
         >
           {memoSelectedLayerDataFeatures && (

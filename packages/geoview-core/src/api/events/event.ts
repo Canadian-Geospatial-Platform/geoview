@@ -2,9 +2,18 @@ import EventEmitter from 'eventemitter3';
 
 import { EVENT_NAMES, EventStringId } from './event-types';
 import { PayloadBaseClass } from './payloads/payload-base-class';
-import { ButtonPanelPayload, buttonPanelPayload, inKeyfocusPayload, payloadIsAButtonPanel, payloadIsAInKeyfocus } from './payloads';
+import {
+  ButtonPanelPayload,
+  buttonPanelPayload,
+  payloadIsAButtonPanel,
+  footerBarPayload,
+  FooterBarPayload,
+  payloadIsAFooterBar,
+  inKeyfocusPayload,
+  payloadIsAInKeyfocus,
+} from './payloads';
 import { logger } from '@/core/utils/logger';
-import { TypeButtonPanel } from '@/core/types/global-types';
+import { TypeButtonPanel, TypeTabs } from '@/core/types/global-types';
 
 export type TypeEventHandlerFunction = (payload: PayloadBaseClass) => void;
 
@@ -238,7 +247,7 @@ export class Event {
     this.off(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, mapId, callback as TypeEventHandlerFunction);
   };
 
-  // --- EVENT_MAP_IN_KEYFOCUS ---------------------------------------------------------------------------------------
+  // --- EVENT_MAP_IN_KEYFOCUS ----------------------------------------------------------------------------------------
 
   emitMapInKeyFocus = (mapId: string) => {
     // Emit
@@ -266,6 +275,66 @@ export class Event {
   offMapInKeyFocus = (mapId: string, callback: () => void) => {
     // Unwire
     this.off(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId, callback as TypeEventHandlerFunction);
+  };
+
+  // --- EVENT_FOOTERBAR_TAB_CREATE -----------------------------------------------------------------------------------
+
+  emitCreateFooterBarPanel = (mapId: string, tabProps: TypeTabs) => {
+    // Emit
+    this.emit(footerBarPayload(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_CREATE, mapId, tabProps));
+  };
+
+  onCreateFooterBarPanel = (mapId: string, callback: (footerBarPayload: FooterBarPayload) => void) => {
+    // Wire
+    this.on(
+      EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_CREATE,
+      (payload: PayloadBaseClass<EventStringId>) => {
+        // Log
+        logger.logTraceCoreAPIEvent('FOOTERBAR.EVENT_FOOTERBAR_TAB_CREATE', payload);
+
+        // Payload check, likely unecessary, check later..
+        if (payloadIsAFooterBar(payload)) {
+          // Sure callback
+          callback(payload as FooterBarPayload);
+        }
+      },
+      mapId
+    );
+  };
+
+  offCreateFooterBarPanel = (mapId: string, callback: (footerBarPayload: FooterBarPayload) => void) => {
+    // Unwire
+    this.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_CREATE, mapId, callback as TypeEventHandlerFunction);
+  };
+
+  // --- EVENT_FOOTERBAR_TAB_REMOVE -----------------------------------------------------------------------------------
+
+  emitRemoveFooterBarPanel = (mapId: string, tabToRemove: TypeTabs) => {
+    // Emit
+    this.emit(footerBarPayload(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_REMOVE, mapId, tabToRemove));
+  };
+
+  onRemoveFooterBarPanel = (mapId: string, callback: (footerBarPayload: FooterBarPayload) => void) => {
+    // Wire
+    this.on(
+      EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_REMOVE,
+      (payload: PayloadBaseClass<EventStringId>) => {
+        // Log
+        logger.logTraceCoreAPIEvent('FOOTERBAR.EVENT_FOOTERBAR_TAB_REMOVE', payload);
+
+        // Payload check, likely unecessary, check later..
+        if (payloadIsAFooterBar(payload)) {
+          // Sure callback
+          callback(payload as FooterBarPayload);
+        }
+      },
+      mapId
+    );
+  };
+
+  offRemoveFooterBarPanel = (mapId: string, callback: (footerBarPayload: FooterBarPayload) => void) => {
+    // Unwire
+    this.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_REMOVE, mapId, callback as TypeEventHandlerFunction);
   };
 
   // #endregion

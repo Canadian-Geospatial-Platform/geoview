@@ -7,8 +7,9 @@ import { Slider as MaterialSlider, SliderProps } from '@mui/material';
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { sliderPayload, payloadIsASlider, SliderTypePayload, PayloadBaseClass } from '@/api/events/payloads';
-import { getSxClasses } from './slider-style';
 import { logger } from '@/core/utils/logger';
+
+import { getSxClasses } from './slider-style';
 
 /**
  * Properties for the Slider
