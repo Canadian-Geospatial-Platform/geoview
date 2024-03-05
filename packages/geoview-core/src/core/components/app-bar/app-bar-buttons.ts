@@ -2,8 +2,6 @@ import { api } from '@/app';
 
 import { EVENT_NAMES } from '@/api/events/event-types';
 
-import { PanelApi } from '@/ui';
-
 import { generateId } from '../../utils/utilities';
 
 import { buttonPanelPayload } from '@/api/events/payloads';
@@ -73,7 +71,7 @@ export class AppbarButtons {
         visible: buttonProps.visible === undefined ? true : buttonProps.visible,
       };
 
-      const panel: TypePanelProps = {
+      const thePanelProps: TypePanelProps = {
         ...panelProps,
         type: CONST_PANEL_TYPES.APPBAR,
       };
@@ -88,10 +86,9 @@ export class AppbarButtons {
 
       const buttonPanel: TypeButtonPanel = {
         buttonPanelId: buttonId,
-        panel: new PanelApi(panel, buttonId, this.mapId),
+        panel: thePanelProps,
         button,
         groupName: group,
-        onPanelOpened: panelProps.onPanelOpened,
       };
 
       // add the new button panel to the correct group

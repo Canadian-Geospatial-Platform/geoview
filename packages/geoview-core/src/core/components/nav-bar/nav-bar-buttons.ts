@@ -2,11 +2,9 @@ import { api } from '@/app';
 
 import { EVENT_NAMES } from '@/api/events/event-types';
 
-import { PanelApi } from '@/ui';
-
 import { generateId } from '../../utils/utilities';
 import { buttonPanelPayload } from '@/api/events/payloads';
-import { CONST_PANEL_TYPES, TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
+import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 
 /**
@@ -60,7 +58,7 @@ export class NavbarButtons {
    */
   private createButtonPanel = (
     buttonProps: TypeIconButtonProps,
-    panelProps: TypePanelProps | null | undefined,
+    panelProps: TypePanelProps | undefined,
     groupName: string
   ): TypeButtonPanel | null => {
     if (buttonProps) {
@@ -84,18 +82,9 @@ export class NavbarButtons {
       const buttonPanel: TypeButtonPanel = {
         buttonPanelId: buttonId,
         button,
+        panel: panelProps,
         groupName: group,
       };
-
-      // if adding a panel
-      if (panelProps) {
-        const panel: TypePanelProps = {
-          ...panelProps,
-          type: CONST_PANEL_TYPES.NAVBAR,
-        };
-
-        buttonPanel.panel = new PanelApi(panel, buttonId, this.mapId);
-      }
 
       // add the new button panel to the correct group
       if (group !== '__proto__' && buttonId !== '__proto__') this.buttons[group][buttonId] = buttonPanel;
@@ -131,7 +120,7 @@ export class NavbarButtons {
    * @returns the create button
    */
   createNavbarButton = (buttonProps: TypeIconButtonProps, groupName: string): TypeButtonPanel | null => {
-    return this.createButtonPanel(buttonProps, null, groupName);
+    return this.createButtonPanel(buttonProps, undefined, groupName);
   };
 
   /**
