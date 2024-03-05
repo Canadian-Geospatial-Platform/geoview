@@ -6,15 +6,9 @@ import { Box, List, ListItem, Panel, IconButton, TypeIconButtonProps, SchoolIcon
 
 import { AbstractPlugin, TypeJsonObject, TypeJsonValue, api, toJsonObject, useGeoViewMapId } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
-
 import { payloadIsAButtonPanel, ButtonPanelPayload, PayloadBaseClass, inKeyfocusPayload } from '@/api/events/payloads';
 import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
-
 import ExportButton from '@/core/components/export/export-modal-button';
-import Geolocator from './buttons/geolocator';
-import Notifications from '@/core/components/notifications/notifications';
-import Version from './buttons/version';
-import { getSxClasses } from './app-bar-style';
 import {
   useUIActiveFocusItem,
   useUIActiveFooterBarTabId,
@@ -25,10 +19,17 @@ import { useGeoViewConfig } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import { GuidePanel, Legend, DetailsPanel } from '@/core/components';
 
+import Geolocator from './buttons/geolocator';
+import Notifications from '@/core/components/notifications/notifications';
+import Version from './buttons/version';
+import { getSxClasses } from './app-bar-style';
+import { helpCloseAll, helpClosePanelById, helpOpenPanelById } from './app-bar-helper';
+
 interface GroupPanelType {
   icon: ReactNode;
   content: ReactNode;
 }
+
 /**
  * Create an app-bar with buttons that can open a panel
  */
@@ -69,22 +70,6 @@ export function Appbar(): JSX.Element {
     } as unknown as Record<string, GroupPanelType>;
   }, []);
 
-  const findGroupName = useCallback(
-    (buttonId: string): string | undefined => {
-      let groupName: string | undefined;
-      Object.entries(buttonPanelGroups).forEach(([buttonPanelGroupName, buttonPanelGroup]) => {
-        if (!groupName) {
-          if (Object.keys(buttonPanelGroup).includes(buttonId)) {
-            // Found it
-            groupName = buttonPanelGroupName;
-          }
-        }
-      });
-      return groupName;
-    },
-    [buttonPanelGroups]
-  );
-
   const addButtonPanel = useCallback(
     (payload: ButtonPanelPayload) => {
       // Log
@@ -122,61 +107,10 @@ export function Appbar(): JSX.Element {
     [setButtonPanelGroups]
   );
 
-  const openClosePanelByIdState = useCallback(
-    (buttonId: string, groupName: string | undefined, status: boolean) => {
-      // Read the group name
-      const theGroupName = groupName || findGroupName(buttonId);
-      if (!theGroupName) return;
-
-      // Open or Close it
-      setButtonPanelGroups((prevState) => {
-        // Check if doing it
-        const doIt = !!(
-          prevState[theGroupName] &&
-          prevState[theGroupName][buttonId] &&
-          prevState[theGroupName][buttonId].panel &&
-          prevState[theGroupName][buttonId].panel?.status !== status
-        );
-
-        // If is open/closed right now
-        if (doIt) {
-          return {
-            ...prevState,
-            [theGroupName]: {
-              ...prevState[theGroupName],
-              [buttonId]: {
-                ...prevState[theGroupName][buttonId],
-                panel: {
-                  ...prevState[theGroupName][buttonId].panel!,
-                  status,
-                },
-              },
-            },
-          };
-        }
-
-        // Leave as-is
-        return prevState;
-      });
-    },
-    [findGroupName]
-  );
-
   const closePanelById = useCallback(
     (buttonId: string, groupName: string | undefined) => {
-      // Read the group name
-      const theGroupName = groupName || findGroupName(buttonId);
-
-      // Close the panel
-      openClosePanelByIdState(buttonId, theGroupName, false);
-      setSelectedAppbarButtonId('');
-
-      const buttonElement = buttonId && document.getElementById(mapId)?.querySelector(`#${buttonId}`);
-
-      if (buttonElement) {
-        // put back focus on calling button
-        document.getElementById(buttonId)?.focus();
-      } else {
+      // Callback when removing and focus is lost
+      const focusWhenNoElementCallback = () => {
         const mapCont = api.maps[mapId].map.getTargetElement();
         mapCont.focus();
 
@@ -185,35 +119,27 @@ export function Appbar(): JSX.Element {
           mapCont.classList.add('keyboard-focus');
           api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, `map-${mapId}`));
         }
-      }
+      };
+
+      // Redirect to helper
+      helpClosePanelById(mapId, buttonPanelGroups, buttonId, groupName, setButtonPanelGroups, focusWhenNoElementCallback);
+      setSelectedAppbarButtonId('');
     },
-    [findGroupName, mapId, openClosePanelByIdState]
+    [buttonPanelGroups, mapId]
   );
 
   const closeAll = useCallback(() => {
-    // For each group
-    Object.entries(buttonPanelGroups).forEach(([buttonPanelGroupName, buttonPanelGroup]) => {
-      // For each button
-      Object.keys(buttonPanelGroup).forEach((buttonId) => {
-        // Close it
-        closePanelById(buttonId, buttonPanelGroupName);
-      });
-    });
+    // Redirect to helper
+    helpCloseAll(buttonPanelGroups, closePanelById);
   }, [buttonPanelGroups, closePanelById]);
 
   const openPanelById = useCallback(
     (buttonId: string, groupName: string | undefined) => {
-      // Read the group name
-      const theGroupName = groupName || findGroupName(buttonId);
-
-      // Close any already opened panels
-      closeAll();
-
-      // Open the panel
-      openClosePanelByIdState(buttonId, theGroupName, true);
+      // Redirect to helper
+      helpOpenPanelById(buttonPanelGroups, buttonId, groupName, setButtonPanelGroups, closeAll);
       setSelectedAppbarButtonId(buttonId);
     },
-    [closeAll, findGroupName, openClosePanelByIdState]
+    [buttonPanelGroups, closeAll]
   );
 
   const handleButtonClicked = useCallback(
