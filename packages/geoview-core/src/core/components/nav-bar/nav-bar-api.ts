@@ -11,7 +11,7 @@ import { generateId } from '../../utils/utilities';
  * @exports
  * @class
  */
-export class NavbarButtons {
+export class NavbarApi {
   mapId!: string;
 
   // group of array to hold all buttons, button panels created on the nav-bar

@@ -11,7 +11,7 @@ import { generateId } from '../../utils/utilities';
  * @exports
  * @class
  */
-export class AppbarButtons {
+export class AppbarApi {
   mapId!: string;
 
   // groups of array of button panels to hold all buttons created on the app-bar

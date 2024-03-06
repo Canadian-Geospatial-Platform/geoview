@@ -24,9 +24,15 @@ import { logger } from '@/core/utils/logger';
  * Create a nav-bar with buttons that can call functions or open custom panels
  */
 export function Navbar(): JSX.Element {
+  // ? No props for this component.
+  // ? We are handling the logic via api.event management, via nav-bar-api, once this component is mounted.
+
+  // Log
+  logger.logTraceRender('components/nav-bar/nav-bar');
+
   const mapId = useGeoViewMapId();
 
-  const { t } = useTranslation<string>();
+  const { t } = useTranslation();
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
