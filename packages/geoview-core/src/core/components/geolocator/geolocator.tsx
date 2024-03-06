@@ -42,6 +42,40 @@ export function Geolocator() {
   const urlRef = useRef<string>(`${geolocatorServiceURL}&lang=${displayLanguage}`);
 
   /**
+   * Checks if search term is decimal degree coordinate and return geo list item.
+   * @param {string} searchTerm search term user searched.
+   * @returns GeoListItem | null
+   */
+  const getDecimalDegreeItem = (searchTerm: string): GeoListItem | null => {
+    const latLngRegDD = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/;
+
+    if (!latLngRegDD.test(searchTerm)) {
+      return null;
+    }
+
+    // remove extra spaces and delimiters (the filter). convert string numbers to floaty numbers
+    const coords = searchTerm
+      .split(/[\s|,|;|]/)
+      .filter((n) => !Number.isNaN(n) && n !== '')
+      .map((n) => parseFloat(n));
+
+    // apply buffer to create bbox from point coordinates
+    const buff = 0.015; // degrees
+    const boundingBox: [number, number, number, number] = [coords[1] - buff, coords[0] - buff, coords[1] + buff, coords[0] + buff];
+
+    // prep the lat/long result that needs to be generated along with name based results
+    return {
+      key: 'coordinates',
+      name: `${coords[0]},${coords[1]}`,
+      lat: coords[0],
+      lng: coords[1],
+      bbox: boundingBox,
+      province: '',
+      category: 'Latitude/Longitude',
+    };
+  };
+
+  /**
    * Send fetch call to the service for given search term.
    * @param {string} searchTerm the search term entered by the user
    * @returns void
@@ -55,6 +89,11 @@ export function Geolocator() {
       }
       const result = (await response.json()) as GeoListItem[];
       setIsLoading(false);
+      const ddSupport = getDecimalDegreeItem(searchTerm);
+      if (ddSupport) {
+        // insert at the top of array.
+        result.unshift(ddSupport);
+      }
       setData(result);
     } catch (err) {
       setIsLoading(false);
@@ -96,7 +135,8 @@ export function Geolocator() {
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     setSearchValue(value);
-    if (value.length) {
+    // do fetch request when user enter at least 3 characters.
+    if (value.length >= 3) {
       debouncedRequest(value);
     }
     // clear geo list when search term cleared from input field.
