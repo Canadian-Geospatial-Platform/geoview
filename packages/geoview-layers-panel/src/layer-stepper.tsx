@@ -140,26 +140,6 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     },
   };
 
-  // const snackbarEventOpenListenerFunction = (payload: SnackbarMessagePayload) => {
-  //   // Log
-  //   logger.logTraceCoreAPIEvent('LAYER-STEPPER - snackbarEventOpenListenerFunction', payload);
-
-  //   if (payload.message === 'validation.layer.loadfailed') {
-  //     // Not sure what this if does, leaving it as-is as part of this specialized emit refactor
-  //     setIsLoading(false);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   // Log
-  //   logger.logTraceUseEffect('LAYER-STEPPER - mount', mapId);
-
-  //   api.event.on(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, snackbarEventOpenListenerFunction, mapId);
-  //   return () => {
-  //     api.event.off(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, snackbarEventOpenListenerFunction);
-  //   };
-  // }, [api.event, api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId]);
-
   /**
    * Returns the appropriate error config for ESRI layer types
    *
