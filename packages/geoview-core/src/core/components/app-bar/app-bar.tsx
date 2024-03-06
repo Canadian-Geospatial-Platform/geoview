@@ -17,9 +17,9 @@ import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-inter
 import { useGeoViewConfig } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import { GuidePanel, Legend, DetailsPanel } from '@/core/components';
+import Notifications from '@/core/components/notifications/notifications';
 
 import Geolocator from './buttons/geolocator';
-import Notifications from '@/core/components/notifications/notifications';
 import Version from './buttons/version';
 import { getSxClasses } from './app-bar-style';
 import { helpCloseAll, helpClosePanelById, helpOpenPanelById } from './app-bar-helper';
@@ -263,7 +263,8 @@ export function Appbar(): JSX.Element {
         return [button, panel, tab];
       })
       .forEach((footerGroup) => api.maps[mapId].appBarApi.createAppbarPanel(footerGroup[0], footerGroup[1], footerGroup[2]));
-  }, [appBarConfig?.tabs.core, mapId, panels, t]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appBarConfig?.tabs.core, mapId]); // Not exhaustive, because it'd be dangerous to trigger on `panels` or on `t`, because of how the appbar panels are just recreated all the time (should refactor this, maybe..)
 
   // #endregion
 
