@@ -259,6 +259,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
               children: `EPSG:${value}`,
             },
           }))}
+          variant="standard"
         />
       )}
       {basemapList.map((basemap: TypeBasemapProps) => {
