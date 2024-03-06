@@ -13,9 +13,11 @@ import { MapInfo } from '@/core/components/map-info/map-info';
 
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { Box, CircularProgress, Link, Modal, Snackbar } from '@/ui';
+import { Box, CircularProgress, Link, Modal, Snackbar, Button } from '@/ui';
 import {
   PayloadBaseClass,
+  SnackbarMessagePayload,
+  SnackbarType,
   mapConfigPayload,
   payloadIsAMapComponent,
   payloadIsAModal,
@@ -60,6 +62,12 @@ export function Shell(props: ShellProps): JSX.Element {
   const [components, setComponents] = useState<Record<string, JSX.Element>>({});
   const [update, setUpdate] = useState<number>(0);
 
+  // snackbar state
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarType, setSnackbarType] = useState<SnackbarType>('info');
+  const [snackbarButton, setSnackbarButton] = useState<JSX.Element>();
+
   // get values from the store
   const mapLoaded = useMapLoaded();
   const circularProgressActive = useAppCircularProgressActive();
@@ -93,6 +101,30 @@ export function Shell(props: ShellProps): JSX.Element {
       }));
     }
   };
+
+  const snackBarOpenListenerFunction = (payload: SnackbarMessagePayload) => {
+    // create button
+    const myButton = payload.button?.label ? (
+      <Button type="icon" onClick={payload.button.action}>
+        {payload.button.label}
+      </Button>
+    ) : undefined;
+    setSnackbarButton(myButton);
+
+    // set message and type
+    setSnackbarMessage(payload.message);
+    setSnackbarType(payload.snackbarType);
+
+    // show the notification
+    setSnackbarOpen(true);
+  };
+
+  const snackBarCloseListenerFunction = useCallback((event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbarOpen(false);
+  }, []);
 
   useEffect(() => {
     // Log
@@ -129,7 +161,7 @@ export function Shell(props: ShellProps): JSX.Element {
     api.event.on(EVENT_NAMES.MODAL.EVENT_MODAL_CREATE, modalCreateHandler, shellId);
 
     // Reload
-    // TODO: use store config when we relaod the map
+    // TODO: use store config when we reload the map
     const mapReloadHandler = (payload: PayloadBaseClass) => {
       // Log
       logger.logTraceCoreAPIEvent('SHELL - mapReloadHandler', payload);
@@ -142,11 +174,15 @@ export function Shell(props: ShellProps): JSX.Element {
 
     api.event.on(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, mapReloadHandler, shellId);
 
+    // listen to API event when app wants to show message
+    api.event.onSnackbarOpen(shellId, snackBarOpenListenerFunction);
+
     return () => {
       api.event.off(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, shellId, mapAddComponentHandler);
       api.event.off(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, shellId, mapRemoveComponentHandler);
       api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_CREATE, shellId, modalCreateHandler);
       api.event.off(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, shellId, mapReloadHandler);
+      api.event.offSnackbarOpen(shellId, snackBarOpenListenerFunction);
     };
   }, [components, shellId, updateShell, geoviewConfig]);
 
@@ -181,7 +217,14 @@ export function Shell(props: ShellProps): JSX.Element {
           {Object.keys(components).map((key: string) => {
             return <Fragment key={key}>{components[key]}</Fragment>;
           })}
-          <Snackbar snackBarId={shellId} />
+          <Snackbar
+            snackBarId={shellId}
+            message={snackbarMessage}
+            open={snackbarOpen}
+            type={snackbarType}
+            button={snackbarButton}
+            onClose={snackBarCloseListenerFunction}
+          />
         </Box>
       </FocusTrap>
       <Link id={`bottomlink-${shellId}`} href={`#toplink-${shellId}`} tabIndex={0} sx={[sxClasses.skip, { bottom: '0px' }]}>
