@@ -57,7 +57,7 @@ const transformListTitle = (_title: string, _searchValue: string, province: stri
 
 /**
  * Create list of items to display under search.
- * @param {GeoListItem} geoListItems - items to display
+ * @param {GeoListItem[]} geoListItems - items to display
  * @param {string} searchValue - search text
  * @returns {JSX} - React JSX element
  */

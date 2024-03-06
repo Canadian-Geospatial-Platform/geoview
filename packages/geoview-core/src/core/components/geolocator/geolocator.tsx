@@ -42,7 +42,7 @@ export function Geolocator() {
   const urlRef = useRef<string>(`${geolocatorServiceURL}&lang=${displayLanguage}`);
 
   /**
-   * Checks if search term is decimal degree and return geo list item.
+   * Checks if search term is decimal degree coordinate and return geo list item.
    * @param {string} searchTerm search term user searched.
    * @returns GeoListItem | null
    */
@@ -134,7 +134,7 @@ export function Geolocator() {
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     setSearchValue(value);
-    // do fetch request when user enter alteast 3 characters. #1826
+    // do fetch request when user enter at least 3 characters.
     if (value.length >= 3) {
       debouncedRequest(value);
     }
