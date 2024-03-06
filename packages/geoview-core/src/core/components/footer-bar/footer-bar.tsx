@@ -48,6 +48,9 @@ interface Tab {
  * @returns {JSX.Element} returns the FooterBar Tabs component
  */
 export function FooterBar(): JSX.Element | null {
+  // ? No props for this component.
+  // ? We are handling the logic via api.event management, via footer-bar-api, once this component is mounted.
+
   // Log
   logger.logTraceRender('components/footer-bar/footer-bar');
 

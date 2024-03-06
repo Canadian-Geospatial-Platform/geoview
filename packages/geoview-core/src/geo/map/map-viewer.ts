@@ -20,8 +20,8 @@ import { TypeClickMarker, api, unmountMap } from '@/app';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
-import { AppbarButtons } from '@/core/components/app-bar/app-bar-buttons';
-import { NavbarButtons } from '@/core/components/nav-bar/nav-bar-buttons';
+import { AppbarApi } from '@/core/components/app-bar/app-bar-api';
+import { NavbarApi } from '@/core/components/nav-bar/nav-bar-api';
 import { FooterBarApi } from '@/core/components/footer-bar/footer-bar-api';
 
 import { GeoviewRenderer } from '@/geo/renderer/geoview-renderer';
@@ -86,14 +86,14 @@ export class MapViewer {
   // the overview map reat root
   overviewRoot: Root | undefined;
 
-  // used to access button panel API to create buttons and button panels on the app-bar
-  appBarButtons!: AppbarButtons;
+  // used to access button bar API to create buttons and button panels on the app-bar
+  appBarApi: AppbarApi;
 
-  // used to access button panel API to create buttons and button panels on the nav-bar
-  navBarButtons!: NavbarButtons;
+  // used to access button bar API to create buttons and button panels on the nav-bar
+  navBarApi: NavbarApi;
 
-  // used to access the footer tabs api
-  footerBar!: FooterBarApi;
+  // used to access the footer bar API to create buttons and footer panels on the footer-bar
+  footerBarApi: FooterBarApi;
 
   // used to access basemap functions
   basemap!: Basemap;
@@ -132,9 +132,9 @@ export class MapViewer {
 
     this.i18nInstance = i18instance;
 
-    this.appBarButtons = new AppbarButtons(this.mapId);
-    this.navBarButtons = new NavbarButtons(this.mapId);
-    this.footerBar = new FooterBarApi(this.mapId);
+    this.appBarApi = new AppbarApi(this.mapId);
+    this.navBarApi = new NavbarApi(this.mapId);
+    this.footerBarApi = new FooterBarApi(this.mapId);
 
     this.modal = new ModalApi(this.mapId);
 

@@ -33,11 +33,15 @@ interface GroupPanelType {
  * Create an app-bar with buttons that can open a panel
  */
 export function Appbar(): JSX.Element {
+  // ? No props for this component.
+  // ? We are handling the logic via api.event management, via app-bar-api, once this component is mounted.
+
   // Log
   logger.logTraceRender('components/app-bar/app-bar');
-  const { t } = useTranslation();
 
   const mapId = useGeoViewMapId();
+
+  const { t } = useTranslation();
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
@@ -258,7 +262,7 @@ export function Appbar(): JSX.Element {
         };
         return [button, panel, tab];
       })
-      .forEach((footerGroup) => api.maps[mapId].appBarButtons.createAppbarPanel(footerGroup[0], footerGroup[1], footerGroup[2]));
+      .forEach((footerGroup) => api.maps[mapId].appBarApi.createAppbarPanel(footerGroup[0], footerGroup[1], footerGroup[2]));
   }, [appBarConfig?.tabs.core, mapId, panels, t]);
 
   // #endregion
