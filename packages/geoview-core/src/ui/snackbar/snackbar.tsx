@@ -3,11 +3,9 @@ import { useEffect, forwardRef, useState } from 'react';
 import { Alert as MaterialAlert, AlertProps, Snackbar as MaterialSnackbar, Button } from '@mui/material';
 
 import { api, useGeoViewMapId } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { Cast } from '@/core/types/global-types';
-import { PayloadBaseClass, payloadIsASnackbarMessage } from '@/api/events/payloads';
-import { SnackbarType } from '@/api/events/payloads/snackbar-message-payload';
+import { SnackbarMessagePayload, SnackbarType } from '@/api/events/payloads/snackbar-message-payload';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -55,27 +53,22 @@ export function Snackbar(props: SnackBarProps): JSX.Element {
   const [snackbarType, setSnackbarType] = useState<SnackbarType>('info');
   const [button, setButton] = useState<JSX.Element | undefined>();
 
-  const snackBarOpenListenerFunction = (payload: PayloadBaseClass) => {
-    // Log
-    logger.logTraceCoreAPIEvent('UI.SNACKBAR - snackBarOpenListenerFunction', payload);
+  const snackBarOpenListenerFunction = (payload: SnackbarMessagePayload) => {
+    // apply function if provided
+    const myButton = payload.button?.label
+      ? SnackButton({
+          label: payload.button.label as string,
+          action: Cast<() => void>(payload.button.action),
+        })
+      : undefined;
 
-    if (payloadIsASnackbarMessage(payload)) {
-      // apply function if provided
-      const myButton = payload.button?.label
-        ? SnackButton({
-            label: payload.button.label as string,
-            action: Cast<() => void>(payload.button.action),
-          })
-        : undefined;
+    // get message and set type
+    setMessage(payload.message);
+    setButton(myButton);
+    setSnackbarType(payload.snackbarType);
 
-      // get message and set type
-      setMessage(payload.message);
-      setButton(myButton);
-      setSnackbarType(payload.snackbarType);
-
-      // show the notification
-      setOpen(true);
-    }
+    // show the notification
+    setOpen(true);
   };
 
   const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
@@ -91,11 +84,12 @@ export function Snackbar(props: SnackBarProps): JSX.Element {
     logger.logTraceUseEffect('UI.SNACKBAR - mount', mapId);
 
     // listen to API event when app wants to show message
-    api.event.on(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, snackBarOpenListenerFunction, mapId);
+    api.event.onSnackbarOpen(mapId, snackBarOpenListenerFunction);
 
     // remove the listener when the component unmounts
     return () => {
-      api.event.off(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, snackBarOpenListenerFunction);
+      // Unwire
+      api.event.offSnackbarOpen(mapId, snackBarOpenListenerFunction);
     };
   }, [mapId]);
 

@@ -9,10 +9,9 @@ import sanitizeHtml from 'sanitize-html';
 
 import { AbstractGeoViewLayer, api } from '@/app';
 import { TypeLocalizedString } from '@/geo/map/map-schema-types';
-import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { SnackbarType, snackbarMessagePayload } from '@/api/events/payloads';
+import { SnackbarType } from '@/api/events/payloads';
 import { NotificationType } from '@/core/components/notifications/notifications';
 import { Config } from '@/core/utils/config/config';
 import { logger } from '@/core/utils/logger';
@@ -129,7 +128,8 @@ export function addNotificationError(mapId: string, message: string) {
  */
 // eslint-disable-next-line no-underscore-dangle
 function _showSnackbarMessage(mapId: string, type: SnackbarType, message: string, button?: TypeJsonObject) {
-  api.event.emit(snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, type, message, button));
+  // Emit
+  api.event.emitSnackbarOpen(mapId, type, message, button);
 }
 
 /**
