@@ -17,9 +17,9 @@ import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-inter
 import { useGeoViewConfig } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import { GuidePanel, Legend, DetailsPanel } from '@/core/components';
+import Notifications from '@/core/components/notifications/notifications';
 
 import Geolocator from './buttons/geolocator';
-import Notifications from '@/core/components/notifications/notifications';
 import Version from './buttons/version';
 import { getSxClasses } from './app-bar-style';
 import { helpCloseAll, helpClosePanelById, helpOpenPanelById } from './app-bar-helper';
