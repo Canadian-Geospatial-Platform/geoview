@@ -52,7 +52,7 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) => 
     mapConfig: undefined,
     setMapConfig: (config: TypeMapFeaturesConfig) => {
       // Log (leaving the logDebug for now until more tests are done with the config 2024-02-28)
-      logger.logDebug('Sending the map config to the store...');
+      logger.logDebug('Sending the map config to the store...', config.mapId);
 
       // ! this is a copy of the original map configuration, no modifications is allowed
       // ? this configuration is use to reload the map
