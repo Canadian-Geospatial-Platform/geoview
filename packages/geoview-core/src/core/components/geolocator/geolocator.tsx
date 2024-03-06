@@ -91,7 +91,8 @@ export function Geolocator() {
       setIsLoading(false);
       const ddSupport = getDecimalDegreeItem(searchTerm);
       if (ddSupport) {
-        result.push(ddSupport);
+        // insert at the top of array.
+        result.unshift(ddSupport);
       }
       setData(result);
     } catch (err) {

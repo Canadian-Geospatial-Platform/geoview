@@ -44,8 +44,13 @@ const transformListTitle = (_title: string, _searchValue: string, province: stri
   const searchValue = _searchValue.toUpperCase();
   const idx = title.indexOf(searchValue);
   if (!searchValue || idx === -1) {
-    return _title;
+    return (
+      <Box className="list-title">
+        <Box>{_title}</Box>
+      </Box>
+    );
   }
+
   const len = searchValue.length;
   return (
     <HtmlToReact
