@@ -3,9 +3,11 @@ import { Box, ListItemButton, Grid, Tooltip, Typography } from '@/ui';
 import { GeoListItem } from './geolocator';
 import { sxClassesList } from './geolocator-style';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { HtmlToReact } from '@/app';
 
 type GeoListProps = {
   geoListItems: GeoListItem[];
+  searchValue: string;
 };
 
 type tooltipProp = Pick<GeoListItem, 'name' | 'province' | 'category'>;
@@ -31,11 +33,40 @@ const getTooltipTitle = ({ name, province, category }: tooltipProp): string => {
 };
 
 /**
+ * Transform the search value in search result with bold css.
+ * @param {string} title list title in search result
+ * @param {string} searchValue value with user did the search
+ * @param {string} province province of the list title in search result
+ * @returns string
+ */
+const transformListTitle = (_title: string, _searchValue: string, province: string) => {
+  const title = _title.toUpperCase();
+  const searchValue = _searchValue.toUpperCase();
+  const idx = title.indexOf(searchValue);
+  if (!searchValue || idx === -1) {
+    return (
+      <Box className="list-title">
+        <Box>{_title}</Box>
+      </Box>
+    );
+  }
+
+  const len = searchValue.length;
+  return (
+    <HtmlToReact
+      className="list-title"
+      htmlContent={`${_title.slice(0, idx)}<b>${_title.slice(idx, idx + len)}</b>${_title.slice(idx + len)}${province}`}
+    />
+  );
+};
+
+/**
  * Create list of items to display under search.
- * @param {geoListItems} - items to display
+ * @param {GeoListItem[]} geoListItems - items to display
+ * @param {string} searchValue - search text
  * @returns {JSX} - React JSX element
  */
-export default function GeoList({ geoListItems }: GeoListProps) {
+export default function GeoList({ geoListItems, searchValue }: GeoListProps) {
   const { zoomToGeoLocatorLocation } = useMapStoreActions();
 
   return (
@@ -45,17 +76,17 @@ export default function GeoList({ geoListItems }: GeoListProps) {
           title={getTooltipTitle(geoListItem)}
           placement="right"
           // sometime when we search by `bay`, response have name and lat same, thats why index is used to distinguish
-          // eslint-disable-next-line react/no-array-index-key
-          key={`${geoListItem.name}-${geoListItem.lat}-${index}`}
+          key={`${geoListItem.name}-${geoListItem.lat}-${index.toString()}`}
         >
           <ListItem component="div" disablePadding>
             <ListItemButton onClick={() => zoomToGeoLocatorLocation([geoListItem.lng, geoListItem.lat], geoListItem.bbox)}>
               <Grid container>
                 <Grid item xs={12} sm={8}>
-                  <Typography component="p" sx={sxClassesList.main}>
-                    <Typography component="span">{geoListItem.name}</Typography>
-                    {!!geoListItem.province && geoListItem.province !== 'null' && (
-                      <Typography component="span">{`, ${geoListItem.province}`}</Typography>
+                  <Typography component="div" sx={sxClassesList.listStyle}>
+                    {transformListTitle(
+                      geoListItem.name,
+                      searchValue,
+                      !!geoListItem.province && geoListItem.province !== 'null' ? `, ${geoListItem.province}` : ''
                     )}
                   </Typography>
                 </Grid>
