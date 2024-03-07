@@ -75,7 +75,7 @@ export class Select extends Interaction {
 
   /**
    * Wires an event handler.
-   * @param callback The callback to be executed whenever the event is raised
+   * @param {SelectChangedDelegate} callback The callback to be executed whenever the event is raised
    */
   onSelectChanged = (callback: SelectChangedDelegate): void => {
     // Push a new callback handler to the list of handlers
@@ -84,7 +84,7 @@ export class Select extends Interaction {
 
   /**
    * Unwires an event handler.
-   * @param callback The callback to stop being called whenever the event is raised
+   * @param {SelectChangedDelegate} callback The callback to stop being called whenever the event is raised
    */
   offSelectChanged = (callback: SelectChangedDelegate): void => {
     const index = this.onSelectChangedHandlers.indexOf(callback);

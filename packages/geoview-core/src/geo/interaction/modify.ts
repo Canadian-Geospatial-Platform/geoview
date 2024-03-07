@@ -90,7 +90,7 @@ export class Modify extends Interaction {
 
   /**
    * Wires an event handler.
-   * @param callback The callback to be executed whenever the event is raised
+   * @param {ModifyDelegate} callback The callback to be executed whenever the event is raised
    */
   onModifyStarted = (callback: ModifyDelegate): void => {
     // Push a new callback handler to the list of handlers
@@ -99,7 +99,7 @@ export class Modify extends Interaction {
 
   /**
    * Unwires an event handler.
-   * @param callback The callback to stop being called whenever the event is raised
+   * @param {ModifyDelegate} callback The callback to stop being called whenever the event is raised
    */
   offModifyStarted = (callback: ModifyDelegate): void => {
     const index = this.onModifyStartedHandlers.indexOf(callback);
@@ -110,7 +110,7 @@ export class Modify extends Interaction {
 
   /**
    * Emits an event to all handlers.
-   * @param {OLSelectEvent} modifyEvent object representing the Open Layers event from the interaction
+   * @param {OLModifyEvent} modifyEvent object representing the Open Layers event from the interaction
    */
   emitModifyStarted = (modifyEvent: OLModifyEvent) => {
     // Trigger all the handlers in the array
@@ -119,7 +119,7 @@ export class Modify extends Interaction {
 
   /**
    * Wires an event handler.
-   * @param callback The callback to be executed whenever the event is raised
+   * @param {ModifyDelegate} callback The callback to be executed whenever the event is raised
    */
   onModifyEnded = (callback: ModifyDelegate): void => {
     // Push a new callback handler to the list of handlers
@@ -128,7 +128,7 @@ export class Modify extends Interaction {
 
   /**
    * Unwires an event handler.
-   * @param callback The callback to stop being called whenever the event is raised
+   * @param {ModifyDelegate} callback The callback to stop being called whenever the event is raised
    */
   offModifyEnded = (callback: ModifyDelegate): void => {
     const index = this.onModifyEndedHandlers.indexOf(callback);
@@ -139,7 +139,7 @@ export class Modify extends Interaction {
 
   /**
    * Emits an event to all handlers.
-   * @param {OLSelectEvent} modifyEvent object representing the Open Layers event from the interaction
+   * @param {OLModifyEvent} modifyEvent object representing the Open Layers event from the interaction
    */
   emitModifyEnded = (modifyEvent: OLModifyEvent) => {
     // Trigger all the handlers in the array
