@@ -49,6 +49,8 @@ interface TypeSliderProps extends SliderProps {
  * @returns {JSX.Element} the created Slider element
  */
 export function Slider(props: TypeSliderProps): JSX.Element {
+  // TODO: Refactor - Remove any coupling to 'api' from inside that ui component
+
   const { ...properties } = props;
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);

@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import { useState, useEffect, useCallback, Fragment, CSSProperties, ReactNode } from 'react';
+import { Fragment, CSSProperties, ReactNode } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -11,22 +11,18 @@ import { Box, Dialog, DialogActions, DialogContent, DialogProps, DialogTitle } f
 import { animated } from '@react-spring/web';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { HtmlToReact } from '@/core/containers/html-to-react';
-
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { api } from '@/app';
-
-import { TypeModalProps } from '.';
-import { CloseIcon, IconButton } from '..';
-import { PayloadBaseClass, payloadIsAModal } from '@/api/events/payloads';
-import { getSxClasses } from './modal-style';
 import { logger } from '@/core/utils/logger';
+
+import { CloseIcon, IconButton } from '..';
+import { getSxClasses } from './modal-style';
 import { useFadeIn } from '@/core/utils/useSpringAnimations';
 
 /**
  * Customized Material UI Dialog Properties
  */
 interface TypeDialogProps extends Omit<DialogProps, 'title'> {
-  modalId?: string;
+  modalId: string;
+  modalProps?: TypeModalProps;
 
   // custom dialog classes and styles
   className?: string;
@@ -49,14 +45,76 @@ interface TypeDialogProps extends Omit<DialogProps, 'title'> {
   // action elements / buttons
   actions?: ReactNode;
 
-  // id of the map that is using this modal
-  mapId: string;
-
   container?: Element;
   open: boolean;
   fullScreen?: boolean;
   'aria-labelledby'?: string;
   'aria-describedby'?: string;
+}
+
+/**
+ * Properties definition of the modal
+ */
+export type TypeModalProps = {
+  // id of the modal. Must be unique. If not provided, it will be generated
+  modalId?: string;
+
+  // header of modal. Contains heading (title) of modal and/or action buttons, if provided. If header is not provided, modal will have no header content
+  header?: ModalHeader;
+
+  // content (description) of the modal. The HTML passed will be displayed inside a <div> element
+  content: ReactNode | string;
+
+  // footer object for the modal. Can contain buttons list as an array of JSX elements. If none provided, there will be no action buttons or footer
+  footer?: ModalFooter;
+
+  // boolean condition to check if modal is active (open) or not
+  active?: boolean;
+
+  // function that opens a modal
+  open?: () => void;
+
+  // function that closes a modal
+  close?: () => void;
+
+  // the id of map whose modal is generated
+  mapId?: string;
+
+  // width of the modal
+  width?: string | number;
+
+  // height of the modal
+  height?: string | number;
+};
+
+/**
+ * Modal header properties interface
+ */
+export interface ModalHeader {
+  // the heading (title) of modal. MUI places heading inside <h2> element
+  title: string | undefined;
+
+  // for the action buttons like close, back etc. Must be an array of objects with 'id' and 'content'
+  actions?: Array<ModalActionsType>;
+}
+
+/**
+ * Modal footer properties interface
+ */
+export interface ModalFooter {
+  // the action buttons in footer of the modal. Must be an array
+  actions?: Array<ModalActionsType>;
+}
+
+/**
+ * Both header and footer actions' properties interface
+ */
+export interface ModalActionsType {
+  // the id of the action (button)
+  actionId: string;
+
+  // content is the action itself, HTML (in the form of a string) or JSX
+  content?: ReactNode;
 }
 
 /**
@@ -66,8 +124,12 @@ interface TypeDialogProps extends Omit<DialogProps, 'title'> {
  * @returns {JSX.Element} the created Dialog element
  */
 export function Modal(props: TypeDialogProps): JSX.Element {
+  // Log
+  logger.logTraceRender('MODAL', props);
+
   const {
     modalId,
+    modalProps,
     title,
     titleId,
     className,
@@ -82,7 +144,6 @@ export function Modal(props: TypeDialogProps): JSX.Element {
     contentTextId,
     contentTextClassName,
     contentTextStyle,
-    mapId,
     'aria-labelledby': ariaLabeledBy,
     'aria-describedby': ariaDescribedBy,
   } = props;
@@ -98,17 +159,6 @@ export function Modal(props: TypeDialogProps): JSX.Element {
   let openEvent = false;
 
   /**
-   * Causes the modal to re-render
-   */
-  const updateModal = useCallback(() => {
-    // Log
-    logger.logTraceUseCallback('UI.MODAL - updateModal');
-
-    setUpdate((prevState) => {
-      return 1 + prevState;
-    });
-  }, []);
-
   const fadeInAnimation = useFadeIn();
   const AnimatedDialog = animated(Dialog);
 
@@ -128,7 +178,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
       // eslint-disable-next-line react/no-unused-prop-types
     })(({ classes }: { classes: ClassNameMap }) => (
       <AnimatedDialog
-        open={openEvent}
+        open={open}
         onClose={modal.close}
         container={document.querySelector(`#${modal.mapId}`)}
         style={fadeInAnimation}
@@ -201,70 +251,10 @@ export function Modal(props: TypeDialogProps): JSX.Element {
     return <CustomDialog />;
   };
 
-  const modalOpenListenerFunction = (payload: PayloadBaseClass) => {
-    // Log
-    logger.logTraceCoreAPIEvent('UI.MODAL - modalOpenListenerFunction', payload);
-
-    if (payloadIsAModal(payload)) {
-      if (modalId === payload.modalId) {
-        const modal = api.maps[mapId].modal.modals[payload.modalId] as TypeModalProps;
-        openEvent = true;
-
-        setCreatedModal(ceatedModalJSXReturner(modal));
-      }
-    }
-  };
-
-  const modalUpdateListenerFunction = (payload: PayloadBaseClass) => {
-    // Log
-    logger.logTraceCoreAPIEvent('UI.MODAL - modalUpdateListenerFunction', payload);
-
-    if (payloadIsAModal(payload)) {
-      if (modalId === payload.modalId) {
-        const modal = api.maps[mapId].modal.modals[payload.modalId] as TypeModalProps;
-
-        setCreatedModal(ceatedModalJSXReturner(modal));
-      }
-    }
-  };
-
-  const modalCloseListenerFunction = (payload: PayloadBaseClass) => {
-    // Log
-    logger.logTraceCoreAPIEvent('UI.MODAL - modalCloseListenerFunction', payload);
-
-    if (payloadIsAModal(payload)) {
-      if (modalId === payload.modalId) {
-        if (!payload.open) openEvent = false;
-        setCreatedModal(<Dialog open={openEvent} sx={sxClasses.closedModal} />);
-      }
-    }
-  };
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('UI.MODAL - updateModal');
-
-    // to open the modal
-    api.event.on(EVENT_NAMES.MODAL.EVENT_MODAL_OPEN, modalOpenListenerFunction, mapId);
-
-    // to update modals
-    api.event.on(EVENT_NAMES.MODAL.EVENT_MODAL_UPDATE, modalUpdateListenerFunction, mapId);
-
-    // to close the modal
-    api.event.on(EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE, modalCloseListenerFunction, mapId);
-
-    return () => {
-      api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_OPEN, mapId, modalOpenListenerFunction);
-      api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE, mapId, modalCloseListenerFunction);
-      api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_UPDATE, mapId, modalUpdateListenerFunction);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [updateModal, createdModal]);
-
   return (
-    createdModal || (
+    (modalProps && ceatedModalJSXReturner(modalProps)) || (
       <Dialog
-        open={open || openEvent}
+        open={open}
         sx={sxClasses.dialog}
         className={`${className && className}`}
         style={{ ...style, position: 'absolute' }}
