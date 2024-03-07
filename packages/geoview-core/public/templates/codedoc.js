@@ -125,8 +125,6 @@ function getAllInteractionEvents(api) {
     api.eventNames.INTERACTION.EVENT_EXTENT,
     api.eventNames.INTERACTION.EVENT_DRAW_STARTED,
     api.eventNames.INTERACTION.EVENT_DRAW_ENDED,
-    api.eventNames.INTERACTION.EVENT_MODIFY_STARTED,
-    api.eventNames.INTERACTION.EVENT_MODIFY_ENDED,
     api.eventNames.INTERACTION.EVENT_TRANSLATE_STARTED,
     api.eventNames.INTERACTION.EVENT_TRANSLATE_ENDED,
   ];

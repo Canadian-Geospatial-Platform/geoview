@@ -11,8 +11,8 @@ export type InteractionEventKey =
   | 'EVENT_DRAW_STARTED'
   | 'EVENT_DRAW_ENDED'
   | 'EVENT_DRAW_ABORTED'
-  | 'EVENT_MODIFY_STARTED'
-  | 'EVENT_MODIFY_ENDED'
+  // | 'EVENT_MODIFY_STARTED'
+  // | 'EVENT_MODIFY_ENDED'
   | 'EVENT_TRANSLATE_STARTED'
   | 'EVENT_TRANSLATE_ENDED';
 
@@ -38,15 +38,15 @@ export const INTERACTION: Record<InteractionEventKey, EventStringId> = {
    */
   EVENT_DRAW_ABORTED: 'interaction/draw_aborted',
 
-  /**
-   * Event triggered when modifying has started
-   */
-  EVENT_MODIFY_STARTED: 'interaction/modify_started',
+  // /**
+  //  * Event triggered when modifying has started
+  //  */
+  // EVENT_MODIFY_STARTED: 'interaction/modify_started',
 
-  /**
-   * Event triggered when modifying has ended
-   */
-  EVENT_MODIFY_ENDED: 'interaction/modify_ended',
+  // /**
+  //  * Event triggered when modifying has ended
+  //  */
+  // EVENT_MODIFY_ENDED: 'interaction/modify_ended',
 
   /**
    * Event is triggered when a translate operation starts
