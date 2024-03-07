@@ -8,7 +8,6 @@ import { globalStyleOverrides } from './global-style-overrides';
 function tooltipsPopperContainer() {
   // Use the fullscreen element if in fullscreen mode, otherwise just the document's body
   return document.fullscreenElement ?? document.body;
-  //shell-mapWM1
 }
 
 export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoViewColors): ThemeOptions => {
@@ -194,7 +193,7 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
         defaultProps: {
           PopperProps: {
             container: tooltipsPopperContainer,
-          }
+          },
         },
         styleOverrides: {
           tooltip: {
