@@ -3,6 +3,14 @@ import { IGeoViewColors } from './types';
 import { font, headingStyles, opacity, geoViewColors as defaultGeoViewColors, geoViewFontSizes } from './default';
 import { globalStyleOverrides } from './global-style-overrides';
 
+// this function is fixing tooltips not appearing in fullscreen mode, #1685
+// https://github.com/mui/material-ui/issues/15618#issuecomment-1893503162
+function tooltipsPopperContainer() {
+  // Use the fullscreen element if in fullscreen mode, otherwise just the document's body
+  return document.fullscreenElement ?? document.body;
+  //shell-mapWM1
+}
+
 export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoViewColors): ThemeOptions => {
   const themeOptions: ThemeOptions = {
     palette: {
@@ -183,6 +191,11 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
         styleOverrides: globalStyleOverrides(geoViewColors),
       },
       MuiTooltip: {
+        defaultProps: {
+          PopperProps: {
+            container: tooltipsPopperContainer,
+          }
+        },
         styleOverrides: {
           tooltip: {
             backgroundColor: geoViewColors.bgColor.dark[800],
