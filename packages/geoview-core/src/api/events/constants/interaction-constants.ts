@@ -7,7 +7,6 @@ import { EventStringId } from '../event-types';
 
 /** Valid keys for the INTERACTION category */
 export type InteractionEventKey =
-  | 'EVENT_SELECTED'
   | 'EVENT_EXTENT'
   | 'EVENT_DRAW_STARTED'
   | 'EVENT_DRAW_ENDED'
@@ -19,11 +18,6 @@ export type InteractionEventKey =
 
 /** Record that associates DRAW's event keys to their event string id */
 export const INTERACTION: Record<InteractionEventKey, EventStringId> = {
-  /**
-   * Event is triggered when a select notification opens
-   */
-  EVENT_SELECTED: 'interaction/select_selected',
-
   /**
    * Event is triggered when a select notification opens
    */

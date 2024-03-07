@@ -3,12 +3,10 @@ import { SelectEvent as OLSelectEvent, Options as OLSelectOptions } from 'ol/int
 import Collection from 'ol/Collection';
 import Feature from 'ol/Feature';
 
-import { Interaction, InteractionOptions } from './interaction';
-import { api } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { selectPayload } from '@/api/events/payloads';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { GeoUtilities } from '@/geo/utils/utilities';
+
+import { Interaction, InteractionOptions } from './interaction';
 
 /**
  * Supported options for select interactions
@@ -20,6 +18,11 @@ export type SelectOptions = InteractionOptions & {
 };
 
 /**
+ * Define a delegate for the event handler function signature
+ */
+type SelectChangedDelegate = (sender: Select, event: OLSelectEvent) => void;
+
+/**
  * Class used for selecting features on a map
  *
  * @exports
@@ -28,6 +31,9 @@ export type SelectOptions = InteractionOptions & {
 export class Select extends Interaction {
   // The embedded Open Layers Select component
   ol_select: OLSelect;
+
+  // Keep all callback delegates references
+  private onSelectChangedHandlers: SelectChangedDelegate[] = [];
 
   /**
    * Initialize Select component
@@ -47,8 +53,8 @@ export class Select extends Interaction {
     // Activate the OpenLayers Select module
     this.ol_select = new OLSelect(olOptions);
 
-    // Wire handler when drawing is changed
-    this.ol_select.on('select', this.onSelectChanged);
+    // Wire handler when drawing is changed and immediately re-emit
+    this.ol_select.on('select', this.emitSelectChanged);
   }
 
   /**
@@ -68,11 +74,31 @@ export class Select extends Interaction {
   }
 
   /**
-   * Handles when the selection has changed
-   * @param {OLSelectEvent} e object representing the Open Layers event from the interaction
+   * Wires an event handler.
+   * @param callback The callback to be executed whenever the event is raised
    */
-  onSelectChanged = (e: OLSelectEvent) => {
-    // Raises EVENT_SELECTED event via the api
-    api.event.emit(selectPayload(EVENT_NAMES.INTERACTION.EVENT_SELECTED, this.mapViewer.mapId, e));
+  onSelectChanged = (callback: SelectChangedDelegate): void => {
+    // Push a new callback handler to the list of handlers
+    this.onSelectChangedHandlers.push(callback);
+  };
+
+  /**
+   * Unwires an event handler.
+   * @param callback The callback to stop being called whenever the event is raised
+   */
+  offSelectChanged = (callback: SelectChangedDelegate): void => {
+    const index = this.onSelectChangedHandlers.indexOf(callback);
+    if (index !== -1) {
+      this.onSelectChangedHandlers.splice(index, 1);
+    }
+  };
+
+  /**
+   * Emits an event to all handlers.
+   * @param {OLSelectEvent} selectEvent object representing the Open Layers event from the interaction
+   */
+  emitSelectChanged = (selectEvent: OLSelectEvent) => {
+    // Trigger all the handlers in the array
+    this.onSelectChangedHandlers.forEach((handler) => handler(this, selectEvent));
   };
 }

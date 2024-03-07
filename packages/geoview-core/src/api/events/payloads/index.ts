@@ -11,7 +11,6 @@ export * from './in-keyfocus-payload';
 export * from './inter-draw-payload';
 export * from './inter-extent-payload';
 export * from './inter-modify-payload';
-export * from './inter-select-payload';
 export * from './inter-translate-payload';
 export * from './layer-config-payload';
 export * from './layer-set-payload';
