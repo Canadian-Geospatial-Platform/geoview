@@ -110,7 +110,7 @@
         const translate1 = map.initTranslateInteractions();
 
         // Wire handler
-        translate1.onTranslatetarted((sender, payload) => {
+        translate1.onTranslateStarted((sender, payload) => {
           // Log the event
           addLog('LOGS1', 'translateStarted');
           console.log(payload);

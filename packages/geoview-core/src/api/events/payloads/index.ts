@@ -10,7 +10,6 @@ export * from './geoview-layer-payload';
 export * from './get-feature-info-payload';
 export * from './get-legends-payload';
 export * from './in-keyfocus-payload';
-export * from './inter-draw-payload';
 export * from './inter-extent-payload';
 export * from './layer-config-payload';
 export * from './layer-set-payload';

@@ -144,6 +144,27 @@
 
         // Start drawing interaction
         draw1 = map1.initDrawInteractions(groupKey, geomType);
+
+        // Wire handler
+        draw1.onDrawStart((sender, payload) => {
+          // Log the event
+          addLog('LOGS1', 'drawStart');
+          console.log(payload);
+        });
+
+        // Wire handler
+        draw1.onDrawEnd((sender, payload) => {
+          // Log the event
+          addLog('LOGS1', 'drawEnd');
+          console.log(payload);
+        });
+
+        // Wire handler
+        draw1.onDrawAbort((sender, payload) => {
+          // Log the event
+          addLog('LOGS1', 'drawAbort');
+          console.log(payload);
+        });
       }
 
       function stopDrawing1() {
@@ -167,8 +188,6 @@
             (payload) => {
               // Init map
               initMap1(cgpv.api.maps[mapId1]);
-              // Wire the logs
-              wireLogs(cgpv.api, mapId1, 'LOGS1');
             },
             mapId1
           );
