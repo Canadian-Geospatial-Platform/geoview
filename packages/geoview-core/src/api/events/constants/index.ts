@@ -4,7 +4,6 @@ export * from './feature-highlight-constants';
 export * from './footer-bar-constants';
 export * from './get-feature-info-constants';
 export * from './get-legends-constants';
-export * from './interaction-constants';
 export * from './layer-set-constants';
 export * from './layer-constants';
 export * from './map-constants';

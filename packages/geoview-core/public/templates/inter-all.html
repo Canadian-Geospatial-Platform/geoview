@@ -320,6 +320,13 @@
             addLog('LOGS1', 'modifyStarted');
             console.log(payload);
           });
+
+          // Wire handler
+          groupInteractions[groupKey]['modify'].onModifyEnded((sender, payload) => {
+            // Log the event
+            addLog('LOGS1', 'modifyEnded');
+            console.log(payload);
+          });
         }
       }
 
@@ -345,13 +352,6 @@
         else {
           // Init snap interaction
           groupInteractions[groupKey]['snap'] = map1.initSnapInteractions(groupKey);
-
-          // Wire handler
-          groupInteractions[groupKey]['snap'].onModifyStarted((sender, payload) => {
-            // Log the event
-            addLog('LOGS1', 'modifyStarted');
-            console.log(payload);
-          });
         }
       }
 
