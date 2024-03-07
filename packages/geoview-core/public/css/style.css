@@ -72,7 +72,7 @@ td {
 }
 
 .header-table {
-  width: 1180px;
+  width: 100%;
   text-align: left;
   margin: 0 auto;
 }
@@ -96,7 +96,7 @@ td {
 .geoview-map {
   height: 800px;
   border: gray 1px solid;
-
+  width: calc(100%);
 }
 
 
