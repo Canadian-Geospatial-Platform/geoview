@@ -1,4 +1,3 @@
-export * from './basemap-layers-payload';
 export * from './boolean-payload';
 export * from './button-panel-payload';
 export * from './clear-highlights-payload';

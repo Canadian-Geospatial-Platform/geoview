@@ -1,5 +1,4 @@
 export * from './app-bar-constants';
-export * from './basemap-constants';
 export * from './feature-highlight-constants';
 export * from './footer-bar-constants';
 export * from './get-feature-info-constants';
