@@ -68,13 +68,13 @@ function AppStart(props: AppStartProps): JSX.Element {
     });
 
     //! call layer sets creation here instead of map event processor because the store map event processor
-    //! is ot created yet
-    api.getFeatureInfoLayerSet(mapId);
-    api.getLegendsLayerSet(mapId);
+    //! is not created yet
+    // TODO YC:delete this line = "    api.getFeatureInfoLayerSet(mapId);"
+    // TODO YC:delete this line = "    api.getLegendsLayerSet(mapId);"
 
     // create a new map viewer instance and add it to the api
     // TODO: use store, remove the use of feature by viewer class and use state to gather values
-    if (!Object.keys(api.maps).includes(mapId)) api.maps[mapId] = new MapViewer(mapFeaturesConfig, i18nInstance);
+    if (!('mapId' in api.maps)) api.maps[mapId] = new MapViewer(mapFeaturesConfig, i18nInstance);
 
     // Start the process of checking for map readiness
     api.maps[mapId].mapReady().then(() => {

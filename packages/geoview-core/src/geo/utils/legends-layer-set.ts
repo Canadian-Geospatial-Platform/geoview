@@ -9,12 +9,14 @@ import {
   payloadIsLayerSetChangeLayerStatus,
   payloadIsLayerSetUpdated,
 } from '@/api/events/payloads';
-import { api } from '@/app';
-import { LayerSet } from './layer-set';
+// import { api } from '@/app';
+import { LayerSet } from '@/geo/utils/layer-set';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { logger } from '@/core/utils/logger';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validationClasses/abstract-base-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { api, TypeLayerEntryConfig } from '@/core/types/cgpv-types';
+import { GeoCoreLayerEntryConfig } from '@/core/utils/config/validation-classes/geocore-layer-entry-config';
 
 type TypeLegendsLayerSetInstance = { [mapId: string]: LegendsLayerSet };
 
@@ -77,7 +79,9 @@ export class LegendsLayerSet extends LayerSet {
           this.resultSet[layerPath].querySent = true;
           // config file could not determine if the layer is queryable, can it be done using the metadata? let's try
           const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
-          layerConfig.geoviewLayerInstance?.registerToLayerSets(layerConfig as AbstractBaseLayerEntryConfig);
+          (layerConfig as Exclude<TypeLayerEntryConfig, GeoCoreLayerEntryConfig>).geoviewLayerInstance?.registerToLayerSets(
+            layerConfig as AbstractBaseLayerEntryConfig
+          );
         }
         if (layerExists || layerStatus === 'loaded')
           LegendEventProcessor.propagateLegendToStore(this.mapId, layerPath, this.resultSet[layerPath]);
@@ -127,7 +131,7 @@ export class LegendsLayerSet extends LayerSet {
             const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
             if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerPath.split('.')[1]) !== -1) {
               MapEventProcessor.replaceOrderedLayerInfo(this.mapId, layerConfig, layerPath.split('.')[1]);
-            } else if (layerConfig.parentLayerConfig) {
+            } else if ((layerConfig as Exclude<TypeLayerEntryConfig, GeoCoreLayerEntryConfig>).parentLayerConfig) {
               const parentLayerPathArray = layerPath.split('/');
               parentLayerPathArray.pop();
               const parentLayerPath = parentLayerPathArray.join('/');
@@ -137,7 +141,11 @@ export class LegendsLayerSet extends LayerSet {
               ).length;
               if (parentLayerIndex !== -1)
                 MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig, parentLayerIndex + numberOfLayers);
-              else MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig.parentLayerConfig);
+              else
+                MapEventProcessor.addOrderedLayerInfo(
+                  this.mapId,
+                  (layerConfig as Exclude<TypeLayerEntryConfig, GeoCoreLayerEntryConfig>).parentLayerConfig!
+                );
             } else MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig);
           }
         }

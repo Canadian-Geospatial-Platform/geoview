@@ -54,8 +54,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
 
-// TODO: Refactor - Typo TypeDcoument - actually, remove the type altogether, doesn't seem useful
-interface TypeDcoument extends Document {
+interface TypeDocument extends Document {
   webkitExitFullscreen: () => void;
   msExitFullscreen: () => void;
   mozCancelFullScreen: () => void;
@@ -270,7 +269,7 @@ export class MapViewer {
             // If not queryable, don't expect a result set
             if (!registeredLayer.source?.featureInfo?.queryable) return;
 
-            const { resultSet } = api.getFeatureInfoLayerSet(this.mapId);
+            const { resultSet } = api.maps[this.mapId].layer.featureInfoLayerSet;
             const layerResultSetReady = Object.keys(resultSet).includes(layerPath);
             if (!layerResultSetReady) {
               logger.logTraceDetailed('layer resultset not ready, waiting...', layerPath);
@@ -284,7 +283,7 @@ export class MapViewer {
             clearInterval(layersInterval);
 
             // How many layers resultset?
-            const resultSetCount = Object.keys(api.getFeatureInfoLayerSet(this.mapId).resultSet).length;
+            const resultSetCount = Object.keys(api.maps[this.mapId].layer.featureInfoLayerSet.resultSet).length;
 
             // Log
             logger.logInfo(`All (${resultSetCount}) Layers ResultSet are ready`, this.mapId);
@@ -404,15 +403,15 @@ export class MapViewer {
     if (!status) {
       if (document.exitFullscreen) {
         document.exitFullscreen();
-      } else if ((document as TypeDcoument).webkitExitFullscreen) {
+      } else if ((document as TypeDocument).webkitExitFullscreen) {
         /* Safari */
-        (document as TypeDcoument).webkitExitFullscreen();
-      } else if ((document as TypeDcoument).msExitFullscreen) {
+        (document as TypeDocument).webkitExitFullscreen();
+      } else if ((document as TypeDocument).msExitFullscreen) {
         /* IE11 */
-        (document as TypeDcoument).msExitFullscreen();
-      } else if ((document as TypeDcoument).mozCancelFullScreen) {
+        (document as TypeDocument).msExitFullscreen();
+      } else if ((document as TypeDocument).mozCancelFullScreen) {
         /* Firefox */
-        (document as TypeDcoument).mozCancelFullScreen();
+        (document as TypeDocument).mozCancelFullScreen();
       }
     }
   }

@@ -12,7 +12,7 @@ import { TypeClassBreakStyleConfig, TypeStyleGeometry, TypeUniqueValueStyleConfi
 import { AbstractGeoViewVector, api } from '@/app';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validationClasses/vector-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 
 export interface ILayerState {
   highlightedLayer: string;

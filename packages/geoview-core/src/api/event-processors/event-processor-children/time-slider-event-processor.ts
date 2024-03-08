@@ -1,17 +1,19 @@
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
+import { logger } from '@/core/utils/logger';
+
+import { AbstractEventProcessor } from '../abstract-event-processor';
+import { GeoCoreLayerEntryConfig } from '@/core/utils/config/validation-classes/geocore-layer-entry-config';
 import {
   AbstractGeoViewVector,
   EsriDynamic,
   ITimeSliderState,
-  TypeFeatureInfoLayerConfig,
   TimeSliderLayerSet,
+  TypeFeatureInfoLayerConfig,
+  TypeLayerEntryConfig,
   WMS,
   api,
   getLocalizedValue,
-} from '@/app';
-import { logger } from '@/core/utils/logger';
-
-import { AbstractEventProcessor } from '../abstract-event-processor';
+} from '@/core/types/cgpv-types';
 
 export class TimeSliderEventProcessor extends AbstractEventProcessor {
   /**
@@ -116,7 +118,8 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    */
   static getInitialTimeSliderValues(mapId: string, layerPath: string): TimeSliderLayerSet {
     const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath];
-    const name = getLocalizedValue(layerConfig.layerName, mapId) || layerConfig.layerId;
+    const name =
+      getLocalizedValue(layerConfig.layerName, mapId) || (layerConfig as Exclude<TypeLayerEntryConfig, GeoCoreLayerEntryConfig>).layerId;
     const temporalDimensionInfo = api.maps[mapId].layer.geoviewLayer(layerPath).getTemporalDimension();
     const { range } = temporalDimensionInfo.range;
     const defaultValueIsArray = Array.isArray(temporalDimensionInfo.default);

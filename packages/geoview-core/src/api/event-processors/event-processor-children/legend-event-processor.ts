@@ -16,6 +16,7 @@ import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendI
 import { api, getLocalizedValue, ILayerState } from '@/app';
 
 import { AbstractEventProcessor } from '../abstract-event-processor';
+import { GeoCoreLayerEntryConfig } from '@/core/utils/config/validation-classes/geocore-layer-entry-config';
 
 export class LegendEventProcessor extends AbstractEventProcessor {
   // **********************************************************
@@ -139,18 +140,21 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       const entryLayerPath = `${layerPathBeginning}/${layerPathNodes[currentLevel]}`;
       const layerConfig = api.maps[mapId].layer.registeredLayers[entryLayerPath] as TypeLayerEntryConfig;
       let entryIndex = existingEntries.findIndex((entry) => entry.layerPath === entryLayerPath);
-      if (layerEntryIsGroupLayer(layerConfig)) {
+      if (layerEntryIsGroupLayer(layerConfig as Exclude<TypeLayerEntryConfig, GeoCoreLayerEntryConfig>)) {
         if (entryIndex === -1) {
           const legendLayerEntry: TypeLegendLayer = {
             bounds: undefined,
-            layerId: layerConfig.layerId,
+            layerId: (layerConfig as Exclude<TypeLayerEntryConfig, GeoCoreLayerEntryConfig>).layerId,
             layerPath: entryLayerPath,
             layerStatus: legendResultSetEntry.layerStatus,
             layerName:
               legendResultSetEntry.layerName ||
               getLocalizedValue(layerConfig.layerName, mapId) ||
-              getLocalizedValue(layerConfig.geoviewLayerInstance?.geoviewLayerName, mapId) ||
-              layerConfig.layerPath,
+              getLocalizedValue(
+                (layerConfig as Exclude<TypeLayerEntryConfig, GeoCoreLayerEntryConfig>).geoviewLayerInstance?.geoviewLayerName,
+                mapId
+              ) ||
+              (layerConfig as Exclude<TypeLayerEntryConfig, GeoCoreLayerEntryConfig>).layerPath,
             type: layerConfig.entryType as TypeGeoviewLayerType,
             canToggle: legendResultSetEntry.data?.type !== 'esriImage',
             opacity: layerConfig.initialSettings?.opacity ? layerConfig.initialSettings.opacity : 1,
@@ -159,8 +163,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           };
           existingEntries.push(legendLayerEntry);
           entryIndex = existingEntries.length - 1;
-          // eslint-disable-next-line no-param-reassign
-        } else existingEntries[entryIndex].layerStatus = layerConfig.layerStatus;
+        }
+        // eslint-disable-next-line no-param-reassign
+        else existingEntries[entryIndex].layerStatus = (layerConfig as Exclude<TypeLayerEntryConfig, GeoCoreLayerEntryConfig>).layerStatus;
         createNewLegendEntries(entryLayerPath, currentLevel + 1, existingEntries[entryIndex].children);
       } else if (layerConfig) {
         const newLegendLayer: TypeLegendLayer = {
@@ -171,8 +176,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           layerName:
             legendResultSetEntry.layerName ||
             getLocalizedValue(layerConfig.layerName, mapId) ||
-            getLocalizedValue(layerConfig.geoviewLayerInstance?.geoviewLayerName, mapId) ||
-            layerConfig.layerPath,
+            getLocalizedValue(
+              (layerConfig as Exclude<TypeLayerEntryConfig, GeoCoreLayerEntryConfig>).geoviewLayerInstance?.geoviewLayerName,
+              mapId
+            ) ||
+            (layerConfig as Exclude<TypeLayerEntryConfig, GeoCoreLayerEntryConfig>).layerPath,
           layerStatus: legendResultSetEntry.layerStatus,
           querySent: legendResultSetEntry.querySent,
           styleConfig: legendResultSetEntry.data?.styleConfig,
