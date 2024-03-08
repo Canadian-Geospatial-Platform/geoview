@@ -65,6 +65,9 @@ export function Appbar(): JSX.Element {
   // #region REACT HOOKS
 
   const panels = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('APP-BAR - panels');
+
     // TODO: Refactor - We should find a way to make this 'dictionary of supported components' dynamic.
     return {
       legend: { icon: <HubOutlinedIcon />, content: <Legend fullWidth /> },
