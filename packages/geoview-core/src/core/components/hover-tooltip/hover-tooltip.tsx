@@ -10,8 +10,9 @@ import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { Box } from '@/ui';
 import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { PayloadBaseClass, TypeFeatureInfoEntry, payloadIsAllQueriesDone } from '@/api/events/payloads';
+import { PayloadBaseClass, payloadIsAllQueriesDone } from '@/api/events/payloads';
 import { logger } from '@/core/utils/logger';
+import { TypeHoverFeatureInfo, TypeHoverFeatureInfoResultSet } from '@/geo/utils/hover-feature-info-layer-set';
 
 /**
  * Hover tooltip component to show name field information on hover
@@ -62,43 +63,48 @@ export function HoverTooltip(): JSX.Element {
   const [tooltipIcon, setTooltipIcon] = useState<string>('');
   const [showTooltip, setShowTooltip] = useState<boolean>(false);
   // Currently selected feature - will not show tooltip
-  const selectedFeature = useRef<TypeFeatureInfoEntry>();
+  const selectedFeature = useRef<TypeHoverFeatureInfo>();
 
-  const allQueriesDoneListenerFunciton = (payload: PayloadBaseClass) => {
+  const allHoverQueriesDoneListenerFunciton = (payload: PayloadBaseClass) => {
     // Log
-    logger.logTraceCoreAPIEvent('HOVER-TOOLTIP - allQueriesDoneListenerFunciton', payload);
+    logger.logTraceCoreAPIEvent('HOVER-TOOLTIP - allHoverQueriesDoneListenerFunciton', payload);
 
     if (payloadIsAllQueriesDone(payload)) {
-      const { eventType, resultSet } = payload;
-      if (eventType === 'hover') {
-        // eslint-disable-next-line no-restricted-syntax
-        for (const [, value] of Object.entries(resultSet)) {
-          // if there is a result and layer is not ogcWms, and it is not selected, show tooltip
-          if (
-            value?.data?.hover?.features &&
-            value.data.hover.features.length > 0 &&
-            value.data.hover.features[0].geoviewLayerType !== 'ogcWms' &&
-            !(selectedFeature.current && getUid(value.data.hover.features[0].geometry) === getUid(selectedFeature.current?.geometry))
-          ) {
-            const item = value.data.hover.features[0];
-            const nameField = item.nameField || Object.entries(item.fieldInfo)[0][0];
-            const field = item.fieldInfo[nameField];
-            setTooltipValue(field?.value as string | '');
-            setTooltipIcon(item.featureIcon.toDataURL());
-            setShowTooltip(true);
-            break;
-          }
+      const resultSet = payload.resultSet as TypeHoverFeatureInfoResultSet;
+      // eslint-disable-next-line no-restricted-syntax
+      for (const [, value] of Object.entries(resultSet)) {
+        // if there is a result and layer is not ogcWms, and it is not selected, show tooltip
+        if (
+          value?.data?.feature &&
+          value.data.feature.geoviewLayerType !== 'ogcWms' &&
+          !(selectedFeature.current && getUid(value.data.feature.geometry) === getUid(selectedFeature.current?.geometry))
+        ) {
+          const item = value.data.feature;
+          const nameField = item.nameField || Object.entries(item.fieldInfo)[0];
+          const field = item.fieldInfo[nameField as string];
+          setTooltipValue(field?.value as string | '');
+          setTooltipIcon(item.featureIcon.toDataURL());
+          setShowTooltip(true);
+          break;
         }
-      } else if (eventType === 'click') {
-        Object.keys(resultSet).every((layerPath) => {
-          const features = resultSet[layerPath]!.data.click?.features;
-          if (features && features.length > 0 && features[0].geoviewLayerType !== 'ogcWms') {
-            [selectedFeature.current] = features;
-            return false;
-          }
-          return true;
-        });
       }
+    }
+  };
+
+  const allQueriesDoneListenerFunction = (payload: PayloadBaseClass) => {
+    // Log
+    logger.logTraceCoreAPIEvent('HOVER-TOOLTIP - allQueriesDoneListenerFunction', payload);
+
+    if (payloadIsAllQueriesDone(payload)) {
+      const { resultSet } = payload;
+      Object.keys(resultSet).every((layerPath) => {
+        const feature = (resultSet as TypeHoverFeatureInfoResultSet)[layerPath]?.data?.feature;
+        if (feature && feature.geoviewLayerType !== 'ogcWms') {
+          selectedFeature.current = feature;
+          return false;
+        }
+        return true;
+      });
     }
   };
 
@@ -137,10 +143,12 @@ export function HoverTooltip(): JSX.Element {
     );
 
     // Get a feature when it is selected
-    api.event.on(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, allQueriesDoneListenerFunciton, `${mapId}/FeatureInfoLayerSet`);
+    api.event.on(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, allQueriesDoneListenerFunction, `${mapId}/click/FeatureInfoLayerSet`);
+    api.event.on(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, allHoverQueriesDoneListenerFunciton, `${mapId}/hover/FeatureInfoLayerSet`);
 
     return () => {
-      api.event.off(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, mapId, allQueriesDoneListenerFunciton);
+      api.event.off(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, mapId, allQueriesDoneListenerFunction);
+      api.event.off(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, mapId, allHoverQueriesDoneListenerFunciton);
       unsubMapPointer();
       unsubMapSingleClick();
     };

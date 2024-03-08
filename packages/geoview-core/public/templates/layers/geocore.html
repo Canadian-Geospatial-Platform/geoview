@@ -268,14 +268,13 @@
       });
 
       // LYR1 ===================================================================================================================
-      const featureInfoLayerSet1 = cgpv.api.getFeatureInfoLayerSet('LYR1');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
           const { layerSetId, resultSet, eventType } = payload;
           createInfoTable('LYR1', 'ResultSetId1', resultSet, eventType);
         },
-        'LYR1/FeatureInfoLayerSet'
+        'LYR1/click/FeatureInfoLayerSet'
       );
 
       const LegendsLayerSet1 = cgpv.api.getLegendsLayerSet('LYR1');

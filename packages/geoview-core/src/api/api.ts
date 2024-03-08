@@ -11,12 +11,14 @@ import { DateMgt } from '@/core/utils/date-mgt';
 
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import * as Utilities from '../core/utils/utilities';
-import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
-import { LegendsLayerSet } from '@/geo/utils/legends-layer-set';
 import { GeoViewLayerPayload, payloadIsTestGeoViewLayers } from './events/payloads/geoview-layer-payload';
-import { initMapDivFromFunctionCall } from '@/app';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
+import { LegendsLayerSet } from '@/geo/utils/legends-layer-set';
+import { HoverFeatureInfoLayerSet } from '@/geo/utils/hover-feature-info-layer-set';
+import { AllFeatureInfoLayerSet } from '@/geo/utils/all-feature-info-layer-set';
+import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
+import { initMapDivFromFunctionCall } from '@/core/types/cgpv-types';
 
 /**
  * Class used to handle api calls (events, functions etc...)
@@ -61,11 +63,17 @@ export class API {
   // dates utilities object
   dateUtilities: DateMgt;
 
-  // FeatureInfo layer set instanciator
-  getFeatureInfoLayerSet = FeatureInfoLayerSet.get;
-
   // Legends layer set instanciator
   getLegendsLayerSet = LegendsLayerSet.get;
+
+  // HoverFeatureInfoLayerSet instanciator
+  getHoverFeatureInfoLayerSet = HoverFeatureInfoLayerSet.get;
+
+  // AllFeatureInfoLayerSet instanciator
+  getAllFeatureInfoLayerSet = AllFeatureInfoLayerSet.get;
+
+  // FeatureInfoLayerSet instanciator
+  getFeatureInfoLayerSet = FeatureInfoLayerSet.get;
 
   /**
    * Initiate the event and projection objects

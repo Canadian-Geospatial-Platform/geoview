@@ -1,3 +1,6 @@
+import debounce from 'lodash/debounce';
+
+import Feature from 'ol/Feature';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import {
   GetFeatureInfoPayload,
@@ -5,39 +8,60 @@ import {
   payloadIsQueryResult,
   payloadIsLayerSetChangeLayerStatus,
   payloadIsAMapMouseEvent,
-  TypeLayerData,
 } from '@/api/events/payloads';
 import { api } from '@/app';
 import { LayerSet } from './layer-set';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { logger } from '@/core/utils/logger';
 import { getLocalizedValue } from '@/core/utils/utilities';
-import { Coordinate, TypeLayerStatus, TypeQueryStatus } from '@/core/types/cgpv-types';
+import { Coordinate, TypeFieldEntry, TypeGeometry, TypeGeoviewLayerType, TypeLayerStatus, TypeQueryStatus } from '@/core/types/cgpv-types';
 
-export type TypeFeatureInfoResultSetEntry = {
+export type TypeHoverFeatureInfo =
+  | {
+      geoviewLayerType: TypeGeoviewLayerType;
+      featureIcon: HTMLCanvasElement;
+      geometry: TypeGeometry | Feature | null;
+      fieldInfo: Partial<Record<string, TypeFieldEntry>>;
+      nameField: string | null;
+    }
+  | undefined
+  | null;
+
+export type TypeHoverLayerData = {
+  layerPath: string;
+  layerName: string;
+  layerStatus: TypeLayerStatus;
+  eventListenerEnabled: boolean;
+  // When property features is undefined, we are waiting for the query result.
+  // when Array.isArray(features) is true, the features property contains the query result.
+  // when property features is null, the query ended with an error.
+  queryStatus: TypeQueryStatus;
+  feature: TypeHoverFeatureInfo;
+};
+export type TypeHoverFeatureInfoResultSetEntry = {
   layerName?: string;
   layerStatus: TypeLayerStatus;
-  data: TypeLayerData;
+  data: TypeHoverLayerData;
 };
 
-export type TypeFeatureInfoResultSet = {
-  [layerPath: string]: TypeFeatureInfoResultSetEntry;
+export type TypeHoverFeatureInfoResultSet = {
+  [layerPath: string]: TypeHoverFeatureInfoResultSetEntry;
 };
 
-type TypeFeatureInfoLayerSetInstance = { [mapId: string]: FeatureInfoLayerSet };
+type TypeFeatureInfoLayerSetInstance = { [mapId: string]: HoverFeatureInfoLayerSet };
 
 /** ***************************************************************************************************************************
  * A class containing a set of layers associated with a TypeLayerData object, which will receive the result of a
- * "get feature info" request made on the map layers when the user click a location on the map.
+ * "get feature info" request made on the map layers when the user hovers over a position in a stationary way.
  *
- * @class FeatureInfoLayerSet
+ * @class HoverFeatureInfoLayerSet
  */
-export class FeatureInfoLayerSet extends LayerSet {
+export class HoverFeatureInfoLayerSet extends LayerSet {
   /** Private static variable to keep the single instance that can be created by this class for a mapId (see singleton design pattern) */
   private static featureInfoLayerSetInstance: TypeFeatureInfoLayerSetInstance = {};
 
   /** An object containing the result sets indexed using the layer path */
-  declare resultSet: TypeFeatureInfoResultSet;
+  declare resultSet: TypeHoverFeatureInfoResultSet;
 
   /** ***************************************************************************************************************************
    * The class constructor that instanciate a set of layer.
@@ -46,10 +70,10 @@ export class FeatureInfoLayerSet extends LayerSet {
    *
    */
   private constructor(mapId: string) {
-    super(mapId, `${mapId}/click/FeatureInfoLayerSet`, {});
+    super(mapId, `${mapId}/hover/FeatureInfoLayerSet`, {});
     this.setRegistrationConditionFunction();
     this.setUserRegistrationInitFunction();
-    this.setMapClickListener();
+    this.setMapHoverListener();
     this.setQueryResultListener();
   }
 
@@ -59,7 +83,7 @@ export class FeatureInfoLayerSet extends LayerSet {
   setRegistrationConditionFunction() {
     this.registrationConditionFunction = (layerPath: string): boolean => {
       // Log
-      logger.logTraceCore('FEATURE-INFO-LAYER-SET setRegistrationConditionFunction', layerPath, Object.keys(this.resultSet));
+      logger.logTraceCore('HOVER-FEATURE-INFO-LAYER-SET setRegistrationConditionFunction', layerPath, Object.keys(this.resultSet));
 
       const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
       const queryable = layerConfig?.source?.featureInfo?.queryable;
@@ -74,7 +98,7 @@ export class FeatureInfoLayerSet extends LayerSet {
   setUserRegistrationInitFunction() {
     this.registrationUserInitialisation = (layerPath: string) => {
       // Log
-      logger.logTraceCore('FEATURE-INFO-LAYER-SET setUserRegistrationInitFunction', layerPath, Object.keys(this.resultSet));
+      logger.logTraceCore('HOVER-FEATURE-INFO-LAYER-SET setUserRegistrationInitFunction', layerPath, Object.keys(this.resultSet));
 
       const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
       this.resultSet[layerPath] = {
@@ -85,11 +109,11 @@ export class FeatureInfoLayerSet extends LayerSet {
           layerStatus: layerConfig.layerStatus!,
           eventListenerEnabled: true,
           queryStatus: 'processed',
-          features: [],
+          feature: undefined,
           layerPath,
         },
       };
-      FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, 'click', this.resultSet);
+      FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, 'hover', this.resultSet);
     };
   }
 
@@ -102,7 +126,7 @@ export class FeatureInfoLayerSet extends LayerSet {
   protected changeLayerStatusListenerFunctions(payload: PayloadBaseClass) {
     if (payloadIsLayerSetChangeLayerStatus(payload)) {
       // Log
-      logger.logTraceCoreAPIEvent('FEATURE-INFO-LAYER-SET on EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS', this.mapId, payload);
+      logger.logTraceCoreAPIEvent('HOVER-FEATURE-INFO-LAYER-SET on EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS', this.mapId, payload);
 
       const { layerPath, layerStatus } = payload;
       // if layer's status flag exists and is different than the new one
@@ -113,7 +137,7 @@ export class FeatureInfoLayerSet extends LayerSet {
           super.changeLayerStatusListenerFunctions(payload);
           if (this?.resultSet?.[layerPath]?.data) {
             this.resultSet[layerPath].data.layerStatus = layerStatus;
-            FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerConfig.layerPath, 'click', this.resultSet);
+            FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerConfig.layerPath, 'hover', this.resultSet);
           }
         }
       }
@@ -122,10 +146,8 @@ export class FeatureInfoLayerSet extends LayerSet {
 
   /* **************************************************************************************************************************
    * Private method used to emit a query layer event for all layers in the result set that are loaded. Layers that has an error
-   * are set with an undefined features array and a queryStatus equal to 'error'.
+   * are set with an null features array and a queryStatus equal to 'error'.
    *
-   * @param {EventType} eventType The event type (ex.: "click" | "hover" | "crosshaire-enter" | "all-features")
-   * @param {QueryType} queryType The query type (ex.: "all" | "at_pixel" | "at_coordinate" | "at_long_lat", ...)
    * @param {Coordinate} coordinate The coordinate of the event
    */
   private createQueryLayerPayload = (coordinate: Coordinate): void => {
@@ -136,33 +158,33 @@ export class FeatureInfoLayerSet extends LayerSet {
       const { data } = this.resultSet[layerPath];
       if (!data.eventListenerEnabled) return;
       if (layerConfig.layerStatus === 'loaded') {
-        data.features = undefined;
-        data.queryStatus = 'processing';
+        data.feature = undefined;
+        data.queryStatus = 'init';
       } else {
-        data.features = null;
+        data.feature = null;
         data.queryStatus = 'error';
       }
 
       if (data.eventListenerEnabled && data.queryStatus !== ('error' as TypeQueryStatus)) {
-        api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(`${this.mapId}/${layerPath}`, 'at_long_lat', coordinate, 'click'));
+        api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(`${this.mapId}/${layerPath}`, 'at_pixel', coordinate, 'hover'));
       }
     });
   };
 
   /** ***************************************************************************************************************************
-   * Listen to "map click" and send a query layers event to queryable layers. These layers will return a result set of features.
+   * Listen to "map hover" and send a query layers event to queryable layers. These layers will return a result set of features.
    */
-  setMapClickListener() {
+  setMapHoverListener() {
     api.event.on(
-      EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK,
-      (payload) => {
-        if (payloadIsAMapMouseEvent(payload)) {
-          // Log
-          logger.logTraceCoreAPIEvent('FEATURE-INFO-LAYER-SET on EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK', this.mapId, payload);
+      EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE,
+      debounce((payload) => {
+        // Log
+        logger.logTraceCoreAPIEvent('HOVER-FEATURE-INFO-LAYER-SET on EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE', this.mapId, payload);
 
-          this.createQueryLayerPayload(payload.coordinates.lnglat);
+        if (payloadIsAMapMouseEvent(payload)) {
+          this.createQueryLayerPayload(payload.coordinates.pixel);
         }
-      },
+      }, 750),
       this.mapId
     );
   }
@@ -176,25 +198,36 @@ export class FeatureInfoLayerSet extends LayerSet {
       EVENT_NAMES.GET_FEATURE_INFO.QUERY_RESULT,
       (payload) => {
         // Log
-        logger.logTraceCoreAPIEvent('FEATURE-INFO-LAYER-SET - QUERY_RESULT', this.mapId, payload);
+        logger.logTraceCoreAPIEvent('HOVER-FEATURE-INFO-LAYER-SET - QUERY_RESULT', this.mapId, payload);
 
         if (payloadIsQueryResult(payload)) {
           const { layerPath, queryType, arrayOfRecords, eventType } = payload;
-          if (eventType === 'click') {
-            const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
-            if (this.resultSet?.[layerPath]?.data) {
+          const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
+          if (eventType === 'hover') {
+            if (arrayOfRecords === null) {
+              this.resultSet[layerPath].data.queryStatus = 'error';
+              this.resultSet[layerPath].data.layerStatus = layerConfig.layerStatus!;
+              this.resultSet[layerPath].data.feature = null;
+            } else {
               const { data } = this.resultSet[layerPath];
-              data.features = arrayOfRecords;
+              if (arrayOfRecords?.length) {
+                data.feature = {
+                  featureIcon: arrayOfRecords![0].featureIcon,
+                  fieldInfo: arrayOfRecords![0].fieldInfo,
+                  geometry: arrayOfRecords![0].geometry,
+                  geoviewLayerType: arrayOfRecords![0].geoviewLayerType,
+                  nameField: arrayOfRecords![0].nameField,
+                };
+              } else {
+                data.feature = undefined;
+              }
               data.layerStatus = layerConfig.layerStatus!;
-              // When property features is undefined, we are waiting for the query result.
-              // when Array.isArray(features) is true, the features property contains the query result.
-              // when property features is null, the query ended with an error.
-              data.queryStatus = arrayOfRecords === null ? 'error' : 'processed';
-              FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, eventType, this.resultSet);
+              data.queryStatus = 'processed';
             }
+            FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, 'hover', this.resultSet);
 
             const allDone = Object.keys(this.resultSet).reduce((doneFlag, layerPathToTest) => {
-              return doneFlag && this.resultSet[layerPathToTest].data.features !== undefined;
+              return doneFlag && ['processed', 'error'].includes(this.resultSet[layerPathToTest].data.queryStatus);
             }, true);
 
             if (allDone) {
@@ -217,12 +250,12 @@ export class FeatureInfoLayerSet extends LayerSet {
   }
 
   /**
-   * Function used to enable listening of click events. When a layer path is not provided,
-   * click events listening is enabled for all layers
+   * Function used to enable listening of hover events. When a layer path is not provided,
+   * hover events listening is enabled for all layers
    *
    * @param {string} layerPath Optional parameter used to enable only one layer
    */
-  enableClickListener(layerPath?: string) {
+  enableHoverListener(layerPath?: string) {
     if (layerPath) this.resultSet[layerPath].data.eventListenerEnabled = true;
     else
       Object.keys(this.resultSet).forEach((key: string) => {
@@ -231,12 +264,12 @@ export class FeatureInfoLayerSet extends LayerSet {
   }
 
   /**
-   * Function used to disable listening of click events. When a layer path is not provided,
-   * click events listening is disable for all layers
+   * Function used to disable listening of hover events. When a layer path is not provided,
+   * hover events listening is disable for all layers
    *
    * @param {string} layerPath Optional parameter used to disable only one layer
    */
-  disableClickListener(layerPath?: string) {
+  disableHoverListener(layerPath?: string) {
     if (layerPath) this.resultSet[layerPath].data.eventListenerEnabled = false;
     else
       Object.keys(this.resultSet).forEach((key: string) => {
@@ -245,14 +278,14 @@ export class FeatureInfoLayerSet extends LayerSet {
   }
 
   /**
-   * Function used to determine whether click events are disabled for a layer. When a layer path is not provided,
+   * Function used to determine whether hover events are disabled for a layer. When a layer path is not provided,
    * the value returned is undefined if the map flags are a mixture of true and false values.
    *
    * @param {string} layerPath Optional parameter used to get the flag value of a layer.
    *
    * @returns {boolean | undefined} The flag value for the map or layer.
    */
-  isClickListenerEnabled(layerPath?: string): boolean | undefined {
+  isHoverListenerEnabled(layerPath?: string): boolean | undefined {
     if (layerPath) return !!this.resultSet?.[layerPath]?.data?.eventListenerEnabled;
 
     let returnValue: boolean | undefined;
@@ -271,10 +304,10 @@ export class FeatureInfoLayerSet extends LayerSet {
    *
    * @returns {FeatureInfoLayerSet} the FeatureInfoLayerSet object created
    */
-  static get(mapId: string): FeatureInfoLayerSet {
-    if (!FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId])
-      FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId] = new FeatureInfoLayerSet(mapId);
-    return FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId];
+  static get(mapId: string): HoverFeatureInfoLayerSet {
+    if (!HoverFeatureInfoLayerSet.featureInfoLayerSetInstance[mapId])
+      HoverFeatureInfoLayerSet.featureInfoLayerSetInstance[mapId] = new HoverFeatureInfoLayerSet(mapId);
+    return HoverFeatureInfoLayerSet.featureInfoLayerSetInstance[mapId];
   }
 
   /**
@@ -283,6 +316,6 @@ export class FeatureInfoLayerSet extends LayerSet {
    * @param {string} mapId The map identifier the layer set belongs to.
    */
   static delete(mapId: string) {
-    if (FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId]) delete FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId];
+    if (HoverFeatureInfoLayerSet.featureInfoLayerSetInstance[mapId]) delete HoverFeatureInfoLayerSet.featureInfoLayerSetInstance[mapId];
   }
 }

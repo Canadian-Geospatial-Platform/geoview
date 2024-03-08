@@ -1,5 +1,5 @@
 import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '../abstract-base-layer-entry-config';
 import {
   GeoviewChild,
   TypeLayerEntryType,
@@ -11,9 +11,9 @@ import {
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.
  */
-export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
+export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** Tag used to link the entry to a specific schema. */
-  schemaTag = 'esriImage' as TypeGeoviewLayerType;
+  schemaTag = 'esriDynamic' as TypeGeoviewLayerType;
 
   /** Layer entry data type. */
   entryType = 'raster-image' as TypeLayerEntryType;
@@ -29,15 +29,11 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * The class constructor.
-   * @param {EsriImageLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+   * @param {EsriDynamicLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: EsriImageLayerEntryConfig) {
+  constructor(layerConfig: EsriDynamicLayerEntryConfig) {
     super(layerConfig);
     Object.assign(this, layerConfig);
-
-    if (Number.isNaN(this.layerId)) {
-      throw new Error(`The layer entry with layerId equal to ${this.layerPath} must be an integer string`);
-    }
     // if layerConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
     if (!this.source) this.source = {};
     if (!this.source.dataAccessPath) this.source.dataAccessPath = { ...this.geoviewLayerConfig.metadataAccessPath } as TypeLocalizedString;

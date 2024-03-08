@@ -21,7 +21,7 @@ import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
 import { Cast, toJsonObject } from '@/core/types/global-types';
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validationClasses/xyz-layer-entry-config';
+import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
 // TODO: Implement method to validate XYZ tile service
@@ -89,9 +89,6 @@ export const geoviewEntryIsXYZTiles = (verifyIfGeoViewEntry: TypeLayerEntryConfi
  */
 // ******************************************************************************************************************************
 export class XYZTiles extends AbstractGeoViewRaster {
-  // layer
-  layer!: TileLayer<XYZ>;
-
   /** ***************************************************************************************************************************
    * Initialize layer
    *
