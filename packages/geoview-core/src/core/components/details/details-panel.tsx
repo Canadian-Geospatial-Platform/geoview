@@ -384,6 +384,9 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
    */
   const renderComplete = () => {
     if (memoLayersList) {
+      const featureTitleDetails = t('details.featureDetailsTitle').replace('{count}', `${currentFeatureIndex + 1}`)
+                    .replace('{total}', `${memoSelectedLayerDataFeatures?.length}`);
+
       return (
         <Layout
           selectedLayerPath={selectedLayerPath || ''}
@@ -396,7 +399,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
               <Grid container sx={sxClasses.rightPanelBtnHolder}>
                 <Grid item xs={6}>
                   <Box style={{ marginLeft: '22px' }}>
-                    Feature {currentFeatureIndex + 1} of {memoSelectedLayerDataFeatures.length}
+                    {featureTitleDetails}
                     <IconButton
                       sx={{ marginLeft: '20px', [theme.breakpoints.down('sm')]: { display: 'none' } }}
                       aria-label="clear-all-features"

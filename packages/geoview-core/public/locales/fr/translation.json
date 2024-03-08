@@ -132,7 +132,8 @@
     "highlightFeaturesOnMap": "Déselctionner tout les items",
     "keepFeatureSelected": "Garder l'élément sélectionné",
     "detailsInstructions": "Instructions détaillées",
-    "loadingUI": "Chargement de l'interface utilisateur"
+    "loadingUI": "Chargement de l'interface utilisateur",
+    "featureDetailsTitle": "Élément {count} sur {total}"
   },
   "lightbox": {
     "next": "Prochaine",

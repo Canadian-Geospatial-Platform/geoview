@@ -132,7 +132,8 @@
     "highlightFeaturesOnMap": "Highlight features on map",
     "keepFeatureSelected": "Keep feature highlighted",
     "detailsInstructions": "Details Instructions",
-    "loadingUI": "Loading user interface"
+    "loadingUI": "Loading user interface",
+    "featureDetailsTitle": "Feature {count} of {total}"
   },
   "lightbox": {
     "next": "Next",
