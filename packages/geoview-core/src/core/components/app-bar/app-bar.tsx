@@ -5,9 +5,8 @@ import { useTheme } from '@mui/material/styles';
 import { Box, List, ListItem, Panel, IconButton, TypeIconButtonProps, SchoolIcon, InfoOutlinedIcon, HubOutlinedIcon } from '@/ui';
 
 import { AbstractPlugin, TypeJsonObject, TypeJsonValue, api, toJsonObject } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
 
-import { payloadIsAButtonPanel, ButtonPanelPayload, PayloadBaseClass } from '@/api/events/payloads';
+import { ButtonPanelPayload } from '@/api/events/payloads';
 
 import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import ExportButton from '@/core/components/export/export-modal-button';

@@ -4,8 +4,7 @@ import { useTheme } from '@mui/material/styles';
 
 import { Box, IconButton, Tabs, TypeTabs, MoveDownRoundedIcon, MoveUpRoundedIcon } from '@/ui';
 import { api } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { FooterBarPayload, PayloadBaseClass, payloadIsAFooterBar } from '@/api/events/payloads';
+import { FooterBarPayload } from '@/api/events/payloads';
 import { getSxClasses } from './footer-bar-style';
 import { ResizeFooterPanel } from '../resize-footer-panel/resize-footer-panel';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
