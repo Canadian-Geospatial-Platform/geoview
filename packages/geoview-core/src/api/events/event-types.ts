@@ -3,7 +3,6 @@ import { BASEMAP } from './constants/basemap-constants';
 import { FOOTERBAR } from './constants/footer-bar-constants';
 import { GET_FEATURE_INFO } from './constants/get-feature-info-constants';
 import { GET_LEGENDS } from './constants/get-legends-constants';
-import { GEOMETRY } from './constants/geometry-constants';
 import { INTERACTION } from './constants/interaction-constants';
 import { LAYER_SET } from './constants/layer-set-constants';
 import { LAYER } from './constants/layer-constants';
@@ -23,7 +22,6 @@ export const EVENT_NAMES = {
   FOOTERBAR,
   GET_FEATURE_INFO,
   GET_LEGENDS,
-  GEOMETRY,
   INTERACTION,
   LAYER_SET,
   LAYER,
@@ -48,11 +46,6 @@ export type EventStringId =
   | 'feature_highlight/highlightBBox'
   | 'footerbar/tab_create'
   | 'footerbar/tab_remove'
-  | 'geometry/add'
-  | 'geometry/added'
-  | 'geometry/off'
-  | 'geometry/on'
-  | 'geometry/remove'
   | 'get_feature_info/all_queries_done'
   | 'get_feature_info/query_all_features'
   | 'get_feature_info/query_layer'

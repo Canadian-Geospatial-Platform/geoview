@@ -4,8 +4,6 @@ export * from './button-panel-payload';
 export * from './clear-highlights-payload';
 export * from './feature-highlight-payload';
 export * from './footer-bar-payload';
-export * from './geometry-config-payload';
-export * from './geometry-payload';
 export * from './geoview-layer-payload';
 export * from './get-feature-info-payload';
 export * from './get-legends-payload';

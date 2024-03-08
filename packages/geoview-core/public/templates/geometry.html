@@ -303,15 +303,9 @@
         });
 
         // listen to geometry added event
-        cgpv.api.event.on(
-          cgpv.api.eventNames.GEOMETRY.EVENT_GEOMETRY_ADDED,
-          (payload) => {
-            if (cgpv.types.cgpv.types.payloadIsAGeometry(payload)) {
-              console.log(`geometry added ${payload.type}`);
-            }
-          },
-          'mapWM'
-        );
+        cgpv.api.maps['mapWM'].layer.geometry.onGeometryAdded((sender, payload) => {
+          console.log(`geometry added ${payload.feature.getGeometry().getType()}`);
+        });
       });
     </script>
   </body>
