@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { Fade, IconButton as MaterialIconButton, Tooltip } from '@mui/material';
 
 import { TypeIconButtonProps } from './icon-button-types';
-import { get } from 'lodash';
 
 /**
  * Create a customized Material UI Icon Button
@@ -52,7 +51,7 @@ export function IconButton(props: TypeIconButtonProps): JSX.Element {
   }
 
   if (disabled) {
-    return (getMaterialIconButton());
+    return getMaterialIconButton();
   }
   return (
     <Tooltip title={t((tooltip as string) || '') as string} placement={tooltipPlacement} TransitionComponent={Fade}>
