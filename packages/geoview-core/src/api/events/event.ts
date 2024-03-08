@@ -165,6 +165,11 @@ export class Event {
   };
 
   // #region SPECIALIZED EVENTS - IMPORTANT
+  // ! These events exists to communicate between the Shell/MapViewer and the App-Bar/Nav-Bar/Footer-Bar components.
+  // ! The laters are mounted and then 'autonomous'. They rely on events to self-manage their rendering.
+  // ! Ideally, we should get rid of those events and use props inside App-Bar/Nav-Bar/Footer-Bar and have the management
+  // ! higher in the call stack. At the time of writing this, having them explicit here was sufficient as a first step
+  // ! in cleaning generic api.event calls and payloads.
 
   // #region EVENT_APPBAR_PANEL_CREATE --------------------------------------------------------------------------------
 
@@ -302,6 +307,10 @@ export class Event {
   // #endregion
 
   // #region SPECIALIZED EVENTS - UNSURE
+  // ! These events exists to communicate between different application code and components.
+  // ! They are annoying to have, but unsure if worth spending time to refactor. They have less reason to exist than the
+  // ! 'IMPORTANT' ones above. However, at the time of writing this having them here was sufficient
+  // ! as a first step in cleaning generic api.event calls and payloads.
 
   // #region EVENT_MAP_IN_KEYFOCUS ------------------------------------------------------------------------------------
 
@@ -325,6 +334,9 @@ export class Event {
   // #endregion
 
   // #region SPECIALIZED EVENTS - OBSOLETE
+  // ! These events exists to communicate between different application code and components.
+  // ! They should be fixed/removed altogether as they don't have a 'valid' reason to exist or their refactoring would be beneficial.
+  // ! At the time writing this, having them here was sufficient as a first step in cleaning generic api.event calls and payloads.
 
   // TODO: Move some that are hard to refactor here temporarily
 
