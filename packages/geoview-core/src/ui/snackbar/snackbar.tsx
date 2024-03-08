@@ -6,7 +6,6 @@ import { animated } from '@react-spring/web';
 import { useFadeIn } from '@/core/utils/useSpringAnimations';
 import { SnackbarType } from '@/api/events/payloads/snackbar-message-payload';
 import { logger } from '@/core/utils/logger';
-import { useFadeIn } from '@/core/utils/useSpringAnimations';
 
 /**
  * Snackbar properties interface
