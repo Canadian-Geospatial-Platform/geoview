@@ -384,8 +384,9 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
    */
   const renderComplete = () => {
     if (memoLayersList) {
-      const featureTitleDetails = t('details.featureDetailsTitle').replace('{count}', `${currentFeatureIndex + 1}`)
-                    .replace('{total}', `${memoSelectedLayerDataFeatures?.length}`);
+      const featureTitleDetails = t('details.featureDetailsTitle')
+        .replace('{count}', `${currentFeatureIndex + 1}`)
+        .replace('{total}', `${memoSelectedLayerDataFeatures?.length}`);
 
       return (
         <Layout

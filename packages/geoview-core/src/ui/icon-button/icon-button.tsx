@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Fade, IconButton as MaterialIconButton, Tooltip } from '@mui/material';
 
 import { TypeIconButtonProps } from './icon-button-types';
+import { get } from 'lodash';
 
 /**
  * Create a customized Material UI Icon Button
@@ -30,26 +31,8 @@ export function IconButton(props: TypeIconButtonProps): JSX.Element {
 
   const { t } = useTranslation<string>();
 
-  if(disabled) {
-    return (<MaterialIconButton
-        id={id}
-        sx={sx}
-        aria-label={(t(ariaLabel as string) || t(tooltip as string)) as string}
-        style={style}
-        className={className}
-        onClick={onClick}
-        tabIndex={tabIndex}
-        size={size}
-        ref={iconRef}
-        disabled={disabled}
-        color={color}
-      >
-        {children && children}
-    </MaterialIconButton>
-    );
-  }
-  return (
-    <Tooltip title={t((tooltip as string) || '') as string} placement={tooltipPlacement} TransitionComponent={Fade}>
+  function getMaterialIconButton() {
+    return (
       <MaterialIconButton
         id={id}
         sx={sx}
@@ -65,6 +48,15 @@ export function IconButton(props: TypeIconButtonProps): JSX.Element {
       >
         {children && children}
       </MaterialIconButton>
+    );
+  }
+
+  if (disabled) {
+    return (getMaterialIconButton());
+  }
+  return (
+    <Tooltip title={t((tooltip as string) || '') as string} placement={tooltipPlacement} TransitionComponent={Fade}>
+      {getMaterialIconButton()}
     </Tooltip>
   );
 }
