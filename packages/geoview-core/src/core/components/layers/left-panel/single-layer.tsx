@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
+import { animated, useSpring } from '@react-spring/web';
 import {
   Box,
   Collapse,
@@ -41,9 +42,10 @@ interface SingleLayerProps {
   depth: number;
   isDragging: boolean;
   setIsLayersListPanelVisible: Dispatch<SetStateAction<boolean>>;
+  index: number;
 }
 
-export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisible }: SingleLayerProps): JSX.Element {
+export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisible, index }: SingleLayerProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/left-panel/single-layer');
 
@@ -273,8 +275,16 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     return result.join(' ');
   }
 
+  const listItemSpring = useSpring({
+    delay: index * 150 + (depth * 150) / 2,
+    from: { opacity: 0.1 },
+    to: { opacity: 1 },
+  });
+
+  const AnimatedBox = animated(Box);
+
   return (
-    <Box className={getContainerClass()} data-layer-depth={depth}>
+    <AnimatedBox className={getContainerClass()} style={listItemSpring} data-layer-depth={depth}>
       <ListItem key={layer.layerName} divider>
         <ListItemButton selected={layerIsSelected || (layerChildIsSelected && !isGroupOpen)}>
           <LayerIcon layer={layer} />
@@ -293,6 +303,6 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
         </ListItemButton>
       </ListItem>
       {renderCollapsible()}
-    </Box>
+    </AnimatedBox>
   );
 }

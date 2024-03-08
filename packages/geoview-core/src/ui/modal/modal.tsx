@@ -8,6 +8,7 @@ import withStyles from '@mui/styles/withStyles';
 import { useTheme } from '@mui/material/styles';
 import { Box, Dialog, DialogActions, DialogContent, DialogProps, DialogTitle } from '@mui/material';
 
+import { animated } from '@react-spring/web';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { HtmlToReact } from '@/core/containers/html-to-react';
 
@@ -19,6 +20,7 @@ import { CloseIcon, IconButton } from '..';
 import { PayloadBaseClass, payloadIsAModal } from '@/api/events/payloads';
 import { getSxClasses } from './modal-style';
 import { logger } from '@/core/utils/logger';
+import { useFadeIn } from '@/core/utils/useSpringAnimations';
 
 /**
  * Customized Material UI Dialog Properties
@@ -107,6 +109,9 @@ export function Modal(props: TypeDialogProps): JSX.Element {
     });
   }, []);
 
+  const fadeInAnimation = useFadeIn();
+  const AnimatedDialog = animated(Dialog);
+
   /**
    * to return the updated / newly-created modal
    *
@@ -122,10 +127,11 @@ export function Modal(props: TypeDialogProps): JSX.Element {
       },
       // eslint-disable-next-line react/no-unused-prop-types
     })(({ classes }: { classes: ClassNameMap }) => (
-      <Dialog
+      <AnimatedDialog
         open={openEvent}
         onClose={modal.close}
         container={document.querySelector(`#${modal.mapId}`)}
+        style={fadeInAnimation}
         sx={sxClasses.dialog}
         className={`${className && className}`}
         classes={{
@@ -189,7 +195,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
             }) || null}
           </DialogActions>
         ) : null}
-      </Dialog>
+      </AnimatedDialog>
     ));
 
     return <CustomDialog />;

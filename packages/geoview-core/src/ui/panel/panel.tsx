@@ -69,6 +69,10 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     ...(panelStyles?.panelContainer && { ...panelStyles.panelContainer }),
     width: panelStatus ? panelWidth : 0,
     maxWidth: 400,
+    [theme.breakpoints.down('sm')]: {
+      width: 'calc(100% - 64px)',
+      maxWidth: 'calc(100% - 64px)',
+    },
     transition: `width ${theme.transitions.duration.standard}ms ease`,
     position: 'absolute',
     left: '64px',

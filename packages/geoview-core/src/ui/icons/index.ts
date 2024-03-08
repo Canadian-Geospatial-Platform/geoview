@@ -16,7 +16,7 @@ export {
   Check as CheckIcon,
   CheckCircle as CheckCircleIcon,
   CheckBox as CheckBoxIcon,
-  CheckBoxOutlineBlank as CheckBoxOutineBlankIcon,
+  CheckBoxOutlineBlank as CheckBoxOutlineBlankIcon,
   CheckBoxOutlined as CheckBoxOutinedIcon,
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
