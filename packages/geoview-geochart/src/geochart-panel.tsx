@@ -20,6 +20,8 @@ import { getSxClasses } from './geochart-style';
 
 interface GeoChartPanelProps {
   mapId: string;
+  // eslint-disable-next-line react/require-default-props
+  provideCallbackRedraw?: (callbackRedraw: () => void) => void;
 }
 
 /**
@@ -33,9 +35,9 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   logger.logTraceRender('geochart/geochart-panel');
 
   const { cgpv } = window as TypeWindow;
-  const { mapId } = props;
+  const { mapId, provideCallbackRedraw } = props;
   const { react } = cgpv;
-  const { useState, useCallback, useMemo, useEffect } = react;
+  const { useState, useCallback, useMemo, useEffect, useRef } = react;
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
@@ -50,21 +52,48 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   // Create the validator shared for all the charts in the footer
   const [schemaValidator] = useState<SchemaValidator>(new SchemaValidator());
 
+  // Keep a reference to the redraw callbacks for each GeoChart child components
+  const redrawGeochart = useRef<Record<string, () => void>>({});
+
+  /**
+   * Redraws the GeoCharts in the Panel
+   */
+  const redrawGeoCharts = () => {
+    // We need to redraw when the canvas isn't 'showing' in the DOM and when the user resizes the canvas placeholder.
+    Object.entries(redrawGeochart.current).forEach(([, callback]) => {
+      // Redraw
+      callback();
+    });
+  };
+
+  // Provide the callback to redraw the GeoCharts in the Panel to the Parent component
+  provideCallbackRedraw?.(() => {
+    // Redraw the GeoCharts
+    redrawGeoCharts();
+  });
+
   /**
    * Handles click on enlarge button in the layout component.
    *
    * @param {boolean} isEnlarge Indicates if is enlarged
    */
-  const handleIsEnlargeClicked = useCallback(
-    (isEnlarge: boolean) => {
-      // Log
-      logger.logTraceUseCallback('GEOCHART-PANEL - handleIsEnlargeClicked', isEnlarge);
+  const handleIsEnlargeClicked = useCallback((isEnlarge: boolean) => {
+    // Log
+    logger.logTraceUseCallback('GEOCHART-PANEL - handleIsEnlargeClicked', isEnlarge);
 
-      // We need to redraw when the canvas isn't 'showing' in the DOM and when the user resizes the canvas placeholder.
-      cgpv.api.maps[mapId].plugins.geochart.redrawChart();
-    },
-    [cgpv.api.maps, mapId]
-  );
+    // Redraw the GeoCharts
+    redrawGeoCharts();
+  }, []);
+
+  /**
+   * Handles when the GeoChart child component is providing its callback to redraw itself
+   * @param {string} key The GeoChart unique key of the child component
+   * @param {Function} theCallbackRedraw The callback to execute whenever we want to redraw the GeoChart
+   */
+  const handleProvideCallbackRedraw = (key: string, theCallbackRedraw: () => void) => {
+    // Keep the callback
+    redrawGeochart.current[key] = theCallbackRedraw;
+  };
 
   /**
    * Gets the label for the number of features of a layer.
@@ -184,6 +213,8 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     }
   }, [memoLayerSelectedItem, memoLayersList, setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass]);
 
+  // #region RENDERING ************************************************************************************************
+
   /**
    * Renders a single GeoChart component
    * @param chartConfig PluginGeoChartConfig<ChartType> the Chart Config to assign the the GeoChart
@@ -199,6 +230,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
         config={{ charts: [chartConfig] }}
         layers={storeArrayOfLayerData}
         schemaValidator={schemaValidator}
+        provideCallbackRedraw={(theCallbackRedraw) => handleProvideCallbackRedraw(key, theCallbackRedraw)}
       />
     );
   };
@@ -247,4 +279,6 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
   // Render
   return renderComplete();
+
+  // #endregion
 }

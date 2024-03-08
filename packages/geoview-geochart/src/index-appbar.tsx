@@ -1,11 +1,7 @@
 import { Cast, AnySchemaObject, TypeIconButtonProps, TypePanelProps, toJsonObject, TypeJsonObject } from 'geoview-core';
 import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
-import { ChartType } from 'geochart';
 import { ChartIcon } from 'geoview-core/src/ui/icons';
 
-import { PayloadBaseClassChart, EVENT_CHART_REDRAW } from './geochart-event-base';
-import { PayloadChartConfig } from './geochart-event-config';
-import { PluginGeoChartConfig } from './geochart-types';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-geochart.json';
 
@@ -75,20 +71,11 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
   }
 
   /**
-   * Callable plugin function to emit a Chart config event in order to update the Chart configuration on demand.
-   * @param config PluginGeoChartConfig<ChartType> The GeoChart Config
-   */
-  loadConfig = (config: PluginGeoChartConfig<ChartType>): void => {
-    // Emit a Chart Changed event so the chart updates
-    this.api.event.emit(new PayloadChartConfig(this.pluginProps.mapId, config));
-  };
-
-  /**
    * Callable plugin function to emit a Chart redraw event in order to update the Chart ui on demand.
    */
   redrawChart = (): void => {
     // Emit a Chart Redraw event so the chart redraws
-    this.api.event.emit(new PayloadBaseClassChart(EVENT_CHART_REDRAW, this.pluginProps.mapId));
+    // TODO: Implement the equivalent that's in the index.tsx file
   };
 }
 
