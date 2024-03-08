@@ -1,26 +1,36 @@
-import { TypeSourceGeoPackageInitialConfig } from '@/geo/layer/geoview-layers/vector/geopackage';
+import { TypeSourceCSVInitialConfig } from '@/geo/layer/geoview-layers/vector/csv';
 import { TypeLocalizedString } from '@/geo/map/map-schema-types';
-import { VectorLayerEntryConfig } from './vector-layer-entry-config';
+import { VectorLayerEntryConfig } from '../vector-layer-entry-config';
 
-export class GeoPackageLayerEntryConfig extends VectorLayerEntryConfig {
-  declare source: TypeSourceGeoPackageInitialConfig;
+export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
+  declare source: TypeSourceCSVInitialConfig;
+
+  // character separating values in csv file
+  valueSeparator? = ',';
 
   /**
    * The class constructor.
-   * @param {GeoPackageLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+   * @param {CsvLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: GeoPackageLayerEntryConfig) {
+  constructor(layerConfig: CsvLayerEntryConfig) {
     super(layerConfig);
     Object.assign(this, layerConfig);
 
+    if (!this.geoviewLayerConfig.metadataAccessPath && !this.source?.dataAccessPath) {
+      throw new Error(
+        `dataAccessPath is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} of type CSV when the metadataAccessPath is undefined.`
+      );
+    }
     // Default value for this.entryType is vector
     if (this.entryType === undefined) this.entryType = 'vector';
     // Attribute 'style' must exist in layerConfig even if it is undefined
     if (!('style' in this)) this.style = undefined;
-    // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
-    // Value for this.source.format can only be GeoPackage.
-    if (!this.source) this.source = { format: 'GeoPackage' };
-    if (!this.source.format) this.source.format = 'GeoPackage';
+    // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the CSV layer to it
+    // and place the layerId at the end of it.
+    // Value for this.source.format can only be CSV.
+    if (!this.source) this.source = { format: 'CSV', separator: ',' };
+    if (!this.source.format) this.source.format = 'CSV';
+    if (!this.source.separator) this.source.separator = ',';
     if (!this.source.dataAccessPath) {
       let { en, fr } = this.geoviewLayerConfig.metadataAccessPath!;
       en = en!.split('/').length > 1 ? en!.split('/').slice(0, -1).join('/') : './';
@@ -29,7 +39,7 @@ export class GeoPackageLayerEntryConfig extends VectorLayerEntryConfig {
     }
     if (
       !(this.source.dataAccessPath!.en?.startsWith('blob') && !this.source.dataAccessPath!.en?.endsWith('/')) &&
-      !this.source.dataAccessPath!.en?.toLowerCase().endsWith('.gpkg')
+      !this.source.dataAccessPath!.en?.toUpperCase().endsWith('.CSV')
     ) {
       this.source.dataAccessPath!.en = this.source.dataAccessPath!.en!.endsWith('/')
         ? `${this.source.dataAccessPath!.en}${this.layerId}`
@@ -38,6 +48,6 @@ export class GeoPackageLayerEntryConfig extends VectorLayerEntryConfig {
         ? `${this.source.dataAccessPath!.fr}${this.layerId}`
         : `${this.source.dataAccessPath!.fr}/${this.layerId}`;
     }
-    if (!this?.source?.dataProjection) this.source.dataProjection = 'EPSG:4326';
+    if (!this.source.dataProjection) this.source.dataProjection = 'EPSG:4326';
   }
 }

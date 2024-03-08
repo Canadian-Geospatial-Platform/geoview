@@ -99,7 +99,7 @@
 
       window.setInterval(() => {
         const displayField1 = document.getElementById('HUC3-state');
-        const featureInfoLayerSet = cgpv.api.getFeatureInfoLayerSet('mapWM3').resultSet;
+        const featureInfoLayerSet = cgpv.api.maps['mapWM3'].layer.featureInfoLayerSet.resultSet;
         if (featureInfoLayerSet) {
           const output = Object.keys(featureInfoLayerSet).reduce((outputValue, layerId) => {
             const { layerStatus } = featureInfoLayerSet[layerId];

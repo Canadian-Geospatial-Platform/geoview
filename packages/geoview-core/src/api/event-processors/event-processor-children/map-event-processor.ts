@@ -40,6 +40,7 @@ import { AppEventProcessor } from './app-event-processor';
 import { logger } from '@/core/utils/logger';
 
 import { AbstractEventProcessor } from '../abstract-event-processor';
+import { GeoCoreLayerEntryConfig } from '@/core/utils/config/validation-classes/geocore-layer-entry-config';
 
 export class MapEventProcessor extends AbstractEventProcessor {
   /**
@@ -272,12 +273,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
     });
     map.addOverlay(clickMarkerOverlay);
 
-    // trigger the creation of feature info layer set and legend layer set
-    // We always trigger creation because outside package may rely on them
-    // ? duplicate of code in app-start, evaluate if there is a needed refactor for layer set.
-    api.getFeatureInfoLayerSet(mapId);
-    api.getLegendsLayerSet(mapId);
-
     // set autofocus/blur on mouse enter/leave the map so user can scroll (zoom) without having to click the map
     const mapHTMLElement = map.getTargetElement();
     mapHTMLElement.addEventListener('wheel', () => mapHTMLElement.focus());
@@ -451,7 +446,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const { orderedLayerInfo } = this.getMapStateProtected(mapId);
     const layerPath = (geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId
       ? `${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}/${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}`
-      : (geoviewLayerConfig as TypeLayerEntryConfig).layerPath;
+      : (geoviewLayerConfig as Exclude<TypeLayerEntryConfig, GeoCoreLayerEntryConfig>).layerPath;
     const index = this.getMapIndexFromOrderedLayerInfo(mapId, layerPathToReplace || layerPath);
     const replacedLayers = orderedLayerInfo.filter((layerInfo) => layerInfo.layerPath.startsWith(layerPathToReplace || layerPath));
     const newOrderedLayerInfo = api.maps[mapId].layer.generateArrayOfLayerOrderInfo(geoviewLayerConfig);

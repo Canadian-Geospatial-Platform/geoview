@@ -43,19 +43,21 @@ import { CONFIG_GEOCORE_URL, CONFIG_GEOLOCATOR_URL } from '@/app';
 
 import { generateId, replaceParams, getLocalizedMessage, showError } from '../utilities';
 import schema from '../../../../schema.json';
-import { WfsLayerEntryConfig } from './validationClasses/wfs-layer-entry-config';
-import { OgcFeatureLayerEntryConfig } from './validationClasses/ogc-layer-entry-config';
-import { CsvLayerEntryConfig } from './validationClasses/csv-layer-entry-config';
-import { VectorTilesLayerEntryConfig } from './validationClasses/vector-tiles-layer-entry-config';
-import { GeoJSONLayerEntryConfig } from './validationClasses/geojson-layer-entry-config';
-import { EsriFeatureLayerEntryConfig } from './validationClasses/esri-feature-layer-entry-config';
-import { GeoPackageLayerEntryConfig } from './validationClasses/geopackage-layer-config-entry';
-import { XYZTilesLayerEntryConfig } from './validationClasses/xyz-layer-entry-config';
-import { OgcWmsLayerEntryConfig } from './validationClasses/ogc-wms-layer-entry-config';
-import { ImageStaticLayerEntryConfig } from './validationClasses/image-static-layer-entry-config';
-import { EsriDynamicLayerEntryConfig } from './validationClasses/esri-dynamic-layer-entry-config';
-import { EsriImageLayerEntryConfig } from './validationClasses/esri-image-layer-entry-config';
-import { GroupLayerEntryConfig } from './validationClasses/group-layer-entry-config';
+import { WfsLayerEntryConfig } from './validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import { OgcFeatureLayerEntryConfig } from './validation-classes/vector-validation-classes/ogc-layer-entry-config';
+import { CsvLayerEntryConfig } from './validation-classes/vector-validation-classes/csv-layer-entry-config';
+import { VectorTilesLayerEntryConfig } from './validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
+import { GeoJSONLayerEntryConfig } from './validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import { EsriFeatureLayerEntryConfig } from './validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import { GeoPackageLayerEntryConfig } from './validation-classes/vector-validation-classes/geopackage-layer-config-entry';
+import { XYZTilesLayerEntryConfig } from './validation-classes/raster-validation-classes/xyz-layer-entry-config';
+import { OgcWmsLayerEntryConfig } from './validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { ImageStaticLayerEntryConfig } from './validation-classes/raster-validation-classes/image-static-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from './validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import { EsriImageLayerEntryConfig } from './validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import { GroupLayerEntryConfig } from './validation-classes/group-layer-entry-config';
+import { ConfigBaseClass } from './validation-classes/config-base-class';
+import { GeoCoreLayerEntryConfig } from './validation-classes/geocore-layer-entry-config';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -419,7 +421,7 @@ export class ConfigValidation {
     const groupSchemaPath = `https://cgpv/schema#/definitions/TypeLayerGroupEntryConfig`;
 
     for (let i = 0; i < listOfLayerEntryConfig.length; i++) {
-      const schemaPath = layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) ? groupSchemaPath : layerSchemaPath;
+      const schemaPath = layerEntryIsGroupLayer(listOfLayerEntryConfig[i] as ConfigBaseClass) ? groupSchemaPath : layerSchemaPath;
       const validate = validator.getSchema(schemaPath);
 
       if (!validate) {
@@ -441,7 +443,7 @@ export class ConfigValidation {
 
     for (let i = 0; i < listOfLayerEntryConfig.length; i++) {
       if (
-        layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) &&
+        layerEntryIsGroupLayer(listOfLayerEntryConfig[i] as ConfigBaseClass) &&
         !this.IsValidTypeListOfLayerEntryConfig(geoviewLayerType, listOfLayerEntryConfig[i].listOfLayerEntryConfig!, validator)
       )
         return false;
@@ -608,10 +610,10 @@ export class ConfigValidation {
         layerConfig.parentLayerConfig?.initialSettings || layerConfig.geoviewLayerConfig?.initialSettings
       );
 
-      if (layerEntryIsGroupLayer(layerConfig)) {
+      if (layerEntryIsGroupLayer(layerConfig as ConfigBaseClass)) {
         // We must set the parents of all elements in the group.
         this.recursivelySetChildParent(geoviewLayerConfig, [layerConfig], parentLayerConfig);
-        const parent = new GroupLayerEntryConfig(layerConfig);
+        const parent = new GroupLayerEntryConfig(layerConfig as GroupLayerEntryConfig);
         listOfLayerEntryConfig[i] = parent;
         this.processLayerEntryConfig(geoviewLayerConfig, parent.listOfLayerEntryConfig, parent);
       } else if (geoviewEntryIsWMS(layerConfig)) {
@@ -622,8 +624,8 @@ export class ConfigValidation {
         listOfLayerEntryConfig[i] = new XYZTilesLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsVectorTiles(layerConfig)) {
         listOfLayerEntryConfig[i] = new VectorTilesLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsEsriDynamic(layerConfig)) {
-        listOfLayerEntryConfig[i] = new EsriDynamicLayerEntryConfig(layerConfig);
+      } else if (geoviewEntryIsEsriDynamic(layerConfig as Exclude<TypeLayerEntryConfig, GeoCoreLayerEntryConfig>)) {
+        listOfLayerEntryConfig[i] = new EsriDynamicLayerEntryConfig(layerConfig as EsriDynamicLayerEntryConfig);
       } else if (geoviewEntryIsEsriFeature(layerConfig)) {
         listOfLayerEntryConfig[i] = new EsriFeatureLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsEsriImage(layerConfig)) {
@@ -658,7 +660,7 @@ export class ConfigValidation {
       layerConfig.parentLayerConfig = parentLayerConfig;
       layerConfig.geoviewLayerConfig = geoviewLayerConfig;
       if (layerEntryIsGroupLayer(layerConfig))
-        this.recursivelySetChildParent(geoviewLayerConfig, layerConfig.listOfLayerEntryConfig, layerConfig);
+        this.recursivelySetChildParent(geoviewLayerConfig, layerConfig.listOfLayerEntryConfig!, layerConfig as GroupLayerEntryConfig);
     });
   }
 

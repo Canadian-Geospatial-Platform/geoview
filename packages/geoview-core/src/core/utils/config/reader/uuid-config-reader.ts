@@ -15,16 +15,16 @@ import { TypeXYZTilesConfig } from '@/geo/layer/geoview-layers/raster/xyz-tiles'
 import { TypeVectorTilesConfig } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { createLocalizedString } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { WfsLayerEntryConfig } from '../validationClasses/wfs-layer-entry-config';
-import { OgcFeatureLayerEntryConfig } from '../validationClasses/ogc-layer-entry-config';
-import { VectorTilesLayerEntryConfig } from '../validationClasses/vector-tiles-layer-entry-config';
-import { GeoJSONLayerEntryConfig } from '../validationClasses/geojson-layer-entry-config';
-import { EsriFeatureLayerEntryConfig } from '../validationClasses/esri-feature-layer-entry-config';
-import { GeoPackageLayerEntryConfig } from '../validationClasses/geopackage-layer-config-entry';
-import { XYZTilesLayerEntryConfig } from '../validationClasses/xyz-layer-entry-config';
-import { ImageStaticLayerEntryConfig } from '../validationClasses/image-static-layer-entry-config';
-import { OgcWmsLayerEntryConfig } from '../validationClasses/ogc-wms-layer-entry-config';
-import { EsriDynamicLayerEntryConfig } from '../validationClasses/esri-dynamic-layer-entry-config';
+import { WfsLayerEntryConfig } from '../validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import { OgcFeatureLayerEntryConfig } from '../validation-classes/vector-validation-classes/ogc-layer-entry-config';
+import { VectorTilesLayerEntryConfig } from '../validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
+import { GeoJSONLayerEntryConfig } from '../validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import { EsriFeatureLayerEntryConfig } from '../validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import { GeoPackageLayerEntryConfig } from '../validation-classes/vector-validation-classes/geopackage-layer-config-entry';
+import { XYZTilesLayerEntryConfig } from '../validation-classes/raster-validation-classes/xyz-layer-entry-config';
+import { ImageStaticLayerEntryConfig } from '../validation-classes/raster-validation-classes/image-static-layer-entry-config';
+import { OgcWmsLayerEntryConfig } from '../validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from '../validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 
 // The GeoChart Json object coming out of the GeoCore response
 export type GeoChartGeoCoreConfig = TypeJsonObject & {

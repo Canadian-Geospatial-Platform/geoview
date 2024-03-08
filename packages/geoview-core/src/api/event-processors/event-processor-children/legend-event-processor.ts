@@ -159,8 +159,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           };
           existingEntries.push(legendLayerEntry);
           entryIndex = existingEntries.length - 1;
-          // eslint-disable-next-line no-param-reassign
-        } else existingEntries[entryIndex].layerStatus = layerConfig.layerStatus;
+        }
+        // eslint-disable-next-line no-param-reassign
+        else existingEntries[entryIndex].layerStatus = layerConfig.layerStatus;
         createNewLegendEntries(entryLayerPath, currentLevel + 1, existingEntries[entryIndex].children);
       } else if (layerConfig) {
         const newLegendLayer: TypeLegendLayer = {

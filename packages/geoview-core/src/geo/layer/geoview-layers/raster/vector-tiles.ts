@@ -27,9 +27,9 @@ import { getLocalizedValue, getMinOrMaxExtents, showError } from '@/core/utils/u
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validationClasses/vector-tiles-layer-entry-config';
+import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
-import { TileLayerEntryConfig } from '@/core/utils/config/validationClasses/tile-layer-entry-config';
+import { TileLayerEntryConfig } from '@/core/utils/config/validation-classes/tile-layer-entry-config';
 
 // TODO: Implement method to validate Vector Tiles service
 // TODO: Add more customization (minZoom, maxZoom, TMS)

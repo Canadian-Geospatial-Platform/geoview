@@ -9,6 +9,7 @@ import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId, EVENT_NAMES } from '../event-types';
 import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoResultSet } from '@/geo/utils/feature-info-layer-set';
 
 /** Valid events that can create GetFeatureInfoPayload */
 const validEvents: EventStringId[] = [
@@ -89,16 +90,6 @@ export type TypeArrayOfLayerData = TypeLayerData[];
 
 export type TypeFeatureInfoByEventTypes = {
   [eventName in EventType]?: TypeLayerData;
-};
-
-export type TypeFeatureInfoResultSetEntry = {
-  layerName?: string;
-  layerStatus: TypeLayerStatus;
-  data: TypeFeatureInfoByEventTypes;
-};
-
-export type TypeFeatureInfoResultSet = {
-  [layerPath: string]: TypeFeatureInfoResultSetEntry;
 };
 
 /**

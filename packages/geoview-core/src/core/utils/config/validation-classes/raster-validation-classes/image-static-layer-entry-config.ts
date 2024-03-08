@@ -1,19 +1,13 @@
 import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
-import {
-  GeoviewChild,
-  TypeLayerEntryType,
-  TypeLocalizedString,
-  TypeSourceImageEsriInitialConfig,
-  TypeStyleConfig,
-} from '@/geo/map/map-schema-types';
+import { GeoviewChild, TypeLayerEntryType, TypeSourceImageStaticInitialConfig } from '@/geo/map/map-schema-types';
+import { AbstractBaseLayerEntryConfig } from '../abstract-base-layer-entry-config';
 
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.
  */
-export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
+export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** Tag used to link the entry to a specific schema. */
-  schemaTag = 'esriDynamic' as TypeGeoviewLayerType;
+  schemaTag = 'imageStatic' as TypeGeoviewLayerType;
 
   /** Layer entry data type. */
   entryType = 'raster-image' as TypeLayerEntryType;
@@ -22,21 +16,21 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   layerFilter?: string;
 
   /** Source settings to apply to the GeoView image layer source at creation time. */
-  declare source: TypeSourceImageEsriInitialConfig;
-
-  /** Style to apply to the raster layer. */
-  style?: TypeStyleConfig;
+  declare source: TypeSourceImageStaticInitialConfig;
 
   /**
    * The class constructor.
-   * @param {EsriDynamicLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+   * @param {ImageStaticLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: EsriDynamicLayerEntryConfig) {
+  constructor(layerConfig: ImageStaticLayerEntryConfig) {
     super(layerConfig);
     Object.assign(this, layerConfig);
-    // if layerConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
-    if (!this.source) this.source = {};
-    if (!this.source.dataAccessPath) this.source.dataAccessPath = { ...this.geoviewLayerConfig.metadataAccessPath } as TypeLocalizedString;
+
+    if (!this.source.dataAccessPath) {
+      throw new Error(
+        `source.dataAccessPath on layer entry ${this.layerPath} is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} of type ${this.geoviewLayerConfig.geoviewLayerType}`
+      );
+    }
   }
 
   /**

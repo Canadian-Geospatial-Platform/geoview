@@ -47,16 +47,17 @@ import { Cast, Config, api } from '@/app';
 import { logger } from '@/core/utils/logger';
 import { EsriImage, TypeEsriImageLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { WfsLayerEntryConfig } from '@/core/utils/config/validationClasses/wfs-layer-entry-config';
-import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validationClasses/ogc-layer-entry-config';
-import { CsvLayerEntryConfig } from '@/core/utils/config/validationClasses/csv-layer-entry-config';
-import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validationClasses/geojson-layer-entry-config';
-import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-feature-layer-entry-config';
-import { GeoPackageLayerEntryConfig } from '@/core/utils/config/validationClasses/geopackage-layer-config-entry';
-import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validationClasses/xyz-layer-entry-config';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-dynamic-layer-entry-config';
-import { EsriImageLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-image-layer-entry-config';
-import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validationClasses/ogc-wms-layer-entry-config';
+import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
+import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
+import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import { GeoPackageLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geopackage-layer-config-entry';
+import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { GeoCoreLayerEntryConfig } from '@/core/utils/config/validation-classes/geocore-layer-entry-config';
 
 type EsriOptions = {
   err: string;
@@ -852,7 +853,7 @@ export function AddNewLayer(): JSX.Element {
       }
     } else if (geoviewLayerInstance) {
       geoviewLayerInstance.geoviewLayerName = createLocalizedString(layerName);
-      const { geoviewLayerConfig } = layerEntries[0] as TypeLayerEntryConfig;
+      const { geoviewLayerConfig } = layerEntries[0] as Exclude<TypeLayerEntryConfig, GeoCoreLayerEntryConfig>;
       geoviewLayerConfig.geoviewLayerName = createLocalizedString(layerName);
       if (layerType === XYZ_TILES) (layerEntries[0] as TypeLayerEntryConfig).layerName = createLocalizedString(layerName);
       geoviewLayerInstance.setListOfLayerEntryConfig(geoviewLayerConfig, layerEntries as TypeListOfLayerEntryConfig);

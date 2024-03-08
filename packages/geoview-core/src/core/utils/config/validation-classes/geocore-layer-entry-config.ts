@@ -2,7 +2,6 @@ import LayerGroup from 'ol/layer/Group';
 import BaseLayer from 'ol/layer/Base';
 import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
-  ConfigBaseClass,
   TypeLayerEntryType,
   TypeLayerInitialSettings,
   TypeListOfLayerEntryConfig,
@@ -11,6 +10,7 @@ import {
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { logger } from '../../logger';
+import { ConfigBaseClass } from './config-base-class';
 
 /** ******************************************************************************************************************************
  * Type used to define a GeoView layer where configration is extracted by a configuration snippet stored on a server. The server
