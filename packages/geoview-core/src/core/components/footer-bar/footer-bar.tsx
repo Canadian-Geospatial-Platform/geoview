@@ -3,7 +3,7 @@ import { camelCase } from 'lodash';
 import { useTheme } from '@mui/material/styles';
 
 import { Box, IconButton, Tabs, TypeTabs, MoveDownRoundedIcon, MoveUpRoundedIcon } from '@/ui';
-import { api, useGeoViewMapId } from '@/app';
+import { api } from '@/app';
 import { FooterBarPayload } from '@/api/events/payloads';
 import { getSxClasses } from './footer-bar-style';
 import { ResizeFooterPanel } from '../resize-footer-panel/resize-footer-panel';
@@ -19,7 +19,7 @@ import {
 
 import { toJsonObject, TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
-import { useGeoViewConfig } from '@/core/stores/geoview-store';
+import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 
 // default tabs icon and class
 import { HubOutlinedIcon, InfoOutlinedIcon, LayersOutlinedIcon, StorageIcon, SchoolIcon } from '@/ui/icons';

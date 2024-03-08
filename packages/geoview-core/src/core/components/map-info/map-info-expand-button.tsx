@@ -4,8 +4,8 @@ import { useTheme } from '@mui/material';
 import { ExpandMoreIcon, ExpandLessIcon, IconButton, Box } from '@/ui';
 import { getSxClasses } from './map-info-style';
 import { useUIStoreActions, useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useGeoViewMapId } from '@/app';
 import { logger } from '@/core/utils/logger';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 /**
  * Map Information Expand Button component

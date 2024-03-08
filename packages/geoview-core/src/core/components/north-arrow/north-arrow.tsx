@@ -9,7 +9,7 @@ import { getSxClasses } from './north-arrow-style';
 import { useMapNorthArrowElement, useMapProjection, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 import useManageArrow from './hooks/useManageArrow';
-import { useGeoViewMapId } from '@/app';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 /**

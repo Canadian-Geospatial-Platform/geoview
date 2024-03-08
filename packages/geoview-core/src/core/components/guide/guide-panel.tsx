@@ -3,8 +3,7 @@ import Markdown from 'markdown-to-jsx';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Box, List, ListItem } from '@/ui';
-import { useGeoViewMapId } from '@/app';
-import { useGeoViewConfig } from '@/core/stores/geoview-store';
+import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { TypeValidFooterBarTabsCoreProps } from '@/geo/map/map-schema-types';
 
 import { getSxClasses } from './guide-style';

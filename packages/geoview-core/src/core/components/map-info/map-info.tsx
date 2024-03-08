@@ -12,8 +12,8 @@ import { MapInfoFixNorthSwitch } from './map-info-fixnorth-switch';
 import { getSxClasses } from './map-info-style';
 import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useGeoViewMapId } from '@/app';
 import { logger } from '@/core/utils/logger';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 /**
  * Create a map information element that contains attribtuion, mouse position and scale

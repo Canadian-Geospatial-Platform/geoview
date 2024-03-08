@@ -19,7 +19,7 @@ import {
 } from '@/ui';
 import { getSxClasses } from './notifications-style';
 import { useAppNotifications, useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useGeoViewMapId } from '@/app';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 export type NotificationDetailsType = {

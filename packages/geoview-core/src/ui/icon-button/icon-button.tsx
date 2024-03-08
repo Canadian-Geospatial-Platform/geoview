@@ -30,8 +30,8 @@ export function IconButton(props: TypeIconButtonProps): JSX.Element {
 
   const { t } = useTranslation<string>();
 
-  return (
-    <Tooltip title={t((tooltip as string) || '') as string} placement={tooltipPlacement} TransitionComponent={Fade}>
+  function getMaterialIconButton() {
+    return (
       <MaterialIconButton
         id={id}
         sx={sx}
@@ -47,6 +47,15 @@ export function IconButton(props: TypeIconButtonProps): JSX.Element {
       >
         {children && children}
       </MaterialIconButton>
+    );
+  }
+
+  if (disabled) {
+    return getMaterialIconButton();
+  }
+  return (
+    <Tooltip title={t((tooltip as string) || '') as string} placement={tooltipPlacement} TransitionComponent={Fade}>
+      {getMaterialIconButton()}
     </Tooltip>
   );
 }

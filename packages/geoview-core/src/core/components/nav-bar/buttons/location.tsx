@@ -1,10 +1,11 @@
 import { useTheme } from '@mui/material/styles';
 
 import { IconButton, EmojiPeopleIcon } from '@/ui';
-import { api, useGeoViewMapId } from '@/app';
+import { api } from '@/app';
 import { getSxClasses } from '../nav-bar-style';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 /**
  * Create a location button to zoom to user location

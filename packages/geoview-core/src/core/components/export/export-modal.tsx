@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Button, Dialog, DialogActions, DialogTitle } from '@/ui';
 import { exportPNG } from '@/core/utils/utilities';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useGeoViewMapId } from '@/app';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 /**
  * Export modal window component to export the viewer information in a PNG file

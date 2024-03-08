@@ -4,8 +4,10 @@ import { capitalize } from 'lodash';
 import { useTheme } from '@mui/material/styles';
 import { Box, List, ListItem, Panel, IconButton, TypeIconButtonProps, SchoolIcon, InfoOutlinedIcon, HubOutlinedIcon } from '@/ui';
 
-import { AbstractPlugin, TypeJsonObject, TypeJsonValue, api, toJsonObject, useGeoViewMapId } from '@/app';
+import { AbstractPlugin, TypeJsonObject, TypeJsonValue, api, toJsonObject } from '@/app';
+
 import { ButtonPanelPayload } from '@/api/events/payloads';
+
 import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import ExportButton from '@/core/components/export/export-modal-button';
 import {
@@ -14,7 +16,7 @@ import {
   useUIAppbarComponents,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useGeoViewConfig } from '@/core/stores/geoview-store';
+import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import { GuidePanel, Legend, DetailsPanel } from '@/core/components';
 import Notifications from '@/core/components/notifications/notifications';

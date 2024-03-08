@@ -6,7 +6,7 @@ import { Box, MoreHorizIcon, Popover, IconButton, Typography } from '@/ui';
 import { useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapAttribution } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { generateId } from '@/core/utils/utilities';
-import { useGeoViewMapId } from '@/app';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 /**

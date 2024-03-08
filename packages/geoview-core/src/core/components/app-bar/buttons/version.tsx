@@ -4,7 +4,7 @@ import { Typography, Box, Link, Theme, SvgIcon, ClickAwayListener, Paper } from 
 
 import { GITHUB_REPO, GEO_URL_TEXT } from '@/core/utils/constant';
 import { GeoCaIcon, IconButton, Popper } from '@/ui';
-import { useGeoViewMapId } from '@/app';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 // eslint-disable-next-line no-underscore-dangle
 declare const __VERSION__: TypeAppVersion;
