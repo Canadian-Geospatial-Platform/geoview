@@ -1,6 +1,6 @@
 import { useState, MouseEvent, useMemo } from 'react';
 import Slider from '@mui/material/Slider';
-import { useGeoViewMapId } from '@/app';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { Box, HeightIcon, IconButton, Popover } from '@/ui';
 import { getSxClasses } from './resize-footer-panel-style';
 import {

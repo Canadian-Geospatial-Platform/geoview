@@ -5,9 +5,10 @@ import { useTheme, Theme } from '@mui/material/styles';
 import { getUid } from 'ol/util';
 
 import { getGeoViewStore } from '@/core/stores/stores-managers';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 import { Box } from '@/ui';
-import { api, useGeoViewMapId } from '@/app';
+import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { PayloadBaseClass, TypeFeatureInfoEntry, payloadIsAllQueriesDone } from '@/api/events/payloads';
 import { logger } from '@/core/utils/logger';

@@ -1,6 +1,6 @@
 import { IconButton, DownloadIcon } from '@/ui';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useGeoViewMapId } from '@/app';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 /**
  * Interface used for export button properties

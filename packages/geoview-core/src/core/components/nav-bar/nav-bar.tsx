@@ -11,7 +11,8 @@ import Home from './buttons/home';
 import ExportButton from '@/core/components/export/export-modal-button';
 import Location from './buttons/location';
 
-import { api, useGeoViewMapId } from '@/app';
+import { api } from '@/app';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { Panel, ButtonGroup, IconButton, Box } from '@/ui';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { payloadIsAButtonPanel, ButtonPanelPayload, PayloadBaseClass } from '@/api/events/payloads';
