@@ -8,20 +8,11 @@ import { Options as VectorLayerOptions } from 'ol/layer/BaseVector';
 import { asArray, asString } from 'ol/color';
 
 import { api } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
-
 import { generateId, setAlphaColor } from '@/core/utils/utilities';
-import {
-  payloadIsACircleConfig,
-  payloadIsAMarkerConfig,
-  payloadIsAPolygonConfig,
-  payloadIsAPolylineConfig,
-  payloadIsAGeometryConfig,
-  GeometryPayload,
-} from '@/api/events/payloads';
-import { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from './geometry-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
+
+import { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from './geometry-types';
 
 /**
  * Store a group of features
@@ -31,6 +22,18 @@ interface FeatureCollection {
   vectorLayer: VectorLayer<VectorSource>;
   vectorSource: VectorSource;
 }
+
+/**
+ * Event interface for GeometryAdded
+ */
+interface GeometryAddedEvent {
+  feature: Feature;
+}
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type GeometryAddedDelegate = (sender: Geometry, event: GeometryAddedEvent) => void;
 
 /**
  * Class used to manage vector geometries (Polyline, Polygon, Circle, Marker...)
@@ -54,8 +57,11 @@ export class Geometry {
   // index of the active geometry group used to add new geometries in the map
   activeGeometryGroupIndex = 0;
 
+  // Keep all callback delegates references
+  private onGeometryAddedHandlers: GeometryAddedDelegate[] = [];
+
   /**
-   * Initialize map, vectors, and listen to add geometry events
+   * Constructs a Geometry class and creates a geometry group in the process.
    *
    * @param {string} mapId map id
    */
@@ -64,66 +70,36 @@ export class Geometry {
 
     // create default geometry group
     this.createGeometryGroup(this.defaultGeometryGroupId);
-
-    // listen to add geometry events
-    api.event.on(
-      EVENT_NAMES.GEOMETRY.EVENT_GEOMETRY_ADD,
-      (payload) => {
-        // Log
-        logger.logTraceCoreAPIEvent('GEOMETRY - EVENT_GEOMETRY_ADD', payload);
-
-        if (payloadIsACircleConfig(payload)) {
-          this.addCircle(payload.coordintate, payload.options, payload.id);
-        } else if (payloadIsAPolygonConfig(payload)) {
-          this.addPolygon(payload.points, payload.options, payload.id);
-        } else if (payloadIsAPolylineConfig(payload)) {
-          this.addPolyline(payload.points, payload.options, payload.id);
-        } else if (payloadIsAMarkerConfig(payload)) {
-          this.addMarkerIcon(payload.coordinate, payload.options, payload.id);
-        }
-      },
-      this.#mapId
-    );
-
-    // listen to outside events to remove geometries
-    api.event.on(
-      EVENT_NAMES.GEOMETRY.EVENT_GEOMETRY_REMOVE,
-      (payload) => {
-        // Log
-        logger.logTraceCoreAPIEvent('GEOMETRY - EVENT_GEOMETRY_REMOVE', payload);
-
-        if (payloadIsAGeometryConfig(payload)) {
-          // remove geometry from outside
-          this.deleteGeometry(payload.id!);
-        }
-      },
-      this.#mapId
-    );
-
-    // listen to outside events to turn on geometry groups
-    api.event.on(
-      EVENT_NAMES.GEOMETRY.EVENT_GEOMETRY_ON,
-      () => {
-        // Log
-        logger.logTraceCoreAPIEvent('GEOMETRY - EVENT_GEOMETRY_ON');
-
-        this.setGeometryGroupAsVisible();
-      },
-      this.#mapId
-    );
-
-    // listen to outside events to turn off geometry groups
-    api.event.on(
-      EVENT_NAMES.GEOMETRY.EVENT_GEOMETRY_OFF,
-      () => {
-        // Log
-        logger.logTraceCoreAPIEvent('GEOMETRY - EVENT_GEOMETRY_OFF');
-
-        this.setGeometryGroupAsInvisible();
-      },
-      this.#mapId
-    );
   }
+
+  /**
+   * Wires an event handler.
+   * @param callback The callback to be executed whenever the event is raised
+   */
+  onGeometryAdded = (callback: GeometryAddedDelegate): void => {
+    // Push a new callback handler to the list of handlers
+    this.onGeometryAddedHandlers.push(callback);
+  };
+
+  /**
+   * Unwires an event handler.
+   * @param callback The callback to stop being called whenever the event is raised
+   */
+  offGeometryAdded = (callback: GeometryAddedDelegate): void => {
+    const index = this.onGeometryAddedHandlers.indexOf(callback);
+    if (index !== -1) {
+      this.onGeometryAddedHandlers.splice(index, 1);
+    }
+  };
+
+  /**
+   * Emits an event to all handlers.
+   * @param {Feature} feature The geometry feature being added
+   */
+  private emitGeometryAddedEvent = (feature: Feature) => {
+    // Trigger all the handlers in the array
+    this.onGeometryAddedHandlers.forEach((handler) => handler(this, { feature }));
+  };
 
   /**
    * Create a polyline using an array of lng/lat points
@@ -191,8 +167,8 @@ export class Geometry {
     // add the geometry to the geometries array
     this.geometries.push(polyline);
 
-    // emit an event that a polyline geometry has been added
-    api.event.emit(GeometryPayload.forPolyline(EVENT_NAMES.GEOMETRY.EVENT_GEOMETRY_ADDED, this.#mapId, polyline));
+    // emit an event that a geometry has been added
+    this.emitGeometryAddedEvent(polyline);
 
     return polyline;
   };
@@ -263,8 +239,8 @@ export class Geometry {
     // add the geometry to the geometries array
     this.geometries.push(polygon);
 
-    // emit an event that a polygon geometry has been added
-    api.event.emit(GeometryPayload.forPolygon(EVENT_NAMES.GEOMETRY.EVENT_GEOMETRY_ADDED, this.#mapId, polygon));
+    // emit an event that a geometry has been added
+    this.emitGeometryAddedEvent(polygon);
 
     return polygon;
   };
@@ -338,8 +314,8 @@ export class Geometry {
     // add the geometry to the geometries array
     this.geometries.push(circle);
 
-    // emit an event that a circle geometry has been added
-    api.event.emit(GeometryPayload.forCircle(EVENT_NAMES.GEOMETRY.EVENT_GEOMETRY_ADDED, this.#mapId, circle));
+    // emit an event that a geometry has been added
+    this.emitGeometryAddedEvent(circle);
 
     return circle;
   }
@@ -402,8 +378,8 @@ export class Geometry {
     // add the geometry to the geometries array
     this.geometries.push(marker);
 
-    // emit an event that a marker geometry has been added
-    api.event.emit(GeometryPayload.forMarker(EVENT_NAMES.GEOMETRY.EVENT_GEOMETRY_ADDED, this.#mapId, marker));
+    // emit an event that a geometry has been added
+    this.emitGeometryAddedEvent(marker);
 
     return marker;
   };
