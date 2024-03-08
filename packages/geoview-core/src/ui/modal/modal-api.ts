@@ -3,7 +3,7 @@ import { generateId } from '@/core/utils/utilities';
 import { TypeModalProps } from './modal';
 
 /**
- * Event interface for GeometryAdded
+ * Event interface for ModalEvent
  */
 interface ModalEvent {
   modalId: string;
