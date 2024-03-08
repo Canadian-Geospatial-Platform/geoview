@@ -17,9 +17,6 @@ import {
   SnackbarType,
   SnackbarMessagePayload,
   ISnackbarButton,
-} from './payloads';
-
-  SnackbarMessagePayload,
   ModalPayload,
   modalPayload,
   payloadIsAModal,

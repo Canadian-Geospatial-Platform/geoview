@@ -158,9 +158,7 @@ export function Shell(): JSX.Element {
     api.event.on(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, mapReloadHandler, mapId);
 
     // listen to API event when app wants to show message
-    api.event.onSnackbarOpen(shellId, snackBarOpenListenerFunction);
-
-    return () => {
+    api.event.onSnackbarOpen(mapId, snackBarOpenListenerFunction);
 
     const modalOpenListenerFunction = (payload: ModalPayload) => {
       setModalProps(api.maps[mapId].modal.modals[payload.modalId] as TypeModalProps);
@@ -183,7 +181,7 @@ export function Shell(): JSX.Element {
       api.event.off(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, mapId, mapReloadHandler);
       api.event.offModalOpen(mapId, modalOpenListenerFunction);
       api.event.offModalClose(mapId, modalCloseListenerFunction);
-      api.event.offSnackbarOpen(shellId, snackBarOpenListenerFunction);
+      api.event.offSnackbarOpen(mapId, snackBarOpenListenerFunction);
     };
   }, [components, mapId, geoviewConfig, updateShell]);
 
@@ -208,7 +206,13 @@ export function Shell(): JSX.Element {
           </Box>
           {geoviewConfig!.footerBar !== undefined && <FooterBar />}
           {Object.keys(api.maps[mapId].modal.modals).map((modalId) => (
-            <Modal key={modalId} modalId={modalId} open={modalOpen} modalProps={modalProps} />
+            <Modal
+              key={modalId}
+              modalId={modalId}
+              open={modalOpen}
+              modalProps={modalProps}
+              container={document.querySelector(`#${mapId}`) || undefined}
+            />
           ))}
           {/* modal section start */}
           <FocusTrapDialog mapId={mapId} focusTrapId={mapId} />
