@@ -2,6 +2,7 @@ import { useEffect, forwardRef, useState } from 'react';
 
 import { Alert as MaterialAlert, AlertProps, Snackbar as MaterialSnackbar, Button } from '@mui/material';
 
+import { animated } from '@react-spring/web';
 import { api, useGeoViewMapId } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
@@ -9,6 +10,7 @@ import { Cast } from '@/core/types/global-types';
 import { PayloadBaseClass, payloadIsASnackbarMessage } from '@/api/events/payloads';
 import { SnackbarType } from '@/api/events/payloads/snackbar-message-payload';
 import { logger } from '@/core/utils/logger';
+import { useFadeIn } from '@/core/utils/useSpringAnimations';
 
 /**
  * Snackbar properties interface
@@ -99,8 +101,12 @@ export function Snackbar(props: SnackBarProps): JSX.Element {
     };
   }, [mapId]);
 
+  const fadeInAnimation = useFadeIn();
+  const AnimatedSnackbar = animated(MaterialSnackbar);
+
   return (
-    <MaterialSnackbar
+    <AnimatedSnackbar
+      style={fadeInAnimation}
       sx={{
         position: 'absolute',
         bottom: '40px!important',
@@ -115,6 +121,6 @@ export function Snackbar(props: SnackBarProps): JSX.Element {
         {message}
         {button !== undefined && button}
       </Alert>
-    </MaterialSnackbar>
+    </AnimatedSnackbar>
   );
 }

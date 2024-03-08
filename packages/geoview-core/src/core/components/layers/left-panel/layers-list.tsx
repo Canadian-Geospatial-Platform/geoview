@@ -99,6 +99,7 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
               depth={depth}
               layer={details}
               setIsLayersListPanelVisible={setIsLayersListPanelVisible}
+              index={index}
             />
           </div>
         )}
