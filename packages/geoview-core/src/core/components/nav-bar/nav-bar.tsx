@@ -24,7 +24,7 @@ import { logger } from '@/core/utils/logger';
  * Create a nav-bar with buttons that can call functions or open custom panels
  */
 export function Navbar(): JSX.Element {
-  // ? No props for this component.
+  // ? No props for this component. Same logic in FooterBar and AppBar.
   // ? We are handling the logic via api.event management, via nav-bar-api, once this component is mounted.
 
   // Log
