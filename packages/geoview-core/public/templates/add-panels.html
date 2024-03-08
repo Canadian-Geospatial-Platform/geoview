@@ -112,7 +112,7 @@
           };
 
           // call an api function to add a panel with a button in the default group
-          cgpv.api.maps['mapWM'].appBarButtons.createAppbarPanel(button, panel, null);
+          cgpv.api.maps['mapWM'].appBarApi.createAppbarPanel(button, panel, null);
         });
 
         // get add nav-bar panel button element for WM map
@@ -134,7 +134,7 @@
           };
 
           // call an api function to add a panel with a button
-          cgpv.api.maps['mapWM'].navBarButtons.createNavbarButtonPanel(button, panel, null);
+          cgpv.api.maps['mapWM'].navBarApi.createNavbarButtonPanel(button, panel, null);
         });
 
         // get add nav-bar button element for WM map
@@ -153,7 +153,7 @@
           };
 
           // call an api function to add a panel with a button
-          cgpv.api.maps['mapWM'].navBarButtons.createNavbarButton(button, null);
+          cgpv.api.maps['mapWM'].navBarApi.createNavbarButton(button, null);
         });
 
         // get add nav-bar button group element for WM map
@@ -177,7 +177,7 @@
           };
 
           // call an api function to add a new button panel in the nav-bar in a new group
-          cgpv.api.maps['mapWM'].navBarButtons.createNavbarButtonPanel(button, panel, 'newGroup');
+          cgpv.api.maps['mapWM'].navBarApi.createNavbarButtonPanel(button, panel, 'newGroup');
         });
       });
     </script>

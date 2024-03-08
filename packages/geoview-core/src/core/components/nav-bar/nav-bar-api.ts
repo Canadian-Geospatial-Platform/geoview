@@ -1,13 +1,9 @@
 import { api } from '@/app';
 
-import { EVENT_NAMES } from '@/api/events/event-types';
-
-import { PanelApi } from '@/ui';
+import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
+import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 
 import { generateId } from '../../utils/utilities';
-import { buttonPanelPayload } from '@/api/events/payloads';
-import { CONST_PANEL_TYPES, TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
-import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 
 /**
  * Class to manage buttons on the nav-bar
@@ -15,7 +11,7 @@ import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
  * @exports
  * @class
  */
-export class NavbarButtons {
+export class NavbarApi {
   mapId!: string;
 
   // group of array to hold all buttons, button panels created on the nav-bar
@@ -60,12 +56,12 @@ export class NavbarButtons {
    */
   private createButtonPanel = (
     buttonProps: TypeIconButtonProps,
-    panelProps: TypePanelProps | null | undefined,
+    panelProps: TypePanelProps | undefined,
     groupName: string
   ): TypeButtonPanel | null => {
     if (buttonProps) {
       // generate an id if not provided
-      const buttonId = generateId(buttonProps.id);
+      const buttonPanelId = generateId(buttonProps.id);
 
       // if group was not specified then add button panels to the default group
       const group = groupName || 'default';
@@ -77,31 +73,22 @@ export class NavbarButtons {
 
       const button: TypeIconButtonProps = {
         ...buttonProps,
-        id: buttonId,
+        id: buttonPanelId,
         visible: !buttonProps.visible ? true : buttonProps.visible,
       };
 
       const buttonPanel: TypeButtonPanel = {
-        buttonPanelId: buttonId,
+        buttonPanelId,
         button,
+        panel: panelProps,
         groupName: group,
       };
 
-      // if adding a panel
-      if (panelProps) {
-        const panel: TypePanelProps = {
-          ...panelProps,
-          type: CONST_PANEL_TYPES.NAVBAR,
-        };
-
-        buttonPanel.panel = new PanelApi(panel, buttonId, this.mapId);
-      }
-
       // add the new button panel to the correct group
-      if (group !== '__proto__' && buttonId !== '__proto__') this.buttons[group][buttonId] = buttonPanel;
+      if (group !== '__proto__' && buttonPanelId !== '__proto__') this.buttons[group][buttonPanelId] = buttonPanel;
 
       // trigger an event that a new button or button panel has been created to update the state and re-render
-      api.event.emit(buttonPanelPayload(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE, this.mapId, buttonId, group, buttonPanel));
+      api.event.emitCreateNavBarPanel(this.mapId, buttonPanelId, group, buttonPanel);
 
       return buttonPanel;
     }
@@ -131,7 +118,7 @@ export class NavbarButtons {
    * @returns the create button
    */
   createNavbarButton = (buttonProps: TypeIconButtonProps, groupName: string): TypeButtonPanel | null => {
-    return this.createButtonPanel(buttonProps, null, groupName);
+    return this.createButtonPanel(buttonProps, undefined, groupName);
   };
 
   /**
@@ -171,9 +158,7 @@ export class NavbarButtons {
       delete group[buttonPanelId];
 
       // trigger an event that a button or panel has been removed to update the state and re-render
-      api.event.emit(
-        buttonPanelPayload(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, this.mapId, buttonPanelId, groupName, group[buttonPanelId])
-      );
+      api.event.emitRemoveNavBarPanel(this.mapId, buttonPanelId, groupName, group[buttonPanelId]);
     });
   };
 }

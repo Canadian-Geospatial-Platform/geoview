@@ -72,14 +72,11 @@ export abstract class AppBarPlugin extends AbstractPlugin {
     // Create panel props
     this.panelProps = this.onCreateContentProps();
 
-    // Create a new button panel on the app-bar
-    this.buttonPanel = this.map()?.appBarButtons.createAppbarPanel(this.buttonProps!, this.panelProps, null) || undefined;
-
     // Create content
-    const content = this.onCreateContent();
+    this.panelProps.content = this.onCreateContent();
 
-    // Set panel content
-    this.buttonPanel?.panel?.changeContent(content);
+    // Create a new button panel on the app-bar
+    this.buttonPanel = this.map()?.appBarApi.createAppbarPanel(this.buttonProps!, this.panelProps, null) || undefined;
   }
 
   /**
@@ -89,7 +86,7 @@ export abstract class AppBarPlugin extends AbstractPlugin {
     // If cgpv exists
     if (this.api && this.buttonPanel) {
       // Remove the app bar panel
-      this.map()?.appBarButtons.removeAppbarPanel(this.buttonPanel.buttonPanelId);
+      this.map()?.appBarApi.removeAppbarPanel(this.buttonPanel.buttonPanelId);
     }
   }
 }

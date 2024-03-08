@@ -9,10 +9,9 @@ import sanitizeHtml from 'sanitize-html';
 
 import { AbstractGeoViewLayer, api } from '@/app';
 import { TypeLocalizedString } from '@/geo/map/map-schema-types';
-import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { SnackbarType, snackbarMessagePayload } from '@/api/events/payloads';
+import { ISnackbarButton, SnackbarType } from '@/api/events/payloads';
 import { NotificationType } from '@/core/components/notifications/notifications';
 import { Config } from '@/core/utils/config/config';
 import { logger } from '@/core/utils/logger';
@@ -125,11 +124,12 @@ export function addNotificationError(mapId: string, message: string) {
  * @param {string} mapId the map to show the message for
  * @param {SnackbarType} snackbarType the  type of snackbar
  * @param {string} message the snackbar message
- * @param {TypeJsonObject} button optional snackbar button
+ * @param {ISnackbarButton} button optional snackbar button
  */
 // eslint-disable-next-line no-underscore-dangle
-function _showSnackbarMessage(mapId: string, type: SnackbarType, message: string, button?: TypeJsonObject) {
-  api.event.emit(snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, type, message, button));
+function _showSnackbarMessage(mapId: string, type: SnackbarType, message: string, button?: ISnackbarButton) {
+  // Emit
+  api.event.emitSnackbarOpen(mapId, type, message, button);
 }
 
 /**
@@ -138,7 +138,7 @@ function _showSnackbarMessage(mapId: string, type: SnackbarType, message: string
  * @param {string} mapId the map to show the message for
  * @param {string} message the message string
  * @param {string} withNotification optional, indicates if the message should also be added as a notification, default true
- * @param {TypeJsonObject} button optional snackbar button
+ * @param {ISnackbarButton} button optional snackbar button
  */
 export function showMessage(mapId: string, message: string, withNotification = true, button = {}) {
   // Redirect
@@ -152,7 +152,7 @@ export function showMessage(mapId: string, message: string, withNotification = t
  * @param {string} mapId the map to show the message for
  * @param {string} message the message string
  * @param {string} withNotification optional, indicates if the message should also be added as a notification, default true
- * @param {TypeJsonObject} button optional snackbar button
+ * @param {ISnackbarButton} button optional snackbar button
  */
 export function showSuccess(mapId: string, message: string, withNotification = true, button = {}) {
   // Redirect
@@ -166,7 +166,7 @@ export function showSuccess(mapId: string, message: string, withNotification = t
  * @param {string} mapId the map to show the message for
  * @param {string} message the message string
  * @param {string} withNotification optional, indicates if the message should also be added as a notification, default true
- * @param {TypeJsonObject} button optional snackbar button
+ * @param {ISnackbarButton} button optional snackbar button
  */
 export function showWarning(mapId: string, message: string, withNotification = true, button = {}) {
   // Redirect
@@ -180,7 +180,7 @@ export function showWarning(mapId: string, message: string, withNotification = t
  * @param {string} mapId the map to show the message for
  * @param {string} message the message string
  * @param {string} withNotification optional, indicates if the message should also be added as a notification, default true
- * @param {TypeJsonObject} button optional snackbar button
+ * @param {ISnackbarButton} button optional snackbar button
  */
 export function showError(mapId: string, message: string, withNotification = true, button = {}) {
   // Redirect
