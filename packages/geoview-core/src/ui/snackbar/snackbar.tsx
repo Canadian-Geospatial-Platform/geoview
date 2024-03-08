@@ -1,11 +1,8 @@
-import { useEffect, forwardRef, useState } from 'react';
+import { forwardRef } from 'react';
 
-import { Alert as MaterialAlert, AlertProps, Snackbar as MaterialSnackbar, Button } from '@mui/material';
+import { Alert as MaterialAlert, AlertProps, Snackbar as MaterialSnackbar } from '@mui/material';
 
-import { api, useGeoViewMapId } from '@/app';
-
-import { Cast } from '@/core/types/global-types';
-import { SnackbarMessagePayload, SnackbarType } from '@/api/events/payloads/snackbar-message-payload';
+import { SnackbarType } from '@/api/events/payloads/snackbar-message-payload';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -13,24 +10,11 @@ import { logger } from '@/core/utils/logger';
  */
 interface SnackBarProps {
   snackBarId: string;
-}
-
-/**
- * Snackbar button properties interface
- */
-interface SnackButtonProps {
-  label: string;
-  action(): void;
-}
-
-/**
- * The snackbar button component
- * @param {SnackButtonProps} props the snackbar button properties
- * @returns {JSX.Element} the snackbar component
- */
-function SnackButton(props: SnackButtonProps): JSX.Element {
-  const { label, action } = props;
-  return <Button onClick={action}>{label}</Button>;
+  message: string;
+  open: boolean;
+  type: SnackbarType;
+  button?: JSX.Element;
+  onClose?: (event?: React.SyntheticEvent | Event, reason?: string) => void;
 }
 
 const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
@@ -43,55 +27,11 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) 
  * @param {SnackBarProps} props the snackbar properties
  */
 export function Snackbar(props: SnackBarProps): JSX.Element {
-  const { snackBarId } = props;
+  // Log
+  logger.logTraceRender('SNACKBAR', props);
 
-  const mapId = useGeoViewMapId();
-
-  // internal state
-  const [open, setOpen] = useState(false);
-  const [message, setMessage] = useState('');
-  const [snackbarType, setSnackbarType] = useState<SnackbarType>('info');
-  const [button, setButton] = useState<JSX.Element | undefined>();
-
-  const snackBarOpenListenerFunction = (payload: SnackbarMessagePayload) => {
-    // apply function if provided
-    const myButton = payload.button?.label
-      ? SnackButton({
-          label: payload.button.label as string,
-          action: Cast<() => void>(payload.button.action),
-        })
-      : undefined;
-
-    // get message and set type
-    setMessage(payload.message);
-    setButton(myButton);
-    setSnackbarType(payload.snackbarType);
-
-    // show the notification
-    setOpen(true);
-  };
-
-  const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-
-    setOpen(false);
-  };
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('UI.SNACKBAR - mount', mapId);
-
-    // listen to API event when app wants to show message
-    api.event.onSnackbarOpen(mapId, snackBarOpenListenerFunction);
-
-    // remove the listener when the component unmounts
-    return () => {
-      // Unwire
-      api.event.offSnackbarOpen(mapId, snackBarOpenListenerFunction);
-    };
-  }, [mapId]);
+  // Read props
+  const { snackBarId, open, message, type, button, onClose } = props;
 
   return (
     <MaterialSnackbar
@@ -103,12 +43,17 @@ export function Snackbar(props: SnackBarProps): JSX.Element {
       anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       open={open}
       autoHideDuration={6000}
-      onClose={handleClose}
+      onClose={() => onClose?.()}
     >
-      <Alert onClose={handleClose} severity={snackbarType} sx={{ width: '100%' }}>
+      <Alert onClose={() => onClose?.()} severity={type} sx={{ width: '100%' }}>
         {message}
         {button !== undefined && button}
       </Alert>
     </MaterialSnackbar>
   );
 }
+
+Snackbar.defaultProps = {
+  button: undefined,
+  onClose: undefined,
+};

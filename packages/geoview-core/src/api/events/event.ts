@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
 
 import { logger } from '@/core/utils/logger';
-import { TypeButtonPanel, TypeJsonObject, TypeTabs, payloadIsASnackbarMessage, snackbarMessagePayload } from '@/core/types/global-types';
+import { TypeButtonPanel, TypeTabs, payloadIsASnackbarMessage, snackbarMessagePayload } from '@/core/types/global-types';
 
 import { EVENT_NAMES, EventStringId } from './event-types';
 import { PayloadBaseClass } from './payloads/payload-base-class';
@@ -16,6 +16,7 @@ import {
   payloadIsAInKeyfocus,
   SnackbarType,
   SnackbarMessagePayload,
+  ISnackbarButton,
 } from './payloads';
 
 export type TypeEventHandlerFunction = (payload: PayloadBaseClass) => void;
@@ -281,7 +282,7 @@ export class Event {
 
   // #region EVENT_SNACKBAR_OPEN --------------------------------------------------------------------------------------
 
-  emitSnackbarOpen = (mapId: string, type: SnackbarType, message: string, button?: TypeJsonObject) => {
+  emitSnackbarOpen = (mapId: string, type: SnackbarType, message: string, button?: ISnackbarButton) => {
     // Emit
     this.emit(snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, type, message, button));
   };
