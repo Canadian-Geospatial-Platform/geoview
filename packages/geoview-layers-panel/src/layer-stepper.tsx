@@ -9,8 +9,6 @@ import {
   TypeListOfLayerEntryConfig,
   TypeLayerEntryConfig,
   TypeJsonObject,
-  PayloadBaseClass,
-  payloadIsASnackbarMessage,
 } from 'geoview-core';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
@@ -37,7 +35,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   const displayLanguage = api.maps[mapId].getDisplayLanguage() as 'en' | 'fr';
 
   const { ESRI_DYNAMIC, ESRI_FEATURE, GEOJSON, GEOPACKAGE, WMS, WFS, OGC_FEATURE, XYZ_TILES, GEOCORE } = api.layerTypes;
-  const { useState, useEffect, useRef } = react;
+  const { useState, useRef } = react;
   const {
     Select,
     Stepper,
@@ -141,27 +139,6 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       only: 'seulement',
     },
   };
-
-  const snackbarEventOpenListenerFunction = (payload: PayloadBaseClass) => {
-    // Log
-    logger.logTraceCoreAPIEvent('LAYER-STEPPER - snackbarEventOpenListenerFunction', payload);
-
-    if (payloadIsASnackbarMessage(payload)) {
-      if (payload.message && payload.message.value === 'validation.layer.loadfailed') {
-        setIsLoading(false);
-      }
-    }
-  };
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('LAYER-STEPPER - mount', mapId);
-
-    api.event.on(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, snackbarEventOpenListenerFunction, mapId);
-    return () => {
-      api.event.off(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, snackbarEventOpenListenerFunction);
-    };
-  }, [api.event, api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId]);
 
   /**
    * Returns the appropriate error config for ESRI layer types
@@ -952,6 +929,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
                         children: label,
                       },
                     }))}
+                    variant="standard"
                   />
                   <NavButtons handleNext={handleStep2} />
                 </>

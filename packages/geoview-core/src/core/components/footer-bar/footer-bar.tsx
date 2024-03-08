@@ -4,8 +4,7 @@ import { useTheme } from '@mui/material/styles';
 
 import { Box, IconButton, Tabs, TypeTabs, MoveDownRoundedIcon, MoveUpRoundedIcon } from '@/ui';
 import { api, useGeoViewMapId } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { FooterBarPayload, PayloadBaseClass, payloadIsAFooterBar } from '@/api/events/payloads';
+import { FooterBarPayload } from '@/api/events/payloads';
 import { getSxClasses } from './footer-bar-style';
 import { ResizeFooterPanel } from '../resize-footer-panel/resize-footer-panel';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -49,6 +48,9 @@ interface Tab {
  * @returns {JSX.Element} returns the FooterBar Tabs component
  */
 export function FooterBar(): JSX.Element | null {
+  // ? No props for this component. Same logic in AppBar and NavBar.
+  // ? We are handling the logic via api.event management, via footer-bar-api, once this component is mounted.
+
   // Log
   logger.logTraceRender('components/footer-bar/footer-bar');
 
@@ -81,9 +83,9 @@ export function FooterBar(): JSX.Element | null {
   // get store config for footer bar tabs to add (similar logic as in app-bar)
   const footerBarTabsConfig = useGeoViewConfig()?.footerBar;
 
-  const footerBarTabKeys = useMemo(() => {
+  const memoFooterBarTabKeys = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('FOOTER-BAR TABS KEYS', footerBarTabsConfig?.tabs?.core);
+    logger.logTraceUseMemo('FOOTER-BAR - memoFooterBarTabKeys', footerBarTabsConfig?.tabs?.core);
 
     return (footerBarTabsConfig?.tabs?.core ?? []).reduce((acc, curr) => {
       acc[curr] = {} as Tab;
@@ -92,12 +94,12 @@ export function FooterBar(): JSX.Element | null {
   }, [footerBarTabsConfig?.tabs?.core]);
 
   // List of Footer Tabs created from config file.
-  const [tabsList, setTabsList] = useState<Record<string, Tab>>(footerBarTabKeys);
+  const [tabsList, setTabsList] = useState<Record<string, Tab>>(memoFooterBarTabKeys);
 
   // Panels for each tab in footer config file.
-  const tabs = useMemo(() => {
+  const memoTabs = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('FOOTER-BAR TABS');
+    logger.logTraceUseMemo('FOOTER-BAR - memoTabs');
 
     return {
       legend: { icon: <HubOutlinedIcon />, content: <Legend /> },
@@ -109,11 +111,11 @@ export function FooterBar(): JSX.Element | null {
   }, []);
 
   // Map the panels with footer bar tab keys.
-  const footerBarTabs = useMemo(() => {
+  const memoFooterBarTabs = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('FOOTER-BAR TABS', tabsList, tabs);
+    logger.logTraceUseMemo('FOOTER-BAR - memoFooterBarTabs', tabsList, memoTabs);
 
-    const allTabs = { ...tabsList, ...tabs };
+    const allTabs = { ...tabsList, ...memoTabs };
     // inject guide tab at last position of tabs.
     return Object.keys({ ...tabsList, ...{ guide: {} } }).map((tab, index) => {
       return {
@@ -124,14 +126,14 @@ export function FooterBar(): JSX.Element | null {
         content: allTabs[tab]?.content ?? '',
       };
     }) as unknown as TypeTabs[];
-  }, [tabs, tabsList]);
+  }, [memoTabs, tabsList]);
 
   /**
    * Calculate resize values from popover values defined in store.
    */
-  const resizeValues = useMemo(() => {
+  const memoResizeValues = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('FOOTER-BAR - resizeValues', footerPanelResizeValue, footerPanelResizeValues);
+    logger.logTraceUseMemo('FOOTER-BAR - memoResizeValues', footerPanelResizeValue, footerPanelResizeValues);
 
     return footerPanelResizeValues.reduce((acc, curr) => {
       const windowHeight = window.screen.height;
@@ -166,10 +168,10 @@ export function FooterBar(): JSX.Element | null {
   /**
    * Add a tab
    */
-  const addTab = useCallback(
+  const handleAddTab = useCallback(
     (payload: FooterBarPayload) => {
       // Log
-      logger.logTraceUseCallback('FOOTER-BAR - addTab', payload);
+      logger.logTraceUseCallback('FOOTER-BAR - handleAddTab', payload);
 
       const newTab = { [payload.tab.id]: { icon: payload.tab.icon, content: payload.tab.content } } as Record<string, Tab>;
       setTabsList({ ...tabsList, ...newTab });
@@ -180,9 +182,9 @@ export function FooterBar(): JSX.Element | null {
   /**
    * Remove a tab
    */
-  const removeTab = useCallback((payload: FooterBarPayload) => {
+  const handleRemoveTab = useCallback((payload: FooterBarPayload) => {
     // Log
-    logger.logTraceUseCallback('FOOTER-BAR - removeTab', payload);
+    logger.logTraceUseCallback('FOOTER-BAR - handleRemoveTab', payload);
 
     // remove the tab from the list
     setTabsList((prevState) => {
@@ -265,22 +267,6 @@ export function FooterBar(): JSX.Element | null {
     setActiveFooterBarTab(tab.id);
   };
 
-  const eventFooterBarCreateListenerFunction = (payload: PayloadBaseClass) => {
-    // Log
-    logger.logTraceCoreAPIEvent('FOOTER-BAR - eventFooterBarCreateListenerFunction', payload);
-
-    if (payloadIsAFooterBar(payload)) {
-      addTab(payload);
-    }
-  };
-
-  const eventFooterBarRemoveListenerFunction = (payload: PayloadBaseClass) => {
-    // Log
-    logger.logTraceCoreAPIEvent('FOOTER-BAR - eventFooterBarRemoveListenerFunction', payload);
-
-    if (payloadIsAFooterBar(payload)) removeTab(payload);
-  };
-
   useEffect(() => {
     // If clicked on a tab with a plugin
     if (api.maps[mapId].plugins[selectedTab]) {
@@ -302,20 +288,20 @@ export function FooterBar(): JSX.Element | null {
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('FOOTER-BAR - addTab | removeTab', mapId);
+    logger.logTraceUseEffect('FOOTER-BAR - mount', mapId);
 
     // listen to new tab creation
-    api.event.on(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_CREATE, eventFooterBarCreateListenerFunction, mapId);
+    api.event.onCreateFooterBarPanel(mapId, handleAddTab);
 
     // listen on tab removal
-    api.event.on(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_REMOVE, eventFooterBarRemoveListenerFunction, mapId);
+    api.event.onRemoveFooterBarPanel(mapId, handleRemoveTab);
 
     return () => {
-      api.event.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_CREATE, mapId, eventFooterBarCreateListenerFunction);
-      api.event.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_REMOVE, mapId, eventFooterBarRemoveListenerFunction);
+      // Unwire
+      api.event.offCreateFooterBarPanel(mapId, handleAddTab);
+      api.event.offRemoveFooterBarPanel(mapId, handleRemoveTab);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [addTab, mapId, removeTab]);
+  }, [mapId, handleAddTab, handleRemoveTab]);
 
   /**
    * Update map and footer panel height when switch to fullscreen
@@ -325,7 +311,7 @@ export function FooterBar(): JSX.Element | null {
     logger.logTraceUseEffect('FOOTER-TABS - isMapFullScreen', isMapFullScreen, isCollapsed);
 
     if (isMapFullScreen && tabsContainerRef.current && mapContainerRef.current && !isCollapsed) {
-      const { mapVisibility, mapHeight, tabHeight } = resizeValues[footerPanelResizeValue];
+      const { mapVisibility, mapHeight, tabHeight } = memoResizeValues[footerPanelResizeValue];
 
       // #region i have set the map height and tabCOnatiner height.
       mapContainerRef.current.style.visibility = mapVisibility;
@@ -342,7 +328,7 @@ export function FooterBar(): JSX.Element | null {
       setFooterPanelResizeValue(footerPanelResizeValues[0]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMapFullScreen, footerPanelResizeValue, resizeValues, isCollapsed]);
+  }, [isMapFullScreen, footerPanelResizeValue, memoResizeValues, isCollapsed]);
 
   /**
    * Update the map and footer panel height after footer panel is collapsed.
@@ -406,7 +392,7 @@ export function FooterBar(): JSX.Element | null {
     setIsFocusToMap(!isFocusToMap);
   };
 
-  return footerBarTabs.length > 0 ? (
+  return memoFooterBarTabs.length > 0 ? (
     <Box
       ref={tabsContainerRef as MutableRefObject<HTMLDivElement>}
       sx={sxClasses.tabsContainer}
@@ -420,9 +406,9 @@ export function FooterBar(): JSX.Element | null {
         onSelectedTabChanged={handleSelectedTabChanged}
         onOpenKeyboard={openModal}
         onCloseKeyboard={closeModal}
-        selectedTab={footerBarTabs.findIndex((t) => t.id === selectedTab)}
+        selectedTab={memoFooterBarTabs.findIndex((t) => t.id === selectedTab)}
         tabsProps={{ variant: 'scrollable' }}
-        tabs={footerBarTabs}
+        tabs={memoFooterBarTabs}
         TabContentVisibilty={!isCollapsed ? 'visible' : 'hidden'}
         rightButtons={
           <>

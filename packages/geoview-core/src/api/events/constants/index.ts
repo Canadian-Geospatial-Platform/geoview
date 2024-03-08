@@ -10,7 +10,6 @@ export * from './layer-constants';
 export * from './map-constants';
 export * from './modal-constants';
 export * from './nav-bar-constants';
-export * from './panel-constants';
 export * from './slider-constants';
 export * from './snackbar-constants';
 export * from './geometry-constants';
