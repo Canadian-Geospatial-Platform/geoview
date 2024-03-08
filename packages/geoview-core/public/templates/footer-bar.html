@@ -267,10 +267,10 @@
         }
 
         // import footerBar tabs from the core for the current map
-        const { footerBar } = api.maps[mapId];
+        const { footerBarApi } = api.maps[mapId];
 
         // create new tab and add the component
-        footerBar.createTab({
+        footerBarApi.createTab({
           id: 'custom',
           value: 2,
           label: 'Custom',
