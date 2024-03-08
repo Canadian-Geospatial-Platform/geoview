@@ -33,7 +33,7 @@ interface GroupPanelType {
  * Create an app-bar with buttons that can open a panel
  */
 export function Appbar(): JSX.Element {
-  // ? No props for this component.
+  // ? No props for this component. Same logic in FooterBar and NavBar.
   // ? We are handling the logic via api.event management, via app-bar-api, once this component is mounted.
 
   // Log
@@ -64,7 +64,7 @@ export function Appbar(): JSX.Element {
 
   // #region REACT HOOKS
 
-  const panels = useMemo(() => {
+  const memoPanels = useMemo(() => {
     // Log
     logger.logTraceUseMemo('APP-BAR - panels');
 
@@ -250,14 +250,14 @@ export function Appbar(): JSX.Element {
           id: `AppbarPanelButton${capitalize(tab)}`,
           tooltip: t(`${tab}.title`)!,
           tooltipPlacement: 'bottom',
-          children: panels[tab].icon,
+          children: memoPanels[tab].icon,
         };
         const panel: TypePanelProps = {
           panelId: `Appbar${capitalize(tab)}PanelId`,
           type: 'app-bar',
           title: capitalize(tab),
-          icon: panels[tab].icon,
-          content: panels[tab].content,
+          icon: memoPanels[tab].icon,
+          content: memoPanels[tab].content,
           width: 400,
           panelStyles: {
             panelCardContent: { padding: '0' },
