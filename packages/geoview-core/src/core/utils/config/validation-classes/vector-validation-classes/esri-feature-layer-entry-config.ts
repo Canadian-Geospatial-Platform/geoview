@@ -1,6 +1,6 @@
 import { TypeSourceEsriFeatureInitialConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { TypeLocalizedString } from '@/geo/map/map-schema-types';
-import { VectorLayerEntryConfig } from './vector-layer-entry-config';
+import { VectorLayerEntryConfig } from '../vector-layer-entry-config';
 
 export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
   declare source: TypeSourceEsriFeatureInitialConfig;
