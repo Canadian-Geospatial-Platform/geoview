@@ -77,9 +77,6 @@ export type TypeModalProps = {
   // function that closes a modal
   close?: () => void;
 
-  // the id of map whose modal is generated
-  mapId?: string;
-
   // width of the modal
   width?: string | number;
 
@@ -152,13 +149,6 @@ export function Modal(props: TypeDialogProps): JSX.Element {
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
-
-  // internal state
-  const [createdModal, setCreatedModal] = useState<JSX.Element>();
-  const [, setUpdate] = useState<number>(0);
-  let openEvent = false;
-
-  /**
   const fadeInAnimation = useFadeIn();
   const AnimatedDialog = animated(Dialog);
 
@@ -168,7 +158,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
    * @param { TypeModalProps } modal the object with modal properties
    * @returns { JSX.Element } JSX for the newly created / updated modal
    */
-  const ceatedModalJSXReturner = (modal: TypeModalProps): JSX.Element => {
+  const createdModalJSXReturner = (modal: TypeModalProps): JSX.Element => {
     const CustomDialog = withStyles({
       dialogContent: {
         width: modal.width,
@@ -180,7 +170,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
       <AnimatedDialog
         open={open}
         onClose={modal.close}
-        container={document.querySelector(`#${modal.mapId}`)}
+        container={container}
         style={fadeInAnimation}
         sx={sxClasses.dialog}
         className={`${className && className}`}
@@ -252,7 +242,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
   };
 
   return (
-    (modalProps && ceatedModalJSXReturner(modalProps)) || (
+    (modalProps && createdModalJSXReturner(modalProps)) || (
       <Dialog
         open={open}
         sx={sxClasses.dialog}

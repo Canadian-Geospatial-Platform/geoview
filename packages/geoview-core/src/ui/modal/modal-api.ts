@@ -3,7 +3,7 @@ import { generateId } from '@/core/utils/utilities';
 import { TypeModalProps } from './modal';
 
 /**
- * Event interface for GeometryAdded
+ * Event interface for ModalEvent
  */
 interface ModalEvent {
   modalId: string;
@@ -50,8 +50,8 @@ export class ModalApi {
    *
    * @param { TypeModalProps } modal the modal object of type TypeModalProps
    */
-  createModal = (modal: TypeModalProps): void => {
-    if (!modal.content) return;
+  createModal = (modal: TypeModalProps): string | undefined => {
+    if (!modal.content) return undefined;
     const modalId = modal.modalId ? modal.modalId : generateId('');
 
     // Make sure we handle the close
@@ -65,6 +65,9 @@ export class ModalApi {
 
     // Keep it
     this.modals[modalId] = modal;
+
+    // Return the id
+    return modalId;
   };
 
   /**
