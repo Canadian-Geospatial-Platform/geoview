@@ -141,14 +141,22 @@
     <script src="layerlib.js"></script>
     <script>
     // GeoJson ==================================================================================================================
-    const featureInfoGeoJsonLayerSet = cgpv.api.getFeatureInfoLayerSet('LYR5');
     cgpv.api.event.on(
       cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
       (payload) => {
         const { layerSetId, resultSet, eventType } = payload;
-        createInfoTable('LYR5', 'geoJsonResultSetId', resultSet, eventType);
+        createInfoTable('LYR5', 'geoJsonResultSetId', resultSet, 'click');
       },
-      'LYR5/FeatureInfoLayerSet'
+      'LYR5/click/FeatureInfoLayerSet'
+    );
+
+    cgpv.api.event.on(
+      cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+      (payload) => {
+        const { layerSetId, resultSet, eventType } = payload;
+        createInfoTable('LYR5', 'geoJsonResultSetId', resultSet, 'hover');
+      },
+      'LYR5/hover/FeatureInfoLayerSet'
     );
 
     const LegendsGeoJsonLayerSet = cgpv.api.getLegendsLayerSet('LYR5');

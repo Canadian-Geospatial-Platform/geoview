@@ -16,11 +16,12 @@ import { codedValueType, rangeDomainType, TypeFeatureInfoEntryPartial, TypeField
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { EsriImage } from './raster/esri-image';
 import { logger } from '@/core/utils/logger';
-import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-feature-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validationClasses/abstract-base-layer-entry-config';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-dynamic-layer-entry-config';
-import { EsriImageLayerEntryConfig } from '@/core/utils/config/validationClasses/esri-image-layer-entry-config';
-import { GroupLayerEntryConfig } from '@/core/utils/config/validationClasses/group-layer-entry-config';
+import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
+import { GeoCoreLayerEntryConfig } from '@/core/utils/config/validation-classes/geocore-layer-entry-config';
 
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
@@ -121,7 +122,9 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
       api.maps[this.mapId].layer.registeredLayers[groupLayerConfig.layerPath] = groupLayerConfig;
 
       (this.metadata!.layers[esriIndex].subLayerIds as TypeJsonArray).forEach((layerId) => {
-        const subLayerEntryConfig: TypeLayerEntryConfig = geoviewEntryIsEsriDynamic(layerConfig)
+        const subLayerEntryConfig: TypeLayerEntryConfig = geoviewEntryIsEsriDynamic(
+          layerConfig as Exclude<TypeLayerEntryConfig, GeoCoreLayerEntryConfig>
+        )
           ? new EsriDynamicLayerEntryConfig(layerConfig as EsriDynamicLayerEntryConfig)
           : new EsriFeatureLayerEntryConfig(layerConfig as EsriFeatureLayerEntryConfig);
         subLayerEntryConfig.parentLayerConfig = groupLayerConfig;
@@ -138,7 +141,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
       return;
     }
 
-    if (this.esriChildHasDetectedAnError(layerConfig, esriIndex)) {
+    if (this.esriChildHasDetectedAnError(layerConfig as Exclude<TypeLayerEntryConfig, GeoCoreLayerEntryConfig>, esriIndex)) {
       layerConfig.layerStatus = 'error';
       return;
     }
@@ -355,14 +358,16 @@ export async function commonProcessLayerMetadata(
         throw new Error(`Error code = ${data.error.code}, ${data.error.message}`);
       }
       this.layerMetadata[layerPath] = data;
-      if (geoviewEntryIsEsriDynamic(layerConfig) || geoviewEntryIsEsriFeature(layerConfig)) {
-        if (!layerConfig.style) {
+      // The following line allow the type ascention of the type guard functions on the second line below
+      const EsriLayerConfig = layerConfig as Exclude<TypeLayerEntryConfig, GeoCoreLayerEntryConfig>;
+      if (geoviewEntryIsEsriDynamic(EsriLayerConfig) || geoviewEntryIsEsriFeature(EsriLayerConfig)) {
+        if (!EsriLayerConfig.style) {
           const renderer = Cast<EsriBaseRenderer>(data.drawingInfo?.renderer);
-          if (renderer) layerConfig.style = getStyleFromEsriRenderer(renderer);
+          if (renderer) EsriLayerConfig.style = getStyleFromEsriRenderer(renderer);
         }
         this.processFeatureInfoConfig(layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig);
         this.processInitialSettings(layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig);
-        commonProcessTemporalDimension.call(this, data.timeInfo as TypeJsonObject, layerConfig);
+        commonProcessTemporalDimension.call(this, data.timeInfo as TypeJsonObject, EsriLayerConfig);
       }
     } catch (error) {
       layerConfig.layerStatus = 'error';

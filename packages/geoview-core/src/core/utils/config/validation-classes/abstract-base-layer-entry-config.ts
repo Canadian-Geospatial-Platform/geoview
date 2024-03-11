@@ -4,7 +4,6 @@ import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 
 import {
-  ConfigBaseClass,
   TypeBaseSourceVectorInitialConfig,
   TypeLayerAndListenerType,
   TypeLayerInitialSettings,
@@ -20,6 +19,7 @@ import {
 } from '@/geo/map/map-schema-types';
 import { logger } from '../../logger';
 import { LayerSetPayload, TypeJsonValue, api } from '@/app';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 /** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map.

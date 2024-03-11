@@ -9,6 +9,8 @@ import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId, EVENT_NAMES } from '../event-types';
 import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoResultSet } from '@/geo/utils/feature-info-layer-set';
+import { TypeHoverFeatureInfoResultSet } from '@/geo/utils/hover-feature-info-layer-set';
 
 /** Valid events that can create GetFeatureInfoPayload */
 const validEvents: EventStringId[] = [
@@ -53,6 +55,7 @@ export type TypeFieldEntry = {
 export interface TypeGeometry extends RenderFeature {
   ol_uid: string;
 }
+
 export type TypeFeatureInfoEntry = {
   featureKey: number;
   geoviewLayerType: TypeGeoviewLayerType;
@@ -89,16 +92,6 @@ export type TypeArrayOfLayerData = TypeLayerData[];
 
 export type TypeFeatureInfoByEventTypes = {
   [eventName in EventType]?: TypeLayerData;
-};
-
-export type TypeFeatureInfoResultSetEntry = {
-  layerName?: string;
-  layerStatus: TypeLayerStatus;
-  data: TypeFeatureInfoByEventTypes;
-};
-
-export type TypeFeatureInfoResultSet = {
-  [layerPath: string]: TypeFeatureInfoResultSetEntry;
 };
 
 /**
@@ -184,7 +177,7 @@ export interface TypeAllQueriesDonePayload extends GetFeatureInfoPayload {
   // The layer set identifier
   layerSetId: string;
   // the resultSet that contains the query results
-  resultSet: TypeFeatureInfoResultSet;
+  resultSet: TypeFeatureInfoResultSet | TypeHoverFeatureInfoResultSet;
 }
 
 /**
@@ -321,7 +314,7 @@ export class GetFeatureInfoPayload extends PayloadBaseClass {
     layerPath: string,
     queryType: QueryType,
     layerSetId: string,
-    resultSet: TypeFeatureInfoResultSet
+    resultSet: TypeFeatureInfoResultSet | TypeHoverFeatureInfoResultSet
   ): TypeAllQueriesDonePayload => {
     const allQueriesDonePayload = new GetFeatureInfoPayload(
       EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE,

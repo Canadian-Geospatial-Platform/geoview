@@ -54,9 +54,9 @@ import {
 import { TypeVectorLayerStyles } from '../layer/geoview-layers/abstract-geoview-layers';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validationClasses/vector-layer-entry-config';
-import { VectorTileLayerEntryConfig } from '../layer/geoview-layers/raster/abstract-tile-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validationClasses/abstract-base-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 type TypeStyleProcessor = (
   styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
@@ -535,7 +535,7 @@ export class GeoviewRenderer {
    */
   getFeatureStyle(
     feature: Feature,
-    layerConfig: AbstractBaseLayerEntryConfig | VectorTileLayerEntryConfig | VectorLayerEntryConfig
+    layerConfig: AbstractBaseLayerEntryConfig | VectorTilesLayerEntryConfig | VectorLayerEntryConfig
   ): Style | undefined {
     const geometryType = getGeometryType(feature);
     // If style does not exist for the geometryType, create it.
@@ -568,7 +568,7 @@ export class GeoviewRenderer {
    */
   getFeatureCanvas(
     feature: Feature,
-    layerConfig: AbstractBaseLayerEntryConfig | VectorTileLayerEntryConfig | VectorLayerEntryConfig
+    layerConfig: AbstractBaseLayerEntryConfig | VectorTilesLayerEntryConfig | VectorLayerEntryConfig
   ): Promise<HTMLCanvasElement | undefined> {
     const promisedCanvas = new Promise<HTMLCanvasElement | undefined>((resolve) => {
       const geometryType = getGeometryType(feature);
@@ -1312,7 +1312,7 @@ export class GeoviewRenderer {
    */
   private createDefaultStyle(
     geometryType: TypeStyleGeometry,
-    layerConfig: VectorTileLayerEntryConfig | VectorLayerEntryConfig
+    layerConfig: VectorTilesLayerEntryConfig | VectorLayerEntryConfig
   ): TypeStyleConfig | undefined {
     if (layerConfig.style === undefined) layerConfig.style = {};
     const label = getLocalizedValue(layerConfig.layerName, this.mapId) || layerConfig.layerId;

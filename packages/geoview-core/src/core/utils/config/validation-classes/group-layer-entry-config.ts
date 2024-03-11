@@ -1,14 +1,14 @@
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import {
-  ConfigBaseClass,
   TypeLayerEntryType,
   TypeLayerInitialSettings,
   TypeListOfLayerEntryConfig,
   TypeLocalizedString,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
-import { logger } from '../../logger';
+import { logger } from '@/core/utils/logger';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 /** ******************************************************************************************************************************
  * Type used to define a layer group.
