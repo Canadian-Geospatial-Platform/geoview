@@ -1,5 +1,4 @@
 import { APPBAR } from './constants/app-bar-constants';
-import { BASEMAP } from './constants/basemap-constants';
 import { FOOTERBAR } from './constants/footer-bar-constants';
 import { GET_FEATURE_INFO } from './constants/get-feature-info-constants';
 import { GET_LEGENDS } from './constants/get-legends-constants';
@@ -17,7 +16,6 @@ import { SNACKBAR } from './constants/snackbar-constants';
  */
 export const EVENT_NAMES = {
   APPBAR,
-  BASEMAP,
   FOOTERBAR,
   GET_FEATURE_INFO,
   GET_LEGENDS,
@@ -37,7 +35,6 @@ export const EVENT_NAMES = {
 export type EventStringId =
   | 'appbar/panel_create'
   | 'appbar/panel_remove'
-  | 'basemap/layers_update'
   | 'details_panel/crosshair_enter'
   | 'feature_highlight/highlight'
   | 'feature_highlight/clear'
