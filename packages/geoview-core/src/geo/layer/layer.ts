@@ -1,6 +1,6 @@
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
-import { GeoCore, layerConfigIsGeoCore } from '@/geo/layer/other/geocore';
+import { GeoCore } from '@/geo/layer/other/geocore';
 import { Geometry } from '@/geo/layer/geometry/geometry';
 import { FeatureHighlight } from '@/geo/utils/feature-highlight';
 
@@ -9,7 +9,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 import { Config } from '@/core/utils/config/config';
-import { generateId, showError, replaceParams, getLocalizedMessage, whenThisThen, addNotificationError } from '@/core/utils/utilities';
+import { generateId, showError, replaceParams, getLocalizedMessage, whenThisThen } from '@/core/utils/utilities';
 import {
   layerConfigPayload,
   payloadIsALayerConfig,
@@ -21,9 +21,9 @@ import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geovie
 import {
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
-  TypeListOfGeoviewLayerConfig,
   TypeListOfLocalizedLanguages,
   layerEntryIsGroupLayer,
+  mapConfigLayerEntryIsGeoCore,
 } from '@/geo/map/map-schema-types';
 import { GeoJSON, layerConfigIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { GeoPackage, layerConfigIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
@@ -38,7 +38,7 @@ import { layerConfigIsXYZTiles, XYZTiles } from '@/geo/layer/geoview-layers/rast
 import { layerConfigIsVectorTiles, VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { CSV, layerConfigIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
 import { logger } from '@/core/utils/logger';
-import { FeatureInfoLayerSet, LegendsLayerSet, TypeOrderedLayerInfo } from '@/core/types/cgpv-types';
+import { FeatureInfoLayerSet, LegendsLayerSet, MapConfigLayerEntry, TypeOrderedLayerInfo } from '@/core/types/cgpv-types';
 import { HoverFeatureInfoLayerSet } from '../utils/hover-feature-info-layer-set';
 import { AllFeatureInfoLayerSet } from '../utils/all-feature-info-layer-set';
 
@@ -118,14 +118,7 @@ export class Layer {
         if (payloadIsALayerConfig(payload)) {
           const { layerConfig } = payload;
 
-          if (layerConfigIsGeoCore(layerConfig)) {
-            const geoCore = new GeoCore(this.mapId);
-            geoCore.createLayers(layerConfig).then((listOfGeoviewLayerConfig: TypeListOfGeoviewLayerConfig) => {
-              listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
-                this.addGeoviewLayer(geoviewLayerConfig);
-              });
-            });
-          } else if (layerConfigIsGeoJSON(layerConfig)) {
+          if (layerConfigIsGeoJSON(layerConfig)) {
             const geoJSON = new GeoJSON(this.mapId, layerConfig);
             geoJSON.createGeoViewLayers().then(() => {
               this.addToMap(geoJSON);
@@ -222,21 +215,6 @@ export class Layer {
   generateArrayOfLayerOrderInfo(geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig): TypeOrderedLayerInfo[] {
     const newOrderedLayerInfos: TypeOrderedLayerInfo[] = [];
 
-    if ((geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerType === 'geoCore') {
-      geoviewLayerConfig.listOfLayerEntryConfig?.forEach((layerEntryConfig) => {
-        const layerInfo: TypeOrderedLayerInfo = {
-          layerPath: layerEntryConfig.layerId,
-          alwaysVisible: false,
-          visible: true,
-          removable: true,
-          queryable: true,
-          hoverable: true,
-        };
-        newOrderedLayerInfos.push(layerInfo);
-      });
-      return newOrderedLayerInfos;
-    }
-
     const addSubLayerPathToLayerOrder = (layerEntryConfig: TypeLayerEntryConfig, layerPath: string): void => {
       const subLayerPath = layerPath.endsWith(layerEntryConfig.layerId) ? layerPath : `${layerPath}/${layerEntryConfig.layerId}`;
       const layerInfo: TypeOrderedLayerInfo = {
@@ -282,39 +260,53 @@ export class Layer {
   /**
    * Load layers that was passed in with the map config
    *
-   * @param {TypeGeoviewLayerConfig[]} geoviewLayerConfigs an optional array containing layers passed within the map config
+   * @param {MapConfigLayerEntry[]} mapConfigLayerEntries an optional array containing layers passed within the map config
    */
-  loadListOfGeoviewLayer(geoviewLayerConfigs?: TypeGeoviewLayerConfig[]) {
-    const validGeoviewLayerConfigs = this.deleteDuplicatAndMultipleUuidGeoviewLayerConfig(geoviewLayerConfigs);
+  async loadListOfGeoviewLayer(mapConfigLayerEntries?: MapConfigLayerEntry[]): Promise<void> {
+    const validGeoviewLayerConfigs = this.deleteDuplicatAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries);
 
     // set order for layers to appear on the map according to config
     const orderedLayerInfos: TypeOrderedLayerInfo[] = [];
-    validGeoviewLayerConfigs.forEach((geoviewLayerConfig) => {
-      const layerInfos = this.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
-      orderedLayerInfos.push(...layerInfos);
+    for (let i = 0; i < validGeoviewLayerConfigs.length; i++) {
+      const geoviewLayerConfig = validGeoviewLayerConfigs[i];
 
-      api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig));
-    });
+      // If the layer is GeoCore add it via the core function
+      if (mapConfigLayerEntryIsGeoCore(geoviewLayerConfig)) {
+        const geoCore = new GeoCore(this.mapId, api.maps[this.mapId].getDisplayLanguage());
+        // Create the layers from the UUID and await so it keeps its order in the orderedLayerInfos..
+        // TODO: Refactor - Fix the order thing so that we don't have to await here..
+        // eslint-disable-next-line no-await-in-loop
+        const layers = await geoCore.createLayersFromUUID(geoviewLayerConfig.geoviewLayerId);
+        layers.forEach((geocoreGVLayer) => {
+          const layerInfos = this.generateArrayOfLayerOrderInfo(geocoreGVLayer);
+          orderedLayerInfos.push(...layerInfos);
+          // Add it (EVENT_ADD_LAYER will be emitted)
+          api.maps[this.mapId].layer.addGeoviewLayer(geocoreGVLayer);
+        });
+      } else {
+        // Regular
+        const layerInfos = this.generateArrayOfLayerOrderInfo(geoviewLayerConfig as TypeGeoviewLayerConfig);
+        orderedLayerInfos.push(...layerInfos);
+
+        // Emit ADD_LAYER
+        api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig as TypeGeoviewLayerConfig));
+      }
+    }
     MapEventProcessor.setMapOrderedLayerInfo(this.mapId, orderedLayerInfos);
   }
 
   /**
    * Validates the geoview layer configuration array to eliminate duplicate entries and inform the user.
-   * @param {TypeGeoviewLayerConfig[]} geoviewLayerConfigs The geoview layer configurations to validate.
+   * @param {MapConfigLayerEntry[]} mapConfigLayerEntries The Map Config Layer Entries to validate.
    *
-   * @returns {TypeGeoviewLayerConfig} The new configuration with duplicate entries eliminated.
+   * @returns {MapConfigLayerEntry[]} The new configuration with duplicate entries eliminated.
    */
-  private deleteDuplicatAndMultipleUuidGeoviewLayerConfig(geoviewLayerConfigs?: TypeGeoviewLayerConfig[]): TypeGeoviewLayerConfig[] {
-    if (geoviewLayerConfigs && geoviewLayerConfigs.length > 0) {
-      const validGeoviewLayerConfigs = geoviewLayerConfigs.filter((geoviewLayerConfigToCreate, configToCreateIndex) => {
-        for (let configToTestIndex = 0; configToTestIndex < geoviewLayerConfigs.length; configToTestIndex++) {
-          if (layerConfigIsGeoCore(geoviewLayerConfigToCreate) && geoviewLayerConfigToCreate.listOfLayerEntryConfig.length > 1) {
-            logger.logError('GeoCore layers may only have one GeoCore UUID per layer');
-            addNotificationError(this.mapId, getLocalizedMessage(this.mapId, 'validation.layer.multipleUUID'));
-            return false;
-          }
+  private deleteDuplicatAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries?: MapConfigLayerEntry[]): MapConfigLayerEntry[] {
+    if (mapConfigLayerEntries && mapConfigLayerEntries.length > 0) {
+      const validGeoviewLayerConfigs = mapConfigLayerEntries.filter((geoviewLayerConfigToCreate, configToCreateIndex) => {
+        for (let configToTestIndex = 0; configToTestIndex < mapConfigLayerEntries.length; configToTestIndex++) {
           if (
-            geoviewLayerConfigToCreate.geoviewLayerId === geoviewLayerConfigs[configToTestIndex].geoviewLayerId &&
+            geoviewLayerConfigToCreate.geoviewLayerId === mapConfigLayerEntries[configToTestIndex].geoviewLayerId &&
             // We keep the first instance of the duplicate entry.
             configToCreateIndex > configToTestIndex
           ) {
@@ -331,16 +323,16 @@ export class Layer {
 
   /**
    * Prints an error message for the duplicate geoview layer configuration.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The geoview layer configuration in error.
+   * @param {MapConfigLayerEntry} geoviewLayerConfig The Map Config Layer Entry in error.
    */
-  private printDuplicateGeoviewLayerConfigError(geoviewLayerConfig: TypeGeoviewLayerConfig) {
+  private printDuplicateGeoviewLayerConfigError(mapConfigLayerEntry: MapConfigLayerEntry) {
     const message = replaceParams(
-      [geoviewLayerConfig.geoviewLayerId, this.mapId],
+      [mapConfigLayerEntry.geoviewLayerId, this.mapId],
       getLocalizedMessage(this.mapId, 'validation.layer.usedtwice')
     );
     showError(this.mapId, message);
     // Log
-    logger.logError(`Duplicate use of geoview layer identifier ${geoviewLayerConfig.geoviewLayerId} on map ${this.mapId}`);
+    logger.logError(`Duplicate use of geoview layer identifier ${mapConfigLayerEntry.geoviewLayerId} on map ${this.mapId}`);
   }
 
   /**
@@ -477,7 +469,7 @@ export class Layer {
    * @param uuid The GeoCore UUID
    */
   addGeoviewLayerByGeoCoreUUID = async (uuid: string): Promise<void> => {
-    const geoCoreGeoviewLayerInstance = new GeoCore(this.mapId);
+    const geoCoreGeoviewLayerInstance = new GeoCore(this.mapId, api.maps[this.mapId].getDisplayLanguage());
     const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(uuid);
     layers.forEach((geoviewLayerConfig) => {
       api.maps[this.mapId].layer.addGeoviewLayer(geoviewLayerConfig);
