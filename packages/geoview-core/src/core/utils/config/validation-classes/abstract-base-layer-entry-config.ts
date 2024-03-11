@@ -65,6 +65,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * @param {TypeLayerAndListenerType} layerAndListenerType The layer configuration we want to instanciate
    *                                                        and its listener type.
    */
+  // TODO: Replace the setter/getter functions with methods actiong on private properties.
   set olLayerAndLoadEndListeners(layerAndListenerType: TypeLayerAndListenerType) {
     const { olLayer, loadEndListenerType } = layerAndListenerType;
     this._olLayer = olLayer;
@@ -73,12 +74,9 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
       if (loadEndListenerType) {
         let loadErrorListener: () => void;
 
-        // TODO: Can we manage this in callback or promises?
-        // migration to OpenLayers 9.0.0 seems to restrict access to key elements
         // Definition of the load end listener functions
         const loadEndListener = () => {
           this.loadedFunction();
-          this.geoviewLayerInstance!.setLayerPhase('loaded', this.layerPath);
           this.layerStatus = 'loaded';
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (this._olLayer! as any).get('source').un(`${loadEndListenerType}loaderror`, loadErrorListener);

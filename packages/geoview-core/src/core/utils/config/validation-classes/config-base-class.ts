@@ -29,9 +29,6 @@ export class ConfigBaseClass {
   /** The geoview layer instance that contains this layer configuration. */
   geoviewLayerInstance?: AbstractGeoViewLayer;
 
-  /** It is used to identified the process phase of the layer */
-  layerPhase?: string;
-
   /** It is used to link the layer entry config to the GeoView layer config. */
   geoviewLayerConfig = {} as TypeGeoviewLayerConfig;
 
@@ -158,8 +155,6 @@ export class ConfigBaseClass {
     if (!this.IsGreaterThanOrEqualTo(newLayerStatus)) {
       // eslint-disable-next-line no-underscore-dangle
       this._layerStatus = newLayerStatus;
-      // TODO: layerPhase property will be removed soon. We must not use it anymore.
-      this.geoviewLayerInstance!.setLayerPhase(newLayerStatus, this.layerPath);
       api.event.emit(
         // TODO: Change createLayerSetChangeLayerStatusPayload events for a direct function call.
         LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.geoviewLayerInstance!.mapId, this.layerPath, newLayerStatus)
@@ -236,7 +231,6 @@ export class ConfigBaseClass {
       schemaTag: this.schemaTag,
       entryType: this.entryType,
       layerStatus: this.layerStatus,
-      layerPhase: this.layerPhase,
       isMetadataLayerGroup: this.isMetadataLayerGroup,
     } as unknown as TypeJsonValue;
   }
