@@ -231,8 +231,6 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // !            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
-    const { layerPath } = layerConfig;
-    this.setLayerPhase('processOneLayerEntry', layerPath);
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
     sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, this.mapId);
