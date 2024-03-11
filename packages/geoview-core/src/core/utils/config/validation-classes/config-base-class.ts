@@ -70,12 +70,6 @@ export class ConfigBaseClass {
    * @param {ConfigBaseClass} layerConfig The layer configuration we want to instanciate.
    */
   constructor(layerConfig: ConfigBaseClass) {
-    if (layerConfig.entryType === 'geoCore') {
-      // eslint-disable-next-line no-underscore-dangle
-      this._layerPath = '';
-      this.geoviewLayerConfig = {} as TypeGeoviewLayerConfig;
-      return;
-    }
     Object.assign(this, layerConfig);
     // eslint-disable-next-line no-underscore-dangle
     if (this.geoviewLayerConfig) this._layerPath = ConfigBaseClass.evaluateLayerPath(layerConfig);

@@ -44,7 +44,6 @@ import { TypeJsonObject } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { GeoCoreLayerEntryConfig } from '@/core/utils/config/validation-classes/geocore-layer-entry-config';
 
 export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'esriDynamic';
@@ -142,7 +141,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {boolean} true if an error is detected.
    */
-  esriChildHasDetectedAnError(layerConfig: Exclude<TypeLayerEntryConfig, GeoCoreLayerEntryConfig>): boolean {
+  esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig): boolean {
     if (!this.metadata!.supportsDynamicLayers) {
       this.layerLoadError.push({
         layer: layerConfig.layerPath,

@@ -18,6 +18,7 @@ import {
 import {
   AbstractGeoViewLayer,
   CONST_LAYER_TYPES,
+  CONST_CONFIG_GEOCORE,
   EsriDynamic,
   EsriFeature,
   GeoCore,
@@ -28,7 +29,7 @@ import {
   TypeGeoJSONLayerConfig,
   TypeGeoPackageLayerConfig,
   TypeGeoviewLayerConfig,
-  TypeGeoviewLayerType,
+  TypeGeoviewLayerTypeWithGeoCore,
   TypeLayerEntryConfig,
   TypeListOfGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
@@ -57,7 +58,6 @@ import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { GeoCoreLayerEntryConfig } from '@/core/utils/config/validation-classes/geocore-layer-entry-config';
 
 type EsriOptions = {
   err: string;
@@ -70,13 +70,14 @@ export function AddNewLayer(): JSX.Element {
 
   const { t } = useTranslation<string>();
 
-  const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, ESRI_IMAGE, GEOJSON, GEOPACKAGE, WMS, WFS, OGC_FEATURE, XYZ_TILES, GEOCORE } = CONST_LAYER_TYPES;
+  const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, ESRI_IMAGE, GEOJSON, GEOPACKAGE, WMS, WFS, OGC_FEATURE, XYZ_TILES } = CONST_LAYER_TYPES;
+  const GEOCORE = CONST_CONFIG_GEOCORE;
 
   const [geoviewLayerInstance, setGeoviewLayerInstance] = useState<AbstractGeoViewLayer | undefined>();
   const [activeStep, setActiveStep] = useState(0);
   const [layerURL, setLayerURL] = useState('');
   const [displayURL, setDisplayURL] = useState('');
-  const [layerType, setLayerType] = useState<TypeGeoviewLayerType | ''>('');
+  const [layerType, setLayerType] = useState<TypeGeoviewLayerTypeWithGeoCore | ''>('');
   const [layerList, setLayerList] = useState<TypeListOfLayerEntryConfig | TypeListOfGeoviewLayerConfig>([]);
   const [layerName, setLayerName] = useState('');
   const [layerEntries, setLayerEntries] = useState<TypeListOfLayerEntryConfig | TypeListOfGeoviewLayerConfig>([]);
@@ -429,7 +430,7 @@ export function AddNewLayer(): JSX.Element {
       const isValid = layerURL.indexOf('/') === -1 && layerURL.replaceAll('-', '').length === 32;
       if (!isValid) throw new Error('err');
 
-      const geoCoreGeoviewLayerInstance = new GeoCore(mapId);
+      const geoCoreGeoviewLayerInstance = new GeoCore(mapId, api.maps[mapId].getDisplayLanguage());
       const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(layerURL);
       if (layers.length === 1) {
         if (layers.length === 1) {
@@ -853,7 +854,7 @@ export function AddNewLayer(): JSX.Element {
       }
     } else if (geoviewLayerInstance) {
       geoviewLayerInstance.geoviewLayerName = createLocalizedString(layerName);
-      const { geoviewLayerConfig } = layerEntries[0] as Exclude<TypeLayerEntryConfig, GeoCoreLayerEntryConfig>;
+      const { geoviewLayerConfig } = layerEntries[0] as TypeLayerEntryConfig;
       geoviewLayerConfig.geoviewLayerName = createLocalizedString(layerName);
       if (layerType === XYZ_TILES) (layerEntries[0] as TypeLayerEntryConfig).layerName = createLocalizedString(layerName);
       geoviewLayerInstance.setListOfLayerEntryConfig(geoviewLayerConfig, layerEntries as TypeListOfLayerEntryConfig);
@@ -928,7 +929,7 @@ export function AddNewLayer(): JSX.Element {
    * @param {SelectChangeEvent} event TextField event
    */
   const handleSelectType = (event: SelectChangeEvent<unknown>) => {
-    setLayerType(event.target.value as TypeGeoviewLayerType);
+    setLayerType(event.target.value as TypeGeoviewLayerTypeWithGeoCore);
     setLayerList([]);
     setLayerEntries([]);
   };

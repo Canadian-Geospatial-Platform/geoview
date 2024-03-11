@@ -29,6 +29,7 @@ import {
   TypeLayerInitialSettings,
   TypeLayerStatus,
   TypeStyleGeometry,
+  CONST_CONFIG_GEOCORE,
 } from '@/geo/map/map-schema-types';
 import {
   codedValueType,
@@ -151,7 +152,6 @@ const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
   esriImage: 'Esri Image Layer',
   imageStatic: 'Static Image Layer',
   GeoJSON: 'GeoJson Layer',
-  geoCore: 'GeoCore Layer',
   GeoPackage: 'GeoPackage Layer',
   xyzTiles: 'XYZ Tiles',
   vectorTiles: 'Vector Tiles',
@@ -168,7 +168,6 @@ type LayerTypesKey =
   | 'ESRI_IMAGE'
   | 'IMAGE_STATIC'
   | 'GEOJSON'
-  | 'GEOCORE'
   | 'GEOPACKAGE'
   | 'XYZ_TILES'
   | 'VECTOR_TILES'
@@ -186,13 +185,14 @@ export type TypeGeoviewLayerType =
   | 'esriImage'
   | 'imageStatic'
   | 'GeoJSON'
-  | 'geoCore'
   | 'GeoPackage'
   | 'xyzTiles'
   | 'vectorTiles'
   | 'ogcFeature'
   | 'ogcWfs'
   | 'ogcWms';
+
+export type TypeGeoviewLayerTypeWithGeoCore = TypeGeoviewLayerType | typeof CONST_CONFIG_GEOCORE;
 
 /**
  * Definition of the GeoView layer constants
@@ -204,7 +204,6 @@ export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
   ESRI_IMAGE: 'esriImage',
   IMAGE_STATIC: 'imageStatic',
   GEOJSON: 'GeoJSON',
-  GEOCORE: 'geoCore',
   GEOPACKAGE: 'GeoPackage',
   XYZ_TILES: 'xyzTiles',
   VECTOR_TILES: 'vectorTiles',
@@ -223,7 +222,6 @@ export const CONST_LAYER_ENTRY_TYPE: Record<TypeGeoviewLayerType, TypeLayerEntry
   esriFeature: 'vector',
   esriImage: 'raster-image',
   GeoJSON: 'vector',
-  geoCore: 'geoCore',
   GeoPackage: 'vector',
   xyzTiles: 'raster-tile',
   vectorTiles: 'raster-tile',
@@ -242,7 +240,6 @@ export const CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<TypeGeoviewLayerType, string> 
   esriFeature: 'TypeVectorLayerEntryConfig',
   esriImage: 'TypeEsriImageLayerEntryConfig',
   GeoJSON: 'TypeVectorLayerEntryConfig',
-  geoCore: 'TypeGeoCoreLayerEntryConfig',
   GeoPackage: 'TypeVectorLayerEntryConfig',
   xyzTiles: 'TypeTileLayerEntryConfig',
   vectorTiles: 'TypeTileLayerEntryConfig',
