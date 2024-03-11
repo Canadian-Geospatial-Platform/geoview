@@ -162,8 +162,7 @@ async function init(callback: () => void): Promise<void> {
   }
 
   // Wait for map renders to end. Note: the api.readyCallback isn't quite done yet; that's different.
-  // TODO: Check - Maybe we want to use Promise.allSettled here instead?
-  await Promise.all(promises);
+  await Promise.allSettled(promises);
 }
 
 // cgpv object to be exported with the api for outside use

@@ -65,7 +65,13 @@ export class UUIDmapConfigReader {
    */
   private static getLayerConfigFromResponse(result: AxiosResponse<TypeJsonObject>, lang: string): TypeListOfGeoviewLayerConfig {
     // If invalid response
-    if (!result?.data || !result.data.reponse || !result.data.reponse.rcs || !result.data.reponse.rcs[lang])
+    if (
+      !result?.data ||
+      !result.data.reponse ||
+      !result.data.reponse.rcs ||
+      !result.data.reponse.rcs[lang] ||
+      result.data.reponse.rcs[lang].length === 0
+    )
       throw new Error('Invalid response from GeoCore service');
 
     const listOfGeoviewLayerConfig: TypeListOfGeoviewLayerConfig = [];
