@@ -67,6 +67,7 @@ export class UUIDmapConfigReader {
     // If invalid response
     if (!result?.data || !result.data.reponse || !result.data.reponse.rcs || !result.data.reponse.rcs[lang])
       throw new Error('Invalid response from GeoCore service');
+    if (result.data.reponse.rcs[lang].length === 0) throw new Error('No layers returned by GeoCore service');
 
     const listOfGeoviewLayerConfig: TypeListOfGeoviewLayerConfig = [];
     for (let i = 0; i < (result.data.reponse.rcs[lang] as TypeJsonArray).length; i++) {
