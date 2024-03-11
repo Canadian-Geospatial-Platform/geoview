@@ -234,6 +234,27 @@
       // Start drawing interaction
       groupInteractions[groupKey]['draw'] = map1.initDrawInteractions(groupKey, geomType);
 
+      // Wire handler
+      groupInteractions[groupKey]['draw'].onDrawStart((sender, payload) => {
+        // Log the event
+        addLog('LOGS1', 'drawStart');
+        console.log(payload);
+      });
+
+      // Wire handler
+      groupInteractions[groupKey]['draw'].onDrawEnd((sender, payload) => {
+        // Log the event
+        addLog('LOGS1', 'drawEnd');
+        console.log(payload);
+      });
+
+      // Wire handler
+      groupInteractions[groupKey]['draw'].onDrawAbort((sender, payload) => {
+        // Log the event
+        addLog('LOGS1', 'drawAbort');
+        console.log(payload);
+      });
+
       // Get the style based on the group
       let styleForGroup = cgpv.api.geoUtilities.defaultDrawingStyle('blue');
       if (groupKey == 'geomGroupB') styleForGroup = cgpv.api.geoUtilities.defaultDrawingStyle('green');
@@ -291,7 +312,21 @@
         }
 
         else {
-            groupInteractions[groupKey]['modify'] = map1.initModifyInteractions(groupKey);
+          groupInteractions[groupKey]['modify'] = map1.initModifyInteractions(groupKey);
+
+          // Wire handler
+          groupInteractions[groupKey]['modify'].onModifyStarted((sender, payload) => {
+            // Log the event
+            addLog('LOGS1', 'modifyStarted');
+            console.log(payload);
+          });
+
+          // Wire handler
+          groupInteractions[groupKey]['modify'].onModifyEnded((sender, payload) => {
+            // Log the event
+            addLog('LOGS1', 'modifyEnded');
+            console.log(payload);
+          });
         }
       }
 
@@ -340,8 +375,6 @@
             (payload) => {
               // Init map
               initMap1(cgpv.api.maps[mapId1]);
-              // Wire the logs
-              wireLogs(cgpv.api, mapId1, 'LOGS1');
             },
             mapId1
         );

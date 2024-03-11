@@ -116,43 +116,10 @@ function createCollapsible() {
   }
 }
 
-/**
- * Get all interaction based events to log in the API EVENTS LOGS across all maps
- * @param {*} eventNames The CGPV API EVENT_NAMES
- */
-function getAllInteractionEvents(api) {
-  return [
-    api.eventNames.INTERACTION.EVENT_SELECTED,
-    api.eventNames.INTERACTION.EVENT_EXTENT,
-    api.eventNames.INTERACTION.EVENT_DRAW_STARTED,
-    api.eventNames.INTERACTION.EVENT_DRAW_ENDED,
-    api.eventNames.INTERACTION.EVENT_MODIFY_STARTED,
-    api.eventNames.INTERACTION.EVENT_MODIFY_ENDED,
-    api.eventNames.INTERACTION.EVENT_TRANSLATE_STARTED,
-    api.eventNames.INTERACTION.EVENT_TRANSLATE_ENDED,
-  ];
-}
-
 function addLog(logId, msg) {
   const logs = document.getElementById(logId);
   logs.innerText += `${msg}\n`;
   logs.scrollTop = logs.scrollHeight;
-}
-
-function wireLogs(api, mapId, logsDomId) {
-  getAllInteractionEvents(api).forEach((eventName) => {
-    // Listen to the event
-    api.event.on(
-      eventName,
-      (payload) => {
-        // Log the event
-        addLog(logsDomId, payload.event);
-        // eslint-disable-next-line no-console
-        console.log(payload);
-      },
-      mapId
-    );
-  });
 }
 
 function addDefaultShapes(map, groupKey) {

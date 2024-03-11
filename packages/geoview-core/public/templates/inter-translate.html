@@ -108,6 +108,20 @@
 
         // Init translate interactions
         const translate1 = map.initTranslateInteractions();
+
+        // Wire handler
+        translate1.onTranslateStarted((sender, payload) => {
+          // Log the event
+          addLog('LOGS1', 'translateStarted');
+          console.log(payload);
+        });
+
+        // Wire handler
+        translate1.onTranslateEnded((sender, payload) => {
+          // Log the event
+          addLog('LOGS1', 'translateEnded');
+          console.log(payload);
+        });
       }
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
@@ -123,8 +137,6 @@
             (payload) => {
               // Init map
               initMap1(cgpv.api.maps[mapId1]);
-              // Wire the logs
-              wireLogs(cgpv.api, mapId1, 'LOGS1');
             },
             mapId1
           );

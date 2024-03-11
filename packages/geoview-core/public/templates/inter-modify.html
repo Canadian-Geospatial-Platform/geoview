@@ -109,6 +109,20 @@
         // Init modify interactions
         const modify1 = map.initModifyInteractions(groupKey);
 
+        // Wire handler
+        modify1.onModifyStarted((sender, payload) => {
+          // Log the event
+          addLog('LOGS1', 'modifyStarted');
+          console.log(payload);
+        });
+
+        // Wire handler
+        modify1.onModifyEnded((sender, payload) => {
+          // Log the event
+          addLog('LOGS1', 'modifyEnded');
+          console.log(payload);
+        });
+
         // Create static group which will hold non-modifiable features
         const staticKey = 'staticGroup';
         const staticGrp = map.layer.geometry.createGeometryGroup(staticKey);
@@ -130,8 +144,6 @@
             (payload) => {
               // Init map
               initMap1(cgpv.api.maps[mapId1]);
-              // Wire the logs
-              wireLogs(cgpv.api, mapId1, 'LOGS1');
             },
             mapId1
           );
