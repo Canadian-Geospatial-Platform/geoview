@@ -31,6 +31,47 @@ export const getShellSxClasses = (theme: Theme) => ({
   all: {
     height: '100%',
     width: '100%',
+
+    '& .layer-icon': {
+      padding: 3,
+      borderRadius: 0,
+      border: '1px solid',
+      borderColor: theme.palette.geoViewColor.grey.dark[100],
+      boxShadow: 2,
+      background: theme.palette.geoViewColor.white,
+      objectFit: 'scale-down',
+      width: '35px',
+      height: '35px',
+      marginRight: '10px',
+    },
+
+    '& a[href]': {
+      color: theme.palette.geoViewColor.primary.main,
+      '*:hover': {
+        color: theme.palette.geoViewColor.primary.dark[300],
+      },
+    },
+
+    '& *::-webkit-scrollbar': {
+      width: '8px',
+    },
+    '& *::-webkit-scrollbar-track': {
+      background: theme.palette.geoViewColor.bgColor.darken(0.5, 0.5),
+      borderRadius: '5px',
+    },
+    '& *::-webkit-scrollbar-thumb': {
+      background: theme.palette.geoViewColor.bgColor.darken(0.5),
+      borderRadius: '5px',
+    },
+
+    '.bordered': {
+      border: `1px solid ${theme.palette.geoViewColor.bgColor.darken(0.5, 0.5)}`,
+      boxShadow: `0px 12px 9px -13px ${theme.palette.geoViewColor.bgColor.darken(0.2, 0.5)}`,
+    },
+    '.bordered-primary': {
+      border: `1px solid ${theme.palette.geoViewColor.primary.darken(0.1, 0.9)}`,
+      boxShadow: `0px 12px 9px -13px ${theme.palette.geoViewColor.bgColor.dark[200]}`,
+    },
   },
   shell: {
     display: 'flex',

@@ -1,7 +1,6 @@
 import { ThemeOptions } from '@mui/material';
 import { IGeoViewColors } from './types';
 import { font, headingStyles, opacity, geoViewColors as defaultGeoViewColors, geoViewFontSizes } from './default';
-import { globalStyleOverrides } from './global-style-overrides';
 
 // this function is fixing tooltips not appearing in fullscreen mode, #1685
 // https://github.com/mui/material-ui/issues/15618#issuecomment-1893503162
@@ -186,9 +185,7 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
       left: '0%',
     },
     components: {
-      MuiCssBaseline: {
-        styleOverrides: globalStyleOverrides(geoViewColors),
-      },
+      
       MuiTooltip: {
         defaultProps: {
           PopperProps: {
@@ -210,6 +207,55 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
             borderColor: geoViewColors.bgColor.darken(0.5, 0.5),
             borderStyle: 'solid',
             boxShadow: `0px 12px 9px -13px ${geoViewColors.bgColor.darken(0.2, 0.5)}`,
+
+            '&.layer-panel': {
+              boxShadow: 'none',
+              '&[data-layer-depth="0"], &:not([data-layer-depth])': {
+                background: `${geoViewColors.bgColor.light[600]} 0% 0% no-repeat padding-box`,
+                borderRadius: '5px',
+                marginBottom: '1rem',
+              },
+
+              '&[data-layer-depth] &:not([data-layer-depth="0"])': {
+                borderRadius: '0px',
+                border: 'unset',
+                backgroundColor: 'unset',
+
+              },
+          
+              '& .MuiListItemButton-root': {
+                backgroundColor: 'transparent !important',
+              },
+          
+              // for selected layer
+              '&.selectedLayer, &.selected': {
+                borderColor: geoViewColors.primary.main,
+                borderWidth: '2px',
+                borderStyle: 'solid',
+              },
+              // when layer is dragging
+              '&.dragging': {
+                backgroundcolor: geoViewColors.primary.dark[600],
+                cursor: 'grab',
+                userSelect: 'none',
+              },
+              // for handling layer status
+              '&.error, &.query-error': {
+                background: geoViewColors.error.lighten(0.7, 0.6),
+                '& .MuiListItemText-secondary': {
+                  fontWeight: 'bold',
+                  color: geoViewColors.error.main,
+                },
+              },
+              // for handling loading layer status
+              '&.loading, &.processing, &.query-processing': {
+                background: geoViewColors.info.lighten(0.7, 0.6),
+                '& .MuiListItemText-secondary': {
+                  fontWeight: 'bold',
+                  color: geoViewColors.info.main,
+                },
+              },
+            },
 
             '&.unbordered': {
               borderStyle: 'none',
