@@ -185,7 +185,6 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
       left: '0%',
     },
     components: {
-      
       MuiTooltip: {
         defaultProps: {
           PopperProps: {
@@ -220,13 +219,12 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
                 borderRadius: '0px',
                 border: 'unset',
                 backgroundColor: 'unset',
-
               },
-          
+
               '& .MuiListItemButton-root': {
                 backgroundColor: 'transparent !important',
               },
-          
+
               // for selected layer
               '&.selectedLayer, &.selected': {
                 borderColor: geoViewColors.primary.main,
