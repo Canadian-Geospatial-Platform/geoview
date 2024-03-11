@@ -2,12 +2,10 @@ import { Extent as OLExtent } from 'ol/interaction';
 import { ExtentEvent as OLExtentEvent, Options as OLExtentOptions } from 'ol/interaction/Extent';
 import { shiftKeyOnly } from 'ol/events/condition';
 
-import { Interaction, InteractionOptions } from './interaction';
-import { api } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { extentPayload } from '@/api/events/payloads';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { GeoUtilities } from '@/geo/utils/utilities';
+
+import { Interaction, InteractionOptions } from './interaction';
 
 /**
  * Supported options for extent interactions
@@ -18,6 +16,11 @@ export type ExtentOptions = InteractionOptions & {
 };
 
 /**
+ * Define a delegate for the event handler function signature
+ */
+type ExtentDelegate = (sender: Extent, event: OLExtentEvent) => void;
+
+/**
  * Class used for drawing extent on a map
  *
  * @exports
@@ -26,6 +29,9 @@ export type ExtentOptions = InteractionOptions & {
 export class Extent extends Interaction {
   // The embedded Open Layers Extent component
   ol_extent: OLExtent;
+
+  // Keep all callback delegates references
+  private onExtentChangedHandlers: ExtentDelegate[] = [];
 
   /**
    * Initialize Extent component
@@ -44,8 +50,8 @@ export class Extent extends Interaction {
     // Activate the OpenLayers Extent module
     this.ol_extent = new OLExtent(olOptions);
 
-    // Wire handler when drawing is changed
-    this.ol_extent.on('extentchanged', this.onExtentChanged);
+    // Wire handler when drawing of extent is changed
+    this.ol_extent.on('extentchanged', this.emitExtentChanged);
   }
 
   /**
@@ -65,11 +71,31 @@ export class Extent extends Interaction {
   }
 
   /**
-   * Handles when the extent has changed
-   * @param {OLExtentEvent} e object representing the Open Layers event from the interaction
+   * Wires an event handler.
+   * @param {ExtentDelegate} callback The callback to be executed whenever the event is raised
    */
-  onExtentChanged = (e: OLExtentEvent) => {
-    // Raises EVENT_EXTENT event via the api
-    api.event.emit(extentPayload(EVENT_NAMES.INTERACTION.EVENT_EXTENT, this.mapViewer.mapId, e));
+  onExtentChanged = (callback: ExtentDelegate): void => {
+    // Push a new callback handler to the list of handlers
+    this.onExtentChangedHandlers.push(callback);
+  };
+
+  /**
+   * Unwires an event handler.
+   * @param {ExtentDelegate} callback The callback to stop being called whenever the event is raised
+   */
+  offExtentChanged = (callback: ExtentDelegate): void => {
+    const index = this.onExtentChangedHandlers.indexOf(callback);
+    if (index !== -1) {
+      this.onExtentChangedHandlers.splice(index, 1);
+    }
+  };
+
+  /**
+   * Emits an event to all handlers.
+   * @param {OLExtentEvent} extentEvent object representing the Open Layers event from the interaction
+   */
+  emitExtentChanged = (extentEvent: OLExtentEvent) => {
+    // Trigger all the handlers in the array
+    this.onExtentChangedHandlers.forEach((handler) => handler(this, extentEvent));
   };
 }
