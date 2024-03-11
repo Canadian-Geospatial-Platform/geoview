@@ -78,7 +78,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
         // Definition of the load end listener functions
         const loadEndListener = () => {
           this.loadedFunction();
-          this.geoviewLayerInstance!.setLayerPhase('loaded', this.layerPath);
           this.layerStatus = 'loaded';
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (this._olLayer! as any).get('source').un(`${loadEndListenerType}loaderror`, loadErrorListener);

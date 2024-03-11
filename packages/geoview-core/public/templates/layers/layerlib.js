@@ -9,15 +9,13 @@ function listenToLegendLayerSetChanges(elementId, handlerName) {
   cgpv.api.event.on(
     cgpv.api.eventNames.LAYER_SET.UPDATED,
     (payload) => {
-      const outputHeader =
-        '<table class="state"><tr class="state"><th class="state">Name</th><th class="state">Phase</th><th class="state">Status</th></tr>';
+      const outputHeader = '<table class="state"><tr class="state"><th class="state">Name</th><th class="state">Status</th></tr>';
       const displayField = document.getElementById(elementId);
       const { resultSet } = payload;
       const output = Object.keys(resultSet).reduce((outputValue, layerPath) => {
         const layerName = resultSet[layerPath]?.layerName || '';
         const { layerStatus } = resultSet[layerPath];
-        const { layerPhase } = cgpv.api.maps[mapId].layer.registeredLayers[layerPath];
-        return `${outputValue}<tr class="state"><td class="state">${layerName}</td><td class="state">${layerPhase}</td><td class="state">${layerStatus}</td></tr>`;
+        return `${outputValue}<tr class="state"><td class="state">${layerName}</td><td class="state">${layerStatus}</td></tr>`;
       }, outputHeader);
       displayField.innerHTML = output && output !== outputHeader ? `${output}</table>` : '';
     },
