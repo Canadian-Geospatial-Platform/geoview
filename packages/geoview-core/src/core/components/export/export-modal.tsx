@@ -1,11 +1,22 @@
-import { MouseEventHandler } from 'react';
+import { MouseEventHandler, RefObject, useEffect, useRef } from 'react';
+import ReactDOMServer from 'react-dom/server';
 
 import { useTranslation } from 'react-i18next';
 
-import { Button, Dialog, DialogActions, DialogTitle } from '@/ui';
+import { Button, Dialog, DialogActions, DialogTitle, DialogContent } from '@/ui';
 import { exportPNG } from '@/core/utils/utilities';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import {
+  NorthArrow,
+  api,
+  useGeoViewMapId,
+  useMapLoaded,
+  useMapNorthArrow,
+  NorthArrowIcon,
+  useMapNorthArrowElement,
+  useMapScale,
+  useLayerLegendLayers,
+} from '@/app';
 
 /**
  * Export modal window component to export the viewer information in a PNG file
@@ -14,9 +25,19 @@ import { useGeoViewMapId } from '@/core/stores/geoview-store';
  */
 export default function ExportModal(): JSX.Element {
   const mapId = useGeoViewMapId();
-  const mapElem = document.getElementById(`shell-${mapId}`);
 
   const { t } = useTranslation();
+
+  // export template variables
+  const exportCanvasRef = useRef(null) as RefObject<HTMLCanvasElement>;
+  const dialogRef = useRef(null) as RefObject<HTMLDivElement>;
+
+  const northArrow = useMapNorthArrow();
+  const northArrowElement = useMapNorthArrowElement();
+  const scale = useMapScale();
+  const legendLayers = useLayerLegendLayers();
+
+  console.log('legendLayers', legendLayers);
 
   // get store function
   const { closeModal } = useUIStoreActions();
@@ -27,14 +48,105 @@ export default function ExportModal(): JSX.Element {
     closeModal();
   }) as MouseEventHandler<HTMLButtonElement>;
 
+  // Get the markup of the component
+  const staticNorthArrowIcon = ReactDOMServer.renderToStaticMarkup(<NorthArrowIcon width={44} height={44} />);
+
+  useEffect(() => {
+    if (activeModalId === 'export' && exportCanvasRef.current && dialogRef.current) {
+      const exportCanvas = exportCanvasRef.current;
+      const dialogBox = dialogRef.current;
+      const { map } = api.maps[mapId];
+      const mapSize = map.getSize();
+
+      const dialogBoxCompStyles = window.getComputedStyle(dialogBox);
+
+      const paddingLeft = Number(dialogBoxCompStyles.getPropertyValue('padding-left').match(/\d+/)![0]);
+      const paddingRight = Number(dialogBoxCompStyles.getPropertyValue('padding-left').match(/\d+/)![0]);
+
+      exportCanvas.width = dialogBox.clientWidth - paddingLeft - paddingRight;
+      exportCanvas.height = 1200;
+
+      const context = exportCanvas.getContext('2d');
+      if (context) {
+        //  Set the heading of the canvas
+        context.font = "1.25rem 'Roboto','Helvetica','Arial',sans-serif";
+        context.textAlign = 'center';
+        context.fillText('Export the Map', exportCanvas.width / 2, 30);
+
+        // Set the Map.
+        Array.prototype.forEach.call(map.getViewport().querySelectorAll('.ol-layer canvas, canvas.ol-layer'), (canvas) => {
+          if (canvas.width > 0) {
+            const opacity = canvas.parentNode.style.opacity || canvas.style.opacity;
+            context!.globalAlpha = opacity === '' ? 1 : Number(opacity);
+            let matrix;
+            const { transform } = canvas.style;
+
+            if (transform) {
+              // Get the transform parameters from the style's transform matrix
+              matrix = transform
+                .match(/^matrix\(([^(]*)\)$/)[1]
+                .split(',')
+                .map(Number);
+            } else {
+              matrix = [parseFloat(canvas.style.width) / canvas.width, 0, 0, parseFloat(canvas.style.height) / canvas.height, 0, 0];
+            }
+
+            // Apply the transform to the export map context
+            CanvasRenderingContext2D.prototype.setTransform.apply(context, matrix);
+            const { backgroundColor } = canvas.parentNode.style;
+            if (backgroundColor) {
+              context!.fillStyle = backgroundColor;
+              context!.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            context!.drawImage(canvas, 0, 100);
+          }
+        });
+
+        context!.globalAlpha = 1;
+        context!.setTransform(1, 0, 0, 1, 0, 0);
+
+        // Set the north icon
+        const northArrowIconImage = new Image();
+
+        northArrowIconImage.onload = () => {
+          // TODO: rotate the image here, before rendering on the screen.
+          context.drawImage(northArrowIconImage, exportCanvas.width - 40, mapSize![1] + 60);
+        };
+
+        const svgNorthIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="500" height="300" style="transform: rotate(185deg 50 50)"><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml">${staticNorthArrowIcon}</div></foreignObject></svg>`;
+        northArrowIconImage.src = `data:image/svg+xml;base64,${btoa(svgNorthIcon)}`;
+
+        // Set the scale
+        if (scale?.labelGraphic?.length) {
+          context.font = "1rem 'Roboto','Helvetica','Arial',sans-serif";
+          context.textAlign = 'left';
+          context.fillText(`${scale.labelGraphic} approx`, 0, mapSize![1] + 100);
+          // TODO: Add miles from label graphic if needed.
+
+          // add stroke/line below scale
+          context.beginPath();
+          context.moveTo(0, mapSize![1] + 110);
+          context.lineTo(100, mapSize![1] + 110);
+          context.stroke();
+        }
+
+        // add legend
+      }
+    }
+  }, [activeModalId, mapId, northArrowElement.degreeRotation, scale.labelGraphic, staticNorthArrowIcon]);
+
   return (
-    <Dialog open={activeModalId === 'export'} onClose={closeModal} container={mapElem}>
+    <Dialog open={activeModalId === 'export'} onClose={closeModal} fullWidth maxWidth="lg" disablePortal>
       <DialogTitle>{t('exportModal.title')}</DialogTitle>
+      <DialogContent dividers ref={dialogRef}>
+        <canvas id="exportCanvasTemplate" width="550" height="500" ref={exportCanvasRef} />
+      </DialogContent>
       <DialogActions>
-        <Button onClick={closeModal} type="text" size="small" role="button" tabIndex={-1} autoFocus>
+        <Button onClick={closeModal} type="text" size="small" autoFocus>
           {t('exportModal.cancelBtn')}
         </Button>
-        <Button type="text" onClick={exportMap} role="button" tabIndex={-1} size="small">
+        <Button type="text" onClick={exportMap} size="small">
           {t('exportModal.exportBtn')}
         </Button>
       </DialogActions>
