@@ -3,6 +3,7 @@ import ReactDOMServer from 'react-dom/server';
 
 import { useTranslation } from 'react-i18next';
 
+import html2Canvas from 'html2canvas';
 import { Button, Dialog, DialogActions, DialogTitle, DialogContent } from '@/ui';
 import { exportPNG } from '@/core/utils/utilities';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
@@ -17,7 +18,6 @@ import {
   useMapScale,
   useLayerLegendLayers,
 } from '@/app';
-
 /**
  * Export modal window component to export the viewer information in a PNG file
  *
@@ -37,8 +37,6 @@ export default function ExportModal(): JSX.Element {
   const scale = useMapScale();
   const legendLayers = useLayerLegendLayers();
 
-  console.log('legendLayers', legendLayers);
-
   // get store function
   const { closeModal } = useUIStoreActions();
   const activeModalId = useUIActiveFocusItem().activeElementId;
@@ -57,17 +55,22 @@ export default function ExportModal(): JSX.Element {
       const dialogBox = dialogRef.current;
       const { map } = api.maps[mapId];
       const mapSize = map.getSize();
+      const context = exportCanvas.getContext('2d');
 
       const dialogBoxCompStyles = window.getComputedStyle(dialogBox);
 
       const paddingLeft = Number(dialogBoxCompStyles.getPropertyValue('padding-left').match(/\d+/)![0]);
       const paddingRight = Number(dialogBoxCompStyles.getPropertyValue('padding-left').match(/\d+/)![0]);
+      const exportCanvasWidth = dialogBox.clientWidth - paddingLeft - paddingRight;
+      const exportCanvasHeight = 3500;
 
-      exportCanvas.width = dialogBox.clientWidth - paddingLeft - paddingRight;
-      exportCanvas.height = 1200;
+      exportCanvas.width = exportCanvasWidth;
+      exportCanvas.height = exportCanvasHeight;
 
-      const context = exportCanvas.getContext('2d');
       if (context) {
+        // Clear the canvas
+        context.clearRect(0, 0, dialogBox.clientWidth - paddingLeft - paddingRight, 1500);
+
         //  Set the heading of the canvas
         context.font = "1.25rem 'Roboto','Helvetica','Arial',sans-serif";
         context.textAlign = 'center';
@@ -132,9 +135,22 @@ export default function ExportModal(): JSX.Element {
         }
 
         // add legend
+        const legendContainer = document.getElementById('legendContainer')!;
+        const styleObj = legendContainer.getAttribute('style')!;
+        legendContainer.removeAttribute('style');
+        html2Canvas(legendContainer, {
+          backgroundColor: 'inherit',
+          width: window.innerWidth - 10,
+          scale: 0.85,
+          height: legendContainer.scrollHeight,
+          windowHeight: legendContainer.scrollHeight,
+        }).then((canvas) => {
+          context.drawImage(canvas, 0, mapSize![1] + 120);
+        });
+        legendContainer.setAttribute('style', styleObj);
       }
     }
-  }, [activeModalId, mapId, northArrowElement.degreeRotation, scale.labelGraphic, staticNorthArrowIcon]);
+  }, [activeModalId, legendLayers, mapId, northArrowElement.degreeRotation, scale.labelGraphic, staticNorthArrowIcon]);
 
   return (
     <Dialog open={activeModalId === 'export'} onClose={closeModal} fullWidth maxWidth="lg" disablePortal>
