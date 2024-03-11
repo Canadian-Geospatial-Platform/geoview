@@ -9,12 +9,12 @@ import {
   payloadIsLayerSetChangeLayerStatus,
   payloadIsLayerSetUpdated,
 } from '@/api/events/payloads';
-import { api } from '@/app';
-import { LayerSet } from './layer-set';
+import { LayerSet } from '@/geo/utils/layer-set';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { logger } from '@/core/utils/logger';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validationClasses/abstract-base-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { api } from '@/core/types/cgpv-types';
 
 type TypeLegendsLayerSetInstance = { [mapId: string]: LegendsLayerSet };
 
@@ -137,7 +137,7 @@ export class LegendsLayerSet extends LayerSet {
               ).length;
               if (parentLayerIndex !== -1)
                 MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig, parentLayerIndex + numberOfLayers);
-              else MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig.parentLayerConfig);
+              else MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig.parentLayerConfig!);
             } else MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig);
           }
         }

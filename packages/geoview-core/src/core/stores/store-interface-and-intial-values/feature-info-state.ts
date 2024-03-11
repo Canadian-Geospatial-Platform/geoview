@@ -109,7 +109,7 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
         });
       },
       triggerGetAllFeatureInfo(layerPath: string, queryType: QueryType = 'all') {
-        api.getFeatureInfoLayerSet(get().mapId).triggerGetAllFeatureInfo(layerPath, queryType);
+        api.maps[get().mapId].layer.allFeatureInfoLayerSet.triggerGetAllFeatureInfo(layerPath, queryType);
       },
     },
     // #endregion ACTIONS

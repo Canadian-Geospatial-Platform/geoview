@@ -640,14 +640,13 @@
       });
 
       //LYR1 ===================================================================================================================
-      const featureInfoLayerSet1 = cgpv.api.getFeatureInfoLayerSet('LYR1');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
           const { layerSetId, resultSet, eventType } = payload;
           createInfoTable('LYR1', 'ResultSetId1', resultSet, eventType);
         },
-        'LYR1/FeatureInfoLayerSet'
+        'LYR1/click/FeatureInfoLayerSet'
       );
 
       const LegendsLayerSet1 = cgpv.api.getLegendsLayerSet('LYR1');
@@ -670,14 +669,13 @@
       listenToLegendLayerSetChanges('HLYR1-state', 'LYR1/LegendsLayerSet');
 
       // LYR2 ===================================================================================================================
-      const featureInfoLayerSet2 = cgpv.api.getFeatureInfoLayerSet('LYR2');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
           const { layerSetId, resultSet, eventType } = payload;
           createInfoTable('LYR2', 'ResultSetId2', resultSet, eventType);
         },
-        'LYR2/FeatureInfoLayerSet'
+        'LYR2/click/FeatureInfoLayerSet'
       );
 
       const LegendsLayerSet2 = cgpv.api.getLegendsLayerSet('LYR2');
@@ -693,14 +691,13 @@
       listenToLegendLayerSetChanges('HLYR2-state', 'LYR2/LegendsLayerSet');
 
       // LYR3 ===================================================================================================================
-      const featureInfoLayerSet3 = cgpv.api.getFeatureInfoLayerSet('LYR3');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
           const { layerSetId, resultSet, eventType } = payload;
           createInfoTable('LYR3', 'ResultSetId3', resultSet, eventType);
         },
-        'LYR3/FeatureInfoLayerSet'
+        'LYR3/click/FeatureInfoLayerSet'
       );
 
       const LegendsLayerSet3 = cgpv.api.getLegendsLayerSet('LYR3');

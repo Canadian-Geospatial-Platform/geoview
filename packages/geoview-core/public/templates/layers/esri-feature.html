@@ -447,7 +447,7 @@
             }
           });
           dropDownContent.addEventListener('click', (e) => {
-            cgpv.api.getFeatureInfoLayerSet('LYR1').triggerGetAllFeatureInfo(e.currentTarget.value, 'all');
+            cgpv.api.maps['LYR1'].layer.allFeatureInfoLayerSet.triggerGetAllFeatureInfo(e.currentTarget.value, 'all');
           });
 
           cgpv.api.event.on(
@@ -456,7 +456,7 @@
               const { layerSetId, resultSet, eventType } = payload;
               createInfoTable('LYR1', 'ResultSetId1', resultSet, eventType);
             },
-            'LYR1/FeatureInfoLayerSet'
+            'LYR1/all/FeatureInfoLayerSet'
           );
         },
         'LYR1'
@@ -487,7 +487,7 @@
           const { layerSetId, resultSet, eventType } = payload;
           createInfoTable('LYR2', 'ResultSetId2', resultSet, eventType);
         },
-        'LYR2/FeatureInfoLayerSet'
+        'LYR2/click/FeatureInfoLayerSet'
       );
 
       cgpv.api.event.on(
@@ -513,7 +513,7 @@
           const { layerSetId, resultSet, eventType } = payload;
           createInfoTable('LYR3', 'ResultSetId3', resultSet, eventType);
         },
-        'LYR3/FeatureInfoLayerSet'
+        'LYR3/click/FeatureInfoLayerSet'
       );
 
       cgpv.api.event.on(
