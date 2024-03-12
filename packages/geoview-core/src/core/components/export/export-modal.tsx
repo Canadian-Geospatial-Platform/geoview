@@ -73,6 +73,7 @@ export default function ExportModal(): JSX.Element {
   const setTitle = (context: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
     context.font = "1.25rem 'Roboto','Helvetica','Arial',sans-serif";
     context.textAlign = 'center';
+    context.fillStyle = '#000000';
     context.fillText('Export the Map', canvas.width / 2, 30);
   };
 
@@ -138,6 +139,7 @@ export default function ExportModal(): JSX.Element {
   const drawScale = (context: CanvasRenderingContext2D, height: number) => {
     context.font = "1rem 'Roboto','Helvetica','Arial',sans-serif";
     context.textAlign = 'left';
+    context.fillStyle = '#000000';
     context.fillText(`${scale.labelGraphic} approx`, 0, height + 100);
     // TODO: Add miles from label graphic if needed.
 
@@ -145,6 +147,7 @@ export default function ExportModal(): JSX.Element {
     context.beginPath();
     context.moveTo(0, height + 110);
     context.lineTo(100, height + 110);
+    context.strokeStyle = '#000000';
     context.stroke();
   };
 
@@ -157,6 +160,7 @@ export default function ExportModal(): JSX.Element {
   const drawLegend = (context: CanvasRenderingContext2D, height: number, legendContainer: HTMLElement) => {
     const styleObj = legendContainer.getAttribute('style')!;
     legendContainer.removeAttribute('style');
+    // https://html2canvas.hertzen.com/configuration/
     html2Canvas(legendContainer, {
       backgroundColor: 'inherit',
       width: window.innerWidth - 10,
@@ -204,6 +208,7 @@ export default function ExportModal(): JSX.Element {
 
     context.font = "1rem 'Roboto','Helvetica','Arial',sans-serif";
     context.textAlign = 'left';
+    context.fillStyle = '#000000';
     context.fillText(api.dateUtilities.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A'), 0, timeStampHeight);
   };
 
@@ -224,6 +229,9 @@ export default function ExportModal(): JSX.Element {
     exportCanvas.height = height;
 
     if (context) {
+      // Draw background color or image
+      context.fillStyle = '#FFFFFF'; // Set background color to white
+      context.fillRect(0, 0, exportCanvas.width, exportCanvas.height); // Fill canvas with background color
       //  Set the heading of the canvas
       setTitle(context, exportCanvas);
 
