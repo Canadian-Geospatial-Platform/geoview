@@ -14,10 +14,6 @@ import * as Utilities from '../core/utils/utilities';
 import { GeoViewLayerPayload, payloadIsTestGeoViewLayers } from './events/payloads/geoview-layer-payload';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
-import { LegendsLayerSet } from '@/geo/utils/legends-layer-set';
-import { HoverFeatureInfoLayerSet } from '@/geo/utils/hover-feature-info-layer-set';
-import { AllFeatureInfoLayerSet } from '@/geo/utils/all-feature-info-layer-set';
-import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
 import { initMapDivFromFunctionCall } from '@/core/types/cgpv-types';
 
 /**
@@ -62,19 +58,6 @@ export class API {
 
   // dates utilities object
   dateUtilities: DateMgt;
-
-  // TODO: Find the reason why the four lines bellow cause an infinit loop when placed where they should be in the Layer class.
-  // Legends layer set instanciator
-  getLegendsLayerSet = LegendsLayerSet.get;
-
-  // HoverFeatureInfoLayerSet instanciator
-  getHoverFeatureInfoLayerSet = HoverFeatureInfoLayerSet.get;
-
-  // AllFeatureInfoLayerSet instanciator
-  getAllFeatureInfoLayerSet = AllFeatureInfoLayerSet.get;
-
-  // FeatureInfoLayerSet instanciator
-  getFeatureInfoLayerSet = FeatureInfoLayerSet.get;
 
   /**
    * Initiate the event and projection objects

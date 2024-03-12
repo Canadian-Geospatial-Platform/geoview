@@ -38,15 +38,11 @@ import { layerConfigIsXYZTiles, XYZTiles } from '@/geo/layer/geoview-layers/rast
 import { layerConfigIsVectorTiles, VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { CSV, layerConfigIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
 import { logger } from '@/core/utils/logger';
-import {
-  FeatureInfoLayerSet,
-  LegendsLayerSet,
-  MapConfigLayerEntry,
-  TypeListOfGeoviewLayerConfig,
-  TypeOrderedLayerInfo,
-} from '@/core/types/cgpv-types';
-import { HoverFeatureInfoLayerSet } from '../utils/hover-feature-info-layer-set';
-import { AllFeatureInfoLayerSet } from '../utils/all-feature-info-layer-set';
+import { MapConfigLayerEntry, TypeListOfGeoviewLayerConfig, TypeOrderedLayerInfo } from '@/core/types/cgpv-types';
+import { LegendsLayerSet } from '@/geo/utils/legends-layer-set';
+import { HoverFeatureInfoLayerSet } from '@/geo/utils/hover-feature-info-layer-set';
+import { AllFeatureInfoLayerSet } from '@/geo/utils/all-feature-info-layer-set';
+import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
 
 export type TypeRegisteredLayers = { [layerPath: string]: TypeLayerEntryConfig };
 
@@ -108,10 +104,10 @@ export class Layer {
    */
   constructor(mapId: string) {
     this.mapId = mapId;
-    this.legendsLayerSet = api.getLegendsLayerSet(mapId);
-    this.hoverFeatureInfoLayerSet = api.getHoverFeatureInfoLayerSet(mapId);
-    this.allFeatureInfoLayerSet = api.getAllFeatureInfoLayerSet(mapId);
-    this.featureInfoLayerSet = api.getFeatureInfoLayerSet(mapId);
+    this.legendsLayerSet = LegendsLayerSet.get(mapId);
+    this.hoverFeatureInfoLayerSet = HoverFeatureInfoLayerSet.get(mapId);
+    this.allFeatureInfoLayerSet = AllFeatureInfoLayerSet.get(mapId);
+    this.featureInfoLayerSet = FeatureInfoLayerSet.get(mapId);
 
     this.geometry = new Geometry(this.mapId);
     this.featureHighlight = new FeatureHighlight(this.mapId);
