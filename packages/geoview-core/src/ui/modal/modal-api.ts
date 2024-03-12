@@ -1,77 +1,23 @@
-import { ReactNode } from 'react';
-
-import { ModalModel } from './modal-model';
-
 import { generateId } from '@/core/utils/utilities';
 
-import { api } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { modalPayload } from '@/api/events/payloads';
+import { TypeModalProps } from './modal';
 
 /**
- * Both header and footer actions' properties interface
+ * Event interface for ModalEvent
  */
-export interface ModalActionsType {
-  // the id of the action (button)
-  actionId: string;
-
-  // content is the action itself, HTML (in the form of a string) or JSX
-  content?: ReactNode;
+interface ModalEvent {
+  modalId: string;
 }
 
 /**
- * Modal header properties interface
+ * Define a delegate for the event handler function signature
  */
-export interface modalHeader {
-  // the heading (title) of modal. MUI places heading inside <h2> element
-  title: string | undefined;
-
-  // for the action buttons like close, back etc. Must be an array of objects with 'id' and 'content'
-  actions?: Array<ModalActionsType>;
-}
+type ModalOpenedDelegate = (sender: ModalApi, event: ModalEvent) => void;
 
 /**
- * Modal footer properties interface
+ * Define a delegate for the event handler function signature
  */
-export interface modalFooter {
-  // the action buttons in footer of the modal. Must be an array
-  actions?: Array<ModalActionsType>;
-}
-
-/**
- * Properties definition of the modal
- */
-export type TypeModalProps = {
-  // id of the modal. Must be unique. If not provided, it will be generated
-  modalId?: string;
-
-  // header of modal. Contains heading (title) of modal and/or action buttons, if provided. If header is not provided, modal will have no header content
-  header?: modalHeader;
-
-  // content (description) of the modal. The HTML passed will be displayed inside a <div> element
-  content: ReactNode | string;
-
-  // footer object for the modal. Can contain buttons list as an array of JSX elements. If none provided, there will be no action buttons or footer
-  footer?: modalFooter;
-
-  // boolean condition to check if modal is active (open) or not
-  active?: boolean;
-
-  // function that opens a modal
-  open?: () => void;
-
-  // function that closes a modal
-  close?: () => void;
-
-  // the id of map whose modal is generated
-  mapId?: string;
-
-  // width of the modal
-  width?: string | number;
-
-  // height of the modal
-  height?: string | number;
-};
+type ModalClosedDelegate = (sender: ModalApi, event: ModalEvent) => void;
 
 /**
  * Class used to handle creating a new modal
@@ -82,7 +28,13 @@ export type TypeModalProps = {
 export class ModalApi {
   mapId: string;
 
-  modals: Record<string, ModalModel> = {};
+  modals: Record<string, TypeModalProps> = {};
+
+  // Keep all callback delegates references
+  private onModalOpenedHandlers: ModalOpenedDelegate[] = [];
+
+  // Keep all callback delegates references
+  private onModalClosedHandlers: ModalClosedDelegate[] = [];
 
   /**
    * constructor to initiate the map id
@@ -98,19 +50,24 @@ export class ModalApi {
    *
    * @param { TypeModalProps } modal the modal object of type TypeModalProps
    */
-  createModal = (modal: TypeModalProps): void => {
-    if (!modal.content) return;
+  createModal = (modal: TypeModalProps): string | undefined => {
+    if (!modal.content) return undefined;
     const modalId = modal.modalId ? modal.modalId : generateId('');
-    this.modals[modalId] = new ModalModel(modal.content);
-    this.modals[modalId].modalModelId = modalId;
-    this.modals[modalId].mapId = this.mapId;
-    this.modals[modalId].header = modal.header || this.modals[modalId].header;
-    this.modals[modalId].content = modal.content;
-    this.modals[modalId].footer = modal.footer || this.modals[modalId].footer;
-    this.modals[modalId].width = modal.width || this.modals[modalId].width;
-    this.modals[modalId].height = modal.height || this.modals[modalId].height;
 
-    api.event.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_CREATE, this.mapId, modalId));
+    // Make sure we handle the close
+    if (!modal.close) {
+      // eslint-disable-next-line no-param-reassign
+      modal.close = () => {
+        // Close it
+        this.closeModal(modalId);
+      };
+    }
+
+    // Keep it
+    this.modals[modalId] = modal;
+
+    // Return the id
+    return modalId;
   };
 
   /**
@@ -121,5 +78,73 @@ export class ModalApi {
   deleteModal = (modalId: string): void => {
     if (!Object.keys(this.modals)) return;
     delete this.modals[modalId];
+  };
+
+  openModal = (modalId: string): void => {
+    this.modals[modalId].active = true;
+    this.emitModalOpenedEvent(modalId);
+  };
+
+  closeModal = (modalId: string): void => {
+    this.modals[modalId].active = false;
+    this.emitModalClosedEvent(modalId);
+  };
+
+  /**
+   * Wires an event handler.
+   * @param callback The callback to be executed whenever the event is raised
+   */
+  onModalOpened = (callback: ModalOpenedDelegate): void => {
+    // Push a new callback handler to the list of handlers
+    this.onModalOpenedHandlers.push(callback);
+  };
+
+  /**
+   * Unwires an event handler.
+   * @param callback The callback to stop being called whenever the event is raised
+   */
+  offModalOpened = (callback: ModalOpenedDelegate): void => {
+    const index = this.onModalOpenedHandlers.indexOf(callback);
+    if (index !== -1) {
+      this.onModalOpenedHandlers.splice(index, 1);
+    }
+  };
+
+  /**
+   * Emits an event to all handlers.
+   * @param {string} modalId The modal id being opened
+   */
+  private emitModalOpenedEvent = (modalId: string) => {
+    // Trigger all the handlers in the array
+    this.onModalOpenedHandlers.forEach((handler) => handler(this, { modalId }));
+  };
+
+  /**
+   * Wires an event handler.
+   * @param callback The callback to be executed whenever the event is raised
+   */
+  onModalClosed = (callback: ModalClosedDelegate): void => {
+    // Push a new callback handler to the list of handlers
+    this.onModalClosedHandlers.push(callback);
+  };
+
+  /**
+   * Unwires an event handler.
+   * @param callback The callback to stop being called whenever the event is raised
+   */
+  offModalClosed = (callback: ModalClosedDelegate): void => {
+    const index = this.onModalClosedHandlers.indexOf(callback);
+    if (index !== -1) {
+      this.onModalClosedHandlers.splice(index, 1);
+    }
+  };
+
+  /**
+   * Emits an event to all handlers.
+   * @param {string} modalId The modal id being closed
+   */
+  private emitModalClosedEvent = (modalId: string) => {
+    // Trigger all the handlers in the array
+    this.onModalClosedHandlers.forEach((handler) => handler(this, { modalId }));
   };
 }
