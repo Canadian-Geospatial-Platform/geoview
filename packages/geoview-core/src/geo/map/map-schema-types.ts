@@ -627,6 +627,8 @@ export type TypeMapConfig = {
   listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig;
   /** View settings. */
   viewSettings: TypeViewSettings;
+  /** Highlight color. */
+  highlightColor?: TypeHighlightColors;
   /** Additional options used for OpenLayers map options. */
   extraOptions?: Record<string, unknown>;
 };
@@ -673,6 +675,11 @@ export type TypeViewSettings = {
   /** Initial map zoom level. Zoom level are define by the basemap zoom levels. Domaine = [0..28], default = 12. */
   zoom: number;
 };
+
+/** ******************************************************************************************************************************
+ *  Type used to define valid highlight colors.
+ */
+export type TypeHighlightColors = 'black' | 'white' | 'red' | 'green';
 
 /** ******************************************************************************************************************************
  *  Type used to define valid projection codes.
