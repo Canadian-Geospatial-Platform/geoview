@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { MouseEventHandler, RefObject, useEffect, useRef } from 'react';
 import ReactDOMServer from 'react-dom/server';
 
@@ -32,7 +33,7 @@ export default function ExportModal(): JSX.Element {
   const exportCanvasRef = useRef(null) as RefObject<HTMLCanvasElement>;
   const dialogRef = useRef(null) as RefObject<HTMLDivElement>;
 
-  const northArrow = useMapNorthArrow();
+  // const northArrow = useMapNorthArrow();
   const northArrowElement = useMapNorthArrowElement();
   const scale = useMapScale();
   const legendLayers = useLayerLegendLayers();
@@ -61,15 +62,17 @@ export default function ExportModal(): JSX.Element {
 
       const paddingLeft = Number(dialogBoxCompStyles.getPropertyValue('padding-left').match(/\d+/)![0]);
       const paddingRight = Number(dialogBoxCompStyles.getPropertyValue('padding-left').match(/\d+/)![0]);
+
+      // Initial Height of the canvas.
       const exportCanvasWidth = dialogBox.clientWidth - paddingLeft - paddingRight;
-      const exportCanvasHeight = 3500;
+      const exportCanvasHeight = 1900;
 
       exportCanvas.width = exportCanvasWidth;
       exportCanvas.height = exportCanvasHeight;
 
       if (context) {
         // Clear the canvas
-        context.clearRect(0, 0, dialogBox.clientWidth - paddingLeft - paddingRight, 1500);
+        // context.clearRect(0, 0, dialogBox.clientWidth - paddingLeft - paddingRight, 1500);
 
         //  Set the heading of the canvas
         context.font = "1.25rem 'Roboto','Helvetica','Arial',sans-serif";
@@ -101,7 +104,6 @@ export default function ExportModal(): JSX.Element {
               context!.fillStyle = backgroundColor;
               context!.fillRect(0, 0, canvas.width, canvas.height);
             }
-
             context!.drawImage(canvas, 0, 100);
           }
         });
@@ -114,7 +116,7 @@ export default function ExportModal(): JSX.Element {
 
         northArrowIconImage.onload = () => {
           // TODO: rotate the image here, before rendering on the screen.
-          context.drawImage(northArrowIconImage, exportCanvas.width - 40, mapSize![1] + 60);
+          context.drawImage(northArrowIconImage, exportCanvas.width - 60, mapSize![1] + 60);
         };
 
         const svgNorthIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="500" height="300" style="transform: rotate(185deg 50 50)"><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml">${staticNorthArrowIcon}</div></foreignObject></svg>`;
@@ -148,6 +150,11 @@ export default function ExportModal(): JSX.Element {
           context.drawImage(canvas, 0, mapSize![1] + 120);
         });
         legendContainer.setAttribute('style', styleObj);
+
+        // add timestamp
+        context.font = "1rem 'Roboto','Helvetica','Arial',sans-serif";
+        context.textAlign = 'left';
+        context.fillText(api.dateUtilities.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A'), 0, mapSize![1] + legendContainer.scrollHeight);
       }
     }
   }, [activeModalId, legendLayers, mapId, northArrowElement.degreeRotation, scale.labelGraphic, staticNorthArrowIcon]);
@@ -155,7 +162,7 @@ export default function ExportModal(): JSX.Element {
   return (
     <Dialog open={activeModalId === 'export'} onClose={closeModal} fullWidth maxWidth="lg" disablePortal>
       <DialogTitle>{t('exportModal.title')}</DialogTitle>
-      <DialogContent dividers ref={dialogRef}>
+      <DialogContent dividers ref={dialogRef} sx={{ overflowX: 'hidden' }}>
         <canvas id="exportCanvasTemplate" width="550" height="500" ref={exportCanvasRef} />
       </DialogContent>
       <DialogActions>
