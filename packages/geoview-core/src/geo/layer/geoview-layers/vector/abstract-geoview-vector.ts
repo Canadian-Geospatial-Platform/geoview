@@ -90,7 +90,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // !            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
-    this.setLayerPhase('processOneLayerEntry', layerConfig.layerPath);
     const vectorSource = this.createVectorSource(layerConfig);
     const vectorLayer = this.createVectorLayer(layerConfig as VectorLayerEntryConfig, vectorSource);
     return Promise.resolve(vectorLayer);
@@ -113,7 +112,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     const { layerPath } = layerConfig;
     // The line below uses var because a var declaration has a wider scope than a let declaration.
     let vectorSource: VectorSource<Feature>;
-    this.setLayerPhase('createVectorSource', layerPath);
     if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
 
     // set loading strategy option
@@ -212,7 +210,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   protected createVectorLayer(layerConfig: VectorLayerEntryConfig, vectorSource: VectorSource<Feature>): VectorLayer<VectorSource> {
     const { layerPath } = layerConfig;
-    this.setLayerPhase('createVectorLayer');
 
     const layerOptions: VectorLayerOptions<VectorSource> = {
       properties: { layerConfig },

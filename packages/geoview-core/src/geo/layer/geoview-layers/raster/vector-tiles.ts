@@ -125,7 +125,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-    this.setLayerPhase('validateListOfLayerEntryConfig');
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
@@ -155,8 +154,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
     // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // !            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
-    const { layerPath } = layerConfig;
-    this.setLayerPhase('processOneLayerEntry', layerPath);
     const sourceOptions: SourceOptions<Feature> = {
       url: getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId),
     };

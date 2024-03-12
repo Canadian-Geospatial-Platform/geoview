@@ -65,7 +65,7 @@ export class LegendsLayerSet extends LayerSet {
   protected changeLayerStatusListenerFunctions(payload: PayloadBaseClass) {
     if (payloadIsLayerSetChangeLayerStatus(payload)) {
       // Log
-      logger.logTraceCoreAPIEvent('LEGEND-LAYER-SET on LAYER_SET.CHANGE_LAYER_STATUS', this.mapId, payload);
+      logger.logTraceCoreAPIEvent('LEGEND-LAYER-SET on EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS', this.mapId, payload);
 
       const { layerPath, layerStatus } = payload;
       const layerExists = !!this.resultSet?.[layerPath];
