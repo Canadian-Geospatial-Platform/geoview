@@ -1,9 +1,7 @@
 import { APPBAR } from './constants/app-bar-constants';
-import { BASEMAP } from './constants/basemap-constants';
 import { FOOTERBAR } from './constants/footer-bar-constants';
 import { GET_FEATURE_INFO } from './constants/get-feature-info-constants';
 import { GET_LEGENDS } from './constants/get-legends-constants';
-import { INTERACTION } from './constants/interaction-constants';
 import { LAYER_SET } from './constants/layer-set-constants';
 import { LAYER } from './constants/layer-constants';
 import { MAP } from './constants/map-constants';
@@ -18,11 +16,9 @@ import { SNACKBAR } from './constants/snackbar-constants';
  */
 export const EVENT_NAMES = {
   APPBAR,
-  BASEMAP,
   FOOTERBAR,
   GET_FEATURE_INFO,
   GET_LEGENDS,
-  INTERACTION,
   LAYER_SET,
   LAYER,
   MAP,
@@ -39,7 +35,6 @@ export const EVENT_NAMES = {
 export type EventStringId =
   | 'appbar/panel_create'
   | 'appbar/panel_remove'
-  | 'basemap/layers_update'
   | 'details_panel/crosshair_enter'
   | 'feature_highlight/highlight'
   | 'feature_highlight/clear'
@@ -53,15 +48,6 @@ export type EventStringId =
   | 'get_legends/legend_info'
   | 'get_legends/query_legends'
   | 'get_legends/trigger'
-  | 'interaction/draw_started'
-  | 'interaction/draw_ended'
-  | 'interaction/draw_aborted'
-  | 'interaction/extent_selected'
-  | 'interaction/modify_started'
-  | 'interaction/modify_ended'
-  | 'interaction/select_selected'
-  | 'interaction/translate_started'
-  | 'interaction/translate_ended'
   | 'layer_set/layer_registration'
   | 'layer_set/change_layer_status'
   | 'layer_set/request_layer_inventory'

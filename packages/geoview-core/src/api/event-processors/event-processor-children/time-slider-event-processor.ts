@@ -1,17 +1,17 @@
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
+import { logger } from '@/core/utils/logger';
+
+import { AbstractEventProcessor } from '../abstract-event-processor';
 import {
   AbstractGeoViewVector,
   EsriDynamic,
   ITimeSliderState,
-  TypeFeatureInfoLayerConfig,
   TimeSliderLayerSet,
+  TypeFeatureInfoLayerConfig,
   WMS,
   api,
   getLocalizedValue,
-} from '@/app';
-import { logger } from '@/core/utils/logger';
-
-import { AbstractEventProcessor } from '../abstract-event-processor';
+} from '@/core/types/cgpv-types';
 
 export class TimeSliderEventProcessor extends AbstractEventProcessor {
   /**

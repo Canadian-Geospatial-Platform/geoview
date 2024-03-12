@@ -481,17 +481,17 @@
       const getEventListenerFunctions = (clickFlag) => {
         if (clickFlag.endsWith('click-text')) {
           return [
-            cgpv.api.getFeatureInfoLayerSet('mapWM1').isClickListenerEnabled,
-            cgpv.api.getFeatureInfoLayerSet('mapWM1').disableClickListener,
-            cgpv.api.getFeatureInfoLayerSet('mapWM1').enableClickListener,
-            cgpv.api.getFeatureInfoLayerSet('mapWM1'),
+            cgpv.api.maps['mapWM1'].layer.featureInfoLayerSet.isClickListenerEnabled,
+            cgpv.api.maps['mapWM1'].layer.featureInfoLayerSet.disableClickListener,
+            cgpv.api.maps['mapWM1'].layer.featureInfoLayerSet.enableClickListener,
+            cgpv.api.maps['mapWM1'].layer.featureInfoLayerSet,
           ];
         } else {
           return [
-            cgpv.api.getFeatureInfoLayerSet('mapWM1').isHoverListenerEnabled,
-            cgpv.api.getFeatureInfoLayerSet('mapWM1').disableHoverListener,
-            cgpv.api.getFeatureInfoLayerSet('mapWM1').enableHoverListener,
-            cgpv.api.getFeatureInfoLayerSet('mapWM1'),
+            cgpv.api.maps['mapWM1'].layer.hoverFeatureInfoLayerSet.isHoverListenerEnabled,
+            cgpv.api.maps['mapWM1'].layer.hoverFeatureInfoLayerSet.disableHoverListener,
+            cgpv.api.maps['mapWM1'].layer.hoverFeatureInfoLayerSet.enableHoverListener,
+            cgpv.api.maps['mapWM1'].layer.hoverFeatureInfoLayerSet,
           ];
         }
       };
@@ -534,7 +534,8 @@
         Object.keys(registeredLayers).forEach((key) => {
           if (['processed', 'loaded'].includes(registeredLayers[key].layerStatus)) {
             const queryable = registeredLayers[key]?.source?.featureInfo?.queryable ?? true;
-            if (queryable) {
+            const isNotGroupLayerEntry = registeredLayers[key]?.entryType !== 'group';
+            if (queryable && isNotGroupLayerEntry) {
               if (firstpass) {
                 firstpass = false;
                 configureTableRow(false, 'all-click-text', 'All layers are', 'all-click-disable', 'all-click-enable', '');
@@ -567,7 +568,8 @@
       Object.keys(registeredLayers).forEach((key) => {
         if (['processed', 'loaded'].includes(registeredLayers[key].layerStatus)) {
           const queryable = registeredLayers[key]?.source?.featureInfo?.queryable ?? true;
-          if (queryable) {
+          const isNotGroupLayerEntry = registeredLayers[key]?.entryType !== 'group';
+          if (queryable && isNotGroupLayerEntry) {
             if (firstpass) {
               firstpass = false;
               fillTableRow('all', 'click-table', 'click-disable', 'click-enable', 'click-text');

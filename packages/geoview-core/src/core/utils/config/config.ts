@@ -7,6 +7,7 @@ import { ConfigValidation } from './config-validation';
 import { InlineDivConfigReader } from './reader/div-config-reader';
 import { JsonConfigReader } from './reader/json-config-reader';
 import { URLmapConfigReader } from './reader/url-config-reader';
+import { ConfigBaseClass } from './validation-classes/config-base-class';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -132,7 +133,8 @@ export class Config {
    */
   private setLayerEntryType(listOfLayerEntryConfig: TypeListOfLayerEntryConfig, geoviewLayerType: TypeGeoviewLayerType): void {
     listOfLayerEntryConfig?.forEach((layerConfig) => {
-      if (layerEntryIsGroupLayer(layerConfig)) this.setLayerEntryType(layerConfig.listOfLayerEntryConfig!, geoviewLayerType);
+      if (layerEntryIsGroupLayer(layerConfig as ConfigBaseClass))
+        this.setLayerEntryType(layerConfig.listOfLayerEntryConfig!, geoviewLayerType);
       else {
         // eslint-disable-next-line no-param-reassign
         layerConfig.schemaTag = geoviewLayerType;

@@ -17,7 +17,7 @@ import {
   TypeLayerEntryType,
 } from '../../map/map-schema-types';
 import { CONST_LAYER_TYPES, TypeGeoviewLayerType } from '../geoview-layers/abstract-geoview-layers';
-import { GeoCoreLayerEntryConfig } from '@/core/utils/config/validationClasses/geocore-layer-entry-config';
+import { GeoCoreLayerEntryConfig } from '@/core/utils/config/validation-classes/geocore-layer-entry-config';
 
 export interface TypeGeoCoreLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'geoCore';

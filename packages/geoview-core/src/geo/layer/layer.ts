@@ -4,7 +4,7 @@ import { GeoCore, layerConfigIsGeoCore } from '@/geo/layer/other/geocore';
 import { Geometry } from '@/geo/layer/geometry/geometry';
 import { FeatureHighlight } from '@/geo/utils/feature-highlight';
 
-import { TypeOrderedLayerInfo, api } from '@/app';
+import { api } from '@/app';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
@@ -38,6 +38,9 @@ import { layerConfigIsXYZTiles, XYZTiles } from '@/geo/layer/geoview-layers/rast
 import { layerConfigIsVectorTiles, VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { CSV, layerConfigIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
 import { logger } from '@/core/utils/logger';
+import { FeatureInfoLayerSet, LegendsLayerSet, TypeOrderedLayerInfo } from '@/core/types/cgpv-types';
+import { HoverFeatureInfoLayerSet } from '../utils/hover-feature-info-layer-set';
+import { AllFeatureInfoLayerSet } from '../utils/all-feature-info-layer-set';
 
 export type TypeRegisteredLayers = { [layerPath: string]: TypeLayerEntryConfig };
 
@@ -80,6 +83,18 @@ export class Layer {
   // used to access feature and bounding box highlighting
   featureHighlight: FeatureHighlight;
 
+  // Legends layer set associated to the map
+  legendsLayerSet: LegendsLayerSet;
+
+  // Hover feature info layer set associated to the map
+  hoverFeatureInfoLayerSet: HoverFeatureInfoLayerSet;
+
+  // All feature info layer set associated to the map
+  allFeatureInfoLayerSet: AllFeatureInfoLayerSet;
+
+  // Feature info layer set associated to the map
+  featureInfoLayerSet: FeatureInfoLayerSet;
+
   /**
    * Initializes layer types and listen to add/remove layer events from outside
    *
@@ -87,6 +102,10 @@ export class Layer {
    */
   constructor(mapId: string) {
     this.mapId = mapId;
+    this.legendsLayerSet = api.getLegendsLayerSet(mapId);
+    this.hoverFeatureInfoLayerSet = api.getHoverFeatureInfoLayerSet(mapId);
+    this.allFeatureInfoLayerSet = api.getAllFeatureInfoLayerSet(mapId);
+    this.featureInfoLayerSet = api.getFeatureInfoLayerSet(mapId);
 
     this.geometry = new Geometry(this.mapId);
     this.featureHighlight = new FeatureHighlight(this.mapId);

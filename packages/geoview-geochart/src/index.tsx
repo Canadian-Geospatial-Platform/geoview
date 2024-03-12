@@ -1,13 +1,9 @@
 import { Cast, AnySchemaObject, toJsonObject, TypeJsonObject } from 'geoview-core';
 import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
 import { TypeTabs } from 'geoview-core/src/ui/tabs/tabs';
-import { ChartType } from 'geochart';
 import { ChartIcon } from 'geoview-core/src/ui/icons';
 
 import { GeochartEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/geochart-event-processor';
-import { PayloadBaseClassChart, EVENT_CHART_REDRAW } from './geochart-event-base';
-import { PayloadChartConfig } from './geochart-event-config';
-import { PluginGeoChartConfig } from './geochart-types';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-geochart.json';
 import { GeoChartPanel } from './geochart-panel';
@@ -29,6 +25,9 @@ class GeoChartFooterPlugin extends FooterPlugin {
    * @returns {TypeJsonObject} the default config
    */
   defaultConfig = (): TypeJsonObject => toJsonObject(defaultConfig);
+
+  // The callback used to redraw the GeoCharts in the GeoChartPanel
+  callbackRedraw?: () => void;
 
   /**
    * Translations object to inject to the viewer translations
@@ -73,7 +72,12 @@ class GeoChartFooterPlugin extends FooterPlugin {
    */
   onCreateContentProps(): TypeTabs {
     // Create element
-    const content = <GeoChartPanel mapId={this.pluginProps.mapId} />;
+    const content = (
+      <GeoChartPanel
+        mapId={this.pluginProps.mapId}
+        provideCallbackRedraw={(theCallbackRedraw) => this.handleProvideCallbackRedraw(theCallbackRedraw)}
+      />
+    );
 
     return {
       id: 'geochart',
@@ -85,6 +89,14 @@ class GeoChartFooterPlugin extends FooterPlugin {
   }
 
   /**
+   * Handles when a redraw callback has been provided by GeoChartPanel
+   */
+  handleProvideCallbackRedraw(callbackRedraw: () => void): void {
+    // Keep it
+    this.callbackRedraw = callbackRedraw;
+  }
+
+  /**
    * Overrides when the plugin is selected in the Footer Bar.
    * @returns {TypeTabs} The TypeTabs for the GeoChart Footer Plugin
    */
@@ -92,25 +104,16 @@ class GeoChartFooterPlugin extends FooterPlugin {
     // Call parent
     super.onSelected();
 
-    // When the GeoChart Plugin in the Footer is selected, we redraw the chart, in case
+    // When the GeoChart Plugin in the Footer is selected, we redraw the GeoChart, in case
     this.redrawChart();
   }
 
   /**
-   * Callable plugin function to emit a Chart config event in order to update the Chart configuration on demand.
-   * @param config PluginGeoChartConfig<ChartType> The GeoChart Config
-   */
-  loadConfig(config: PluginGeoChartConfig<ChartType>): void {
-    // Emit a Chart Changed event so the chart updates
-    this.api.event.emit(new PayloadChartConfig(this.pluginProps.mapId, config));
-  }
-
-  /**
-   * Callable plugin function to emit a Chart redraw event in order to update the Chart ui on demand.
+   * Callable plugin function to redraw the GeoCharts on demand.
    */
   redrawChart(): void {
-    // Emit a Chart Redraw event so the chart redraws
-    this.api.event.emit(new PayloadBaseClassChart(EVENT_CHART_REDRAW, this.pluginProps.mapId));
+    // Redraw the GeoChart Panel which will redraw the GeoCharts
+    this.callbackRedraw?.();
   }
 }
 

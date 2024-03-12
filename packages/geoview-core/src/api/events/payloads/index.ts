@@ -1,4 +1,3 @@
-export * from './basemap-layers-payload';
 export * from './boolean-payload';
 export * from './button-panel-payload';
 export * from './clear-highlights-payload';
@@ -8,11 +7,6 @@ export * from './geoview-layer-payload';
 export * from './get-feature-info-payload';
 export * from './get-legends-payload';
 export * from './in-keyfocus-payload';
-export * from './inter-draw-payload';
-export * from './inter-extent-payload';
-export * from './inter-modify-payload';
-export * from './inter-select-payload';
-export * from './inter-translate-payload';
 export * from './layer-config-payload';
 export * from './layer-set-payload';
 export * from './lng-lat-payload';
