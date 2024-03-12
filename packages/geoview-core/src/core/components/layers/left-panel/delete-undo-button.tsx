@@ -78,7 +78,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     if (inUndoState) {
       const timer = setInterval(() => {
         setProgress((prevProgress) => (prevProgress >= 100 ? 0 : prevProgress + 5));
-      }, 250);
+      }, 120);
       return () => {
         clearInterval(timer);
       };
