@@ -94,7 +94,6 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected fetchServiceMetadata(): Promise<void> {
-    this.setLayerPhase('fetchServiceMetadata');
     const promisedExecution = new Promise<void>((resolve) => {
       resolve();
     });
@@ -195,7 +194,6 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-    this.setLayerPhase('validateListOfLayerEntryConfig');
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
@@ -246,8 +244,6 @@ export class ImageStatic extends AbstractGeoViewRaster {
    */
   processOneLayerEntry(layerConfig: ImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     super.processOneLayerEntry(layerConfig);
-    const { layerPath } = layerConfig;
-    this.setLayerPhase('processOneLayerEntry', layerPath);
 
     if (!layerConfig?.source?.extent) throw new Error('Parameter extent is not defined in source element of layerConfig.');
     const sourceOptions: SourceOptions = {

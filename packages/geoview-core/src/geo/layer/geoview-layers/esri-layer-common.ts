@@ -31,7 +31,6 @@ import { GeoCoreLayerEntryConfig } from '@/core/utils/config/validation-classes/
  * @returns {Promise<void>} A promise that the execution is completed.
  */
 export async function commonfetchServiceMetadata(this: EsriDynamic | EsriFeature): Promise<void> {
-  this.setLayerPhase('fetchServiceMetadata');
   const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
   if (metadataUrl) {
     try {
@@ -60,7 +59,6 @@ export async function commonfetchServiceMetadata(this: EsriDynamic | EsriFeature
  * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
  */
 export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFeature, listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-  this.setLayerPhase('validateListOfLayerEntryConfig');
   listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig, i) => {
     if (layerConfig.layerStatus === 'error') return;
     const { layerPath } = layerConfig;
