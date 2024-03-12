@@ -140,7 +140,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
               item.isVisible = item.isVisible === 'no' ? 'yes' : 'no'; // eslint-disable-line no-param-reassign
 
               if (item.isVisible === 'yes' && MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(get().mapId, layerPath)) {
-                MapEventProcessor.setOrToggleMapVisibilty(get().mapId, layerPath, 'yes');
+                MapEventProcessor.setOrToggleMapVisibility(get().mapId, layerPath, true);
               }
 
               // assign value to registered layer. This is use by applyFilter function to set visibility
@@ -162,7 +162,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           // 'always' is neither 'yes', nor 'no'.
           const allItemsUnchecked = _.every(layer.items, (i) => ['no', 'always'].includes(i.isVisible!));
           if (allItemsUnchecked) {
-            MapEventProcessor.setOrToggleMapVisibilty(get().mapId, layerPath, 'no');
+            MapEventProcessor.setOrToggleMapVisibility(get().mapId, layerPath, false);
           }
 
           // apply filter to layer
@@ -176,7 +176,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         });
       },
       setAllItemsVisibility: (layerPath: string, visibility: 'yes' | 'no') => {
-        MapEventProcessor.setOrToggleMapVisibilty(get().mapId, layerPath, visibility);
+        MapEventProcessor.setOrToggleMapVisibility(get().mapId, layerPath, visibility === 'yes');
         const curLayers = get().layerState.legendLayers;
 
         const registeredLayer = api.maps[get().mapId].layer.registeredLayers[layerPath] as VectorLayerEntryConfig;

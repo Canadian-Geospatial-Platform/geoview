@@ -1437,6 +1437,9 @@
         "viewSettings": {
           "$ref": "#/definitions/TypeViewSettings"
         },
+        "highlightColor": {
+          "$ref": "#/definitions/TypeHighlightColors"
+        },
         "extraOptions": {
           "type": "object",
           "description": "Additional options used for OpenLayers map options"
@@ -1473,6 +1476,11 @@
       "enum": ["static", "dynamic"],
       "default": "dynamic",
       "description": "If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar)."
+    },
+    "TypeHighlightColors": {
+      "enum": ["black", "white", "red", "green"],
+      "default": "black",
+      "description": "Color to use for feature highlights."
     },
     "TypeListOfGeoviewLayerConfig": {
       "description": "List of GeoView Layers in the order which they should be added to the map.",
