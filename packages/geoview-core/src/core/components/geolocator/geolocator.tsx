@@ -5,11 +5,12 @@ import { useTheme } from '@mui/material';
 import { CloseIcon, SearchIcon, AppBar, Box, Divider, IconButton, ProgressBar, Toolbar } from '@/ui';
 import { FocusTrapElement } from '@/core/components/common/focus-trap-element';
 import { StyledInputField, sxClasses } from './geolocator-style';
-import { OL_ZOOM_DURATION, ARROW_KEY_CODES } from '@/core/utils/constant';
+import { OL_ZOOM_DURATION } from '@/core/utils/constant';
 import { useUIAppbarGeolocatorActive, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useAppGeolocatorServiceURL, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { GeolocatorResult } from './geolocator-result';
 import { logger } from '@/core/utils/logger';
+import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 export interface GeoListItem {
   key: string;
@@ -28,6 +29,7 @@ export function Geolocator() {
   const { t } = useTranslation();
 
   const theme = useTheme();
+  const { setMapKeyboardPanInteractions } = useMapStoreActions();
 
   // internal state
   const [data, setData] = useState<GeoListItem[]>();
@@ -153,14 +155,11 @@ export function Geolocator() {
   };
 
   const handleKeyDown = (event: KeyboardEvent) => {
+    // disables map interactions (arrow keys won't move the map)
+    setMapKeyboardPanInteractions(0);
+
     if (event.key === 'Escape') {
       setGeolocatorActive(false);
-    }
-
-    if (ARROW_KEY_CODES.includes(event.code as string)) {
-      // TODO stop moving the map here
-      event.preventDefault();
-      event.stopPropagation();
     }
   };
 
