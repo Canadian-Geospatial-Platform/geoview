@@ -1,24 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { MouseEventHandler, RefObject, useEffect, useRef } from 'react';
 import ReactDOMServer from 'react-dom/server';
-
+import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 
 import html2Canvas from 'html2canvas';
 import { Button, Dialog, DialogActions, DialogTitle, DialogContent } from '@/ui';
 import { exportPNG } from '@/core/utils/utilities';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import {
-  NorthArrow,
-  api,
-  useGeoViewMapId,
-  useMapLoaded,
-  useMapNorthArrow,
-  NorthArrowIcon,
-  useMapNorthArrowElement,
-  useMapScale,
-  useLayerLegendLayers,
-} from '@/app';
+import { api, useGeoViewMapId, useMapNorthArrow, NorthArrowIcon, useMapScale } from '@/app';
 /**
  * Export modal window component to export the viewer information in a PNG file
  *
@@ -26,6 +15,11 @@ import {
  */
 export default function ExportModal(): JSX.Element {
   const mapId = useGeoViewMapId();
+  const theme = useTheme();
+
+  const textColor = theme.palette.text.primary;
+  const bgColor = theme.palette.background.default;
+
   const { map } = api.maps[mapId];
 
   const { t } = useTranslation();
@@ -73,8 +67,8 @@ export default function ExportModal(): JSX.Element {
   const setTitle = (context: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
     context.font = "1.25rem 'Roboto','Helvetica','Arial',sans-serif";
     context.textAlign = 'center';
-    context.fillStyle = '#000000';
-    context.fillText('Export the Map', canvas.width / 2, 30);
+    context.fillStyle = textColor;
+    context.fillText(t('exportModal.exportTitle'), canvas.width / 2, 30);
   };
 
   /**
@@ -139,15 +133,15 @@ export default function ExportModal(): JSX.Element {
   const drawScale = (context: CanvasRenderingContext2D, height: number) => {
     context.font = "1rem 'Roboto','Helvetica','Arial',sans-serif";
     context.textAlign = 'left';
-    context.fillStyle = '#000000';
-    context.fillText(`${scale.labelGraphic} approx`, 0, height + 100);
+    context.fillStyle = textColor;
+    context.fillText(`${scale.labelGraphic} ${t('exportModal.approx')}`, 10, height + 100);
     // TODO: Add miles from label graphic if needed.
 
     // add stroke/line below scale
     context.beginPath();
-    context.moveTo(0, height + 110);
+    context.moveTo(10, height + 110);
     context.lineTo(100, height + 110);
-    context.strokeStyle = '#000000';
+    context.strokeStyle = textColor;
     context.stroke();
   };
 
@@ -162,7 +156,7 @@ export default function ExportModal(): JSX.Element {
     legendContainer.removeAttribute('style');
     // https://html2canvas.hertzen.com/configuration/
     html2Canvas(legendContainer, {
-      backgroundColor: 'inherit',
+      backgroundColor: bgColor,
       width: window.innerWidth - 10,
       scale: 0.85,
       height: legendContainer.scrollHeight,
@@ -176,7 +170,7 @@ export default function ExportModal(): JSX.Element {
   /**
    * Draw timestamp on the canvas
    * @param {CanvasRenderingContext2D} context the context of the canvas
-   * @param {legendContainer} legendContainer he container where legend is rendered in the footerTabs.
+   * @param {HTMLElement} legendContainer he container where legend is rendered in the footerTabs.
    * @param {number} height the height of the canvas
    * @param {HTMLCanvasElement} canvas html5 canvas
    */
@@ -186,12 +180,12 @@ export default function ExportModal(): JSX.Element {
     height: number,
     canvas: HTMLCanvasElement
   ) => {
-    let timeStampHeight = height;
+    let timeStampHeight = height + 140;
     // Redraw the export template with updated height when legend container is not available,
     // so that their will less white space at the bottom of export modal.
     if (!legendContainer) {
       // eslint-disable-next-line no-param-reassign
-      canvas.height = height + 100;
+      canvas.height = height + 150;
       setTitle(context, canvas);
       drawMap(context);
       // Set the north icon
@@ -208,8 +202,8 @@ export default function ExportModal(): JSX.Element {
 
     context.font = "1rem 'Roboto','Helvetica','Arial',sans-serif";
     context.textAlign = 'left';
-    context.fillStyle = '#000000';
-    context.fillText(api.dateUtilities.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A'), 0, timeStampHeight);
+    context.fillStyle = textColor;
+    context.fillText(api.dateUtilities.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A'), 10, timeStampHeight);
   };
 
   /**
@@ -229,9 +223,9 @@ export default function ExportModal(): JSX.Element {
     exportCanvas.height = height;
 
     if (context) {
-      // Draw background color or image
-      context.fillStyle = '#FFFFFF'; // Set background color to white
-      context.fillRect(0, 0, exportCanvas.width, exportCanvas.height); // Fill canvas with background color
+      // Draw background color for canvas
+      context.fillStyle = bgColor;
+      context.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
       //  Set the heading of the canvas
       setTitle(context, exportCanvas);
 
@@ -249,7 +243,7 @@ export default function ExportModal(): JSX.Element {
       }
 
       // add legend
-      const legendContainer = document.getElementById('legendContainer');
+      const legendContainer = document.getElementById(`${mapId}-legendContainer`);
       if (legendContainer) {
         drawLegend(context, mapHeight, legendContainer);
       }
@@ -276,10 +270,10 @@ export default function ExportModal(): JSX.Element {
         <canvas id="exportCanvasTemplate" width="550" height="500" ref={exportCanvasRef} />
       </DialogContent>
       <DialogActions>
-        <Button onClick={closeModal} type="text" size="small" autoFocus>
+        <Button onClick={closeModal} type="text" size="small" autoFocus sx={{ width: 'inherit' }}>
           {t('exportModal.cancelBtn')}
         </Button>
-        <Button type="text" onClick={exportMap} size="small">
+        <Button type="text" onClick={exportMap} size="small" sx={{ width: 'inherit' }}>
           {t('exportModal.exportBtn')}
         </Button>
       </DialogActions>
