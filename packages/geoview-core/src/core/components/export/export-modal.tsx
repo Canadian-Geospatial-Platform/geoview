@@ -42,7 +42,9 @@ export default function ExportModal(): JSX.Element {
   const activeModalId = useUIActiveFocusItem().activeElementId;
 
   const exportMap = ((): void => {
-    exportPNG(mapId);
+    if (exportCanvasRef.current) {
+      exportPNG(exportCanvasRef.current, mapId);
+    }
     closeModal();
   }) as MouseEventHandler<HTMLButtonElement>;
 
