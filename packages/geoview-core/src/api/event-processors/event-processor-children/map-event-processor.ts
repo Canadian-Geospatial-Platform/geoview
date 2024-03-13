@@ -5,7 +5,6 @@ import { Extent } from 'ol/extent';
 import View, { FitOptions } from 'ol/View';
 import { KeyboardPan } from 'ol/interaction';
 
-import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import {
   api,
   Coordinate,
@@ -24,21 +23,15 @@ import {
   TypeMapState,
   TypeValidMapProjectionCodes,
 } from '@/geo/map/map-schema-types';
-import {
-  mapPayload,
-  lngLatPayload,
-  mapMouseEventPayload,
-  numberPayload,
-  mapViewProjectionPayload,
-  TypeGeometry,
-  TypeFeatureInfoEntry,
-} from '@/api/events/payloads';
+import { mapPayload, lngLatPayload, mapMouseEventPayload, numberPayload, mapViewProjectionPayload } from '@/api/events/payloads';
 import { EVENT_NAMES } from '@/api/events/event-types';
+import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
-import { AppEventProcessor } from './app-event-processor';
 import { logger } from '@/core/utils/logger';
+import { TypeFeatureInfoEntry, TypeGeometry } from '@/geo/utils/layer-set';
 
+import { AppEventProcessor } from './app-event-processor';
 import { AbstractEventProcessor } from '../abstract-event-processor';
 
 export class MapEventProcessor extends AbstractEventProcessor {

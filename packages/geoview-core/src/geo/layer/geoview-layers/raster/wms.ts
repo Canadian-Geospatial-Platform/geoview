@@ -31,7 +31,6 @@ import {
   layerEntryIsGroupLayer,
   CONST_LAYER_ENTRY_TYPES,
 } from '@/geo/map/map-schema-types';
-import { TypeFeatureInfoEntry, TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import { getLocalizedValue, getMinOrMaxExtents, xmlToJson, showError, replaceParams, getLocalizedMessage } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -39,6 +38,7 @@ import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
+import { TypeArrayOfFeatureInfoEntries, TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;

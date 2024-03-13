@@ -14,6 +14,12 @@ import Geometry from 'ol/geom/Geometry';
 import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
+import { api } from '@/app';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { TypeJsonObject } from '@/core/types/global-types';
+import { logger } from '@/core/utils/logger';
+import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
@@ -27,8 +33,8 @@ import {
   TypeFeatureInfoLayerConfig,
   TypeVisibilityFlags,
 } from '@/geo/map/map-schema-types';
-import { TypeArrayOfFeatureInfoEntries, codedValueType, rangeDomainType } from '@/api/events/payloads';
-import { api } from '@/app';
+import { TypeArrayOfFeatureInfoEntries, codedValueType, rangeDomainType } from '@/geo/utils/layer-set';
+
 import {
   commonGetFieldDomain,
   commonGetFieldType,
@@ -39,11 +45,6 @@ import {
   commonProcessTemporalDimension,
   commonValidateListOfLayerEntryConfig,
 } from '../esri-layer-common';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { TypeJsonObject } from '@/core/types/global-types';
-import { logger } from '@/core/utils/logger';
-import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 
 export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_DYNAMIC;

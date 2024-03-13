@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-// We have many reassing for layerPath-layerConfig. We keep it global...
 import axios from 'axios';
 
 import ImageLayer from 'ol/layer/Image';
@@ -203,11 +201,13 @@ export class ImageStatic extends AbstractGeoViewRaster {
             layer: layerPath,
             loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
+          // eslint-disable-next-line no-param-reassign
           layerConfig.layerStatus = 'error';
           return;
         }
       }
 
+      // eslint-disable-next-line no-param-reassign
       layerConfig.layerStatus = 'processing';
 
       // When no metadata are provided, all layers are considered valid.
@@ -223,6 +223,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
             layer: layerPath,
             loggerMessage: `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
+          // eslint-disable-next-line no-param-reassign
           layerConfig.layerStatus = 'error';
           return;
         }
@@ -270,10 +271,12 @@ export class ImageStatic extends AbstractGeoViewRaster {
     // ! IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
     // !            in the 'loading' state if the flag value is 'no'.
 
+    // eslint-disable-next-line no-param-reassign
     layerConfig.olLayerAndLoadEndListeners = {
       olLayer: new ImageLayer(staticImageOptions),
       loadEndListenerType: 'image',
     };
+    // eslint-disable-next-line no-param-reassign
     layerConfig.geoviewLayerInstance = this;
 
     return Promise.resolve(layerConfig.olLayer);
