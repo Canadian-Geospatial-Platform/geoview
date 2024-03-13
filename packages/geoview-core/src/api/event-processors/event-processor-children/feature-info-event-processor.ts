@@ -1,11 +1,11 @@
 import { GeoviewStoreType, IFeatureInfoState } from '@/core/stores';
-import { EventType, TypeLayerData, TypeArrayOfLayerData } from '@/api/events/payloads/get-feature-info-payload';
 import { logger } from '@/core/utils/logger';
+import { TypeFeatureInfoResultSet } from '@/geo/utils/feature-info-layer-set';
+import { TypeHoverFeatureInfoResultSet } from '@/geo/utils/hover-feature-info-layer-set';
+import { EventType, TypeArrayOfLayerData, TypeLayerData } from '@/geo/utils/layer-set';
 
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '../abstract-event-processor';
 import { UIEventProcessor } from './ui-event-processor';
-import { TypeFeatureInfoResultSet } from '@/geo/utils/feature-info-layer-set';
-import { TypeHoverFeatureInfoResultSet } from '@/geo/utils/hover-feature-info-layer-set';
 
 /**
  * Event processor focusing on interacting with the feature info state in the store (currently called detailsState).

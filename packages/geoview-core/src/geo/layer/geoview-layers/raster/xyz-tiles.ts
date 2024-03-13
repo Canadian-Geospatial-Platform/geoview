@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-// We have many reassign for layerConfig. We keep it global...
 import TileLayer from 'ol/layer/Tile';
 import { Options as TileOptions } from 'ol/layer/BaseTile';
 import XYZ, { Options as SourceOptions } from 'ol/source/XYZ';
@@ -130,11 +128,13 @@ export class XYZTiles extends AbstractGeoViewRaster {
             layer: layerPath,
             loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
+          // eslint-disable-next-line no-param-reassign
           layerConfig.layerStatus = 'error';
           return;
         }
       }
 
+      // eslint-disable-next-line no-param-reassign
       layerConfig.layerStatus = 'processing';
 
       // When no metadata are provided, all layers are considered valid.
@@ -150,6 +150,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
             layer: layerPath,
             loggerMessage: `XYZ layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
+          // eslint-disable-next-line no-param-reassign
           layerConfig.layerStatus = 'error';
           return;
         }
@@ -202,10 +203,12 @@ export class XYZTiles extends AbstractGeoViewRaster {
     // ! IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
     // !            in the 'loading' state if the flag value is 'no'.
 
+    // eslint-disable-next-line no-param-reassign
     layerConfig.olLayerAndLoadEndListeners = {
       olLayer: new TileLayer(tileLayerOptions),
       loadEndListenerType: 'tile',
     };
+    // eslint-disable-next-line no-param-reassign
     layerConfig.geoviewLayerInstance = this;
 
     return Promise.resolve(layerConfig.olLayer);
@@ -226,10 +229,13 @@ export class XYZTiles extends AbstractGeoViewRaster {
       );
       // metadataLayerConfigFound can not be undefined because we have already validated the config exist
       this.layerMetadata[layerConfig.layerPath] = toJsonObject(metadataLayerConfigFound);
+      // eslint-disable-next-line no-param-reassign
       layerConfig.source = defaultsDeep(layerConfig.source, metadataLayerConfigFound!.source);
+      // eslint-disable-next-line no-param-reassign
       layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, metadataLayerConfigFound!.initialSettings);
 
       if (layerConfig.initialSettings?.extent)
+        // eslint-disable-next-line no-param-reassign
         layerConfig.initialSettings.extent = api.projection.transformExtent(
           layerConfig.initialSettings.extent,
           'EPSG:4326',

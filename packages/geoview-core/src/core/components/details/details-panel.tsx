@@ -11,7 +11,6 @@ import {
   Box,
   Paper,
 } from '@/ui';
-import { TypeFeatureInfoEntry, TypeLayerData, TypeGeometry, TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import {
   useMapStoreActions,
   useMapVisibleLayers,
@@ -21,6 +20,7 @@ import {
   useDetailsStoreSelectedLayerPath,
 } from '@/core/stores';
 import { logger } from '@/core/utils/logger';
+import { TypeArrayOfFeatureInfoEntries, TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/utils/layer-set';
 
 import { LayerListEntry, Layout } from '../common';
 import { getSxClasses } from './details-style';

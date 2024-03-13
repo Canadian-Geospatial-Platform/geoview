@@ -96,10 +96,10 @@ export class LayerApi {
    */
   constructor(mapViewer: MapViewer) {
     this.mapViewer = mapViewer;
-    this.legendsLayerSet = LegendsLayerSet.get(this.mapId);
-    this.hoverFeatureInfoLayerSet = HoverFeatureInfoLayerSet.get(this.mapId);
-    this.allFeatureInfoLayerSet = AllFeatureInfoLayerSet.get(this.mapId);
-    this.featureInfoLayerSet = FeatureInfoLayerSet.get(this.mapId);
+    this.legendsLayerSet = LegendsLayerSet.get(this, this.mapId);
+    this.hoverFeatureInfoLayerSet = HoverFeatureInfoLayerSet.get(this, this.mapId);
+    this.allFeatureInfoLayerSet = AllFeatureInfoLayerSet.get(this, this.mapId);
+    this.featureInfoLayerSet = FeatureInfoLayerSet.get(this, this.mapId);
 
     this.geometry = new Geometry(this.mapId);
     this.featureHighlight = new FeatureHighlight(this.mapId);
@@ -397,7 +397,7 @@ export class LayerApi {
    * Adds the layer to the map if valid. If not (is a string) emit an error
    * @param {any} geoviewLayer the layer config
    */
-  // TODO: Consider - Turn this function private (#addToMap) when it's not used in add-new-layer.tsx anymore
+  // TODO: Suggestion - Turn this function private (#addToMap) when it's not used in add-new-layer.tsx anymore
   addToMap(geoviewLayer: AbstractGeoViewLayer): void {
     // if the returned layer object has something in the layerLoadError, it is because an error was detected
     // do not add the layer to the map

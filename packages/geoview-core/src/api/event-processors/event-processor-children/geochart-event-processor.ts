@@ -1,8 +1,8 @@
 import { GeoviewStoreType } from '@/core/stores';
-import { TypeArrayOfLayerData } from '@/core/types/global-types';
 import { GeoChartStoreByLayerPath, IGeochartState } from '@/core/stores/store-interface-and-intial-values/geochart-state';
 import { GeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
 import { logger } from '@/core/utils/logger';
+import { TypeArrayOfLayerData } from '@/geo/utils/layer-set';
 
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '../abstract-event-processor';
 

@@ -298,11 +298,11 @@ export class MapViewer {
         if (api.maps[this.mapId].layer) {
           // Check if all registered layers have their results set
           let allGood = true;
-          Object.entries(api.maps[this.mapId].layer.registeredLayers).forEach(([layerPath, registeredLayer]) => {
+          Object.entries(this.layer.registeredLayers).forEach(([layerPath, registeredLayer]) => {
             // If not queryable, don't expect a result set
             if (!registeredLayer.source?.featureInfo?.queryable) return;
 
-            const { resultSet } = api.maps[this.mapId].layer.featureInfoLayerSet;
+            const { resultSet } = this.layer.featureInfoLayerSet;
             const layerResultSetReady = Object.keys(resultSet).includes(layerPath);
             if (!layerResultSetReady) {
               logger.logTraceDetailed('checkLayerResultSetReady - layer resultSet not ready, waiting...', layerPath);
@@ -316,7 +316,7 @@ export class MapViewer {
             clearInterval(layersInterval);
 
             // How many layers resultset?
-            const resultSetCount = Object.keys(api.maps[this.mapId].layer.featureInfoLayerSet.resultSet).length;
+            const resultSetCount = Object.keys(this.layer.featureInfoLayerSet.resultSet).length;
 
             // Log
             logger.logMarkerCheck(`mapReady-${this.mapId}`, `for all ${resultSetCount} layer resultSet to be instanciated`);
@@ -610,7 +610,7 @@ export class MapViewer {
    * @returns A Promise which resolves when the rendering is completed after the source(s) were changed.
    */
   refreshLayers(): Promise<void> {
-    const mapLayers = api.maps[this.mapId].layer.geoviewLayers;
+    const mapLayers = this.layer.geoviewLayers;
     Object.entries(mapLayers).forEach((mapLayerEntry) => {
       const refreshBaseLayer = (baseLayer: BaseLayer | null) => {
         if (baseLayer) {
