@@ -16,7 +16,7 @@ import { Basemap } from '@/geo/layer/basemap/basemap';
 import { Layer } from '@/geo/layer/layer';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 
-import { TypeClickMarker, api, unmountMap } from '@/app';
+import { api, TypeClickMarker, unmountMap } from '@/app';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { EVENT_NAMES } from '@/api/events/event-types';
 
@@ -136,6 +136,8 @@ export class MapViewer {
     this.footerBarApi = new FooterBarApi(this.mapId);
 
     this.modal = new ModalApi(this.mapId);
+    this.modal.onModalOpened((sender, modalEvent) => api.event.emitModalOpen(this.mapId, modalEvent.modalId));
+    this.modal.onModalClosed((sender, modalEvent) => api.event.emitModalClose(this.mapId, modalEvent.modalId));
 
     this.geoviewRenderer = new GeoviewRenderer(this.mapId);
 

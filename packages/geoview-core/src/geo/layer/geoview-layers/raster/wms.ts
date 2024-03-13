@@ -111,7 +111,6 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected async fetchServiceMetadata(): Promise<void> {
-    this.setLayerPhase('fetchServiceMetadata');
     const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
     if (metadataUrl) {
       const metadataAccessPathIsXmlFile = metadataUrl.slice(-4).toLowerCase() === '.xml';
@@ -208,7 +207,6 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   private async fetchXmlServiceMetadata(metadataUrl: string): Promise<void> {
-    this.setLayerPhase('fetchXmlServiceMetadata');
     try {
       const parser = new WMSCapabilities();
       const response = await fetch(metadataUrl);
@@ -371,7 +369,6 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-    this.setLayerPhase('validateListOfLayerEntryConfig');
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
@@ -491,8 +488,6 @@ export class WMS extends AbstractGeoViewRaster {
     // Log
     logger.logTraceCore('WMS - processOneLayerEntry', layerConfig.layerPath);
 
-    const { layerPath } = layerConfig;
-    this.setLayerPhase('processOneLayerEntry', layerPath);
     if (geoviewEntryIsWMS(layerConfig)) {
       const layerCapabilities = this.getLayerMetadataEntry(layerConfig.layerId);
       if (layerCapabilities) {

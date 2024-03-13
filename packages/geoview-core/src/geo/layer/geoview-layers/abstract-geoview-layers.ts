@@ -256,7 +256,6 @@ type TypeLayerSetHandlerFunctions = {
   queryLegend?: TypeEventHandlerFunction;
   queryLayer?: TypeEventHandlerFunction;
   updateLayerStatus?: TypeEventHandlerFunction;
-  updateLayerPhase?: TypeEventHandlerFunction;
 };
 
 // ******************************************************************************************************************************
@@ -424,29 +423,6 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Change the layer phase property and emit an event to update existing layer sets.
-   *
-   * @param {string} layerPhase The value to assign to the layer phase property.
-   * @param {string} layerPath The layer path to the layer's configuration affected by the change.
-   */
-  setLayerPhase(layerPhase: string, layerPath?: string) {
-    if (layerPath) {
-      const layerConfig = this.getLayerConfig(layerPath) as AbstractBaseLayerEntryConfig;
-      layerConfig.layerPhase = layerPhase;
-    } else {
-      const changeAllSublayerPhase = (listOfLayerEntryConfig = this.listOfLayerEntryConfig) => {
-        listOfLayerEntryConfig.forEach((subLayerConfig) => {
-          if (layerEntryIsGroupLayer(subLayerConfig)) changeAllSublayerPhase(subLayerConfig.listOfLayerEntryConfig);
-          else {
-            (subLayerConfig as AbstractBaseLayerEntryConfig).layerPhase = layerPhase;
-          }
-        });
-      };
-      changeAllSublayerPhase();
-    }
-  }
-
-  /** ***************************************************************************************************************************
    * Process recursively the list of layer entries to see if all of them are processed.
    *
    * @param {TypeLayerStatus} layerStatus The layer status to compare with the internal value of the config.
@@ -537,9 +513,6 @@ export abstract class AbstractGeoViewLayer {
         // Log
         if (logTimingsKey) logger.logMarkerStart(logTimingsKey);
 
-        // Set the phase
-        this.setLayerPhase('createGeoViewLayers');
-
         // Get additional service and await
         await this.getAdditionalServiceDefinition();
 
@@ -567,7 +540,6 @@ export abstract class AbstractGeoViewLayer {
    * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
    */
   protected async getAdditionalServiceDefinition(): Promise<void> {
-    this.setLayerPhase('getAdditionalServiceDefinition');
     try {
       await this.fetchServiceMetadata();
       if (this.listOfLayerEntryConfig.length) await this.validateAndExtractLayerMetadata();
@@ -581,7 +553,6 @@ export abstract class AbstractGeoViewLayer {
    * This method Validate the list of layer configs and extract them in the geoview instance.
    */
   async validateAndExtractLayerMetadata(): Promise<void> {
-    this.setLayerPhase('validateAndExtractLayerMetadata');
     try {
       // Recursively process the configuration tree of layer entries by removing layers in error and processing valid layers.
       this.validateListOfLayerEntryConfig(this.listOfLayerEntryConfig);
@@ -598,7 +569,6 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected async fetchServiceMetadata(): Promise<void> {
-    this.setLayerPhase('fetchServiceMetadata');
     const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
     if (metadataUrl) {
       try {
@@ -633,7 +603,6 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected async processListOfLayerEntryMetadata(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): Promise<void> {
-    this.setLayerPhase('processListOfLayerEntryMetadata');
     try {
       const promisedAllLayerDone: Promise<TypeLayerEntryConfig>[] = [];
       for (let i = 0; i < listOfLayerEntryConfig.length; i++) {
@@ -717,7 +686,6 @@ export abstract class AbstractGeoViewLayer {
     // Log
     logger.logTraceCore('ABSTRACT-GEOVIEW-LAYERS - processListOfLayerEntryConfig', listOfLayerEntryConfig);
 
-    this.setLayerPhase('processListOfLayerEntryConfig');
     try {
       if (listOfLayerEntryConfig.length === 0) return null;
       if (listOfLayerEntryConfig.length === 1) {
@@ -951,7 +919,7 @@ export abstract class AbstractGeoViewLayer {
 
   protected getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
     // Log
-    logger.logError(`getFeatureInfoAtLongLat is not implemented! for ${layerPath} - ${location}`);
+    logger.logError(`getFeatureInfoAtLongLat is not implemented for ${layerPath} - ${location}!`);
     return Promise.resolve(null);
   }
 

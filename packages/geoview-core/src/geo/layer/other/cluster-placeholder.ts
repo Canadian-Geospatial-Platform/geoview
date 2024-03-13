@@ -172,7 +172,6 @@
 //   layerConfig: TypeVectorLayerEntryConfig,
 //   vectorSource: VectorSource<Feature>
 // ): VectorLayer<VectorSource> {
-//   this.setLayerPhase('createVectorLayer');
 //   let configSource: TypeBaseSourceVectorInitialConfig = {};
 //   if (layerConfig.source !== undefined) {
 //     configSource = layerConfig.source as TypeBaseSourceVectorInitialConfig;

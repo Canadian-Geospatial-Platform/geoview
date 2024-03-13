@@ -169,6 +169,8 @@ async function init(callback: () => void): Promise<void> {
 // cgpv object to be exported with the api for outside use
 export const cgpv: types.TypeCGPV = {
   init,
+  // TODO: Refactor - See if we can get rid of spreading the event and plugin inside the 'api' which causes leaking/duplication..
+  // TO.DOCONT: Why did we want it to be spreading? This causes duplications in the form of cgpv.api.event.emitXXX and cgpv.api.emitXXX?
   api: types.Cast<API>({
     ...api,
     ...api.event,

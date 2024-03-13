@@ -51,12 +51,13 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   const [inUndoState, setInUndoState] = useState(false);
 
   // get store actions
-  const { deleteLayer } = useLayerStoreActions();
+  const { deleteLayer, setLayerDeleteInProgress, getLayerDeleteInProgress } = useLayerStoreActions();
   const { getVisibilityFromOrderedLayerInfo, getRemovableFromOrderedLayerInfo, setOrToggleLayerVisibility } = useMapStoreActions();
 
   const handleDeleteClick = () => {
     if (getVisibilityFromOrderedLayerInfo(layer.layerPath)) setOrToggleLayerVisibility(layer.layerPath);
     setInUndoState(true);
+    setLayerDeleteInProgress(true);
   };
 
   const handleUndoClick = () => {
@@ -77,16 +78,17 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     if (inUndoState) {
       const timer = setInterval(() => {
         setProgress((prevProgress) => (prevProgress >= 100 ? 0 : prevProgress + 5));
-      }, 250);
+      }, 120);
       return () => {
         clearInterval(timer);
       };
     }
     setProgress(0);
+    setLayerDeleteInProgress(false);
     return undefined;
-  }, [inUndoState]);
+  }, [inUndoState, getLayerDeleteInProgress()]);
 
-  if (!inUndoState && getRemovableFromOrderedLayerInfo(layer.layerPath)) {
+  if (!inUndoState && getRemovableFromOrderedLayerInfo(layer.layerPath) && !getLayerDeleteInProgress()) {
     return (
       <IconButton onClick={handleDeleteClick} edge="end" size="small">
         <DeleteOutlineIcon color="error" />

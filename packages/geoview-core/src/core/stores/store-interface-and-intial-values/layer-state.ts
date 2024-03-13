@@ -20,6 +20,7 @@ export interface ILayerState {
   selectedLayerPath: string | undefined | null;
   legendLayers: TypeLegendLayer[];
   displayState: TypeLayersViewDisplayState;
+  layerDeleteInProgress: boolean;
 
   actions: {
     setLegendLayers: (legendLayers: TypeLegendLayer[]) => void;
@@ -31,6 +32,8 @@ export interface ILayerState {
     setSelectedLayerPath: (layerPath: string) => void;
     toggleItemVisibility: (layerPath: string, geometryType: TypeStyleGeometry, itemName: string) => void;
     setAllItemsVisibility: (layerPath: string, visibility: 'yes' | 'no') => void;
+    setLayerDeleteInProgress: (newVal: boolean) => void;
+    getLayerDeleteInProgress: () => boolean;
     deleteLayer: (layerPath: string) => void;
     zoomToLayerExtent: (layerPath: string) => void;
   };
@@ -42,6 +45,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
     legendLayers: [] as TypeLegendLayer[],
     selectedLayerPath: null,
     displayState: 'view',
+    layerDeleteInProgress: false,
 
     actions: {
       setLegendLayers: (legendLayers: TypeLegendLayer[]): void => {
@@ -136,7 +140,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
               item.isVisible = item.isVisible === 'no' ? 'yes' : 'no'; // eslint-disable-line no-param-reassign
 
               if (item.isVisible === 'yes' && MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(get().mapId, layerPath)) {
-                MapEventProcessor.setOrToggleMapVisibilty(get().mapId, layerPath, 'yes');
+                MapEventProcessor.setOrToggleMapVisibility(get().mapId, layerPath, true);
               }
 
               // assign value to registered layer. This is use by applyFilter function to set visibility
@@ -158,7 +162,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           // 'always' is neither 'yes', nor 'no'.
           const allItemsUnchecked = _.every(layer.items, (i) => ['no', 'always'].includes(i.isVisible!));
           if (allItemsUnchecked) {
-            MapEventProcessor.setOrToggleMapVisibilty(get().mapId, layerPath, 'no');
+            MapEventProcessor.setOrToggleMapVisibility(get().mapId, layerPath, false);
           }
 
           // apply filter to layer
@@ -172,7 +176,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         });
       },
       setAllItemsVisibility: (layerPath: string, visibility: 'yes' | 'no') => {
-        MapEventProcessor.setOrToggleMapVisibilty(get().mapId, layerPath, visibility);
+        MapEventProcessor.setOrToggleMapVisibility(get().mapId, layerPath, visibility === 'yes');
         const curLayers = get().layerState.legendLayers;
 
         const registeredLayer = api.maps[get().mapId].layer.registeredLayers[layerPath] as VectorLayerEntryConfig;
@@ -222,12 +226,22 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         // ! create a function setItemVisibility called with layer path and this function set the registered layer (from store values) then apply the filter.
         (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter('');
       },
+      getLayerDeleteInProgress: () => get().layerState.layerDeleteInProgress,
+      setLayerDeleteInProgress: (newVal: boolean) => {
+        set({
+          layerState: {
+            ...get().layerState,
+            layerDeleteInProgress: newVal,
+          },
+        });
+      },
       deleteLayer: (layerPath: string) => {
         const curLayers = get().layerState.legendLayers;
         deleteSingleLayer(curLayers, layerPath);
         set({
           layerState: {
             ...get().layerState,
+            layerDeleteInProgress: false,
             legendLayers: [...curLayers],
           },
         });

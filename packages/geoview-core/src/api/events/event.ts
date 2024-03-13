@@ -17,6 +17,9 @@ import {
   SnackbarType,
   SnackbarMessagePayload,
   ISnackbarButton,
+  ModalPayload,
+  modalPayload,
+  payloadIsAModal,
 } from './payloads';
 
 export type TypeEventHandlerFunction = (payload: PayloadBaseClass) => void;
@@ -312,6 +315,44 @@ export class Event {
   // ! 'IMPORTANT' ones above. However, at the time of writing this having them here was sufficient
   // ! as a first step in cleaning generic api.event calls and payloads.
 
+  // #region EVENT_MODAL_OPEN -----------------------------------------------------------------------------------------
+
+  emitModalOpen = (mapId: string, modalId: string) => {
+    // Emit
+    this.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_OPEN, mapId, modalId, true));
+  };
+
+  onModalOpen = (mapId: string, callback: (modalPayload: ModalPayload) => void) => {
+    // Wire
+    this.onMapHelperHandler(mapId, EVENT_NAMES.MODAL.EVENT_MODAL_OPEN, payloadIsAModal, callback);
+  };
+
+  offModalOpen = (mapId: string, callback: (modalPayload: ModalPayload) => void) => {
+    // Unwire
+    this.off(EVENT_NAMES.MODAL.EVENT_MODAL_OPEN, mapId, callback as TypeEventHandlerFunction);
+  };
+
+  // #endregion
+
+  // #region EVENT_MODAL_CLOSE ----------------------------------------------------------------------------------------
+
+  emitModalClose = (mapId: string, modalId: string) => {
+    // Emit
+    this.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE, mapId, modalId, false));
+  };
+
+  onModalClose = (mapId: string, callback: (modalPayload: ModalPayload) => void) => {
+    // Wire
+    this.onMapHelperHandler(mapId, EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE, payloadIsAModal, callback);
+  };
+
+  offModalClose = (mapId: string, callback: (modalPayload: ModalPayload) => void) => {
+    // Unwire
+    this.off(EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE, mapId, callback as TypeEventHandlerFunction);
+  };
+
+  // #endregion
+
   // #region EVENT_MAP_IN_KEYFOCUS ------------------------------------------------------------------------------------
 
   emitMapInKeyFocus = (mapId: string) => {
@@ -338,7 +379,7 @@ export class Event {
   // ! They should be fixed/removed altogether as they don't have a 'valid' reason to exist or their refactoring would be beneficial.
   // ! At the time writing this, having them here was sufficient as a first step in cleaning generic api.event calls and payloads.
 
-  // TODO: Move some that are hard to refactor here temporarily
+  // ? Move some that are hard to refactor here temporarily
 
   // #endregion
 }

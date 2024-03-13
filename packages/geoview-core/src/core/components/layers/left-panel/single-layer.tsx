@@ -18,6 +18,7 @@ import {
   RestartAltIcon,
   TableViewIcon,
   HandleIcon,
+  Paper,
 } from '@/ui';
 import { TypeLegendLayer } from '../types';
 import {
@@ -281,10 +282,10 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     to: { opacity: 1 },
   });
 
-  const AnimatedBox = animated(Box);
+  const AnimatedPaper = animated(Paper);
 
   return (
-    <AnimatedBox className={getContainerClass()} style={listItemSpring} data-layer-depth={depth}>
+    <AnimatedPaper className={getContainerClass()} style={listItemSpring} data-layer-depth={depth}>
       <ListItem key={layer.layerName} divider>
         <ListItemButton selected={layerIsSelected || (layerChildIsSelected && !isGroupOpen)}>
           <LayerIcon layer={layer} />
@@ -303,6 +304,6 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
         </ListItemButton>
       </ListItem>
       {renderCollapsible()}
-    </AnimatedBox>
+    </AnimatedPaper>
   );
 }

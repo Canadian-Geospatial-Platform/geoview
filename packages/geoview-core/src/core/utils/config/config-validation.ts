@@ -781,6 +781,7 @@ export class ConfigValidation {
           maxZoom,
           extent,
         },
+        highlightColor: tempMapFeaturesConfig.map.highlightColor,
         interaction: tempMapFeaturesConfig.map.interaction,
         listOfGeoviewLayerConfig: tempMapFeaturesConfig.map.listOfGeoviewLayerConfig,
         extraOptions: tempMapFeaturesConfig.map.extraOptions,
