@@ -31,7 +31,6 @@ import {
   isSimpleStyleConfig,
   TypeListOfLayerEntryConfig,
   TypeFeatureInfoLayerConfig,
-  TypeVisibilityFlags,
 } from '@/geo/map/map-schema-types';
 import { TypeFeatureInfoEntry, codedValueType, rangeDomainType } from '@/geo/utils/layer-set';
 
@@ -249,11 +248,11 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       properties: { layerConfig },
     };
     // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-    if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings?.className;
-    if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings?.extent;
-    if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
-    if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings?.minZoom;
-    if (layerConfig.initialSettings?.opacity !== undefined) imageLayerOptions.opacity = layerConfig.initialSettings?.opacity;
+    if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings.className;
+    if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings.extent;
+    if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
+    if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
+    if (layerConfig.initialSettings?.states?.opacity !== undefined) imageLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
     // If a layer on the map has an initialSettings.visible set to false, its status will never reach the status 'loaded' because
     // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
     // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
@@ -369,8 +368,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     return styleSettings.uniqueValueStyleInfo.reduce<TypeFieldOfTheSameValue[][]>(
       (counter, styleEntry): TypeFieldOfTheSameValue[][] => {
         if (
-          (styleEntry.visible === 'no' && styleSettings.defaultVisible !== 'no') ||
-          (styleEntry.visible !== 'no' && styleSettings.defaultVisible === 'no')
+          (styleEntry.visible === false && styleSettings.defaultVisible !== false) ||
+          (styleEntry.visible !== false && styleSettings.defaultVisible === false)
         ) {
           styleEntry.values.forEach((styleValue, i) => {
             const valueExist = counter[i].find((counterEntry) => counterEntry.value === styleValue);
@@ -449,8 +448,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     const queryTree: TypeQueryTree = [];
     styleSettings.uniqueValueStyleInfo.forEach((styleEntry) => {
       if (
-        (styleEntry.visible === 'no' && styleSettings.defaultVisible !== 'no') ||
-        (styleEntry.visible !== 'no' && styleSettings.defaultVisible === 'no')
+        (styleEntry.visible === false && styleSettings.defaultVisible !== false) ||
+        (styleEntry.visible !== false && styleSettings.defaultVisible === false)
       ) {
         let levelToSearch = queryTree;
         for (let i = 0; i < fieldOrder.length; i++) {
@@ -507,7 +506,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     styleSettings: TypeUniqueValueStyleConfig,
     sourceFeatureInfo: TypeFeatureInfoLayerConfig
   ): string {
-    let queryString = styleSettings.defaultVisible !== 'no' && !level ? 'not (' : '(';
+    let queryString = styleSettings.defaultVisible !== false && !level ? 'not (' : '(';
     for (let i = 0; i < queryTree.length; i++) {
       const value = this.formatFieldValue(styleSettings.fields[fieldOrder[level]], queryTree[i].fieldValue, sourceFeatureInfo);
       // The nextField array is not empty, then it is is not the last field
@@ -548,15 +547,15 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     if (layerConfig?.style) {
       const setAllUndefinedVisibilityFlagsToYes = (styleConfig: TypeUniqueValueStyleConfig | TypeClassBreakStyleConfig) => {
         // default value is true for all undefined visibility flags
-        if (styleConfig.defaultVisible === undefined) styleConfig.defaultVisible = 'yes';
+        if (styleConfig.defaultVisible === undefined) styleConfig.defaultVisible = true;
         const settings = isUniqueValueStyleConfig(styleConfig) ? styleConfig.uniqueValueStyleInfo : styleConfig.classBreakStyleInfo;
-        for (let i = 0; i < settings.length; i++) if (settings[i].visible === undefined) settings[i].visible = 'yes';
+        for (let i = 0; i < settings.length; i++) if (settings[i].visible === undefined) settings[i].visible = true;
       };
 
-      const featuresAreAllVisible = (defaultVisibility: TypeVisibilityFlags, settings: { visible: TypeVisibilityFlags }[]): boolean => {
-        let allVisible = defaultVisibility !== 'no';
+      const featuresAreAllVisible = (defaultVisibility: boolean, settings: { visible: boolean }[]): boolean => {
+        let allVisible = defaultVisibility !== false;
         for (let i = 0; i < settings.length; i++) {
-          allVisible &&= settings[i].visible !== 'no';
+          allVisible &&= settings[i].visible !== false;
         }
         return allVisible;
       };
@@ -568,7 +567,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       }
       if (isUniqueValueStyleConfig(styleSettings)) {
         setAllUndefinedVisibilityFlagsToYes(styleSettings);
-        if (featuresAreAllVisible(styleSettings.defaultVisible!, styleSettings.uniqueValueStyleInfo as { visible: TypeVisibilityFlags }[]))
+        if (featuresAreAllVisible(styleSettings.defaultVisible!, styleSettings.uniqueValueStyleInfo as { visible: boolean }[]))
           return `(1=1)${layerFilter ? ` and (${layerFilter})` : ''}`;
 
         // This section of code optimize the query to reduce it at it shortest expression.
@@ -581,7 +580,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
       if (isClassBreakStyleConfig(styleSettings)) {
         setAllUndefinedVisibilityFlagsToYes(styleSettings);
-        if (featuresAreAllVisible(styleSettings.defaultVisible!, styleSettings.classBreakStyleInfo as { visible: TypeVisibilityFlags }[]))
+        if (featuresAreAllVisible(styleSettings.defaultVisible!, styleSettings.classBreakStyleInfo as { visible: boolean }[]))
           return `(1=1)${layerFilter ? ` and (${layerFilter})` : ''}`;
 
         const filterArray: string[] = [];
@@ -589,7 +588,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         for (let i = 0; i < styleSettings.classBreakStyleInfo.length; i++) {
           if (filterArray.length % 2 === 0) {
             if (i === 0) {
-              if (styleSettings.classBreakStyleInfo[0].visible !== 'no' && styleSettings.defaultVisible === 'no')
+              if (styleSettings.classBreakStyleInfo[0].visible !== false && styleSettings.defaultVisible === false)
                 filterArray.push(
                   `${styleSettings.field} >= ${this.formatFieldValue(
                     styleSettings.field,
@@ -597,7 +596,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
                     layerConfig.source.featureInfo!
                   )}`
                 );
-              else if (styleSettings.classBreakStyleInfo[0].visible === 'no' && styleSettings.defaultVisible !== 'no') {
+              else if (styleSettings.classBreakStyleInfo[0].visible === false && styleSettings.defaultVisible !== false) {
                 filterArray.push(
                   `${styleSettings.field} < ${this.formatFieldValue(
                     styleSettings.field,
@@ -607,7 +606,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
                 );
                 visibleWhenGreatherThisIndex = i;
               }
-            } else if (styleSettings.classBreakStyleInfo[i].visible !== 'no' && styleSettings.defaultVisible === 'no') {
+            } else if (styleSettings.classBreakStyleInfo[i].visible !== false && styleSettings.defaultVisible === false) {
               filterArray.push(
                 `${styleSettings.field} > ${this.formatFieldValue(
                   styleSettings.field,
@@ -623,7 +622,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
                     layerConfig.source.featureInfo!
                   )}`
                 );
-            } else if (styleSettings.classBreakStyleInfo[i].visible === 'no' && styleSettings.defaultVisible !== 'no') {
+            } else if (styleSettings.classBreakStyleInfo[i].visible === false && styleSettings.defaultVisible !== false) {
               filterArray.push(
                 `${styleSettings.field} <= ${this.formatFieldValue(
                   styleSettings.field,
@@ -633,8 +632,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
               );
               visibleWhenGreatherThisIndex = i;
             }
-          } else if (styleSettings.defaultVisible === 'no') {
-            if (styleSettings.classBreakStyleInfo[i].visible === 'no') {
+          } else if (styleSettings.defaultVisible === false) {
+            if (styleSettings.classBreakStyleInfo[i].visible === false) {
               filterArray.push(
                 `${styleSettings.field} <= ${this.formatFieldValue(
                   styleSettings.field,
@@ -651,7 +650,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
                 )}`
               );
             }
-          } else if (styleSettings.classBreakStyleInfo[i].visible !== 'no') {
+          } else if (styleSettings.classBreakStyleInfo[i].visible !== false) {
             filterArray.push(
               `${styleSettings.field} > ${this.formatFieldValue(
                 styleSettings.field,
@@ -673,7 +672,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
             )}`
           );
 
-        if (styleSettings.defaultVisible !== 'no') {
+        if (styleSettings.defaultVisible !== false) {
           const filterValue = `${filterArray.slice(0, -1).reduce((previousFilterValue, filterNode, i) => {
             if (i === 0) return `(${filterNode} or `;
             if (i % 2 === 0) return `${previousFilterValue} and ${filterNode}) or `;

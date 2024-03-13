@@ -265,8 +265,8 @@
           "description": "Label used if field/value association is not found."
         },
         "defaultVisible": {
-          "enum": ["yes", "no", "always"],
-          "description": "Flag used to show/hide features associated to the default label (default: yes)."
+          "type": "boolean",
+          "description": "Flag used to show/hide features associated to the default label (default: true)."
         },
         "defaultSettings": {
           "$ref": "#/definitions/TypeKindOfVectorSettings",
@@ -295,8 +295,8 @@
             "type": "string"
           },
           "visible": {
-            "enum": ["yes", "no", "always"],
-            "description": "Flag used to show/hide features associated to the label (default: yes)."
+            "type": "boolean",
+            "description": "Flag used to show/hide features associated to the label (default: true)."
           },
           "values": {
             "type": "array",
@@ -335,8 +335,8 @@
           "description": "Label used if field/value association is not found."
         },
         "defaultVisible": {
-          "enum": ["yes", "no", "always"],
-          "description": "Flag used to show/hide features associated to the default label (default: yes)."
+          "type": "boolean",
+          "description": "Flag used to show/hide features associated to the default label (default: true)."
         },
         "defaultSettings": {
           "$ref": "#/definitions/TypeKindOfVectorSettings",
@@ -362,8 +362,8 @@
             "type": "string"
           },
           "visible": {
-            "enum": ["yes", "no", "always"],
-            "description": "Flag used to show/hide features associated to the label (default: yes)."
+            "type": "boolean",
+            "description": "Flag used to show/hide features associated to the label (default: true)."
           },
           "minValue": {
             "oneOf": [
@@ -438,10 +438,54 @@
         }
       }
     },
-    "TypeLayerInitialSettings": {
+    "TypeLayerControls": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
+        "highlight": {
+          "type": "boolean",
+          "default": true
+        },
+        "hover": {
+          "type": "boolean",
+          "default": true
+        },
+        "opacity": {
+          "type": "boolean",
+          "default": true
+        },
+        "query": {
+          "type": "boolean",
+          "default": true
+        },
+        "remove": {
+          "type": "boolean",
+          "default": true
+        },
+        "table": {
+          "type": "boolean",
+          "default": true
+        },
+        "visibility": {
+          "type": "boolean",
+          "default": true
+        },
+        "zoom": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "description": "Which UI controls are available."
+    },
+    "TypeLayerStates": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "visible": {
+          "type": "boolean",
+          "default": true,
+          "description": "Initial visibility setting."
+        },
         "opacity": {
           "type": "number",
           "minimum": 0,
@@ -449,10 +493,24 @@
           "default": 1,
           "description": "Initial opacity setting."
         },
-        "visible": {
-          "enum": ["yes", "no", "always"],
-          "default": "yes",
-          "description": "Initial visibility setting."
+        "hoverable": {
+          "type": "boolean",
+          "description": "Is the layer hoverable."
+        },
+        "queryable": {
+          "type": "boolean",
+          "description": "Is the layer queryable."
+        }
+      },
+      "description": "Which UI controls are available."
+    },
+    "TypeLayerInitialSettings": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "controls": {
+          "$ref": "#/definitions/TypeLayerControls",
+          "description": "The status of various controls for the layer (available/unavailable)."
         },
         "bounds": {
           "type": "array",
@@ -488,17 +546,9 @@
           "type": "string",
           "description": "A CSS class name to set to the layer element."
         },
-        "removable": {
-          "type": "boolean",
-          "description": "Is the layer removable."
-        },
-        "hoverable": {
-          "type": "boolean",
-          "description": "Is the layer hoverable."
-        },
-        "queryable": {
-          "type": "boolean",
-          "description": "Is the layer queryable."
+        "states": {
+          "$ref": "#/definitions/TypeLayerStates",
+          "description": "The status of initial states for the layer."
         }
       }
     },
@@ -1421,12 +1471,14 @@
       "type": "array",
       "additionalProperties": false,
       "items": {
-        "anyOf": [{
-          "$ref": "#/definitions/TypeGeoviewLayerConfig"
-        },
-        {
-          "$ref": "#/definitions/TypeGeoCoreLayerConfig"
-        }]
+        "anyOf": [
+          {
+            "$ref": "#/definitions/TypeGeoviewLayerConfig"
+          },
+          {
+            "$ref": "#/definitions/TypeGeoCoreLayerConfig"
+          }
+        ]
       }
     },
     "TypeGeoviewLayerConfig": {
@@ -1514,9 +1566,7 @@
     "TypeGeoCoreLayerType": {
       "type": "string",
       "items": {
-        "enum": [
-          "geoCore"
-        ]
+        "enum": ["geoCore"]
       },
       "description": "Type of GeoCore layer."
     },
