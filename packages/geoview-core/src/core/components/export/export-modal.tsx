@@ -25,7 +25,6 @@ export default function ExportModal(): JSX.Element {
 
   // export template variables
   const [exportTitle, setExportTitle] = useState<string>('');
-  const exportCanvasRef = useRef(null) as RefObject<HTMLCanvasElement>;
   const exportContainerRef = useRef(null) as RefObject<HTMLDivElement>;
   const mapImageRef = useRef(null) as RefObject<HTMLDivElement>;
   const dialogRef = useRef(null) as RefObject<HTMLDivElement>;
