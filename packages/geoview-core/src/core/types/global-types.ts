@@ -39,16 +39,7 @@ export type { Coordinate } from 'ol/coordinate';
 export type { TypeAllQueriesDonePayload, MapMouseEventPayload, TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 export type { TypeTabs } from '@/ui/tabs/tabs';
 
-export {
-  snackbarMessagePayload,
-  mapViewProjectionPayload,
-  PayloadBaseClass,
-  payloadIsALayerConfig,
-  payloadIsRemoveGeoViewLayer,
-  payloadIsASnackbarMessage,
-  payloadIsAMapMouseEvent,
-  payloadIsAllQueriesDone,
-} from '@/api/events/payloads';
+export { mapViewProjectionPayload, PayloadBaseClass, payloadIsAMapMouseEvent, payloadIsAllQueriesDone } from '@/api/events/payloads';
 export { geoviewLayerIsWMS } from '@/geo/layer/geoview-layers/raster/wms';
 export { geoviewLayerIsEsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 export { geoviewLayerIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';

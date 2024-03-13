@@ -17,14 +17,12 @@ import {
   TextField,
 } from '@/ui';
 import {
-  AbstractGeoViewLayer,
-  CONST_LAYER_TYPES,
-  CONST_LAYER_ENTRY_TYPES,
   EsriDynamic,
   EsriFeature,
   GeoCore,
   GeoJSON,
   GeoPackage,
+  GeoViewLayerAddedResponse,
   TypeEsriDynamicLayerConfig,
   TypeEsriFeatureLayerConfig,
   TypeGeoJSONLayerConfig,
@@ -37,6 +35,8 @@ import {
   TypeXYZTilesConfig,
   XYZTiles,
 } from '@/geo';
+import { CONST_LAYER_ENTRY_TYPES } from '@/geo/map/map-schema-types';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { OgcFeature, TypeOgcFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { TypeWMSLayerConfig, WMS as WmsGeoviewClass } from '@/geo/layer/geoview-layers/raster/wms';
 import { TypeWFSLayerConfig, WFS as WfsGeoviewClass } from '@/geo/layer/geoview-layers/vector/wfs';
@@ -204,16 +204,6 @@ export function AddNewLayer(): JSX.Element {
   const emitErrorServer = (serviceName: string) => {
     setIsLoading(false);
     api.utilities.showError(mapId, `${serviceName} ${t('layers.errorServer')}`, false);
-  };
-
-  /**
-   * Emits an error when the geoview layer doesn't load
-   *
-   * @param serviceName type of service provided by the URL
-   */
-  const emitErrorNotLoaded = () => {
-    setIsLoading(false);
-    api.utilities.showError(mapId, t('layers.errorNotLoaded'), false);
   };
 
   /**
@@ -839,53 +829,80 @@ export function AddNewLayer(): JSX.Element {
     if (valid) setActiveStep(3);
   };
 
+  const doneAdding = () => {
+    // Done adding
+    setIsLoading(false);
+    setDisplayState('view');
+    MapEventProcessor.setLayerZIndices(mapId);
+  };
+
+  const doneAddedShowMessage = (layerBeingAdded: AbstractGeoViewLayer) => {
+    let message = '';
+    if (layerBeingAdded.allLayerStatusAreGreaterThanOrEqualTo('error'))
+      message = api.utilities.replaceParams([layerName], t('layers.layerAddedWithError'));
+    else if (layerBeingAdded?.allLayerStatusAreGreaterThanOrEqualTo('loaded'))
+      message = api.utilities.replaceParams([layerName], t('layers.layerAdded'));
+    else message = api.utilities.replaceParams([layerName], t('layers.layerAddedAndLoading'));
+    api.utilities.showMessage(mapId, message, false);
+  };
+
   /**
    * Handle the behavior of the 'Finish' button in the Stepper UI
    */
   const handleStepLast = async () => {
     setIsLoading(true);
     if (layerType === GEOCORE) {
+      // TODO: Refactor - When reworking on this component, fix this weird thing of layerList vs layerEntries confusion for GeoCore
+      const addedLayers: GeoViewLayerAddedResponse[] = [];
       if (layerList.length > 1) {
         (layerList as TypeListOfGeoviewLayerConfig).forEach((geoviewLayerConfig) => {
-          api.maps[mapId].layer.addGeoviewLayer(geoviewLayerConfig);
+          const addedLayer = api.maps[mapId].layer.addGeoviewLayer(geoviewLayerConfig);
+          if (addedLayer) addedLayers.push(addedLayer);
         });
       } else if (layerEntries.length > 0) {
         (layerEntries as TypeListOfGeoviewLayerConfig).forEach((geoviewLayerConfig) => {
-          api.maps[mapId].layer.addGeoviewLayer(geoviewLayerConfig);
+          const addedLayer = api.maps[mapId].layer.addGeoviewLayer(geoviewLayerConfig);
+          if (addedLayer) addedLayers.push(addedLayer);
         });
       }
+
+      // When each promise is done
+      Promise.allSettled(addedLayers.map((addedLayer) => addedLayer.promiseLayerOnMap)).then(() => {
+        // Done adding
+        doneAdding();
+        addedLayers.forEach((addedLayer) => doneAddedShowMessage(addedLayer.layerBeingAdded));
+      });
     } else if (geoviewLayerInstance) {
-      geoviewLayerInstance.geoviewLayerName = createLocalizedString(layerName);
+      // Get config
       const { geoviewLayerConfig } = layerEntries[0] as TypeLayerEntryConfig;
+
+      // Have to massage this so the `setListOfLayerEntryConfig` inside the layer constructor works
+      // TODO: Refactor - Try to find a way to simplify/clarify what's going on in the layer constructor's call to `setListOfLayerEntryConfig`.
+      // TO.DOCONT: The recursion is necessary, but can the root be a derived type of the branches/leaves or something?
+      // TO.DOCONT: Maybe just me, but seems a bit hard to understand what needs to be set in the `geoviewLayerConfig.listOfLayerEntryConfig`.
+      // TO.DOCONT: Anyways, this works as-it-was before the refactor for now.
+      geoviewLayerConfig.listOfLayerEntryConfig = layerEntries as TypeListOfLayerEntryConfig;
+
+      // TODO: Bug - Fix this layer naming not working, wasn't working before the refactor either, leaving it as-is
       geoviewLayerConfig.geoviewLayerName = createLocalizedString(layerName);
       if (layerType === XYZ_TILES) (layerEntries[0] as TypeLayerEntryConfig).layerName = createLocalizedString(layerName);
-      geoviewLayerInstance.setListOfLayerEntryConfig(geoviewLayerConfig, layerEntries as TypeListOfLayerEntryConfig);
-      if (geoviewLayerInstance.listOfLayerEntryConfig.length === 1)
-        geoviewLayerInstance.listOfLayerEntryConfig[0].layerName = geoviewLayerInstance.geoviewLayerName;
+      if (geoviewLayerConfig.listOfLayerEntryConfig.length === 1)
+        geoviewLayerConfig.listOfLayerEntryConfig[0].layerName = geoviewLayerConfig.geoviewLayerName;
 
-      // TODO probably want an option to add metadata if geojson or geopackage
-      await geoviewLayerInstance.validateAndExtractLayerMetadata();
-      setGeoviewLayerInstance(geoviewLayerInstance);
-      logger.logDebug('After validateAndExtractLayerMetadata');
-      geoviewLayerInstance.olLayers = await geoviewLayerInstance.processListOfLayerEntryConfig(geoviewLayerInstance.listOfLayerEntryConfig);
-      logger.logDebug('After processListOfLayerEntryConfig');
-      if (geoviewLayerInstance.olLayers) {
-        logger.logDebug('Before addToMap', geoviewLayerInstance);
-        api.maps[mapId].layer.addToMap(geoviewLayerInstance);
-        logger.logDebug('After addToMap', geoviewLayerInstance);
-      } else emitErrorNotLoaded();
+      // Add the layer using the proper function
+      const addedLayer = api.maps[mapId].layer.addGeoviewLayer(geoviewLayerConfig);
+      if (addedLayer) {
+        // Wait on the promise
+        await addedLayer.promiseLayerOnMap;
+
+        // Done adding
+        doneAdding();
+        doneAddedShowMessage(addedLayer.layerBeingAdded);
+      } else {
+        // Failed to add, remove spinning, but stay on the add ui
+        setIsLoading(false);
+      }
     }
-    setIsLoading(false);
-    let message = '';
-    if (geoviewLayerInstance?.allLayerStatusAreGreaterThanOrEqualTo('error'))
-      message = api.utilities.replaceParams([layerName], t('layers.layerAddedWithError'));
-    else if (geoviewLayerInstance?.allLayerStatusAreGreaterThanOrEqualTo('loaded'))
-      message = api.utilities.replaceParams([layerName], t('layers.layerAdded'));
-    else message = api.utilities.replaceParams([layerName], t('layers.layerAddedAndLoading'));
-    api.utilities.showMessage(mapId, message, false);
-
-    setDisplayState('view');
-    MapEventProcessor.setLayerZIndices(mapId);
   };
 
   /**
