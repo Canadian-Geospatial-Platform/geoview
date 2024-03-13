@@ -78,7 +78,6 @@
               'geoviewLayerName': { 'en': 'GeoJSON Sample' },
               'metadataAccessPath': { 'en': './datasets/geojson/metadata.json' },
               'geoviewLayerType': 'GeoJSON',
-              'initialSettings': { 'visible': 'yes' },
               'listOfLayerEntryConfig': [
                 {
                   'layerId': 'polygons.json',
@@ -96,7 +95,7 @@
                     {
                       'layerId': 'icon_points.json',
                       'layerName': { 'en': 'Icons' },
-                      'initialSettings': { 'visible': 'no' }
+                      'initialSettings': { 'states': {'visible': false} }
                     },
                     {
                       'layerId': 'points.json',
@@ -169,20 +168,18 @@
               'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
             },
             {
-              'geoviewLayerId': 'GeoPackageLYR1',
+              'geoviewLayerId': 'wfsLYR2',
               'geoviewLayerName': {
-                'en': 'Natural Earth'
+                'en': 'Current Conditions'
               },
-              'geoviewLayerType': 'GeoPackage',
+              'metadataAccessPath': {
+                'en': 'https://geo.weather.gc.ca/geomet?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS'
+              },
+              'geoviewLayerType': 'ogcWfs',
               'listOfLayerEntryConfig': [
                 {
-                  'layerId': 'Natural_Earth_QGIS_layers_and_styles.gpkg',
-                  'layerName': { 'en': 'Natural Earth' },
-                  'source': {
-                    'dataAccessPath': {
-                      'en': './datasets/geopackages'
-                    }
-                  }
+                  'layerId': 'ec-msc:CURRENT_CONDITIONS',
+                  'layerName': { 'en': 'Current Conditions' }
                 }
               ]
             },
@@ -227,22 +224,6 @@
               ]
             },
             {
-              'geoviewLayerId': 'wfsLYR2',
-              'geoviewLayerName': {
-                'en': 'Current Conditions'
-              },
-              'metadataAccessPath': {
-                'en': 'https://geo.weather.gc.ca/geomet?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS'
-              },
-              'geoviewLayerType': 'ogcWfs',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': 'ec-msc:CURRENT_CONDITIONS',
-                  'layerName': { 'en': 'Current Conditions' }
-                }
-              ]
-            },
-            {
               'geoviewLayerId': 'wmsLYR1-msi',
               'geoviewLayerName': { 'en': 'MSI' },
               'metadataAccessPath': { 'en': 'https://datacube.services.geo.ca/ows/msi' },
@@ -259,6 +240,24 @@
                       'fieldTypes': 'number',
                       'outfields': { 'en': 'band-0-pixel-value', 'fr': 'band-0-pixel-value' },
                       'aliasFields':  { 'en': 'Pixel value', 'fr': 'Valeur du pixel' }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'GeoPackageLYR1',
+              'geoviewLayerName': {
+                'en': 'Natural Earth'
+              },
+              'geoviewLayerType': 'GeoPackage',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'Natural_Earth_QGIS_layers_and_styles.gpkg',
+                  'layerName': { 'en': 'Natural Earth' },
+                  'source': {
+                    'dataAccessPath': {
+                      'en': './datasets/geopackages'
                     }
                   }
                 }

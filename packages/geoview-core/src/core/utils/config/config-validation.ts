@@ -542,7 +542,7 @@ export class ConfigValidation {
         .forEach((geoviewLayerConfig) => {
           // The default value for geoviewLayerConfig.initialSettings.visible is true.
           const geoviewLayerConfigCasted = geoviewLayerConfig as TypeGeoviewLayerConfig;
-          if (!geoviewLayerConfigCasted.initialSettings) geoviewLayerConfigCasted.initialSettings = { visible: 'yes' };
+          if (!geoviewLayerConfigCasted.initialSettings) geoviewLayerConfigCasted.initialSettings = { states: { visible: true } };
           switch (geoviewLayerConfig.geoviewLayerType) {
             case CONST_LAYER_TYPES.CSV:
             case CONST_LAYER_TYPES.GEOJSON:
