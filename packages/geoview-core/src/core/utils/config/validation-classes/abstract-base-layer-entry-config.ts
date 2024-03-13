@@ -124,7 +124,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   loadedFunction() {
     // Update registration based on metadata that were read since the first registration.
     this.geoviewLayerInstance?.registerToLayerSets(this);
-    this.geoviewLayerInstance?.setVisible(this.initialSettings?.visible !== 'no', this.layerPath);
+    this.geoviewLayerInstance?.setVisible(this.initialSettings?.states?.visible !== false, this.layerPath);
     if (this._layerStatus === 'loaded')
       api.event.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.geoviewLayerInstance!.mapId, this.layerPath, 'loaded'));
   }

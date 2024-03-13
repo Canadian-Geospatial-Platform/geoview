@@ -4,7 +4,6 @@ import { logger } from '@/core/utils/logger';
 import { AbstractEventProcessor } from '../abstract-event-processor';
 import {
   AbstractGeoViewVector,
-  CONST_LAYER_TYPES,
   EsriDynamic,
   ITimeSliderState,
   TimeSliderLayerSet,
@@ -29,7 +28,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
 
         const orderedLayers = store.getState().mapState.orderedLayerInfo.map((info) => info.layerPath);
         const initialTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, orderedLayers);
-        if (initialTimeSliderLayerPaths) {
+        if (initialTimeSliderLayerPaths.length) {
           initialTimeSliderLayerPaths.forEach((layerPath) => {
             const timeSliderLayer = TimeSliderEventProcessor.getInitialTimeSliderValues(mapId, layerPath);
             store.getState().timeSliderState.actions.addTimeSliderLayer(timeSliderLayer);
@@ -190,7 +189,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     values: number[]
   ): void {
     const layerType = api.maps[mapId].layer.geoviewLayer(layerPath).type;
-    if (layerType === CONST_LAYER_TYPES.WMS) {
+    if (layerType === 'ogcWms') {
       if (filtering) {
         const newValue = `${new Date(values[0]).toISOString().slice(0, new Date(values[0]).toISOString().length - 5)}Z`;
         const filter = `${field}=date '${newValue}'`;
