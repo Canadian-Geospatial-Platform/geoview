@@ -7,29 +7,28 @@ import html2Canvas from 'html2canvas';
 import { Button, Dialog, DialogActions, DialogTitle, DialogContent } from '@/ui';
 import { exportPNG } from '@/core/utils/utilities';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { api, useGeoViewMapId, useMapNorthArrow, NorthArrowIcon, useMapScale } from '@/app';
+import { api, useGeoViewMapId, useMapNorthArrow, NorthArrowIcon, useMapScale, useMapAttribution } from '@/app';
 /**
  * Export modal window component to export the viewer information in a PNG file
  *
  * @returns {JSX.Element} the export modal component
  */
 export default function ExportModal(): JSX.Element {
+  const { t } = useTranslation();
+
   const mapId = useGeoViewMapId();
-  const theme = useTheme();
-
-  const textColor = theme.palette.text.primary;
-  const bgColor = theme.palette.background.default;
-
   const { map } = api.maps[mapId];
 
-  const { t } = useTranslation();
+  const theme = useTheme();
+  const textColor = theme.palette.text.primary;
+  const bgColor = theme.palette.background.default;
 
   // export template variables
   const exportCanvasRef = useRef(null) as RefObject<HTMLCanvasElement>;
   const dialogRef = useRef(null) as RefObject<HTMLDivElement>;
-
   const northArrow = useMapNorthArrow();
   const scale = useMapScale();
+  const mapAttributions = useMapAttribution();
 
   // get store function
   const { closeModal } = useUIStoreActions();
@@ -117,7 +116,6 @@ export default function ExportModal(): JSX.Element {
     const northArrowIconImage = new Image();
 
     northArrowIconImage.onload = () => {
-      // TODO: rotate the image here, before rendering on the screen.
       context.drawImage(northArrowIconImage, canvas.width - 60, height);
     };
 
@@ -135,7 +133,6 @@ export default function ExportModal(): JSX.Element {
     context.textAlign = 'left';
     context.fillStyle = textColor;
     context.fillText(`${scale.labelGraphic} ${t('exportModal.approx')}`, 10, height + 100);
-    // TODO: Add miles from label graphic if needed.
 
     // add stroke/line below scale
     context.beginPath();
@@ -167,6 +164,14 @@ export default function ExportModal(): JSX.Element {
     legendContainer.setAttribute('style', styleObj);
   };
 
+  const drawMapAttribution = (context: CanvasRenderingContext2D, canvas: HTMLCanvasElement, height: number) => {
+    mapAttributions.forEach(() => {
+      context.font = "1rem 'Roboto','Helvetica','Arial',sans-serif";
+      context.textAlign = 'center';
+      context.fillStyle = textColor;
+      context.fillText(t('exportModal.exportTitle'), canvas.width / 2, height);
+    });
+  };
   /**
    * Draw timestamp on the canvas
    * @param {CanvasRenderingContext2D} context the context of the canvas
