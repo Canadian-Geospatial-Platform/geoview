@@ -26,6 +26,7 @@ import {
   TypeLineStringVectorConfig,
   TypePolygonVectorConfig,
   TypeFillStyle,
+  CONST_LAYER_ENTRY_TYPES,
 } from '@/geo/map/map-schema-types';
 import { createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -39,7 +40,7 @@ export interface TypeSourceGeoPackageInitialConfig extends TypeVectorSourceIniti
 }
 
 export interface TypeGeoPackageLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
-  geoviewLayerType: 'GeoPackage';
+  geoviewLayerType: typeof CONST_LAYER_TYPES.GEOPACKAGE;
   listOfLayerEntryConfig: GeoPackageLayerEntryConfig[];
 }
 
@@ -564,14 +565,14 @@ export class GeoPackage extends AbstractGeoViewVector {
             }
           });
         } else {
-          layerConfig.entryType = 'group';
+          layerConfig.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
           (layerConfig as TypeLayerEntryConfig).listOfLayerEntryConfig = [];
           const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings!);
           for (let i = 0; i < layers.length; i++) {
             const newLayerEntryConfig = cloneDeep(layerConfig) as AbstractBaseLayerEntryConfig;
             newLayerEntryConfig.layerId = layers[i].name;
             newLayerEntryConfig.layerName = createLocalizedString(layers[i].name);
-            newLayerEntryConfig.entryType = 'vector';
+            newLayerEntryConfig.entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
             newLayerEntryConfig.parentLayerConfig = Cast<GroupLayerEntryConfig>(layerConfig);
 
             this.processOneGeopackageLayer(newLayerEntryConfig, layers[i], slds).then((baseLayer) => {

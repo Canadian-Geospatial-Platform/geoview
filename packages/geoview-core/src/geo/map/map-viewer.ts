@@ -171,6 +171,11 @@ export class MapViewer {
    * @param {MapConfigLayerEntry[]} listOfMapLayerEntryConfig The list of geoview layer configurations.
    */
   setLayerAddedListener4ThisListOfLayer(listOfMapLayerEntryConfig: MapConfigLayerEntry[]) {
+    // TODO: Refactor - We should not have a listener on layer added on map viewer
+    // TO.DOCONT: The viewer does not care about layers status. As soon as the init state is done (store, basemap, plugins, ....)
+    // TO.DOCONT: We should remove the spinner. All layers boxes should be there with their status (loading, error, loaded).
+    // TO.DOCONT: Their status change but the viewer does not care. We show it in legend and emit an event for the outside world for each status.
+
     if (listOfMapLayerEntryConfig.length) {
       listOfMapLayerEntryConfig.forEach((geoviewLayerConfig) => {
         if (!mapConfigLayerEntryIsGeoCore(geoviewLayerConfig)) {

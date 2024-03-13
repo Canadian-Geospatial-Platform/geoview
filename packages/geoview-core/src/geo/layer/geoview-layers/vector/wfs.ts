@@ -32,7 +32,7 @@ export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitia
 }
 
 export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geoviewLayerType'> {
-  geoviewLayerType: 'ogcWfs';
+  geoviewLayerType: typeof CONST_LAYER_TYPES.WFS;
   listOfLayerEntryConfig: WfsLayerEntryConfig[];
 }
 

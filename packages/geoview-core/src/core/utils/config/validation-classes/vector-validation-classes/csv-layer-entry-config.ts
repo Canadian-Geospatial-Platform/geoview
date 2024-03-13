@@ -1,5 +1,5 @@
 import { TypeSourceCSVInitialConfig } from '@/geo/layer/geoview-layers/vector/csv';
-import { TypeLocalizedString } from '@/geo/map/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, TypeLocalizedString } from '@/geo/map/map-schema-types';
 import { VectorLayerEntryConfig } from '../vector-layer-entry-config';
 
 export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
@@ -22,7 +22,7 @@ export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
       );
     }
     // Default value for this.entryType is vector
-    if (this.entryType === undefined) this.entryType = 'vector';
+    if (this.entryType === undefined) this.entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
     // Attribute 'style' must exist in layerConfig even if it is undefined
     if (!('style' in this)) this.style = undefined;
     // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the CSV layer to it

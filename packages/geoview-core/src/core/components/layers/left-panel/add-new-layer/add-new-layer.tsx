@@ -18,7 +18,7 @@ import {
 import {
   AbstractGeoViewLayer,
   CONST_LAYER_TYPES,
-  CONST_CONFIG_GEOCORE,
+  CONST_LAYER_ENTRY_TYPES,
   EsriDynamic,
   EsriFeature,
   GeoCore,
@@ -71,7 +71,7 @@ export function AddNewLayer(): JSX.Element {
   const { t } = useTranslation<string>();
 
   const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, ESRI_IMAGE, GEOJSON, GEOPACKAGE, WMS, WFS, OGC_FEATURE, XYZ_TILES } = CONST_LAYER_TYPES;
-  const GEOCORE = CONST_CONFIG_GEOCORE;
+  const { GEOCORE } = CONST_LAYER_ENTRY_TYPES;
 
   const [geoviewLayerInstance, setGeoviewLayerInstance] = useState<AbstractGeoViewLayer | undefined>();
   const [activeStep, setActiveStep] = useState(0);
@@ -633,7 +633,7 @@ export function AddNewLayer(): JSX.Element {
           geoviewLayerConfig: csvGeoviewLayerConfig,
           layerId: csvGeoviewLayerConfig.geoviewLayerId,
           layerName: createLocalizedString(''),
-          schemaTag: 'CSV',
+          schemaTag: CONST_LAYER_TYPES.CSV,
           source: {
             dataAccessPath: createLocalizedString(layerURL),
           },

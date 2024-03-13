@@ -31,7 +31,7 @@ export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceIni
 }
 
 export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
-  geoviewLayerType: 'GeoJSON';
+  geoviewLayerType: typeof CONST_LAYER_TYPES.GEOJSON;
   listOfLayerEntryConfig: GeoJSONLayerEntryConfig[];
 }
 

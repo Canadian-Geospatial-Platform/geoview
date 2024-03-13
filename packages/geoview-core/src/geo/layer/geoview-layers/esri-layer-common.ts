@@ -5,7 +5,12 @@ import { Extent } from 'ol/extent';
 
 import cloneDeep from 'lodash/cloneDeep';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
-import { layerEntryIsGroupLayer, TypeLayerEntryConfig, TypeListOfLayerEntryConfig } from '@/geo/map/map-schema-types';
+import {
+  CONST_LAYER_ENTRY_TYPES,
+  layerEntryIsGroupLayer,
+  TypeLayerEntryConfig,
+  TypeListOfLayerEntryConfig,
+} from '@/geo/map/map-schema-types';
 import { getLocalizedValue, getXMLHttpRequest } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
@@ -105,7 +110,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
       // Group layer are not registered to layer sets.
       if (this.registerToLayerSetListenerFunctions[layerPath]) this.unregisterFromLayerSets(layerConfig as AbstractBaseLayerEntryConfig);
       const switchToGroupLayer = Cast<GroupLayerEntryConfig>(cloneDeep(layerConfig));
-      switchToGroupLayer.entryType = 'group';
+      switchToGroupLayer.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
       switchToGroupLayer.layerName = {
         en: this.metadata!.layers[esriIndex].name as string,
         fr: this.metadata!.layers[esriIndex].name as string,

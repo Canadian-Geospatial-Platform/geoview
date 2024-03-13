@@ -1,7 +1,13 @@
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeGeoviewLayerConfig, TypeLayerEntryType, TypeLayerStatus, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
+import {
+  CONST_LAYER_ENTRY_TYPES,
+  TypeGeoviewLayerConfig,
+  TypeLayerEntryType,
+  TypeLayerStatus,
+  layerEntryIsGroupLayer,
+} from '@/geo/map/map-schema-types';
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
 import { logger } from '../../logger';
 import { LayerSetPayload } from '@/api/events/payloads';
@@ -175,7 +181,7 @@ export class ConfigBaseClass {
     const { registeredLayers } = api.maps[this.geoviewLayerInstance!.mapId].layer;
     if (registeredLayers[this.layerPath]) return false;
     (registeredLayers[this.layerPath] as ConfigBaseClass) = this;
-    if (this.entryType !== 'group')
+    if (this.entryType !== CONST_LAYER_ENTRY_TYPES.GROUP)
       (this.geoviewLayerInstance as AbstractGeoViewLayer).registerToLayerSets(Cast<AbstractBaseLayerEntryConfig>(this));
     this.layerStatus = 'registered';
     return true;

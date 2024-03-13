@@ -32,7 +32,7 @@ export interface TypeSourceCSVInitialConfig extends Omit<TypeVectorSourceInitial
 }
 
 export interface TypeCSVLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
-  geoviewLayerType: 'CSV';
+  geoviewLayerType: typeof CONST_LAYER_TYPES.CSV;
   listOfLayerEntryConfig: CsvLayerEntryConfig[];
 }
 

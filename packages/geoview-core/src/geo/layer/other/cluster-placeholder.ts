@@ -139,7 +139,7 @@
 
 // packages\geoview-core\src\geo\layer\geoview-layers\abstract-geoview-layers.ts - processListOfLayerEntryConfig
 // if (
-//   listOfLayerEntryConfig[0].entryType === 'vector' &&
+//   listOfLayerEntryConfig[0].entryType === CONST_LAYER_ENTRY_TYPES.VECTOR &&
 //   (listOfLayerEntryConfig[0].source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable
 // ) {
 //   const unclusteredLayerConfig = cloneDeep(listOfLayerEntryConfig[0]) as TypeVectorLayerEntryConfig;
@@ -157,7 +157,7 @@
 //     unclusteredLayerConfig.source!.cluster!.settings;
 // }
 
-// if (layerConfig.entryType === 'vector' && (layerConfig.source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable) {
+// if (layerConfig.entryType === CONST_LAYER_ENTRY_TYPES.VECTOR && (layerConfig.source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable) {
 //   const unclusteredLayerConfig = cloneDeep(layerConfig) as TypeVectorLayerEntryConfig;
 //   unclusteredLayerConfig.layerId = `${layerConfig.layerId}-unclustered`;
 //   unclusteredLayerConfig.source!.cluster!.enable = false;
@@ -214,7 +214,7 @@
 //     },
 //   };
 
-//    ! You must always set the layerConfig.loadEndListenerType before setting the layerConfig.olLayer except when entryType = 'group'.
+//    ! You must always set the layerConfig.loadEndListenerType before setting the layerConfig.olLayer except when entryType = CONST_LAYER_ENTRY_TYPES.GROUP.
 //    layerConfig.loadEndListenerType = 'features';
 //   layerConfig.olLayer = new VectorLayer(layerOptions);
 //   layerConfig.geoviewLayerInstance = this;
@@ -284,14 +284,14 @@
 //           }
 //         });
 //       } else {
-//         layerConfig.entryType = 'group';
+//         layerConfig.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
 //         (layerConfig as TypeLayerEntryConfig).listOfLayerEntryConfig = [];
 //         const newLayerGroup = this.createLayerGroup(layerConfig);
 //         for (let i = 0; i < layers.length; i++) {
 //           const newLayerEntryConfig = cloneDeep(layerConfig) as TypeBaseLayerEntryConfig;
 //           newLayerEntryConfig.layerId = layers[i].name;
 //           newLayerEntryConfig.layerName =  createLocalizedString(layers[i].name);
-//           newLayerEntryConfig.entryType = 'vector';
+//           newLayerEntryConfig.entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
 //           newLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerConfig);
 //           if ((newLayerEntryConfig.source as TypeBaseSourceVectorInitialConfig)?.cluster?.enable) {
 //             const unclusteredLayerConfig = cloneDeep(newLayerEntryConfig) as TypeVectorLayerEntryConfig;
