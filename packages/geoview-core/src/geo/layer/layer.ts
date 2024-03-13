@@ -290,6 +290,12 @@ export class Layer {
     }
 
     // Wait for all GeoCore to process
+    // The reason for the Promise.allSettled is because of synch issues with the 'setMapOrderedLayerInfo' which happens below and the
+    // other setMapOrderedLayerInfos that happen in parallel via the ADD_LAYER events ping/pong'ing, making the setMapOrdered below fail
+    // if we don't stage the promises. If we don't stage the promises, sometimes I have 4 layers loaded in 'Details' and sometimes
+    // I have 3 layers loaded in Details - for example.
+    // To fix this, we'll have to synch the ADD_LAYER events and make sure those 'know' what order they should be in when they
+    // propagate the mapOrderedLayerInfo in their processes. For now at least, this is repeating the same behavior until the events are fixed.
     const orderedLayerInfos: TypeOrderedLayerInfo[] = [];
     Promise.allSettled(promisesOfGeoCoreGeoviewLayers).then((promisedLayers) => {
       // For each layers in the fulfilled promises only
