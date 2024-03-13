@@ -4,7 +4,7 @@ import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-clas
 import { CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 
 export interface TypeVectorTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
-  geoviewLayerType: 'vectorTiles';
+  geoviewLayerType: typeof CONST_LAYER_TYPES.VECTOR_TILES;
   listOfLayerEntryConfig: VectorTilesLayerEntryConfig[];
 }
 

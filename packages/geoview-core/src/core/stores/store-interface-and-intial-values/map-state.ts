@@ -16,6 +16,7 @@ import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeBasemapOptions, TypeMapFeaturesConfig, TypeValidMapProjectionCodes } from '@/core/types/global-types';
 import { TypeFeatureInfoEntry, TypeGeometry, TypeMapMouseInfo } from '@/api/events/payloads';
 import { TypeInteraction, TypeHighlightColors } from '@/geo/map/map-schema-types';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeClickMarker, api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
@@ -311,7 +312,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     // #region ACTIONS
     actions: {
       addHighlightedFeature: (feature: TypeFeatureInfoEntry) => {
-        if (feature.geoviewLayerType !== 'ogcWms') {
+        if (feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS) {
           set({
             mapState: {
               ...get().mapState,
@@ -359,7 +360,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         api.maps[get().mapId].layer.featureHighlight.highlightGeolocatorBBox(extent, isLayerHighlight);
       },
       removeHighlightedFeature: (feature: TypeFeatureInfoEntry | 'all') => {
-        if (feature === 'all' || feature.geoviewLayerType !== 'ogcWms') {
+        if (feature === 'all' || feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS) {
           set({
             mapState: {
               ...get().mapState,

@@ -1,5 +1,5 @@
 import { TypeSourceGeoJSONInitialConfig } from '@/geo/layer/geoview-layers/vector/geojson';
-import { TypeLocalizedString } from '@/geo/map/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, TypeLocalizedString } from '@/geo/map/map-schema-types';
 import { VectorLayerEntryConfig } from '../vector-layer-entry-config';
 
 export class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
@@ -19,7 +19,7 @@ export class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
       );
     }
     // Default value for this.entryType is vector
-    if (this.entryType === undefined) this.entryType = 'vector';
+    if (this.entryType === undefined) this.entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
     // Attribute 'style' must exist in layerConfig even if it is undefined
     if (!('style' in this)) this.style = undefined;
     // Value for this.source.format can only be GeoJSON.

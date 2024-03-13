@@ -76,64 +76,19 @@
             'listOfGeoviewLayerConfig': [
               {
                 'geoviewLayerType': 'geoCore',
-                'geoviewLayerId': 'airborneRad',
-                'listOfLayerEntryConfig': [
-                  {
-                    'layerId': '21b821cf-0f1c-40ee-8925-eab12d357668',
-                    'geocoreLayerName': { 'en': 'Airborne Radioactivity' },
-                    'listOfLayerEntryConfig': [
-                      {
-                        'layerId': '0'
-                      }
-                    ]
-                  }
-                ]
+                'geoviewLayerId': '21b821cf-0f1c-40ee-8925-eab12d357668'
               },
               {
                 'geoviewLayerType': 'geoCore',
-                'geoviewLayerId': 'commem',
-                'listOfLayerEntryConfig': [
-                  {
-                    'layerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9',
-                    'geocoreLayerName': { 'en': 'Commemorative Map' },
-                    'listOfLayerEntryConfig': [
-                      {
-                        'layerId': '0'
-                      }
-                    ]
-                  }
-                ]
+                'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
               },
               {
                 'geoviewLayerType': 'geoCore',
-                'geoviewLayerId': 'MWQ',
-                'listOfLayerEntryConfig': [
-                  {
-                    'layerId': '0fca08b5-e9d0-414b-a3c4-092ff9c5e326',
-                    'geocoreLayerName': { 'en': 'Marine Water Quality' },
-                    'listOfLayerEntryConfig': [
-                      {
-                        'layerId': '6'
-                      }
-                    ]
-                  }
-                ]
+                'geoviewLayerId': '0fca08b5-e9d0-414b-a3c4-092ff9c5e326'
               },
               {
                 'geoviewLayerType': 'geoCore',
-                'geoviewLayerId': 'napl',
-                'listOfLayerEntryConfig': [
-                  {
-                    'layerId': '03ccfb5c-a06e-43e3-80fd-09d4f8f69703',
-                    'geocoreLayerName': { 'en': 'NAPL Temporal Series' },
-                    'listOfLayerEntryConfig': [
-                      {
-                        'layerId': 'regina',
-                        'layerName': { 'en': 'Map of Regina' }
-                      }
-                    ]
-                  }
-                ]
+                'geoviewLayerId': '03ccfb5c-a06e-43e3-80fd-09d4f8f69703'
               }
             ]
           },
@@ -189,58 +144,19 @@
           'listOfGeoviewLayerConfig': [
             {
               'geoviewLayerType': 'geoCore',
-              'geoviewLayerId': 'airborneRad',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': '21b821cf-0f1c-40ee-8925-eab12d357668',
-                  'geocoreLayerName': { 'en': 'Airborne Radioactivity' },
-                  'listOfLayerEntryConfig': [
-                    {
-                      'layerId': '0'
-                    }
-                  ]
-                }
-              ]
+              'geoviewLayerId': '21b821cf-0f1c-40ee-8925-eab12d357668'
             },
             {
               'geoviewLayerType': 'geoCore',
-              'geoviewLayerId': 'commem',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9',
-                  'geocoreLayerName': { 'en': 'Commemorative Map' },
-                  'listOfLayerEntryConfig': [
-                    {
-                      'layerId': '0'
-                    }
-                  ]
-                }
-              ]
+              'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
             },
             {
               'geoviewLayerType': 'geoCore',
-              'geoviewLayerId': 'MWQ',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': '0fca08b5-e9d0-414b-a3c4-092ff9c5e326',
-                  'geocoreLayerName': { 'en': 'Marine Water Quality' },
-                  'listOfLayerEntryConfig': [
-                    {
-                      'layerId': '6'
-                    }
-                  ]
-                },
-                {
-                  'layerId': '03ccfb5c-a06e-43e3-80fd-09d4f8f69703',
-                  'geocoreLayerName': { 'en': 'NAPL Temporal Series' },
-                  'listOfLayerEntryConfig': [
-                    {
-                      'layerId': 'regina',
-                      'layerName': { 'en': 'Map of Regina' }
-                    }
-                  ]
-                }
-              ]
+              'geoviewLayerId': '0fca08b5-e9d0-414b-a3c4-092ff9c5e326'
+            },
+            {
+              'geoviewLayerType': 'geoCore',
+              'geoviewLayerId': '03ccfb5c-a06e-43e3-80fd-09d4f8f69703'
             }
           ]
         },
@@ -263,7 +179,8 @@
       cgpv.init(function (mapId) {
         console.log(`api is ready for ${mapId}`);
 
-        if (mapId === 'allMaps') {          createTableOfFilter('LYR1');
+        if (mapId === 'allMaps') {
+          createTableOfFilter('LYR1');
         }
       });
 

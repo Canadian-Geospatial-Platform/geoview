@@ -23,7 +23,7 @@ import { logger } from '@/core/utils/logger';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
-  geoviewLayerType: 'imageStatic';
+  geoviewLayerType: typeof CONST_LAYER_TYPES.IMAGE_STATIC;
   listOfLayerEntryConfig: ImageStaticLayerEntryConfig[];
 }
 

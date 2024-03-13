@@ -35,7 +35,7 @@ import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes
 export type TypeSourceImageXYZTilesInitialConfig = TypeSourceTileInitialConfig;
 
 export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
-  geoviewLayerType: 'xyzTiles';
+  geoviewLayerType: typeof CONST_LAYER_TYPES.XYZ_TILES;
   listOfLayerEntryConfig: XYZTilesLayerEntryConfig[];
 }
 

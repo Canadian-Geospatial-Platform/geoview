@@ -33,7 +33,7 @@ export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceIniti
 }
 
 export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
-  geoviewLayerType: 'ogcFeature';
+  geoviewLayerType: typeof CONST_LAYER_TYPES.OGC_FEATURE;
   listOfLayerEntryConfig: OgcFeatureLayerEntryConfig[];
 }
 

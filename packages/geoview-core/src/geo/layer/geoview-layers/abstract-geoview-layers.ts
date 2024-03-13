@@ -25,10 +25,10 @@ import {
   TypeLayerEntryConfig,
   layerEntryIsGroupLayer,
   TypeStyleConfig,
-  TypeLayerEntryType,
   TypeLayerInitialSettings,
   TypeLayerStatus,
   TypeStyleGeometry,
+  CONST_LAYER_ENTRY_TYPES,
 } from '@/geo/map/map-schema-types';
 import {
   codedValueType,
@@ -65,18 +65,6 @@ export type TypeLegend = {
   legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
 };
 
-/**
- * type guard function that redefines a TypeLegend as a TypeWmsLegend
- * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export const isWmsLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeWmsLegend => {
-  return verifyIfLegend?.type === 'ogcWms';
-};
-
 export interface TypeWmsLegendStyle {
   name: string;
   legend: HTMLCanvasElement | null;
@@ -87,43 +75,9 @@ export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {
   styles?: TypeWmsLegendStyle[];
 }
 
-/**
- * type guard function that redefines a TypeLegend as a TypeImageStaticLegend
- * if the type attribute of the verifyIfLegend parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export const isImageStaticLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeImageStaticLegend => {
-  return verifyIfLegend?.type === 'imageStatic';
-};
-
 export interface TypeImageStaticLegend extends Omit<TypeLegend, 'styleConfig'> {
   legend: HTMLCanvasElement | null;
 }
-
-const validVectorLayerLegendTypes: TypeGeoviewLayerType[] = [
-  'CSV',
-  'GeoJSON',
-  'esriDynamic',
-  'esriFeature',
-  'esriImage',
-  'ogcFeature',
-  'ogcWfs',
-  'GeoPackage',
-];
-/**
- * type guard function that redefines a TypeLegend as a TypeVectorLegend
- * if the type attribute of the verifyIfLegend parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export const isVectorLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeVectorLegend => {
-  return validVectorLayerLegendTypes.includes(verifyIfLegend?.type);
-};
 
 export interface TypeVectorLegend extends TypeLegend {
   legend: TypeVectorLayerStyles;
@@ -151,7 +105,6 @@ const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
   esriImage: 'Esri Image Layer',
   imageStatic: 'Static Image Layer',
   GeoJSON: 'GeoJson Layer',
-  geoCore: 'GeoCore Layer',
   GeoPackage: 'GeoPackage Layer',
   xyzTiles: 'XYZ Tiles',
   vectorTiles: 'Vector Tiles',
@@ -161,6 +114,7 @@ const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
 };
 
 // Definition of the keys used to create the constants of the GeoView layer
+// TODO: Refactor - Move this and related types/const below lower in the architecture? Say, to MapSchemaTypes? Otherwise, things circle..
 type LayerTypesKey =
   | 'CSV'
   | 'ESRI_DYNAMIC'
@@ -168,7 +122,6 @@ type LayerTypesKey =
   | 'ESRI_IMAGE'
   | 'IMAGE_STATIC'
   | 'GEOJSON'
-  | 'GEOCORE'
   | 'GEOPACKAGE'
   | 'XYZ_TILES'
   | 'VECTOR_TILES'
@@ -186,13 +139,18 @@ export type TypeGeoviewLayerType =
   | 'esriImage'
   | 'imageStatic'
   | 'GeoJSON'
-  | 'geoCore'
   | 'GeoPackage'
   | 'xyzTiles'
   | 'vectorTiles'
   | 'ogcFeature'
   | 'ogcWfs'
   | 'ogcWms';
+
+/**
+ * This type is created to only be used when validating the configuration schema types.
+ * Indeed, GeoCore is not an official Abstract Geoview Layer, but it can be used in schema types.
+ */
+export type TypeGeoviewLayerTypeWithGeoCore = TypeGeoviewLayerType | typeof CONST_LAYER_ENTRY_TYPES.GEOCORE;
 
 /**
  * Definition of the GeoView layer constants
@@ -204,32 +162,12 @@ export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
   ESRI_IMAGE: 'esriImage',
   IMAGE_STATIC: 'imageStatic',
   GEOJSON: 'GeoJSON',
-  GEOCORE: 'geoCore',
   GEOPACKAGE: 'GeoPackage',
   XYZ_TILES: 'xyzTiles',
   VECTOR_TILES: 'vectorTiles',
   OGC_FEATURE: 'ogcFeature',
   WFS: 'ogcWfs',
   WMS: 'ogcWms',
-};
-
-/**
- * Definition of the GeoView layer entry types for each type of Geoview layer
- */
-export const CONST_LAYER_ENTRY_TYPE: Record<TypeGeoviewLayerType, TypeLayerEntryType> = {
-  CSV: 'vector',
-  imageStatic: 'raster-image',
-  esriDynamic: 'raster-image',
-  esriFeature: 'vector',
-  esriImage: 'raster-image',
-  GeoJSON: 'vector',
-  geoCore: 'geoCore',
-  GeoPackage: 'vector',
-  xyzTiles: 'raster-tile',
-  vectorTiles: 'raster-tile',
-  ogcFeature: 'vector',
-  ogcWfs: 'vector',
-  ogcWms: 'raster-image',
 };
 
 /**
@@ -242,13 +180,59 @@ export const CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<TypeGeoviewLayerType, string> 
   esriFeature: 'TypeVectorLayerEntryConfig',
   esriImage: 'TypeEsriImageLayerEntryConfig',
   GeoJSON: 'TypeVectorLayerEntryConfig',
-  geoCore: 'TypeGeoCoreLayerEntryConfig',
   GeoPackage: 'TypeVectorLayerEntryConfig',
   xyzTiles: 'TypeTileLayerEntryConfig',
   vectorTiles: 'TypeTileLayerEntryConfig',
   ogcFeature: 'TypeVectorLayerEntryConfig',
   ogcWfs: 'TypeVectorLayerEntryConfig',
   ogcWms: 'TypeOgcWmsLayerEntryConfig',
+};
+
+const validVectorLayerLegendTypes: TypeGeoviewLayerType[] = [
+  CONST_LAYER_TYPES.CSV,
+  CONST_LAYER_TYPES.GEOJSON,
+  CONST_LAYER_TYPES.ESRI_DYNAMIC,
+  CONST_LAYER_TYPES.ESRI_FEATURE,
+  CONST_LAYER_TYPES.ESRI_IMAGE,
+  CONST_LAYER_TYPES.OGC_FEATURE,
+  CONST_LAYER_TYPES.WFS,
+  CONST_LAYER_TYPES.GEOPACKAGE,
+];
+
+/**
+ * type guard function that redefines a TypeLegend as a TypeVectorLegend
+ * if the type attribute of the verifyIfLegend parameter is valid. The type ascention
+ * applies only to the true block of the if clause.
+ *
+ * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true if the payload is valid
+ */
+export const isVectorLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeVectorLegend => {
+  return validVectorLayerLegendTypes.includes(verifyIfLegend?.type);
+};
+
+/**
+ * type guard function that redefines a TypeLegend as a TypeWmsLegend
+ * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
+ * applies only to the true block of the if clause.
+ *
+ * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true if the payload is valid
+ */
+export const isWmsLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeWmsLegend => {
+  return verifyIfLegend?.type === CONST_LAYER_TYPES.WMS;
+};
+
+/**
+ * type guard function that redefines a TypeLegend as a TypeImageStaticLegend
+ * if the type attribute of the verifyIfLegend parameter is valid. The type ascention
+ * applies only to the true block of the if clause.
+ *
+ * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true if the payload is valid
+ */
+export const isImageStaticLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeImageStaticLegend => {
+  return verifyIfLegend?.type === CONST_LAYER_TYPES.IMAGE_STATIC;
 };
 
 type TypeLayerSetHandlerFunctions = {
@@ -751,9 +735,9 @@ export abstract class AbstractGeoViewLayer {
         } else {
           this.layerLoadError.push({
             layer: listOfLayerEntryConfig[i].layerPath,
-            loggerMessage: `Unable to create ${layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) ? 'group' : ''} layer ${
-              listOfLayerEntryConfig[i].layerPath
-            } on map ${this.mapId}`,
+            loggerMessage: `Unable to create ${
+              layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) ? CONST_LAYER_ENTRY_TYPES.GROUP : ''
+            } layer ${listOfLayerEntryConfig[i].layerPath} on map ${this.mapId}`,
           });
           this.getLayerConfig(layerPath)!.layerStatus = 'error';
         }
@@ -1080,7 +1064,7 @@ export abstract class AbstractGeoViewLayer {
     if (initialSettings?.minZoom !== undefined) layerGroupOptions.minZoom = initialSettings?.minZoom;
     if (initialSettings?.opacity !== undefined) layerGroupOptions.opacity = initialSettings?.opacity;
     if (initialSettings?.visible !== undefined) layerGroupOptions.visible = initialSettings?.visible !== 'no';
-    // You dont have to provide the loadEndListenerType when you set the olLayer of an entryType = 'group'.
+    // You dont have to provide the loadEndListenerType when you set the olLayer of an entryType = CONST_LAYER_ENTRY_TYPES.GROUP.
     layerConfig.olLayer = new LayerGroup(layerGroupOptions);
     return layerConfig.olLayer as LayerGroup;
   }
@@ -1601,7 +1585,7 @@ export abstract class AbstractGeoViewLayer {
   removeConfig(layerPath?: string) {
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const layerConfigToRemove = this.getLayerConfig(layerPath) as AbstractBaseLayerEntryConfig;
-    if (layerConfigToRemove.entryType !== 'group') this.unregisterFromLayerSets(layerConfigToRemove);
+    if (layerConfigToRemove.entryType !== CONST_LAYER_ENTRY_TYPES.GROUP) this.unregisterFromLayerSets(layerConfigToRemove);
     delete api.maps[this.mapId].layer.registeredLayers[layerPath];
   }
 }

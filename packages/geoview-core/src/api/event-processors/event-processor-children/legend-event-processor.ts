@@ -12,6 +12,7 @@ import {
   TypeLegend,
   TypeStyleGeometry,
 } from '@/geo';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import { api, getLocalizedValue, ILayerState } from '@/app';
 
@@ -152,7 +153,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
               getLocalizedValue(layerConfig.geoviewLayerInstance?.geoviewLayerName, mapId) ||
               layerConfig.layerPath,
             type: layerConfig.entryType as TypeGeoviewLayerType,
-            canToggle: legendResultSetEntry.data?.type !== 'esriImage',
+            canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
             opacity: layerConfig.initialSettings?.opacity ? layerConfig.initialSettings.opacity : 1,
             items: [] as TypeLegendItem[],
             children: [] as TypeLegendLayer[],
@@ -178,7 +179,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           querySent: legendResultSetEntry.querySent,
           styleConfig: legendResultSetEntry.data?.styleConfig,
           type: legendResultSetEntry.data?.type,
-          canToggle: legendResultSetEntry.data?.type !== 'esriImage',
+          canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
           opacity: layerConfig.initialSettings?.opacity || 1,
           items: [] as TypeLegendItem[],
           children: [] as TypeLegendLayer[],
