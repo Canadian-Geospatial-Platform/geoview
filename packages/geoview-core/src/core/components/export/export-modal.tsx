@@ -1,49 +1,56 @@
-import { MouseEventHandler, RefObject, useEffect, useRef } from 'react';
-import ReactDOMServer from 'react-dom/server';
-import { useTheme } from '@mui/material/styles';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { ChangeEvent, MouseEventHandler, MutableRefObject, RefObject, useEffect, useRef, useState } from 'react';
+
 import { useTranslation } from 'react-i18next';
 
 import html2Canvas from 'html2canvas';
-import { Button, Dialog, DialogActions, DialogTitle, DialogContent } from '@/ui';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@/ui';
 import { exportPNG } from '@/core/utils/utilities';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { api, useGeoViewMapId, useMapNorthArrow, NorthArrowIcon, useMapScale, useMapAttribution } from '@/app';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { NorthArrowIcon, api, useMapAttribution, useMapNorthArrow, useMapScale } from '@/app';
+
 /**
  * Export modal window component to export the viewer information in a PNG file
  *
  * @returns {JSX.Element} the export modal component
  */
 export default function ExportModal(): JSX.Element {
-  const { t } = useTranslation();
-
   const mapId = useGeoViewMapId();
+
   const { map } = api.maps[mapId];
 
-  const theme = useTheme();
-  const textColor = theme.palette.text.primary;
-  const bgColor = theme.palette.background.default;
-
   // export template variables
+  const [exportTitle, setExportTitle] = useState<string>('');
   const exportCanvasRef = useRef(null) as RefObject<HTMLCanvasElement>;
+  const exportContainerRef = useRef(null) as RefObject<HTMLDivElement>;
+  const mapImageRef = useRef(null) as RefObject<HTMLDivElement>;
   const dialogRef = useRef(null) as RefObject<HTMLDivElement>;
+  const legendContainerRef = useRef(null) as RefObject<HTMLDivElement>;
+  const textFieldRef = useRef(null) as RefObject<HTMLInputElement>;
+  const exportTitleRef = useRef(null) as RefObject<HTMLDivElement>;
+
   const northArrow = useMapNorthArrow();
   const scale = useMapScale();
   const mapAttributions = useMapAttribution();
+
+  const { t } = useTranslation();
 
   // get store function
   const { closeModal } = useUIStoreActions();
   const activeModalId = useUIActiveFocusItem().activeElementId;
 
   const exportMap = ((): void => {
-    if (exportCanvasRef.current) {
-      exportPNG(exportCanvasRef.current, mapId);
+    if (exportContainerRef.current && textFieldRef.current && exportTitleRef.current) {
+      textFieldRef.current.style.display = 'none';
+      exportTitleRef.current.style.padding = '1rem';
+      exportTitleRef.current.innerHTML = exportTitle;
+      html2Canvas(exportContainerRef.current).then((canvas: HTMLCanvasElement) => {
+        exportPNG(canvas, mapId);
+      });
     }
     closeModal();
   }) as MouseEventHandler<HTMLButtonElement>;
-
-  // Get the markup of the component
-  const staticNorthArrowIcon = ReactDOMServer.renderToStaticMarkup(<NorthArrowIcon width={44} height={44} />);
-
   /**
    * Calculate the width of the canvas based on dialog box container width.
    * @param {HTMLDivElement} dialogBox container where canvas will be rendered.
@@ -58,212 +65,34 @@ export default function ExportModal(): JSX.Element {
     return dialogBox.clientWidth - paddingLeft - paddingRight;
   };
 
-  /**
-   * Set the title of the canvas
-   * @param {CanvasRenderingContext2D} context canvas context
-   * @param {HTMLCanvasElement} canvas canvas where title will be set.
-   */
-  const setTitle = (context: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
-    context.font = "1.25rem 'Roboto','Helvetica','Arial',sans-serif";
-    context.textAlign = 'center';
-    context.fillStyle = textColor;
-    context.fillText(t('exportModal.exportTitle'), canvas.width / 2, 30);
-  };
+  useEffect(() => {
+    if (activeModalId === 'export' && mapImageRef.current && dialogRef.current) {
+      const mapImage = mapImageRef.current;
+      const dialogBox = dialogRef.current;
 
-  /**
-   * Draw map on the convas
-   * @param {CanvasRenderingContext2D} context context of the canvas.
-   */
-  const drawMap = (context: CanvasRenderingContext2D) => {
-    Array.prototype.forEach.call(map.getViewport().querySelectorAll('.ol-layer canvas, canvas.ol-layer'), (canvas) => {
-      if (canvas.width > 0) {
-        const opacity = canvas.parentNode.style.opacity || canvas.style.opacity;
-        context!.globalAlpha = opacity === '' ? 1 : Number(opacity);
-        let matrix;
-        const { transform } = canvas.style;
-
-        if (transform) {
-          // Get the transform parameters from the style's transform matrix
-          matrix = transform
-            .match(/^matrix\(([^(]*)\)$/)[1]
-            .split(',')
-            .map(Number);
-        } else {
-          matrix = [parseFloat(canvas.style.width) / canvas.width, 0, 0, parseFloat(canvas.style.height) / canvas.height, 0, 0];
-        }
-
-        // Apply the transform to the export map context
-        CanvasRenderingContext2D.prototype.setTransform.apply(context, matrix);
-        const { backgroundColor } = canvas.parentNode.style;
-        if (backgroundColor) {
-          context!.fillStyle = backgroundColor;
-          context!.fillRect(0, 0, canvas.width, canvas.height);
-        }
-        context!.drawImage(canvas, 0, 100);
-      }
-      context!.globalAlpha = 1;
-      context!.setTransform(1, 0, 0, 1, 0, 0);
-    });
-  };
-
-  /**
-   * Draw north arrow icon on the cavas
-   * @param {CanvasRenderingContext2D} context context of the canvas.
-   * @param {HTMLCanvasElement} canvas html5 canvas
-   * @param {number} height height of the canvas
-   */
-  const drawNorthIcon = (context: CanvasRenderingContext2D, canvas: HTMLCanvasElement, height: number) => {
-    const northArrowIconImage = new Image();
-
-    northArrowIconImage.onload = () => {
-      context.drawImage(northArrowIconImage, canvas.width - 60, height);
-    };
-
-    const svgNorthIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="500" height="300" style="transform: rotate(185deg 50 50)"><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml">${staticNorthArrowIcon}</div></foreignObject></svg>`;
-    northArrowIconImage.src = `data:image/svg+xml;base64,${btoa(svgNorthIcon)}`;
-  };
-
-  /**
-   * Draw scale on the canvas
-   * @param {CanvasRenderingContext2D} context the context of the canvas
-   * @param {number} height height of the canvas
-   */
-  const drawScale = (context: CanvasRenderingContext2D, height: number) => {
-    context.font = "1rem 'Roboto','Helvetica','Arial',sans-serif";
-    context.textAlign = 'left';
-    context.fillStyle = textColor;
-    context.fillText(`${scale.labelGraphic} ${t('exportModal.approx')}`, 10, height + 100);
-
-    // add stroke/line below scale
-    context.beginPath();
-    context.moveTo(10, height + 110);
-    context.lineTo(100, height + 110);
-    context.strokeStyle = textColor;
-    context.stroke();
-  };
-
-  /**
-   * Draw list of legends on the canvas
-   * @param {CanvasRenderingContext2D} context the context of the canvas
-   * @param {number} height the height of the canvas
-   * @param {HTMLElement} legendContainer the container where legend is rendered in the footerTabs.
-   */
-  const drawLegend = (context: CanvasRenderingContext2D, height: number, legendContainer: HTMLElement) => {
-    const styleObj = legendContainer.getAttribute('style')!;
-    legendContainer.removeAttribute('style');
-    // https://html2canvas.hertzen.com/configuration/
-    html2Canvas(legendContainer, {
-      backgroundColor: bgColor,
-      width: window.innerWidth - 10,
-      scale: 0.85,
-      height: legendContainer.scrollHeight,
-      windowHeight: legendContainer.scrollHeight,
-    }).then((canvas) => {
-      context.drawImage(canvas, 0, height + 120);
-    });
-    legendContainer.setAttribute('style', styleObj);
-  };
-
-  const drawMapAttribution = (context: CanvasRenderingContext2D, canvas: HTMLCanvasElement, height: number) => {
-    mapAttributions.forEach(() => {
-      context.font = "1rem 'Roboto','Helvetica','Arial',sans-serif";
-      context.textAlign = 'center';
-      context.fillStyle = textColor;
-      context.fillText(t('exportModal.exportTitle'), canvas.width / 2, height);
-    });
-  };
-  /**
-   * Draw timestamp on the canvas
-   * @param {CanvasRenderingContext2D} context the context of the canvas
-   * @param {HTMLElement} legendContainer he container where legend is rendered in the footerTabs.
-   * @param {number} height the height of the canvas
-   * @param {HTMLCanvasElement} canvas html5 canvas
-   */
-  const drawTimestamp = (
-    context: CanvasRenderingContext2D,
-    legendContainer: HTMLElement | null,
-    height: number,
-    canvas: HTMLCanvasElement
-  ) => {
-    let timeStampHeight = height + 140;
-    // Redraw the export template with updated height when legend container is not available,
-    // so that their will less white space at the bottom of export modal.
-    if (!legendContainer) {
-      // eslint-disable-next-line no-param-reassign
-      canvas.height = height + 150;
-      setTitle(context, canvas);
-      drawMap(context);
-      // Set the north icon
-      if (northArrow) {
-        drawNorthIcon(context, canvas, height + 60);
-      }
-      // Set the scale
-      if (scale?.labelGraphic?.length) {
-        drawScale(context, height);
-      }
-    } else {
-      timeStampHeight = height + legendContainer.scrollHeight;
-    }
-
-    context.font = "1rem 'Roboto','Helvetica','Arial',sans-serif";
-    context.textAlign = 'left';
-    context.fillStyle = textColor;
-    context.fillText(api.dateUtilities.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A'), 10, timeStampHeight);
-  };
-
-  /**
-   * Draw canvas on the dialog box.
-   * @param {HTMLCanvasElement} _exportCanvas the canvas to be drawn onto dialog box.
-   * @param {HTMLDivElement} _dialogBox container where canvas will be drawn
-   * @param {number} height the height of the canvas.
-   */
-  const drawCanvas = (_exportCanvas: HTMLCanvasElement, _dialogBox: HTMLDivElement, height: number) => {
-    const exportCanvas = _exportCanvas;
-    const dialogBox = _dialogBox;
-    const mapSize = map.getSize();
-    const mapHeight = mapSize![1];
-    const context = exportCanvas.getContext('2d');
-
-    exportCanvas.width = getCanvasWidth(dialogBox);
-    exportCanvas.height = height;
-
-    if (context) {
-      // Draw background color for canvas
-      context.fillStyle = bgColor;
-      context.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
-      //  Set the heading of the canvas
-      setTitle(context, exportCanvas);
-
-      // Set the Map.
-      drawMap(context);
-
-      // Set the north icon
-      if (northArrow) {
-        drawNorthIcon(context, exportCanvas, mapHeight + 60);
-      }
-
-      // Set the scale
-      if (scale?.labelGraphic?.length) {
-        drawScale(context, mapHeight);
-      }
+      const mapSize = map.getSize();
+      const height = mapSize![1];
+      // https://html2canvas.hertzen.com/configuration/
+      html2Canvas(map.getViewport()).then((canvas) => {
+        mapImage.appendChild(canvas);
+        const styleObj = `width: ${getCanvasWidth(dialogBox)}px; height: ${height}px`;
+        mapImage.querySelector('canvas')?.setAttribute('style', styleObj);
+      });
 
       // add legend
       const legendContainer = document.getElementById(`${mapId}-legendContainer`);
-      if (legendContainer) {
-        drawLegend(context, mapHeight, legendContainer);
+      if (legendContainer && legendContainerRef.current) {
+        const styleObj = legendContainer.getAttribute('style')!;
+        legendContainer.removeAttribute('style');
+        html2Canvas(legendContainer, {
+          backgroundColor: 'inherit',
+          width: getCanvasWidth(dialogBox),
+          windowWidth: getCanvasWidth(dialogBox),
+        }).then((canvas) => {
+          legendContainerRef.current?.appendChild(canvas);
+          legendContainer.setAttribute('style', styleObj);
+        });
       }
-
-      // add timestamp
-      drawTimestamp(context, legendContainer, mapHeight, exportCanvas);
-    }
-  };
-
-  useEffect(() => {
-    if (activeModalId === 'export' && exportCanvasRef.current && dialogRef.current) {
-      const exportCanvas = exportCanvasRef.current;
-      const dialogBox = dialogRef.current;
-
-      drawCanvas(exportCanvas, dialogBox, 1900);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeModalId]);
@@ -271,14 +100,50 @@ export default function ExportModal(): JSX.Element {
   return (
     <Dialog open={activeModalId === 'export'} onClose={closeModal} fullWidth maxWidth="lg" disablePortal>
       <DialogTitle>{t('exportModal.title')}</DialogTitle>
-      <DialogContent dividers ref={dialogRef} sx={{ overflowX: 'hidden' }}>
-        <canvas id="exportCanvasTemplate" width="550" height="500" ref={exportCanvasRef} />
+      <DialogContent dividers ref={dialogRef}>
+        <Box ref={exportContainerRef} textAlign="center">
+          <Box ref={textFieldRef}>
+            <TextField
+              label={t('exportModal.exportTitle')}
+              variant="standard"
+              value={exportTitle}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setExportTitle(e.target.value)}
+              sx={{ paddingBottom: '1rem', minWidth: 300 }}
+            />
+          </Box>
+          <Box ref={exportTitleRef} />
+          <Box id="mapImage" ref={mapImageRef} />
+          <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ padding: '1rem' }}>
+            <Box>
+              {!!scale.labelGraphic.length && (
+                <Box>
+                  {scale.labelGraphic} {t('exportModal.approx')} <hr />
+                </Box>
+              )}
+            </Box>
+            <Box textAlign="right">
+              <NorthArrowIcon width={44} height={44} />
+            </Box>
+          </Box>
+          <Box ref={legendContainerRef} />
+
+          <Box textAlign="center">
+            {mapAttributions.map((mapAttribution) => (
+              <Box key={mapAttribution} component="p" sx={{ margin: 0 }}>
+                {mapAttribution}
+              </Box>
+            ))}
+          </Box>
+          <Box textAlign="center" sx={{ marginBottom: '1rem' }}>
+            {api.dateUtilities.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A')}
+          </Box>
+        </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={closeModal} type="text" size="small" autoFocus sx={{ width: 'inherit' }}>
+        <Button onClick={closeModal} type="text" size="small" role="button" tabIndex={-1} autoFocus sx={{ width: 'inherit' }}>
           {t('exportModal.cancelBtn')}
         </Button>
-        <Button type="text" onClick={exportMap} size="small" sx={{ width: 'inherit' }}>
+        <Button type="text" onClick={exportMap} role="button" tabIndex={-1} size="small" sx={{ width: 'inherit' }}>
           {t('exportModal.exportBtn')}
         </Button>
       </DialogActions>

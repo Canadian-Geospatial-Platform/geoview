@@ -175,7 +175,7 @@
     "title": "Exporter la carte en PNG",
     "cancelBtn": "Annuler",
     "exportBtn": "Exporter",
-    "exportTitle": "Exporter la carte",
+    "exportTitle": "Titre",
     "approx": "approx"
   },
   "geolocator": {
