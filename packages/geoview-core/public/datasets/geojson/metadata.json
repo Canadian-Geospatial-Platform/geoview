@@ -15,7 +15,7 @@
         }
       },
       "initialSettings": {
-        "visible": "yes"
+        "visible": true
       },
       "style": {
         "Polygon": {
@@ -33,7 +33,7 @@
               "lineStyle": "dot"
             }
           },
-          "defaultVisible": "yes",
+          "defaultVisible": true,
           "fields": ["Province"],
           "uniqueValueStyleInfo": [
             {
@@ -50,7 +50,7 @@
                 }
               },
               "values": ["Quebec"],
-              "visible": "always"
+              "visible": true
             },
             {
               "label": "Alberta",
@@ -66,7 +66,7 @@
                 }
               },
               "values": ["Alberta"],
-              "visible": "no"
+              "visible": false
             }
           ]
         }
@@ -85,7 +85,7 @@
         }
       },
       "initialSettings": {
-        "visible": "yes"
+        "visible": true
       },
       "style": {
         "LineString": {
@@ -113,7 +113,7 @@
         }
       },
       "initialSettings": {
-        "visible": "yes"
+        "visible": true
       },
       "style": {
         "Point": {
@@ -141,7 +141,7 @@
         }
       },
       "initialSettings": {
-        "visible": "yes"
+        "visible": true
       },
       "style": {
         "Point": {
@@ -167,7 +167,7 @@
         }
       },
       "initialSettings": {
-        "visible": "yes"
+        "visible": true
       },
       "style": {
         "Point": {
@@ -193,7 +193,7 @@
         }
       },
       "initialSettings": {
-        "visible": "yes"
+        "visible": true
       },
       "style": {
         "Point": {
@@ -219,7 +219,7 @@
         }
       },
       "initialSettings": {
-        "visible": "yes"
+        "visible": true
       },
       "style": {
         "Point": {

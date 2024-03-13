@@ -265,8 +265,8 @@
           "description": "Label used if field/value association is not found."
         },
         "defaultVisible": {
-          "enum": ["yes", "no", "always"],
-          "description": "Flag used to show/hide features associated to the default label (default: yes)."
+          "type": "boolean",
+          "description": "Flag used to show/hide features associated to the default label (default: true)."
         },
         "defaultSettings": {
           "$ref": "#/definitions/TypeKindOfVectorSettings",
@@ -295,8 +295,8 @@
             "type": "string"
           },
           "visible": {
-            "enum": ["yes", "no", "always"],
-            "description": "Flag used to show/hide features associated to the label (default: yes)."
+            "type": "boolean",
+            "description": "Flag used to show/hide features associated to the label (default: true)."
           },
           "values": {
             "type": "array",
@@ -335,8 +335,8 @@
           "description": "Label used if field/value association is not found."
         },
         "defaultVisible": {
-          "enum": ["yes", "no", "always"],
-          "description": "Flag used to show/hide features associated to the default label (default: yes)."
+          "type": "boolean",
+          "description": "Flag used to show/hide features associated to the default label (default: true)."
         },
         "defaultSettings": {
           "$ref": "#/definitions/TypeKindOfVectorSettings",
@@ -362,8 +362,8 @@
             "type": "string"
           },
           "visible": {
-            "enum": ["yes", "no", "always"],
-            "description": "Flag used to show/hide features associated to the label (default: yes)."
+            "type": "boolean",
+            "description": "Flag used to show/hide features associated to the label (default: true)."
           },
           "minValue": {
             "oneOf": [
@@ -438,6 +438,44 @@
         }
       }
     },
+    "TypeLayerControls": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "highlight": {
+          "type": "boolean",
+          "default": true
+        },
+        "hover": {
+          "type": "boolean",
+          "default": true
+        },
+        "opacity": {
+          "type": "boolean",
+          "default": true
+        },
+        "query": {
+          "type": "boolean",
+          "default": true
+        },
+        "remove": {
+          "type": "boolean",
+          "default": true
+        },
+        "table": {
+          "type": "boolean",
+          "default": true
+        },
+        "visibility": {
+          "type": "boolean",
+          "default": true
+        },
+        "zoom": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
     "TypeLayerInitialSettings": {
       "additionalProperties": false,
       "type": "object",
@@ -449,9 +487,13 @@
           "default": 1,
           "description": "Initial opacity setting."
         },
+        "controls": {
+          "$ref": "#/definitions/TypeLayerControls",
+          "description": "The status of various controls for the layer (available/unavailable)."
+        },
         "visible": {
-          "enum": ["yes", "no", "always"],
-          "default": "yes",
+          "type": "boolean",
+          "default": true,
           "description": "Initial visibility setting."
         },
         "bounds": {

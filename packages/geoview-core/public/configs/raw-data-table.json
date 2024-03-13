@@ -24,7 +24,7 @@
         },
         "geoviewLayerType": "esriFeature",
         "initialSettings": {
-          "visible": "no"
+          "visible": false
         },
         "listOfLayerEntryConfig": [
           {
@@ -62,7 +62,7 @@
         },
         "geoviewLayerType": "GeoJSON",
         "initialSettings": {
-          "visible": "yes"
+          "visible": true
         },
         "listOfLayerEntryConfig": [
           {
@@ -90,7 +90,7 @@
               {
                 "layerId": "icon_points.json",
                 "initialSettings": {
-                  "visible": "no"
+                  "visible": false
                 },
                 "layerName": {
                   "en": "Icons",
@@ -100,7 +100,8 @@
               {
                 "layerId": "points.json",
                 "initialSettings": {
-                  "visible": "always"
+                  "visible": true,
+                  "controls": { "visibility": false }
                 },
                 "layerName": {
                   "en": "Points",

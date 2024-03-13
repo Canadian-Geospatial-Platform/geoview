@@ -1063,8 +1063,8 @@ export abstract class AbstractGeoViewLayer {
     if (initialSettings?.maxZoom !== undefined) layerGroupOptions.maxZoom = initialSettings?.maxZoom;
     if (initialSettings?.minZoom !== undefined) layerGroupOptions.minZoom = initialSettings?.minZoom;
     if (initialSettings?.opacity !== undefined) layerGroupOptions.opacity = initialSettings?.opacity;
-    if (initialSettings?.visible !== undefined) layerGroupOptions.visible = initialSettings?.visible !== 'no';
-    // You dont have to provide the loadEndListenerType when you set the olLayer of an entryType = CONST_LAYER_ENTRY_TYPES.GROUP.
+    if (initialSettings?.visible !== undefined) layerGroupOptions.visible = initialSettings?.visible;
+    // You dont have to provide the loadEndListenerType when you set the olLayer of an entryType = 'group'.
     layerConfig.olLayer = new LayerGroup(layerGroupOptions);
     return layerConfig.olLayer as LayerGroup;
   }

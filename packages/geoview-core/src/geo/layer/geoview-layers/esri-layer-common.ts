@@ -308,8 +308,7 @@ export function commonProcessInitialSettings(
 ) {
   // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
   const layerMetadata = this.layerMetadata[layerConfig.layerPath];
-  if (layerConfig.initialSettings?.visible === undefined)
-    layerConfig.initialSettings!.visible = layerMetadata.defaultVisibility ? 'yes' : 'no';
+  if (layerConfig.initialSettings?.visible === undefined) layerConfig.initialSettings!.visible = !!layerMetadata.defaultVisibility;
   // ! TODO: The solution implemented in the following two lines is not right. scale and zoom are not the same things.
   // ! if (layerConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerConfig.initialSettings.minZoom = minScale;
   // ! if (layerConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerConfig.initialSettings.maxZoom = maxScale;

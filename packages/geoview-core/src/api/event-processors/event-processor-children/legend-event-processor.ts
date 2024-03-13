@@ -8,6 +8,7 @@ import {
   isWmsLegend,
   layerEntryIsGroupLayer,
   TypeGeoviewLayerType,
+  TypeLayerControls,
   TypeLayerEntryConfig,
   TypeLegend,
   TypeStyleGeometry,
@@ -65,8 +66,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
               geometryType,
               icon: iconDetailsEntry.iconImage,
               name: iconDetailsEntry.name,
-              isVisible: 'yes',
-              default: true,
+              isVisible: true,
             };
             iconDetailsEntry.iconList = [legendLayerListItem];
             iconDetails.push(iconDetailsEntry);
@@ -79,7 +79,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
                   icon: canvas ? canvas.toDataURL() : null,
                   name: styleSettings.classBreakStyleInfo[i].label,
                   isVisible: styleSettings.classBreakStyleInfo[i].visible!,
-                  default: false,
                 };
                 return legendLayerListItem;
               });
@@ -89,7 +88,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
                   icon: styleRepresentation.defaultCanvas.toDataURL(),
                   name: styleSettings.defaultLabel!,
                   isVisible: styleSettings.defaultVisible!,
-                  default: true,
                 };
                 iconDetailsEntry.iconList.push(legendLayerListItem);
               }
@@ -99,8 +97,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
                   geometryType,
                   icon: canvas ? canvas.toDataURL() : null,
                   name: styleSettings.uniqueValueStyleInfo[i].label,
-                  isVisible: styleSettings.uniqueValueStyleInfo[i].visible || 'yes',
-                  default: false,
+                  isVisible: styleSettings.uniqueValueStyleInfo[i].visible !== false,
                 };
                 return legendLayerListItem;
               });
@@ -110,7 +107,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
                   icon: styleRepresentation.defaultCanvas.toDataURL(),
                   name: styleSettings.defaultLabel!,
                   isVisible: styleSettings.defaultVisible!,
-                  default: true,
                 };
                 iconDetailsEntry.iconList.push(legendLayerListItem);
               }
@@ -141,9 +137,22 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       const layerConfig = api.maps[mapId].layer.registeredLayers[entryLayerPath] as TypeLayerEntryConfig;
       let entryIndex = existingEntries.findIndex((entry) => entry.layerPath === entryLayerPath);
       if (layerEntryIsGroupLayer(layerConfig)) {
+        const controls: TypeLayerControls = {
+          highlight:
+            layerConfig.initialSettings?.controls?.highlight !== undefined ? layerConfig.initialSettings?.controls?.highlight : true,
+          hover: layerConfig.initialSettings?.controls?.hover !== undefined ? layerConfig.initialSettings?.controls?.hover : true,
+          opacity: layerConfig.initialSettings?.controls?.opacity !== undefined ? layerConfig.initialSettings?.controls?.opacity : true,
+          query: layerConfig.initialSettings?.controls?.query !== undefined ? layerConfig.initialSettings?.controls?.query : true,
+          remove: layerConfig.initialSettings?.controls?.remove !== undefined ? layerConfig.initialSettings?.controls?.remove : true,
+          table: layerConfig.initialSettings?.controls?.table !== undefined ? layerConfig.initialSettings?.controls?.table : true,
+          visibility:
+            layerConfig.initialSettings?.controls?.visibility !== undefined ? layerConfig.initialSettings?.controls?.visibility : true,
+          zoom: layerConfig.initialSettings?.controls?.zoom !== undefined ? layerConfig.initialSettings?.controls?.zoom : true,
+        };
         if (entryIndex === -1) {
           const legendLayerEntry: TypeLegendLayer = {
             bounds: undefined,
+            controls,
             layerId: layerConfig.layerId,
             layerPath: entryLayerPath,
             layerStatus: legendResultSetEntry.layerStatus,
@@ -165,8 +174,21 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         else existingEntries[entryIndex].layerStatus = layerConfig.layerStatus;
         createNewLegendEntries(entryLayerPath, currentLevel + 1, existingEntries[entryIndex].children);
       } else if (layerConfig) {
+        const controls: TypeLayerControls = {
+          highlight:
+            layerConfig.initialSettings?.controls?.highlight !== undefined ? layerConfig.initialSettings?.controls?.highlight : true,
+          hover: layerConfig.initialSettings?.controls?.hover !== undefined ? layerConfig.initialSettings?.controls?.hover : true,
+          opacity: layerConfig.initialSettings?.controls?.opacity !== undefined ? layerConfig.initialSettings?.controls?.opacity : true,
+          query: layerConfig.initialSettings?.controls?.query !== undefined ? layerConfig.initialSettings?.controls?.query : true,
+          remove: layerConfig.initialSettings?.controls?.remove !== undefined ? layerConfig.initialSettings?.controls?.remove : true,
+          table: layerConfig.initialSettings?.controls?.table !== undefined ? layerConfig.initialSettings?.controls?.table : true,
+          visibility:
+            layerConfig.initialSettings?.controls?.visibility !== undefined ? layerConfig.initialSettings?.controls?.visibility : true,
+          zoom: layerConfig.initialSettings?.controls?.zoom !== undefined ? layerConfig.initialSettings?.controls?.zoom : true,
+        };
         const newLegendLayer: TypeLegendLayer = {
           bounds: undefined,
+          controls,
           layerId: layerPathNodes[currentLevel],
           layerPath: entryLayerPath,
           layerAttribution: api.maps[mapId].layer.geoviewLayers[layerPathNodes[0]].attributions,

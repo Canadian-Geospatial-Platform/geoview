@@ -31,7 +31,7 @@ export interface ILayerState {
     setLayerOpacity: (layerPath: string, opacity: number) => void;
     setSelectedLayerPath: (layerPath: string) => void;
     toggleItemVisibility: (layerPath: string, geometryType: TypeStyleGeometry, itemName: string) => void;
-    setAllItemsVisibility: (layerPath: string, visibility: 'yes' | 'no') => void;
+    setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
     setLayerDeleteInProgress: (newVal: boolean) => void;
     getLayerDeleteInProgress: () => boolean;
     deleteLayer: (layerPath: string) => void;
@@ -136,10 +136,10 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         const layer = findLayerByPath(curLayers, layerPath);
         if (layer) {
           _.each(layer.items, (item) => {
-            if (item.geometryType === geometryType && item.name === itemName && item.isVisible !== 'always') {
-              item.isVisible = item.isVisible === 'no' ? 'yes' : 'no'; // eslint-disable-line no-param-reassign
+            if (item.geometryType === geometryType && item.name === itemName) {
+              item.isVisible = !item.isVisible; // eslint-disable-line no-param-reassign
 
-              if (item.isVisible === 'yes' && MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(get().mapId, layerPath)) {
+              if (item.isVisible && MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(get().mapId, layerPath)) {
                 MapEventProcessor.setOrToggleMapVisibility(get().mapId, layerPath, true);
               }
 
@@ -159,8 +159,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
               }
             }
           });
-          // 'always' is neither 'yes', nor 'no'.
-          const allItemsUnchecked = _.every(layer.items, (i) => ['no', 'always'].includes(i.isVisible!));
+          const allItemsUnchecked = _.every(layer.items, (i) => !i.isVisible!);
           if (allItemsUnchecked) {
             MapEventProcessor.setOrToggleMapVisibility(get().mapId, layerPath, false);
           }
@@ -175,8 +174,8 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           },
         });
       },
-      setAllItemsVisibility: (layerPath: string, visibility: 'yes' | 'no') => {
-        MapEventProcessor.setOrToggleMapVisibility(get().mapId, layerPath, visibility === 'yes');
+      setAllItemsVisibility: (layerPath: string, visibility: boolean) => {
+        MapEventProcessor.setOrToggleMapVisibility(get().mapId, layerPath, true);
         const curLayers = get().layerState.legendLayers;
 
         const registeredLayer = api.maps[get().mapId].layer.registeredLayers[layerPath] as VectorLayerEntryConfig;
@@ -184,7 +183,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         if (layer) {
           _.each(layer.items, (item) => {
             // eslint-disable-next-line no-param-reassign
-            if (item.isVisible !== 'always') item.isVisible = visibility;
+            item.isVisible = visibility;
           });
           // assign value to registered layer. This is use by applyFilter function to set visibility
           // TODO: check if we need to refactor to centralize attribute setting....
@@ -193,19 +192,17 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
               if (registeredLayer.style![geometry as TypeStyleGeometry]) {
                 if (registeredLayer.style![geometry as TypeStyleGeometry]?.styleType === 'classBreaks') {
                   const geometryStyleConfig = registeredLayer.style![geometry as TypeStyleGeometry]! as TypeClassBreakStyleConfig;
-                  if (geometryStyleConfig.defaultVisible && geometryStyleConfig.defaultVisible !== 'always')
-                    geometryStyleConfig.defaultVisible = visibility;
+                  if (geometryStyleConfig.defaultVisible !== undefined) geometryStyleConfig.defaultVisible = visibility;
                   geometryStyleConfig.classBreakStyleInfo.forEach((styleInfo) => {
                     // eslint-disable-next-line no-param-reassign
-                    if (styleInfo.visible !== 'always') styleInfo.visible = visibility;
+                    styleInfo.visible = visibility;
                   });
                 } else if (registeredLayer.style![geometry as TypeStyleGeometry]?.styleType === 'uniqueValue') {
                   const geometryStyleConfig = registeredLayer.style![geometry as TypeStyleGeometry]! as TypeUniqueValueStyleConfig;
-                  if (geometryStyleConfig.defaultVisible && geometryStyleConfig.defaultVisible !== 'always')
-                    geometryStyleConfig.defaultVisible = visibility;
+                  if (geometryStyleConfig.defaultVisible !== undefined) geometryStyleConfig.defaultVisible = visibility;
                   geometryStyleConfig.uniqueValueStyleInfo.forEach((styleInfo) => {
                     // eslint-disable-next-line no-param-reassign
-                    if (styleInfo.visible !== 'always') styleInfo.visible = visibility;
+                    styleInfo.visible = visibility;
                   });
                 }
               }

@@ -1,6 +1,6 @@
 import { Extent } from 'ol/extent';
 
-import { TypeGeoviewLayerType, TypeStyleConfig, TypeStyleGeometry, TypeVisibilityFlags } from '@/geo';
+import { TypeGeoviewLayerType, TypeLayerControls, TypeStyleConfig, TypeStyleGeometry } from '@/geo';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 
 export type TypeLayersViewDisplayState = 'remove' | 'add' | 'order' | 'view';
@@ -19,13 +19,13 @@ export type TypeLegendLayerItem = {
 export interface TypeLegendItem {
   geometryType: TypeStyleGeometry;
   name: string;
-  isVisible: TypeVisibilityFlags;
+  isVisible: boolean;
   icon: string | null;
-  default: boolean;
 }
 
 export interface TypeLegendLayer {
   bounds: Extent | undefined;
+  controls?: TypeLayerControls;
   layerId: string;
   layerPath: string;
   layerAttribution?: string[];
@@ -44,5 +44,4 @@ export interface TypeLegendLayer {
   opacity?: number;
   opacityFromParent?: number;
   zoom?: number;
-  canSetOpacity?: boolean;
 }

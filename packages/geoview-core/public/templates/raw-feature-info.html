@@ -80,7 +80,10 @@
               'fr': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer'
             },
             'geoviewLayerType': 'esriFeature',
-            'initialSettings': { 'visible': 'always' },
+            'initialSettings': { 
+              'visible': true,
+              'controls': {'visibility': false}
+             },
             'listOfLayerEntryConfig': [
               {
                 'layerId': '8'
@@ -92,10 +95,18 @@
             'geoviewLayerName': { 'en': 'uniqueValue', 'fr': 'uniqueValue' },
             'metadataAccessPath': { 'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/', 'fr': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/' },
             'geoviewLayerType': 'esriFeature',
+            'initialSettings': { 
+              'controls': {
+                'visibility': true,
+                'zoom': false,
+                'highlight': false,
+                'table': false,
+                'opacity': false
+              }
+            },
             'listOfLayerEntryConfig': [
               {
-                'layerId': '1',
-                'initialSettings': { 'removable': false }
+                'layerId': '1'
               }
             ]
           },
@@ -112,7 +123,14 @@
             'geoviewLayerType': 'esriFeature',
             'listOfLayerEntryConfig': [
               {
-                'layerId': '0'
+                'layerId': '0',
+                'initialSettings': { 
+                  'visible': true,
+                  'controls': {
+                    'visibility': false,
+                    'remove': false
+                  }
+                }
               }
             ]
           },
@@ -138,7 +156,10 @@
                   {
                     'layerId': 'icon_points.json',
                     'layerName': { 'en': 'Icons', 'fr': 'Icones' },
-                    'initialSettings': { 'visible': 'yes' }
+                    'initialSettings': { 
+                      'visible': true,
+                      'controls': {'visibility': false}
+                    }
                   },
                   {
                     'layerId': 'points.json',
@@ -219,7 +240,10 @@
                 'fr': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer'
               },
               'geoviewLayerType': 'esriFeature',
-              'initialSettings': { 'visible': 'always' },
+              'initialSettings': { 
+                'visible': true,
+                'controls': { 'visibility': false}
+              },
               'listOfLayerEntryConfig': [
                 {
                   'layerId': '8'
@@ -276,7 +300,7 @@
                     {
                       'layerId': 'icon_points.json',
                       'layerName': { 'en': 'Icons', 'fr': 'Icones' },
-                      'initialSettings': { 'visible': 'yes' }
+                      'initialSettings': { 'visible': true }
                     },
                     {
                       'layerId': 'points.json',
@@ -353,7 +377,10 @@
                 'fr': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer'
               },
               'geoviewLayerType': 'esriFeature',
-              'initialSettings': { 'visible': 'always' },
+              'initialSettings': { 
+                'visible': true,
+                'controls': {'visibility': false}
+              },
               'listOfLayerEntryConfig': [
                 {
                   'layerId': '8'
@@ -410,7 +437,10 @@
                     {
                       'layerId': 'icon_points.json',
                       'layerName': { 'en': 'Icons', 'fr': 'Icones' },
-                      'initialSettings': { 'visible': 'yes' }
+                      'initialSettings': { 
+                        'visible': true,
+                        'controls': {'visibility': false}
+                      }
                     },
                     {
                       'layerId': 'points.json',
