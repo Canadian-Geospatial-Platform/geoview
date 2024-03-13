@@ -48,11 +48,6 @@ export class GeoCore {
       // Get the GV config from UUID and await
       const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(url, this.displayLanguage, [uuid]);
 
-      // // For each found layer associated with the Geocore UUIDs
-      // response.layers.forEach((geoviewLayerConfig) => {
-      //   this.copyConfigSettingsOverGeocoreSettings(layerConfig, geoviewLayerConfig);
-      // });
-
       // Validate the generated Geoview Layer Config
       this.configValidation.validateListOfGeoviewLayerConfig(AppEventProcessor.getSupportedLanguages(this.mapId), response.layers);
 
@@ -71,61 +66,4 @@ export class GeoCore {
       throw error;
     }
   }
-
-  // /**
-  //  * Copies the config settings over the geocore values (config values have priority).
-  //  *
-  //  * @param {GeoCoreLayerEntryConfig} geocoreLayerEntryConfig The config file settings
-  //  * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The settings returned by the geocore service
-  //  */
-  // private copyConfigSettingsOverGeocoreSettings(
-  //   geocoreLayerEntryConfig: GeoCoreLayerEntryConfig,
-  //   geoviewLayerConfig: TypeGeoviewLayerConfig
-  // ) {
-  //   if (geocoreLayerEntryConfig.geocoreLayerName)
-  //     // eslint-disable-next-line no-param-reassign
-  //     geoviewLayerConfig.geoviewLayerName = {
-  //       ...geocoreLayerEntryConfig.geocoreLayerName,
-  //     } as TypeLocalizedString;
-
-  //   if (geocoreLayerEntryConfig.listOfLayerEntryConfig?.length) {
-  //     const defaultDeepFoundEntry = (
-  //       layerArrayFromConfig: TypeListOfLayerEntryConfig,
-  //       layerArrayFromService: TypeListOfLayerEntryConfig
-  //     ) => {
-  //       layerArrayFromService.forEach((layerEntryFromService, i, arrayFromService) => {
-  //         const entryFound = layerArrayFromConfig.find((layerEntryFromConfig) => {
-  //           if (layerEntryFromConfig.layerId === layerEntryFromService.layerId) {
-  //             if (layerEntryIsGroupLayer(layerEntryFromService)) {
-  //               if (layerEntryIsGroupLayer(layerEntryFromConfig)) {
-  //                 defaultDeepFoundEntry(layerEntryFromConfig.listOfLayerEntryConfig!, layerEntryFromService.listOfLayerEntryConfig);
-  //               } else
-  //                 throw new Error(`Geocore group id ${layerEntryFromService.layerId} should be defined as a group in the configuration`);
-  //             } else {
-  //               // eslint-disable-next-line no-param-reassign
-  //               arrayFromService[i] = defaultsDeep(layerEntryFromConfig, layerEntryFromService);
-  //               // Force a found property to the layerEntryFromConfig object
-  //               Object.assign(layerEntryFromConfig, { found: true });
-  //             }
-  //             return true;
-  //           }
-  //           return false;
-  //         });
-  //         // eslint-disable-next-line no-param-reassign
-  //         if (!entryFound) arrayFromService[i].layerId = '';
-  //       });
-  //       for (let i = layerArrayFromService.length - 1; i >= 0; i--)
-  //         if (!layerArrayFromService[i].layerId) layerArrayFromService.splice(i, 1);
-  //     };
-  //     defaultDeepFoundEntry(geocoreLayerEntryConfig.listOfLayerEntryConfig, geoviewLayerConfig.listOfLayerEntryConfig);
-  //     const validateConfig = (layerArrayFromConfig: TypeListOfLayerEntryConfig) => {
-  //       for (let i = 0; i < layerArrayFromConfig.length; i++) {
-  //         if (!('found' in layerArrayFromConfig[i]))
-  //           throw new Error(`Layer ${layerArrayFromConfig[i].layerId} from the configuration does not exist on the geocore service`);
-  //         if (layerEntryIsGroupLayer(layerArrayFromConfig[i])) validateConfig(layerArrayFromConfig[i].listOfLayerEntryConfig!);
-  //       }
-  //     };
-  //     validateConfig(geocoreLayerEntryConfig.listOfLayerEntryConfig);
-  //   }
-  // }
 }

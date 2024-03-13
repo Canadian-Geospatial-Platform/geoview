@@ -35,7 +35,7 @@ import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classe
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 export interface TypeEsriImageLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
-  geoviewLayerType: 'esriImage';
+  geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
   listOfLayerEntryConfig: EsriImageLayerEntryConfig[];
 }
 

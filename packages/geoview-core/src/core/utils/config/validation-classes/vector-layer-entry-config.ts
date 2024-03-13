@@ -1,4 +1,4 @@
-import { GeoviewChild, TypeLayerEntryType, TypeStyleConfig, TypeVectorSourceInitialConfig } from '@/geo/map/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, GeoviewChild, TypeStyleConfig, TypeVectorSourceInitialConfig } from '@/geo/map/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
 
 /** ******************************************************************************************************************************
@@ -6,7 +6,7 @@ import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config
  */
 export class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** Layer entry data type. */
-  entryType = 'vector' as TypeLayerEntryType;
+  entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
 
   /** Filter to apply on feature of this layer. */
   layerFilter?: string;

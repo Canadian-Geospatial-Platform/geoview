@@ -13,7 +13,7 @@ import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
 
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   TypeBaseSourceVectorInitialConfig,
   TypeLayerEntryConfig,
@@ -138,7 +138,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       xhr.onload = () => {
         if (xhr.status === 200) {
           let features: Feature[] | null;
-          if (layerConfig.schemaTag === 'CSV') {
+          if (layerConfig.schemaTag === CONST_LAYER_TYPES.CSV) {
             features = (api.maps[this.mapId].layer.geoviewLayer(layerPath) as CSV).convertCsv(
               xhr.responseText,
               layerConfig as VectorLayerEntryConfig

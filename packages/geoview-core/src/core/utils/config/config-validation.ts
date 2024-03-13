@@ -38,7 +38,7 @@ import {
   mapConfigLayerEntryIsGeoCore,
 } from '@/geo/map/map-schema-types';
 import { Cast, toJsonObject, TypeJsonObject, TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { CONST_GEOVIEW_SCHEMA_BY_TYPE, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { CONST_GEOVIEW_SCHEMA_BY_TYPE, CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { geoviewEntryIsEsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { logger } from '@/core/utils/logger';
 import { CONFIG_GEOCORE_URL, CONFIG_GEOLOCATOR_URL } from '@/app';
@@ -543,21 +543,21 @@ export class ConfigValidation {
           const geoviewLayerConfigCasted = geoviewLayerConfig as TypeGeoviewLayerConfig;
           if (!geoviewLayerConfigCasted.initialSettings) geoviewLayerConfigCasted.initialSettings = { visible: 'yes' };
           switch (geoviewLayerConfig.geoviewLayerType) {
-            case 'CSV':
-            case 'GeoJSON':
-            case 'xyzTiles':
-            case 'vectorTiles':
-            case 'GeoPackage':
-            case 'imageStatic':
+            case CONST_LAYER_TYPES.CSV:
+            case CONST_LAYER_TYPES.GEOJSON:
+            case CONST_LAYER_TYPES.XYZ_TILES:
+            case CONST_LAYER_TYPES.VECTOR_TILES:
+            case CONST_LAYER_TYPES.GEOPACKAGE:
+            case CONST_LAYER_TYPES.IMAGE_STATIC:
               this.geoviewLayerIdIsMandatory(geoviewLayerConfigCasted);
               this.processLayerEntryConfig(geoviewLayerConfigCasted, geoviewLayerConfigCasted.listOfLayerEntryConfig);
               break;
-            case 'esriDynamic':
-            case 'esriFeature':
-            case 'esriImage':
-            case 'ogcFeature':
-            case 'ogcWfs':
-            case 'ogcWms':
+            case CONST_LAYER_TYPES.ESRI_DYNAMIC:
+            case CONST_LAYER_TYPES.ESRI_FEATURE:
+            case CONST_LAYER_TYPES.ESRI_IMAGE:
+            case CONST_LAYER_TYPES.OGC_FEATURE:
+            case CONST_LAYER_TYPES.WFS:
+            case CONST_LAYER_TYPES.WMS:
               this.geoviewLayerIdIsMandatory(geoviewLayerConfigCasted);
               this.metadataAccessPathIsMandatory(geoviewLayerConfigCasted);
               this.processLayerEntryConfig(geoviewLayerConfigCasted, geoviewLayerConfigCasted.listOfLayerEntryConfig);

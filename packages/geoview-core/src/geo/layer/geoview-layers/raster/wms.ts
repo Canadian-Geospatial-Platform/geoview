@@ -29,6 +29,7 @@ import {
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
+  CONST_LAYER_ENTRY_TYPES,
 } from '@/geo/map/map-schema-types';
 import { TypeFeatureInfoEntry, TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import { getLocalizedValue, getMinOrMaxExtents, xmlToJson, showError, replaceParams, getLocalizedMessage } from '@/core/utils/utilities';
@@ -40,7 +41,7 @@ import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-cla
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
-  geoviewLayerType: 'ogcWms';
+  geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
   listOfLayerEntryConfig: OgcWmsLayerEntryConfig[];
 }
 
@@ -437,7 +438,7 @@ export class WMS extends AbstractGeoViewRaster {
 
     if (this.registerToLayerSetListenerFunctions[layerPath]) this.unregisterFromLayerSets(layerConfig);
     const switchToGroupLayer = Cast<GroupLayerEntryConfig>(layerConfig);
-    switchToGroupLayer.entryType = 'group';
+    switchToGroupLayer.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
     switchToGroupLayer.layerName = {
       en: layer.Title as string,
       fr: layer.Title as string,

@@ -46,7 +46,7 @@ import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-clas
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 
 export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
-  geoviewLayerType: 'esriDynamic';
+  geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_DYNAMIC;
   listOfLayerEntryConfig: EsriDynamicLayerEntryConfig[];
 }
 

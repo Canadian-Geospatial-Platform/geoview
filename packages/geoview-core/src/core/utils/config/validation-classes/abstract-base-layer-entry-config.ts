@@ -4,6 +4,7 @@ import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 
 import {
+  CONST_LAYER_ENTRY_TYPES,
   TypeBaseSourceVectorInitialConfig,
   TypeLayerAndListenerType,
   TypeLayerInitialSettings,
@@ -70,7 +71,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     const { olLayer, loadEndListenerType } = layerAndListenerType;
     this._olLayer = olLayer;
     // Group layers have no listener
-    if (olLayer && this.entryType !== 'group') {
+    if (olLayer && this.entryType !== CONST_LAYER_ENTRY_TYPES.GROUP) {
       if (loadEndListenerType) {
         let loadErrorListener: () => void;
 
