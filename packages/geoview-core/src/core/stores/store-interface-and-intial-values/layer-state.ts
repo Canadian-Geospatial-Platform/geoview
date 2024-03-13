@@ -20,6 +20,7 @@ export interface ILayerState {
   selectedLayerPath: string | undefined | null;
   legendLayers: TypeLegendLayer[];
   displayState: TypeLayersViewDisplayState;
+  layerDeleteInProgress: boolean;
 
   actions: {
     setLegendLayers: (legendLayers: TypeLegendLayer[]) => void;
@@ -31,6 +32,8 @@ export interface ILayerState {
     setSelectedLayerPath: (layerPath: string) => void;
     toggleItemVisibility: (layerPath: string, geometryType: TypeStyleGeometry, itemName: string) => void;
     setAllItemsVisibility: (layerPath: string, visibility: 'yes' | 'no') => void;
+    setLayerDeleteInProgress: (newVal: boolean) => void;
+    getLayerDeleteInProgress: () => boolean;
     deleteLayer: (layerPath: string) => void;
     zoomToLayerExtent: (layerPath: string) => void;
   };
@@ -42,6 +45,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
     legendLayers: [] as TypeLegendLayer[],
     selectedLayerPath: null,
     displayState: 'view',
+    layerDeleteInProgress: false,
 
     actions: {
       setLegendLayers: (legendLayers: TypeLegendLayer[]): void => {
@@ -222,12 +226,22 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         // ! create a function setItemVisibility called with layer path and this function set the registered layer (from store values) then apply the filter.
         (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter('');
       },
+      getLayerDeleteInProgress: () => get().layerState.layerDeleteInProgress,
+      setLayerDeleteInProgress: (newVal: boolean) => {
+        set({
+          layerState: {
+            ...get().layerState,
+            layerDeleteInProgress: newVal,
+          },
+        });
+      },
       deleteLayer: (layerPath: string) => {
         const curLayers = get().layerState.legendLayers;
         deleteSingleLayer(curLayers, layerPath);
         set({
           layerState: {
             ...get().layerState,
+            layerDeleteInProgress: false,
             legendLayers: [...curLayers],
           },
         });
