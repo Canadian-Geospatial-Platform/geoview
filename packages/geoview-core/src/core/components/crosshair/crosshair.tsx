@@ -9,6 +9,7 @@ import { getSxClasses } from './crosshair-style';
 import { CrosshairIcon } from './crosshair-icon';
 import { useAppCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useMapElement, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useUIAppbarGeolocatorActive, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -20,6 +21,9 @@ export function Crosshair(): JSX.Element {
   logger.logTraceRender('components/crosshair/crosshair');
 
   const { t } = useTranslation<string>();
+
+  const isGeolocatorActive = useUIAppbarGeolocatorActive();
+  const { setGeolocatorActive } = useUIStoreActions();
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
@@ -79,6 +83,26 @@ export function Crosshair(): JSX.Element {
       mapHTMLElement.removeEventListener('keydown', managePanDelta);
     };
   }, [isCrosshairsActive, mapElement, simulateClick, managePanDelta]);
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    // disables map interactions (arrow keys won't move the map)
+    setMapKeyboardPanInteractions(0);
+
+    if (event.key === 'Escape') {
+      setGeolocatorActive(false);
+      setMapKeyboardPanInteractions(panDelta.current);
+    }
+  };
+
+  useEffect(() => {
+    if (isGeolocatorActive) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isGeolocatorActive]);
 
   return (
     <Box
