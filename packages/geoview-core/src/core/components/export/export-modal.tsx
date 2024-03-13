@@ -9,6 +9,7 @@ import { exportPNG } from '@/core/utils/utilities';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { NorthArrowIcon, api, useMapAttribution, useMapNorthArrow, useMapScale } from '@/app';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Export modal window component to export the viewer information in a PNG file
@@ -53,6 +54,7 @@ export default function ExportModal(): JSX.Element {
     }
     closeModal();
   }) as MouseEventHandler<HTMLButtonElement>;
+
   /**
    * Calculate the width of the canvas based on dialog box container width.
    * @param {HTMLDivElement} dialogBox container where canvas will be rendered.
@@ -68,6 +70,9 @@ export default function ExportModal(): JSX.Element {
   };
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('Export Modal - mount');
+
     let timer: NodeJS.Timeout;
     if (activeModalId === 'export' && mapImageRef.current && dialogRef.current) {
       const mapImage = mapImageRef.current;
@@ -76,6 +81,8 @@ export default function ExportModal(): JSX.Element {
       const mapSize = map.getSize();
       const height = mapSize![1];
 
+      // Reason for timer, so that content of the export modal will be loaded
+      // after modal is fully opened.
       timer = setTimeout(() => {
         // https://html2canvas.hertzen.com/configuration/
         setIsMapLoading(true);
@@ -106,12 +113,14 @@ export default function ExportModal(): JSX.Element {
     }
     return () => {
       if (timer) clearTimeout(timer);
+      setIsMapLoading(true);
+      setIsLegendLoading(true);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeModalId]);
 
   return (
-    <Dialog open={activeModalId === 'export'} onClose={closeModal} fullWidth maxWidth="lg" disablePortal>
+    <Dialog open={activeModalId === 'export'} onClose={closeModal} fullWidth maxWidth="xl" disablePortal>
       <DialogTitle>{t('exportModal.title')}</DialogTitle>
       <DialogContent dividers ref={dialogRef}>
         <Box ref={exportContainerRef} textAlign="center">
