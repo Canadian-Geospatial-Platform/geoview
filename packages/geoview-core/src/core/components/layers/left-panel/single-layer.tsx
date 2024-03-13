@@ -54,7 +54,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
 
   // Get store states
   const { setSelectedLayerPath } = useLayerStoreActions();
-  const { getAlwaysVisibleFromOrderedLayerInfo, getVisibilityFromOrderedLayerInfo, setOrToggleLayerVisibility } = useMapStoreActions();
+  const { getVisibilityFromOrderedLayerInfo, setOrToggleLayerVisibility } = useMapStoreActions();
   const selectedLayerPath = useLayerSelectedLayerPath();
   const displayState = useLayerDisplayState();
   const mapFiltered = useDataTableStoreMapFilteredRecord();
@@ -80,24 +80,20 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   const layerChildIsSelected = isLayerChildSelected(layer);
   const layerIsSelected = layer.layerPath === selectedLayerPath && displayState === 'view';
 
-  // returns true if any of the layer children or items has visibility of 'always'
-  const layerHasAlwaysVisible = (startingLayer: TypeLegendLayer): boolean => {
-    if (getAlwaysVisibleFromOrderedLayerInfo(layer.layerPath)) {
+  // returns true if any of the layer children has visibility of false
+  const layerHasDisabledVisibility = (startingLayer: TypeLegendLayer): boolean => {
+    if (startingLayer.controls?.visibility === false) {
       return true;
     }
-    let itemsHasAlways = false;
     let childrenHasAlways = false;
     if (startingLayer.children && startingLayer.children.length > 0) {
-      childrenHasAlways = _.some(startingLayer.children, (child) => layerHasAlwaysVisible(child));
-    }
-    if (startingLayer.items && startingLayer.items.length) {
-      itemsHasAlways = startingLayer.items.filter((i) => i.isVisible === 'always').length > 0;
+      childrenHasAlways = startingLayer.children.some((child) => layerHasDisabledVisibility(child));
     }
 
-    return itemsHasAlways || childrenHasAlways;
+    return childrenHasAlways;
   };
 
-  const isLayerAlwaysVisible = layerHasAlwaysVisible(layer);
+  const isLayerAlwaysVisible = layerHasDisabledVisibility(layer);
 
   const [isGroupOpen, setGroupOpen] = useState(layerIsSelected || layerChildIsSelected);
 
@@ -114,7 +110,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
       return t('legend.subLayersCount').replace('{count}', layer.children.length.toString());
     }
 
-    const count = layer.items.filter((d) => d.isVisible !== 'no').length;
+    const count = layer.items.filter((d) => d.isVisible !== false).length;
     const totalCount = layer.items.length;
     const itemsLengthDesc = t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
 

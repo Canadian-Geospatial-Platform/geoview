@@ -221,11 +221,10 @@ export class Layer {
       const subLayerPath = layerPath.endsWith(layerEntryConfig.layerId) ? layerPath : `${layerPath}/${layerEntryConfig.layerId}`;
       const layerInfo: TypeOrderedLayerInfo = {
         layerPath: subLayerPath,
-        alwaysVisible: layerEntryConfig.initialSettings?.visible === 'always',
-        visible: layerEntryConfig.initialSettings?.visible !== 'no',
-        removable: layerEntryConfig.initialSettings?.removable !== undefined ? layerEntryConfig.initialSettings?.removable : true,
+        visible: layerEntryConfig.initialSettings?.states?.visible !== false,
         queryable: layerEntryConfig.source?.featureInfo?.queryable !== undefined ? layerEntryConfig.source?.featureInfo?.queryable : true,
-        hoverable: layerEntryConfig.initialSettings?.hoverable !== undefined ? layerEntryConfig.initialSettings?.hoverable : true,
+        hoverable:
+          layerEntryConfig.initialSettings?.states?.hoverable !== undefined ? layerEntryConfig.initialSettings?.states?.hoverable : true,
       };
       newOrderedLayerInfos.push(layerInfo);
       if (layerEntryConfig.listOfLayerEntryConfig?.length) {
@@ -242,9 +241,7 @@ export class Layer {
         }`;
         const layerInfo: TypeOrderedLayerInfo = {
           layerPath,
-          alwaysVisible: geoviewLayerConfig.initialSettings?.visible === 'always',
-          visible: geoviewLayerConfig.initialSettings?.visible !== 'no',
-          removable: geoviewLayerConfig.initialSettings?.removable !== undefined ? geoviewLayerConfig.initialSettings?.removable : true,
+          visible: geoviewLayerConfig.initialSettings?.states?.visible !== false,
         };
         newOrderedLayerInfos.push(layerInfo);
         (geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig.forEach((layerEntryConfig) => {
