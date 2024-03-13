@@ -9,7 +9,6 @@ import { useUIAppbarGeolocatorActive, useUIStoreActions } from '@/core/stores/st
 import { useAppGeolocatorServiceURL, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { GeolocatorResult } from './geolocator-result';
 import { logger } from '@/core/utils/logger';
-import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 export interface GeoListItem {
   key: string;
@@ -26,8 +25,6 @@ export function Geolocator() {
   logger.logTraceRender('components/geolocator/geolocator');
 
   const { t } = useTranslation();
-
-  const { setMapKeyboardPanInteractions } = useMapStoreActions();
 
   // internal state
   const [data, setData] = useState<GeoListItem[]>();
@@ -152,30 +149,12 @@ export function Geolocator() {
     }
   };
 
-  const handleKeyDown = (event: KeyboardEvent) => {
-    // disables map interactions (arrow keys won't move the map)
-    setMapKeyboardPanInteractions(0);
-
-    if (event.key === 'Escape') {
-      setGeolocatorActive(false);
-    }
-  };
-
   useEffect(() => {
     if (searchInputRef.current && active) {
       searchInputRef.current?.click();
     }
+
     setSearchValue(active ? searchValue : '');
-
-    if (active) {
-      document.addEventListener('keydown', handleKeyDown);
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
 
   const searchPanelContent: ReactNode = (
