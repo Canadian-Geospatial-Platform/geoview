@@ -46,10 +46,10 @@ export const getSxClasses = (theme: Theme) => ({
     },
     '& .MuiListItemText-root': {
       '>span': {
-        fontSize: '1rem',
+        fontSize: theme.palette.geoViewFontSize.default,
       },
       '> p': {
-        fontSize: '0.875rem',
+        fontSize: theme.palette.geoViewFontSize.sm,
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
@@ -75,7 +75,7 @@ export const getSxClasses = (theme: Theme) => ({
     display: 'flex',
     flexDirection: 'column',
     '& p': {
-      fontSize: '1rem',
+      fontSize: theme.palette.geoViewFontSize.default,
       font: '600 18px / 24px Roboto, Helvetica, Arial, sans-serif;',
       fontWeight: 400,
       lineHeight: 1.5,
@@ -88,7 +88,7 @@ export const getSxClasses = (theme: Theme) => ({
       alignItems: 'center',
       marginTop: '4px',
       '>p': {
-        fontSize: '0.875rem !important',
+        fontSize: `${theme.palette.geoViewFontSize.sm} 0.875rem !important`,
         color: theme.palette.text.secondary,
       },
       ' svg': {

@@ -17,7 +17,7 @@ export const getSxClasses = (theme: Theme) => ({
     },
     '& .MuiListItemText-primary': {
       padding: '15px',
-      fontSize: '21px !important',
+      fontSize: `${theme.palette.geoViewFontSize.lg} !important`,
       lineHeight: 1.5,
       fontWeight: '700',
       textTransform: 'capitalize',
@@ -26,7 +26,7 @@ export const getSxClasses = (theme: Theme) => ({
   footerGuideListItemCollapse: {
     '& .MuiListItemText-primary': {
       padding: '15px 15px 15px 30px',
-      fontSize: '1.15rem !important',
+      fontSize: `${theme.palette.geoViewFontSize.md} !important`,
       lineHeight: 1.5,
       whiteSpace: 'unset',
     },

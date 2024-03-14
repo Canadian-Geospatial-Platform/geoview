@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Button } from '@mui/material';
+import { Button, useTheme } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Box, AddCircleOutlineIcon, ButtonGroup, DeleteOutlineIcon, HandleIcon, Tooltip, VisibilityOutlinedIcon } from '@/ui';
 import { useLayerStoreActions, useLayerDisplayState } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -76,31 +76,32 @@ function ResponsiveButton(props: ResponsiveButtonProps): JSX.Element {
 }
 
 export function LayersToolbar(): JSX.Element {
+  const theme = useTheme();
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'left', padding: '18px 18px 0px 18px' }}>
       <ButtonGroup size="small" variant="outlined" aria-label="outlined button group">
         <ResponsiveButton
           tooltipKey="general.view"
           translationKey="general.view"
-          icon={<VisibilityOutlinedIcon fontSize="small" />}
+          icon={<VisibilityOutlinedIcon fontSize={theme.palette.geoViewFontSize.sm} />}
           newState="view"
         />
         <ResponsiveButton
           tooltipKey="legend.addLayer"
           translationKey="general.add"
-          icon={<AddCircleOutlineIcon fontSize="small" />}
+          icon={<AddCircleOutlineIcon fontSize={theme.palette.geoViewFontSize.sm} />}
           newState="add"
         />
         <ResponsiveButton
           tooltipKey="legend.sortLayers"
           translationKey="legend.sort"
-          icon={<HandleIcon fontSize="small" />}
+          icon={<HandleIcon fontSize={theme.palette.geoViewFontSize.sm} />}
           newState="order"
         />
         <ResponsiveButton
           tooltipKey="legend.removeLayer"
           translationKey="general.remove"
-          icon={<DeleteOutlineIcon fontSize="small" />}
+          icon={<DeleteOutlineIcon fontSize={theme.palette.geoViewFontSize.sm} />}
           newState="remove"
         />
       </ButtonGroup>

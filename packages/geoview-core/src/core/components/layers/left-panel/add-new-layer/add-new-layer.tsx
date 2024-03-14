@@ -1,5 +1,6 @@
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '@mui/material';
 import {
   Autocomplete,
   Box,
@@ -69,6 +70,7 @@ export function AddNewLayer(): JSX.Element {
   logger.logTraceRender('components/layers/left-panel/add-new-layer/add-new-layer');
 
   const { t } = useTranslation<string>();
+  const theme = useTheme();
 
   const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, ESRI_IMAGE, GEOJSON, GEOPACKAGE, WMS, WFS, OGC_FEATURE, XYZ_TILES } = CONST_LAYER_TYPES;
   const { GEOCORE } = CONST_LAYER_ENTRY_TYPES;
@@ -1043,8 +1045,8 @@ export function AddNewLayer(): JSX.Element {
     );
   }
 
-  const uncheckedIcon = <CheckBoxOutlineBlankIcon fontSize="small" />;
-  const checkedIcon = <CheckBoxIcon fontSize="small" />;
+  const uncheckedIcon = <CheckBoxOutlineBlankIcon fontSize={theme.palette.geoViewFontSize.sm} />;
+  const checkedIcon = <CheckBoxIcon fontSize={theme.palette.geoViewFontSize.sm} />;
 
   return (
     <Paper sx={{ padding: '20px', gap: '8' }}>

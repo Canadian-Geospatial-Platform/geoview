@@ -27,10 +27,10 @@ export const getSxClasses = (theme: Theme) => ({
     },
     '& .MuiListItemText-root': {
       '>span': {
-        fontSize: '1rem',
+        fontSize: theme.palette.geoViewFontSize.default,
       },
       '> p': {
-        fontSize: '0.875rem',
+        fontSize: theme.palette.geoViewFontSize.sm,
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
@@ -58,7 +58,7 @@ export const getSxClasses = (theme: Theme) => ({
       alignItems: 'center',
       marginTop: '4px',
       '>p': {
-        fontSize: '0.875rem !important',
+        fontSize: `${theme.palette.geoViewFontSize.sm} !important`,
         color: theme.palette.text.secondary,
         fontWeight: 400,
       },
@@ -70,17 +70,17 @@ export const getSxClasses = (theme: Theme) => ({
   },
   borderWithIndex: `2px solid ${theme.palette.geoViewColor.primary.main} !important`,
   borderNone: 'none',
-  headline: { fontSize: '1.125rem', fontWeight: 'bold' },
+  headline: { fontSize: theme.palette.geoViewFontSize.md, fontWeight: 'bold' },
   layersInstructionsPaper: {
     padding: '2rem',
     cursor: 'pointer',
   },
   layersInstructionsTitle: {
-    fontSize: theme.palette.geoViewFontSize.lg,
+    fontSize: theme.palette.geoViewFontSize.md,
     fontWeight: '600',
     lineHeight: '1.5em',
   },
   layersInstructionsBody: {
-    fontSize: '1rem',
+    fontSize: theme.palette.geoViewFontSize.default,
   },
 });

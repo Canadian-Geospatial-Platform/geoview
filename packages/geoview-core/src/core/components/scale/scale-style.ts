@@ -30,7 +30,7 @@ export const getSxClasses = (theme: Theme) => ({
     maxHeight: '18px',
   },
   scaleText: {
-    fontSize: theme.typography.fontSize,
+    fontSize: theme.palette.geoViewFontSize.default,
     color: theme.palette.geoViewColor.bgColor.light[800],
     whiteSpace: 'nowrap',
     border: '1px solid',
