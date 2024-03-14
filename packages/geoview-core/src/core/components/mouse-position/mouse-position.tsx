@@ -81,7 +81,13 @@ export function MousePosition(): JSX.Element {
             return (
               // eslint-disable-next-line react/no-array-index-key
               <Box sx={sxClasses.mousePositionTextCheckmarkContainer} key={index}>
-                <CheckIcon sx={{ fontSize: theme.palette.geoViewFontSize.lg, opacity: index === positionMode ? 1 : 0, ...sxClasses.mousePositionCheckmark }} />
+                <CheckIcon
+                  sx={{
+                    fontSize: theme.palette.geoViewFontSize.lg,
+                    opacity: index === positionMode ? 1 : 0,
+                    ...sxClasses.mousePositionCheckmark,
+                  }}
+                />
                 <span>{position}</span>
               </Box>
             );

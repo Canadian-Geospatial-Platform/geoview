@@ -1,6 +1,7 @@
 import { ChangeEvent, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import debounce from 'lodash/debounce';
+import { useTheme } from '@mui/material';
 import { CloseIcon, SearchIcon, AppBar, Box, Divider, IconButton, ProgressBar, Toolbar } from '@/ui';
 import { StyledInputField, sxClasses } from './geolocator-style';
 import { OL_ZOOM_DURATION } from '@/core/utils/constant';
@@ -8,7 +9,6 @@ import { useUIAppbarGeolocatorActive } from '@/core/stores/store-interface-and-i
 import { useAppGeolocatorServiceURL, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { GeolocatorResult } from './geolocator-result';
 import { logger } from '@/core/utils/logger';
-import { useTheme } from '@mui/material';
 
 export interface GeoListItem {
   key: string;

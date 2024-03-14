@@ -72,7 +72,9 @@ export function Scale(): JSX.Element {
               {scaleValues.map((value, index) => {
                 return (
                   <Box sx={sxClasses.scaleExpandedCheckmarkText} key={value.scaleId}>
-                    <CheckIcon sx={{ ...sxClasses.scaleCheckmark, fontSize: theme.palette.geoViewFontSize.lg, opacity: scaleMode === index ? 1 : 0 }} />
+                    <CheckIcon
+                      sx={{ ...sxClasses.scaleCheckmark, fontSize: theme.palette.geoViewFontSize.lg, opacity: scaleMode === index ? 1 : 0 }}
+                    />
                     <Box component="span" sx={{ ...sxClasses.scaleText, borderBottom: !value.borderBottom ? 'none' : '1px solid' }}>
                       {value.label}
                     </Box>

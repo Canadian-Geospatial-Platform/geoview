@@ -81,6 +81,6 @@ export const getSxClasses = (theme: Theme) => ({
     lineHeight: '1.5em',
   },
   layersInstructionsBody: {
-    fontSize: theme.palette.geoViewFontSize.default
+    fontSize: theme.palette.geoViewFontSize.default,
   },
 });

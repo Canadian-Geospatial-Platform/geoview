@@ -1,5 +1,6 @@
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '@mui/material';
 import {
   Autocomplete,
   Box,
@@ -58,7 +59,6 @@ import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { useTheme } from '@mui/material';
 
 type EsriOptions = {
   err: string;

@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 
 import { Coordinate } from 'ol/coordinate'; // For typing only
 
+import { useTheme } from '@mui/material';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 import { TypeJsonObject, useGeoViewMapId } from '@/app';
@@ -9,7 +10,6 @@ import { Box, ClickMapMarker } from '@/ui';
 
 import { useMapClickMarker, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
-import { useTheme } from '@mui/material';
 
 export type TypeClickMarker = {
   lnglat: Coordinate;
