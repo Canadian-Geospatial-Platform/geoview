@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from 'react';
 
 import { Coordinate } from 'ol/coordinate'; // For typing only
 
-import { useTheme } from '@mui/material';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 import { TypeJsonObject, useGeoViewMapId } from '@/app';
@@ -27,7 +26,6 @@ export function ClickMarker(): JSX.Element {
   logger.logTraceRender('components/click-marker/click-marker');
 
   const mapId = useGeoViewMapId();
-  const theme = useTheme();
 
   // internal state
   const markerCoordinates = useRef<Coordinate>();
@@ -81,7 +79,7 @@ export function ClickMarker(): JSX.Element {
             },
           },
         }}
-        fontSize={theme.palette.geoViewFontSize.lg}
+        fontSize="large"
         color="warning"
       />
     </Box>

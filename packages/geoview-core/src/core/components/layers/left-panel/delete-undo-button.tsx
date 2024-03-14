@@ -63,6 +63,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   const handleUndoClick = () => {
     setOrToggleLayerVisibility(layer.layerPath);
     setInUndoState(false);
+    setLayerDeleteInProgress(false);
   };
 
   useEffect(() => {
@@ -84,9 +85,8 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
       };
     }
     setProgress(0);
-    setLayerDeleteInProgress(false);
     return undefined;
-  }, [inUndoState, getLayerDeleteInProgress()]);
+  }, [inUndoState]);
 
   if (!inUndoState && getRemovableFromOrderedLayerInfo(layer.layerPath) && !getLayerDeleteInProgress()) {
     return (
