@@ -15,7 +15,7 @@ export const getSxClasses = (theme: Theme) => ({
     padding: '10px',
   },
   notificationsTitle: {
-    fontSize: '15px',
+    fontSize: theme.palette.geoViewFontSize.default,
     fontWeight: '700',
     padding: '10px',
     color: theme.palette.geoViewColor.textColor.main,
@@ -47,7 +47,7 @@ export const getSxClasses = (theme: Theme) => ({
   notificationsCount: {
     backgroundColor: theme.palette.geoViewColor.bgColor.dark[800],
     color: theme.palette.geoViewColor.bgColor.light[800],
-    fontSize: '12px',
+    fontSize: theme.palette.geoViewFontSize.sm,
     borderRadius: '10px',
     height: '20px',
     width: '40px',

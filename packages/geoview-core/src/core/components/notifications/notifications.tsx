@@ -94,7 +94,7 @@ export default function Notifications(): JSX.Element {
     return (
       <Box sx={sxClasses.notificationItem} key={index}>
         <Box>{getNotificationIcon(notification)}</Box>
-        <Box sx={{ flexGrow: 1, fontSize: '0.9em', color: theme.palette.geoViewColor.textColor.light[250] }}>
+        <Box sx={{ flexGrow: 1, fontSize: theme.palette.geoViewFontSize.sm, color: theme.palette.geoViewColor.textColor.light[250] }}>
           <span>{notification.message}</span>
         </Box>
         {notification.count > 1 ? (

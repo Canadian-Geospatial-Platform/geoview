@@ -8,6 +8,7 @@ import { useUIAppbarGeolocatorActive } from '@/core/stores/store-interface-and-i
 import { useAppGeolocatorServiceURL, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { GeolocatorResult } from './geolocator-result';
 import { logger } from '@/core/utils/logger';
+import { useTheme } from '@mui/material';
 
 export interface GeoListItem {
   key: string;
@@ -24,6 +25,8 @@ export function Geolocator() {
   logger.logTraceRender('components/geolocator/geolocator');
 
   const { t } = useTranslation();
+
+  const theme = useTheme();
 
   // internal state
   const [data, setData] = useState<GeoListItem[]>();
@@ -183,13 +186,13 @@ export function Geolocator() {
                     }
                   }}
                 >
-                  <SearchIcon fontSize="small" />
+                  <SearchIcon fontSize={theme.palette.geoViewFontSize.sm} />
                 </IconButton>
                 {isSearchInputVisible && (
                   <>
                     <Divider orientation="vertical" variant="middle" flexItem />
                     <IconButton size="small" edge="end" color="inherit" sx={{ mr: 2, ml: 4 }} onClick={resetSearch}>
-                      <CloseIcon fontSize="small" />
+                      <CloseIcon fontSize={theme.palette.geoViewFontSize.sm} />
                     </IconButton>
                   </>
                 )}

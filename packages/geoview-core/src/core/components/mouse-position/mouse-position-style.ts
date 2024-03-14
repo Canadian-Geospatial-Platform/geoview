@@ -32,7 +32,7 @@ export const getSxClasses = (theme: Theme) => ({
     justifyContent: 'center',
     alignItems: 'center',
     '& span': {
-      fontSize: theme.typography.fontSize,
+      fontSize: theme.palette.geoViewFontSize.default,
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
       overflow: 'hidden',
@@ -42,7 +42,7 @@ export const getSxClasses = (theme: Theme) => ({
     paddingRight: 5,
   },
   mousePositionText: {
-    fontSize: theme.typography.fontSize,
+    fontSize: theme.palette.geoViewFontSize.default,
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     overflow: 'hidden',

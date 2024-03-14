@@ -9,6 +9,7 @@ import { Box, ClickMapMarker } from '@/ui';
 
 import { useMapClickMarker, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
+import { useTheme } from '@mui/material';
 
 export type TypeClickMarker = {
   lnglat: Coordinate;
@@ -26,6 +27,7 @@ export function ClickMarker(): JSX.Element {
   logger.logTraceRender('components/click-marker/click-marker');
 
   const mapId = useGeoViewMapId();
+  const theme = useTheme();
 
   // internal state
   const markerCoordinates = useRef<Coordinate>();
@@ -79,7 +81,7 @@ export function ClickMarker(): JSX.Element {
             },
           },
         }}
-        fontSize="large"
+        fontSize={theme.palette.geoViewFontSize.lg}
         color="warning"
       />
     </Box>

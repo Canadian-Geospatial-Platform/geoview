@@ -32,9 +32,9 @@ export const geoViewColors: IGeoViewColors = {
 };
 
 const fontSizes: IGeoViewFontSizes = {
-  xs: `${defaultFontSize * 0.8}rem`,
-  sm: `${defaultFontSize * 1}rem`,
-  md: `${defaultFontSize * 1.1}rem`,
+  xs: `${defaultFontSize * 0.7}rem`,
+  sm: `${defaultFontSize * 0.875}rem`,
+  md: `${defaultFontSize * 1.125}rem`,
   lg: `${defaultFontSize * 1.3}rem`,
   xl: `${defaultFontSize * 1.6}rem`,
   xxl: `${defaultFontSize * 2}rem`,

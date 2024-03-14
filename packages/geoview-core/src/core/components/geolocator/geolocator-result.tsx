@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { SelectChangeEvent } from '@mui/material';
+import { SelectChangeEvent, useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { sxClasses } from './geolocator-style';
 import {
@@ -41,6 +41,8 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
 
   // get store values
   const mapSize = useMapSize();
+
+  const theme = useTheme();
 
   /**
    * Clear all filters.
@@ -183,7 +185,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               onClick={handleClearFilters}
               disabled={!geoLocationData.length}
             >
-              <FilterAltOffIcon fontSize="small" />
+              <FilterAltOffIcon fontSize={theme.palette.geoViewFontSize.sm} />
             </IconButton>
           </Box>
         </Box>
@@ -193,7 +195,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
         {!!data.length && <GeoList geoListItems={data} searchValue={searchValue} />}
         {(!data.length || error) && (
           <Box sx={{ p: 10 }}>
-            <Typography component="p" sx={{ fontSize: 14 }}>
+            <Typography component="p" sx={{ fontSize: theme.palette.geoViewFontSize.md }}>
               {t('geolocator.errorMessage')} <b>{searchValue}</b>
             </Typography>
             {!!(province.length || category.length) && (

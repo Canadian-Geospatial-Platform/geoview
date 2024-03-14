@@ -238,7 +238,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
             <Box sx={{ textAlign: 'left' }}>
               <Typography sx={sxClasses.categoryTitle}> {layerDetails.layerName} </Typography>
-              <Typography sx={{ fontSize: '0.8em' }}> {getSubTitle()} </Typography>
+              <Typography sx={{ fontSize: theme.palette.geoViewFontSize.sm }}> {getSubTitle()} </Typography>
             </Box>
             {renderLayerButtons()}
           </Box>
