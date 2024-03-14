@@ -649,7 +649,6 @@
         'LYR1/click/FeatureInfoLayerSet'
       );
 
-      const LegendsLayerSet1 = cgpv.api.getLegendsLayerSet('LYR1');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_LEGENDS.LEGEND_LAYERSET_UPDATED,
         (payload) => {
@@ -678,7 +677,6 @@
         'LYR2/click/FeatureInfoLayerSet'
       );
 
-      const LegendsLayerSet2 = cgpv.api.getLegendsLayerSet('LYR2');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_LEGENDS.LEGEND_LAYERSET_UPDATED,
         (payload) => {
@@ -700,7 +698,6 @@
         'LYR3/click/FeatureInfoLayerSet'
       );
 
-      const LegendsLayerSet3 = cgpv.api.getLegendsLayerSet('LYR3');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_LEGENDS.LEGEND_LAYERSET_UPDATED,
         (payload) => {
@@ -713,7 +710,6 @@
       listenToLegendLayerSetChanges('HLYR3-state', 'LYR3/LegendsLayerSet');
 
       //LYR4 ===================================================================================================================
-      const LegendsLayerSet4 = cgpv.api.getLegendsLayerSet('LYR4', 'LegendsId4');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_LEGENDS.LEGEND_LAYERSET_UPDATED,
         (payload) => {
