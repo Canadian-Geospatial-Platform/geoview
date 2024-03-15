@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { animated, useSpring } from '@react-spring/web';
 import { Box, ChevronRightIcon, IconButton, List, ListItem, ListItemButton, ListItemIcon, Paper, Tooltip, Typography } from '@/ui';
 
-import { TypeArrayOfFeatureInfoEntries, TypeQueryStatus } from '@/geo/utils/layer-set';
+import { TypeFeatureInfoEntry, TypeQueryStatus } from '@/geo/utils/layer-set';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 
 import { getSxClasses } from './layer-list-style';
@@ -19,7 +19,7 @@ export interface LayerListEntry {
   mapFilteredIcon?: ReactNode;
   tooltip?: ReactNode;
   numOffeatures?: number;
-  features?: TypeArrayOfFeatureInfoEntries;
+  features?: TypeFeatureInfoEntry[] | undefined | null;
 }
 
 interface LayerListProps {

@@ -203,6 +203,8 @@ export class LayerSet {
    * @param {string} layerPath
    * @param {QueryType} queryType
    * @param {TypeLocation} location
+   *
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} promise of the results
    */
   processQueryResultSetData = (
     data: TypeLayerData | TypeHoverLayerData,
@@ -210,7 +212,7 @@ export class LayerSet {
     layerPath: string,
     queryType: QueryType,
     location: TypeLocation
-  ): Promise<TypeArrayOfFeatureInfoEntries | null> => {
+  ): Promise<TypeFeatureInfoEntry[] | undefined | null> => {
     // If event listener is enabled, query status isn't in error, and geoview layer instance is defined
     if (data.eventListenerEnabled && data.queryStatus !== 'error' && layerConfig.geoviewLayerInstance) {
       // If source is queryable
@@ -241,7 +243,7 @@ export type TypeLayerData = {
   // when Array.isArray(features) is true, the features property contains the query result.
   // when property features is null, the query ended with an error.
   queryStatus: TypeQueryStatus;
-  features: TypeArrayOfFeatureInfoEntries;
+  features: TypeFeatureInfoEntry[] | undefined | null;
 };
 
 export type TypeFeatureInfoByEventTypes = {
@@ -294,5 +296,3 @@ export type TypeFeatureInfoEntry = {
  * to add more information on one or the other and keep things loosely linked together.
  */
 export type TypeFeatureInfoEntryPartial = Pick<TypeFeatureInfoEntry, 'fieldInfo'>;
-
-export type TypeArrayOfFeatureInfoEntries = TypeFeatureInfoEntry[] | undefined | null;
