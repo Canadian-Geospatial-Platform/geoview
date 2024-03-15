@@ -1,4 +1,4 @@
-import { Input, styled } from '@mui/material';
+import { Input, Theme, styled } from '@mui/material';
 
 export const sxClasses = {
   root: {
@@ -39,7 +39,7 @@ export const sxClasses = {
     padding: 6,
     paddingTop: 2,
     '& .MuiInputLabel-formControl': {
-      fontSize: '14px',
+      fontSize: (theme: Theme) => theme.palette.geoViewFontSize.default,
       marginTop: 0,
     },
     '& .MuiSelect-select': {
@@ -69,7 +69,7 @@ export const sxClasses = {
 
 export const sxClassesList = {
   listStyle: {
-    fontSize: '0.875rem',
+    fontSize: (theme: Theme) => theme.palette.geoViewFontSize.sm,
     '& .list-title': {
       '>div': {
         whiteSpace: 'nowrap',
@@ -83,9 +83,9 @@ export const sxClassesList = {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     '& span': {
-      fontSize: '0.75rem',
+      fontSize: (theme: Theme) => theme.palette.geoViewFontSize.xs,
       ':first-of-type': {
-        fontSize: '0.875rem',
+        fontSize: (theme: Theme) => theme.palette.geoViewFontSize.sm,
       },
     },
   },
@@ -94,7 +94,7 @@ export const sxClassesList = {
 export const StyledInputField = styled(Input)(({ theme }) => ({
   color: 'inherit',
   width: '100%',
-  fontSize: '1rem',
+  fontSize: theme.palette.geoViewFontSize.default,
   '& .MuiInputBase-input': {
     transition: theme.transitions.create('width'),
     width: '100%',

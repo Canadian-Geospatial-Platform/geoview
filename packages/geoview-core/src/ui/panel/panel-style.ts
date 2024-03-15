@@ -18,7 +18,7 @@ export const getSxClasses = (theme: Theme) => ({
       height: 64,
     },
     '& .MuiCardHeader-title': {
-      fontSize: 15,
+      fontSize: theme.palette.geoViewFontSize.default,
       paddingTop: 8,
       textTransform: 'uppercase',
     },

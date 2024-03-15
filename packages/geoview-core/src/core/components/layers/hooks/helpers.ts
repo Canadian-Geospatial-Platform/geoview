@@ -1,6 +1,6 @@
 // TODO Remove when no longer needed
 import _ from 'lodash';
-import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { CONST_LAYER_TYPES, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { api } from '@/app';
 import { TypeLegendLayer, TypeLegendItem } from '@/core/components/layers/types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
@@ -63,7 +63,7 @@ export function useLegendHelpers() {
         layerId: 'test_testLayerId',
         layerPath: 'testLayerPath',
         layerName: 'TEST--TestLayer1',
-        type: 'GeoJSON',
+        type: CONST_LAYER_TYPES.GEOJSON,
         layerStatus: 'loaded',
         querySent: true,
         children: [],
@@ -74,7 +74,7 @@ export function useLegendHelpers() {
         layerId: 'test_geojsonLYR5',
         layerPath: 'geojsonLYR5',
         layerName: 'TEST--Layer with groups',
-        type: 'GeoJSON',
+        type: CONST_LAYER_TYPES.GEOJSON,
         layerStatus: 'loaded',
         querySent: true,
         children: [],
@@ -85,7 +85,7 @@ export function useLegendHelpers() {
         layerId: 'test_chrisLayr1',
         layerPath: 'Chris Sample Parent1',
         layerName: 'TEST--chrisparentlayer1',
-        type: 'GeoJSON',
+        type: CONST_LAYER_TYPES.GEOJSON,
         layerStatus: 'loaded',
         querySent: true,
         children: [
@@ -94,7 +94,7 @@ export function useLegendHelpers() {
             layerId: 'test_chrisChildLayer1',
             layerPath: 'ChrisSampleC3',
             layerName: 'TEST--chrisparentchild1',
-            type: 'GeoJSON',
+            type: CONST_LAYER_TYPES.GEOJSON,
             layerStatus: 'loaded',
             querySent: true,
             children: [
@@ -103,7 +103,7 @@ export function useLegendHelpers() {
                 layerId: 'test_chrisGrandChild1',
                 layerPath: 'Gran ChildChidl2',
                 layerName: 'TEST--chris parent child2',
-                type: 'GeoJSON',
+                type: CONST_LAYER_TYPES.GEOJSON,
                 layerStatus: 'error',
                 querySent: true,
                 children: [],
@@ -114,7 +114,7 @@ export function useLegendHelpers() {
                 layerId: 'test_chrisGrandChild5',
                 layerPath: 'Gran ChildChidl555',
                 layerName: 'TEST--chris parent child25555',
-                type: 'GeoJSON',
+                type: CONST_LAYER_TYPES.GEOJSON,
                 layerStatus: 'processing',
                 querySent: true,
                 children: [],
@@ -125,7 +125,7 @@ export function useLegendHelpers() {
                 layerId: 'test_chrisGrandChild2',
                 layerPath: 'Grand Child Chidl3',
                 layerName: 'TEST--chris parent child3',
-                type: 'GeoJSON',
+                type: CONST_LAYER_TYPES.GEOJSON,
                 layerStatus: 'newInstance',
                 querySent: true,
                 children: [],
@@ -139,7 +139,7 @@ export function useLegendHelpers() {
             layerId: 'test_chrisChild2',
             layerPath: 'Chris Sample Chidl2',
             layerName: 'TEST--chirslyerss',
-            type: 'GeoJSON',
+            type: CONST_LAYER_TYPES.GEOJSON,
             layerStatus: 'loaded',
             querySent: true,
             children: [],
@@ -150,7 +150,7 @@ export function useLegendHelpers() {
             layerId: 'test_chrisChild3',
             layerPath: 'Chris Sample Chidl3',
             layerName: 'TEST--chris-child32edd',
-            type: 'GeoJSON',
+            type: CONST_LAYER_TYPES.GEOJSON,
             layerStatus: 'loaded',
             querySent: true,
             children: [],
@@ -188,7 +188,7 @@ export function useLegendHelpers() {
         layerId: setData.data?.layerPath ?? `layer${i}`,
         layerPath: `test_${setData.data?.layerPath ?? generateId()}`,
         layerName: `TEST---${setData.data?.layerName?.en ?? 'Uknown Laer name'}`,
-        type: setData.data?.type ?? 'imageStatic',
+        type: setData.data?.type ?? CONST_LAYER_TYPES.IMAGE_STATIC,
         layerStatus: setData.layerStatus,
         querySent: setData.querySent,
         children: [],

@@ -5,7 +5,12 @@ import { Extent } from 'ol/extent';
 
 import cloneDeep from 'lodash/cloneDeep';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
-import { layerEntryIsGroupLayer, TypeLayerEntryConfig, TypeListOfLayerEntryConfig } from '@/geo/map/map-schema-types';
+import {
+  CONST_LAYER_ENTRY_TYPES,
+  layerEntryIsGroupLayer,
+  TypeLayerEntryConfig,
+  TypeListOfLayerEntryConfig,
+} from '@/geo/map/map-schema-types';
 import { getLocalizedValue, getXMLHttpRequest } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
@@ -21,7 +26,6 @@ import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-cla
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
-import { GeoCoreLayerEntryConfig } from '@/core/utils/config/validation-classes/geocore-layer-entry-config';
 
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
@@ -106,7 +110,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
       // Group layer are not registered to layer sets.
       if (this.registerToLayerSetListenerFunctions[layerPath]) this.unregisterFromLayerSets(layerConfig as AbstractBaseLayerEntryConfig);
       const switchToGroupLayer = Cast<GroupLayerEntryConfig>(cloneDeep(layerConfig));
-      switchToGroupLayer.entryType = 'group';
+      switchToGroupLayer.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
       switchToGroupLayer.layerName = {
         en: this.metadata!.layers[esriIndex].name as string,
         fr: this.metadata!.layers[esriIndex].name as string,
@@ -120,9 +124,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
       api.maps[this.mapId].layer.registeredLayers[groupLayerConfig.layerPath] = groupLayerConfig;
 
       (this.metadata!.layers[esriIndex].subLayerIds as TypeJsonArray).forEach((layerId) => {
-        const subLayerEntryConfig: TypeLayerEntryConfig = geoviewEntryIsEsriDynamic(
-          layerConfig as Exclude<TypeLayerEntryConfig, GeoCoreLayerEntryConfig>
-        )
+        const subLayerEntryConfig: TypeLayerEntryConfig = geoviewEntryIsEsriDynamic(layerConfig)
           ? new EsriDynamicLayerEntryConfig(layerConfig as EsriDynamicLayerEntryConfig)
           : new EsriFeatureLayerEntryConfig(layerConfig as EsriFeatureLayerEntryConfig);
         subLayerEntryConfig.parentLayerConfig = groupLayerConfig;
@@ -139,7 +141,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
       return;
     }
 
-    if (this.esriChildHasDetectedAnError(layerConfig as Exclude<TypeLayerEntryConfig, GeoCoreLayerEntryConfig>, esriIndex)) {
+    if (this.esriChildHasDetectedAnError(layerConfig, esriIndex)) {
       layerConfig.layerStatus = 'error';
       return;
     }
@@ -357,7 +359,7 @@ export async function commonProcessLayerMetadata(
       }
       this.layerMetadata[layerPath] = data;
       // The following line allow the type ascention of the type guard functions on the second line below
-      const EsriLayerConfig = layerConfig as Exclude<TypeLayerEntryConfig, GeoCoreLayerEntryConfig>;
+      const EsriLayerConfig = layerConfig;
       if (geoviewEntryIsEsriDynamic(EsriLayerConfig) || geoviewEntryIsEsriFeature(EsriLayerConfig)) {
         if (!EsriLayerConfig.style) {
           const renderer = Cast<EsriBaseRenderer>(data.drawingInfo?.renderer);

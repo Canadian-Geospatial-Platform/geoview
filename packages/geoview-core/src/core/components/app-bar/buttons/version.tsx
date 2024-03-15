@@ -59,7 +59,7 @@ export default function Version(): JSX.Element {
       },
     },
     versionsInfoTitle: {
-      fontSize: '15px',
+      fontSize: (theme: Theme) => theme.palette.geoViewFontSize.default,
       fontWeight: '700',
       padding: '10px',
       color: (theme: Theme) => theme.palette.geoViewColor.textColor.main,

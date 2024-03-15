@@ -13,6 +13,7 @@ import { EVENT_NAMES } from '@/api/events/event-types';
 import { PayloadBaseClass, payloadIsAllQueriesDone } from '@/api/events/payloads';
 import { logger } from '@/core/utils/logger';
 import { TypeHoverFeatureInfo, TypeHoverFeatureInfoResultSet } from '@/geo/utils/hover-feature-info-layer-set';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 /**
  * Hover tooltip component to show name field information on hover
@@ -76,7 +77,7 @@ export function HoverTooltip(): JSX.Element {
         // if there is a result and layer is not ogcWms, and it is not selected, show tooltip
         if (
           value?.data?.feature &&
-          value.data.feature.geoviewLayerType !== 'ogcWms' &&
+          value.data.feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS &&
           !(selectedFeature.current && getUid(value.data.feature.geometry) === getUid(selectedFeature.current?.geometry))
         ) {
           const item = value.data.feature;
@@ -99,7 +100,7 @@ export function HoverTooltip(): JSX.Element {
       const { resultSet } = payload;
       Object.keys(resultSet).every((layerPath) => {
         const feature = (resultSet as TypeHoverFeatureInfoResultSet)[layerPath]?.data?.feature;
-        if (feature && feature.geoviewLayerType !== 'ogcWms') {
+        if (feature && feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS) {
           selectedFeature.current = feature;
           return false;
         }

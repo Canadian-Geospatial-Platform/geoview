@@ -1,8 +1,14 @@
-import { TypeDisplayLanguage, TypeListOfLayerEntryConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
-import { CONST_LAYER_ENTRY_TYPE, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import {
+  convertLayerTypeToEntry,
+  TypeDisplayLanguage,
+  TypeListOfLayerEntryConfig,
+  layerEntryIsGroupLayer,
+  mapConfigLayerEntryIsGeoCore,
+} from '@/geo/map/map-schema-types';
+import { CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { logger } from '@/core/utils/logger';
 
-import { TypeMapFeaturesConfig } from '../../types/global-types';
+import { TypeGeoviewLayerConfig, TypeMapFeaturesConfig } from '../../types/global-types';
 import { ConfigValidation } from './config-validation';
 import { InlineDivConfigReader } from './reader/div-config-reader';
 import { JsonConfigReader } from './reader/json-config-reader';
@@ -118,9 +124,12 @@ export class Config {
   getValidMapConfig(mapFeaturesConfig: TypeMapFeaturesConfig): TypeMapFeaturesConfig {
     if (mapFeaturesConfig?.map?.listOfGeoviewLayerConfig) {
       mapFeaturesConfig.map.listOfGeoviewLayerConfig.forEach((geoviewLayerEntry) => {
-        if (Object.keys(CONST_LAYER_ENTRY_TYPE).includes(geoviewLayerEntry.geoviewLayerType))
-          this.setLayerEntryType(geoviewLayerEntry.listOfLayerEntryConfig!, geoviewLayerEntry.geoviewLayerType);
-        else throw new Error(`Invalid GeoView Layer Type ${geoviewLayerEntry.geoviewLayerType}`);
+        if (mapConfigLayerEntryIsGeoCore(geoviewLayerEntry)) {
+          //  Skip it, because we don't validate the GeoCore configuration anymore. Not the same way as typical GeoView Layer Types at least.
+        } else if (Object.values(CONST_LAYER_TYPES).includes((geoviewLayerEntry as TypeGeoviewLayerConfig).geoviewLayerType)) {
+          const geoViewLayerEntryCasted = geoviewLayerEntry as TypeGeoviewLayerConfig;
+          this.setLayerEntryType(geoViewLayerEntryCasted.listOfLayerEntryConfig!, geoViewLayerEntryCasted.geoviewLayerType);
+        } else throw new Error(`Invalid GeoView Layer Type ${geoviewLayerEntry.geoviewLayerType}`);
       });
     }
     return this.configValidation.validateMapConfigAgainstSchema(mapFeaturesConfig);
@@ -139,7 +148,7 @@ export class Config {
         // eslint-disable-next-line no-param-reassign
         layerConfig.schemaTag = geoviewLayerType;
         // eslint-disable-next-line no-param-reassign
-        layerConfig.entryType = CONST_LAYER_ENTRY_TYPE[geoviewLayerType];
+        layerConfig.entryType = convertLayerTypeToEntry(geoviewLayerType);
       }
     });
   }

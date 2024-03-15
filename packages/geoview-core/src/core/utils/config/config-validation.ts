@@ -34,9 +34,11 @@ import {
   VALID_VERSIONS,
   TypeListOfGeoviewLayerConfig,
   TypeListOfLocalizedLanguages,
+  MapConfigLayerEntry,
+  mapConfigLayerEntryIsGeoCore,
 } from '@/geo/map/map-schema-types';
 import { Cast, toJsonObject, TypeJsonObject, TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { CONST_GEOVIEW_SCHEMA_BY_TYPE, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { CONST_GEOVIEW_SCHEMA_BY_TYPE, CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { geoviewEntryIsEsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { logger } from '@/core/utils/logger';
 import { CONFIG_GEOCORE_URL, CONFIG_GEOLOCATOR_URL } from '@/app';
@@ -57,7 +59,6 @@ import { EsriDynamicLayerEntryConfig } from './validation-classes/raster-validat
 import { EsriImageLayerEntryConfig } from './validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GroupLayerEntryConfig } from './validation-classes/group-layer-entry-config';
 import { ConfigBaseClass } from './validation-classes/config-base-class';
-import { GeoCoreLayerEntryConfig } from './validation-classes/geocore-layer-entry-config';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -477,11 +478,16 @@ export class ConfigValidation {
 
       let isValid = this.IsValidTypeMapFeaturesInstance(mapFeaturesConfigToValidate, validator);
       for (let i = 0; i < mapFeaturesConfigToValidate.map.listOfGeoviewLayerConfig.length && isValid; i++) {
-        isValid = this.IsValidTypeListOfLayerEntryConfig(
-          mapFeaturesConfigToValidate.map.listOfGeoviewLayerConfig[i].geoviewLayerType,
-          mapFeaturesConfigToValidate.map.listOfGeoviewLayerConfig[i].listOfLayerEntryConfig,
-          validator
-        );
+        // If not GeoCore, validate the geoview configuration with the schema.
+        // GeoCore doesn't have schema validation as part of the routine below, because they're not a TypeGeoviewLayerType anymore
+        if (!mapConfigLayerEntryIsGeoCore(mapFeaturesConfigToValidate.map.listOfGeoviewLayerConfig[i])) {
+          const gvLayerConfigCasted = mapFeaturesConfigToValidate.map.listOfGeoviewLayerConfig[i] as TypeGeoviewLayerConfig;
+          isValid = this.IsValidTypeListOfLayerEntryConfig(
+            gvLayerConfigCasted.geoviewLayerType,
+            gvLayerConfigCasted.listOfLayerEntryConfig,
+            validator
+          );
+        }
       }
 
       if (!isValid) {
@@ -526,42 +532,41 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Do extra validation that schema can not do.
-   * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig The list of GeoView layer configuration to adjust and
+   * @param {MapConfigLayerEntry[]} listOfMapConfigLayerEntry The list of Map Config Layer Entry configuration to adjust and
    * validate.
    */
-  private doExtraValidation(listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig) {
-    if (listOfGeoviewLayerConfig) {
-      listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
-        // The default value for geoviewLayerConfig.initialSettings.visible is true.
-        if (!geoviewLayerConfig.initialSettings) geoviewLayerConfig.initialSettings = { visible: 'yes' };
-        switch (geoviewLayerConfig.geoviewLayerType) {
-          case 'CSV':
-          case 'GeoJSON':
-          case 'xyzTiles':
-          case 'vectorTiles':
-          case 'GeoPackage':
-          case 'imageStatic':
-            this.geoviewLayerIdIsMandatory(geoviewLayerConfig);
-            this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
-            break;
-          case 'esriDynamic':
-          case 'esriFeature':
-          case 'esriImage':
-          case 'ogcFeature':
-          case 'ogcWfs':
-          case 'ogcWms':
-            this.geoviewLayerIdIsMandatory(geoviewLayerConfig);
-            this.metadataAccessPathIsMandatory(geoviewLayerConfig);
-            this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
-            break;
-          case 'geoCore':
-            this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
-            break;
-          default:
-            throw new Error('Your not supposed to end here. There is a problem with the schema validator.');
-            break;
-        }
-      });
+  private doExtraValidation(listOfMapConfigLayerEntry?: MapConfigLayerEntry[]) {
+    if (listOfMapConfigLayerEntry) {
+      listOfMapConfigLayerEntry
+        .filter((geoviewLayerConfig) => !mapConfigLayerEntryIsGeoCore(geoviewLayerConfig))
+        .forEach((geoviewLayerConfig) => {
+          // The default value for geoviewLayerConfig.initialSettings.visible is true.
+          const geoviewLayerConfigCasted = geoviewLayerConfig as TypeGeoviewLayerConfig;
+          if (!geoviewLayerConfigCasted.initialSettings) geoviewLayerConfigCasted.initialSettings = { visible: 'yes' };
+          switch (geoviewLayerConfig.geoviewLayerType) {
+            case CONST_LAYER_TYPES.CSV:
+            case CONST_LAYER_TYPES.GEOJSON:
+            case CONST_LAYER_TYPES.XYZ_TILES:
+            case CONST_LAYER_TYPES.VECTOR_TILES:
+            case CONST_LAYER_TYPES.GEOPACKAGE:
+            case CONST_LAYER_TYPES.IMAGE_STATIC:
+              this.geoviewLayerIdIsMandatory(geoviewLayerConfigCasted);
+              this.processLayerEntryConfig(geoviewLayerConfigCasted, geoviewLayerConfigCasted.listOfLayerEntryConfig);
+              break;
+            case CONST_LAYER_TYPES.ESRI_DYNAMIC:
+            case CONST_LAYER_TYPES.ESRI_FEATURE:
+            case CONST_LAYER_TYPES.ESRI_IMAGE:
+            case CONST_LAYER_TYPES.OGC_FEATURE:
+            case CONST_LAYER_TYPES.WFS:
+            case CONST_LAYER_TYPES.WMS:
+              this.geoviewLayerIdIsMandatory(geoviewLayerConfigCasted);
+              this.metadataAccessPathIsMandatory(geoviewLayerConfigCasted);
+              this.processLayerEntryConfig(geoviewLayerConfigCasted, geoviewLayerConfigCasted.listOfLayerEntryConfig);
+              break;
+            default:
+              throw new Error('Your not supposed to end here. There is a problem with the schema validator.');
+          }
+        });
     }
   }
 
@@ -624,7 +629,7 @@ export class ConfigValidation {
         listOfLayerEntryConfig[i] = new XYZTilesLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsVectorTiles(layerConfig)) {
         listOfLayerEntryConfig[i] = new VectorTilesLayerEntryConfig(layerConfig);
-      } else if (geoviewEntryIsEsriDynamic(layerConfig as Exclude<TypeLayerEntryConfig, GeoCoreLayerEntryConfig>)) {
+      } else if (geoviewEntryIsEsriDynamic(layerConfig)) {
         listOfLayerEntryConfig[i] = new EsriDynamicLayerEntryConfig(layerConfig as EsriDynamicLayerEntryConfig);
       } else if (geoviewEntryIsEsriFeature(layerConfig)) {
         listOfLayerEntryConfig[i] = new EsriFeatureLayerEntryConfig(layerConfig);
@@ -683,14 +688,11 @@ export class ConfigValidation {
   /** ***************************************************************************************************************************
    * Adjust the map features configuration localized strings according to the suported languages array content.
    * @param {TypeListOfLocalizedLanguages} suportedLanguages The list of supported languages.
-   * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig The list of GeoView layer configuration to adjust according
+   * @param {MapConfigLayerEntry[]} listOfMapConfigLayerEntry The list of Map Config Layer Entry configuration to adjust according
    * to the suported languages array content.
    */
-  private processLocalizedString(
-    suportedLanguages: TypeListOfLocalizedLanguages,
-    listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig
-  ): void {
-    if (suportedLanguages.includes('en') && suportedLanguages.includes('fr') && listOfGeoviewLayerConfig) {
+  private processLocalizedString(suportedLanguages: TypeListOfLocalizedLanguages, listOfMapConfigLayerEntry?: MapConfigLayerEntry[]): void {
+    if (suportedLanguages.includes('en') && suportedLanguages.includes('fr') && listOfMapConfigLayerEntry) {
       const validateLocalizedString = (config: TypeJsonObject) => {
         if (typeof config === 'object') {
           Object.keys(config).forEach((key) => {
@@ -709,7 +711,7 @@ export class ConfigValidation {
           });
         }
       };
-      listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => validateLocalizedString(toJsonObject(geoviewLayerConfig)));
+      listOfMapConfigLayerEntry.forEach((geoviewLayerConfig) => validateLocalizedString(toJsonObject(geoviewLayerConfig)));
       return;
     }
 
@@ -723,7 +725,7 @@ export class ConfigValidation {
       destinationKey = 'en';
     }
 
-    if (listOfGeoviewLayerConfig) {
+    if (listOfMapConfigLayerEntry) {
       const propagateLocalizedString = (config: TypeJsonObject) => {
         if (typeof config === 'object') {
           Object.keys(config).forEach((key) => {
@@ -739,7 +741,7 @@ export class ConfigValidation {
           });
         }
       };
-      listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => propagateLocalizedString(toJsonObject(geoviewLayerConfig)));
+      listOfMapConfigLayerEntry.forEach((geoviewLayerConfig) => propagateLocalizedString(toJsonObject(geoviewLayerConfig)));
     }
   }
 

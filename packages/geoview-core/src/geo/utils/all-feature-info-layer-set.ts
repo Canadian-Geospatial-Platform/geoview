@@ -7,11 +7,12 @@ import {
   QueryType,
 } from '@/api/events/payloads';
 import { api } from '@/app';
-import { LayerSet } from './layer-set';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { logger } from '@/core/utils/logger';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { TypeLayerData, TypeLayerEntryConfig, TypeLayerStatus, payloadIsGetAllLayerFeatures } from '@/core/types/cgpv-types';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { LayerSet } from './layer-set';
 
 export type TypeAllFeatureInfoResultSetEntry = {
   layerName?: string;
@@ -60,7 +61,17 @@ export class AllFeatureInfoLayerSet extends LayerSet {
       logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET setRegistrationConditionFunction', layerPath, Object.keys(this.resultSet));
 
       const geoviewLayerConfig = api.maps[this.mapId].layer.geoviewLayer(layerPath);
-      if (['esriImage', 'imageStatic', 'xyzTiles', 'vectorTiles', 'ogcWms'].includes(geoviewLayerConfig.type)) return false;
+      // TODO: Make a util function for this check
+      if (
+        [
+          CONST_LAYER_TYPES.ESRI_IMAGE,
+          CONST_LAYER_TYPES.IMAGE_STATIC,
+          CONST_LAYER_TYPES.XYZ_TILES,
+          CONST_LAYER_TYPES.VECTOR_TILES,
+          CONST_LAYER_TYPES.WMS,
+        ].includes(geoviewLayerConfig.type)
+      )
+        return false;
 
       const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
       const queryable = layerConfig?.source?.featureInfo?.queryable;

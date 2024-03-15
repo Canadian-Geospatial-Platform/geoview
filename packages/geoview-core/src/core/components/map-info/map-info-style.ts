@@ -54,7 +54,6 @@ export const getSxClasses = (theme: Theme) => ({
       marginRight: 5,
     },
     rotationIcon: {
-      fontSize: 'fontSize',
       width: '1.5em',
       height: '1.5em',
       color: theme.palette.geoViewColor.bgColor.light[800],

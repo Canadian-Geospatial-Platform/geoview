@@ -4,6 +4,7 @@ import { logger } from '@/core/utils/logger';
 import { AbstractEventProcessor } from '../abstract-event-processor';
 import {
   AbstractGeoViewVector,
+  CONST_LAYER_TYPES,
   EsriDynamic,
   ITimeSliderState,
   TimeSliderLayerSet,
@@ -189,7 +190,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     values: number[]
   ): void {
     const layerType = api.maps[mapId].layer.geoviewLayer(layerPath).type;
-    if (layerType === 'ogcWms') {
+    if (layerType === CONST_LAYER_TYPES.WMS) {
       if (filtering) {
         const newValue = `${new Date(values[0]).toISOString().slice(0, new Date(values[0]).toISOString().length - 5)}Z`;
         const filter = `${field}=date '${newValue}'`;

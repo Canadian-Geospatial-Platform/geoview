@@ -99,23 +99,23 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
         fontWeight: 400,
       },
       subtitle1: {
-        fontSize: '1rem',
+        fontSize: geoViewFontSizes.default,
         lineHeight: 1.25,
       },
       subtitle2: {
-        fontSize: '0.8rem',
+        fontSize: geoViewFontSizes.xs,
         lineHeight: 1.25,
       },
       body1: {},
       body2: {},
       caption: {},
       overline: {
-        fontSize: '0.875rem',
+        fontSize: geoViewFontSizes.sm,
         fontWeight: 500,
         letterSpacing: 2,
       },
       button: {
-        fontSize: 24,
+        fontSize: geoViewFontSizes.lg,
         fontWeight: 500,
       },
       control: {

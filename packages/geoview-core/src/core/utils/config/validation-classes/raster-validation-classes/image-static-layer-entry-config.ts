@@ -1,5 +1,5 @@
-import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { GeoviewChild, TypeLayerEntryType, TypeSourceImageStaticInitialConfig } from '@/geo/map/map-schema-types';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { CONST_LAYER_ENTRY_TYPES, GeoviewChild, TypeSourceImageStaticInitialConfig } from '@/geo/map/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '../abstract-base-layer-entry-config';
 
 /** ******************************************************************************************************************************
@@ -7,10 +7,10 @@ import { AbstractBaseLayerEntryConfig } from '../abstract-base-layer-entry-confi
  */
 export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** Tag used to link the entry to a specific schema. */
-  schemaTag = 'imageStatic' as TypeGeoviewLayerType;
+  schemaTag = CONST_LAYER_TYPES.IMAGE_STATIC;
 
   /** Layer entry data type. */
-  entryType = 'raster-image' as TypeLayerEntryType;
+  entryType = CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE;
 
   /** Filter to apply on feature of this layer. */
   layerFilter?: string;

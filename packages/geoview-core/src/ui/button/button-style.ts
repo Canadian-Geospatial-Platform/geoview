@@ -26,7 +26,7 @@ export const getSxClasses = (theme: Theme) => ({
   },
   buttonClass: {
     display: 'flex',
-    fontSize: theme.typography.fontSize,
+    fontSize: theme.palette.geoViewFontSize.default,
     paddingLeft: '16px',
     paddingRight: '16px',
     justifyContent: 'center',

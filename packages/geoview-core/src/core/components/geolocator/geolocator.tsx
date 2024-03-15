@@ -1,6 +1,7 @@
 import { ChangeEvent, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import debounce from 'lodash/debounce';
+import { useTheme } from '@mui/material';
 import { CloseIcon, SearchIcon, AppBar, Box, Divider, IconButton, ProgressBar, Toolbar } from '@/ui';
 import { StyledInputField, sxClasses } from './geolocator-style';
 import { OL_ZOOM_DURATION } from '@/core/utils/constant';
@@ -24,6 +25,8 @@ export function Geolocator() {
   logger.logTraceRender('components/geolocator/geolocator');
 
   const { t } = useTranslation();
+
+  const theme = useTheme();
 
   // internal state
   const [data, setData] = useState<GeoListItem[]>();
@@ -183,13 +186,13 @@ export function Geolocator() {
                     }
                   }}
                 >
-                  <SearchIcon fontSize="small" />
+                  <SearchIcon fontSize={theme.palette.geoViewFontSize.sm} />
                 </IconButton>
                 {isSearchInputVisible && (
                   <>
                     <Divider orientation="vertical" variant="middle" flexItem />
                     <IconButton size="small" edge="end" color="inherit" sx={{ mr: 2, ml: 4 }} onClick={resetSearch}>
-                      <CloseIcon fontSize="small" />
+                      <CloseIcon fontSize={theme.palette.geoViewFontSize.sm} />
                     </IconButton>
                   </>
                 )}

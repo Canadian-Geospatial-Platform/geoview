@@ -38,7 +38,6 @@ import { ModalApi } from '@/ui';
 import { mapComponentPayload, mapConfigPayload, GeoViewLayerPayload, payloadIsGeoViewLayerAdded } from '@/api/events/payloads';
 import { addNotificationError, generateId, getLocalizedMessage } from '@/core/utils/utilities';
 import {
-  TypeListOfGeoviewLayerConfig,
   TypeDisplayLanguage,
   TypeViewSettings,
   TypeMapState,
@@ -47,9 +46,10 @@ import {
   VALID_DISPLAY_THEME,
   VALID_PROJECTION_CODES,
   TypeInteraction,
+  MapConfigLayerEntry,
+  mapConfigLayerEntryIsGeoCore,
 } from '@/geo/map/map-schema-types';
 import { TypeMapFeaturesConfig, TypeHTMLElement, TypeValidMapProjectionCodes, TypeJsonObject } from '@/core/types/global-types';
-import { layerConfigIsGeoCore } from '@/geo/layer/other/geocore';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
@@ -143,10 +143,6 @@ export class MapViewer {
 
     // create basemap and pass in the map id to be able to access the map instance
     this.basemap = new Basemap(MapEventProcessor.getBasemapOptions(this.mapId), this.mapId);
-
-    // extract the number of layers to load and listen to added layers event to decrease the number of expected layer
-    const listOfGeoviewLayerConfig: TypeListOfGeoviewLayerConfig = this.mapFeaturesConfig.map.listOfGeoviewLayerConfig || [];
-    this.setLayerAddedListener4ThisListOfLayer(listOfGeoviewLayerConfig);
   }
 
   /**
@@ -172,12 +168,17 @@ export class MapViewer {
   /**
    * Set the layer added event listener and timeout function for the list of geoview layer configurations.
    *
-   * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig The list of geoview layer configurations.
+   * @param {MapConfigLayerEntry[]} listOfMapLayerEntryConfig The list of geoview layer configurations.
    */
-  setLayerAddedListener4ThisListOfLayer(listOfGeoviewLayerConfig: TypeListOfGeoviewLayerConfig) {
-    if (listOfGeoviewLayerConfig.length) {
-      listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
-        if (!layerConfigIsGeoCore(geoviewLayerConfig)) {
+  setLayerAddedListener4ThisListOfLayer(listOfMapLayerEntryConfig: MapConfigLayerEntry[]) {
+    // TODO: Refactor - We should not have a listener on layer added on map viewer
+    // TO.DOCONT: The viewer does not care about layers status. As soon as the init state is done (store, basemap, plugins, ....)
+    // TO.DOCONT: We should remove the spinner. All layers boxes should be there with their status (loading, error, loaded).
+    // TO.DOCONT: Their status change but the viewer does not care. We show it in legend and emit an event for the outside world for each status.
+
+    if (listOfMapLayerEntryConfig.length) {
+      listOfMapLayerEntryConfig.forEach((geoviewLayerConfig) => {
+        if (!mapConfigLayerEntryIsGeoCore(geoviewLayerConfig)) {
           api.event.on(
             EVENT_NAMES.LAYER.EVENT_LAYER_ADDED,
             (payload) => {

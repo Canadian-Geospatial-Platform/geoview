@@ -6,7 +6,7 @@ export const getSxClasses = (theme: Theme) => ({
   selectedRows: {
     transition: 'box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
     fontWeight: 400,
-    fontSize: '0.875rem',
+    fontSize: theme.palette.geoViewFontSize.sm,
     linHeight: 1.43,
     letterSpacing: '0.01071em',
     display: 'flex',
@@ -45,7 +45,7 @@ export const getSxClasses = (theme: Theme) => ({
         gridTemplateColumns: '1fr',
       },
     },
-    '& .MuiInput-root': { fontSize: '0.875rem', '& .MuiSvgIcon-root': { width: '0.75em', height: '0.75em' } },
+    '& .MuiInput-root': { fontSize: theme.palette.geoViewFontSize.sm, '& .MuiSvgIcon-root': { width: '0.75em', height: '0.75em' } },
     '& .MuiBadge-root': {
       marginLeft: '0.5rem',
       '>span': {

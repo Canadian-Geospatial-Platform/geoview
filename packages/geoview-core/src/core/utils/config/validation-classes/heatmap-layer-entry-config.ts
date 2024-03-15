@@ -1,4 +1,4 @@
-import { TypeLayerEntryType, TypeVectorSourceInitialConfig } from '@/geo/map/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, TypeVectorSourceInitialConfig } from '@/geo/map/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
 
 /** ******************************************************************************************************************************
@@ -6,7 +6,7 @@ import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config
  */
 export class VectorHeatmapLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** Layer entry data type. */
-  entryType = 'vector-heatmap' as TypeLayerEntryType;
+  entryType = CONST_LAYER_ENTRY_TYPES.VECTOR_HEATMAP;
 
   /** Initial settings to apply to the GeoView vector layer source at creation time. */
   declare source?: TypeVectorSourceInitialConfig;

@@ -38,7 +38,7 @@ export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourc
 }
 
 export interface TypeEsriFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
-  geoviewLayerType: 'esriFeature';
+  geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_FEATURE;
   listOfLayerEntryConfig: EsriFeatureLayerEntryConfig[];
 }
 
