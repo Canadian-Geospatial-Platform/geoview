@@ -28,7 +28,24 @@ import {
   payloadIsAmapFeaturesConfig,
   MapFeaturesPayload,
   mapConfigPayload,
+  LayerSetPayload,
+  payloadIsLayerRegistration,
+  TypeLayerRegistrationPayload,
+  GetLegendsPayload,
+  TypeLegendInfoPayload,
+  payloadIsLegendInfo,
+  payloadIsQueryLegend,
+  TypeQueryLegendPayload,
+  payloadIsRequestLayerInventory,
+  TypeRequestLayerInventoryPayload,
+  payloadIsLayerSetChangeLayerStatus,
+  TypeLayerSetChangeLayerStatusPayload,
+  payloadIsLayerSetUpdated,
+  TypeLayerSetUpdatedPayload,
+  TypeResultSet,
 } from './payloads';
+import { TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 
 export type TypeEventHandlerFunction = (payload: PayloadBaseClass) => void;
 
@@ -169,6 +186,9 @@ export class Event {
         if (checkCallback(payload)) {
           // Sure callback
           callback(payload as T);
+        } else {
+          // Log an error as that shouldn't be possible
+          logger.logError('THIS CALLBACK PAYLOAD IS WRONG!!', eventStringId, payload);
         }
       },
       mapId
@@ -465,7 +485,119 @@ export class Event {
   // ! They should be fixed/removed altogether as they don't have a 'valid' reason to exist or their refactoring would be beneficial.
   // ! At the time writing this, having them here was sufficient as a first step in cleaning generic api.event calls and payloads.
 
-  // ? Move some that are hard to refactor here temporarily
+  // #region REQUEST_LAYER_INVENTORY ----------------------------------------------------------------------------------
+
+  emitLayerInventoryQuery = (mapId: string, layerSetId: string) => {
+    // Emit
+    this.emit(LayerSetPayload.createRequestLayerInventoryPayload(mapId, layerSetId));
+  };
+
+  onLayerInventoryQuery = (mapId: string, callback: (layerInventory: TypeRequestLayerInventoryPayload) => void) => {
+    // Wire
+    this.onMapHelperHandler(mapId, EVENT_NAMES.LAYER_SET.REQUEST_LAYER_INVENTORY, payloadIsRequestLayerInventory, callback);
+  };
+
+  offLayerInventoryQuery = (mapId: string, callback: (layerRegistration: TypeRequestLayerInventoryPayload) => void) => {
+    // Unwire
+    this.off(EVENT_NAMES.LAYER_SET.REQUEST_LAYER_INVENTORY, mapId, callback as TypeEventHandlerFunction);
+  };
+
+  // #endregion
+
+  // #region LAYER_REGISTRATION ---------------------------------------------------------------------------------------
+
+  emitLayerRegistration = (mapId: string, layerPath: string, action: 'add' | 'remove', layerSetId?: string) => {
+    // Emit
+    this.emit(LayerSetPayload.createLayerRegistrationPayload(mapId, layerPath, action, layerSetId));
+  };
+
+  onLayerRegistration = (mapId: string, callback: (layerRegistration: TypeLayerRegistrationPayload) => void) => {
+    // Wire
+    this.onMapHelperHandler(mapId, EVENT_NAMES.LAYER_SET.LAYER_REGISTRATION, payloadIsLayerRegistration, callback);
+  };
+
+  offLayerRegistration = (mapId: string, callback: (layerRegistration: TypeLayerRegistrationPayload) => void) => {
+    // Unwire
+    this.off(EVENT_NAMES.LAYER_SET.LAYER_REGISTRATION, mapId, callback as TypeEventHandlerFunction);
+  };
+
+  // #endregion
+
+  // #region LAYER_SET.UPDATED ----------------------------------------------------------------------------------------
+
+  emitLayerSetUpdated = (layerSetId: string, layerPath: string, resultSet: TypeResultSet) => {
+    // Emit
+    this.emit(LayerSetPayload.createLayerSetUpdatedPayload(layerSetId, resultSet, layerPath));
+  };
+
+  onLayerSetUpdated = (layerSetId: string, callback: (layerSetUpdated: TypeLayerSetUpdatedPayload) => void) => {
+    // Wire
+    this.onMapHelperHandler(layerSetId, EVENT_NAMES.LAYER_SET.UPDATED, payloadIsLayerSetUpdated, callback);
+  };
+
+  offLayerSetUpdated = (layerSetId: string, callback: (layerSetUpdated: TypeLayerSetUpdatedPayload) => void) => {
+    // Unwire
+    this.off(EVENT_NAMES.LAYER_SET.UPDATED, layerSetId, callback as TypeEventHandlerFunction);
+  };
+
+  // #endregion
+
+  // #region CHANGE_LAYER_STATUS --------------------------------------------------------------------------------------
+
+  emitLayerStatusChanged = (mapId: string, layerPath: string, status: TypeLayerStatus) => {
+    // Emit
+    this.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(mapId, layerPath, status));
+  };
+
+  onLayerStatusChanged = (mapId: string, callback: (layerStatusChanged: TypeLayerSetChangeLayerStatusPayload) => void) => {
+    // Wire
+    this.onMapHelperHandler(mapId, EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS, payloadIsLayerSetChangeLayerStatus, callback);
+  };
+
+  offLayerStatusChanged = (mapId: string, callback: (layerStatusChanged: TypeLayerSetChangeLayerStatusPayload) => void) => {
+    // Unwire
+    this.off(EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS, mapId, callback as TypeEventHandlerFunction);
+  };
+
+  // #endregion
+
+  // #region QUERY_LEGEND ---------------------------------------------------------------------------------------------
+
+  emitLayerLegendQuery = (mapId: string, layerPath: string) => {
+    // Emit
+    this.emit(GetLegendsPayload.createQueryLegendPayload(`${mapId}/${layerPath}`, layerPath));
+  };
+
+  onLayerLegendQuery = (mapId: string, layerPath: string, callback: (legendInfo: TypeQueryLegendPayload) => void) => {
+    // Wire
+    this.onMapHelperHandler(`${mapId}/${layerPath}`, EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND, payloadIsQueryLegend, callback);
+  };
+
+  offLayerLegendQuery = (mapId: string, layerPath: string, callback: (legendInfo: TypeQueryLegendPayload) => void) => {
+    // Unwire
+    this.off(EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND, `${mapId}/${layerPath}`, callback as TypeEventHandlerFunction);
+  };
+
+  // #endregion
+
+  // #region LEGEND_INFO ----------------------------------------------------------------------------------------------
+
+  emitLayerLegendInfo = (mapId: string, layerPath: string, queryResult: TypeLegend | null) => {
+    // Emit
+    this.emit(GetLegendsPayload.createLegendInfoPayload(mapId, layerPath, queryResult));
+  };
+
+  onLayerLegendInfo = (mapId: string, callback: (legendInfo: TypeLegendInfoPayload) => void) => {
+    // Wire
+    this.onMapHelperHandler(mapId, EVENT_NAMES.GET_LEGENDS.LEGEND_INFO, payloadIsLegendInfo, callback);
+  };
+
+  offLayerLegendInfo = (mapId: string, callback: (legendInfo: TypeLegendInfoPayload) => void) => {
+    // Unwire
+    this.off(EVENT_NAMES.GET_LEGENDS.LEGEND_INFO, mapId, callback as TypeEventHandlerFunction);
+  };
+
+  // #endregion
 
   // #endregion
 }
