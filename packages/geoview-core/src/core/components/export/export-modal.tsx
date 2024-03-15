@@ -1,15 +1,16 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { ChangeEvent, MouseEventHandler, MutableRefObject, RefObject, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, MouseEventHandler, RefObject, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '@mui/material/styles';
 
 import html2Canvas from 'html2canvas';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Skeleton, TextField } from '@/ui';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, LoadingButton, Skeleton, TextField } from '@/ui';
 import { exportPNG } from '@/core/utils/utilities';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { NorthArrowIcon, api, useMapAttribution, useMapNorthArrow, useMapScale } from '@/app';
 import { logger } from '@/core/utils/logger';
+import useManageArrow from '../north-arrow/hooks/useManageArrow';
 
 /**
  * Export modal window component to export the viewer information in a PNG file
@@ -17,11 +18,15 @@ import { logger } from '@/core/utils/logger';
  * @returns {JSX.Element} the export modal component
  */
 export default function ExportModal(): JSX.Element {
+  const { t } = useTranslation();
   const mapId = useGeoViewMapId();
+
+  const theme = useTheme();
 
   const { map } = api.maps[mapId];
   const [isMapLoading, setIsMapLoading] = useState(true);
   const [isLegendLoading, setIsLegendLoading] = useState(true);
+  const [isMapExporting, setIsMapExporting] = useState(false);
 
   // export template variables
   const [exportTitle, setExportTitle] = useState<string>('');
@@ -36,7 +41,7 @@ export default function ExportModal(): JSX.Element {
   const scale = useMapScale();
   const mapAttributions = useMapAttribution();
 
-  const { t } = useTranslation();
+  const { rotationAngle } = useManageArrow();
 
   // get store function
   const { closeModal } = useUIStoreActions();
@@ -47,11 +52,13 @@ export default function ExportModal(): JSX.Element {
       textFieldRef.current.style.display = 'none';
       exportTitleRef.current.style.padding = '1rem';
       exportTitleRef.current.innerHTML = exportTitle;
+      setIsMapExporting(true);
       html2Canvas(exportContainerRef.current).then((canvas: HTMLCanvasElement) => {
         exportPNG(canvas, mapId);
+        setIsMapExporting(false);
+        closeModal();
       });
     }
-    closeModal();
   }) as MouseEventHandler<HTMLButtonElement>;
 
   /**
@@ -77,9 +84,6 @@ export default function ExportModal(): JSX.Element {
       const mapImage = mapImageRef.current;
       const dialogBox = dialogRef.current;
 
-      const mapSize = map.getSize();
-      const height = mapSize![1];
-
       // Reason for timer, so that content of the export modal will be loaded
       // after modal is fully opened.
       timer = setTimeout(() => {
@@ -88,11 +92,9 @@ export default function ExportModal(): JSX.Element {
         html2Canvas(map.getViewport()).then((canvas) => {
           setIsMapLoading(false);
           mapImage.appendChild(canvas);
-          const styleObj = `width: ${getCanvasWidth(dialogBox)}px; height: ${height}px`;
-          mapImage.querySelector('canvas')?.setAttribute('style', styleObj);
         });
 
-        //   // add legend
+        // add legend
         const legendContainer = document.getElementById(`${mapId}-legendContainer`);
         if (legendContainer && legendContainerRef.current) {
           const styleObj = legendContainer.getAttribute('style')!;
@@ -143,9 +145,16 @@ export default function ExportModal(): JSX.Element {
                 </Box>
               )}
             </Box>
-            <Box textAlign="right">
-              <NorthArrowIcon width={44} height={44} />
-            </Box>
+            {northArrow && (
+              <Box
+                textAlign="right"
+                style={{
+                  transform: `rotate(${rotationAngle.angle}deg)`,
+                }}
+              >
+                <NorthArrowIcon width={44} height={44} />
+              </Box>
+            )}
           </Box>
           <Box ref={legendContainerRef}>{isLegendLoading && <Skeleton variant="rounded" width="100%" height={500} />}</Box>
 
@@ -165,17 +174,16 @@ export default function ExportModal(): JSX.Element {
         <Button onClick={closeModal} type="text" size="small" role="button" tabIndex={-1} autoFocus sx={{ width: 'inherit' }}>
           {t('exportModal.cancelBtn')}
         </Button>
-        <Button
-          type="text"
+        <LoadingButton
+          loading={isMapExporting}
+          variant="outlined"
           onClick={exportMap}
-          role="button"
-          tabIndex={-1}
           size="small"
-          sx={{ width: 'inherit' }}
+          sx={{ fontSize: theme.palette.geoViewFontSize.xs, padding: '0.7rem 1rem', backgroundColor: 'inherit' }}
           disabled={isLegendLoading || isMapLoading}
         >
           {t('exportModal.exportBtn')}
-        </Button>
+        </LoadingButton>
       </DialogActions>
     </Dialog>
   );

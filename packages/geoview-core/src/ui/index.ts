@@ -19,6 +19,7 @@ export * from './icon-button/icon-button-types';
 export * from './icon-button/icon-button';
 export * from './icons';
 export * from './layout';
+export * from './button/loading-button';
 export * from './linear-progress/linear-progress';
 export * from './list/checkbox-list/checkbox-list';
 export * from './list';
