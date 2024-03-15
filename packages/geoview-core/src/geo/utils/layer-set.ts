@@ -243,7 +243,6 @@ export type TypeLayerData = {
   queryStatus: TypeQueryStatus;
   features: TypeArrayOfFeatureInfoEntries;
 };
-export type TypeArrayOfLayerData = TypeLayerData[];
 
 export type TypeFeatureInfoByEventTypes = {
   [eventName in EventType]?: TypeLayerData;

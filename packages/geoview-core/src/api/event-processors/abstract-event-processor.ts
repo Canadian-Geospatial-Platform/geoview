@@ -3,13 +3,13 @@ import { getGeoViewStore, getGeoViewStoreAsync } from '@/core/stores/stores-mana
 import { IGeoviewState } from '@/core/types/cgpv-types';
 import { logger } from '@/core/utils/logger';
 import { delay } from '@/core/utils/utilities';
-import { TypeArrayOfLayerData } from '@/geo/utils/layer-set';
+import { TypeLayerData } from '@/geo/utils/layer-set';
 
 /**
  * Holds the buffer, on a map basis, for the propagation in batch in the layer data array store
  */
 export type BatchedPropagationLayerDataArrayByMap = {
-  [mapId: string]: TypeArrayOfLayerData[];
+  [mapId: string]: TypeLayerData[][];
 };
 
 export abstract class AbstractEventProcessor {
@@ -73,10 +73,10 @@ export abstract class AbstractEventProcessor {
    * The propagation can be bypassed using 'layerPathBypass' parameter which tells the process to
    * immediately batch out the array in the store for faster triggering of the state, for faster updating of the UI.
    * @param {string} mapId The map id
-   * @param {TypeArrayOfLayerData} layerDataArray The layer data array to hold in buffer during the batch
+   * @param {TypeLayerData[]} layerDataArray The layer data array to hold in buffer during the batch
    * @param {BatchedPropagationLayerDataArrayByMap} batchPropagationObject A reference to the BatchedPropagationLayerDataArrayByMap object used to hold all the layer data arrays in the buffer
    * @param {number} timeDelayBetweenPropagations The delay between actual propagations in the store
-   * @param {(layerDataArray: TypeArrayOfLayerData) => void} onSetLayerDataArray The store action callback used to store the layerDataArray in the actual store
+   * @param {(layerDataArray: TypeLayerData[]) => void} onSetLayerDataArray The store action callback used to store the layerDataArray in the actual store
    * @param {string} traceProcessorIndication? Simple parameter for logging purposes
    * @param {string} layerPathBypass? Indicates a layer path which, when processed, should bypass the buffer period and immediately trigger an update to the store
    * @param {(layerPath: string) => void} onResetBypass? The store action callback used to reset the layerPathBypass value in the store.
@@ -87,10 +87,10 @@ export abstract class AbstractEventProcessor {
    */
   protected static async helperPropagateArrayStoreBatch(
     mapId: string,
-    layerDataArray: TypeArrayOfLayerData,
+    layerDataArray: TypeLayerData[],
     batchPropagationObject: BatchedPropagationLayerDataArrayByMap,
     timeDelayBetweenPropagations: number,
-    onSetLayerDataArray: (layerDataArray: TypeArrayOfLayerData) => void,
+    onSetLayerDataArray: (layerDataArray: TypeLayerData[]) => void,
     traceProcessorIndication?: string,
     layerPathBypass?: string,
     onResetBypass?: (layerPath: string) => void

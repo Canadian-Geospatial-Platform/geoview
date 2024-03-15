@@ -1,6 +1,6 @@
 import { useStore } from 'zustand';
 import { GeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
-import { TypeArrayOfLayerData } from '@/geo/utils/layer-set';
+import { TypeLayerData } from '@/geo/utils/layer-set';
 
 import { useGeoViewStore } from '../stores-managers';
 import { TypeGetStore, TypeSetStore } from '../geoview-store';
@@ -13,15 +13,15 @@ export type GeoChartStoreByLayerPath = {
 
 export interface IGeochartState {
   geochartChartsConfig: GeoChartStoreByLayerPath;
-  layerDataArray: TypeArrayOfLayerData;
-  layerDataArrayBatch: TypeArrayOfLayerData;
+  layerDataArray: TypeLayerData[];
+  layerDataArrayBatch: TypeLayerData[];
   layerDataArrayBatchLayerPathBypass: string;
   selectedLayerPath: string;
 
   actions: {
     setGeochartCharts: (charts: GeoChartStoreByLayerPath) => void;
-    setLayerDataArray: (layerDataArray: TypeArrayOfLayerData) => void;
-    setLayerDataArrayBatch: (layerDataArray: TypeArrayOfLayerData) => void;
+    setLayerDataArray: (layerDataArray: TypeLayerData[]) => void;
+    setLayerDataArrayBatch: (layerDataArray: TypeLayerData[]) => void;
     setLayerDataArrayBatchLayerPathBypass: (layerPath: string) => void;
     setSelectedLayerPath: (selectedLayerPath: string) => void;
   };
@@ -54,7 +54,7 @@ export function initializeGeochartState(set: TypeSetStore, get: TypeGetStore): I
           },
         });
       },
-      setLayerDataArray(layerDataArray: TypeArrayOfLayerData) {
+      setLayerDataArray(layerDataArray: TypeLayerData[]) {
         set({
           geochartState: {
             ...get().geochartState,
@@ -62,7 +62,7 @@ export function initializeGeochartState(set: TypeSetStore, get: TypeGetStore): I
           },
         });
       },
-      setLayerDataArrayBatch(layerDataArrayBatch: TypeArrayOfLayerData) {
+      setLayerDataArrayBatch(layerDataArrayBatch: TypeLayerData[]) {
         set({
           geochartState: {
             ...get().geochartState,
