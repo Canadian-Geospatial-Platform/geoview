@@ -66,21 +66,21 @@ export interface TypeRequestLayerInventoryPayload extends LayerSetPayload {
 }
 
 /**
- * type guard function that redefines a PayloadBaseClass as a TypelayerSetUpdatedPayload
+ * type guard function that redefines a PayloadBaseClass as a TypeLayerSetUpdatedPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
  * @returns {boolean} returns true if the payload is valid
  */
-export const payloadIsLayerSetUpdated = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypelayerSetUpdatedPayload => {
+export const payloadIsLayerSetUpdated = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeLayerSetUpdatedPayload => {
   return verifyIfPayload?.event === EVENT_NAMES.LAYER_SET.UPDATED;
 };
 
 /**
- * Additional attribute needed to define a TypelayerSetUpdatedPayload
+ * Additional attribute needed to define a TypeLayerSetUpdatedPayload
  */
-export interface TypelayerSetUpdatedPayload extends LayerSetPayload {
+export interface TypeLayerSetUpdatedPayload extends LayerSetPayload {
   /** An object containing the result sets indexed using the layer path */
   resultSet: TypeResultSet;
   // The layerPath affected
@@ -154,7 +154,7 @@ export class LayerSetPayload extends PayloadBaseClass {
   static createLayerRegistrationPayload = (
     handlerName: string,
     layerPath: string,
-    action: 'add' | 'remove' = 'add',
+    action: 'add' | 'remove',
     layerSetId: string | undefined = undefined
   ): TypeLayerRegistrationPayload => {
     const layerRegistrationPayload = new LayerSetPayload(
@@ -191,7 +191,7 @@ export class LayerSetPayload extends PayloadBaseClass {
    * @param {string} layerPath the layer path affected by the change
    * @param {TypeLayerStatus} layerStatus the value to assign to the layerStatus property
    *
-   * @returns {TypelayerSetUpdatedPayload} the requestLayerInventoryPayload object created
+   * @returns {TypeLayerSetUpdatedPayload} the requestLayerInventoryPayload object created
    */
   static createLayerSetChangeLayerStatusPayload = (
     handlerName: string,
@@ -213,10 +213,10 @@ export class LayerSetPayload extends PayloadBaseClass {
    * @param {string | null} handlerName the handler Name
    * @param {string} LayerSetId the layer set identifier that has changed
    *
-   * @returns {TypelayerSetUpdatedPayload} the requestLayerInventoryPayload object created
+   * @returns {TypeLayerSetUpdatedPayload} the requestLayerInventoryPayload object created
    */
-  static createLayerSetUpdatedPayload = (handlerName: string, resultSet: TypeResultSet, layerPath: string): TypelayerSetUpdatedPayload => {
-    const layerSetUpdatedPayload = new LayerSetPayload(EVENT_NAMES.LAYER_SET.UPDATED, handlerName) as TypelayerSetUpdatedPayload;
+  static createLayerSetUpdatedPayload = (handlerName: string, resultSet: TypeResultSet, layerPath: string): TypeLayerSetUpdatedPayload => {
+    const layerSetUpdatedPayload = new LayerSetPayload(EVENT_NAMES.LAYER_SET.UPDATED, handlerName) as TypeLayerSetUpdatedPayload;
     layerSetUpdatedPayload.resultSet = resultSet;
     layerSetUpdatedPayload.layerPath = layerPath;
     return layerSetUpdatedPayload;

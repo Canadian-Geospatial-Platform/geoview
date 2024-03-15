@@ -18,9 +18,8 @@ import {
   getLocalizedMessage,
   createLocalizedString,
 } from '@/core/utils/utilities';
-import { LayerSetPayload, payloadIsRequestLayerInventory, GetLegendsPayload, payloadIsQueryLegend } from '@/api/events/payloads';
+import { TypeQueryLegendPayload, TypeRequestLayerInventoryPayload } from '@/api/events/payloads';
 import { LayerApi, api } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
 import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
 import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
 import { TypeEventHandlerFunction } from '@/api/events/event';
@@ -224,8 +223,8 @@ export const isImageStaticLegend = (verifyIfLegend: TypeLegend): verifyIfLegend 
 };
 
 type TypeLayerSetHandlerFunctions = {
-  requestLayerInventory?: TypeEventHandlerFunction;
-  queryLegend?: TypeEventHandlerFunction;
+  requestLayerInventory?: (layerInvetoryQuery: TypeRequestLayerInventoryPayload) => void;
+  queryLegend?: (legendInfo: TypeQueryLegendPayload) => void;
   // queryLayer?: TypeEventHandlerFunction;
   updateLayerStatus?: TypeEventHandlerFunction;
 };
@@ -903,46 +902,33 @@ export abstract class AbstractGeoViewLayer {
     if (!this.registerToLayerSetListenerFunctions[layerPath]) this.registerToLayerSetListenerFunctions[layerPath] = {};
 
     if (!this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory) {
-      // Listen to events that request a layer inventory and emit a register payload event.
-      // This will register all existing layers to a newly created layer set.
+      // Prep the handle
       this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory = (payload) => {
-        // Log
-        logger.logTraceCoreAPIEvent('ABSTRACT-GEOVIEW-LAYERS - requestLayerInventory', layerPath, payload);
-
-        if (payloadIsRequestLayerInventory(payload)) {
-          const { layerSetId } = payload;
-          api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'add', layerSetId));
-        }
+        // Emit the layer registration
+        api.event.emitLayerRegistration(this.mapId, layerPath, 'add', payload.layerSetId);
       };
 
-      api.event.on(
-        EVENT_NAMES.LAYER_SET.REQUEST_LAYER_INVENTORY,
-        this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory!,
-        this.mapId
-      );
+      // Wire when a layer inventory has been queried
+      api.event.onLayerInventoryQuery(this.mapId, this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory!);
     }
 
     if (!this.registerToLayerSetListenerFunctions[layerPath].queryLegend) {
+      // Prep the handle
       this.registerToLayerSetListenerFunctions[layerPath].queryLegend = (payload) => {
-        // Log
-        logger.logTraceCoreAPIEvent('ABSTRACT-GEOVIEW-LAYERS - queryLegend', layerPath, payload);
-
-        if (payloadIsQueryLegend(payload)) {
-          this.getLegend(layerPath).then((queryResult) => {
-            api.event.emit(GetLegendsPayload.createLegendInfoPayload(this.mapId, layerPath, queryResult));
-          });
-        }
+        // Get the legend
+        this.getLegend(payload.layerPath).then((queryResult) => {
+          // Emit legend information once retrieved
+          api.event.emitLayerLegendInfo(this.mapId, payload.layerPath, queryResult);
+        });
       };
 
-      api.event.on(
-        EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND,
-        this.registerToLayerSetListenerFunctions[layerPath].queryLegend!,
-        `${this.mapId}/${layerPath}`
-      );
+      // Wire when a layer legend has been queried
+      api.event.onLayerLegendQuery(this.mapId, layerPath, this.registerToLayerSetListenerFunctions[layerPath].queryLegend!);
     }
 
     // Register to layer sets that are already created.
-    api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'add'));
+    // Emit the layer registration
+    api.event.emitLayerRegistration(this.mapId, layerPath, 'add');
   }
 
   /** ***************************************************************************************************************************
@@ -952,23 +938,17 @@ export abstract class AbstractGeoViewLayer {
    */
   unregisterFromLayerSets(layerConfig: AbstractBaseLayerEntryConfig): void {
     const { layerPath } = layerConfig;
-    api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'remove'));
+
+    // Emit the layer unregistration
+    api.event.emitLayerRegistration(this.mapId, layerPath, 'remove');
 
     if (this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory) {
-      api.event.off(
-        EVENT_NAMES.LAYER_SET.REQUEST_LAYER_INVENTORY,
-        this.mapId,
-        this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory
-      );
+      api.event.offLayerInventoryQuery(this.mapId, this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory!);
       delete this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory;
     }
 
     if (this.registerToLayerSetListenerFunctions[layerPath].queryLegend) {
-      api.event.off(
-        EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND,
-        `${this.mapId}/${layerPath}`,
-        this.registerToLayerSetListenerFunctions[layerPath].queryLegend
-      );
+      api.event.offLayerLegendQuery(this.mapId, layerPath, this.registerToLayerSetListenerFunctions[layerPath].queryLegend!);
       delete this.registerToLayerSetListenerFunctions[layerPath].queryLegend;
     }
   }
