@@ -60,7 +60,7 @@ export class AllFeatureInfoLayerSet extends LayerSet {
       // Log
       logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET setRegistrationConditionFunction', layerPath, Object.keys(this.resultSet));
 
-      const geoviewLayerConfig = api.maps[this.mapId].layer.geoviewLayer(layerPath);
+      const geoviewLayerConfig = api.maps[this.mapId].layer.getGeoviewLayer(layerPath);
       // TODO: Make a util function for this check
       if (
         [

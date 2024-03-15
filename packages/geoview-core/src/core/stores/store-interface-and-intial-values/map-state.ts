@@ -569,7 +569,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           if (layerInfo && !layerInfo.alwaysVisible) {
             // eslint-disable-next-line no-param-reassign
             layerInfo!.visible = newValue || !layerVisibility;
-            api.maps[get().mapId].layer.geoviewLayer(layerInfo.layerPath).setVisible(layerInfo.visible, layerInfo.layerPath);
+            api.maps[get().mapId].layer.getGeoviewLayer(layerInfo.layerPath).setVisible(layerInfo.visible, layerInfo.layerPath);
           }
         });
 
@@ -578,7 +578,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           if ((!layerVisibility || newValue) && parentLayerVisibility === false) {
             if (parentLayerInfo) {
               parentLayerInfo.visible = true;
-              api.maps[get().mapId].layer.geoviewLayer(parentLayerPath).setVisible(true, parentLayerPath);
+              api.maps[get().mapId].layer.getGeoviewLayer(parentLayerPath).setVisible(true, parentLayerPath);
             }
           }
           const children = curOrderedLayerInfo.filter(

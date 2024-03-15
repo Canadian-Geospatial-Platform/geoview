@@ -240,16 +240,6 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Get the bounds of the layer represented in the layerConfig pointed to by the cached layerPath, returns updated bounds
-   *
-   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
-   * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
-   *
-   * @returns {Extent} The new layer bounding box.
-   */
-  protected getBounds(bounds: Extent, notUsed?: never): Extent | undefined;
-
-  /** ***************************************************************************************************************************
    * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
    *
    * @param {string} layerPath The Layer path to the layer's configuration.
@@ -257,13 +247,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
    *
    * @returns {Extent} The new layer bounding box.
    */
-  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined;
-
-  // See above headers for signification of the parameters. The first lines of the method select the template
-  // used based on the parameter types received.
-  protected getBounds(parameter1?: string | Extent, parameter2?: Extent): Extent | undefined {
-    const layerPath = typeof parameter1 === 'string' ? parameter1 : this.layerPathAssociatedToTheGeoviewLayer;
-    let bounds = typeof parameter1 !== 'string' ? parameter1 : parameter2;
+  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
     const layerConfig = this.getLayerConfig(layerPath);
     const layerBounds = (layerConfig?.olLayer as TileLayer<XYZ>)?.getSource()?.getTileGrid()?.getExtent();
     const projection =

@@ -21,13 +21,13 @@ export class DataTableProcessor extends AbstractEventProcessor {
    * @param {boolean} isMapRecordExist filtered Map switch is on off.
    */
   static applyFilters(mapId: string, layerPath: string, filterStrings: string, isMapRecordExist: boolean) {
-    const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayer(layerPath);
+    const geoviewLayerInstance = api.maps[mapId].layer.getGeoviewLayer(layerPath);
     const filterLayerConfig = api.maps[mapId].layer.registeredLayers[layerPath] as TypeLayerEntryConfig;
 
     if (isMapRecordExist && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined && filterStrings.length) {
-      (api.maps[mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterStrings);
+      (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(layerPath, filterStrings);
     } else {
-      (api.maps[mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter('');
+      (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(layerPath, '');
     }
   }
 }

@@ -118,7 +118,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   static getInitialTimeSliderValues(mapId: string, layerPath: string): TimeSliderLayerSet {
     const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath];
     const name = getLocalizedValue(layerConfig.layerName, mapId) || layerConfig.layerId;
-    const temporalDimensionInfo = api.maps[mapId].layer.geoviewLayer(layerPath).getTemporalDimension();
+    const temporalDimensionInfo = api.maps[mapId].layer.getGeoviewLayer(layerPath).getTemporalDimension(layerPath);
     const { range } = temporalDimensionInfo.range;
     const defaultValueIsArray = Array.isArray(temporalDimensionInfo.default);
     const defaultValue = defaultValueIsArray ? temporalDimensionInfo.default[0] : temporalDimensionInfo.default;
@@ -189,28 +189,28 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     minAndMax: number[],
     values: number[]
   ): void {
-    const layerType = api.maps[mapId].layer.geoviewLayer(layerPath).type;
+    const layerType = api.maps[mapId].layer.getGeoviewLayer(layerPath).type;
     if (layerType === CONST_LAYER_TYPES.WMS) {
       if (filtering) {
         const newValue = `${new Date(values[0]).toISOString().slice(0, new Date(values[0]).toISOString().length - 5)}Z`;
         const filter = `${field}=date '${newValue}'`;
-        (api.maps[mapId].layer.geoviewLayer(layerPath) as WMS).applyViewFilter(filter);
+        (api.maps[mapId].layer.getGeoviewLayer(layerPath) as WMS).applyViewFilter(layerPath, filter);
       } else {
         const filter = `${field}=date '${defaultValue}'`;
-        (api.maps[mapId].layer.geoviewLayer(layerPath) as WMS).applyViewFilter(filter);
+        (api.maps[mapId].layer.getGeoviewLayer(layerPath) as WMS).applyViewFilter(layerPath, filter);
       }
     } else if (filtering) {
       let filter = `${field} >= date '${new Date(values[0]).toISOString()}'`;
       if (values.length > 1) {
         filter += ` and ${field} <= date '${new Date(values[1]).toISOString()}'`;
       }
-      (api.maps[mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter(filter);
+      (api.maps[mapId].layer.getGeoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter(layerPath, filter);
     } else {
       let filter = `${field} >= date '${new Date(minAndMax[0]).toISOString()}'`;
       if (values.length > 1) {
         filter += `and ${field} <= date '${new Date(minAndMax[1]).toISOString()}'`;
       }
-      (api.maps[mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter(filter);
+      (api.maps[mapId].layer.getGeoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter(layerPath, filter);
     }
   }
   // #endregion

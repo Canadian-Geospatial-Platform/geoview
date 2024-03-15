@@ -108,14 +108,14 @@ class TimeSliderPlugin extends FooterPlugin {
           range: api.dateUtilities.createRangeOGC(obj.temporalDimension.range as unknown as string),
           singleHandle: obj.temporalDimension.singleHandle,
         };
-        api.maps[this.pluginProps.mapId].layer.geoviewLayer(obj.layerPaths[0]).setTemporalDimension(obj.layerPaths[0], timeDimension);
+        api.maps[this.pluginProps.mapId].layer.getGeoviewLayer(obj.layerPaths[0]).setTemporalDimension(obj.layerPaths[0], timeDimension);
       }
 
       // Set override default value under time dimension if applicable
       if (obj.defaultValue) {
         const layerPath = obj.layerPaths[0];
-        const timeDimension = api.maps[this.pluginProps.mapId].layer.geoviewLayer(layerPath).layerTemporalDimension[layerPath];
-        api.maps[this.pluginProps.mapId].layer.geoviewLayer(layerPath).setTemporalDimension(layerPath, {
+        const timeDimension = api.maps[this.pluginProps.mapId].layer.getGeoviewLayer(layerPath).layerTemporalDimension[layerPath];
+        api.maps[this.pluginProps.mapId].layer.getGeoviewLayer(layerPath).setTemporalDimension(layerPath, {
           ...timeDimension,
           default: obj.defaultValue,
         });

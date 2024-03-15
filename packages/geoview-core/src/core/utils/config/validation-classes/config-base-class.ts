@@ -188,19 +188,6 @@ export class ConfigBaseClass {
   }
 
   /**
-   * This method returns the GeoView instance associated to a specific layer path. The first element of the layerPath
-   * is the geoviewLayerId.
-   * @param {string} layerPath The layer path to the layer's configuration.
-   *
-   * @returns {AbstractGeoViewLayer} Returns the geoview instance associated to the layer path.
-   */
-  // TODO: Check - Is this still used? Remove it and favor the homonymous method in `layer`?
-  geoviewLayer(layerPath?: string): AbstractGeoViewLayer {
-    this.geoviewLayerInstance!.layerPathAssociatedToTheGeoviewLayer = layerPath || this.layerPath;
-    return this.geoviewLayerInstance!;
-  }
-
-  /**
    * This method compares the internal layer status of the config with the layer status passed as a parameter and it
    * returns true if the internal value is greater or equal to the value of the parameter.
    *
