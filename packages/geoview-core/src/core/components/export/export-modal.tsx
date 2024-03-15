@@ -179,7 +179,7 @@ export default function ExportModal(): JSX.Element {
           variant="outlined"
           onClick={exportMap}
           size="small"
-          sx={{ fontSize: theme.palette.geoViewFontSize.xs, padding: '0.7rem 1rem', backgroundColor: 'inherit' }}
+          sx={{ fontSize: theme.palette.geoViewFontSize.xs, padding: '0.7rem 1rem', backgroundColor: theme.palette.background.default }}
           disabled={isLegendLoading || isMapLoading}
         >
           {t('exportModal.exportBtn')}
