@@ -19,11 +19,4 @@ export class TileLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     super(layerConfig);
     Object.assign(this, layerConfig);
   }
-
-  /**
-   * Method to execute when the layer is loaded.
-   */
-  loadedFunction() {
-    super.loadedFunction();
-  }
 }
