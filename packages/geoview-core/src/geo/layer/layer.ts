@@ -8,7 +8,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 
 import { Config } from '@/core/utils/config/config';
 import { generateId, showError, replaceParams, getLocalizedMessage, whenThisThen } from '@/core/utils/utilities';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer, GeoViewLayerRegistrationEvent } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
@@ -34,6 +34,7 @@ import { HoverFeatureInfoLayerSet } from '../utils/hover-feature-info-layer-set'
 import { AllFeatureInfoLayerSet } from '../utils/all-feature-info-layer-set';
 import { LegendsLayerSet } from '../utils/legends-layer-set';
 import { FeatureInfoLayerSet } from '../utils/feature-info-layer-set';
+import { LayerSet } from '../utils/layer-set';
 
 export type TypeRegisteredLayers = { [layerPath: string]: TypeLayerEntryConfig };
 
@@ -363,6 +364,9 @@ export class LayerApi {
       // Add in the geoviewLayers set
       this.geoviewLayers[layerBeingAdded.geoviewLayerId] = layerBeingAdded;
 
+      // Wire a handle when the layer wants to register
+      layerBeingAdded.onGeoViewLayerRegistration(this.#handleLayerRegistration.bind(this));
+
       // Prepare mandatory registrations
       // TODO: REFACTOR - this shouldn't have to be mandatory!!
       layerBeingAdded.initRegisteredLayers(this);
@@ -430,6 +434,17 @@ export class LayerApi {
     // Set the layer z indices
     // TODO: Check - Confirm if this is still working, moved here as part of a refactor
     MapEventProcessor.setLayerZIndices(this.mapId);
+  }
+
+  #handleLayerRegistration(geoviewLayer: AbstractGeoViewLayer, registrationEvent: GeoViewLayerRegistrationEvent): void {
+    // The layer is ready to be registered, take care of it
+    // Tell the layer sets about it
+    [this.legendsLayerSet, this.hoverFeatureInfoLayerSet, this.allFeatureInfoLayerSet, this.featureInfoLayerSet].forEach(
+      (layerSet: LayerSet) => {
+        // Register or Unregister the layer
+        layerSet.registerOrUnregisterLayer(geoviewLayer, registrationEvent.layerPath, registrationEvent.action);
+      }
+    );
   }
 
   /**

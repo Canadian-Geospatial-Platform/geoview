@@ -4,11 +4,7 @@ import { EventStringId, EVENT_NAMES } from '../event-types';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 
 /** Valid events that can create LayerSetPayload */
-const validEvents: EventStringId[] = [
-  EVENT_NAMES.LAYER_SET.LAYER_REGISTRATION,
-  EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS,
-  EVENT_NAMES.LAYER_SET.UPDATED,
-];
+const validEvents: EventStringId[] = [EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS, EVENT_NAMES.LAYER_SET.UPDATED];
 
 export type TypeResultSetEntry = {
   layerName?: string;
@@ -19,30 +15,6 @@ export type TypeResultSetEntry = {
 export type TypeResultSet = {
   [layerPath: string]: TypeResultSetEntry;
 };
-
-/**
- * type guard function that redefines a PayloadBaseClass as a TypeLayerRegistrationPayload
- * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export const payloadIsLayerRegistration = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeLayerRegistrationPayload => {
-  return verifyIfPayload?.event === EVENT_NAMES.LAYER_SET.LAYER_REGISTRATION;
-};
-
-/**
- * Additional attribute needed to define a TypeLayerRegistrationPayload
- */
-export interface TypeLayerRegistrationPayload extends LayerSetPayload {
-  // the layer path to add to or remove from the inventory
-  layerPath: string;
-  // the layer set identifier
-  layerSetId?: string;
-  // the action to perform
-  action: 'add' | 'remove';
-}
 
 /**
  * type guard function that redefines a PayloadBaseClass as a TypeLayerSetUpdatedPayload
@@ -119,32 +91,6 @@ export class LayerSetPayload extends PayloadBaseClass {
     if (!validEvents.includes(event)) throw new Error(`LayerSetPayload can't be instanciated for event of type ${event}`);
     super(event, handlerName);
   }
-
-  /**
-   * Static method used to create a layer set payload that will register a new layer in the layer set inventory
-   *
-   * @param {string | null} handlerName the handler Name
-   * @param {string} layerPath the layer path to add to the inventory
-   * @param {'add' | 'remove'} action the kind of layer registration (default: add)
-   * @param {string | undefined} layerSetId the layer set identifier that will register the layer
-   *
-   * @returns {TypeLayerRegistrationPayload} the registerLayerPayload object created
-   */
-  static createLayerRegistrationPayload = (
-    handlerName: string,
-    layerPath: string,
-    action: 'add' | 'remove',
-    layerSetId: string | undefined = undefined
-  ): TypeLayerRegistrationPayload => {
-    const layerRegistrationPayload = new LayerSetPayload(
-      EVENT_NAMES.LAYER_SET.LAYER_REGISTRATION,
-      handlerName
-    ) as TypeLayerRegistrationPayload;
-    layerRegistrationPayload.layerPath = layerPath;
-    layerRegistrationPayload.action = action;
-    layerRegistrationPayload.layerSetId = layerSetId;
-    return layerRegistrationPayload;
-  };
 
   /**
    * Static method used to create a layer set payload when we need to change a layer status
