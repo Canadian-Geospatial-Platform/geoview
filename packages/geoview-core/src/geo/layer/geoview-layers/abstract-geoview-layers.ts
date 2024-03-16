@@ -22,13 +22,13 @@ import { TypeQueryLegendPayload } from '@/api/events/payloads';
 import { LayerApi, api } from '@/app';
 import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
 import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
-import { TypeEventHandlerFunction } from '@/api/events/event';
 import { logger } from '@/core/utils/logger';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
+import EventHelper from '@/api/events/event-helper';
 import {
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
@@ -226,7 +226,7 @@ type TypeLayerSetHandlerFunctions = {
   // requestLayerInventory?: (layerInvetoryQuery: TypeRequestLayerInventoryPayload) => void;
   queryLegend?: (legendInfo: TypeQueryLegendPayload) => void;
   // queryLayer?: TypeEventHandlerFunction;
-  updateLayerStatus?: TypeEventHandlerFunction;
+  // updateLayerStatus?: TypeEventHandlerFunction;
 };
 
 // ******************************************************************************************************************************
@@ -358,31 +358,30 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
+   * Emits an event to all handlers.
+   * @param {GeoViewLayerRegistrationEvent} event The event to emit
+   */
+  emitGeoViewLayerRegistration = (event: GeoViewLayerRegistrationEvent) => {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.onGeoViewLayerRegistrationHandlers, event);
+  };
+
+  /**
    * Wires an event handler.
-   * @param {GeoViewLayerRegistrationDelegate} callback The callback to be executed whenever the event is raised
+   * @param {GeoViewLayerRegistrationDelegate} callback The callback to be executed whenever the event is emitted
    */
   onGeoViewLayerRegistration = (callback: GeoViewLayerRegistrationDelegate): void => {
-    // Push a new callback handler to the list of handlers
-    this.onGeoViewLayerRegistrationHandlers.push(callback);
+    // Wire the event handler
+    EventHelper.onEvent(this.onGeoViewLayerRegistrationHandlers, callback);
   };
 
   /**
    * Unwires an event handler.
-   * @param {GeoViewLayerRegistrationDelegate} callback The callback to stop being called whenever the event is raised
+   * @param {GeoViewLayerRegistrationDelegate} callback The callback to stop being called whenever the event is emitted
    */
   offGeoViewLayerRegistration = (callback: GeoViewLayerRegistrationDelegate): void => {
-    const index = this.onGeoViewLayerRegistrationHandlers.indexOf(callback);
-    if (index !== -1) {
-      this.onGeoViewLayerRegistrationHandlers.splice(index, 1);
-    }
-  };
-
-  /**
-   * Emits an event to all handlers.
-   */
-  emitGeoViewLayerRegistration = (event: GeoViewLayerRegistrationEvent) => {
-    // Trigger all the handlers in the array
-    this.onGeoViewLayerRegistrationHandlers.forEach((handler) => handler(this, event));
+    // Unwire the event handler
+    EventHelper.offEvent(this.onGeoViewLayerRegistrationHandlers, callback);
   };
 
   /** ***************************************************************************************************************************
