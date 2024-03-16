@@ -645,6 +645,9 @@ export class ConfigValidation {
         listOfLayerEntryConfig[i] = new GeoJSONLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsCSV(layerConfig)) {
         listOfLayerEntryConfig[i] = new CsvLayerEntryConfig(layerConfig);
+      } else {
+        // Unknown
+        logger.logWarning('Unknown layer entry config type', layerConfig);
       }
     });
   }

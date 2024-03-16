@@ -3,12 +3,13 @@ import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import Feature from 'ol/Feature';
 import RenderFeature from 'ol/render/Feature';
-import { TypeLayerSetChangeLayerStatusPayload, TypeResultSet } from '@/api/events/payloads';
+import { TypeResultSet } from '@/api/events/payloads';
 import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { api, LayerApi } from '@/app';
 import { TypeLayerStatus, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 import { TypeHoverLayerData } from './hover-feature-info-layer-set';
 
@@ -66,18 +67,15 @@ export class LayerSet {
     this.resultSet = resultSet;
     this.registrationConditionFunction = registrationConditionFunction || (() => true); // The function or a function that's always true
     this.registrationUserInitialisation = registrationUserInitialisation;
-    this.setChangeLayerStatusListenerFunctions();
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * The listener that will handle the CHANGE_LAYER_STATUS event triggered on the map.
    *
-   * @param {TypeLayerSetChangeLayerStatusPayload} payload The payload to process.
+   * @param {string} layerPath The layer path being affected
+   * @param {string} layerStatus The new layer status
    */
-  protected changeLayerStatusListenerFunctions(payload: TypeLayerSetChangeLayerStatusPayload) {
-    // Read info
-    const { layerPath, layerStatus } = payload;
-
+  protected changeLayerStatusListenerFunctions(layerPath: string, layerStatus: TypeLayerStatus): void {
     // if layer's status flag exists and is different than the new one
     if (this.resultSet?.[layerPath]?.layerStatus && this.resultSet?.[layerPath]?.layerStatus !== layerStatus) {
       // Change the layer status!
@@ -107,15 +105,12 @@ export class LayerSet {
     }
   }
 
-  /** ***************************************************************************************************************************
-   * Set the listener that will handle the CHANGE_LAYER_STATUS event triggered on the map.
+  /**
+   * Processes the layer status change in the system, notably making sure to propagate in the store.
    */
-  protected setChangeLayerStatusListenerFunctions() {
-    // Wire handle on the layer status changed
-    api.event.onLayerStatusChanged(this.mapId, (payload) => {
-      // Redirect for the children classes
-      this.changeLayerStatusListenerFunctions.call(this, payload);
-    });
+  public processLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
+    // Redirect for the children classes
+    this.changeLayerStatusListenerFunctions.call(this, layerPath, layerStatus);
   }
 
   /**
