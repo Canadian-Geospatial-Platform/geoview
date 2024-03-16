@@ -8,6 +8,9 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 
 import { Config } from '@/core/utils/config/config';
 import { generateId, showError, replaceParams, getLocalizedMessage, whenThisThen } from '@/core/utils/utilities';
+import { MapConfigLayerEntry, MapViewer, TypeListOfGeoviewLayerConfig, TypeOrderedLayerInfo } from '@/core/types/cgpv-types';
+import { ConfigBaseClass, LayerStatusChangedEvent } from '@/core/utils/config/validation-classes/config-base-class';
+import { logger } from '@/core/utils/logger';
 import { AbstractGeoViewLayer, GeoViewLayerRegistrationEvent } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   TypeGeoviewLayerConfig,
@@ -28,8 +31,7 @@ import { layerConfigIsOgcFeature, OgcFeature } from '@/geo/layer/geoview-layers/
 import { layerConfigIsXYZTiles, XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 import { layerConfigIsVectorTiles, VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { CSV, layerConfigIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
-import { logger } from '@/core/utils/logger';
-import { MapConfigLayerEntry, MapViewer, TypeListOfGeoviewLayerConfig, TypeOrderedLayerInfo } from '@/core/types/cgpv-types';
+
 import { HoverFeatureInfoLayerSet } from '../utils/hover-feature-info-layer-set';
 import { AllFeatureInfoLayerSet } from '../utils/all-feature-info-layer-set';
 import { LegendsLayerSet } from '../utils/legends-layer-set';
@@ -38,7 +40,7 @@ import { LayerSet } from '../utils/layer-set';
 
 export type TypeRegisteredLayers = { [layerPath: string]: TypeLayerEntryConfig };
 
-export type GeoViewLayerAddedResponse = {
+export type GeoViewLayerAddedResult = {
   layerBeingAdded: AbstractGeoViewLayer;
   promiseLayerOnMap: Promise<void>;
 };
@@ -92,8 +94,7 @@ export class LayerApi {
 
   /**
    * Initializes layer types and listen to add/remove layer events from outside
-   *
-   * @param {string} mapId a reference to the map
+   * @param {MapViewer} mapViewer a reference to the map viewer
    */
   constructor(mapViewer: MapViewer) {
     this.mapViewer = mapViewer;
@@ -158,7 +159,6 @@ export class LayerApi {
 
   /**
    * Load layers that was passed in with the map config
-   *
    * @param {MapConfigLayerEntry[]} mapConfigLayerEntries an optional array containing layers passed within the map config
    */
   loadListOfGeoviewLayer(mapConfigLayerEntries?: MapConfigLayerEntry[]): void {
@@ -213,7 +213,6 @@ export class LayerApi {
   /**
    * Validates the geoview layer configuration array to eliminate duplicate entries and inform the user.
    * @param {MapConfigLayerEntry[]} mapConfigLayerEntries The Map Config Layer Entries to validate.
-   *
    * @returns {MapConfigLayerEntry[]} The new configuration with duplicate entries eliminated.
    */
   private deleteDuplicatAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries?: MapConfigLayerEntry[]): MapConfigLayerEntry[] {
@@ -262,7 +261,7 @@ export class LayerApi {
     // The first element of the layerPath is the geoviewLayerId
     const geoviewLayerInstance = this.geoviewLayers[layerPath.split('/')[0]];
 
-    // TODO: Check #1857 - Why set the `layerPathAssociatedToTheGeoviewLayer` property on the fly like that? Should likely set this somewhere else than in this function that looks more like a getter.
+    // TODO: Check #1857 - Why set the `layerPathAssociatedToTheGeoviewLayer` property on the fly? Should likely set this somewhere else than in this function that looks more like a getter.
     // TO.DOCONT: It seems `layerPathAssociatedToTheGeoviewLayer` is indeed used many places, notably in applyFilters logic.
     // TO.DOCONT: If all those places rely on the `layerPathAssociatedToTheGeoviewLayer` to be set, that logic using layerPathAssociatedToTheGeoviewLayer should be moved over there.
     // TO.DOCONT: If there's more other places relying on the `layerPathAssociatedToTheGeoviewLayer`, then it's not ideal,
@@ -275,7 +274,6 @@ export class LayerApi {
   /**
    * Verifies if a layer is registered. Returns true if registered.
    * @param {TypeLayerEntryConfig} layerConfig The layer configuration to test.
-   *
    * @returns {boolean} Returns true if the layer configuration is registered.
    */
   isRegistered(layerConfig: TypeLayerEntryConfig): boolean {
@@ -298,15 +296,17 @@ export class LayerApi {
   };
 
   /**
-   * Adds a layer to the map
-   *
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig the geoview layer configuration to add
-   * @param {TypeListOfLocalizedLanguages} optionalSuportedLanguages an optional list of supported language
+   * Adds a layer to the map. This is the main method to add a GeoView Layer on the map.
+   * It handles all the processing, including the validations, and makes sure to inform the layer sets about the layer.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The geoview layer configuration to add
+   * @param {TypeListOfLocalizedLanguages} optionalSuportedLanguages An optional list of supported language
+   * @returns {GeoViewLayerAddedResult | undefined} The result of the addition of the geoview layer.
+   * The result contains the instanciated GeoViewLayer along with a promise that will resolve when the layer will be officially on the map.
    */
   addGeoviewLayer = (
     geoviewLayerConfig: TypeGeoviewLayerConfig,
     optionalSuportedLanguages?: TypeListOfLocalizedLanguages
-  ): GeoViewLayerAddedResponse | undefined => {
+  ): GeoViewLayerAddedResult | undefined => {
     // eslint-disable-next-line no-param-reassign
     geoviewLayerConfig.geoviewLayerId = generateId(geoviewLayerConfig.geoviewLayerId);
     // create a new config object for this map element
@@ -329,32 +329,38 @@ export class LayerApi {
     return undefined;
   };
 
-  #onAddGeoviewLayer = (layerConfig: TypeGeoviewLayerConfig): GeoViewLayerAddedResponse | undefined => {
+  /**
+   * Continues the addition of the geoview layer.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The geoview layer configuration to add
+   * @returns {GeoViewLayerAddedResult | undefined} The result of the addition of the geoview layer.
+   * The result contains the instanciated GeoViewLayer along with a promise that will resolve when the layer will be officially on the map.
+   */
+  #onAddGeoviewLayer = (geoviewLayerConfig: TypeGeoviewLayerConfig): GeoViewLayerAddedResult | undefined => {
     let layerBeingAdded: AbstractGeoViewLayer | undefined;
-    if (layerConfigIsGeoJSON(layerConfig)) {
-      layerBeingAdded = new GeoJSON(this.mapId, layerConfig);
-    } else if (layerConfigIsGeoPackage(layerConfig)) {
-      layerBeingAdded = new GeoPackage(this.mapId, layerConfig);
-    } else if (layerConfigIsCSV(layerConfig)) {
-      layerBeingAdded = new CSV(this.mapId, layerConfig);
-    } else if (layerConfigIsWMS(layerConfig)) {
-      layerBeingAdded = new WMS(this.mapId, layerConfig);
-    } else if (layerConfigIsEsriDynamic(layerConfig)) {
-      layerBeingAdded = new EsriDynamic(this.mapId, layerConfig);
-    } else if (layerConfigIsEsriFeature(layerConfig)) {
-      layerBeingAdded = new EsriFeature(this.mapId, layerConfig);
-    } else if (layerConfigIsEsriImage(layerConfig)) {
-      layerBeingAdded = new EsriImage(this.mapId, layerConfig);
-    } else if (layerConfigIsImageStatic(layerConfig)) {
-      layerBeingAdded = new ImageStatic(this.mapId, layerConfig);
-    } else if (layerConfigIsWFS(layerConfig)) {
-      layerBeingAdded = new WFS(this.mapId, layerConfig);
-    } else if (layerConfigIsOgcFeature(layerConfig)) {
-      layerBeingAdded = new OgcFeature(this.mapId, layerConfig);
-    } else if (layerConfigIsXYZTiles(layerConfig)) {
-      layerBeingAdded = new XYZTiles(this.mapId, layerConfig);
-    } else if (layerConfigIsVectorTiles(layerConfig)) {
-      layerBeingAdded = new VectorTiles(this.mapId, layerConfig);
+    if (layerConfigIsGeoJSON(geoviewLayerConfig)) {
+      layerBeingAdded = new GeoJSON(this.mapId, geoviewLayerConfig);
+    } else if (layerConfigIsGeoPackage(geoviewLayerConfig)) {
+      layerBeingAdded = new GeoPackage(this.mapId, geoviewLayerConfig);
+    } else if (layerConfigIsCSV(geoviewLayerConfig)) {
+      layerBeingAdded = new CSV(this.mapId, geoviewLayerConfig);
+    } else if (layerConfigIsWMS(geoviewLayerConfig)) {
+      layerBeingAdded = new WMS(this.mapId, geoviewLayerConfig);
+    } else if (layerConfigIsEsriDynamic(geoviewLayerConfig)) {
+      layerBeingAdded = new EsriDynamic(this.mapId, geoviewLayerConfig);
+    } else if (layerConfigIsEsriFeature(geoviewLayerConfig)) {
+      layerBeingAdded = new EsriFeature(this.mapId, geoviewLayerConfig);
+    } else if (layerConfigIsEsriImage(geoviewLayerConfig)) {
+      layerBeingAdded = new EsriImage(this.mapId, geoviewLayerConfig);
+    } else if (layerConfigIsImageStatic(geoviewLayerConfig)) {
+      layerBeingAdded = new ImageStatic(this.mapId, geoviewLayerConfig);
+    } else if (layerConfigIsWFS(geoviewLayerConfig)) {
+      layerBeingAdded = new WFS(this.mapId, geoviewLayerConfig);
+    } else if (layerConfigIsOgcFeature(geoviewLayerConfig)) {
+      layerBeingAdded = new OgcFeature(this.mapId, geoviewLayerConfig);
+    } else if (layerConfigIsXYZTiles(geoviewLayerConfig)) {
+      layerBeingAdded = new XYZTiles(this.mapId, geoviewLayerConfig);
+    } else if (layerConfigIsVectorTiles(geoviewLayerConfig)) {
+      layerBeingAdded = new VectorTiles(this.mapId, geoviewLayerConfig);
     } else {
       // TODO: Refactor - Throw an Error when falling in this else and change return type to AbstractGeoViewLayer without undefined
     }
@@ -368,7 +374,7 @@ export class LayerApi {
       layerBeingAdded.onGeoViewLayerRegistration(this.#handleLayerRegistration.bind(this));
 
       // Prepare mandatory registrations
-      // TODO: REFACTOR - this shouldn't have to be mandatory!!
+      // TODO: Refactor - this shouldn't have to be mandatory! And not a function of the layer.
       layerBeingAdded.initRegisteredLayers(this);
 
       // Create a promise about the layer will be on the map
@@ -378,7 +384,7 @@ export class LayerApi {
           .createGeoViewLayers()
           .then(() => {
             // Add the layer on the map
-            this.addToMap(layerBeingAdded!);
+            this.#addToMap(layerBeingAdded!);
 
             // Resolve, done
             resolve();
@@ -398,11 +404,11 @@ export class LayerApi {
   };
 
   /**
-   * Adds the layer to the map if valid. If not (is a string) emit an error
+   * Continues the addition of the geoview layer.
+   * Adds the layer to the map if valid. If not (is a string) emits an error.
    * @param {any} geoviewLayer the layer config
    */
-  // TODO: Suggestion - Turn this function private (#addToMap) when it's not used in add-new-layer.tsx anymore
-  addToMap(geoviewLayer: AbstractGeoViewLayer): void {
+  #addToMap = (geoviewLayer: AbstractGeoViewLayer): void => {
     // if the returned layer object has something in the layerLoadError, it is because an error was detected
     // do not add the layer to the map
     if (geoviewLayer.layerLoadError.length !== 0) {
@@ -423,21 +429,29 @@ export class LayerApi {
       this.mapViewer.map.addLayer(geoviewLayer.olLayers!);
     }
 
-    // Redirect
-    this.#onLayerAddedToMap(geoviewLayer);
-  }
-
-  #onLayerAddedToMap(geoviewLayer: AbstractGeoViewLayer): void {
     // Log
     logger.logInfo(`GeoView Layer added on map ${geoviewLayer.geoviewLayerId}`, geoviewLayer);
 
     // Set the layer z indices
     // TODO: Check - Confirm if this is still working, moved here as part of a refactor
     MapEventProcessor.setLayerZIndices(this.mapId);
-  }
+  };
 
-  #handleLayerRegistration(geoviewLayer: AbstractGeoViewLayer, registrationEvent: GeoViewLayerRegistrationEvent): void {
+  /**
+   * Handles the registration of a geoview layer as part of its addition on the map.
+   * This handle is called when the geoview layer is ready to be registered in the layer set.
+   * @param {AbstractGeoViewLayer} geoviewLayer The Geoview layer to register
+   * @param {GeoViewLayerRegistrationEvent} registrationEvent The registration event
+   */
+  #handleLayerRegistration = (geoviewLayer: AbstractGeoViewLayer, registrationEvent: GeoViewLayerRegistrationEvent): void => {
     // The layer is ready to be registered, take care of it
+
+    // Log - leaving the line in comment as it can be pretty useful to uncomment it sometimes
+    // logger.logDebug('REGISTERING LAYER', registrationEvent.action, registrationEvent.layerPath, registrationEvent.layerConfig);
+
+    // Wire handler on the layer config to track the status changed
+    registrationEvent.layerConfig.onLayerStatusChanged(this.#handleLayerStatusChanged.bind(this));
+
     // Tell the layer sets about it
     [this.legendsLayerSet, this.hoverFeatureInfoLayerSet, this.allFeatureInfoLayerSet, this.featureInfoLayerSet].forEach(
       (layerSet: LayerSet) => {
@@ -445,7 +459,26 @@ export class LayerApi {
         layerSet.registerOrUnregisterLayer(geoviewLayer, registrationEvent.layerPath, registrationEvent.action);
       }
     );
-  }
+  };
+
+  /**
+   * Handles when the layer status changes on a given layer/configuration as part of its addition on the map.
+   * This handle is called when the geoview layer is being added.
+   * @param {AbstractGeoViewLayer} geoviewLayer The Geoview layer to register
+   * @param {GeoViewLayerRegistrationEvent} registrationEvent The registration event
+   */
+  #handleLayerStatusChanged = (config: ConfigBaseClass, layerStatusEvent: LayerStatusChangedEvent) => {
+    // Log - leaving the line in comment as it can be pretty useful to uncomment it sometimes
+    // logger.logDebug('LAYER STATUS CHANGED', layerStatusEvent.layerPath, layerStatusEvent.layerStatus, config);
+
+    // The layer status has changed for the given config/layer, take care of it
+    [this.legendsLayerSet, this.hoverFeatureInfoLayerSet, this.allFeatureInfoLayerSet, this.featureInfoLayerSet].forEach(
+      (layerSet: LayerSet) => {
+        // Process the layer status change
+        layerSet.processLayerStatusChanged(config, layerStatusEvent.layerPath, layerStatusEvent.layerStatus);
+      }
+    );
+  };
 
   /**
    * Removes all geoview layers from the map
