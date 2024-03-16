@@ -1,5 +1,6 @@
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   CONST_LAYER_ENTRY_TYPES,
@@ -170,31 +171,30 @@ export class ConfigBaseClass {
   }
 
   /**
+   * Emits an event to all handlers.
+   * @param {LayerStatusChangedEvent} event The event to emit
+   */
+  emitLayerStatusChanged = (event: LayerStatusChangedEvent) => {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.onLayerStatusChangedHandlers, event);
+  };
+
+  /**
    * Wires an event handler.
-   * @param {LayerStatusChangedDelegate} callback The callback to be executed whenever the event is raised
+   * @param {LayerStatusChangedDelegate} callback The callback to be executed whenever the event is emitted
    */
   onLayerStatusChanged = (callback: LayerStatusChangedDelegate): void => {
-    // Push a new callback handler to the list of handlers
-    this.onLayerStatusChangedHandlers.push(callback);
+    // Wire the event handler
+    EventHelper.onEvent(this.onLayerStatusChangedHandlers, callback);
   };
 
   /**
    * Unwires an event handler.
-   * @param {LayerStatusChangedDelegate} callback The callback to stop being called whenever the event is raised
+   * @param {LayerStatusChangedDelegate} callback The callback to stop being called whenever the event is emitted
    */
   offLayerStatusChanged = (callback: LayerStatusChangedDelegate): void => {
-    const index = this.onLayerStatusChangedHandlers.indexOf(callback);
-    if (index !== -1) {
-      this.onLayerStatusChangedHandlers.splice(index, 1);
-    }
-  };
-
-  /**
-   * Emits an event to all handlers.
-   */
-  emitLayerStatusChanged = (event: LayerStatusChangedEvent) => {
-    // Trigger all the handlers in the array
-    this.onLayerStatusChangedHandlers.forEach((handler) => handler(this, event));
+    // Unwire the event handler
+    EventHelper.offEvent(this.onLayerStatusChangedHandlers, callback);
   };
 
   /**
@@ -265,7 +265,7 @@ export class ConfigBaseClass {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerStatusChangedDelegate = (sender: ConfigBaseClass, event: LayerStatusChangedEvent) => void;
+type LayerStatusChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStatusChangedEvent>;
 
 /**
  * Define an event for the delegate

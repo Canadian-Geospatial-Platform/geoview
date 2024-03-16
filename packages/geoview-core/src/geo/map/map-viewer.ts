@@ -31,6 +31,7 @@ import { Modify } from '@/geo/interaction/modify';
 import { Snap } from '@/geo/interaction/snap';
 import { Translate } from '@/geo/interaction/translate';
 
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { LegendsLayerSet } from '@/geo/utils/legends-layer-set';
 import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
 import { ModalApi } from '@/ui';
@@ -55,21 +56,6 @@ interface TypeDocument extends Document {
   msExitFullscreen: () => void;
   mozCancelFullScreen: () => void;
 }
-
-/**
- * Define a delegate for the event handler function signature
- */
-type MapInitDelegate = (sender: MapViewer, event: undefined) => void;
-
-/**
- * Define a delegate for the event handler function signature
- */
-type MapReadyDelegate = (sender: MapViewer, event: undefined) => void;
-
-/**
- * Define a delegate for the event handler function signature
- */
-type MapLayersLoadedDelegate = (sender: MapViewer, event: undefined) => void;
 
 /**
  * Class used to manage created maps
@@ -330,87 +316,81 @@ export class MapViewer {
   }
 
   /**
-   * Wires an event handler.
-   * @param {MapInitDelegate} callback The callback to be executed whenever the event is raised
-   */
-  onMapInit = (callback: MapInitDelegate): void => {
-    // Push a new callback handler to the list of handlers
-    this.onMapInitHandlers.push(callback);
-  };
-
-  /**
-   * Unwires an event handler.
-   * @param {MapInitDelegate} callback The callback to stop being called whenever the event is raised
-   */
-  offMapInit = (callback: MapInitDelegate): void => {
-    const index = this.onMapInitHandlers.indexOf(callback);
-    if (index !== -1) {
-      this.onMapInitHandlers.splice(index, 1);
-    }
-  };
-
-  /**
    * Emits an event to all handlers.
    */
   emitMapInit = () => {
-    // Trigger all the handlers in the array
-    this.onMapInitHandlers.forEach((handler) => handler(this, undefined));
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.onMapInitHandlers, undefined);
   };
 
   /**
    * Wires an event handler.
-   * @param {MapReadyDelegate} callback The callback to be executed whenever the event is raised
+   * @param {MapInitDelegate} callback The callback to be executed whenever the event is emitted
    */
-  onMapReady = (callback: MapReadyDelegate): void => {
-    // Push a new callback handler to the list of handlers
-    this.onMapReadyHandlers.push(callback);
+  onMapInit = (callback: MapInitDelegate): void => {
+    // Wire the event handler
+    EventHelper.onEvent(this.onMapInitHandlers, callback);
   };
 
   /**
    * Unwires an event handler.
-   * @param {MapReadyDelegate} callback The callback to stop being called whenever the event is raised
+   * @param {MapInitDelegate} callback The callback to stop being called whenever the event is emitted
    */
-  offMapReady = (callback: MapReadyDelegate): void => {
-    const index = this.onMapReadyHandlers.indexOf(callback);
-    if (index !== -1) {
-      this.onMapReadyHandlers.splice(index, 1);
-    }
+  offMapInit = (callback: MapInitDelegate): void => {
+    // Unwire the event handler
+    EventHelper.offEvent(this.onMapInitHandlers, callback);
   };
 
   /**
    * Emits an event to all handlers.
    */
   emitMapReady = () => {
-    // Trigger all the handlers in the array
-    this.onMapReadyHandlers.forEach((handler) => handler(this, undefined));
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.onMapReadyHandlers, undefined);
   };
 
   /**
    * Wires an event handler.
-   * @param {MapReadyDelegate} callback The callback to be executed whenever the event is raised
+   * @param {MapReadyDelegate} callback The callback to be executed whenever the event is emitted
    */
-  onMapLayersLoaded = (callback: MapReadyDelegate): void => {
-    // Push a new callback handler to the list of handlers
-    this.onMapLayersLoadedHandlers.push(callback);
+  onMapReady = (callback: MapReadyDelegate): void => {
+    // Wire the event handler
+    EventHelper.onEvent(this.onMapReadyHandlers, callback);
   };
 
   /**
    * Unwires an event handler.
-   * @param {MapReadyDelegate} callback The callback to stop being called whenever the event is raised
+   * @param {MapReadyDelegate} callback The callback to stop being called whenever the event is emitted
    */
-  offMapLayersLoaded = (callback: MapReadyDelegate): void => {
-    const index = this.onMapLayersLoadedHandlers.indexOf(callback);
-    if (index !== -1) {
-      this.onMapLayersLoadedHandlers.splice(index, 1);
-    }
+  offMapReady = (callback: MapReadyDelegate): void => {
+    // Unwire the event handler
+    EventHelper.offEvent(this.onMapReadyHandlers, callback);
   };
 
   /**
    * Emits an event to all handlers.
    */
   emitMapLayersLoaded = () => {
-    // Trigger all the handlers in the array
-    this.onMapLayersLoadedHandlers.forEach((handler) => handler(this, undefined));
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.onMapLayersLoadedHandlers, undefined);
+  };
+
+  /**
+   * Wires an event handler.
+   * @param {MapLayersLoadedDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onMapLayersLoaded = (callback: MapLayersLoadedDelegate): void => {
+    // Wire the event handler
+    EventHelper.onEvent(this.onMapLayersLoadedHandlers, callback);
+  };
+
+  /**
+   * Unwires an event handler.
+   * @param {MapLayersLoadedDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offMapLayersLoaded = (callback: MapLayersLoadedDelegate): void => {
+    // Unwire the event handler
+    EventHelper.offEvent(this.onMapLayersLoadedHandlers, callback);
   };
 
   /**
@@ -878,3 +858,18 @@ export class MapViewer {
   }
   // #endregion
 }
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapInitDelegate = EventDelegateBase<MapViewer, undefined>;
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapReadyDelegate = EventDelegateBase<MapViewer, undefined>;
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapLayersLoadedDelegate = EventDelegateBase<MapViewer, undefined>;

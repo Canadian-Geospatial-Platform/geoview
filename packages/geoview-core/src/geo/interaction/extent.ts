@@ -2,6 +2,7 @@ import { Extent as OLExtent } from 'ol/interaction';
 import { ExtentEvent as OLExtentEvent, Options as OLExtentOptions } from 'ol/interaction/Extent';
 import { shiftKeyOnly } from 'ol/events/condition';
 
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { GeoUtilities } from '@/geo/utils/utilities';
 
@@ -14,11 +15,6 @@ export type ExtentOptions = InteractionOptions & {
   boxStyle?: TypeFeatureStyle;
   pixelTolerance?: number;
 };
-
-/**
- * Define a delegate for the event handler function signature
- */
-type ExtentDelegate = (sender: Extent, event: OLExtentEvent) => void;
 
 /**
  * Class used for drawing extent on a map
@@ -71,31 +67,34 @@ export class Extent extends Interaction {
   }
 
   /**
+   * Emits an event to all handlers.
+   * @param {OLExtentEvent} event The event to emit
+   */
+  emitExtentChanged = (event: OLExtentEvent) => {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.onExtentChangedHandlers, event);
+  };
+
+  /**
    * Wires an event handler.
-   * @param {ExtentDelegate} callback The callback to be executed whenever the event is raised
+   * @param {ExtentDelegate} callback The callback to be executed whenever the event is emitted
    */
   onExtentChanged = (callback: ExtentDelegate): void => {
-    // Push a new callback handler to the list of handlers
-    this.onExtentChangedHandlers.push(callback);
+    // Wire the event handler
+    EventHelper.onEvent(this.onExtentChangedHandlers, callback);
   };
 
   /**
    * Unwires an event handler.
-   * @param {ExtentDelegate} callback The callback to stop being called whenever the event is raised
+   * @param {ExtentDelegate} callback The callback to stop being called whenever the event is emitted
    */
   offExtentChanged = (callback: ExtentDelegate): void => {
-    const index = this.onExtentChangedHandlers.indexOf(callback);
-    if (index !== -1) {
-      this.onExtentChangedHandlers.splice(index, 1);
-    }
-  };
-
-  /**
-   * Emits an event to all handlers.
-   * @param {OLExtentEvent} extentEvent object representing the Open Layers event from the interaction
-   */
-  emitExtentChanged = (extentEvent: OLExtentEvent) => {
-    // Trigger all the handlers in the array
-    this.onExtentChangedHandlers.forEach((handler) => handler(this, extentEvent));
+    // Unwire the event handler
+    EventHelper.offEvent(this.onExtentChangedHandlers, callback);
   };
 }
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type ExtentDelegate = EventDelegateBase<Extent, OLExtentEvent>;
