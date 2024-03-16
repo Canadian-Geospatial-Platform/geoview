@@ -29,8 +29,6 @@ import {
   MapFeaturesPayload,
   mapConfigPayload,
   LayerSetPayload,
-  payloadIsLayerRegistration,
-  TypeLayerRegistrationPayload,
   GetLegendsPayload,
   TypeLegendInfoPayload,
   payloadIsLegendInfo,
@@ -482,25 +480,6 @@ export class Event {
   // ! These events exists to communicate between different application code and components.
   // ! They should be fixed/removed altogether as they don't have a 'valid' reason to exist or their refactoring would be beneficial.
   // ! At the time writing this, having them here was sufficient as a first step in cleaning generic api.event calls and payloads.
-
-  // #region LAYER_REGISTRATION ---------------------------------------------------------------------------------------
-
-  emitLayerRegistration = (mapId: string, layerPath: string, action: 'add' | 'remove', layerSetId?: string) => {
-    // Emit
-    this.emit(LayerSetPayload.createLayerRegistrationPayload(mapId, layerPath, action, layerSetId));
-  };
-
-  onLayerRegistration = (mapId: string, callback: (layerRegistration: TypeLayerRegistrationPayload) => void) => {
-    // Wire
-    this.onMapHelperHandler(mapId, EVENT_NAMES.LAYER_SET.LAYER_REGISTRATION, payloadIsLayerRegistration, callback);
-  };
-
-  offLayerRegistration = (mapId: string, callback: (layerRegistration: TypeLayerRegistrationPayload) => void) => {
-    // Unwire
-    this.off(EVENT_NAMES.LAYER_SET.LAYER_REGISTRATION, mapId, callback as TypeEventHandlerFunction);
-  };
-
-  // #endregion
 
   // #region LAYER_SET.UPDATED ----------------------------------------------------------------------------------------
 

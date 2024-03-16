@@ -3,11 +3,11 @@ import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import Feature from 'ol/Feature';
 import RenderFeature from 'ol/render/Feature';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeLayerSetChangeLayerStatusPayload, TypeResultSet } from '@/api/events/payloads';
-import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { api, LayerApi } from '@/app';
 import { TypeLayerStatus, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
 
 import { TypeHoverLayerData } from './hover-feature-info-layer-set';
@@ -28,7 +28,7 @@ export class LayerSet {
   protected mapId: string;
 
   /** The layer set identifier. */
-  protected layerSetId: string;
+  layerSetId: string;
 
   /** An object containing the result sets indexed using the layer path */
   resultSet: TypeResultSet;
@@ -67,7 +67,6 @@ export class LayerSet {
     this.registrationConditionFunction = registrationConditionFunction || (() => true); // The function or a function that's always true
     this.registrationUserInitialisation = registrationUserInitialisation;
     this.setChangeLayerStatusListenerFunctions();
-    this.setLayerRegistrationListenerFunctions();
   }
 
   /** ***************************************************************************************************************************
@@ -119,33 +118,28 @@ export class LayerSet {
     });
   }
 
-  /** ***************************************************************************************************************************
-   * Set the listener that will handle the LAYER_REGISTRATION event triggered on the map. Layer registration is the action of
-   * adding or deleting a layer in the layerset
+  /**
+   * Registers or Unregisters the layer in the layer-set, making sure the layer-set is aware of the layer.
+   * @param {AbstractGeoViewLayer} geoviewLayer The layer to register/unregister
+   * @param {string} action The action to register(add) or unregister(remove) the layer
    */
-  private setLayerRegistrationListenerFunctions() {
-    // Register a layer to the layer set or unregister the layer when it is deleted from the map.
-    api.event.onLayerRegistration(this.mapId, (payload) => {
-      const { action, layerPath, layerSetId } = payload;
-      // update the registration of all layer sets if !payload.layerSetId or update only the specified layer set
-      if (!layerSetId || layerSetId === this.layerSetId) {
-        if (action === 'add' && this.registrationConditionFunction(layerPath) && !(layerPath in this.resultSet)) {
-          const layerConfig = this.layerApi.registeredLayers[layerPath];
-          this.resultSet[layerPath] = {
-            data: undefined,
-            layerStatus: 'newInstance',
-            layerName: getLocalizedValue(layerConfig.layerName, this.mapId),
-          };
-          this.registrationUserInitialisation?.(layerPath);
-        } else if (action === 'remove' && layerPath in this.resultSet) {
-          MapEventProcessor.removeOrderedLayerInfo(this.mapId, layerPath);
-          delete this.resultSet[layerPath];
-        }
+  public registerOrUnregisterLayer(geoviewLayer: AbstractGeoViewLayer, layerPath: string, action: 'add' | 'remove'): void {
+    // Update the registration of all layer sets if !payload.layerSetId or update only the specified layer set
+    if (action === 'add' && this.registrationConditionFunction(layerPath) && !(layerPath in this.resultSet)) {
+      const layerConfig = this.layerApi.registeredLayers[layerPath];
+      this.resultSet[layerPath] = {
+        data: undefined,
+        layerStatus: 'newInstance',
+        layerName: getLocalizedValue(layerConfig.layerName, this.mapId),
+      };
+      this.registrationUserInitialisation?.(layerPath);
+    } else if (action === 'remove' && layerPath in this.resultSet) {
+      MapEventProcessor.removeOrderedLayerInfo(this.mapId, layerPath);
+      delete this.resultSet[layerPath];
+    }
 
-        // Emit layer set updated
-        api.event.emitLayerSetUpdated(this.layerSetId, layerPath, this.resultSet);
-      }
-    });
+    // Emit layer set updated
+    api.event.emitLayerSetUpdated(this.layerSetId, layerPath, this.resultSet);
   }
 
   /**
