@@ -146,9 +146,6 @@ export class LayerSet {
         api.event.emitLayerSetUpdated(this.layerSetId, layerPath, this.resultSet);
       }
     });
-
-    // Send a request layer inventory signal to all existing layers of the map. These layers will return a layer registration event.
-    api.event.emitLayerInventoryQuery(this.mapId, this.layerSetId);
   }
 
   /**
@@ -204,8 +201,8 @@ export class LayerSet {
   };
 }
 
-export type EventType = 'click' | 'hover' | 'crosshaire-enter' | 'all-features';
-export const ArrayOfEventTypes: EventType[] = ['click', 'hover', 'crosshaire-enter', 'all-features'];
+export type EventType = 'click' | 'hover' | 'all-features';
+export const ArrayOfEventTypes: EventType[] = ['click', 'hover', 'all-features'];
 export type QueryType = 'at_pixel' | 'at_coordinate' | 'at_long_lat' | 'using_a_bounding_box' | 'using_a_polygon' | 'all';
 
 export type TypeQueryStatus = 'init' | 'processing' | 'processed' | 'error';

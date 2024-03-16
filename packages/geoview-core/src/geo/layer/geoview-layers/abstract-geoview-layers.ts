@@ -18,7 +18,7 @@ import {
   getLocalizedMessage,
   createLocalizedString,
 } from '@/core/utils/utilities';
-import { TypeQueryLegendPayload, TypeRequestLayerInventoryPayload } from '@/api/events/payloads';
+import { TypeQueryLegendPayload } from '@/api/events/payloads';
 import { LayerApi, api } from '@/app';
 import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
 import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
@@ -223,7 +223,7 @@ export const isImageStaticLegend = (verifyIfLegend: TypeLegend): verifyIfLegend 
 };
 
 type TypeLayerSetHandlerFunctions = {
-  requestLayerInventory?: (layerInvetoryQuery: TypeRequestLayerInventoryPayload) => void;
+  // requestLayerInventory?: (layerInvetoryQuery: TypeRequestLayerInventoryPayload) => void;
   queryLegend?: (legendInfo: TypeQueryLegendPayload) => void;
   // queryLayer?: TypeEventHandlerFunction;
   updateLayerStatus?: TypeEventHandlerFunction;
@@ -901,17 +901,6 @@ export abstract class AbstractGeoViewLayer {
     const { layerPath } = layerConfig;
     if (!this.registerToLayerSetListenerFunctions[layerPath]) this.registerToLayerSetListenerFunctions[layerPath] = {};
 
-    if (!this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory) {
-      // Prep the handle
-      this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory = (payload) => {
-        // Emit the layer registration
-        api.event.emitLayerRegistration(this.mapId, layerPath, 'add', payload.layerSetId);
-      };
-
-      // Wire when a layer inventory has been queried
-      api.event.onLayerInventoryQuery(this.mapId, this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory!);
-    }
-
     if (!this.registerToLayerSetListenerFunctions[layerPath].queryLegend) {
       // Prep the handle
       this.registerToLayerSetListenerFunctions[layerPath].queryLegend = (payload) => {
@@ -941,11 +930,6 @@ export abstract class AbstractGeoViewLayer {
 
     // Emit the layer unregistration
     api.event.emitLayerRegistration(this.mapId, layerPath, 'remove');
-
-    if (this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory) {
-      api.event.offLayerInventoryQuery(this.mapId, this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory!);
-      delete this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory;
-    }
 
     if (this.registerToLayerSetListenerFunctions[layerPath].queryLegend) {
       api.event.offLayerLegendQuery(this.mapId, layerPath, this.registerToLayerSetListenerFunctions[layerPath].queryLegend!);

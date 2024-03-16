@@ -6,7 +6,6 @@ import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 /** Valid events that can create LayerSetPayload */
 const validEvents: EventStringId[] = [
   EVENT_NAMES.LAYER_SET.LAYER_REGISTRATION,
-  EVENT_NAMES.LAYER_SET.REQUEST_LAYER_INVENTORY,
   EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS,
   EVENT_NAMES.LAYER_SET.UPDATED,
 ];
@@ -43,26 +42,6 @@ export interface TypeLayerRegistrationPayload extends LayerSetPayload {
   layerSetId?: string;
   // the action to perform
   action: 'add' | 'remove';
-}
-
-/**
- * type guard function that redefines a PayloadBaseClass as a TypeRequestLayerInventoryPayload
- * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export const payloadIsRequestLayerInventory = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeRequestLayerInventoryPayload => {
-  return verifyIfPayload?.event === EVENT_NAMES.LAYER_SET.REQUEST_LAYER_INVENTORY;
-};
-
-/**
- * Additional attribute needed to define a TypeRequestLayerInventoryPayload
- */
-export interface TypeRequestLayerInventoryPayload extends LayerSetPayload {
-  // The layer set identifier that will receive the inventory
-  layerSetId: string;
 }
 
 /**
@@ -165,23 +144,6 @@ export class LayerSetPayload extends PayloadBaseClass {
     layerRegistrationPayload.action = action;
     layerRegistrationPayload.layerSetId = layerSetId;
     return layerRegistrationPayload;
-  };
-
-  /**
-   * Static method used to create a layer set payload requesting a layer inventory
-   *
-   * @param {string | null} handlerName the handler Name
-   * @param {string} layerSetId the layer set identifier that will receive the inventory
-   *
-   * @returns {TypeRequestLayerInventoryPayload} the requestLayerInventoryPayload object created
-   */
-  static createRequestLayerInventoryPayload = (handlerName: string, layerSetId: string): TypeRequestLayerInventoryPayload => {
-    const requestLayerInventoryPayload = new LayerSetPayload(
-      EVENT_NAMES.LAYER_SET.REQUEST_LAYER_INVENTORY,
-      handlerName
-    ) as TypeRequestLayerInventoryPayload;
-    requestLayerInventoryPayload.layerSetId = layerSetId;
-    return requestLayerInventoryPayload;
   };
 
   /**
