@@ -1,25 +1,14 @@
 import { LayerApi } from '@/app';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { logger } from '@/core/utils/logger';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 import { LayerSet, QueryType, TypeLayerData } from './layer-set';
 
-export type TypeAllFeatureInfoResultSetEntry = {
-  layerName?: string;
-  layerStatus: TypeLayerStatus;
-  data: TypeLayerData;
-};
-
-export type TypeAllFeatureInfoResultSet = {
-  [layerPath: string]: TypeAllFeatureInfoResultSetEntry;
-};
-
-type TypeAllFeatureInfoLayerSetInstance = { [mapId: string]: AllFeatureInfoLayerSet };
-
-/** ***************************************************************************************************************************
+/**
  * A class containing a set of layers associated with a TypeLayerData object, which will receive the result of a
  * "get  all feature info" request made on a specific layer of the map. The query is made for one layer at a time.
  *
@@ -29,10 +18,10 @@ export class AllFeatureInfoLayerSet extends LayerSet {
   /** Private static variable to keep the single instance that can be created by this class for a mapId (see singleton design pattern) */
   private static allFeatureInfoLayerSetInstance: TypeAllFeatureInfoLayerSetInstance = {};
 
-  /** An object containing the result sets indexed using the layer path */
+  /** The resultSet object as existing in the base class, retyped here as a TypeAllFeatureInfoResultSet */
   declare resultSet: TypeAllFeatureInfoResultSet;
 
-  /** ***************************************************************************************************************************
+  /**
    * The class constructor that instanciate a set of layer.
    *
    * @param {LayerApi} layerApi The layer Api to work with.
@@ -40,79 +29,75 @@ export class AllFeatureInfoLayerSet extends LayerSet {
    *
    */
   private constructor(layerApi: LayerApi, mapId: string) {
-    super(layerApi, mapId, `${mapId}/all/FeatureInfoLayerSet`, {});
-    this.setRegistrationConditionFunction();
-    this.setUserRegistrationInitFunction();
-  }
-
-  /* **************************************************************************************************************************
-   * This function determines whether a layer can be registered or not.
-   */
-  setRegistrationConditionFunction() {
-    this.registrationConditionFunction = (layerPath: string): boolean => {
-      // Log
-      logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET setRegistrationConditionFunction', layerPath, Object.keys(this.resultSet));
-
-      const geoviewLayerConfig = this.layerApi.geoviewLayer(layerPath);
-      // TODO: Make a util function for this check
-      if (
-        [
-          CONST_LAYER_TYPES.ESRI_IMAGE,
-          CONST_LAYER_TYPES.IMAGE_STATIC,
-          CONST_LAYER_TYPES.XYZ_TILES,
-          CONST_LAYER_TYPES.VECTOR_TILES,
-          CONST_LAYER_TYPES.WMS,
-        ].includes(geoviewLayerConfig.type)
-      )
-        return false;
-
-      const layerConfig = this.layerApi.registeredLayers[layerPath];
-      const queryable = layerConfig?.source?.featureInfo?.queryable;
-      return !!queryable;
-    };
-  }
-
-  /** ***************************************************************************************************************************
-   * Define the initialization function that the registration process will use to create a new entry in the layer set for a
-   * specific layer path.
-   */
-  setUserRegistrationInitFunction() {
-    this.registrationUserInitialisation = (layerPath: string) => {
-      // Log
-      logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET setUserRegistrationInitFunction', layerPath, Object.keys(this.resultSet));
-
-      const layerConfig = this.layerApi.registeredLayers[layerPath];
-      this.resultSet[layerPath] = {
-        layerName: getLocalizedValue(layerConfig.layerName, this.mapId) ?? '',
-        layerStatus: layerConfig.layerStatus!,
-        data: {
-          layerName: getLocalizedValue(layerConfig.layerName, this.mapId) ?? '',
-          layerStatus: layerConfig.layerStatus!,
-          eventListenerEnabled: true,
-          queryStatus: 'processed',
-          features: [],
-          layerPath,
-        },
-      };
-
-      FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, 'all-features', this.resultSet);
-    };
+    super(layerApi, mapId, `${mapId}/all/FeatureInfoLayerSet`);
   }
 
   /**
-   * The listener that will handle the CHANGE_LAYER_STATUS event triggered on the map. This method is called by the parent class
-   * LayerSet via the listener created by the processLayerStatusChanged method.
-   *
+   * Overrides the behavior to apply when an all-feature-info-layer-set wants to check for condition to register a layer in its set.
+   * @param {AbstractGeoViewLayer} geoviewLayer The geoview layer being registered
+   * @param {string} layerPath The layer path
+   */
+  protected onRegisterLayerCheck = (geoviewLayer: AbstractGeoViewLayer, layerPath: string): boolean => {
+    // Log
+    logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerPath, Object.keys(this.resultSet));
+
+    const geoviewLayerConfig = this.layerApi.geoviewLayer(layerPath);
+    // TODO: Make a util function for this check
+    if (
+      [
+        CONST_LAYER_TYPES.ESRI_IMAGE,
+        CONST_LAYER_TYPES.IMAGE_STATIC,
+        CONST_LAYER_TYPES.XYZ_TILES,
+        CONST_LAYER_TYPES.VECTOR_TILES,
+        CONST_LAYER_TYPES.WMS,
+      ].includes(geoviewLayerConfig.type)
+    )
+      return false;
+
+    const layerConfig = this.layerApi.registeredLayers[layerPath];
+    const queryable = layerConfig?.source?.featureInfo?.queryable;
+    return !!queryable;
+  };
+
+  /**
+   * Overrides the behavior to apply when an all-feature-info-layer-set wants to register a layer in its set.
+   * @param {AbstractGeoViewLayer} geoviewLayer The geoview layer being registered
+   * @param {string} layerPath The layer path
+   */
+  protected onRegisterLayer = (geoviewLayer: AbstractGeoViewLayer, layerPath: string): void => {
+    // Log
+    logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET - onRegisterLayer', layerPath, Object.keys(this.resultSet));
+
+    const layerConfig = this.layerApi.registeredLayers[layerPath];
+    this.resultSet[layerPath] = {
+      layerName: getLocalizedValue(layerConfig.layerName, this.mapId) ?? '',
+      layerStatus: layerConfig.layerStatus!,
+      data: {
+        layerName: getLocalizedValue(layerConfig.layerName, this.mapId) ?? '',
+        layerStatus: layerConfig.layerStatus!,
+        eventListenerEnabled: true,
+        queryStatus: 'processed',
+        features: [],
+        layerPath,
+      },
+    };
+
+    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, 'all-features', this.resultSet);
+  };
+
+  /**
+   * Overrides the behavior to apply when a layer status changed for a all-feature-info-layer-set.
+   * @param {ConfigBaseClass} config The layer config class
    * @param {string} layerPath The layer path being affected
    * @param {string} layerStatus The new layer status
    */
-  protected changeLayerStatusListenerFunctions(layerPath: string, layerStatus: TypeLayerStatus): void {
+  protected onProcessLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
     // if layer's status flag exists and is different than the new one
     if (this.resultSet?.[layerPath]?.layerStatus && this.resultSet?.[layerPath]?.layerStatus !== layerStatus) {
       if (layerStatus === 'error') delete this.resultSet[layerPath];
       else {
-        // Call parent
-        super.changeLayerStatusListenerFunctions(layerPath, layerStatus);
+        // Call parent. After this call, this.resultSet?.[layerPath]?.layerStatus may have changed!
+        super.onProcessLayerStatusChanged(config, layerPath, layerStatus);
 
         const layerConfig = this.layerApi.registeredLayers[layerPath];
         if (this?.resultSet?.[layerPath]?.data) {
@@ -193,3 +178,15 @@ export class AllFeatureInfoLayerSet extends LayerSet {
     if (AllFeatureInfoLayerSet.allFeatureInfoLayerSetInstance[mapId]) delete AllFeatureInfoLayerSet.allFeatureInfoLayerSetInstance[mapId];
   }
 }
+
+export type TypeAllFeatureInfoResultSetEntry = {
+  layerName?: string;
+  layerStatus: TypeLayerStatus;
+  data: TypeLayerData;
+};
+
+export type TypeAllFeatureInfoResultSet = {
+  [layerPath: string]: TypeAllFeatureInfoResultSetEntry;
+};
+
+type TypeAllFeatureInfoLayerSetInstance = { [mapId: string]: AllFeatureInfoLayerSet };

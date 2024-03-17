@@ -1,24 +1,7 @@
 import { generateId } from '@/core/utils/utilities';
-import EventHelper from '@/api/events/event-helper';
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 
 import { TypeModalProps } from './modal';
-
-/**
- * Event interface for ModalEvent
- */
-type ModalEvent = {
-  modalId: string;
-};
-
-/**
- * Define a delegate for the event handler function signature
- */
-type ModalOpenedDelegate = (sender: ModalApi, event: ModalEvent) => void;
-
-/**
- * Define a delegate for the event handler function signature
- */
-type ModalClosedDelegate = (sender: ModalApi, event: ModalEvent) => void;
 
 /**
  * Class used to handle creating a new modal
@@ -145,3 +128,20 @@ export class ModalApi {
     EventHelper.offEvent(this.onModalClosedHandlers, callback);
   };
 }
+
+/**
+ * Event interface for ModalEvent
+ */
+type ModalEvent = {
+  modalId: string;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type ModalOpenedDelegate = EventDelegateBase<ModalApi, ModalEvent>;
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type ModalClosedDelegate = EventDelegateBase<ModalApi, ModalEvent>;

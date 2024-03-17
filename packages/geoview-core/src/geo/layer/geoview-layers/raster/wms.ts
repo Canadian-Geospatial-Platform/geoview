@@ -418,7 +418,6 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer configurstion associated to the dynamic group.
    */
   private createGroupLayer(layer: TypeJsonObject, layerConfig: AbstractBaseLayerEntryConfig) {
-    const { layerPath } = layerConfig;
     const newListOfLayerEntryConfig: TypeListOfLayerEntryConfig = [];
     const arrayOfLayerMetadata = Array.isArray(layer.Layer) ? layer.Layer : ([layer.Layer] as TypeJsonArray);
 
@@ -436,7 +435,6 @@ export class WMS extends AbstractGeoViewRaster {
       subLayerEntryConfig.registerLayerConfig();
     });
 
-    if (this.registerToLayerSetListenerFunctions[layerPath]) this.unregisterFromLayerSets(layerConfig);
     const switchToGroupLayer = Cast<GroupLayerEntryConfig>(layerConfig);
     switchToGroupLayer.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
     switchToGroupLayer.layerName = {
