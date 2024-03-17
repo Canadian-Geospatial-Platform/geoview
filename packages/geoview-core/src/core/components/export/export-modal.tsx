@@ -89,9 +89,10 @@ export default function ExportModal(): JSX.Element {
       timer = setTimeout(() => {
         // https://html2canvas.hertzen.com/configuration/
         setIsMapLoading(true);
-        html2Canvas(map.getViewport()).then((canvas) => {
+        html2Canvas(map.getViewport()).then((canvas: HTMLCanvasElement) => {
           setIsMapLoading(false);
           mapImage.appendChild(canvas);
+          canvas.setAttribute('style', `max-width:${getCanvasWidth(dialogBox)}px`);
         });
 
         // add legend
@@ -179,7 +180,7 @@ export default function ExportModal(): JSX.Element {
           variant="outlined"
           onClick={exportMap}
           size="small"
-          sx={{ fontSize: theme.palette.geoViewFontSize.xs, padding: '0.7rem 1rem', backgroundColor: theme.palette.background.default }}
+          sx={{ fontSize: theme.palette.geoViewFontSize.sm, padding: '0.7rem 1rem', backgroundColor: theme.palette.background.default }}
           disabled={isLegendLoading || isMapLoading}
         >
           {t('exportModal.exportBtn')}
