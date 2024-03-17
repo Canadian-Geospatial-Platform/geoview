@@ -19,9 +19,6 @@ import { EventType, LayerSet, TypeFeatureInfoEntry, TypeLayerData } from './laye
  * @class FeatureInfoLayerSet
  */
 export class FeatureInfoLayerSet extends LayerSet {
-  /** Private static variable to keep the single instance that can be created by this class for a mapId (see singleton design pattern) */
-  private static featureInfoLayerSetInstance: TypeFeatureInfoLayerSetInstance = {};
-
   /** The resultSet object as existing in the base class, retyped here as a TypeFeatureInfoResultSet */
   declare resultSet: TypeFeatureInfoResultSet;
 
@@ -34,7 +31,7 @@ export class FeatureInfoLayerSet extends LayerSet {
    * @param {LayerApi} layerApi The layer Api to work with.
    * @param {string} mapId The map identifier the layer set belongs to.
    */
-  private constructor(layerApi: LayerApi, mapId: string) {
+  constructor(layerApi: LayerApi, mapId: string) {
     super(layerApi, mapId, `${mapId}/click/FeatureInfoLayerSet`);
 
     // Wire a listener on the map click
@@ -258,30 +255,6 @@ export class FeatureInfoLayerSet extends LayerSet {
     });
     return returnValue;
   }
-
-  /**
-   * Helper function used to instanciate a FeatureInfoLayerSet object. This function
-   * must be used in place of the "new FeatureInfoLayerSet" syntax.
-   *
-   * @param {LayerApi} layerApi The layer Api to work with.
-   * @param {string} mapId The map identifier the layer set belongs to.
-   *
-   * @returns {FeatureInfoLayerSet} the FeatureInfoLayerSet object created
-   */
-  static get(layerApi: LayerApi, mapId: string): FeatureInfoLayerSet {
-    if (!FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId])
-      FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId] = new FeatureInfoLayerSet(layerApi, mapId);
-    return FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId];
-  }
-
-  /**
-   * Function used to delete a FeatureInfoLayerSet object associated to a mapId.
-   *
-   * @param {string} mapId The map identifier the layer set belongs to.
-   */
-  static delete(mapId: string) {
-    if (FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId]) delete FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId];
-  }
 }
 
 export type TypeFeatureInfoResultSetEntry = {
@@ -293,8 +266,6 @@ export type TypeFeatureInfoResultSetEntry = {
 export type TypeFeatureInfoResultSet = {
   [layerPath: string]: TypeFeatureInfoResultSetEntry;
 };
-
-type TypeFeatureInfoLayerSetInstance = { [mapId: string]: FeatureInfoLayerSet };
 
 /**
  * Define a delegate for the event handler function signature

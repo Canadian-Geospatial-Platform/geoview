@@ -137,6 +137,7 @@ export async function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig:
     // Render the map
     await renderMap(mapDiv);
   } else {
+    // Log warning
     logger.logWarning(`Div with id ${mapDiv.id} has a class 'geoview-map' and should be initialized via a cgpv.init() call.`);
   }
 }
@@ -144,27 +145,54 @@ export async function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig:
 /**
  * Initialize the cgpv and render it to root element
  *
- * @param {Function} callback optional callback function to run once the rendering is ready
+ * @param {Function} callbackMapInit optional callback function to run once the map rendering is ready
+ * @param {Function} callbackMapLayersLoaded optional callback function to run once layers are loaded on the map
  */
-async function init(callback: () => void): Promise<void> {
-  // set the API callback if a callback is provided
-  if (callback) api.readyCallback = callback;
-
+async function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded?: (mapId: string) => void): Promise<void> {
   const mapElements = document.getElementsByClassName('geoview-map');
 
   // loop through map elements on the page
   const promises = [];
   for (let i = 0; i < mapElements.length; i += 1) {
     const mapElement = mapElements[i] as Element;
-    if (!mapElement.classList.contains('geoview-map-func-call')) promises.push(renderMap(mapElement));
+    if (!mapElement.classList.contains('geoview-map-func-call')) {
+      // Render the map
+      const promiseMapInit = renderMap(mapElement);
+
+      // When the map init is done
+      promiseMapInit.then(() => {
+        // Log
+        logger.logInfo('Map initialized', mapElement.getAttribute('id')!);
+
+        // Callback about it
+        callbackMapInit?.(mapElement.getAttribute('id')!);
+      });
+
+      // Push the promise in the list of all maps being rendered
+      promises.push(promiseMapInit);
+    }
   }
 
   // Wait for map renders to end and MapViewers to be initialized
   await Promise.allSettled(promises);
 
+  // TODO: REFACTOR - Petition to never callback with 'allMaps' and rethink this.
+  // TO.DOCONT: It's very dangerous for the listeners and imposes that they always be careful what the callback is about.
+  // TO.DOCONT: I've even found examples of us not using it correctly in the template pages...
+
+  // Log
+  logger.logInfo('Map initialized', 'allMaps');
+
+  // Callback all maps have been initialized
+  callbackMapInit?.('allMaps');
+
+  //
   // At this point, all api.maps[] MapViewers that needed to be instantiated were done so.
-  // Start checking for whenever each map have loaded layers and call the api.readyCallback when they are
+  //
+
+  // Loop on each map viewer to wire more listeners
   const mapViewersPromises = Object.values(api.maps).map((mapViewer) => {
+    // Create promise for when all the layers will be loaded
     return new Promise((resolve) => {
       // If the mapviewer is already ready, resolve right away
       if (mapViewer.mapLayersLoaded) {
@@ -176,8 +204,11 @@ async function init(callback: () => void): Promise<void> {
       mapViewer.onMapLayersLoaded((mapViewerLoaded) => {
         // Run the callback for maps that have the triggerReadyCallback set using the mapId for the parameter value
         if (mapViewerLoaded.mapFeaturesConfig.triggerReadyCallback) {
+          // Log
+          logger.logInfo('Map layers loaded', mapViewerLoaded.mapId);
+
           // Callback for that particular map
-          api.readyCallback?.(mapViewerLoaded.mapId);
+          callbackMapLayersLoaded?.(mapViewerLoaded.mapId);
         }
 
         // Resolve
@@ -186,11 +217,14 @@ async function init(callback: () => void): Promise<void> {
     });
   });
 
-  // Start checking for whenever all maps are ready and call api.readyCallback when they are
+  // Wait for all maps to have their layers loaded
   await Promise.allSettled(mapViewersPromises);
 
-  // Callback for all maps
-  api.readyCallback?.('allMaps');
+  // Log
+  logger.logInfo('Map layers loaded', 'allMaps');
+
+  // Callback all maps and layers have been loaded
+  callbackMapLayersLoaded?.('allMaps');
 }
 
 // cgpv object to be exported with the api for outside use

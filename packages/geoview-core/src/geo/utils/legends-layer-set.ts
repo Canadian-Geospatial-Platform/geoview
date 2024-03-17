@@ -1,7 +1,7 @@
 import { LayerSet } from '@/geo/utils/layer-set';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { api, LayerApi, TypeLayerEntryConfig, TypeLegend } from '@/core/types/cgpv-types';
+import { LayerApi, TypeLayerEntryConfig, TypeLegend } from '@/core/types/cgpv-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { logger } from '@/core/utils/logger';
@@ -16,9 +16,6 @@ import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geovie
  * @class LegendsLayerSet
  */
 export class LegendsLayerSet extends LayerSet {
-  /** Private static variable to keep the single instance that can be created by this class for a mapIId (see singleton design pattern) */
-  private static legendsLayerSetInstance: TypeLegendsLayerSetInstance = {};
-
   /** The resultSet object as existing in the base class, retyped here as a TypeLegendResultSet */
   declare resultSet: TypeLegendResultSet;
 
@@ -29,11 +26,8 @@ export class LegendsLayerSet extends LayerSet {
    * @param {string} mapId The map identifier the layer set belongs to.
    *
    */
-  private constructor(layerApi: LayerApi, mapId: string) {
+  constructor(layerApi: LayerApi, mapId: string) {
     super(layerApi, mapId, `${mapId}/LegendsLayerSet`);
-
-    // Wire layer set updated event
-    this.setLayerSetUpdatedListener();
   }
 
   /**
@@ -62,8 +56,8 @@ export class LegendsLayerSet extends LayerSet {
       // Propagate to store
       LegendEventProcessor.propagateLegendToStore(this.mapId, layerPath, this.resultSet[layerPath]);
 
-      // Emit layer set updated
-      api.event.emitLayerSetUpdated(this.layerSetId, layerPath, this.resultSet);
+      // Inform that the layer set has been updated
+      this.onLayerSetUpdatedProcess(layerPath);
     });
   };
 
@@ -133,58 +127,32 @@ export class LegendsLayerSet extends LayerSet {
     }
   }
 
-  /** ***************************************************************************************************************************
-   * Set the listener function that will monitor events triggered when a layer is updated.
-   */
-  private setLayerSetUpdatedListener() {
-    // Wire a layer set updated listener
-    api.event.onLayerSetUpdated(this.layerSetId, (payload) => {
-      const { layerPath } = payload;
-      if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerPath) === -1) {
-        const layerConfig = this.layerApi.registeredLayers[layerPath];
-        if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerPath.split('.')[1]) !== -1) {
-          MapEventProcessor.replaceOrderedLayerInfo(this.mapId, layerConfig, layerPath.split('.')[1]);
-        } else if (layerConfig.parentLayerConfig) {
-          const parentLayerPathArray = layerPath.split('/');
-          parentLayerPathArray.pop();
-          const parentLayerPath = parentLayerPathArray.join('/');
-          const parentLayerIndex = MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, parentLayerPath);
-          const numberOfLayers = MapEventProcessor.getMapOrderedLayerInfo(this.mapId).filter((layerInfo) =>
-            layerInfo.layerPath.startsWith(parentLayerPath)
-          ).length;
-          if (parentLayerIndex !== -1) MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig, parentLayerIndex + numberOfLayers);
-          else MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig.parentLayerConfig!);
-        } else MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig);
-      }
-    });
-  }
-
   /**
-   * Helper function used to instanciate a LegendsLayerSet object. This function
-   * avoids the "new LegendsLayerSet" syntax.
-   *
-   * @param {LayerApi} layerApi The layer Api to work with.
-   * @param {string} mapId The map identifier the layer set belongs to.
-   *
-   * @returns {LegendsLayerSet} the LegendsLayerSet object created
+   * Overrides the behavior to apply when a layer set was updated for a legends-layer-set.
+   * @param {string} layerPath The layer path which triggered the layer set update
    */
-  static get(layerApi: LayerApi, mapId: string): LegendsLayerSet {
-    if (!LegendsLayerSet.legendsLayerSetInstance[mapId])
-      LegendsLayerSet.legendsLayerSetInstance[mapId] = new LegendsLayerSet(layerApi, mapId);
-    return LegendsLayerSet.legendsLayerSetInstance[mapId];
-  }
+  protected onLayerSetUpdatedProcess(layerPath: string): void {
+    if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerPath) === -1) {
+      const layerConfig = this.layerApi.registeredLayers[layerPath];
+      if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerPath.split('.')[1]) !== -1) {
+        MapEventProcessor.replaceOrderedLayerInfo(this.mapId, layerConfig, layerPath.split('.')[1]);
+      } else if (layerConfig.parentLayerConfig) {
+        const parentLayerPathArray = layerPath.split('/');
+        parentLayerPathArray.pop();
+        const parentLayerPath = parentLayerPathArray.join('/');
+        const parentLayerIndex = MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, parentLayerPath);
+        const numberOfLayers = MapEventProcessor.getMapOrderedLayerInfo(this.mapId).filter((layerInfo) =>
+          layerInfo.layerPath.startsWith(parentLayerPath)
+        ).length;
+        if (parentLayerIndex !== -1) MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig, parentLayerIndex + numberOfLayers);
+        else MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig.parentLayerConfig!);
+      } else MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig);
+    }
 
-  /**
-   * Function used to delete a LegendsLayerSet object associated to a mapId.
-   *
-   * @param {string} mapId The map identifier the layer set belongs to.
-   */
-  static delete(mapId: string) {
-    if (LegendsLayerSet.legendsLayerSetInstance[mapId]) delete LegendsLayerSet.legendsLayerSetInstance[mapId];
+    // Call parent now
+    super.onLayerSetUpdatedProcess(layerPath);
   }
 }
-
-type TypeLegendsLayerSetInstance = { [mapId: string]: LegendsLayerSet };
 
 export type TypeLegendResultSetEntry = {
   layerName?: string;
