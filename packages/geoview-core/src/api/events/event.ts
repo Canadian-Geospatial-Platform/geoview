@@ -29,16 +29,10 @@ import {
   MapFeaturesPayload,
   mapConfigPayload,
   LayerSetPayload,
-  GetLegendsPayload,
-  TypeLegendInfoPayload,
-  payloadIsLegendInfo,
-  payloadIsQueryLegend,
-  TypeQueryLegendPayload,
   payloadIsLayerSetUpdated,
   TypeLayerSetUpdatedPayload,
   TypeResultSet,
 } from './payloads';
-import { TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 export type TypeEventHandlerFunction = (payload: PayloadBaseClass) => void;
 
@@ -493,48 +487,6 @@ export class Event {
   offLayerSetUpdated = (layerSetId: string, callback: (layerSetUpdated: TypeLayerSetUpdatedPayload) => void) => {
     // Unwire
     this.off(EVENT_NAMES.LAYER_SET.UPDATED, layerSetId, callback as TypeEventHandlerFunction);
-  };
-
-  // #endregion
-
-  // #region CHANGE_LAYER_STATUS --------------------------------------------------------------------------------------
-
-  // #endregion
-
-  // #region QUERY_LEGEND ---------------------------------------------------------------------------------------------
-
-  emitLayerLegendQuery = (mapId: string, layerPath: string) => {
-    // Emit
-    this.emit(GetLegendsPayload.createQueryLegendPayload(`${mapId}/${layerPath}`, layerPath));
-  };
-
-  onLayerLegendQuery = (mapId: string, layerPath: string, callback: (legendInfo: TypeQueryLegendPayload) => void) => {
-    // Wire
-    this.onMapHelperHandler(`${mapId}/${layerPath}`, EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND, payloadIsQueryLegend, callback);
-  };
-
-  offLayerLegendQuery = (mapId: string, layerPath: string, callback: (legendInfo: TypeQueryLegendPayload) => void) => {
-    // Unwire
-    this.off(EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND, `${mapId}/${layerPath}`, callback as TypeEventHandlerFunction);
-  };
-
-  // #endregion
-
-  // #region LEGEND_INFO ----------------------------------------------------------------------------------------------
-
-  emitLayerLegendInfo = (mapId: string, layerPath: string, queryResult: TypeLegend | null) => {
-    // Emit
-    this.emit(GetLegendsPayload.createLegendInfoPayload(mapId, layerPath, queryResult));
-  };
-
-  onLayerLegendInfo = (mapId: string, callback: (legendInfo: TypeLegendInfoPayload) => void) => {
-    // Wire
-    this.onMapHelperHandler(mapId, EVENT_NAMES.GET_LEGENDS.LEGEND_INFO, payloadIsLegendInfo, callback);
-  };
-
-  offLayerLegendInfo = (mapId: string, callback: (legendInfo: TypeLegendInfoPayload) => void) => {
-    // Unwire
-    this.off(EVENT_NAMES.GET_LEGENDS.LEGEND_INFO, mapId, callback as TypeEventHandlerFunction);
   };
 
   // #endregion
