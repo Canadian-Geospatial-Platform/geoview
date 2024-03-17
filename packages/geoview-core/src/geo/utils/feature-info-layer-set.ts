@@ -1,15 +1,16 @@
 import { Coordinate } from 'ol/coordinate';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { payloadIsAMapMouseEvent } from '@/api/events/payloads';
+import { payloadIsAMapMouseEvent, TypeResultSet } from '@/api/events/payloads';
 import { api, LayerApi } from '@/app';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { logger } from '@/core/utils/logger';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
-import { LayerSet, TypeFeatureInfoEntry, TypeLayerData } from './layer-set';
+import { EventType, LayerSet, TypeFeatureInfoEntry, TypeLayerData } from './layer-set';
 
 /**
  * A class containing a set of layers associated with a TypeLayerData object, which will receive the result of a
@@ -23,6 +24,9 @@ export class FeatureInfoLayerSet extends LayerSet {
 
   /** The resultSet object as existing in the base class, retyped here as a TypeFeatureInfoResultSet */
   declare resultSet: TypeFeatureInfoResultSet;
+
+  // Keep all callback delegate references
+  private onQueryEndedHandlers: QueryEndedDelegate[] = [];
 
   /**
    * The class constructor that instanciate a set of layer.
@@ -100,6 +104,33 @@ export class FeatureInfoLayerSet extends LayerSet {
   }
 
   /**
+   * Emits an event to all handlers.
+   * @param {QueryEndedEvent} event The event to emit
+   */
+  emitQueryEnded = (event: QueryEndedEvent) => {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.onQueryEndedHandlers, event);
+  };
+
+  /**
+   * Wires an event handler.
+   * @param {QueryEndedDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onQueryEnded = (callback: QueryEndedDelegate): void => {
+    // Wire the event handler
+    EventHelper.onEvent(this.onQueryEndedHandlers, callback);
+  };
+
+  /**
+   * Unwires an event handler.
+   * @param {QueryEndedDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offQueryEnded = (callback: QueryEndedDelegate): void => {
+    // Unwire the event handler
+    EventHelper.offEvent(this.onQueryEndedHandlers, callback);
+  };
+
+  /**
    * Queries the features at the provided coordinate for all the registered layers.
    *
    * @param {Coordinate} longLatCoordinate The longitude/latitude coordinate where to query the features
@@ -112,6 +143,10 @@ export class FeatureInfoLayerSet extends LayerSet {
     // Prepare to hold all promises of features in the loop below
     const allPromises: Promise<TypeFeatureInfoEntry[] | undefined | null>[] = [];
 
+    // Query and event types of what we're doing
+    const queryType = 'at_long_lat';
+    const eventType = 'click';
+
     // Reinitialize the resultSet
     // Loop on each layer path in the resultSet
     Object.keys(this.resultSet).forEach((layerPath) => {
@@ -121,10 +156,6 @@ export class FeatureInfoLayerSet extends LayerSet {
       if (layerConfig.layerStatus === 'loaded') {
         data.features = undefined;
         data.queryStatus = 'processing';
-
-        // Query and event types of what we're doing
-        const queryType = 'at_long_lat';
-        const eventType = 'click';
 
         // Process query on results data
         const promiseResult = this.processQueryResultSetData(data, layerConfig, layerPath, queryType, longLatCoordinate);
@@ -154,6 +185,9 @@ export class FeatureInfoLayerSet extends LayerSet {
 
     // Await for the promises to settle
     await Promise.allSettled(allPromises);
+
+    // Emit the query layers has ended
+    this.emitQueryEnded({ coordinate: longLatCoordinate, resultSet: this.resultSet, eventType });
 
     // Return the results
     return this.resultSet;
@@ -261,3 +295,17 @@ export type TypeFeatureInfoResultSet = {
 };
 
 type TypeFeatureInfoLayerSetInstance = { [mapId: string]: FeatureInfoLayerSet };
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type QueryEndedDelegate = EventDelegateBase<FeatureInfoLayerSet, QueryEndedEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type QueryEndedEvent = {
+  coordinate: Coordinate;
+  resultSet: TypeResultSet;
+  eventType: EventType;
+};
