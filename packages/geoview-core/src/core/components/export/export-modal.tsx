@@ -105,6 +105,11 @@ export default function ExportModal(): JSX.Element {
             backgroundColor: 'inherit',
             width: getCanvasWidth(dialogBox),
             windowWidth: getCanvasWidth(dialogBox),
+            onclone: (cloneDoc: Document) => {
+              // remove hidden attribute from clone document legend, so that html2Canvas can copy the legend container.
+              const legendTab = cloneDoc.getElementById(`${mapId}-legend`) as HTMLElement;
+              legendTab.removeAttribute('hidden');
+            },
           }).then((canvas) => {
             setIsLegendLoading(false);
             legendContainerRef.current?.appendChild(canvas);
