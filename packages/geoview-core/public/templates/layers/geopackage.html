@@ -108,8 +108,8 @@
     <pre id="LegendsId1-table-pre" class="panel"></pre>
     <button type="button" class="collapsible">Get Feature Info</button>
     <pre id="ResultSetId1-click" class="panel">Click on feature on the map</pre>
-    <button type="button" class="collapsible" id="AllFeatureInfo1">Get All Feature Info</button>
-    <pre id="ResultSetId1-all" class="panel"></pre>
+    <button type="button" class="collapsible" id="AllFeatureInfo1">Get All Feature Info (GeoPackageLYR1/Natural_Earth_QGIS_layers_and_styles.gpkg/Countries)</button>
+    <pre id="ResultSetId1-all-features" class="panel"></pre>
     <hr />
 
     <div class="map-title-holder">
@@ -246,44 +246,35 @@
     <script src="layerlib.js"></script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init(function (mapId) {
-        console.log(`api is ready for ${mapId}`);
-
+      cgpv.init((mapId) => {
         if (mapId === 'allMaps') {
           // Wire a handle when all queries done after a map click
           cgpv.api.maps['LYR1'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
             const { coordinate, resultSet, eventType } = payload;
             createInfoTable('LYR1', 'ResultSetId1', resultSet, eventType);
           });
+          cgpv.api.maps['LYR1'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+            const { resultSet } = payload;
+            displayLegend('LegendsId1', resultSet);
+          });
+          listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
+          listenToLegendLayerSetChanges('HLYR2-state', 'LYR2');
+          listenToLegendLayerSetChanges('HLYR3-state', 'LYR3');
 
           createTableOfFilter('LYR1');
+
+          // create snippets
+          createCodeSnippet();
+          createConfigSnippet();
         }
       });
 
       // LYR1 ===================================================================================================================
       const getAllFeatureInfo1 = document.getElementById('AllFeatureInfo1');
-      getAllFeatureInfo1.addEventListener('click', function (e) {
-            cgpv.api.event.emit({ event: 'map/get_all_features', handlerName: 'LYR1' });
-          });
-
-      cgpv.api.event.on(
-        cgpv.api.eventNames.LAYER_SET.UPDATED,
-        (payload) => {
-          const { resultSet } = payload;
-          displayLegend('LegendsId1', resultSet);
-        },
-        'LYR1/LegendsLayerSet'
-      );
-
-      listenToLegendLayerSetChanges('HLYR1-state', 'LYR1/LegendsLayerSet');
-
-      listenToLegendLayerSetChanges('HLYR2-state', 'LYR2/LegendsLayerSet');
-
-      listenToLegendLayerSetChanges('HLYR3-state', 'LYR3/LegendsLayerSet');
-
-      //create snippets
-      createCodeSnippet();
-      createConfigSnippet();
+      getAllFeatureInfo1.addEventListener('click', async () => {
+        const resultSet = await cgpv.api.maps['LYR1'].layer.allFeatureInfoLayerSet.queryLayer('GeoPackageLYR1/Natural_Earth_QGIS_layers_and_styles.gpkg/Countries');
+        createInfoTable('LYR1', 'ResultSetId1', resultSet, 'all-features');
+      });
     </script>
   </body>
 </html>

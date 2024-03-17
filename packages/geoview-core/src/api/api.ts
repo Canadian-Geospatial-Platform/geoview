@@ -43,9 +43,6 @@ export class API {
   // timeout number used to check if everything is ready to make API calls
   isReady = 0;
 
-  // callback function to call after everything is ready
-  readyCallback?: (mapId?: string) => void;
-
   // load plugins API
   plugin: Plugin;
 
@@ -113,24 +110,25 @@ export class API {
     document.addEventListener('focusout', removeFocusedClass);
   };
 
-  /**
-   * Check if map rendering / drawing is ready then run the callback function
-   * Timeout does not effect rendering speed, each map will cancel the previous timer after it renders
-   * so timing of rendering will be based on device specs.
-   *
-   * @param callback a callback to make once the map has rendered
-   */
-  ready = (callback: () => void): void => {
-    // Clear our timeout throughout the event change
-    window.clearTimeout(this.isReady);
+  // TODO: Get rid of this dead code once it's confirmed that it's not used anymore
+  // /**
+  //  * Check if map rendering / drawing is ready then run the callback function
+  //  * Timeout does not effect rendering speed, each map will cancel the previous timer after it renders
+  //  * so timing of rendering will be based on device specs.
+  //  *
+  //  * @param callback a callback to make once the map has rendered
+  //  */
+  // ready = (callback: () => void): void => {
+  //   // Clear our timeout throughout the event change
+  //   window.clearTimeout(this.isReady);
 
-    // Set a timeout to run after render ends
-    // this will only be called after the last map renders so no delay in rendering and performance will happen
-    this.isReady = window.setTimeout(() => {
-      // call the callback function to load plugins
-      if (callback) callback();
-    }, 500);
-  };
+  //   // Set a timeout to run after render ends
+  //   // this will only be called after the last map renders so no delay in rendering and performance will happen
+  //   this.isReady = window.setTimeout(() => {
+  //     // call the callback function to load plugins
+  //     if (callback) callback();
+  //   }, 500);
+  // };
 
   /**
    * Create a new map in a given div id.
@@ -140,16 +138,18 @@ export class API {
    * @param {string} divId the id of the div to create map in
    * @param {string} mapConfig the config passed in from the function call
    */
-  createMapFromConfig = (divId: string, mapConfig: string): void => {
+  createMapFromConfig = (divId: string, mapConfig: string): Promise<void> => {
     // Get the map div
     const mapDiv = document.getElementById(divId);
 
     // If found the map div
     if (mapDiv) {
       // Init by function call
-      initMapDivFromFunctionCall(mapDiv, mapConfig);
-    } else {
-      logger.logError(`Div with id ${divId} does not exist`);
+      return initMapDivFromFunctionCall(mapDiv, mapConfig);
     }
+
+    // Log error
+    logger.logError(`Div with id ${divId} does not exist`);
+    return Promise.reject(new Error(`Div with id ${divId} does not exist`));
   };
 }

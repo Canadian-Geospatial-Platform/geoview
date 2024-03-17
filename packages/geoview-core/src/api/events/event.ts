@@ -28,10 +28,6 @@ import {
   payloadIsAmapFeaturesConfig,
   MapFeaturesPayload,
   mapConfigPayload,
-  LayerSetPayload,
-  payloadIsLayerSetUpdated,
-  TypeLayerSetUpdatedPayload,
-  TypeResultSet,
 } from './payloads';
 
 export type TypeEventHandlerFunction = (payload: PayloadBaseClass) => void;
@@ -461,32 +457,6 @@ export class Event {
   offMapReloadRemove = (mapId: string, callback: (mapFeaturesPayload: MapFeaturesPayload) => void) => {
     // Unwire
     this.off(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, `${mapId}/delete_old_map`, callback as TypeEventHandlerFunction);
-  };
-
-  // #endregion
-
-  // #endregion
-
-  // #region SPECIALIZED EVENTS - OBSOLETE
-  // ! These events exists to communicate between different application code and components.
-  // ! They should be fixed/removed altogether as they don't have a 'valid' reason to exist or their refactoring would be beneficial.
-  // ! At the time writing this, having them here was sufficient as a first step in cleaning generic api.event calls and payloads.
-
-  // #region LAYER_SET.UPDATED ----------------------------------------------------------------------------------------
-
-  emitLayerSetUpdated = (layerSetId: string, layerPath: string, resultSet: TypeResultSet) => {
-    // Emit
-    this.emit(LayerSetPayload.createLayerSetUpdatedPayload(layerSetId, resultSet, layerPath));
-  };
-
-  onLayerSetUpdated = (layerSetId: string, callback: (layerSetUpdated: TypeLayerSetUpdatedPayload) => void) => {
-    // Wire
-    this.onMapHelperHandler(layerSetId, EVENT_NAMES.LAYER_SET.UPDATED, payloadIsLayerSetUpdated, callback);
-  };
-
-  offLayerSetUpdated = (layerSetId: string, callback: (layerSetUpdated: TypeLayerSetUpdatedPayload) => void) => {
-    // Unwire
-    this.off(EVENT_NAMES.LAYER_SET.UPDATED, layerSetId, callback as TypeEventHandlerFunction);
   };
 
   // #endregion

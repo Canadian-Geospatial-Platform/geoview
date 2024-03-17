@@ -94,7 +94,7 @@
   'map': {
     'interaction': 'dynamic',
     'viewSettings': {
-      'zoom': 10,
+      'zoom': 5,
       'center': [-110, 70],
       'projection': 3978
     },
@@ -136,6 +136,7 @@
     <div>
       <button id="validateConfig" style="margin:10px;">Validate</button>
       <button id="createMap" style="margin:10px;">Create Map</button>
+      <button id="deleteMap" style="margin:10px;">Delete map</button>
       <span id="validationMessage" style="margin:10px;">File not validate...</span>
     </div>
     <div class="map-title-holder">
@@ -194,7 +195,7 @@
       // add an event listener when a button is clicked
       createMapButton.addEventListener('click', function (e) {
         // delete old map
-        cgpv.api.maps['sandboxMap'].remove(true);
+        cgpv.api.maps['sandboxMap']?.remove(true);
 
         // create new map in a new dom node
         const newDiv = document.createElement('div');
@@ -204,7 +205,15 @@
         document.getElementById('mapSection').appendChild(newDiv);
 
         // create map
-        setTimeout(() => cgpv.api.createMapFromConfig('sandboxMap', document.getElementById('configGeoview').value), 300);
+        cgpv.api.createMapFromConfig('sandboxMap', document.getElementById('configGeoview').value);
+      });
+
+      const deleteMapButton = document.getElementById('deleteMap');
+
+      // add an event listener when a button is clicked
+      deleteMapButton.addEventListener('click', function (e) {
+        // Delete the map
+        cgpv.api.maps['sandboxMap'].remove(true);
       });
 
       // Editor script section===================================================================================================
@@ -231,7 +240,7 @@
               'map': {
                 'interaction': 'dynamic',
                 'viewSettings': {
-                  'zoom': 10,
+                  'zoom': 5,
                   'center': [-110, 70],
                   'projection': 3978
                 },
@@ -271,12 +280,12 @@
       );
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init(function (mapId) {
-        console.log('api is ready');
-
-        //create snippets
-        createCodeSnippet();
-        createConfigSnippet();
+      cgpv.init((mapId) => {
+        if (mapId === 'allMaps') {
+          // create snippets
+          createCodeSnippet();
+          createConfigSnippet();
+        }
       });
     </script>
   </body>

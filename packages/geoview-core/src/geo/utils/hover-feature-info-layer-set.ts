@@ -21,9 +21,6 @@ import { LayerSet, TypeFieldEntry, TypeGeometry, TypeQueryStatus } from './layer
  * @class HoverFeatureInfoLayerSet
  */
 export class HoverFeatureInfoLayerSet extends LayerSet {
-  /** Private static variable to keep the single instance that can be created by this class for a mapId (see singleton design pattern) */
-  private static featureInfoLayerSetInstance: TypeFeatureInfoLayerSetInstance = {};
-
   /** The resultSet object as existing in the base class, retyped here as a TypeHoverFeatureInfoResultSet */
   declare resultSet: TypeHoverFeatureInfoResultSet;
 
@@ -34,7 +31,7 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
    * @param {string} mapId The map identifier the layer set belongs to.
    *
    */
-  private constructor(layerApi: LayerApi, mapId: string) {
+  constructor(layerApi: LayerApi, mapId: string) {
     super(layerApi, mapId, `${mapId}/hover/FeatureInfoLayerSet`);
 
     // Wire a listener on the map hover
@@ -221,30 +218,6 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
     });
     return returnValue;
   }
-
-  /**
-   * Helper function used to instanciate a FeatureInfoLayerSet object. This function
-   * must be used in place of the "new FeatureInfoLayerSet" syntax.
-   *
-   * @param {LayerApi} layerApi The layer Api to work with.
-   * @param {string} mapId The map identifier the layer set belongs to.
-   *
-   * @returns {FeatureInfoLayerSet} the FeatureInfoLayerSet object created
-   */
-  static get(layerApi: LayerApi, mapId: string): HoverFeatureInfoLayerSet {
-    if (!HoverFeatureInfoLayerSet.featureInfoLayerSetInstance[mapId])
-      HoverFeatureInfoLayerSet.featureInfoLayerSetInstance[mapId] = new HoverFeatureInfoLayerSet(layerApi, mapId);
-    return HoverFeatureInfoLayerSet.featureInfoLayerSetInstance[mapId];
-  }
-
-  /**
-   * Function used to delete a FeatureInfoLayerSet object associated to a mapId.
-   *
-   * @param {string} mapId The map identifier the layer set belongs to.
-   */
-  static delete(mapId: string) {
-    if (HoverFeatureInfoLayerSet.featureInfoLayerSetInstance[mapId]) delete HoverFeatureInfoLayerSet.featureInfoLayerSetInstance[mapId];
-  }
 }
 
 export type TypeHoverFeatureInfo =
@@ -278,5 +251,3 @@ export type TypeHoverFeatureInfoResultSetEntry = {
 export type TypeHoverFeatureInfoResultSet = {
   [layerPath: string]: TypeHoverFeatureInfoResultSetEntry;
 };
-
-type TypeFeatureInfoLayerSetInstance = { [mapId: string]: HoverFeatureInfoLayerSet };
