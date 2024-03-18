@@ -27,13 +27,13 @@ export type ModifyOptions = InteractionOptions & {
  */
 export class Modify extends Interaction {
   // The embedded Open Layers Modify component
-  ol_modify: OLModify;
+  #ol_modify: OLModify;
 
   // Keep all callback delegates references
-  private onModifyStartedHandlers: ModifyDelegate[] = [];
+  #onModifyStartedHandlers: ModifyDelegate[] = [];
 
   // Keep all callback delegates references
-  private onModifyEndedHandlers: ModifyDelegate[] = [];
+  #onModifyEndedHandlers: ModifyDelegate[] = [];
 
   /**
    * Initialize Modify component
@@ -60,12 +60,12 @@ export class Modify extends Interaction {
     }
 
     // Activate the OpenLayers Modify module
-    this.ol_modify = new OLModify(olOptions);
+    this.#ol_modify = new OLModify(olOptions);
 
     // Wire handler when modification is started
-    this.ol_modify.on('modifystart', this.emitModifyStarted);
+    this.#ol_modify.on('modifystart', this.emitModifyStarted);
     // Wire handler when modification is ended
-    this.ol_modify.on('modifyend', this.emitModifyEnded);
+    this.#ol_modify.on('modifyend', this.emitModifyEnded);
   }
 
   /**
@@ -73,7 +73,7 @@ export class Modify extends Interaction {
    */
   public startInteraction() {
     // Redirect
-    super.startInteraction(this.ol_modify);
+    super.startInteraction(this.#ol_modify);
   }
 
   /**
@@ -81,7 +81,7 @@ export class Modify extends Interaction {
    */
   public stopInteraction() {
     // Redirect
-    super.stopInteraction(this.ol_modify);
+    super.stopInteraction(this.#ol_modify);
   }
 
   /**
@@ -90,7 +90,7 @@ export class Modify extends Interaction {
    */
   emitModifyStarted = (event: OLModifyEvent) => {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onModifyStartedHandlers, event);
+    EventHelper.emitEvent(this, this.#onModifyStartedHandlers, event);
   };
 
   /**
@@ -99,7 +99,7 @@ export class Modify extends Interaction {
    */
   onModifyStarted = (callback: ModifyDelegate): void => {
     // Wire the event handler
-    EventHelper.onEvent(this.onModifyStartedHandlers, callback);
+    EventHelper.onEvent(this.#onModifyStartedHandlers, callback);
   };
 
   /**
@@ -108,7 +108,7 @@ export class Modify extends Interaction {
    */
   offModifyStarted = (callback: ModifyDelegate): void => {
     // Unwire the event handler
-    EventHelper.offEvent(this.onModifyStartedHandlers, callback);
+    EventHelper.offEvent(this.#onModifyStartedHandlers, callback);
   };
 
   /**
@@ -117,7 +117,7 @@ export class Modify extends Interaction {
    */
   emitModifyEnded = (event: OLModifyEvent) => {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onModifyEndedHandlers, event);
+    EventHelper.emitEvent(this, this.#onModifyEndedHandlers, event);
   };
 
   /**
@@ -126,7 +126,7 @@ export class Modify extends Interaction {
    */
   onModifyEnded = (callback: ModifyDelegate): void => {
     // Wire the event handler
-    EventHelper.onEvent(this.onModifyEndedHandlers, callback);
+    EventHelper.onEvent(this.#onModifyEndedHandlers, callback);
   };
 
   /**
@@ -135,7 +135,7 @@ export class Modify extends Interaction {
    */
   offModifyEnded = (callback: ModifyDelegate): void => {
     // Unwire the event handler
-    EventHelper.offEvent(this.onModifyEndedHandlers, callback);
+    EventHelper.offEvent(this.#onModifyEndedHandlers, callback);
   };
 }
 

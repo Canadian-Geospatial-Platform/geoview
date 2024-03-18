@@ -171,6 +171,7 @@ export class Event {
           callback(payload as T);
         } else {
           // Log an error as that shouldn't be possible
+          // TODO: Refactor - When all generic events are gone, remove the checkCallback, move some types here, remove bunch of payload files
           logger.logError('THIS CALLBACK PAYLOAD IS WRONG!!', eventStringId, payload);
         }
       },
@@ -444,17 +445,17 @@ export class Event {
 
   // #region EVENT_MAP_RELOAD (remove) --------------------------------------------------------------------------------
 
-  emitMapReloadRemove = (mapId: string, mapFeaturesConfig: TypeMapFeaturesConfig) => {
+  emitMapRemove = (mapId: string, mapFeaturesConfig: TypeMapFeaturesConfig) => {
     // Emit
     this.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, `${mapId}/delete_old_map`, mapFeaturesConfig));
   };
 
-  onMapReloadRemove = (mapId: string, callback: (mapFeaturesPayload: MapFeaturesPayload) => void) => {
+  onMapRemove = (mapId: string, callback: (mapFeaturesPayload: MapFeaturesPayload) => void) => {
     // Wire
     this.onMapHelperHandler(`${mapId}/delete_old_map`, EVENT_NAMES.MAP.EVENT_MAP_RELOAD, payloadIsAmapFeaturesConfig, callback);
   };
 
-  offMapReloadRemove = (mapId: string, callback: (mapFeaturesPayload: MapFeaturesPayload) => void) => {
+  offMapRemove = (mapId: string, callback: (mapFeaturesPayload: MapFeaturesPayload) => void) => {
     // Unwire
     this.off(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, `${mapId}/delete_old_map`, callback as TypeEventHandlerFunction);
   };

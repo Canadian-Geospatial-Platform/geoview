@@ -190,7 +190,6 @@ export function useLegendHelpers() {
         layerName: `TEST---${setData.data?.layerName?.en ?? 'Uknown Laer name'}`,
         type: setData.data?.type ?? CONST_LAYER_TYPES.IMAGE_STATIC,
         layerStatus: setData.layerStatus,
-        querySent: setData.querySent,
         children: [],
         items,
       };

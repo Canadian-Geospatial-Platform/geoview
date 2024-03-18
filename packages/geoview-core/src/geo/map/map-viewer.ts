@@ -90,38 +90,59 @@ export class MapViewer {
   footerBarApi: FooterBarApi;
 
   // used to access basemap functions
-  basemap!: Basemap;
+  basemap: Basemap;
 
   // used to access layers functions
+  // Note: The '!' is used here, because it's being created just a bit late, but not late enough that we want to keep checking for undefined throughout the code base
+  // Should probably refactor that a bit later..
   layer!: LayerApi;
 
   // modals creation
-  modal!: ModalApi;
+  modal: ModalApi;
 
   // GeoView renderer
   geoviewRenderer: GeoviewRenderer;
 
   // i18n instance
-  private i18nInstance!: i18n;
+  #i18nInstance: i18n;
 
   // Keep all callback delegates references
-  private onMapInitHandlers: MapInitDelegate[] = [];
+  #onMapInitHandlers: MapInitDelegate[] = [];
 
   // Keep all callback delegates references
-  private onMapReadyHandlers: MapReadyDelegate[] = [];
+  #onMapReadyHandlers: MapReadyDelegate[] = [];
 
   // Keep all callback delegates references
-  private onMapLayersLoadedHandlers: MapLayersLoadedDelegate[] = [];
+  #onMapLayersProcessedHandlers: MapLayersProcessedDelegate[] = [];
+
+  // Keep all callback delegates references
+  #onMapLayersLoadedHandlers: MapLayersLoadedDelegate[] = [];
+
+  // Indicate if the map has been initialized
+  #mapInit = false;
 
   // Indicate if the map is ready
   #mapReady = false;
 
+  // Indicate if the map has all its layers processed upon launch
+  #mapLayersProcessed = false;
+
   // Indicate if the map has all its layers loaded upon launch
   #mapLayersLoaded = false;
 
-  // Getter for map is ready
+  // Getter for map is init
+  get mapInit(): boolean {
+    return this.#mapInit;
+  }
+
+  // Getter for map is ready. A Map is ready when all layers have been processed.
   get mapReady(): boolean {
     return this.#mapReady;
+  }
+
+  // Getter for map layers processed
+  get mapLayersProcessed(): boolean {
+    return this.#mapLayersProcessed;
   }
 
   // Getter for map layers loaded
@@ -145,7 +166,7 @@ export class MapViewer {
     this.mapId = mapFeaturesConfig.mapId;
     this.mapFeaturesConfig = mapFeaturesConfig;
 
-    this.i18nInstance = i18instance;
+    this.#i18nInstance = i18instance;
 
     this.appBarApi = new AppbarApi(this.mapId);
     this.navBarApi = new NavbarApi(this.mapId);
@@ -181,6 +202,7 @@ export class MapViewer {
     this.loadGeometries();
 
     // Emit map init
+    this.#mapInit = true;
     this.emitMapInit();
 
     // Start checking for when the map will be ready
@@ -223,10 +245,50 @@ export class MapViewer {
           this.emitMapReady();
 
           // ! We added processed to layers check so this map loaded event is fired faster
+          // This emits the MAP_LOADED event
           MapEventProcessor.setMapLoaded(this.mapId);
 
           // Start checking for layers result sets to be ready
           this.#checkLayerResultSetReady();
+
+          // Start checking for map layers processed
+          this.#checkMapLayersProcessed();
+        }
+      }
+    }, 250);
+  }
+
+  /**
+   * Function called to monitor when the map has its layers in processed state.
+   */
+  #checkMapLayersProcessed(): void {
+    // Start an interval checker
+    const mapInterval = setInterval(() => {
+      if (this.layer.geoviewLayers) {
+        const { geoviewLayers } = this.layer;
+        let allGeoviewLayerLoaded =
+          this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
+        Object.values(geoviewLayers).forEach((geoviewLayer) => {
+          const layerIsLoaded = geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('processed');
+          if (!layerIsLoaded)
+            logger.logTraceDetailed('checkMapLayersProcessed - waiting on layer processed...', geoviewLayer.geoviewLayerId);
+          allGeoviewLayerLoaded &&= layerIsLoaded;
+        });
+
+        if (allGeoviewLayerLoaded) {
+          // Clear interval
+          clearInterval(mapInterval);
+
+          // How many layers?
+          const layersCount = Object.keys(geoviewLayers).length;
+
+          // Log
+          logger.logInfo(`Map is ready with ${layersCount} processed layers`, this.mapId);
+          logger.logMarkerCheck(`mapReady-${this.mapId}`, `for all ${layersCount} layers to be processed`);
+
+          // Is ready
+          this.#mapLayersProcessed = true;
+          this.emitMapLayersProcessed();
 
           // Start checking for map layers loaded
           this.#checkMapLayersLoaded();
@@ -318,7 +380,7 @@ export class MapViewer {
    */
   emitMapInit = () => {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onMapInitHandlers, undefined);
+    EventHelper.emitEvent(this, this.#onMapInitHandlers, undefined);
   };
 
   /**
@@ -327,7 +389,7 @@ export class MapViewer {
    */
   onMapInit = (callback: MapInitDelegate): void => {
     // Wire the event handler
-    EventHelper.onEvent(this.onMapInitHandlers, callback);
+    EventHelper.onEvent(this.#onMapInitHandlers, callback);
   };
 
   /**
@@ -336,7 +398,7 @@ export class MapViewer {
    */
   offMapInit = (callback: MapInitDelegate): void => {
     // Unwire the event handler
-    EventHelper.offEvent(this.onMapInitHandlers, callback);
+    EventHelper.offEvent(this.#onMapInitHandlers, callback);
   };
 
   /**
@@ -344,7 +406,7 @@ export class MapViewer {
    */
   emitMapReady = () => {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onMapReadyHandlers, undefined);
+    EventHelper.emitEvent(this, this.#onMapReadyHandlers, undefined);
   };
 
   /**
@@ -353,7 +415,7 @@ export class MapViewer {
    */
   onMapReady = (callback: MapReadyDelegate): void => {
     // Wire the event handler
-    EventHelper.onEvent(this.onMapReadyHandlers, callback);
+    EventHelper.onEvent(this.#onMapReadyHandlers, callback);
   };
 
   /**
@@ -362,7 +424,33 @@ export class MapViewer {
    */
   offMapReady = (callback: MapReadyDelegate): void => {
     // Unwire the event handler
-    EventHelper.offEvent(this.onMapReadyHandlers, callback);
+    EventHelper.offEvent(this.#onMapReadyHandlers, callback);
+  };
+
+  /**
+   * Emits an event to all handlers.
+   */
+  emitMapLayersProcessed = () => {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onMapLayersProcessedHandlers, undefined);
+  };
+
+  /**
+   * Wires an event handler.
+   * @param {MapLayersProcessedDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onMapLayersProcessed = (callback: MapLayersProcessedDelegate): void => {
+    // Wire the event handler
+    EventHelper.onEvent(this.#onMapLayersProcessedHandlers, callback);
+  };
+
+  /**
+   * Unwires an event handler.
+   * @param {MapLayersProcessedDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offMapLayersProcessed = (callback: MapLayersProcessedDelegate): void => {
+    // Unwire the event handler
+    EventHelper.offEvent(this.#onMapLayersProcessedHandlers, callback);
   };
 
   /**
@@ -370,7 +458,7 @@ export class MapViewer {
    */
   emitMapLayersLoaded = () => {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onMapLayersLoadedHandlers, undefined);
+    EventHelper.emitEvent(this, this.#onMapLayersLoadedHandlers, undefined);
   };
 
   /**
@@ -379,7 +467,7 @@ export class MapViewer {
    */
   onMapLayersLoaded = (callback: MapLayersLoadedDelegate): void => {
     // Wire the event handler
-    EventHelper.onEvent(this.onMapLayersLoadedHandlers, callback);
+    EventHelper.onEvent(this.#onMapLayersLoadedHandlers, callback);
   };
 
   /**
@@ -388,7 +476,7 @@ export class MapViewer {
    */
   offMapLayersLoaded = (callback: MapLayersLoadedDelegate): void => {
     // Unwire the event handler
-    EventHelper.offEvent(this.onMapLayersLoadedHandlers, callback);
+    EventHelper.offEvent(this.#onMapLayersLoadedHandlers, callback);
   };
 
   /**
@@ -424,7 +512,7 @@ export class MapViewer {
    * @param {TypeJsonObject} translations the translation object to add
    */
   addLocalizeRessourceBundle(language: TypeDisplayLanguage, translations: TypeJsonObject): void {
-    this.i18nInstance.addResourceBundle(language, 'translation', translations, true, false);
+    this.#i18nInstance.addResourceBundle(language, 'translation', translations, true, false);
   }
 
   // #region MAP STATES
@@ -654,7 +742,7 @@ export class MapViewer {
               if (data.geometry !== undefined) {
                 // add the geometry
                 // TODO: use the geometry as GeoJSON and add properties to by queried by the details panel
-                this.layer.geometry?.addPolygon(data.geometry.coordinates, undefined, generateId(null));
+                this.layer.geometry.addPolygon(data.geometry.coordinates, undefined, generateId(null));
               }
             });
           }
@@ -794,7 +882,7 @@ export class MapViewer {
    */
   initTranslateInteractions() {
     // Create selecting capabilities
-    const features = this.initSelectInteractions().ol_select.getFeatures();
+    const features = this.initSelectInteractions().getFeatures();
 
     // Create translating capabilities
     const translate = new Translate({
@@ -862,6 +950,11 @@ type MapInitDelegate = EventDelegateBase<MapViewer, undefined>;
  * Define a delegate for the event handler function signature
  */
 type MapReadyDelegate = EventDelegateBase<MapViewer, undefined>;
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapLayersProcessedDelegate = EventDelegateBase<MapViewer, undefined>;
 
 /**
  * Define a delegate for the event handler function signature

@@ -10,6 +10,7 @@ import {
   WMS,
   api,
   getLocalizedValue,
+  whenThisThenThat,
 } from '@/core/types/cgpv-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
@@ -21,25 +22,34 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
     const { mapId } = store.getState();
 
-    api.event.once(
-      api.eventNames.MAP.EVENT_MAP_LOADED,
-      () => {
-        // Log
-        logger.logTraceCoreAPIEvent('TIME SLIDER EVENT PROCESSOR - EVENT_MAP_LOADED');
+    // TODO: Check - Do we want to switch the order of MapViewer instantiation vs store instantiation/initialization?
+    // At the time of writing, the MapViewer is actually created and added to the api.maps AFTER
+    // the store (and this current processor initialization) is called.
 
-        const orderedLayers = store.getState().mapState.orderedLayerInfo.map((info) => info.layerPath);
-        const initialTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, orderedLayers);
-        if (initialTimeSliderLayerPaths) {
-          initialTimeSliderLayerPaths.forEach((layerPath) => {
-            const timeSliderLayer = TimeSliderEventProcessor.getInitialTimeSliderValues(mapId, layerPath);
-            store.getState().timeSliderState.actions.addTimeSliderLayer(timeSliderLayer);
+    // Wait for the map to 'appear' in the maps container
+    whenThisThenThat(
+      () => api.maps[mapId],
+      async (mapViewer) => {
+        // Wait for the layers to be processed so that their 'layerTemporalDimension' information is set
+        await mapViewer.onMapLayersProcessed(() => {
+          // Now the layerTemporalDimension should be good on the layers
+          const orderedLayers = store.getState().mapState.orderedLayerInfo.map((info) => info.layerPath);
+          const initialTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, orderedLayers);
+          if (initialTimeSliderLayerPaths) {
+            initialTimeSliderLayerPaths.forEach((layerPath) => {
+              const timeSliderLayer = TimeSliderEventProcessor.getInitialTimeSliderValues(mapId, layerPath);
+              store.getState().timeSliderState.actions.addTimeSliderLayer(timeSliderLayer);
 
-            const { defaultValue, field, filtering, minAndMax, values } = timeSliderLayer[layerPath];
-            TimeSliderEventProcessor.applyFilters(mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
-          });
-        }
+              const { defaultValue, field, filtering, minAndMax, values } = timeSliderLayer[layerPath];
+              TimeSliderEventProcessor.applyFilters(mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
+            });
+          }
+        });
       },
-      mapId
+      (failedReason) => {
+        // Log
+        logger.logError('Failed to initialize the Time-Slider-Event-Processor', failedReason);
+      }
     );
 
     // Checks for added and removed layers with time dimension

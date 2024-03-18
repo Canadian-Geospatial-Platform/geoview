@@ -418,6 +418,8 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer configurstion associated to the dynamic group.
    */
   private createGroupLayer(layer: TypeJsonObject, layerConfig: AbstractBaseLayerEntryConfig) {
+    // TODO: Refactor - createGroup is the same thing for all the layers type? group is a geoview structure.
+    // TO.DOCONT: Should it be handle upper in abstract class to loop in structure and launch the creation of a leaf?
     const newListOfLayerEntryConfig: TypeListOfLayerEntryConfig = [];
     const arrayOfLayerMetadata = Array.isArray(layer.Layer) ? layer.Layer : ([layer.Layer] as TypeJsonArray);
 

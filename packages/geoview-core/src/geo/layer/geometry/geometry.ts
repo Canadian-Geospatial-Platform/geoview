@@ -28,9 +28,9 @@ interface FeatureCollection {
  * Class used to manage vector geometries (Polyline, Polygon, Circle, Marker...)
  *
  * @exports
- * @class Geometry
+ * @class GeometryApi
  */
-export class Geometry {
+export class GeometryApi {
   // reference to the map id
   #mapId: string;
 
@@ -640,7 +640,7 @@ export class Geometry {
 /**
  * Define a delegate for the event handler function signature
  */
-type GeometryAddedDelegate = EventDelegateBase<Geometry, GeometryAddedEvent>;
+type GeometryAddedDelegate = EventDelegateBase<GeometryApi, GeometryAddedEvent>;
 
 /**
  * Event interface for GeometryAdded
