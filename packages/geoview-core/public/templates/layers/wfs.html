@@ -286,8 +286,6 @@
             displayLegend('LegendsId1', resultSet);
           });
           listenToLegendLayerSetChanges('HLYR1-state', mapId);
-
-          createTableOfFilter(mapId);
         }
 
         if (mapId === 'LYR2') {
@@ -301,8 +299,6 @@
             displayLegend('LegendsId2', resultSet);
           });
           listenToLegendLayerSetChanges('HLYR2-state', mapId);
-
-          createTableOfFilter(mapId);
         }
 
         if (mapId === 'LYR3') {
@@ -313,6 +309,12 @@
           // create snippets
           createCodeSnippet();
           createConfigSnippet();
+        }
+      }, (mapId) => {
+        if (mapId === 'allMaps') {
+          // Layers are loaded
+          createTableOfFilter('LYR1');
+          createTableOfFilter('LYR2');
         }
       });
 

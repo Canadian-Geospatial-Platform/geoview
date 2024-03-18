@@ -253,8 +253,6 @@
           listenToLegendLayerSetChanges('HCSV1-state', 'CSV1');
           listenToLegendLayerSetChanges('HCSV2-state', 'CSV2');
 
-          createTableOfFilter('CSV1');
-
           // CSV1 ===================================================================================================================
           const getAllFeatureInfo1 = document.getElementById('AllFeatureInfo1');
           getAllFeatureInfo1.addEventListener('click', async () => {
@@ -265,6 +263,11 @@
           // create snippets
           createCodeSnippet();
           createConfigSnippet();
+        }
+      }, (mapId) => {
+        if (mapId === 'allMaps') {
+          // Layers are loaded
+          createTableOfFilter('CSV1');
         }
       });
     </script>

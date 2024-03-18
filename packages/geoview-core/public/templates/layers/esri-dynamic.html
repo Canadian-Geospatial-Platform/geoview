@@ -1099,10 +1099,6 @@
           listenToLegendLayerSetChanges('HLYR3-state', 'LYR3');
           listenToLegendLayerSetChanges('HLYR4-state', 'LYR4');
 
-          createTableOfFilter('LYR1');
-          createTableOfFilter('LYR2');
-          createTableOfFilter('LYR3');
-
           if (cgpv.api.maps.LYR2.layer.registeredLayers['historical-flood/0'].layerStatus === 'loaded') {
             const field1 = cgpv.api.maps.LYR2.layer.geoviewLayer('historical-flood/0').getTemporalDimension().field;
             const LYR2_FILTERS = [`${field1} >= date '01/01/2018 05:00:00' and ${field1} <= date '12/31/2019 19:00:00-05:00'`,
@@ -1166,6 +1162,13 @@
           // create snippets
           createCodeSnippet();
           createConfigSnippet();
+        }
+      }, (mapId) => {
+        if (mapId === 'allMaps') {
+          // Layers are loaded
+          createTableOfFilter('LYR1');
+          createTableOfFilter('LYR2');
+          createTableOfFilter('LYR3');
         }
       });
     </script>
