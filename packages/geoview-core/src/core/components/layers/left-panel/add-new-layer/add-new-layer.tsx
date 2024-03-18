@@ -867,10 +867,10 @@ export function AddNewLayer(): JSX.Element {
       }
 
       // When each promise is done
-      Promise.allSettled(addedLayers.map((addedLayer) => addedLayer.promiseLayerOnMap)).then(() => {
+      Promise.allSettled(addedLayers.map((addedLayer) => addedLayer.promiseLayer)).then(() => {
         // Done adding
         doneAdding();
-        addedLayers.forEach((addedLayer) => doneAddedShowMessage(addedLayer.layerBeingAdded));
+        addedLayers.forEach((addedLayer) => doneAddedShowMessage(addedLayer.layer));
       });
     } else if (geoviewLayerInstance) {
       // Get config
@@ -893,11 +893,11 @@ export function AddNewLayer(): JSX.Element {
       const addedLayer = api.maps[mapId].layer.addGeoviewLayer(geoviewLayerConfig);
       if (addedLayer) {
         // Wait on the promise
-        await addedLayer.promiseLayerOnMap;
+        await addedLayer.promiseLayer;
 
         // Done adding
         doneAdding();
-        doneAddedShowMessage(addedLayer.layerBeingAdded);
+        doneAddedShowMessage(addedLayer.layer);
       } else {
         // Failed to add, remove spinning, but stay on the add ui
         setIsLoading(false);

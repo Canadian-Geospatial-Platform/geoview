@@ -37,12 +37,13 @@ import { AllFeatureInfoLayerSet } from '../utils/all-feature-info-layer-set';
 import { LegendsLayerSet } from '../utils/legends-layer-set';
 import { FeatureInfoLayerSet } from '../utils/feature-info-layer-set';
 import { LayerSet } from '../utils/layer-set';
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 
 export type TypeRegisteredLayers = { [layerPath: string]: TypeLayerEntryConfig };
 
 export type GeoViewLayerAddedResult = {
-  layerBeingAdded: AbstractGeoViewLayer;
-  promiseLayerOnMap: Promise<void>;
+  layer: AbstractGeoViewLayer;
+  promiseLayer: Promise<void>;
 };
 
 /**
@@ -91,6 +92,9 @@ export class LayerApi {
 
   // Feature info layer set associated to the map
   featureInfoLayerSet: FeatureInfoLayerSet;
+
+  // Keep all callback delegates references
+  private onLayerAddedHandlers: LayerAddedDelegate[] = [];
 
   /**
    * Initializes layer types and listen to add/remove layer events from outside
@@ -322,7 +326,7 @@ export class LayerApi {
       this.mapViewer.mapFeaturesConfig.map.listOfGeoviewLayerConfig!.push(geoviewLayerConfig);
 
       // Process the addition of the layer
-      return this.#onAddGeoviewLayer(geoviewLayerConfig);
+      return this.#addGeoviewLayerStep2(geoviewLayerConfig);
     }
 
     // Not added
@@ -335,7 +339,7 @@ export class LayerApi {
    * @returns {GeoViewLayerAddedResult | undefined} The result of the addition of the geoview layer.
    * The result contains the instanciated GeoViewLayer along with a promise that will resolve when the layer will be officially on the map.
    */
-  #onAddGeoviewLayer = (geoviewLayerConfig: TypeGeoviewLayerConfig): GeoViewLayerAddedResult | undefined => {
+  #addGeoviewLayerStep2 = (geoviewLayerConfig: TypeGeoviewLayerConfig): GeoViewLayerAddedResult | undefined => {
     let layerBeingAdded: AbstractGeoViewLayer | undefined;
     if (layerConfigIsGeoJSON(geoviewLayerConfig)) {
       layerBeingAdded = new GeoJSON(this.mapId, geoviewLayerConfig);
@@ -378,7 +382,7 @@ export class LayerApi {
       layerBeingAdded.initRegisteredLayers(this);
 
       // Create a promise about the layer will be on the map
-      const promiseLayerOnMap = new Promise<void>((resolve, reject) => {
+      const promiseLayer = new Promise<void>((resolve, reject) => {
         // Continue the addition process
         layerBeingAdded!
           .createGeoViewLayers()
@@ -388,6 +392,9 @@ export class LayerApi {
 
             // Resolve, done
             resolve();
+
+            // Emit about it
+            this.emitLayerAdded({ layer: layerBeingAdded! });
           })
           .catch((error) => {
             // Reject
@@ -396,7 +403,7 @@ export class LayerApi {
       });
 
       // Return the layer with the promise it'll be on the map
-      return { layerBeingAdded, promiseLayerOnMap };
+      return { layer: layerBeingAdded, promiseLayer };
     }
 
     // Not added
@@ -430,7 +437,7 @@ export class LayerApi {
     }
 
     // Log
-    logger.logInfo(`GeoView Layer ${geoviewLayer.geoviewLayerId} added on map ${this.mapId}`, geoviewLayer);
+    logger.logInfo(`GeoView Layer ${geoviewLayer.geoviewLayerId} added ${this.mapId}`, geoviewLayer);
 
     // Set the layer z indices
     MapEventProcessor.setLayerZIndices(this.mapId);
@@ -479,6 +486,33 @@ export class LayerApi {
         layerSet.processLayerStatusChanged(config, layerStatusEvent.layerPath, layerStatusEvent.layerStatus);
       }
     );
+  };
+
+  /**
+   * Emits an event to all handlers.
+   * @param {LayerAddedEvent} event The event to emit
+   */
+  emitLayerAdded = (event: LayerAddedEvent) => {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.onLayerAddedHandlers, event);
+  };
+
+  /**
+   * Wires an event handler.
+   * @param {LayerAddedDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onLayerAdded = (callback: LayerAddedDelegate): void => {
+    // Wire the event handler
+    EventHelper.onEvent(this.onLayerAddedHandlers, callback);
+  };
+
+  /**
+   * Unwires an event handler.
+   * @param {LayerAddedDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offLayerAdded = (callback: LayerAddedDelegate): void => {
+    // Unwire the event handler
+    EventHelper.offEvent(this.onLayerAddedHandlers, callback);
   };
 
   /**
@@ -725,3 +759,16 @@ export class LayerApi {
     }
   }
 }
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerAddedDelegate = EventDelegateBase<LayerApi, LayerAddedEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerAddedEvent = {
+  // The added layer
+  layer: AbstractGeoViewLayer;
+};

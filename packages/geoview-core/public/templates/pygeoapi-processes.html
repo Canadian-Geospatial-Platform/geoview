@@ -153,11 +153,14 @@
             displayLegend('geojsonLegendsId', resultSet);
           });
 
-          createTableOfFilter('LYR5');
-
           // create snippets
           createCodeSnippet();
           createConfigSnippet();
+        }
+      }, (mapId) => {
+        if (mapId === 'allMaps') {
+          // Layers are loaded
+          createTableOfFilter('LYR5');
         }
       });
 
@@ -166,7 +169,7 @@
       var addGeoJSONButton = document.getElementById('Add-GeoMet-Button');
 
       // add an event listener when a button is clicked
-      addGeoJSONButton.addEventListener('click', function (e) {
+      addGeoJSONButton.addEventListener('click', async () => {
         const layerPath = document.getElementById('GeoMet-New-Layer-Id-Label').innerText;
         if (layerPath) cgpv.api.maps['LYR5'].layer.removeLayersUsingPath(layerPath);
         document.getElementById('GeoMet-New-Layer-Id-Label').innerText = '';
@@ -175,7 +178,7 @@
         // adding a geojson layer requires a type of geojson and url
         const lat = document.getElementById('GeoMet-Lat-Input').value;
         const long = document.getElementById('GeoMet-Long-Input').value;
-        const layerID = cgpv.api.maps['LYR5'].layer.addGeoviewLayer(
+        const addResult = cgpv.api.maps['LYR5'].layer.addGeoviewLayer(
           {
             geoviewLayerId: 'GeoMetGeoJsonProcess',
             metadataAccessPath: { 'en': './datasets/geojson/processes-metadata.json' },
@@ -202,14 +205,12 @@
           },
           ['en']
         );
-        document.getElementById('GeoMet-New-Layer-Id-Label').innerText = layerID;
-        cgpv.api.event.once(
-          cgpv.api.eventNames.LAYER.EVENT_LAYER_ADDED,
-            (payload) => {
-              createTableOfFilter('LYR5');
-            },
-            `LYR5/${layerID}`
-          );
+
+        // Wait for the full response
+        await addResult.promiseLayer;
+
+        document.getElementById('GeoMet-New-Layer-Id-Label').innerText = addResult.layer.geoviewLayerId;
+        createTableOfFilter('LYR5');
       });
 
       // HydroButton============================================================================================================
@@ -217,7 +218,7 @@
       var addGeoJSONButton = document.getElementById('Add-Hydro-Button');
 
       // add an event listener when a button is clicked
-      addGeoJSONButton.addEventListener('click', function (e) {
+      addGeoJSONButton.addEventListener('click', async () => {
         const layerPath = document.getElementById('Hydro-New-Layer-Id-Label').innerText;
         if (layerPath) cgpv.api.maps['LYR5'].layer.removeLayersUsingPath(layerPath);
         document.getElementById('Hydro-New-Layer-Id-Label').innerText = '';
@@ -226,7 +227,7 @@
         // adding a geojson layer requires a type of geojson and url
         const lat = document.getElementById('Hydro-Lat-Input').value;
         const long = document.getElementById('Hydro-Long-Input').value;
-        const layerID = cgpv.api.maps['LYR5'].layer.addGeoviewLayer(
+        const addResult = cgpv.api.maps['LYR5'].layer.addGeoviewLayer(
           {
             geoviewLayerId: 'HydroGeoJsonProcess',
             metadataAccessPath: { 'en': './datasets/geojson/hydro-metadata.json' },
@@ -252,14 +253,12 @@
           },
           ['en']
         );
-        document.getElementById('Hydro-New-Layer-Id-Label').innerText = layerID;
-        cgpv.api.event.once(
-          cgpv.api.eventNames.LAYER.EVENT_LAYER_ADDED,
-            (payload) => {
-              createTableOfFilter('LYR5');
-            },
-            `LYR5/${layerID}`
-          );
+
+        // Wait for the full response
+        await addResult.promiseLayer;
+
+        document.getElementById('Hydro-New-Layer-Id-Label').innerText = addResult.layer.geoviewLayerId;
+        createTableOfFilter('LYR5');
       });
     </script>
   </body>
