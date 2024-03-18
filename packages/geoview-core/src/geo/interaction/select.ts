@@ -2,6 +2,7 @@ import { Select as OLSelect } from 'ol/interaction';
 import { SelectEvent as OLSelectEvent, Options as OLSelectOptions } from 'ol/interaction/Select';
 import Collection from 'ol/Collection';
 import Feature from 'ol/Feature';
+import { Geometry } from 'ol/geom';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
@@ -26,10 +27,10 @@ export type SelectOptions = InteractionOptions & {
  */
 export class Select extends Interaction {
   // The embedded Open Layers Select component
-  ol_select: OLSelect;
+  #ol_select: OLSelect;
 
   // Keep all callback delegates references
-  private onSelectChangedHandlers: SelectChangedDelegate[] = [];
+  #onSelectChangedHandlers: SelectChangedDelegate[] = [];
 
   /**
    * Initialize Select component
@@ -47,10 +48,10 @@ export class Select extends Interaction {
     };
 
     // Activate the OpenLayers Select module
-    this.ol_select = new OLSelect(olOptions);
+    this.#ol_select = new OLSelect(olOptions);
 
     // Wire handler when drawing is changed and immediately re-emit
-    this.ol_select.on('select', this.emitSelectChanged);
+    this.#ol_select.on('select', this.emitSelectChanged);
   }
 
   /**
@@ -58,7 +59,7 @@ export class Select extends Interaction {
    */
   public startInteraction() {
     // Redirect
-    super.startInteraction(this.ol_select);
+    super.startInteraction(this.#ol_select);
   }
 
   /**
@@ -66,7 +67,15 @@ export class Select extends Interaction {
    */
   public stopInteraction() {
     // Redirect
-    super.stopInteraction(this.ol_select);
+    super.stopInteraction(this.#ol_select);
+  }
+
+  /**
+   * Gets the selected features
+   * @returns {Collection<Feature<Geometry>>} The selected features
+   */
+  public getFeatures(): Collection<Feature<Geometry>> {
+    return this.#ol_select.getFeatures();
   }
 
   /**
@@ -75,7 +84,7 @@ export class Select extends Interaction {
    */
   emitSelectChanged = (event: OLSelectEvent) => {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onSelectChangedHandlers, event);
+    EventHelper.emitEvent(this, this.#onSelectChangedHandlers, event);
   };
 
   /**
@@ -84,7 +93,7 @@ export class Select extends Interaction {
    */
   onSelectChanged = (callback: SelectChangedDelegate): void => {
     // Wire the event handler
-    EventHelper.onEvent(this.onSelectChangedHandlers, callback);
+    EventHelper.onEvent(this.#onSelectChangedHandlers, callback);
   };
 
   /**
@@ -93,7 +102,7 @@ export class Select extends Interaction {
    */
   offSelectChanged = (callback: SelectChangedDelegate): void => {
     // Unwire the event handler
-    EventHelper.offEvent(this.onSelectChangedHandlers, callback);
+    EventHelper.offEvent(this.#onSelectChangedHandlers, callback);
   };
 }
 

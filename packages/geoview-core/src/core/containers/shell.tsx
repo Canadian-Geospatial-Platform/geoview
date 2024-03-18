@@ -86,7 +86,7 @@ export function Shell(): JSX.Element {
   };
 
   /**
-   * Handles when a component is being added to the map
+   * Handles when a component is being removed from the map
    * @param {MapComponentPayload} payload The map component being removed (component is empty, only mapComponentId is set)
    */
   const handleMapRemoveComponent = useCallback(
@@ -160,7 +160,7 @@ export function Shell(): JSX.Element {
   const handleMapReload = useCallback(() => {
     // TODO: use store config when we reload the map
     // Emit a map reload removal
-    api.event.emitMapReloadRemove(mapId, geoviewConfig!);
+    api.event.emitMapRemove(mapId, geoviewConfig!);
 
     // Update the Shell
     updateShell();

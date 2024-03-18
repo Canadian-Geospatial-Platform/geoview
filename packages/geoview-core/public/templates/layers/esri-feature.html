@@ -463,18 +463,20 @@
       }, (mapId) => {
         if (mapId === 'allMaps') {
           // Layers are loaded
-          createTableOfFilter('LYR1');
           createTableOfFilter('LYR2');
           createTableOfFilter('LYR3');
         }
-      });
 
-      // LYR1 ===================================================================================================================
-      cgpv.api.event.on(
-        cgpv.api.eventNames.MAP.EVENT_MAP_LOADED,
-        (payload) => {
-          const lyr1RegisteredLayers = cgpv.api.maps.LYR1.layer.registeredLayers;
+        if (mapId === 'LYR1') {
+          createTableOfFilter('LYR1');
+
           const dropDownContent = document.getElementById('dropdown1');
+          var element = document.createElement('option');
+          element.value = '';
+          element.innerText = 'Select a layer';
+          dropDownContent.appendChild(element);
+
+          const lyr1RegisteredLayers = cgpv.api.maps.LYR1.layer.registeredLayers;
           Object.keys(lyr1RegisteredLayers).forEach((layerPath) => {
             if (lyr1RegisteredLayers[layerPath].layerStatus === 'loaded') {
               const layerName = lyr1RegisteredLayers[layerPath]?.layerName?.en;
@@ -484,13 +486,16 @@
               dropDownContent.appendChild(element);
             }
           });
-          dropDownContent.addEventListener('click', (e) => {
-            cgpv.api.maps['LYR1'].layer.allFeatureInfoLayerSet.triggerGetAllFeatureInfo(e.currentTarget.value, 'all');
+          dropDownContent.addEventListener('change', async (e) => {
+            if (e.currentTarget.value) {
+              const resultSet = await cgpv.api.maps['LYR1'].layer.allFeatureInfoLayerSet.queryLayer(e.currentTarget.value);
+              createInfoTable('LYR1', 'ResultSetId1', resultSet, 'all-features');
+            }
           });
-        },
-        'LYR1'
-      );
+        }
+      });
 
+      // LYR1 ===================================================================================================================
       const getAllFeatureInfo2 = document.getElementById('AllFeatureInfo2');
       getAllFeatureInfo2.addEventListener('click', async () => {
         const resultSet = await cgpv.api.maps['LYR2'].layer.allFeatureInfoLayerSet.queryLayer('historical-flood/0');

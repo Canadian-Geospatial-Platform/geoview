@@ -91,7 +91,7 @@ async function renderMap(mapElement: Element): Promise<void> {
     reactRoot[mapId] = createRoot(mapElement!);
 
     // Wire the handling of the map reload
-    api.event.onMapReloadRemove(mapId, handleReload);
+    api.event.onMapRemove(mapId, handleReload);
 
     // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
     return new Promise<void>((resolve) => {

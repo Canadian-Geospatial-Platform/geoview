@@ -27,16 +27,16 @@ export type DrawOptions = InteractionOptions & {
  */
 export class Draw extends Interaction {
   // The embedded Open Layers Draw component
-  ol_draw: OLDraw;
+  #ol_draw: OLDraw;
 
   // Keep all callback delegates references
-  private onDrawStartHandlers: DrawDelegate[] = [];
+  #onDrawStartHandlers: DrawDelegate[] = [];
 
   // Keep all callback delegates references
-  private onDrawEndHandlers: DrawDelegate[] = [];
+  #onDrawEndHandlers: DrawDelegate[] = [];
 
   // Keep all callback delegates references
-  private onDrawAbortHandlers: DrawDelegate[] = [];
+  #onDrawAbortHandlers: DrawDelegate[] = [];
 
   /**
    * Initialize Draw component
@@ -58,12 +58,12 @@ export class Draw extends Interaction {
     };
 
     // Create the Open Layers Draw component
-    this.ol_draw = new OLDraw(olOptions);
+    this.#ol_draw = new OLDraw(olOptions);
 
     // Wire handler when drawing starts
-    this.ol_draw.on('drawstart', this.emitDrawStart);
-    this.ol_draw.on('drawend', this.emitDrawEnd);
-    this.ol_draw.on('drawabort', this.emitDrawAbort);
+    this.#ol_draw.on('drawstart', this.emitDrawStart);
+    this.#ol_draw.on('drawend', this.emitDrawEnd);
+    this.#ol_draw.on('drawabort', this.emitDrawAbort);
   }
 
   /**
@@ -71,7 +71,7 @@ export class Draw extends Interaction {
    */
   public startInteraction() {
     // Redirect
-    super.startInteraction(this.ol_draw);
+    super.startInteraction(this.#ol_draw);
   }
 
   /**
@@ -79,7 +79,7 @@ export class Draw extends Interaction {
    */
   public stopInteraction() {
     // Redirect
-    super.stopInteraction(this.ol_draw);
+    super.stopInteraction(this.#ol_draw);
   }
 
   /**
@@ -88,7 +88,7 @@ export class Draw extends Interaction {
    */
   emitDrawStart = (event: OLDrawEvent) => {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onDrawStartHandlers, event);
+    EventHelper.emitEvent(this, this.#onDrawStartHandlers, event);
   };
 
   /**
@@ -97,7 +97,7 @@ export class Draw extends Interaction {
    */
   onDrawStart = (callback: DrawDelegate): void => {
     // Wire the event handler
-    EventHelper.onEvent(this.onDrawStartHandlers, callback);
+    EventHelper.onEvent(this.#onDrawStartHandlers, callback);
   };
 
   /**
@@ -106,7 +106,7 @@ export class Draw extends Interaction {
    */
   offDrawStart = (callback: DrawDelegate): void => {
     // Unwire the event handler
-    EventHelper.offEvent(this.onDrawStartHandlers, callback);
+    EventHelper.offEvent(this.#onDrawStartHandlers, callback);
   };
 
   /**
@@ -115,7 +115,7 @@ export class Draw extends Interaction {
    */
   emitDrawEnd = (event: OLDrawEvent) => {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onDrawEndHandlers, event);
+    EventHelper.emitEvent(this, this.#onDrawEndHandlers, event);
   };
 
   /**
@@ -124,7 +124,7 @@ export class Draw extends Interaction {
    */
   onDrawEnd = (callback: DrawDelegate): void => {
     // Wire the event handler
-    EventHelper.onEvent(this.onDrawEndHandlers, callback);
+    EventHelper.onEvent(this.#onDrawEndHandlers, callback);
   };
 
   /**
@@ -133,7 +133,7 @@ export class Draw extends Interaction {
    */
   offDrawEnd = (callback: DrawDelegate): void => {
     // Unwire the event handler
-    EventHelper.offEvent(this.onDrawEndHandlers, callback);
+    EventHelper.offEvent(this.#onDrawEndHandlers, callback);
   };
 
   /**
@@ -142,7 +142,7 @@ export class Draw extends Interaction {
    */
   emitDrawAbort = (event: OLDrawEvent) => {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onDrawAbortHandlers, event);
+    EventHelper.emitEvent(this, this.#onDrawAbortHandlers, event);
   };
 
   /**
@@ -151,7 +151,7 @@ export class Draw extends Interaction {
    */
   onDrawAbort = (callback: DrawDelegate): void => {
     // Wire the event handler
-    EventHelper.onEvent(this.onDrawAbortHandlers, callback);
+    EventHelper.onEvent(this.#onDrawAbortHandlers, callback);
   };
 
   /**
@@ -160,7 +160,7 @@ export class Draw extends Interaction {
    */
   offDrawAbort = (callback: DrawDelegate): void => {
     // Unwire the event handler
-    EventHelper.offEvent(this.onDrawAbortHandlers, callback);
+    EventHelper.offEvent(this.#onDrawAbortHandlers, callback);
   };
 }
 
