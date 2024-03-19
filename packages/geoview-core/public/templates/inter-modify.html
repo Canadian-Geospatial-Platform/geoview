@@ -137,16 +137,8 @@
         if (mapId === 'allMaps') {
           console.log('api is ready');
 
-          // Listen to the map loaded event
-          const mapId1 = 'MAP1';
-          cgpv.api.event.on(
-            cgpv.api.eventNames.MAP.EVENT_MAP_LOADED,
-            (payload) => {
-              // Init map
-              initMap1(cgpv.api.maps[mapId1]);
-            },
-            mapId1
-          );
+          // Init map
+          initMap1(cgpv.api.maps['MAP1']);
         }
 
         //create snippets

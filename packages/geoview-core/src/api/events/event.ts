@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
 
 import { logger } from '@/core/utils/logger';
-import { TypeButtonPanel, TypeTabs, payloadIsASnackbarMessage, snackbarMessagePayload } from '@/core/types/global-types';
+import { TypeButtonPanel, TypeTabs, TypeMapFeaturesConfig } from '@/core/types/global-types';
 
 import { EVENT_NAMES, EventStringId } from './event-types';
 import { PayloadBaseClass } from './payloads/payload-base-class';
@@ -14,12 +14,20 @@ import {
   payloadIsAFooterBar,
   inKeyfocusPayload,
   payloadIsAInKeyfocus,
+  payloadIsASnackbarMessage,
+  snackbarMessagePayload,
   SnackbarType,
   SnackbarMessagePayload,
   ISnackbarButton,
   ModalPayload,
   modalPayload,
   payloadIsAModal,
+  mapComponentPayload,
+  payloadIsAMapComponent,
+  MapComponentPayload,
+  payloadIsAmapFeaturesConfig,
+  MapFeaturesPayload,
+  mapConfigPayload,
 } from './payloads';
 
 export type TypeEventHandlerFunction = (payload: PayloadBaseClass) => void;
@@ -307,6 +315,44 @@ export class Event {
 
   // #endregion
 
+  // #region EVENT_MAP_ADD_COMPONENT ----------------------------------------------------------------------------------
+
+  emitCreateComponent = (mapId: string, mapComponentId: string, component: JSX.Element) => {
+    // Emit
+    this.emit(mapComponentPayload(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, mapId, mapComponentId, component));
+  };
+
+  onCreateComponent = (mapId: string, callback: (mapComponentPayload: MapComponentPayload) => void) => {
+    // Wire
+    this.onMapHelperHandler(mapId, EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, payloadIsAMapComponent, callback);
+  };
+
+  offCreateComponent = (mapId: string, callback: (mapComponentPayload: MapComponentPayload) => void) => {
+    // Unwire
+    this.off(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, mapId, callback as TypeEventHandlerFunction);
+  };
+
+  // #endregion
+
+  // #region EVENT_MAP_REMOVE_COMPONENT -------------------------------------------------------------------------------
+
+  emitRemoveComponent = (mapId: string, mapComponentId: string) => {
+    // Emit
+    this.emit(mapComponentPayload(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, mapId, mapComponentId));
+  };
+
+  onRemoveComponent = (mapId: string, callback: (mapComponentPayload: MapComponentPayload) => void) => {
+    // Wire
+    this.onMapHelperHandler(mapId, EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, payloadIsAMapComponent, callback);
+  };
+
+  offRemoveComponent = (mapId: string, callback: (mapComponentPayload: MapComponentPayload) => void) => {
+    // Unwire
+    this.off(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, mapId, callback as TypeEventHandlerFunction);
+  };
+
+  // #endregion
+
   // #endregion
 
   // #region SPECIALIZED EVENTS - UNSURE
@@ -368,6 +414,46 @@ export class Event {
   offMapInKeyFocus = (mapId: string, callback: () => void) => {
     // Unwire
     this.off(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId, callback as TypeEventHandlerFunction);
+  };
+
+  // #endregion
+
+  // #region EVENT_MAP_RELOAD -----------------------------------------------------------------------------------------
+
+  emitMapReload = (mapId: string, mapFeaturesConfig: TypeMapFeaturesConfig) => {
+    // TODO: Refactor - The payload requires a TypeMapFeaturesConfig, but the onMapReload callback currently implement doesn't use it.
+    // TO.DOCONT: Suggestion to remove the mapFeaturesConfig from the payload altogether if the listeners don't use it.
+    // Emit
+    this.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, mapId, mapFeaturesConfig));
+  };
+
+  onMapReload = (mapId: string, callback: (mapFeaturesPayload: MapFeaturesPayload) => void) => {
+    // Wire
+    this.onMapHelperHandler(mapId, EVENT_NAMES.MAP.EVENT_MAP_RELOAD, payloadIsAmapFeaturesConfig, callback);
+  };
+
+  offMapReload = (mapId: string, callback: (mapFeaturesPayload: MapFeaturesPayload) => void) => {
+    // Unwire
+    this.off(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, mapId, callback as TypeEventHandlerFunction);
+  };
+
+  // #endregion
+
+  // #region EVENT_MAP_RELOAD (remove) --------------------------------------------------------------------------------
+
+  emitMapReloadRemove = (mapId: string, mapFeaturesConfig: TypeMapFeaturesConfig) => {
+    // Emit
+    this.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, `${mapId}/delete_old_map`, mapFeaturesConfig));
+  };
+
+  onMapReloadRemove = (mapId: string, callback: (mapFeaturesPayload: MapFeaturesPayload) => void) => {
+    // Wire
+    this.onMapHelperHandler(`${mapId}/delete_old_map`, EVENT_NAMES.MAP.EVENT_MAP_RELOAD, payloadIsAmapFeaturesConfig, callback);
+  };
+
+  offMapReloadRemove = (mapId: string, callback: (mapFeaturesPayload: MapFeaturesPayload) => void) => {
+    // Unwire
+    this.off(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, `${mapId}/delete_old_map`, callback as TypeEventHandlerFunction);
   };
 
   // #endregion

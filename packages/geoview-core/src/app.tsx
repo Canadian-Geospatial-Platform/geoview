@@ -12,13 +12,11 @@ import * as UI from '@/ui';
 
 import AppStart from '@/core/app-start';
 import * as types from '@/core/types/cgpv-types';
-
-import { EVENT_NAMES } from '@/api/events/event-types';
 import { API } from '@/api/api';
 
 import { Config } from '@/core/utils/config/config';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
-import { payloadIsAmapFeaturesConfig } from '@/api/events/payloads';
+import { MapFeaturesPayload } from '@/api/events/payloads';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
 import { logger } from '@/core/utils/logger';
 
@@ -34,49 +32,41 @@ const reactRoot: Record<string, Root> = {};
  * @param {string} mapId the map id to unmount
  */
 export function unmountMap(mapId: string) {
-  if (reactRoot[mapId] !== null) reactRoot[mapId].unmount();
+  // Unmount the react root
+  reactRoot[mapId]?.unmount();
 }
 
 /**
- * Listen for map reload events. The map component is linked to a specific mapId. When we modify something on the map, the
+ * Handles when the map reload needs to happen. The map component is linked to a specific mapId. When we modify something on the map, the
  * changes spread throughout the data structure. We therefore need to reload the entire map configuration to ensure that
  * all changes made to the map are applied.
  *
  * @param {string} mapId the map id to reload
  */
-export function addReloadListener(mapId: string) {
-  const reloadHandler = (payload: types.PayloadBaseClass) => {
-    // Log
-    logger.logTraceCoreAPIEvent('APP - reloadHandler', payload);
+const handleReload = (payload: MapFeaturesPayload) => {
+  const { mapFeaturesConfig } = payload;
+  if (mapFeaturesConfig) {
+    const map = api.maps[mapFeaturesConfig.mapId].remove(false);
 
-    if (payloadIsAmapFeaturesConfig(payload)) {
-      const { mapFeaturesConfig } = payload;
-      if (mapFeaturesConfig) {
-        const map = api.maps[mapId].remove(false);
+    // recreate the map - create a new div and remove the active one
+    const newRoot = document.createElement('div');
+    newRoot.setAttribute('id', mapFeaturesConfig.mapId);
+    newRoot.setAttribute('class', 'geoview-map');
+    map!.parentNode!.insertBefore(newRoot, map);
+    map.remove();
 
-        // recreate the map - create a new div and remove the active one
-        const newRoot = document.createElement('div');
-        newRoot.setAttribute('id', mapId);
-        newRoot.setAttribute('class', 'geoview-map');
-        map!.parentNode!.insertBefore(newRoot, map);
-        map.remove();
+    // set plugin's loaded to false
+    // TODO: need to have this flag by map not for the api
+    api.plugin.pluginsLoaded = false;
 
-        // set plugin's loaded to false
-        // TODO: need to have this flag by map not for the api
-        api.plugin.pluginsLoaded = false;
+    addGeoViewStore(mapFeaturesConfig!);
+    // create the new root
+    reactRoot[mapFeaturesConfig.mapId] = createRoot(newRoot!);
 
-        addGeoViewStore(mapFeaturesConfig!);
-        // create the new root
-        reactRoot[mapId] = createRoot(newRoot!);
-        addReloadListener(mapId);
-
-        // re-render map with original configuration
-        reactRoot[mapId].render(<AppStart mapFeaturesConfig={mapFeaturesConfig} />);
-      }
-    }
-  };
-  api.event.on(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, reloadHandler, `${mapId}/delete_old_map`);
-}
+    // re-render map with original configuration
+    reactRoot[mapFeaturesConfig.mapId].render(<AppStart mapFeaturesConfig={mapFeaturesConfig} />);
+  }
+};
 
 /**
  * Function to render the map for inline map and map create from a function call
@@ -99,16 +89,24 @@ async function renderMap(mapElement: Element): Promise<void> {
 
     // render the map with the config
     reactRoot[mapId] = createRoot(mapElement!);
-    addReloadListener(mapId);
 
-    // TODO: Refactor #1810 - Activate <React.StrictMode> here or in app-start.tsx?
-    reactRoot[mapId].render(<AppStart mapFeaturesConfig={configObj} />);
-    // reactRoot[mapId].render(
-    //   <React.StrictMode>
-    //     <AppStart mapFeaturesConfig={configObj} />
-    //   </React.StrictMode>
-    // );
+    // Wire the handling of the map reload
+    api.event.onMapReloadRemove(mapId, handleReload);
+
+    // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
+    return new Promise<void>((resolve) => {
+      // TODO: Refactor #1810 - Activate <React.StrictMode> here or in app-start.tsx?
+      reactRoot[mapId].render(<AppStart mapFeaturesConfig={configObj} onMapViewerInit={() => resolve()} />);
+      // reactRoot[mapId].render(
+      //   <React.StrictMode>
+      //     <AppStart mapFeaturesConfig={configObj} />
+      //   </React.StrictMode>
+      // );
+    });
   }
+
+  // Failed
+  return Promise.reject(new Error('Failed to render the map'));
 }
 
 /**
@@ -161,8 +159,38 @@ async function init(callback: () => void): Promise<void> {
     if (!mapElement.classList.contains('geoview-map-func-call')) promises.push(renderMap(mapElement));
   }
 
-  // Wait for map renders to end. Note: the api.readyCallback isn't quite done yet; that's different.
+  // Wait for map renders to end and MapViewers to be initialized
   await Promise.allSettled(promises);
+
+  // At this point, all api.maps[] MapViewers that needed to be instantiated were done so.
+  // Start checking for whenever each map have loaded layers and call the api.readyCallback when they are
+  const mapViewersPromises = Object.values(api.maps).map((mapViewer) => {
+    return new Promise((resolve) => {
+      // If the mapviewer is already ready, resolve right away
+      if (mapViewer.mapLayersLoaded) {
+        resolve(mapViewer);
+        return;
+      }
+
+      // Wire when the map viewer will have loaded layers
+      mapViewer.onMapLayersLoaded((mapViewerLoaded) => {
+        // Run the callback for maps that have the triggerReadyCallback set using the mapId for the parameter value
+        if (mapViewerLoaded.mapFeaturesConfig.triggerReadyCallback) {
+          // Callback for that particular map
+          api.readyCallback?.(mapViewerLoaded.mapId);
+        }
+
+        // Resolve
+        resolve(mapViewerLoaded);
+      });
+    });
+  });
+
+  // Start checking for whenever all maps are ready and call api.readyCallback when they are
+  await Promise.allSettled(mapViewersPromises);
+
+  // Callback for all maps
+  api.readyCallback?.('allMaps');
 }
 
 // cgpv object to be exported with the api for outside use

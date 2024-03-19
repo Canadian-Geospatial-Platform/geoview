@@ -4,19 +4,10 @@ import { GeoCore } from '@/geo/layer/other/geocore';
 import { Geometry } from '@/geo/layer/geometry/geometry';
 import { FeatureHighlight } from '@/geo/utils/feature-highlight';
 
-import { api } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 import { Config } from '@/core/utils/config/config';
 import { generateId, showError, replaceParams, getLocalizedMessage, whenThisThen } from '@/core/utils/utilities';
-import {
-  layerConfigPayload,
-  payloadIsALayerConfig,
-  GeoViewLayerPayload,
-  payloadIsRemoveGeoViewLayer,
-  PayloadBaseClass,
-} from '@/api/events/payloads';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   TypeGeoviewLayerConfig,
@@ -38,26 +29,26 @@ import { layerConfigIsXYZTiles, XYZTiles } from '@/geo/layer/geoview-layers/rast
 import { layerConfigIsVectorTiles, VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { CSV, layerConfigIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
 import { logger } from '@/core/utils/logger';
-import { MapConfigLayerEntry, TypeListOfGeoviewLayerConfig, TypeOrderedLayerInfo } from '@/core/types/cgpv-types';
-import { LegendsLayerSet } from '@/geo/utils/legends-layer-set';
-import { HoverFeatureInfoLayerSet } from '@/geo/utils/hover-feature-info-layer-set';
-import { AllFeatureInfoLayerSet } from '@/geo/utils/all-feature-info-layer-set';
-import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
+import { MapConfigLayerEntry, MapViewer, TypeListOfGeoviewLayerConfig, TypeOrderedLayerInfo } from '@/core/types/cgpv-types';
+import { HoverFeatureInfoLayerSet } from '../utils/hover-feature-info-layer-set';
+import { AllFeatureInfoLayerSet } from '../utils/all-feature-info-layer-set';
+import { LegendsLayerSet } from '../utils/legends-layer-set';
+import { FeatureInfoLayerSet } from '../utils/feature-info-layer-set';
 
 export type TypeRegisteredLayers = { [layerPath: string]: TypeLayerEntryConfig };
 
-type TypeEventHandlerFunctions = {
-  addLayer: (payload: PayloadBaseClass) => void;
-  removeLayer: (payload: PayloadBaseClass) => void;
+export type GeoViewLayerAddedResponse = {
+  layerBeingAdded: AbstractGeoViewLayer;
+  promiseLayerOnMap: Promise<void>;
 };
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
  *
  * @exports
- * @class Layer
+ * @class LayerApi
  */
-export class Layer {
+export class LayerApi {
   /** Layers with valid configuration for this map. */
   registeredLayers: TypeRegisteredLayers = {};
 
@@ -70,11 +61,12 @@ export class Layer {
   // order to load layers
   initialLayerOrder: Array<TypeOrderedLayerInfo> = [];
 
-  /** used to reference the map id */
-  private mapId: string;
+  /** used to reference the map viewer */
+  private mapViewer: MapViewer;
 
-  /** used to keep a reference to the Layer's event handler functions */
-  private eventHandlerFunctions: TypeEventHandlerFunctions;
+  private get mapId(): string {
+    return this.mapViewer.mapId;
+  }
 
   /** used to keep a reference of highlighted layer */
   private highlightedLayer: { layerPath?: string; originalOpacity?: number } = {
@@ -102,111 +94,15 @@ export class Layer {
    *
    * @param {string} mapId a reference to the map
    */
-  constructor(mapId: string) {
-    this.mapId = mapId;
-    this.legendsLayerSet = LegendsLayerSet.get(mapId);
-    this.hoverFeatureInfoLayerSet = HoverFeatureInfoLayerSet.get(mapId);
-    this.allFeatureInfoLayerSet = AllFeatureInfoLayerSet.get(mapId);
-    this.featureInfoLayerSet = FeatureInfoLayerSet.get(mapId);
+  constructor(mapViewer: MapViewer) {
+    this.mapViewer = mapViewer;
+    this.legendsLayerSet = LegendsLayerSet.get(this.mapId);
+    this.hoverFeatureInfoLayerSet = HoverFeatureInfoLayerSet.get(this.mapId);
+    this.allFeatureInfoLayerSet = AllFeatureInfoLayerSet.get(this.mapId);
+    this.featureInfoLayerSet = FeatureInfoLayerSet.get(this.mapId);
 
     this.geometry = new Geometry(this.mapId);
     this.featureHighlight = new FeatureHighlight(this.mapId);
-
-    this.eventHandlerFunctions = {
-      addLayer: (payload: PayloadBaseClass) => {
-        // Log
-        logger.logTraceCoreAPIEvent('LAYER - eventHandlerFunctions.addLayer', payload);
-
-        if (payloadIsALayerConfig(payload)) {
-          const { layerConfig } = payload;
-
-          if (layerConfigIsGeoJSON(layerConfig)) {
-            const geoJSON = new GeoJSON(this.mapId, layerConfig);
-            geoJSON.createGeoViewLayers().then(() => {
-              this.addToMap(geoJSON);
-            });
-          } else if (layerConfigIsGeoPackage(layerConfig)) {
-            const geoPackage = new GeoPackage(this.mapId, layerConfig);
-            geoPackage.createGeoViewLayers().then(() => {
-              this.addToMap(geoPackage);
-            });
-          } else if (layerConfigIsCSV(layerConfig)) {
-            const csv = new CSV(this.mapId, layerConfig);
-            csv.createGeoViewLayers().then(() => {
-              this.addToMap(csv);
-            });
-          } else if (layerConfigIsWMS(layerConfig)) {
-            const wmsLayer = new WMS(this.mapId, layerConfig);
-            wmsLayer.createGeoViewLayers().then(() => {
-              this.addToMap(wmsLayer);
-            });
-          } else if (layerConfigIsEsriDynamic(layerConfig)) {
-            const esriDynamic = new EsriDynamic(this.mapId, layerConfig);
-            esriDynamic.createGeoViewLayers().then(() => {
-              this.addToMap(esriDynamic);
-            });
-          } else if (layerConfigIsEsriFeature(layerConfig)) {
-            const esriFeature = new EsriFeature(this.mapId, layerConfig);
-            esriFeature.createGeoViewLayers().then(() => {
-              this.addToMap(esriFeature);
-            });
-          } else if (layerConfigIsEsriImage(layerConfig)) {
-            const esriImage = new EsriImage(this.mapId, layerConfig);
-            esriImage.createGeoViewLayers().then(() => {
-              this.addToMap(esriImage);
-            });
-          } else if (layerConfigIsImageStatic(layerConfig)) {
-            const imageStatic = new ImageStatic(this.mapId, layerConfig);
-            imageStatic.createGeoViewLayers().then(() => {
-              this.addToMap(imageStatic);
-            });
-          } else if (layerConfigIsWFS(layerConfig)) {
-            const wfsLayer = new WFS(this.mapId, layerConfig);
-            wfsLayer.createGeoViewLayers().then(() => {
-              this.addToMap(wfsLayer);
-            });
-          } else if (layerConfigIsOgcFeature(layerConfig)) {
-            const ogcFeatureLayer = new OgcFeature(this.mapId, layerConfig);
-            ogcFeatureLayer.createGeoViewLayers().then(() => {
-              this.addToMap(ogcFeatureLayer);
-            });
-          } else if (layerConfigIsXYZTiles(layerConfig)) {
-            const xyzTiles = new XYZTiles(this.mapId, layerConfig);
-            xyzTiles.createGeoViewLayers().then(() => {
-              this.addToMap(xyzTiles);
-            });
-          } else if (layerConfigIsVectorTiles(layerConfig)) {
-            const vectorTiles = new VectorTiles(this.mapId, layerConfig);
-            vectorTiles.createGeoViewLayers().then(() => {
-              this.addToMap(vectorTiles);
-            });
-          }
-        }
-      },
-      removeLayer: (payload: PayloadBaseClass) => {
-        // Log
-        logger.logTraceCoreAPIEvent('LAYER - eventHandlerFunctions.removeLayer', payload);
-
-        if (payloadIsRemoveGeoViewLayer(payload)) {
-          // remove layer from outside
-          this.removeLayersUsingPath(payload.geoviewLayer!.geoviewLayerId);
-        }
-      },
-    };
-
-    // listen to outside events to add layers
-    api.event.on(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.eventHandlerFunctions.addLayer, this.mapId);
-
-    // listen to outside events to remove layers
-    api.event.on(EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER, this.eventHandlerFunctions.removeLayer, this.mapId);
-  }
-
-  /**
-   * Deletes the event handler functions associated to the Layer instance.
-   */
-  deleteEventHandlerFunctionsOfThisLayerInstance() {
-    api.event.off(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, this.eventHandlerFunctions!.addLayer);
-    api.event.off(EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER, this.mapId, this.eventHandlerFunctions.removeLayer);
   }
 
   /**
@@ -275,7 +171,7 @@ export class Layer {
       // If the layer is GeoCore add it via the core function
       if (mapConfigLayerEntryIsGeoCore(geoviewLayerConfig)) {
         // Prep the GeoCore
-        const geoCore = new GeoCore(this.mapId, api.maps[this.mapId].getDisplayLanguage());
+        const geoCore = new GeoCore(this.mapId, this.mapViewer.getDisplayLanguage());
 
         // Create the layers from the UUID
         promisesOfGeoCoreGeoviewLayers.push(geoCore.createLayersFromUUID(geoviewLayerConfig.geoviewLayerId));
@@ -305,8 +201,8 @@ export class Layer {
             const layerInfos = this.generateArrayOfLayerOrderInfo(geocoreGVLayer);
             orderedLayerInfos.push(...layerInfos);
 
-            // Add it (EVENT_ADD_LAYER will be emitted)
-            api.maps[this.mapId].layer.addGeoviewLayer(geocoreGVLayer);
+            // Add it
+            this.addGeoviewLayer(geocoreGVLayer);
           });
         });
       MapEventProcessor.setMapOrderedLayerInfo(this.mapId, orderedLayerInfos);
@@ -387,9 +283,121 @@ export class Layer {
   }
 
   /**
+   * Adds a Geoview Layer by GeoCore UUID.
+   * @param mapId The map id to add to
+   * @param uuid The GeoCore UUID
+   */
+  addGeoviewLayerByGeoCoreUUID = async (uuid: string): Promise<void> => {
+    const geoCoreGeoviewLayerInstance = new GeoCore(this.mapId, this.mapViewer.getDisplayLanguage());
+    const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(uuid);
+    layers.forEach((geoviewLayerConfig) => {
+      // Redirect
+      this.addGeoviewLayer(geoviewLayerConfig);
+    });
+  };
+
+  /**
+   * Adds a layer to the map
+   *
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig the geoview layer configuration to add
+   * @param {TypeListOfLocalizedLanguages} optionalSuportedLanguages an optional list of supported language
+   */
+  addGeoviewLayer = (
+    geoviewLayerConfig: TypeGeoviewLayerConfig,
+    optionalSuportedLanguages?: TypeListOfLocalizedLanguages
+  ): GeoViewLayerAddedResponse | undefined => {
+    // eslint-disable-next-line no-param-reassign
+    geoviewLayerConfig.geoviewLayerId = generateId(geoviewLayerConfig.geoviewLayerId);
+    // create a new config object for this map element
+    const config = new Config(this.mapViewer.map.getTargetElement());
+
+    const suportedLanguages = optionalSuportedLanguages || config.configValidation.defaultMapFeaturesConfig.suportedLanguages;
+    config.configValidation.validateListOfGeoviewLayerConfig(suportedLanguages, [geoviewLayerConfig]);
+
+    if (geoviewLayerConfig.geoviewLayerId in this.geoviewLayers) this.printDuplicateGeoviewLayerConfigError(geoviewLayerConfig);
+    else {
+      // Adds the configuration to the list in map
+      // TODO: Refactor - Figure out why doing this - and then not do this
+      this.mapViewer.mapFeaturesConfig.map.listOfGeoviewLayerConfig!.push(geoviewLayerConfig);
+
+      // Process the addition of the layer
+      return this.#onAddGeoviewLayer(geoviewLayerConfig);
+    }
+
+    // Not added
+    return undefined;
+  };
+
+  #onAddGeoviewLayer = (layerConfig: TypeGeoviewLayerConfig): GeoViewLayerAddedResponse | undefined => {
+    let layerBeingAdded: AbstractGeoViewLayer | undefined;
+    if (layerConfigIsGeoJSON(layerConfig)) {
+      layerBeingAdded = new GeoJSON(this.mapId, layerConfig);
+    } else if (layerConfigIsGeoPackage(layerConfig)) {
+      layerBeingAdded = new GeoPackage(this.mapId, layerConfig);
+    } else if (layerConfigIsCSV(layerConfig)) {
+      layerBeingAdded = new CSV(this.mapId, layerConfig);
+    } else if (layerConfigIsWMS(layerConfig)) {
+      layerBeingAdded = new WMS(this.mapId, layerConfig);
+    } else if (layerConfigIsEsriDynamic(layerConfig)) {
+      layerBeingAdded = new EsriDynamic(this.mapId, layerConfig);
+    } else if (layerConfigIsEsriFeature(layerConfig)) {
+      layerBeingAdded = new EsriFeature(this.mapId, layerConfig);
+    } else if (layerConfigIsEsriImage(layerConfig)) {
+      layerBeingAdded = new EsriImage(this.mapId, layerConfig);
+    } else if (layerConfigIsImageStatic(layerConfig)) {
+      layerBeingAdded = new ImageStatic(this.mapId, layerConfig);
+    } else if (layerConfigIsWFS(layerConfig)) {
+      layerBeingAdded = new WFS(this.mapId, layerConfig);
+    } else if (layerConfigIsOgcFeature(layerConfig)) {
+      layerBeingAdded = new OgcFeature(this.mapId, layerConfig);
+    } else if (layerConfigIsXYZTiles(layerConfig)) {
+      layerBeingAdded = new XYZTiles(this.mapId, layerConfig);
+    } else if (layerConfigIsVectorTiles(layerConfig)) {
+      layerBeingAdded = new VectorTiles(this.mapId, layerConfig);
+    } else {
+      // TODO: Refactor - Throw an Error when falling in this else and change return type to AbstractGeoViewLayer without undefined
+    }
+
+    // If created
+    if (layerBeingAdded) {
+      // Add in the geoviewLayers set
+      this.geoviewLayers[layerBeingAdded.geoviewLayerId] = layerBeingAdded;
+
+      // Prepare mandatory registrations
+      // TODO: REFACTOR - this shouldn't have to be mandatory!!
+      layerBeingAdded.initRegisteredLayers(this);
+
+      // Create a promise about the layer will be on the map
+      const promiseLayerOnMap = new Promise<void>((resolve, reject) => {
+        // Continue the addition process
+        layerBeingAdded!
+          .createGeoViewLayers()
+          .then(() => {
+            // Add the layer on the map
+            this.addToMap(layerBeingAdded!);
+
+            // Resolve, done
+            resolve();
+          })
+          .catch((error) => {
+            // Reject
+            reject(error);
+          });
+      });
+
+      // Return the layer with the promise it'll be on the map
+      return { layerBeingAdded, promiseLayerOnMap };
+    }
+
+    // Not added
+    return undefined;
+  };
+
+  /**
    * Adds the layer to the map if valid. If not (is a string) emit an error
    * @param {any} geoviewLayer the layer config
    */
+  // TODO: Consider - Turn this function private (#addToMap) when it's not used in add-new-layer.tsx anymore
   addToMap(geoviewLayer: AbstractGeoViewLayer): void {
     // if the returned layer object has something in the layerLoadError, it is because an error was detected
     // do not add the layer to the map
@@ -405,14 +413,45 @@ export class Layer {
       });
     }
 
-    if (geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('error'))
-      // an empty geoview layer is created
-      api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
-    else {
-      api.maps[this.mapId].map.addLayer(geoviewLayer.olLayers!);
-      api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer));
+    // If all layer status are good
+    if (!geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('error')) {
+      // Add the OpenLayers layer to the map officially
+      this.mapViewer.map.addLayer(geoviewLayer.olLayers!);
     }
+
+    // Redirect
+    this.#onLayerAddedToMap(geoviewLayer);
   }
+
+  #onLayerAddedToMap(geoviewLayer: AbstractGeoViewLayer): void {
+    // Log
+    logger.logInfo(`GeoView Layer added on map ${geoviewLayer.geoviewLayerId}`, geoviewLayer);
+
+    // Set the layer z indices
+    // TODO: Check - Confirm if this is still working, moved here as part of a refactor
+    MapEventProcessor.setLayerZIndices(this.mapId);
+  }
+
+  /**
+   * Removes all geoview layers from the map
+   */
+  removeAllGeoviewLayers = (): void => {
+    // For each Geoview layers
+    Object.values(this.geoviewLayers).forEach((layer: AbstractGeoViewLayer) => {
+      // Remove it
+      this.removeGeoviewLayer(layer.geoviewLayerId);
+    });
+  };
+
+  /**
+   * Removes a geoview layer from the map
+   *
+   * @param {TypeGeoviewLayerConfig} geoviewLayer the layer configuration to remove
+   */
+  removeGeoviewLayer = (geoviewLayerId: string): void => {
+    // Redirect (weird, but at the time of writing for this refactor - this was what it was doing)
+    this.removeLayersUsingPath(geoviewLayerId);
+  };
 
   /**
    * Removes a layer from the map using its layer path. The path may point to the root geoview layer
@@ -444,7 +483,7 @@ export class Layer {
     if (this.geoviewLayers[partialLayerPath]) {
       this.geoviewLayers[partialLayerPath].olLayers!.dispose();
       delete this.geoviewLayers[partialLayerPath];
-      const { mapFeaturesConfig } = api.maps[this.mapId];
+      const { mapFeaturesConfig } = this.mapViewer;
       if (mapFeaturesConfig.map.listOfGeoviewLayerConfig)
         mapFeaturesConfig.map.listOfGeoviewLayerConfig = mapFeaturesConfig.map.listOfGeoviewLayerConfig.filter(
           (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerId !== partialLayerPath
@@ -453,67 +492,6 @@ export class Layer {
 
     // Log
     logger.logInfo(`Layer removed for ${partialLayerPath}`);
-  };
-
-  /**
-   * Adds a layer to the map
-   *
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig the geoview layer configuration to add
-   * @param {TypeListOfLocalizedLanguages} optionalSuportedLanguages an optional list of supported language
-   */
-  addGeoviewLayer = (geoviewLayerConfig: TypeGeoviewLayerConfig, optionalSuportedLanguages?: TypeListOfLocalizedLanguages): string => {
-    // eslint-disable-next-line no-param-reassign
-    geoviewLayerConfig.geoviewLayerId = generateId(geoviewLayerConfig.geoviewLayerId);
-    // create a new config object for this map element
-    const config = new Config(api.maps[this.mapId].map.getTargetElement());
-
-    const suportedLanguages = optionalSuportedLanguages || config.configValidation.defaultMapFeaturesConfig.suportedLanguages;
-    config.configValidation.validateListOfGeoviewLayerConfig(suportedLanguages, [geoviewLayerConfig]);
-
-    if (geoviewLayerConfig.geoviewLayerId in api.maps[this.mapId].layer.geoviewLayers)
-      this.printDuplicateGeoviewLayerConfigError(geoviewLayerConfig);
-    else {
-      api.maps[this.mapId].mapFeaturesConfig.map.listOfGeoviewLayerConfig!.push(geoviewLayerConfig);
-      api.maps[this.mapId].setLayerAddedListener4ThisListOfLayer([geoviewLayerConfig]);
-      api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig));
-    }
-    return geoviewLayerConfig.geoviewLayerId;
-  };
-
-  /**
-   * Adds a Geoview Layer by GeoCore UUID.
-   * Example: cgpv.api.maps['UIM10'].layer.addGeoviewLayerByGeoCoreUUID('21b821cf-0f1c-40ee-8925-eab12d357668')
-   * @param mapId The map id to add to
-   * @param uuid The GeoCore UUID
-   */
-  addGeoviewLayerByGeoCoreUUID = async (uuid: string): Promise<void> => {
-    const geoCoreGeoviewLayerInstance = new GeoCore(this.mapId, api.maps[this.mapId].getDisplayLanguage());
-    const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(uuid);
-    layers.forEach((geoviewLayerConfig) => {
-      api.maps[this.mapId].layer.addGeoviewLayer(geoviewLayerConfig);
-    });
-  };
-
-  /**
-   * Removes a geoview layer from the map
-   *
-   * @param {TypeGeoviewLayerConfig} geoviewLayer the layer configuration to remove
-   */
-  removeGeoviewLayer = (geoviewLayer: AbstractGeoViewLayer): string => {
-    api.event.emit(GeoViewLayerPayload.createRemoveGeoviewLayerPayload(this.mapId, geoviewLayer));
-
-    return geoviewLayer.geoviewLayerId;
-  };
-
-  /**
-   * Removes all geoview layers from the map
-   */
-  removeAllGeoviewLayers = () => {
-    Object.keys(this.geoviewLayers).forEach((layerId: string) => {
-      this.removeGeoviewLayer(this.geoviewLayers[layerId]);
-    });
-
-    return this.mapId;
   };
 
   /**
@@ -575,7 +553,7 @@ export class Layer {
    */
   getOLLayerByLayerPath = (layerPath: string): BaseLayer | LayerGroup => {
     // Return the olLayer object from the registered layers
-    const olLayer = api.maps[this.mapId].layer.registeredLayers[layerPath]?.olLayer;
+    const olLayer = this.registeredLayers[layerPath]?.olLayer;
     if (olLayer) return olLayer;
     throw new Error(`Layer at path ${layerPath} not found.`);
   };
@@ -592,7 +570,7 @@ export class Layer {
     // Make sure the open layer has been created, sometimes it can still be in the process of being created
     const promisedLayer = await whenThisThen(
       () => {
-        return api.maps[this.mapId].layer.registeredLayers[layerPath]?.olLayer;
+        return this.registeredLayers[layerPath]?.olLayer;
       },
       timeout,
       checkFrequency
@@ -667,7 +645,7 @@ export class Layer {
    * Removes layer or sublayer highlight
    */
   removeHighlightLayer(): void {
-    api.maps[this.mapId].layer.featureHighlight.removeBBoxHighlight();
+    this.featureHighlight.removeBBoxHighlight();
     if (this.highlightedLayer.layerPath !== undefined) {
       const { layerPath, originalOpacity } = this.highlightedLayer;
       if (layerEntryIsGroupLayer(this.registeredLayers[layerPath] as TypeLayerEntryConfig)) {
