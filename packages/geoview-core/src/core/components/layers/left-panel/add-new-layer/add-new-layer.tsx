@@ -97,14 +97,6 @@ export function AddNewLayer(): JSX.Element {
 
   const isMultiple = () => hasMetadata && (layerType === ESRI_DYNAMIC || layerType === WFS || layerType === WMS || layerType === GEOJSON);
 
-  useEffect(() => {
-    console.log('geoViewLayerInstance', geoviewLayerInstance);
-  }, [geoviewLayerInstance]);
-
-  useEffect(() => {
-    console.log('layerList ', layerList);
-  }, [layerList]);
-
   /**
    * List of layer types and labels
    */
