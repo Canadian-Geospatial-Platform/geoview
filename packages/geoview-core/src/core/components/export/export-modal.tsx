@@ -142,7 +142,9 @@ export default function ExportModal(): JSX.Element {
           </Box>
           <Box ref={exportTitleRef} />
 
-          <Box ref={mapImageRef}>{isMapLoading && <Skeleton variant="rounded" width="100%" height={500} />}</Box>
+          <Box ref={mapImageRef}>
+            {isMapLoading && <Skeleton variant="rounded" width="100%" height={500} sx={{ bgcolor: theme.palette.grey[500] }} />}
+          </Box>
           <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ padding: '1rem', paddingBottom: 0 }}>
             <Box>
               {!!scale.labelGraphic.length && (
@@ -162,7 +164,9 @@ export default function ExportModal(): JSX.Element {
               </Box>
             )}
           </Box>
-          <Box ref={legendContainerRef}>{isLegendLoading && <Skeleton variant="rounded" width="100%" height={500} />}</Box>
+          <Box ref={legendContainerRef}>
+            {isLegendLoading && <Skeleton variant="rounded" width="100%" height={500} sx={{ bgcolor: theme.palette.grey[500] }} />}
+          </Box>
 
           <Box textAlign="center">
             {mapAttributions.map((mapAttribution) => (
