@@ -5,6 +5,7 @@ import { Extent } from 'ol/extent';
 import View, { FitOptions } from 'ol/View';
 import { KeyboardPan } from 'ol/interaction';
 
+import { Coordinate } from 'ol/coordinate';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { api } from '@/app';
 import {
@@ -31,7 +32,7 @@ import { AppEventProcessor } from './app-event-processor';
 import { logger } from '@/core/utils/logger';
 
 import { AbstractEventProcessor } from '../abstract-event-processor';
-import { Coordinate, TypeBasemapOptions, TypeBasemapProps, TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { TypeBasemapOptions, TypeBasemapProps, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeClickMarker } from '@/core/components';
 import { TypeOrderedLayerInfo } from '@/core/stores';
 
