@@ -7,6 +7,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { logger } from '@/core/utils/logger';
 import { useDataTableStoreActions } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { TABS } from '@/app';
 
 interface UseFooterPanelHeightType {
@@ -19,6 +20,7 @@ interface UseFooterPanelHeightType {
  * @returns list of ref objects that are attached to DOM.
  */
 export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightType) {
+  const mapId = useGeoViewMapId();
   const leftPanelRef = useRef<HTMLDivElement>(null);
   const rightPanelRef = useRef<HTMLDivElement>(null);
   const panelTitleRef = useRef<HTMLDivElement>(null);
@@ -38,8 +40,9 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
 
     if (leftPanelRef.current && isMapFullScreen && (activeFooterBarTabId === footerPanelTab || footerPanelTab === 'default')) {
       const panelTitleHeight = panelTitleRef.current?.clientHeight ?? 0;
-      const tabsContainer = document.getElementById(`mapId-tabsContainer`)!;
+      const tabsContainer = document.getElementById(`${mapId}-tabsContainer`)!;
       const firstChild = tabsContainer?.firstElementChild?.firstElementChild;
+
       const firstChildHeight = firstChild?.clientHeight ?? 0;
       const leftPanelHeight = (window.screen.height * footerPanelResizeValue) / 100 - panelTitleHeight - firstChildHeight;
 
@@ -55,6 +58,7 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
         rightPanelRef.current.style.paddingBottom = `24px`;
       } else {
         const rightPanel = (rightPanelRef.current?.firstElementChild ?? null) as HTMLElement | null;
+
         if (rightPanel) {
           rightPanel.style.maxHeight = `${leftPanelHeight}px`;
           rightPanel.style.paddingBottom = `24px`;
