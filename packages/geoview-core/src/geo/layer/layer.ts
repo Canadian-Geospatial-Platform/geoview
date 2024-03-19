@@ -252,9 +252,15 @@ export class Layer {
         });
       } else {
         const layerEntryConfig = (geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig[0];
-        addSubLayerPathToLayerOrder(layerEntryConfig, layerEntryConfig.layerPath);
+        if(layerEntryConfig && layerEntryConfig.layerPath !== undefined) {
+          addSubLayerPathToLayerOrder(layerEntryConfig, layerEntryConfig.layerPath);
+        }
       }
-    } else addSubLayerPathToLayerOrder(geoviewLayerConfig as TypeLayerEntryConfig, (geoviewLayerConfig as TypeLayerEntryConfig).layerPath);
+    } else {
+      if(geoviewLayerConfig && (geoviewLayerConfig as TypeLayerEntryConfig).layerPath !== undefined) {
+        addSubLayerPathToLayerOrder(geoviewLayerConfig as TypeLayerEntryConfig, (geoviewLayerConfig as TypeLayerEntryConfig).layerPath);
+      }
+    }
 
     return newOrderedLayerInfos;
   }

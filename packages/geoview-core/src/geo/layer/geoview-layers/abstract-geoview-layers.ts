@@ -423,6 +423,7 @@ export abstract class AbstractGeoViewLayer {
     return !listOfLayerEntryConfig.find((layerConfig: TypeLayerEntryConfig) => {
       if (layerEntryIsGroupLayer(layerConfig))
         return !this.allLayerStatusAreGreaterThanOrEqualTo(layerStatus, layerConfig.listOfLayerEntryConfig);
+      if(layerConfig === undefined) return false;
       return !layerConfig.IsGreaterThanOrEqualTo(layerStatus || 'newInstance');
     });
   }

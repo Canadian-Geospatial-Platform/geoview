@@ -1,4 +1,4 @@
-import { createContext, Suspense, useMemo } from 'react';
+import { createContext, StrictMode, Suspense, useMemo } from 'react';
 
 import './translation/i18n';
 import i18n from 'i18next';
@@ -84,9 +84,9 @@ function AppStart(props: AppStartProps): JSX.Element {
       <I18nextProvider i18n={i18nInstance}>
         <MapContext.Provider value={mapContextValue}>
           <ThemeProvider theme={getTheme(theme)}>
-            {/* <StrictMode> */}
+            <StrictMode>
             <Shell />
-            {/* </StrictMode> */}
+            </StrictMode>
           </ThemeProvider>
         </MapContext.Provider>
       </I18nextProvider>
