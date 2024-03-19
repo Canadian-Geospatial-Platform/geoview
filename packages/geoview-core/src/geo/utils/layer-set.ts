@@ -4,18 +4,10 @@ import { Extent } from 'ol/extent';
 import Feature from 'ol/Feature';
 import RenderFeature from 'ol/render/Feature';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { EVENT_NAMES } from '@/api/events/event-types';
-import {
-  LayerSetPayload,
-  PayloadBaseClass,
-  payloadIsLayerRegistration,
-  payloadIsLayerSetChangeLayerStatus,
-  TypeResultSet,
-} from '@/api/events/payloads';
+import { TypeLayerSetChangeLayerStatusPayload, TypeResultSet } from '@/api/events/payloads';
 import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { api, LayerApi } from '@/app';
 import { TypeLayerStatus, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
-import { logger } from '@/core/utils/logger';
 import { createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
 
 import { TypeHoverLayerData } from './hover-feature-info-layer-set';
@@ -65,19 +57,14 @@ export class LayerSet {
     mapId: string,
     layerSetIdentifier: string,
     resultSet: TypeResultSet,
-    registrationConditionFunction?: true | ((layerPath: string) => boolean),
+    registrationConditionFunction?: (layerPath: string) => boolean,
     registrationUserInitialisation?: (layerPath: string) => void
   ) {
     this.layerApi = layerApi;
     this.mapId = mapId;
     this.layerSetId = layerSetIdentifier;
     this.resultSet = resultSet;
-    this.registrationConditionFunction =
-      registrationConditionFunction === true || registrationConditionFunction === undefined
-        ? () => {
-            return true;
-          }
-        : registrationConditionFunction;
+    this.registrationConditionFunction = registrationConditionFunction || (() => true); // The function or a function that's always true
     this.registrationUserInitialisation = registrationUserInitialisation;
     this.setChangeLayerStatusListenerFunctions();
     this.setLayerRegistrationListenerFunctions();
@@ -86,37 +73,38 @@ export class LayerSet {
   /** ***************************************************************************************************************************
    * The listener that will handle the CHANGE_LAYER_STATUS event triggered on the map.
    *
-   * @param {PayloadBaseClass} payload The payload to process.
+   * @param {TypeLayerSetChangeLayerStatusPayload} payload The payload to process.
    */
-  protected changeLayerStatusListenerFunctions(payload: PayloadBaseClass) {
-    if (payloadIsLayerSetChangeLayerStatus(payload)) {
-      // Log
-      logger.logTraceCoreAPIEvent('LAYER-SET on EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS', this.mapId, payload);
+  protected changeLayerStatusListenerFunctions(payload: TypeLayerSetChangeLayerStatusPayload) {
+    // Read info
+    const { layerPath, layerStatus } = payload;
 
-      const { layerPath, layerStatus } = payload;
-      // if layer's status flag exists and is different than the new one
-      if (this.resultSet?.[layerPath]?.layerStatus && this.resultSet?.[layerPath]?.layerStatus !== layerStatus) {
-        this.resultSet[layerPath].layerStatus = layerStatus;
-        if (['processed', 'error'].includes(layerStatus) && !this.resultSet[layerPath].layerName) {
-          const layerConfig = this.layerApi.registeredLayers[layerPath];
-          const layerName = getLocalizedValue(layerConfig.layerName, this.mapId);
-          if (layerName) this.resultSet[layerPath].layerName = layerName;
-          else {
-            this.resultSet[layerPath].layerName = getLocalizedValue(
-              {
-                en: `Anonymous Layer ${this.anonymousSequenceNumber}`,
-                fr: `Couche Anonyme ${this.anonymousSequenceNumber}`,
-              },
-              this.mapId
-            );
-            this.anonymousSequenceNumber++;
-          }
+    // if layer's status flag exists and is different than the new one
+    if (this.resultSet?.[layerPath]?.layerStatus && this.resultSet?.[layerPath]?.layerStatus !== layerStatus) {
+      // Change the layer status!
+      this.resultSet[layerPath].layerStatus = layerStatus;
 
-          // Synchronize the layer name property in the config and the layer set object when the geoview instance is ready.
-          if (!layerConfig.layerName) layerConfig.layerName = createLocalizedString(this.resultSet[layerPath].layerName!);
+      if (['processed', 'error'].includes(layerStatus) && !this.resultSet[layerPath].layerName) {
+        const layerConfig = this.layerApi.registeredLayers[layerPath];
+        const layerName = getLocalizedValue(layerConfig.layerName, this.mapId);
+        if (layerName) this.resultSet[layerPath].layerName = layerName;
+        else {
+          this.resultSet[layerPath].layerName = getLocalizedValue(
+            {
+              en: `Anonymous Layer ${this.anonymousSequenceNumber}`,
+              fr: `Couche Anonyme ${this.anonymousSequenceNumber}`,
+            },
+            this.mapId
+          );
+          this.anonymousSequenceNumber++;
         }
-        api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSet, layerPath));
+
+        // Synchronize the layer name property in the config and the layer set object when the geoview instance is ready.
+        if (!layerConfig.layerName) layerConfig.layerName = createLocalizedString(this.resultSet[layerPath].layerName!);
       }
+
+      // Emit layer set updated
+      api.event.emitLayerSetUpdated(this.layerSetId, layerPath, this.resultSet);
     }
   }
 
@@ -124,14 +112,11 @@ export class LayerSet {
    * Set the listener that will handle the CHANGE_LAYER_STATUS event triggered on the map.
    */
   protected setChangeLayerStatusListenerFunctions() {
-    api.event.on(
-      EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS,
-      (payload) => {
-        // Logger is called in the changeLayerStatusListenerFunctions above.
-        this.changeLayerStatusListenerFunctions.call(this, payload);
-      },
-      this.mapId
-    );
+    // Wire handle on the layer status changed
+    api.event.onLayerStatusChanged(this.mapId, (payload) => {
+      // Redirect for the children classes
+      this.changeLayerStatusListenerFunctions.call(this, payload);
+    });
   }
 
   /** ***************************************************************************************************************************
@@ -140,37 +125,30 @@ export class LayerSet {
    */
   private setLayerRegistrationListenerFunctions() {
     // Register a layer to the layer set or unregister the layer when it is deleted from the map.
-    api.event.on(
-      EVENT_NAMES.LAYER_SET.LAYER_REGISTRATION,
-      (payload) => {
-        // Log
-        logger.logTraceCoreAPIEvent('LAYER-SET - LAYER_REGISTRATION', this.mapId, payload);
-
-        if (payloadIsLayerRegistration(payload)) {
-          const { action, layerPath, layerSetId } = payload;
-          // update the registration of all layer sets if !payload.layerSetId or update only the specified layer set
-          if (!layerSetId || layerSetId === this.layerSetId) {
-            if (action === 'add' && this.registrationConditionFunction(layerPath) && !(layerPath in this.resultSet)) {
-              const layerConfig = this.layerApi.registeredLayers[layerPath];
-              this.resultSet[layerPath] = {
-                data: undefined,
-                layerStatus: 'newInstance',
-                layerName: getLocalizedValue(layerConfig.layerName, this.mapId),
-              };
-              if (this.registrationUserInitialisation) this.registrationUserInitialisation(layerPath);
-            } else if (action === 'remove' && layerPath in this.resultSet) {
-              MapEventProcessor.removeOrderedLayerInfo(this.mapId, layerPath);
-              delete this.resultSet[layerPath];
-            }
-            api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.layerSetId, this.resultSet, layerPath));
-          }
+    api.event.onLayerRegistration(this.mapId, (payload) => {
+      const { action, layerPath, layerSetId } = payload;
+      // update the registration of all layer sets if !payload.layerSetId or update only the specified layer set
+      if (!layerSetId || layerSetId === this.layerSetId) {
+        if (action === 'add' && this.registrationConditionFunction(layerPath) && !(layerPath in this.resultSet)) {
+          const layerConfig = this.layerApi.registeredLayers[layerPath];
+          this.resultSet[layerPath] = {
+            data: undefined,
+            layerStatus: 'newInstance',
+            layerName: getLocalizedValue(layerConfig.layerName, this.mapId),
+          };
+          this.registrationUserInitialisation?.(layerPath);
+        } else if (action === 'remove' && layerPath in this.resultSet) {
+          MapEventProcessor.removeOrderedLayerInfo(this.mapId, layerPath);
+          delete this.resultSet[layerPath];
         }
-      },
-      this.mapId
-    );
+
+        // Emit layer set updated
+        api.event.emitLayerSetUpdated(this.layerSetId, layerPath, this.resultSet);
+      }
+    });
 
     // Send a request layer inventory signal to all existing layers of the map. These layers will return a layer registration event.
-    api.event.emit(LayerSetPayload.createRequestLayerInventoryPayload(this.mapId, this.layerSetId));
+    api.event.emitLayerInventoryQuery(this.mapId, this.layerSetId);
   }
 
   /**

@@ -3,7 +3,7 @@ import debounce from 'lodash/debounce';
 import Feature from 'ol/Feature';
 import { Coordinate } from 'ol/coordinate';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { PayloadBaseClass, payloadIsLayerSetChangeLayerStatus, payloadIsAMapMouseEvent } from '@/api/events/payloads';
+import { payloadIsAMapMouseEvent, TypeLayerSetChangeLayerStatusPayload } from '@/api/events/payloads';
 import { api, LayerApi } from '@/app';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { logger } from '@/core/utils/logger';
@@ -115,27 +115,26 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
   }
 
   /** ***************************************************************************************************************************
-   * The listener that will handle the CHANGE_LAYER_STATUS event triggered on the map.This method is called by the parent class
+   * The listener that will handle the CHANGE_LAYER_STATUS event triggered on the map. This method is called by the parent class
    * LayerSet via the listener created by the setChangeLayerStatusListenerFunctions method.
    *
-   * @param {PayloadBaseClass} payload The payload to process.
+   * @param {TypeLayerSetChangeLayerStatusPayload} payload The payload to process.
    */
-  protected changeLayerStatusListenerFunctions(payload: PayloadBaseClass) {
-    if (payloadIsLayerSetChangeLayerStatus(payload)) {
-      // Log
-      logger.logTraceCoreAPIEvent('HOVER-FEATURE-INFO-LAYER-SET on EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS', this.mapId, payload);
+  protected changeLayerStatusListenerFunctions(payload: TypeLayerSetChangeLayerStatusPayload) {
+    // Read info
+    const { layerPath, layerStatus } = payload;
 
-      const { layerPath, layerStatus } = payload;
-      // if layer's status flag exists and is different than the new one
-      if (this.resultSet?.[layerPath]?.layerStatus && this.resultSet?.[layerPath]?.layerStatus !== layerStatus) {
-        if (layerStatus === 'error') delete this.resultSet[layerPath];
-        else {
-          const layerConfig = this.layerApi.registeredLayers[layerPath];
-          super.changeLayerStatusListenerFunctions(payload);
-          if (this?.resultSet?.[layerPath]?.data) {
-            this.resultSet[layerPath].data.layerStatus = layerStatus;
-            FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerConfig.layerPath, 'hover', this.resultSet);
-          }
+    // if layer's status flag exists and is different than the new one
+    if (this.resultSet?.[layerPath]?.layerStatus && this.resultSet?.[layerPath]?.layerStatus !== layerStatus) {
+      if (layerStatus === 'error') delete this.resultSet[layerPath];
+      else {
+        // Call parent
+        super.changeLayerStatusListenerFunctions(payload);
+
+        const layerConfig = this.layerApi.registeredLayers[layerPath];
+        if (this?.resultSet?.[layerPath]?.data) {
+          this.resultSet[layerPath].data.layerStatus = layerStatus;
+          FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerConfig.layerPath, 'hover', this.resultSet);
         }
       }
     }
