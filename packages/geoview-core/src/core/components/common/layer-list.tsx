@@ -3,7 +3,9 @@ import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { animated, useSpring } from '@react-spring/web';
 import { Box, ChevronRightIcon, IconButton, List, ListItem, ListItemButton, ListItemIcon, Paper, Tooltip, Typography } from '@/ui';
-import { TypeArrayOfFeatureInfoEntries, TypeLayerStatus, TypeQueryStatus } from '@/app';
+
+import { TypeArrayOfFeatureInfoEntries, TypeQueryStatus } from '@/geo/utils/layer-set';
+import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 
 import { getSxClasses } from './layer-list-style';
 import { LayerIcon } from './layer-icon';

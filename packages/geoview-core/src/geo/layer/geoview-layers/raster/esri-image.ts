@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 // We have many reassign for layerPath-layerConfig. We keep it global...
 import { ImageArcGISRest } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
@@ -7,6 +6,13 @@ import { Image as ImageLayer } from 'ol/layer';
 import { Extent } from 'ol/extent';
 
 import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
+import { api } from '@/app';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { TypeJsonObject } from '@/core/types/global-types';
+import { logger } from '@/core/utils/logger';
+import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { codedValueType, rangeDomainType } from '@/geo/utils/layer-set';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
@@ -18,8 +24,7 @@ import {
   TypeUniqueValueStyleInfo,
   TypeStyleConfig,
 } from '@/geo/map/map-schema-types';
-import { codedValueType, rangeDomainType } from '@/api/events/payloads';
-import { api } from '@/app';
+
 import {
   commonGetFieldDomain,
   commonGetFieldType,
@@ -28,11 +33,6 @@ import {
   commonProcessLayerMetadata,
   commonProcessTemporalDimension,
 } from '../esri-layer-common';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { TypeJsonObject } from '@/core/types/global-types';
-import { logger } from '@/core/utils/logger';
-import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 export interface TypeEsriImageLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
@@ -115,6 +115,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {TypeEsriImageLayerConfig} layerConfig The layer configuration.
    */
   constructor(mapId: string, layerConfig: TypeEsriImageLayerConfig) {
+    // eslint-disable-next-line no-param-reassign
     if (!layerConfig.serviceDateFormat) layerConfig.serviceDateFormat = 'DD/MM/YYYY HH:MM:SSZ';
     super(CONST_LAYER_TYPES.ESRI_IMAGE, layerConfig, mapId);
   }
@@ -211,6 +212,7 @@ export class EsriImage extends AbstractGeoViewRaster {
             layer: layerPath,
             loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
+          // eslint-disable-next-line no-param-reassign
           layerConfig.layerStatus = 'error';
         }
       }
@@ -319,10 +321,12 @@ export class EsriImage extends AbstractGeoViewRaster {
     // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
     // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
 
+    // eslint-disable-next-line no-param-reassign
     layerConfig.olLayerAndLoadEndListeners = {
       olLayer: new ImageLayer(imageLayerOptions),
       loadEndListenerType: 'image',
     };
+    // eslint-disable-next-line no-param-reassign
     layerConfig.geoviewLayerInstance = this;
 
     return Promise.resolve(layerConfig.olLayer);

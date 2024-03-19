@@ -252,17 +252,18 @@
             cgpv.api.event.emit({ event: 'map/get_all_features', handlerName: 'CSV1' });
           });
 
-      cgpv.api.event.on(
-        cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-        (payload) => {
-          const { layerSetId, resultSets, eventType } = payload;
-          createInfoTable('CSV1', 'ResultSetId1', resultSets, eventType);
-        },
-        'CSV1/click/FeatureInfoLayerSet'
-      );
+      // Note: ALL_QUERIES_DONE is obsolete, a replacement is coming (upcoming PR)
+      // cgpv.api.event.on(
+      //   cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+      //   (payload) => {
+      //     const { layerSetId, resultSets, eventType } = payload;
+      //     createInfoTable('CSV1', 'ResultSetId1', resultSets, eventType);
+      //   },
+      //   'CSV1/click/FeatureInfoLayerSet'
+      // );
 
       cgpv.api.event.on(
-        cgpv.api.eventNames.GET_LEGENDS.LEGEND_LAYERSET_UPDATED,
+        cgpv.api.eventNames.LAYER_SET.UPDATED,
         (payload) => {
           const { resultSets } = payload;
           if (resultSets) displayLegend('LegendsId1', resultSets);

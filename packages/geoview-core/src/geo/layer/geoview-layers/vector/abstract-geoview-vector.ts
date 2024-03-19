@@ -22,13 +22,13 @@ import {
 } from '@/geo/map/map-schema-types';
 import { Cast, api } from '@/app';
 import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
-import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import { NodeType } from '@/geo/renderer/geoview-renderer-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { CSV } from './csv';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { TypeArrayOfFeatureInfoEntries } from '@/geo/utils/layer-set';
 
 /* *******************************************************************************************************************************
  * AbstractGeoViewVector types

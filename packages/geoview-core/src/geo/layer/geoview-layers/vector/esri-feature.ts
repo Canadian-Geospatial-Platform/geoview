@@ -1,21 +1,24 @@
-/* eslint-disable no-param-reassign */
-// We have many reassign for sourceOptions. We keep it global...
 import { Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { EsriJSON } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import Feature from 'ol/Feature';
 
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-
+import { getLocalizedValue } from '@/core/utils/utilities';
+import { AbstractGeoViewVector } from './abstract-geoview-vector';
+import { TypeJsonObject } from '@/core/types/global-types';
+import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import {
   TypeLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { codedValueType, rangeDomainType } from '@/geo/utils/layer-set';
 
-import { getLocalizedValue } from '@/core/utils/utilities';
 import {
   commonGetFieldDomain,
   commonGetFieldType,
@@ -26,12 +29,6 @@ import {
   commonProcessTemporalDimension,
   commonValidateListOfLayerEntryConfig,
 } from '../esri-layer-common';
-import { AbstractGeoViewVector } from './abstract-geoview-vector';
-import { TypeJsonObject } from '@/core/types/global-types';
-import { codedValueType, rangeDomainType } from '@/api/events/payloads';
-import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'EsriJSON';
@@ -225,8 +222,11 @@ export class EsriFeature extends AbstractGeoViewVector {
     // ? The line below uses var because a var declaration has a wider scope than a let declaration.
     // eslint-disable-next-line no-var
     var vectorSource: VectorSource<Feature>;
+    // eslint-disable-next-line no-param-reassign
     sourceOptions.url = getLocalizedValue(layerConfig.source!.dataAccessPath!, this.mapId);
+    // eslint-disable-next-line no-param-reassign
     sourceOptions.url = `${sourceOptions.url}/${String(layerConfig.layerId)}/query?f=pjson&outfields=*&where=1%3D1`;
+    // eslint-disable-next-line no-param-reassign
     sourceOptions.format = new EsriJSON();
 
     vectorSource = super.createVectorSource(layerConfig, sourceOptions, readOptions);

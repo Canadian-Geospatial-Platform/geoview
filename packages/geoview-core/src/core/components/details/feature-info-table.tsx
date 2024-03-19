@@ -1,18 +1,16 @@
 import { useState } from 'react';
-
 import { useTranslation } from 'react-i18next';
-
 import { useTheme } from '@mui/material/styles';
-
 import linkifyHtml from 'linkify-html';
 
-import { TypeFieldEntry } from '@/api/events/payloads';
-import { LightboxImg, LightBoxSlides } from '@/core/components/lightbox/lightbox';
 import { CardMedia, Box, Grid } from '@/ui';
+import { LightboxImg, LightBoxSlides } from '@/core/components/lightbox/lightbox';
 import { isImage, stringify, generateId, sanitizeHtmlContent } from '@/core/utils/utilities';
 import { HtmlToReact } from '@/core/containers/html-to-react';
-import { getSxClasses } from './details-style';
 import { logger } from '@/core/utils/logger';
+import { TypeFieldEntry } from '@/geo/utils/layer-set';
+
+import { getSxClasses } from './details-style';
 
 interface FeatureInfoTableProps {
   featureInfoList: TypeFieldEntry[];

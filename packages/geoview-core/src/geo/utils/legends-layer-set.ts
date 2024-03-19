@@ -14,7 +14,7 @@ import { LegendEventProcessor } from '@/api/event-processors/event-processor-chi
 import { logger } from '@/core/utils/logger';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { api } from '@/core/types/cgpv-types';
+import { api, LayerApi } from '@/core/types/cgpv-types';
 
 type TypeLegendsLayerSetInstance = { [mapId: string]: LegendsLayerSet };
 
@@ -35,11 +35,12 @@ export class LegendsLayerSet extends LayerSet {
   /** ***************************************************************************************************************************
    * The class constructor that instanciate a set of layer.
    *
+   * @param {LayerApi} layerApi The layer Api to work with.
    * @param {string} mapId The map identifier the layer set belongs to.
    *
    */
-  private constructor(mapId: string) {
-    super(mapId, `${mapId}/LegendsLayerSet`, {});
+  private constructor(layerApi: LayerApi, mapId: string) {
+    super(layerApi, mapId, `${mapId}/LegendsLayerSet`, {});
     this.setUserRegistrationInitFunction();
     this.setLayerInfoListener();
     this.setLayerSetUpdatedListener();
@@ -76,7 +77,7 @@ export class LegendsLayerSet extends LayerSet {
           api.event.emit(GetLegendsPayload.createQueryLegendPayload(`${this.mapId}/${layerPath}`, layerPath));
           this.resultSet[layerPath].querySent = true;
           // config file could not determine if the layer is queryable, can it be done using the metadata? let's try
-          const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
+          const layerConfig = this.layerApi.registeredLayers[layerPath];
           layerConfig.geoviewLayerInstance?.registerToLayerSets(layerConfig as AbstractBaseLayerEntryConfig);
         }
         if (layerExists || layerStatus === 'loaded')
@@ -124,7 +125,7 @@ export class LegendsLayerSet extends LayerSet {
         if (payloadIsLayerSetUpdated(payload)) {
           const { layerPath } = payload;
           if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerPath) === -1) {
-            const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
+            const layerConfig = this.layerApi.registeredLayers[layerPath];
             if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerPath.split('.')[1]) !== -1) {
               MapEventProcessor.replaceOrderedLayerInfo(this.mapId, layerConfig, layerPath.split('.')[1]);
             } else if (layerConfig.parentLayerConfig) {
@@ -150,12 +151,14 @@ export class LegendsLayerSet extends LayerSet {
    * Helper function used to instanciate a LegendsLayerSet object. This function
    * avoids the "new LegendsLayerSet" syntax.
    *
+   * @param {LayerApi} layerApi The layer Api to work with.
    * @param {string} mapId The map identifier the layer set belongs to.
    *
    * @returns {LegendsLayerSet} the LegendsLayerSet object created
    */
-  static get(mapId: string): LegendsLayerSet {
-    if (!LegendsLayerSet.legendsLayerSetInstance[mapId]) LegendsLayerSet.legendsLayerSetInstance[mapId] = new LegendsLayerSet(mapId);
+  static get(layerApi: LayerApi, mapId: string): LegendsLayerSet {
+    if (!LegendsLayerSet.legendsLayerSetInstance[mapId])
+      LegendsLayerSet.legendsLayerSetInstance[mapId] = new LegendsLayerSet(layerApi, mapId);
     return LegendsLayerSet.legendsLayerSetInstance[mapId];
   }
 

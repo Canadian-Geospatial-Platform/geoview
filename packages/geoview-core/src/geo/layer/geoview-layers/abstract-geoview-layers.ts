@@ -18,6 +18,18 @@ import {
   getLocalizedMessage,
   createLocalizedString,
 } from '@/core/utils/utilities';
+import { LayerSetPayload, payloadIsRequestLayerInventory, GetLegendsPayload, payloadIsQueryLegend } from '@/api/events/payloads';
+import { LayerApi, api } from '@/app';
+import { EVENT_NAMES } from '@/api/events/event-types';
+import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
+import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
+import { TypeEventHandlerFunction } from '@/api/events/event';
+import { logger } from '@/core/utils/logger';
+import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import {
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
@@ -31,30 +43,13 @@ import {
   CONST_LAYER_ENTRY_TYPES,
 } from '@/geo/map/map-schema-types';
 import {
-  codedValueType,
-  GetFeatureInfoPayload,
-  payloadIsQueryLayer,
-  rangeDomainType,
+  QueryType,
   TypeArrayOfFeatureInfoEntries,
   TypeFeatureInfoEntry,
-  QueryType,
-  LayerSetPayload,
-  payloadIsRequestLayerInventory,
-  GetLegendsPayload,
-  payloadIsQueryLegend,
   TypeLocation,
-} from '@/api/events/payloads';
-import { LayerApi, api } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
-import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
-import { TypeEventHandlerFunction } from '@/api/events/event';
-import { logger } from '@/core/utils/logger';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
+  codedValueType,
+  rangeDomainType,
+} from '@/geo/utils/layer-set';
 
 export type TypeLegend = {
   layerPath: string;
@@ -238,7 +233,7 @@ export const isImageStaticLegend = (verifyIfLegend: TypeLegend): verifyIfLegend 
 type TypeLayerSetHandlerFunctions = {
   requestLayerInventory?: TypeEventHandlerFunction;
   queryLegend?: TypeEventHandlerFunction;
-  queryLayer?: TypeEventHandlerFunction;
+  // queryLayer?: TypeEventHandlerFunction;
   updateLayerStatus?: TypeEventHandlerFunction;
 };
 
@@ -745,6 +740,8 @@ export abstract class AbstractGeoViewLayer {
    */
   async getFeatureInfo(queryType: QueryType, layerPath: string, location: TypeLocation = null): Promise<TypeArrayOfFeatureInfoEntries> {
     try {
+      // TODO: Refactor - Rework this function to not need a layer path in the param, nor a need to get a layer config here..
+      // TO.DOCONT: For example, this call seems to have logic redundancy: `layerConfig.geoviewLayerInstance.getFeatureInfo(queryType, layerPath, location)`
       // Get the layer config
       const layerConfig = this.getLayerConfig(layerPath);
 
@@ -947,30 +944,6 @@ export abstract class AbstractGeoViewLayer {
       );
     }
 
-    if (!this.registerToLayerSetListenerFunctions[layerPath].queryLayer) {
-      if (layerConfig?.source?.featureInfo?.queryable) {
-        // Listen to events that request to query a layer and return the resultset to the requester.
-        this.registerToLayerSetListenerFunctions[layerPath].queryLayer = async (payload) => {
-          // Log
-          logger.logTraceCoreAPIEvent('ABSTRACT-GEOVIEW-LAYERS - queryLayer', layerPath, payload);
-
-          if (payloadIsQueryLayer(payload)) {
-            const { queryType, location, eventType } = payload;
-
-            // Get Feature Info
-            const queryResult = await this.getFeatureInfo(queryType, layerPath, location);
-            api.event.emit(GetFeatureInfoPayload.createQueryResultPayload(this.mapId, layerPath, queryType, queryResult, eventType));
-          }
-        };
-
-        api.event.on(
-          EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER,
-          this.registerToLayerSetListenerFunctions[layerPath].queryLayer!,
-          `${this.mapId}/${layerPath}`
-        );
-      }
-    }
-
     // Register to layer sets that are already created.
     api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'add'));
   }
@@ -1000,11 +973,6 @@ export abstract class AbstractGeoViewLayer {
         this.registerToLayerSetListenerFunctions[layerPath].queryLegend
       );
       delete this.registerToLayerSetListenerFunctions[layerPath].queryLegend;
-    }
-
-    if (this.registerToLayerSetListenerFunctions[layerPath].queryLayer) {
-      api.event.off(EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER, this.mapId, this.registerToLayerSetListenerFunctions[layerPath].queryLayer);
-      delete this.registerToLayerSetListenerFunctions[layerPath].queryLayer;
     }
   }
 

@@ -1,8 +1,9 @@
 import { useStore } from 'zustand';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { QueryType, TypeArrayOfLayerData, TypeFeatureInfoEntry, TypeGeometry } from '@/api/events/payloads/get-feature-info-payload';
-import { useGeoViewStore } from '../stores-managers';
 import { api } from '@/app';
+import { QueryType, TypeArrayOfLayerData, TypeFeatureInfoEntry, TypeGeometry } from '@/geo/utils/layer-set';
+
+import { useGeoViewStore } from '../stores-managers';
 
 export interface IFeatureInfoState {
   checkedFeatures: Array<TypeFeatureInfoEntry>;
@@ -109,7 +110,7 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
         });
       },
       triggerGetAllFeatureInfo(layerPath: string, queryType: QueryType = 'all') {
-        api.maps[get().mapId].layer.allFeatureInfoLayerSet.triggerGetAllFeatureInfo(layerPath, queryType);
+        api.maps[get().mapId].layer.allFeatureInfoLayerSet.queryLayer(layerPath, queryType);
       },
     },
     // #endregion ACTIONS
