@@ -38,7 +38,7 @@ import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
-import { TypeArrayOfFeatureInfoEntries, TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
+import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
@@ -618,9 +618,9 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {Coordinate} location The pixel coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-  protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     const { map } = api.maps[this.mapId];
     return this.getFeatureInfoAtCoordinate(map.getCoordinateFromPixel(location), layerPath);
   }
@@ -631,9 +631,9 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The promised feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The promised feature info table.
    */
-  protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     const convertedLocation = api.projection.transform(
       location,
       `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`,
@@ -648,9 +648,9 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {Coordinate} lnglat The coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The promised feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The promised feature info table.
    */
-  protected async getFeatureInfoAtLongLat(lnglat: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected async getFeatureInfoAtLongLat(lnglat: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig(layerPath) as OgcWmsLayerEntryConfig;
@@ -912,24 +912,24 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Translate the get feature information result set to the TypeArrayOfFeatureInfoEntries used by GeoView.
+   * Translate the get feature information result set to the TypeFeatureInfoEntry[] used by GeoView.
    *
    * @param {TypeJsonObject} featureMember An object formatted using the query syntax.
    * @param {OgcWmsLayerEntryConfig} layerConfig The layer configuration.
    * @param {Coordinate} clickCoordinate The coordinate where the user has clicked.
    *
-   * @returns {TypeArrayOfFeatureInfoEntries} The feature info table.
+   * @returns {TypeFeatureInfoEntry[]} The feature info table.
    */
   private formatWmsFeatureInfoResult(
     featureMember: TypeJsonObject,
     layerConfig: OgcWmsLayerEntryConfig,
     clickCoordinate: Coordinate
-  ): TypeArrayOfFeatureInfoEntries {
+  ): TypeFeatureInfoEntry[] {
     const featureInfo = layerConfig?.source?.featureInfo;
     const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
     const fieldTypes = featureInfo?.fieldTypes?.split(',');
     const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
-    const queryResult: TypeArrayOfFeatureInfoEntries = [];
+    const queryResult: TypeFeatureInfoEntry[] = [];
 
     let featureKeyCounter = 0;
     let fieldKeyCounter = 0;

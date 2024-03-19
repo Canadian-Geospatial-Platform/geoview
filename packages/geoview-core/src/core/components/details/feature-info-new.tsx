@@ -8,13 +8,13 @@ import { useDetailsStoreCheckedFeatures, useDetailsStoreActions } from '@/core/s
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { delay } from '@/core/utils/utilities';
-import { TypeArrayOfFeatureInfoEntries, TypeFieldEntry, TypeGeometry } from '@/geo/utils/layer-set';
+import { TypeFeatureInfoEntry, TypeFieldEntry, TypeGeometry } from '@/geo/utils/layer-set';
 
 import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
 
 export interface TypeFeatureInfoProps {
-  features: TypeArrayOfFeatureInfoEntries;
+  features: TypeFeatureInfoEntry[] | undefined | null;
   currentFeatureIndex: number;
 }
 

@@ -7,7 +7,7 @@ import { logger } from '@/core/utils/logger';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { TypeLayerStatus } from '@/core/types/cgpv-types';
 
-import { LayerSet, TypeArrayOfFeatureInfoEntries, TypeLayerData } from './layer-set';
+import { LayerSet, TypeFeatureInfoEntry, TypeLayerData } from './layer-set';
 
 export type TypeFeatureInfoResultSetEntry = {
   layerName?: string;
@@ -125,7 +125,7 @@ export class FeatureInfoLayerSet extends LayerSet {
     // ! As it is (and was like this befor events refactor), the this.resultSet is mutating between async calls.
 
     // Prepare to hold all promises of features in the loop below
-    const allPromises: Promise<TypeArrayOfFeatureInfoEntries>[] = [];
+    const allPromises: Promise<TypeFeatureInfoEntry[] | undefined | null>[] = [];
 
     // Reinitialize the resultSet
     // Loop on each layer path in the resultSet

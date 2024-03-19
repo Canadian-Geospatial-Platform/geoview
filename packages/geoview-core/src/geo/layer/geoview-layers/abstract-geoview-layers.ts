@@ -42,14 +42,7 @@ import {
   TypeStyleGeometry,
   CONST_LAYER_ENTRY_TYPES,
 } from '@/geo/map/map-schema-types';
-import {
-  QueryType,
-  TypeArrayOfFeatureInfoEntries,
-  TypeFeatureInfoEntry,
-  TypeLocation,
-  codedValueType,
-  rangeDomainType,
-} from '@/geo/utils/layer-set';
+import { QueryType, TypeFeatureInfoEntry, TypeLocation, codedValueType, rangeDomainType } from '@/geo/utils/layer-set';
 
 export type TypeLegend = {
   layerPath: string;
@@ -738,7 +731,11 @@ export abstract class AbstractGeoViewLayer {
    * users can't expect anything to be returned after a click. They have to wait until they see something on the map to know where
    * the features are so they can click on them.
    */
-  async getFeatureInfo(queryType: QueryType, layerPath: string, location: TypeLocation = null): Promise<TypeArrayOfFeatureInfoEntries> {
+  async getFeatureInfo(
+    queryType: QueryType,
+    layerPath: string,
+    location: TypeLocation = null
+  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       // TODO: Refactor - Rework this function to not need a layer path in the param, nor a need to get a layer config here..
       // TO.DOCONT: For example, this call seems to have logic redundancy: `layerConfig.geoviewLayerInstance.getFeatureInfo(queryType, layerPath, location)`
@@ -757,7 +754,7 @@ export abstract class AbstractGeoViewLayer {
       const logMarkerKey = `${queryType} | ${layerPath}`;
       logger.logMarkerStart(logMarkerKey);
 
-      let promiseGetFeature: Promise<TypeArrayOfFeatureInfoEntries>;
+      let promiseGetFeature: Promise<TypeFeatureInfoEntry[] | undefined | null>;
       switch (queryType) {
         case 'all':
           promiseGetFeature = this.getAllFeatureInfo(layerPath);
@@ -807,10 +804,10 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
 
-  protected getAllFeatureInfo(layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getAllFeatureInfo(layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getAllFeatureInfo is not implemented! for ${layerPath}`);
     return Promise.resolve(null);
@@ -823,10 +820,10 @@ export abstract class AbstractGeoViewLayer {
    * @param {Coordinate} location The pixel coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
 
-  protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoAtPixel is not implemented! for ${layerPath} - ${location}`);
     return Promise.resolve(null);
@@ -839,10 +836,10 @@ export abstract class AbstractGeoViewLayer {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
 
-  protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoAtCoordinate is not implemented! for ${layerPath} - ${location}`);
     return Promise.resolve(null);
@@ -855,10 +852,10 @@ export abstract class AbstractGeoViewLayer {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
 
-  protected getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoAtLongLat is not implemented for ${layerPath} - ${location}!`);
     return Promise.resolve(null);
@@ -871,10 +868,10 @@ export abstract class AbstractGeoViewLayer {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
 
-  protected getFeatureInfoUsingBBox(location: Coordinate[], layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoUsingBBox(location: Coordinate[], layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoUsingBBox is not implemented! for ${layerPath} - ${location}`);
     return Promise.resolve(null);
@@ -887,10 +884,10 @@ export abstract class AbstractGeoViewLayer {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
 
-  protected getFeatureInfoUsingPolygon(location: Coordinate[], layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoUsingPolygon(location: Coordinate[], layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoUsingPolygon is not implemented! for ${layerPath} - ${location}`);
     return Promise.resolve(null);
@@ -1303,17 +1300,17 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Convert the feature information to an array of TypeArrayOfFeatureInfoEntries.
+   * Convert the feature information to an array of TypeFeatureInfoEntry[] | undefined | null.
    *
    * @param {Feature[]} features The array of features to convert.
    * @param {ImageLayerEntryConfig | VectorLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {TypeArrayOfFeatureInfoEntries} The Array of feature information.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The Array of feature information.
    */
   protected async formatFeatureInfoResult(
     features: Feature[],
     layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig
-  ): Promise<TypeArrayOfFeatureInfoEntries> {
+  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       if (!features.length) return [];
 
@@ -1321,7 +1318,7 @@ export abstract class AbstractGeoViewLayer {
       const fieldTypes = featureInfo?.fieldTypes?.split(',') as ('string' | 'number' | 'date')[];
       const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
       const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
-      const queryResult: TypeArrayOfFeatureInfoEntries = [];
+      const queryResult: TypeFeatureInfoEntry[] = [];
       let featureKeyCounter = 0;
       let fieldKeyCounter = 0;
       const promisedAllCanvasFound: Promise<{ feature: Feature; canvas: HTMLCanvasElement | undefined }>[] = [];

@@ -1,27 +1,27 @@
 import { useStore } from 'zustand';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { api } from '@/app';
-import { QueryType, TypeArrayOfLayerData, TypeFeatureInfoEntry, TypeGeometry } from '@/geo/utils/layer-set';
+import { QueryType, TypeLayerData, TypeFeatureInfoEntry, TypeGeometry } from '@/geo/utils/layer-set';
 
 import { useGeoViewStore } from '../stores-managers';
 
 export interface IFeatureInfoState {
   checkedFeatures: Array<TypeFeatureInfoEntry>;
-  layerDataArray: TypeArrayOfLayerData;
-  layerDataArrayBatch: TypeArrayOfLayerData;
+  layerDataArray: TypeLayerData[];
+  layerDataArrayBatch: TypeLayerData[];
   layerDataArrayBatchLayerPathBypass: string;
-  hoverDataArray: TypeArrayOfLayerData;
-  allFeaturesDataArray: TypeArrayOfLayerData;
+  hoverDataArray: TypeLayerData[];
+  allFeaturesDataArray: TypeLayerData[];
   selectedLayerPath: string;
 
   actions: {
     addCheckedFeature: (feature: TypeFeatureInfoEntry) => void;
     removeCheckedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
-    setLayerDataArray: (layerDataArray: TypeArrayOfLayerData) => void;
-    setLayerDataArrayBatch: (layerDataArray: TypeArrayOfLayerData) => void;
+    setLayerDataArray: (layerDataArray: TypeLayerData[]) => void;
+    setLayerDataArrayBatch: (layerDataArray: TypeLayerData[]) => void;
     setLayerDataArrayBatchLayerPathBypass: (layerPath: string) => void;
-    setHoverDataArray: (hoverDataArray: TypeArrayOfLayerData) => void;
-    setAllFeaturesDataArray: (allFeaturesDataArray: TypeArrayOfLayerData) => void;
+    setHoverDataArray: (hoverDataArray: TypeLayerData[]) => void;
+    setAllFeaturesDataArray: (allFeaturesDataArray: TypeLayerData[]) => void;
     setSelectedLayerPath: (selectedLayerPath: string) => void;
     triggerGetAllFeatureInfo: (layerPath: string, queryType: QueryType) => void;
   };
@@ -61,7 +61,7 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
           },
         });
       },
-      setLayerDataArray(layerDataArray: TypeArrayOfLayerData) {
+      setLayerDataArray(layerDataArray: TypeLayerData[]) {
         set({
           detailsState: {
             ...get().detailsState,
@@ -69,7 +69,7 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
           },
         });
       },
-      setLayerDataArrayBatch(layerDataArrayBatch: TypeArrayOfLayerData) {
+      setLayerDataArrayBatch(layerDataArrayBatch: TypeLayerData[]) {
         set({
           detailsState: {
             ...get().detailsState,
@@ -85,7 +85,7 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
           },
         });
       },
-      setHoverDataArray(hoverDataArray: TypeArrayOfLayerData) {
+      setHoverDataArray(hoverDataArray: TypeLayerData[]) {
         set({
           detailsState: {
             ...get().detailsState,
@@ -93,7 +93,7 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
           },
         });
       },
-      setAllFeaturesDataArray(allFeaturesDataArray: TypeArrayOfLayerData) {
+      setAllFeaturesDataArray(allFeaturesDataArray: TypeLayerData[]) {
         set({
           detailsState: {
             ...get().detailsState,
