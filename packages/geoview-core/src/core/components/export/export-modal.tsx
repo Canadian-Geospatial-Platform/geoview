@@ -177,15 +177,34 @@ export default function ExportModal(): JSX.Element {
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={closeModal} type="text" size="small" role="button" tabIndex={-1} autoFocus sx={{ width: 'inherit' }}>
+        <Button
+          onClick={closeModal}
+          type="text"
+          size="small"
+          role="button"
+          tabIndex={-1}
+          autoFocus
+          sx={{
+            width: 'inherit',
+            fontSize: theme.palette.geoViewFontSize.sm,
+            color: theme.palette.common.white,
+            padding: '0.7rem 1rem',
+            backgroundColor: theme.palette.geoViewColor.primary.main,
+          }}
+        >
           {t('exportModal.cancelBtn')}
         </Button>
         <LoadingButton
           loading={isMapExporting}
-          variant="outlined"
+          variant="contained"
           onClick={exportMap}
           size="small"
-          sx={{ fontSize: theme.palette.geoViewFontSize.sm, padding: '0.7rem 1rem', backgroundColor: theme.palette.background.default }}
+          sx={{
+            fontSize: theme.palette.geoViewFontSize.sm,
+            padding: '0.7rem 1rem',
+            backgroundColor: theme.palette.geoViewColor.primary.main,
+            height: '50px',
+          }}
           disabled={isLegendLoading || isMapLoading}
         >
           {t('exportModal.exportBtn')}
