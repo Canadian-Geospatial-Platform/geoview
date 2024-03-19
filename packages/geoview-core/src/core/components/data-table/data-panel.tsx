@@ -17,8 +17,9 @@ import {
 import { LayerListEntry, Layout } from '../common';
 import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
-import { LAYER_STATUS, TABS, TypeFieldEntry, TypeLayerData } from '@/app';
 import { getSxClasses } from './data-table-style';
+import { TypeFieldEntry, TypeLayerData } from '@/api/events/payloads';
+import { LAYER_STATUS, TABS } from '@/core/types/cgpv-types';
 
 export interface MappedLayerDataType extends TypeLayerData {
   fieldInfos: Record<string, TypeFieldEntry | undefined>;

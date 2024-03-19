@@ -6,10 +6,12 @@ import { LineString, MultiLineString, MultiPoint, MultiPolygon, Point, Polygon }
 import { Extent, getCenter } from 'ol/extent';
 import { getUid } from 'ol';
 import { fromExtent } from 'ol/geom/Polygon';
-import { Coordinate, TypeFeatureInfoEntry, api } from '@/app';
+import { Coordinate } from 'ol/coordinate';
+import { api } from '@/app';
 import { TypeHighlightColors } from '@/geo/map/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
+import { TypeFeatureInfoEntry } from '@/api/events/payloads/get-feature-info-payload';
 
 /** *****************************************************************************************************************************
  * A class to handle highlighting of features

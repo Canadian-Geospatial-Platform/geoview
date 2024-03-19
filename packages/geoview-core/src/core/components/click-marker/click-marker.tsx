@@ -4,11 +4,12 @@ import { Coordinate } from 'ol/coordinate'; // For typing only
 
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 
-import { TypeJsonObject, useGeoViewMapId } from '@/app';
 import { Box, ClickMapMarker } from '@/ui';
 
 import { useMapClickMarker, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
+import { TypeJsonObject } from '@/core/types/global-types';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 export type TypeClickMarker = {
   lnglat: Coordinate;

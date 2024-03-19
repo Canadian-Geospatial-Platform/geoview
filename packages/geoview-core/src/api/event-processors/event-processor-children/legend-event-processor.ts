@@ -14,9 +14,11 @@ import {
 } from '@/geo';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
-import { api, getLocalizedValue, ILayerState } from '@/app';
+import { api } from '@/app';
 
 import { AbstractEventProcessor } from '../abstract-event-processor';
+import { ILayerState } from '@/core/stores';
+import { getLocalizedValue } from '@/core/utils/utilities';
 
 export class LegendEventProcessor extends AbstractEventProcessor {
   // **********************************************************

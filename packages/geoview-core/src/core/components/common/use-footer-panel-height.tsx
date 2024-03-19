@@ -7,7 +7,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { logger } from '@/core/utils/logger';
 import { useDataTableStoreActions } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { TABS } from '@/app';
+import { TABS } from '@/core/utils/constant';
 
 interface UseFooterPanelHeightType {
   footerPanelTab: 'layers' | 'details' | 'data-table' | 'legend' | 'default' | 'guide';

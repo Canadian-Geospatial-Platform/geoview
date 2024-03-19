@@ -1,4 +1,4 @@
-import { TypeArrayOfLayerData, TypeFieldEntry } from '@/app';
+import { TypeArrayOfLayerData, TypeFieldEntry } from '@/api/events/payloads/get-feature-info-payload';
 import { MappedLayerDataType } from '../data-panel';
 
 /**

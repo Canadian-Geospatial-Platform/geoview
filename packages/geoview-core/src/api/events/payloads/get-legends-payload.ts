@@ -1,8 +1,7 @@
 import { PayloadBaseClass } from './payload-base-class';
 
 import { EventStringId, EVENT_NAMES } from '../event-types';
-import { TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { TypeLegend, TypeLayerStatus } from '@/geo';
 
 /** Valid events that can create GetLegendsPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.GET_LEGENDS.LEGEND_INFO, EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND];

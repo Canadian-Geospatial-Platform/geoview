@@ -41,11 +41,11 @@ import { OgcFeature, TypeOgcFeatureLayerConfig } from '@/geo/layer/geoview-layer
 import { TypeWMSLayerConfig, WMS as WmsGeoviewClass } from '@/geo/layer/geoview-layers/raster/wms';
 import { TypeWFSLayerConfig, WFS as WfsGeoviewClass } from '@/geo/layer/geoview-layers/vector/wfs';
 import { TypeCSVLayerConfig, CSV as CsvGeoviewClass } from '@/geo/layer/geoview-layers/vector/csv';
-import { ButtonPropsLayerPanel, SelectChangeEvent, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
+import { ButtonPropsLayerPanel, Cast, SelectChangeEvent, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { createLocalizedString } from '@/core/utils/utilities';
 import { useLayerStoreActions, useLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { Cast, Config, api } from '@/app';
+import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
 import { EsriImage, TypeEsriImageLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -59,6 +59,7 @@ import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { Config } from '@/core/types/cgpv-types';
 
 type EsriOptions = {
   err: string;
@@ -95,6 +96,14 @@ export function AddNewLayer(): JSX.Element {
   const { setDisplayState } = useLayerStoreActions();
 
   const isMultiple = () => hasMetadata && (layerType === ESRI_DYNAMIC || layerType === WFS || layerType === WMS || layerType === GEOJSON);
+
+  useEffect(() => {
+    console.log('geoViewLayerInstance', geoviewLayerInstance);
+  }, [geoviewLayerInstance]);
+
+  useEffect(() => {
+    console.log('layerList ', layerList);
+  }, [layerList]);
 
   /**
    * List of layer types and labels

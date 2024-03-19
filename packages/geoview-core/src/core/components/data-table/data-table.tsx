@@ -39,7 +39,7 @@ import {
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
-import { TypeFeatureInfoEntry, api, isImage } from '@/app';
+import { api } from '@/app';
 import { getSxClasses } from './data-table-style';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
@@ -51,6 +51,8 @@ import { useLightBox, useFilterRows, useToolbarActionMessage } from './hooks';
 import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from '@/core/utils/logger';
 import { MappedLayerDataType } from './data-panel';
+import { isImage } from '@/core/utils/utilities';
+import { TypeFeatureInfoEntry } from '@/api/events/payloads/get-feature-info-payload';
 
 export interface FieldInfos {
   alias: string;

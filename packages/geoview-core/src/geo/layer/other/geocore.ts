@@ -1,4 +1,3 @@
-import { TypeJsonValue, getLocalizedMessage, replaceParams, showError } from '@/app';
 import { UUIDmapConfigReader } from '@/core/utils/config/reader/uuid-config-reader';
 import { ConfigValidation } from '@/core/utils/config/config-validation';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
@@ -7,6 +6,8 @@ import { logger } from '@/core/utils/logger';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage } from '../../map/map-schema-types';
+import { getLocalizedMessage, replaceParams, showError } from '@/core/utils/utilities';
+import { TypeJsonValue } from '@/core/types/global-types';
 
 /**
  * Class used to add geoCore layer to the map

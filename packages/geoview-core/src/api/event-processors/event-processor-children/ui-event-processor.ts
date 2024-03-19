@@ -1,7 +1,7 @@
 import { TypeValidAppBarCoreProps, TypeMapCorePackages } from '@/geo';
-import { IUIState } from '@/app';
 
 import { AbstractEventProcessor } from '../abstract-event-processor';
+import { IUIState } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 export class UIEventProcessor extends AbstractEventProcessor {
   // **********************************************************

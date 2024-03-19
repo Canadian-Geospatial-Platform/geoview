@@ -12,7 +12,7 @@ import { Cast, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '@/co
 import { UUIDmapConfigReader } from './uuid-config-reader';
 import { ConfigValidation } from '../config-validation';
 import { logger } from '../../logger';
-import { getLocalizedMessage, replaceParams, showError } from '@/app';
+import { getLocalizedMessage, replaceParams, showError } from '../../utilities';
 
 /**
  * A class to process GeoView map features configuration from a URL.

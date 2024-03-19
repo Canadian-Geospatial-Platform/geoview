@@ -17,8 +17,9 @@ import { TypeBasemapOptions, TypeMapFeaturesConfig, TypeValidMapProjectionCodes 
 import { TypeFeatureInfoEntry, TypeGeometry, TypeMapMouseInfo } from '@/api/events/payloads';
 import { TypeInteraction, TypeHighlightColors } from '@/geo/map/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeClickMarker, api } from '@/app';
+import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 
 // #region INTERFACES
 interface TypeScaleInfo {

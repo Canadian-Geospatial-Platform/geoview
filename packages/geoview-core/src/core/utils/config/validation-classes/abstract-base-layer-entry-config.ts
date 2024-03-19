@@ -19,8 +19,10 @@ import {
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { logger } from '../../logger';
-import { LayerSetPayload, TypeJsonValue, api } from '@/app';
+import { api } from '@/app';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { LayerSetPayload } from '@/api/events/payloads/layer-set-payload';
+import { TypeJsonValue } from '@/core/types/global-types';
 
 /** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map.
