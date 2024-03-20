@@ -468,10 +468,12 @@ export class LayerApi {
    * @param {GeoViewLayerRegistrationEvent} registrationEvent The registration event
    */
   #handleLayerStatusChanged = (config: ConfigBaseClass, layerStatusEvent: LayerStatusChangedEvent) => {
+    // The layer status has changed for the given config/layer, take care of it
+
     // Log - leaving the line in comment as it can be pretty useful to uncomment it sometimes
     // logger.logDebug('LAYER STATUS CHANGED', layerStatusEvent.layerPath, layerStatusEvent.layerStatus, config);
 
-    // The layer status has changed for the given config/layer, take care of it
+    // Tell the layer sets about it
     [this.legendsLayerSet, this.hoverFeatureInfoLayerSet, this.allFeatureInfoLayerSet, this.featureInfoLayerSet].forEach(
       (layerSet: LayerSet) => {
         // Process the layer status change
