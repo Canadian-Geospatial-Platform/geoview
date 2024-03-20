@@ -22,7 +22,7 @@ import {
   GeoCore,
   GeoJSON,
   GeoPackage,
-  GeoViewLayerAddedResponse,
+  GeoViewLayerAddedResult,
   TypeEsriDynamicLayerConfig,
   TypeEsriFeatureLayerConfig,
   TypeGeoJSONLayerConfig,
@@ -853,7 +853,7 @@ export function AddNewLayer(): JSX.Element {
     setIsLoading(true);
     if (layerType === GEOCORE) {
       // TODO: Refactor - When reworking on this component, fix this weird thing of layerList vs layerEntries confusion for GeoCore
-      const addedLayers: GeoViewLayerAddedResponse[] = [];
+      const addedLayers: GeoViewLayerAddedResult[] = [];
       if (layerList.length > 1) {
         (layerList as TypeListOfGeoviewLayerConfig).forEach((geoviewLayerConfig) => {
           const addedLayer = api.maps[mapId].layer.addGeoviewLayer(geoviewLayerConfig);

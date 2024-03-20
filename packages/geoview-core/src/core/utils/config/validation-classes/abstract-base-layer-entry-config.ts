@@ -19,7 +19,7 @@ import {
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { logger } from '../../logger';
-import { TypeJsonValue, api } from '@/app';
+import { TypeJsonValue } from '@/app';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 /** ******************************************************************************************************************************
@@ -125,7 +125,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     // Update registration based on metadata that were read since the first registration.
     this.geoviewLayerInstance?.registerToLayerSets(this);
     this.geoviewLayerInstance?.setVisible(this.initialSettings?.visible !== 'no', this.layerPath);
-    if (this._layerStatus === 'loaded') api.event.emitLayerStatusChanged(this.geoviewLayerInstance!.mapId, this.layerPath, 'loaded');
   }
 
   /**

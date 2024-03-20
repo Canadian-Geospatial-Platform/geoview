@@ -69,6 +69,9 @@ export class ConfigBaseClass {
   /** Flag indicating that the loaded signal arrived before the processed one */
   protected waitForProcessedBeforeSendingLoaded = false;
 
+  // Keep all callback delegates references
+  private onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
+
   /**
    * The class constructor.
    * @param {ConfigBaseClass} layerConfig The layer configuration we want to instanciate.
@@ -153,7 +156,7 @@ export class ConfigBaseClass {
     if (!this.IsGreaterThanOrEqualTo(newLayerStatus)) {
       // eslint-disable-next-line no-underscore-dangle
       this._layerStatus = newLayerStatus;
-      api.event.emitLayerStatusChanged(this.geoviewLayerInstance!.mapId, this.layerPath, newLayerStatus);
+      this.emitLayerStatusChanged({ layerPath: this.layerPath, layerStatus: newLayerStatus });
     }
     if (newLayerStatus === 'processed' && this.waitForProcessedBeforeSendingLoaded) this.layerStatus = 'loaded';
 
@@ -165,6 +168,34 @@ export class ConfigBaseClass {
     )
       (this.parentLayerConfig as GroupLayerEntryConfig).layerStatus = 'loaded';
   }
+
+  /**
+   * Wires an event handler.
+   * @param {LayerStatusChangedDelegate} callback The callback to be executed whenever the event is raised
+   */
+  onLayerStatusChanged = (callback: LayerStatusChangedDelegate): void => {
+    // Push a new callback handler to the list of handlers
+    this.onLayerStatusChangedHandlers.push(callback);
+  };
+
+  /**
+   * Unwires an event handler.
+   * @param {LayerStatusChangedDelegate} callback The callback to stop being called whenever the event is raised
+   */
+  offLayerStatusChanged = (callback: LayerStatusChangedDelegate): void => {
+    const index = this.onLayerStatusChangedHandlers.indexOf(callback);
+    if (index !== -1) {
+      this.onLayerStatusChangedHandlers.splice(index, 1);
+    }
+  };
+
+  /**
+   * Emits an event to all handlers.
+   */
+  emitLayerStatusChanged = (event: LayerStatusChangedEvent) => {
+    // Trigger all the handlers in the array
+    this.onLayerStatusChangedHandlers.forEach((handler) => handler(this, event));
+  };
 
   /**
    * Register the layer identifier. Duplicate identifier are not allowed.
@@ -230,3 +261,18 @@ export class ConfigBaseClass {
     } as unknown as TypeJsonValue;
   }
 }
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerStatusChangedDelegate = (sender: ConfigBaseClass, event: LayerStatusChangedEvent) => void;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerStatusChangedEvent = {
+  // The layer path affected.
+  layerPath: string;
+  // The new layer status to assign to the layer path.
+  layerStatus: TypeLayerStatus;
+};
