@@ -36,8 +36,6 @@ import {
   payloadIsLegendInfo,
   payloadIsQueryLegend,
   TypeQueryLegendPayload,
-  payloadIsRequestLayerInventory,
-  TypeRequestLayerInventoryPayload,
   payloadIsLayerSetChangeLayerStatus,
   TypeLayerSetChangeLayerStatusPayload,
   payloadIsLayerSetUpdated,
@@ -484,25 +482,6 @@ export class Event {
   // ! These events exists to communicate between different application code and components.
   // ! They should be fixed/removed altogether as they don't have a 'valid' reason to exist or their refactoring would be beneficial.
   // ! At the time writing this, having them here was sufficient as a first step in cleaning generic api.event calls and payloads.
-
-  // #region REQUEST_LAYER_INVENTORY ----------------------------------------------------------------------------------
-
-  emitLayerInventoryQuery = (mapId: string, layerSetId: string) => {
-    // Emit
-    this.emit(LayerSetPayload.createRequestLayerInventoryPayload(mapId, layerSetId));
-  };
-
-  onLayerInventoryQuery = (mapId: string, callback: (layerInventory: TypeRequestLayerInventoryPayload) => void) => {
-    // Wire
-    this.onMapHelperHandler(mapId, EVENT_NAMES.LAYER_SET.REQUEST_LAYER_INVENTORY, payloadIsRequestLayerInventory, callback);
-  };
-
-  offLayerInventoryQuery = (mapId: string, callback: (layerRegistration: TypeRequestLayerInventoryPayload) => void) => {
-    // Unwire
-    this.off(EVENT_NAMES.LAYER_SET.REQUEST_LAYER_INVENTORY, mapId, callback as TypeEventHandlerFunction);
-  };
-
-  // #endregion
 
   // #region LAYER_REGISTRATION ---------------------------------------------------------------------------------------
 
