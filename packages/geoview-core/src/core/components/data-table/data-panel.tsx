@@ -193,7 +193,6 @@ export function Datapanel({ fullWidth }: DataPanelType) {
       {isLoading && <Skeleton variant="rounded" width="100%" height={400} />}
 
       {!isLoading &&
-        selectedTab === TABS.DATA_TABLE &&
         !isLayerDisabled() &&
         isSelectedLayerHasFeatures() &&
         orderedLayerData.map((data: MappedLayerDataType) => (
