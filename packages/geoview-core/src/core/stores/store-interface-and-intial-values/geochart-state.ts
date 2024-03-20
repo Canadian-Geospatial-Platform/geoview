@@ -2,7 +2,7 @@ import { useStore } from 'zustand';
 import { TypeArrayOfLayerData } from '@/api/events/payloads/get-feature-info-payload';
 import { GeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
 
-import { useGeoViewStore } from '../stores-managers';
+import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeGetStore, TypeSetStore } from '../geoview-store';
 
 export type GeoChartStoreByLayerPath = {

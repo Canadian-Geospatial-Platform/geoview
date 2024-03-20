@@ -1,9 +1,9 @@
 import { useStore } from 'zustand';
 import { type MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { useGeoViewStore } from '../stores-managers';
-import { TypeArrayOfLayerData } from '@/app';
+import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { DataTableProcessor } from '@/api/event-processors/event-processor-children/data-table-processor';
+import { TypeArrayOfLayerData } from '@/api/events/payloads/get-feature-info-payload';
 
 interface IMapDataTableStateActions {
   setColumnFiltersEntry: (filtered: MRTColumnFiltersState, layerPath: string) => void;

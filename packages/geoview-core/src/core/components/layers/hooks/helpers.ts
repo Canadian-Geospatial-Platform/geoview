@@ -5,7 +5,7 @@ import { api } from '@/app';
 import { TypeLegendLayer, TypeLegendItem } from '@/core/components/layers/types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { generateId } from '@/core/utils/utilities';
-import { TypeVisibilityFlags } from '@/geo';
+import { TypeVisibilityFlags } from '@/geo/map/map-schema-types';
 
 export function useLegendHelpers() {
   const store = useGeoViewStore();

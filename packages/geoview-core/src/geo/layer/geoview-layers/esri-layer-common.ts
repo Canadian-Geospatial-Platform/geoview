@@ -15,7 +15,7 @@ import { getLocalizedValue, getXMLHttpRequest } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
 import { EsriFeature, geoviewEntryIsEsriFeature } from './vector/esri-feature';
-import { EsriBaseRenderer, getStyleFromEsriRenderer } from '../../renderer/esri-renderer';
+import { EsriBaseRenderer, getStyleFromEsriRenderer } from '@/geo/renderer/esri-renderer';
 import { TimeDimensionESRI } from '@/core/utils/date-mgt';
 import { codedValueType, rangeDomainType, TypeFeatureInfoEntryPartial, TypeFieldEntry } from '@/api/events/payloads';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';

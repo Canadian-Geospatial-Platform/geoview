@@ -1,8 +1,7 @@
 import { useStore } from 'zustand';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { TypeValidAppBarCoreProps, TypeMapCorePackages, TypeNavBarProps } from '@/geo';
-import { TypeMapFeaturesConfig } from '@/core/types/cgpv-types';
+import { TypeMapCorePackages, TypeMapFeaturesConfig, TypeNavBarProps, TypeValidAppBarCoreProps } from '@/core/types/cgpv-types';
 
 type focusItemProps = {
   activeElementId: string | false;

@@ -1,6 +1,6 @@
 import { PayloadBaseClass } from './payload-base-class';
 
-import { EventStringId, EVENT_NAMES } from '../event-types';
+import { EventStringId, EVENT_NAMES } from '@/api/events/event-types';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 
 /** Valid events that can create LayerSetPayload */

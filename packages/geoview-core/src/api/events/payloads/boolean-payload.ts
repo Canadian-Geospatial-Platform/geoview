@@ -1,6 +1,6 @@
 import { PayloadBaseClass } from './payload-base-class';
 
-import { EventStringId, EVENT_NAMES } from '../event-types';
+import { EventStringId, EVENT_NAMES } from '@/api/events/event-types';
 
 /** Valid events that can create BooleanPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS];

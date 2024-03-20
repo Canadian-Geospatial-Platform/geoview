@@ -16,36 +16,15 @@ import {
   Stepper,
   TextField,
 } from '@/ui';
-import {
-  AbstractGeoViewLayer,
-  CONST_LAYER_TYPES,
-  CONST_LAYER_ENTRY_TYPES,
-  EsriDynamic,
-  EsriFeature,
-  GeoCore,
-  GeoJSON,
-  GeoPackage,
-  TypeEsriDynamicLayerConfig,
-  TypeEsriFeatureLayerConfig,
-  TypeGeoJSONLayerConfig,
-  TypeGeoPackageLayerConfig,
-  TypeGeoviewLayerConfig,
-  TypeGeoviewLayerTypeWithGeoCore,
-  TypeLayerEntryConfig,
-  TypeListOfGeoviewLayerConfig,
-  TypeListOfLayerEntryConfig,
-  TypeXYZTilesConfig,
-  XYZTiles,
-} from '@/geo';
 import { OgcFeature, TypeOgcFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { TypeWMSLayerConfig, WMS as WmsGeoviewClass } from '@/geo/layer/geoview-layers/raster/wms';
 import { TypeWFSLayerConfig, WFS as WfsGeoviewClass } from '@/geo/layer/geoview-layers/vector/wfs';
 import { TypeCSVLayerConfig, CSV as CsvGeoviewClass } from '@/geo/layer/geoview-layers/vector/csv';
-import { ButtonPropsLayerPanel, SelectChangeEvent, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
+import { ButtonPropsLayerPanel, Cast, SelectChangeEvent, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { createLocalizedString } from '@/core/utils/utilities';
 import { useLayerStoreActions, useLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { Cast, Config, api } from '@/app';
+import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
 import { EsriImage, TypeEsriImageLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -59,6 +38,25 @@ import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { GeoPackage, TypeGeoPackageLayerConfig } from '@/geo/layer/geoview-layers/vector/geopackage';
+import { GeoCore } from '@/geo/layer/other/geocore';
+import {
+  CONST_LAYER_TYPES,
+  TypeGeoviewLayerTypeWithGeoCore,
+  AbstractGeoViewLayer,
+} from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import {
+  CONST_LAYER_ENTRY_TYPES,
+  TypeListOfGeoviewLayerConfig,
+  TypeLayerEntryConfig,
+  TypeListOfLayerEntryConfig,
+  TypeGeoviewLayerConfig,
+} from '@/geo/map/map-schema-types';
+import { EsriDynamic, TypeEsriDynamicLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
+import { TypeXYZTilesConfig, XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
+import { EsriFeature, TypeEsriFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import { GeoJSON, TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
+import { Config } from '@/core/utils/config/config';
 
 type EsriOptions = {
   err: string;

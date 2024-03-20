@@ -11,8 +11,9 @@ import { Shell } from '@/core/containers/shell';
 import { getTheme, cgpvTheme } from '@/ui/style/theme';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { api, useAppDisplayLanguageById, useAppDisplayThemeById } from '@/app';
+import { api } from '@/app';
 import { logger } from './utils/logger';
+import { useAppDisplayLanguageById, useAppDisplayThemeById } from './stores/store-interface-and-intial-values/app-state';
 
 // create a state that will hold map config information
 // TODO: use store, only keep map id on context for store manager to gather right store on hooks

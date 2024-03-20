@@ -1,6 +1,6 @@
 import { useStore } from 'zustand';
 
-import { useGeoViewStore } from '../stores-managers';
+import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeGetStore, TypeSetStore } from '../geoview-store';
 
 // #region INTERFACES

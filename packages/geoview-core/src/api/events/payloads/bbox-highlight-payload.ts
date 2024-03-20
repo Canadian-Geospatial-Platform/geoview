@@ -1,7 +1,7 @@
 import { Extent } from 'ol/extent';
 import { PayloadBaseClass } from './payload-base-class';
 
-import { EventStringId, EVENT_NAMES } from '../event-types';
+import { EventStringId, EVENT_NAMES } from '@/api/events/event-types';
 
 /** Valid events that can create BBoxHighlightPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_BBOX];

@@ -9,7 +9,7 @@ import {
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
-import { logger } from '../../logger';
+import { logger } from '@/core/utils/logger';
 import { LayerSetPayload } from '@/api/events/payloads';
 import { Cast, TypeJsonValue, api } from '@/core/types/cgpv-types';
 import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';

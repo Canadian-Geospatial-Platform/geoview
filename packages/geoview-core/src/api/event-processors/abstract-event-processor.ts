@@ -1,8 +1,8 @@
-import { GeoviewStoreType } from '@/core/stores/geoview-store';
+import { GeoviewStoreType, IGeoviewState } from '@/core/stores/geoview-store';
 import { getGeoViewStore, getGeoViewStoreAsync } from '@/core/stores/stores-managers';
-import { IGeoviewState, TypeArrayOfLayerData } from '@/core/types/cgpv-types';
 import { logger } from '@/core/utils/logger';
 import { delay } from '@/core/utils/utilities';
+import { TypeArrayOfLayerData } from '../events/payloads/get-feature-info-payload';
 
 /**
  * Holds the buffer, on a map basis, for the propagation in batch in the layer data array store

@@ -5,17 +5,9 @@ import { Extent } from 'ol/extent';
 import View, { FitOptions } from 'ol/View';
 import { KeyboardPan } from 'ol/interaction';
 
+import { Coordinate } from 'ol/coordinate';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
-import {
-  api,
-  Coordinate,
-  NORTH_POLE_POSITION,
-  TypeBasemapOptions,
-  TypeBasemapProps,
-  TypeClickMarker,
-  TypeMapFeaturesConfig,
-  TypeOrderedLayerInfo,
-} from '@/app';
+import { api } from '@/app';
 import {
   TypeGeoviewLayerConfig,
   TypeHighlightColors,
@@ -35,11 +27,14 @@ import {
 } from '@/api/events/payloads';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
-import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
+import { NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { AppEventProcessor } from './app-event-processor';
 import { logger } from '@/core/utils/logger';
 
 import { AbstractEventProcessor } from '../abstract-event-processor';
+import { TypeBasemapOptions, TypeBasemapProps, TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { TypeClickMarker } from '@/core/components';
+import { TypeOrderedLayerInfo } from '@/core/stores';
 
 export class MapEventProcessor extends AbstractEventProcessor {
   /**

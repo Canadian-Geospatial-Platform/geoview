@@ -1,4 +1,4 @@
-import { EventStringId } from '../event-types';
+import { EventStringId } from '@/api/events/event-types';
 
 /**
  * This file defines the constants of the GET_FEATURE_INFO category. The constants are placed

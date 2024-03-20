@@ -2,17 +2,14 @@ import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 import { AbstractEventProcessor } from '../abstract-event-processor';
-import {
-  AbstractGeoViewVector,
-  CONST_LAYER_TYPES,
-  EsriDynamic,
-  ITimeSliderState,
-  TimeSliderLayerSet,
-  TypeFeatureInfoLayerConfig,
-  WMS,
-  api,
-  getLocalizedValue,
-} from '@/core/types/cgpv-types';
+import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
+import { ITimeSliderState, TimeSliderLayerSet } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import { getLocalizedValue } from '@/core/utils/utilities';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
+import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
+import { api } from '@/app';
+import { TypeFeatureInfoLayerConfig } from '@/geo/map/map-schema-types';
 
 export class TimeSliderEventProcessor extends AbstractEventProcessor {
   /**

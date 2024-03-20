@@ -1,7 +1,7 @@
 import { PayloadBaseClass } from './payload-base-class';
 
-import { EventStringId, EVENT_NAMES } from '../event-types';
-import { TypeFeatureInfoEntry } from '@/app';
+import { EventStringId, EVENT_NAMES } from '@/api/events/event-types';
+import { TypeFeatureInfoEntry } from './get-feature-info-payload';
 
 /** Valid events that can create FeatureHighlightPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.FEATURE_HIGHLIGHT.EVENT_HIGHLIGHT_FEATURE];
