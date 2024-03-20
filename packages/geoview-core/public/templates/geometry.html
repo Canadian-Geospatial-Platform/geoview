@@ -304,7 +304,7 @@
 
         // listen to geometry added event
         cgpv.api.maps['mapWM'].layer.geometry.onGeometryAdded((sender, payload) => {
-          console.log(`geometry added ${payload.feature.getGeometry().getType()}`);
+          console.log(`geometry added ${payload.getGeometry().getType()}`);
         });
       });
     </script>
