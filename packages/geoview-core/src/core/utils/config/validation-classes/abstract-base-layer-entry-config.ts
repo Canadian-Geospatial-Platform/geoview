@@ -18,9 +18,9 @@ import {
   TypeVectorTileSourceInitialConfig,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
-import { logger } from '../../logger';
-import { TypeJsonValue } from '@/app';
+import { logger } from '@/core/utils/logger';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { TypeJsonValue } from '@/core/types/global-types';
 
 /** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map.

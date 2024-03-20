@@ -6,7 +6,7 @@ import { useMediaQuery } from '@mui/material';
 import { API } from '@/api/api';
 import { logger } from '@/core/utils/logger';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
-import * as UI from '../../ui';
+import * as UI from '@/ui';
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { TypeDisplayLanguage, TypeMapFeaturesInstance } from '@/geo/map/map-schema-types';
 

@@ -20,7 +20,7 @@ import {
   HandleIcon,
   Paper,
 } from '@/ui';
-import { TypeLegendLayer } from '../types';
+import { TypeLegendLayer } from '@/core/components/layers/types';
 import {
   useLayerStoreActions,
   useLayerDisplayState,
@@ -30,7 +30,7 @@ import { useDataTableStoreMapFilteredRecord } from '@/core/stores/store-interfac
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { DeleteUndoButton } from './delete-undo-button';
 import { LayersList } from './layers-list';
-import { LayerIcon } from '../../common/layer-icon';
+import { LayerIcon } from '@/core/components/common/layer-icon';
 import { logger } from '@/core/utils/logger';
 import {
   useDetailsStoreActions,

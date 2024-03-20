@@ -1,6 +1,6 @@
 import { PayloadBaseClass } from './payload-base-class';
 
-import { EventStringId, EVENT_NAMES } from '../event-types';
+import { EventStringId, EVENT_NAMES } from '@/api/events/event-types';
 
 /** Valid events that can create SnackbarMessagePayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN];
