@@ -34,14 +34,11 @@ import {
   payloadIsLegendInfo,
   payloadIsQueryLegend,
   TypeQueryLegendPayload,
-  payloadIsLayerSetChangeLayerStatus,
-  TypeLayerSetChangeLayerStatusPayload,
   payloadIsLayerSetUpdated,
   TypeLayerSetUpdatedPayload,
   TypeResultSet,
 } from './payloads';
 import { TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 
 export type TypeEventHandlerFunction = (payload: PayloadBaseClass) => void;
 
@@ -501,21 +498,6 @@ export class Event {
   // #endregion
 
   // #region CHANGE_LAYER_STATUS --------------------------------------------------------------------------------------
-
-  emitLayerStatusChanged = (mapId: string, layerPath: string, status: TypeLayerStatus) => {
-    // Emit
-    this.emit(LayerSetPayload.createLayerSetChangeLayerStatusPayload(mapId, layerPath, status));
-  };
-
-  onLayerStatusChanged = (mapId: string, callback: (layerStatusChanged: TypeLayerSetChangeLayerStatusPayload) => void) => {
-    // Wire
-    this.onMapHelperHandler(mapId, EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS, payloadIsLayerSetChangeLayerStatus, callback);
-  };
-
-  offLayerStatusChanged = (mapId: string, callback: (layerStatusChanged: TypeLayerSetChangeLayerStatusPayload) => void) => {
-    // Unwire
-    this.off(EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS, mapId, callback as TypeEventHandlerFunction);
-  };
 
   // #endregion
 
