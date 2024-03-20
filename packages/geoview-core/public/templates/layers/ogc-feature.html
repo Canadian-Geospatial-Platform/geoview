@@ -188,11 +188,14 @@
           listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
           listenToLegendLayerSetChanges('HLYR2-state', 'LYR2');
 
-          createTableOfFilter('LYR1');
-
           // create snippets
           createCodeSnippet();
           createConfigSnippet();
+        }
+      }, (mapId) => {
+        if (mapId === 'allMaps') {
+          // Layers are loaded
+          createTableOfFilter('LYR1');
         }
       });
 
