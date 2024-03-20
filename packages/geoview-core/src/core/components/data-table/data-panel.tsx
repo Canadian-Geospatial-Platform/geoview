@@ -8,8 +8,7 @@ import {
   useDataTableStoreMapFilteredRecord,
   useDataTableStoreRowsFiltered,
   useDataTableStoreSelectedLayerPath,
-  useDetailsStoreActions,
-  useDetailsStoreAllFeaturesDataArray,
+  useDataTableStoreAllFeaturesDataArray,
   useUIActiveFooterBarTabId,
   useDatatableStoreTableHeight,
   useMapVisibleLayers,
@@ -39,7 +38,7 @@ export function Datapanel({ fullWidth }: DataPanelType) {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const layerData = useDetailsStoreAllFeaturesDataArray();
+  const layerData = useDataTableStoreAllFeaturesDataArray();
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -47,8 +46,7 @@ export function Datapanel({ fullWidth }: DataPanelType) {
   const selectedLayerPath = useDataTableStoreSelectedLayerPath();
   const mapFiltered = useDataTableStoreMapFilteredRecord();
   const rowsFiltered = useDataTableStoreRowsFiltered();
-  const { setSelectedLayerPath } = useDataTableStoreActions();
-  const { triggerGetAllFeatureInfo } = useDetailsStoreActions();
+  const { setSelectedLayerPath, triggerGetAllFeatureInfo } = useDataTableStoreActions();
   const selectedTab = useUIActiveFooterBarTabId();
   const visibleLayers = useMapVisibleLayers();
 

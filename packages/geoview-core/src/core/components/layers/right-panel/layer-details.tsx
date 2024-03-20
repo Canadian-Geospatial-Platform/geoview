@@ -23,13 +23,8 @@ import {
   ListItem,
   List,
 } from '@/ui';
-import {
-  useLayerHighlightedLayer,
-  useLayerStoreActions,
-  useUIStoreActions,
-  useMapStoreActions,
-  useDetailsStoreAllFeaturesDataArray,
-} from '@/core/stores';
+import { useLayerHighlightedLayer, useLayerStoreActions, useUIStoreActions, useMapStoreActions } from '@/core/stores';
+import { useDataTableStoreAllFeaturesDataArray } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { generateId } from '@/core/utils/utilities';
 import { LayerIcon } from '../../common/layer-icon';
 import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-control';
@@ -57,7 +52,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const { setAllItemsVisibility, toggleItemVisibility, setHighlightLayer, zoomToLayerExtent, getLayerBounds } = useLayerStoreActions();
   const { openModal } = useUIStoreActions();
   const { getAlwaysVisibleFromOrderedLayerInfo } = useMapStoreActions();
-  const layersData = useDetailsStoreAllFeaturesDataArray();
+  const layersData = useDataTableStoreAllFeaturesDataArray();
   const selectedLayer = layersData.find((_layer) => _layer.layerPath === layerDetails?.layerPath);
 
   useEffect(() => {

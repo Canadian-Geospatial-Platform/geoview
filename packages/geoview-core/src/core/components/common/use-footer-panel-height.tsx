@@ -1,12 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIActiveFooterBarTabId, useUIFooterPanelResizeValue } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import {
-  useDetailsStoreAllFeaturesDataArray,
-  useDetailsStoreLayerDataArray,
-} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { useDetailsStoreLayerDataArray } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { logger } from '@/core/utils/logger';
-import { useDataTableStoreActions } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import {
+  useDataTableStoreActions,
+  useDataTableStoreAllFeaturesDataArray,
+} from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { TABS } from '@/app';
 
 interface UseFooterPanelHeightType {
@@ -27,7 +27,7 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
   const activeFooterBarTabId = useUIActiveFooterBarTabId();
   const arrayOfLayerData = useDetailsStoreLayerDataArray();
-  const allFeaturesLayerData = useDetailsStoreAllFeaturesDataArray();
+  const allFeaturesLayerData = useDataTableStoreAllFeaturesDataArray();
   const { setTableHeight } = useDataTableStoreActions();
 
   useEffect(() => {

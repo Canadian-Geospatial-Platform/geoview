@@ -26,16 +26,16 @@ import {
   useLayerDisplayState,
   useLayerSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useDataTableStoreMapFilteredRecord } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import {
+  useDataTableStoreMapFilteredRecord,
+  useDataTableStoreAllFeaturesDataArray,
+  useDataTableStoreActions,
+} from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { DeleteUndoButton } from './delete-undo-button';
 import { LayersList } from './layers-list';
 import { LayerIcon } from '../../common/layer-icon';
 import { logger } from '@/core/utils/logger';
-import {
-  useDetailsStoreActions,
-  useDetailsStoreAllFeaturesDataArray,
-} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { LAYER_STATUS } from '@/core/utils/constant';
 
 interface SingleLayerProps {
@@ -58,9 +58,9 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   const selectedLayerPath = useLayerSelectedLayerPath();
   const displayState = useLayerDisplayState();
   const mapFiltered = useDataTableStoreMapFilteredRecord();
-  const layerData = useDetailsStoreAllFeaturesDataArray();
+  const layerData = useDataTableStoreAllFeaturesDataArray();
 
-  const { triggerGetAllFeatureInfo } = useDetailsStoreActions();
+  const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
 
   // if any of the chiild layers is selected return true
   const isLayerChildSelected = (startingLayer: TypeLegendLayer): boolean => {
