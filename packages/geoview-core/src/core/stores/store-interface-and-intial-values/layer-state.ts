@@ -62,7 +62,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         return layer;
       },
       getLayerBounds: (layerPath: string) => {
-        const layer = api.maps[get().mapId].layer.getGeoviewLayerById(layerPath.split('/')[0]);
+        const layer = api.maps[get().mapId].layer.geoviewLayer(layerPath);
         if (layer) {
           const bounds = layer.calculateBounds(layerPath);
           if (bounds) return bounds;
@@ -166,7 +166,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           }
 
           // apply filter to layer
-          (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter('');
+          (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter(layerPath, '');
         }
         set({
           layerState: {
@@ -224,7 +224,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         // ! try to make reusable store actions....
         // ! we can have always item.... we cannot set visibility so if present we will need to trap. Need more use case
         // ! create a function setItemVisibility called with layer path and this function set the registered layer (from store values) then apply the filter.
-        (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter('');
+        (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter(layerPath, '');
       },
       getLayerDeleteInProgress: () => get().layerState.layerDeleteInProgress,
       setLayerDeleteInProgress: (newVal: boolean) => {
