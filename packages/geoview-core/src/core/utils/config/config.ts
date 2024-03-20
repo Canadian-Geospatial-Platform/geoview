@@ -10,11 +10,11 @@ import { CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-lay
 import { logger } from '@/core/utils/logger';
 
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { ConfigValidation } from './config-validation';
-import { InlineDivConfigReader } from './reader/div-config-reader';
-import { JsonConfigReader } from './reader/json-config-reader';
-import { URLmapConfigReader } from './reader/url-config-reader';
-import { ConfigBaseClass } from './validation-classes/config-base-class';
+import { ConfigValidation } from '@/core/utils/config/config-validation';
+import { InlineDivConfigReader } from '@/core/utils/config/reader/div-config-reader';
+import { JsonConfigReader } from '@/core/utils/config/reader/json-config-reader';
+import { URLmapConfigReader } from '@/core/utils/config/reader/url-config-reader';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -28,7 +28,7 @@ import { ConfigBaseClass } from './validation-classes/config-base-class';
 // ******************************************************************************************************************************
 export class Config {
   /** The element associated to the map properties configuration.. */
-  private mapElement: Element;
+  #mapElement: Element;
 
   /** Config validation object used to validate the configuration and define default values */
   configValidation: ConfigValidation;
@@ -40,25 +40,25 @@ export class Config {
    * @returns {Config} An instance of the Config class.
    */
   constructor(mapElement: Element) {
-    this.mapElement = mapElement;
+    this.#mapElement = mapElement;
 
     // Instanciate the configuration validator.
     this.configValidation = new ConfigValidation();
 
     // get the id from the map element
-    const mapId = this.mapElement.getAttribute('id');
+    const mapId = this.#mapElement.getAttribute('id');
 
     // update map id if provided in map element
     if (mapId) this.mapId = mapId;
 
     // get the triggerReadyCallback from the map element
-    const triggerReadyCallback = this.mapElement.getAttribute('triggerReadyCallback');
+    const triggerReadyCallback = this.#mapElement.getAttribute('triggerReadyCallback');
 
     // update triggerReadyCallback if provided in map element
     this.triggerReadyCallback = triggerReadyCallback ? triggerReadyCallback.toLowerCase() === 'true' : false;
 
     // get the display language from the map element
-    const displayLanguage = this.mapElement.getAttribute('data-lang');
+    const displayLanguage = this.#mapElement.getAttribute('data-lang');
 
     // update display language if provided in map element
     this.displayLanguage = (displayLanguage && displayLanguage.toLowerCase() === 'fr' ? 'fr' : 'en') as TypeDisplayLanguage;
@@ -164,18 +164,18 @@ export class Config {
     let mapFeaturesConfig: TypeMapFeaturesConfig | undefined;
 
     // check if inline div config has been passed
-    const inlineDivConfig = await InlineDivConfigReader.getMapFeaturesConfig(this.mapId, this.mapElement);
+    const inlineDivConfig = await InlineDivConfigReader.getMapFeaturesConfig(this.mapId, this.#mapElement);
 
     // use inline config if provided
     if (inlineDivConfig) mapFeaturesConfig = { ...inlineDivConfig };
 
     // check if a config file url is provided.
-    const jsonFileConfig = await JsonConfigReader.getMapFeaturesConfig(this.mapId, this.mapElement);
+    const jsonFileConfig = await JsonConfigReader.getMapFeaturesConfig(this.mapId, this.#mapElement);
 
     if (jsonFileConfig) mapFeaturesConfig = { ...jsonFileConfig };
 
     // get the value that will check if any url params passed will override existing map
-    const shared = this.mapElement.getAttribute('data-shared');
+    const shared = this.#mapElement.getAttribute('data-shared');
     if (shared === 'true') {
       // check if config params have been passed
       const urlParamsConfig = await URLmapConfigReader.getMapFeaturesConfig(this.mapId);
