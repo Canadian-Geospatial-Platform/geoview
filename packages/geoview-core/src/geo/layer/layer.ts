@@ -254,25 +254,15 @@ export class LayerApi {
   }
 
   /**
-   * Returns the GeoView instance associated to a specific layer path. The first element of the layerPath
+   * Returns the GeoView instance associated to the layer path. The first element of the layerPath
    * is the geoviewLayerId.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
    * @returns {AbstractGeoViewLayer} Returns the geoview instance associated to the layer path.
    */
   geoviewLayer(layerPath: string): AbstractGeoViewLayer {
-    // TODO: Refactor - Move this method next to the getGeoviewLayerByLayerPath equivalent. And then rename it?
     // The first element of the layerPath is the geoviewLayerId
-    const geoviewLayerInstance = this.geoviewLayers[layerPath.split('/')[0]];
-
-    // TODO: Check #1857 - Why set the `layerPathAssociatedToTheGeoviewLayer` property on the fly? Should likely set this somewhere else than in this function that looks more like a getter.
-    // TO.DOCONT: It seems `layerPathAssociatedToTheGeoviewLayer` is indeed used many places, notably in applyFilters logic.
-    // TO.DOCONT: If all those places rely on the `layerPathAssociatedToTheGeoviewLayer` to be set, that logic using layerPathAssociatedToTheGeoviewLayer should be moved over there.
-    // TO.DOCONT: If there's more other places relying on the `layerPathAssociatedToTheGeoviewLayer`, then it's not ideal,
-    // TO.DOCONT: because it's assuming/relying on the fact that all those other places use this specific geoviewLayer() prior to do their work.
-    // TO.DOCONT: There's likely some separation of logic to apply here. Make this function more evident that it 'sets' something, not just 'gets' a GeoViewLayer.
-    geoviewLayerInstance.layerPathAssociatedToTheGeoviewLayer = layerPath;
-    return geoviewLayerInstance;
+    return this.geoviewLayers[layerPath.split('/')[0]];
   }
 
   /**
@@ -568,7 +558,7 @@ export class LayerApi {
       const pathBeginningAreEqual = partialLayerPathNodes.reduce<boolean>((areEqual, partialLayerPathNode, nodeIndex) => {
         return areEqual && partialLayerPathNode === completeLayerPathNodes[nodeIndex];
       }, true);
-      if (pathBeginningAreEqual) this.geoviewLayer(completeLayerPath).removeConfig();
+      if (pathBeginningAreEqual) this.geoviewLayer(completeLayerPath).removeConfig(completeLayerPath);
     });
     if (listOfLayerEntryConfigAffected) listOfLayerEntryConfigAffected.splice(indexToDelete!, 1);
 
@@ -587,20 +577,10 @@ export class LayerApi {
   };
 
   /**
-   * Searches for a layer using its id and return the layer data
-   *
-   * @param {string} geoviewLayerId the layer id to look for
-   * @returns the found layer data object
-   */
-  getGeoviewLayerById = (geoviewLayerId: string): AbstractGeoViewLayer | null => {
-    return this.geoviewLayers?.[geoviewLayerId] || null;
-  };
-
-  /**
    * Asynchronously gets a layer using its id and return the layer data.
    * If the layer we're searching for has to be processed, set mustBeProcessed to true when awaiting on this method.
    * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
-   * Note this function uses the 'Async' suffix to differentiate it from 'getGeoviewLayerById'.
+   * Note this function uses the 'Async' suffix to differentiate it from 'geoviewLayer()'.
    *
    * @param {string} layerID the layer id to look for
    * @param {string} mustBeProcessed indicate if the layer we're searching for must be found only once processed
@@ -616,7 +596,7 @@ export class LayerApi {
     checkFrequency?: number
   ): Promise<AbstractGeoViewLayer> => {
     // Redirects
-    const layer = this.getGeoviewLayerById(geoviewLayerId);
+    const layer = this.geoviewLayer(geoviewLayerId);
 
     // If layer was found
     if (layer) {
@@ -705,8 +685,8 @@ export class LayerApi {
    */
   highlightLayer(layerPath: string): void {
     this.removeHighlightLayer();
-    this.highlightedLayer = { layerPath, originalOpacity: this.geoviewLayer(layerPath).getOpacity() };
-    this.geoviewLayer(layerPath).setOpacity(1);
+    this.highlightedLayer = { layerPath, originalOpacity: this.geoviewLayer(layerPath).getOpacity(layerPath) };
+    this.geoviewLayer(layerPath).setOpacity(1, layerPath);
     // If it is a group layer, highlight sublayers
     if (layerEntryIsGroupLayer(this.registeredLayers[layerPath] as TypeLayerEntryConfig)) {
       Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
@@ -714,8 +694,8 @@ export class LayerApi {
           !registeredLayerPath.startsWith(layerPath) &&
           !layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath] as TypeLayerEntryConfig)
         ) {
-          const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
-          this.geoviewLayer(registeredLayerPath).setOpacity((otherOpacity || 1) * 0.25);
+          const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity(registeredLayerPath);
+          this.geoviewLayer(registeredLayerPath).setOpacity((otherOpacity || 1) * 0.25, registeredLayerPath);
         } else this.registeredLayers[registeredLayerPath].olLayer!.setZIndex(999);
       });
     } else {
@@ -725,8 +705,8 @@ export class LayerApi {
           registeredLayerPath !== layerPath &&
           !layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath] as TypeLayerEntryConfig)
         ) {
-          const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
-          this.geoviewLayer(registeredLayerPath).setOpacity((otherOpacity || 1) * 0.25);
+          const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity(registeredLayerPath);
+          this.geoviewLayer(registeredLayerPath).setOpacity((otherOpacity || 1) * 0.25, registeredLayerPath);
         }
       });
       this.registeredLayers[layerPath].olLayer!.setZIndex(999);
@@ -746,9 +726,9 @@ export class LayerApi {
             !registeredLayerPath.startsWith(layerPath) &&
             !layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath] as TypeLayerEntryConfig)
           ) {
-            const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
-            this.geoviewLayer(registeredLayerPath).setOpacity(otherOpacity ? otherOpacity * 4 : 1);
-          } else this.geoviewLayer(registeredLayerPath).setOpacity(originalOpacity || 1);
+            const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity(registeredLayerPath);
+            this.geoviewLayer(registeredLayerPath).setOpacity(otherOpacity ? otherOpacity * 4 : 1, registeredLayerPath);
+          } else this.geoviewLayer(registeredLayerPath).setOpacity(originalOpacity || 1, registeredLayerPath);
         });
       } else {
         Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
@@ -757,9 +737,9 @@ export class LayerApi {
             registeredLayerPath !== layerPath &&
             !layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath] as TypeLayerEntryConfig)
           ) {
-            const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
-            this.geoviewLayer(registeredLayerPath).setOpacity(otherOpacity ? otherOpacity * 4 : 1);
-          } else this.geoviewLayer(registeredLayerPath).setOpacity(originalOpacity || 1);
+            const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity(registeredLayerPath);
+            this.geoviewLayer(registeredLayerPath).setOpacity(otherOpacity ? otherOpacity * 4 : 1, registeredLayerPath);
+          } else this.geoviewLayer(registeredLayerPath).setOpacity(originalOpacity || 1, registeredLayerPath);
         });
       }
       MapEventProcessor.setLayerZIndices(this.mapId);
