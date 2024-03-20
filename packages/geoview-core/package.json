@@ -88,7 +88,7 @@
     "react-beautiful-dnd": "~13.1.1",
     "react-dropzone": "^14.2.3",
     "markdown-to-jsx": "~7.4.0",
-    "html2canvas": "^1.4.1"
+    "html-to-image": "^1.11.11"
   },
   "devDependencies": {
     "@babel/cli": "^7.17.0",

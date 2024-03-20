@@ -2,8 +2,7 @@ import { ChangeEvent, MouseEventHandler, RefObject, useEffect, useRef, useState 
 
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-
-import html2Canvas from 'html2canvas';
+import * as htmlToImage from 'html-to-image';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, LoadingButton, Skeleton, TextField } from '@/ui';
 import { exportPNG } from '@/core/utils/utilities';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
@@ -53,9 +52,9 @@ export default function ExportModal(): JSX.Element {
       exportTitleRef.current.style.padding = '1rem';
       exportTitleRef.current.innerHTML = exportTitle;
       setIsMapExporting(true);
-      html2Canvas(exportContainerRef.current).then((canvas: HTMLCanvasElement) => {
-        exportPNG(canvas, mapId);
+      htmlToImage.toPng(exportContainerRef.current, { backgroundColor: theme.palette.common.white }).then((dataUrl) => {
         setIsMapExporting(false);
+        exportPNG(dataUrl, mapId);
         closeModal();
       });
     }
@@ -87,33 +86,31 @@ export default function ExportModal(): JSX.Element {
       // Reason for timer, so that content of the export modal will be loaded
       // after modal is fully opened.
       timer = setTimeout(() => {
-        // https://html2canvas.hertzen.com/configuration/
         setIsMapLoading(true);
-        html2Canvas(map.getViewport()).then((canvas: HTMLCanvasElement) => {
+        htmlToImage.toPng(map.getViewport()).then((dataUrl) => {
           setIsMapLoading(false);
-          mapImage.appendChild(canvas);
-          canvas.setAttribute('style', `max-width:${getCanvasWidth(dialogBox)}px`);
+          const img = new Image();
+          img.src = dataUrl;
+          img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
+          mapImage.appendChild(img);
         });
 
         // add legend
         const legendContainer = document.getElementById(`${mapId}-legendContainer`);
         if (legendContainer && legendContainerRef.current) {
-          const styleObj = legendContainer.getAttribute('style')!;
           legendContainer.removeAttribute('style');
           setIsLegendLoading(true);
-          html2Canvas(legendContainer, {
-            backgroundColor: 'inherit',
-            width: getCanvasWidth(dialogBox),
-            windowWidth: getCanvasWidth(dialogBox),
-            onclone: (cloneDoc: Document) => {
-              // remove hidden attribute from clone document legend, so that html2Canvas can copy the legend container.
-              const legendTab = cloneDoc.getElementById(`${mapId}-legend`) as HTMLElement;
-              legendTab.removeAttribute('hidden');
-            },
-          }).then((canvas) => {
+          // remove hidden attribute from document legend, so that html-to-image can copy the legend container.
+          const legendTab = document.getElementById(`${mapId}-legend`) as HTMLElement;
+          const hasHiddenAttr = legendTab.hasAttribute('hidden');
+          if (hasHiddenAttr) legendTab.removeAttribute('hidden');
+          htmlToImage.toPng(legendContainer).then((dataUrl) => {
             setIsLegendLoading(false);
-            legendContainerRef.current?.appendChild(canvas);
-            legendContainer.setAttribute('style', styleObj);
+            const img = new Image();
+            img.src = dataUrl;
+            img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
+            legendContainerRef.current?.appendChild(img);
+            if (hasHiddenAttr) legendTab.hidden = true;
           });
         }
       }, 10);

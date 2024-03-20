@@ -411,16 +411,15 @@ export function getValidConfigFromString(configString: string, mapDiv: HTMLEleme
 }
 
 /**
- * Export the canvas as a PNG
- * @param {HTMLCanvasElement} canvas the canvas to be downloaded as png.
+ * Export the image data url as a PNG
+ * @param {string} datUrl the dataurl to be downloaded as png.
  * @param {string} mapId Id of map to export
  */
-export function exportPNG(canvas: HTMLCanvasElement, mapId: string): void {
+export function exportPNG(dataUrl: string, mapId: string): void {
   try {
-    const image = canvas.toDataURL('image/png');
     const element = document.createElement('a');
     const filename = `${mapId}.png`;
-    element.setAttribute('href', image);
+    element.setAttribute('href', dataUrl);
     element.setAttribute('download', filename);
     element.click();
   } catch (error) {
