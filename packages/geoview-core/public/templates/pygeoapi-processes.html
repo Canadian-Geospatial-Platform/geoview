@@ -141,26 +141,28 @@
     <script src="layerlib.js"></script>
     <script>
     // GeoJson ==================================================================================================================
-    cgpv.api.event.on(
-      cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-      (payload) => {
-        const { layerSetId, resultSet, eventType } = payload;
-        createInfoTable('LYR5', 'geoJsonResultSetId', resultSet, 'click');
-      },
-      'LYR5/click/FeatureInfoLayerSet'
-    );
+    // Note: ALL_QUERIES_DONE is obsolete, a replacement is coming (upcoming PR)
+    // cgpv.api.event.on(
+    //   cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+    //   (payload) => {
+    //     const { layerSetId, resultSet, eventType } = payload;
+    //     createInfoTable('LYR5', 'geoJsonResultSetId', resultSet, 'click');
+    //   },
+    //   'LYR5/click/FeatureInfoLayerSet'
+    // );
+
+    // Note: ALL_QUERIES_DONE is obsolete, a replacement is coming (upcoming PR)
+    // cgpv.api.event.on(
+    //   cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+    //   (payload) => {
+    //     const { layerSetId, resultSet, eventType } = payload;
+    //     createInfoTable('LYR5', 'geoJsonResultSetId', resultSet, 'hover');
+    //   },
+    //   'LYR5/hover/FeatureInfoLayerSet'
+    // );
 
     cgpv.api.event.on(
-      cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-      (payload) => {
-        const { layerSetId, resultSet, eventType } = payload;
-        createInfoTable('LYR5', 'geoJsonResultSetId', resultSet, 'hover');
-      },
-      'LYR5/hover/FeatureInfoLayerSet'
-    );
-
-    cgpv.api.event.on(
-      cgpv.api.eventNames.GET_LEGENDS.LEGEND_LAYERSET_UPDATED,
+      cgpv.api.eventNames.LAYER_SET.UPDATED,
       (payload) => {
         const { resultSet } = payload;
         displayLegend('geojsonLegendsId', resultSet);

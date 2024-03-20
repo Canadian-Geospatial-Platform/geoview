@@ -22,13 +22,13 @@ import {
 } from '@/geo/map/map-schema-types';
 import { Cast, api } from '@/app';
 import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
-import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import { NodeType } from '@/geo/renderer/geoview-renderer-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { CSV } from './csv';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
 
 /* *******************************************************************************************************************************
  * AbstractGeoViewVector types
@@ -246,9 +246,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {TypeArrayOfFeatureInfoEntries} The feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-  protected async getAllFeatureInfo(layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected async getAllFeatureInfo(layerPath?: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     try {
       // Get the layer config in a loaded phase
@@ -269,9 +269,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {Coordinate} location The pixel coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries> | null} The feature info table or null if an error occured.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table or null if an error occured.
    */
-  protected async getFeatureInfoAtPixel(location: Pixel, layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries | null> {
+  protected async getFeatureInfoAtPixel(location: Pixel, layerPath?: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     try {
       // Get the layer config in a loaded phase
@@ -297,11 +297,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {Coordinate} location The pixel coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-  protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries> {
-    // TODO: Check - The return type of this function should maybe be Promise<TypeArrayOfFeatureInfoEntries | null>
-    // TO.DD.CONT: and standardize this across all layer classes and all getFeatureInfo functions.
+  protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath?: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const { map } = api.maps[this.mapId];
     return this.getFeatureInfoAtPixel(map.getPixelFromCoordinate(location as Coordinate), layerPath);
@@ -313,9 +311,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-  protected getFeatureInfoAtLongLat(location: Coordinate, layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoAtLongLat(location: Coordinate, layerPath?: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const { map } = api.maps[this.mapId];
     const convertedLocation = api.projection.transform(

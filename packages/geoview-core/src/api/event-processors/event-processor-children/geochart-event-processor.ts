@@ -1,8 +1,8 @@
 import { GeoviewStoreType } from '@/core/stores';
-import { TypeArrayOfLayerData } from '@/core/types/global-types';
 import { GeoChartStoreByLayerPath, IGeochartState } from '@/core/stores/store-interface-and-intial-values/geochart-state';
 import { GeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
 import { logger } from '@/core/utils/logger';
+import { TypeLayerData } from '@/geo/utils/layer-set';
 
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '../abstract-event-processor';
 
@@ -170,7 +170,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId The map id
    * @param {string} layerDataArray The layer data array to propagate in the store
    */
-  static propagateArrayDataToStore(mapId: string, layerDataArray: TypeArrayOfLayerData): void {
+  static propagateArrayDataToStore(mapId: string, layerDataArray: TypeLayerData[]): void {
     // To propagate in the store, the processor needs an initialized chart store which is only initialized if the Geochart plugin exists.
     // Therefore, we validate its existence first.
     if (!this.getGeochartState(mapId)) return;
@@ -192,7 +192,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * @param {string} layerDataArray The layer data array to batch on
    * @returns {Promise<void>} Promise upon completion
    */
-  private static propagateFeatureInfoToStoreBatch(mapId: string, layerDataArray: TypeArrayOfLayerData): Promise<void> {
+  private static propagateFeatureInfoToStoreBatch(mapId: string, layerDataArray: TypeLayerData[]): Promise<void> {
     // To propagate in the store, the processor needs an initialized chart store which is only initialized if the Geochart plugin exists.
     // Therefore, we validate its existence first.
     if (!this.getGeochartState(mapId)) return Promise.resolve();

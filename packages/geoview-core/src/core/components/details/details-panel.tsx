@@ -11,7 +11,6 @@ import {
   Box,
   Paper,
 } from '@/ui';
-import { TypeFeatureInfoEntry, TypeLayerData, TypeGeometry, TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import {
   useMapStoreActions,
   useMapVisibleLayers,
@@ -21,6 +20,7 @@ import {
   useDetailsStoreSelectedLayerPath,
 } from '@/core/stores';
 import { logger } from '@/core/utils/logger';
+import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/utils/layer-set';
 
 import { LayerListEntry, Layout } from '../common';
 import { getSxClasses } from './details-style';
@@ -60,7 +60,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
   const [arrayOfLayerListLocal, setArrayOfLayerListLocal] = useState<LayerListEntry[]>([]);
 
   const prevLayerSelected = useRef<TypeLayerData>();
-  const prevLayerFeatures = useRef<TypeArrayOfFeatureInfoEntries>();
+  const prevLayerFeatures = useRef<TypeFeatureInfoEntry[] | undefined | null>();
   const prevFeatureIndex = useRef<number>(0); // 0 because that's the default index for the features
 
   // #endregion
@@ -87,10 +87,10 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
 
   /**
    * Clears the highlighed features when they are not checked.
-   * @param {TypeArrayOfFeatureInfoEntries} arrayToClear The array to clear of the unchecked features
+   * @param {TypeFeatureInfoEntry[] | undefined | null} arrayToClear The array to clear of the unchecked features
    */
   const clearHighlightsUnchecked = useCallback(
-    (arrayToClear: TypeArrayOfFeatureInfoEntries | undefined) => {
+    (arrayToClear: TypeFeatureInfoEntry[] | undefined | null) => {
       // Log
       logger.logTraceUseCallback('DETAILS-PANEL - clearHighlightsUnchecked');
 

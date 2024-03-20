@@ -2,18 +2,12 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme, Theme } from '@mui/material/styles';
 
-import { getUid } from 'ol/util';
-
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 import { Box } from '@/ui';
-import { api } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { PayloadBaseClass, payloadIsAllQueriesDone } from '@/api/events/payloads';
 import { logger } from '@/core/utils/logger';
-import { TypeHoverFeatureInfo, TypeHoverFeatureInfoResultSet } from '@/geo/utils/hover-feature-info-layer-set';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeHoverFeatureInfo } from '@/geo/utils/hover-feature-info-layer-set';
 
 /**
  * Hover tooltip component to show name field information on hover
@@ -61,53 +55,54 @@ export function HoverTooltip(): JSX.Element {
   // internal component state
   const [pixel, setPixel] = useState<[number, number]>([0, 0]);
   const [tooltipValue, setTooltipValue] = useState<string>('');
-  const [tooltipIcon, setTooltipIcon] = useState<string>('');
+  const [tooltipIcon] = useState<string>('');
   const [showTooltip, setShowTooltip] = useState<boolean>(false);
   // Currently selected feature - will not show tooltip
   const selectedFeature = useRef<TypeHoverFeatureInfo>();
 
-  const allHoverQueriesDoneListenerFunciton = (payload: PayloadBaseClass) => {
-    // Log
-    logger.logTraceCoreAPIEvent('HOVER-TOOLTIP - allHoverQueriesDoneListenerFunciton', payload);
+  // TODO: Refactor - Revisit the way to query the features under the mouse cursor. No more using ALL_QUERIES_DONE (remove dead code below).
+  // const allHoverQueriesDoneListenerFunciton = (payload: PayloadBaseClass) => {
+  //   // Log
+  //   logger.logTraceCoreAPIEvent('HOVER-TOOLTIP - allHoverQueriesDoneListenerFunciton', payload);
 
-    if (payloadIsAllQueriesDone(payload)) {
-      const resultSet = payload.resultSet as TypeHoverFeatureInfoResultSet;
-      // eslint-disable-next-line no-restricted-syntax
-      for (const [, value] of Object.entries(resultSet)) {
-        // if there is a result and layer is not ogcWms, and it is not selected, show tooltip
-        if (
-          value?.data?.feature &&
-          value.data.feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS &&
-          !(selectedFeature.current && getUid(value.data.feature.geometry) === getUid(selectedFeature.current?.geometry))
-        ) {
-          const item = value.data.feature;
-          const nameField = item.nameField || Object.entries(item.fieldInfo)[0];
-          const field = item.fieldInfo[nameField as string];
-          setTooltipValue(field?.value as string | '');
-          setTooltipIcon(item.featureIcon.toDataURL());
-          setShowTooltip(true);
-          break;
-        }
-      }
-    }
-  };
+  //   if (payloadIsAllQueriesDone(payload)) {
+  //     const resultSet = payload.resultSet as TypeHoverFeatureInfoResultSet;
+  //     // eslint-disable-next-line no-restricted-syntax
+  //     for (const [, value] of Object.entries(resultSet)) {
+  //       // if there is a result and layer is not ogcWms, and it is not selected, show tooltip
+  //       if (
+  //         value?.data?.feature &&
+  //         value.data.feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS &&
+  //         !(selectedFeature.current && getUid(value.data.feature.geometry) === getUid(selectedFeature.current?.geometry))
+  //       ) {
+  //         const item = value.data.feature;
+  //         const nameField = item.nameField || Object.entries(item.fieldInfo)[0];
+  //         const field = item.fieldInfo[nameField as string];
+  //         setTooltipValue(field?.value as string | '');
+  //         setTooltipIcon(item.featureIcon.toDataURL());
+  //         setShowTooltip(true);
+  //         break;
+  //       }
+  //     }
+  //   }
+  // };
 
-  const allQueriesDoneListenerFunction = (payload: PayloadBaseClass) => {
-    // Log
-    logger.logTraceCoreAPIEvent('HOVER-TOOLTIP - allQueriesDoneListenerFunction', payload);
+  // const allQueriesDoneListenerFunction = (payload: PayloadBaseClass) => {
+  //   // Log
+  //   logger.logTraceCoreAPIEvent('HOVER-TOOLTIP - allQueriesDoneListenerFunction', payload);
 
-    if (payloadIsAllQueriesDone(payload)) {
-      const { resultSet } = payload;
-      Object.keys(resultSet).every((layerPath) => {
-        const feature = (resultSet as TypeHoverFeatureInfoResultSet)[layerPath]?.data?.feature;
-        if (feature && feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS) {
-          selectedFeature.current = feature;
-          return false;
-        }
-        return true;
-      });
-    }
-  };
+  //   if (payloadIsAllQueriesDone(payload)) {
+  //     const { resultSet } = payload;
+  //     Object.keys(resultSet).every((layerPath) => {
+  //       const feature = (resultSet as TypeHoverFeatureInfoResultSet)[layerPath]?.data?.feature;
+  //       if (feature && feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS) {
+  //         selectedFeature.current = feature;
+  //         return false;
+  //       }
+  //       return true;
+  //     });
+  //   }
+  // };
 
   useEffect(() => {
     // Log
@@ -143,13 +138,14 @@ export function HoverTooltip(): JSX.Element {
       }
     );
 
-    // Get a feature when it is selected
-    api.event.on(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, allQueriesDoneListenerFunction, `${mapId}/click/FeatureInfoLayerSet`);
-    api.event.on(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, allHoverQueriesDoneListenerFunciton, `${mapId}/hover/FeatureInfoLayerSet`);
+    // TODO: Refactor - Revisit the way to query the features under the mouse cursor.
+    // TO.DOCONT: No more using ALL_QUERIES_DONE. Use AbstractGeoViewLayer.getFeatureInfoAtPixel().
+    // api.event.on(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, allQueriesDoneListenerFunction, `${mapId}/click/FeatureInfoLayerSet`);
+    // api.event.on(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, allHoverQueriesDoneListenerFunciton, `${mapId}/hover/FeatureInfoLayerSet`);
 
     return () => {
-      api.event.off(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, mapId, allQueriesDoneListenerFunction);
-      api.event.off(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, mapId, allHoverQueriesDoneListenerFunciton);
+      // api.event.off(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, mapId, allQueriesDoneListenerFunction);
+      // api.event.off(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, mapId, allHoverQueriesDoneListenerFunciton);
       unsubMapPointer();
       unsubMapSingleClick();
     };

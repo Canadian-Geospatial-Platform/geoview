@@ -1,6 +1,5 @@
 import { APPBAR } from './constants/app-bar-constants';
 import { FOOTERBAR } from './constants/footer-bar-constants';
-import { GET_FEATURE_INFO } from './constants/get-feature-info-constants';
 import { GET_LEGENDS } from './constants/get-legends-constants';
 import { LAYER_SET } from './constants/layer-set-constants';
 import { LAYER } from './constants/layer-constants';
@@ -17,7 +16,6 @@ import { SNACKBAR } from './constants/snackbar-constants';
 export const EVENT_NAMES = {
   APPBAR,
   FOOTERBAR,
-  GET_FEATURE_INFO,
   GET_LEGENDS,
   LAYER_SET,
   LAYER,
@@ -41,10 +39,6 @@ export type EventStringId =
   | 'feature_highlight/highlightBBox'
   | 'footerbar/tab_create'
   | 'footerbar/tab_remove'
-  | 'get_feature_info/all_queries_done'
-  | 'get_feature_info/query_all_features'
-  | 'get_feature_info/query_layer'
-  | 'get_feature_info/query_result'
   | 'get_legends/legend_info'
   | 'get_legends/query_legends'
   | 'get_legends/trigger'

@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-// We have many reassign for layerPath-layerConfig. We keep it global...
 import View from 'ol/View';
 import Map from 'ol/Map';
 import TileLayer from 'ol/layer/Tile';
@@ -135,11 +133,13 @@ export class VectorTiles extends AbstractGeoViewRaster {
             layer: layerPath,
             loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
+          // eslint-disable-next-line no-param-reassign
           layerConfig.layerStatus = 'error';
           return;
         }
       }
 
+      // eslint-disable-next-line no-param-reassign
       layerConfig.layerStatus = 'processing';
     });
   }
@@ -165,6 +165,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     ) {
       showError(this.mapId, `Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
       logger.logError(`Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
+      // eslint-disable-next-line no-param-reassign
       layerConfig.layerStatus = 'error';
       return Promise.resolve(null);
     }
@@ -197,6 +198,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     // TODO remove after demoing again
     const declutter = this.mapId !== 'LYR2';
 
+    // eslint-disable-next-line no-param-reassign
     layerConfig.olLayerAndLoadEndListeners = {
       olLayer: new VectorTileLayer({ ...tileLayerOptions, declutter }),
       loadEndListenerType: 'tile',
@@ -204,6 +206,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
 
     const resolutions = (layerConfig.olLayer as VectorTileLayer).getSource()?.getTileGrid()?.getResolutions();
 
+    // eslint-disable-next-line no-param-reassign
     layerConfig.geoviewLayerInstance = this;
     if (this.metadata?.defaultStyles)
       applyStyle(
@@ -233,9 +236,11 @@ export class VectorTiles extends AbstractGeoViewRaster {
         resolutions: (tileInfo.lods as Array<TypeJsonObject>).map(({ resolution }) => resolution as number),
         tileSize: [tileInfo.rows as number, tileInfo.cols as number],
       };
+      // eslint-disable-next-line no-param-reassign
       layerConfig.source!.tileGrid = newTileGrid;
 
       if (layerConfig.initialSettings?.extent)
+        // eslint-disable-next-line no-param-reassign
         layerConfig.initialSettings.extent = api.projection.transformExtent(
           layerConfig.initialSettings.extent,
           'EPSG:4326',
