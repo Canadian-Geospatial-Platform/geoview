@@ -1062,25 +1062,42 @@
     <script src="layerlib.js"></script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init(function (mapId) {
-        console.log(`api is ready for ${mapId}`);
-
+      cgpv.init((mapId) => {
         if (mapId === 'allMaps') {
           // Wire a handle when all queries done after a map click
           cgpv.api.maps['LYR1'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
             const { coordinate, resultSet, eventType } = payload;
             createInfoTable('LYR1', 'ResultSetId1', resultSet, eventType);
           });
+          cgpv.api.maps['LYR1'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+            const { resultSet } = payload;
+            displayLegend('LegendsId1', resultSet);
+          });
+
           // Wire a handle when all queries done after a map click
           cgpv.api.maps['LYR2'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
             const { coordinate, resultSet, eventType } = payload;
             createInfoTable('LYR2', 'ResultSetId2', resultSet, eventType);
           });
+          cgpv.api.maps['LYR2'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+            const { resultSet } = payload;
+            displayLegend('LegendsId2', resultSet);
+          });
+
           // Wire a handle when all queries done after a map click
           cgpv.api.maps['LYR3'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
             const { coordinate, resultSet, eventType } = payload;
             createInfoTable('LYR3', 'ResultSetId3', resultSet, eventType);
           });
+          cgpv.api.maps['LYR3'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+            const { resultSet } = payload;
+            displayLegend('LegendsId3', resultSet);
+          });
+
+          listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
+          listenToLegendLayerSetChanges('HLYR2-state', 'LYR2');
+          listenToLegendLayerSetChanges('HLYR3-state', 'LYR3');
+          listenToLegendLayerSetChanges('HLYR4-state', 'LYR4');
 
           createTableOfFilter('LYR1');
           createTableOfFilter('LYR2');
@@ -1145,51 +1162,12 @@
               }
             }, 1000)
           }
+
+          // create snippets
+          createCodeSnippet();
+          createConfigSnippet();
         }
       });
-
-      // LYR1 ===================================================================================================================
-      cgpv.api.event.on(
-        cgpv.api.eventNames.LAYER_SET.UPDATED,
-        (payload) => {
-          const { resultSet } = payload;
-          displayLegend('LegendsId1', resultSet);
-        },
-        'LYR1/LegendsLayerSet'
-      );
-
-      listenToLegendLayerSetChanges('HLYR1-state', 'LYR1/LegendsLayerSet');
-
-      // LYR2 ===================================================================================================================
-      cgpv.api.event.on(
-        cgpv.api.eventNames.LAYER_SET.UPDATED,
-        (payload) => {
-          const { resultSet } = payload;
-          displayLegend('LegendsId2', resultSet);
-        },
-        'LYR2/LegendsLayerSet'
-      );
-
-      listenToLegendLayerSetChanges('HLYR2-state', 'LYR2/LegendsLayerSet');
-
-      // LYR3 ===================================================================================================================
-      cgpv.api.event.on(
-        cgpv.api.eventNames.LAYER_SET.UPDATED,
-        (payload) => {
-          const { resultSet } = payload;
-          displayLegend('LegendsId3', resultSet);
-        },
-        'LYR3/LegendsLayerSet'
-      );
-
-      listenToLegendLayerSetChanges('HLYR3-state', 'LYR3/LegendsLayerSet');
-
-      // LYR4 ===================================================================================================================
-      listenToLegendLayerSetChanges('HLYR4-state', 'LYR4/LegendsLayerSet');
-
-      //create snippets
-      createCodeSnippet();
-      createConfigSnippet();
     </script>
   </body>
 </html>

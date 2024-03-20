@@ -98,10 +98,10 @@ export class LayerApi {
    */
   constructor(mapViewer: MapViewer) {
     this.mapViewer = mapViewer;
-    this.legendsLayerSet = LegendsLayerSet.get(this, this.mapId);
-    this.hoverFeatureInfoLayerSet = HoverFeatureInfoLayerSet.get(this, this.mapId);
-    this.allFeatureInfoLayerSet = AllFeatureInfoLayerSet.get(this, this.mapId);
-    this.featureInfoLayerSet = FeatureInfoLayerSet.get(this, this.mapId);
+    this.legendsLayerSet = new LegendsLayerSet(this, this.mapId);
+    this.hoverFeatureInfoLayerSet = new HoverFeatureInfoLayerSet(this, this.mapId);
+    this.allFeatureInfoLayerSet = new AllFeatureInfoLayerSet(this, this.mapId);
+    this.featureInfoLayerSet = new FeatureInfoLayerSet(this, this.mapId);
 
     this.geometry = new Geometry(this.mapId);
     this.featureHighlight = new FeatureHighlight(this.mapId);
@@ -430,10 +430,9 @@ export class LayerApi {
     }
 
     // Log
-    logger.logInfo(`GeoView Layer added on map ${geoviewLayer.geoviewLayerId}`, geoviewLayer);
+    logger.logInfo(`GeoView Layer ${geoviewLayer.geoviewLayerId} added on map ${this.mapId}`, geoviewLayer);
 
     // Set the layer z indices
-    // TODO: Check - Confirm if this is still working, moved here as part of a refactor
     MapEventProcessor.setLayerZIndices(this.mapId);
   };
 

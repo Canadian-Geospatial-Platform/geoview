@@ -82,11 +82,15 @@
     <script src="codedoc.js"></script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init(function () {
-        console.log('api is ready');
+      cgpv.init((mapId) => {
+        if (mapId === 'allMaps') {
+          // Write code here...
+          // ...
 
-        //create snippets
-        createConfigSnippet();
+          // create snippets
+          createCodeSnippet();
+          createConfigSnippet();
+        }
       });
     </script>
   </body>

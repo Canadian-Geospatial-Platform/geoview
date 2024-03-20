@@ -224,9 +224,7 @@
     <script src="codedoc.js"></script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init(function (mapId) {
-        console.log(`api is ready for ${mapId}`);
-
+      cgpv.init((mapId) => {
         if (mapId === 'allMaps') {
           var timeConsoleLyr1 = document.getElementById('LYR1TD');
           var timeConsoleLyr2 = document.getElementById('LYR2TD');
@@ -249,7 +247,7 @@
             2
           );
 
-          //create snippets
+          // create snippets
           createCodeSnippet();
           createConfigSnippet();
         }

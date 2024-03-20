@@ -207,24 +207,29 @@ export class ConfigBaseClass {
     const { registeredLayers } = api.maps[this.geoviewLayerInstance!.mapId].layer;
     if (registeredLayers[this.layerPath]) return false;
     (registeredLayers[this.layerPath] as ConfigBaseClass) = this;
+
+    // TODO: Check - Move this registerToLayerSets closer to the others, when I comment the line it seems good, except
+    // TO.DOCONT: for an 'Anonymous' group layer that never got 'loaded'. See if we can fix this elsewhere and remove this.
     if (this.entryType !== CONST_LAYER_ENTRY_TYPES.GROUP)
       (this.geoviewLayerInstance as AbstractGeoViewLayer).registerToLayerSets(Cast<AbstractBaseLayerEntryConfig>(this));
+
     this.layerStatus = 'registered';
     return true;
   }
 
-  /**
-   * This method returns the GeoView instance associated to a specific layer path. The first element of the layerPath
-   * is the geoviewLayerId.
-   * @param {string} layerPath The layer path to the layer's configuration.
-   *
-   * @returns {AbstractGeoViewLayer} Returns the geoview instance associated to the layer path.
-   */
-  // TODO: Check - Is this still used? Remove it and favor the homonymous method in `layer`?
-  geoviewLayer(layerPath?: string): AbstractGeoViewLayer {
-    this.geoviewLayerInstance!.layerPathAssociatedToTheGeoviewLayer = layerPath || this.layerPath;
-    return this.geoviewLayerInstance!;
-  }
+  // TODO: Check - Is this still used? Remove it and favor the homonymous method in `layer`? (which also should be deleted)
+  // TO.DOCONT: I'm commenting it in this big refactor (2024-03-17) to see if anything crashes and if so, where. Seems good to me without it so far.
+  // /**
+  //  * This method returns the GeoView instance associated to a specific layer path. The first element of the layerPath
+  //  * is the geoviewLayerId.
+  //  * @param {string} layerPath The layer path to the layer's configuration.
+  //  *
+  //  * @returns {AbstractGeoViewLayer} Returns the geoview instance associated to the layer path.
+  //  */
+  //   geoviewLayer(layerPath?: string): AbstractGeoViewLayer {
+  //   this.geoviewLayerInstance!.layerPathAssociatedToTheGeoviewLayer = layerPath || this.layerPath;
+  //   return this.geoviewLayerInstance!;
+  // }
 
   /**
    * This method compares the internal layer status of the config with the layer status passed as a parameter and it

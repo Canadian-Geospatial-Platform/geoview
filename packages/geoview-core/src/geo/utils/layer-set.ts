@@ -4,20 +4,19 @@ import { Extent } from 'ol/extent';
 import Feature from 'ol/Feature';
 import RenderFeature from 'ol/render/Feature';
 import { TypeResultSet } from '@/api/events/payloads';
-import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { api, LayerApi } from '@/app';
-import { TypeLayerStatus, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { LayerApi } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
+import { TypeLayerStatus, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 import { TypeHoverLayerData } from './hover-feature-info-layer-set';
 
-/** ***************************************************************************************************************************
- * A class to hold a set of layers associated with an value of any type. When this class is instantiated, all layers already
- * loaded on the specified map that have a return value equal to true when the registrationConditionFunction is called using
- * the layer path as a parameter will be added to the set. Layers added afterwards will be added to the set if the
- * registrationConditionFunction returns true. Deleted layers will be removed from the set.
+/**
+ * A class to hold a set of layers associated with an value of any type.
+ * Layers are added/removed to the layer-set via the registerOrUnregisterLayer function.
  *
  * @class LayerSet
  */
@@ -36,6 +35,9 @@ export class LayerSet {
 
   /** Sequence number to append to the layer name when we declare a layer as anonymous. */
   protected anonymousSequenceNumber = 1;
+
+  // Keep all callback delegates references
+  private onLayerSetUpdatedHandlers: LayerSetUpdatedDelegate[] = [];
 
   /**
    * The class constructor that instanciate a set of layer.
@@ -92,8 +94,8 @@ export class LayerSet {
         if (!layerConfig.layerName) layerConfig.layerName = createLocalizedString(this.resultSet[layerPath].layerName!);
       }
 
-      // Emit layer set updated
-      api.event.emitLayerSetUpdated(this.layerSetId, layerPath, this.resultSet);
+      // Inform that the layer set has been updated
+      this.onLayerSetUpdatedProcess(layerPath);
     }
   }
 
@@ -115,14 +117,14 @@ export class LayerSet {
       // Call the registration function for the layer-set. This method is different for each child.
       this.onRegisterLayer(geoviewLayer, layerPath);
 
-      // Emit layer set updated
-      api.event.emitLayerSetUpdated(this.layerSetId, layerPath, this.resultSet);
+      // Inform that the layer set has been updated
+      this.onLayerSetUpdatedProcess(layerPath);
     } else if (action === 'remove' && layerPath in this.resultSet) {
       MapEventProcessor.removeOrderedLayerInfo(this.mapId, layerPath);
       delete this.resultSet[layerPath];
 
-      // Emit layer set updated
-      api.event.emitLayerSetUpdated(this.layerSetId, layerPath, this.resultSet);
+      // Inform that the layer set has been updated
+      this.onLayerSetUpdatedProcess(layerPath);
     }
   }
 
@@ -152,6 +154,15 @@ export class LayerSet {
   };
 
   /**
+   * An overridable layer set updated function for a layer-set to indicate the layer set has been updated.
+   * @param {string} layerPath The layer path
+   */
+  protected onLayerSetUpdatedProcess(layerPath: string): void {
+    // Emit layer set updated event to the outside
+    this.emitLayerSetUpdated({ layerPath, resultSet: this.resultSet });
+  }
+
+  /**
    * Process a layer result set data to query features on it, if said layer path can be queried.
    *
    * @param {TypeLayerData | TypeHoverLayerData} data
@@ -179,6 +190,33 @@ export class LayerSet {
     }
     // No query made
     return Promise.resolve(null);
+  };
+
+  /**
+   * Emits an event to all handlers.
+   * @param {LayerSetUpdatedEvent} event The event to emit
+   */
+  emitLayerSetUpdated = (event: LayerSetUpdatedEvent) => {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.onLayerSetUpdatedHandlers, event);
+  };
+
+  /**
+   * Wires an event handler.
+   * @param {LayerSetUpdatedDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onLayerSetUpdated = (callback: LayerSetUpdatedDelegate): void => {
+    // Wire the event handler
+    EventHelper.onEvent(this.onLayerSetUpdatedHandlers, callback);
+  };
+
+  /**
+   * Unwires an event handler.
+   * @param {LayerSetUpdatedDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offLayerSetUpdated = (callback: LayerSetUpdatedDelegate): void => {
+    // Unwire the event handler
+    EventHelper.offEvent(this.onLayerSetUpdatedHandlers, callback);
   };
 }
 
@@ -252,3 +290,16 @@ export type TypeFeatureInfoEntry = {
  * to add more information on one or the other and keep things loosely linked together.
  */
 export type TypeFeatureInfoEntryPartial = Pick<TypeFeatureInfoEntry, 'fieldInfo'>;
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerSetUpdatedDelegate = EventDelegateBase<LayerSet, LayerSetUpdatedEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerSetUpdatedEvent = {
+  layerPath: string;
+  resultSet: TypeResultSet;
+};

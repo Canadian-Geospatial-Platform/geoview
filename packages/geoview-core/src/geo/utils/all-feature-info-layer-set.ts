@@ -15,9 +15,6 @@ import { LayerSet, QueryType, TypeLayerData } from './layer-set';
  * @class AllFeatureInfoLayerSet
  */
 export class AllFeatureInfoLayerSet extends LayerSet {
-  /** Private static variable to keep the single instance that can be created by this class for a mapId (see singleton design pattern) */
-  private static allFeatureInfoLayerSetInstance: TypeAllFeatureInfoLayerSetInstance = {};
-
   /** The resultSet object as existing in the base class, retyped here as a TypeAllFeatureInfoResultSet */
   declare resultSet: TypeAllFeatureInfoResultSet;
 
@@ -28,7 +25,7 @@ export class AllFeatureInfoLayerSet extends LayerSet {
    * @param {string} mapId The map identifier the layer set belongs to.
    *
    */
-  private constructor(layerApi: LayerApi, mapId: string) {
+  constructor(layerApi: LayerApi, mapId: string) {
     super(layerApi, mapId, `${mapId}/all/FeatureInfoLayerSet`);
   }
 
@@ -41,7 +38,6 @@ export class AllFeatureInfoLayerSet extends LayerSet {
     // Log
     logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerPath, Object.keys(this.resultSet));
 
-    const geoviewLayerConfig = this.layerApi.geoviewLayer(layerPath);
     // TODO: Make a util function for this check
     if (
       [
@@ -50,7 +46,7 @@ export class AllFeatureInfoLayerSet extends LayerSet {
         CONST_LAYER_TYPES.XYZ_TILES,
         CONST_LAYER_TYPES.VECTOR_TILES,
         CONST_LAYER_TYPES.WMS,
-      ].includes(geoviewLayerConfig.type)
+      ].includes(geoviewLayer.type)
     )
       return false;
 
@@ -115,8 +111,14 @@ export class AllFeatureInfoLayerSet extends LayerSet {
    * @param {QueryType} queryType the query's type to perform
    */
   // TODO: (futur development) The queryType is a door opened to allow the triggering using a bounding box or a polygon.
-  queryLayer(layerPath: string, queryType: QueryType = 'all'): void {
-    // TODO: Refactor - Make this function async similar to featureInfoLayerSet.queryLayers()
+  async queryLayer(layerPath: string, queryType: QueryType = 'all'): Promise<TypeAllFeatureInfoResultSet | void> {
+    // TODO: REFACTOR - Watch out for code reentrancy between queries!
+    // ! Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
+    // ! As it is (and was like this befor events refactor), the this.resultSet is mutating between async calls.
+
+    // TODO: Refactor - Make this function throw an error instead of returning void as option of the promise
+
+    // If valid layer path
     if (this.layerApi.registeredLayers[layerPath] && this.resultSet[layerPath]) {
       const { data } = this.resultSet[layerPath];
       const layerConfig = this.layerApi.registeredLayers[layerPath];
@@ -124,26 +126,26 @@ export class AllFeatureInfoLayerSet extends LayerSet {
       // Query and event types of what we're doing
       const eventType = 'all-features';
 
-      if (!this.resultSet[layerPath].data.eventListenerEnabled) return;
+      if (!this.resultSet[layerPath].data.eventListenerEnabled) return Promise.resolve();
 
       if (layerConfig.layerStatus === 'loaded') {
         data.features = undefined;
         data.queryStatus = 'processing';
 
         // Process query on results data
-        this.processQueryResultSetData(data, layerConfig, layerPath, queryType, layerPath).then((arrayOfRecords) => {
-          // Keep the features retrieved
-          data.features = arrayOfRecords;
-          data.layerStatus = layerConfig.layerStatus!;
+        const promiseResult = this.processQueryResultSetData(data, layerConfig, layerPath, queryType, layerPath);
 
-          // When property features is undefined, we are waiting for the query result.
-          // when Array.isArray(features) is true, the features property contains the query result.
-          // when property features is null, the query ended with an error.
-          data.queryStatus = arrayOfRecords ? 'processed' : 'error';
+        // Wait for promise to resolve
+        const arrayOfRecords = await promiseResult;
 
-          // Propagate to store
-          FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, eventType, this.resultSet);
-        });
+        // Keep the features retrieved
+        data.features = arrayOfRecords;
+        data.layerStatus = layerConfig.layerStatus!;
+
+        // When property features is undefined, we are waiting for the query result.
+        // when Array.isArray(features) is true, the features property contains the query result.
+        // when property features is null, the query ended with an error.
+        data.queryStatus = arrayOfRecords ? 'processed' : 'error';
       } else {
         data.features = null;
         data.queryStatus = 'error';
@@ -151,31 +153,14 @@ export class AllFeatureInfoLayerSet extends LayerSet {
 
       // Propagate to the store
       FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, eventType, this.resultSet);
-    } else logger.logError(`The queryLayer method cannot be used on an inexistant layer path (${layerPath})`);
-  }
 
-  /**
-   * Helper function used to instanciate a FeatureInfoLayerSet object. This function
-   * must be used in place of the "new FeatureInfoLayerSet" syntax.
-   *
-   * @param {LayerApi} layerApi The layer Api to work with.
-   * @param {string} mapId The map identifier the layer set belongs to.
-   *
-   * @returns {FeatureInfoLayerSet} the FeatureInfoLayerSet object created
-   */
-  static get(layerApi: LayerApi, mapId: string): AllFeatureInfoLayerSet {
-    if (!AllFeatureInfoLayerSet.allFeatureInfoLayerSetInstance[mapId])
-      AllFeatureInfoLayerSet.allFeatureInfoLayerSetInstance[mapId] = new AllFeatureInfoLayerSet(layerApi, mapId);
-    return AllFeatureInfoLayerSet.allFeatureInfoLayerSetInstance[mapId];
-  }
+      // Return the resultsSet
+      return this.resultSet;
+    }
 
-  /**
-   * Function used to delete a FeatureInfoLayerSet object associated to a mapId.
-   *
-   * @param {string} mapId The map identifier the layer set belongs to.
-   */
-  static delete(mapId: string) {
-    if (AllFeatureInfoLayerSet.allFeatureInfoLayerSetInstance[mapId]) delete AllFeatureInfoLayerSet.allFeatureInfoLayerSetInstance[mapId];
+    // Log the error
+    logger.logError(`The queryLayer method cannot be used on an inexistant layer path (${layerPath})`);
+    return Promise.resolve();
   }
 }
 
@@ -188,5 +173,3 @@ export type TypeAllFeatureInfoResultSetEntry = {
 export type TypeAllFeatureInfoResultSet = {
   [layerPath: string]: TypeAllFeatureInfoResultSetEntry;
 };
-
-type TypeAllFeatureInfoLayerSetInstance = { [mapId: string]: AllFeatureInfoLayerSet };
