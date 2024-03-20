@@ -305,6 +305,9 @@ export abstract class AbstractGeoViewLayer {
   // api.maps[mapId].layer.geoviewLayer(layerPath).getVisible()
   layerPathAssociatedToTheGeoviewLayer = '';
 
+  // Keep all callback delegates references
+  private onGeoViewLayerRegistrationHandlers: GeoViewLayerRegistrationDelegate[] = [];
+
   /** ***************************************************************************************************************************
    * The class constructor saves parameters and common configuration parameters in attributes.
    *
@@ -353,6 +356,34 @@ export abstract class AbstractGeoViewLayer {
     }
     this.listOfLayerEntryConfig[0].geoviewLayerConfig.listOfLayerEntryConfig = listOfLayerEntryConfig;
   }
+
+  /**
+   * Wires an event handler.
+   * @param {MapReadyDelegate} callback The callback to be executed whenever the event is raised
+   */
+  onGeoViewLayerRegistration = (callback: GeoViewLayerRegistrationDelegate): void => {
+    // Push a new callback handler to the list of handlers
+    this.onGeoViewLayerRegistrationHandlers.push(callback);
+  };
+
+  /**
+   * Unwires an event handler.
+   * @param {MapReadyDelegate} callback The callback to stop being called whenever the event is raised
+   */
+  offGeoViewLayerRegistration = (callback: GeoViewLayerRegistrationDelegate): void => {
+    const index = this.onGeoViewLayerRegistrationHandlers.indexOf(callback);
+    if (index !== -1) {
+      this.onGeoViewLayerRegistrationHandlers.splice(index, 1);
+    }
+  };
+
+  /**
+   * Emits an event to all handlers.
+   */
+  emitGeoViewLayerRegistration = (event: GeoViewLayerRegistrationEvent) => {
+    // Trigger all the handlers in the array
+    this.onGeoViewLayerRegistrationHandlers.forEach((handler) => handler(this, event));
+  };
 
   /** ***************************************************************************************************************************
    * Process recursively the list of layer entries to see if all of them are processed.
@@ -898,6 +929,8 @@ export abstract class AbstractGeoViewLayer {
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer config to register.
    */
   registerToLayerSets(layerConfig: AbstractBaseLayerEntryConfig): void {
+    // TODO: Refactor - This function should be deleted eventually. It's up to the layer orchestrator to manage the layers.
+    // TO.DOCONT: The layer itself shouldn't know about it nor should have an explicit function mentioning the layer sets.
     const { layerPath } = layerConfig;
     if (!this.registerToLayerSetListenerFunctions[layerPath]) this.registerToLayerSetListenerFunctions[layerPath] = {};
 
@@ -917,7 +950,7 @@ export abstract class AbstractGeoViewLayer {
 
     // Register to layer sets that are already created.
     // Emit the layer registration
-    api.event.emitLayerRegistration(this.mapId, layerPath, 'add');
+    this.emitGeoViewLayerRegistration({ layerPath, action: 'add' });
   }
 
   /** ***************************************************************************************************************************
@@ -926,10 +959,12 @@ export abstract class AbstractGeoViewLayer {
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry to register.
    */
   unregisterFromLayerSets(layerConfig: AbstractBaseLayerEntryConfig): void {
+    // TODO: Refactor - This function should be deleted eventually. It's up to the layer orchestrator to manage the layers.
+    // TO.DOCONT: The layer itself shouldn't know about it nor should have an explicit function mentioning the layer sets.
     const { layerPath } = layerConfig;
 
     // Emit the layer unregistration
-    api.event.emitLayerRegistration(this.mapId, layerPath, 'remove');
+    this.emitGeoViewLayerRegistration({ layerPath, action: 'remove' });
 
     if (this.registerToLayerSetListenerFunctions[layerPath].queryLegend) {
       api.event.offLayerLegendQuery(this.mapId, layerPath, this.registerToLayerSetListenerFunctions[layerPath].queryLegend!);
@@ -1480,3 +1515,16 @@ export abstract class AbstractGeoViewLayer {
     delete api.maps[this.mapId].layer.registeredLayers[layerPath];
   }
 }
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type GeoViewLayerRegistrationDelegate = (sender: AbstractGeoViewLayer, event: GeoViewLayerRegistrationEvent) => void;
+
+/**
+ * Define an event for the delegate
+ */
+export type GeoViewLayerRegistrationEvent = {
+  layerPath: string;
+  action: 'add' | 'remove';
+};
