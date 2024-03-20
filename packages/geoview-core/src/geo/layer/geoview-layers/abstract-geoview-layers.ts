@@ -359,7 +359,7 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Wires an event handler.
-   * @param {MapReadyDelegate} callback The callback to be executed whenever the event is raised
+   * @param {GeoViewLayerRegistrationDelegate} callback The callback to be executed whenever the event is raised
    */
   onGeoViewLayerRegistration = (callback: GeoViewLayerRegistrationDelegate): void => {
     // Push a new callback handler to the list of handlers
@@ -368,7 +368,7 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Unwires an event handler.
-   * @param {MapReadyDelegate} callback The callback to stop being called whenever the event is raised
+   * @param {GeoViewLayerRegistrationDelegate} callback The callback to stop being called whenever the event is raised
    */
   offGeoViewLayerRegistration = (callback: GeoViewLayerRegistrationDelegate): void => {
     const index = this.onGeoViewLayerRegistrationHandlers.indexOf(callback);
@@ -950,7 +950,7 @@ export abstract class AbstractGeoViewLayer {
 
     // Register to layer sets that are already created.
     // Emit the layer registration
-    this.emitGeoViewLayerRegistration({ layerPath, action: 'add' });
+    this.emitGeoViewLayerRegistration({ layerPath, layerConfig, action: 'add' });
   }
 
   /** ***************************************************************************************************************************
@@ -964,7 +964,7 @@ export abstract class AbstractGeoViewLayer {
     const { layerPath } = layerConfig;
 
     // Emit the layer unregistration
-    this.emitGeoViewLayerRegistration({ layerPath, action: 'remove' });
+    this.emitGeoViewLayerRegistration({ layerPath, layerConfig, action: 'remove' });
 
     if (this.registerToLayerSetListenerFunctions[layerPath].queryLegend) {
       api.event.offLayerLegendQuery(this.mapId, layerPath, this.registerToLayerSetListenerFunctions[layerPath].queryLegend!);
@@ -1526,5 +1526,6 @@ type GeoViewLayerRegistrationDelegate = (sender: AbstractGeoViewLayer, event: Ge
  */
 export type GeoViewLayerRegistrationEvent = {
   layerPath: string;
+  layerConfig: AbstractBaseLayerEntryConfig;
   action: 'add' | 'remove';
 };

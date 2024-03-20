@@ -1,4 +1,3 @@
-import { TypeLayerSetChangeLayerStatusPayload } from '@/api/events/payloads';
 import { LayerApi } from '@/app';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { logger } from '@/core/utils/logger';
@@ -100,22 +99,20 @@ export class AllFeatureInfoLayerSet extends LayerSet {
     };
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * The listener that will handle the CHANGE_LAYER_STATUS event triggered on the map. This method is called by the parent class
-   * LayerSet via the listener created by the setChangeLayerStatusListenerFunctions method.
+   * LayerSet via the listener created by the processLayerStatusChanged method.
    *
-   * @param {TypeLayerSetChangeLayerStatusPayload} payload The payload to process.
+   * @param {string} layerPath The layer path being affected
+   * @param {string} layerStatus The new layer status
    */
-  protected changeLayerStatusListenerFunctions(payload: TypeLayerSetChangeLayerStatusPayload) {
-    // Read info
-    const { layerPath, layerStatus } = payload;
-
+  protected changeLayerStatusListenerFunctions(layerPath: string, layerStatus: TypeLayerStatus): void {
     // if layer's status flag exists and is different than the new one
     if (this.resultSet?.[layerPath]?.layerStatus && this.resultSet?.[layerPath]?.layerStatus !== layerStatus) {
       if (layerStatus === 'error') delete this.resultSet[layerPath];
       else {
         // Call parent
-        super.changeLayerStatusListenerFunctions(payload);
+        super.changeLayerStatusListenerFunctions(layerPath, layerStatus);
 
         const layerConfig = this.layerApi.registeredLayers[layerPath];
         if (this?.resultSet?.[layerPath]?.data) {

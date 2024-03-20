@@ -1,9 +1,11 @@
-import { TypeLegendResultSet, TypeLayerSetChangeLayerStatusPayload } from '@/api/events/payloads';
+import { TypeLegendResultSet } from '@/api/events/payloads';
 import { LayerSet } from '@/geo/utils/layer-set';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { api, LayerApi } from '@/core/types/cgpv-types';
+import { api, LayerApi, TypeLayerEntryConfig } from '@/core/types/cgpv-types';
+import { TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 
 type TypeLegendsLayerSetInstance = { [mapId: string]: LegendsLayerSet };
 
@@ -46,24 +48,25 @@ export class LegendsLayerSet extends LayerSet {
     };
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * The listener that will handle the CHANGE_LAYER_STATUS event triggered on the map. This method is called by the parent class
-   * LayerSet via the listener created by the setChangeLayerStatusListenerFunctions method.
+   * LayerSet via the listener created by the processLayerStatusChanged method.
    *
-   * @param {TypeLayerSetChangeLayerStatusPayload} payload The payload to process.
+   * @param {string} layerPath The layer path being affected
+   * @param {string} layerStatus The new layer status
    */
-  protected changeLayerStatusListenerFunctions(payload: TypeLayerSetChangeLayerStatusPayload) {
-    // Read info
-    const { layerPath, layerStatus } = payload;
-
+  protected changeLayerStatusListenerFunctions(layerPath: string, layerStatus: TypeLayerStatus): void {
     // Check some variables as received
     const layerExists = !!this.resultSet?.[layerPath];
     const statusHasChanged = this.resultSet?.[layerPath]?.layerStatus !== layerStatus;
 
     // Call parent. After this call, this.resultSet?.[layerPath]?.layerStatus may have changed!
-    super.changeLayerStatusListenerFunctions(payload);
+    super.changeLayerStatusListenerFunctions(layerPath, layerStatus);
 
     if (statusHasChanged) {
+      // Get the config from the registered layers
+      const layerConfig = this.layerApi.registeredLayers[layerPath];
+
       if (layerExists && ['processed', 'loaded'].includes(layerStatus) && this.resultSet?.[layerPath]?.querySent === false) {
         // Emit that we're looking for the legend for this layer
         api.event.emitLayerLegendQuery(this.mapId, layerPath);
@@ -72,12 +75,44 @@ export class LegendsLayerSet extends LayerSet {
         this.resultSet[layerPath].querySent = true;
 
         // config file could not determine if the layer is queryable, can it be done using the metadata? let's try
-        const layerConfig = this.layerApi.registeredLayers[layerPath];
         layerConfig.geoviewLayerInstance?.registerToLayerSets(layerConfig as AbstractBaseLayerEntryConfig);
       }
+
       if (layerExists || layerStatus === 'loaded') {
+        // Possibly update the layer status(es) of the parent(s)
+        // TODO: Check - I'm not sure where the logic to set layer status for the parent to loaded when a child is loaded/error, but
+        // TO.DOCONT: I had to add this as part of the refactor to make it work
+        this.changeLayerStatusOfParentsRecursive(layerConfig, layerStatus);
+
         // Propagate to store
         LegendEventProcessor.propagateLegendToStore(this.mapId, layerPath, this.resultSet[layerPath]);
+      }
+    }
+  }
+
+  /**
+   * Recursively tries to set the layer status on the parent group layer(s), depending if the layer entry has a parent and
+   * if the current layer status is loaded or error.
+   *
+   * @param {TypeLayerEntryConfig} currentLayerConfig The current layer config being checked
+   * @param {TypeLayerStatus} currentLayerStatus The layer status that triggered the check on the parent(s)
+   */
+  private changeLayerStatusOfParentsRecursive(currentLayerConfig: TypeLayerEntryConfig, currentLayerStatus: TypeLayerStatus): void {
+    // If layer has a parent
+    if (currentLayerConfig.parentLayerConfig) {
+      // If the current status to set is at least loaded (or error), make the parent loaded
+      if (['loaded', 'error'].includes(currentLayerStatus)) {
+        // Get the parent config
+        const parentGroupLayer = currentLayerConfig.parentLayerConfig as GroupLayerEntryConfig;
+
+        // Update the status on the parent
+        parentGroupLayer.layerStatus = 'loaded';
+
+        // If has another parent, go recursive
+        if (parentGroupLayer.parentLayerConfig) {
+          // Going recursive
+          this.changeLayerStatusOfParentsRecursive(parentGroupLayer, currentLayerStatus);
+        }
       }
     }
   }
