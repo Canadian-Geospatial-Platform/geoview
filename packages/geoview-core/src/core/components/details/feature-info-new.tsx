@@ -95,7 +95,7 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
       })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checkedFeatures, feature]); // ! Check if feature is necessary in this dependency array? If so explain it in comment? Should be featurUid?
+  }, [checkedFeatures, feature]); // GV Check if feature is necessary in this dependency array? If so explain it in comment? Should be featurUid?
 
   return (
     <Paper sx={{ boxShadow: 'none', border: 'none', paddingTop: '0.5rem' }}>

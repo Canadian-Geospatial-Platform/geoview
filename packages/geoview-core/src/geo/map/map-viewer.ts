@@ -244,7 +244,7 @@ export class MapViewer {
           this.#mapReady = true;
           this.emitMapReady();
 
-          // ! We added processed to layers check so this map loaded event is fired faster
+          // GV We added processed to layers check so this map loaded event is fired faster
           // This emits the MAP_LOADED event
           MapEventProcessor.setMapLoaded(this.mapId);
 

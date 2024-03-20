@@ -133,8 +133,8 @@ export class FeatureInfoLayerSet extends LayerSet {
    */
   queryLayers = async (longLatCoordinate: Coordinate): Promise<TypeFeatureInfoResultSet> => {
     // TODO: REFACTOR - Watch out for code reentrancy between queries!
-    // ! Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
-    // ! As it is (and was like this befor events refactor), the this.resultSet is mutating between async calls.
+    // GV Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
+    // GV As it is (and was like this befor events refactor), the this.resultSet is mutating between async calls.
 
     // Prepare to hold all promises of features in the loop below
     const allPromises: Promise<TypeFeatureInfoEntry[] | undefined | null>[] = [];

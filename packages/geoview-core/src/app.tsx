@@ -111,7 +111,7 @@ async function renderMap(mapElement: Element): Promise<void> {
 
 /**
  * Initialize a basic div from a function call.
- * !The div MUST NOT have a geoview-map class or a warning will be shown.
+ * GV The div MUST NOT have a geoview-map class or a warning will be shown.
  * If is present, the div will be created with a default config
  *
  * @param {Element} mapDiv The basic div to initialise

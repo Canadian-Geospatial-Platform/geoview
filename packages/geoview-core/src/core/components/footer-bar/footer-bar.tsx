@@ -200,7 +200,7 @@ export function FooterBar(): JSX.Element | null {
     logger.logTraceUseEffect('FOOTER-TABS - mapDiv');
 
     setOrigHeight(mapDiv!.clientHeight + 55);
-  }, [mapDiv]); // ! Is a useEffect on a dom element recommented here? Consider using useRef?
+  }, [mapDiv]); // GV Is a useEffect on a dom element recommented here? Consider using useRef?
 
   /**
    * Whenever the array layer data batch changes if we're on 'details' tab and it's collapsed, make sure we uncollapse it
@@ -219,7 +219,7 @@ export function FooterBar(): JSX.Element | null {
   // Don't add isCollapsed in the dependency array, because it'll retrigger the useEffect
 
   // TODO: need a refactor to use proper sx classes and style
-  // !https://github.com/Canadian-Geospatial-Platform/geoview/issues/1136
+  // GVhttps://github.com/Canadian-Geospatial-Platform/geoview/issues/1136
   /**
    * Handle the collapse/expand state effect
    */
@@ -250,7 +250,7 @@ export function FooterBar(): JSX.Element | null {
         lastChild.style.maxHeight = isCollapsed ? '0px' : '';
       }
     }
-  }, [isCollapsed, mapDiv, origHeight]); // ! Is a useEffect on a dom element recommented here? Consider using useRef?
+  }, [isCollapsed, mapDiv, origHeight]); // GV Is a useEffect on a dom element recommented here? Consider using useRef?
 
   /**
    * Handle a collapse, expand event for the tabs component

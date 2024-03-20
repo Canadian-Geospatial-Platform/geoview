@@ -483,8 +483,8 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {TypeBaseRasterLayer | null} The GeoView raster layer that has been created.
    */
   protected processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
-    // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
-    // !            layerStatus values is correctly sequenced.
+    // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
+    // GV            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
     // Log
     logger.logTraceCore('WMS - processOneLayerEntry', layerConfig.layerPath);
@@ -536,8 +536,8 @@ export class WMS extends AbstractGeoViewRaster {
         if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
         if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings?.minZoom;
         if (layerConfig.initialSettings?.opacity !== undefined) imageLayerOptions.opacity = layerConfig.initialSettings?.opacity;
-        // ! IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
-        // !            in the 'loading' state if the flag value is 'no'.
+        // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
+        // GV            in the 'loading' state if the flag value is 'no'.
 
         layerConfig.olLayerAndLoadEndListeners = {
           olLayer: new ImageLayer(imageLayerOptions),
@@ -574,7 +574,7 @@ export class WMS extends AbstractGeoViewRaster {
         if (layerCapabilities.Attribution) this.attributions.push(layerCapabilities.Attribution.Title as string);
         if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
         MapEventProcessor.setMapLayerQueryable(this.mapId, layerConfig.layerPath, layerConfig.source.featureInfo.queryable);
-        // ! TODO: The solution implemented in the following lines is not right. scale and zoom are not the same things.
+        // GV TODO: The solution implemented in the following lines is not right. scale and zoom are not the same things.
         // if (layerConfig.initialSettings?.minZoom === undefined && layerCapabilities.MinScaleDenominator !== undefined)
         //   layerConfig.initialSettings.minZoom = layerCapabilities.MinScaleDenominator as number;
         // if (layerConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
@@ -684,8 +684,8 @@ export class WMS extends AbstractGeoViewRaster {
         if (infoFormat === 'text/xml') {
           const xmlDomResponse = new DOMParser().parseFromString(response.data, 'text/xml');
           const jsonResponse = xmlToJson(xmlDomResponse);
-          // ! TODO: We should use a WMS format setting in the schema to decide what feature info response interpreter to use
-          // ! For the moment, we try to guess the response format based on properties returned from the query
+          // GV TODO: We should use a WMS format setting in the schema to decide what feature info response interpreter to use
+          // GV For the moment, we try to guess the response format based on properties returned from the query
           const featureCollection = this.getAttribute(jsonResponse, 'FeatureCollection');
           if (featureCollection) featureMember = this.getAttribute(featureCollection, 'featureMember');
           else {
@@ -1082,7 +1082,7 @@ export class WMS extends AbstractGeoViewRaster {
 
     const layerConfig = this.getLayerConfig(layerPath) as OgcWmsLayerEntryConfig;
     if (!layerConfig) {
-      // ! Things important to know about the applyViewFilter usage:
+      // GV Things important to know about the applyViewFilter usage:
       logger.logError(
         `
         The applyViewFilter method must never be called by GeoView code before the layer refered by the layerPath has reached the 'loaded' status.\n

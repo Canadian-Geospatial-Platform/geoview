@@ -77,7 +77,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     // the user escape the trap, remove it, put back skip link in focus cycle and zoom to top link
     setActiveTrapGeoView(false);
     mapHTMLElement.classList.remove('map-focus-trap');
-    // mapHTMLElement.removeEventListener('keydown',handleExit); //! can't remove because of eslint @typescript-eslint/no-use-before-define
+    // mapHTMLElement.removeEventListener('keydown',handleExit); // GV can't remove because of eslint @typescript-eslint/no-use-before-define
     document.removeEventListener('keydown', handleScrolling);
 
     // update store and focus to top link

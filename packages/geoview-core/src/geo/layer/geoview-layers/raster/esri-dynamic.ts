@@ -228,8 +228,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
   protected processOneLayerEntry(layerConfig: EsriDynamicLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
-    // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
-    // !            layerStatus values is correctly sequenced.
+    // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
+    // GV            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
@@ -768,7 +768,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
     const layerConfig = this.getLayerConfig(layerPath) as EsriDynamicLayerEntryConfig;
     if (!layerConfig) {
-      // ! Things important to know about the applyViewFilter usage:
+      // GV Things important to know about the applyViewFilter usage:
       logger.logError(
         `
         The applyViewFilter method must never be called by GeoView code before the layer refered by the layerPath has reached the 'loaded' status.\n
