@@ -1,11 +1,6 @@
 import { TypeLayerEntryConfig, TypeJsonObject } from 'geoview-core';
 import { ChartType, GeoChartDatasource } from 'geochart';
-import {
-  TypeArrayOfLayerData,
-  TypeLayerData,
-  TypeFeatureInfoEntry,
-  TypeFeatureInfoEntryPartial,
-} from 'geoview-core/src/api/events/payloads';
+import { TypeLayerData, TypeFeatureInfoEntry, TypeFeatureInfoEntryPartial } from 'geoview-core/src/geo/utils/layer-set';
 import { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
 
 /**
@@ -81,7 +76,7 @@ const simplifyTypeFeatureInfoEntries = (entries: TypeFeatureInfoEntryPartial[]):
 export const findLayerDataAndConfigFromQueryResults = (
   config: PluginGeoChartConfig<ChartType>,
   registeredLayers: { [layerEntryConfigId: string]: TypeLayerEntryConfig },
-  layerDataArray: TypeArrayOfLayerData
+  layerDataArray: TypeLayerData[]
 ): [
   GeoViewGeoChartConfig<ChartType> | undefined,
   GeoViewGeoChartConfigLayer | undefined,

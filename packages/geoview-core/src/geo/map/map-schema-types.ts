@@ -175,7 +175,6 @@ export type LayerEntryTypesKey = 'VECTOR' | 'VECTOR_TILE' | 'VECTOR_HEATMAP' | '
 export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'vector-heatmap' | 'raster-tile' | 'raster-image' | 'group' | 'geoCore';
 
 // Constants for the layer config types
-// TODO: Refactor - Figure out how to simplify if possible these two constants.. CONST_LAYER_ENTRY_TYPES vs CONST_LAYER_ENTRY_TYPE
 export const CONST_LAYER_ENTRY_TYPES: Record<LayerEntryTypesKey, TypeLayerEntryType> = {
   VECTOR: 'vector',
   VECTOR_TILE: 'vector-tile',

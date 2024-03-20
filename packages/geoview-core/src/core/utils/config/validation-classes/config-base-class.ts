@@ -8,10 +8,10 @@ import {
   TypeLayerStatus,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
-import { GroupLayerEntryConfig } from './group-layer-entry-config';
-import { logger } from '../../logger';
-import { LayerSetPayload } from '@/api/events/payloads';
+import { logger } from '@/core/utils/logger';
 import { Cast, TypeJsonValue, api } from '@/core/types/cgpv-types';
+
+import { GroupLayerEntryConfig } from './group-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
 
 /** ******************************************************************************************************************************
@@ -30,7 +30,7 @@ export class ConfigBaseClass {
   /** Layer entry data type. This element is part of the schema. */
   entryType?: TypeLayerEntryType;
 
-  // TODO: There shouldn't be a coupling to a `AbstractGeoViewLayer` inside a Configuration class.
+  // TODO: Refactor - There shouldn't be a coupling to a `AbstractGeoViewLayer` inside a Configuration class.
   // TO.DOCONT: That logic should be elsewhere so that the Configuration class remains portable and immutable.
   /** The geoview layer instance that contains this layer configuration. */
   geoviewLayerInstance?: AbstractGeoViewLayer;
@@ -42,15 +42,13 @@ export class ConfigBaseClass {
    * metadata. */
   isMetadataLayerGroup?: boolean;
 
-  // TODO: There shouldn't be a coupling to a `AbstractGeoViewLayer` inside a Configuration class.
-  // TO.DOCONT: That logic should be elsewhere so that the Configuration class remains portable and immutable.
   /** It is used to link the layer entry config to the parent's layer config. */
   parentLayerConfig?: TypeGeoviewLayerConfig | GroupLayerEntryConfig;
 
   /** The layer path to this instance. */
   protected _layerPath = '';
 
-  // TODO: There shouldn't be a coupling to a `AbstractGeoViewLayer` inside a Configuration class.
+  // TODO: Refactor - There shouldn't be a coupling to an OpenLayers `BaseLayer` inside a Configuration class.
   // TO.DOCONT: That logic should be elsewhere so that the Configuration class remains portable and immutable.
   /** This property is used to link the displayed layer to its layer entry config. it is not part of the schema. */
   protected _olLayer: BaseLayer | LayerGroup | null = null;
@@ -155,10 +153,7 @@ export class ConfigBaseClass {
     if (!this.IsGreaterThanOrEqualTo(newLayerStatus)) {
       // eslint-disable-next-line no-underscore-dangle
       this._layerStatus = newLayerStatus;
-      api.event.emit(
-        // TODO: Change createLayerSetChangeLayerStatusPayload events for a direct function call.
-        LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.geoviewLayerInstance!.mapId, this.layerPath, newLayerStatus)
-      );
+      api.event.emitLayerStatusChanged(this.geoviewLayerInstance!.mapId, this.layerPath, newLayerStatus);
     }
     if (newLayerStatus === 'processed' && this.waitForProcessedBeforeSendingLoaded) this.layerStatus = 'loaded';
 

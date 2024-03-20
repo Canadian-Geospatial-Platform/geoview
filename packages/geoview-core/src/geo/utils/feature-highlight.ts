@@ -1,15 +1,17 @@
+import { getUid } from 'ol';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style';
 import Feature from 'ol/Feature';
 import { LineString, MultiLineString, MultiPoint, MultiPolygon, Point, Polygon } from 'ol/geom';
 import { Extent, getCenter } from 'ol/extent';
-import { getUid } from 'ol';
 import { fromExtent } from 'ol/geom/Polygon';
-import { Coordinate, TypeFeatureInfoEntry, api } from '@/app';
+import { Coordinate, api } from '@/app';
 import { TypeHighlightColors } from '@/geo/map/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
+
+import { TypeFeatureInfoEntry } from './layer-set';
 
 /** *****************************************************************************************************************************
  * A class to handle highlighting of features

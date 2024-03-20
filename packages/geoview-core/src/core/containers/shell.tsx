@@ -12,17 +12,8 @@ import { Geolocator } from '@/core/components/geolocator/geolocator';
 import { MapInfo } from '@/core/components/map-info/map-info';
 
 import { api } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
 import { Box, CircularProgress, Link, Modal, Snackbar, Button, TypeModalProps } from '@/ui';
-import {
-  ModalPayload,
-  PayloadBaseClass,
-  SnackbarMessagePayload,
-  SnackbarType,
-  mapConfigPayload,
-  payloadIsAMapComponent,
-  payloadIsAmapFeaturesConfig,
-} from '@/api/events/payloads';
+import { MapComponentPayload, ModalPayload, SnackbarMessagePayload, SnackbarType } from '@/api/events/payloads';
 import { getShellSxClasses } from './containers-style';
 import { useMapInteraction, useMapLoaded } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useAppCircularProgressActive } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -83,19 +74,57 @@ export function Shell(): JSX.Element {
     });
   }, []);
 
-  const mapAddComponentHandler = (payload: PayloadBaseClass) => {
-    // Log
-    logger.logTraceCoreAPIEvent('SHELL - mapAddComponentHandler', payload);
-
-    if (payloadIsAMapComponent(payload)) {
-      setComponents((tempComponents) => ({
-        ...tempComponents,
-        [payload.mapComponentId]: payload.component!,
-      }));
-    }
+  /**
+   * Handles when a component is being added to the map
+   * @param {MapComponentPayload} payload The map component being added
+   */
+  const handleMapAddComponent = (payload: MapComponentPayload) => {
+    setComponents((tempComponents) => ({
+      ...tempComponents,
+      [payload.mapComponentId]: payload.component!,
+    }));
   };
 
-  const snackBarOpenListenerFunction = (payload: SnackbarMessagePayload) => {
+  /**
+   * Handles when a component is being added to the map
+   * @param {MapComponentPayload} payload The map component being removed (component is empty, only mapComponentId is set)
+   */
+  const handleMapRemoveComponent = useCallback(
+    (payload: MapComponentPayload) => {
+      const tempComponents: Record<string, JSX.Element> = { ...components };
+      delete tempComponents[payload.mapComponentId];
+
+      setComponents(() => ({
+        ...tempComponents,
+      }));
+    },
+    [components]
+  );
+
+  /**
+   * Handles when a modal needs to open
+   * @param {ModalPayload} payload The modal being opened
+   */
+  const handleModalOpen = useCallback(
+    (payload: ModalPayload) => {
+      setModalProps(api.maps[mapId].modal.modals[payload.modalId] as TypeModalProps);
+      setModalOpen(true);
+    },
+    [mapId]
+  );
+
+  /**
+   * Handles when the modal needs to close (only 1 at a time is allowed)
+   */
+  const handleModalClose = () => {
+    setModalOpen(false);
+  };
+
+  /**
+   * Handles when a SnackBar needs to open
+   * @param {SnackbarMessagePayload} payload The snackbar information to open
+   */
+  const handleSnackBarOpen = (payload: SnackbarMessagePayload) => {
     // create button
     const myButton = payload.button?.label ? (
       <Button type="icon" onClick={payload.button.action}>
@@ -108,82 +137,66 @@ export function Shell(): JSX.Element {
     setSnackbarMessage(payload.message);
     setSnackbarType(payload.snackbarType);
 
-    // show the notification
+    // show the snackbar
     setSnackbarOpen(true);
   };
 
-  const snackBarCloseListenerFunction = useCallback((event?: React.SyntheticEvent | Event, reason?: string) => {
+  /**
+   * Handles when a SnackBar needs to close
+   * @param {React.SyntheticEvent | Event} event The event associated with the closing of the snackbar
+   * @param {string} reason The reason for closing
+   */
+  const handleSnackBarClose = useCallback((event?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
       return;
     }
+    // hide the snackbar
     setSnackbarOpen(false);
   }, []);
+
+  /**
+   * Handles when the map needs to reload
+   */
+  const handleMapReload = useCallback(() => {
+    // TODO: use store config when we reload the map
+    // Emit a map reload removal
+    api.event.emitMapReloadRemove(mapId, geoviewConfig!);
+
+    // Update the Shell
+    updateShell();
+  }, [geoviewConfig, mapId, updateShell]);
 
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('SHELL - mount', mapId, geoviewConfig, components);
 
-    // listen to adding a new component events
-    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, mapAddComponentHandler, mapId);
-
-    const mapRemoveComponentHandler = (payload: PayloadBaseClass) => {
-      // Log
-      logger.logTraceCoreAPIEvent('SHELL - mapRemoveComponentHandler', payload);
-
-      if (payloadIsAMapComponent(payload)) {
-        const tempComponents: Record<string, JSX.Element> = { ...components };
-        delete tempComponents[payload.mapComponentId];
-
-        setComponents(() => ({
-          ...tempComponents,
-        }));
-      }
-    };
-
-    // listen to removing a component events
-    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, mapRemoveComponentHandler, mapId);
-
-    // Reload
-    // TODO: use store config when we reload the map
-    const mapReloadHandler = (payload: PayloadBaseClass) => {
-      // Log
-      logger.logTraceCoreAPIEvent('SHELL - mapReloadHandler', payload);
-
-      if (payloadIsAmapFeaturesConfig(payload)) {
-        api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, `${mapId}/delete_old_map`, geoviewConfig!));
-        updateShell();
-      }
-    };
-
-    api.event.on(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, mapReloadHandler, mapId);
-
     // listen to API event when app wants to show message
-    api.event.onSnackbarOpen(mapId, snackBarOpenListenerFunction);
-
-    const modalOpenListenerFunction = (payload: ModalPayload) => {
-      setModalProps(api.maps[mapId].modal.modals[payload.modalId] as TypeModalProps);
-      setModalOpen(true);
-    };
-
-    const modalCloseListenerFunction = () => {
-      setModalOpen(false);
-    };
-
-    // to open the modal
-    api.event.onModalOpen(mapId, modalOpenListenerFunction);
+    api.event.onSnackbarOpen(mapId, handleSnackBarOpen);
 
     // to close the modal
-    api.event.onModalClose(mapId, modalCloseListenerFunction);
+    api.event.onModalClose(mapId, handleModalClose);
+
+    // to open the modal
+    api.event.onModalOpen(mapId, handleModalOpen);
+
+    // listen to removing a component events
+    api.event.onRemoveComponent(mapId, handleMapRemoveComponent);
+
+    // listen to adding a new component events
+    api.event.onCreateComponent(mapId, handleMapAddComponent);
+
+    // listen to map reload
+    api.event.onMapReload(mapId, handleMapReload);
 
     return () => {
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, mapId, mapAddComponentHandler);
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, mapId, mapRemoveComponentHandler);
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, mapId, mapReloadHandler);
-      api.event.offModalOpen(mapId, modalOpenListenerFunction);
-      api.event.offModalClose(mapId, modalCloseListenerFunction);
-      api.event.offSnackbarOpen(mapId, snackBarOpenListenerFunction);
+      api.event.offMapReload(mapId, handleMapReload);
+      api.event.offCreateComponent(mapId, handleMapAddComponent);
+      api.event.offRemoveComponent(mapId, handleMapRemoveComponent);
+      api.event.offModalOpen(mapId, handleModalOpen);
+      api.event.offModalClose(mapId, handleModalClose);
+      api.event.offSnackbarOpen(mapId, handleSnackBarOpen);
     };
-  }, [components, mapId, geoviewConfig, updateShell]);
+  }, [components, mapId, geoviewConfig, updateShell, handleMapRemoveComponent, handleModalOpen, handleMapReload]);
 
   return (
     <Box sx={sxClasses.all}>
@@ -228,7 +241,7 @@ export function Shell(): JSX.Element {
             open={snackbarOpen}
             type={snackbarType}
             button={snackbarButton}
-            onClose={snackBarCloseListenerFunction}
+            onClose={handleSnackBarClose}
           />
         </Box>
       </FocusTrap>

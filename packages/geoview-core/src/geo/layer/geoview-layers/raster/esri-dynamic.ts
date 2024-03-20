@@ -14,6 +14,12 @@ import Geometry from 'ol/geom/Geometry';
 import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
+import { api } from '@/app';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { TypeJsonObject } from '@/core/types/global-types';
+import { logger } from '@/core/utils/logger';
+import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
@@ -27,8 +33,8 @@ import {
   TypeFeatureInfoLayerConfig,
   TypeVisibilityFlags,
 } from '@/geo/map/map-schema-types';
-import { TypeArrayOfFeatureInfoEntries, codedValueType, rangeDomainType } from '@/api/events/payloads';
-import { api } from '@/app';
+import { TypeFeatureInfoEntry, codedValueType, rangeDomainType } from '@/geo/utils/layer-set';
+
 import {
   commonGetFieldDomain,
   commonGetFieldType,
@@ -39,11 +45,6 @@ import {
   commonProcessTemporalDimension,
   commonValidateListOfLayerEntryConfig,
 } from '../esri-layer-common';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { TypeJsonObject } from '@/core/types/global-types';
-import { logger } from '@/core/utils/logger';
-import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 
 export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_DYNAMIC;
@@ -272,9 +273,9 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {Coordinate} location The pixel coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-  protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     const { map } = api.maps[this.mapId];
     return this.getFeatureInfoAtCoordinate(map.getCoordinateFromPixel(location), layerPath);
   }
@@ -285,9 +286,9 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The promised feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The promised feature info table.
    */
-  protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     const convertedLocation = api.projection.transform(
       location,
       `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`,
@@ -302,9 +303,9 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {Coordinate} lnglat The coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The promised feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The promised feature info table.
    */
-  protected async getFeatureInfoAtLongLat(lnglat: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected async getFeatureInfoAtLongLat(lnglat: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       // Get the layer config in a loaded phase
       const layerConfig = (await this.getLayerConfig(layerPath)) as EsriDynamicLayerEntryConfig;

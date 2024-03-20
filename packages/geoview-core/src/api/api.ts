@@ -11,7 +11,6 @@ import { DateMgt } from '@/core/utils/date-mgt';
 
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import * as Utilities from '../core/utils/utilities';
-import { GeoViewLayerPayload, payloadIsTestGeoViewLayers } from './events/payloads/geoview-layer-payload';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
 import { initMapDivFromFunctionCall } from '@/core/types/cgpv-types';
@@ -71,37 +70,6 @@ export class API {
 
     // apply focus to element when keyboard navigation is use
     this.manageKeyboardFocus();
-
-    // Run the callback for maps that have the triggerReadyCallback set to true and when all the maps are ready
-    this.event.once(
-      EVENT_NAMES.LAYER.EVENT_IF_CONDITION,
-      (payload) => {
-        if (payloadIsTestGeoViewLayers(payload)) {
-          let readyCallbackHasRun4AllMaps = false;
-          const intervalId = setInterval(() => {
-            let allMapsAreReady = true;
-            Object.keys(this.maps).forEach((mapId) => {
-              if (this.maps[mapId].mapIsReady()) {
-                this.event.emit(GeoViewLayerPayload.createTestGeoviewLayersPayload(`${mapId}/visibilityTest`));
-                // Run the callback for maps that have the triggerReadyCallback set using the mapId for the parameter value
-                if (this.maps[mapId].mapFeaturesConfig.triggerReadyCallback && !this.maps[mapId].readyCallbackHasRun) {
-                  if (this.readyCallback) this.readyCallback(mapId);
-                  this.maps[mapId].readyCallbackHasRun = true;
-                }
-              } else allMapsAreReady = false;
-            });
-
-            // Run the callback when all the maps are ready using allMaps for the parameter value
-            if (allMapsAreReady && !readyCallbackHasRun4AllMaps && this.readyCallback) {
-              clearInterval(intervalId);
-              readyCallbackHasRun4AllMaps = true;
-              this.readyCallback('allMaps');
-            }
-          }, 250);
-        }
-      },
-      'run cgpv.init callback?'
-    );
   }
 
   /**

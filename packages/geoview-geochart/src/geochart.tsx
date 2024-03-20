@@ -1,7 +1,7 @@
-import { TypeWindow, TypeLayerEntryConfig, useAppDisplayLanguageById } from 'geoview-core';
 import { GeoChart as GeoChartComponent, GeoChartConfig, ChartType, GeoChartDefaultColors, SchemaValidator, GeoChartAction } from 'geochart';
-import { TypeArrayOfLayerData, TypeFeatureInfoEntry } from 'geoview-core/src/api/events/payloads';
+import { TypeWindow, TypeLayerEntryConfig, useAppDisplayLanguageById } from 'geoview-core';
 import { logger } from 'geoview-core/src/core/utils/logger';
+import { TypeLayerData, TypeFeatureInfoEntry } from 'geoview-core/src/geo/utils/layer-set';
 import { findLayerDataAndConfigFromQueryResults, loadDatasources } from './geochart-parsing';
 import { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
 
@@ -12,7 +12,7 @@ interface GeoChartProps {
   mapId: string;
   config: PluginGeoChartConfig<ChartType>;
   schemaValidator: SchemaValidator;
-  layers: TypeArrayOfLayerData;
+  layers: TypeLayerData[];
   // eslint-disable-next-line react/require-default-props
   sx?: React.CSSProperties;
   // eslint-disable-next-line react/require-default-props

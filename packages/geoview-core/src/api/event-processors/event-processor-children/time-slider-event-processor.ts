@@ -3,8 +3,6 @@ import { logger } from '@/core/utils/logger';
 
 import { AbstractEventProcessor } from '../abstract-event-processor';
 import {
-  AbstractGeoViewVector,
-  CONST_LAYER_TYPES,
   EsriDynamic,
   ITimeSliderState,
   TimeSliderLayerSet,
@@ -13,6 +11,8 @@ import {
   api,
   getLocalizedValue,
 } from '@/core/types/cgpv-types';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 
 export class TimeSliderEventProcessor extends AbstractEventProcessor {
   /**

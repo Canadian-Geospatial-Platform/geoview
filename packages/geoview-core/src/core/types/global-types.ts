@@ -14,7 +14,6 @@ export * from 'zustand';
 export { getGeoViewStore } from '@/core/stores/stores-managers';
 export { isEqual } from 'lodash';
 export type { MutableRefObject, RefObject, Dispatch, SetStateAction } from 'react';
-export type { TypeArrayOfLayerData, TypeLayerData, TypeFeatureInfoEntry, TypeFeatureInfoEntryPartial } from '@/api/events/payloads';
 export type { TypeRegisteredLayers } from '@/geo/layer/layer';
 export type { ButtonPropsLayerPanel } from '@/ui/panel/panel-types';
 export type { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -36,19 +35,10 @@ export type { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 export type { TypePluginOptions } from '@/api/plugin/abstract-plugin';
 export type { SelectChangeEvent } from '@mui/material';
 export type { Coordinate } from 'ol/coordinate';
-export type { TypeAllQueriesDonePayload, MapMouseEventPayload, TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
+export type { MapMouseEventPayload } from '@/api/events/payloads';
 export type { TypeTabs } from '@/ui/tabs/tabs';
 
-export {
-  snackbarMessagePayload,
-  mapViewProjectionPayload,
-  PayloadBaseClass,
-  payloadIsALayerConfig,
-  payloadIsRemoveGeoViewLayer,
-  payloadIsASnackbarMessage,
-  payloadIsAMapMouseEvent,
-  payloadIsAllQueriesDone,
-} from '@/api/events/payloads';
+export { mapViewProjectionPayload, PayloadBaseClass, payloadIsAMapMouseEvent } from '@/api/events/payloads';
 export { geoviewLayerIsWMS } from '@/geo/layer/geoview-layers/raster/wms';
 export { geoviewLayerIsEsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 export { geoviewLayerIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
