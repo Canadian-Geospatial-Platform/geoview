@@ -365,6 +365,22 @@
         console.log(`api is ready for ${mapId}`);
 
         if (mapId === 'allMaps') {
+          // Wire a handle when all queries done after a map click
+          cgpv.api.maps['LYR1'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
+            const { coordinate, resultSet, eventType } = payload;
+            createInfoTable('LYR1', 'ResultSetId1', resultSet, eventType);
+          });
+          // Wire a handle when all queries done after a map click
+          cgpv.api.maps['LYR2'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
+            const { coordinate, resultSet, eventType } = payload;
+            createInfoTable('LYR2', 'ResultSetId2', resultSet, eventType);
+          });
+          // Wire a handle when all queries done after a map click
+          cgpv.api.maps['LYR3'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
+            const { coordinate, resultSet, eventType } = payload;
+            createInfoTable('LYR3', 'ResultSetId3', resultSet, eventType);
+          });
+
           createTableOfFilter('LYR1');
           createTableOfFilter('LYR2');
           createTableOfFilter('LYR3');
@@ -449,16 +465,6 @@
           dropDownContent.addEventListener('click', (e) => {
             cgpv.api.maps['LYR1'].layer.allFeatureInfoLayerSet.triggerGetAllFeatureInfo(e.currentTarget.value, 'all');
           });
-
-          // Note: ALL_QUERIES_DONE is obsolete, a replacement is coming (upcoming PR)
-          // cgpv.api.event.on(
-          //   cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-          //   (payload) => {
-          //     const { layerSetId, resultSet, eventType } = payload;
-          //     createInfoTable('LYR1', 'ResultSetId1', resultSet, eventType);
-          //   },
-          //   'LYR1/all/FeatureInfoLayerSet'
-          // );
         },
         'LYR1'
       );
@@ -482,16 +488,6 @@
         cgpv.api.event.emit({ event: 'map/get_all_features', handlerName: 'LYR2' });
       });
 
-      // Note: ALL_QUERIES_DONE is obsolete, a replacement is coming (upcoming PR)
-      // cgpv.api.event.on(
-      //   cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-      //   (payload) => {
-      //     const { layerSetId, resultSet, eventType } = payload;
-      //     createInfoTable('LYR2', 'ResultSetId2', resultSet, eventType);
-      //   },
-      //   'LYR2/click/FeatureInfoLayerSet'
-      // );
-
       cgpv.api.event.on(
         cgpv.api.eventNames.LAYER_SET.UPDATED,
         (payload) => {
@@ -508,16 +504,6 @@
       getAllFeatureInfo3.addEventListener('click', function (e) {
             cgpv.api.event.emit({ event: 'map/get_all_features', handlerName: 'LYR3' });
           });
-
-      // Note: ALL_QUERIES_DONE is obsolete, a replacement is coming (upcoming PR)
-      // cgpv.api.event.on(
-      //   cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-      //   (payload) => {
-      //     const { layerSetId, resultSet, eventType } = payload;
-      //     createInfoTable('LYR3', 'ResultSetId3', resultSet, eventType);
-      //   },
-      //   'LYR3/click/FeatureInfoLayerSet'
-      // );
 
       cgpv.api.event.on(
         cgpv.api.eventNames.LAYER_SET.UPDATED,

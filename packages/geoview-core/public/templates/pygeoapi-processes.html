@@ -140,27 +140,6 @@
     <script src="codedoc.js"></script>
     <script src="layerlib.js"></script>
     <script>
-    // GeoJson ==================================================================================================================
-    // Note: ALL_QUERIES_DONE is obsolete, a replacement is coming (upcoming PR)
-    // cgpv.api.event.on(
-    //   cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-    //   (payload) => {
-    //     const { layerSetId, resultSet, eventType } = payload;
-    //     createInfoTable('LYR5', 'geoJsonResultSetId', resultSet, 'click');
-    //   },
-    //   'LYR5/click/FeatureInfoLayerSet'
-    // );
-
-    // Note: ALL_QUERIES_DONE is obsolete, a replacement is coming (upcoming PR)
-    // cgpv.api.event.on(
-    //   cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-    //   (payload) => {
-    //     const { layerSetId, resultSet, eventType } = payload;
-    //     createInfoTable('LYR5', 'geoJsonResultSetId', resultSet, 'hover');
-    //   },
-    //   'LYR5/hover/FeatureInfoLayerSet'
-    // );
-
     cgpv.api.event.on(
       cgpv.api.eventNames.LAYER_SET.UPDATED,
       (payload) => {
@@ -178,6 +157,13 @@
         createCodeSnippet();
         createConfigSnippet();
 
+        if (mapId === 'allMaps') {
+          // Wire a handle when all queries done after a map click
+          cgpv.api.maps['LYR5'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
+            const { coordinate, resultSet, eventType } = payload;
+            createInfoTable('LYR5', 'geoJsonResultSetId', resultSet, eventType);
+          });
+        }
         createTableOfFilter('LYR5');
       });
 
