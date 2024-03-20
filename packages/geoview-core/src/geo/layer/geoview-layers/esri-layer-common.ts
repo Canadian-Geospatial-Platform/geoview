@@ -418,7 +418,8 @@ export function parseFeatureInfoEntries(records: TypeJsonObject[]): TypeFeatureI
  */
 export async function queryRecordsByUrl(url: string): Promise<TypeFeatureInfoEntryPartial[] | null> {
   // TODO: Refactor - Suggestion to rework this function and the one in EsriDynamic.getFeatureInfoAtLongLat(), making
-  // TO.DO.CONT: the latter redirect to this one here and merge some logic between the 2 functions ideally making this one here return a TypeFeatureInfoEntry[] with options to have returnGeometry=true or false and such.
+  // TO.DO.CONT: the latter redirect to this one here and merge some logic between the 2 functions ideally making this
+  // TO.DO.CONT: one here return a TypeFeatureInfoEntry[] with options to have returnGeometry=true or false and such.
   // Query the data
   try {
     const response = await fetch(url);

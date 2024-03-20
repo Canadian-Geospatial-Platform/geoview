@@ -974,10 +974,9 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param {string} layerPath Layer path to the layer's configuration.
    *
-   * @returns {Extent} The layer extent.
+   * @returns {Extent | undefined} The layer extent.
    */
-  getExtent(layerPath?: string): Extent | undefined {
-    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
+  getExtent(layerPath: string): Extent | undefined {
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     return olLayer?.getExtent();
   }
@@ -990,8 +989,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {Extent} layerExtent The extent to assign to the layer.
    * @param {string} layerPath The layer path to the layer's configuration.
    */
-  setExtent(layerExtent: Extent, layerPath?: string) {
-    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
+  setExtent(layerExtent: Extent, layerPath: string) {
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) olLayer.setExtent(layerExtent);
   }
@@ -1001,10 +999,9 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {number} The opacity of the layer.
+   * @returns {number | undefined} The opacity of the layer.
    */
-  getOpacity(layerPath?: string): number | undefined {
-    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
+  getOpacity(layerPath: string): number | undefined {
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     return olLayer?.getOpacity();
   }
@@ -1016,8 +1013,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {string} layerPath The layer path to the layer's configuration.
    *
    */
-  setOpacity(layerOpacity: number, layerPath?: string) {
-    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
+  setOpacity(layerOpacity: number, layerPath: string) {
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) olLayer.setOpacity(layerOpacity);
   }
@@ -1027,10 +1023,9 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {boolean} The visibility of the layer.
+   * @returns {boolean | undefined} The visibility of the layer.
    */
-  getVisible(layerPath?: string): boolean | undefined {
-    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
+  getVisible(layerPath: string): boolean | undefined {
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     return olLayer?.getVisible();
   }
@@ -1041,8 +1036,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {boolean} layerVisibility The visibility of the layer.
    * @param {string} layerPath The layer path to the layer's configuration.
    */
-  setVisible(layerVisibility: boolean, layerPath?: string) {
-    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
+  setVisible(layerVisibility: boolean, layerPath: string) {
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) {
       olLayer.setVisible(layerVisibility);
@@ -1055,10 +1049,9 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {boolean} The visibility of the layer.
+   * @returns {number | undefined} The min zoom of the layer.
    */
-  getMinZoom(layerPath?: string): number | undefined {
-    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
+  getMinZoom(layerPath: string): number | undefined {
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     return olLayer?.getMinZoom();
   }
@@ -1066,11 +1059,10 @@ export abstract class AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * Set the min zoom of the layer. This routine does nothing when the layerPath specified is not found.
    *
-   * @param {boolean} layerVisibility The visibility of the layer.
+   * @param {boolean} layerVisibility The min zoom of the layer.
    * @param {string} layerPath The layer path to the layer's configuration.
    */
-  setMinZoom(minZoom: number, layerPath?: string) {
-    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
+  setMinZoom(minZoom: number, layerPath: string) {
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) olLayer.setMinZoom(minZoom);
   }
@@ -1080,10 +1072,9 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {boolean} The visibility of the layer.
+   * @returns {number | undefined} The max zoom of the layer.
    */
-  getMaxZoom(layerPath?: string): number | undefined {
-    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
+  getMaxZoom(layerPath: string): number | undefined {
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     return olLayer?.getMaxZoom();
   }
@@ -1091,11 +1082,10 @@ export abstract class AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * Set the max zoom of the layer. This routine does nothing when the layerPath specified is not found.
    *
-   * @param {boolean} layerVisibility The visibility of the layer.
+   * @param {boolean} layerVisibility The max zoom of the layer.
    * @param {string} layerPath The layer path to the layer's configuration.
    */
-  setMaxZoom(maxZoom: number, layerPath?: string) {
-    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
+  setMaxZoom(maxZoom: number, layerPath: string) {
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) olLayer.setMaxZoom(maxZoom);
   }
@@ -1108,9 +1098,8 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeLegend | null>} The legend of the layer.
    */
-  async getLegend(layerPath?: string): Promise<TypeLegend | null> {
+  async getLegend(layerPath: string): Promise<TypeLegend | null> {
     try {
-      layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
       const layerConfig = this.getLayerConfig(layerPath) as
         | (AbstractBaseLayerEntryConfig & {
             style: TypeStyleConfig;
@@ -1276,8 +1265,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {string | undefined} The filter associated to the layer or undefined.
    */
-  getLayerFilter(layerPath?: string): string | undefined {
-    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
+  getLayerFilter(layerPath: string): string | undefined {
     const layerConfig = this.getLayerConfig(layerPath);
     return layerConfig?.olLayer?.get('layerFilter');
   }
@@ -1290,8 +1278,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {TimeDimension} The temporal dimension associated to the layer or undefined.
    */
-  getTemporalDimension(layerPath?: string): TimeDimension {
-    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
+  getTemporalDimension(layerPath: string): TimeDimension {
     return this.layerTemporalDimension[layerPath];
   }
 
@@ -1302,19 +1289,8 @@ export abstract class AbstractGeoViewLayer {
    * @param {TimeDimension} temporalDimension The value to assign to the layer temporal dimension property.
    */
   setTemporalDimension(layerPath: string, temporalDimension: TimeDimension): void {
-    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     this.layerTemporalDimension[layerPath] = temporalDimension;
   }
-
-  /** ***************************************************************************************************************************
-   * Get the bounds of the layer represented in the layerConfig pointed to by the cached layerPath, returns updated bounds
-   *
-   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
-   * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
-   *
-   * @returns {Extent} The new layer bounding box.
-   */
-  protected abstract getBounds(bounds: Extent, notUsed?: never): Extent | undefined;
 
   /** ***************************************************************************************************************************
    * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
@@ -1336,11 +1312,10 @@ export abstract class AbstractGeoViewLayer {
    * @param {string | number | undefined} projectionCode Optional projection code to use for the returned bounds. Default to
    * current projection.
    *
-   * @returns {Extent} The layer bounding box.
+   * @returns {Extent | undefined} The layer bounding box.
    */
-  calculateBounds(layerPath?: string): Extent | undefined {
+  calculateBounds(layerPath: string): Extent | undefined {
     try {
-      layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
       let bounds: Extent | undefined;
       const processGroupLayerBounds = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {
         listOfLayerEntryConfig.forEach((layerConfig) => {
@@ -1394,8 +1369,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param {string} layerPath The layerpath to the node we want to delete.
    */
-  removeConfig(layerPath?: string) {
-    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
+  removeConfig(layerPath: string) {
     const layerConfigToRemove = this.getLayerConfig(layerPath) as AbstractBaseLayerEntryConfig;
     if (layerConfigToRemove.entryType !== CONST_LAYER_ENTRY_TYPES.GROUP) this.unregisterFromLayerSets(layerConfigToRemove);
     delete api.maps[this.mapId].layer.registeredLayers[layerPath];
