@@ -1,4 +1,4 @@
-import { GeoviewStoreType, IFeatureInfoState } from '@/core/stores';
+import { GeoviewStoreType, IFeatureInfoState, IMapDataTableState } from '@/core/stores';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoResultSet } from '@/geo/utils/feature-info-layer-set';
 import { TypeHoverFeatureInfoResultSet } from '@/geo/utils/hover-feature-info-layer-set';
@@ -79,6 +79,15 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Shortcut to get the data table state for a given map id
+   * @param {string} mapId The mapId
+   * @returns {IMapDataTableState} The data table state
+   */
+  protected static getDataTableState(mapId: string): IMapDataTableState {
+    return super.getState(mapId).dataTableState;
+  }
+
+  /**
    * Deletes the specified layer path from the layer sets in the store
    * @param {string} mapId The map identifier
    * @param {string} layerPath The layer path to delete
@@ -120,12 +129,12 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    */
   private static deleteFeatureAllInfo(mapId: string, layerPath: string) {
     // The feature info state
-    const featureInfoState = this.getFeatureInfoState(mapId);
+    const dataTableState = this.getDataTableState(mapId);
 
     // Redirect to helper function
-    this.deleteFromArray(featureInfoState.allFeaturesDataArray, layerPath, (layerArrayResult) => {
+    this.deleteFromArray(dataTableState.allFeaturesDataArray, layerPath, (layerArrayResult) => {
       // Update the layer data array in the store
-      featureInfoState.actions.setAllFeaturesDataArray(layerArrayResult);
+      dataTableState.actions.setAllFeaturesDataArray(layerArrayResult);
     });
   }
 
@@ -166,6 +175,9 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
     // The feature info state
     const featureInfoState = this.getFeatureInfoState(mapId);
 
+    // Data table state
+    const dataTableState = this.getDataTableState(mapId);
+
     // Depending on the event type
     if (eventType === 'click') {
       /**
@@ -201,10 +213,10 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       /**
        * Create a get all features info object for each layer which is then used to render layers
        */
-      const allFeaturesDataArray = [...featureInfoState.allFeaturesDataArray];
+      const allFeaturesDataArray = [...dataTableState.allFeaturesDataArray];
       if (!allFeaturesDataArray.find((layerEntry) => layerEntry.layerPath === layerPath)) {
         allFeaturesDataArray.push((resultSet as TypeFeatureInfoResultSet)?.[layerPath]?.data);
-        featureInfoState.actions.setAllFeaturesDataArray(allFeaturesDataArray);
+        dataTableState.actions.setAllFeaturesDataArray(allFeaturesDataArray);
       }
     }
   }

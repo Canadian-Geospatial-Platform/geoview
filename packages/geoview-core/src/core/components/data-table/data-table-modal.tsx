@@ -15,11 +15,11 @@ import {
 } from '@/ui';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useLayerSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useDataTableStoreAllFeaturesDataArray } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 
 import { FieldInfos } from './data-table';
 import { getSxClasses } from './data-table-style';
 import { logger } from '@/core/utils/logger';
-import { useDetailsStoreAllFeaturesDataArray } from '@/core/stores';
 import { useFeatureFieldInfos } from './hooks';
 
 interface ColumnsType {
@@ -46,7 +46,7 @@ export default function DataTableModal(): JSX.Element {
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const selectedLayer = useLayerSelectedLayerPath();
 
-  const layersData = useDetailsStoreAllFeaturesDataArray();
+  const layersData = useDataTableStoreAllFeaturesDataArray();
 
   // Create columns for data table.
   const mappedLayerData = useFeatureFieldInfos(layersData);

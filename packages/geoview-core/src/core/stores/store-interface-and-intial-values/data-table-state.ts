@@ -2,9 +2,10 @@ import { useStore } from 'zustand';
 import { type MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { DataTableProcessor } from '@/api/event-processors/event-processor-children/data-table-processor';
-import { TypeLayerData } from '@/geo/utils/layer-set';
+import { QueryType, TypeLayerData } from '@/geo/utils/layer-set';
 
 import { useGeoViewStore } from '../stores-managers';
+import { api } from '@/app';
 
 interface IMapDataTableStateActions {
   setColumnFiltersEntry: (filtered: MRTColumnFiltersState, layerPath: string) => void;
@@ -13,9 +14,10 @@ interface IMapDataTableStateActions {
   setRowsFilteredEntry: (rows: number, layerPath: string) => void;
   setSelectedLayerPath: (layerPath: string) => void;
   setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
-  setLayersData: (layers: TypeLayerData[]) => void;
+  setAllFeaturesDataArray: (allFeaturesDataArray: TypeLayerData[]) => void;
   applyMapFilters: (filterStrings: string) => void;
   setTableHeight: (tableHeight: number) => void;
+  triggerGetAllFeatureInfo: (layerPath: string, queryType: QueryType) => void;
 }
 export interface IMapDataTableState {
   columnFiltersRecord: Record<string, MRTColumnFiltersState>;
@@ -24,8 +26,8 @@ export interface IMapDataTableState {
   rowsFilteredRecord: Record<string, number>;
   selectedLayerPath: string;
   toolbarRowSelectedMessageRecord: Record<string, string>;
-  layersData: TypeLayerData[];
   tableHeight: number;
+  allFeaturesDataArray: TypeLayerData[];
   actions: IMapDataTableStateActions;
 }
 
@@ -38,15 +40,15 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IMa
     selectedLayerPath: '',
     toolbarRowSelectedMessageRecord: {},
     tableHeight: 600,
-    layersData: [],
+    allFeaturesDataArray: [],
 
     // #region ACTIONS
     actions: {
-      setLayersData: (layersData: TypeLayerData[]) => {
+      setAllFeaturesDataArray: (allFeaturesDataArray: TypeLayerData[]) => {
         set({
           dataTableState: {
             ...get().dataTableState,
-            layersData,
+            allFeaturesDataArray,
           },
         });
       },
@@ -111,6 +113,9 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IMa
           },
         });
       },
+      triggerGetAllFeatureInfo(layerPath: string, queryType: QueryType = 'all') {
+        api.maps[get().mapId].layer.allFeatureInfoLayerSet.queryLayer(layerPath, queryType);
+      },
     },
     // #endregion ACTIONS
   } as IMapDataTableState;
@@ -131,7 +136,8 @@ export const useDataTableStoreMapFilteredRecord = (): Record<string, boolean> =>
   useStore(useGeoViewStore(), (state) => state.dataTableState.mapFilteredRecord);
 export const useDataTableStoreRowsFiltered = (): Record<string, number> =>
   useStore(useGeoViewStore(), (state) => state.dataTableState.rowsFilteredRecord);
-export const useDatatableStoreLayersData = (): TypeLayerData[] => useStore(useGeoViewStore(), (state) => state.dataTableState.layersData);
+export const useDataTableStoreAllFeaturesDataArray = (): TypeLayerData[] =>
+  useStore(useGeoViewStore(), (state) => state.dataTableState.allFeaturesDataArray);
 export const useDatatableStoreTableHeight = (): number => useStore(useGeoViewStore(), (state) => state.dataTableState.tableHeight);
 
 export const useDataTableStoreActions = (): IMapDataTableStateActions =>
