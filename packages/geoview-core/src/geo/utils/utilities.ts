@@ -32,9 +32,9 @@ export class GeoUtilities {
    */
   geometryToWKT = (geometry: Geometry): string | null => {
     // TODO: Refactor - This method should be static
-    // ! but since it goes through the api instance to be importable
-    // ! afterwards it loses non static methods. For this reason, I've left it like this.
-    // ! See api.constructor: this.geoUtilities = new GeoUtilities();
+    // GV but since it goes through the api instance to be importable
+    // GV afterwards it loses non static methods. For this reason, I've left it like this.
+    // GV See api.constructor: this.geoUtilities = new GeoUtilities();
     if (geometry) {
       // Get the wkt for the geometry
       const format = new WKT();
@@ -52,9 +52,9 @@ export class GeoUtilities {
    */
   wktToGeometry = (wkt: string, readOptions: ReadOptions): Geometry | null => {
     // TODO: Refactor - This method should be static
-    // ! but since it goes through the api instance to be importable
-    // ! afterwards it loses non static methods. For this reason, I've left it like this.
-    // ! See api.constructor: this.geoUtilities = new GeoUtilities();
+    // GV but since it goes through the api instance to be importable
+    // GV afterwards it loses non static methods. For this reason, I've left it like this.
+    // GV See api.constructor: this.geoUtilities = new GeoUtilities();
     if (wkt) {
       // Get the feature for the wkt
       const format = new WKT();
@@ -72,9 +72,9 @@ export class GeoUtilities {
    */
   geojsonToGeometry = (geojson: string, readOptions: ReadOptions): Geometry | null => {
     // TODO: Refactor - This method should be static
-    // ! but since it goes through the api instance to be importable
-    // ! afterwards it loses non static methods. For this reason, I've left it like this.
-    // ! See api.constructor: this.geoUtilities = new GeoUtilities();
+    // GV but since it goes through the api instance to be importable
+    // GV afterwards it loses non static methods. For this reason, I've left it like this.
+    // GV See api.constructor: this.geoUtilities = new GeoUtilities();
     if (geojson) {
       // Get the feature for the geojson
       const format = new GeoJSON();
@@ -89,9 +89,9 @@ export class GeoUtilities {
    */
   defaultDrawingStyle = (strokeColor?: Color | string, strokeWidth?: number, fillColor?: Color | string): Style => {
     // TODO: Refactor - This method should be static
-    // ! but since it goes through the api instance to be importable
-    // ! afterwards it loses non static methods. For this reason, I've left it like this.
-    // ! See api.constructor: this.geoUtilities = new GeoUtilities();
+    // GV but since it goes through the api instance to be importable
+    // GV afterwards it loses non static methods. For this reason, I've left it like this.
+    // GV See api.constructor: this.geoUtilities = new GeoUtilities();
     return new Style({
       stroke: new Stroke({
         color: strokeColor || 'orange',
@@ -128,12 +128,12 @@ export class GeoUtilities {
    */
   convertTypeFeatureStyleToOpenLayersStyle = (style?: TypeFeatureStyle): Style => {
     // TODO: Refactor - This method should be static
-    // ! but since it goes through the api instance to be importable
-    // ! afterwards it loses non static methods. For this reason, I've left it like this.
-    // ! See api.constructor: this.geoUtilities = new GeoUtilities();
+    // GV but since it goes through the api instance to be importable
+    // GV afterwards it loses non static methods. For this reason, I've left it like this.
+    // GV See api.constructor: this.geoUtilities = new GeoUtilities();
     // TODO: Refactor - This function could also be used by vector class when it works with the styling
-    // ! So I'm putting it in this utilities class so that it eventually becomes shared between vector
-    // ! class and interactions classes.
+    // GV So I'm putting it in this utilities class so that it eventually becomes shared between vector
+    // GV class and interactions classes.
     // Redirect
     return this.defaultDrawingStyle(style?.strokeColor, style?.strokeWidth, style?.fillColor);
   };

@@ -1,6 +1,6 @@
 import { Coordinate } from 'ol/coordinate';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import { payloadIsAMapMouseEvent, TypeResultSet } from '@/api/events/payloads';
+import { payloadIsAMapMouseEvent } from '@/api/events/payloads';
 import { api, LayerApi } from '@/app';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
@@ -10,7 +10,7 @@ import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-b
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
-import { EventType, LayerSet, TypeFeatureInfoEntry, TypeLayerData } from './layer-set';
+import { EventType, LayerSet, TypeFeatureInfoEntry, TypeLayerData, TypeResultSet } from './layer-set';
 
 /**
  * A class containing a set of layers associated with a TypeLayerData object, which will receive the result of a
@@ -23,16 +23,15 @@ export class FeatureInfoLayerSet extends LayerSet {
   declare resultSet: TypeFeatureInfoResultSet;
 
   // Keep all callback delegate references
-  private onQueryEndedHandlers: QueryEndedDelegate[] = [];
+  #onQueryEndedHandlers: QueryEndedDelegate[] = [];
 
   /**
    * The class constructor that instanciate a set of layer.
    *
    * @param {LayerApi} layerApi The layer Api to work with.
-   * @param {string} mapId The map identifier the layer set belongs to.
    */
-  constructor(layerApi: LayerApi, mapId: string) {
-    super(layerApi, mapId, `${mapId}/click/FeatureInfoLayerSet`);
+  constructor(layerApi: LayerApi) {
+    super(layerApi);
 
     // Wire a listener on the map click
     this.setMapClickListener();
@@ -106,7 +105,7 @@ export class FeatureInfoLayerSet extends LayerSet {
    */
   emitQueryEnded = (event: QueryEndedEvent) => {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onQueryEndedHandlers, event);
+    EventHelper.emitEvent(this, this.#onQueryEndedHandlers, event);
   };
 
   /**
@@ -115,7 +114,7 @@ export class FeatureInfoLayerSet extends LayerSet {
    */
   onQueryEnded = (callback: QueryEndedDelegate): void => {
     // Wire the event handler
-    EventHelper.onEvent(this.onQueryEndedHandlers, callback);
+    EventHelper.onEvent(this.#onQueryEndedHandlers, callback);
   };
 
   /**
@@ -124,7 +123,7 @@ export class FeatureInfoLayerSet extends LayerSet {
    */
   offQueryEnded = (callback: QueryEndedDelegate): void => {
     // Unwire the event handler
-    EventHelper.offEvent(this.onQueryEndedHandlers, callback);
+    EventHelper.offEvent(this.#onQueryEndedHandlers, callback);
   };
 
   /**
@@ -134,8 +133,8 @@ export class FeatureInfoLayerSet extends LayerSet {
    */
   queryLayers = async (longLatCoordinate: Coordinate): Promise<TypeFeatureInfoResultSet> => {
     // TODO: REFACTOR - Watch out for code reentrancy between queries!
-    // ! Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
-    // ! As it is (and was like this befor events refactor), the this.resultSet is mutating between async calls.
+    // GV Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
+    // GV As it is (and was like this befor events refactor), the this.resultSet is mutating between async calls.
 
     // Prepare to hold all promises of features in the loop below
     const allPromises: Promise<TypeFeatureInfoEntry[] | undefined | null>[] = [];
@@ -155,7 +154,7 @@ export class FeatureInfoLayerSet extends LayerSet {
         data.queryStatus = 'processing';
 
         // Process query on results data
-        const promiseResult = this.processQueryResultSetData(data, layerConfig, layerPath, queryType, longLatCoordinate);
+        const promiseResult = this.queryLayerFeatures(data, layerConfig, layerPath, queryType, longLatCoordinate);
 
         // Add the promise
         allPromises.push(promiseResult);

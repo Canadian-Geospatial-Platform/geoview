@@ -1,7 +1,7 @@
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import { GeoCore } from '@/geo/layer/other/geocore';
-import { Geometry } from '@/geo/layer/geometry/geometry';
+import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { FeatureHighlight } from '@/geo/utils/feature-highlight';
 
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -60,15 +60,15 @@ export class LayerApi {
   geoviewLayers: { [geoviewLayerId: string]: AbstractGeoViewLayer } = {};
 
   // used to access geometry API to create and manage geometries
-  geometry: Geometry | undefined;
+  geometry: GeometryApi;
 
   // order to load layers
   initialLayerOrder: Array<TypeOrderedLayerInfo> = [];
 
   /** used to reference the map viewer */
-  private mapViewer: MapViewer;
+  mapViewer: MapViewer;
 
-  private get mapId(): string {
+  get mapId(): string {
     return this.mapViewer.mapId;
   }
 
@@ -94,7 +94,7 @@ export class LayerApi {
   featureInfoLayerSet: FeatureInfoLayerSet;
 
   // Keep all callback delegates references
-  private onLayerAddedHandlers: LayerAddedDelegate[] = [];
+  #onLayerAddedHandlers: LayerAddedDelegate[] = [];
 
   /**
    * Initializes layer types and listen to add/remove layer events from outside
@@ -102,12 +102,12 @@ export class LayerApi {
    */
   constructor(mapViewer: MapViewer) {
     this.mapViewer = mapViewer;
-    this.legendsLayerSet = new LegendsLayerSet(this, this.mapId);
-    this.hoverFeatureInfoLayerSet = new HoverFeatureInfoLayerSet(this, this.mapId);
-    this.allFeatureInfoLayerSet = new AllFeatureInfoLayerSet(this, this.mapId);
-    this.featureInfoLayerSet = new FeatureInfoLayerSet(this, this.mapId);
+    this.legendsLayerSet = new LegendsLayerSet(this);
+    this.hoverFeatureInfoLayerSet = new HoverFeatureInfoLayerSet(this);
+    this.allFeatureInfoLayerSet = new AllFeatureInfoLayerSet(this);
+    this.featureInfoLayerSet = new FeatureInfoLayerSet(this);
 
-    this.geometry = new Geometry(this.mapId);
+    this.geometry = new GeometryApi(this.mapId);
     this.featureHighlight = new FeatureHighlight(this.mapId);
   }
 
@@ -313,17 +313,25 @@ export class LayerApi {
   ): GeoViewLayerAddedResult | undefined => {
     // eslint-disable-next-line no-param-reassign
     geoviewLayerConfig.geoviewLayerId = generateId(geoviewLayerConfig.geoviewLayerId);
+    // TODO: Refactor - We should not create a new config here.
+    // TO.DOCONT: The layer class should receive an instance of configuration in is constructor.
+    // TO.DOCONT: Here the function sends the config to this class to get the structure to use to generate layers.
+    // TO.DOCONT: We should not have link to config anymore...
     // create a new config object for this map element
     const config = new Config(this.mapViewer.map.getTargetElement());
 
     const suportedLanguages = optionalSuportedLanguages || config.configValidation.defaultMapFeaturesConfig.suportedLanguages;
+
+    // TODO: Refactor - This should be deal with the config classes and this class pushes the structure ready for consumption by layer orchestrator
     config.configValidation.validateListOfGeoviewLayerConfig(suportedLanguages, [geoviewLayerConfig]);
 
     if (geoviewLayerConfig.geoviewLayerId in this.geoviewLayers) this.printDuplicateGeoviewLayerConfigError(geoviewLayerConfig);
     else {
       // Adds the configuration to the list in map
       // TODO: Refactor - Figure out why doing this - and then not do this
-      this.mapViewer.mapFeaturesConfig.map.listOfGeoviewLayerConfig!.push(geoviewLayerConfig);
+      // TO.DOCONT: 2024-03-20 as part of the layers refactoring, this has been commented out, leave it commented for a bit
+      // TO.DOCONT: until things are confirmed to be still working
+      // this.mapViewer.mapFeaturesConfig.map.listOfGeoviewLayerConfig!.push(geoviewLayerConfig);
 
       // Process the addition of the layer
       return this.#addGeoviewLayerStep2(geoviewLayerConfig);
@@ -340,6 +348,7 @@ export class LayerApi {
    * The result contains the instanciated GeoViewLayer along with a promise that will resolve when the layer will be officially on the map.
    */
   #addGeoviewLayerStep2 = (geoviewLayerConfig: TypeGeoviewLayerConfig): GeoViewLayerAddedResult | undefined => {
+    // TODO: Refactor - Here the function should use the structure created by validation config with the metadata fetch and no need to pass the validation.
     let layerBeingAdded: AbstractGeoViewLayer | undefined;
     if (layerConfigIsGeoJSON(geoviewLayerConfig)) {
       layerBeingAdded = new GeoJSON(this.mapId, geoviewLayerConfig);
@@ -437,7 +446,7 @@ export class LayerApi {
     }
 
     // Log
-    logger.logInfo(`GeoView Layer ${geoviewLayer.geoviewLayerId} added ${this.mapId}`, geoviewLayer);
+    logger.logInfo(`GeoView Layer ${geoviewLayer.geoviewLayerId} added to map ${this.mapId}`, geoviewLayer);
 
     // Set the layer z indices
     MapEventProcessor.setLayerZIndices(this.mapId);
@@ -494,7 +503,7 @@ export class LayerApi {
    */
   emitLayerAdded = (event: LayerAddedEvent) => {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onLayerAddedHandlers, event);
+    EventHelper.emitEvent(this, this.#onLayerAddedHandlers, event);
   };
 
   /**
@@ -503,7 +512,7 @@ export class LayerApi {
    */
   onLayerAdded = (callback: LayerAddedDelegate): void => {
     // Wire the event handler
-    EventHelper.onEvent(this.onLayerAddedHandlers, callback);
+    EventHelper.onEvent(this.#onLayerAddedHandlers, callback);
   };
 
   /**
@@ -512,7 +521,7 @@ export class LayerApi {
    */
   offLayerAdded = (callback: LayerAddedDelegate): void => {
     // Unwire the event handler
-    EventHelper.offEvent(this.onLayerAddedHandlers, callback);
+    EventHelper.offEvent(this.#onLayerAddedHandlers, callback);
   };
 
   /**

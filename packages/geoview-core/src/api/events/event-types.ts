@@ -1,8 +1,6 @@
 import { APPBAR } from './constants/app-bar-constants';
 import { FOOTERBAR } from './constants/footer-bar-constants';
-import { LAYER_SET } from './constants/layer-set-constants';
 import { MAP } from './constants/map-constants';
-import { FEATURE_HIGHLIGHT } from './constants/feature-highlight-constants';
 import { MODAL } from './constants/modal-constants';
 import { NAVBAR } from './constants/nav-bar-constants';
 import { SLIDER } from './constants/slider-constants';
@@ -14,9 +12,7 @@ import { SNACKBAR } from './constants/snackbar-constants';
 export const EVENT_NAMES = {
   APPBAR,
   FOOTERBAR,
-  LAYER_SET,
   MAP,
-  FEATURE_HIGHLIGHT,
   MODAL,
   NAVBAR,
   SLIDER,
@@ -29,18 +25,12 @@ export const EVENT_NAMES = {
 export type EventStringId =
   | 'appbar/panel_create'
   | 'appbar/panel_remove'
-  | 'details_panel/crosshair_enter'
-  | 'feature_highlight/highlight'
-  | 'feature_highlight/clear'
-  | 'feature_highlight/highlightBBox'
   | 'footerbar/tab_create'
   | 'footerbar/tab_remove'
-  | 'layer_set/updated'
   | 'map/add_component'
   | 'map/crosshair_enter'
   | 'map/get_all_features'
   | 'map/inkeyfocus'
-  | 'map/loaded'
   | 'map/moveend'
   | 'map/pointermove'
   | 'map/reload'

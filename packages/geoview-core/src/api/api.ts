@@ -132,7 +132,7 @@ export class API {
 
   /**
    * Create a new map in a given div id.
-   * !The div MUST NOT have a geoview-map class or a warning will be shown when initMapDivFromFunctionCall is called.
+   * GV The div MUST NOT have a geoview-map class or a warning will be shown when initMapDivFromFunctionCall is called.
    * If is present, the div will be created with a default config
    *
    * @param {string} divId the id of the div to create map in

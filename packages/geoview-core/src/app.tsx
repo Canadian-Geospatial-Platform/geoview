@@ -91,7 +91,7 @@ async function renderMap(mapElement: Element): Promise<void> {
     reactRoot[mapId] = createRoot(mapElement!);
 
     // Wire the handling of the map reload
-    api.event.onMapReloadRemove(mapId, handleReload);
+    api.event.onMapRemove(mapId, handleReload);
 
     // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
     return new Promise<void>((resolve) => {
@@ -111,7 +111,7 @@ async function renderMap(mapElement: Element): Promise<void> {
 
 /**
  * Initialize a basic div from a function call.
- * !The div MUST NOT have a geoview-map class or a warning will be shown.
+ * GV The div MUST NOT have a geoview-map class or a warning will be shown.
  * If is present, the div will be created with a default config
  *
  * @param {Element} mapDiv The basic div to initialise

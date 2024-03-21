@@ -549,7 +549,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       showClickMarker: (marker: TypeClickMarker) => {
         const projectedCoords = api.projection.transformPoints([marker.lnglat], `EPSG:4326`, `EPSG:${get().mapState.currentProjection}`);
 
-        //! need to use state because it changes store and do action at the same time
+        // GV need to use state because it changes store and do action at the same time
         get().mapState.mapElement!.getOverlayById(`${get().mapId}-clickmarker`)!.setPosition(projectedCoords[0]);
 
         set({

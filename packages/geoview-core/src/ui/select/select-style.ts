@@ -3,7 +3,7 @@ import { Theme } from '@mui/material/styles';
 // TODO: Refactor Note - No theme when an external component (e.g. GeoChart) uses a CGPV UI component. I had to add the "?" to support when no theme are set (no map).
 export const getSxClasses = (theme: Theme) => ({
   formControl: {
-    fontSize: theme.palette.geoViewFontSize.sm,
+    fontSize: theme.palette.geoViewFontSize?.sm,
     width: '100%',
     color: theme.palette.text.primary,
     '& .MuiOutlinedInput-notchedOutline': {
@@ -31,9 +31,9 @@ export const getSxClasses = (theme: Theme) => ({
   },
   label: {
     color: theme.palette.text.primary,
-    fontSize: theme.palette.geoViewFontSize.default,
+    fontSize: theme.palette.geoViewFontSize?.default,
   },
   menuItem: {
-    fontSize: theme.palette.geoViewFontSize.sm,
+    fontSize: theme.palette.geoViewFontSize?.sm,
   },
 });

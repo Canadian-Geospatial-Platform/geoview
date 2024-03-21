@@ -23,7 +23,7 @@ import {
   TypeMapState,
   TypeValidMapProjectionCodes,
 } from '@/geo/map/map-schema-types';
-import { mapPayload, lngLatPayload, mapMouseEventPayload, numberPayload, mapViewProjectionPayload } from '@/api/events/payloads';
+import { lngLatPayload, mapMouseEventPayload, numberPayload, mapViewProjectionPayload } from '@/api/events/payloads';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
@@ -41,17 +41,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
   protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
     const { mapId } = store.getState();
 
-    const unsubMapLoaded = store.subscribe(
-      (state) => state.mapState.mapLoaded,
-      (cur, prev) => {
-        if (cur !== prev) {
-          // Log (too annoying, already have trace in EVENT_MAP_LOADED handler that works well)
-          // logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - mapLoaded (changed)', mapId, cur);
-
-          api.event.emit(mapPayload(EVENT_NAMES.MAP.EVENT_MAP_LOADED, mapId, store.getState().mapState.mapElement!));
-        }
-      }
-    );
+    // TODO: Refactor - We should remove all the api.event.emits from the Processor and place them
+    // TO.DOCONT: where they belong, closer to their respective classes, in those examples, the MAP.
+    // TO.DOCONT: Only use store subscriptions at the processor level to maintain a
+    // TO.DOCONT: store state internally and, eventually, use them to order the state changes to reduce
+    // TO.DOCONT: possible component refreshes.
 
     // #region MAP STATE
     const unsubMapCenterCoord = store.subscribe(
@@ -163,7 +157,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Return the array of subscriptions so they can be destroyed later
     return [
       unsubMapHighlightedFeatures,
-      unsubMapLoaded,
       unsubMapCenterCoord,
       unsubMapPointerPosition,
       unsubMapProjection,
@@ -173,7 +166,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     ];
   }
 
-  //! THIS IS THE ONLY FUNCTION TO SET STORE DIRECTLY
+  // GV THIS IS THE ONLY FUNCTION TO SET STORE DIRECTLY
   static setMapLoaded(mapId: string): void {
     // Log
     logger.logTraceCore('MAP EVENT PROCESSOR - setMapLoaded', mapId);
@@ -258,9 +251,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // Static functions for Typescript files to access store actions
   // **********************************************************
-  //! Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
-  //! Some action does state modifications AND map actions.
-  //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+  // GV Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
+  // GV Some action does state modifications AND map actions.
+  // GV ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
 
   // #region
   /**
@@ -462,8 +455,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // Static functions for Store Map State to action on API
   // **********************************************************
-  //! NEVER add a store action who does set state AND map action at a same time.
-  //! Review the action in store state to make sure
+  // GV NEVER add a store action who does set state AND map action at a same time.
+  // GV Review the action in store state to make sure
   // #region
   static createEmptyBasemap(mapId: string) {
     return api.maps[mapId].basemap.createEmptyBasemap();
@@ -535,9 +528,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     const projectionConfig = api.projection.projections[MapEventProcessor.getMapState(mapId).currentProjection];
     if (bbox) {
-      //! There were issues with fromLonLat in rare cases in LCC projections, transformExtent seems to solve them.
-      //! fromLonLat and transformExtent give differing results in many cases, fromLonLat had issues with the first
-      //! three results from a geolocator search for "vancouver river"
+      // GV There were issues with fromLonLat in rare cases in LCC projections, transformExtent seems to solve them.
+      // GV fromLonLat and transformExtent give differing results in many cases, fromLonLat had issues with the first
+      // GV three results from a geolocator search for "vancouver river"
       const convertedExtent = api.projection.transformExtent(bbox, 'EPSG:4326', projectionConfig);
 
       // Highlight

@@ -24,10 +24,10 @@ export type ExtentOptions = InteractionOptions & {
  */
 export class Extent extends Interaction {
   // The embedded Open Layers Extent component
-  ol_extent: OLExtent;
+  #ol_extent: OLExtent;
 
   // Keep all callback delegates references
-  private onExtentChangedHandlers: ExtentDelegate[] = [];
+  #onExtentChangedHandlers: ExtentDelegate[] = [];
 
   /**
    * Initialize Extent component
@@ -44,10 +44,10 @@ export class Extent extends Interaction {
     };
 
     // Activate the OpenLayers Extent module
-    this.ol_extent = new OLExtent(olOptions);
+    this.#ol_extent = new OLExtent(olOptions);
 
     // Wire handler when drawing of extent is changed
-    this.ol_extent.on('extentchanged', this.emitExtentChanged);
+    this.#ol_extent.on('extentchanged', this.emitExtentChanged);
   }
 
   /**
@@ -55,7 +55,7 @@ export class Extent extends Interaction {
    */
   public startInteraction() {
     // Redirect
-    super.startInteraction(this.ol_extent);
+    super.startInteraction(this.#ol_extent);
   }
 
   /**
@@ -63,7 +63,7 @@ export class Extent extends Interaction {
    */
   public stopInteraction() {
     // Redirect
-    super.stopInteraction(this.ol_extent);
+    super.stopInteraction(this.#ol_extent);
   }
 
   /**
@@ -72,7 +72,7 @@ export class Extent extends Interaction {
    */
   emitExtentChanged = (event: OLExtentEvent) => {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onExtentChangedHandlers, event);
+    EventHelper.emitEvent(this, this.#onExtentChangedHandlers, event);
   };
 
   /**
@@ -81,7 +81,7 @@ export class Extent extends Interaction {
    */
   onExtentChanged = (callback: ExtentDelegate): void => {
     // Wire the event handler
-    EventHelper.onEvent(this.onExtentChangedHandlers, callback);
+    EventHelper.onEvent(this.#onExtentChangedHandlers, callback);
   };
 
   /**
@@ -90,7 +90,7 @@ export class Extent extends Interaction {
    */
   offExtentChanged = (callback: ExtentDelegate): void => {
     // Unwire the event handler
-    EventHelper.offEvent(this.onExtentChangedHandlers, callback);
+    EventHelper.offEvent(this.#onExtentChangedHandlers, callback);
   };
 }
 

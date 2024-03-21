@@ -11,7 +11,6 @@ export type MapEventKey =
   | 'EVENT_MAP_ADD_COMPONENT'
   | 'EVENT_MAP_CROSSHAIR_ENTER'
   | 'EVENT_MAP_IN_KEYFOCUS'
-  | 'EVENT_MAP_LOADED'
   | 'EVENT_MAP_MOVE_END'
   | 'EVENT_MAP_POINTER_MOVE'
   | 'EVENT_MAP_RELOAD'
@@ -36,11 +35,6 @@ export const MAP: Record<MapEventKey, EventStringId> = {
    * Event triggered when a user focus the map with keyboard (WCAG)
    */
   EVENT_MAP_IN_KEYFOCUS: 'map/inkeyfocus',
-
-  /**
-   * Event triggered when map is loaded and api ready
-   */
-  EVENT_MAP_LOADED: 'map/loaded',
 
   /**
    * Event triggered when a user stops moving the map
