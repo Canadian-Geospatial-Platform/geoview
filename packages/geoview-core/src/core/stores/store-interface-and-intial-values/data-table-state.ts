@@ -16,12 +16,14 @@ interface IMapDataTableStateActions {
   setLayersData: (layers: TypeLayerData[]) => void;
   applyMapFilters: (filterStrings: string) => void;
   setTableHeight: (tableHeight: number) => void;
+  setGlobalFilteredEntry: (globalFilterStr: string, layerPath: string) => void;
 }
 export interface IMapDataTableState {
   columnFiltersRecord: Record<string, MRTColumnFiltersState>;
   isEnlargeDataTable: boolean;
   mapFilteredRecord: Record<string, boolean>;
   rowsFilteredRecord: Record<string, number>;
+  globalFilteredRecord: Record<string, string>;
   selectedLayerPath: string;
   toolbarRowSelectedMessageRecord: Record<string, string>;
   layersData: TypeLayerData[];
@@ -35,6 +37,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IMa
     isEnlargeDataTable: false,
     mapFilteredRecord: {},
     rowsFilteredRecord: {},
+    globalFilteredRecord: {},
     selectedLayerPath: '',
     toolbarRowSelectedMessageRecord: {},
     tableHeight: 600,
@@ -111,7 +114,16 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IMa
           },
         });
       },
+      setGlobalFilteredEntry: (globalFilterString: string, layerPath: string): void => {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            globalFilteredRecord: { ...get().dataTableState.globalFilteredRecord, [layerPath]: globalFilterString },
+          },
+        });
+      },
     },
+
     // #endregion ACTIONS
   } as IMapDataTableState;
 }
@@ -133,6 +145,8 @@ export const useDataTableStoreRowsFiltered = (): Record<string, number> =>
   useStore(useGeoViewStore(), (state) => state.dataTableState.rowsFilteredRecord);
 export const useDatatableStoreLayersData = (): TypeLayerData[] => useStore(useGeoViewStore(), (state) => state.dataTableState.layersData);
 export const useDatatableStoreTableHeight = (): number => useStore(useGeoViewStore(), (state) => state.dataTableState.tableHeight);
+export const useDatatableStoreGlobalFilteredRecord = (): Record<string, string> =>
+  useStore(useGeoViewStore(), (state) => state.dataTableState.globalFilteredRecord);
 
 export const useDataTableStoreActions = (): IMapDataTableStateActions =>
   useStore(useGeoViewStore(), (state) => state.dataTableState.actions);

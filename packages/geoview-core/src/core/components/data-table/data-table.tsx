@@ -24,6 +24,7 @@ import {
   MRT_ShowHideColumnsButton as MRTShowHideColumnsButton,
   MRT_ToggleFiltersButton as MRTToggleFiltersButton,
   MRT_ToggleFullScreenButton as MRTFullScreenToggleButton,
+  MRT_ToggleGlobalFilterButton as MRTToggleGlobalFilterButton,
   type MRT_SortingState as MRTSortingState,
   type MRT_RowVirtualizer as MRTRowVirtualizer,
   type MRT_ColumnFiltersState as MRTColumnFiltersState,
@@ -48,7 +49,7 @@ import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
 
 import { MappedLayerDataType } from './data-panel';
-import { useLightBox, useFilterRows, useToolbarActionMessage } from './hooks';
+import { useLightBox, useFilterRows, useToolbarActionMessage, useGlobalFilter } from './hooks';
 import { getSxClasses } from './data-table-style';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
@@ -147,6 +148,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
   // #region REACT CUSTOM HOOKS
   const { initLightBox, LightBoxComponent } = useLightBox();
   const { columnFilters, setColumnFilters } = useFilterRows({ layerPath });
+  const { globalFilter, setGlobalFilter } = useGlobalFilter({ layerPath });
   // #endregion
 
   useEffect(() => {
@@ -387,15 +389,21 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
   const useTable = useMaterialReactTable({
     columns,
     data: rows,
-    enableGlobalFilter: false,
     enableDensityToggle: true,
     onDensityChange: setDensity,
     initialState: { showColumnFilters: !!columnFilters.length },
-    state: { sorting, columnFilters, density, columnPinning: { left: ['ICON', 'ZOOM'] } },
+    state: {
+      sorting,
+      columnFilters,
+      density,
+      columnPinning: { left: ['ICON', 'ZOOM'] },
+      globalFilter,
+    },
     enableColumnFilterModes: true,
     enableColumnPinning: true,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
     enableBottomToolbar: false,
     positionToolbarAlertBanner: 'none', // hide existing row count
     renderTopToolbarCustomActions: () => {
@@ -404,6 +412,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
     },
     renderToolbarInternalActions: ({ table }) => (
       <Box>
+        <MRTToggleGlobalFilterButton className="style1" table={table} />
         <MRTToggleFiltersButton className="style1" table={table} />
         <FilterMap layerPath={layerPath} />
         <MRTShowHideColumnsButton className="style1" table={table} />
@@ -543,7 +552,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
   }, [mapFilteredRecord[layerPath]]);
 
   // set toolbar custom action message in store.
-  useToolbarActionMessage({ data, columnFilters, layerPath, tableInstance: useTable });
+  useToolbarActionMessage({ data, columnFilters, globalFilter, layerPath, tableInstance: useTable });
 
   return (
     <Box sx={sxClasses.dataTableWrapper}>
