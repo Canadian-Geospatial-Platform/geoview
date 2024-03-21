@@ -153,6 +153,10 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     }
   };
 
+  const handleLayerKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleLayerClick();
+  };
+
   const handleToggleVisibility = () => {
     setOrToggleLayerVisibility(layer.layerPath);
   };
@@ -282,7 +286,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
 
   return (
     <AnimatedPaper className={getContainerClass()} style={listItemSpring} data-layer-depth={depth}>
-      <ListItem key={layer.layerName} divider>
+      <ListItem key={layer.layerName} divider tabIndex={0} onKeyDown={(e) => handleLayerKeyDown(e)}>
         <ListItemButton selected={layerIsSelected || (layerChildIsSelected && !isGroupOpen)}>
           <LayerIcon layer={layer} />
           <Tooltip title={layer.layerName} placement="top" enterDelay={1000}>
