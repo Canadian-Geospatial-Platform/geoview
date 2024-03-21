@@ -11,7 +11,6 @@ import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { api } from '@/app';
 import { TypeFeatureInfoLayerConfig } from '@/geo/map/map-schema-types';
 
-
 export class TimeSliderEventProcessor extends AbstractEventProcessor {
   /**
    * Override the initialization process to wire subscriptions and return them so they can be destroyed later.

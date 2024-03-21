@@ -14,7 +14,7 @@ import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeFeatureInfoEntry, TypeGeometry } from '@/geo/utils/layer-set';
 import { TypeBasemapOptions, TypeMapFeaturesConfig, TypeValidMapProjectionCodes } from '@/core/types/global-types';
-import {  TypeMapMouseInfo } from '@/api/events/payloads';
+import { TypeMapMouseInfo } from '@/api/events/payloads';
 import { TypeInteraction, TypeHighlightColors } from '@/geo/map/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { api } from '@/app';
