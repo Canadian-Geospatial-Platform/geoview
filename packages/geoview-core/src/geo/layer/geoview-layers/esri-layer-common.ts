@@ -11,7 +11,6 @@ import { getLocalizedValue, getXMLHttpRequest } from '@/core/utils/utilities';
 import { TimeDimensionESRI } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
@@ -108,8 +107,6 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
     if (this.metadata!.layers[esriIndex]?.subLayerIds?.length) {
       // We will create dynamically a group layer.
       const newListOfLayerEntryConfig: TypeListOfLayerEntryConfig = [];
-      // Group layer are not registered to layer sets.
-      if (this.registerToLayerSetListenerFunctions[layerPath]) this.unregisterFromLayerSets(layerConfig as AbstractBaseLayerEntryConfig);
       const switchToGroupLayer = Cast<GroupLayerEntryConfig>(cloneDeep(layerConfig));
       switchToGroupLayer.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
       switchToGroupLayer.layerName = {

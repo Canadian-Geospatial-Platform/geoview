@@ -6,21 +6,17 @@
 // ==========================================================================================================================
 function listenToLegendLayerSetChanges(elementId, handlerName) {
   const mapId = handlerName.split('/')[0];
-  cgpv.api.event.on(
-    cgpv.api.eventNames.LAYER_SET.UPDATED,
-    (payload) => {
-      const outputHeader = '<table class="state"><tr class="state"><th class="state">Name</th><th class="state">Status</th></tr>';
-      const displayField = document.getElementById(elementId);
-      const { resultSet } = payload;
-      const output = Object.keys(resultSet).reduce((outputValue, layerPath) => {
-        const layerName = resultSet[layerPath]?.layerName || '';
-        const { layerStatus } = resultSet[layerPath];
-        return `${outputValue}<tr class="state"><td class="state">${layerName}</td><td class="state">${layerStatus}</td></tr>`;
-      }, outputHeader);
-      displayField.innerHTML = output && output !== outputHeader ? `${output}</table>` : '';
-    },
-    handlerName
-  );
+  cgpv.api.maps[mapId].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+    const { resultSet } = payload;
+    const outputHeader = '<table class="state"><tr class="state"><th class="state">Name</th><th class="state">Status</th></tr>';
+    const displayField = document.getElementById(elementId);
+    const output = Object.keys(resultSet).reduce((outputValue, layerPath) => {
+      const layerName = resultSet[layerPath]?.layerName || '';
+      const { layerStatus } = resultSet[layerPath];
+      return `${outputValue}<tr class="state"><td class="state">${layerName}</td><td class="state">${layerStatus}</td></tr>`;
+    }, outputHeader);
+    displayField.innerHTML = output && output !== outputHeader ? `${output}</table>` : '';
+  });
 }
 
 // ==========================================================================================================================
