@@ -21,7 +21,7 @@ export type SnapOptions = InteractionOptions & {
  */
 export class Snap extends Interaction {
   // The embedded Open Layers Snap component
-  ol_snap: OLSnap;
+  #ol_snap: OLSnap;
 
   /**
    * initialize modify component
@@ -46,7 +46,7 @@ export class Snap extends Interaction {
     }
 
     // Activate the OpenLayers Modify module
-    this.ol_snap = new OLSnap(olOptions);
+    this.#ol_snap = new OLSnap(olOptions);
   }
 
   /**
@@ -54,7 +54,7 @@ export class Snap extends Interaction {
    */
   public startInteraction() {
     // Redirect
-    super.startInteraction(this.ol_snap);
+    super.startInteraction(this.#ol_snap);
   }
 
   /**
@@ -62,6 +62,6 @@ export class Snap extends Interaction {
    */
   public stopInteraction() {
     // Redirect
-    super.stopInteraction(this.ol_snap);
+    super.stopInteraction(this.#ol_snap);
   }
 }

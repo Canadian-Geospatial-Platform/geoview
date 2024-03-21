@@ -1,7 +1,7 @@
 import { LayerSet } from '@/geo/utils/layer-set';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { LayerApi, TypeLayerEntryConfig, TypeLegend } from '@/core/types/cgpv-types';
+import { TypeLayerEntryConfig, TypeLegend } from '@/core/types/cgpv-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { logger } from '@/core/utils/logger';
@@ -20,17 +20,6 @@ export class LegendsLayerSet extends LayerSet {
   declare resultSet: TypeLegendResultSet;
 
   /**
-   * The class constructor that instanciate a set of layer.
-   *
-   * @param {LayerApi} layerApi The layer Api to work with.
-   * @param {string} mapId The map identifier the layer set belongs to.
-   *
-   */
-  constructor(layerApi: LayerApi, mapId: string) {
-    super(layerApi, mapId, `${mapId}/LegendsLayerSet`);
-  }
-
-  /**
    * Overrides the behavior to apply when a legends-layer-set wants to register a layer in its set.
    * @param {AbstractGeoViewLayer} geoviewLayer The geoview layer being registered
    * @param {string} layerPath The layer path
@@ -39,26 +28,8 @@ export class LegendsLayerSet extends LayerSet {
     // Log
     logger.logTraceCore('LEGENDS-LAYER-SET - onRegisterLayer', layerPath, Object.keys(this.resultSet));
 
-    this.resultSet[layerPath].querySent = false;
+    // Leaving this here for now, likely can be refactored later
     this.resultSet[layerPath].data = undefined;
-
-    // When registering a layer in the legends layer set, we're interested to know its legend, attach to the querying/queried legend events.
-    geoviewLayer.onLegendQuerying((sender, layerQueryEvent) => {
-      // Query was sent
-      this.resultSet[layerQueryEvent.layerPath].querySent = true;
-    });
-
-    // Attach to queried
-    geoviewLayer.onLegendQueried((sender, layerQueryEvent) => {
-      // Query completed
-      this.resultSet[layerQueryEvent.layerPath].data = layerQueryEvent.legend;
-
-      // Propagate to store
-      LegendEventProcessor.propagateLegendToStore(this.mapId, layerPath, this.resultSet[layerPath]);
-
-      // Inform that the layer set has been updated
-      this.onLayerSetUpdatedProcess(layerPath);
-    });
   };
 
   /**
@@ -79,9 +50,25 @@ export class LegendsLayerSet extends LayerSet {
       // Get the config from the registered layers
       const layerConfig = this.layerApi.registeredLayers[layerPath];
 
-      if (layerExists && ['processed', 'loaded'].includes(layerStatus) && this.resultSet?.[layerPath]?.querySent === false) {
+      // If the layer has been at least processed, we know its metadata has been processed and legend is ready to be queried (logic to move?)
+      if (layerExists && ['processed', 'loaded'].includes(layerStatus)) {
         // Query for the legend
-        this.layerApi.geoviewLayer(layerPath).queryLegend(layerPath);
+        const legendPromise = this.layerApi.geoviewLayer(layerPath).queryLegend(layerPath);
+
+        // Whenever the legend response comes in
+        legendPromise.then((legend) => {
+          // If legend received
+          if (legend) {
+            // Query completed keep it
+            this.resultSet[layerPath].data = legend;
+
+            // Propagate to store
+            LegendEventProcessor.propagateLegendToStore(this.mapId, layerPath, this.resultSet[layerPath]);
+
+            // Inform that the layer set has been updated by triggering an event down the road
+            this.onLayerSetUpdatedProcess(layerPath);
+          }
+        });
 
         // config file could not determine if the layer is queryable, can it be done using the metadata? let's try
         // ? Trying to comment this line to see if it's good, don't understand the comment line just above this line
@@ -158,7 +145,6 @@ export type TypeLegendResultSetEntry = {
   layerName?: string;
   layerStatus: TypeLayerStatus;
   data: TypeLegend | undefined | null;
-  querySent: boolean;
 };
 
 /** The legend resultset type associate a layer path to a legend object. The undefined value indicate that the get legend query

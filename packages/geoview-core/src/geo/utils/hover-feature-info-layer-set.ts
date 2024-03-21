@@ -28,11 +28,10 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
    * The class constructor that instanciate a set of layer.
    *
    * @param {LayerApi} layerApi The layer Api to work with.
-   * @param {string} mapId The map identifier the layer set belongs to.
    *
    */
-  constructor(layerApi: LayerApi, mapId: string) {
-    super(layerApi, mapId, `${mapId}/hover/FeatureInfoLayerSet`);
+  constructor(layerApi: LayerApi) {
+    super(layerApi);
 
     // Wire a listener on the map hover
     // TODO: Refactor - Revise this when revisiting the hover query process
@@ -122,7 +121,7 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
         data.queryStatus = 'init';
 
         // Process query on results data
-        this.processQueryResultSetData(data, layerConfig, layerPath, queryType, pixelCoordinate).then((arrayOfRecords) => {
+        this.queryLayerFeatures(data, layerConfig, layerPath, queryType, pixelCoordinate).then((arrayOfRecords) => {
           if (arrayOfRecords === null) {
             this.resultSet[layerPath].data.queryStatus = 'error';
             this.resultSet[layerPath].data.layerStatus = layerConfig.layerStatus!;
