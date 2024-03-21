@@ -23,7 +23,7 @@ import {
   TypeMapState,
   TypeValidMapProjectionCodes,
 } from '@/geo/map/map-schema-types';
-import { mapPayload, lngLatPayload, mapMouseEventPayload, numberPayload, mapViewProjectionPayload } from '@/api/events/payloads';
+import { lngLatPayload, mapMouseEventPayload, numberPayload, mapViewProjectionPayload } from '@/api/events/payloads';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
@@ -41,17 +41,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
   protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
     const { mapId } = store.getState();
 
-    const unsubMapLoaded = store.subscribe(
-      (state) => state.mapState.mapLoaded,
-      (cur, prev) => {
-        if (cur !== prev) {
-          // Log (too annoying, already have trace in EVENT_MAP_LOADED handler that works well)
-          // logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - mapLoaded (changed)', mapId, cur);
-
-          api.event.emit(mapPayload(EVENT_NAMES.MAP.EVENT_MAP_LOADED, mapId, store.getState().mapState.mapElement!));
-        }
-      }
-    );
+    // TODO: Refactor - We should remove all the api.event.emits from the Processor and place them
+    // TO.DOCONT: where they belong, closer to their respective classes, in those examples, the MAP.
+    // TO.DOCONT: Only use store subscriptions at the processor level to maintain a
+    // TO.DOCONT: store state internally and, eventually, use them to order the state changes to reduce
+    // TO.DOCONT: possible component refreshes.
 
     // #region MAP STATE
     const unsubMapCenterCoord = store.subscribe(
@@ -163,7 +157,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Return the array of subscriptions so they can be destroyed later
     return [
       unsubMapHighlightedFeatures,
-      unsubMapLoaded,
       unsubMapCenterCoord,
       unsubMapPointerPosition,
       unsubMapProjection,

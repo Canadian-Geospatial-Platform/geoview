@@ -71,7 +71,7 @@ export class ConfigBaseClass {
   protected waitForProcessedBeforeSendingLoaded = false;
 
   // Keep all callback delegates references
-  private onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
+  #onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
 
   /**
    * The class constructor.
@@ -157,6 +157,8 @@ export class ConfigBaseClass {
     if (!this.IsGreaterThanOrEqualTo(newLayerStatus)) {
       // eslint-disable-next-line no-underscore-dangle
       this._layerStatus = newLayerStatus;
+      // TODO: Refactor - Suggestion to hold the layer status elsewhere than in a configuration file. Can it be on the layer itself?
+      // TO.DOCONT: It'd be "nicer" to have a configuration file that doesn't raise events
       this.emitLayerStatusChanged({ layerPath: this.layerPath, layerStatus: newLayerStatus });
     }
     if (newLayerStatus === 'processed' && this.waitForProcessedBeforeSendingLoaded) this.layerStatus = 'loaded';
@@ -176,7 +178,7 @@ export class ConfigBaseClass {
    */
   emitLayerStatusChanged = (event: LayerStatusChangedEvent) => {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onLayerStatusChangedHandlers, event);
+    EventHelper.emitEvent(this, this.#onLayerStatusChangedHandlers, event);
   };
 
   /**
@@ -185,7 +187,7 @@ export class ConfigBaseClass {
    */
   onLayerStatusChanged = (callback: LayerStatusChangedDelegate): void => {
     // Wire the event handler
-    EventHelper.onEvent(this.onLayerStatusChangedHandlers, callback);
+    EventHelper.onEvent(this.#onLayerStatusChangedHandlers, callback);
   };
 
   /**
@@ -194,7 +196,7 @@ export class ConfigBaseClass {
    */
   offLayerStatusChanged = (callback: LayerStatusChangedDelegate): void => {
     // Unwire the event handler
-    EventHelper.offEvent(this.onLayerStatusChangedHandlers, callback);
+    EventHelper.offEvent(this.#onLayerStatusChangedHandlers, callback);
   };
 
   /**
