@@ -30,7 +30,13 @@ export function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIcon
     // TODO: refactor - try to remove the nested ternary to simplify reading
     // eslint-disable-next-line no-nested-ternary
     return numOfIcons === 1 ? (
-      <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={iconImage === 'no data' ? undefined : onIconClick}>
+      <IconButton
+        tabIndex={-1}
+        sx={sxClasses.iconPreview}
+        color="primary"
+        size="small"
+        onClick={iconImage === 'no data' ? undefined : onIconClick}
+      >
         {iconImage === 'no data' ? (
           <BrowserNotSupportedIcon />
         ) : (
@@ -41,7 +47,7 @@ export function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIcon
       </IconButton>
     ) : // eslint-disable-next-line no-nested-ternary
     numOfIcons && numOfIcons > 0 ? (
-      <Box tabIndex={0} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyPress={(e) => onStackIconClick?.(e)}>
+      <Box tabIndex={-1} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyPress={(e) => onStackIconClick?.(e)}>
         <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1}>
           <Box sx={sxClasses.legendIconTransparent}>
             {iconImageStacked && <img alt="icon" src={iconImageStacked} style={sxClasses.maxIconImg} />}
@@ -52,7 +58,7 @@ export function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIcon
         </IconButton>
       </Box>
     ) : layerPath !== '' && iconData.length === 0 && layerPath.charAt(0) !== '!' ? (
-      <Box tabIndex={0} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyPress={(e) => onStackIconClick?.(e)}>
+      <Box tabIndex={-1} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyPress={(e) => onStackIconClick?.(e)}>
         <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1}>
           <Box sx={sxClasses.legendIconTransparent}>
             <BrowserNotSupportedIcon />
