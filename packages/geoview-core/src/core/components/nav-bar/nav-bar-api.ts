@@ -3,7 +3,7 @@ import { api } from '@/app';
 import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 
-import { generateId } from '../../utils/utilities';
+import { generateId } from '@/core/utils/utilities';
 
 /**
  * Class to manage buttons on the nav-bar

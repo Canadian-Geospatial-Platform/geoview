@@ -16,7 +16,7 @@ import { Basemap } from '@/geo/layer/basemap/basemap';
 import { LayerApi } from '@/geo/layer/layer';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 
-import { api, TypeClickMarker, unmountMap } from '@/app';
+import { api, unmountMap } from '@/app';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 
 import { AppbarApi } from '@/core/components/app-bar/app-bar-api';
@@ -48,6 +48,7 @@ import { TypeMapFeaturesConfig, TypeHTMLElement, TypeValidMapProjectionCodes, Ty
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
+import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 
 interface TypeDocument extends Document {
   webkitExitFullscreen: () => void;

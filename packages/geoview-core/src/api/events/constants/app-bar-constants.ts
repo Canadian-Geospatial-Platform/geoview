@@ -1,4 +1,4 @@
-import { EventStringId } from '../event-types';
+import { EventStringId } from '@/api/events/event-types';
 
 /**
  * This file defines the constants of the APPBAR category. The constants are placed

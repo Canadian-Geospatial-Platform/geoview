@@ -6,11 +6,11 @@ import Feature from 'ol/Feature';
 import { LineString, MultiLineString, MultiPoint, MultiPolygon, Point, Polygon } from 'ol/geom';
 import { Extent, getCenter } from 'ol/extent';
 import { fromExtent } from 'ol/geom/Polygon';
-import { Coordinate, api } from '@/app';
+import { Coordinate } from 'ol/coordinate';
+import { api } from '@/app';
 import { TypeHighlightColors } from '@/geo/map/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
-
 import { TypeFeatureInfoEntry } from './layer-set';
 
 /** *****************************************************************************************************************************

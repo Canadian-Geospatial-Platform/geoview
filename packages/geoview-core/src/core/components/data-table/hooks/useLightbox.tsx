@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { LightBoxSlides, LightboxImg } from '@/app';
 import { Box } from '@/ui';
+import { LightBoxSlides, LightboxImg } from '@/core/types/cgpv-types';
 /**
  * Custom Lightbox hook which handle rendering of the lightbox.
  * @returns {Object}

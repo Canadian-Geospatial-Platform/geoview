@@ -1,4 +1,4 @@
-import { EventStringId } from '../event-types';
+import { EventStringId } from '@/api/events/event-types';
 
 /**
  * Class definition for PayloadBaseClass

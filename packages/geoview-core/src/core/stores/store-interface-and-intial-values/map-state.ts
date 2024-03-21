@@ -12,13 +12,14 @@ import { XYZ } from 'ol/source'; // only for typing
 import { useStore } from 'zustand';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { TypeClickMarker, api } from '@/app';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { TypeMapMouseInfo } from '@/api/events/payloads';
+import { TypeFeatureInfoEntry, TypeGeometry } from '@/geo/utils/layer-set';
 import { TypeBasemapOptions, TypeMapFeaturesConfig, TypeValidMapProjectionCodes } from '@/core/types/global-types';
+import { TypeMapMouseInfo } from '@/api/events/payloads';
 import { TypeInteraction, TypeHighlightColors } from '@/geo/map/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeFeatureInfoEntry, TypeGeometry } from '@/geo/utils/layer-set';
+import { api } from '@/app';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 
 // #region INTERFACES
 interface TypeScaleInfo {

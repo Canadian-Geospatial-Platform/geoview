@@ -6,8 +6,8 @@ import { Drawer as MaterialDrawer, DrawerProps, Box } from '@mui/material';
 
 import { IconButton, ChevronLeftIcon, ChevronRightIcon } from '..';
 import { getSxClasses } from './drawer-style';
-import { useGeoViewMapId } from '@/app';
 import { logger } from '@/core/utils/logger';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 /**
  * Drawer Properties

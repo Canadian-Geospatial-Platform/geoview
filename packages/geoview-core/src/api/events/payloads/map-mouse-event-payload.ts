@@ -2,7 +2,7 @@ import { Coordinate } from 'ol/coordinate';
 
 import { PayloadBaseClass } from './payload-base-class';
 
-import { EventStringId, EVENT_NAMES } from '../event-types';
+import { EventStringId, EVENT_NAMES } from '@/api/events/event-types';
 
 /** Valid events that can create MapMouseEventPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK, EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE];
