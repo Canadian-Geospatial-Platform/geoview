@@ -171,6 +171,7 @@ export class Event {
           callback(payload as T);
         } else {
           // Log an error as that shouldn't be possible
+          // TODO: Refactor - When all generic events are gone, remove the checkCallback, move some types here, remove bunch of payload files
           logger.logError('THIS CALLBACK PAYLOAD IS WRONG!!', eventStringId, payload);
         }
       },
@@ -179,11 +180,11 @@ export class Event {
   };
 
   // #region SPECIALIZED EVENTS - IMPORTANT
-  // ! These events exists to communicate between the Shell/MapViewer and the App-Bar/Nav-Bar/Footer-Bar components.
-  // ! The laters are mounted and then 'autonomous'. They rely on events to self-manage their rendering.
-  // ! Ideally, we should get rid of those events and use props inside App-Bar/Nav-Bar/Footer-Bar and have the management
-  // ! higher in the call stack. At the time of writing this, having them explicit here was sufficient as a first step
-  // ! in cleaning generic api.event calls and payloads.
+  // GV These events exists to communicate between the Shell/MapViewer and the App-Bar/Nav-Bar/Footer-Bar components.
+  // GV The laters are mounted and then 'autonomous'. They rely on events to self-manage their rendering.
+  // GV Ideally, we should get rid of those events and use props inside App-Bar/Nav-Bar/Footer-Bar and have the management
+  // GV higher in the call stack. At the time of writing this, having them explicit here was sufficient as a first step
+  // GV in cleaning generic api.event calls and payloads.
 
   // #region EVENT_APPBAR_PANEL_CREATE --------------------------------------------------------------------------------
 
@@ -359,10 +360,10 @@ export class Event {
   // #endregion
 
   // #region SPECIALIZED EVENTS - UNSURE
-  // ! These events exists to communicate between different application code and components.
-  // ! They are annoying to have, but unsure if worth spending time to refactor. They have less reason to exist than the
-  // ! 'IMPORTANT' ones above. However, at the time of writing this having them here was sufficient
-  // ! as a first step in cleaning generic api.event calls and payloads.
+  // GV These events exists to communicate between different application code and components.
+  // GV They are annoying to have, but unsure if worth spending time to refactor. They have less reason to exist than the
+  // GV 'IMPORTANT' ones above. However, at the time of writing this having them here was sufficient
+  // GV as a first step in cleaning generic api.event calls and payloads.
 
   // #region EVENT_MODAL_OPEN -----------------------------------------------------------------------------------------
 
@@ -444,17 +445,17 @@ export class Event {
 
   // #region EVENT_MAP_RELOAD (remove) --------------------------------------------------------------------------------
 
-  emitMapReloadRemove = (mapId: string, mapFeaturesConfig: TypeMapFeaturesConfig) => {
+  emitMapRemove = (mapId: string, mapFeaturesConfig: TypeMapFeaturesConfig) => {
     // Emit
     this.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, `${mapId}/delete_old_map`, mapFeaturesConfig));
   };
 
-  onMapReloadRemove = (mapId: string, callback: (mapFeaturesPayload: MapFeaturesPayload) => void) => {
+  onMapRemove = (mapId: string, callback: (mapFeaturesPayload: MapFeaturesPayload) => void) => {
     // Wire
     this.onMapHelperHandler(`${mapId}/delete_old_map`, EVENT_NAMES.MAP.EVENT_MAP_RELOAD, payloadIsAmapFeaturesConfig, callback);
   };
 
-  offMapReloadRemove = (mapId: string, callback: (mapFeaturesPayload: MapFeaturesPayload) => void) => {
+  offMapRemove = (mapId: string, callback: (mapFeaturesPayload: MapFeaturesPayload) => void) => {
     // Unwire
     this.off(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, `${mapId}/delete_old_map`, callback as TypeEventHandlerFunction);
   };

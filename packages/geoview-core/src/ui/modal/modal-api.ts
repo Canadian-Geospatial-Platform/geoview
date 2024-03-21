@@ -15,10 +15,10 @@ export class ModalApi {
   modals: Record<string, TypeModalProps> = {};
 
   // Keep all callback delegates references
-  private onModalOpenedHandlers: ModalOpenedDelegate[] = [];
+  #onModalOpenedHandlers: ModalOpenedDelegate[] = [];
 
   // Keep all callback delegates references
-  private onModalClosedHandlers: ModalClosedDelegate[] = [];
+  #onModalClosedHandlers: ModalClosedDelegate[] = [];
 
   /**
    * constructor to initiate the map id
@@ -80,7 +80,7 @@ export class ModalApi {
    */
   emitModalOpened = (event: ModalEvent) => {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onModalOpenedHandlers, event);
+    EventHelper.emitEvent(this, this.#onModalOpenedHandlers, event);
   };
 
   /**
@@ -89,7 +89,7 @@ export class ModalApi {
    */
   onModalOpened = (callback: ModalOpenedDelegate): void => {
     // Wire the event handler
-    EventHelper.onEvent(this.onModalOpenedHandlers, callback);
+    EventHelper.onEvent(this.#onModalOpenedHandlers, callback);
   };
 
   /**
@@ -98,7 +98,7 @@ export class ModalApi {
    */
   offModalOpened = (callback: ModalOpenedDelegate): void => {
     // Unwire the event handler
-    EventHelper.offEvent(this.onModalOpenedHandlers, callback);
+    EventHelper.offEvent(this.#onModalOpenedHandlers, callback);
   };
 
   /**
@@ -107,7 +107,7 @@ export class ModalApi {
    */
   emitModalClosed = (event: ModalEvent) => {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onModalClosedHandlers, event);
+    EventHelper.emitEvent(this, this.#onModalClosedHandlers, event);
   };
 
   /**
@@ -116,7 +116,7 @@ export class ModalApi {
    */
   onModalClosed = (callback: ModalClosedDelegate): void => {
     // Wire the event handler
-    EventHelper.onEvent(this.onModalClosedHandlers, callback);
+    EventHelper.onEvent(this.#onModalClosedHandlers, callback);
   };
 
   /**
@@ -125,7 +125,7 @@ export class ModalApi {
    */
   offModalClosed = (callback: ModalClosedDelegate): void => {
     // Unwire the event handler
-    EventHelper.offEvent(this.onModalClosedHandlers, callback);
+    EventHelper.offEvent(this.#onModalClosedHandlers, callback);
   };
 }
 

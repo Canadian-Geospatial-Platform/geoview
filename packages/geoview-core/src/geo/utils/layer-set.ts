@@ -3,7 +3,6 @@ import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import Feature from 'ol/Feature';
 import RenderFeature from 'ol/render/Feature';
-import { TypeResultSet } from '@/api/events/payloads';
 import { LayerApi } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
@@ -24,12 +23,6 @@ export class LayerSet {
   /** The LayerApi to work with */
   protected layerApi: LayerApi;
 
-  /** The map identifier the layer set belongs to. */
-  protected mapId: string;
-
-  /** The layer set identifier. */
-  layerSetId: string;
-
   /** An object containing the result sets indexed using the layer path */
   resultSet: TypeResultSet = {};
 
@@ -37,19 +30,20 @@ export class LayerSet {
   protected anonymousSequenceNumber = 1;
 
   // Keep all callback delegates references
-  private onLayerSetUpdatedHandlers: LayerSetUpdatedDelegate[] = [];
+  #onLayerSetUpdatedHandlers: LayerSetUpdatedDelegate[] = [];
 
   /**
    * The class constructor that instanciate a set of layer.
    *
    * @param {LayerApi} layerApi The layer Api to work with.
-   * @param {string} mapId The map identifier the layer set belongs to.
-   * @param {string} layerSetIdentifier The layer set identifier.
    */
-  constructor(layerApi: LayerApi, mapId: string, layerSetIdentifier: string) {
+  constructor(layerApi: LayerApi) {
     this.layerApi = layerApi;
-    this.mapId = mapId;
-    this.layerSetId = layerSetIdentifier;
+  }
+
+  // Shortcut to get the map id
+  protected get mapId() {
+    return this.layerApi.mapId;
   }
 
   /**
@@ -173,7 +167,7 @@ export class LayerSet {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} promise of the results
    */
-  processQueryResultSetData = (
+  protected queryLayerFeatures = (
     data: TypeLayerData | TypeHoverLayerData,
     layerConfig: TypeLayerEntryConfig,
     layerPath: string,
@@ -198,7 +192,7 @@ export class LayerSet {
    */
   emitLayerSetUpdated = (event: LayerSetUpdatedEvent) => {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onLayerSetUpdatedHandlers, event);
+    EventHelper.emitEvent(this, this.#onLayerSetUpdatedHandlers, event);
   };
 
   /**
@@ -207,7 +201,7 @@ export class LayerSet {
    */
   onLayerSetUpdated = (callback: LayerSetUpdatedDelegate): void => {
     // Wire the event handler
-    EventHelper.onEvent(this.onLayerSetUpdatedHandlers, callback);
+    EventHelper.onEvent(this.#onLayerSetUpdatedHandlers, callback);
   };
 
   /**
@@ -216,10 +210,13 @@ export class LayerSet {
    */
   offLayerSetUpdated = (callback: LayerSetUpdatedDelegate): void => {
     // Unwire the event handler
-    EventHelper.offEvent(this.onLayerSetUpdatedHandlers, callback);
+    EventHelper.offEvent(this.#onLayerSetUpdatedHandlers, callback);
   };
 }
 
+// TODO: Rename this type to something like 'store-container-type' as it is now mostly used to indicate in which store to propagate the result set
+// TO.DOCONT: Be mindful if you rename the eventType property in the event payload to the outside! Because lots of templates expect an 'eventType' in the payload.
+// TO.DOCONT: Ideally, get rid of it completely. The templates should be self aware of the layer-set that responded to their request now.
 export type EventType = 'click' | 'hover' | 'all-features';
 export const ArrayOfEventTypes: EventType[] = ['click', 'hover', 'all-features'];
 export type QueryType = 'at_pixel' | 'at_coordinate' | 'at_long_lat' | 'using_a_bounding_box' | 'using_a_polygon' | 'all';
@@ -302,4 +299,14 @@ type LayerSetUpdatedDelegate = EventDelegateBase<LayerSet, LayerSetUpdatedEvent>
 export type LayerSetUpdatedEvent = {
   layerPath: string;
   resultSet: TypeResultSet;
+};
+
+export type TypeResultSetEntry = {
+  layerName?: string;
+  layerStatus: TypeLayerStatus;
+  data: unknown;
+};
+
+export type TypeResultSet = {
+  [layerPath: string]: TypeResultSetEntry;
 };

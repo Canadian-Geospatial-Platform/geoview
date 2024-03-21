@@ -22,9 +22,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // Static functions for Typescript files to access store actions
   // **********************************************************
-  //! Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
-  //! Some action does state modifications AND map actions.
-  //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+  // GV Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
+  // GV Some action does state modifications AND map actions.
+  // GV ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
 
   // #region
 
@@ -176,7 +176,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             getLocalizedValue(layerConfig.geoviewLayerInstance?.geoviewLayerName, mapId) ||
             layerConfig.layerPath,
           layerStatus: legendResultSetEntry.layerStatus,
-          querySent: legendResultSetEntry.querySent,
           styleConfig: legendResultSetEntry.data?.styleConfig,
           type: legendResultSetEntry.data?.type,
           canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
@@ -217,6 +216,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // Static functions for Store Map State to action on API
   // **********************************************************
-  //! NEVER add a store action who does set state AND map action at a same time.
-  //! Review the action in store state to make sure
+  // GV NEVER add a store action who does set state AND map action at a same time.
+  // GV Review the action in store state to make sure
 }

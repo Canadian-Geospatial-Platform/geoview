@@ -1,4 +1,3 @@
-import { LayerApi } from '@/app';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { logger } from '@/core/utils/logger';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
@@ -17,17 +16,6 @@ import { LayerSet, QueryType, TypeLayerData } from './layer-set';
 export class AllFeatureInfoLayerSet extends LayerSet {
   /** The resultSet object as existing in the base class, retyped here as a TypeAllFeatureInfoResultSet */
   declare resultSet: TypeAllFeatureInfoResultSet;
-
-  /**
-   * The class constructor that instanciate a set of layer.
-   *
-   * @param {LayerApi} layerApi The layer Api to work with.
-   * @param {string} mapId The map identifier the layer set belongs to.
-   *
-   */
-  constructor(layerApi: LayerApi, mapId: string) {
-    super(layerApi, mapId, `${mapId}/all/FeatureInfoLayerSet`);
-  }
 
   /**
    * Overrides the behavior to apply when an all-feature-info-layer-set wants to check for condition to register a layer in its set.
@@ -88,6 +76,13 @@ export class AllFeatureInfoLayerSet extends LayerSet {
    * @param {string} layerStatus The new layer status
    */
   protected onProcessLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
+    // TODO: Refactor - This function (and the same function in feature-info-layer-set and hover-feature-info-layer-set) are all very similar if not identical
+    // TO.DOCONT: Move the code to the mother class. Be mindful of legends-layer-set that also has a onProcessLayerStatusChanged which is different though.
+    // TO.DOCONT: The status of layers should not matters to child layer set (all feature, feature, hover).
+    // TO.DOCONT: The layer set is the one who decide who goes in and out of these 3 sets. So he knows the status of the layer and if
+    // TO.DOCONT: not loaded he does not add the layer to the sets. If a layer becomes unstable and get in error, layer set will remove the layers
+    // TO.DOCONT: from al feature, feature and hover set.
+
     // if layer's status flag exists and is different than the new one
     if (this.resultSet?.[layerPath]?.layerStatus && this.resultSet?.[layerPath]?.layerStatus !== layerStatus) {
       if (layerStatus === 'error') delete this.resultSet[layerPath];
@@ -113,8 +108,8 @@ export class AllFeatureInfoLayerSet extends LayerSet {
   // TODO: (futur development) The queryType is a door opened to allow the triggering using a bounding box or a polygon.
   async queryLayer(layerPath: string, queryType: QueryType = 'all'): Promise<TypeAllFeatureInfoResultSet | void> {
     // TODO: REFACTOR - Watch out for code reentrancy between queries!
-    // ! Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
-    // ! As it is (and was like this befor events refactor), the this.resultSet is mutating between async calls.
+    // GV Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
+    // GV As it is (and was like this befor events refactor), the this.resultSet is mutating between async calls.
 
     // TODO: Refactor - Make this function throw an error instead of returning void as option of the promise
 
@@ -133,7 +128,7 @@ export class AllFeatureInfoLayerSet extends LayerSet {
         data.queryStatus = 'processing';
 
         // Process query on results data
-        const promiseResult = this.processQueryResultSetData(data, layerConfig, layerPath, queryType, layerPath);
+        const promiseResult = this.queryLayerFeatures(data, layerConfig, layerPath, queryType, layerPath);
 
         // Wait for promise to resolve
         const arrayOfRecords = await promiseResult;
