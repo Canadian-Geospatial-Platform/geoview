@@ -62,11 +62,16 @@ export default function ExportModal(): JSX.Element {
       exportTitleRef.current.style.padding = '1rem';
       exportTitleRef.current.innerHTML = exportTitle;
       setIsMapExporting(true);
-      htmlToImage.toPng(exportContainerRef.current, { backgroundColor: theme.palette.common.white }).then((dataUrl) => {
-        setIsMapExporting(false);
-        exportPNG(dataUrl, mapId);
-        closeModal();
-      });
+      htmlToImage
+        .toPng(exportContainerRef.current, { backgroundColor: theme.palette.common.white })
+        .then((dataUrl) => {
+          setIsMapExporting(false);
+          exportPNG(dataUrl, mapId);
+          closeModal();
+        })
+        .catch((error: Error) => {
+          logger.logError('Error while exporting the image', error);
+        });
     }
   }) as MouseEventHandler<HTMLButtonElement>;
 
@@ -97,13 +102,18 @@ export default function ExportModal(): JSX.Element {
       // after modal is fully opened.
       timer = setTimeout(() => {
         setIsMapLoading(true);
-        htmlToImage.toPng(map.getViewport()).then((dataUrl) => {
-          setIsMapLoading(false);
-          const img = new Image();
-          img.src = dataUrl;
-          img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
-          mapImage.appendChild(img);
-        });
+        htmlToImage
+          .toPng(map.getViewport())
+          .then((dataUrl) => {
+            setIsMapLoading(false);
+            const img = new Image();
+            img.src = dataUrl;
+            img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
+            mapImage.appendChild(img);
+          })
+          .catch((error: Error) => {
+            logger.logError('Error occured while converting map to image', error);
+          });
 
         // add legend
         const legendContainer = document.getElementById(`${mapId}-legendContainer`);
@@ -114,14 +124,19 @@ export default function ExportModal(): JSX.Element {
           const legendTab = document.getElementById(`${mapId}-legend`) as HTMLElement;
           const hasHiddenAttr = legendTab.hasAttribute('hidden');
           if (hasHiddenAttr) legendTab.removeAttribute('hidden');
-          htmlToImage.toPng(legendContainer).then((dataUrl) => {
-            setIsLegendLoading(false);
-            const img = new Image();
-            img.src = dataUrl;
-            img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
-            legendContainerRef.current?.appendChild(img);
-            if (hasHiddenAttr) legendTab.hidden = true;
-          });
+          htmlToImage
+            .toPng(legendContainer)
+            .then((dataUrl) => {
+              setIsLegendLoading(false);
+              const img = new Image();
+              img.src = dataUrl;
+              img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
+              legendContainerRef.current?.appendChild(img);
+              if (hasHiddenAttr) legendTab.hidden = true;
+            })
+            .catch((error: Error) => {
+              logger.logError('Error occured while converting legend to image', error);
+            });
         }
       }, 10);
     }
