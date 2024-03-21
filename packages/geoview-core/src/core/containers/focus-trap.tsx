@@ -13,6 +13,7 @@ import { useAppStoreActions } from '@/core/stores/store-interface-and-intial-val
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapElement } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
+import { disableScrolling } from '../utils/utilities';
 
 /**
  * Interface for the focus trap properties
