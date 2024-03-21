@@ -1,5 +1,6 @@
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   CONST_LAYER_ENTRY_TYPES,
@@ -170,31 +171,30 @@ export class ConfigBaseClass {
   }
 
   /**
+   * Emits an event to all handlers.
+   * @param {LayerStatusChangedEvent} event The event to emit
+   */
+  emitLayerStatusChanged = (event: LayerStatusChangedEvent) => {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.onLayerStatusChangedHandlers, event);
+  };
+
+  /**
    * Wires an event handler.
-   * @param {LayerStatusChangedDelegate} callback The callback to be executed whenever the event is raised
+   * @param {LayerStatusChangedDelegate} callback The callback to be executed whenever the event is emitted
    */
   onLayerStatusChanged = (callback: LayerStatusChangedDelegate): void => {
-    // Push a new callback handler to the list of handlers
-    this.onLayerStatusChangedHandlers.push(callback);
+    // Wire the event handler
+    EventHelper.onEvent(this.onLayerStatusChangedHandlers, callback);
   };
 
   /**
    * Unwires an event handler.
-   * @param {LayerStatusChangedDelegate} callback The callback to stop being called whenever the event is raised
+   * @param {LayerStatusChangedDelegate} callback The callback to stop being called whenever the event is emitted
    */
   offLayerStatusChanged = (callback: LayerStatusChangedDelegate): void => {
-    const index = this.onLayerStatusChangedHandlers.indexOf(callback);
-    if (index !== -1) {
-      this.onLayerStatusChangedHandlers.splice(index, 1);
-    }
-  };
-
-  /**
-   * Emits an event to all handlers.
-   */
-  emitLayerStatusChanged = (event: LayerStatusChangedEvent) => {
-    // Trigger all the handlers in the array
-    this.onLayerStatusChangedHandlers.forEach((handler) => handler(this, event));
+    // Unwire the event handler
+    EventHelper.offEvent(this.onLayerStatusChangedHandlers, callback);
   };
 
   /**
@@ -207,24 +207,29 @@ export class ConfigBaseClass {
     const { registeredLayers } = api.maps[this.geoviewLayerInstance!.mapId].layer;
     if (registeredLayers[this.layerPath]) return false;
     (registeredLayers[this.layerPath] as ConfigBaseClass) = this;
+
+    // TODO: Check - Move this registerToLayerSets closer to the others, when I comment the line it seems good, except
+    // TO.DOCONT: for an 'Anonymous' group layer that never got 'loaded'. See if we can fix this elsewhere and remove this.
     if (this.entryType !== CONST_LAYER_ENTRY_TYPES.GROUP)
       (this.geoviewLayerInstance as AbstractGeoViewLayer).registerToLayerSets(Cast<AbstractBaseLayerEntryConfig>(this));
+
     this.layerStatus = 'registered';
     return true;
   }
 
-  /**
-   * This method returns the GeoView instance associated to a specific layer path. The first element of the layerPath
-   * is the geoviewLayerId.
-   * @param {string} layerPath The layer path to the layer's configuration.
-   *
-   * @returns {AbstractGeoViewLayer} Returns the geoview instance associated to the layer path.
-   */
-  // TODO: Check - Is this still used? Remove it and favor the homonymous method in `layer`?
-  geoviewLayer(layerPath?: string): AbstractGeoViewLayer {
-    this.geoviewLayerInstance!.layerPathAssociatedToTheGeoviewLayer = layerPath || this.layerPath;
-    return this.geoviewLayerInstance!;
-  }
+  // TODO: Check - Is this still used? Remove it and favor the homonymous method in `layer`? (which also should be deleted)
+  // TO.DOCONT: I'm commenting it in this big refactor (2024-03-17) to see if anything crashes and if so, where. Seems good to me without it so far.
+  // /**
+  //  * This method returns the GeoView instance associated to a specific layer path. The first element of the layerPath
+  //  * is the geoviewLayerId.
+  //  * @param {string} layerPath The layer path to the layer's configuration.
+  //  *
+  //  * @returns {AbstractGeoViewLayer} Returns the geoview instance associated to the layer path.
+  //  */
+  //   geoviewLayer(layerPath?: string): AbstractGeoViewLayer {
+  //   this.geoviewLayerInstance!.layerPathAssociatedToTheGeoviewLayer = layerPath || this.layerPath;
+  //   return this.geoviewLayerInstance!;
+  // }
 
   /**
    * This method compares the internal layer status of the config with the layer status passed as a parameter and it
@@ -265,7 +270,7 @@ export class ConfigBaseClass {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerStatusChangedDelegate = (sender: ConfigBaseClass, event: LayerStatusChangedEvent) => void;
+type LayerStatusChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStatusChangedEvent>;
 
 /**
  * Define an event for the delegate

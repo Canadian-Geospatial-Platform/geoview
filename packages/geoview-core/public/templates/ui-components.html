@@ -121,122 +121,122 @@
     <script src="codedoc.js"></script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init(function () {
-        console.log('api is ready');
-
-        /**
-         * RANGE SLIDER UI SECTION START
-         */
-        // add a slider component and link it to a map with mapId props
-        cgpv.api.utilities.addUiComponent(
-          'UI1-rangeslider1',
-          cgpv.react.createElement(cgpv.ui.elements.Slider, {
-            mapId: 'UI1',
-            id: 'UI1-slider-flood',
-            min: 1696,
-            max: 2023,
-            value: [1696, 2023],
-            marks: [
-              { value: 1696, label: '1696' },
-              { value: 1700, label: '1700' },
-              { value: 1800, label: '1800' },
-              { value: 1900, label: '1900' },
-              { value: 2000, label: '2000' },
-              { value: 2023, label: '2023' },
-            ],
-            track: 'normal',
-            customOnChange: (dates) => {
-              const field = cgpv.api.maps.UI1.layer.geoviewLayer('historical-flood/0').getTemporalDimension().field;
-              cgpv.api.maps.UI1.layer.geoviewLayer('historical-flood/0').applyViewFilter(`${field} >= date '${dates[0]}-01-01' and ${field} <= date '${dates[1]}-12-31'`);
-            },
-          })
-        );
-        /**
-         * RANGE SLIDER UI SECTION END
-         */
-
-        /**
-         * SLIDER UI SECTION START
-         */
-        // set min max
-        function setSliderMinMax() {
-          cgpv.api.event.emit(
-            cgpv.types.sliderPayload(cgpv.api.eventNames.SLIDER.EVENT_SLIDER_SET_MINMAX, 'UI1-slider1', { min: 2, max: 16 })
+      cgpv.init((mapId) => {
+        if (mapId === 'allMaps') {
+          /**
+           * RANGE SLIDER UI SECTION START
+           */
+          // add a slider component and link it to a map with mapId props
+          cgpv.api.utilities.addUiComponent(
+            'UI1-rangeslider1',
+            cgpv.react.createElement(cgpv.ui.elements.Slider, {
+              mapId: 'UI1',
+              id: 'UI1-slider-flood',
+              min: 1696,
+              max: 2023,
+              value: [1696, 2023],
+              marks: [
+                { value: 1696, label: '1696' },
+                { value: 1700, label: '1700' },
+                { value: 1800, label: '1800' },
+                { value: 1900, label: '1900' },
+                { value: 2000, label: '2000' },
+                { value: 2023, label: '2023' },
+              ],
+              track: 'normal',
+              customOnChange: (dates) => {
+                const field = cgpv.api.maps.UI1.layer.geoviewLayer('historical-flood/0').getTemporalDimension().field;
+                cgpv.api.maps.UI1.layer.geoviewLayer('historical-flood/0').applyViewFilter(`${field} >= date '${dates[0]}-01-01' and ${field} <= date '${dates[1]}-12-31'`);
+              },
+            })
           );
-        }
-        document.getElementById('sliderminmax').addEventListener('click', setSliderMinMax, false);
+          /**
+           * RANGE SLIDER UI SECTION END
+           */
 
-        // set values
-        function setSliderValues() {
-          cgpv.api.event.emit(cgpv.types.sliderPayload(cgpv.api.eventNames.SLIDER.EVENT_SLIDER_SET_VALUES, 'UI1-slider1', { value: 8 }));
-        }
-        document.getElementById('slidervalues').addEventListener('click', setSliderValues, false);
+          /**
+           * SLIDER UI SECTION START
+           */
+          // set min max
+          function setSliderMinMax() {
+            cgpv.api.event.emit(
+              cgpv.types.sliderPayload(cgpv.api.eventNames.SLIDER.EVENT_SLIDER_SET_MINMAX, 'UI1-slider1', { min: 2, max: 16 })
+            );
+          }
+          document.getElementById('sliderminmax').addEventListener('click', setSliderMinMax, false);
 
-        // add a slider component and link it to a map with mapId props
-        cgpv.api.utilities.addUiComponent(
-          'UI1-slider1',
-          cgpv.react.createElement(cgpv.ui.elements.Slider, {
-            mapId: 'UI1',
-            id: 'UI1-slider1',
-            min: 0,
-            max: 18,
-            value: 5,
-            marks: [
-              { value: 0, label: 'Min Level 0' },
-              { value: 4, label: 'Level 4' },
-              { value: 8, label: 'Level 8' },
-              { value: 18, label: 'Max Level 18' },
-            ],
-            track: false,
-            // TODO: setting the view zoom level create bugs with the overview map
-            customOnChange: (zoomLevel) => {
-              const lat = 50;
-              const lng = -95;
-              cgpv.api.maps['UI1'].getView().animate({ zoom: zoomLevel });
+          // set values
+          function setSliderValues() {
+            cgpv.api.event.emit(cgpv.types.sliderPayload(cgpv.api.eventNames.SLIDER.EVENT_SLIDER_SET_VALUES, 'UI1-slider1', { value: 8 }));
+          }
+          document.getElementById('slidervalues').addEventListener('click', setSliderValues, false);
+
+          // add a slider component and link it to a map with mapId props
+          cgpv.api.utilities.addUiComponent(
+            'UI1-slider1',
+            cgpv.react.createElement(cgpv.ui.elements.Slider, {
+              mapId: 'UI1',
+              id: 'UI1-slider1',
+              min: 0,
+              max: 18,
+              value: 5,
+              marks: [
+                { value: 0, label: 'Min Level 0' },
+                { value: 4, label: 'Level 4' },
+                { value: 8, label: 'Level 8' },
+                { value: 18, label: 'Max Level 18' },
+              ],
+              track: false,
+              // TODO: setting the view zoom level create bugs with the overview map
+              customOnChange: (zoomLevel) => {
+                const lat = 50;
+                const lng = -95;
+                cgpv.api.maps['UI1'].getView().animate({ zoom: zoomLevel });
+              },
+            })
+          );
+
+          // listen to slider value change event
+          const sliderPosition2 = document.getElementsByClassName('slider-position2');
+          cgpv.api.event.on(
+            cgpv.api.eventNames.SLIDER.EVENT_SLIDER_CHANGE,
+            (payload) => {
+              if (cgpv.types.payloadIsASlider(payload)) {
+                sliderPosition2[0].innerHTML = `<p>Slider min ${payload.sliderValues.min}, max ${payload.sliderValues.max}, values ${
+                  payload.sliderValues.value
+                } and active thumb ${payload.sliderValues.activeThumb === 0 ? 'left' : 'right'}</p>`;
+              }
             },
-          })
-        );
+            'UI1-slider2'
+          );
 
-        // listen to slider value change event
-        const sliderPosition2 = document.getElementsByClassName('slider-position2');
-        cgpv.api.event.on(
-          cgpv.api.eventNames.SLIDER.EVENT_SLIDER_CHANGE,
-          (payload) => {
-            if (cgpv.types.payloadIsASlider(payload)) {
-              sliderPosition2[0].innerHTML = `<p>Slider min ${payload.sliderValues.min}, max ${payload.sliderValues.max}, values ${
-                payload.sliderValues.value
-              } and active thumb ${payload.sliderValues.activeThumb === 0 ? 'left' : 'right'}</p>`;
-            }
-          },
-          'UI1-slider2'
-        );
+          // add a slider component and DO NOT link it to a map
+          cgpv.api.utilities.addUiComponent(
+            'UI1-slider2',
+            cgpv.react.createElement(cgpv.ui.elements.Slider, {
+              id: 'UI1-slider2',
+              min: 0,
+              max: 18,
+              value: [5, 10],
+              marks: [
+                { value: 0, label: 'Min Level 0' },
+                { value: 2 },
+                { value: 4, label: 'Level 4' },
+                { value: 5, label: 'Level 5' },
+                { value: 6, label: 'Level 6' },
+                { value: 8, label: 'Level 8' },
+                { value: 18, label: 'Max Level 18' },
+              ],
+            })
+          );
+          /**
+           * SLIDER UI SECTION END
+           */
 
-        // add a slider component and DO NOT link it to a map
-        cgpv.api.utilities.addUiComponent(
-          'UI1-slider2',
-          cgpv.react.createElement(cgpv.ui.elements.Slider, {
-            id: 'UI1-slider2',
-            min: 0,
-            max: 18,
-            value: [5, 10],
-            marks: [
-              { value: 0, label: 'Min Level 0' },
-              { value: 2 },
-              { value: 4, label: 'Level 4' },
-              { value: 5, label: 'Level 5' },
-              { value: 6, label: 'Level 6' },
-              { value: 8, label: 'Level 8' },
-              { value: 18, label: 'Max Level 18' },
-            ],
-          })
-        );
-        /**
-         * SLIDER UI SECTION END
-         */
-
-        //create snippets
-        createCodeSnippet();
-        createConfigSnippet();
+          // create snippets
+          createCodeSnippet();
+          createConfigSnippet();
+        }
       });
 
       // document.addEventListener('DOMContentLoaded', async () => {

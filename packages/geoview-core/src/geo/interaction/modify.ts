@@ -4,6 +4,7 @@ import Collection from 'ol/Collection';
 import Feature from 'ol/Feature';
 import { FlatStyle } from 'ol/style/flat';
 
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { GeoUtilities } from '@/geo/utils/utilities';
 
@@ -17,11 +18,6 @@ export type ModifyOptions = InteractionOptions & {
   features?: Collection<Feature>;
   style?: TypeFeatureStyle;
 };
-
-/**
- * Define a delegate for the event handler function signature
- */
-type ModifyDelegate = (sender: Modify, event: OLModifyEvent) => void;
 
 /**
  * Class used for modifying features on a map
@@ -89,60 +85,61 @@ export class Modify extends Interaction {
   }
 
   /**
+   * Emits an event to all handlers.
+   * @param {OLModifyEvent} event The event to emit
+   */
+  emitModifyStarted = (event: OLModifyEvent) => {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.onModifyStartedHandlers, event);
+  };
+
+  /**
    * Wires an event handler.
-   * @param {ModifyDelegate} callback The callback to be executed whenever the event is raised
+   * @param {ModifyDelegate} callback The callback to be executed whenever the event is emitted
    */
   onModifyStarted = (callback: ModifyDelegate): void => {
-    // Push a new callback handler to the list of handlers
-    this.onModifyStartedHandlers.push(callback);
+    // Wire the event handler
+    EventHelper.onEvent(this.onModifyStartedHandlers, callback);
   };
 
   /**
    * Unwires an event handler.
-   * @param {ModifyDelegate} callback The callback to stop being called whenever the event is raised
+   * @param {ModifyDelegate} callback The callback to stop being called whenever the event is emitted
    */
   offModifyStarted = (callback: ModifyDelegate): void => {
-    const index = this.onModifyStartedHandlers.indexOf(callback);
-    if (index !== -1) {
-      this.onModifyStartedHandlers.splice(index, 1);
-    }
+    // Unwire the event handler
+    EventHelper.offEvent(this.onModifyStartedHandlers, callback);
   };
 
   /**
    * Emits an event to all handlers.
-   * @param {OLModifyEvent} modifyEvent object representing the Open Layers event from the interaction
+   * @param {OLModifyEvent} event The event to emit
    */
-  emitModifyStarted = (modifyEvent: OLModifyEvent) => {
-    // Trigger all the handlers in the array
-    this.onModifyStartedHandlers.forEach((handler) => handler(this, modifyEvent));
+  emitModifyEnded = (event: OLModifyEvent) => {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.onModifyEndedHandlers, event);
   };
 
   /**
    * Wires an event handler.
-   * @param {ModifyDelegate} callback The callback to be executed whenever the event is raised
+   * @param {ModifyDelegate} callback The callback to be executed whenever the event is emitted
    */
   onModifyEnded = (callback: ModifyDelegate): void => {
-    // Push a new callback handler to the list of handlers
-    this.onModifyEndedHandlers.push(callback);
+    // Wire the event handler
+    EventHelper.onEvent(this.onModifyEndedHandlers, callback);
   };
 
   /**
    * Unwires an event handler.
-   * @param {ModifyDelegate} callback The callback to stop being called whenever the event is raised
+   * @param {ModifyDelegate} callback The callback to stop being called whenever the event is emitted
    */
   offModifyEnded = (callback: ModifyDelegate): void => {
-    const index = this.onModifyEndedHandlers.indexOf(callback);
-    if (index !== -1) {
-      this.onModifyEndedHandlers.splice(index, 1);
-    }
-  };
-
-  /**
-   * Emits an event to all handlers.
-   * @param {OLModifyEvent} modifyEvent object representing the Open Layers event from the interaction
-   */
-  emitModifyEnded = (modifyEvent: OLModifyEvent) => {
-    // Trigger all the handlers in the array
-    this.onModifyEndedHandlers.forEach((handler) => handler(this, modifyEvent));
+    // Unwire the event handler
+    EventHelper.offEvent(this.onModifyEndedHandlers, callback);
   };
 }
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type ModifyDelegate = EventDelegateBase<Modify, OLModifyEvent>;
