@@ -166,7 +166,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     ];
   }
 
-  //! THIS IS THE ONLY FUNCTION TO SET STORE DIRECTLY
+  // GV THIS IS THE ONLY FUNCTION TO SET STORE DIRECTLY
   static setMapLoaded(mapId: string): void {
     // Log
     logger.logTraceCore('MAP EVENT PROCESSOR - setMapLoaded', mapId);
@@ -251,9 +251,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // Static functions for Typescript files to access store actions
   // **********************************************************
-  //! Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
-  //! Some action does state modifications AND map actions.
-  //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+  // GV Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
+  // GV Some action does state modifications AND map actions.
+  // GV ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
 
   // #region
   /**
@@ -455,8 +455,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // Static functions for Store Map State to action on API
   // **********************************************************
-  //! NEVER add a store action who does set state AND map action at a same time.
-  //! Review the action in store state to make sure
+  // GV NEVER add a store action who does set state AND map action at a same time.
+  // GV Review the action in store state to make sure
   // #region
   static createEmptyBasemap(mapId: string) {
     return api.maps[mapId].basemap.createEmptyBasemap();
@@ -528,9 +528,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     const projectionConfig = api.projection.projections[MapEventProcessor.getMapState(mapId).currentProjection];
     if (bbox) {
-      //! There were issues with fromLonLat in rare cases in LCC projections, transformExtent seems to solve them.
-      //! fromLonLat and transformExtent give differing results in many cases, fromLonLat had issues with the first
-      //! three results from a geolocator search for "vancouver river"
+      // GV There were issues with fromLonLat in rare cases in LCC projections, transformExtent seems to solve them.
+      // GV fromLonLat and transformExtent give differing results in many cases, fromLonLat had issues with the first
+      // GV three results from a geolocator search for "vancouver river"
       const convertedExtent = api.projection.transformExtent(bbox, 'EPSG:4326', projectionConfig);
 
       // Highlight

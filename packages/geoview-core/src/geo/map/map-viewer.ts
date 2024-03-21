@@ -245,7 +245,7 @@ export class MapViewer {
           this.#mapReady = true;
           this.emitMapReady();
 
-          // TODO: Call the setMapLoaded minimaly after 1500ms has elapsed
+          // GV We added processed to layers check so this map loaded event is fired faster
           // This emits the MAP_LOADED event
           MapEventProcessor.setMapLoaded(this.mapId);
 

@@ -221,9 +221,9 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         });
 
         // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
-        // ! try to make reusable store actions....
-        // ! we can have always item.... we cannot set visibility so if present we will need to trap. Need more use case
-        // ! create a function setItemVisibility called with layer path and this function set the registered layer (from store values) then apply the filter.
+        // GV try to make reusable store actions....
+        // GV we can have always item.... we cannot set visibility so if present we will need to trap. Need more use case
+        // GV create a function setItemVisibility called with layer path and this function set the registered layer (from store values) then apply the filter.
         (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter('');
       },
       getLayerDeleteInProgress: () => get().layerState.layerDeleteInProgress,

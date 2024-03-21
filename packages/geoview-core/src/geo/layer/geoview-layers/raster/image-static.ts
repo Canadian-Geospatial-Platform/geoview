@@ -268,8 +268,8 @@ export class ImageStatic extends AbstractGeoViewRaster {
     if (layerConfig.initialSettings?.maxZoom !== undefined) staticImageOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
     if (layerConfig.initialSettings?.minZoom !== undefined) staticImageOptions.minZoom = layerConfig.initialSettings?.minZoom;
     if (layerConfig.initialSettings?.opacity !== undefined) staticImageOptions.opacity = layerConfig.initialSettings?.opacity;
-    // ! IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
-    // !            in the 'loading' state if the flag value is 'no'.
+    // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
+    // GV            in the 'loading' state if the flag value is 'no'.
 
     // eslint-disable-next-line no-param-reassign
     layerConfig.olLayerAndLoadEndListeners = {
