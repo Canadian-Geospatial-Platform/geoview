@@ -411,63 +411,20 @@ export function getValidConfigFromString(configString: string, mapDiv: HTMLEleme
 }
 
 /**
- * Export the map as a PNG
+ * Export the image data url as a PNG
+ * @param {string} datUrl the dataurl to be downloaded as png.
  * @param {string} mapId Id of map to export
  */
-export function exportPNG(mapId: string): void {
-  document.body.style.cursor = 'progress';
-  const { map } = api.maps[mapId];
-
-  map.once('rendercomplete', () => {
-    const mapCanvas = document.createElement('canvas');
-    const size = map.getSize();
-    [mapCanvas.width, mapCanvas.height] = size!;
-    const mapContext = mapCanvas.getContext('2d');
-    Array.prototype.forEach.call(map.getViewport().querySelectorAll('.ol-layer canvas, canvas.ol-layer'), (canvas) => {
-      if (canvas.width > 0) {
-        const opacity = canvas.parentNode.style.opacity || canvas.style.opacity;
-        mapContext!.globalAlpha = opacity === '' ? 1 : Number(opacity);
-        let matrix;
-        const { transform } = canvas.style;
-
-        if (transform) {
-          // Get the transform parameters from the style's transform matrix
-          matrix = transform
-            .match(/^matrix\(([^(]*)\)$/)[1]
-            .split(',')
-            .map(Number);
-        } else {
-          matrix = [parseFloat(canvas.style.width) / canvas.width, 0, 0, parseFloat(canvas.style.height) / canvas.height, 0, 0];
-        }
-
-        // Apply the transform to the export map context
-        CanvasRenderingContext2D.prototype.setTransform.apply(mapContext, matrix);
-        const { backgroundColor } = canvas.parentNode.style;
-        if (backgroundColor) {
-          mapContext!.fillStyle = backgroundColor;
-          mapContext!.fillRect(0, 0, canvas.width, canvas.height);
-        }
-
-        mapContext!.drawImage(canvas, 0, 0);
-      }
-    });
-
-    mapContext!.globalAlpha = 1;
-    mapContext!.setTransform(1, 0, 0, 1, 0, 0);
-
-    try {
-      const image = mapCanvas.toDataURL('image/png');
-      const element = document.createElement('a');
-      const filename = `${mapId}.png`;
-      element.setAttribute('href', image);
-      element.setAttribute('download', filename);
-      element.click();
-    } catch (error) {
-      logger.logError(`Error trying to export PNG.`, error);
-    }
-  });
-  document.body.style.cursor = 'auto';
-  map.renderSync();
+export function exportPNG(dataUrl: string, mapId: string): void {
+  try {
+    const element = document.createElement('a');
+    const filename = `${mapId}.png`;
+    element.setAttribute('href', dataUrl);
+    element.setAttribute('download', filename);
+    element.click();
+  } catch (error) {
+    logger.logError(`Error trying to export PNG.`, error);
+  }
 }
 
 /**
