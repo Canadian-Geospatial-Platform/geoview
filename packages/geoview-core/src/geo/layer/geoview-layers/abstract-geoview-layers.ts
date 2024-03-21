@@ -466,8 +466,8 @@ export abstract class AbstractGeoViewLayer {
         } else {
           // When we get here, we know that the metadata (if the service provide some) are processed.
           // We need to signal to the layer sets that the 'processed' phase is done.
-          // ! TODO: For the moment, be aware that the layerStatus setter is doing a lot of things behind the scene.
-          // !       The layerStatus setter contains a lot of code and we will change it in favor of a method.
+          // GV TODO: For the moment, be aware that the layerStatus setter is doing a lot of things behind the scene.
+          // GV       The layerStatus setter contains a lot of code and we will change it in favor of a method.
           layerConfig.layerStatus = 'processed';
         }
       });
@@ -619,8 +619,8 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<BaseLayer | null>} The GeoView layer that has been created.
    */
   protected processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | null> {
-    // ! IMPORTANT: The processOneLayerEntry method of all the children must call this method to ensure that the flow of
-    // !            layerStatus values is correctly sequenced.
+    // GV IMPORTANT: The processOneLayerEntry method of all the children must call this method to ensure that the flow of
+    // GV            layerStatus values is correctly sequenced.
     layerConfig.layerStatus = 'loading';
     return Promise.resolve(null);
   }
@@ -634,7 +634,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
-  // ! Things important to know about the get feature info family of methods
+  // GV Things important to know about the get feature info family of methods
   /*
    * There's no doubt that the layerConfig is correctly defined when we call these methods. The layerConfig object is created in
    * the GeoView layer constructor and has all the necessary flags to inform programmers and users whether the layer referenced by
@@ -923,8 +923,8 @@ export abstract class AbstractGeoViewLayer {
         }
       });
     };
-    // ! The following code will need to be modified when the topmost layer of a GeoView
-    // ! layer creates dynamicaly a group out of a list of layers.
+    // GV The following code will need to be modified when the topmost layer of a GeoView
+    // GV layer creates dynamicaly a group out of a list of layers.
     const layerConfig: TypeLayerEntryConfig | TypeListOfLayerEntryConfig | undefined = layerPath.includes('/')
       ? this.getLayerConfig(layerPath)
       : this.listOfLayerEntryConfig;

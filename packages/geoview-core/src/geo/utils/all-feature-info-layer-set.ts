@@ -108,8 +108,8 @@ export class AllFeatureInfoLayerSet extends LayerSet {
   // TODO: (futur development) The queryType is a door opened to allow the triggering using a bounding box or a polygon.
   async queryLayer(layerPath: string, queryType: QueryType = 'all'): Promise<TypeAllFeatureInfoResultSet | void> {
     // TODO: REFACTOR - Watch out for code reentrancy between queries!
-    // ! Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
-    // ! As it is (and was like this befor events refactor), the this.resultSet is mutating between async calls.
+    // GV Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
+    // GV As it is (and was like this befor events refactor), the this.resultSet is mutating between async calls.
 
     // TODO: Refactor - Make this function throw an error instead of returning void as option of the promise
 

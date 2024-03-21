@@ -80,7 +80,7 @@ export interface TypeTextFieldProps extends Omit<TextFieldProps, 'type'> {
   tooltipPlacement?: TooltipProps['placement'];
 }
 
-// ! Check if it must be deleted.
+// GV Check if it must be deleted.
 // TODO: used in layer-panel packages... check if we can merge
 /** ******************************************************************************************************************************
  * Interface for the button properties used when creating a new button.
