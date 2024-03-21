@@ -3,10 +3,7 @@
     "interaction": "dynamic",
     "viewSettings": {
       "zoom": 3,
-      "center": [
-        -100,
-        50
-      ],
+      "center": [-100, 50],
       "projection": 3978
     },
     "basemapOptions": {
@@ -27,7 +24,7 @@
         },
         "geoviewLayerType": "esriFeature",
         "initialSettings": {
-          "visible": "always"
+          "controls": { "visibility": false }
         },
         "listOfLayerEntryConfig": [
           {
@@ -108,9 +105,6 @@
                 "layerName": {
                   "en": "Icons",
                   "fr": "Icones"
-                },
-                "initialSettings": {
-                  "visible": "yes"
                 }
               },
               {
@@ -150,29 +144,12 @@
   "theme": "geo.ca",
   "appBar": {
     "tabs": {
-      "core": [
-        "geolocator",
-        "export",
-        "guide",
-        "details",
-        "legend"
-      ]
+      "core": ["geolocator", "export", "guide", "details", "legend"]
     }
   },
-  "navBar": [
-    "zoom",
-    "fullscreen",
-    "home",
-    "location",
-    "export"
-  ],
-  "components": [
-    "north-arrow"
-  ],
+  "navBar": ["zoom", "fullscreen", "home", "location", "export"],
+  "components": ["north-arrow"],
   "corePackages": [],
   "externalPackages": [],
-  "suportedLanguages": [
-    "en",
-    "fr"
-  ]
+  "suportedLanguages": ["en", "fr"]
 }

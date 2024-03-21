@@ -50,12 +50,9 @@ export type TypeLocalizedStringEnAndFr = Required<Record<TypeDisplayLanguage, st
 /** ******************************************************************************************************************************
  * Initial settings to apply to the GeoView layer at creation time.
  */
-export type TypeVisibilityFlags = 'yes' | 'no' | 'always';
 export type TypeLayerInitialSettings = {
-  /** Initial opacity setting. Domain = [0..1] and default = 1. */
-  opacity?: number;
-  /** Initial visibility setting. Default = yes. */
-  visible?: TypeVisibilityFlags;
+  /** Settings for availablity of controls */
+  controls?: TypeLayerControls;
   /** The geographic bounding box that contains all the layer's features. */
   bounds?: Extent;
   /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates. */
@@ -66,12 +63,44 @@ export type TypeLayerInitialSettings = {
   maxZoom?: number;
   /** A CSS class name to set to the layer element. */
   className?: string;
-  /** Is the layer removable. */
-  removable?: true;
-  /** Is the layer hoverable. */
-  hoverable?: true;
-  /** Is the layer queryable. */
-  queryable?: true;
+  /** Settings for availablity of controls */
+  states?: TypeLayerStates;
+};
+
+/** ******************************************************************************************************************************
+ * Control settings to use in UI.
+ */
+export type TypeLayerControls = {
+  /** Is highlight control available for layer. Default = true */
+  highlight?: boolean;
+  /** Is hover control available for layer. Default = true */
+  hover?: boolean;
+  /** Is opacity control available for layer. Default = true */
+  opacity?: boolean;
+  /** Is query control available for layer. Default = true */
+  query?: boolean;
+  /** Is remove control available for layer. Default = true */
+  remove?: boolean;
+  /** Is table available for layer. Default = true */
+  table?: boolean;
+  /** Is visibility control available for layer. Default = true */
+  visibility?: boolean;
+  /** Is zoom available for layer. Default = true */
+  zoom?: boolean;
+};
+
+/** ******************************************************************************************************************************
+ * Initial settings to apply to the GeoView layer at creation time.
+ */
+export type TypeLayerStates = {
+  /** Is the layer initially visible. Default = true */
+  visible?: boolean;
+  /** Initial opacity setting. Default = 1 */
+  opacity?: number;
+  /** Is layer hoverable initially. Domain = [0..1] and default = 1. */
+  hoverable?: boolean;
+  /** Is layer queryable initially. Default = true */
+  queryable?: boolean;
 };
 
 /** ******************************************************************************************************************************
@@ -1071,7 +1100,7 @@ export type TypeUniqueValueStyleInfo = {
   /** Values associated to the style. */
   values: (string | number | Date)[];
   /** Flag used to show/hide features associated to the label (default: yes). */
-  visible?: TypeVisibilityFlags;
+  visible?: boolean;
   /** options associated to the style. */
   settings: TypeKindOfVectorSettings;
 };
@@ -1104,7 +1133,7 @@ export interface TypeUniqueValueStyleConfig extends TypeBaseStyleConfig {
   defaultSettings?: TypeKindOfVectorSettings;
   /** Flag used to show/hide features associated to the default label
    *  (default: no if ESRI renderer in the metadata has no default symbol defined). */
-  defaultVisible?: TypeVisibilityFlags;
+  defaultVisible?: boolean;
   /** Fields used by the style. */
   fields: string[];
   /** Unique value style information configuration. */
@@ -1120,7 +1149,7 @@ export type TypeClassBreakStyleInfo = {
   /** Minimum values associated to the style. */
   minValue: number | string | Date | undefined | null;
   /** Flag used to show/hide features associated to the label (default: yes). */
-  visible?: TypeVisibilityFlags;
+  visible?: boolean;
   /** Maximum values associated to the style. */
   maxValue: number | string | Date;
   /** options associated to the style. */
@@ -1152,7 +1181,7 @@ export interface TypeClassBreakStyleConfig extends TypeBaseStyleConfig {
   /** Label used if field/value association is not found. */
   defaultLabel?: string;
   /** Options used if field/value association is not found. */
-  defaultVisible?: TypeVisibilityFlags;
+  defaultVisible?: boolean;
   /** Flag used to show/hide features associated to the default label (default: yes). */
   defaultSettings?: TypeKindOfVectorSettings;
   /** Field used by the style. */

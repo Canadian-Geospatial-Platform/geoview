@@ -2,6 +2,7 @@ import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 import { AbstractEventProcessor } from '../abstract-event-processor';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   EsriDynamic,
   ITimeSliderState,
@@ -12,7 +13,6 @@ import {
   getLocalizedValue,
   whenThisThenThat,
 } from '@/core/types/cgpv-types';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 
 export class TimeSliderEventProcessor extends AbstractEventProcessor {
