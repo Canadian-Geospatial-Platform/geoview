@@ -3,7 +3,7 @@ import { api } from '@/app';
 import { TypeTabs } from '@/ui/tabs/tabs';
 import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 
-import { sanitizeHtmlContent } from '../../utils/utilities';
+import { sanitizeHtmlContent } from '@/core/utils/utilities';
 
 /**
  * API to manage tabs on the tabs component

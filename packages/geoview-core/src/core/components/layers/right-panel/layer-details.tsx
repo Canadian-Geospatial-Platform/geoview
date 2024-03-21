@@ -25,7 +25,7 @@ import {
 } from '@/ui';
 import { useLayerHighlightedLayer, useLayerStoreActions, useUIStoreActions, useDetailsStoreAllFeaturesDataArray } from '@/core/stores';
 import { generateId } from '@/core/utils/utilities';
-import { LayerIcon } from '../../common/layer-icon';
+import { LayerIcon } from '@/core/components/common/layer-icon';
 import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-control';
 import { logger } from '@/core/utils/logger';
 

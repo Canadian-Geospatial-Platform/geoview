@@ -17,10 +17,9 @@ import {
 import { LayerListEntry, Layout } from '../common';
 import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
-import { LAYER_STATUS, TABS } from '@/app';
 import { TypeFieldEntry, TypeLayerData } from '@/geo/utils/layer-set';
-
 import { getSxClasses } from './data-table-style';
+import { LAYER_STATUS, TABS } from '@/core/types/cgpv-types';
 
 export interface MappedLayerDataType extends TypeLayerData {
   fieldInfos: Record<string, TypeFieldEntry | undefined>;

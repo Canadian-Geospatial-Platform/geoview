@@ -24,8 +24,9 @@ import {
   useMapStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
-import { api, toJsonObject } from '@/app';
+import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
+import { toJsonObject } from '@/core/types/global-types';
 
 export function Map(): JSX.Element {
   // Log

@@ -3,7 +3,7 @@ import { Box, ListItemButton, Grid, Tooltip, Typography } from '@/ui';
 import { GeoListItem } from './geolocator';
 import { sxClassesList } from './geolocator-style';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { HtmlToReact } from '@/app';
+import { HtmlToReact } from '@/core/types/cgpv-types';
 
 type GeoListProps = {
   geoListItems: GeoListItem[];

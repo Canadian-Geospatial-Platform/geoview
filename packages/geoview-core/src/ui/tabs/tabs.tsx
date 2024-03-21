@@ -5,11 +5,12 @@ import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, TabsProps, TabProps, Bo
 import { useTheme } from '@mui/material/styles';
 import { HtmlToReact } from '@/core/containers/html-to-react';
 import { logger } from '@/core/utils/logger';
-import { useGeoViewMapId, useMapSize } from '@/app';
 
 import { Select, TypeMenuItemProps } from '../select/select';
 import { getSxClasses } from './tabs-style';
 import { TabPanel } from './tab-panel';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 /**
  * Type used for properties of each tab

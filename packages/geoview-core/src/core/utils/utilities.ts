@@ -7,10 +7,10 @@ import { Extent } from 'ol/extent';
 
 import sanitizeHtml from 'sanitize-html';
 
-import { AbstractGeoViewLayer, api } from '@/app';
+import { api } from '@/app';
 import { TypeLocalizedString } from '@/geo/map/map-schema-types';
 
-import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { AbstractGeoViewLayer, Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { ISnackbarButton, SnackbarType } from '@/api/events/payloads';
 import { NotificationType } from '@/core/components/notifications/notifications';
 import { Config } from '@/core/utils/config/config';
