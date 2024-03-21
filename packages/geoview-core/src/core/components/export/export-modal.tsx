@@ -97,7 +97,6 @@ export default function ExportModal(): JSX.Element {
       // after modal is fully opened.
       timer = setTimeout(() => {
         setIsMapLoading(true);
-        console.log(map.getViewport());
         htmlToImage.toPng(map.getViewport()).then((dataUrl) => {
           setIsMapLoading(false);
           const img = new Image();
