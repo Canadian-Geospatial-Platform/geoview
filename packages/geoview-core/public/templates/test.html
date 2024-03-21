@@ -512,11 +512,14 @@
           });
           listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
 
-          createTableOfFilter('LYR1');
-
           // create snippets
           createCodeSnippet();
           createConfigSnippet();
+        }
+      }, (mapId) => {
+        if (mapId === 'allMaps') {
+          // Layers are loaded
+          createTableOfFilter('LYR1');
         }
       });
     </script>

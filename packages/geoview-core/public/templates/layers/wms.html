@@ -620,10 +620,6 @@
           listenToLegendLayerSetChanges('HLYR4-state', 'LYR4');
           listenToLegendLayerSetChanges('HLYR5-state', 'LYR5');
 
-          createTableOfFilter('LYR1');
-          createTableOfFilter('LYR2');
-          createTableOfFilter('LYR4');
-
           const intervalId = window.setInterval(() => {
             // If metadata are processed
             if (cgpv.api.maps.LYR3?.layer?.geoviewLayers?.['wmsLYR3-Root']?.allLayerStatusAreGreaterThanOrEqualTo('processed')) {
@@ -676,6 +672,13 @@
           // create snippets
           createCodeSnippet();
           createConfigSnippet();
+        }
+      }, (mapId) => {
+        if (mapId === 'allMaps') {
+          // Layers are loaded
+          createTableOfFilter('LYR1');
+          createTableOfFilter('LYR2');
+          createTableOfFilter('LYR4');
         }
       });
 

@@ -230,11 +230,14 @@
           listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
           listenToLegendLayerSetChanges('HLYR2-state', 'LYR2');
 
-          createTableOfFilter('LYR1');
-
           // create snippets
           createCodeSnippet();
           createConfigSnippet();
+        }
+      }, (mapId) => {
+        if (mapId === 'allMaps') {
+          // Layers are loaded
+          createTableOfFilter('LYR1');
         }
       });
 
@@ -242,9 +245,9 @@
       var addGeoJSONButton = document.getElementById('add-geojson');
 
       // add an event listener when a button is clicked
-      addGeoJSONButton.addEventListener('click', function (e) {
+      addGeoJSONButton.addEventListener('click', async () => {
         // adding a geojson layer requires a type of geojson and url
-        const layerID = cgpv.api.maps['LYR1'].layer.addGeoviewLayer(
+        const addResult = cgpv.api.maps['LYR1'].layer.addGeoviewLayer(
           {
             geoviewLayerId: 'geoJsonSample',
             geoviewLayerName: {
@@ -274,14 +277,12 @@
           },
           ['en', 'fr']
         );
-        document.getElementById('new-layer-id-label').innerText = layerID;
-        cgpv.api.event.once(
-          cgpv.api.eventNames.LAYER.EVENT_LAYER_ADDED,
-            (payload) => {
-              createTableOfFilter('LYR1');
-            },
-            'LYR1/geoJsonSample'
-          );
+
+        // Wait for the full response
+        await addResult.promiseLayer;
+
+        document.getElementById('new-layer-id-label').innerText = addResult.layer.geoviewLayerId;
+        createTableOfFilter('LYR1');
       });
 
       // =======================================================================================================================

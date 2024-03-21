@@ -22,13 +22,13 @@ export type TranslateOptions = InteractionOptions & {
  */
 export class Translate extends Interaction {
   // The embedded Open Layers Translate component
-  ol_translate: OLTranslate;
+  #ol_translate: OLTranslate;
 
   // Keep all callback delegates references
-  private onTranslateStartedHandlers: TranslateDelegate[] = [];
+  #onTranslateStartedHandlers: TranslateDelegate[] = [];
 
   // Keep all callback delegates references
-  private onTranslateEndedHandlers: TranslateDelegate[] = [];
+  #onTranslateEndedHandlers: TranslateDelegate[] = [];
 
   /**
    * Initialize Translate component
@@ -48,11 +48,11 @@ export class Translate extends Interaction {
     }
 
     // Activate the OpenLayers Translate module
-    this.ol_translate = new OLTranslate(olOptions);
+    this.#ol_translate = new OLTranslate(olOptions);
 
     // Wire handler when drawing is changed
-    this.ol_translate.on('translatestart', this.emitTranslateStarted);
-    this.ol_translate.on('translateend', this.emitTranslateEnded);
+    this.#ol_translate.on('translatestart', this.emitTranslateStarted);
+    this.#ol_translate.on('translateend', this.emitTranslateEnded);
   }
 
   /**
@@ -60,7 +60,7 @@ export class Translate extends Interaction {
    */
   public startInteraction() {
     // Redirect
-    super.startInteraction(this.ol_translate);
+    super.startInteraction(this.#ol_translate);
   }
 
   /**
@@ -68,7 +68,7 @@ export class Translate extends Interaction {
    */
   public stopInteraction() {
     // Redirect
-    super.stopInteraction(this.ol_translate);
+    super.stopInteraction(this.#ol_translate);
   }
 
   /**
@@ -77,7 +77,7 @@ export class Translate extends Interaction {
    */
   emitTranslateStarted = (event: OLTranslateEvent) => {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onTranslateStartedHandlers, event);
+    EventHelper.emitEvent(this, this.#onTranslateStartedHandlers, event);
   };
 
   /**
@@ -86,7 +86,7 @@ export class Translate extends Interaction {
    */
   onTranslateStarted = (callback: TranslateDelegate): void => {
     // Wire the event handler
-    EventHelper.onEvent(this.onTranslateStartedHandlers, callback);
+    EventHelper.onEvent(this.#onTranslateStartedHandlers, callback);
   };
 
   /**
@@ -95,7 +95,7 @@ export class Translate extends Interaction {
    */
   offTranslateStarted = (callback: TranslateDelegate): void => {
     // Unwire the event handler
-    EventHelper.offEvent(this.onTranslateStartedHandlers, callback);
+    EventHelper.offEvent(this.#onTranslateStartedHandlers, callback);
   };
 
   /**
@@ -104,7 +104,7 @@ export class Translate extends Interaction {
    */
   emitTranslateEnded = (event: OLTranslateEvent) => {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onTranslateEndedHandlers, event);
+    EventHelper.emitEvent(this, this.#onTranslateEndedHandlers, event);
   };
 
   /**
@@ -113,7 +113,7 @@ export class Translate extends Interaction {
    */
   onTranslateEnded = (callback: TranslateDelegate): void => {
     // Wire the event handler
-    EventHelper.onEvent(this.onTranslateEndedHandlers, callback);
+    EventHelper.onEvent(this.#onTranslateEndedHandlers, callback);
   };
 
   /**
@@ -122,7 +122,7 @@ export class Translate extends Interaction {
    */
   offTranslateEnded = (callback: TranslateDelegate): void => {
     // Unwire the event handler
-    EventHelper.offEvent(this.onTranslateEndedHandlers, callback);
+    EventHelper.offEvent(this.#onTranslateEndedHandlers, callback);
   };
 }
 

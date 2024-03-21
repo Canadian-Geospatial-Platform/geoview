@@ -176,7 +176,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             getLocalizedValue(layerConfig.geoviewLayerInstance?.geoviewLayerName, mapId) ||
             layerConfig.layerPath,
           layerStatus: legendResultSetEntry.layerStatus,
-          querySent: legendResultSetEntry.querySent,
           styleConfig: legendResultSetEntry.data?.styleConfig,
           type: legendResultSetEntry.data?.type,
           canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
