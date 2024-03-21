@@ -7,9 +7,17 @@ import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Loading
 import { exportPNG } from '@/core/utils/utilities';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { NorthArrowIcon, api, useMapAttribution, useMapNorthArrow, useMapScale } from '@/app';
-import { logger } from '@/core/utils/logger';
+import { NorthArrowIcon } from '@/core/components/north-arrow/north-arrow-icon';
+import { useMapAttribution, useMapNorthArrow, useMapScale } from '@/core/stores/store-interface-and-intial-values/map-state';
 import useManageArrow from '../north-arrow/hooks/useManageArrow';
+import { api } from '@/app';
+import { logger } from '@/core/utils/logger';
+
+/**
+ * !NOTE: Error loading remote stylesheet DOMException: Failed to read the 'cssRules' property from 'CSSStyleSheet' for google api
+ * please add `crossOrigin="anonymous"` in stylesheet link
+ * like <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" crossOrigin="anonymous" />
+ */
 
 /**
  * Export modal window component to export the viewer information in a PNG file
@@ -22,7 +30,9 @@ export default function ExportModal(): JSX.Element {
 
   const theme = useTheme();
 
+  // TODO: we should not access the api in component.
   const { map } = api.maps[mapId];
+
   const [isMapLoading, setIsMapLoading] = useState(true);
   const [isLegendLoading, setIsLegendLoading] = useState(true);
   const [isMapExporting, setIsMapExporting] = useState(false);
@@ -87,6 +97,7 @@ export default function ExportModal(): JSX.Element {
       // after modal is fully opened.
       timer = setTimeout(() => {
         setIsMapLoading(true);
+        console.log(map.getViewport());
         htmlToImage.toPng(map.getViewport()).then((dataUrl) => {
           setIsMapLoading(false);
           const img = new Image();
