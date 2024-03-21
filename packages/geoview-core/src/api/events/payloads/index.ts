@@ -1,6 +1,5 @@
 export * from './button-panel-payload';
 export * from './footer-bar-payload';
-export * from './get-legends-payload';
 export * from './in-keyfocus-payload';
 export * from './layer-set-payload';
 export * from './lng-lat-payload';

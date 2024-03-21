@@ -215,17 +215,17 @@
   <script src="layerlib.js"></script>
   <script>
     // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-    cgpv.init(function (mapId) {
-      console.log(`api is ready for ${mapId}`);
+    cgpv.init((mapId) => {
+      if (mapId === 'allMaps') {
+        listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
+        listenToLegendLayerSetChanges('HLYR2-state', 'LYR2');
+        listenToLegendLayerSetChanges('HLYR3-state', 'LYR3');
+
+        // create snippets
+        createCodeSnippet();
+        createConfigSnippet();
+      }
     });
-
-    listenToLegendLayerSetChanges('HLYR1-state', 'LYR1/LegendsLayerSet');
-    listenToLegendLayerSetChanges('HLYR2-state', 'LYR2/LegendsLayerSet');
-    listenToLegendLayerSetChanges('HLYR3-state', 'LYR3/LegendsLayerSet');
-
-    //create snippets
-    createCodeSnippet();
-    createConfigSnippet();
   </script>
 </body>
 

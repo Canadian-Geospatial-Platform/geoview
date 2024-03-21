@@ -1,23 +1,7 @@
 import { generateId } from '@/core/utils/utilities';
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 
 import { TypeModalProps } from './modal';
-
-/**
- * Event interface for ModalEvent
- */
-interface ModalEvent {
-  modalId: string;
-}
-
-/**
- * Define a delegate for the event handler function signature
- */
-type ModalOpenedDelegate = (sender: ModalApi, event: ModalEvent) => void;
-
-/**
- * Define a delegate for the event handler function signature
- */
-type ModalClosedDelegate = (sender: ModalApi, event: ModalEvent) => void;
 
 /**
  * Class used to handle creating a new modal
@@ -82,69 +66,82 @@ export class ModalApi {
 
   openModal = (modalId: string): void => {
     this.modals[modalId].active = true;
-    this.emitModalOpenedEvent(modalId);
+    this.emitModalOpened({ modalId });
   };
 
   closeModal = (modalId: string): void => {
     this.modals[modalId].active = false;
-    this.emitModalClosedEvent(modalId);
+    this.emitModalClosed({ modalId });
+  };
+
+  /**
+   * Emits an event to all handlers.
+   * @param {ModalEvent} event The event to emit
+   */
+  emitModalOpened = (event: ModalEvent) => {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.onModalOpenedHandlers, event);
   };
 
   /**
    * Wires an event handler.
-   * @param callback The callback to be executed whenever the event is raised
+   * @param {ModalOpenedDelegate} callback The callback to be executed whenever the event is emitted
    */
   onModalOpened = (callback: ModalOpenedDelegate): void => {
-    // Push a new callback handler to the list of handlers
-    this.onModalOpenedHandlers.push(callback);
+    // Wire the event handler
+    EventHelper.onEvent(this.onModalOpenedHandlers, callback);
   };
 
   /**
    * Unwires an event handler.
-   * @param callback The callback to stop being called whenever the event is raised
+   * @param {ModalOpenedDelegate} callback The callback to stop being called whenever the event is emitted
    */
   offModalOpened = (callback: ModalOpenedDelegate): void => {
-    const index = this.onModalOpenedHandlers.indexOf(callback);
-    if (index !== -1) {
-      this.onModalOpenedHandlers.splice(index, 1);
-    }
+    // Unwire the event handler
+    EventHelper.offEvent(this.onModalOpenedHandlers, callback);
   };
 
   /**
    * Emits an event to all handlers.
-   * @param {string} modalId The modal id being opened
+   * @param {ModalEvent} event The event to emit
    */
-  private emitModalOpenedEvent = (modalId: string) => {
-    // Trigger all the handlers in the array
-    this.onModalOpenedHandlers.forEach((handler) => handler(this, { modalId }));
+  emitModalClosed = (event: ModalEvent) => {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.onModalClosedHandlers, event);
   };
 
   /**
    * Wires an event handler.
-   * @param callback The callback to be executed whenever the event is raised
+   * @param {ModalClosedDelegate} callback The callback to be executed whenever the event is emitted
    */
   onModalClosed = (callback: ModalClosedDelegate): void => {
-    // Push a new callback handler to the list of handlers
-    this.onModalClosedHandlers.push(callback);
+    // Wire the event handler
+    EventHelper.onEvent(this.onModalClosedHandlers, callback);
   };
 
   /**
    * Unwires an event handler.
-   * @param callback The callback to stop being called whenever the event is raised
+   * @param {ModalClosedDelegate} callback The callback to stop being called whenever the event is emitted
    */
   offModalClosed = (callback: ModalClosedDelegate): void => {
-    const index = this.onModalClosedHandlers.indexOf(callback);
-    if (index !== -1) {
-      this.onModalClosedHandlers.splice(index, 1);
-    }
-  };
-
-  /**
-   * Emits an event to all handlers.
-   * @param {string} modalId The modal id being closed
-   */
-  private emitModalClosedEvent = (modalId: string) => {
-    // Trigger all the handlers in the array
-    this.onModalClosedHandlers.forEach((handler) => handler(this, { modalId }));
+    // Unwire the event handler
+    EventHelper.offEvent(this.onModalClosedHandlers, callback);
   };
 }
+
+/**
+ * Event interface for ModalEvent
+ */
+type ModalEvent = {
+  modalId: string;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type ModalOpenedDelegate = EventDelegateBase<ModalApi, ModalEvent>;
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type ModalClosedDelegate = EventDelegateBase<ModalApi, ModalEvent>;

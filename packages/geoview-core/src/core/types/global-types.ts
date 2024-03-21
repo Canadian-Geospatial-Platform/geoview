@@ -81,7 +81,7 @@ export interface TypeWindow extends Window {
  * Type used for exporting core.
  */
 export type TypeCGPV = {
-  init: TypeCallback;
+  init: CGPVInitCallback;
   api: API;
   react: typeof React;
   createRoot: typeof createRoot;
@@ -93,7 +93,7 @@ export type TypeCGPV = {
 /** ******************************************************************************************************************************
  * Type used for a callback function.
  */
-export type TypeCallback = (callback: () => void) => void;
+export type CGPVInitCallback = (callbackMapsInit?: (mapId: string) => void, callbackMapsLayersLoaded?: (mapId: string) => void) => void;
 
 /** ******************************************************************************************************************************
  * Type used for exporting UI

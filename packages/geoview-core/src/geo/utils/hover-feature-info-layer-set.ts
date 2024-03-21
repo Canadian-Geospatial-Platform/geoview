@@ -8,126 +8,89 @@ import { api, LayerApi } from '@/app';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { logger } from '@/core/utils/logger';
 import { getLocalizedValue } from '@/core/utils/utilities';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
-import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 import { LayerSet, TypeFieldEntry, TypeGeometry, TypeQueryStatus } from './layer-set';
 
-export type TypeHoverFeatureInfo =
-  | {
-      geoviewLayerType: TypeGeoviewLayerType;
-      featureIcon: HTMLCanvasElement;
-      geometry: TypeGeometry | Feature | null;
-      fieldInfo: Partial<Record<string, TypeFieldEntry>>;
-      nameField: string | null;
-    }
-  | undefined
-  | null;
-
-export type TypeHoverLayerData = {
-  layerPath: string;
-  layerName: string;
-  layerStatus: TypeLayerStatus;
-  eventListenerEnabled: boolean;
-  // When property features is undefined, we are waiting for the query result.
-  // when Array.isArray(features) is true, the features property contains the query result.
-  // when property features is null, the query ended with an error.
-  queryStatus: TypeQueryStatus;
-  feature: TypeHoverFeatureInfo;
-};
-export type TypeHoverFeatureInfoResultSetEntry = {
-  layerName?: string;
-  layerStatus: TypeLayerStatus;
-  data: TypeHoverLayerData;
-};
-
-export type TypeHoverFeatureInfoResultSet = {
-  [layerPath: string]: TypeHoverFeatureInfoResultSetEntry;
-};
-
-type TypeFeatureInfoLayerSetInstance = { [mapId: string]: HoverFeatureInfoLayerSet };
-
-/** ***************************************************************************************************************************
+/**
  * A class containing a set of layers associated with a TypeLayerData object, which will receive the result of a
  * "get feature info" request made on the map layers when the user hovers over a position in a stationary way.
  *
  * @class HoverFeatureInfoLayerSet
  */
 export class HoverFeatureInfoLayerSet extends LayerSet {
-  /** Private static variable to keep the single instance that can be created by this class for a mapId (see singleton design pattern) */
-  private static featureInfoLayerSetInstance: TypeFeatureInfoLayerSetInstance = {};
-
-  /** An object containing the result sets indexed using the layer path */
+  /** The resultSet object as existing in the base class, retyped here as a TypeHoverFeatureInfoResultSet */
   declare resultSet: TypeHoverFeatureInfoResultSet;
 
-  /** ***************************************************************************************************************************
+  /**
    * The class constructor that instanciate a set of layer.
    *
    * @param {LayerApi} layerApi The layer Api to work with.
    * @param {string} mapId The map identifier the layer set belongs to.
    *
    */
-  private constructor(layerApi: LayerApi, mapId: string) {
-    super(layerApi, mapId, `${mapId}/hover/FeatureInfoLayerSet`, {});
-    this.setRegistrationConditionFunction();
-    this.setUserRegistrationInitFunction();
+  constructor(layerApi: LayerApi, mapId: string) {
+    super(layerApi, mapId, `${mapId}/hover/FeatureInfoLayerSet`);
+
+    // Wire a listener on the map hover
+    // TODO: Refactor - Revise this when revisiting the hover query process
     this.setMapHoverListener();
   }
 
-  /* **************************************************************************************************************************
-   * This function determines whether a layer can be registered or not.
+  /**
+   * Overrides the behavior to apply when a hover-feature-info-layer-set wants to check for condition to register a layer in its set.
+   * @param {AbstractGeoViewLayer} geoviewLayer The geoview layer being registered
+   * @param {string} layerPath The layer path
    */
-  setRegistrationConditionFunction() {
-    this.registrationConditionFunction = (layerPath: string): boolean => {
-      // Log
-      logger.logTraceCore('HOVER-FEATURE-INFO-LAYER-SET setRegistrationConditionFunction', layerPath, Object.keys(this.resultSet));
+  protected onRegisterLayerCheck = (geoviewLayer: AbstractGeoViewLayer, layerPath: string): boolean => {
+    // Log
+    logger.logTraceCore('HOVER-FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerPath, Object.keys(this.resultSet));
 
-      const layerConfig = this.layerApi.registeredLayers[layerPath];
-      const queryable = layerConfig?.source?.featureInfo?.queryable;
-      return !!queryable;
-    };
-  }
-
-  /** ***************************************************************************************************************************
-   * Define the initialization function that the registration process will use to create a new entry in the layer set for a
-   * specific layer path.
-   */
-  setUserRegistrationInitFunction() {
-    this.registrationUserInitialisation = (layerPath: string) => {
-      // Log
-      logger.logTraceCore('HOVER-FEATURE-INFO-LAYER-SET setUserRegistrationInitFunction', layerPath, Object.keys(this.resultSet));
-
-      const layerConfig = this.layerApi.registeredLayers[layerPath];
-      this.resultSet[layerPath] = {
-        layerName: getLocalizedValue(layerConfig.layerName, this.mapId) ?? '',
-        layerStatus: layerConfig.layerStatus!,
-        data: {
-          layerName: getLocalizedValue(layerConfig.layerName, this.mapId) ?? '',
-          layerStatus: layerConfig.layerStatus!,
-          eventListenerEnabled: true,
-          queryStatus: 'processed',
-          feature: undefined,
-          layerPath,
-        },
-      };
-      FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, 'hover', this.resultSet);
-    };
-  }
+    const layerConfig = this.layerApi.registeredLayers[layerPath];
+    const queryable = layerConfig?.source?.featureInfo?.queryable;
+    return !!queryable;
+  };
 
   /**
-   * The listener that will handle the CHANGE_LAYER_STATUS event triggered on the map. This method is called by the parent class
-   * LayerSet via the listener created by the processLayerStatusChanged method.
-   *
+   * Overrides the behavior to apply when a hover-feature-info-layer-set wants to register a layer in its set.
+   * @param {AbstractGeoViewLayer} geoviewLayer The geoview layer being registered
+   * @param {string} layerPath The layer path
+   */
+  protected onRegisterLayer = (geoviewLayer: AbstractGeoViewLayer, layerPath: string): void => {
+    // Log
+    logger.logTraceCore('HOVER-FEATURE-INFO-LAYER-SET - onRegisterLayer', layerPath, Object.keys(this.resultSet));
+
+    const layerConfig = this.layerApi.registeredLayers[layerPath];
+    this.resultSet[layerPath] = {
+      layerName: getLocalizedValue(layerConfig.layerName, this.mapId) ?? '',
+      layerStatus: layerConfig.layerStatus!,
+      data: {
+        layerName: getLocalizedValue(layerConfig.layerName, this.mapId) ?? '',
+        layerStatus: layerConfig.layerStatus!,
+        eventListenerEnabled: true,
+        queryStatus: 'processed',
+        feature: undefined,
+        layerPath,
+      },
+    };
+    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, 'hover', this.resultSet);
+  };
+
+  /**
+   * Overrides the behavior to apply when a layer status changed for a hover-feature-info-layer-set.
+   * @param {ConfigBaseClass} config The layer config class
    * @param {string} layerPath The layer path being affected
    * @param {string} layerStatus The new layer status
    */
-  protected changeLayerStatusListenerFunctions(layerPath: string, layerStatus: TypeLayerStatus): void {
+  protected onProcessLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
     // if layer's status flag exists and is different than the new one
     if (this.resultSet?.[layerPath]?.layerStatus && this.resultSet?.[layerPath]?.layerStatus !== layerStatus) {
       if (layerStatus === 'error') delete this.resultSet[layerPath];
       else {
-        // Call parent
-        super.changeLayerStatusListenerFunctions(layerPath, layerStatus);
+        // Call parent. After this call, this.resultSet?.[layerPath]?.layerStatus may have changed!
+        super.onProcessLayerStatusChanged(config, layerPath, layerStatus);
 
         const layerConfig = this.layerApi.registeredLayers[layerPath];
         if (this?.resultSet?.[layerPath]?.data) {
@@ -138,13 +101,16 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
     }
   }
 
-  /* **************************************************************************************************************************
-   * Private method used to emit a query layer event for all layers in the result set that are loaded. Layers that has an error
-   * are set with an null features array and a queryStatus equal to 'error'.
+  /**
+   * Queries the features at the provided coordinate for all the registered layers.
    *
-   * @param {Coordinate} coordinate The coordinate of the event
+   * @param {Coordinate} pixelCoordinate The pixel coordinate where to query the features
    */
-  private createQueryLayerPayload = (coordinate: Coordinate): void => {
+  queryLayers = (pixelCoordinate: Coordinate): void => {
+    // Query and event types of what we're doing
+    const queryType = 'at_pixel';
+    const eventType = 'hover';
+
     // Reinitialize the resultSet
     // Loop on each layer path in the resultSet
     Object.keys(this.resultSet).forEach((layerPath) => {
@@ -155,12 +121,8 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
         data.feature = undefined;
         data.queryStatus = 'init';
 
-        // Query and event types of what we're doing
-        const queryType = 'at_pixel';
-        const eventType = 'hover';
-
         // Process query on results data
-        this.processQueryResultSetData(data, layerConfig, layerPath, queryType, coordinate).then((arrayOfRecords) => {
+        this.processQueryResultSetData(data, layerConfig, layerPath, queryType, pixelCoordinate).then((arrayOfRecords) => {
           if (arrayOfRecords === null) {
             this.resultSet[layerPath].data.queryStatus = 'error';
             this.resultSet[layerPath].data.layerStatus = layerConfig.layerStatus!;
@@ -202,7 +164,8 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
         logger.logTraceCoreAPIEvent('HOVER-FEATURE-INFO-LAYER-SET on EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE', this.mapId, payload);
 
         if (payloadIsAMapMouseEvent(payload)) {
-          this.createQueryLayerPayload(payload.coordinates.pixel);
+          // Query all layers which can be queried
+          this.queryLayers(payload.coordinates.pixel);
         }
       }, 750),
       this.mapId
@@ -255,28 +218,36 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
     });
     return returnValue;
   }
-
-  /**
-   * Helper function used to instanciate a FeatureInfoLayerSet object. This function
-   * must be used in place of the "new FeatureInfoLayerSet" syntax.
-   *
-   * @param {LayerApi} layerApi The layer Api to work with.
-   * @param {string} mapId The map identifier the layer set belongs to.
-   *
-   * @returns {FeatureInfoLayerSet} the FeatureInfoLayerSet object created
-   */
-  static get(layerApi: LayerApi, mapId: string): HoverFeatureInfoLayerSet {
-    if (!HoverFeatureInfoLayerSet.featureInfoLayerSetInstance[mapId])
-      HoverFeatureInfoLayerSet.featureInfoLayerSetInstance[mapId] = new HoverFeatureInfoLayerSet(layerApi, mapId);
-    return HoverFeatureInfoLayerSet.featureInfoLayerSetInstance[mapId];
-  }
-
-  /**
-   * Function used to delete a FeatureInfoLayerSet object associated to a mapId.
-   *
-   * @param {string} mapId The map identifier the layer set belongs to.
-   */
-  static delete(mapId: string) {
-    if (HoverFeatureInfoLayerSet.featureInfoLayerSetInstance[mapId]) delete HoverFeatureInfoLayerSet.featureInfoLayerSetInstance[mapId];
-  }
 }
+
+export type TypeHoverFeatureInfo =
+  | {
+      geoviewLayerType: TypeGeoviewLayerType;
+      featureIcon: HTMLCanvasElement;
+      geometry: TypeGeometry | Feature | null;
+      fieldInfo: Partial<Record<string, TypeFieldEntry>>;
+      nameField: string | null;
+    }
+  | undefined
+  | null;
+
+export type TypeHoverLayerData = {
+  layerPath: string;
+  layerName: string;
+  layerStatus: TypeLayerStatus;
+  eventListenerEnabled: boolean;
+  // When property features is undefined, we are waiting for the query result.
+  // when Array.isArray(features) is true, the features property contains the query result.
+  // when property features is null, the query ended with an error.
+  queryStatus: TypeQueryStatus;
+  feature: TypeHoverFeatureInfo;
+};
+export type TypeHoverFeatureInfoResultSetEntry = {
+  layerName?: string;
+  layerStatus: TypeLayerStatus;
+  data: TypeHoverLayerData;
+};
+
+export type TypeHoverFeatureInfoResultSet = {
+  [layerPath: string]: TypeHoverFeatureInfoResultSetEntry;
+};

@@ -123,7 +123,9 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    */
   loadedFunction() {
     // Update registration based on metadata that were read since the first registration.
-    this.geoviewLayerInstance?.registerToLayerSets(this);
+    // TODO: Check - Commenting this line for now as part of big refactor (2024-03-17). It seems good to me without it so far.
+    // TO.DOCONT: Maybe there was a reason for it. I'd like to see it.
+    // this.geoviewLayerInstance?.registerToLayerSets(this);
     this.geoviewLayerInstance?.setVisible(this.initialSettings?.visible !== 'no', this.layerPath);
   }
 
