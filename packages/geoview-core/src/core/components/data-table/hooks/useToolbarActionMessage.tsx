@@ -74,5 +74,5 @@ export function useToolbarActionMessage({ data, columnFilters, globalFilter, lay
     setToolbarRowSelectedMessageEntry(message, layerPath);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [columnFilters, data.features]);
+  }, [columnFilters, data.features, globalFilter]);
 }
