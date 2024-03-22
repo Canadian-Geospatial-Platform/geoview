@@ -21,10 +21,9 @@ import {
   TypeLayerEntryConfig,
   TypeListOfLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
-
 import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
 import { EsriFeature, geoviewEntryIsEsriFeature } from './vector/esri-feature';
-import { EsriBaseRenderer, getStyleFromEsriRenderer } from '../../renderer/esri-renderer';
+import { EsriBaseRenderer, getStyleFromEsriRenderer } from '@/geo/renderer/esri-renderer';
 import { EsriImage } from './raster/esri-image';
 
 /** ***************************************************************************************************************************
@@ -306,8 +305,8 @@ export function commonProcessInitialSettings(
 ) {
   // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
   const layerMetadata = this.layerMetadata[layerConfig.layerPath];
-  if (layerConfig.initialSettings?.visible === undefined)
-    layerConfig.initialSettings!.visible = layerMetadata.defaultVisibility ? 'yes' : 'no';
+  if (layerConfig.initialSettings?.states?.visible === undefined)
+    layerConfig.initialSettings!.states = { visible: !!layerMetadata.defaultVisibility };
   // GV TODO: The solution implemented in the following two lines is not right. scale and zoom are not the same things.
   // GV if (layerConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerConfig.initialSettings.minZoom = minScale;
   // GV if (layerConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerConfig.initialSettings.maxZoom = maxScale;

@@ -12,13 +12,14 @@ import { XYZ } from 'ol/source'; // only for typing
 import { useStore } from 'zustand';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { TypeClickMarker, api } from '@/app';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { TypeMapMouseInfo } from '@/api/events/payloads';
+import { TypeFeatureInfoEntry, TypeGeometry } from '@/geo/utils/layer-set';
 import { TypeBasemapOptions, TypeMapFeaturesConfig, TypeValidMapProjectionCodes } from '@/core/types/global-types';
+import { TypeMapMouseInfo } from '@/api/events/payloads';
 import { TypeInteraction, TypeHighlightColors } from '@/geo/map/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeFeatureInfoEntry, TypeGeometry } from '@/geo/utils/layer-set';
+import { api } from '@/app';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 
 // #region INTERFACES
 interface TypeScaleInfo {
@@ -33,11 +34,9 @@ export interface TypeNorthArrow {
 }
 
 export interface TypeOrderedLayerInfo {
-  alwaysVisible: boolean;
   hoverable?: boolean;
   layerPath: string;
   queryable?: boolean;
-  removable: boolean;
   visible: boolean;
 }
 
@@ -84,10 +83,8 @@ export interface IMapState {
     addHighlightedFeature: (feature: TypeFeatureInfoEntry) => void;
     createBaseMapFromOptions: () => void;
     createEmptyBasemap: () => TileLayer<XYZ>;
-    getAlwaysVisibleFromOrderedLayerInfo: (layerPath: string) => boolean;
     getIndexFromOrderedLayerInfo: (layerPath: string) => number;
     getPixelFromCoordinate: (coord: Coordinate) => [number, number];
-    getRemovableFromOrderedLayerInfo: (layerPath: string) => boolean;
     getVisibilityFromOrderedLayerInfo: (layerPath: string) => boolean;
     hideClickMarker: () => void;
     highlightBBox: (extent: Extent, isLayerHighlight?: boolean) => void;
@@ -327,21 +324,11 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       createEmptyBasemap: (): TileLayer<XYZ> => {
         return MapEventProcessor.createEmptyBasemap(get().mapId);
       },
-      getAlwaysVisibleFromOrderedLayerInfo: (layerPath: string): boolean => {
-        const info = get().mapState.orderedLayerInfo;
-        const pathInfo = info.find((item) => item.layerPath === layerPath);
-        if (pathInfo) return pathInfo.alwaysVisible;
-        return false;
-      },
+
       getIndexFromOrderedLayerInfo: (layerPath: string): number => {
         const info = get().mapState.orderedLayerInfo;
         for (let i = 0; i < info.length; i++) if (info[i].layerPath === layerPath) return i;
         return -1;
-      },
-      getRemovableFromOrderedLayerInfo: (layerPath: string): boolean => {
-        const info = get().mapState.orderedLayerInfo;
-        const pathInfo = info.find((item) => item.layerPath === layerPath);
-        return pathInfo!.removable;
       },
       getVisibilityFromOrderedLayerInfo: (layerPath: string): boolean => {
         const info = get().mapState.orderedLayerInfo;
@@ -566,7 +553,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         const parentLayerInfo = curOrderedLayerInfo.find((info) => info.layerPath === parentLayerPath);
 
         layerInfos.forEach((layerInfo) => {
-          if (layerInfo && !layerInfo.alwaysVisible) {
+          if (layerInfo) {
             // eslint-disable-next-line no-param-reassign
             layerInfo!.visible = newValue || !layerVisibility;
             api.maps[get().mapId].layer.geoviewLayer(layerInfo.layerPath).setVisible(layerInfo.visible, layerInfo.layerPath);

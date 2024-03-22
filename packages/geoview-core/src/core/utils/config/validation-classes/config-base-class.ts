@@ -11,7 +11,6 @@ import {
 } from '@/geo/map/map-schema-types';
 import { logger } from '@/core/utils/logger';
 import { Cast, TypeJsonValue, api } from '@/core/types/cgpv-types';
-
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
 

@@ -531,13 +531,14 @@ export class WMS extends AbstractGeoViewRaster {
           properties: { layerCapabilities, layerConfig },
         };
         // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-        if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings?.className;
-        if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings?.extent;
-        if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
-        if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings?.minZoom;
-        if (layerConfig.initialSettings?.opacity !== undefined) imageLayerOptions.opacity = layerConfig.initialSettings?.opacity;
+        if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings.className;
+        if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings.extent;
+        if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
+        if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
+        if (layerConfig.initialSettings?.states?.opacity !== undefined)
+          imageLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
         // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
-        // GV            in the 'loading' state if the flag value is 'no'.
+        // GV            in the 'loading' state if the flag value is false.
 
         layerConfig.olLayerAndLoadEndListeners = {
           olLayer: new ImageLayer(imageLayerOptions),

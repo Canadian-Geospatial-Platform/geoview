@@ -41,7 +41,6 @@ import { Cast, toJsonObject, TypeJsonObject, TypeMapFeaturesConfig } from '@/cor
 import { CONST_GEOVIEW_SCHEMA_BY_TYPE, CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { geoviewEntryIsEsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { logger } from '@/core/utils/logger';
-import { CONFIG_GEOCORE_URL, CONFIG_GEOLOCATOR_URL } from '@/app';
 
 import { generateId, replaceParams, getLocalizedMessage, showError } from '../utilities';
 import schema from '../../../../schema.json';
@@ -59,6 +58,7 @@ import { EsriDynamicLayerEntryConfig } from './validation-classes/raster-validat
 import { EsriImageLayerEntryConfig } from './validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GroupLayerEntryConfig } from './validation-classes/group-layer-entry-config';
 import { ConfigBaseClass } from './validation-classes/config-base-class';
+import { CONFIG_GEOCORE_URL, CONFIG_GEOLOCATOR_URL } from '../constant';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -542,7 +542,7 @@ export class ConfigValidation {
         .forEach((geoviewLayerConfig) => {
           // The default value for geoviewLayerConfig.initialSettings.visible is true.
           const geoviewLayerConfigCasted = geoviewLayerConfig as TypeGeoviewLayerConfig;
-          if (!geoviewLayerConfigCasted.initialSettings) geoviewLayerConfigCasted.initialSettings = { visible: 'yes' };
+          if (!geoviewLayerConfigCasted.initialSettings) geoviewLayerConfigCasted.initialSettings = { states: { visible: true } };
           switch (geoviewLayerConfig.geoviewLayerType) {
             case CONST_LAYER_TYPES.CSV:
             case CONST_LAYER_TYPES.GEOJSON:

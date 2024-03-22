@@ -23,15 +23,9 @@ import {
   ListItem,
   List,
 } from '@/ui';
-import {
-  useLayerHighlightedLayer,
-  useLayerStoreActions,
-  useUIStoreActions,
-  useMapStoreActions,
-  useDetailsStoreAllFeaturesDataArray,
-} from '@/core/stores';
+import { useLayerHighlightedLayer, useLayerStoreActions, useUIStoreActions, useDetailsStoreAllFeaturesDataArray } from '@/core/stores';
 import { generateId } from '@/core/utils/utilities';
-import { LayerIcon } from '../../common/layer-icon';
+import { LayerIcon } from '@/core/components/common/layer-icon';
 import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-control';
 import { logger } from '@/core/utils/logger';
 
@@ -56,7 +50,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const highlightedLayer = useLayerHighlightedLayer();
   const { setAllItemsVisibility, toggleItemVisibility, setHighlightLayer, zoomToLayerExtent, getLayerBounds } = useLayerStoreActions();
   const { openModal } = useUIStoreActions();
-  const { getAlwaysVisibleFromOrderedLayerInfo } = useMapStoreActions();
   const layersData = useDetailsStoreAllFeaturesDataArray();
   const selectedLayer = layersData.find((_layer) => _layer.layerPath === layerDetails?.layerPath);
 
@@ -107,13 +100,13 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     if (layerDetails.children.length > 0) {
       return t('legend.subLayersCount').replace('{count}', layerDetails.children.length.toString());
     }
-    const count = layerDetails.items.filter((d) => d.isVisible !== 'no').length;
+    const count = layerDetails.items.filter((d) => d.isVisible !== false).length;
     const totalCount = layerDetails.items.length;
     return t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
   };
 
   const allItemsChecked = () => {
-    return _.every(layerDetails.items, (i) => ['yes', 'always'].includes(i.isVisible!));
+    return _.every(layerDetails.items, (i) => i.isVisible !== false);
   };
 
   function renderItemCheckbox(item: TypeLegendItem) {
@@ -125,7 +118,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     ) {
       return null;
     }
-    if (item.isVisible === 'always' || getAlwaysVisibleFromOrderedLayerInfo(layerDetails.layerPath) || !layerDetails.canToggle) {
+    if (!layerDetails.canToggle) {
       return (
         <IconButton disabled tooltip="layers.visibilityIsAlways">
           {' '}
@@ -136,14 +129,13 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
     return (
       <IconButton color="primary" onClick={() => toggleItemVisibility(layerDetails.layerPath, item.geometryType, item.name)}>
-        {item.isVisible === 'yes' ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
+        {item.isVisible === true ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
       </IconButton>
     );
   }
 
   function renderHeaderCheckbox() {
-    const containsDisabled = _.some(layerDetails.items, (i) => i.isVisible === 'always');
-    if (getAlwaysVisibleFromOrderedLayerInfo(layerDetails.layerPath) || !layerDetails.canToggle || containsDisabled) {
+    if (!layerDetails.canToggle) {
       return (
         <IconButton disabled>
           {' '}
@@ -153,7 +145,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     }
 
     return (
-      <IconButton color="primary" onClick={() => setAllItemsVisibility(layerDetails.layerPath, !allItemsChecked() ? 'yes' : 'no')}>
+      <IconButton color="primary" onClick={() => setAllItemsVisibility(layerDetails.layerPath, !allItemsChecked())}>
         {allItemsChecked() ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
       </IconButton>
     );
@@ -205,17 +197,23 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     );
   }
 
-  function renderLayerButtons() {
-    return (
-      <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px' }}>
-        {isDataTableVisible && selectedLayer?.features?.length && (
-          <IconButton id="table-details" tooltip="legend.tableDetails" className="style1" onClick={handleOpenTable}>
-            <TableViewIcon />
-          </IconButton>
-        )}
-        <IconButton tooltip="legend.refreshLayer" className="style1" onClick={handleRefreshLayer}>
-          <RestartAltIcon />
+  function renderDetailsButton() {
+    if (layerDetails.controls?.table !== false)
+      return (
+        <IconButton id="table-details" tooltip="legend.tableDetails" className="style1" onClick={handleOpenTable}>
+          <TableViewIcon />
         </IconButton>
+      );
+    return (
+      <IconButton id="table-details" className="style1" disabled>
+        <TableViewIcon color="disabled" />
+      </IconButton>
+    );
+  }
+
+  function renderHighlightButton() {
+    if (layerDetails.controls?.highlight !== false)
+      return (
         <IconButton
           tooltip="legend.highlightLayer"
           onClick={handleHighlightLayer}
@@ -223,9 +221,37 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         >
           <HighlightOutlinedIcon />
         </IconButton>
+      );
+    return (
+      <IconButton className="style1" disabled>
+        <HighlightOutlinedIcon color="disabled" />
+      </IconButton>
+    );
+  }
+
+  function renderZoomButton() {
+    if (layerDetails.controls?.zoom !== false)
+      return (
         <IconButton tooltip="legend.zoomTo" onClick={handleZoomTo} className="style1" disabled={layerDetails.bounds === undefined}>
           <ZoomInSearchIcon />
         </IconButton>
+      );
+    return (
+      <IconButton className="style1" disabled>
+        <ZoomInSearchIcon color="disabled" />
+      </IconButton>
+    );
+  }
+
+  function renderLayerButtons() {
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px' }}>
+        {isDataTableVisible && selectedLayer?.features?.length && renderDetailsButton()}
+        <IconButton tooltip="legend.refreshLayer" className="style1" onClick={handleRefreshLayer}>
+          <RestartAltIcon />
+        </IconButton>
+        {renderHighlightButton()}
+        {renderZoomButton()}
       </Box>
     );
   }
@@ -242,7 +268,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             </Box>
             {renderLayerButtons()}
           </Box>
-          <LayerOpacityControl layerDetails={layerDetails} />
+          {layerDetails.controls?.opacity !== false && <LayerOpacityControl layerDetails={layerDetails} />}
           <Box sx={{ marginTop: '20px' }}>
             {layerDetails.items?.length > 0 && renderItems()}
             {layerDetails.children.length > 0 && (

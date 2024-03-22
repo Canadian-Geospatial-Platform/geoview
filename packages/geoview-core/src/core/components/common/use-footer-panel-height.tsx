@@ -8,7 +8,7 @@ import {
 import { logger } from '@/core/utils/logger';
 import { useDataTableStoreActions } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { TABS } from '@/app';
+import { TABS } from '@/core/utils/constant';
 
 interface UseFooterPanelHeightType {
   footerPanelTab: 'layers' | 'details' | 'data-table' | 'legend' | 'default' | 'guide';
@@ -89,6 +89,7 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
     arrayOfLayerData,
     allFeaturesLayerData,
     setTableHeight,
+    mapId,
   ]);
 
   return { leftPanelRef, rightPanelRef, panelTitleRef };

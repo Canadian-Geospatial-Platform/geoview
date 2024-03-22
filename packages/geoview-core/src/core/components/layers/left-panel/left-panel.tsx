@@ -3,7 +3,7 @@ import { useLayerDisplayState, useLayerLegendLayers, useMapOrderedLayerInfo, use
 import { LayersList } from './layers-list';
 import { AddNewLayer } from './add-new-layer/add-new-layer';
 import { logger } from '@/core/utils/logger';
-import { TypeLegendLayer } from '../types';
+import { TypeLegendLayer } from '@/core/components/layers/types';
 
 interface LeftPanelProps {
   setIsLayersListPanelVisible: Dispatch<SetStateAction<boolean>>;

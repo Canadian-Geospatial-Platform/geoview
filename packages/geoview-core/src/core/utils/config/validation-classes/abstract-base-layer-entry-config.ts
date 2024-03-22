@@ -18,9 +18,9 @@ import {
   TypeVectorTileSourceInitialConfig,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
-import { logger } from '../../logger';
-import { TypeJsonValue } from '@/app';
+import { logger } from '@/core/utils/logger';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { TypeJsonValue } from '@/core/types/global-types';
 
 /** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map.
@@ -126,7 +126,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     // TODO: Check - Commenting this line for now as part of big refactor (2024-03-17). It seems good to me without it so far.
     // TO.DOCONT: Maybe there was a reason for it. I'd like to see it.
     // this.geoviewLayerInstance?.registerToLayerSets(this);
-    this.geoviewLayerInstance?.setVisible(this.initialSettings?.visible !== 'no', this.layerPath);
+    this.geoviewLayerInstance?.setVisible(this.initialSettings?.states?.visible !== false, this.layerPath);
   }
 
   /**

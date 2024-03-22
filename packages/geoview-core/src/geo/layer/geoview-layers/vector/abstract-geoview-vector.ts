@@ -20,7 +20,7 @@ import {
   TypeListOfLayerEntryConfig,
   TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
-import { Cast, api } from '@/app';
+import { api } from '@/app';
 import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
 import { NodeType } from '@/geo/renderer/geoview-renderer-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -29,6 +29,7 @@ import { CSV } from './csv';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
+import { Cast } from '@/core/types/global-types';
 
 /* *******************************************************************************************************************************
  * AbstractGeoViewVector types
@@ -230,10 +231,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     };
     layerConfig.geoviewLayerInstance = this;
 
-    if (layerConfig.initialSettings?.extent !== undefined) this.setExtent(layerConfig.initialSettings?.extent, layerPath);
-    if (layerConfig.initialSettings?.maxZoom !== undefined) this.setMaxZoom(layerConfig.initialSettings?.maxZoom, layerPath);
-    if (layerConfig.initialSettings?.minZoom !== undefined) this.setMinZoom(layerConfig.initialSettings?.minZoom, layerPath);
-    if (layerConfig.initialSettings?.opacity !== undefined) this.setOpacity(layerConfig.initialSettings?.opacity, layerPath);
+    if (layerConfig.initialSettings?.extent !== undefined) this.setExtent(layerConfig.initialSettings.extent, layerPath);
+    if (layerConfig.initialSettings?.maxZoom !== undefined) this.setMaxZoom(layerConfig.initialSettings.maxZoom, layerPath);
+    if (layerConfig.initialSettings?.minZoom !== undefined) this.setMinZoom(layerConfig.initialSettings.minZoom, layerPath);
+    if (layerConfig.initialSettings?.states?.opacity !== undefined) this.setOpacity(layerConfig.initialSettings.states.opacity, layerPath);
     // If a layer on the map has an initialSettings.visible set to false, its status will never reach the status 'loaded' because
     // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
     // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.

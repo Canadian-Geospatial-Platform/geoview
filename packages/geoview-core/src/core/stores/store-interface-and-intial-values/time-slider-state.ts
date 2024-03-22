@@ -1,5 +1,5 @@
 import { useStore } from 'zustand';
-import { useGeoViewStore } from '../stores-managers';
+import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeGetStore, TypeSetStore } from '../geoview-store';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 
