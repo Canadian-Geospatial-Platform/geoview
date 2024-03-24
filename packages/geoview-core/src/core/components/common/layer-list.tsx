@@ -109,7 +109,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
 
       default:
         return (
-          <IconButton edge="end" size="small" className="style1" disabled={isDisabled}>
+          <IconButton edge="end" size="small" className="style1" disabled={isDisabled} tabIndex={-1}>
             <ChevronRightIcon />
           </IconButton>
         );
