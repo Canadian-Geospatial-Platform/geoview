@@ -36,6 +36,7 @@ export function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIcon
         color="primary"
         size="small"
         onClick={iconImage === 'no data' ? undefined : onIconClick}
+        aria-hidden="true"
       >
         {iconImage === 'no data' ? (
           <BrowserNotSupportedIcon />
@@ -47,19 +48,19 @@ export function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIcon
       </IconButton>
     ) : // eslint-disable-next-line no-nested-ternary
     numOfIcons && numOfIcons > 0 ? (
-      <Box tabIndex={-1} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyPress={(e) => onStackIconClick?.(e)}>
-        <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1}>
+      <Box tabIndex={-1} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyPress={(e) => onStackIconClick?.(e)} aria-hidden="true">
+        <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1} aria-hidden="true">
           <Box sx={sxClasses.legendIconTransparent}>
             {iconImageStacked && <img alt="icon" src={iconImageStacked} style={sxClasses.maxIconImg} />}
           </Box>
         </IconButton>
-        <IconButton sx={sxClasses.iconPreviewHoverable} color="primary" size="small" tabIndex={-1}>
+        <IconButton sx={sxClasses.iconPreviewHoverable} color="primary" size="small" tabIndex={-1} aria-hidden="true">
           <Box sx={sxClasses.legendIcon}>{iconImage && <img alt="icon" src={iconImage} style={sxClasses.maxIconImg} />}</Box>
         </IconButton>
       </Box>
     ) : layerPath !== '' && iconData.length === 0 && layerPath.charAt(0) !== '!' ? (
-      <Box tabIndex={-1} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyPress={(e) => onStackIconClick?.(e)}>
-        <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1}>
+      <Box tabIndex={-1} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyPress={(e) => onStackIconClick?.(e)} aria-hidden="true">
+        <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1} aria-hidden="true">
           <Box sx={sxClasses.legendIconTransparent}>
             <BrowserNotSupportedIcon />
           </Box>
