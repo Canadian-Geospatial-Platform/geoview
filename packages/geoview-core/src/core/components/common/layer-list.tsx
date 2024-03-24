@@ -60,7 +60,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
         // If there's a layer path
         if (layer.layerPath) {
           return (
-            <ListItemIcon>
+            <ListItemIcon aria-hidden="true">
               <LayerIcon layer={layer} />
             </ListItemIcon>
           );
@@ -111,7 +111,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
 
       default:
         return (
-          <IconButton edge="end" size="small" className="style1" disabled={isDisabled} tabIndex={-1}>
+          <IconButton edge="end" size="small" className="style1" disabled={isDisabled} tabIndex={-1} aria-hidden="true">
             <ChevronRightIcon />
           </IconButton>
         );
@@ -146,6 +146,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
               // disable when layer features has null value.
               disabled={isDisabled || isLoading}
               onClick={() => onListItemClick(layer)}
+              aria-label={layer.layerName}
             >
               {renderLayerIcon()}
               {renderLayerBody()}

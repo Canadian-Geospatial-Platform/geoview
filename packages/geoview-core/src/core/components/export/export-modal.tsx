@@ -31,10 +31,10 @@ export default function ExportModal(): JSX.Element {
     <Dialog open={activeModalId === 'export'} onClose={closeModal} container={mapElem}>
       <DialogTitle>{t('exportModal.title')}</DialogTitle>
       <DialogActions>
-        <Button onClick={closeModal} type="text" size="small" role="button" tabIndex={-1} autoFocus>
+        <Button onClick={closeModal} type="text" size="small" role="button" tabIndex={-1} aria-hidden="true" autoFocus>
           {t('exportModal.cancelBtn')}
         </Button>
-        <Button type="text" onClick={exportMap} role="button" tabIndex={-1} size="small">
+        <Button type="text" onClick={exportMap} role="button" tabIndex={-1} size="small" aria-hidden="true">
           {t('exportModal.exportBtn')}
         </Button>
       </DialogActions>

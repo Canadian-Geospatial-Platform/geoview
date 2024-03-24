@@ -96,6 +96,7 @@ export function CheckboxList(props: CheckboxListProps): JSX.Element {
                 tabIndex={-1}
                 disableRipple
                 inputProps={{ 'aria-labelledby': labelId }}
+                aria-hidden="true"
               />
             </ListItemIcon>
             <Typography sx={sxClasses.typography} variant="body2" noWrap component="ul">
