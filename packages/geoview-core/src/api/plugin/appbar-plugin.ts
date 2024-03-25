@@ -1,6 +1,8 @@
-import { TypeButtonPanel, TypeIconButtonProps, TypePanelProps } from '@/ui';
+// import { TypeButtonPanel, TypeIconButtonProps, TypePanelProps } from '@/ui';
+import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import { AbstractPlugin } from './abstract-plugin';
 import { TypeWindow } from '@/core/types/global-types';
+import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 
 /** ******************************************************************************************************************************
  * AppBar Plugin abstract class.

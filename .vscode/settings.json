@@ -4,6 +4,13 @@
   "editor.tabSize": 2,
   "editor.hover.delay": 1000,
   "window.title": "${activeEditorMedium}${separator}${rootName}${separator}${profileName}",
+  "typescript.preferences.autoImportFileExcludePatterns": [
+    "packages/geoview-core/src/core/types/cgpv-types.ts",
+    "packages/geoview-core/src/ui/index.ts",
+    "packages/geoview-core/src/geo/index.ts",
+    "packages/geoview-core/src/api/index.ts",
+    "packages/geoview-core/src/ui/index.ts"
+  ],
   "better-comments.tags": [
     {
       "tag": "!",

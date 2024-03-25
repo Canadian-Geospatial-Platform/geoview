@@ -1,4 +1,3 @@
-import {} from '@/geo'; // TODO what is causing an error when removing this import?
 import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import {
   CONST_LAYER_TYPES,
@@ -9,8 +8,9 @@ import {
   isWmsLegend,
 } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeLegendResultSetEntry } from '@/geo/utils/legends-layer-set';
-import { api, getLocalizedValue, ILayerState } from '@/app';
-
+import { api } from '@/app';
+import { ILayerState } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { getLocalizedValue } from '@/core/utils/utilities';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import {
   TypeLayerControls,
