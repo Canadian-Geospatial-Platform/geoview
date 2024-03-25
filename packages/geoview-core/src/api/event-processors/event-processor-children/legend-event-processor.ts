@@ -11,7 +11,7 @@ import {
 import { TypeLegendResultSetEntry } from '@/geo/utils/legends-layer-set';
 import { api, getLocalizedValue, ILayerState } from '@/app';
 
-import { AbstractEventProcessor } from '../abstract-event-processor';
+import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import {
   TypeLayerControls,
   TypeLayerEntryConfig,

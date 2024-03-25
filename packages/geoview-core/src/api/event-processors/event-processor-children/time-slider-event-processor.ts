@@ -1,6 +1,6 @@
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
-import { AbstractEventProcessor } from '../abstract-event-processor';
+import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { ITimeSliderState, TimeSliderLayerSet } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { getLocalizedValue, whenThisThenThat } from '@/core/utils/utilities';

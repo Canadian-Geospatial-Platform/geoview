@@ -33,14 +33,14 @@ import { layerConfigIsXYZTiles, XYZTiles } from '@/geo/layer/geoview-layers/rast
 import { layerConfigIsVectorTiles, VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { CSV, layerConfigIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
 
-import { HoverFeatureInfoLayerSet } from '../utils/hover-feature-info-layer-set';
-import { AllFeatureInfoLayerSet } from '../utils/all-feature-info-layer-set';
-import { LegendsLayerSet } from '../utils/legends-layer-set';
-import { FeatureInfoLayerSet } from '../utils/feature-info-layer-set';
-import { LayerSet } from '../utils/layer-set';
+import { HoverFeatureInfoLayerSet } from '@/geo/utils/hover-feature-info-layer-set';
+import { AllFeatureInfoLayerSet } from '@/geo/utils/all-feature-info-layer-set';
+import { LegendsLayerSet } from '@/geo/utils/legends-layer-set';
+import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
+import { LayerSet } from '@/geo/utils/layer-set';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { MapViewer } from '../map/map-viewer';
+import { MapViewer } from '@/geo/map/map-viewer';
 
 export type TypeRegisteredLayers = { [layerPath: string]: TypeLayerEntryConfig };
 

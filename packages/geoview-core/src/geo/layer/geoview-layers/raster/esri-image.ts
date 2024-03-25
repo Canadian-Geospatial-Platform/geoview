@@ -31,7 +31,7 @@ import {
   commonProcessInitialSettings,
   commonProcessLayerMetadata,
   commonProcessTemporalDimension,
-} from '../esri-layer-common';
+} from '@/geo/layer/geoview-layers/esri-layer-common';
 
 export interface TypeEsriImageLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;

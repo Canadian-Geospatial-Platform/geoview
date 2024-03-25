@@ -2,7 +2,7 @@ import { GeoviewStoreType } from '@/core/stores';
 import { ISwiperState } from '@/core/stores/store-interface-and-intial-values/swiper-state';
 import { logger } from '@/core/utils/logger';
 
-import { AbstractEventProcessor } from '../abstract-event-processor';
+import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 
 /**
  * Event processor focusing on interacting with the swiper state in the store.

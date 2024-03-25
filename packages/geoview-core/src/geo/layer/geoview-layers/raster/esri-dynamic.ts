@@ -43,7 +43,7 @@ import {
   commonProcessLayerMetadata,
   commonProcessTemporalDimension,
   commonValidateListOfLayerEntryConfig,
-} from '../esri-layer-common';
+} from '@/geo/layer/geoview-layers/esri-layer-common';
 
 export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_DYNAMIC;

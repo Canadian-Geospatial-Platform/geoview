@@ -2,7 +2,7 @@ import { api } from '@/app';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
-import { AbstractEventProcessor } from '../abstract-event-processor';
+import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 
 export class DataTableProcessor extends AbstractEventProcessor {
   // **********************************************************

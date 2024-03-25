@@ -4,7 +4,7 @@ import { GeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
 import { logger } from '@/core/utils/logger';
 import { TypeLayerData } from '@/geo/utils/layer-set';
 
-import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '../abstract-event-processor';
+import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
 
 /**
  * Event processor focusing on interacting with the geochart state in the store.

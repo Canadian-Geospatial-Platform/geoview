@@ -4,7 +4,7 @@ import { TypeFeatureInfoResultSet } from '@/geo/utils/feature-info-layer-set';
 import { TypeHoverFeatureInfoResultSet } from '@/geo/utils/hover-feature-info-layer-set';
 import { EventType, TypeLayerData } from '@/geo/utils/layer-set';
 
-import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '../abstract-event-processor';
+import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
 import { UIEventProcessor } from './ui-event-processor';
 
 /**

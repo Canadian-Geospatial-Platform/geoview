@@ -42,7 +42,7 @@ import { CONST_GEOVIEW_SCHEMA_BY_TYPE, CONST_LAYER_TYPES, TypeGeoviewLayerType }
 import { geoviewEntryIsEsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { logger } from '@/core/utils/logger';
 
-import { generateId, replaceParams, getLocalizedMessage, showError } from '../utilities';
+import { generateId, replaceParams, getLocalizedMessage, showError } from '@/core/utils/utilities';
 import schema from '../../../../schema.json';
 import { WfsLayerEntryConfig } from './validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { OgcFeatureLayerEntryConfig } from './validation-classes/vector-validation-classes/ogc-layer-entry-config';
@@ -58,7 +58,7 @@ import { EsriDynamicLayerEntryConfig } from './validation-classes/raster-validat
 import { EsriImageLayerEntryConfig } from './validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GroupLayerEntryConfig } from './validation-classes/group-layer-entry-config';
 import { ConfigBaseClass } from './validation-classes/config-base-class';
-import { CONFIG_GEOCORE_URL, CONFIG_GEOLOCATOR_URL } from '../constant';
+import { CONFIG_GEOCORE_URL, CONFIG_GEOLOCATOR_URL } from '@/core/utils/constant';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************

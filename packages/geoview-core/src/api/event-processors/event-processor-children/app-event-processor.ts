@@ -1,5 +1,5 @@
 import { IAppState } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { AbstractEventProcessor } from '../abstract-event-processor';
+import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { NotificationDetailsType } from '@/core/components';
 import { TypeDisplayLanguage, TypeDisplayTheme } from '@/geo/map/map-schema-types';
 import { TypeHTMLElement } from '@/core/types/global-types';

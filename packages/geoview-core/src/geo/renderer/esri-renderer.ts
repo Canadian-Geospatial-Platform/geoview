@@ -19,7 +19,7 @@ import {
   TypeSymbol,
   TypeUniqueValueStyleConfig,
   TypeUniqueValueStyleInfo,
-} from '../map/map-schema-types';
+} from '@/geo/map/map-schema-types';
 import { logger } from '@/core/utils/logger';
 
 /*

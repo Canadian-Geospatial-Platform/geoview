@@ -38,7 +38,7 @@ import {
   isClassBreakStyleConfig,
   TypeUniqueValueStyleConfig,
   TypeClassBreakStyleConfig,
-} from '../map/map-schema-types';
+} from '@/geo/map/map-schema-types';
 import {
   binaryKeywors,
   defaultColor,
@@ -51,7 +51,7 @@ import {
   operatorPriority,
   unaryKeywords,
 } from './geoview-renderer-types';
-import { TypeVectorLayerStyles } from '../layer/geoview-layers/abstract-geoview-layers';
+import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';

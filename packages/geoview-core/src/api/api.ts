@@ -10,7 +10,7 @@ import { GeoUtilities } from '@/geo/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import * as Utilities from '../core/utils/utilities';
+import * as Utilities from '@/core/utils/utilities';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
 import { initMapDivFromFunctionCall } from '@/core/types/cgpv-types';

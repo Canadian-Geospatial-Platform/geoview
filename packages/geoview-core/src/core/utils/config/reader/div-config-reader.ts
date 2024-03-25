@@ -2,7 +2,7 @@ import { TypeJsonValue, TypeMapFeaturesConfig } from '@/core/types/global-types'
 import { getLocalizedMessage, isJsonString, removeCommentsFromJSON, replaceParams, showError } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { api } from '@/app';
-import { ConfigValidation } from '../config-validation';
+import { ConfigValidation } from '@/core/utils/config/config-validation';
 import { UUIDmapConfigReader } from './uuid-config-reader';
 
 /**

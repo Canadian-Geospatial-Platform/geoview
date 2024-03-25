@@ -1,4 +1,4 @@
-import { TypeFillStyle } from '../map/map-schema-types';
+import { TypeFillStyle } from '@/geo/map/map-schema-types';
 
 export const defaultColor = [
   '#800000',
