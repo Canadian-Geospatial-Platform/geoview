@@ -28,4 +28,4 @@ export * from '@/geo';
 export * from '@/ui';
 
 export type { AnySchemaObject } from 'ajv';
-export * from './material-ui';
+export * from './material-ui.d';
