@@ -288,7 +288,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     <AnimatedPaper className={getContainerClass()} style={listItemSpring} data-layer-depth={depth}>
       <Tooltip title={layer.layerName} placement="top" enterDelay={1000} arrow>
         <ListItem key={layer.layerName} divider tabIndex={0} onKeyDown={(e) => handleLayerKeyDown(e)}>
-          <ListItemButton selected={layerIsSelected || (layerChildIsSelected && !isGroupOpen)}>
+          <ListItemButton selected={layerIsSelected || (layerChildIsSelected && !isGroupOpen)} tabIndex={-1}>
             <LayerIcon layer={layer} />
             <ListItemText
               primary={layer.layerName !== undefined ? layer.layerName : layer.layerId}
