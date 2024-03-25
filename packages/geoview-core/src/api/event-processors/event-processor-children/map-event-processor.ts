@@ -24,9 +24,10 @@ import { TypeFeatureInfoEntry, TypeGeometry } from '@/geo/utils/layer-set';
 
 import { AppEventProcessor } from './app-event-processor';
 import { AbstractEventProcessor } from '../abstract-event-processor';
-import { TypeBasemapOptions, TypeBasemapProps, TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeClickMarker } from '@/core/components';
 import { TypeOrderedLayerInfo } from '@/core/stores';
+import { TypeBasemapOptions, TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
 
 export class MapEventProcessor extends AbstractEventProcessor {
   /**

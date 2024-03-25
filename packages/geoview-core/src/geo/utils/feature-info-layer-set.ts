@@ -1,7 +1,7 @@
 import { Coordinate } from 'ol/coordinate';
 import { EVENT_NAMES } from '@/api/events/event-types';
 import { payloadIsAMapMouseEvent } from '@/api/events/payloads';
-import { api, LayerApi } from '@/app';
+import { api } from '@/app';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { logger } from '@/core/utils/logger';
@@ -9,8 +9,8 @@ import { getLocalizedValue } from '@/core/utils/utilities';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-
 import { EventType, LayerSet, TypeFeatureInfoEntry, TypeLayerData, TypeResultSet } from './layer-set';
+import { LayerApi } from '@/geo/layer/layer';
 
 /**
  * A class containing a set of layers associated with a TypeLayerData object, which will receive the result of a

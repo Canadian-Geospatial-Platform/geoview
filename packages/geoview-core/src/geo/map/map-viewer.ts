@@ -43,8 +43,9 @@ import {
   VALID_DISPLAY_THEME,
   VALID_PROJECTION_CODES,
   TypeInteraction,
+  TypeValidMapProjectionCodes,
 } from '@/geo/map/map-schema-types';
-import { TypeMapFeaturesConfig, TypeHTMLElement, TypeValidMapProjectionCodes, TypeJsonObject } from '@/core/types/global-types';
+import { TypeMapFeaturesConfig, TypeHTMLElement, TypeJsonObject } from '@/core/types/global-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';

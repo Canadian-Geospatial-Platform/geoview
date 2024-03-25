@@ -55,7 +55,7 @@ export class LegendsLayerSet extends LayerSet {
         const legendPromise = this.layerApi.geoviewLayer(layerPath).queryLegend(layerPath);
 
         // Whenever the legend response comes in
-        legendPromise.then((legend) => {
+        legendPromise.then((legend: TypeLegend | null | undefined) => {
           // If legend received
           if (legend) {
             // Query completed keep it

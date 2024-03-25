@@ -1,11 +1,12 @@
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '@mui/material';
+import { SelectChangeEvent, useTheme } from '@mui/material';
 import {
   Autocomplete,
   Box,
   Button,
   ButtonGroup,
+  ButtonPropsLayerPanel,
   CheckBoxIcon,
   CheckBoxOutlineBlankIcon,
   Checkbox,
@@ -20,7 +21,7 @@ import { OgcFeature, TypeOgcFeatureLayerConfig } from '@/geo/layer/geoview-layer
 import { TypeWMSLayerConfig, WMS as WmsGeoviewClass } from '@/geo/layer/geoview-layers/raster/wms';
 import { TypeWFSLayerConfig, WFS as WfsGeoviewClass } from '@/geo/layer/geoview-layers/vector/wfs';
 import { TypeCSVLayerConfig, CSV as CsvGeoviewClass } from '@/geo/layer/geoview-layers/vector/csv';
-import { ButtonPropsLayerPanel, Cast, SelectChangeEvent, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
+import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { createLocalizedString } from '@/core/utils/utilities';
 import { useLayerStoreActions, useLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';

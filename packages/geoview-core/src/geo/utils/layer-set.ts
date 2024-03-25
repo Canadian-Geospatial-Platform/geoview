@@ -3,7 +3,6 @@ import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import Feature from 'ol/Feature';
 import RenderFeature from 'ol/render/Feature';
-import { LayerApi } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeLayerStatus, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
@@ -12,6 +11,7 @@ import { createLocalizedString, getLocalizedValue } from '@/core/utils/utilities
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 import { TypeHoverLayerData } from './hover-feature-info-layer-set';
+import { LayerApi } from '@/geo/layer/layer';
 
 /**
  * A class to hold a set of layers associated with an value of any type.

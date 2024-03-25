@@ -1,7 +1,8 @@
 import { ReactNode } from 'react';
 import { TooltipProps, ButtonProps, TextFieldProps } from '@mui/material';
 
-import { TypeIconButtonProps, TypeJsonValue } from '@/core/types/global-types';
+import { TypeJsonValue } from '@/core/types/global-types';
+import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 
 /** ******************************************************************************************************************************
  * Interface used to initialize a button panel.

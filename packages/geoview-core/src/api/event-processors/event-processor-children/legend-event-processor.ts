@@ -1,23 +1,26 @@
+import {} from '@/geo'; // TODO what is causing an error when removing this import?
+import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import {
-  isClassBreakStyleConfig,
+  CONST_LAYER_TYPES,
+  TypeGeoviewLayerType,
+  TypeLegend,
   isImageStaticLegend,
-  isSimpleStyleConfig,
-  isUniqueValueStyleConfig,
   isVectorLegend,
   isWmsLegend,
-  layerEntryIsGroupLayer,
-  TypeGeoviewLayerType,
-  TypeLayerControls,
-  TypeLayerEntryConfig,
-  TypeLegend,
-  TypeStyleGeometry,
-} from '@/geo';
-import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+} from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeLegendResultSetEntry } from '@/geo/utils/legends-layer-set';
 import { api, getLocalizedValue, ILayerState } from '@/app';
 
 import { AbstractEventProcessor } from '../abstract-event-processor';
+import {
+  TypeLayerControls,
+  TypeLayerEntryConfig,
+  TypeStyleGeometry,
+  isClassBreakStyleConfig,
+  isSimpleStyleConfig,
+  isUniqueValueStyleConfig,
+  layerEntryIsGroupLayer,
+} from '@/geo/map/map-schema-types';
 
 export class LegendEventProcessor extends AbstractEventProcessor {
   // **********************************************************

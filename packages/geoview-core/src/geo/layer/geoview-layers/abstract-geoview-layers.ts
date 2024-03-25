@@ -18,7 +18,8 @@ import {
   getLocalizedMessage,
   createLocalizedString,
 } from '@/core/utils/utilities';
-import { LayerApi, api } from '@/app';
+import { api } from '@/app';
+import { LayerApi } from '@/geo/layer/layer';
 import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
 import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';

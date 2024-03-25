@@ -25,7 +25,8 @@ import Geolocator from './buttons/geolocator';
 import Version from './buttons/version';
 import { getSxClasses } from './app-bar-style';
 import { helpCloseAll, helpClosePanelById, helpOpenPanelById } from './app-bar-helper';
-import { AbstractPlugin, TypeJsonObject, TypeJsonValue, toJsonObject } from '@/core/types/global-types';
+import { TypeJsonObject, TypeJsonValue, toJsonObject } from '@/core/types/global-types';
+import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 
 interface GroupPanelType {
   icon: ReactNode;
