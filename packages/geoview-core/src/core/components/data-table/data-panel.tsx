@@ -19,7 +19,7 @@ import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
 import { TypeFieldEntry, TypeLayerData } from '@/geo/utils/layer-set';
 import { getSxClasses } from './data-table-style';
-import { LAYER_STATUS, TABS } from '@/core/types/cgpv-types';
+import { LAYER_STATUS, TABS } from '@/core/utils/constant';
 
 export interface MappedLayerDataType extends TypeLayerData {
   fieldInfos: Record<string, TypeFieldEntry | undefined>;

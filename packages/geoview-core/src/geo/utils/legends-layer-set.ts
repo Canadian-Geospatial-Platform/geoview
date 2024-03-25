@@ -1,12 +1,11 @@
 import { LayerSet } from '@/geo/utils/layer-set';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { TypeLayerEntryConfig, TypeLegend } from '@/core/types/cgpv-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { logger } from '@/core/utils/logger';
-import { TypeLayerStatus } from '@/geo/map/map-schema-types';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeLayerEntryConfig, TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { AbstractGeoViewLayer, TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 /**
  * A class to hold a set of layers associated with an array of TypeLegend. When this class is instantiated, all layers already

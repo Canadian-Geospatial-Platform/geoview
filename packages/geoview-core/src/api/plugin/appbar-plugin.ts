@@ -1,5 +1,6 @@
-import { TypeWindow, TypeButtonPanel, TypeIconButtonProps, TypePanelProps } from '@/core/types/cgpv-types';
+import { TypeButtonPanel, TypeIconButtonProps, TypePanelProps } from '@/ui';
 import { AbstractPlugin } from './abstract-plugin';
+import { TypeWindow } from '@/core/types/global-types';
 
 /** ******************************************************************************************************************************
  * AppBar Plugin abstract class.

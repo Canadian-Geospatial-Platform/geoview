@@ -8,13 +8,14 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 
 import { Config } from '@/core/utils/config/config';
 import { generateId, showError, replaceParams, getLocalizedMessage, whenThisThen } from '@/core/utils/utilities';
-import { MapConfigLayerEntry, MapViewer, TypeListOfGeoviewLayerConfig, TypeOrderedLayerInfo } from '@/core/types/cgpv-types';
 import { ConfigBaseClass, LayerStatusChangedEvent } from '@/core/utils/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
 import { AbstractGeoViewLayer, GeoViewLayerRegistrationEvent } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
+  MapConfigLayerEntry,
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
+  TypeListOfGeoviewLayerConfig,
   TypeListOfLocalizedLanguages,
   layerEntryIsGroupLayer,
   mapConfigLayerEntryIsGeoCore,
@@ -38,6 +39,8 @@ import { LegendsLayerSet } from '../utils/legends-layer-set';
 import { FeatureInfoLayerSet } from '../utils/feature-info-layer-set';
 import { LayerSet } from '../utils/layer-set';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
+import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { MapViewer } from '../map/map-viewer';
 
 export type TypeRegisteredLayers = { [layerPath: string]: TypeLayerEntryConfig };
 
