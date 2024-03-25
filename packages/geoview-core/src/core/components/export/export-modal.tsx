@@ -210,6 +210,7 @@ export default function ExportModal(): JSX.Element {
           role="button"
           tabIndex={-1}
           autoFocus
+          aria-hidden="true"
           sx={{
             width: 'inherit',
             fontSize: theme.palette.geoViewFontSize.sm,
