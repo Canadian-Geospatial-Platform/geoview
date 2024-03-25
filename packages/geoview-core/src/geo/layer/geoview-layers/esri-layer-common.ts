@@ -21,6 +21,7 @@ import {
   TypeLayerEntryConfig,
   TypeListOfLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
 import { EsriFeature, geoviewEntryIsEsriFeature } from './vector/esri-feature';
 import { EsriBaseRenderer, getStyleFromEsriRenderer } from '@/geo/renderer/esri-renderer';
@@ -204,15 +205,18 @@ export function commonGetFieldDomain(
  * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
  * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
  * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig The layer entry to configure
+ * @param {boolean} singleHandle True for ESRI Image
  */
 export function commonProcessTemporalDimension(
   this: EsriDynamic | EsriFeature | EsriImage,
   esriTimeDimension: TypeJsonObject,
-  layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
+  layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig,
+  singleHandle?: boolean
 ) {
   if (esriTimeDimension !== undefined) {
     this.layerTemporalDimension[layerConfig.layerPath] = api.dateUtilities.createDimensionFromESRI(
-      Cast<TimeDimensionESRI>(esriTimeDimension)
+      Cast<TimeDimensionESRI>(esriTimeDimension),
+      singleHandle
     );
   }
 }
@@ -258,7 +262,7 @@ export function commonProcessFeatureInfoConfig(
       }
       if (processAliasFields) layerConfig.source.featureInfo.aliasFields = { en: '' };
       (layerMetadata.fields as TypeJsonArray).forEach((fieldEntry) => {
-        if (fieldEntry.name === layerMetadata.geometryField.name) return;
+        if (fieldEntry?.name === layerMetadata.geometryField.name) return;
         if (processOutField) {
           layerConfig.source.featureInfo!.outfields!.en = `${layerConfig.source.featureInfo!.outfields!.en}${fieldEntry.name},`;
           const fieldType = commonGetFieldType.call(this, fieldEntry.name as string, layerConfig);
@@ -347,7 +351,8 @@ export async function commonProcessLayerMetadata(
 
   let queryUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
   if (queryUrl) {
-    queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
+    if (layerConfig.geoviewLayerConfig.geoviewLayerType !== 'esriImage')
+      queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
     try {
       const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=pjson`);
       if (data?.error) {
@@ -364,8 +369,13 @@ export async function commonProcessLayerMetadata(
         }
         this.processFeatureInfoConfig(layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig);
         this.processInitialSettings(layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig);
-        commonProcessTemporalDimension.call(this, data.timeInfo as TypeJsonObject, EsriLayerConfig);
       }
+      commonProcessTemporalDimension.call(
+        this,
+        data.timeInfo as TypeJsonObject,
+        EsriLayerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig,
+        this.type === CONST_LAYER_TYPES.ESRI_IMAGE
+      );
     } catch (error) {
       layerConfig.layerStatus = 'error';
       logger.logError('Error in commonProcessLayerMetadata', layerConfig, error);

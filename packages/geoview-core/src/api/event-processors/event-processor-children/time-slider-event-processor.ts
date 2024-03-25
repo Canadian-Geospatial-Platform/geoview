@@ -9,6 +9,7 @@ import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { api } from '@/app';
 import { TypeFeatureInfoLayerConfig } from '@/geo/map/map-schema-types';
+import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 
 export class TimeSliderEventProcessor extends AbstractEventProcessor {
   /**
@@ -133,16 +134,21 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     const defaultValueIsArray = Array.isArray(temporalDimensionInfo.default);
     const defaultValue = defaultValueIsArray ? temporalDimensionInfo.default[0] : temporalDimensionInfo.default;
     const minAndMax: number[] = [new Date(range[0]).getTime(), new Date(range[range.length - 1]).getTime()];
-    const { field, singleHandle } = temporalDimensionInfo;
+    const { field, singleHandle, nearestValues } = temporalDimensionInfo;
 
     // If the field type has an alias, use that as a label
     let fieldAlias = field;
-    const { featureInfo } = api.maps[mapId].layer.registeredLayers[layerPath].source!;
-    const { aliasFields, outfields } = featureInfo as TypeFeatureInfoLayerConfig;
-    const localizedOutFields = getLocalizedValue(outfields, mapId)?.split(',');
-    const localizedAliasFields = getLocalizedValue(aliasFields, mapId)?.split(',');
+    let localizedAliasFields;
+    let localizedOutFields;
+    const { featureInfo } = layerConfig.source!;
+    if (featureInfo) {
+      const { aliasFields, outfields } = featureInfo as TypeFeatureInfoLayerConfig;
+      localizedOutFields = getLocalizedValue(outfields, mapId)?.split(',');
+      localizedAliasFields = getLocalizedValue(aliasFields, mapId)?.split(',');
+    }
     const fieldIndex = localizedOutFields ? localizedOutFields.indexOf(field) : -1;
-    if (fieldIndex !== -1 && localizedAliasFields?.length === localizedOutFields?.length) fieldAlias = localizedAliasFields![fieldIndex];
+    if (fieldIndex !== -1 && localizedAliasFields && localizedOutFields && localizedAliasFields?.length === localizedOutFields?.length)
+      fieldAlias = localizedAliasFields![fieldIndex];
 
     // eslint-disable-next-line no-nested-ternary
     const values = singleHandle
@@ -156,6 +162,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
         name,
         range,
         defaultValue,
+        discreteValues: nearestValues === 'discrete',
         minAndMax,
         field,
         fieldAlias,
@@ -208,6 +215,14 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       } else {
         const filter = `${field}=date '${defaultValue}'`;
         (api.maps[mapId].layer.geoviewLayer(layerPath) as WMS).applyViewFilter(filter);
+      }
+    } else if (layerType === CONST_LAYER_TYPES.ESRI_IMAGE) {
+      if (filtering) {
+        const filter = `time=${minAndMax[0]},${values[0]}`;
+        (api.maps[mapId].layer.geoviewLayer(layerPath) as EsriImage).applyViewFilter(filter);
+      } else {
+        const filter = `time=${minAndMax[0]},${defaultValue}`;
+        (api.maps[mapId].layer.geoviewLayer(layerPath) as EsriImage).applyViewFilter(filter);
       }
     } else if (filtering) {
       let filter = `${field} >= date '${new Date(values[0]).toISOString()}'`;
