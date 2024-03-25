@@ -286,23 +286,23 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
 
   return (
     <AnimatedPaper className={getContainerClass()} style={listItemSpring} data-layer-depth={depth}>
-      <ListItem key={layer.layerName} divider tabIndex={0} onKeyDown={(e) => handleLayerKeyDown(e)}>
-        <ListItemButton selected={layerIsSelected || (layerChildIsSelected && !isGroupOpen)}>
-          <LayerIcon layer={layer} />
-          <Tooltip title={layer.layerName} placement="top" enterDelay={1000}>
+      <Tooltip title={layer.layerName} placement="top" enterDelay={1000} arrow>
+        <ListItem key={layer.layerName} divider tabIndex={0} onKeyDown={(e) => handleLayerKeyDown(e)}>
+          <ListItemButton selected={layerIsSelected || (layerChildIsSelected && !isGroupOpen)}>
+            <LayerIcon layer={layer} />
             <ListItemText
               primary={layer.layerName !== undefined ? layer.layerName : layer.layerId}
               secondary={getLayerDescription()}
               onClick={handleLayerClick}
             />
-          </Tooltip>
-          <ListItemIcon className="rightIcons-container">
-            {renderMoreLayerButtons()}
-            {renderArrowButtons()}
-            {renderEditModeButtons()}
-          </ListItemIcon>
-        </ListItemButton>
-      </ListItem>
+            <ListItemIcon className="rightIcons-container">
+              {renderMoreLayerButtons()}
+              {renderArrowButtons()}
+              {renderEditModeButtons()}
+            </ListItemIcon>
+          </ListItemButton>
+        </ListItem>
+      </Tooltip>
       {renderCollapsible()}
     </AnimatedPaper>
   );
