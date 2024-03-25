@@ -9,7 +9,7 @@ import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-int
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { NorthArrowIcon } from '@/core/components/north-arrow/north-arrow-icon';
 import { useMapAttribution, useMapNorthArrow, useMapScale } from '@/core/stores/store-interface-and-intial-values/map-state';
-import useManageArrow from '../north-arrow/hooks/useManageArrow';
+import useManageArrow from '@/core/components/north-arrow/hooks/useManageArrow';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
 

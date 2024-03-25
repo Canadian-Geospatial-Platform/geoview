@@ -14,7 +14,7 @@ import {
   useDatatableStoreTableHeight,
   useMapVisibleLayers,
 } from '@/core/stores';
-import { LayerListEntry, Layout } from '../common';
+import { LayerListEntry, Layout } from '@/core/components/common';
 import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
 import { TypeFieldEntry, TypeLayerData } from '@/geo/utils/layer-set';

@@ -1,6 +1,6 @@
 import { Box, CircularProgressBase, ErrorIcon, GroupWorkOutlinedIcon } from '@/ui';
 import { TypeLegendLayer } from '@/core/components/layers/types';
-import { IconStack } from '../icon-stack/icon-stack';
+import { IconStack } from '@/core/components/icon-stack/icon-stack';
 import { LayerListEntry } from '.';
 
 interface LayerIconProps {

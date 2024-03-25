@@ -5,9 +5,9 @@ import {
   useDataTableStoreActions,
   useDataTableStoreToolbarRowSelectedMessageRecord,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { ColumnsType } from '../data-table';
 import { logger } from '@/core/utils/logger';
-import { MappedLayerDataType } from '../data-panel';
+import { MappedLayerDataType } from '@/core/components/data-table/data-panel';
+import { ColumnsType } from '@/core/components/data-table/data-table';
 
 interface UseSelectedRowMessageProps {
   data: MappedLayerDataType;

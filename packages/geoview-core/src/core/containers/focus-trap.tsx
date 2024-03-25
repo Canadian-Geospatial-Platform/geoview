@@ -9,11 +9,11 @@ import { Modal, Button } from '@/ui';
 import { HtmlToReact } from './html-to-react';
 import { getFocusTrapSxClasses } from './containers-style';
 import { ARROW_KEY_CODES } from '@/core/utils/constant';
-import { useAppStoreActions } from '../stores/store-interface-and-intial-values/app-state';
-import { useUIStoreActions } from '../stores/store-interface-and-intial-values/ui-state';
-import { useMapElement } from '../stores/store-interface-and-intial-values/map-state';
+import { useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useMapElement } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
-import { disableScrolling } from '../utils/utilities';
+import { disableScrolling } from '@/core/utils/utilities';
 
 /**
  * Interface for the focus trap properties

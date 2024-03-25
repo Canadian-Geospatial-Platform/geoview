@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Button as MaterialButton, Fade, Tooltip } from '@mui/material';
 
-import { TypeButtonProps } from '../panel/panel-types';
+import { TypeButtonProps } from '@/ui/panel/panel-types';
 import { getSxClasses } from './button-style';
 
 /**

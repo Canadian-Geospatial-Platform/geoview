@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { CloseButton, ResponsiveGrid, useFooterPanelHeight } from '../common';
+import { CloseButton, ResponsiveGrid, useFooterPanelHeight } from '@/core/components/common';
 import { Box, DeleteOutlineIcon, IconButton, Paper } from '@/ui';
 import { getSxClasses } from './layers-style';
 import { useLayerDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';

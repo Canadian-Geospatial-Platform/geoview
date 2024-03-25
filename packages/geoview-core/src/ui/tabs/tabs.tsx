@@ -6,7 +6,7 @@ import { useTheme } from '@mui/material/styles';
 import { HtmlToReact } from '@/core/containers/html-to-react';
 import { logger } from '@/core/utils/logger';
 
-import { Select, TypeMenuItemProps } from '../select/select';
+import { Select, TypeMenuItemProps } from '@/ui/select/select';
 import { getSxClasses } from './tabs-style';
 import { TabPanel } from './tab-panel';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';

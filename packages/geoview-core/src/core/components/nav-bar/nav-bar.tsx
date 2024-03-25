@@ -17,7 +17,7 @@ import { Panel, ButtonGroup, IconButton, Box } from '@/ui';
 import { ButtonPanelPayload } from '@/api/events/payloads';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
-import { helpCloseAll, helpClosePanelById, helpOpenPanelById } from '../app-bar/app-bar-helper';
+import { helpCloseAll, helpClosePanelById, helpOpenPanelById } from '@/core/components/app-bar/app-bar-helper';
 import { useUIMapInfoExpanded, useUINavbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
 

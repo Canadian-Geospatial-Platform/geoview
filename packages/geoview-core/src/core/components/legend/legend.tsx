@@ -7,8 +7,8 @@ import { logger } from '@/core/utils/logger';
 
 import { getSxClasses } from './legend-styles';
 import { LegendLayer } from './legend-layer';
-import { TypeLegendLayer } from '../layers/types';
-import { useFooterPanelHeight } from '../common';
+import { TypeLegendLayer } from '@/core/components/layers/types';
+import { useFooterPanelHeight } from '@/core/components/common';
 
 interface LegendType {
   fullWidth?: boolean;
