@@ -13,7 +13,7 @@ import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-l
 import * as Utilities from '@/core/utils/utilities';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
-import { initMapDivFromFunctionCall } from '@/core/types/cgpv-types';
+import { initMapDivFromFunctionCall } from '@/core/types/external-types';
 
 /**
  * Class used to handle api calls (events, functions etc...)

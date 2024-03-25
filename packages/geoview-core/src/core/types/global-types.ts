@@ -55,7 +55,7 @@ export type TypeCGPV = {
   createRoot: typeof createRoot;
   ui: TypeCGPVUI;
   logger: typeof logger;
-  types: typeof import('./cgpv-types');
+  types: typeof import('./external-types');
 };
 
 /** ******************************************************************************************************************************

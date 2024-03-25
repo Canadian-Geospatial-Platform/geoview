@@ -68,7 +68,7 @@ Finally, TypeJsonArray allows to define json arrays or to transform a TypeJsonOb
 ## The recipe ##
 
 Let' say I want to use a new component and needs to create type, event and payloads...
-- Inside ```cgpv-types.ts``` I would need to import my MUI component, export my payload, export my type and create my element props signature
+- Inside ```external-types.ts``` I would need to import my MUI component, export my payload, export my type and create my element props signature
 ```ts
       import {
         ...
