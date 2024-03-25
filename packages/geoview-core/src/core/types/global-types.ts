@@ -10,6 +10,9 @@ import * as UI from '@/ui';
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { TypeDisplayLanguage, TypeMapFeaturesInstance } from '@/geo/map/map-schema-types';
 
+export { getGeoViewStore } from '@/core/stores/stores-managers';
+
+
 /** ******************************************************************************************************************************
  * Definition of the map feature configuration according to what can be specified in the map div and in the schema for the
  * type extension TypeMapFeaturesInstance.
