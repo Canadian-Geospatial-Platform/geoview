@@ -9,20 +9,21 @@ export type TimeSliderLayerSet = {
 };
 
 export interface TypeTimeSliderValues {
-  title?: string;
-  description?: string;
-  name: string;
-  range: string[];
   defaultValue: string;
-  minAndMax: number[];
+  delay: number;
+  description?: string;
+  discreteValues: boolean;
   field: string;
   fieldAlias: string;
-  singleHandle: boolean;
-  values: number[];
   filtering: boolean;
-  delay: number;
   locked?: boolean;
+  minAndMax: number[];
+  name: string;
+  range: string[];
   reversed?: boolean;
+  singleHandle: boolean;
+  title?: string;
+  values: number[];
 }
 
 export interface ITimeSliderState {

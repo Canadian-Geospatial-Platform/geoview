@@ -1,10 +1,12 @@
 import { useTheme } from '@mui/material/styles';
-import { TypeWindow, getLocalizedMessage } from 'geoview-core';
+import { TypeWindow } from 'geoview-core';
+import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
-import { useMapVisibleLayers, useTimeSliderLayers } from 'geoview-core/src/core/stores';
-import { Paper, Typography } from 'geoview-core/src/ui';
+import { TypeTimeSliderValues, useMapVisibleLayers, useTimeSliderLayers } from 'geoview-core/src/core/stores';
+import { Box, Paper, Typography } from 'geoview-core/src/ui';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
+import { ReactNode } from 'react';
 import { TimeSlider } from './time-slider';
 import { ConfigProps } from './time-slider-types';
 import { getSxClasses } from './time-slider-style';
@@ -48,10 +50,36 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     setSelectedLayerPath(layer.layerPath);
   }, []);
 
+  /**
+   * Get dates for current filters
+   * @param {TypeTimeSliderValuesListEntry} timeSliderLayerInfo Time slider layer info.
+   */
+  const getFilterInfo = (timeSliderLayerInfo: TypeTimeSliderValues): string | null => {
+    if (timeSliderLayerInfo.filtering)
+      return timeSliderLayerInfo.values.length === 1
+        ? new Date(timeSliderLayerInfo.values[0]).toLocaleString()
+        : `${new Date(timeSliderLayerInfo.values[0]).toLocaleString()} - ${new Date(timeSliderLayerInfo.values[1]).toLocaleString()}`;
+    return null;
+  };
+
   // Reacts when the array of layer data updates
   const memoLayersList = useMemo(() => {
     // Log
     logger.logTraceUseMemo('TIME-SLIDER-PANEL - memoLayersList', timeSliderLayers);
+
+    /**
+     * Create layer tooltip
+     * @param {TypeTimeSliderValues} timeSliderLayerInfo Time slider layer info.
+     * @returns
+     */
+    const getLayerTooltip = (timeSliderLayerInfo: TypeTimeSliderValues): ReactNode => {
+      return (
+        <Box sx={{ display: 'flex', alignContent: 'center', '& svg ': { width: '0.75em', height: '0.75em' } }}>
+          {timeSliderLayerInfo.name}
+          {timeSliderLayerInfo.filtering && `: ${getFilterInfo(timeSliderLayerInfo)}`}
+        </Box>
+      );
+    };
 
     // Return the layers
     return visibleLayers
@@ -63,12 +91,13 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
         return {
           layerName: layer.timeSliderLayerInfo.name,
           layerPath: layer.layerPath,
-          tooltip: layer.timeSliderLayerInfo.name,
+          layerFeatures: getFilterInfo(layer.timeSliderLayerInfo),
+          tooltip: getLayerTooltip(layer.timeSliderLayerInfo),
           layerStatus: 'loaded',
           queryStatus: 'processed',
         } as LayerListEntry;
       });
-  }, [visibleLayers, timeSliderLayers]);
+  }, [timeSliderLayers, visibleLayers]);
 
   useEffect(() => {
     // Log
