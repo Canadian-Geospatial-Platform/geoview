@@ -18,7 +18,6 @@ import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
-import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import {
   TypeLayerEntryConfig,
@@ -179,13 +178,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * This method will create a Geoview temporal dimension if it exist in the service metadata
    * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
-   * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
+   * @param {EsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
    */
-  protected processTemporalDimension(
-    esriTimeDimension: TypeJsonObject,
-    layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig // TODO: why feature layer is dynamic config not in common
-  ) {
-    commonProcessTemporalDimension.call(this, esriTimeDimension, layerConfig);
+  protected processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: EsriDynamicLayerEntryConfig) {
+    commonProcessTemporalDimension(this, esriTimeDimension, layerConfig);
   }
 
   /** ***************************************************************************************************************************

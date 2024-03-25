@@ -60,6 +60,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
     description,
     name,
     defaultValue,
+    discreteValues,
     range,
     minAndMax,
     field,
@@ -109,7 +110,10 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
   else if (yearDelta === 0) timeframe = 'year';
 
   let timeMarks: number[] = [];
-  if (range.length < 6 || singleHandle) timeMarks = timeStampRange;
+  if (range.length < 4 && discreteValues) {
+    const interval = (new Date(range[range.length - 1]).getTime() - new Date(range[0]).getTime()) / 4;
+    timeMarks = [minAndMax[0], minAndMax[0] + interval, minAndMax[0] + interval * 2, minAndMax[0] + interval * 3, minAndMax[1]];
+  } else if (range.length < 6 || singleHandle) timeMarks = timeStampRange;
   else {
     timeMarks = [
       minAndMax[0],
@@ -148,12 +152,16 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
    * Moves the slider handle(s) back one increment
    */
   function moveBack(): void {
-    if (singleHandle) {
+    if (singleHandle && !discreteValues) {
       const currentIndex = timeStampRange.indexOf(values[0]);
       let newIndex: number;
       if (timeStampRange[currentIndex] === minAndMax[0]) newIndex = timeStampRange.length - 1;
       else newIndex = currentIndex - 1;
       setValues(layerPath, [timeStampRange[newIndex]]);
+    } else if (singleHandle) {
+      const interval = (minAndMax[1] - minAndMax[0]) / 20;
+      const newPosition = values[0] - interval < minAndMax[0] ? minAndMax[1] : values[0] - interval;
+      setValues(layerPath, [newPosition]);
     } else {
       let [leftHandle, rightHandle] = values;
       // If the current distance between slider handles is more than 1/5th of the range, reduce the difference to 1/5th range
@@ -190,12 +198,16 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
    * Moves the slider handle(s) forward one increment
    */
   function moveForward(): void {
-    if (singleHandle) {
+    if (singleHandle && !discreteValues) {
       const currentIndex = timeStampRange.indexOf(values[0]);
       let newIndex: number;
       if (timeStampRange[currentIndex] === minAndMax[1]) newIndex = 0;
       else newIndex = currentIndex + 1;
       setValues(layerPath, [timeStampRange[newIndex]]);
+    } else if (singleHandle) {
+      const interval = (minAndMax[1] - minAndMax[0]) / 20;
+      const newPosition = values[0] + interval > minAndMax[1] ? minAndMax[0] : values[0] + interval;
+      setValues(layerPath, [newPosition]);
     } else {
       let [leftHandle, rightHandle] = values;
       // If the current distance between slider handles is more than 1/5th of the range, reduce the difference to 1/5th range
@@ -333,7 +345,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
                 placement="top"
                 enterDelay={1000}
               >
-                <Checkbox checked={filtering} onChange={(event, child) => handleCheckbox(child)} />
+                <Checkbox checked={filtering} onChange={(event: never, child: boolean) => handleCheckbox(child)} />
               </Tooltip>
             </div>
           </Grid>
@@ -347,10 +359,10 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               min={minAndMax[0]}
               max={minAndMax[1]}
               value={values}
-              valueLabelFormat={(value) => valueLabelFormat(value)}
+              valueLabelFormat={(value: number) => valueLabelFormat(value)}
               marks={sliderMarks}
-              step={singleHandle ? null : 0.1}
-              customOnChange={(event) => handleSliderChange(event)}
+              step={!discreteValues ? null : 0.1}
+              customOnChange={(event: number | number[]) => handleSliderChange(event)}
               key={values[1] ? values[1] + values[0] : values[0]}
             />
           </div>
