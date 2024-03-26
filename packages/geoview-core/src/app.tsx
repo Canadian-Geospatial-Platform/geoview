@@ -11,9 +11,8 @@ import '@/ui/style/vendor.css';
 import * as UI from '@/ui';
 
 import AppStart from '@/core/app-start';
-import * as types from '@/core/types/external-types';
 import { API } from '@/api/api';
-
+import { Cast, TypeCGPV, TypeWindow } from '@/core/types/global-types';
 import { Config } from '@/core/utils/config/config';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { MapFeaturesPayload } from '@/api/events/payloads';
@@ -227,9 +226,9 @@ async function init(callbackMapInit?: (mapId: string) => void, callbackMapLayers
 }
 
 // cgpv object to be exported with the api for outside use
-export const cgpv: types.TypeCGPV = {
+export const cgpv: TypeCGPV = {
   init,
-  api: types.Cast<API>(api),
+  api: Cast<API>(api),
   react: React,
   createRoot,
   ui: {
@@ -245,4 +244,4 @@ export const cgpv: types.TypeCGPV = {
 Object.freeze(cgpv);
 
 // export the cgpv globally
-types.Cast<types.TypeWindow>(window).cgpv = cgpv;
+Cast<TypeWindow>(window).cgpv = cgpv;
