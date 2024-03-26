@@ -1,4 +1,5 @@
 import { useState, useCallback, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Box } from '@/ui';
 import { logger } from '@/core/utils/logger';
@@ -20,6 +21,7 @@ interface LayoutProps {
 
 export function Layout({ children, layerList, selectedLayerPath, onLayerListClicked, onIsEnlargeClicked, fullWidth }: LayoutProps) {
   const theme = useTheme();
+  const { t } = useTranslation<string>();
 
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
   const [isEnlarged, setIsEnlarged] = useState(false);
@@ -86,7 +88,8 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
     <Box>
       <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
         {!fullWidth && (
-          <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlarged}>
+          <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlarged} aria-hidden={!isLayersPanelVisible}>
+            {/* This panel is hidden from screen readers when not visible */}
             {null}
           </ResponsiveGrid.Left>
         )}
@@ -110,6 +113,7 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
                   isLayersPanelVisible={isLayersPanelVisible}
                   onSetIsLayersPanelVisible={setIsLayersPanelVisible}
                   fullWidth={fullWidth}
+                  aria-label={t('general.close')}
                 />
               )}
             </Box>
@@ -122,6 +126,7 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
           isEnlarged={isEnlarged}
           isLayersPanelVisible={isLayersPanelVisible}
           fullWidth={fullWidth}
+          aria-hidden={!isLayersPanelVisible}
         >
           {renderLayerList()}
         </ResponsiveGrid.Left>
