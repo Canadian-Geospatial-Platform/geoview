@@ -13,8 +13,8 @@ import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { xmlToJson } from '@/core/utils/utilities';
 
-import { NORTH_POLE_POSITION } from '@/core/types/cgpv-types';
 import { api } from '@/app';
+import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 
 /**
  * Interface used for css style declarations

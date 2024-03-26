@@ -1,6 +1,8 @@
-import { NotificationDetailsType, TypeDisplayLanguage, TypeHTMLElement, TypeDisplayTheme, IAppState } from '@/core/types/cgpv-types';
-
-import { AbstractEventProcessor } from '../abstract-event-processor';
+import { IAppState } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
+import { NotificationDetailsType } from '@/core/components';
+import { TypeDisplayLanguage, TypeDisplayTheme } from '@/geo/map/map-schema-types';
+import { TypeHTMLElement } from '@/core/types/global-types';
 
 export class AppEventProcessor extends AbstractEventProcessor {
   // Static functions for Typescript files to access store actions

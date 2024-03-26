@@ -1,6 +1,6 @@
 import { TypeSourceVectorTilesInitialConfig } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { TypeStyleConfig, TypeTileGrid } from '@/geo/map/map-schema-types';
-import { TileLayerEntryConfig } from '../tile-layer-entry-config';
+import { TileLayerEntryConfig } from '@/core/utils/config/validation-classes/tile-layer-entry-config';
 
 export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
   declare source: TypeSourceVectorTilesInitialConfig;

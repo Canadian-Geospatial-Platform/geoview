@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Fade, TextField as MaterialTextField, Tooltip } from '@mui/material';
 
-import { TypeTextFieldProps } from '../panel/panel-types';
+import { TypeTextFieldProps } from '@/ui/panel/panel-types';
 
 /**
  * Create a Material UI TextField component

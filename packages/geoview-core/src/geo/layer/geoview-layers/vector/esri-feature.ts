@@ -28,7 +28,7 @@ import {
   commonProcessLayerMetadata,
   commonProcessTemporalDimension,
   commonValidateListOfLayerEntryConfig,
-} from '../esri-layer-common';
+} from '@/geo/layer/geoview-layers/esri-layer-common';
 
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'EsriJSON';

@@ -10,11 +10,12 @@ import sanitizeHtml from 'sanitize-html';
 import { api } from '@/app';
 import { TypeLocalizedString } from '@/geo/map/map-schema-types';
 
-import { AbstractGeoViewLayer, Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { ISnackbarButton, SnackbarType } from '@/api/events/payloads';
 import { NotificationType } from '@/core/components/notifications/notifications';
 import { Config } from '@/core/utils/config/config';
 import { logger } from '@/core/utils/logger';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 /**
  * Get the string associated to the current display language for localized object type.

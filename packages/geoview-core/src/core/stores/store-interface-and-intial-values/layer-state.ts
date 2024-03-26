@@ -7,7 +7,7 @@ import { FitOptions } from 'ol/View';
 
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeLayersViewDisplayState, TypeLegendLayer } from '@/core/components/layers/types';
-import { TypeGetStore, TypeSetStore } from '../geoview-store';
+import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import { TypeClassBreakStyleConfig, TypeStyleGeometry, TypeUniqueValueStyleConfig } from '@/geo/map/map-schema-types';
 import { api } from '@/app';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';

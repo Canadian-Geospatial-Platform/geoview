@@ -1,16 +1,11 @@
 import { useStore } from 'zustand';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-
-import {
-  NotificationDetailsType,
-  TypeDisplayLanguage,
-  TypeHTMLElement,
-  TypeMapFeaturesConfig,
-  TypeDisplayTheme,
-} from '@/core/types/cgpv-types';
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { TypeDisplayLanguage, TypeDisplayTheme } from '@/geo/map/map-schema-types';
+import { NotificationDetailsType } from '@/core/components/notifications/notifications';
+import { TypeHTMLElement, TypeMapFeaturesConfig } from '@/core/types/global-types';
 
 export interface IAppState {
   displayLanguage: TypeDisplayLanguage;

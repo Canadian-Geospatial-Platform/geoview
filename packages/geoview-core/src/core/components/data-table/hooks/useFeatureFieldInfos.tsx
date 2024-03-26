@@ -1,5 +1,5 @@
 import { TypeLayerData, TypeFieldEntry } from '@/geo/utils/layer-set';
-import { MappedLayerDataType } from '../data-panel';
+import { MappedLayerDataType } from '@/core/components/data-table/data-panel';
 
 /**
  * Custom hook for caching the mapping of fieldInfos aka columns for data table.

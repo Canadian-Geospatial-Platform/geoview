@@ -1,23 +1,26 @@
+import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import {
-  isClassBreakStyleConfig,
+  CONST_LAYER_TYPES,
+  TypeGeoviewLayerType,
+  TypeLegend,
   isImageStaticLegend,
-  isSimpleStyleConfig,
-  isUniqueValueStyleConfig,
   isVectorLegend,
   isWmsLegend,
-  layerEntryIsGroupLayer,
-  TypeGeoviewLayerType,
+} from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeLegendResultSetEntry } from '@/geo/utils/legends-layer-set';
+import { api } from '@/app';
+import { ILayerState } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { getLocalizedValue } from '@/core/utils/utilities';
+import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
+import {
   TypeLayerControls,
   TypeLayerEntryConfig,
-  TypeLegend,
   TypeStyleGeometry,
-} from '@/geo';
-import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeLegendResultSetEntry } from '@/geo/utils/legends-layer-set';
-import { api, getLocalizedValue, ILayerState } from '@/app';
-
-import { AbstractEventProcessor } from '../abstract-event-processor';
+  isClassBreakStyleConfig,
+  isSimpleStyleConfig,
+  isUniqueValueStyleConfig,
+  layerEntryIsGroupLayer,
+} from '@/geo/map/map-schema-types';
 
 export class LegendEventProcessor extends AbstractEventProcessor {
   // **********************************************************

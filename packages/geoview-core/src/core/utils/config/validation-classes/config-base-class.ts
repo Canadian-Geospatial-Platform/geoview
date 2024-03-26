@@ -10,9 +10,10 @@ import {
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { logger } from '@/core/utils/logger';
-import { Cast, TypeJsonValue, api } from '@/core/types/cgpv-types';
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
+import { Cast, TypeJsonValue } from '@/core/types/global-types';
+import { api } from '@/app';
 
 /** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.

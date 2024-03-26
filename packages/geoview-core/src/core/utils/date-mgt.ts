@@ -6,7 +6,7 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
 import { TypeLocalizedLanguages } from '@/geo/map/map-schema-types';
-import { TypeJsonObject } from '../types/global-types';
+import { TypeJsonObject } from '@/core/types/global-types';
 
 dayjs.extend(duration);
 

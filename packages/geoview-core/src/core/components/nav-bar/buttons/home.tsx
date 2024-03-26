@@ -1,7 +1,7 @@
 import { useTheme } from '@mui/material/styles';
 
 import { IconButton, HomeIcon } from '@/ui';
-import { getSxClasses } from '../nav-bar-style';
+import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 

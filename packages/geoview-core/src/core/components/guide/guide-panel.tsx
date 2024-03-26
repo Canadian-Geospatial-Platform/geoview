@@ -7,7 +7,7 @@ import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { TypeValidFooterBarTabsCoreProps } from '@/geo/map/map-schema-types';
 
 import { getSxClasses } from './guide-style';
-import { LayerListEntry, Layout } from '../common';
+import { LayerListEntry, Layout } from '@/core/components/common';
 import { useFetchAndParseMarkdown } from './custom-hook';
 
 type renderedMarkdownFileType = Record<string, string>;

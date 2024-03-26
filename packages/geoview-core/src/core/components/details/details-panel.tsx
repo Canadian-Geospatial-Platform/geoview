@@ -22,7 +22,7 @@ import {
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/utils/layer-set';
 
-import { LayerListEntry, Layout } from '../common';
+import { LayerListEntry, Layout } from '@/core/components/common';
 import { getSxClasses } from './details-style';
 import { FeatureInfo } from './feature-info-new';
 

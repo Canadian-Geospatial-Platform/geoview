@@ -1,10 +1,9 @@
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
-import { AbstractEventProcessor } from '../abstract-event-processor';
-import { whenThisThenThat } from '@/core/types/cgpv-types';
+import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { ITimeSliderState, TimeSliderLayerSet } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import { getLocalizedValue } from '@/core/utils/utilities';
+import { getLocalizedValue, whenThisThenThat } from '@/core/utils/utilities';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';

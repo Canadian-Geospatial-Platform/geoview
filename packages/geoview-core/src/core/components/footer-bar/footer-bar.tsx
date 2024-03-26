@@ -6,7 +6,7 @@ import { Box, IconButton, Tabs, TypeTabs, MoveDownRoundedIcon, MoveUpRoundedIcon
 import { api } from '@/app';
 import { FooterBarPayload } from '@/api/events/payloads';
 import { getSxClasses } from './footer-bar-style';
-import { ResizeFooterPanel } from '../resize-footer-panel/resize-footer-panel';
+import { ResizeFooterPanel } from '@/core/components/resize-footer-panel/resize-footer-panel';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useDetailsStoreLayerDataArrayBatch } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import {

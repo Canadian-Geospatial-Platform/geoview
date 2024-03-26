@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
 
 import { logger } from '@/core/utils/logger';
-import { TypeButtonPanel, TypeTabs, TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 
 import { EVENT_NAMES, EventStringId } from './event-types';
 import { PayloadBaseClass } from './payloads/payload-base-class';
@@ -29,6 +29,8 @@ import {
   MapFeaturesPayload,
   mapConfigPayload,
 } from './payloads';
+import { TypeButtonPanel } from '@/ui/panel/panel-types';
+import { TypeTabs } from '@/ui/tabs/tabs';
 
 export type TypeEventHandlerFunction = (payload: PayloadBaseClass) => void;
 

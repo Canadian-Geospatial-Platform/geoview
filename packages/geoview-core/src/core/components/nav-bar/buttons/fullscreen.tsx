@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { IconButton, FullscreenIcon, FullscreenExitIcon } from '@/ui';
 import { TypeHTMLElement } from '@/core/types/global-types';
-import { getSxClasses } from '../nav-bar-style';
+import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
 import { useAppStoreActions, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
