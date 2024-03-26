@@ -19,7 +19,6 @@ import { MapFeaturesPayload } from '@/api/events/payloads';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
 import { logger } from '@/core/utils/logger';
 
-// The next export allow to import the external-types from 'geoview-core' from outside of the geoview-core package.
 export const api = new API();
 
 const reactRoot: Record<string, Root> = {};
