@@ -132,13 +132,17 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
     to: { opacity: 1 },
   });
 
+  const handleLayerKeyDown = (layaer: LayerListEntry, e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') onListItemClick(layer);
+  };
+
   const AnimatedPaper = animated(Paper);
 
   return (
     <AnimatedPaper sx={{ marginBottom: '1rem' }} style={listItemSpring} className={getContainerClass()}>
       <Tooltip title={layer.tooltip} placement="top" arrow>
         <Box>
-          <ListItem disablePadding onKeyDown={() => onListItemClick(layer)} tabIndex={0}>
+          <ListItem disablePadding onKeyDown={(e) => handleLayerKeyDown(layer, e)} tabIndex={0}>
             <ListItemButton
               tabIndex={-1}
               selected={isSelected}
