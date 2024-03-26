@@ -1,6 +1,8 @@
-import { Cast, TypeIconButtonProps, toJsonObject, TypePanelProps, TypeJsonObject, AnySchemaObject } from 'geoview-core';
+import { TypeJsonObject, toJsonObject } from 'geoview-core/src/core/types/global-types';
 import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
 import { MapIcon } from 'geoview-core/src/ui/icons';
+import { AnySchemaObject } from 'geoview-core/src/core/types/global-types';
+import { TypeIconButtonProps } from 'geoview-core/src/ui/icon-button/icon-button-types';
 
 import { BasemapPanel } from './basemap-panel';
 import schema from '../schema.json';

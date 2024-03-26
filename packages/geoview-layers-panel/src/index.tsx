@@ -1,6 +1,10 @@
-import { Cast, toJsonObject, TypeJsonObject, TypeIconButtonProps, TypePanelProps, AnySchemaObject } from 'geoview-core';
+import { TypeJsonObject, toJsonObject } from 'geoview-core/src/core/types/global-types';
+import { Cast } from 'geoview-core/src/core/types/global-types';
+import { AnySchemaObject } from 'geoview-core/src/core/types/global-types';
+import { TypeIconButtonProps } from 'geoview-core/src/ui/icon-button/icon-button-types';
 import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
 import { LayersOutlinedIcon } from 'geoview-core/src/ui';
+import { TypePanelProps } from 'geoview-core/src/ui/panel/panel-types';
 import PanelContent from './panel-content';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-layers-panel.json';

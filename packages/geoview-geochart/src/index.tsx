@@ -1,7 +1,9 @@
-import { Cast, AnySchemaObject, toJsonObject, TypeJsonObject } from 'geoview-core';
+import { Cast } from 'geoview-core/src/core/types/global-types';
 import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
 import { TypeTabs } from 'geoview-core/src/ui/tabs/tabs';
 import { ChartIcon } from 'geoview-core/src/ui/icons';
+import { AnySchemaObject } from 'geoview-core/src/core/types/global-types';
+import { TypeJsonObject, toJsonObject } from 'geoview-core/src/core/types/global-types';
 
 import { GeochartEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/geochart-event-processor';
 import schema from '../schema.json';

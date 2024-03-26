@@ -1,5 +1,6 @@
 import type React from 'react';
-import { toJsonObject, TypeJsonObject, TypeButtonPanel } from 'geoview-core';
+import { TypeButtonPanel } from 'geoview-core/src/ui/panel/panel-types';
+import { TypeJsonObject, toJsonObject } from 'geoview-core/src/core/types/global-types';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
 import LayerStepper from './layer-stepper';

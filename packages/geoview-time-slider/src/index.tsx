@@ -1,4 +1,9 @@
-import { AnySchemaObject, api, Cast, TimeDimension, toJsonObject, TypeJsonObject, TypeTabs } from 'geoview-core';
+import { TypeJsonObject, toJsonObject } from 'geoview-core/src/core/types/global-types';
+import { Cast } from 'geoview-core/src/core/types/global-types';
+import { AnySchemaObject } from 'geoview-core/src/core/types/global-types';
+import { TimeDimension } from 'geoview-core/src/core/utils/date-mgt';
+import { TypeTabs } from 'geoview-core/src/ui/tabs/tabs';
+import { api } from 'geoview-core';
 import { TimeSliderIcon } from 'geoview-core/src/ui';
 import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
 
