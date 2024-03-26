@@ -138,8 +138,9 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
     <AnimatedPaper sx={{ marginBottom: '1rem' }} style={listItemSpring} className={getContainerClass()}>
       <Tooltip title={layer.tooltip} placement="top" arrow>
         <Box>
-          <ListItem disablePadding>
+          <ListItem disablePadding onKeyDown={() => onListItemClick(layer)} tabIndex={0}>
             <ListItemButton
+              tabIndex={-1}
               selected={isSelected}
               // disable when layer features has null value.
               disabled={isDisabled || isLoading}
