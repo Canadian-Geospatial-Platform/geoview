@@ -21,7 +21,6 @@ import { addGeoViewStore } from '@/core/stores/stores-managers';
 import { logger } from '@/core/utils/logger';
 
 // The next export allow to import the external-types from 'geoview-core' from outside of the geoview-core package.
-export * from './core/types/external-types';
 export const api = new API();
 
 const reactRoot: Record<string, Root> = {};
@@ -240,7 +239,6 @@ export const cgpv: types.TypeCGPV = {
     elements: UI,
   },
   logger,
-  types,
 };
 
 // freeze variable name so a variable with same name can't be defined from outside
