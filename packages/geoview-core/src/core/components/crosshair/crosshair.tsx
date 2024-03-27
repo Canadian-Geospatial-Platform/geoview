@@ -4,11 +4,13 @@ import { useTheme } from '@mui/material/styles';
 
 import { useTranslation } from 'react-i18next';
 
+import { api } from '@/app';
 import { Box, Fade, Typography } from '@/ui';
 import { getSxClasses } from './crosshair-style';
 import { CrosshairIcon } from './crosshair-icon';
 import { useAppCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useMapElement, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapElement, useMapPointerPosition, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -19,6 +21,8 @@ export function Crosshair(): JSX.Element {
   // Log
   logger.logTraceRender('components/crosshair/crosshair');
 
+  const mapId = useGeoViewMapId();
+
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
@@ -27,6 +31,7 @@ export function Crosshair(): JSX.Element {
   // get store values
   const isCrosshairsActive = useAppCrosshairsActive();
   const mapElement = useMapElement();
+  const pointerPosition = useMapPointerPosition();
   const { setClickCoordinates, setMapKeyboardPanInteractions } = useMapStoreActions();
 
   // do not use useState for item used inside function only without rendering... use useRef
@@ -38,27 +43,35 @@ export function Crosshair(): JSX.Element {
    * @function simulateClick
    * @param {KeyboardEvent} event the keyboard event
    */
-  const simulateClick = useCallback((event: KeyboardEvent) => {
-    if (event.key === 'Enter') {
-      setClickCoordinates();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const simulateClick = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === 'Enter' && pointerPosition) {
+        // Update the store
+        setClickCoordinates(pointerPosition);
+
+        // Perform query via the feature info layer set process
+        api.maps[mapId].layer.featureInfoLayerSet.queryLayers(pointerPosition.lnglat);
+      }
+    },
+    [mapId, pointerPosition, setClickCoordinates]
+  );
 
   /**
    * Modify the pixelDelta value for the keyboard pan on Shift arrow up or down
    *
    * @param {KeyboardEvent} event the keyboard event to trap
    */
-  const managePanDelta = useCallback((event: KeyboardEvent) => {
-    if ((event.key === 'ArrowDown' && event.shiftKey) || (event.key === 'ArrowUp' && event.shiftKey)) {
-      panDelta.current = event.key === 'ArrowDown' ? (panDelta.current -= 10) : (panDelta.current += 10);
-      panDelta.current = panDelta.current < 10 ? 10 : panDelta.current; // minus panDelta reset the value so we need to trap
+  const managePanDelta = useCallback(
+    (event: KeyboardEvent) => {
+      if ((event.key === 'ArrowDown' && event.shiftKey) || (event.key === 'ArrowUp' && event.shiftKey)) {
+        panDelta.current = event.key === 'ArrowDown' ? (panDelta.current -= 10) : (panDelta.current += 10);
+        panDelta.current = panDelta.current < 10 ? 10 : panDelta.current; // minus panDelta reset the value so we need to trap
 
-      setMapKeyboardPanInteractions(panDelta.current);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+        setMapKeyboardPanInteractions(panDelta.current);
+      }
+    },
+    [setMapKeyboardPanInteractions]
+  );
 
   useEffect(() => {
     // Log

@@ -65,6 +65,11 @@ export class AppEventProcessor extends AbstractEventProcessor {
   static setFullscreen(mapId: string, active: boolean, element: TypeHTMLElement): void {
     this.getAppState(mapId).actions.setFullScreenActive(active, element);
   }
+
+  static setCircularProgress(mapId: string, active: boolean): void {
+    this.getAppState(mapId).actions.setCircularProgress(active);
+  }
+
   // #endregion
 
   // **********************************************************
