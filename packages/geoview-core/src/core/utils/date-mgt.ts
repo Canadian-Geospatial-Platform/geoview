@@ -290,10 +290,11 @@ export class DateMgt {
   /**
    * Create the Geoview time dimension from ESRI dimension
    * @param {TimeDimensionESRI} timeDimensionESRI esri time dimension object
+   * @param {boolean} singleHandle true if it is ESRI Image
    *
    * @returns {TimeDimension} the Geoview time dimension
    */
-  createDimensionFromESRI(timeDimensionESRI: TimeDimensionESRI): TimeDimension {
+  createDimensionFromESRI(timeDimensionESRI: TimeDimensionESRI, singleHandle = false): TimeDimension {
     const { startTimeField, timeExtent, timeInterval, timeIntervalUnits } = timeDimensionESRI;
 
     // create interval string
@@ -314,11 +315,11 @@ export class DateMgt {
     const rangeItem = this.createRangeOGC(dimensionValues);
     const timeDimension: TimeDimension = {
       field: startTimeField,
-      default: rangeItem.range[0],
+      default: rangeItem.range[rangeItem.range.length - 1],
       unitSymbol: '',
       range: rangeItem,
       nearestValues: startTimeField === '' ? 'absolute' : 'discrete',
-      singleHandle: false,
+      singleHandle,
     };
 
     return timeDimension;
@@ -336,7 +337,7 @@ export class DateMgt {
       default: dimensionObject.default,
       unitSymbol: dimensionObject.unitSymbol || '',
       range: this.createRangeOGC(dimensionObject.values),
-      nearestValues: dimensionObject.nearestValues ? 'absolute' : 'discrete',
+      nearestValues: dimensionObject.nearestValues !== false ? 'absolute' : 'discrete',
       singleHandle: true,
     };
 
