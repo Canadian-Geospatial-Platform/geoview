@@ -160,7 +160,7 @@
           // set min max
           function setSliderMinMax() {
             cgpv.api.event.emit(
-              { event: cgpv.api.eventNames.SLIDER.EVENT_SLIDER_SET_MINMAX, handlerName: 'UI1-slider1', sliderVales: { min: 2, max: 16 }}
+              { event: cgpv.api.eventNames.SLIDER.EVENT_SLIDER_SET_MINMAX, handlerName: 'UI1-slider1', sliderValues: { min: 2, max: 16 }}
             );
           }
           document.getElementById('sliderminmax').addEventListener('click', setSliderMinMax, false);
