@@ -351,6 +351,7 @@ export function Appbar(): JSX.Element {
 
               return buttonPanel?.panel ? (
                 <Panel
+                  // eslint-disable-next-line react/no-array-index-key
                   key={`panel-${index}`}
                   panel={buttonPanel.panel}
                   button={buttonPanel.button}
