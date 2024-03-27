@@ -6,7 +6,6 @@ import { useMapVisibleLayers, useTimeSliderLayers } from 'geoview-core/src/core/
 import { Paper, Typography } from 'geoview-core/src/ui';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
-
 import { TimeSlider } from './time-slider';
 import { ConfigProps } from './time-slider-types';
 import { getSxClasses } from './time-slider-style';

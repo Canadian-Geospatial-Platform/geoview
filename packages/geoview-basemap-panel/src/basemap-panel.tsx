@@ -1,11 +1,10 @@
 import { TypeBasemapProps, TypeBasemapOptions } from 'geoview-core/src/geo/layer/basemap/basemap-types';
-import { TypeJsonObject, TypeJsonArray, toJsonObject } from 'geoview-core/src/core/types/global-types';
+import { TypeJsonObject, TypeJsonArray, toJsonObject, SelectChangeEvent } from 'geoview-core/src/core/types/global-types';
 import { useMapProjection } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
 import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { TypeValidMapProjectionCodes, TypeDisplayLanguage } from 'geoview-core/src/geo/map/map-schema-types';
 import { getSxClasses } from './basemap-panel-style';
-import { SelectChangeEvent } from 'geoview-core/src/core/types/global-types';
 
 interface BaseMapPanelProps {
   mapId: string;

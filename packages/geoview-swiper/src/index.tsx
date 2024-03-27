@@ -1,6 +1,4 @@
-import { TypeJsonObject, toJsonObject } from 'geoview-core/src/core/types/global-types';
-import { Cast } from 'geoview-core/src/core/types/global-types';
-import { AnySchemaObject } from 'geoview-core/src/core/types/global-types';
+import { TypeJsonObject, toJsonObject, Cast, AnySchemaObject } from 'geoview-core/src/core/types/global-types';
 import { MapPlugin } from 'geoview-core/src/api/plugin/map-plugin';
 import { SwiperEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/swiper-event-processor';
 import { logger } from 'geoview-core/src/core/utils/logger';
