@@ -1,7 +1,4 @@
 import { Coordinate } from 'ol/coordinate';
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { payloadIsAMapMouseEvent } from '@/api/events/payloads';
-import { api } from '@/app';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { logger } from '@/core/utils/logger';
@@ -27,36 +24,39 @@ export class FeatureInfoLayerSet extends LayerSet {
 
   /**
    * The class constructor that instanciate a set of layer.
-   *
-   * @param {LayerApi} layerApi The layer Api to work with.
+   * @param {LayerApi} layerApi - The layer Api to work with.
    */
   constructor(layerApi: LayerApi) {
     super(layerApi);
 
     // Wire a listener on the map click
-    this.setMapClickListener();
+    this.layerApi.mapViewer.onMapSingleClick((mapViewer, payload) => {
+      // Query all layers which can be queried
+      this.queryLayers(payload.lnglat);
+    });
   }
 
   /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
-   * @param {AbstractGeoViewLayer} geoviewLayer The geoview layer being registered
-   * @param {string} layerPath The layer path
+   * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
+   * @param {string} layerPath - The layer path
+   * @returns {boolean} True when the layer should be registered to this feature-info-layer-set.
    */
-  protected onRegisterLayerCheck = (geoviewLayer: AbstractGeoViewLayer, layerPath: string): boolean => {
+  protected onRegisterLayerCheck(geoviewLayer: AbstractGeoViewLayer, layerPath: string): boolean {
     // Log
     logger.logTraceCore('FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerPath, Object.keys(this.resultSet));
 
     const layerConfig = this.layerApi.registeredLayers[layerPath];
     const queryable = layerConfig?.source?.featureInfo?.queryable;
     return !!queryable;
-  };
+  }
 
   /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to register a layer in its set.
-   * @param {AbstractGeoViewLayer} geoviewLayer The geoview layer being registered
-   * @param {string} layerPath The layer path
+   * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
+   * @param {string} layerPath - The layer path
    */
-  protected onRegisterLayer = (geoviewLayer: AbstractGeoViewLayer, layerPath: string): void => {
+  protected onRegisterLayer(geoviewLayer: AbstractGeoViewLayer, layerPath: string): void {
     // Log
     logger.logTraceCore('FEATURE-INFO-LAYER-SET - onRegisterLayer', layerPath, Object.keys(this.resultSet));
 
@@ -74,13 +74,13 @@ export class FeatureInfoLayerSet extends LayerSet {
       },
     };
     FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, 'click', this.resultSet);
-  };
+  }
 
   /**
    * Overrides the behavior to apply when a layer status changed for a feature-info-layer-set.
-   * @param {ConfigBaseClass} config The layer config class
-   * @param {string} layerPath The layer path being affected
-   * @param {string} layerStatus The new layer status
+   * @param {ConfigBaseClass} config - The layer config class
+   * @param {string} layerPath - The layer path being affected
+   * @param {string} layerStatus - The new layer status
    */
   protected onProcessLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
     // if layer's status flag exists and is different than the new one
@@ -100,38 +100,39 @@ export class FeatureInfoLayerSet extends LayerSet {
   }
 
   /**
-   * Emits an event to all handlers.
-   * @param {QueryEndedEvent} event The event to emit
+   * Emits a query ended event to all handlers.
+   * @param {QueryEndedEvent} event - The event to emit
+   * @private
    */
-  emitQueryEnded = (event: QueryEndedEvent) => {
+  #emitQueryEnded(event: QueryEndedEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onQueryEndedHandlers, event);
-  };
+  }
 
   /**
-   * Wires an event handler.
-   * @param {QueryEndedDelegate} callback The callback to be executed whenever the event is emitted
+   * Registers a query ended event handler.
+   * @param {QueryEndedDelegate} callback - The callback to be executed whenever the event is emitted
    */
-  onQueryEnded = (callback: QueryEndedDelegate): void => {
-    // Wire the event handler
+  onQueryEnded(callback: QueryEndedDelegate): void {
+    // Register the event handler
     EventHelper.onEvent(this.#onQueryEndedHandlers, callback);
-  };
+  }
 
   /**
-   * Unwires an event handler.
-   * @param {QueryEndedDelegate} callback The callback to stop being called whenever the event is emitted
+   * Unregisters a query ended event handler.
+   * @param {QueryEndedDelegate} callback - The callback to stop being called whenever the event is emitted
    */
-  offQueryEnded = (callback: QueryEndedDelegate): void => {
-    // Unwire the event handler
+  offQueryEnded(callback: QueryEndedDelegate): void {
+    // Unregister the event handler
     EventHelper.offEvent(this.#onQueryEndedHandlers, callback);
-  };
+  }
 
   /**
    * Queries the features at the provided coordinate for all the registered layers.
-   *
-   * @param {Coordinate} longLatCoordinate The longitude/latitude coordinate where to query the features
+   * @param {Coordinate} longLatCoordinate - The longitude/latitude coordinate where to query the features
+   * @returns {Promise<TypeFeatureInfoResultSet>} A promise which will hold the result of the query
    */
-  queryLayers = async (longLatCoordinate: Coordinate): Promise<TypeFeatureInfoResultSet> => {
+  async queryLayers(longLatCoordinate: Coordinate): Promise<TypeFeatureInfoResultSet> {
     // TODO: REFACTOR - Watch out for code reentrancy between queries!
     // GV Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
     // GV As it is (and was like this befor events refactor), the this.resultSet is mutating between async calls.
@@ -183,38 +184,18 @@ export class FeatureInfoLayerSet extends LayerSet {
     await Promise.allSettled(allPromises);
 
     // Emit the query layers has ended
-    this.emitQueryEnded({ coordinate: longLatCoordinate, resultSet: this.resultSet, eventType });
+    this.#emitQueryEnded({ coordinate: longLatCoordinate, resultSet: this.resultSet, eventType });
 
     // Return the results
     return this.resultSet;
-  };
-
-  /**
-   * Listen to "map click" and call a query for all registered layers at the clicked location.
-   */
-  setMapClickListener() {
-    api.event.on(
-      EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK,
-      (payload) => {
-        // Log
-        logger.logTraceCoreAPIEvent('FEATURE-INFO-LAYER-SET on EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK', this.mapId, payload);
-
-        if (payloadIsAMapMouseEvent(payload)) {
-          // Query all layers which can be queried
-          this.queryLayers(payload.coordinates.lnglat);
-        }
-      },
-      this.mapId
-    );
   }
 
   /**
    * Function used to enable listening of click events. When a layer path is not provided,
    * click events listening is enabled for all layers
-   *
-   * @param {string} layerPath Optional parameter used to enable only one layer
+   * @param {string} layerPath - Optional parameter used to enable only one layer
    */
-  enableClickListener(layerPath?: string) {
+  enableClickListener(layerPath?: string): void {
     if (layerPath) this.resultSet[layerPath].data.eventListenerEnabled = true;
     else
       Object.keys(this.resultSet).forEach((key: string) => {
@@ -225,10 +206,9 @@ export class FeatureInfoLayerSet extends LayerSet {
   /**
    * Function used to disable listening of click events. When a layer path is not provided,
    * click events listening is disable for all layers
-   *
-   * @param {string} layerPath Optional parameter used to disable only one layer
+   * @param {string} layerPath - Optional parameter used to disable only one layer
    */
-  disableClickListener(layerPath?: string) {
+  disableClickListener(layerPath?: string): void {
     if (layerPath) this.resultSet[layerPath].data.eventListenerEnabled = false;
     else
       Object.keys(this.resultSet).forEach((key: string) => {
@@ -239,9 +219,7 @@ export class FeatureInfoLayerSet extends LayerSet {
   /**
    * Function used to determine whether click events are disabled for a layer. When a layer path is not provided,
    * the value returned is undefined if the map flags are a mixture of true and false values.
-   *
-   * @param {string} layerPath Optional parameter used to get the flag value of a layer.
-   *
+   * @param {string} layerPath - Optional parameter used to get the flag value of a layer.
    * @returns {boolean | undefined} The flag value for the map or layer.
    */
   isClickListenerEnabled(layerPath?: string): boolean | undefined {

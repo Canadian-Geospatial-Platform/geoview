@@ -190,83 +190,86 @@ export abstract class AbstractGeoViewLayer {
   /**
    * Emits an event to all handlers.
    * @param {GeoViewLayerRegistrationEvent} event The event to emit
+   * @private
    */
-  emitGeoViewLayerRegistration = (event: GeoViewLayerRegistrationEvent) => {
+  #emitGeoViewLayerRegistration(event: GeoViewLayerRegistrationEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onGeoViewLayerRegistrationHandlers, event);
-  };
+  }
 
   /**
    * Wires an event handler.
    * @param {GeoViewLayerRegistrationDelegate} callback The callback to be executed whenever the event is emitted
    */
-  onGeoViewLayerRegistration = (callback: GeoViewLayerRegistrationDelegate): void => {
+  onGeoViewLayerRegistration(callback: GeoViewLayerRegistrationDelegate): void {
     // Wire the event handler
     EventHelper.onEvent(this.#onGeoViewLayerRegistrationHandlers, callback);
-  };
+  }
 
   /**
    * Unwires an event handler.
    * @param {GeoViewLayerRegistrationDelegate} callback The callback to stop being called whenever the event is emitted
    */
-  offGeoViewLayerRegistration = (callback: GeoViewLayerRegistrationDelegate): void => {
+  offGeoViewLayerRegistration(callback: GeoViewLayerRegistrationDelegate): void {
     // Unwire the event handler
     EventHelper.offEvent(this.#onGeoViewLayerRegistrationHandlers, callback);
-  };
+  }
 
   /**
    * Emits an event to all handlers.
    * @param {GeoViewLayerLegendQueryingEvent} event The event to emit
+   * @private
    */
-  emitLegendQuerying = (event: GeoViewLayerLegendQueryingEvent) => {
+  #emitLegendQuerying(event: GeoViewLayerLegendQueryingEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onGeoViewLayerLegendQueryingHandlers, event);
-  };
+  }
 
   /**
    * Wires an event handler.
    * @param {GeoViewLayerLegendQueryingDelegate} callback The callback to be executed whenever the event is emitted
    */
-  onLegendQuerying = (callback: GeoViewLayerLegendQueryingDelegate): void => {
+  onLegendQuerying(callback: GeoViewLayerLegendQueryingDelegate): void {
     // Wire the event handler
     EventHelper.onEvent(this.#onGeoViewLayerLegendQueryingHandlers, callback);
-  };
+  }
 
   /**
    * Unwires an event handler.
    * @param {GeoViewLayerLegendQueryingDelegate} callback The callback to stop being called whenever the event is emitted
    */
-  offLegendQuerying = (callback: GeoViewLayerLegendQueryingDelegate): void => {
+  offLegendQuerying(callback: GeoViewLayerLegendQueryingDelegate): void {
     // Unwire the event handler
     EventHelper.offEvent(this.#onGeoViewLayerLegendQueryingHandlers, callback);
-  };
+  }
 
   /**
    * Emits an event to all handlers.
    * @param {GeoViewLayerLegendQueriedEvent} event The event to emit
+   * @private
    */
-  emitLegendQueried = (event: GeoViewLayerLegendQueriedEvent) => {
+  #emitLegendQueried(event: GeoViewLayerLegendQueriedEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onGeoViewLayerLegendQueriedHandlers, event);
-  };
+  }
 
   /**
    * Wires an event handler.
    * @param {GeoViewLayerLegendQueriedDelegate} callback The callback to be executed whenever the event is emitted
    */
-  onLegendQueried = (callback: GeoViewLayerLegendQueriedDelegate): void => {
+  onLegendQueried(callback: GeoViewLayerLegendQueriedDelegate): void {
     // Wire the event handler
     EventHelper.onEvent(this.#onGeoViewLayerLegendQueriedHandlers, callback);
-  };
+  }
 
   /**
    * Unwires an event handler.
    * @param {GeoViewLayerLegendQueriedDelegate} callback The callback to stop being called whenever the event is emitted
    */
-  offLegendQueried = (callback: GeoViewLayerLegendQueriedDelegate): void => {
+  offLegendQueried(callback: GeoViewLayerLegendQueriedDelegate): void {
     // Unwire the event handler
     EventHelper.offEvent(this.#onGeoViewLayerLegendQueriedHandlers, callback);
-  };
+  }
 
   /** ***************************************************************************************************************************
    * Process recursively the list of layer entries to see if all of them are processed.
@@ -719,7 +722,6 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-
   protected getAllFeatureInfo(layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getAllFeatureInfo is not implemented! for ${layerPath}`);
@@ -735,7 +737,6 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-
   protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoAtPixel is not implemented! for ${layerPath} - ${location}`);
@@ -751,7 +752,6 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-
   protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoAtCoordinate is not implemented! for ${layerPath} - ${location}`);
@@ -767,7 +767,6 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-
   protected getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoAtLongLat is not implemented for ${layerPath} - ${location}!`);
@@ -783,7 +782,6 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-
   protected getFeatureInfoUsingBBox(location: Coordinate[], layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoUsingBBox is not implemented! for ${layerPath} - ${location}`);
@@ -799,7 +797,6 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-
   protected getFeatureInfoUsingPolygon(location: Coordinate[], layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoUsingPolygon is not implemented! for ${layerPath} - ${location}`);
@@ -817,7 +814,7 @@ export abstract class AbstractGeoViewLayer {
 
     // Register to layer sets that are already created.
     // Emit the layer registration
-    this.emitGeoViewLayerRegistration({ layerPath: layerConfig.layerPath, layerConfig, action: 'add' });
+    this.#emitGeoViewLayerRegistration({ layerPath: layerConfig.layerPath, layerConfig, action: 'add' });
   }
 
   /** ***************************************************************************************************************************
@@ -831,16 +828,16 @@ export abstract class AbstractGeoViewLayer {
     const { layerPath } = layerConfig;
 
     // Emit the layer unregistration
-    this.emitGeoViewLayerRegistration({ layerPath, layerConfig, action: 'remove' });
+    this.#emitGeoViewLayerRegistration({ layerPath, layerConfig, action: 'remove' });
   }
 
   /**
    * Queries the legend.
    * This function raises legend querying and queried events.
    */
-  queryLegend = (layerPath: string) => {
+  queryLegend(layerPath: string) {
     // Emit that the legend has been queried
-    this.emitLegendQuerying({ layerPath });
+    this.#emitLegendQuerying({ layerPath });
 
     // Get the legend
     const promiseLegend = this.getLegend(layerPath);
@@ -850,13 +847,13 @@ export abstract class AbstractGeoViewLayer {
       // If legend was received
       if (legend) {
         // Emit legend information once retrieved
-        this.emitLegendQueried({ layerPath, legend });
+        this.#emitLegendQueried({ layerPath, legend });
       }
     });
 
     // Return the promise
     return promiseLegend;
-  };
+  }
 
   /** ***************************************************************************************************************************
    * This method create a layer group.

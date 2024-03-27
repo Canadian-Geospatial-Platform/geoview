@@ -14,18 +14,18 @@ export type SnapOptions = InteractionOptions & {
 };
 
 /**
- * Class used for snapping features on a map
- *
- * @exports
+ * Class used for snapping features on a map.
  * @class Snap
+ * @extends {Interaction}
+ * @exports
  */
 export class Snap extends Interaction {
-  // The embedded Open Layers Snap component
+  // The embedded OpenLayers Snap component
   #ol_snap: OLSnap;
 
   /**
-   * initialize modify component
-   * @param {SnapOptions} options object to configure the initialization of the Snap interaction
+   * Initializes a Snap component.
+   * @param {SnapOptions} options - Object to configure the initialization of the Snap interaction.
    */
   constructor(options: SnapOptions) {
     super(options);
@@ -34,34 +34,32 @@ export class Snap extends Interaction {
     // TODO: Enhancements - Add support for more snapping options
     const olOptions: OLSnapOptions = {};
 
-    // If a list of features is specified
+    // If a list of features is specified, set the features to snap to
     if (options.features) {
-      // Set the features to snap to
       olOptions.features = options.features;
     } else if (options.geometryGroupKey) {
-      // If a geometry group key is set
-      // Get the vector source for the geometry group or create one when not existing
+      // If a geometry group key is set, get the vector source for the geometry group
       const geomGroup = this.mapViewer.layer.geometry?.createGeometryGroup(options.geometryGroupKey);
       olOptions.source = geomGroup?.vectorSource;
     }
 
-    // Activate the OpenLayers Modify module
+    // Instantiate the OpenLayers Snap interaction
     this.#ol_snap = new OLSnap(olOptions);
   }
 
   /**
-   * Starts the interaction on the map
+   * Starts the interaction on the map.
    */
-  public startInteraction() {
-    // Redirect
+  public startInteraction(): void {
+    // Redirect to super method to start interaction
     super.startInteraction(this.#ol_snap);
   }
 
   /**
-   * Stops the interaction on the map
+   * Stops the interaction on the map.
    */
-  public stopInteraction() {
-    // Redirect
+  public stopInteraction(): void {
+    // Redirect to super method to stop interaction
     super.stopInteraction(this.#ol_snap);
   }
 }

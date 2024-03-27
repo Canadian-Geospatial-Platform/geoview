@@ -2,9 +2,6 @@ import debounce from 'lodash/debounce';
 
 import Feature from 'ol/Feature';
 import { Coordinate } from 'ol/coordinate';
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { payloadIsAMapMouseEvent } from '@/api/events/payloads';
-import { api } from '@/app';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { logger } from '@/core/utils/logger';
 import { getLocalizedValue } from '@/core/utils/utilities';
@@ -26,38 +23,42 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
 
   /**
    * The class constructor that instanciate a set of layer.
-   *
-   * @param {LayerApi} layerApi The layer Api to work with.
-   *
+   * @param {LayerApi} layerApi - The layer Api to work with.
    */
   constructor(layerApi: LayerApi) {
     super(layerApi);
 
-    // Wire a listener on the map hover
+    // Wire a listener on the map pointer move
     // TODO: Refactor - Revise this when revisiting the hover query process
-    this.setMapHoverListener();
+    layerApi.mapViewer.onMapPointerMove(
+      debounce((mapViewer, payload) => {
+        // Query all layers which can be queried
+        this.queryLayers(payload.pixel);
+      }, 750).bind(this)
+    );
   }
 
   /**
    * Overrides the behavior to apply when a hover-feature-info-layer-set wants to check for condition to register a layer in its set.
-   * @param {AbstractGeoViewLayer} geoviewLayer The geoview layer being registered
-   * @param {string} layerPath The layer path
+   * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
+   * @param {string} layerPath - The layer path
+   * @returns {boolean} True when the layer should be registered to this hover-feature-info-layer-set.
    */
-  protected onRegisterLayerCheck = (geoviewLayer: AbstractGeoViewLayer, layerPath: string): boolean => {
+  protected onRegisterLayerCheck(geoviewLayer: AbstractGeoViewLayer, layerPath: string): boolean {
     // Log
     logger.logTraceCore('HOVER-FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerPath, Object.keys(this.resultSet));
 
     const layerConfig = this.layerApi.registeredLayers[layerPath];
     const queryable = layerConfig?.source?.featureInfo?.queryable;
     return !!queryable;
-  };
+  }
 
   /**
    * Overrides the behavior to apply when a hover-feature-info-layer-set wants to register a layer in its set.
-   * @param {AbstractGeoViewLayer} geoviewLayer The geoview layer being registered
-   * @param {string} layerPath The layer path
+   * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
+   * @param {string} layerPath - The layer path
    */
-  protected onRegisterLayer = (geoviewLayer: AbstractGeoViewLayer, layerPath: string): void => {
+  protected onRegisterLayer(geoviewLayer: AbstractGeoViewLayer, layerPath: string): void {
     // Log
     logger.logTraceCore('HOVER-FEATURE-INFO-LAYER-SET - onRegisterLayer', layerPath, Object.keys(this.resultSet));
 
@@ -75,13 +76,13 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
       },
     };
     FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, 'hover', this.resultSet);
-  };
+  }
 
   /**
    * Overrides the behavior to apply when a layer status changed for a hover-feature-info-layer-set.
-   * @param {ConfigBaseClass} config The layer config class
-   * @param {string} layerPath The layer path being affected
-   * @param {string} layerStatus The new layer status
+   * @param {ConfigBaseClass} config - The layer config class
+   * @param {string} layerPath - The layer path being affected
+   * @param {string} layerStatus - The new layer status
    */
   protected onProcessLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
     // if layer's status flag exists and is different than the new one
@@ -102,10 +103,9 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
 
   /**
    * Queries the features at the provided coordinate for all the registered layers.
-   *
-   * @param {Coordinate} pixelCoordinate The pixel coordinate where to query the features
+   * @param {Coordinate} pixelCoordinate - The pixel coordinate where to query the features
    */
-  queryLayers = (pixelCoordinate: Coordinate): void => {
+  queryLayers(pixelCoordinate: Coordinate): void {
     // Query and event types of what we're doing
     const queryType = 'at_pixel';
     const eventType = 'hover';
@@ -150,34 +150,14 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
         data.queryStatus = 'error';
       }
     });
-  };
-
-  /** ***************************************************************************************************************************
-   * Listen to "map hover" and send a query layers event to queryable layers. These layers will return a result set of features.
-   */
-  setMapHoverListener() {
-    api.event.on(
-      EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE,
-      debounce((payload) => {
-        // Log
-        logger.logTraceCoreAPIEvent('HOVER-FEATURE-INFO-LAYER-SET on EVENT_NAMES.MAP.EVENT_MAP_POINTER_MOVE', this.mapId, payload);
-
-        if (payloadIsAMapMouseEvent(payload)) {
-          // Query all layers which can be queried
-          this.queryLayers(payload.coordinates.pixel);
-        }
-      }, 750),
-      this.mapId
-    );
   }
 
   /**
    * Function used to enable listening of hover events. When a layer path is not provided,
-   * hover events listening is enabled for all layers
-   *
-   * @param {string} layerPath Optional parameter used to enable only one layer
+   * hover events listening is enabled for all layers.
+   * @param {string} layerPath - Optional parameter used to enable only one layer
    */
-  enableHoverListener(layerPath?: string) {
+  enableHoverListener(layerPath?: string): void {
     if (layerPath) this.resultSet[layerPath].data.eventListenerEnabled = true;
     else
       Object.keys(this.resultSet).forEach((key: string) => {
@@ -187,11 +167,10 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
 
   /**
    * Function used to disable listening of hover events. When a layer path is not provided,
-   * hover events listening is disable for all layers
-   *
-   * @param {string} layerPath Optional parameter used to disable only one layer
+   * hover events listening is disable for all layers.
+   * @param {string} layerPath - Optional parameter used to disable only one layer
    */
-  disableHoverListener(layerPath?: string) {
+  disableHoverListener(layerPath?: string): void {
     if (layerPath) this.resultSet[layerPath].data.eventListenerEnabled = false;
     else
       Object.keys(this.resultSet).forEach((key: string) => {
@@ -202,9 +181,7 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
   /**
    * Function used to determine whether hover events are disabled for a layer. When a layer path is not provided,
    * the value returned is undefined if the map flags are a mixture of true and false values.
-   *
-   * @param {string} layerPath Optional parameter used to get the flag value of a layer.
-   *
+   * @param {string} layerPath - Optional parameter used to get the flag value of a layer.
    * @returns {boolean | undefined} The flag value for the map or layer.
    */
   isHoverListenerEnabled(layerPath?: string): boolean | undefined {
@@ -241,6 +218,7 @@ export type TypeHoverLayerData = {
   queryStatus: TypeQueryStatus;
   feature: TypeHoverFeatureInfo;
 };
+
 export type TypeHoverFeatureInfoResultSetEntry = {
   layerName?: string;
   layerStatus: TypeLayerStatus;
