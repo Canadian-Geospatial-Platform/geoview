@@ -13,25 +13,26 @@ export type InteractionOptions = {
 /**
  * Astract Class used for GeoView Interactions
  *
- * @exports
  * @class Interaction
+ * @abstract
+ * @exports
  */
 export abstract class Interaction {
   // Reference the MapViewer associated with this interaction
   public mapViewer: MapViewer;
 
   /**
-   * initialize modify component
-   * @param {InteractionOptions} options object to configure the initialization of the Interaction mother class
+   * Constructs an abstract Interaction component
+   * @param {InteractionOptions} options - Object to configure the initialization of the Interaction mother class
    */
-  constructor(public options: InteractionOptions) {
+  constructor(options: InteractionOptions) {
     // Keep reference
     this.mapViewer = options.mapViewer;
   }
 
   /**
    * Starts the drawing interaction on the map
-   * @param {OLInteraction} olInteraction the Open Layers Interaction object the map should start interacting on
+   * @param {OLInteraction} olInteraction - The OpenLayers Interaction object the map should start interacting on
    */
   protected startInteraction(olInteraction: OLInteraction) {
     // Add modifier interaction on the map
@@ -40,7 +41,7 @@ export abstract class Interaction {
 
   /**
    * Stops the drawing interaction on the map
-   * @param {OLInteraction} olInteraction the Open Layers Interaction object the map should stop interacting on
+   * @param {OLInteraction} olInteraction - The OpenLayers Interaction object the map should stop interacting on
    */
   protected stopInteraction(olInteraction: OLInteraction) {
     // Stop modifier interaction on the map

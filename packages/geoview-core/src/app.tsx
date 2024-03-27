@@ -90,7 +90,7 @@ async function renderMap(mapElement: Element): Promise<void> {
     // render the map with the config
     reactRoot[mapId] = createRoot(mapElement!);
 
-    // Wire the handling of the map reload
+    // Register a handle when the map reloads
     api.event.onMapRemove(mapId, handleReload);
 
     // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
@@ -190,7 +190,7 @@ async function init(callbackMapInit?: (mapId: string) => void, callbackMapLayers
   // At this point, all api.maps[] MapViewers that needed to be instantiated were done so.
   //
 
-  // Loop on each map viewer to wire more listeners
+  // Loop on each map viewer to register more handlers
   const mapViewersPromises = Object.values(api.maps).map((mapViewer) => {
     // Create promise for when all the layers will be loaded
     return new Promise((resolve) => {
@@ -200,7 +200,7 @@ async function init(callbackMapInit?: (mapId: string) => void, callbackMapLayers
         return;
       }
 
-      // Wire when the map viewer will have loaded layers
+      // Register when the map viewer will have loaded layers
       mapViewer.onMapLayersLoaded((mapViewerLoaded) => {
         // Run the callback for maps that have the triggerReadyCallback set using the mapId for the parameter value
         if (mapViewerLoaded.mapFeaturesConfig.triggerReadyCallback) {
