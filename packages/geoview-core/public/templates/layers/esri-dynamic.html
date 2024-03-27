@@ -885,7 +885,7 @@
                           'label': '0.0001 - ≤ 5,000,000 m3',
                           'minValue': 0,
                           'maxValue': 5000000,
-                          'visible': 'yes',
+                          'visible': true,
                           'settings': {
                             'symbol': 'circle',
                             'type': 'simpleSymbol',
@@ -923,7 +923,7 @@
                           'label': '> 10,000,000 - ≤ 15,000,000 m3',
                           'minValue': 10000000,
                           'maxValue': 15000000,
-                          'visible': 'yes',
+                          'visible': true,
                           'settings': {
                             'symbol': 'circle',
                             'type': 'simpleSymbol',
@@ -942,7 +942,7 @@
                           'label': '> 15,000,000 - ≤ 20,000,000 m3',
                           'minValue': 15000000,
                           'maxValue': 20000000,
-                          'visible': 'yes',
+                          'visible': true,
                           'settings': {
                             'symbol': 'circle',
                             'type': 'simpleSymbol',
@@ -961,7 +961,7 @@
                           'label': '> 20,000,000 - ≤ 25,000,000 m3',
                           'minValue': 20000000,
                           'maxValue': 25000000,
-                          'visible': 'yes',
+                          'visible': true,
                           'settings': {
                             'symbol': 'circle',
                             'type': 'simpleSymbol',
@@ -980,7 +980,7 @@
                           'label': '> 25,000,000 - ≤ 30,000,000 m3',
                           'minValue': 25000000,
                           'maxValue': 30000000,
-                          'visible': 'yes',
+                          'visible': true,
                           'settings': {
                             'symbol': 'circle',
                             'type': 'simpleSymbol',
@@ -999,7 +999,7 @@
                           'label': '> 30,000,000 - ≤ 35,000,000 m3',
                           'minValue': 30000000,
                           'maxValue': 35000000,
-                          'visible': 'yes',
+                          'visible': true,
                           'settings': {
                             'symbol': 'circle',
                             'type': 'simpleSymbol',
@@ -1018,7 +1018,7 @@
                           'label': '> 35,000,000 m3',
                           'minValue': 35000000,
                           'maxValue': 999000000,
-                          'visible': 'yes',
+                          'visible': true,
                           'settings': {
                             'symbol': 'circle',
                             'type': 'simpleSymbol',
@@ -1094,66 +1094,6 @@
           listenToLegendLayerSetChanges('HLYR3-state', 'LYR3');
           listenToLegendLayerSetChanges('HLYR4-state', 'LYR4');
 
-          if (cgpv.api.maps.LYR2.layer.registeredLayers['historical-flood/0'].layerStatus === 'loaded') {
-            const field1 = cgpv.api.maps.LYR2.layer.geoviewLayer('historical-flood/0').getTemporalDimension().field;
-            const LYR2_FILTERS = [`${field1} >= date '01/01/2018 05:00:00' and ${field1} <= date '12/31/2019 19:00:00-05:00'`,
-                                  `${field1} > date '01/01/2018 05:00:00' and ${field1} <= date '01/01/2020 05:00:00Z'`,
-                                  `${field1} >= date '01/01/2018 05:00:00' and ${field1} < date '01/01/2020 00:00:00+05:00'`];
-            let i = 0;
-            window.setInterval(() => {
-              const input = document.getElementById('filter-input-LYR2-historical-flood');
-              if (input) {
-                input.value = LYR2_FILTERS[i];
-                const layerConfig = cgpv.api.maps.LYR2.layer.registeredLayers['historical-flood/0'];
-                const checkbox = document.getElementById('checkbox-LYR2-historical-flood');
-                cgpv.api.maps.LYR2.layer.geoviewLayer('historical-flood/0').applyViewFilter(
-                  LYR2_FILTERS[i],
-                  checkbox.value !== 'true'
-                );
-                if (++i === LYR2_FILTERS.length) i = 0;
-              }
-            }, 3000)
-          }
-
-          if (cgpv.api.maps.LYR3.layer.registeredLayers['historical-flood/0'].layerStatus === 'loaded') {
-            const field2 = cgpv.api.maps.LYR3.layer.geoviewLayer('historical-flood/0').getTemporalDimension().field;
-            const LYR3_FILTERS = [`${field2} >= date '2018-01-01T00:00:00' and ${field2} <= date '2020-01-01T00:00:00'`,
-                                `${field2} > date '2018-01-01T00:00:00' and ${field2} <= date '2020-01-01T00:00:00'`,
-                                `${field2} >= date '2018-01-01T00:00:00' and ${field2} < date '2020-01-01T00:00:00'`];
-            let j = 0;
-            window.setInterval(() => {
-              const input = document.getElementById('filter-input-LYR3-historical-flood');
-              if (input) {
-                input.value = LYR3_FILTERS[j];
-                const layerConfig = cgpv.api.maps.LYR3.layer.registeredLayers['historical-flood/0'];
-                const checkbox = document.getElementById('checkbox-LYR3-historical-flood');
-                cgpv.api.maps.LYR3.layer.geoviewLayer('historical-flood/0').applyViewFilter(
-                  LYR3_FILTERS[j],
-                  checkbox.value !== 'true'
-                );
-                if (++j === LYR3_FILTERS.length) j = 0;
-              }
-            }, 3000)
-          }
-
-          if (cgpv.api.maps.LYR1.layer.registeredLayers['esriFeatureLYR1/0'].layerStatus === 'loaded') {
-            let k = 0;
-            window.setInterval(() => {
-              const input = document.getElementById('filter-input-LYR1-esriFeatureLYR1');
-              if (input) {
-                const layerConfig = cgpv.api.maps.LYR1.layer.registeredLayers['esriFeatureLYR1/0'];
-                const checkbox = document.getElementById('checkbox-LYR1-esriFeatureLYR1');
-                const temporalData = cgpv.api.maps.LYR1.layer.geoviewLayer('esriFeatureLYR1/0').getTemporalDimension();
-                cgpv.api.maps.LYR1.layer.geoviewLayer('esriFeatureLYR1/0').applyViewFilter(
-                  `Date < date '${temporalData.range.range[k]}'`,
-                  checkbox.value !== 'true'
-                );
-                input.value = `Date < date '${temporalData.range.range[k]}'`;
-                if (++k === temporalData.range.range.length) k = 0;
-              }
-            }, 1000)
-          }
-
           // create snippets
           createCodeSnippet();
           createConfigSnippet();
@@ -1164,6 +1104,60 @@
           createTableOfFilter('LYR1');
           createTableOfFilter('LYR2');
           createTableOfFilter('LYR3');
+
+          const field1 = cgpv.api.maps.LYR2.layer.geoviewLayer('historical-flood/0').getTemporalDimension('historical-flood/0').field;
+          const LYR2_FILTERS = [`${field1} >= date '01/01/2018 05:00:00' and ${field1} <= date '12/31/2019 19:00:00-05:00'`,
+                                `${field1} > date '01/01/2018 05:00:00' and ${field1} <= date '01/01/2020 05:00:00Z'`,
+                                `${field1} >= date '01/01/2018 05:00:00' and ${field1} < date '01/01/2020 00:00:00+05:00'`];
+          let i = 0;
+          window.setInterval(() => {
+            const input = document.getElementById('filter-input-LYR2-historical-flood');
+            if (input) {
+              input.value = LYR2_FILTERS[i];
+              const layerConfig = cgpv.api.maps.LYR2.layer.registeredLayers['historical-flood/0'];
+              const checkbox = document.getElementById('checkbox-LYR2-historical-flood');
+              cgpv.api.maps.LYR2.layer.geoviewLayer('historical-flood/0').applyViewFilter('historical-flood/0',
+                LYR2_FILTERS[i],
+                checkbox.value !== 'true'
+              );
+              if (++i === LYR2_FILTERS.length) i = 0;
+            }
+          }, 3000)
+
+          const field2 = cgpv.api.maps.LYR3.layer.geoviewLayer('historical-flood/0').getTemporalDimension('historical-flood/0').field;
+          const LYR3_FILTERS = [`${field2} >= date '2018-01-01T00:00:00' and ${field2} <= date '2020-01-01T00:00:00'`,
+                              `${field2} > date '2018-01-01T00:00:00' and ${field2} <= date '2020-01-01T00:00:00'`,
+                              `${field2} >= date '2018-01-01T00:00:00' and ${field2} < date '2020-01-01T00:00:00'`];
+          let j = 0;
+          window.setInterval(() => {
+            const input = document.getElementById('filter-input-LYR3-historical-flood');
+            if (input) {
+              input.value = LYR3_FILTERS[j];
+              const layerConfig = cgpv.api.maps.LYR3.layer.registeredLayers['historical-flood/0'];
+              const checkbox = document.getElementById('checkbox-LYR3-historical-flood');
+              cgpv.api.maps.LYR3.layer.geoviewLayer('historical-flood/0').applyViewFilter('historical-flood/0',
+                LYR3_FILTERS[j],
+                checkbox.value !== 'true'
+              );
+              if (++j === LYR3_FILTERS.length) j = 0;
+            }
+          }, 3000)
+
+          let k = 0;
+          window.setInterval(() => {
+            const input = document.getElementById('filter-input-LYR1-esriFeatureLYR1');
+            if (input) {
+              const layerConfig = cgpv.api.maps.LYR1.layer.registeredLayers['esriFeatureLYR1/0'];
+              const checkbox = document.getElementById('checkbox-LYR1-esriFeatureLYR1');
+              const temporalData = cgpv.api.maps.LYR1.layer.geoviewLayer('esriFeatureLYR1/0').getTemporalDimension('esriFeatureLYR1/0');
+              cgpv.api.maps.LYR1.layer.geoviewLayer('esriFeatureLYR1/0').applyViewFilter('esriFeatureLYR1/0',
+                `Date < date '${temporalData.range.range[k]}'`,
+                checkbox.value !== 'true'
+              );
+              input.value = `Date < date '${temporalData.range.range[k]}'`;
+              if (++k === temporalData.range.range.length) k = 0;
+            }
+          }, 1000)
         }
       });
     </script>

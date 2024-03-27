@@ -33,7 +33,7 @@ import {
   commonProcessTemporalDimension,
 } from '@/geo/layer/geoview-layers/esri-layer-common';
 
-export interface TypeEsriImageLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
+export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
   listOfLayerEntryConfig: EsriImageLayerEntryConfig[];
 }
@@ -331,92 +331,18 @@ export class EsriImage extends AbstractGeoViewRaster {
     return Promise.resolve(layerConfig.olLayer);
   }
 
-  // TODO: Yves will correct this when he rebase his PR 1930
-  /** ***************************************************************************************************************************
-   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToTheGeoviewLayer property stored
-   * in the layer instance associated to the map. The legend filters are derived from the uniqueValue or classBreaks style of the
-   * layer. When the layer config is invalid, nothing is done.
-   *
-   * @param {string} filter An optional filter to be used in place of the getViewFilter value.
-   * @param {never} notUsed1 This parameter must not be provided. It is there to allow overloading of the method signature.
-   * @param {never} notUsed2 This parameter must not be provided. It is there to allow overloading of the method signature.
-   */
-  applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): void;
-
-  /** ***************************************************************************************************************************
-   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToTheGeoviewLayer property stored
-   * in the layer instance associated to the map. When the CombineLegendFilter flag is false, the filter paramater is used alone
-   * to display the features. Otherwise, the legend filter and the filter parameter are combined together to define the view
-   * filter. The legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is
-   * invalid, nothing is done.
-   *
-   * @param {string} filter An optional filter to be used in place of the getViewFilter value.
-   * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
-   * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
-   */
-  applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): void;
-
   /** ***************************************************************************************************************************
    * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
    * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
    * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
    * is done.
-   * TODO ! The combination of the legend filter and the dimension filter probably does not apply to WMS. The code can be simplified.
    *
    * @param {string} layerPath The layer path to the layer's configuration.
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath: string, filter?: string, CombineLegendFilter?: boolean): void;
-
-  // See above headers for signification of the parameters. The first lines of the method select the template
-  // used based on the parameter types received.
-
-  applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never) {
-    // At the beginning, we assume that:
-    // 1- the layer path was saved in this.layerPathAssociatedToTheGeoviewLayer using a call to
-    //    api.maps[mapId].layer.geoviewLayer(layerPath);
-    // 2- the filter is empty;
-    // 3- the combine legend filters is true
-    let layerPath = this.layerPathAssociatedToTheGeoviewLayer;
-    let filter = '';
-    let CombineLegendFilter = true;
-
-    // Method signature detection
-    if (typeof parameter3 === 'boolean') {
-      // Signature detected is: applyViewFilter(layerPath: string, filter?: string, combineLegendFilter?: boolean): void;
-      layerPath = parameter1;
-      filter = parameter2 as string;
-      CombineLegendFilter = parameter3;
-    } else if (parameter2 !== undefined && parameter3 === undefined) {
-      if (typeof parameter2 === 'boolean') {
-        // Signature detected is: applyViewFilter(filter: string, CombineLegendFilter: boolean): void;
-        filter = parameter1;
-        CombineLegendFilter = parameter2;
-      } else {
-        // Signature detected is: applyViewFilter(layerPath: string, filter: string): void;
-        layerPath = parameter1;
-        filter = parameter2;
-      }
-    } else if (parameter2 === undefined && parameter3 === undefined) {
-      // Signature detected is: applyViewFilter(filter: string): void;
-      filter = parameter1;
-    }
-
-    const layerConfig = this.getLayerConfig(layerPath);
-    if (!layerConfig) {
-      // GV Things important to know about the applyViewFilter usage:
-      logger.logError(
-        `
-      The applyViewFilter method must never be called by GeoView code before the layer refered by the layerPath has reached the 'loaded' status.\n
-      It will never be called by the GeoView internal code except in the layerConfig.loadedFunction() that is called right after the 'loaded' signal.\n
-      If you are a user, you can set the layer filter in the configuration or using code called in the cgpv.init() method of the viewer.\n
-      It appeares that the layer refered by the layerPath "${layerPath} does not respect these rules.\n
-    `.replace(/\s+/g, ' ')
-      );
-      return;
-    }
-
+  applyViewFilter(layerPath: string, filter: string, CombineLegendFilter?: boolean) {
+    const layerConfig = this.getLayerConfig(layerPath) as EsriImageLayerEntryConfig;
     // Log
     logger.logTraceCore('ESRIImage - applyViewFilter', layerPath);
 
@@ -453,30 +379,14 @@ export class EsriImage extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Get the bounds of the layer represented in the layerConfig pointed to by the cached layerPath, returns updated bounds
-   *
-   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
-   * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
-   *
-   * @returns {Extent} The new layer bounding box.
-   */
-  protected getBounds(bounds: Extent, notUsed?: never): Extent | undefined;
-
-  /** ***************************************************************************************************************************
    * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
    *
    * @param {string} layerPath The Layer path to the layer's configuration.
    * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
-   * @returns {Extent} The new layer bounding box.
+   * @returns {Extent | undefined} The new layer bounding box.
    */
-  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined;
-
-  // See above headers for signification of the parameters. The first lines of the method select the template
-  // used based on the parameter types received.
-  protected getBounds(parameter1?: string | Extent, parameter2?: Extent): Extent | undefined {
-    const layerPath = typeof parameter1 === 'string' ? parameter1 : this.layerPathAssociatedToTheGeoviewLayer;
-    let bounds = typeof parameter1 !== 'string' ? parameter1 : parameter2;
+  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
     const layerConfig = this.getLayerConfig(layerPath);
     const layerBounds = layerConfig?.initialSettings?.bounds || [];
     const projection = this.metadata?.fullExtent?.spatialReference?.wkid || MapEventProcessor.getMapState(this.mapId).currentProjection;
@@ -498,7 +408,9 @@ export class EsriImage extends AbstractGeoViewRaster {
         );
       }
 
+      // eslint-disable-next-line no-param-reassign
       if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
+      // eslint-disable-next-line no-param-reassign
       else bounds = getMinOrMaxExtents(bounds, transformedBounds);
     }
 
