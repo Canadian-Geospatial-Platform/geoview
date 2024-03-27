@@ -176,40 +176,30 @@
     <script src="layerlib.js"></script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init(function (mapId) {
-        console.log(`api is ready for ${mapId}`);
-
+      cgpv.init((mapId) => {
         if (mapId === 'allMaps') {
+          // Wire a handle when all queries done after a map click
+          cgpv.api.maps['LYR1'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
+            const { coordinate, resultSet, eventType } = payload;
+            createInfoTable('LYR1', 'ResultSetId1', resultSet, eventType);
+          });
+          cgpv.api.maps['LYR1'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+            const { resultSet } = payload;
+            displayLegend('LegendsId1', resultSet);
+          });
+          listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
+          listenToLegendLayerSetChanges('HLYR2-state', 'LYR2');
+
+          // create snippets
+          createCodeSnippet();
+          createConfigSnippet();
+        }
+      }, (mapId) => {
+        if (mapId === 'allMaps') {
+          // Layers are loaded
           createTableOfFilter('LYR1');
         }
       });
-
-      // LYR1 ===================================================================================================================
-      cgpv.api.event.on(
-        cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-        (payload) => {
-          const { layerSetId, resultSet, eventType } = payload;
-          createInfoTable('LYR1', 'ResultSetId1', resultSet, eventType);
-        },
-        'LYR1/click/FeatureInfoLayerSet'
-      );
-
-      cgpv.api.event.on(
-        cgpv.api.eventNames.GET_LEGENDS.LEGEND_LAYERSET_UPDATED,
-        (payload) => {
-          const { resultSet } = payload;
-          displayLegend('LegendsId1', resultSet);
-        },
-        'LYR1/LegendsLayerSet'
-      );
-      listenToLegendLayerSetChanges('HLYR1-state', 'LYR1/LegendsLayerSet');
-
-      // LYR2 ===================================================================================================================
-      listenToLegendLayerSetChanges('HLYR2-state', 'LYR2/LegendsLayerSet');
-
-      //create snippets
-      createCodeSnippet();
-      createConfigSnippet();
     </script>
   </body>
 </html>

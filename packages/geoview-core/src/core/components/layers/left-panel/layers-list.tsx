@@ -6,7 +6,7 @@ import { getSxClasses } from './left-panel-styles';
 import { Box } from '@/ui';
 import { useMapStoreActions, useLayerDisplayState } from '@/core/stores/';
 import { logger } from '@/core/utils/logger';
-import { TypeLegendLayer } from '../types';
+import { TypeLegendLayer } from '@/core/components/layers/types';
 
 interface LayerListProps {
   depth: number;

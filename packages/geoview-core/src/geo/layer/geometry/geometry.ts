@@ -1,13 +1,14 @@
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource, { Options as VectorSourceOptions } from 'ol/source/Vector';
 import { Feature } from 'ol';
-import { Circle, LineString, Point, Polygon } from 'ol/geom';
+import { Geometry as OLGeometry, Circle, LineString, Point, Polygon } from 'ol/geom';
 import { Coordinate } from 'ol/coordinate';
 import { Fill, Stroke, Style, Icon } from 'ol/style';
 import { Options as VectorLayerOptions } from 'ol/layer/BaseVector';
 import { asArray, asString } from 'ol/color';
 
 import { api } from '@/app';
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { generateId, setAlphaColor } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
@@ -24,24 +25,12 @@ interface FeatureCollection {
 }
 
 /**
- * Event interface for GeometryAdded
- */
-interface GeometryAddedEvent {
-  feature: Feature;
-}
-
-/**
- * Define a delegate for the event handler function signature
- */
-type GeometryAddedDelegate = (sender: Geometry, event: GeometryAddedEvent) => void;
-
-/**
  * Class used to manage vector geometries (Polyline, Polygon, Circle, Marker...)
  *
  * @exports
- * @class Geometry
+ * @class GeometryApi
  */
-export class Geometry {
+export class GeometryApi {
   // reference to the map id
   #mapId: string;
 
@@ -73,32 +62,30 @@ export class Geometry {
   }
 
   /**
+   * Emits an event to all handlers.
+   * @param {GeometryAddedEvent} event The event to emit
+   */
+  emitGeometryAdded = (event: GeometryAddedEvent) => {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.onGeometryAddedHandlers, event);
+  };
+
+  /**
    * Wires an event handler.
-   * @param callback The callback to be executed whenever the event is raised
+   * @param {GeometryAddedDelegate} callback The callback to be executed whenever the event is emitted
    */
   onGeometryAdded = (callback: GeometryAddedDelegate): void => {
-    // Push a new callback handler to the list of handlers
-    this.onGeometryAddedHandlers.push(callback);
+    // Wire the event handler
+    EventHelper.onEvent(this.onGeometryAddedHandlers, callback);
   };
 
   /**
    * Unwires an event handler.
-   * @param callback The callback to stop being called whenever the event is raised
+   * @param {GeometryAddedDelegate} callback The callback to stop being called whenever the event is emitted
    */
   offGeometryAdded = (callback: GeometryAddedDelegate): void => {
-    const index = this.onGeometryAddedHandlers.indexOf(callback);
-    if (index !== -1) {
-      this.onGeometryAddedHandlers.splice(index, 1);
-    }
-  };
-
-  /**
-   * Emits an event to all handlers.
-   * @param {Feature} feature The geometry feature being added
-   */
-  private emitGeometryAddedEvent = (feature: Feature) => {
-    // Trigger all the handlers in the array
-    this.onGeometryAddedHandlers.forEach((handler) => handler(this, { feature }));
+    // Unwire the event handler
+    EventHelper.offEvent(this.onGeometryAddedHandlers, callback);
   };
 
   /**
@@ -168,7 +155,7 @@ export class Geometry {
     this.geometries.push(polyline);
 
     // emit an event that a geometry has been added
-    this.emitGeometryAddedEvent(polyline);
+    this.emitGeometryAdded(polyline);
 
     return polyline;
   };
@@ -240,7 +227,7 @@ export class Geometry {
     this.geometries.push(polygon);
 
     // emit an event that a geometry has been added
-    this.emitGeometryAddedEvent(polygon);
+    this.emitGeometryAdded(polygon);
 
     return polygon;
   };
@@ -315,7 +302,7 @@ export class Geometry {
     this.geometries.push(circle);
 
     // emit an event that a geometry has been added
-    this.emitGeometryAddedEvent(circle);
+    this.emitGeometryAdded(circle);
 
     return circle;
   }
@@ -379,7 +366,7 @@ export class Geometry {
     this.geometries.push(marker);
 
     // emit an event that a geometry has been added
-    this.emitGeometryAddedEvent(marker);
+    this.emitGeometryAdded(marker);
 
     return marker;
   };
@@ -649,3 +636,13 @@ export class Geometry {
     }
   };
 }
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type GeometryAddedDelegate = EventDelegateBase<GeometryApi, GeometryAddedEvent>;
+
+/**
+ * Event interface for GeometryAdded
+ */
+type GeometryAddedEvent<T extends OLGeometry = OLGeometry> = Feature<T>;

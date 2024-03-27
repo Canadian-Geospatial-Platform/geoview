@@ -8,12 +8,12 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { Modal, Button } from '@/ui';
 import { HtmlToReact } from './html-to-react';
 import { getFocusTrapSxClasses } from './containers-style';
-import { disableScrolling } from '@/app';
 import { ARROW_KEY_CODES } from '@/core/utils/constant';
-import { useAppStoreActions } from '../stores/store-interface-and-intial-values/app-state';
-import { useUIStoreActions } from '../stores/store-interface-and-intial-values/ui-state';
-import { useMapElement } from '../stores/store-interface-and-intial-values/map-state';
+import { useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useMapElement } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
+import { disableScrolling } from '@/core/utils/utilities';
 
 /**
  * Interface for the focus trap properties
@@ -77,7 +77,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     // the user escape the trap, remove it, put back skip link in focus cycle and zoom to top link
     setActiveTrapGeoView(false);
     mapHTMLElement.classList.remove('map-focus-trap');
-    // mapHTMLElement.removeEventListener('keydown',handleExit); //! can't remove because of eslint @typescript-eslint/no-use-before-define
+    // mapHTMLElement.removeEventListener('keydown',handleExit); // GV can't remove because of eslint @typescript-eslint/no-use-before-define
     document.removeEventListener('keydown', handleScrolling);
 
     // update store and focus to top link

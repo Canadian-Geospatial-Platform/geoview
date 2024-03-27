@@ -266,28 +266,20 @@
     <script src="layerlib.js"></script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init(function (mapId) {
-        console.log(`api is ready for ${mapId}`);
+      cgpv.init((mapId) => {
+        if (mapId === 'allMaps') {
+          cgpv.api.maps['Map1'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+            const { resultSet } = payload;
+            displayLegend('LegendsId1', resultSet);
+          });
+          listenToLegendLayerSetChanges('HMap1-state', 'Map1');
+          listenToLegendLayerSetChanges('HMap2-state', 'Map2');
+
+          // create snippets
+          createCodeSnippet();
+          createConfigSnippet();
+        }
       });
-
-      // LYR1 ===================================================================================================================
-      cgpv.api.event.on(
-        cgpv.api.eventNames.GET_LEGENDS.LEGEND_LAYERSET_UPDATED,
-        (payload) => {
-          const { resultSet } = payload;
-          displayLegend('LegendsId1', resultSet);
-        },
-        'Map1/LegendsLayerSet'
-      );
-
-      listenToLegendLayerSetChanges('HMap1-state', 'Map1/LegendsLayerSet');
-
-      // LYR2 ===================================================================================================================
-      listenToLegendLayerSetChanges('HMap2-state', 'Map2/LegendsLayerSet');
-
-      //create snippets
-      createCodeSnippet();
-      createConfigSnippet();
     </script>
   </body>
 </html>

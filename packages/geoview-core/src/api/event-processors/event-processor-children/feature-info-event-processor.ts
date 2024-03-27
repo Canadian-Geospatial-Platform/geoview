@@ -1,11 +1,11 @@
 import { GeoviewStoreType, IFeatureInfoState } from '@/core/stores';
-import { EventType, TypeLayerData, TypeArrayOfLayerData } from '@/api/events/payloads/get-feature-info-payload';
 import { logger } from '@/core/utils/logger';
-
-import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '../abstract-event-processor';
-import { UIEventProcessor } from './ui-event-processor';
 import { TypeFeatureInfoResultSet } from '@/geo/utils/feature-info-layer-set';
 import { TypeHoverFeatureInfoResultSet } from '@/geo/utils/hover-feature-info-layer-set';
+import { EventType, TypeLayerData } from '@/geo/utils/layer-set';
+
+import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
+import { UIEventProcessor } from './ui-event-processor';
 
 /**
  * Event processor focusing on interacting with the feature info state in the store (currently called detailsState).
@@ -14,9 +14,9 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // Static functions for Typescript files to access store actions
   // **********************************************************
-  //! Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
-  //! Some action does state modifications AND map actions.
-  //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+  // GV Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
+  // GV Some action does state modifications AND map actions.
+  // GV ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
 
   // #region
   // Holds the list of layer data arrays being buffered in the propagation process for the batch
@@ -131,15 +131,11 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
 
   /**
    * Helper function to delete a layer information from an array when found
-   * @param {TypeArrayOfLayerData} layerArray The layer array to work with
+   * @param {TypeLayerData[]} layerArray The layer array to work with
    * @param {string} layerPath The layer path to delete
-   * @param {(layerArray: TypeArrayOfLayerData) => void} onDeleteCallback The callback executed when the array is updated
+   * @param {(layerArray: TypeLayerData[]) => void} onDeleteCallback The callback executed when the array is updated
    */
-  private static deleteFromArray(
-    layerArray: TypeArrayOfLayerData,
-    layerPath: string,
-    onDeleteCallback: (layerArray: TypeArrayOfLayerData) => void
-  ) {
+  private static deleteFromArray(layerArray: TypeLayerData[], layerPath: string, onDeleteCallback: (layerArray: TypeLayerData[]) => void) {
     // Find the layer data info to delete from the array
     const layerDataInfoToDelIndex = layerArray.findIndex((layerInfo) => layerInfo.layerPath === layerPath);
 
@@ -223,7 +219,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {string} layerDataArray The layer data array to batch on
    * @returns {Promise<void>} Promise upon completion
    */
-  private static propagateFeatureInfoToStoreBatch(mapId: string, layerDataArray: TypeArrayOfLayerData): Promise<void> {
+  private static propagateFeatureInfoToStoreBatch(mapId: string, layerDataArray: TypeLayerData[]): Promise<void> {
     // The feature info state
     const featureInfoState = this.getFeatureInfoState(mapId);
 
@@ -245,6 +241,6 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // Static functions for Store Map State to action on API
   // **********************************************************
-  //! NEVER add a store action who does set state AND map action at a same time.
-  //! Review the action in store state to make sure
+  // GV NEVER add a store action who does set state AND map action at a same time.
+  // GV Review the action in store state to make sure
 }

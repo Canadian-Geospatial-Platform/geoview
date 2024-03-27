@@ -20,7 +20,7 @@ import {
   HandleIcon,
   Paper,
 } from '@/ui';
-import { TypeLegendLayer } from '../types';
+import { TypeLegendLayer } from '@/core/components/layers/types';
 import {
   useLayerStoreActions,
   useLayerDisplayState,
@@ -30,7 +30,7 @@ import { useDataTableStoreMapFilteredRecord } from '@/core/stores/store-interfac
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { DeleteUndoButton } from './delete-undo-button';
 import { LayersList } from './layers-list';
-import { LayerIcon } from '../../common/layer-icon';
+import { LayerIcon } from '@/core/components/common/layer-icon';
 import { logger } from '@/core/utils/logger';
 import {
   useDetailsStoreActions,
@@ -54,7 +54,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
 
   // Get store states
   const { setSelectedLayerPath } = useLayerStoreActions();
-  const { getAlwaysVisibleFromOrderedLayerInfo, getVisibilityFromOrderedLayerInfo, setOrToggleLayerVisibility } = useMapStoreActions();
+  const { getVisibilityFromOrderedLayerInfo, setOrToggleLayerVisibility } = useMapStoreActions();
   const selectedLayerPath = useLayerSelectedLayerPath();
   const displayState = useLayerDisplayState();
   const mapFiltered = useDataTableStoreMapFilteredRecord();
@@ -80,24 +80,20 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   const layerChildIsSelected = isLayerChildSelected(layer);
   const layerIsSelected = layer.layerPath === selectedLayerPath && displayState === 'view';
 
-  // returns true if any of the layer children or items has visibility of 'always'
-  const layerHasAlwaysVisible = (startingLayer: TypeLegendLayer): boolean => {
-    if (getAlwaysVisibleFromOrderedLayerInfo(layer.layerPath)) {
+  // returns true if any of the layer children has visibility of false
+  const layerHasDisabledVisibility = (startingLayer: TypeLegendLayer): boolean => {
+    if (startingLayer.controls?.visibility === false) {
       return true;
     }
-    let itemsHasAlways = false;
     let childrenHasAlways = false;
     if (startingLayer.children && startingLayer.children.length > 0) {
-      childrenHasAlways = _.some(startingLayer.children, (child) => layerHasAlwaysVisible(child));
-    }
-    if (startingLayer.items && startingLayer.items.length) {
-      itemsHasAlways = startingLayer.items.filter((i) => i.isVisible === 'always').length > 0;
+      childrenHasAlways = startingLayer.children.some((child) => layerHasDisabledVisibility(child));
     }
 
-    return itemsHasAlways || childrenHasAlways;
+    return childrenHasAlways;
   };
 
-  const isLayerAlwaysVisible = layerHasAlwaysVisible(layer);
+  const isLayerAlwaysVisible = layerHasDisabledVisibility(layer);
 
   const [isGroupOpen, setGroupOpen] = useState(layerIsSelected || layerChildIsSelected);
 
@@ -114,7 +110,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
       return t('legend.subLayersCount').replace('{count}', layer.children.length.toString());
     }
 
-    const count = layer.items.filter((d) => d.isVisible !== 'no').length;
+    const count = layer.items.filter((d) => d.isVisible !== false).length;
     const totalCount = layer.items.length;
     const itemsLengthDesc = t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
 
@@ -155,6 +151,10 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
         triggerGetAllFeatureInfo(layer.layerPath, 'all');
       }
     }
+  };
+
+  const handleLayerKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleLayerClick();
   };
 
   const handleToggleVisibility = () => {
@@ -286,23 +286,23 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
 
   return (
     <AnimatedPaper className={getContainerClass()} style={listItemSpring} data-layer-depth={depth}>
-      <ListItem key={layer.layerName} divider>
-        <ListItemButton selected={layerIsSelected || (layerChildIsSelected && !isGroupOpen)}>
-          <LayerIcon layer={layer} />
-          <Tooltip title={layer.layerName} placement="top" enterDelay={1000}>
+      <Tooltip title={layer.layerName} placement="top" enterDelay={1000} arrow>
+        <ListItem key={layer.layerName} divider tabIndex={0} onKeyDown={(e) => handleLayerKeyDown(e)}>
+          <ListItemButton selected={layerIsSelected || (layerChildIsSelected && !isGroupOpen)} tabIndex={-1}>
+            <LayerIcon layer={layer} />
             <ListItemText
               primary={layer.layerName !== undefined ? layer.layerName : layer.layerId}
               secondary={getLayerDescription()}
               onClick={handleLayerClick}
             />
-          </Tooltip>
-          <ListItemIcon className="rightIcons-container">
-            {renderMoreLayerButtons()}
-            {renderArrowButtons()}
-            {renderEditModeButtons()}
-          </ListItemIcon>
-        </ListItemButton>
-      </ListItem>
+            <ListItemIcon className="rightIcons-container">
+              {renderMoreLayerButtons()}
+              {renderArrowButtons()}
+              {renderEditModeButtons()}
+            </ListItemIcon>
+          </ListItemButton>
+        </ListItem>
+      </Tooltip>
       {renderCollapsible()}
     </AnimatedPaper>
   );

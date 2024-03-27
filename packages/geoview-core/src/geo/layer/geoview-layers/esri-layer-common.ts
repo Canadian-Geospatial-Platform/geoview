@@ -4,28 +4,27 @@ import axios from 'axios';
 import { Extent } from 'ol/extent';
 
 import cloneDeep from 'lodash/cloneDeep';
+import { api } from '@/app';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
+import { getLocalizedValue, getXMLHttpRequest } from '@/core/utils/utilities';
+import { TimeDimensionESRI } from '@/core/utils/date-mgt';
+import { logger } from '@/core/utils/logger';
+import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
+import { TypeFeatureInfoEntryPartial, TypeFieldEntry, codedValueType, rangeDomainType } from '@/geo/utils/layer-set';
 import {
   CONST_LAYER_ENTRY_TYPES,
   layerEntryIsGroupLayer,
   TypeLayerEntryConfig,
   TypeListOfLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
-import { getLocalizedValue, getXMLHttpRequest } from '@/core/utils/utilities';
-import { api } from '@/app';
 import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
 import { EsriFeature, geoviewEntryIsEsriFeature } from './vector/esri-feature';
-import { EsriBaseRenderer, getStyleFromEsriRenderer } from '../../renderer/esri-renderer';
-import { TimeDimensionESRI } from '@/core/utils/date-mgt';
-import { codedValueType, rangeDomainType, TypeFeatureInfoEntryPartial, TypeFieldEntry } from '@/api/events/payloads';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { EsriBaseRenderer, getStyleFromEsriRenderer } from '@/geo/renderer/esri-renderer';
 import { EsriImage } from './raster/esri-image';
-import { logger } from '@/core/utils/logger';
-import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
@@ -107,8 +106,6 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
     if (this.metadata!.layers[esriIndex]?.subLayerIds?.length) {
       // We will create dynamically a group layer.
       const newListOfLayerEntryConfig: TypeListOfLayerEntryConfig = [];
-      // Group layer are not registered to layer sets.
-      if (this.registerToLayerSetListenerFunctions[layerPath]) this.unregisterFromLayerSets(layerConfig as AbstractBaseLayerEntryConfig);
       const switchToGroupLayer = Cast<GroupLayerEntryConfig>(cloneDeep(layerConfig));
       switchToGroupLayer.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
       switchToGroupLayer.layerName = {
@@ -308,11 +305,11 @@ export function commonProcessInitialSettings(
 ) {
   // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
   const layerMetadata = this.layerMetadata[layerConfig.layerPath];
-  if (layerConfig.initialSettings?.visible === undefined)
-    layerConfig.initialSettings!.visible = layerMetadata.defaultVisibility ? 'yes' : 'no';
-  // ! TODO: The solution implemented in the following two lines is not right. scale and zoom are not the same things.
-  // ! if (layerConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerConfig.initialSettings.minZoom = minScale;
-  // ! if (layerConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerConfig.initialSettings.maxZoom = maxScale;
+  if (layerConfig.initialSettings?.states?.visible === undefined)
+    layerConfig.initialSettings!.states = { visible: !!layerMetadata.defaultVisibility };
+  // GV TODO: The solution implemented in the following two lines is not right. scale and zoom are not the same things.
+  // GV if (layerConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerConfig.initialSettings.minZoom = minScale;
+  // GV if (layerConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerConfig.initialSettings.maxZoom = maxScale;
   if (layerConfig.initialSettings?.extent)
     layerConfig.initialSettings.extent = api.projection.transformExtent(
       layerConfig.initialSettings.extent,

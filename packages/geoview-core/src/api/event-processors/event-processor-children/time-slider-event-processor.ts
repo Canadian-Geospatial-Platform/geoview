@@ -1,18 +1,14 @@
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
-
-import { AbstractEventProcessor } from '../abstract-event-processor';
-import {
-  AbstractGeoViewVector,
-  CONST_LAYER_TYPES,
-  EsriDynamic,
-  ITimeSliderState,
-  TimeSliderLayerSet,
-  TypeFeatureInfoLayerConfig,
-  WMS,
-  api,
-  getLocalizedValue,
-} from '@/core/types/cgpv-types';
+import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
+import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
+import { ITimeSliderState, TimeSliderLayerSet } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import { getLocalizedValue, whenThisThenThat } from '@/core/utils/utilities';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
+import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
+import { api } from '@/app';
+import { TypeFeatureInfoLayerConfig } from '@/geo/map/map-schema-types';
 
 export class TimeSliderEventProcessor extends AbstractEventProcessor {
   /**
@@ -21,25 +17,39 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
     const { mapId } = store.getState();
 
-    api.event.once(
-      api.eventNames.MAP.EVENT_MAP_LOADED,
-      () => {
-        // Log
-        logger.logTraceCoreAPIEvent('TIME SLIDER EVENT PROCESSOR - EVENT_MAP_LOADED');
+    // TODO: Check - Do we want to switch the order of MapViewer instantiation vs store instantiation/initialization?
+    // At the time of writing, the MapViewer is actually created and added to the api.maps AFTER
+    // the store (and this current processor initialization) is called.
 
-        const orderedLayers = store.getState().mapState.orderedLayerInfo.map((info) => info.layerPath);
-        const initialTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, orderedLayers);
-        if (initialTimeSliderLayerPaths) {
-          initialTimeSliderLayerPaths.forEach((layerPath) => {
-            const timeSliderLayer = TimeSliderEventProcessor.getInitialTimeSliderValues(mapId, layerPath);
-            store.getState().timeSliderState.actions.addTimeSliderLayer(timeSliderLayer);
+    // TO.DOCONT: This is because the viewer is using the store config to start the init.
+    // Store creates a copy of it for reload and then viewer use the store init value to remove passing of object config.
+    // We should discuss the modification to do to switch creation later. If we move event to classes
+    // (map, layer) and these 2 classes (only) can call store function to set values, maybe doing this may be a good idea
 
-            const { defaultValue, field, filtering, minAndMax, values } = timeSliderLayer[layerPath];
-            TimeSliderEventProcessor.applyFilters(mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
-          });
-        }
+    // Wait for the map to 'appear' in the maps container
+    whenThisThenThat(
+      () => api.maps[mapId],
+      async (mapViewer) => {
+        // Wait for the layers to be processed so that their 'layerTemporalDimension' information is set
+        await mapViewer.onMapLayersProcessed(() => {
+          // Now the layerTemporalDimension should be good on the layers
+          const orderedLayers = store.getState().mapState.orderedLayerInfo.map((info) => info.layerPath);
+          const initialTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, orderedLayers);
+          if (initialTimeSliderLayerPaths) {
+            initialTimeSliderLayerPaths.forEach((layerPath) => {
+              const timeSliderLayer = TimeSliderEventProcessor.getInitialTimeSliderValues(mapId, layerPath);
+              store.getState().timeSliderState.actions.addTimeSliderLayer(timeSliderLayer);
+
+              const { defaultValue, field, filtering, minAndMax, values } = timeSliderLayer[layerPath];
+              TimeSliderEventProcessor.applyFilters(mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
+            });
+          }
+        });
       },
-      mapId
+      (failedReason) => {
+        // Log
+        logger.logError('Failed to initialize the Time-Slider-Event-Processor', failedReason);
+      }
     );
 
     // Checks for added and removed layers with time dimension
@@ -77,9 +87,9 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // Static functions for Typescript files to access store actions
   // **********************************************************
-  //! Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
-  //! Some action does state modifications AND map actions.
-  //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+  // GV Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
+  // GV Some action does state modifications AND map actions.
+  // GV ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
 
   // #region
   /**
@@ -164,8 +174,8 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // Static functions for Store Map State to action on API
   // **********************************************************
-  //! NEVER add a store action who does set state AND map action at a same time.
-  //! Review the action in store state to make sure
+  // GV NEVER add a store action who does set state AND map action at a same time.
+  // GV Review the action in store state to make sure
 
   // #region
   /**

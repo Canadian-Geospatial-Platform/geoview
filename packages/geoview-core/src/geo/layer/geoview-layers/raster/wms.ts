@@ -31,7 +31,6 @@ import {
   layerEntryIsGroupLayer,
   CONST_LAYER_ENTRY_TYPES,
 } from '@/geo/map/map-schema-types';
-import { TypeFeatureInfoEntry, TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import { getLocalizedValue, getMinOrMaxExtents, xmlToJson, showError, replaceParams, getLocalizedMessage } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -39,6 +38,7 @@ import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
+import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
@@ -418,7 +418,8 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer configurstion associated to the dynamic group.
    */
   private createGroupLayer(layer: TypeJsonObject, layerConfig: AbstractBaseLayerEntryConfig) {
-    const { layerPath } = layerConfig;
+    // TODO: Refactor - createGroup is the same thing for all the layers type? group is a geoview structure.
+    // TO.DOCONT: Should it be handle upper in abstract class to loop in structure and launch the creation of a leaf?
     const newListOfLayerEntryConfig: TypeListOfLayerEntryConfig = [];
     const arrayOfLayerMetadata = Array.isArray(layer.Layer) ? layer.Layer : ([layer.Layer] as TypeJsonArray);
 
@@ -436,7 +437,6 @@ export class WMS extends AbstractGeoViewRaster {
       subLayerEntryConfig.registerLayerConfig();
     });
 
-    if (this.registerToLayerSetListenerFunctions[layerPath]) this.unregisterFromLayerSets(layerConfig);
     const switchToGroupLayer = Cast<GroupLayerEntryConfig>(layerConfig);
     switchToGroupLayer.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
     switchToGroupLayer.layerName = {
@@ -483,8 +483,8 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {TypeBaseRasterLayer | null} The GeoView raster layer that has been created.
    */
   protected processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
-    // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
-    // !            layerStatus values is correctly sequenced.
+    // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
+    // GV            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
     // Log
     logger.logTraceCore('WMS - processOneLayerEntry', layerConfig.layerPath);
@@ -531,13 +531,14 @@ export class WMS extends AbstractGeoViewRaster {
           properties: { layerCapabilities, layerConfig },
         };
         // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-        if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings?.className;
-        if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings?.extent;
-        if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
-        if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings?.minZoom;
-        if (layerConfig.initialSettings?.opacity !== undefined) imageLayerOptions.opacity = layerConfig.initialSettings?.opacity;
-        // ! IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
-        // !            in the 'loading' state if the flag value is 'no'.
+        if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings.className;
+        if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings.extent;
+        if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
+        if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
+        if (layerConfig.initialSettings?.states?.opacity !== undefined)
+          imageLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
+        // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
+        // GV            in the 'loading' state if the flag value is false.
 
         layerConfig.olLayerAndLoadEndListeners = {
           olLayer: new ImageLayer(imageLayerOptions),
@@ -574,7 +575,7 @@ export class WMS extends AbstractGeoViewRaster {
         if (layerCapabilities.Attribution) this.attributions.push(layerCapabilities.Attribution.Title as string);
         if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
         MapEventProcessor.setMapLayerQueryable(this.mapId, layerConfig.layerPath, layerConfig.source.featureInfo.queryable);
-        // ! TODO: The solution implemented in the following lines is not right. scale and zoom are not the same things.
+        // GV TODO: The solution implemented in the following lines is not right. scale and zoom are not the same things.
         // if (layerConfig.initialSettings?.minZoom === undefined && layerCapabilities.MinScaleDenominator !== undefined)
         //   layerConfig.initialSettings.minZoom = layerCapabilities.MinScaleDenominator as number;
         // if (layerConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
@@ -618,9 +619,9 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {Coordinate} location The pixel coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-  protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     const { map } = api.maps[this.mapId];
     return this.getFeatureInfoAtCoordinate(map.getCoordinateFromPixel(location), layerPath);
   }
@@ -631,9 +632,9 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The promised feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The promised feature info table.
    */
-  protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     const convertedLocation = api.projection.transform(
       location,
       `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`,
@@ -648,9 +649,9 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {Coordinate} lnglat The coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The promised feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The promised feature info table.
    */
-  protected async getFeatureInfoAtLongLat(lnglat: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected async getFeatureInfoAtLongLat(lnglat: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig(layerPath) as OgcWmsLayerEntryConfig;
@@ -684,8 +685,8 @@ export class WMS extends AbstractGeoViewRaster {
         if (infoFormat === 'text/xml') {
           const xmlDomResponse = new DOMParser().parseFromString(response.data, 'text/xml');
           const jsonResponse = xmlToJson(xmlDomResponse);
-          // ! TODO: We should use a WMS format setting in the schema to decide what feature info response interpreter to use
-          // ! For the moment, we try to guess the response format based on properties returned from the query
+          // GV TODO: We should use a WMS format setting in the schema to decide what feature info response interpreter to use
+          // GV For the moment, we try to guess the response format based on properties returned from the query
           const featureCollection = this.getAttribute(jsonResponse, 'FeatureCollection');
           if (featureCollection) featureMember = this.getAttribute(featureCollection, 'featureMember');
           else {
@@ -912,24 +913,24 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Translate the get feature information result set to the TypeArrayOfFeatureInfoEntries used by GeoView.
+   * Translate the get feature information result set to the TypeFeatureInfoEntry[] used by GeoView.
    *
    * @param {TypeJsonObject} featureMember An object formatted using the query syntax.
    * @param {OgcWmsLayerEntryConfig} layerConfig The layer configuration.
    * @param {Coordinate} clickCoordinate The coordinate where the user has clicked.
    *
-   * @returns {TypeArrayOfFeatureInfoEntries} The feature info table.
+   * @returns {TypeFeatureInfoEntry[]} The feature info table.
    */
   private formatWmsFeatureInfoResult(
     featureMember: TypeJsonObject,
     layerConfig: OgcWmsLayerEntryConfig,
     clickCoordinate: Coordinate
-  ): TypeArrayOfFeatureInfoEntries {
+  ): TypeFeatureInfoEntry[] {
     const featureInfo = layerConfig?.source?.featureInfo;
     const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
     const fieldTypes = featureInfo?.fieldTypes?.split(',');
     const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
-    const queryResult: TypeArrayOfFeatureInfoEntries = [];
+    const queryResult: TypeFeatureInfoEntry[] = [];
 
     let featureKeyCounter = 0;
     let fieldKeyCounter = 0;
@@ -1082,7 +1083,7 @@ export class WMS extends AbstractGeoViewRaster {
 
     const layerConfig = this.getLayerConfig(layerPath) as OgcWmsLayerEntryConfig;
     if (!layerConfig) {
-      // ! Things important to know about the applyViewFilter usage:
+      // GV Things important to know about the applyViewFilter usage:
       logger.logError(
         `
         The applyViewFilter method must never be called by GeoView code before the layer refered by the layerPath has reached the 'loaded' status.\n

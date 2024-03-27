@@ -1,7 +1,7 @@
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { CONST_LAYER_ENTRY_TYPES, GeoviewChild, TypeSourceImageWmsInitialConfig, TypeStyleConfig } from '@/geo/map/map-schema-types';
-import { AbstractBaseLayerEntryConfig } from '../abstract-base-layer-entry-config';
-import { createLocalizedString } from '../../../utilities';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { createLocalizedString } from '@/core/utils/utilities';
 
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.

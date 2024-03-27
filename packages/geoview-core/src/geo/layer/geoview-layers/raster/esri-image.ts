@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-// We have many reassign for layerPath-layerConfig. We keep it global...
 import { ImageArcGISRest } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
@@ -7,6 +5,13 @@ import { Image as ImageLayer } from 'ol/layer';
 import { Extent } from 'ol/extent';
 
 import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
+import { api } from '@/app';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { TypeJsonObject } from '@/core/types/global-types';
+import { logger } from '@/core/utils/logger';
+import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { codedValueType, rangeDomainType } from '@/geo/utils/layer-set';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
@@ -18,8 +23,7 @@ import {
   TypeUniqueValueStyleInfo,
   TypeStyleConfig,
 } from '@/geo/map/map-schema-types';
-import { codedValueType, rangeDomainType } from '@/api/events/payloads';
-import { api } from '@/app';
+
 import {
   commonGetFieldDomain,
   commonGetFieldType,
@@ -27,12 +31,7 @@ import {
   commonProcessInitialSettings,
   commonProcessLayerMetadata,
   commonProcessTemporalDimension,
-} from '../esri-layer-common';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { TypeJsonObject } from '@/core/types/global-types';
-import { logger } from '@/core/utils/logger';
-import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+} from '@/geo/layer/geoview-layers/esri-layer-common';
 
 export interface TypeEsriImageLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
@@ -115,6 +114,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {TypeEsriImageLayerConfig} layerConfig The layer configuration.
    */
   constructor(mapId: string, layerConfig: TypeEsriImageLayerConfig) {
+    // eslint-disable-next-line no-param-reassign
     if (!layerConfig.serviceDateFormat) layerConfig.serviceDateFormat = 'DD/MM/YYYY HH:MM:SSZ';
     super(CONST_LAYER_TYPES.ESRI_IMAGE, layerConfig, mapId);
   }
@@ -211,6 +211,7 @@ export class EsriImage extends AbstractGeoViewRaster {
             layer: layerPath,
             loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
+          // eslint-disable-next-line no-param-reassign
           layerConfig.layerStatus = 'error';
         }
       }
@@ -289,8 +290,8 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
   protected processOneLayerEntry(layerConfig: EsriImageLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
-    // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
-    // !            layerStatus values is correctly sequenced.
+    // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
+    // GV            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
@@ -310,19 +311,21 @@ export class EsriImage extends AbstractGeoViewRaster {
       properties: { layerConfig },
     };
     // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-    if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings?.className;
-    if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings?.extent;
-    if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
-    if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings?.minZoom;
-    if (layerConfig.initialSettings?.opacity !== undefined) imageLayerOptions.opacity = layerConfig.initialSettings?.opacity;
+    if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings.className;
+    if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings.extent;
+    if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
+    if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
+    if (layerConfig.initialSettings?.states?.opacity !== undefined) imageLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
     // If a layer on the map has an initialSettings.visible set to false, its status will never reach the status 'loaded' because
     // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
     // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
 
+    // eslint-disable-next-line no-param-reassign
     layerConfig.olLayerAndLoadEndListeners = {
       olLayer: new ImageLayer(imageLayerOptions),
       loadEndListenerType: 'image',
     };
+    // eslint-disable-next-line no-param-reassign
     layerConfig.geoviewLayerInstance = this;
 
     return Promise.resolve(layerConfig.olLayer);

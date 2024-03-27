@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
 
 import { logger } from '@/core/utils/logger';
-import { TypeButtonPanel, TypeTabs, payloadIsASnackbarMessage, snackbarMessagePayload } from '@/core/types/global-types';
+import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 
 import { EVENT_NAMES, EventStringId } from './event-types';
 import { PayloadBaseClass } from './payloads/payload-base-class';
@@ -14,13 +14,23 @@ import {
   payloadIsAFooterBar,
   inKeyfocusPayload,
   payloadIsAInKeyfocus,
+  payloadIsASnackbarMessage,
+  snackbarMessagePayload,
   SnackbarType,
   SnackbarMessagePayload,
   ISnackbarButton,
   ModalPayload,
   modalPayload,
   payloadIsAModal,
+  mapComponentPayload,
+  payloadIsAMapComponent,
+  MapComponentPayload,
+  payloadIsAmapFeaturesConfig,
+  MapFeaturesPayload,
+  mapConfigPayload,
 } from './payloads';
+import { TypeButtonPanel } from '@/ui/panel/panel-types';
+import { TypeTabs } from '@/ui/tabs/tabs';
 
 export type TypeEventHandlerFunction = (payload: PayloadBaseClass) => void;
 
@@ -161,6 +171,10 @@ export class Event {
         if (checkCallback(payload)) {
           // Sure callback
           callback(payload as T);
+        } else {
+          // Log an error as that shouldn't be possible
+          // TODO: Refactor - When all generic events are gone, remove the checkCallback, move some types here, remove bunch of payload files
+          logger.logError('THIS CALLBACK PAYLOAD IS WRONG!!', eventStringId, payload);
         }
       },
       mapId
@@ -168,11 +182,11 @@ export class Event {
   };
 
   // #region SPECIALIZED EVENTS - IMPORTANT
-  // ! These events exists to communicate between the Shell/MapViewer and the App-Bar/Nav-Bar/Footer-Bar components.
-  // ! The laters are mounted and then 'autonomous'. They rely on events to self-manage their rendering.
-  // ! Ideally, we should get rid of those events and use props inside App-Bar/Nav-Bar/Footer-Bar and have the management
-  // ! higher in the call stack. At the time of writing this, having them explicit here was sufficient as a first step
-  // ! in cleaning generic api.event calls and payloads.
+  // GV These events exists to communicate between the Shell/MapViewer and the App-Bar/Nav-Bar/Footer-Bar components.
+  // GV The laters are mounted and then 'autonomous'. They rely on events to self-manage their rendering.
+  // GV Ideally, we should get rid of those events and use props inside App-Bar/Nav-Bar/Footer-Bar and have the management
+  // GV higher in the call stack. At the time of writing this, having them explicit here was sufficient as a first step
+  // GV in cleaning generic api.event calls and payloads.
 
   // #region EVENT_APPBAR_PANEL_CREATE --------------------------------------------------------------------------------
 
@@ -307,13 +321,51 @@ export class Event {
 
   // #endregion
 
+  // #region EVENT_MAP_ADD_COMPONENT ----------------------------------------------------------------------------------
+
+  emitCreateComponent = (mapId: string, mapComponentId: string, component: JSX.Element) => {
+    // Emit
+    this.emit(mapComponentPayload(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, mapId, mapComponentId, component));
+  };
+
+  onCreateComponent = (mapId: string, callback: (mapComponentPayload: MapComponentPayload) => void) => {
+    // Wire
+    this.onMapHelperHandler(mapId, EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, payloadIsAMapComponent, callback);
+  };
+
+  offCreateComponent = (mapId: string, callback: (mapComponentPayload: MapComponentPayload) => void) => {
+    // Unwire
+    this.off(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, mapId, callback as TypeEventHandlerFunction);
+  };
+
+  // #endregion
+
+  // #region EVENT_MAP_REMOVE_COMPONENT -------------------------------------------------------------------------------
+
+  emitRemoveComponent = (mapId: string, mapComponentId: string) => {
+    // Emit
+    this.emit(mapComponentPayload(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, mapId, mapComponentId));
+  };
+
+  onRemoveComponent = (mapId: string, callback: (mapComponentPayload: MapComponentPayload) => void) => {
+    // Wire
+    this.onMapHelperHandler(mapId, EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, payloadIsAMapComponent, callback);
+  };
+
+  offRemoveComponent = (mapId: string, callback: (mapComponentPayload: MapComponentPayload) => void) => {
+    // Unwire
+    this.off(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, mapId, callback as TypeEventHandlerFunction);
+  };
+
+  // #endregion
+
   // #endregion
 
   // #region SPECIALIZED EVENTS - UNSURE
-  // ! These events exists to communicate between different application code and components.
-  // ! They are annoying to have, but unsure if worth spending time to refactor. They have less reason to exist than the
-  // ! 'IMPORTANT' ones above. However, at the time of writing this having them here was sufficient
-  // ! as a first step in cleaning generic api.event calls and payloads.
+  // GV These events exists to communicate between different application code and components.
+  // GV They are annoying to have, but unsure if worth spending time to refactor. They have less reason to exist than the
+  // GV 'IMPORTANT' ones above. However, at the time of writing this having them here was sufficient
+  // GV as a first step in cleaning generic api.event calls and payloads.
 
   // #region EVENT_MODAL_OPEN -----------------------------------------------------------------------------------------
 
@@ -372,14 +424,45 @@ export class Event {
 
   // #endregion
 
+  // #region EVENT_MAP_RELOAD -----------------------------------------------------------------------------------------
+
+  emitMapReload = (mapId: string, mapFeaturesConfig: TypeMapFeaturesConfig) => {
+    // TODO: Refactor - The payload requires a TypeMapFeaturesConfig, but the onMapReload callback currently implement doesn't use it.
+    // TO.DOCONT: Suggestion to remove the mapFeaturesConfig from the payload altogether if the listeners don't use it.
+    // Emit
+    this.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, mapId, mapFeaturesConfig));
+  };
+
+  onMapReload = (mapId: string, callback: (mapFeaturesPayload: MapFeaturesPayload) => void) => {
+    // Wire
+    this.onMapHelperHandler(mapId, EVENT_NAMES.MAP.EVENT_MAP_RELOAD, payloadIsAmapFeaturesConfig, callback);
+  };
+
+  offMapReload = (mapId: string, callback: (mapFeaturesPayload: MapFeaturesPayload) => void) => {
+    // Unwire
+    this.off(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, mapId, callback as TypeEventHandlerFunction);
+  };
+
   // #endregion
 
-  // #region SPECIALIZED EVENTS - OBSOLETE
-  // ! These events exists to communicate between different application code and components.
-  // ! They should be fixed/removed altogether as they don't have a 'valid' reason to exist or their refactoring would be beneficial.
-  // ! At the time writing this, having them here was sufficient as a first step in cleaning generic api.event calls and payloads.
+  // #region EVENT_MAP_RELOAD (remove) --------------------------------------------------------------------------------
 
-  // ? Move some that are hard to refactor here temporarily
+  emitMapRemove = (mapId: string, mapFeaturesConfig: TypeMapFeaturesConfig) => {
+    // Emit
+    this.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, `${mapId}/delete_old_map`, mapFeaturesConfig));
+  };
+
+  onMapRemove = (mapId: string, callback: (mapFeaturesPayload: MapFeaturesPayload) => void) => {
+    // Wire
+    this.onMapHelperHandler(`${mapId}/delete_old_map`, EVENT_NAMES.MAP.EVENT_MAP_RELOAD, payloadIsAmapFeaturesConfig, callback);
+  };
+
+  offMapRemove = (mapId: string, callback: (mapFeaturesPayload: MapFeaturesPayload) => void) => {
+    // Unwire
+    this.off(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, `${mapId}/delete_old_map`, callback as TypeEventHandlerFunction);
+  };
+
+  // #endregion
 
   // #endregion
 }

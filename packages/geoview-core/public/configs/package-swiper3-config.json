@@ -105,9 +105,6 @@
           "en": "statmen toner"
         },
         "geoviewLayerType": "xyzTiles",
-        "initialSettings": {
-          "visible": "yes"
-        },
         "listOfLayerEntryConfig": [
           {
             "layerId": "toner",

@@ -39,7 +39,7 @@
       </table>
     </div>
 
-    <a href="https://osdp-psdo.canada.ca/en/learn-about/climate">Original RAMP Climate</a><br >
+    <a href="https://osdp-psdo.canada.ca/en/learn-about/climate">Original RAMP Climate</a><br />
 
     <div class="map-title-holder">
       <h4 id="HMap1">Climate</h4>
@@ -75,7 +75,7 @@
               'listOfLayerEntryConfig': [
                 {
                   'layerId': '10',
-                  'initialSettings': { 'visible': 'no' }
+                  'initialSettings': { 'states': {'visible': false} }
                 }
               ]
             },
@@ -112,15 +112,15 @@
     <script src="layerlib.js"></script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init(function (mapId) {
-        console.log(`api is ready for ${mapId}`);
+      cgpv.init((mapId) => {
+        if (mapId === 'allMaps') {
+          listenToLegendLayerSetChanges('HMap1-state', 'Map1');
+
+          // create snippets
+          createCodeSnippet();
+          createConfigSnippet();
+        }
       });
-
-      listenToLegendLayerSetChanges('HMap1-state', 'Map1/LegendsLayerSet');
-
-      //create snippets
-      createCodeSnippet();
-      createConfigSnippet();
     </script>
   </body>
 </html>

@@ -4,7 +4,7 @@ import { capitalize } from 'lodash';
 import { useTheme } from '@mui/material/styles';
 import { Box, List, ListItem, Panel, IconButton, TypeIconButtonProps, SchoolIcon, InfoOutlinedIcon, HubOutlinedIcon } from '@/ui';
 
-import { AbstractPlugin, TypeJsonObject, TypeJsonValue, api, toJsonObject } from '@/app';
+import { api } from '@/app';
 
 import { ButtonPanelPayload } from '@/api/events/payloads';
 
@@ -25,6 +25,8 @@ import Geolocator from './buttons/geolocator';
 import Version from './buttons/version';
 import { getSxClasses } from './app-bar-style';
 import { helpCloseAll, helpClosePanelById, helpOpenPanelById } from './app-bar-helper';
+import { TypeJsonObject, TypeJsonValue, toJsonObject } from '@/core/types/global-types';
+import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 
 interface GroupPanelType {
   icon: ReactNode;
@@ -344,11 +346,13 @@ export function Appbar(): JSX.Element {
         // display the panels in the list
         return (
           <Fragment key={groupName}>
-            {Object.keys(buttonPanels).map((buttonPanelsKey) => {
+            {Object.keys(buttonPanels).map((buttonPanelsKey, index) => {
               const buttonPanel = buttonPanels[buttonPanelsKey];
+
               return buttonPanel?.panel ? (
                 <Panel
-                  key={buttonPanel.panel.panelId}
+                  // eslint-disable-next-line react/no-array-index-key
+                  key={`panel-${index}`}
                   panel={buttonPanel.panel}
                   button={buttonPanel.button}
                   onPanelOpened={buttonPanel.onPanelOpened}

@@ -18,6 +18,17 @@ import {
   getLocalizedMessage,
   createLocalizedString,
 } from '@/core/utils/utilities';
+import { api } from '@/app';
+import { LayerApi } from '@/geo/layer/layer';
+import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
+import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
+import { logger } from '@/core/utils/logger';
+import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import {
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
@@ -30,72 +41,7 @@ import {
   TypeStyleGeometry,
   CONST_LAYER_ENTRY_TYPES,
 } from '@/geo/map/map-schema-types';
-import {
-  codedValueType,
-  GetFeatureInfoPayload,
-  payloadIsQueryLayer,
-  rangeDomainType,
-  TypeArrayOfFeatureInfoEntries,
-  TypeFeatureInfoEntry,
-  QueryType,
-  LayerSetPayload,
-  payloadIsRequestLayerInventory,
-  GetLegendsPayload,
-  payloadIsQueryLegend,
-  TypeLocation,
-} from '@/api/events/payloads';
-import { api } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
-import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
-import { TypeEventHandlerFunction } from '@/api/events/event';
-import { logger } from '@/core/utils/logger';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
-
-export type TypeLegend = {
-  layerPath: string;
-  layerName?: TypeLocalizedString;
-  type: TypeGeoviewLayerType;
-  styleConfig?: TypeStyleConfig | null;
-  // Layers other than vector layers use the HTMLCanvasElement type for their legend.
-  legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
-};
-
-export interface TypeWmsLegendStyle {
-  name: string;
-  legend: HTMLCanvasElement | null;
-}
-
-export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {
-  legend: HTMLCanvasElement | null;
-  styles?: TypeWmsLegendStyle[];
-}
-
-export interface TypeImageStaticLegend extends Omit<TypeLegend, 'styleConfig'> {
-  legend: HTMLCanvasElement | null;
-}
-
-export interface TypeVectorLegend extends TypeLegend {
-  legend: TypeVectorLayerStyles;
-}
-
-export type TypeStyleRepresentation = {
-  /** The defaultCanvas property is used by Simple styles and default styles when defined in unique value and class
-   * break styles.
-   */
-  defaultCanvas?: HTMLCanvasElement | null;
-  /** The arrayOfCanvas property is used by unique value and class break styles. */
-  arrayOfCanvas?: (HTMLCanvasElement | null)[];
-};
-export type TypeVectorLayerStyles = Partial<Record<TypeStyleGeometry, TypeStyleRepresentation>>;
-
-/** ******************************************************************************************************************************
- * GeoViewAbstractLayers types
- */
+import { QueryType, TypeFeatureInfoEntry, TypeLocation, codedValueType, rangeDomainType } from '@/geo/utils/layer-set';
 
 // Constant used to define the default layer names
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
@@ -113,145 +59,13 @@ const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
   ogcWms: 'WMS Layer',
 };
 
-// Definition of the keys used to create the constants of the GeoView layer
-// TODO: Refactor - Move this and related types/const below lower in the architecture? Say, to MapSchemaTypes? Otherwise, things circle..
-type LayerTypesKey =
-  | 'CSV'
-  | 'ESRI_DYNAMIC'
-  | 'ESRI_FEATURE'
-  | 'ESRI_IMAGE'
-  | 'IMAGE_STATIC'
-  | 'GEOJSON'
-  | 'GEOPACKAGE'
-  | 'XYZ_TILES'
-  | 'VECTOR_TILES'
-  | 'OGC_FEATURE'
-  | 'WFS'
-  | 'WMS';
-
 /**
- * Type of GeoView layers
- */
-export type TypeGeoviewLayerType =
-  | 'CSV'
-  | 'esriDynamic'
-  | 'esriFeature'
-  | 'esriImage'
-  | 'imageStatic'
-  | 'GeoJSON'
-  | 'GeoPackage'
-  | 'xyzTiles'
-  | 'vectorTiles'
-  | 'ogcFeature'
-  | 'ogcWfs'
-  | 'ogcWms';
-
-/**
- * This type is created to only be used when validating the configuration schema types.
- * Indeed, GeoCore is not an official Abstract Geoview Layer, but it can be used in schema types.
- */
-export type TypeGeoviewLayerTypeWithGeoCore = TypeGeoviewLayerType | typeof CONST_LAYER_ENTRY_TYPES.GEOCORE;
-
-/**
- * Definition of the GeoView layer constants
- */
-export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
-  CSV: 'CSV',
-  ESRI_DYNAMIC: 'esriDynamic',
-  ESRI_FEATURE: 'esriFeature',
-  ESRI_IMAGE: 'esriImage',
-  IMAGE_STATIC: 'imageStatic',
-  GEOJSON: 'GeoJSON',
-  GEOPACKAGE: 'GeoPackage',
-  XYZ_TILES: 'xyzTiles',
-  VECTOR_TILES: 'vectorTiles',
-  OGC_FEATURE: 'ogcFeature',
-  WFS: 'ogcWfs',
-  WMS: 'ogcWms',
-};
-
-/**
- * Definition of the sub schema to use for each type of Geoview layer
- */
-export const CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<TypeGeoviewLayerType, string> = {
-  CSV: 'TypeVectorLayerEntryConfig',
-  imageStatic: 'TypeImageStaticLayerEntryConfig',
-  esriDynamic: 'TypeEsriDynamicLayerEntryConfig',
-  esriFeature: 'TypeVectorLayerEntryConfig',
-  esriImage: 'TypeEsriImageLayerEntryConfig',
-  GeoJSON: 'TypeVectorLayerEntryConfig',
-  GeoPackage: 'TypeVectorLayerEntryConfig',
-  xyzTiles: 'TypeTileLayerEntryConfig',
-  vectorTiles: 'TypeTileLayerEntryConfig',
-  ogcFeature: 'TypeVectorLayerEntryConfig',
-  ogcWfs: 'TypeVectorLayerEntryConfig',
-  ogcWms: 'TypeOgcWmsLayerEntryConfig',
-};
-
-const validVectorLayerLegendTypes: TypeGeoviewLayerType[] = [
-  CONST_LAYER_TYPES.CSV,
-  CONST_LAYER_TYPES.GEOJSON,
-  CONST_LAYER_TYPES.ESRI_DYNAMIC,
-  CONST_LAYER_TYPES.ESRI_FEATURE,
-  CONST_LAYER_TYPES.ESRI_IMAGE,
-  CONST_LAYER_TYPES.OGC_FEATURE,
-  CONST_LAYER_TYPES.WFS,
-  CONST_LAYER_TYPES.GEOPACKAGE,
-];
-
-/**
- * type guard function that redefines a TypeLegend as a TypeVectorLegend
- * if the type attribute of the verifyIfLegend parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export const isVectorLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeVectorLegend => {
-  return validVectorLayerLegendTypes.includes(verifyIfLegend?.type);
-};
-
-/**
- * type guard function that redefines a TypeLegend as a TypeWmsLegend
- * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export const isWmsLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeWmsLegend => {
-  return verifyIfLegend?.type === CONST_LAYER_TYPES.WMS;
-};
-
-/**
- * type guard function that redefines a TypeLegend as a TypeImageStaticLegend
- * if the type attribute of the verifyIfLegend parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export const isImageStaticLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeImageStaticLegend => {
-  return verifyIfLegend?.type === CONST_LAYER_TYPES.IMAGE_STATIC;
-};
-
-type TypeLayerSetHandlerFunctions = {
-  requestLayerInventory?: TypeEventHandlerFunction;
-  queryLegend?: TypeEventHandlerFunction;
-  queryLayer?: TypeEventHandlerFunction;
-  updateLayerStatus?: TypeEventHandlerFunction;
-};
-
-// ******************************************************************************************************************************
-// ******************************************************************************************************************************
-/** ******************************************************************************************************************************
- * The AbstractGeoViewLayer class is normally used for creating subclasses and is not instantiated (using the new operator) in the
- * app. It registers the configuration options and defines the methods shared by all its descendant. The class constructor has
+ * The AbstractGeoViewLayer class is the abstraction class of all GeoView Layers classes.
+ * It registers the configuration options and defines the methods shared by all its descendant. The class constructor has
  * three parameters: mapId, type and mapLayerConfig. Its role is to save in attributes the mapId, type and elements of the
  * mapLayerConfig that are common to all GeoView layers. The main characteristic of a GeoView layer is the presence of an
  * metadataAccessPath attribute whose value is passed as an attribute of the mapLayerConfig object.
  */
-// ******************************************************************************************************************************
 export abstract class AbstractGeoViewLayer {
   /** The unique identifier of the map on which the GeoView layer will be drawn. */
   mapId: string;
@@ -305,9 +119,6 @@ export abstract class AbstractGeoViewLayer {
   /** Attribution used in the OpenLayer source. */
   attributions: string[] = [];
 
-  /** LayerSet handler functions indexed by layerPath. This property is used to deactivate (off) events attached to a layer. */
-  registerToLayerSetListenerFunctions: Record<string, TypeLayerSetHandlerFunctions> = {};
-
   /** Date format object used to translate server to ISO format and ISO to server format */
   serverDateFragmentsOrder?: TypeDateFragments;
 
@@ -317,6 +128,15 @@ export abstract class AbstractGeoViewLayer {
   // LayerPath to use when we want to call a GeoView layer's method using the following syntaxe:
   // api.maps[mapId].layer.geoviewLayer(layerPath).getVisible()
   layerPathAssociatedToTheGeoviewLayer = '';
+
+  // Keep all callback delegate references
+  #onGeoViewLayerRegistrationHandlers: GeoViewLayerRegistrationDelegate[] = [];
+
+  // Keep all callback delegate references
+  #onGeoViewLayerLegendQueryingHandlers: GeoViewLayerLegendQueryingDelegate[] = [];
+
+  // Keep all callback delegate references
+  #onGeoViewLayerLegendQueriedHandlers: GeoViewLayerLegendQueriedDelegate[] = [];
 
   /** ***************************************************************************************************************************
    * The class constructor saves parameters and common configuration parameters in attributes.
@@ -338,44 +158,6 @@ export abstract class AbstractGeoViewLayer {
       ? api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.serviceDateFormat)
       : undefined;
     this.externalFragmentsOrder = api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.externalDateFormat);
-
-    // TODO: Refactor - This assignation logic in the api...geoviewLayers array should be outside of a constructor logic.
-    // TO.DOCONT: If this was written to make sure all created geoview layers, anywhere, automatically appear in the api array, then
-    // TO.DOCONT: I'd suggest having that logic elsewhere and allow the devs/framework to create geoview layers, by code, that do not
-    // TO.DOCONT: necessarily jump in an api array and possibly affect other code just because an object was instanciated.
-    api.maps[mapId].layer.geoviewLayers[this.geoviewLayerId] = this;
-
-    // TODO: Refactor - This call to `setListOfLayerEntryConfig` does a lot more than a simple 'setter' and should be outside of a constructor logic.
-    // TO.DOCONT: The function should be renamed and a lot more documentation should be associated with the function to detail what it does.
-    // TO.DOCONT: Notably important is what it does when there's a least one `mapLayerConfig.listOfLayerEntryConfig`(!). After a quick read, it does the following:
-    // TO.DOCONT: 1- Sets the `this.listOfLayerEntryConfig`to the provided `mapLayerConfig.listOfLayerEntryConfig` OR
-    // TO.DOCONT:    if there's more than 1 `mapLayerConfig.listOfLayerEntryConfig` it creates a new `TypeLayerGroupEntryConfig` class
-    // TO.DOCONT:    and then it loops on each `mapLayerConfig.listOfLayerEntryConfig` to set the parentLayerConfig.
-    // TO.DOCONT: 2- Then, it calls `initRegisteredLayers` which loops on the `mapLayerConfig.listOfLayerEntryConfig` to attach the
-    // TO.DOCONT:    layerConfig.geoviewLayerInstance property to a reference of `this` (also coupling it with the `api...layer`)
-    // TO.DOCONT: 3- Then, it calls `registerLayerConfig` on each `mapLayerConfig.listOfLayerEntryConfig` which attaches the
-    // TO.DOCONT:    (api...layer.registeredLayers[this.layerPath] as ConfigBaseClass) to each `mapLayerConfig.listOfLayerEntryConfig`
-    // TO.DOCONT: 4- Then, it calls `(this.geoviewLayerInstance as AbstractGeoViewLayer).registerToLayerSets` on `this` (which is
-    // TO.DOCONT:    technically still being constructed at this point) and wires a series of event handlers on the `api.event`
-    // TO.DOCONT: Here are some notes for discussion and I could be wrong/missunderstanding on some points, but:
-    // TO.DOCONT: Note 1 - the `registerToLayerSets` is also called via other patterns like via `processListOfLayerEntryConfig` which is
-    // TO.DOCONT:   also a function processing the `listOfLayerEntryConfig`, making it difficult to know where the code must be modified to edit the behavior.
-    // TO.DOCONT:   Indeed, on one hand, some processing on the `listOfLayerEntryConfig` is done as part of the constructor and on the other hand via
-    // TO.DOCONT:   a function such as `createGeoViewLayers`, adding to the confusion.
-    // TO.DOCONT: Note 2 - `setlistOfLayerEntryConfig` launches a series of api.event which continues executing long after the call
-    // TO.DOCONT:   to `setlistOfLayerEntryConfig` has returned and the propagation to the store happen in parallel with other code being executed inside
-    // TO.DOCONT:   functions such as `createGeoViewLayers`.
-    // TO.DOCONT: Note 3 - to be confirmed, it's possible the information being propagated to the store during this execution will vary depending on the time
-    // TO.DOCONT:   the propagation happens and the state of the mutating layerConfig object.
-    // TO.DOCONT: Note 4 - the `setListOfLayerEntryConfig` is also manually called in `add-new-layer` which overrides the listOfLayerEntryConfig set
-    // TO.DOCONT:   in the constructor (maybe that's by-design here, but is confusing, because that's possibly doubling (unless all correctly bypassed?)
-    // TO.DOCONT:   the raising and handling of api.events and also slowing down the code). Furthermore, in another place in in `add-new-layer`
-    // TO.DOCONT:   when going through the steps to add a layer, a new layer instance is created, triggering
-    // TO.DOCONT:   this `setListOfLayerEntryConfig` line below, but because the `mapLayerConfig.listOfLayerEntryConfig` is an empty array it seems to
-    // TO.DOCONT:   save the situation of not hitting the `initRegisteredLayers` line in `setListOfLayerEntryConfig` and attach multiple api.events.
-    // TO.DOCONT:   That's a relief, because the user can move through the steps and create multiple instances of layers to validate them and even
-    // TO.DOCONT:   cancel the addition. If that's by design, it should be clarified. Hopefully nobody in code creates a layer with a
-    // TO.DOCONT:   `mapLayerConfig.listOfLayerEntryConfig` already set and cancels though(!)
     this.setListOfLayerEntryConfig(mapLayerConfig, mapLayerConfig.listOfLayerEntryConfig);
   }
 
@@ -385,7 +167,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {TypeGeoviewLayer} mapLayerConfig The GeoView layer configuration options.
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration
    */
-  setListOfLayerEntryConfig(mapLayerConfig: TypeGeoviewLayerConfig, listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
+  private setListOfLayerEntryConfig(mapLayerConfig: TypeGeoviewLayerConfig, listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
     if (listOfLayerEntryConfig.length === 0) return;
     if (listOfLayerEntryConfig.length === 1) this.listOfLayerEntryConfig = listOfLayerEntryConfig;
     else {
@@ -403,8 +185,88 @@ export abstract class AbstractGeoViewLayer {
       });
     }
     this.listOfLayerEntryConfig[0].geoviewLayerConfig.listOfLayerEntryConfig = listOfLayerEntryConfig;
-    this.initRegisteredLayers();
   }
+
+  /**
+   * Emits an event to all handlers.
+   * @param {GeoViewLayerRegistrationEvent} event The event to emit
+   */
+  emitGeoViewLayerRegistration = (event: GeoViewLayerRegistrationEvent) => {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onGeoViewLayerRegistrationHandlers, event);
+  };
+
+  /**
+   * Wires an event handler.
+   * @param {GeoViewLayerRegistrationDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onGeoViewLayerRegistration = (callback: GeoViewLayerRegistrationDelegate): void => {
+    // Wire the event handler
+    EventHelper.onEvent(this.#onGeoViewLayerRegistrationHandlers, callback);
+  };
+
+  /**
+   * Unwires an event handler.
+   * @param {GeoViewLayerRegistrationDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offGeoViewLayerRegistration = (callback: GeoViewLayerRegistrationDelegate): void => {
+    // Unwire the event handler
+    EventHelper.offEvent(this.#onGeoViewLayerRegistrationHandlers, callback);
+  };
+
+  /**
+   * Emits an event to all handlers.
+   * @param {GeoViewLayerLegendQueryingEvent} event The event to emit
+   */
+  emitLegendQuerying = (event: GeoViewLayerLegendQueryingEvent) => {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onGeoViewLayerLegendQueryingHandlers, event);
+  };
+
+  /**
+   * Wires an event handler.
+   * @param {GeoViewLayerLegendQueryingDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onLegendQuerying = (callback: GeoViewLayerLegendQueryingDelegate): void => {
+    // Wire the event handler
+    EventHelper.onEvent(this.#onGeoViewLayerLegendQueryingHandlers, callback);
+  };
+
+  /**
+   * Unwires an event handler.
+   * @param {GeoViewLayerLegendQueryingDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offLegendQuerying = (callback: GeoViewLayerLegendQueryingDelegate): void => {
+    // Unwire the event handler
+    EventHelper.offEvent(this.#onGeoViewLayerLegendQueryingHandlers, callback);
+  };
+
+  /**
+   * Emits an event to all handlers.
+   * @param {GeoViewLayerLegendQueriedEvent} event The event to emit
+   */
+  emitLegendQueried = (event: GeoViewLayerLegendQueriedEvent) => {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onGeoViewLayerLegendQueriedHandlers, event);
+  };
+
+  /**
+   * Wires an event handler.
+   * @param {GeoViewLayerLegendQueriedDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onLegendQueried = (callback: GeoViewLayerLegendQueriedDelegate): void => {
+    // Wire the event handler
+    EventHelper.onEvent(this.#onGeoViewLayerLegendQueriedHandlers, callback);
+  };
+
+  /**
+   * Unwires an event handler.
+   * @param {GeoViewLayerLegendQueriedDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offLegendQueried = (callback: GeoViewLayerLegendQueriedDelegate): void => {
+    // Unwire the event handler
+    EventHelper.offEvent(this.#onGeoViewLayerLegendQueriedHandlers, callback);
+  };
 
   /** ***************************************************************************************************************************
    * Process recursively the list of layer entries to see if all of them are processed.
@@ -449,10 +311,9 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries to process.
    */
-  private initRegisteredLayers(listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig) {
-    const { layer } = api.maps[this.mapId];
+  initRegisteredLayers(layerApi: LayerApi, listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig) {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig, i) => {
-      if (layer.isRegistered(layerConfig)) {
+      if (layerApi.isRegistered(layerConfig)) {
         this.layerLoadError.push({
           layer: layerConfig.layerPath,
           loggerMessage: `Duplicate layerPath (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`,
@@ -463,7 +324,7 @@ export abstract class AbstractGeoViewLayer {
         layerConfig.geoviewLayerInstance = this;
         layerConfig.registerLayerConfig();
       }
-      if (layerEntryIsGroupLayer(layerConfig)) this.initRegisteredLayers(layerConfig.listOfLayerEntryConfig);
+      if (layerEntryIsGroupLayer(layerConfig)) this.initRegisteredLayers(layerApi, layerConfig.listOfLayerEntryConfig);
     });
   }
 
@@ -502,13 +363,13 @@ export abstract class AbstractGeoViewLayer {
         await this.getAdditionalServiceDefinition();
 
         // Log the time it took thus far
-        if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to get additional service definition (since creating the geoview layer)');
+        if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to get additional service definition');
 
         // Process list of layers and await
         this.olLayers = await this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
 
         // Log the time it took thus far
-        if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to process list of layer entry config (since creating the geoview layer)');
+        if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to process list of layer entry config');
       } catch (error) {
         // Log error
         logger.logError(error);
@@ -607,8 +468,8 @@ export abstract class AbstractGeoViewLayer {
         } else {
           // When we get here, we know that the metadata (if the service provide some) are processed.
           // We need to signal to the layer sets that the 'processed' phase is done.
-          // ! TODO: For the moment, be aware that the layerStatus setter is doing a lot of things behind the scene.
-          // !       The layerStatus setter contains a lot of code and we will change it in favor of a method.
+          // GV TODO: For the moment, be aware that the layerStatus setter is doing a lot of things behind the scene.
+          // GV       The layerStatus setter contains a lot of code and we will change it in favor of a method.
           layerConfig.layerStatus = 'processed';
         }
       });
@@ -760,8 +621,8 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<BaseLayer | null>} The GeoView layer that has been created.
    */
   protected processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | null> {
-    // ! IMPORTANT: The processOneLayerEntry method of all the children must call this method to ensure that the flow of
-    // !            layerStatus values is correctly sequenced.
+    // GV IMPORTANT: The processOneLayerEntry method of all the children must call this method to ensure that the flow of
+    // GV            layerStatus values is correctly sequenced.
     layerConfig.layerStatus = 'loading';
     return Promise.resolve(null);
   }
@@ -775,7 +636,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
-  // ! Things important to know about the get feature info family of methods
+  // GV Things important to know about the get feature info family of methods
   /*
    * There's no doubt that the layerConfig is correctly defined when we call these methods. The layerConfig object is created in
    * the GeoView layer constructor and has all the necessary flags to inform programmers and users whether the layer referenced by
@@ -784,8 +645,14 @@ export abstract class AbstractGeoViewLayer {
    * users can't expect anything to be returned after a click. They have to wait until they see something on the map to know where
    * the features are so they can click on them.
    */
-  async getFeatureInfo(queryType: QueryType, layerPath: string, location: TypeLocation = null): Promise<TypeArrayOfFeatureInfoEntries> {
+  async getFeatureInfo(
+    queryType: QueryType,
+    layerPath: string,
+    location: TypeLocation = null
+  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
+      // TODO: Refactor - Rework this function to not need a layer path in the param, nor a need to get a layer config here..
+      // TO.DOCONT: For example, this call seems to have logic redundancy: `layerConfig.geoviewLayerInstance.getFeatureInfo(queryType, layerPath, location)`
       // Get the layer config
       const layerConfig = this.getLayerConfig(layerPath);
 
@@ -801,7 +668,7 @@ export abstract class AbstractGeoViewLayer {
       const logMarkerKey = `${queryType} | ${layerPath}`;
       logger.logMarkerStart(logMarkerKey);
 
-      let promiseGetFeature: Promise<TypeArrayOfFeatureInfoEntries>;
+      let promiseGetFeature: Promise<TypeFeatureInfoEntry[] | undefined | null>;
       switch (queryType) {
         case 'all':
           promiseGetFeature = this.getAllFeatureInfo(layerPath);
@@ -851,10 +718,10 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
 
-  protected getAllFeatureInfo(layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getAllFeatureInfo(layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getAllFeatureInfo is not implemented! for ${layerPath}`);
     return Promise.resolve(null);
@@ -867,10 +734,10 @@ export abstract class AbstractGeoViewLayer {
    * @param {Coordinate} location The pixel coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
 
-  protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoAtPixel is not implemented! for ${layerPath} - ${location}`);
     return Promise.resolve(null);
@@ -883,10 +750,10 @@ export abstract class AbstractGeoViewLayer {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
 
-  protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoAtCoordinate is not implemented! for ${layerPath} - ${location}`);
     return Promise.resolve(null);
@@ -899,10 +766,10 @@ export abstract class AbstractGeoViewLayer {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
 
-  protected getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoAtLongLat is not implemented for ${layerPath} - ${location}!`);
     return Promise.resolve(null);
@@ -915,10 +782,10 @@ export abstract class AbstractGeoViewLayer {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
 
-  protected getFeatureInfoUsingBBox(location: Coordinate[], layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoUsingBBox(location: Coordinate[], layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoUsingBBox is not implemented! for ${layerPath} - ${location}`);
     return Promise.resolve(null);
@@ -931,10 +798,10 @@ export abstract class AbstractGeoViewLayer {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
 
-  protected getFeatureInfoUsingPolygon(location: Coordinate[], layerPath: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoUsingPolygon(location: Coordinate[], layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoUsingPolygon is not implemented! for ${layerPath} - ${location}`);
     return Promise.resolve(null);
@@ -946,74 +813,12 @@ export abstract class AbstractGeoViewLayer {
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer config to register.
    */
   registerToLayerSets(layerConfig: AbstractBaseLayerEntryConfig): void {
-    const { layerPath } = layerConfig;
-    if (!this.registerToLayerSetListenerFunctions[layerPath]) this.registerToLayerSetListenerFunctions[layerPath] = {};
-
-    if (!this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory) {
-      // Listen to events that request a layer inventory and emit a register payload event.
-      // This will register all existing layers to a newly created layer set.
-      this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory = (payload) => {
-        // Log
-        logger.logTraceCoreAPIEvent('ABSTRACT-GEOVIEW-LAYERS - requestLayerInventory', layerPath, payload);
-
-        if (payloadIsRequestLayerInventory(payload)) {
-          const { layerSetId } = payload;
-          api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'add', layerSetId));
-        }
-      };
-
-      api.event.on(
-        EVENT_NAMES.LAYER_SET.REQUEST_LAYER_INVENTORY,
-        this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory!,
-        this.mapId
-      );
-    }
-
-    if (!this.registerToLayerSetListenerFunctions[layerPath].queryLegend) {
-      this.registerToLayerSetListenerFunctions[layerPath].queryLegend = (payload) => {
-        // Log
-        logger.logTraceCoreAPIEvent('ABSTRACT-GEOVIEW-LAYERS - queryLegend', layerPath, payload);
-
-        if (payloadIsQueryLegend(payload)) {
-          this.getLegend(layerPath).then((queryResult) => {
-            api.event.emit(GetLegendsPayload.createLegendInfoPayload(this.mapId, layerPath, queryResult));
-          });
-        }
-      };
-
-      api.event.on(
-        EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND,
-        this.registerToLayerSetListenerFunctions[layerPath].queryLegend!,
-        `${this.mapId}/${layerPath}`
-      );
-    }
-
-    if (!this.registerToLayerSetListenerFunctions[layerPath].queryLayer) {
-      if (layerConfig?.source?.featureInfo?.queryable) {
-        // Listen to events that request to query a layer and return the resultset to the requester.
-        this.registerToLayerSetListenerFunctions[layerPath].queryLayer = async (payload) => {
-          // Log
-          logger.logTraceCoreAPIEvent('ABSTRACT-GEOVIEW-LAYERS - queryLayer', layerPath, payload);
-
-          if (payloadIsQueryLayer(payload)) {
-            const { queryType, location, eventType } = payload;
-
-            // Get Feature Info
-            const queryResult = await this.getFeatureInfo(queryType, layerPath, location);
-            api.event.emit(GetFeatureInfoPayload.createQueryResultPayload(this.mapId, layerPath, queryType, queryResult, eventType));
-          }
-        };
-
-        api.event.on(
-          EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER,
-          this.registerToLayerSetListenerFunctions[layerPath].queryLayer!,
-          `${this.mapId}/${layerPath}`
-        );
-      }
-    }
+    // TODO: Refactor - This function should be deleted eventually. It's up to the layer orchestrator to manage the layers.
+    // TO.DOCONT: The layer itself shouldn't know about it nor should have an explicit function mentioning the layer sets.
 
     // Register to layer sets that are already created.
-    api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'add'));
+    // Emit the layer registration
+    this.emitGeoViewLayerRegistration({ layerPath: layerConfig.layerPath, layerConfig, action: 'add' });
   }
 
   /** ***************************************************************************************************************************
@@ -1022,32 +827,37 @@ export abstract class AbstractGeoViewLayer {
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry to register.
    */
   unregisterFromLayerSets(layerConfig: AbstractBaseLayerEntryConfig): void {
+    // TODO: Refactor - This function should be deleted eventually. It's up to the layer orchestrator to manage the layers.
+    // TO.DOCONT: The layer itself shouldn't know about it nor should have an explicit function mentioning the layer sets.
     const { layerPath } = layerConfig;
-    api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'remove'));
 
-    if (this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory) {
-      api.event.off(
-        EVENT_NAMES.LAYER_SET.REQUEST_LAYER_INVENTORY,
-        this.mapId,
-        this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory
-      );
-      delete this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory;
-    }
-
-    if (this.registerToLayerSetListenerFunctions[layerPath].queryLegend) {
-      api.event.off(
-        EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND,
-        `${this.mapId}/${layerPath}`,
-        this.registerToLayerSetListenerFunctions[layerPath].queryLegend
-      );
-      delete this.registerToLayerSetListenerFunctions[layerPath].queryLegend;
-    }
-
-    if (this.registerToLayerSetListenerFunctions[layerPath].queryLayer) {
-      api.event.off(EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER, this.mapId, this.registerToLayerSetListenerFunctions[layerPath].queryLayer);
-      delete this.registerToLayerSetListenerFunctions[layerPath].queryLayer;
-    }
+    // Emit the layer unregistration
+    this.emitGeoViewLayerRegistration({ layerPath, layerConfig, action: 'remove' });
   }
+
+  /**
+   * Queries the legend.
+   * This function raises legend querying and queried events.
+   */
+  queryLegend = (layerPath: string) => {
+    // Emit that the legend has been queried
+    this.emitLegendQuerying({ layerPath });
+
+    // Get the legend
+    const promiseLegend = this.getLegend(layerPath);
+
+    // Whenever the promise resolves
+    promiseLegend.then((legend) => {
+      // If legend was received
+      if (legend) {
+        // Emit legend information once retrieved
+        this.emitLegendQueried({ layerPath, legend });
+      }
+    });
+
+    // Return the promise
+    return promiseLegend;
+  };
 
   /** ***************************************************************************************************************************
    * This method create a layer group.
@@ -1060,12 +870,12 @@ export abstract class AbstractGeoViewLayer {
       layers: new Collection(),
       properties: { layerConfig },
     };
-    if (initialSettings?.extent !== undefined) layerGroupOptions.extent = initialSettings?.extent;
-    if (initialSettings?.maxZoom !== undefined) layerGroupOptions.maxZoom = initialSettings?.maxZoom;
-    if (initialSettings?.minZoom !== undefined) layerGroupOptions.minZoom = initialSettings?.minZoom;
-    if (initialSettings?.opacity !== undefined) layerGroupOptions.opacity = initialSettings?.opacity;
-    if (initialSettings?.visible !== undefined) layerGroupOptions.visible = initialSettings?.visible !== 'no';
-    // You dont have to provide the loadEndListenerType when you set the olLayer of an entryType = CONST_LAYER_ENTRY_TYPES.GROUP.
+    if (initialSettings?.extent !== undefined) layerGroupOptions.extent = initialSettings.extent;
+    if (initialSettings?.maxZoom !== undefined) layerGroupOptions.maxZoom = initialSettings.maxZoom;
+    if (initialSettings?.minZoom !== undefined) layerGroupOptions.minZoom = initialSettings.minZoom;
+    if (initialSettings?.states?.opacity !== undefined) layerGroupOptions.opacity = initialSettings.states.opacity;
+    if (initialSettings?.states?.visible !== undefined) layerGroupOptions.visible = initialSettings.states.visible;
+    // You dont have to provide the loadEndListenerType when you set the olLayer of an entryType to CONST_LAYER_ENTRY_TYPES.GROUP.
     layerConfig.olLayer = new LayerGroup(layerGroupOptions);
     return layerConfig.olLayer as LayerGroup;
   }
@@ -1115,8 +925,8 @@ export abstract class AbstractGeoViewLayer {
         }
       });
     };
-    // ! The following code will need to be modified when the topmost layer of a GeoView
-    // ! layer creates dynamicaly a group out of a list of layers.
+    // GV The following code will need to be modified when the topmost layer of a GeoView
+    // GV layer creates dynamicaly a group out of a list of layers.
     const layerConfig: TypeLayerEntryConfig | TypeListOfLayerEntryConfig | undefined = layerPath.includes('/')
       ? this.getLayerConfig(layerPath)
       : this.listOfLayerEntryConfig;
@@ -1138,7 +948,8 @@ export abstract class AbstractGeoViewLayer {
    */
 
   protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
-    logger.logInfo(`getFieldDomain is not implemented! for ${fieldName} - ${layerConfig}`);
+    // Log
+    logger.logWarning(`getFieldDomain is not implemented for ${fieldName} - ${layerConfig}`);
     return null;
   }
 
@@ -1152,7 +963,8 @@ export abstract class AbstractGeoViewLayer {
    */
 
   protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
-    logger.logInfo(`getFieldType is not implemented! for ${fieldName} - ${layerConfig}`);
+    // Log
+    logger.logWarning(`getFieldType is not implemented for ${fieldName} - ${layerConfig}`);
     return 'string';
   }
 
@@ -1374,17 +1186,17 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Convert the feature information to an array of TypeArrayOfFeatureInfoEntries.
+   * Convert the feature information to an array of TypeFeatureInfoEntry[] | undefined | null.
    *
    * @param {Feature[]} features The array of features to convert.
    * @param {ImageLayerEntryConfig | VectorLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {TypeArrayOfFeatureInfoEntries} The Array of feature information.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The Array of feature information.
    */
   protected async formatFeatureInfoResult(
     features: Feature[],
     layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig
-  ): Promise<TypeArrayOfFeatureInfoEntries> {
+  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       if (!features.length) return [];
 
@@ -1392,7 +1204,7 @@ export abstract class AbstractGeoViewLayer {
       const fieldTypes = featureInfo?.fieldTypes?.split(',') as ('string' | 'number' | 'date')[];
       const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
       const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
-      const queryResult: TypeArrayOfFeatureInfoEntries = [];
+      const queryResult: TypeFeatureInfoEntry[] = [];
       let featureKeyCounter = 0;
       let fieldKeyCounter = 0;
       const promisedAllCanvasFound: Promise<{ feature: Feature; canvas: HTMLCanvasElement | undefined }>[] = [];
@@ -1590,3 +1402,205 @@ export abstract class AbstractGeoViewLayer {
     delete api.maps[this.mapId].layer.registeredLayers[layerPath];
   }
 }
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type GeoViewLayerRegistrationDelegate = EventDelegateBase<AbstractGeoViewLayer, GeoViewLayerRegistrationEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type GeoViewLayerRegistrationEvent = {
+  layerPath: string;
+  layerConfig: AbstractBaseLayerEntryConfig;
+  action: 'add' | 'remove';
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type GeoViewLayerLegendQueryingDelegate = EventDelegateBase<AbstractGeoViewLayer, GeoViewLayerLegendQueryingEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type GeoViewLayerLegendQueryingEvent = {
+  layerPath: string;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type GeoViewLayerLegendQueriedDelegate = EventDelegateBase<AbstractGeoViewLayer, GeoViewLayerLegendQueriedEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type GeoViewLayerLegendQueriedEvent = {
+  layerPath: string;
+  legend: TypeLegend;
+};
+
+export type TypeLegend = {
+  layerPath: string;
+  layerName?: TypeLocalizedString;
+  type: TypeGeoviewLayerType;
+  styleConfig?: TypeStyleConfig | null;
+  // Layers other than vector layers use the HTMLCanvasElement type for their legend.
+  legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
+};
+
+export interface TypeWmsLegendStyle {
+  name: string;
+  legend: HTMLCanvasElement | null;
+}
+
+export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {
+  legend: HTMLCanvasElement | null;
+  styles?: TypeWmsLegendStyle[];
+}
+
+export interface TypeImageStaticLegend extends Omit<TypeLegend, 'styleConfig'> {
+  legend: HTMLCanvasElement | null;
+}
+
+export interface TypeVectorLegend extends TypeLegend {
+  legend: TypeVectorLayerStyles;
+}
+
+export type TypeStyleRepresentation = {
+  /** The defaultCanvas property is used by Simple styles and default styles when defined in unique value and class
+   * break styles.
+   */
+  defaultCanvas?: HTMLCanvasElement | null;
+  /** The arrayOfCanvas property is used by unique value and class break styles. */
+  arrayOfCanvas?: (HTMLCanvasElement | null)[];
+};
+export type TypeVectorLayerStyles = Partial<Record<TypeStyleGeometry, TypeStyleRepresentation>>;
+
+/** ******************************************************************************************************************************
+ * GeoViewAbstractLayers types
+ */
+
+// Definition of the keys used to create the constants of the GeoView layer
+// TODO: Refactor - Move this and related types/const below lower in the architecture? Say, to MapSchemaTypes? Otherwise, things circle..
+type LayerTypesKey =
+  | 'CSV'
+  | 'ESRI_DYNAMIC'
+  | 'ESRI_FEATURE'
+  | 'ESRI_IMAGE'
+  | 'IMAGE_STATIC'
+  | 'GEOJSON'
+  | 'GEOPACKAGE'
+  | 'XYZ_TILES'
+  | 'VECTOR_TILES'
+  | 'OGC_FEATURE'
+  | 'WFS'
+  | 'WMS';
+
+/**
+ * Type of GeoView layers
+ */
+export type TypeGeoviewLayerType =
+  | 'CSV'
+  | 'esriDynamic'
+  | 'esriFeature'
+  | 'esriImage'
+  | 'imageStatic'
+  | 'GeoJSON'
+  | 'GeoPackage'
+  | 'xyzTiles'
+  | 'vectorTiles'
+  | 'ogcFeature'
+  | 'ogcWfs'
+  | 'ogcWms';
+
+/**
+ * This type is created to only be used when validating the configuration schema types.
+ * Indeed, GeoCore is not an official Abstract Geoview Layer, but it can be used in schema types.
+ */
+export type TypeGeoviewLayerTypeWithGeoCore = TypeGeoviewLayerType | typeof CONST_LAYER_ENTRY_TYPES.GEOCORE;
+
+/**
+ * Definition of the GeoView layer constants
+ */
+export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
+  CSV: 'CSV',
+  ESRI_DYNAMIC: 'esriDynamic',
+  ESRI_FEATURE: 'esriFeature',
+  ESRI_IMAGE: 'esriImage',
+  IMAGE_STATIC: 'imageStatic',
+  GEOJSON: 'GeoJSON',
+  GEOPACKAGE: 'GeoPackage',
+  XYZ_TILES: 'xyzTiles',
+  VECTOR_TILES: 'vectorTiles',
+  OGC_FEATURE: 'ogcFeature',
+  WFS: 'ogcWfs',
+  WMS: 'ogcWms',
+};
+
+/**
+ * Definition of the sub schema to use for each type of Geoview layer
+ */
+export const CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<TypeGeoviewLayerType, string> = {
+  CSV: 'TypeVectorLayerEntryConfig',
+  imageStatic: 'TypeImageStaticLayerEntryConfig',
+  esriDynamic: 'TypeEsriDynamicLayerEntryConfig',
+  esriFeature: 'TypeVectorLayerEntryConfig',
+  esriImage: 'TypeEsriImageLayerEntryConfig',
+  GeoJSON: 'TypeVectorLayerEntryConfig',
+  GeoPackage: 'TypeVectorLayerEntryConfig',
+  xyzTiles: 'TypeTileLayerEntryConfig',
+  vectorTiles: 'TypeTileLayerEntryConfig',
+  ogcFeature: 'TypeVectorLayerEntryConfig',
+  ogcWfs: 'TypeVectorLayerEntryConfig',
+  ogcWms: 'TypeOgcWmsLayerEntryConfig',
+};
+
+const validVectorLayerLegendTypes: TypeGeoviewLayerType[] = [
+  CONST_LAYER_TYPES.CSV,
+  CONST_LAYER_TYPES.GEOJSON,
+  CONST_LAYER_TYPES.ESRI_DYNAMIC,
+  CONST_LAYER_TYPES.ESRI_FEATURE,
+  CONST_LAYER_TYPES.ESRI_IMAGE,
+  CONST_LAYER_TYPES.OGC_FEATURE,
+  CONST_LAYER_TYPES.WFS,
+  CONST_LAYER_TYPES.GEOPACKAGE,
+];
+
+/**
+ * type guard function that redefines a TypeLegend as a TypeVectorLegend
+ * if the type attribute of the verifyIfLegend parameter is valid. The type ascention
+ * applies only to the true block of the if clause.
+ *
+ * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true if the payload is valid
+ */
+export const isVectorLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeVectorLegend => {
+  return validVectorLayerLegendTypes.includes(verifyIfLegend?.type);
+};
+
+/**
+ * type guard function that redefines a TypeLegend as a TypeWmsLegend
+ * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
+ * applies only to the true block of the if clause.
+ *
+ * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true if the payload is valid
+ */
+export const isWmsLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeWmsLegend => {
+  return verifyIfLegend?.type === CONST_LAYER_TYPES.WMS;
+};
+
+/**
+ * type guard function that redefines a TypeLegend as a TypeImageStaticLegend
+ * if the type attribute of the verifyIfLegend parameter is valid. The type ascention
+ * applies only to the true block of the if clause.
+ *
+ * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true if the payload is valid
+ */
+export const isImageStaticLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeImageStaticLegend => {
+  return verifyIfLegend?.type === CONST_LAYER_TYPES.IMAGE_STATIC;
+};

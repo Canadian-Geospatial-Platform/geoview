@@ -1,10 +1,10 @@
 import { GeoviewStoreType } from '@/core/stores';
-import { TypeArrayOfLayerData } from '@/core/types/global-types';
 import { GeoChartStoreByLayerPath, IGeochartState } from '@/core/stores/store-interface-and-intial-values/geochart-state';
 import { GeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
 import { logger } from '@/core/utils/logger';
+import { TypeLayerData } from '@/geo/utils/layer-set';
 
-import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '../abstract-event-processor';
+import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
 
 /**
  * Event processor focusing on interacting with the geochart state in the store.
@@ -54,9 +54,9 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // Static functions for Typescript files to access store actions
   // **********************************************************
-  //! Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
-  //! Some action does state modifications AND map actions.
-  //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+  // GV Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
+  // GV Some action does state modifications AND map actions.
+  // GV ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
 
   // #region
   // Holds the list of layer data arrays being buffered in the propagation process for the batch
@@ -170,7 +170,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId The map id
    * @param {string} layerDataArray The layer data array to propagate in the store
    */
-  static propagateArrayDataToStore(mapId: string, layerDataArray: TypeArrayOfLayerData): void {
+  static propagateArrayDataToStore(mapId: string, layerDataArray: TypeLayerData[]): void {
     // To propagate in the store, the processor needs an initialized chart store which is only initialized if the Geochart plugin exists.
     // Therefore, we validate its existence first.
     if (!this.getGeochartState(mapId)) return;
@@ -192,7 +192,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * @param {string} layerDataArray The layer data array to batch on
    * @returns {Promise<void>} Promise upon completion
    */
-  private static propagateFeatureInfoToStoreBatch(mapId: string, layerDataArray: TypeArrayOfLayerData): Promise<void> {
+  private static propagateFeatureInfoToStoreBatch(mapId: string, layerDataArray: TypeLayerData[]): Promise<void> {
     // To propagate in the store, the processor needs an initialized chart store which is only initialized if the Geochart plugin exists.
     // Therefore, we validate its existence first.
     if (!this.getGeochartState(mapId)) return Promise.resolve();
@@ -218,6 +218,6 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // Static functions for Store Map State to action on API
   // **********************************************************
-  //! NEVER add a store action who does set state AND map action at a same time.
-  //! Review the action in store state to make sure
+  // GV NEVER add a store action who does set state AND map action at a same time.
+  // GV Review the action in store state to make sure
 }

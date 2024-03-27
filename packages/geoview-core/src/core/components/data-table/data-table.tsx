@@ -36,21 +36,23 @@ import {
   Tooltip,
   ZoomInSearchIcon,
 } from '@/ui';
-import ExportButton from './export-button';
-import JSONExportButton from './json-export-button';
-import FilterMap from './filter-map';
-import { TypeFeatureInfoEntry, api, isImage } from '@/app';
-import { getSxClasses } from './data-table-style';
+import { api } from '@/app';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
   useDataTableStoreActions,
   useDataTableStoreMapFilteredRecord,
   useDataTableStoreToolbarRowSelectedMessageRecord,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { useLightBox, useFilterRows, useToolbarActionMessage } from './hooks';
 import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from '@/core/utils/logger';
+import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
 import { MappedLayerDataType } from './data-panel';
+import { useLightBox, useFilterRows, useToolbarActionMessage } from './hooks';
+import { getSxClasses } from './data-table-style';
+import ExportButton from './export-button';
+import JSONExportButton from './json-export-button';
+import FilterMap from './filter-map';
+import { isImage } from '@/core/utils/utilities';
 
 export interface FieldInfos {
   alias: string;

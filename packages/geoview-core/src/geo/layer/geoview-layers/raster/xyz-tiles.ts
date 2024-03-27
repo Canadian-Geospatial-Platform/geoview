@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-// We have many reassign for layerConfig. We keep it global...
 import TileLayer from 'ol/layer/Tile';
 import { Options as TileOptions } from 'ol/layer/BaseTile';
 import XYZ, { Options as SourceOptions } from 'ol/source/XYZ';
@@ -130,11 +128,13 @@ export class XYZTiles extends AbstractGeoViewRaster {
             layer: layerPath,
             loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
+          // eslint-disable-next-line no-param-reassign
           layerConfig.layerStatus = 'error';
           return;
         }
       }
 
+      // eslint-disable-next-line no-param-reassign
       layerConfig.layerStatus = 'processing';
 
       // When no metadata are provided, all layers are considered valid.
@@ -150,6 +150,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
             layer: layerPath,
             loggerMessage: `XYZ layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
+          // eslint-disable-next-line no-param-reassign
           layerConfig.layerStatus = 'error';
           return;
         }
@@ -170,8 +171,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
   protected processOneLayerEntry(layerConfig: XYZTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
-    // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
-    // !            layerStatus values is correctly sequenced.
+    // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
+    // GV            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
     const sourceOptions: SourceOptions = {
       url: getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId),
@@ -194,18 +195,20 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
     const tileLayerOptions: TileOptions<XYZ> = { source: new XYZ(sourceOptions) };
     // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-    if (layerConfig.initialSettings?.className !== undefined) tileLayerOptions.className = layerConfig.initialSettings?.className;
-    if (layerConfig.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerConfig.initialSettings?.extent;
-    if (layerConfig.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
-    if (layerConfig.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerConfig.initialSettings?.minZoom;
-    if (layerConfig.initialSettings?.opacity !== undefined) tileLayerOptions.opacity = layerConfig.initialSettings?.opacity;
-    // ! IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
-    // !            in the 'loading' state if the flag value is 'no'.
+    if (layerConfig.initialSettings?.className !== undefined) tileLayerOptions.className = layerConfig.initialSettings.className;
+    if (layerConfig.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerConfig.initialSettings.extent;
+    if (layerConfig.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
+    if (layerConfig.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
+    if (layerConfig.initialSettings?.states?.opacity !== undefined) tileLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
+    // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
+    // GV            in the 'loading' state if the flag value is false.
 
+    // eslint-disable-next-line no-param-reassign
     layerConfig.olLayerAndLoadEndListeners = {
       olLayer: new TileLayer(tileLayerOptions),
       loadEndListenerType: 'tile',
     };
+    // eslint-disable-next-line no-param-reassign
     layerConfig.geoviewLayerInstance = this;
 
     return Promise.resolve(layerConfig.olLayer);
@@ -226,10 +229,13 @@ export class XYZTiles extends AbstractGeoViewRaster {
       );
       // metadataLayerConfigFound can not be undefined because we have already validated the config exist
       this.layerMetadata[layerConfig.layerPath] = toJsonObject(metadataLayerConfigFound);
+      // eslint-disable-next-line no-param-reassign
       layerConfig.source = defaultsDeep(layerConfig.source, metadataLayerConfigFound!.source);
+      // eslint-disable-next-line no-param-reassign
       layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, metadataLayerConfigFound!.initialSettings);
 
       if (layerConfig.initialSettings?.extent)
+        // eslint-disable-next-line no-param-reassign
         layerConfig.initialSettings.extent = api.projection.transformExtent(
           layerConfig.initialSettings.extent,
           'EPSG:4326',

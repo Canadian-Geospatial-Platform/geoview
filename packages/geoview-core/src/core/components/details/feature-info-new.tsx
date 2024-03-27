@@ -4,17 +4,17 @@ import { getCenter } from 'ol/extent';
 
 import { useTheme, Theme } from '@mui/material/styles';
 import { List, ZoomInSearchIcon, Tooltip, IconButton, Checkbox, Paper, Box, Typography } from '@/ui';
-import { TypeFieldEntry, TypeArrayOfFeatureInfoEntries, TypeGeometry } from '@/api/events/payloads';
 import { useDetailsStoreCheckedFeatures, useDetailsStoreActions } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { delay } from '@/core/utils/utilities';
+import { TypeFeatureInfoEntry, TypeFieldEntry, TypeGeometry } from '@/geo/utils/layer-set';
 
 import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
 
 export interface TypeFeatureInfoProps {
-  features: TypeArrayOfFeatureInfoEntries;
+  features: TypeFeatureInfoEntry[] | undefined | null;
   currentFeatureIndex: number;
 }
 
@@ -95,7 +95,7 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
       })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checkedFeatures, feature]); // ! Check if feature is necessary in this dependency array? If so explain it in comment? Should be featurUid?
+  }, [checkedFeatures, feature]); // GV Check if feature is necessary in this dependency array? If so explain it in comment? Should be featurUid?
 
   return (
     <Paper sx={{ boxShadow: 'none', border: 'none', paddingTop: '0.5rem' }}>

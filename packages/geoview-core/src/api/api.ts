@@ -10,11 +10,10 @@ import { GeoUtilities } from '@/geo/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import * as Utilities from '../core/utils/utilities';
-import { GeoViewLayerPayload, payloadIsTestGeoViewLayers } from './events/payloads/geoview-layer-payload';
+import * as Utilities from '@/core/utils/utilities';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
-import { initMapDivFromFunctionCall } from '@/core/types/cgpv-types';
+import { initMapDivFromFunctionCall } from '@/app';
 
 /**
  * Class used to handle api calls (events, functions etc...)
@@ -44,9 +43,6 @@ export class API {
   // timeout number used to check if everything is ready to make API calls
   isReady = 0;
 
-  // callback function to call after everything is ready
-  readyCallback?: (mapId?: string) => void;
-
   // load plugins API
   plugin: Plugin;
 
@@ -71,37 +67,6 @@ export class API {
 
     // apply focus to element when keyboard navigation is use
     this.manageKeyboardFocus();
-
-    // Run the callback for maps that have the triggerReadyCallback set to true and when all the maps are ready
-    this.event.once(
-      EVENT_NAMES.LAYER.EVENT_IF_CONDITION,
-      (payload) => {
-        if (payloadIsTestGeoViewLayers(payload)) {
-          let readyCallbackHasRun4AllMaps = false;
-          const intervalId = setInterval(() => {
-            let allMapsAreReady = true;
-            Object.keys(this.maps).forEach((mapId) => {
-              if (this.maps[mapId].mapIsReady()) {
-                this.event.emit(GeoViewLayerPayload.createTestGeoviewLayersPayload(`${mapId}/visibilityTest`));
-                // Run the callback for maps that have the triggerReadyCallback set using the mapId for the parameter value
-                if (this.maps[mapId].mapFeaturesConfig.triggerReadyCallback && !this.maps[mapId].readyCallbackHasRun) {
-                  if (this.readyCallback) this.readyCallback(mapId);
-                  this.maps[mapId].readyCallbackHasRun = true;
-                }
-              } else allMapsAreReady = false;
-            });
-
-            // Run the callback when all the maps are ready using allMaps for the parameter value
-            if (allMapsAreReady && !readyCallbackHasRun4AllMaps && this.readyCallback) {
-              clearInterval(intervalId);
-              readyCallbackHasRun4AllMaps = true;
-              this.readyCallback('allMaps');
-            }
-          }, 250);
-        }
-      },
-      'run cgpv.init callback?'
-    );
   }
 
   /**
@@ -145,43 +110,46 @@ export class API {
     document.addEventListener('focusout', removeFocusedClass);
   };
 
-  /**
-   * Check if map rendering / drawing is ready then run the callback function
-   * Timeout does not effect rendering speed, each map will cancel the previous timer after it renders
-   * so timing of rendering will be based on device specs.
-   *
-   * @param callback a callback to make once the map has rendered
-   */
-  ready = (callback: () => void): void => {
-    // Clear our timeout throughout the event change
-    window.clearTimeout(this.isReady);
+  // TODO: Get rid of this dead code once it's confirmed that it's not used anymore
+  // /**
+  //  * Check if map rendering / drawing is ready then run the callback function
+  //  * Timeout does not effect rendering speed, each map will cancel the previous timer after it renders
+  //  * so timing of rendering will be based on device specs.
+  //  *
+  //  * @param callback a callback to make once the map has rendered
+  //  */
+  // ready = (callback: () => void): void => {
+  //   // Clear our timeout throughout the event change
+  //   window.clearTimeout(this.isReady);
 
-    // Set a timeout to run after render ends
-    // this will only be called after the last map renders so no delay in rendering and performance will happen
-    this.isReady = window.setTimeout(() => {
-      // call the callback function to load plugins
-      if (callback) callback();
-    }, 500);
-  };
+  //   // Set a timeout to run after render ends
+  //   // this will only be called after the last map renders so no delay in rendering and performance will happen
+  //   this.isReady = window.setTimeout(() => {
+  //     // call the callback function to load plugins
+  //     if (callback) callback();
+  //   }, 500);
+  // };
 
   /**
    * Create a new map in a given div id.
-   * !The div MUST NOT have a geoview-map class or a warning will be shown when initMapDivFromFunctionCall is called.
+   * GV The div MUST NOT have a geoview-map class or a warning will be shown when initMapDivFromFunctionCall is called.
    * If is present, the div will be created with a default config
    *
    * @param {string} divId the id of the div to create map in
    * @param {string} mapConfig the config passed in from the function call
    */
-  createMapFromConfig = (divId: string, mapConfig: string): void => {
+  createMapFromConfig = (divId: string, mapConfig: string): Promise<void> => {
     // Get the map div
     const mapDiv = document.getElementById(divId);
 
     // If found the map div
     if (mapDiv) {
       // Init by function call
-      initMapDivFromFunctionCall(mapDiv, mapConfig);
-    } else {
-      logger.logError(`Div with id ${divId} does not exist`);
+      return initMapDivFromFunctionCall(mapDiv, mapConfig);
     }
+
+    // Log error
+    logger.logError(`Div with id ${divId} does not exist`);
+    return Promise.reject(new Error(`Div with id ${divId} does not exist`));
   };
 }

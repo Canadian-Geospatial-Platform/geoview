@@ -11,6 +11,7 @@ type TypeChildren = ReactNode;
 export interface TypeTabPanelProps {
   index: number;
   value: number;
+  id: string;
   children?: TypeChildren;
 }
 
@@ -21,10 +22,10 @@ export interface TypeTabPanelProps {
  * @returns {JSX.Element} returns the tab panel
  */
 export function TabPanel(props: TypeTabPanelProps): JSX.Element {
-  const { children, value, index, ...other } = props;
+  const { children, value, index, id, ...other } = props;
 
   return (
-    <Box role="tabpanel" hidden={value !== index} id={`${`simple-tabpanel`}-${index}`} aria-labelledby={`simple-tab-${index}`} {...other}>
+    <Box role="tabpanel" hidden={value !== index} id={id} aria-labelledby={`simple-tab-${index}`} {...other}>
       <FocusTrapElement id={`panel-${index}`} content={children} />
     </Box>
   );

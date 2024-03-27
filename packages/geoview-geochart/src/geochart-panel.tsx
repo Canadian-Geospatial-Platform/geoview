@@ -1,8 +1,9 @@
 import { useTheme } from '@mui/material/styles';
-import { TypeWindow, getLocalizedMessage } from 'geoview-core';
+import { TypeWindow } from 'geoview-core/src/core/types/global-types';
+import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { ChartType, SchemaValidator } from 'geochart';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
-import { TypeLayerData, TypeArrayOfLayerData } from 'geoview-core/src/api/events/payloads/get-feature-info-payload';
+import { TypeLayerData } from 'geoview-core/src/geo/utils/layer-set';
 import { Typography } from 'geoview-core/src/ui/typography/typography';
 import { Box, Paper } from 'geoview-core/src/ui';
 import {
@@ -45,7 +46,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   // Get states and actions from store
   const configObj = useGeochartConfigs();
   const visibleLayers = useMapVisibleLayers() as string[];
-  const storeArrayOfLayerData = useGeochartStoreLayerDataArrayBatch() as TypeArrayOfLayerData;
+  const storeArrayOfLayerData = useGeochartStoreLayerDataArrayBatch() as TypeLayerData[];
   const selectedLayerPath = useGeochartStoreSelectedLayerPath() as string;
   const { setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass } = useGeochartStoreActions();
 

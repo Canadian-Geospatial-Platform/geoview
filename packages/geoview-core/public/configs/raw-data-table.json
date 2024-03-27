@@ -23,9 +23,7 @@
           "fr": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer"
         },
         "geoviewLayerType": "esriFeature",
-        "initialSettings": {
-          "visible": "no"
-        },
+        "initialSettings": { "states": { "visible": false } },
         "listOfLayerEntryConfig": [
           {
             "layerId": "8"
@@ -61,9 +59,6 @@
           "fr": "./datasets/geojson/metadata.json"
         },
         "geoviewLayerType": "GeoJSON",
-        "initialSettings": {
-          "visible": "yes"
-        },
         "listOfLayerEntryConfig": [
           {
             "layerId": "polygons.json",
@@ -89,9 +84,7 @@
             "listOfLayerEntryConfig": [
               {
                 "layerId": "icon_points.json",
-                "initialSettings": {
-                  "visible": "no"
-                },
+                "initialSettings": { "states": { "visible": false } },
                 "layerName": {
                   "en": "Icons",
                   "fr": "Icons"
@@ -100,7 +93,7 @@
               {
                 "layerId": "points.json",
                 "initialSettings": {
-                  "visible": "always"
+                  "controls": { "visibility": false }
                 },
                 "layerName": {
                   "en": "Points",

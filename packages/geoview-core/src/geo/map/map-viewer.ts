@@ -13,12 +13,11 @@ import queryString from 'query-string';
 import { removeGeoviewStore } from '@/core/stores/stores-managers';
 
 import { Basemap } from '@/geo/layer/basemap/basemap';
-import { Layer } from '@/geo/layer/layer';
+import { LayerApi } from '@/geo/layer/layer';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 
-import { api, TypeClickMarker, unmountMap } from '@/app';
+import { api, unmountMap } from '@/app';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
-import { EVENT_NAMES } from '@/api/events/event-types';
 
 import { AppbarApi } from '@/core/components/app-bar/app-bar-api';
 import { NavbarApi } from '@/core/components/nav-bar/nav-bar-api';
@@ -32,10 +31,8 @@ import { Modify } from '@/geo/interaction/modify';
 import { Snap } from '@/geo/interaction/snap';
 import { Translate } from '@/geo/interaction/translate';
 
-import { LegendsLayerSet } from '@/geo/utils/legends-layer-set';
-import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
-import { mapComponentPayload, mapConfigPayload, GeoViewLayerPayload, payloadIsGeoViewLayerAdded } from '@/api/events/payloads';
 import { addNotificationError, generateId, getLocalizedMessage } from '@/core/utils/utilities';
 import {
   TypeDisplayLanguage,
@@ -46,13 +43,13 @@ import {
   VALID_DISPLAY_THEME,
   VALID_PROJECTION_CODES,
   TypeInteraction,
-  MapConfigLayerEntry,
-  mapConfigLayerEntryIsGeoCore,
+  TypeValidMapProjectionCodes,
 } from '@/geo/map/map-schema-types';
-import { TypeMapFeaturesConfig, TypeHTMLElement, TypeValidMapProjectionCodes, TypeJsonObject } from '@/core/types/global-types';
+import { TypeMapFeaturesConfig, TypeHTMLElement, TypeJsonObject } from '@/core/types/global-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
+import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 
 interface TypeDocument extends Document {
   webkitExitFullscreen: () => void;
@@ -95,22 +92,65 @@ export class MapViewer {
   footerBarApi: FooterBarApi;
 
   // used to access basemap functions
-  basemap!: Basemap;
+  basemap: Basemap;
 
   // used to access layers functions
-  layer!: Layer;
+  // Note: The '!' is used here, because it's being created just a bit late, but not late enough that we want to keep checking for undefined throughout the code base
+  // Should probably refactor that a bit later..
+  layer!: LayerApi;
 
   // modals creation
-  modal!: ModalApi;
+  modal: ModalApi;
 
   // GeoView renderer
   geoviewRenderer: GeoviewRenderer;
 
-  // flag used to indicate that the ready callback routine has been called once
-  readyCallbackHasRun = false;
-
   // i18n instance
-  private i18nInstance!: i18n;
+  #i18nInstance: i18n;
+
+  // Indicate if the map has been initialized
+  #mapInit = false;
+
+  // Indicate if the map is ready
+  #mapReady = false;
+
+  // Indicate if the map has all its layers processed upon launch
+  #mapLayersProcessed = false;
+
+  // Indicate if the map has all its layers loaded upon launch
+  #mapLayersLoaded = false;
+
+  // Keep all callback delegates references
+  #onMapInitHandlers: MapInitDelegate[] = [];
+
+  // Keep all callback delegates references
+  #onMapReadyHandlers: MapReadyDelegate[] = [];
+
+  // Keep all callback delegates references
+  #onMapLayersProcessedHandlers: MapLayersProcessedDelegate[] = [];
+
+  // Keep all callback delegates references
+  #onMapLayersLoadedHandlers: MapLayersLoadedDelegate[] = [];
+
+  // Getter for map is init
+  get mapInit(): boolean {
+    return this.#mapInit;
+  }
+
+  // Getter for map is ready. A Map is ready when all layers have been processed.
+  get mapReady(): boolean {
+    return this.#mapReady;
+  }
+
+  // Getter for map layers processed
+  get mapLayersProcessed(): boolean {
+    return this.#mapLayersProcessed;
+  }
+
+  // Getter for map layers loaded
+  get mapLayersLoaded(): boolean {
+    return this.#mapLayersLoaded;
+  }
 
   /**
    * Constructor for a MapViewer, setting:
@@ -121,7 +161,6 @@ export class MapViewer {
    * - modalApi
    * - geoviewRenderer
    * - basemap
-   * - layers
    * @param {TypeMapFeaturesConfig} mapFeaturesConfig map properties
    * @param {i18n} i18instance language instance
    */
@@ -129,7 +168,7 @@ export class MapViewer {
     this.mapId = mapFeaturesConfig.mapId;
     this.mapFeaturesConfig = mapFeaturesConfig;
 
-    this.i18nInstance = i18instance;
+    this.#i18nInstance = i18instance;
 
     this.appBarApi = new AppbarApi(this.mapId);
     this.navBarApi = new NavbarApi(this.mapId);
@@ -158,124 +197,166 @@ export class MapViewer {
     this.mapId = cgpMap.get('mapId');
 
     // initialize layers and load the layers passed in from map config if any
-    this.layer = new Layer(this.mapId);
+    this.layer = new LayerApi(this);
     this.layer.loadListOfGeoviewLayer(this.mapFeaturesConfig.map.listOfGeoviewLayerConfig);
 
     // check if geometries are provided from url
     this.loadGeometries();
-  }
 
-  /**
-   * Set the layer added event listener and timeout function for the list of geoview layer configurations.
-   *
-   * @param {MapConfigLayerEntry[]} listOfMapLayerEntryConfig The list of geoview layer configurations.
-   */
-  setLayerAddedListener4ThisListOfLayer(listOfMapLayerEntryConfig: MapConfigLayerEntry[]) {
-    // TODO: Refactor - We should not have a listener on layer added on map viewer
-    // TO.DOCONT: The viewer does not care about layers status. As soon as the init state is done (store, basemap, plugins, ....)
-    // TO.DOCONT: We should remove the spinner. All layers boxes should be there with their status (loading, error, loaded).
-    // TO.DOCONT: Their status change but the viewer does not care. We show it in legend and emit an event for the outside world for each status.
+    // Emit map init
+    this.#mapInit = true;
+    this.emitMapInit();
 
-    if (listOfMapLayerEntryConfig.length) {
-      listOfMapLayerEntryConfig.forEach((geoviewLayerConfig) => {
-        if (!mapConfigLayerEntryIsGeoCore(geoviewLayerConfig)) {
-          api.event.on(
-            EVENT_NAMES.LAYER.EVENT_LAYER_ADDED,
-            (payload) => {
-              // Log
-              logger.logTraceCoreAPIEvent('MAP-VIEWER - EVENT_LAYER_ADDED', this.mapId, payload);
-
-              if (payloadIsGeoViewLayerAdded(payload)) {
-                const { geoviewLayer } = payload;
-
-                // Log
-                logger.logInfo(`GeoView Layer added on map ${geoviewLayer.geoviewLayerId}`, geoviewLayer);
-
-                MapEventProcessor.setLayerZIndices(this.mapId);
-                // If metadata are processed
-                if (geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('processed')) {
-                  api.event.emit(GeoViewLayerPayload.createTestGeoviewLayersPayload('run cgpv.init callback?'));
-                }
-              }
-            },
-            `${this.mapId}/${geoviewLayerConfig.geoviewLayerId}`
-          );
-        }
-      });
-    } else api.event.emit(GeoViewLayerPayload.createTestGeoviewLayersPayload('run cgpv.init callback?'));
-  }
-
-  /**
-   * Tests all geoview layers status flags to determine if all the metadata of the map are loaded.
-   * This doesn't mean that all the layers are loaded on the map, Only the metadata are read and processed.
-   *
-   * @returns {boolean} true if all geoview layers on the map are loaded or detected as a load error.
-   */
-  mapIsReady(): boolean {
-    if (this.layer === undefined) return false;
-    return !Object.keys(this.layer.geoviewLayers).find((geoviewLayerId) => {
-      return !this.layer.geoviewLayers[geoviewLayerId].allLayerStatusAreGreaterThanOrEqualTo('loaded');
-    });
+    // Start checking for when the map will be ready
+    this.#checkMapReady();
   }
 
   /**
    * Function called to monitor when the map is actually ready.
    * Important: This function is also responsible for calling the MapEventProcessor.setMapLoaded after 1 second has ellapsed.
    */
-  mapReady(): Promise<void> {
+  #checkMapReady(): void {
     // Log Marker Start
     logger.logMarkerStart(`mapReady-${this.mapId}`);
 
-    return new Promise<void>((resolve) => {
-      // Start an interval checker
-      const mapInterval = setInterval(() => {
-        if (this.layer?.geoviewLayers) {
-          const { geoviewLayers } = this.layer;
-          let allGeoviewLayerReady =
-            this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
-          Object.keys(geoviewLayers).forEach((geoviewLayerId) => {
-            const layerIsReady = geoviewLayers[geoviewLayerId].allLayerStatusAreGreaterThanOrEqualTo('processed');
-            if (!layerIsReady) logger.logTraceDetailed('map-viewer.mapReady? geoview layer not ready, waiting...', geoviewLayerId);
-            allGeoviewLayerReady &&= layerIsReady;
-          });
-          if (allGeoviewLayerReady) {
-            // Clear interval
-            clearInterval(mapInterval);
+    // TODO: Refactor - Rewrite the code here to not have to rely on a setInterval anymore.
+    // Start an interval checker
+    const mapInterval = setInterval(() => {
+      if (this.layer.geoviewLayers) {
+        const { geoviewLayers } = this.layer;
+        let allGeoviewLayerRegistered =
+          this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
+        Object.values(geoviewLayers).forEach((geoviewLayer) => {
+          const layerIsRegistered = geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('registered');
+          if (!layerIsRegistered) logger.logTraceDetailed('checkMapReady - wating on layer registration...', geoviewLayer.geoviewLayerId);
+          allGeoviewLayerRegistered &&= layerIsRegistered;
+        });
 
-            // Log
-            logger.logInfo('Map is ready', this.mapId);
-            logger.logMarkerCheck(`mapReady-${this.mapId}`, 'for map to be ready');
+        if (allGeoviewLayerRegistered) {
+          // Clear interval
+          clearInterval(mapInterval);
 
-            // Resolve the promise
-            resolve();
+          // How many layers?
+          const layersCount = Object.keys(geoviewLayers).length;
 
-            // ! We added processed to layers check so this map loaded event is fired faster
-            // TODO: solve this without using a timeout...
-            setTimeout(() => MapEventProcessor.setMapLoaded(this.mapId), 1000);
-          }
+          // Log
+          logger.logInfo(`Map is ready with ${layersCount} registered layers`, this.mapId);
+          logger.logMarkerCheck(`mapReady-${this.mapId}`, `for map to be ready. Layers are still being processed...`);
+
+          // Is ready
+          this.#mapReady = true;
+          this.emitMapReady();
+
+          // GV We added processed to layers check so this map loaded event is fired faster
+          // This emits the MAP_LOADED event
+          MapEventProcessor.setMapLoaded(this.mapId);
+
+          // Start checking for layers result sets to be ready
+          this.#checkLayerResultSetReady();
+
+          // Start checking for map layers processed
+          this.#checkMapLayersProcessed();
         }
-      }, 250);
-    });
+      }
+    }, 250);
+  }
+
+  /**
+   * Function called to monitor when the map has its layers in processed state.
+   */
+  #checkMapLayersProcessed(): void {
+    // Start an interval checker
+    // TODO: Refactor - Rewrite the code here to not have to rely on a setInterval anymore.
+    const mapInterval = setInterval(() => {
+      if (this.layer.geoviewLayers) {
+        const { geoviewLayers } = this.layer;
+        let allGeoviewLayerLoaded =
+          this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
+        Object.values(geoviewLayers).forEach((geoviewLayer) => {
+          const layerIsLoaded = geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('processed');
+          if (!layerIsLoaded)
+            logger.logTraceDetailed('checkMapLayersProcessed - waiting on layer processed...', geoviewLayer.geoviewLayerId);
+          allGeoviewLayerLoaded &&= layerIsLoaded;
+        });
+
+        if (allGeoviewLayerLoaded) {
+          // Clear interval
+          clearInterval(mapInterval);
+
+          // How many layers?
+          const layersCount = Object.keys(geoviewLayers).length;
+
+          // Log
+          logger.logInfo(`Map is ready with ${layersCount} processed layers`, this.mapId);
+          logger.logMarkerCheck(`mapReady-${this.mapId}`, `for all ${layersCount} layers to be processed`);
+
+          // Is ready
+          this.#mapLayersProcessed = true;
+          this.emitMapLayersProcessed();
+
+          // Start checking for map layers loaded
+          this.#checkMapLayersLoaded();
+        }
+      }
+    }, 250);
+  }
+
+  /**
+   * Function called to monitor when the map has its layers in loaded state.
+   */
+  #checkMapLayersLoaded(): void {
+    // Start an interval checker
+    // TODO: Refactor - Rewrite the code here to not have to rely on a setInterval anymore.
+    const mapInterval = setInterval(() => {
+      if (this.layer.geoviewLayers) {
+        const { geoviewLayers } = this.layer;
+        let allGeoviewLayerLoaded =
+          this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
+        Object.values(geoviewLayers).forEach((geoviewLayer) => {
+          const layerIsLoaded = geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('loaded');
+          if (!layerIsLoaded)
+            logger.logTraceDetailed('checkMapLayersLoaded - waiting on layer loaded/error...', geoviewLayer.geoviewLayerId);
+          allGeoviewLayerLoaded &&= layerIsLoaded;
+        });
+
+        if (allGeoviewLayerLoaded) {
+          // Clear interval
+          clearInterval(mapInterval);
+
+          // How many layers?
+          const layersCount = Object.keys(geoviewLayers).length;
+
+          // Log
+          logger.logInfo(`Map is ready with ${layersCount} loaded layers`, this.mapId);
+          logger.logMarkerCheck(`mapReady-${this.mapId}`, `for all ${layersCount} layers to be loaded`);
+
+          // Is ready
+          this.#mapLayersLoaded = true;
+          this.emitMapLayersLoaded();
+        }
+      }
+    }, 250);
   }
 
   /**
    * Function called to monitor when the layers result sets are actually ready
    */
-  layerResultSetReady(): Promise<void> {
+  #checkLayerResultSetReady(): Promise<void> {
     // Start another interval checker
     return new Promise<void>((resolve) => {
+      // TODO: Refactor - Rewrite the code here to not have to rely on a setInterval anymore.
       const layersInterval = setInterval(() => {
         if (api.maps[this.mapId].layer) {
           // Check if all registered layers have their results set
           let allGood = true;
-          Object.entries(api.maps[this.mapId].layer.registeredLayers).forEach(([layerPath, registeredLayer]) => {
+          Object.entries(this.layer.registeredLayers).forEach(([layerPath, registeredLayer]) => {
             // If not queryable, don't expect a result set
             if (!registeredLayer.source?.featureInfo?.queryable) return;
 
-            const { resultSet } = api.maps[this.mapId].layer.featureInfoLayerSet;
+            const { resultSet } = this.layer.featureInfoLayerSet;
             const layerResultSetReady = Object.keys(resultSet).includes(layerPath);
             if (!layerResultSetReady) {
-              logger.logTraceDetailed('layer resultset not ready, waiting...', layerPath);
+              logger.logTraceDetailed('checkLayerResultSetReady - waiting on layer resultSet...', layerPath);
               allGood = false;
             }
           });
@@ -286,11 +367,11 @@ export class MapViewer {
             clearInterval(layersInterval);
 
             // How many layers resultset?
-            const resultSetCount = Object.keys(api.maps[this.mapId].layer.featureInfoLayerSet.resultSet).length;
+            const resultSetCount = Object.keys(this.layer.featureInfoLayerSet.resultSet).length;
 
             // Log
-            logger.logInfo(`All (${resultSetCount}) Layers ResultSet are ready`, this.mapId);
-            logger.logMarkerCheck(`mapReady-${this.mapId}`, `for all (${resultSetCount}) Layers ResultSet to be ready`);
+            // logger.logDebug(`Map is ready with a layer result set of ${resultSetCount} layers`, this.mapId);
+            logger.logMarkerCheck(`mapReady-${this.mapId}`, `for layer result set of ${resultSetCount} layers to be instanciated`);
 
             // Resolve the promise
             resolve();
@@ -301,16 +382,119 @@ export class MapViewer {
   }
 
   /**
+   * Emits an event to all handlers.
+   */
+  emitMapInit = () => {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onMapInitHandlers, undefined);
+  };
+
+  /**
+   * Wires an event handler.
+   * @param {MapInitDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onMapInit = (callback: MapInitDelegate): void => {
+    // Wire the event handler
+    EventHelper.onEvent(this.#onMapInitHandlers, callback);
+  };
+
+  /**
+   * Unwires an event handler.
+   * @param {MapInitDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offMapInit = (callback: MapInitDelegate): void => {
+    // Unwire the event handler
+    EventHelper.offEvent(this.#onMapInitHandlers, callback);
+  };
+
+  /**
+   * Emits an event to all handlers.
+   */
+  emitMapReady = () => {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onMapReadyHandlers, undefined);
+  };
+
+  /**
+   * Wires an event handler.
+   * @param {MapReadyDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onMapReady = (callback: MapReadyDelegate): void => {
+    // Wire the event handler
+    EventHelper.onEvent(this.#onMapReadyHandlers, callback);
+  };
+
+  /**
+   * Unwires an event handler.
+   * @param {MapReadyDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offMapReady = (callback: MapReadyDelegate): void => {
+    // Unwire the event handler
+    EventHelper.offEvent(this.#onMapReadyHandlers, callback);
+  };
+
+  /**
+   * Emits an event to all handlers.
+   */
+  emitMapLayersProcessed = () => {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onMapLayersProcessedHandlers, undefined);
+  };
+
+  /**
+   * Wires an event handler.
+   * @param {MapLayersProcessedDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onMapLayersProcessed = (callback: MapLayersProcessedDelegate): void => {
+    // Wire the event handler
+    EventHelper.onEvent(this.#onMapLayersProcessedHandlers, callback);
+  };
+
+  /**
+   * Unwires an event handler.
+   * @param {MapLayersProcessedDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offMapLayersProcessed = (callback: MapLayersProcessedDelegate): void => {
+    // Unwire the event handler
+    EventHelper.offEvent(this.#onMapLayersProcessedHandlers, callback);
+  };
+
+  /**
+   * Emits an event to all handlers.
+   */
+  emitMapLayersLoaded = () => {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onMapLayersLoadedHandlers, undefined);
+  };
+
+  /**
+   * Wires an event handler.
+   * @param {MapLayersLoadedDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onMapLayersLoaded = (callback: MapLayersLoadedDelegate): void => {
+    // Wire the event handler
+    EventHelper.onEvent(this.#onMapLayersLoadedHandlers, callback);
+  };
+
+  /**
+   * Unwires an event handler.
+   * @param {MapLayersLoadedDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offMapLayersLoaded = (callback: MapLayersLoadedDelegate): void => {
+    // Unwire the event handler
+    EventHelper.offEvent(this.#onMapLayersLoadedHandlers, callback);
+  };
+
+  /**
    * Add a new custom component to the map
    *
    * @param {string} mapComponentId an id to the new component
    * @param {JSX.Element} component the component to add
    */
   addComponent(mapComponentId: string, component: JSX.Element): void {
-    // TODO: Refactor - Doesn't seem to be used anymore, keep? If keep it, refactor to call a function instead of event.emit.
     if (mapComponentId && component) {
       // emit an event to add the component
-      api.event.emit(mapComponentPayload(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, this.mapId, mapComponentId, component));
+      api.event.emitCreateComponent(this.mapId, mapComponentId, component);
     }
   }
 
@@ -320,10 +504,9 @@ export class MapViewer {
    * @param imapComponentIdd the id of the component to remove
    */
   removeComponent(mapComponentId: string): void {
-    // TODO: Refactor - Doesn't seem to be used anymore, keep? If keep it, refactor to call a function instead of event.emit.
     if (mapComponentId) {
       // emit an event to add the component
-      api.event.emit(mapComponentPayload(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, this.mapId, mapComponentId));
+      api.event.emitRemoveComponent(this.mapId, mapComponentId);
     }
   }
 
@@ -335,7 +518,7 @@ export class MapViewer {
    * @param {TypeJsonObject} translations the translation object to add
    */
   addLocalizeRessourceBundle(language: TypeDisplayLanguage, translations: TypeJsonObject): void {
-    this.i18nInstance.addResourceBundle(language, 'translation', translations, true, false);
+    this.#i18nInstance.addResourceBundle(language, 'translation', translations, true, false);
   }
 
   // #region MAP STATES
@@ -499,7 +682,7 @@ export class MapViewer {
    * @returns A Promise which resolves when the rendering is completed after the source(s) were changed.
    */
   refreshLayers(): Promise<void> {
-    const mapLayers = api.maps[this.mapId].layer.geoviewLayers;
+    const mapLayers = this.layer.geoviewLayers;
     Object.entries(mapLayers).forEach((mapLayerEntry) => {
       const refreshBaseLayer = (baseLayer: BaseLayer | null) => {
         if (baseLayer) {
@@ -565,7 +748,7 @@ export class MapViewer {
               if (data.geometry !== undefined) {
                 // add the geometry
                 // TODO: use the geometry as GeoJSON and add properties to by queried by the details panel
-                this.layer.geometry?.addPolygon(data.geometry.coordinates, undefined, generateId(null));
+                this.layer.geometry.addPolygon(data.geometry.coordinates, undefined, generateId(null));
               }
             });
           }
@@ -581,15 +764,11 @@ export class MapViewer {
    * @returns {HTMLElement} return the HTML element
    */
   remove(deleteContainer: boolean): HTMLElement {
-    // remove layers if present
-    if (this.layer) this.layer.removeAllGeoviewLayers();
+    // Remove all layers
+    this.layer.removeAllGeoviewLayers();
 
     // unsubscribe from all remaining events registered on this map
     api.event.offAll(this.mapId);
-
-    // remove layer sets for this map
-    LegendsLayerSet.delete(this.mapId);
-    FeatureInfoLayerSet.delete(this.mapId);
 
     // unload all loaded plugins on the map
     api.plugin.removePlugins(this.mapId);
@@ -619,7 +798,7 @@ export class MapViewer {
    */
   reload(): void {
     // emit an event to reload the map with the stored config
-    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, this.mapId, MapEventProcessor.getGeoViewMapConfig(this.mapId)!));
+    api.event.emitMapReload(this.mapId, MapEventProcessor.getGeoViewMapConfig(this.mapId)!);
   }
 
   /**
@@ -709,7 +888,7 @@ export class MapViewer {
    */
   initTranslateInteractions() {
     // Create selecting capabilities
-    const features = this.initSelectInteractions().ol_select.getFeatures();
+    const features = this.initSelectInteractions().getFeatures();
 
     // Create translating capabilities
     const translate = new Translate({
@@ -767,3 +946,23 @@ export class MapViewer {
   }
   // #endregion
 }
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapInitDelegate = EventDelegateBase<MapViewer, undefined>;
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapReadyDelegate = EventDelegateBase<MapViewer, undefined>;
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapLayersProcessedDelegate = EventDelegateBase<MapViewer, undefined>;
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapLayersLoadedDelegate = EventDelegateBase<MapViewer, undefined>;

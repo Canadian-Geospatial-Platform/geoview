@@ -98,29 +98,30 @@
     <script src="codedoc.js"></script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init(function () {
-        console.log('api is ready');
+      cgpv.init((mapId) => {
+        if (mapId === 'allMaps') {
+          // get load basemap panel button element
+          var loadBasemapPanelBtn = document.getElementById('load-basemap-panel-btn');
 
-        createCodeSnippet();
-        createConfigSnippet();
-
-        // get load basemap panel button element
-        var loadBasemapPanelBtn = document.getElementById('load-basemap-panel-btn');
-
-        // add event handler to the load basemap panel button
-        loadBasemapPanelBtn.addEventListener('click', function (e) {
-          cgpv.api.addPlugin('basemap-panel', 'mapWM', window.geoviewPlugins['basemap-panel'], {
-            mapId: 'mapWM',
+          // add event handler to the load basemap panel button
+          loadBasemapPanelBtn.addEventListener('click', function (e) {
+            cgpv.api.plugin.addPlugin('basemap-panel', 'mapWM', window.geoviewPlugins['basemap-panel'], {
+              mapId: 'mapWM',
+            });
           });
-        });
 
-        // get unload basemap panel button element
-        var unloadBasemapPanelBtn = document.getElementById('unload-basemap-panel-btn');
+          // get unload basemap panel button element
+          var unloadBasemapPanelBtn = document.getElementById('unload-basemap-panel-btn');
 
-        // add event handler to the unload basemap panel button
-        unloadBasemapPanelBtn.addEventListener('click', function (e) {
-          cgpv.api.removePlugin('basemap-panel', 'mapWM');
-        });
+          // add event handler to the unload basemap panel button
+          unloadBasemapPanelBtn.addEventListener('click', function (e) {
+            cgpv.api.plugin.removePlugin('basemap-panel', 'mapWM');
+          });
+
+          // create snippets
+          createCodeSnippet();
+          createConfigSnippet();
+        }
       });
     </script>
   </body>

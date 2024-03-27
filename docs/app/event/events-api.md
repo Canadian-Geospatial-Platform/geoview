@@ -58,25 +58,6 @@ cgpv.api.event.on('map/moveend', function(payload) {
 }, ...);
 ```
 
-The viewer provides a function to **validate** each payload if it contains the correct data. This is helpful when using this in a typescript enviroment were you want to receive the correct payload type. The validate function will automatically convert the payload to it's correct type and provide you with auto completion. Documentation for payload validation functions for each event can be viewed here: [code](https://github.com/Canadian-Geospatial-Platform/geoview/tree/develop/packages/geoview-core/src/api/events/payloads) and [doc](event-payloads.md).
-
-Validation functions starts with `payloadIs...` You can call `cgpv.types.payloadIs...` to access the validation functions for each event.
-
-For our example, a map move end event sends a `lnglat` object with the payload containing the latitude and longtitude position. Therefore we have a validator function called `payloadIsALngLat`. The validation function will verify if the correct event was received and the payload contains the lnglat object and then convert it's type to LngLatPayload which will give you auto completion to access the payload content.
-
-You can use this validation function as follow:
-
-```js
-cgpv.api.event.on('map/moveend', function(payload) {
-	// before the validation, the type of payload is PayloadBaseClass
-	if(cgpv.types.payloadIsALngLat(payload)) {
-		// after the validation, the type of payload in this case is
-    // LngLatPayload which will give access to the lnglat object
-		console.log(payload.lnglat);
-	}
-}, ...);
-```
-
 #### Third optional parameter
 
 The optional parameter is a handler name. It is used for listening on specefic handlers such as a specefic map, specefic panel in a map etc...
@@ -92,10 +73,7 @@ cgpv.api.event.on(
   "map/moveend",
   function (payload) {
     // before the validation, the type of payload is PayloadBaseClass
-    if (cgpv.types.payloadIsALngLat(payload)) {
-      // after the validation, the type of payload in this case is LngLatPayload which will give access to the lnglat object
-      console.log(payload.lnglat);
-    }
+    console.log(payload.lnglat);
   },
   "mapOne"
 );
@@ -127,28 +105,6 @@ To emit an event you need to call the `cgpv.api.event.emit()` function. The func
 
 #### The emit parameter
 
-The emit parameter is an object that contains the **event name** to emit to, a **handler name**, and the **payload data**.
-
-Just like validation functions and event names, the viewer provides a function that creates the object for you. [Click here](event-payloads.md) to view a list of exported functions that creates the object for each event. Just like validation functions, the functions that creates the object are exported under `cgpv.types`.
-
-The first parameter in the object creating function is required. To emit an event you must provide the event name to emit. Just like the `.on()` function, you can access the existing event names from `cgpv.api.eventNames`.
-
-The second parameter is an optional parameter for the handler name, usually the map id. It can be set to null if you are emitting to all maps. If you want to target a specific map element, for example a panel, its value is a list of handler names separated by slashes.
-
-The third parameter is payload data, this can be any types. For **existing** events you need to provide certain payload data. To list a list of payload data [click here](event-payloads.md)
-
-```js
-// here you will notice the second parameter for the snackbarMessagePayload function is mapOne. This can be null if you
-// target all maps. In here the event name is snackbar/open. Providing the handler name it will automatically become
-// snackbar/open/mapOne.
-cgpv.api.event.emit(
-  cgpv.types.snackbarMessagePayload(
-    cgpv.api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN,
-    "mapOne",
-    "This is my message"
-  )
-);
-```
 
 #### The handler name parameters
 
@@ -161,11 +117,11 @@ separated list of strings. The resulting handler names will automatically be app
 // in a specific map.
 
 cgpv.api.event.emit(
-  cgpv.types.snackbarMessagePayload(
-    cgpv.api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN,
-    "mapOne/panelOne",
-    "This is my message"
-  )
+  {
+    event: cgpv.api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN,
+    handlerName: handlerName: "mapOne/panelOne",
+    message: "This is my message"
+  }
 );
 ```
 

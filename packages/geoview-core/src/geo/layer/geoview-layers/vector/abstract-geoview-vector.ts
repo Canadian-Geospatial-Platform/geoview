@@ -20,15 +20,16 @@ import {
   TypeListOfLayerEntryConfig,
   TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
-import { Cast, api } from '@/app';
+import { api } from '@/app';
 import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
-import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
 import { NodeType } from '@/geo/renderer/geoview-renderer-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { CSV } from './csv';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
+import { Cast } from '@/core/types/global-types';
 
 /* *******************************************************************************************************************************
  * AbstractGeoViewVector types
@@ -87,8 +88,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
    */
   protected processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | null> {
-    // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
-    // !            layerStatus values is correctly sequenced.
+    // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
+    // GV            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
     const vectorSource = this.createVectorSource(layerConfig);
     const vectorLayer = this.createVectorLayer(layerConfig as VectorLayerEntryConfig, vectorSource);
@@ -230,10 +231,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     };
     layerConfig.geoviewLayerInstance = this;
 
-    if (layerConfig.initialSettings?.extent !== undefined) this.setExtent(layerConfig.initialSettings?.extent, layerPath);
-    if (layerConfig.initialSettings?.maxZoom !== undefined) this.setMaxZoom(layerConfig.initialSettings?.maxZoom, layerPath);
-    if (layerConfig.initialSettings?.minZoom !== undefined) this.setMinZoom(layerConfig.initialSettings?.minZoom, layerPath);
-    if (layerConfig.initialSettings?.opacity !== undefined) this.setOpacity(layerConfig.initialSettings?.opacity, layerPath);
+    if (layerConfig.initialSettings?.extent !== undefined) this.setExtent(layerConfig.initialSettings.extent, layerPath);
+    if (layerConfig.initialSettings?.maxZoom !== undefined) this.setMaxZoom(layerConfig.initialSettings.maxZoom, layerPath);
+    if (layerConfig.initialSettings?.minZoom !== undefined) this.setMinZoom(layerConfig.initialSettings.minZoom, layerPath);
+    if (layerConfig.initialSettings?.states?.opacity !== undefined) this.setOpacity(layerConfig.initialSettings.states.opacity, layerPath);
     // If a layer on the map has an initialSettings.visible set to false, its status will never reach the status 'loaded' because
     // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
     // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
@@ -246,9 +247,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {TypeArrayOfFeatureInfoEntries} The feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-  protected async getAllFeatureInfo(layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected async getAllFeatureInfo(layerPath?: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     try {
       // Get the layer config in a loaded phase
@@ -269,9 +270,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {Coordinate} location The pixel coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries> | null} The feature info table or null if an error occured.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table or null if an error occured.
    */
-  protected async getFeatureInfoAtPixel(location: Pixel, layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries | null> {
+  protected async getFeatureInfoAtPixel(location: Pixel, layerPath?: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     try {
       // Get the layer config in a loaded phase
@@ -297,11 +298,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {Coordinate} location The pixel coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-  protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries> {
-    // TODO: Check - The return type of this function should maybe be Promise<TypeArrayOfFeatureInfoEntries | null>
-    // TO.DD.CONT: and standardize this across all layer classes and all getFeatureInfo functions.
+  protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath?: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const { map } = api.maps[this.mapId];
     return this.getFeatureInfoAtPixel(map.getPixelFromCoordinate(location as Coordinate), layerPath);
@@ -313,9 +312,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
-   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-  protected getFeatureInfoAtLongLat(location: Coordinate, layerPath?: string): Promise<TypeArrayOfFeatureInfoEntries> {
+  protected getFeatureInfoAtLongLat(location: Coordinate, layerPath?: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
     const { map } = api.maps[this.mapId];
     const convertedLocation = api.projection.transform(
@@ -434,7 +433,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     const layerConfig = this.getLayerConfig(layerPath) as VectorLayerEntryConfig;
     if (!layerConfig) {
-      // ! Things important to know about the applyViewFilter usage:
+      // GV Things important to know about the applyViewFilter usage:
       logger.logError(
         `
         The applyViewFilter method must never be called by GeoView code before the layer refered by the layerPath has reached the 'loaded' status.\n

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Box, CircularProgressBase, DeleteOutlineIcon, IconButton, UndoIcon } from '@/ui';
-import { TypeLegendLayer } from '../types';
+import { TypeLegendLayer } from '@/core/components/layers/types';
 import { useLayerStoreActions, useMapStoreActions } from '@/core/stores';
 import { logger } from '@/core/utils/logger';
 
@@ -52,7 +52,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
 
   // get store actions
   const { deleteLayer, setLayerDeleteInProgress, getLayerDeleteInProgress } = useLayerStoreActions();
-  const { getVisibilityFromOrderedLayerInfo, getRemovableFromOrderedLayerInfo, setOrToggleLayerVisibility } = useMapStoreActions();
+  const { getVisibilityFromOrderedLayerInfo, setOrToggleLayerVisibility } = useMapStoreActions();
 
   const handleDeleteClick = () => {
     if (getVisibilityFromOrderedLayerInfo(layer.layerPath)) setOrToggleLayerVisibility(layer.layerPath);
@@ -88,7 +88,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     return undefined;
   }, [inUndoState]);
 
-  if (!inUndoState && getRemovableFromOrderedLayerInfo(layer.layerPath) && !getLayerDeleteInProgress()) {
+  if (!inUndoState && layer.controls?.remove !== false && !getLayerDeleteInProgress()) {
     return (
       <IconButton onClick={handleDeleteClick} edge="end" size="small">
         <DeleteOutlineIcon color="error" />

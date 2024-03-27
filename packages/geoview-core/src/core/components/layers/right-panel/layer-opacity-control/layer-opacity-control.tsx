@@ -3,7 +3,7 @@ import { useTheme } from '@mui/material/styles';
 import { Mark } from '@mui/base';
 import { getSxClasses } from './layer-opacity-control-styles';
 import { Box, SliderBase, Typography } from '@/ui';
-import { TypeLegendLayer } from '../../types';
+import { TypeLegendLayer } from '@/core/components/layers/types';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
 

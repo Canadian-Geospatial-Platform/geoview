@@ -1,5 +1,6 @@
 import { useTheme } from '@mui/material/styles';
-import { TypeWindow, getLocalizedMessage } from 'geoview-core';
+import { TypeWindow } from 'geoview-core/src/core/types/global-types';
+import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
 import { useMapVisibleLayers, useTimeSliderLayers } from 'geoview-core/src/core/stores';
 import { Paper, Typography } from 'geoview-core/src/ui';

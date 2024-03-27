@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-// We have many reassing for layerPath-layerConfig. We keep it global...
 import axios from 'axios';
 
 import ImageLayer from 'ol/layer/Image';
@@ -203,11 +201,13 @@ export class ImageStatic extends AbstractGeoViewRaster {
             layer: layerPath,
             loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
+          // eslint-disable-next-line no-param-reassign
           layerConfig.layerStatus = 'error';
           return;
         }
       }
 
+      // eslint-disable-next-line no-param-reassign
       layerConfig.layerStatus = 'processing';
 
       // When no metadata are provided, all layers are considered valid.
@@ -223,6 +223,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
             layer: layerPath,
             loggerMessage: `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
+          // eslint-disable-next-line no-param-reassign
           layerConfig.layerStatus = 'error';
           return;
         }
@@ -263,17 +264,19 @@ export class ImageStatic extends AbstractGeoViewRaster {
 
     const staticImageOptions: ImageOptions<Static> = { source: new Static(sourceOptions) };
     // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-    if (layerConfig.initialSettings?.extent !== undefined) staticImageOptions.extent = layerConfig.initialSettings?.extent;
-    if (layerConfig.initialSettings?.maxZoom !== undefined) staticImageOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
-    if (layerConfig.initialSettings?.minZoom !== undefined) staticImageOptions.minZoom = layerConfig.initialSettings?.minZoom;
-    if (layerConfig.initialSettings?.opacity !== undefined) staticImageOptions.opacity = layerConfig.initialSettings?.opacity;
-    // ! IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
-    // !            in the 'loading' state if the flag value is 'no'.
+    if (layerConfig.initialSettings?.extent !== undefined) staticImageOptions.extent = layerConfig.initialSettings.extent;
+    if (layerConfig.initialSettings?.maxZoom !== undefined) staticImageOptions.maxZoom = layerConfig.initialSettings.maxZoom;
+    if (layerConfig.initialSettings?.minZoom !== undefined) staticImageOptions.minZoom = layerConfig.initialSettings.minZoom;
+    if (layerConfig.initialSettings?.states?.opacity !== undefined) staticImageOptions.opacity = layerConfig.initialSettings.states.opacity;
+    // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
+    // GV            in the 'loading' state if the flag value is false.
 
+    // eslint-disable-next-line no-param-reassign
     layerConfig.olLayerAndLoadEndListeners = {
       olLayer: new ImageLayer(staticImageOptions),
       loadEndListenerType: 'image',
     };
+    // eslint-disable-next-line no-param-reassign
     layerConfig.geoviewLayerInstance = this;
 
     return Promise.resolve(layerConfig.olLayer);

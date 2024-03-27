@@ -11,19 +11,17 @@ import '@/ui/style/vendor.css';
 import * as UI from '@/ui';
 
 import AppStart from '@/core/app-start';
-import * as types from '@/core/types/cgpv-types';
-
-import { EVENT_NAMES } from '@/api/events/event-types';
 import { API } from '@/api/api';
-
+import { Cast, TypeCGPV, TypeWindow } from '@/core/types/global-types';
 import { Config } from '@/core/utils/config/config';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
-import { payloadIsAmapFeaturesConfig } from '@/api/events/payloads';
+import { MapFeaturesPayload } from '@/api/events/payloads';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
 import { logger } from '@/core/utils/logger';
 
-// The next export allow to import the cgpv-types from 'geoview-core' from outside of the geoview-core package.
-export * from './core/types/cgpv-types';
+// The next export allow to import the exernal-types from 'geoview-core' from outside of the geoview-core package.
+export * from './core/types/external-types';
+
 export const api = new API();
 
 const reactRoot: Record<string, Root> = {};
@@ -34,49 +32,41 @@ const reactRoot: Record<string, Root> = {};
  * @param {string} mapId the map id to unmount
  */
 export function unmountMap(mapId: string) {
-  if (reactRoot[mapId] !== null) reactRoot[mapId].unmount();
+  // Unmount the react root
+  reactRoot[mapId]?.unmount();
 }
 
 /**
- * Listen for map reload events. The map component is linked to a specific mapId. When we modify something on the map, the
+ * Handles when the map reload needs to happen. The map component is linked to a specific mapId. When we modify something on the map, the
  * changes spread throughout the data structure. We therefore need to reload the entire map configuration to ensure that
  * all changes made to the map are applied.
  *
  * @param {string} mapId the map id to reload
  */
-export function addReloadListener(mapId: string) {
-  const reloadHandler = (payload: types.PayloadBaseClass) => {
-    // Log
-    logger.logTraceCoreAPIEvent('APP - reloadHandler', payload);
+const handleReload = (payload: MapFeaturesPayload) => {
+  const { mapFeaturesConfig } = payload;
+  if (mapFeaturesConfig) {
+    const map = api.maps[mapFeaturesConfig.mapId].remove(false);
 
-    if (payloadIsAmapFeaturesConfig(payload)) {
-      const { mapFeaturesConfig } = payload;
-      if (mapFeaturesConfig) {
-        const map = api.maps[mapId].remove(false);
+    // recreate the map - create a new div and remove the active one
+    const newRoot = document.createElement('div');
+    newRoot.setAttribute('id', mapFeaturesConfig.mapId);
+    newRoot.setAttribute('class', 'geoview-map');
+    map!.parentNode!.insertBefore(newRoot, map);
+    map.remove();
 
-        // recreate the map - create a new div and remove the active one
-        const newRoot = document.createElement('div');
-        newRoot.setAttribute('id', mapId);
-        newRoot.setAttribute('class', 'geoview-map');
-        map!.parentNode!.insertBefore(newRoot, map);
-        map.remove();
+    // set plugin's loaded to false
+    // TODO: need to have this flag by map not for the api
+    api.plugin.pluginsLoaded = false;
 
-        // set plugin's loaded to false
-        // TODO: need to have this flag by map not for the api
-        api.plugin.pluginsLoaded = false;
+    addGeoViewStore(mapFeaturesConfig!);
+    // create the new root
+    reactRoot[mapFeaturesConfig.mapId] = createRoot(newRoot!);
 
-        addGeoViewStore(mapFeaturesConfig!);
-        // create the new root
-        reactRoot[mapId] = createRoot(newRoot!);
-        addReloadListener(mapId);
-
-        // re-render map with original configuration
-        reactRoot[mapId].render(<AppStart mapFeaturesConfig={mapFeaturesConfig} />);
-      }
-    }
-  };
-  api.event.on(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, reloadHandler, `${mapId}/delete_old_map`);
-}
+    // re-render map with original configuration
+    reactRoot[mapFeaturesConfig.mapId].render(<AppStart mapFeaturesConfig={mapFeaturesConfig} />);
+  }
+};
 
 /**
  * Function to render the map for inline map and map create from a function call
@@ -99,21 +89,29 @@ async function renderMap(mapElement: Element): Promise<void> {
 
     // render the map with the config
     reactRoot[mapId] = createRoot(mapElement!);
-    addReloadListener(mapId);
 
-    // TODO: Refactor #1810 - Activate <React.StrictMode> here or in app-start.tsx?
-    reactRoot[mapId].render(<AppStart mapFeaturesConfig={configObj} />);
-    // reactRoot[mapId].render(
-    //   <React.StrictMode>
-    //     <AppStart mapFeaturesConfig={configObj} />
-    //   </React.StrictMode>
-    // );
+    // Wire the handling of the map reload
+    api.event.onMapRemove(mapId, handleReload);
+
+    // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
+    return new Promise<void>((resolve) => {
+      // TODO: Refactor #1810 - Activate <React.StrictMode> here or in app-start.tsx?
+      reactRoot[mapId].render(<AppStart mapFeaturesConfig={configObj} onMapViewerInit={() => resolve()} />);
+      // reactRoot[mapId].render(
+      //   <React.StrictMode>
+      //     <AppStart mapFeaturesConfig={configObj} />
+      //   </React.StrictMode>
+      // );
+    });
   }
+
+  // Failed
+  return Promise.reject(new Error('Failed to render the map'));
 }
 
 /**
  * Initialize a basic div from a function call.
- * !The div MUST NOT have a geoview-map class or a warning will be shown.
+ * GV The div MUST NOT have a geoview-map class or a warning will be shown.
  * If is present, the div will be created with a default config
  *
  * @param {Element} mapDiv The basic div to initialise
@@ -139,6 +137,7 @@ export async function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig:
     // Render the map
     await renderMap(mapDiv);
   } else {
+    // Log warning
     logger.logWarning(`Div with id ${mapDiv.id} has a class 'geoview-map' and should be initialized via a cgpv.init() call.`);
   }
 }
@@ -146,29 +145,92 @@ export async function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig:
 /**
  * Initialize the cgpv and render it to root element
  *
- * @param {Function} callback optional callback function to run once the rendering is ready
+ * @param {Function} callbackMapInit optional callback function to run once the map rendering is ready
+ * @param {Function} callbackMapLayersLoaded optional callback function to run once layers are loaded on the map
  */
-async function init(callback: () => void): Promise<void> {
-  // set the API callback if a callback is provided
-  if (callback) api.readyCallback = callback;
-
+async function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded?: (mapId: string) => void): Promise<void> {
   const mapElements = document.getElementsByClassName('geoview-map');
 
   // loop through map elements on the page
   const promises = [];
   for (let i = 0; i < mapElements.length; i += 1) {
     const mapElement = mapElements[i] as Element;
-    if (!mapElement.classList.contains('geoview-map-func-call')) promises.push(renderMap(mapElement));
+    if (!mapElement.classList.contains('geoview-map-func-call')) {
+      // Render the map
+      const promiseMapInit = renderMap(mapElement);
+
+      // When the map init is done
+      promiseMapInit.then(() => {
+        // Log
+        logger.logInfo('Map initialized', mapElement.getAttribute('id')!);
+
+        // Callback about it
+        callbackMapInit?.(mapElement.getAttribute('id')!);
+      });
+
+      // Push the promise in the list of all maps being rendered
+      promises.push(promiseMapInit);
+    }
   }
 
-  // Wait for map renders to end. Note: the api.readyCallback isn't quite done yet; that's different.
+  // Wait for map renders to end and MapViewers to be initialized
   await Promise.allSettled(promises);
+
+  // TODO: REFACTOR - Petition to never callback with 'allMaps' and rethink this.
+  // TO.DOCONT: It's very dangerous for the listeners and imposes that they always be careful what the callback is about.
+  // TO.DOCONT: I've even found examples of us not using it correctly in the template pages...
+
+  // Log
+  logger.logInfo('Map initialized', 'allMaps');
+
+  // Callback all maps have been initialized
+  callbackMapInit?.('allMaps');
+
+  //
+  // At this point, all api.maps[] MapViewers that needed to be instantiated were done so.
+  //
+
+  // Loop on each map viewer to wire more listeners
+  const mapViewersPromises = Object.values(api.maps).map((mapViewer) => {
+    // Create promise for when all the layers will be loaded
+    return new Promise((resolve) => {
+      // If the mapviewer is already ready, resolve right away
+      if (mapViewer.mapLayersLoaded) {
+        resolve(mapViewer);
+        return;
+      }
+
+      // Wire when the map viewer will have loaded layers
+      mapViewer.onMapLayersLoaded((mapViewerLoaded) => {
+        // Run the callback for maps that have the triggerReadyCallback set using the mapId for the parameter value
+        if (mapViewerLoaded.mapFeaturesConfig.triggerReadyCallback) {
+          // Log
+          logger.logInfo('Map layers loaded', mapViewerLoaded.mapId);
+
+          // Callback for that particular map
+          callbackMapLayersLoaded?.(mapViewerLoaded.mapId);
+        }
+
+        // Resolve
+        resolve(mapViewerLoaded);
+      });
+    });
+  });
+
+  // Wait for all maps to have their layers loaded
+  await Promise.allSettled(mapViewersPromises);
+
+  // Log
+  logger.logInfo('Map layers loaded', 'allMaps');
+
+  // Callback all maps and layers have been loaded
+  callbackMapLayersLoaded?.('allMaps');
 }
 
 // cgpv object to be exported with the api for outside use
-export const cgpv: types.TypeCGPV = {
+export const cgpv: TypeCGPV = {
   init,
-  api: types.Cast<API>(api),
+  api: Cast<API>(api),
   react: React,
   createRoot,
   ui: {
@@ -178,11 +240,10 @@ export const cgpv: types.TypeCGPV = {
     elements: UI,
   },
   logger,
-  types,
 };
 
 // freeze variable name so a variable with same name can't be defined from outside
 Object.freeze(cgpv);
 
 // export the cgpv globally
-types.Cast<types.TypeWindow>(window).cgpv = cgpv;
+Cast<TypeWindow>(window).cgpv = cgpv;

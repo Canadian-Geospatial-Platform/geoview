@@ -1,1 +1,1 @@
-export * from './src/core/types/cgpv-types';
+export * from './src/core/types/external-types';

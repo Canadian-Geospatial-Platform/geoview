@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-// We have many reassign for layerPath-layerConfig. We keep it global...
 import View from 'ol/View';
 import Map from 'ol/Map';
 import TileLayer from 'ol/layer/Tile';
@@ -135,11 +133,13 @@ export class VectorTiles extends AbstractGeoViewRaster {
             layer: layerPath,
             loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
+          // eslint-disable-next-line no-param-reassign
           layerConfig.layerStatus = 'error';
           return;
         }
       }
 
+      // eslint-disable-next-line no-param-reassign
       layerConfig.layerStatus = 'processing';
     });
   }
@@ -152,8 +152,8 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
   protected processOneLayerEntry(layerConfig: VectorTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
-    // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
-    // !            layerStatus values is correctly sequenced.
+    // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
+    // GV            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
     const sourceOptions: SourceOptions<Feature> = {
       url: getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId),
@@ -165,6 +165,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     ) {
       showError(this.mapId, `Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
       logger.logError(`Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
+      // eslint-disable-next-line no-param-reassign
       layerConfig.layerStatus = 'error';
       return Promise.resolve(null);
     }
@@ -186,17 +187,18 @@ export class VectorTiles extends AbstractGeoViewRaster {
     sourceOptions.tileGrid = new TileGrid(layerConfig.source!.tileGrid!);
     const tileLayerOptions: TileOptions<VectorTileSource> = { source: new VectorTileSource(sourceOptions) };
     // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-    if (layerConfig.initialSettings?.className !== undefined) tileLayerOptions.className = layerConfig.initialSettings?.className;
-    if (layerConfig.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerConfig.initialSettings?.extent;
-    if (layerConfig.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
-    if (layerConfig.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerConfig.initialSettings?.minZoom;
-    if (layerConfig.initialSettings?.opacity !== undefined) tileLayerOptions.opacity = layerConfig.initialSettings?.opacity;
-    // ! IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
-    // !            in the 'loading' state if the flag value is 'no'.
+    if (layerConfig.initialSettings?.className !== undefined) tileLayerOptions.className = layerConfig.initialSettings.className;
+    if (layerConfig.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerConfig.initialSettings.extent;
+    if (layerConfig.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
+    if (layerConfig.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
+    if (layerConfig.initialSettings?.states?.opacity !== undefined) tileLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
+    // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
+    // GV            in the 'loading' state if the flag value is false.
 
     // TODO remove after demoing again
     const declutter = this.mapId !== 'LYR2';
 
+    // eslint-disable-next-line no-param-reassign
     layerConfig.olLayerAndLoadEndListeners = {
       olLayer: new VectorTileLayer({ ...tileLayerOptions, declutter }),
       loadEndListenerType: 'tile',
@@ -204,6 +206,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
 
     const resolutions = (layerConfig.olLayer as VectorTileLayer).getSource()?.getTileGrid()?.getResolutions();
 
+    // eslint-disable-next-line no-param-reassign
     layerConfig.geoviewLayerInstance = this;
     if (this.metadata?.defaultStyles)
       applyStyle(
@@ -233,9 +236,11 @@ export class VectorTiles extends AbstractGeoViewRaster {
         resolutions: (tileInfo.lods as Array<TypeJsonObject>).map(({ resolution }) => resolution as number),
         tileSize: [tileInfo.rows as number, tileInfo.cols as number],
       };
+      // eslint-disable-next-line no-param-reassign
       layerConfig.source!.tileGrid = newTileGrid;
 
       if (layerConfig.initialSettings?.extent)
+        // eslint-disable-next-line no-param-reassign
         layerConfig.initialSettings.extent = api.projection.transformExtent(
           layerConfig.initialSettings.extent,
           'EPSG:4326',
@@ -295,8 +300,8 @@ export class VectorTiles extends AbstractGeoViewRaster {
 
   // TODO: This section needs documentation (a header at least). Also, is it normal to have things hardcoded like that?
   addVectorTileLayer() {
-    // ! from code sandbox https://codesandbox.io/s/vector-tile-info-forked-g28jud?file=/main.js it works good
-    // ! from inside GEoView, even when not use, something is wrong.
+    // GV from code sandbox https://codesandbox.io/s/vector-tile-info-forked-g28jud?file=/main.js it works good
+    // GV from inside GEoView, even when not use, something is wrong.
     olms(
       'LYR3',
       'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/resources/styles/root.json?f=json'

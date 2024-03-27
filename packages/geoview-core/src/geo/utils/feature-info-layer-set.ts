@@ -1,215 +1,207 @@
+import { Coordinate } from 'ol/coordinate';
 import { EVENT_NAMES } from '@/api/events/event-types';
-import {
-  GetFeatureInfoPayload,
-  PayloadBaseClass,
-  payloadIsQueryResult,
-  payloadIsLayerSetChangeLayerStatus,
-  payloadIsAMapMouseEvent,
-  TypeLayerData,
-} from '@/api/events/payloads';
+import { payloadIsAMapMouseEvent } from '@/api/events/payloads';
 import { api } from '@/app';
-import { LayerSet } from './layer-set';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { logger } from '@/core/utils/logger';
 import { getLocalizedValue } from '@/core/utils/utilities';
-import { Coordinate, TypeLayerStatus, TypeQueryStatus } from '@/core/types/cgpv-types';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { EventType, LayerSet, TypeFeatureInfoEntry, TypeLayerData, TypeResultSet } from './layer-set';
+import { LayerApi } from '@/geo/layer/layer';
 
-export type TypeFeatureInfoResultSetEntry = {
-  layerName?: string;
-  layerStatus: TypeLayerStatus;
-  data: TypeLayerData;
-};
-
-export type TypeFeatureInfoResultSet = {
-  [layerPath: string]: TypeFeatureInfoResultSetEntry;
-};
-
-type TypeFeatureInfoLayerSetInstance = { [mapId: string]: FeatureInfoLayerSet };
-
-/** ***************************************************************************************************************************
+/**
  * A class containing a set of layers associated with a TypeLayerData object, which will receive the result of a
  * "get feature info" request made on the map layers when the user click a location on the map.
  *
  * @class FeatureInfoLayerSet
  */
 export class FeatureInfoLayerSet extends LayerSet {
-  /** Private static variable to keep the single instance that can be created by this class for a mapId (see singleton design pattern) */
-  private static featureInfoLayerSetInstance: TypeFeatureInfoLayerSetInstance = {};
-
-  /** An object containing the result sets indexed using the layer path */
+  /** The resultSet object as existing in the base class, retyped here as a TypeFeatureInfoResultSet */
   declare resultSet: TypeFeatureInfoResultSet;
 
-  /** ***************************************************************************************************************************
+  // Keep all callback delegate references
+  #onQueryEndedHandlers: QueryEndedDelegate[] = [];
+
+  /**
    * The class constructor that instanciate a set of layer.
    *
-   * @param {string} mapId The map identifier the layer set belongs to.
-   *
+   * @param {LayerApi} layerApi The layer Api to work with.
    */
-  private constructor(mapId: string) {
-    super(mapId, `${mapId}/click/FeatureInfoLayerSet`, {});
-    this.setRegistrationConditionFunction();
-    this.setUserRegistrationInitFunction();
+  constructor(layerApi: LayerApi) {
+    super(layerApi);
+
+    // Wire a listener on the map click
     this.setMapClickListener();
-    this.setQueryResultListener();
   }
 
-  /* **************************************************************************************************************************
-   * This function determines whether a layer can be registered or not.
+  /**
+   * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
+   * @param {AbstractGeoViewLayer} geoviewLayer The geoview layer being registered
+   * @param {string} layerPath The layer path
    */
-  setRegistrationConditionFunction() {
-    this.registrationConditionFunction = (layerPath: string): boolean => {
-      // Log
-      logger.logTraceCore('FEATURE-INFO-LAYER-SET setRegistrationConditionFunction', layerPath, Object.keys(this.resultSet));
+  protected onRegisterLayerCheck = (geoviewLayer: AbstractGeoViewLayer, layerPath: string): boolean => {
+    // Log
+    logger.logTraceCore('FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerPath, Object.keys(this.resultSet));
 
-      const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
-      const queryable = layerConfig?.source?.featureInfo?.queryable;
-      return !!queryable;
-    };
-  }
+    const layerConfig = this.layerApi.registeredLayers[layerPath];
+    const queryable = layerConfig?.source?.featureInfo?.queryable;
+    return !!queryable;
+  };
 
-  /** ***************************************************************************************************************************
-   * Define the initialization function that the registration process will use to create a new entry in the layer set for a
-   * specific layer path.
+  /**
+   * Overrides the behavior to apply when a feature-info-layer-set wants to register a layer in its set.
+   * @param {AbstractGeoViewLayer} geoviewLayer The geoview layer being registered
+   * @param {string} layerPath The layer path
    */
-  setUserRegistrationInitFunction() {
-    this.registrationUserInitialisation = (layerPath: string) => {
-      // Log
-      logger.logTraceCore('FEATURE-INFO-LAYER-SET setUserRegistrationInitFunction', layerPath, Object.keys(this.resultSet));
+  protected onRegisterLayer = (geoviewLayer: AbstractGeoViewLayer, layerPath: string): void => {
+    // Log
+    logger.logTraceCore('FEATURE-INFO-LAYER-SET - onRegisterLayer', layerPath, Object.keys(this.resultSet));
 
-      const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
-      this.resultSet[layerPath] = {
+    const layerConfig = this.layerApi.registeredLayers[layerPath];
+    this.resultSet[layerPath] = {
+      layerName: getLocalizedValue(layerConfig.layerName, this.mapId) ?? '',
+      layerStatus: layerConfig.layerStatus!,
+      data: {
         layerName: getLocalizedValue(layerConfig.layerName, this.mapId) ?? '',
         layerStatus: layerConfig.layerStatus!,
-        data: {
-          layerName: getLocalizedValue(layerConfig.layerName, this.mapId) ?? '',
-          layerStatus: layerConfig.layerStatus!,
-          eventListenerEnabled: true,
-          queryStatus: 'processed',
-          features: [],
-          layerPath,
-        },
-      };
-      FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, 'click', this.resultSet);
+        eventListenerEnabled: true,
+        queryStatus: 'processed',
+        features: [],
+        layerPath,
+      },
     };
-  }
+    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, 'click', this.resultSet);
+  };
 
-  /** ***************************************************************************************************************************
-   * The listener that will handle the CHANGE_LAYER_STATUS event triggered on the map.This method is called by the parent class
-   * LayerSet via the listener created by the setChangeLayerStatusListenerFunctions method.
-   *
-   * @param {PayloadBaseClass} payload The payload to process.
+  /**
+   * Overrides the behavior to apply when a layer status changed for a feature-info-layer-set.
+   * @param {ConfigBaseClass} config The layer config class
+   * @param {string} layerPath The layer path being affected
+   * @param {string} layerStatus The new layer status
    */
-  protected changeLayerStatusListenerFunctions(payload: PayloadBaseClass) {
-    if (payloadIsLayerSetChangeLayerStatus(payload)) {
-      // Log
-      logger.logTraceCoreAPIEvent('FEATURE-INFO-LAYER-SET on EVENT_NAMES.LAYER_SET.CHANGE_LAYER_STATUS', this.mapId, payload);
+  protected onProcessLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
+    // if layer's status flag exists and is different than the new one
+    if (this.resultSet?.[layerPath]?.layerStatus && this.resultSet?.[layerPath]?.layerStatus !== layerStatus) {
+      if (layerStatus === 'error') delete this.resultSet[layerPath];
+      else {
+        // Call parent. After this call, this.resultSet?.[layerPath]?.layerStatus may have changed!
+        super.onProcessLayerStatusChanged(config, layerPath, layerStatus);
 
-      const { layerPath, layerStatus } = payload;
-      // if layer's status flag exists and is different than the new one
-      if (this.resultSet?.[layerPath]?.layerStatus && this.resultSet?.[layerPath]?.layerStatus !== layerStatus) {
-        if (layerStatus === 'error') delete this.resultSet[layerPath];
-        else {
-          const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
-          super.changeLayerStatusListenerFunctions(payload);
-          if (this?.resultSet?.[layerPath]?.data) {
-            this.resultSet[layerPath].data.layerStatus = layerStatus;
-            FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerConfig.layerPath, 'click', this.resultSet);
-          }
+        const layerConfig = this.layerApi.registeredLayers[layerPath];
+        if (this?.resultSet?.[layerPath]?.data) {
+          this.resultSet[layerPath].data.layerStatus = layerStatus;
+          FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerConfig.layerPath, 'click', this.resultSet);
         }
       }
     }
   }
 
-  /* **************************************************************************************************************************
-   * Private method used to emit a query layer event for all layers in the result set that are loaded. Layers that has an error
-   * are set with an undefined features array and a queryStatus equal to 'error'.
-   *
-   * @param {EventType} eventType The event type (ex.: "click" | "hover" | "crosshaire-enter" | "all-features")
-   * @param {QueryType} queryType The query type (ex.: "all" | "at_pixel" | "at_coordinate" | "at_long_lat", ...)
-   * @param {Coordinate} coordinate The coordinate of the event
+  /**
+   * Emits an event to all handlers.
+   * @param {QueryEndedEvent} event The event to emit
    */
-  private createQueryLayerPayload = (coordinate: Coordinate): void => {
+  emitQueryEnded = (event: QueryEndedEvent) => {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onQueryEndedHandlers, event);
+  };
+
+  /**
+   * Wires an event handler.
+   * @param {QueryEndedDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onQueryEnded = (callback: QueryEndedDelegate): void => {
+    // Wire the event handler
+    EventHelper.onEvent(this.#onQueryEndedHandlers, callback);
+  };
+
+  /**
+   * Unwires an event handler.
+   * @param {QueryEndedDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offQueryEnded = (callback: QueryEndedDelegate): void => {
+    // Unwire the event handler
+    EventHelper.offEvent(this.#onQueryEndedHandlers, callback);
+  };
+
+  /**
+   * Queries the features at the provided coordinate for all the registered layers.
+   *
+   * @param {Coordinate} longLatCoordinate The longitude/latitude coordinate where to query the features
+   */
+  queryLayers = async (longLatCoordinate: Coordinate): Promise<TypeFeatureInfoResultSet> => {
+    // TODO: REFACTOR - Watch out for code reentrancy between queries!
+    // GV Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
+    // GV As it is (and was like this befor events refactor), the this.resultSet is mutating between async calls.
+
+    // Prepare to hold all promises of features in the loop below
+    const allPromises: Promise<TypeFeatureInfoEntry[] | undefined | null>[] = [];
+
+    // Query and event types of what we're doing
+    const queryType = 'at_long_lat';
+    const eventType = 'click';
+
     // Reinitialize the resultSet
     // Loop on each layer path in the resultSet
     Object.keys(this.resultSet).forEach((layerPath) => {
-      const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
+      const layerConfig = this.layerApi.registeredLayers[layerPath];
       const { data } = this.resultSet[layerPath];
       if (!data.eventListenerEnabled) return;
       if (layerConfig.layerStatus === 'loaded') {
         data.features = undefined;
         data.queryStatus = 'processing';
+
+        // Process query on results data
+        const promiseResult = this.queryLayerFeatures(data, layerConfig, layerPath, queryType, longLatCoordinate);
+
+        // Add the promise
+        allPromises.push(promiseResult);
+
+        // When the promise is done, propagate to store
+        promiseResult.then((arrayOfRecords) => {
+          // Keep the features retrieved
+          data.features = arrayOfRecords;
+          data.layerStatus = layerConfig.layerStatus!;
+
+          // When property features is undefined, we are waiting for the query result.
+          // when Array.isArray(features) is true, the features property contains the query result.
+          // when property features is null, the query ended with an error.
+          data.queryStatus = arrayOfRecords ? 'processed' : 'error';
+
+          // Propagate to store
+          FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, eventType, this.resultSet);
+        });
       } else {
         data.features = null;
         data.queryStatus = 'error';
       }
-
-      if (data.eventListenerEnabled && data.queryStatus !== ('error' as TypeQueryStatus)) {
-        api.event.emit(GetFeatureInfoPayload.createQueryLayerPayload(`${this.mapId}/${layerPath}`, 'at_long_lat', coordinate, 'click'));
-      }
     });
+
+    // Await for the promises to settle
+    await Promise.allSettled(allPromises);
+
+    // Emit the query layers has ended
+    this.emitQueryEnded({ coordinate: longLatCoordinate, resultSet: this.resultSet, eventType });
+
+    // Return the results
+    return this.resultSet;
   };
 
-  /** ***************************************************************************************************************************
-   * Listen to "map click" and send a query layers event to queryable layers. These layers will return a result set of features.
+  /**
+   * Listen to "map click" and call a query for all registered layers at the clicked location.
    */
   setMapClickListener() {
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK,
       (payload) => {
-        if (payloadIsAMapMouseEvent(payload)) {
-          // Log
-          logger.logTraceCoreAPIEvent('FEATURE-INFO-LAYER-SET on EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK', this.mapId, payload);
-
-          this.createQueryLayerPayload(payload.coordinates.lnglat);
-        }
-      },
-      this.mapId
-    );
-  }
-
-  /** ***************************************************************************************************************************
-   * Listen to "query result" events and send an all query done event when all the layers have returned their result set of
-   * features.
-   */
-  private setQueryResultListener() {
-    api.event.on(
-      EVENT_NAMES.GET_FEATURE_INFO.QUERY_RESULT,
-      (payload) => {
         // Log
-        logger.logTraceCoreAPIEvent('FEATURE-INFO-LAYER-SET - QUERY_RESULT', this.mapId, payload);
+        logger.logTraceCoreAPIEvent('FEATURE-INFO-LAYER-SET on EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK', this.mapId, payload);
 
-        if (payloadIsQueryResult(payload)) {
-          const { layerPath, queryType, arrayOfRecords, eventType } = payload;
-          if (eventType === 'click') {
-            const layerConfig = api.maps[this.mapId].layer.registeredLayers[layerPath];
-            if (this.resultSet?.[layerPath]?.data) {
-              const { data } = this.resultSet[layerPath];
-              data.features = arrayOfRecords;
-              data.layerStatus = layerConfig.layerStatus!;
-              // When property features is undefined, we are waiting for the query result.
-              // when Array.isArray(features) is true, the features property contains the query result.
-              // when property features is null, the query ended with an error.
-              data.queryStatus = arrayOfRecords === null ? 'error' : 'processed';
-              FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, eventType, this.resultSet);
-            }
-
-            const allDone = Object.keys(this.resultSet).reduce((doneFlag, layerPathToTest) => {
-              return doneFlag && this.resultSet[layerPathToTest].data.features !== undefined;
-            }, true);
-
-            if (allDone) {
-              api.event.emit(
-                GetFeatureInfoPayload.createAllQueriesDonePayload(
-                  this.layerSetId,
-                  eventType,
-                  layerPath,
-                  queryType,
-                  this.layerSetId,
-                  this.resultSet
-                )
-              );
-            }
-          }
+        if (payloadIsAMapMouseEvent(payload)) {
+          // Query all layers which can be queried
+          this.queryLayers(payload.coordinates.lnglat);
         }
       },
       this.mapId
@@ -262,27 +254,28 @@ export class FeatureInfoLayerSet extends LayerSet {
     });
     return returnValue;
   }
-
-  /**
-   * Helper function used to instanciate a FeatureInfoLayerSet object. This function
-   * must be used in place of the "new FeatureInfoLayerSet" syntax.
-   *
-   * @param {string} mapId The map identifier the layer set belongs to.
-   *
-   * @returns {FeatureInfoLayerSet} the FeatureInfoLayerSet object created
-   */
-  static get(mapId: string): FeatureInfoLayerSet {
-    if (!FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId])
-      FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId] = new FeatureInfoLayerSet(mapId);
-    return FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId];
-  }
-
-  /**
-   * Function used to delete a FeatureInfoLayerSet object associated to a mapId.
-   *
-   * @param {string} mapId The map identifier the layer set belongs to.
-   */
-  static delete(mapId: string) {
-    if (FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId]) delete FeatureInfoLayerSet.featureInfoLayerSetInstance[mapId];
-  }
 }
+
+export type TypeFeatureInfoResultSetEntry = {
+  layerName?: string;
+  layerStatus: TypeLayerStatus;
+  data: TypeLayerData;
+};
+
+export type TypeFeatureInfoResultSet = {
+  [layerPath: string]: TypeFeatureInfoResultSetEntry;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type QueryEndedDelegate = EventDelegateBase<FeatureInfoLayerSet, QueryEndedEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type QueryEndedEvent = {
+  coordinate: Coordinate;
+  resultSet: TypeResultSet;
+  eventType: EventType;
+};

@@ -19,7 +19,7 @@ import {
   TypeSymbol,
   TypeUniqueValueStyleConfig,
   TypeUniqueValueStyleInfo,
-} from '../map/map-schema-types';
+} from '@/geo/map/map-schema-types';
 import { logger } from '@/core/utils/logger';
 
 /*
@@ -446,7 +446,7 @@ function processUniqueValueRenderer(renderer: EsriUniqueValueRenderer): TypeStyl
   const style: TypeStyleConfig = {};
   const styleType = 'uniqueValue';
   const defaultLabel = renderer.defaultLabel === null ? undefined : renderer.defaultLabel;
-  const defaultVisible = renderer.defaultSymbol ? 'yes' : 'no';
+  const defaultVisible = !!renderer.defaultSymbol;
   const defaultSettings = convertSymbol(renderer.defaultSymbol);
   const fields = [renderer.field1];
   if (renderer.field2) fields.push(renderer.field2);
@@ -459,7 +459,7 @@ function processUniqueValueRenderer(renderer: EsriUniqueValueRenderer): TypeStyl
         settings.rotation = Math.PI / 2 - settings.rotation!;
       uniqueValueStyleInfo.push({
         label: symbolInfo.label,
-        visible: 'yes',
+        visible: true,
         values: symbolInfo.value.split(renderer.fieldDelimiter),
         settings,
       });
@@ -517,7 +517,7 @@ function processClassBreakRenderer(EsriRenderer: EsriClassBreakRenderer): TypeSt
   const styleType = 'classBreaks';
   const defaultLabel = EsriRenderer.defaultLabel === null ? undefined : EsriRenderer.defaultLabel;
   const defaultSettings = convertSymbol(EsriRenderer.defaultSymbol);
-  const defaultVisible = EsriRenderer.defaultLabel ? 'yes' : 'no';
+  const defaultVisible = !!EsriRenderer.defaultLabel;
   const { field } = EsriRenderer;
   const classBreakStyleInfo: TypeClassBreakStyleInfo[] = [];
   for (let i = 0; i < EsriRenderer.classBreakInfos.length; i++) {
@@ -527,7 +527,7 @@ function processClassBreakRenderer(EsriRenderer: EsriClassBreakRenderer): TypeSt
         settings.rotation = Math.PI / 2 - settings.rotation!;
       const geoviewClassBreakInfo: TypeClassBreakStyleInfo = {
         label: EsriRenderer.classBreakInfos[i].label,
-        visible: 'yes',
+        visible: true,
         minValue: EsriRenderer.classBreakInfos[i].classMinValue,
         maxValue: EsriRenderer.classBreakInfos[i].classMaxValue,
         settings,

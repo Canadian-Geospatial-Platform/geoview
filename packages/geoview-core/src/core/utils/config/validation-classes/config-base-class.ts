@@ -1,5 +1,6 @@
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   CONST_LAYER_ENTRY_TYPES,
@@ -8,11 +9,11 @@ import {
   TypeLayerStatus,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
+import { logger } from '@/core/utils/logger';
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
-import { logger } from '../../logger';
-import { LayerSetPayload } from '@/api/events/payloads';
-import { Cast, TypeJsonValue, api } from '@/core/types/cgpv-types';
 import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
+import { Cast, TypeJsonValue } from '@/core/types/global-types';
+import { api } from '@/app';
 
 /** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
@@ -30,7 +31,7 @@ export class ConfigBaseClass {
   /** Layer entry data type. This element is part of the schema. */
   entryType?: TypeLayerEntryType;
 
-  // TODO: There shouldn't be a coupling to a `AbstractGeoViewLayer` inside a Configuration class.
+  // TODO: Refactor - There shouldn't be a coupling to a `AbstractGeoViewLayer` inside a Configuration class.
   // TO.DOCONT: That logic should be elsewhere so that the Configuration class remains portable and immutable.
   /** The geoview layer instance that contains this layer configuration. */
   geoviewLayerInstance?: AbstractGeoViewLayer;
@@ -42,15 +43,13 @@ export class ConfigBaseClass {
    * metadata. */
   isMetadataLayerGroup?: boolean;
 
-  // TODO: There shouldn't be a coupling to a `AbstractGeoViewLayer` inside a Configuration class.
-  // TO.DOCONT: That logic should be elsewhere so that the Configuration class remains portable and immutable.
   /** It is used to link the layer entry config to the parent's layer config. */
   parentLayerConfig?: TypeGeoviewLayerConfig | GroupLayerEntryConfig;
 
   /** The layer path to this instance. */
   protected _layerPath = '';
 
-  // TODO: There shouldn't be a coupling to a `AbstractGeoViewLayer` inside a Configuration class.
+  // TODO: Refactor - There shouldn't be a coupling to an OpenLayers `BaseLayer` inside a Configuration class.
   // TO.DOCONT: That logic should be elsewhere so that the Configuration class remains portable and immutable.
   /** This property is used to link the displayed layer to its layer entry config. it is not part of the schema. */
   protected _olLayer: BaseLayer | LayerGroup | null = null;
@@ -70,6 +69,9 @@ export class ConfigBaseClass {
 
   /** Flag indicating that the loaded signal arrived before the processed one */
   protected waitForProcessedBeforeSendingLoaded = false;
+
+  // Keep all callback delegates references
+  #onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
 
   /**
    * The class constructor.
@@ -155,10 +157,9 @@ export class ConfigBaseClass {
     if (!this.IsGreaterThanOrEqualTo(newLayerStatus)) {
       // eslint-disable-next-line no-underscore-dangle
       this._layerStatus = newLayerStatus;
-      api.event.emit(
-        // TODO: Change createLayerSetChangeLayerStatusPayload events for a direct function call.
-        LayerSetPayload.createLayerSetChangeLayerStatusPayload(this.geoviewLayerInstance!.mapId, this.layerPath, newLayerStatus)
-      );
+      // TODO: Refactor - Suggestion to hold the layer status elsewhere than in a configuration file. Can it be on the layer itself?
+      // TO.DOCONT: It'd be "nicer" to have a configuration file that doesn't raise events
+      this.emitLayerStatusChanged({ layerPath: this.layerPath, layerStatus: newLayerStatus });
     }
     if (newLayerStatus === 'processed' && this.waitForProcessedBeforeSendingLoaded) this.layerStatus = 'loaded';
 
@@ -172,6 +173,33 @@ export class ConfigBaseClass {
   }
 
   /**
+   * Emits an event to all handlers.
+   * @param {LayerStatusChangedEvent} event The event to emit
+   */
+  emitLayerStatusChanged = (event: LayerStatusChangedEvent) => {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerStatusChangedHandlers, event);
+  };
+
+  /**
+   * Wires an event handler.
+   * @param {LayerStatusChangedDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onLayerStatusChanged = (callback: LayerStatusChangedDelegate): void => {
+    // Wire the event handler
+    EventHelper.onEvent(this.#onLayerStatusChangedHandlers, callback);
+  };
+
+  /**
+   * Unwires an event handler.
+   * @param {LayerStatusChangedDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offLayerStatusChanged = (callback: LayerStatusChangedDelegate): void => {
+    // Unwire the event handler
+    EventHelper.offEvent(this.#onLayerStatusChangedHandlers, callback);
+  };
+
+  /**
    * Register the layer identifier. Duplicate identifier are not allowed.
    *
    * @returns {boolean} Returns false if the layer configuration can't be registered.
@@ -181,24 +209,29 @@ export class ConfigBaseClass {
     const { registeredLayers } = api.maps[this.geoviewLayerInstance!.mapId].layer;
     if (registeredLayers[this.layerPath]) return false;
     (registeredLayers[this.layerPath] as ConfigBaseClass) = this;
+
+    // TODO: Check - Move this registerToLayerSets closer to the others, when I comment the line it seems good, except
+    // TO.DOCONT: for an 'Anonymous' group layer that never got 'loaded'. See if we can fix this elsewhere and remove this.
     if (this.entryType !== CONST_LAYER_ENTRY_TYPES.GROUP)
       (this.geoviewLayerInstance as AbstractGeoViewLayer).registerToLayerSets(Cast<AbstractBaseLayerEntryConfig>(this));
+
     this.layerStatus = 'registered';
     return true;
   }
 
-  /**
-   * This method returns the GeoView instance associated to a specific layer path. The first element of the layerPath
-   * is the geoviewLayerId.
-   * @param {string} layerPath The layer path to the layer's configuration.
-   *
-   * @returns {AbstractGeoViewLayer} Returns the geoview instance associated to the layer path.
-   */
-  // TODO: Check - Is this still used? Remove it and favor the homonymous method in `layer`?
-  geoviewLayer(layerPath?: string): AbstractGeoViewLayer {
-    this.geoviewLayerInstance!.layerPathAssociatedToTheGeoviewLayer = layerPath || this.layerPath;
-    return this.geoviewLayerInstance!;
-  }
+  // TODO: Check - Is this still used? Remove it and favor the homonymous method in `layer`? (which also should be deleted)
+  // TO.DOCONT: I'm commenting it in this big refactor (2024-03-17) to see if anything crashes and if so, where. Seems good to me without it so far.
+  // /**
+  //  * This method returns the GeoView instance associated to a specific layer path. The first element of the layerPath
+  //  * is the geoviewLayerId.
+  //  * @param {string} layerPath The layer path to the layer's configuration.
+  //  *
+  //  * @returns {AbstractGeoViewLayer} Returns the geoview instance associated to the layer path.
+  //  */
+  //   geoviewLayer(layerPath?: string): AbstractGeoViewLayer {
+  //   this.geoviewLayerInstance!.layerPathAssociatedToTheGeoviewLayer = layerPath || this.layerPath;
+  //   return this.geoviewLayerInstance!;
+  // }
 
   /**
    * This method compares the internal layer status of the config with the layer status passed as a parameter and it
@@ -235,3 +268,18 @@ export class ConfigBaseClass {
     } as unknown as TypeJsonValue;
   }
 }
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerStatusChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStatusChangedEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerStatusChangedEvent = {
+  // The layer path affected.
+  layerPath: string;
+  // The new layer status to assign to the layer path.
+  layerStatus: TypeLayerStatus;
+};

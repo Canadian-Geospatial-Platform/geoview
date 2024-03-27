@@ -85,7 +85,6 @@
                 {
                   'layerId': '1',
                   'layerFilter': 'E_Province = \'Alberta\' or E_Province = \'Manitoba\'',
-                  'initialSettings': { 'visible': 'yes' },
                   'style': {
                     'Point': {
                       'styleId': 'uniqueValueId',
@@ -99,7 +98,7 @@
                         'src': 'iVBORw0KGgoAAAANSUhEUgAAABIAAAAPCAYAAADphp8SAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAUhJREFUOI2d0z1Lw1AUBuD3hppCLSo4iLg6dFZBEYtZQgeFgB+jrSIEQXSxFUIFg1jTYhBHyWITEVwDOhXUSVz8Bf4DcahgBxtvrkNrIbamSd/tXM557llOBAGiGQtxRb779OuJdEOUm9UY+6o+6KYkZDN2rWdooF7dZ6BTdXzsATjqCSpaqTGXOblGxeVUc/JCzby8hYZc5pwAiDXLOM8GDwFsh4KOy8kJAGueRwK5cDl7nt94eg0MEdJ3BoC09XO8BmAlEFQwhSUCzHf8ANyyVhZnlPXKsy+0a4An4Er/bQoAjNBTAElfaCQq7gB03A8CMKdZgqSkH+2OUMmaHqaMHnRBGlsxrmgYuJVl0DboG/0qAYaCQAAS71FxE6gYHki7SiWY62wFRJqhqm5K19mMXWtBLnN0EuBk/mT093Rag/n0/WJIxJMfY79g/IvbH/IAAAAASUVORK5CYII=',
                         'type': 'iconSymbol'
                       },
-                      'defaultVisible': 'yes',
+                      'defaultVisible': true,
                       'fields': ['E_Regulated', 'E_SampleType', 'E_Overall_Condition'],
                       'uniqueValueStyleInfo': [
                         {
@@ -113,7 +112,7 @@
                             'type': 'iconSymbol'
                           },
                           'values': ['Natural', 'Seasonal', 'High'],
-                          'visible': 'always'
+                          'visible': true
                         },
                         {
                           'label': 'Natural, Seasonal, Low',
@@ -126,7 +125,7 @@
                             'type': 'iconSymbol'
                           },
                           'values': ['Natural', 'Seasonal', 'Low'],
-                          'visible': 'no'
+                          'visible': false
                         },
                         {
                           'label': 'Natural, Seasonal, Normal',
@@ -139,7 +138,7 @@
                             'type': 'iconSymbol'
                           },
                           'values': ['Natural', 'Seasonal', 'Normal'],
-                          'visible': 'no'
+                          'visible': false
                         },
                         {
                           'label': 'Natural, Yearly, High',
@@ -152,7 +151,7 @@
                             'type': 'iconSymbol'
                           },
                           'values': ['Natural', 'Yearly', 'High'],
-                          'visible': 'yes'
+                          'visible': true
                         },
                         {
                           'label': 'Natural, Yearly, Low',
@@ -165,7 +164,7 @@
                             'type': 'iconSymbol'
                           },
                           'values': ['Natural', 'Yearly', 'Low'],
-                          'visible': 'no'
+                          'visible': false
                         },
                         {
                           'label': 'Natural, Yearly, Normal',
@@ -178,7 +177,7 @@
                             'type': 'iconSymbol'
                           },
                           'values': ['Natural', 'Yearly', 'Normal'],
-                          'visible': 'no'
+                          'visible': false
                         },
                         {
                           'label': 'Regulated, Seasonal, High',
@@ -191,7 +190,7 @@
                             'type': 'iconSymbol'
                           },
                           'values': ['Regulated', 'Seasonal', 'High'],
-                          'visible': 'no'
+                          'visible': false
                         },
                         {
                           'label': 'Regulated, Seasonal, Low',
@@ -204,7 +203,7 @@
                             'type': 'iconSymbol'
                           },
                           'values': ['Regulated', 'Seasonal', 'Low'],
-                          'visible': 'no'
+                          'visible': false
                         },
                         {
                           'label': 'Regulated, Seasonal, Normal',
@@ -217,7 +216,7 @@
                             'type': 'iconSymbol'
                           },
                           'values': ['Regulated', 'Seasonal', 'Normal'],
-                          'visible': 'no'
+                          'visible': false
                         },
                         {
                           'label': 'Regulated, Yearly, High',
@@ -230,7 +229,7 @@
                             'type': 'iconSymbol'
                           },
                           'values': ['Regulated', 'Yearly', 'High'],
-                          'visible': 'no'
+                          'visible': false
                         },
                         {
                           'label': 'Regulated, Yearly, Low',
@@ -243,7 +242,7 @@
                             'type': 'iconSymbol'
                           },
                           'values': ['Regulated', 'Yearly', 'Low'],
-                          'visible': 'no'
+                          'visible': false
                         }
                       ]
                     }
@@ -273,7 +272,6 @@
                 {
                   'layerId': '8',
                   'layerFilter': 'Total_CSO_Volume > 5000000',
-                  'initialSettings': { 'visible': 'yes' },
                   'style': {
                     'Point': {
                       'styleId': 'classBreaksId',
@@ -292,14 +290,14 @@
                           'width': 0.5
                         }
                       },
-                      'defaultVisible': 'yes',
+                      'defaultVisible': true,
                       'field': 'Total_CSO_Volume',
                       'classBreakStyleInfo': [
                         {
                           'label': '0 m3',
                           'minValue': 0,
                           'maxValue': 0,
-                          'visible': 'yes',
+                          'visible': true,
                           'settings': {
                             'symbol': 'circle',
                             'type': 'simpleSymbol',
@@ -318,7 +316,7 @@
                           'label': '0.0001 - ≤ 5,000,000 m3',
                           'minValue': 0,
                           'maxValue': 5000000,
-                          'visible': 'yes',
+                          'visible': true,
                           'settings': {
                             'symbol': 'circle',
                             'type': 'simpleSymbol',
@@ -337,7 +335,7 @@
                           'label': '> 5,000,000 - ≤ 10,000,000 m3',
                           'minValue': 5000000,
                           'maxValue': 10000000,
-                          'visible': 'always',
+                          'visible': true,
                           'settings': {
                             'symbol': 'circle',
                             'type': 'simpleSymbol',
@@ -356,7 +354,7 @@
                           'label': '> 10,000,000 - ≤ 15,000,000 m3',
                           'minValue': 10000000,
                           'maxValue': 15000000,
-                          'visible': 'yes',
+                          'visible': true,
                           'settings': {
                             'symbol': 'circle',
                             'type': 'simpleSymbol',
@@ -375,7 +373,7 @@
                           'label': '> 15,000,000 - ≤ 20,000,000 m3',
                           'minValue': 15000000,
                           'maxValue': 20000000,
-                          'visible': 'yes',
+                          'visible': true,
                           'settings': {
                             'symbol': 'circle',
                             'type': 'simpleSymbol',
@@ -394,7 +392,7 @@
                           'label': '> 20,000,000 - ≤ 25,000,000 m3',
                           'minValue': 20000000,
                           'maxValue': 25000000,
-                          'visible': 'yes',
+                          'visible': true,
                           'settings': {
                             'symbol': 'circle',
                             'type': 'simpleSymbol',
@@ -413,7 +411,7 @@
                           'label': '> 25,000,000 - ≤ 30,000,000 m3',
                           'minValue': 25000000,
                           'maxValue': 30000000,
-                          'visible': 'yes',
+                          'visible': true,
                           'settings': {
                             'symbol': 'circle',
                             'type': 'simpleSymbol',
@@ -432,7 +430,7 @@
                           'label': '> 30,000,000 - ≤ 35,000,000 m3',
                           'minValue': 30000000,
                           'maxValue': 35000000,
-                          'visible': 'yes',
+                          'visible': true,
                           'settings': {
                             'symbol': 'circle',
                             'type': 'simpleSymbol',
@@ -451,7 +449,7 @@
                           'label': '> 35,000,000 m3',
                           'minValue': 35000000,
                           'maxValue': 999000000,
-                          'visible': 'yes',
+                          'visible': true,
                           'settings': {
                             'symbol': 'circle',
                             'type': 'simpleSymbol',
@@ -651,13 +649,11 @@
               'listOfLayerEntryConfig': [
                 {
                   'layerId': '4',
-                  'layerName': { 'en': 'Test' },
-                  'initialSettings': { 'visible': 'yes' }
+                  'layerName': { 'en': 'Test' }
                 },
                 {
                   'layerId': '1',
                   'layerFilter': 'E_Province = \'Alberta\' or E_Province = \'Manitoba\'',
-                  'initialSettings': { 'visible': 'yes' },
                   'style': {
                     'Point': {
                       'styleId': 'uniqueValueId',
@@ -671,7 +667,7 @@
                         'src': 'iVBORw0KGgoAAAANSUhEUgAAABIAAAAPCAYAAADphp8SAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAUhJREFUOI2d0z1Lw1AUBuD3hppCLSo4iLg6dFZBEYtZQgeFgB+jrSIEQXSxFUIFg1jTYhBHyWITEVwDOhXUSVz8Bf4DcahgBxtvrkNrIbamSd/tXM557llOBAGiGQtxRb779OuJdEOUm9UY+6o+6KYkZDN2rWdooF7dZ6BTdXzsATjqCSpaqTGXOblGxeVUc/JCzby8hYZc5pwAiDXLOM8GDwFsh4KOy8kJAGueRwK5cDl7nt94eg0MEdJ3BoC09XO8BmAlEFQwhSUCzHf8ANyyVhZnlPXKsy+0a4An4Er/bQoAjNBTAElfaCQq7gB03A8CMKdZgqSkH+2OUMmaHqaMHnRBGlsxrmgYuJVl0DboG/0qAYaCQAAS71FxE6gYHki7SiWY62wFRJqhqm5K19mMXWtBLnN0EuBk/mT093Rag/n0/WJIxJMfY79g/IvbH/IAAAAASUVORK5CYII=',
                         'type': 'iconSymbol'
                       },
-                      'defaultVisible': 'yes',
+                      'defaultVisible': true,
                       'fields': ['E_Regulated', 'E_SampleType', 'E_Overall_Condition'],
                       'uniqueValueStyleInfo': [
                         {
@@ -685,7 +681,7 @@
                             'type': 'iconSymbol'
                           },
                           'values': ['Natural', 'Seasonal', 'High'],
-                          'visible': 'always'
+                          'visible': true
                         },
                         {
                           'label': 'Natural, Seasonal, Low',
@@ -698,7 +694,7 @@
                             'type': 'iconSymbol'
                           },
                           'values': ['Natural', 'Seasonal', 'Low'],
-                          'visible': 'no'
+                          'visible': false
                         },
                         {
                           'label': 'Natural, Seasonal, Normal',
@@ -711,7 +707,7 @@
                             'type': 'iconSymbol'
                           },
                           'values': ['Natural', 'Seasonal', 'Normal'],
-                          'visible': 'no'
+                          'visible': false
                         },
                         {
                           'label': 'Natural, Yearly, High',
@@ -724,7 +720,7 @@
                             'type': 'iconSymbol'
                           },
                           'values': ['Natural', 'Yearly', 'High'],
-                          'visible': 'yes'
+                          'visible': true
                         },
                         {
                           'label': 'Natural, Yearly, Low',
@@ -737,7 +733,7 @@
                             'type': 'iconSymbol'
                           },
                           'values': ['Natural', 'Yearly', 'Low'],
-                          'visible': 'no'
+                          'visible': false
                         },
                         {
                           'label': 'Natural, Yearly, Normal',
@@ -750,7 +746,7 @@
                             'type': 'iconSymbol'
                           },
                           'values': ['Natural', 'Yearly', 'Normal'],
-                          'visible': 'no'
+                          'visible': false
                         },
                         {
                           'label': 'Regulated, Seasonal, High',
@@ -763,7 +759,7 @@
                             'type': 'iconSymbol'
                           },
                           'values': ['Regulated', 'Seasonal', 'High'],
-                          'visible': 'no'
+                          'visible': false
                         },
                         {
                           'label': 'Regulated, Seasonal, Low',
@@ -776,7 +772,7 @@
                             'type': 'iconSymbol'
                           },
                           'values': ['Regulated', 'Seasonal', 'Low'],
-                          'visible': 'no'
+                          'visible': false
                         },
                         {
                           'label': 'Regulated, Seasonal, Normal',
@@ -789,7 +785,7 @@
                             'type': 'iconSymbol'
                           },
                           'values': ['Regulated', 'Seasonal', 'Normal'],
-                          'visible': 'no'
+                          'visible': false
                         },
                         {
                           'label': 'Regulated, Yearly, High',
@@ -802,7 +798,7 @@
                             'type': 'iconSymbol'
                           },
                           'values': ['Regulated', 'Yearly', 'High'],
-                          'visible': 'no'
+                          'visible': false
                         },
                         {
                           'label': 'Regulated, Yearly, Low',
@@ -815,7 +811,7 @@
                             'type': 'iconSymbol'
                           },
                           'values': ['Regulated', 'Yearly', 'Low'],
-                          'visible': 'no'
+                          'visible': false
                         }
                       ]
                     }
@@ -845,7 +841,6 @@
                 {
                   'layerId': '8',
                   'layerFilter': 'Total_CSO_Volume > 5000000',
-                  'initialSettings': { 'visible': 'yes' },
                   'style': {
                     'Point': {
                       'styleId': 'classBreaksId',
@@ -864,14 +859,14 @@
                           'width': 0.5
                         }
                       },
-                      'defaultVisible': 'yes',
+                      'defaultVisible': true,
                       'field': 'Total_CSO_Volume',
                       'classBreakStyleInfo': [
                         {
                           'label': '0 m3',
                           'minValue': 0,
                           'maxValue': 0,
-                          'visible': 'yes',
+                          'visible': true,
                           'settings': {
                             'symbol': 'circle',
                             'type': 'simpleSymbol',
@@ -909,7 +904,7 @@
                           'label': '> 5,000,000 - ≤ 10,000,000 m3',
                           'minValue': 5000000,
                           'maxValue': 10000000,
-                          'visible': 'always',
+                          'visible': true,
                           'settings': {
                             'symbol': 'circle',
                             'type': 'simpleSymbol',
@@ -1062,13 +1057,42 @@
     <script src="layerlib.js"></script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init(function (mapId) {
-        console.log(`api is ready for ${mapId}`);
-
+      cgpv.init((mapId) => {
         if (mapId === 'allMaps') {
-          createTableOfFilter('LYR1');
-          createTableOfFilter('LYR2');
-          createTableOfFilter('LYR3');
+          // Wire a handle when all queries done after a map click
+          cgpv.api.maps['LYR1'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
+            const { coordinate, resultSet, eventType } = payload;
+            createInfoTable('LYR1', 'ResultSetId1', resultSet, eventType);
+          });
+          cgpv.api.maps['LYR1'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+            const { resultSet } = payload;
+            displayLegend('LegendsId1', resultSet);
+          });
+
+          // Wire a handle when all queries done after a map click
+          cgpv.api.maps['LYR2'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
+            const { coordinate, resultSet, eventType } = payload;
+            createInfoTable('LYR2', 'ResultSetId2', resultSet, eventType);
+          });
+          cgpv.api.maps['LYR2'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+            const { resultSet } = payload;
+            displayLegend('LegendsId2', resultSet);
+          });
+
+          // Wire a handle when all queries done after a map click
+          cgpv.api.maps['LYR3'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
+            const { coordinate, resultSet, eventType } = payload;
+            createInfoTable('LYR3', 'ResultSetId3', resultSet, eventType);
+          });
+          cgpv.api.maps['LYR3'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+            const { resultSet } = payload;
+            displayLegend('LegendsId3', resultSet);
+          });
+
+          listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
+          listenToLegendLayerSetChanges('HLYR2-state', 'LYR2');
+          listenToLegendLayerSetChanges('HLYR3-state', 'LYR3');
+          listenToLegendLayerSetChanges('HLYR4-state', 'LYR4');
 
           if (cgpv.api.maps.LYR2.layer.registeredLayers['historical-flood/0'].layerStatus === 'loaded') {
             const field1 = cgpv.api.maps.LYR2.layer.geoviewLayer('historical-flood/0').getTemporalDimension().field;
@@ -1129,78 +1153,19 @@
               }
             }, 1000)
           }
+
+          // create snippets
+          createCodeSnippet();
+          createConfigSnippet();
+        }
+      }, (mapId) => {
+        if (mapId === 'allMaps') {
+          // Layers are loaded
+          createTableOfFilter('LYR1');
+          createTableOfFilter('LYR2');
+          createTableOfFilter('LYR3');
         }
       });
-
-      // LYR1 ===================================================================================================================
-      cgpv.api.event.on(
-        cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-        (payload) => {
-          const { layerSetId, resultSet, eventType } = payload;
-          createInfoTable('LYR1', 'ResultSetId1', resultSet, eventType);
-        },
-        'LYR1/click/FeatureInfoLayerSet'
-      );
-
-      cgpv.api.event.on(
-        cgpv.api.eventNames.GET_LEGENDS.LEGEND_LAYERSET_UPDATED,
-        (payload) => {
-          const { resultSet } = payload;
-          displayLegend('LegendsId1', resultSet);
-        },
-        'LYR1/LegendsLayerSet'
-      );
-
-      listenToLegendLayerSetChanges('HLYR1-state', 'LYR1/LegendsLayerSet');
-
-      // LYR2 ===================================================================================================================
-      cgpv.api.event.on(
-        cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-        (payload) => {
-          const { layerSetId, resultSet, eventType } = payload;
-          createInfoTable('LYR2', 'ResultSetId2', resultSet, eventType);
-        },
-        'LYR2/click/FeatureInfoLayerSet'
-      );
-
-      cgpv.api.event.on(
-        cgpv.api.eventNames.GET_LEGENDS.LEGEND_LAYERSET_UPDATED,
-        (payload) => {
-          const { resultSet } = payload;
-          displayLegend('LegendsId2', resultSet);
-        },
-        'LYR2/LegendsLayerSet'
-      );
-
-      listenToLegendLayerSetChanges('HLYR2-state', 'LYR2/LegendsLayerSet');
-
-      // LYR3 ===================================================================================================================
-      cgpv.api.event.on(
-        cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-        (payload) => {
-          const { layerSetId, resultSet, eventType } = payload;
-          createInfoTable('LYR3', 'ResultSetId3', resultSet, eventType);
-        },
-        'LYR3/click/FeatureInfoLayerSet'
-      );
-
-      cgpv.api.event.on(
-        cgpv.api.eventNames.GET_LEGENDS.LEGEND_LAYERSET_UPDATED,
-        (payload) => {
-          const { resultSet } = payload;
-          displayLegend('LegendsId3', resultSet);
-        },
-        'LYR3/LegendsLayerSet'
-      );
-
-      listenToLegendLayerSetChanges('HLYR3-state', 'LYR3/LegendsLayerSet');
-
-      // LYR4 ===================================================================================================================
-      listenToLegendLayerSetChanges('HLYR4-state', 'LYR4/LegendsLayerSet');
-
-      //create snippets
-      createCodeSnippet();
-      createConfigSnippet();
     </script>
   </body>
 </html>

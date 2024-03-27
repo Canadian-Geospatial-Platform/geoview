@@ -174,7 +174,9 @@
   "exportModal": {
     "title": "Export Map as PNG",
     "cancelBtn": "Cancel",
-    "exportBtn": "Export"
+    "exportBtn": "Export",
+    "exportTitle": "Title",
+    "approx": "approx"
   },
   "geolocator": {
     "search": "Search",

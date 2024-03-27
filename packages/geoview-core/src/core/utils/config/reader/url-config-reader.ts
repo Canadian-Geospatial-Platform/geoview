@@ -10,9 +10,9 @@ import {
 } from '@/geo/map/map-schema-types';
 import { Cast, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { UUIDmapConfigReader } from './uuid-config-reader';
-import { ConfigValidation } from '../config-validation';
-import { logger } from '../../logger';
-import { getLocalizedMessage, replaceParams, showError } from '@/app';
+import { ConfigValidation } from '@/core/utils/config/config-validation';
+import { logger } from '@/core/utils/logger';
+import { getLocalizedMessage, replaceParams, showError } from '@/core/utils/utilities';
 
 /**
  * A class to process GeoView map features configuration from a URL.

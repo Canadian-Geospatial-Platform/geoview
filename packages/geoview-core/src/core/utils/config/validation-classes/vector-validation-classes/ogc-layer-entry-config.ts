@@ -1,6 +1,6 @@
 import { TypeSourceOgcFeatureInitialConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { TypeLocalizedString } from '@/geo/map/map-schema-types';
-import { VectorLayerEntryConfig } from '../vector-layer-entry-config';
+import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 
 export class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
   declare source: TypeSourceOgcFeatureInitialConfig;
