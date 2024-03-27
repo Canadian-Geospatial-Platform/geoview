@@ -1,5 +1,7 @@
 import { GeoChart as GeoChartComponent, GeoChartConfig, ChartType, GeoChartDefaultColors, SchemaValidator, GeoChartAction } from 'geochart';
-import { TypeWindow, TypeLayerEntryConfig, useAppDisplayLanguageById } from 'geoview-core';
+import { useAppDisplayLanguageById } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
+import { TypeWindow } from 'geoview-core/src/core/types/global-types';
+import { TypeLayerEntryConfig } from 'geoview-core/src/geo/map/map-schema-types';
 import { logger } from 'geoview-core/src/core/utils/logger';
 import { TypeLayerData, TypeFeatureInfoEntry } from 'geoview-core/src/geo/utils/layer-set';
 import { findLayerDataAndConfigFromQueryResults, loadDatasources } from './geochart-parsing';

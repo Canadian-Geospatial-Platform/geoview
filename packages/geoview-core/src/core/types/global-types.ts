@@ -12,6 +12,9 @@ import { TypeDisplayLanguage, TypeMapFeaturesInstance } from '@/geo/map/map-sche
 
 export { getGeoViewStore } from '@/core/stores/stores-managers';
 
+export type { SelectChangeEvent } from '@mui/material';
+export type { AnySchemaObject } from 'ajv';
+
 /** ******************************************************************************************************************************
  * Definition of the map feature configuration according to what can be specified in the map div and in the schema for the
  * type extension TypeMapFeaturesInstance.
@@ -55,7 +58,6 @@ export type TypeCGPV = {
   createRoot: typeof createRoot;
   ui: TypeCGPVUI;
   logger: typeof logger;
-  types: typeof import('./external-types');
 };
 
 /** ******************************************************************************************************************************

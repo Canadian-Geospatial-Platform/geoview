@@ -346,11 +346,13 @@ export function Appbar(): JSX.Element {
         // display the panels in the list
         return (
           <Fragment key={groupName}>
-            {Object.keys(buttonPanels).map((buttonPanelsKey) => {
+            {Object.keys(buttonPanels).map((buttonPanelsKey, index) => {
               const buttonPanel = buttonPanels[buttonPanelsKey];
+
               return buttonPanel?.panel ? (
                 <Panel
-                  key={buttonPanel.panel.panelId}
+                  // eslint-disable-next-line react/no-array-index-key
+                  key={`panel-${index}`}
                   panel={buttonPanel.panel}
                   button={buttonPanel.button}
                   onPanelOpened={buttonPanel.onPanelOpened}

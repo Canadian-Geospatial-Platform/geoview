@@ -116,10 +116,8 @@
           cgpv.api.event.on(
             cgpv.api.eventNames.MAP.EVENT_MAP_MOVE_END,
             (payload) => {
-              if (cgpv.types.cgpv.types.payloadIsALngLat(payload)) {
                 mapsPosition[0].innerHTML =
                   mapsPosition[0].innerHTML = `<p>Map ${payload.handlerName} with latitude ${payload.lnglat[1]} and longitude ${payload.lnglat[0]}</p>`;
-              }
             },
             'EVNT1'
           );

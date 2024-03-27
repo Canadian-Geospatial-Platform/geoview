@@ -160,14 +160,14 @@
           // set min max
           function setSliderMinMax() {
             cgpv.api.event.emit(
-              cgpv.types.sliderPayload(cgpv.api.eventNames.SLIDER.EVENT_SLIDER_SET_MINMAX, 'UI1-slider1', { min: 2, max: 16 })
+              { event: cgpv.api.eventNames.SLIDER.EVENT_SLIDER_SET_MINMAX, handlerName: 'UI1-slider1', sliderValues: { min: 2, max: 16 }}
             );
           }
           document.getElementById('sliderminmax').addEventListener('click', setSliderMinMax, false);
 
           // set values
           function setSliderValues() {
-            cgpv.api.event.emit(cgpv.types.sliderPayload(cgpv.api.eventNames.SLIDER.EVENT_SLIDER_SET_VALUES, 'UI1-slider1', { value: 8 }));
+            cgpv.api.event.emit({ event: cgpv.api.eventNames.SLIDER.EVENT_SLIDER_SET_VALUES, handlerName: 'UI1-slider1', sliderValues: { value: 8 } });
           }
           document.getElementById('slidervalues').addEventListener('click', setSliderValues, false);
 
@@ -201,11 +201,9 @@
           cgpv.api.event.on(
             cgpv.api.eventNames.SLIDER.EVENT_SLIDER_CHANGE,
             (payload) => {
-              if (cgpv.types.payloadIsASlider(payload)) {
                 sliderPosition2[0].innerHTML = `<p>Slider min ${payload.sliderValues.min}, max ${payload.sliderValues.max}, values ${
                   payload.sliderValues.value
                 } and active thumb ${payload.sliderValues.activeThumb === 0 ? 'left' : 'right'}</p>`;
-              }
             },
             'UI1-slider2'
           );

@@ -11,17 +11,17 @@ import '@/ui/style/vendor.css';
 import * as UI from '@/ui';
 
 import AppStart from '@/core/app-start';
-import * as types from '@/core/types/external-types';
 import { API } from '@/api/api';
-
+import { Cast, TypeCGPV, TypeWindow } from '@/core/types/global-types';
 import { Config } from '@/core/utils/config/config';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { MapFeaturesPayload } from '@/api/events/payloads';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
 import { logger } from '@/core/utils/logger';
 
-// The next export allow to import the external-types from 'geoview-core' from outside of the geoview-core package.
+// The next export allow to import the exernal-types from 'geoview-core' from outside of the geoview-core package.
 export * from './core/types/external-types';
+
 export const api = new API();
 
 const reactRoot: Record<string, Root> = {};
@@ -228,9 +228,9 @@ async function init(callbackMapInit?: (mapId: string) => void, callbackMapLayers
 }
 
 // cgpv object to be exported with the api for outside use
-export const cgpv: types.TypeCGPV = {
+export const cgpv: TypeCGPV = {
   init,
-  api: types.Cast<API>(api),
+  api: Cast<API>(api),
   react: React,
   createRoot,
   ui: {
@@ -240,11 +240,10 @@ export const cgpv: types.TypeCGPV = {
     elements: UI,
   },
   logger,
-  types,
 };
 
 // freeze variable name so a variable with same name can't be defined from outside
 Object.freeze(cgpv);
 
 // export the cgpv globally
-types.Cast<types.TypeWindow>(window).cgpv = cgpv;
+Cast<TypeWindow>(window).cgpv = cgpv;
