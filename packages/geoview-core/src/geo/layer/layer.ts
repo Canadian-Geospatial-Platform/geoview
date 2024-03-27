@@ -139,7 +139,7 @@ export class LayerApi {
       }
     };
 
-    if ((geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId) {
+    if ((geoviewLayerConfig as TypeGeoviewLayerConfig)?.geoviewLayerId) {
       if ((geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig.length > 1) {
         const layerPath = `${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}/${
           (geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId
@@ -154,14 +154,12 @@ export class LayerApi {
         });
       } else {
         const layerEntryConfig = (geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig[0];
-        if(layerEntryConfig && layerEntryConfig.layerPath !== undefined) {
+        if (layerEntryConfig && layerEntryConfig.layerPath !== undefined) {
           addSubLayerPathToLayerOrder(layerEntryConfig, layerEntryConfig.layerPath);
         }
       }
-    } else {
-      if(geoviewLayerConfig && (geoviewLayerConfig as TypeLayerEntryConfig).layerPath !== undefined) {
-        addSubLayerPathToLayerOrder(geoviewLayerConfig as TypeLayerEntryConfig, (geoviewLayerConfig as TypeLayerEntryConfig).layerPath);
-      }
+    } else if (geoviewLayerConfig && (geoviewLayerConfig as TypeLayerEntryConfig).layerPath !== undefined) {
+      addSubLayerPathToLayerOrder(geoviewLayerConfig as TypeLayerEntryConfig, (geoviewLayerConfig as TypeLayerEntryConfig).layerPath);
     }
 
     return newOrderedLayerInfos;

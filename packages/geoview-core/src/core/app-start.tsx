@@ -88,7 +88,7 @@ function AppStart(props: AppStartProps): JSX.Element {
         <MapContext.Provider value={mapContextValue}>
           <ThemeProvider theme={getTheme(theme)}>
             <StrictMode>
-            <Shell />
+              <Shell />
             </StrictMode>
           </ThemeProvider>
         </MapContext.Provider>

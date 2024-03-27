@@ -95,7 +95,7 @@ export class LegendsLayerSet extends LayerSet {
    */
   private changeLayerStatusOfParentsRecursive(currentLayerConfig: TypeLayerEntryConfig, currentLayerStatus: TypeLayerStatus): void {
     // If layer has a parent
-    if (currentLayerConfig.parentLayerConfig) {
+    if (currentLayerConfig?.parentLayerConfig) {
       // If the current status to set is at least loaded (or error), make the parent loaded
       if (['loaded', 'error'].includes(currentLayerStatus)) {
         // Get the parent config
@@ -122,7 +122,7 @@ export class LegendsLayerSet extends LayerSet {
       const layerConfig = this.layerApi.registeredLayers[layerPath];
       if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerPath.split('.')[1]) !== -1) {
         MapEventProcessor.replaceOrderedLayerInfo(this.mapId, layerConfig, layerPath.split('.')[1]);
-      } else if (layerConfig.parentLayerConfig) {
+      } else if (layerConfig?.parentLayerConfig) {
         const parentLayerPathArray = layerPath.split('/');
         parentLayerPathArray.pop();
         const parentLayerPath = parentLayerPathArray.join('/');
