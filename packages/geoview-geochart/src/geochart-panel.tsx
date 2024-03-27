@@ -256,6 +256,8 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
                 if (layerPath === selectedLayerPath) {
                   return renderChart(layerChartConfig as GeoViewGeoChartConfig<ChartType>, sx, index.toString());
                 }
+                // eslint-disable-next-line react/jsx-no-useless-fragment
+                return <></>;
               })}
             </Box>
           )}
