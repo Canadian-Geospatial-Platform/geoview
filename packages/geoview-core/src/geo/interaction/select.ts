@@ -6,7 +6,7 @@ import { Geometry } from 'ol/geom';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
-import { GeoUtilities } from '@/geo/utils/utilities';
+import { convertTypeFeatureStyleToOpenLayersStyle } from '@/geo/utils/utilities';
 
 import { Interaction, InteractionOptions } from './interaction';
 
@@ -43,7 +43,7 @@ export class Select extends Interaction {
     // TODO: Enhancements - Add support for more selection options
     const olOptions: OLSelectOptions = {
       features: options.features,
-      style: new GeoUtilities().convertTypeFeatureStyleToOpenLayersStyle(options.style),
+      style: convertTypeFeatureStyleToOpenLayersStyle(options.style),
       hitTolerance: options.hitTolerance || 0,
     };
 
