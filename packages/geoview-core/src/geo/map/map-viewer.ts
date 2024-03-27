@@ -12,6 +12,7 @@ import { Extent } from 'ol/extent';
 import BaseLayer from 'ol/layer/Base';
 import Collection from 'ol/Collection';
 import { Source } from 'ol/source';
+import { Coordinate } from 'ol/coordinate';
 
 import queryString from 'query-string';
 import { removeGeoviewStore } from '@/core/stores/stores-managers';
@@ -51,6 +52,7 @@ import {
   TypeValidMapProjectionCodes,
   TypeMapMouseInfo,
 } from '@/geo/map/map-schema-types';
+import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 import { TypeMapFeaturesConfig, TypeHTMLElement, TypeJsonObject } from '@/core/types/global-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
@@ -1347,6 +1349,58 @@ export class MapViewer {
   }
 
   // #endregion
+
+  /**
+   * Check if north is visible. This is not a perfect solution and is more a work around
+   *
+   * @returns {boolean} true if visible, false otherwise
+   */
+  checkNorth(): boolean {
+    // Check the container value for top middle of the screen
+    // Convert this value to a lat long coordinate
+    const pointXY = [this.map.getSize()![0] / 2, 1];
+    const pt = api.projection.transformToLonLat(this.map.getCoordinateFromPixel(pointXY), this.map.getView().getProjection());
+
+    // If user is pass north, long value will start to be positive (other side of the earth).
+    // This will work only for LCC Canada.
+    return pt ? pt[0] > 0 : true;
+  }
+
+  /**
+   * Get north arrow bearing. Angle use to rotate north arrow for non Web Mercator projection
+   * https://www.movable-type.co.uk/scripts/latlong.html
+   *
+   * @returns {string} the arrow angle
+   */
+  getNorthArrowAngle(): string {
+    try {
+      // north value
+      const pointA = { x: NORTH_POLE_POSITION[1], y: NORTH_POLE_POSITION[0] };
+
+      // map center (we use botton parallel to introduce less distortion)
+      const extent = this.map.getView().calculateExtent();
+      const center: Coordinate = api.projection.transformToLonLat(
+        [(extent[0] + extent[2]) / 2, extent[1]],
+        this.map.getView().getProjection()
+      );
+      const pointB = { x: center[0], y: center[1] };
+
+      // set info on longitude and latitude
+      const dLon = ((pointB.x - pointA.x) * Math.PI) / 180;
+      const lat1 = (pointA.y * Math.PI) / 180;
+      const lat2 = (pointB.y * Math.PI) / 180;
+
+      // calculate bearing
+      const y = Math.sin(dLon) * Math.cos(lat2);
+      const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+      const bearing = (Math.atan2(y, x) * 180) / Math.PI;
+
+      // return angle (180 is pointing north)
+      return ((bearing + 360) % 360).toFixed(1);
+    } catch (error) {
+      return '180.0';
+    }
+  }
 }
 
 /**
