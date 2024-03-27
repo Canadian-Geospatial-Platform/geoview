@@ -11,7 +11,7 @@ type DependencyLog = {
 
 /**
  * Gets a random color
- * @returns string hex color value
+ * @returns {string} A random hex color value
  */
 function getRandomColor(): string {
   const letters = '0123456789ABCDEF';
@@ -24,8 +24,8 @@ function getRandomColor(): string {
 
 /**
  * Stringifies a value for logging purposes
- * @param dependencyItem unknown The value to stringify
- * @returns string stringified value (when possible)
+ * @param {unknown} dependencyItem - The value to stringify
+ * @returns {string | unknown} Stringified value (when possible)
  */
 function stringifyValue(dependencyItem: unknown): string | unknown {
   try {
@@ -43,8 +43,8 @@ function stringifyValue(dependencyItem: unknown): string | unknown {
 
 /**
  * Helper function to create a hook on a hot reference
- * @param {unknown} value any The value to hook in a reference
- * @returns ref The reference to the value
+ * @param {unknown} value - Any The value to hook in a reference
+ * @returns {React<useRef>} The React reference to the value
  */
 // ? unknown type cannot be use, need to escape
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -56,6 +56,10 @@ function useHotRefs(value: unknown): any {
   return fnRef;
 }
 
+/**
+ * Helper function to write to console
+ * @param {unknown[]} messages - The messages to write to console
+ */
 function writeConsole(...messages: unknown[]): void {
   // eslint-disable-next-line no-console
   console.log(...messages);
@@ -63,9 +67,9 @@ function writeConsole(...messages: unknown[]): void {
 
 /**
  * Exposes a function to help debug react hooks and their dependencies
- * @param hookId string An indentifier for the given hook
- * @param dependency unknown[] The dependency array
- * @param dependencyNames? string[] The depedency names for each dependency in the array (strictly for user readability)
+ * @param {string} hookId - An indentifier for the given hook
+ * @param {unknown[]} dependency - The dependency array
+ * @param {string[]} dependencyNames? - The optional depedency names for each dependency in the array (strictly for user readability)
  */
 export const useWhatChanged = (hookId: string, dependency?: unknown[], dependencyNames?: string[]): void => {
   // This ref is responsible for book keeping of the old value

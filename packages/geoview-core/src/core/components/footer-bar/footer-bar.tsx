@@ -297,7 +297,7 @@ export function FooterBar(): JSX.Element | null {
     api.event.onRemoveFooterBarPanel(mapId, handleRemoveTab);
 
     return () => {
-      // Unwire
+      // Unregister events
       api.event.offCreateFooterBarPanel(mapId, handleAddTab);
       api.event.offRemoveFooterBarPanel(mapId, handleRemoveTab);
     };

@@ -15,115 +15,115 @@ export type TranslateOptions = InteractionOptions & {
 };
 
 /**
- * Class used to handle functions for selecting drawings on a map
- *
+ * Class used to translate drawings on a map.
+ * @class
+ * @extends {Interaction}
  * @exports
- * @class Translate
  */
 export class Translate extends Interaction {
-  // The embedded Open Layers Translate component
+  // The embedded OpenLayers Translate component
   #ol_translate: OLTranslate;
 
-  // Keep all callback delegates references
+  // Keep all callback delegates references for translate start event
   #onTranslateStartedHandlers: TranslateDelegate[] = [];
 
-  // Keep all callback delegates references
+  // Keep all callback delegates references for translate end event
   #onTranslateEndedHandlers: TranslateDelegate[] = [];
 
   /**
-   * Initialize Translate component
-   * @param {TranslateOptions} options object to configure the initialization of the Translate interaction
+   * Initializes the Translate component.
+   * @param {TranslateOptions} options - Object to configure the initialization of the Translate interaction.
    */
   constructor(options: TranslateOptions) {
     super(options);
 
     // The OpenLayers Translate options
-    // TODO: Enhancements - Add support for more translating options
     const olOptions: OLTranslateOptions = {};
 
-    // If a list of features is specified
+    // If a list of features is specified, set the features to translate
     if (options.features) {
-      // Set the features to snap to
       olOptions.features = options.features;
     }
 
-    // Activate the OpenLayers Translate module
+    // Instantiate the OpenLayers Translate interaction
     this.#ol_translate = new OLTranslate(olOptions);
 
-    // Wire handler when drawing is changed
-    this.#ol_translate.on('translatestart', this.emitTranslateStarted);
-    this.#ol_translate.on('translateend', this.emitTranslateEnded);
+    // Register handler when translation starts/ends
+    this.#ol_translate.on('translatestart', this.#emitTranslateStarted.bind(this));
+    this.#ol_translate.on('translateend', this.#emitTranslateEnded.bind(this));
   }
 
   /**
-   * Starts the interaction on the map
+   * Starts the interaction on the map.
    */
-  public startInteraction() {
-    // Redirect
+  startInteraction(): void {
+    // Redirect to super method to start interaction
     super.startInteraction(this.#ol_translate);
   }
 
   /**
-   * Stops the interaction on the map
+   * Stops the interaction on the map.
    */
-  public stopInteraction() {
-    // Redirect
+  stopInteraction(): void {
+    // Redirect to super method to stop interaction
     super.stopInteraction(this.#ol_translate);
   }
 
   /**
-   * Emits an event to all handlers.
-   * @param {OLTranslateEvent} event The event to emit
+   * Emits the translate started event the all registered handlers.
+   * @param {OLTranslateEvent} event - The event to emit.
+   * @private
    */
-  emitTranslateStarted = (event: OLTranslateEvent) => {
-    // Emit the event for all handlers
+  #emitTranslateStarted(event: OLTranslateEvent): void {
+    // Emit the translatestarted event
     EventHelper.emitEvent(this, this.#onTranslateStartedHandlers, event);
-  };
+  }
 
   /**
-   * Wires an event handler.
-   * @param {TranslateDelegate} callback The callback to be executed whenever the event is emitted
+   * Registers an event handler for translate started event.
+   * @param {TranslateDelegate} callback - The callback to be executed whenever the event is emitted.
    */
-  onTranslateStarted = (callback: TranslateDelegate): void => {
-    // Wire the event handler
+  onTranslateStarted(callback: TranslateDelegate): void {
+    // Register the translatestarted event callback
     EventHelper.onEvent(this.#onTranslateStartedHandlers, callback);
-  };
+  }
 
   /**
-   * Unwires an event handler.
-   * @param {TranslateDelegate} callback The callback to stop being called whenever the event is emitted
+   * Unregisters an event handler for translate started event.
+   * @param {TranslateDelegate} callback - The callback to stop being called whenever the event is emitted.
    */
-  offTranslateStarted = (callback: TranslateDelegate): void => {
-    // Unwire the event handler
+  offTranslateStarted(callback: TranslateDelegate): void {
+    // Unregister the translatestarted event callback
     EventHelper.offEvent(this.#onTranslateStartedHandlers, callback);
-  };
+  }
 
   /**
-   * Emits an event to all handlers.
-   * @param {OLTranslateEvent} event The event to emit
+   * Emits the translate ended event the all registered handlers.
+   * @param {OLTranslateEvent} event - The event to emit.
+   * @private
    */
-  emitTranslateEnded = (event: OLTranslateEvent) => {
-    // Emit the event for all handlers
+  #emitTranslateEnded(event: OLTranslateEvent): void {
+    // Emit the translateended event
     EventHelper.emitEvent(this, this.#onTranslateEndedHandlers, event);
-  };
+  }
 
   /**
-   * Wires an event handler.
-   * @param {SelectChangedDeTranslateDelegatelegate} callback The callback to be executed whenever the event is emitted
+   * Registers an event handler for translate ended event.
+   * @param {TranslateDelegate} callback - The callback to be executed whenever the event is emitted.
    */
-  onTranslateEnded = (callback: TranslateDelegate): void => {
-    // Wire the event handler
+  onTranslateEnded(callback: TranslateDelegate): void {
+    // Register the translateended event callback
     EventHelper.onEvent(this.#onTranslateEndedHandlers, callback);
-  };
+  }
 
   /**
-   * Unwires an event handler.
-   * @param {TranslateDelegate} callback The callback to stop being called whenever the event is emitted
+   * Unregisters an event handler for translate ended event.
+   * @param {TranslateDelegate} callback - The callback to stop being called whenever the event is emitted.
    */
-  offTranslateEnded = (callback: TranslateDelegate): void => {
-    // Unwire the event handler
+  offTranslateEnded(callback: TranslateDelegate): void {
+    // Unregister the translateended event callback
     EventHelper.offEvent(this.#onTranslateEndedHandlers, callback);
-  };
+  }
 }
 
 /**
