@@ -4,7 +4,7 @@ import { shiftKeyOnly } from 'ol/events/condition';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
-import { GeoUtilities } from '@/geo/utils/utilities';
+import { convertTypeFeatureStyleToOpenLayersStyle } from '@/geo/utils/utilities';
 
 import { Interaction, InteractionOptions } from './interaction';
 
@@ -39,7 +39,7 @@ export class Extent extends Interaction {
     // The OpenLayers Extent options
     const olOptions: OLExtentOptions = {
       condition: shiftKeyOnly,
-      boxStyle: new GeoUtilities().convertTypeFeatureStyleToOpenLayersStyle(options.boxStyle),
+      boxStyle: convertTypeFeatureStyleToOpenLayersStyle(options.boxStyle),
       pixelTolerance: options.pixelTolerance || 0,
     };
 

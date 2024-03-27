@@ -220,12 +220,13 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         });
 
         // on map center coord change, update north arrow parameters
+        // TODO: this will be refactor by the work done by Alex
         set({
           mapState: {
             ...get().mapState,
             northArrowElement: {
-              degreeRotation: api.geoUtilities.getNorthArrowAngle(get().mapState.mapElement!),
-              isNorthVisible: api.geoUtilities.checkNorth(get().mapState.mapElement!),
+              degreeRotation: api.maps[get().mapId].getNorthArrowAngle(),
+              isNorthVisible: api.maps[get().mapId].checkNorth(),
             },
           },
         });
