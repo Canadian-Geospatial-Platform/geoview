@@ -26,6 +26,7 @@ export function IconButton(props: TypeIconButtonProps): JSX.Element {
     size,
     disabled,
     color,
+    ...rest
   } = props;
 
   const { t } = useTranslation<string>();
@@ -44,6 +45,7 @@ export function IconButton(props: TypeIconButtonProps): JSX.Element {
         ref={iconRef}
         disabled={disabled}
         color={color}
+        {...rest}
       >
         {children && children}
       </MaterialIconButton>

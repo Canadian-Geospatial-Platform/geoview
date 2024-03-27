@@ -1,14 +1,16 @@
-import { ChangeEvent, useCallback, useRef, useState } from 'react';
+import { ChangeEvent, useCallback, useEffect, useRef, useState, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import debounce from 'lodash/debounce';
 import { useTheme } from '@mui/material';
 import { CloseIcon, SearchIcon, AppBar, Box, Divider, IconButton, ProgressBar, Toolbar } from '@/ui';
+import { FocusTrapElement } from '@/core/components/common/focus-trap-element';
 import { StyledInputField, sxClasses } from './geolocator-style';
 import { OL_ZOOM_DURATION } from '@/core/utils/constant';
-import { useUIAppbarGeolocatorActive } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIAppbarGeolocatorActive, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useAppGeolocatorServiceURL, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { GeolocatorResult } from './geolocator-result';
 import { logger } from '@/core/utils/logger';
+import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 export interface GeoListItem {
   key: string;
@@ -27,6 +29,7 @@ export function Geolocator() {
   const { t } = useTranslation();
 
   const theme = useTheme();
+  const { setMapKeyboardPanInteractions } = useMapStoreActions();
 
   // internal state
   const [data, setData] = useState<GeoListItem[]>();
@@ -41,8 +44,10 @@ export function Geolocator() {
 
   // set the active (visible) or not active (hidden) from geolocator button click
   const active = useUIAppbarGeolocatorActive();
+  const { setGeolocatorActive } = useUIStoreActions();
 
   const urlRef = useRef<string>(`${geolocatorServiceURL}&lang=${displayLanguage}`);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   /**
    * Checks if search term is decimal degree coordinate and return geo list item.
@@ -110,6 +115,7 @@ export function Geolocator() {
    */
   const resetSearch = useCallback(() => {
     setIsSearchInputVisible(false);
+    setGeolocatorActive(false);
     setSearchValue('');
     setData(undefined);
   }, []);
@@ -148,39 +154,60 @@ export function Geolocator() {
     }
   };
 
-  return (
+  const handleKeyDown = (event: KeyboardEvent) => {
+    // disables map interactions (arrow keys won't move the map)
+    setMapKeyboardPanInteractions(0);
+
+    if (event.key === 'Escape') {
+      setGeolocatorActive(false);
+    }
+  };
+
+  useEffect(() => {
+    if (searchInputRef.current && active) {
+      searchInputRef.current?.click();
+    }
+    setSearchValue(active ? searchValue : '');
+
+    if (active) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active]);
+
+  const searchPanelContent: ReactNode = (
     <Box sx={sxClasses.root} visibility={active ? 'visible' : 'hidden'} id="geolocator-search">
       <Box sx={sxClasses.geolocator}>
         <AppBar position="static">
           <Toolbar
             variant="dense"
-            // attach event handler to toolbar when search input is hidden.
             {...(!isSearchInputVisible && { onClick: () => setIsSearchInputVisible(true) })}
             sx={{ cursor: !isSearchInputVisible ? 'pointer' : 'default' }}
           >
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                // cancel the debounce fn, when enter key clicked before wait time.
                 doRequest.cancel();
                 getGeolocations(searchValue);
               }}
             >
-              {isSearchInputVisible && (
-                <StyledInputField placeholder={t('geolocator.search')!} autoFocus onChange={onChange} value={searchValue} />
-              )}
+              <StyledInputField ref={searchInputRef} placeholder={t('geolocator.search')!} onChange={onChange} value={searchValue} />
 
               <Box sx={{ display: 'flex', marginLeft: 'auto', alignItems: 'center' }}>
                 <IconButton
+                  tabIndex={0}
                   size="small"
                   edge="end"
                   color="inherit"
                   sx={{ mr: 4 }}
                   disabled={isSearchInputVisible && !searchValue.length}
                   onClick={() => {
-                    if (!isSearchInputVisible) {
-                      setIsSearchInputVisible(true);
-                    } else if (searchValue.length) {
+                    if (searchValue.length) {
                       doRequest.cancel();
                       getGeolocations(searchValue);
                     }
@@ -191,7 +218,7 @@ export function Geolocator() {
                 {isSearchInputVisible && (
                   <>
                     <Divider orientation="vertical" variant="middle" flexItem />
-                    <IconButton size="small" edge="end" color="inherit" sx={{ mr: 2, ml: 4 }} onClick={resetSearch}>
+                    <IconButton tabIndex={0} size="small" edge="end" color="inherit" sx={{ mr: 2, ml: 4 }} onClick={resetSearch}>
                       <CloseIcon fontSize={theme.palette.geoViewFontSize.sm} />
                     </IconButton>
                   </>
@@ -213,4 +240,6 @@ export function Geolocator() {
       )}
     </Box>
   );
+
+  return <FocusTrapElement id="search-panel" basic active={active} content={searchPanelContent} />;
 }

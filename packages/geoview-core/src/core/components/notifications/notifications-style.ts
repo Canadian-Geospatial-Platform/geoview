@@ -19,8 +19,8 @@ export const getSxClasses = (theme: Theme) => ({
     fontWeight: '700',
     padding: '10px',
     color: theme.palette.geoViewColor.textColor.main,
-    borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[300]}}`,
     marginBottom: '10px',
+    marginTop: '5px',
   },
   notificationsList: {
     overflowY: 'auto',

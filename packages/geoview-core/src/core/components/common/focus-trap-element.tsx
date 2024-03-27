@@ -11,6 +11,8 @@ import { logger } from '@/core/utils/logger';
 type FocusTrapElementProps = {
   id: string;
   content: ReactNode;
+  basic?: boolean;
+  active?: boolean;
 };
 
 /**
@@ -19,7 +21,8 @@ type FocusTrapElementProps = {
  * @returns {JSX.Element} the geolocator button
  */
 export function FocusTrapElement(props: FocusTrapElementProps): JSX.Element {
-  const { id, content } = props;
+  // We can set basic to be true if we don't have to have Exit button and enabling "open" props in focus trap is based on "active" props
+  const { id, content, basic, active } = props;
 
   const { t } = useTranslation<string>();
 
@@ -54,19 +57,28 @@ export function FocusTrapElement(props: FocusTrapElementProps): JSX.Element {
   // #endregion
 
   return (
-    <FocusTrap open={id === focusItem.activeElementId}>
-      <Box>
-        <Button
-          id={`${id}-exit-btn`}
-          type="text"
-          autoFocus
-          onClick={handleClose}
-          sx={{ display: activeTrapGeoView ? 'block' : 'none', width: '95%', margin: '10px auto' }}
-        >
-          {t('general.exit')}
-        </Button>
-        {content}
-      </Box>
+    <FocusTrap open={basic ? (active as boolean) : id === focusItem.activeElementId}>
+      {!basic ? (
+        <Box>
+          <Button
+            id={`${id}-exit-btn`}
+            type="text"
+            autoFocus
+            onClick={handleClose}
+            sx={{ display: activeTrapGeoView ? 'block' : 'none', width: '95%', margin: '10px auto' }}
+          >
+            {t('general.exit')}
+          </Button>
+          {content}
+        </Box>
+      ) : (
+        <Box>{content}</Box>
+      )}
     </FocusTrap>
   );
 }
+
+FocusTrapElement.defaultProps = {
+  basic: false,
+  active: false,
+};
