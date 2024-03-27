@@ -250,13 +250,14 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
           onIsEnlargeClicked={handleIsEnlargeClicked}
         >
           {selectedLayerPath && (
-            <Box>
+            <Box sx={{ height: '600px' }}>
               {Object.entries(configObj).map(([layerPath, layerChartConfig], index) => {
-                const sx: React.CSSProperties = { position: 'absolute', top: '-5000px' };
+                const sx: React.CSSProperties = { position: 'absolute', top: '0px' };
                 if (layerPath === selectedLayerPath) {
-                  sx.top = '5px';
+                  return renderChart(layerChartConfig as GeoViewGeoChartConfig<ChartType>, sx, index.toString());
                 }
-                return renderChart(layerChartConfig as GeoViewGeoChartConfig<ChartType>, sx, index.toString());
+                // eslint-disable-next-line react/jsx-no-useless-fragment
+                return <></>;
               })}
             </Box>
           )}
