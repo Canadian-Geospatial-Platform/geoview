@@ -1,12 +1,12 @@
 import { useTheme } from '@mui/material/styles';
 import { TypeWindow } from 'geoview-core/src/core/types/global-types';
-import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
 import { TypeTimeSliderValues, useMapVisibleLayers, useTimeSliderLayers } from 'geoview-core/src/core/stores';
 import { Box, Paper, Typography } from 'geoview-core/src/ui';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
 import { ReactNode } from 'react';
+import { MapViewer } from 'geoview-core/src/geo/map/map-viewer';
 import { TimeSlider } from './time-slider';
 import { ConfigProps } from './time-slider-types';
 import { getSxClasses } from './time-slider-style';
@@ -25,11 +25,14 @@ interface TypeTimeSliderProps {
 export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const { mapId, configObj } = props;
   const { cgpv } = window as TypeWindow;
-  const { react } = cgpv;
+  const { api, react } = cgpv;
   const { useState, useCallback, useMemo, useEffect } = react;
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+
+  // TODO: pass the message object as props instead of the whole viewer
+  const mapViewer = api.maps[mapId] as MapViewer;
 
   // internal state
   const [selectedLayerPath, setSelectedLayerPath] = useState<string>();
@@ -118,10 +121,10 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       {!selectedLayerPath && (
         <Paper sx={{ padding: '2rem' }}>
           <Typography variant="h3" gutterBottom sx={sxClasses.timeSliderInstructionsTitle}>
-            {getLocalizedMessage(mapId, 'timeSlider.instructions')}
+            {mapViewer.getLocalizedMessage('timeSlider.instructions')}
           </Typography>
           <Typography component="p" sx={sxClasses.timeSliderInstructionsBody}>
-            {getLocalizedMessage(mapId, 'timeSlider.instructions')}
+            {mapViewer.getLocalizedMessage('timeSlider.instructions')}
           </Typography>
         </Paper>
       )}

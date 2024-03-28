@@ -28,9 +28,6 @@ export class API {
   // available event names
   eventNames = EVENT_NAMES;
 
-  // project object used to handle transforming projects
-  projection: Projection;
-
   // list of available maps
   maps: Record<string, MapViewer> = {};
 
@@ -38,22 +35,21 @@ export class API {
   plugin: Plugin;
 
   // utilities object
-  utilities = Utilities;
-
-  // geo utilities object
-  geoUtilities = GeoUtilities;
-
-  // dates utilities object
-  dateUtilities: DateMgt;
+  utilities;
 
   /**
    * Initiate the event and projection objects
    */
   constructor() {
     this.event = new Event();
-    this.projection = new Projection();
     this.plugin = new Plugin();
-    this.dateUtilities = new DateMgt();
+
+    this.utilities = {
+      core: Utilities,
+      geo: GeoUtilities,
+      projection: new Projection(),
+      date: new DateMgt(),
+    };
 
     // apply focus to element when keyboard navigation is use
     this.#manageKeyboardFocus();

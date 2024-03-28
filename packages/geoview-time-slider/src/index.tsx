@@ -108,7 +108,7 @@ class TimeSliderPlugin extends FooterPlugin {
           default: obj.temporalDimension.default,
           unitSymbol: obj.temporalDimension.unitSymbol,
           nearestValues: obj.temporalDimension.nearestValues,
-          range: api.dateUtilities.createRangeOGC(obj.temporalDimension.range as unknown as string),
+          range: api.utilities.date.createRangeOGC(obj.temporalDimension.range as unknown as string),
           singleHandle: obj.temporalDimension.singleHandle,
         };
 
