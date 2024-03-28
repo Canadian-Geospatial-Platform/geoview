@@ -6,10 +6,23 @@ export const getSxClasses = (theme: Theme) => ({
     paddingBottom: '1rem',
   },
   rightPanelContainer: {
+    overflowY: 'auto',
     border: `2px solid ${theme.palette.primary.main}`,
     borderRadius: '5px',
     backgroundColor: theme.palette.geoViewColor.bgColor.light[500],
     color: theme.palette.geoViewColor.textColor.main,
+  },
+  guideBox: {
+    ml: '30px',
+    mb: '18px',
+    td: {
+      width: 'auto',
+      paddingLeft: '15px',
+    },
+    th: {
+      textAlign: 'left',
+      paddingLeft: '15px',
+    },
   },
   footerGuideListItemText: {
     '&:hover': {
