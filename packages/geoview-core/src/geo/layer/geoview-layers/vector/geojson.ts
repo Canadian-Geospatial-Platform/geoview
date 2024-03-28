@@ -18,10 +18,10 @@ import {
   TypeBaseSourceVectorInitialConfig,
   TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
-import { getLocalizedValue } from '@/core/utils/utilities';
 import { Cast, toJsonObject } from '@/core/types/global-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { api } from '@/app';
+import { getLocalizedValue } from '@/core/utils/utilities';
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
@@ -170,14 +170,24 @@ export class GeoJSON extends AbstractGeoViewVector {
         // layerId ending, chances are that it was set by the config-validation because of an empty dataAcessPath value in the config.
         // This situation means that we want to use the dataAccessPath found in the metadata if it is set, otherwise we will keep the
         // config dataAccessPath value.
-        let metadataAccessPathRoot = getLocalizedValue(layerConfig.geoviewLayerConfig?.metadataAccessPath, this.mapId);
+        let metadataAccessPathRoot = getLocalizedValue(
+          layerConfig.geoviewLayerConfig?.metadataAccessPath as TypeLocalizedString,
+          MapEventProcessor.getDisplayLanguage(this.mapId)
+        );
         if (metadataAccessPathRoot) {
           metadataAccessPathRoot =
             metadataAccessPathRoot.split('/').length > 1 ? metadataAccessPathRoot.split('/').slice(0, -1).join('/') : './';
           const metadataAccessPathRootPlusLayerId = `${metadataAccessPathRoot}/${layerConfig.layerId}`;
           if (
-            metadataAccessPathRootPlusLayerId === getLocalizedValue(layerConfig.source?.dataAccessPath, this.mapId) &&
-            getLocalizedValue(layerMetadataFound.source?.dataAccessPath, this.mapId)
+            metadataAccessPathRootPlusLayerId ===
+              getLocalizedValue(
+                layerConfig.source?.dataAccessPath as TypeLocalizedString,
+                MapEventProcessor.getDisplayLanguage(this.mapId)
+              ) &&
+            getLocalizedValue(
+              layerMetadataFound.source?.dataAccessPath as TypeLocalizedString,
+              MapEventProcessor.getDisplayLanguage(this.mapId)
+            )
           ) {
             layerConfig.source!.dataAccessPath = { ...layerMetadataFound.source!.dataAccessPath } as TypeLocalizedString;
           }
@@ -185,7 +195,7 @@ export class GeoJSON extends AbstractGeoViewVector {
       }
 
       if (layerConfig.initialSettings?.extent)
-        layerConfig.initialSettings.extent = api.projection.transformExtent(
+        layerConfig.initialSettings.extent = api.utilities.projection.transformExtent(
           layerConfig.initialSettings.extent,
           'EPSG:4326',
           `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
@@ -209,7 +219,10 @@ export class GeoJSON extends AbstractGeoViewVector {
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
     readOptions.dataProjection = (layerConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
-    sourceOptions.url = getLocalizedValue(layerConfig.source!.dataAccessPath!, this.mapId);
+    sourceOptions.url = getLocalizedValue(
+      layerConfig.source!.dataAccessPath! as TypeLocalizedString,
+      MapEventProcessor.getDisplayLanguage(this.mapId)
+    );
     sourceOptions.format = new FormatGeoJSON();
     const vectorSource = super.createVectorSource(layerConfig, sourceOptions, readOptions);
     return vectorSource;

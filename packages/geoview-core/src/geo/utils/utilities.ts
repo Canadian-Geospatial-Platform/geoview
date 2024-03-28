@@ -6,12 +6,14 @@ import Geometry from 'ol/geom/Geometry';
 import { Style, Stroke, Fill, Circle } from 'ol/style';
 import { Color } from 'ol/color';
 import { getArea as getAreaOL } from 'ol/sphere';
+import { Extent } from 'ol/extent';
 
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { xmlToJson } from '@/core/utils/utilities';
 
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { VECTOR_LAYER } from '@/core/utils/constant';
 
 /**
  * Interface used for css style declarations
@@ -270,3 +272,41 @@ export function convertTypeFeatureStyleToOpenLayersStyle(style?: TypeFeatureStyl
   // Redirect
   return getDefaultDrawingStyle(style?.strokeColor, style?.strokeWidth, style?.fillColor);
 }
+
+/**
+ * Compare sets of extents of the same projection and return the smallest or largest set.
+ * Extents must be in OpenLayers extent format - [minx, miny, maxx, maxy]
+ *
+ * @param {Extent} extentsA First set of extents
+ * @param {Extent} extentsB Second set of extents
+ * @param {string} minmax Decides whether to get smallest or largest extent
+ * @returns {Extent} the smallest or largest set from the extents
+ */
+export function getMinOrMaxExtents(extentsA: Extent, extentsB: Extent, minmax = 'max'): Extent {
+  let bounds: Extent = [];
+  if (minmax === 'max')
+    bounds = [
+      Math.min(extentsA[0], extentsB[0]),
+      Math.min(extentsA[1], extentsB[1]),
+      Math.max(extentsA[2], extentsB[2]),
+      Math.max(extentsA[3], extentsB[3]),
+    ];
+  else if (minmax === 'min')
+    bounds = [
+      Math.max(extentsA[0], extentsB[0]),
+      Math.max(extentsA[1], extentsB[1]),
+      Math.min(extentsA[2], extentsB[2]),
+      Math.min(extentsA[3], extentsB[3]),
+    ];
+  return bounds;
+}
+
+/**
+ * Determine if layer instance is a vector layer
+ *
+ * @param {AbstractGeoViewLayer} layer the layer to check
+ * @returns {boolean} true if layer is a vector layer
+ */
+export const isVectorLayer = (layer: AbstractGeoViewLayer): boolean => {
+  return layer?.type in VECTOR_LAYER;
+};

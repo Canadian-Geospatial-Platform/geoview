@@ -21,7 +21,8 @@ import {
   TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
 import { api } from '@/app';
-import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
+import { getLocalizedValue } from '@/core/utils/utilities';
+import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { NodeType } from '@/geo/renderer/geoview-renderer-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
@@ -75,7 +76,12 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
     const fieldDefinitions = this.layerMetadata[layerConfig.layerPath].source.featureInfo;
-    const fieldIndex = getLocalizedValue(Cast<TypeLocalizedString>(fieldDefinitions.outfields), this.mapId)?.split(',').indexOf(fieldName);
+    const fieldIndex = getLocalizedValue(
+      Cast<TypeLocalizedString>(fieldDefinitions.outfields),
+      MapEventProcessor.getDisplayLanguage(this.mapId)
+    )
+      ?.split(',')
+      .indexOf(fieldName);
     if (!fieldIndex || fieldIndex === -1) return 'string';
     return (fieldDefinitions.fieldTypes as string).split(',')[fieldIndex!] as 'string' | 'date' | 'number';
   }
@@ -158,7 +164,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           if (layerConfig.source?.featureInfo?.queryable && features) {
             const featureInfo = (layerConfig.source as TypeBaseSourceVectorInitialConfig).featureInfo!;
             const fieldTypes = featureInfo.fieldTypes?.split(',');
-            const fieldNames = getLocalizedValue(featureInfo.outfields, this.mapId)!.split(',');
+            const fieldNames = getLocalizedValue(featureInfo.outfields, MapEventProcessor.getDisplayLanguage(this.mapId))!.split(',');
             const dateFields = fieldTypes?.reduce<string[]>((accumulator, entryFieldType, i) => {
               if (entryFieldType === 'date') accumulator.push(fieldNames![i]);
               return accumulator;
@@ -168,16 +174,16 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
                 dateFields.forEach((fieldName) => {
                   let fieldValue = feature.get(fieldName);
                   if (typeof fieldValue === 'number') {
-                    let dateString = api.dateUtilities.convertMilisecondsToDate(fieldValue);
-                    dateString = api.dateUtilities.applyInputDateFormat(dateString, this.serverDateFragmentsOrder);
-                    (feature as Feature).set(fieldName, api.dateUtilities.convertToMilliseconds(dateString), true);
+                    let dateString = api.utilities.date.convertMilisecondsToDate(fieldValue);
+                    dateString = api.utilities.date.applyInputDateFormat(dateString, this.serverDateFragmentsOrder);
+                    (feature as Feature).set(fieldName, api.utilities.date.convertToMilliseconds(dateString), true);
                   } else {
                     if (!this.serverDateFragmentsOrder)
-                      this.serverDateFragmentsOrder = api.dateUtilities.getDateFragmentsOrder(
-                        api.dateUtilities.deduceDateFormat(fieldValue)
+                      this.serverDateFragmentsOrder = api.utilities.date.getDateFragmentsOrder(
+                        api.utilities.date.deduceDateFormat(fieldValue)
                       );
-                    fieldValue = api.dateUtilities.applyInputDateFormat(fieldValue, this.serverDateFragmentsOrder);
-                    (feature as Feature).set(fieldName, api.dateUtilities.convertToMilliseconds(fieldValue), true);
+                    fieldValue = api.utilities.date.applyInputDateFormat(fieldValue, this.serverDateFragmentsOrder);
+                    (feature as Feature).set(fieldName, api.utilities.date.convertToMilliseconds(fieldValue), true);
                   }
                 });
               });
@@ -313,7 +319,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   protected getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     const { map } = api.maps[this.mapId];
-    const convertedLocation = api.projection.transform(
+    const convertedLocation = api.utilities.projection.transform(
       location,
       'EPSG:4326',
       `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
@@ -370,7 +376,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     searchDateEntry.forEach((dateFound) => {
       // If the date has a time zone, keep it as is, otherwise reverse its time zone by changing its sign
       const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
-      const reformattedDate = api.dateUtilities.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
+      const reformattedDate = api.utilities.date.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
       filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index)}${reformattedDate}${filterValueToUse!.slice(
         dateFound.index! + dateFound[0].length
       )}`;

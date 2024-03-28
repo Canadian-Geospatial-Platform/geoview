@@ -57,6 +57,7 @@ import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 type TypeStyleProcessor = (
   styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
@@ -1315,7 +1316,7 @@ export class GeoviewRenderer {
     layerConfig: VectorTilesLayerEntryConfig | VectorLayerEntryConfig
   ): TypeStyleConfig | undefined {
     if (layerConfig.style === undefined) layerConfig.style = {};
-    const label = getLocalizedValue(layerConfig.layerName, this.mapId) || layerConfig.layerId;
+    const label = getLocalizedValue(layerConfig.layerName, MapEventProcessor.getDisplayLanguage(this.mapId)) || layerConfig.layerId;
     if (geometryType === 'Point') {
       const settings: TypeSimpleSymbolVectorConfig = {
         type: 'simpleSymbol',
@@ -1606,10 +1607,10 @@ export class GeoviewRenderer {
             if (operand.nodeValue === null) dataStack.push(operand);
             else if (typeof operand.nodeValue !== 'string') throw new Error(`DATE operator error`);
             else {
-              operand.nodeValue = api.dateUtilities.applyInputDateFormat(operand.nodeValue);
+              operand.nodeValue = api.utilities.date.applyInputDateFormat(operand.nodeValue);
               dataStack.push({
                 nodeType: NodeType.variable,
-                nodeValue: api.dateUtilities.convertToMilliseconds(api.dateUtilities.convertToUTC(operand.nodeValue)),
+                nodeValue: api.utilities.date.convertToMilliseconds(api.utilities.date.convertToUTC(operand.nodeValue)),
               });
             }
             break;

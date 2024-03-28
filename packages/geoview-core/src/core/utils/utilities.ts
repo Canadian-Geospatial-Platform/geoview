@@ -1,34 +1,12 @@
-import { MutableRefObject } from 'react';
 import { Root, createRoot } from 'react-dom/client';
-
-import i18n from 'i18next';
-
-import { Extent } from 'ol/extent';
 
 import sanitizeHtml from 'sanitize-html';
 
-import { api } from '@/app';
-import { TypeLocalizedString } from '@/geo/map/map-schema-types';
+import { TypeDisplayLanguage, TypeLocalizedString } from '@/geo/map/map-schema-types';
 
 import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { ISnackbarButton, SnackbarType } from '@/api/events/payloads';
-import { NotificationType } from '@/core/components/notifications/notifications';
 import { Config } from '@/core/utils/config/config';
 import { logger } from '@/core/utils/logger';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-
-/**
- * Get the string associated to the current display language for localized object type.
- *
- * @param {TypeLocalizedString} localizedString the localized string to process.
- * @param {string} mapId the map identifier that holds the localized string.
- *
- * @returns {string} The string value according to the map display language,
- */
-export function getLocalizedValue(localizedString: TypeLocalizedString | undefined, mapId: string): string | undefined {
-  if (localizedString) return localizedString[api.maps[mapId].getDisplayLanguage()];
-  return undefined;
-}
 
 /**
  * Create a localized string and set its "en" and "fr" properties to the same value.
@@ -43,6 +21,18 @@ export function createLocalizedString(value: string) {
 }
 
 /**
+ * Get the string associated to the current display language for localized object type.
+ *
+ * @param {TypeLocalizedString} localizedString the localized string to process.
+ *
+ * @returns {string} The string value according to the map display language,
+ */
+export function getLocalizedValue(localizedString: TypeLocalizedString | undefined, language: TypeDisplayLanguage): string | undefined {
+  if (localizedString) return localizedString[language];
+  return undefined;
+}
+
+/**
  * Generate a unique id if an id was not provided
  * @param {string} id an id to return if it was already passed
  * @returns {string} the generated id
@@ -54,161 +44,11 @@ export function generateId(id?: string | null): string {
 }
 
 /**
- * Reusable utility function to send event to add a notification in the notifications manager
+ * Take string like "My strins is __param__" and replace parameters (__param__) from array of values
  *
- * @param {string} mapId the map to show the message for
- * @param {NotificationType} type optional, the type of message (info, success, warning, error), info by default
- * @param {string} message optional, the message string
- */
-// eslint-disable-next-line no-underscore-dangle, default-param-last
-function _addNotification(mapId: string, type: NotificationType = 'info', message: string) {
-  const notification = {
-    key: generateId(),
-    notificationType: type,
-    message,
-    count: 1,
-  };
-
-  // ? Need to do lazy import, if not viewer crashes (AppEventProcessor.addAppNotification(mapId, notification));
-  import('@/api/event-processors/event-processor-children/app-event-processor').then((mod) =>
-    mod.AppEventProcessor.addAppNotification(mapId, notification)
-  );
-}
-
-/**
- * Add a notification message
- *
- * @param {string} mapId the map to show the message for
- * @param {string} message the message string
- */
-export function addNotificationMessage(mapId: string, message: string) {
-  // Redirect
-  _addNotification(mapId, 'info', message);
-}
-
-/**
- * Add a notification success
- *
- * @param {string} mapId the map to show the message for
- * @param {string} message the message string
- */
-export function addNotificationSuccess(mapId: string, message: string) {
-  // Redirect
-  _addNotification(mapId, 'success', message);
-}
-
-/**
- * Add a notification warning
- *
- * @param {string} mapId the map to show the message for
- * @param {string} message the message string
- */
-export function addNotificationWarning(mapId: string, message: string) {
-  // Redirect
-  _addNotification(mapId, 'warning', message);
-}
-
-/**
- * Add a notification error
- *
- * @param {string} mapId the map to show the message for
- * @param {string} message the message string
- */
-export function addNotificationError(mapId: string, message: string) {
-  // Redirect
-  _addNotification(mapId, 'error', message);
-}
-
-/**
- * Reusable utility function to send event to display a message in the snackbar
- *
- * @param {string} mapId the map to show the message for
- * @param {SnackbarType} snackbarType the  type of snackbar
- * @param {string} message the snackbar message
- * @param {ISnackbarButton} button optional snackbar button
- */
-// eslint-disable-next-line no-underscore-dangle
-function _showSnackbarMessage(mapId: string, type: SnackbarType, message: string, button?: ISnackbarButton) {
-  // Emit
-  api.event.emitSnackbarOpen(mapId, type, message, button);
-}
-
-/**
- * Display a message in the snackbar
- *
- * @param {string} mapId the map to show the message for
- * @param {string} message the message string
- * @param {string} withNotification optional, indicates if the message should also be added as a notification, default true
- * @param {ISnackbarButton} button optional snackbar button
- */
-export function showMessage(mapId: string, message: string, withNotification = true, button = {}) {
-  // Redirect
-  _showSnackbarMessage(mapId, 'info', message, button);
-  if (withNotification) addNotificationMessage(mapId, message);
-}
-
-/**
- * Display an success message in the snackbar
- *
- * @param {string} mapId the map to show the message for
- * @param {string} message the message string
- * @param {string} withNotification optional, indicates if the message should also be added as a notification, default true
- * @param {ISnackbarButton} button optional snackbar button
- */
-export function showSuccess(mapId: string, message: string, withNotification = true, button = {}) {
-  // Redirect
-  _showSnackbarMessage(mapId, 'success', message, button);
-  if (withNotification) addNotificationSuccess(mapId, message);
-}
-
-/**
- * Display an warning message in the snackbar
- *
- * @param {string} mapId the map to show the message for
- * @param {string} message the message string
- * @param {string} withNotification optional, indicates if the message should also be added as a notification, default true
- * @param {ISnackbarButton} button optional snackbar button
- */
-export function showWarning(mapId: string, message: string, withNotification = true, button = {}) {
-  // Redirect
-  _showSnackbarMessage(mapId, 'warning', message, button);
-  if (withNotification) addNotificationWarning(mapId, message);
-}
-
-/**
- * Display an error message in the snackbar
- *
- * @param {string} mapId the map to show the message for
- * @param {string} message the message string
- * @param {string} withNotification optional, indicates if the message should also be added as a notification, default true
- * @param {ISnackbarButton} button optional snackbar button
- */
-export function showError(mapId: string, message: string, withNotification = true, button = {}) {
-  // Redirect
-  _showSnackbarMessage(mapId, 'error', message, button);
-  if (withNotification) addNotificationError(mapId, message);
-}
-
-/**
- * Return proper language Geoview localized values from map i18n instance
- *
- * @param {string} mapId the map to get the i18n
- * @param {string} localizedKey localize key to get
- * @returns {string} message with values replaced
- */
-export function getLocalizedMessage(mapId: string, localizedKey: string): string {
-  // when called from a failed map, there is no map to take the display language for.... default to en
-  const lang = api.maps[mapId] !== undefined ? api.maps[mapId].getDisplayLanguage() : 'en';
-  const trans = i18n.getFixedT(lang);
-  return trans(localizedKey);
-}
-
-/**
- * Take string and replace parameters from array of values
- *
- * @param {string[]} params array of parameters to replace
- * @param {string} message original message
- * @returns {string} message with values replaced
+ * @param {string[]} params array of parameters to replace, i.e. ['short']
+ * @param {string} message original message, i.e. "My strins is __param__"
+ * @returns {string} message with values replaced "My strins is short"
  */
 export function replaceParams(params: TypeJsonValue[] | TypeJsonArray | string[], message: string): string {
   let tmpMess = message;
@@ -386,6 +226,7 @@ export function removeCommentsFromJSON(config: string): string {
  * @param {string} configObjStr Map config to parse
  * @returns {any} cleaned and parsed config object
  */
+// TODO: refactor - yves, move this function to config class
 export function parseJSONConfig(configObjStr: string): unknown {
   // remove CR and LF from the map config
   let jsonString = configObjStr.replace(/(\r\n|\n|\r)/gm, '');
@@ -402,7 +243,7 @@ export function parseJSONConfig(configObjStr: string): unknown {
  * @param {string} configString String configuration
  * @returns {TypeMapFeaturesConfig} A valid configuration object
  */
-// TODO: refactor - this function is only used by sandbox html page. If not needed aymore, move to html page or code files for demo.
+// TODO: refactor - yves, move this function to config class
 export function getValidConfigFromString(configString: string, mapDiv: HTMLElement): TypeMapFeaturesConfig {
   const configObjString = removeCommentsFromJSON(configString);
   const parsedMapConfig = parseJSONConfig(configObjString);
@@ -414,12 +255,12 @@ export function getValidConfigFromString(configString: string, mapDiv: HTMLEleme
 /**
  * Export the image data url as a PNG
  * @param {string} datUrl the dataurl to be downloaded as png.
- * @param {string} mapId Id of map to export
+ * @param {string} name name of exported file
  */
-export function exportPNG(dataUrl: string, mapId: string): void {
+export function exportPNG(dataUrl: string, name: string): void {
   try {
     const element = document.createElement('a');
-    const filename = `${mapId}.png`;
+    const filename = `${name}.png`;
     element.setAttribute('href', dataUrl);
     element.setAttribute('download', filename);
     element.click();
@@ -427,31 +268,6 @@ export function exportPNG(dataUrl: string, mapId: string): void {
     logger.logError(`Error trying to export PNG.`, error);
   }
 }
-
-/**
- * Disable scrolling on keydown space, so that screen doesnt scroll down.
- * when focus is set to map and arrows and enter keys are used to navigate the map
- * @param {KeyboardEvent} e - keyboard event like, tab, space
- * @param {MutableRefObject} elem - mutable reference object of html elements.
- */
-export const disableScrolling = (e: KeyboardEvent, elem: MutableRefObject<HTMLElement | undefined>): void => {
-  if (elem.current === document.activeElement) {
-    if (e.code === 'Space') {
-      e.preventDefault();
-    }
-  }
-};
-
-/**
- * Determine if layer instance is a vector layer
- *
- * @param {AbstractGeoViewLayer} layer the layer to check
- * @returns {boolean} true if layer is a vector layer
- */
-export const isVectorLayer = (layer: AbstractGeoViewLayer): boolean => {
-  const vectorLayers = { csv: '', esriFeature: '', GeoJSON: '', GeoPackage: '', ogcFeature: '', ogcWfs: '' };
-  return layer?.type in vectorLayers;
-};
 
 /**
  * Find an object property by regex value
@@ -468,34 +284,6 @@ export const findPropertyNameByRegex = (objectItem: TypeJsonObject, regex: RegEx
 
   return valueObject;
 };
-
-/**
- * Compare sets of extents of the same projection and return the smallest or largest set.
- * Extents must be in OpenLayers extent format - [minx, miny, maxx, maxy]
- *
- * @param {Extent} extentsA First set of extents
- * @param {Extent} extentsB Second set of extents
- * @param {string} minmax Decides whether to get smallest or largest extent
- * @returns {Extent} the smallest or largest set from the extents
- */
-export function getMinOrMaxExtents(extentsA: Extent, extentsB: Extent, minmax = 'max'): Extent {
-  let bounds: Extent = [];
-  if (minmax === 'max')
-    bounds = [
-      Math.min(extentsA[0], extentsB[0]),
-      Math.min(extentsA[1], extentsB[1]),
-      Math.max(extentsA[2], extentsB[2]),
-      Math.max(extentsA[3], extentsB[3]),
-    ];
-  else if (minmax === 'min')
-    bounds = [
-      Math.max(extentsA[0], extentsB[0]),
-      Math.max(extentsA[1], extentsB[1]),
-      Math.min(extentsA[2], extentsB[2]),
-      Math.min(extentsA[3], extentsB[3]),
-    ];
-  return bounds;
-}
 
 /**
  * Check string to see if it is an image

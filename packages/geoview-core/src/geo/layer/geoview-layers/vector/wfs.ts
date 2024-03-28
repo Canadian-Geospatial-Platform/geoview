@@ -122,7 +122,7 @@ export class WFS extends AbstractGeoViewVector {
    */
   protected fetchServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      let metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId) as string;
+      let metadataUrl = getLocalizedValue(this.metadataAccessPath, MapEventProcessor.getDisplayLanguage(this.mapId)) as string;
 
       // check if url contains metadata parameters for the getCapabilities request and reformat the urls
       const getCapabilitiesUrl =
@@ -205,7 +205,7 @@ export class WFS extends AbstractGeoViewVector {
 
         const { currentProjection } = MapEventProcessor.getMapState(this.mapId);
         if (layerConfig.initialSettings?.extent)
-          layerConfig.initialSettings.extent = api.projection.transformExtent(
+          layerConfig.initialSettings.extent = api.utilities.projection.transformExtent(
             layerConfig.initialSettings.extent,
             'EPSG:4326',
             `EPSG:${currentProjection}`
@@ -216,7 +216,7 @@ export class WFS extends AbstractGeoViewVector {
           const upperCorner = (foundMetadata['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'] as string).split(' ');
           const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
           // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-          layerConfig.initialSettings!.bounds = api.projection.transformExtent(bounds, 'EPSG:4326', `EPSG:${currentProjection}`);
+          layerConfig.initialSettings!.bounds = api.utilities.projection.transformExtent(bounds, 'EPSG:4326', `EPSG:${currentProjection}`);
         }
       }
     });
@@ -232,7 +232,7 @@ export class WFS extends AbstractGeoViewVector {
    */
   protected async processLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     try {
-      let queryUrl = getLocalizedValue(layerConfig.source!.dataAccessPath, this.mapId);
+      let queryUrl = getLocalizedValue(layerConfig.source!.dataAccessPath, MapEventProcessor.getDisplayLanguage(this.mapId));
 
       // check if url contains metadata parameters for the getCapabilities request and reformat the urls
       queryUrl = queryUrl!.indexOf('?') > -1 ? queryUrl!.substring(0, queryUrl!.indexOf('?')) : queryUrl;
@@ -357,7 +357,7 @@ export class WFS extends AbstractGeoViewVector {
 
     sourceOptions.url = (extent): string => {
       // check if url contains metadata parameters for the getCapabilities request and reformat the urls
-      let sourceUrl = getLocalizedValue(layerConfig.source!.dataAccessPath!, this.mapId);
+      let sourceUrl = getLocalizedValue(layerConfig.source!.dataAccessPath!, MapEventProcessor.getDisplayLanguage(this.mapId));
       sourceUrl = sourceUrl!.indexOf('?') > -1 ? sourceUrl!.substring(0, sourceUrl!.indexOf('?')) : sourceUrl;
       sourceUrl = `${sourceUrl}?service=WFS&request=getFeature&version=${this.version}`;
       sourceUrl = `${sourceUrl}&typeName=${layerConfig.layerId}`;

@@ -218,7 +218,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @returns {Promise<boolean>} True if layer passes validation
    */
   const wmsValidation = async (): Promise<boolean> => {
-    const proj = api.projection.projections[api.maps[mapId].getMapState().currentProjection].getCode();
+    const proj = api.utilities.projection.projections[api.maps[mapId].getMapState().currentProjection].getCode();
     let supportedProj: string[] = [];
 
     try {
@@ -226,7 +226,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       const urlParams = new URLSearchParams(queryString);
       const paramLayers = urlParams.get('layers')?.split(',') || [''];
       // query layers are not sent, as not all services support asking for multiple layers
-      const wms = await api.geoUtilities.getWMSServiceMetadata(baseUrl, '');
+      const wms = await api.utilities.geo.getWMSServiceMetadata(baseUrl, '');
 
       supportedProj = wms.Capability.Layer.CRS as string[];
       if (!supportedProj.includes(proj)) throw new Error('proj');
@@ -279,7 +279,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    */
   const wfsValidation = async (): Promise<boolean> => {
     try {
-      const wfs = await api.geoUtilities.getWFSServiceMetadata(layerURL);
+      const wfs = await api.utilities.geo.getWFSServiceMetadata(layerURL);
       const layers = (wfs.FeatureTypeList.FeatureType as TypeJsonArray).map((aFeatureType) => [
         (aFeatureType.Name['#text'] as string).split(':')[1] as TypeJsonObject,
         aFeatureType.Title['#text'],
@@ -381,7 +381,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    */
   const esriValidation = async (type: string): Promise<boolean> => {
     try {
-      const esri = await api.geoUtilities.getESRIServiceMetadata(layerURL);
+      const esri = await api.utilities.geo.getESRIServiceMetadata(layerURL);
       if ((esri.capabilities as string).includes(esriOptions(type).capability)) {
         if ('layers' in esri) {
           const layers = (esri.layers as TypeJsonArray).map((aLayer) => [aLayer.id, aLayer.name]);
@@ -602,7 +602,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     const name = layerName;
     let url = layerURL;
     if (layerType === ESRI_DYNAMIC || layerType === ESRI_FEATURE) {
-      url = api.geoUtilities.getMapServerUrl(layerURL);
+      url = api.utilities.geo.getMapServerUrl(layerURL);
     }
     if (layerType === WMS) {
       [url] = layerURL.split('?');
@@ -640,8 +640,8 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     if (layerType === OGC_FEATURE) {
       // make sure the metadataAccessPath is the root OGC API URL
       layerConfig.metadataAccessPath = {
-        en: api.geoUtilities.getOGCServerUrl(layerURL),
-        fr: api.geoUtilities.getOGCServerUrl(layerURL),
+        en: api.utilities.geo.getOGCServerUrl(layerURL),
+        fr: api.utilities.geo.getOGCServerUrl(layerURL),
       };
     }
     if (valid) {
@@ -953,11 +953,18 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
                       disableClearable={!isMultiple()}
                       id="service-layer-label"
                       options={layerList}
-                      getOptionLabel={(option) => `${option[1]} (${option[0]})`}
-                      renderOption={(props, option) => <span {...props}>{option[1] as string}</span>}
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      getOptionLabel={(option: any[]) => `${option[1]} (${option[0]})`}
+                      renderOption={(
+                        props: React.JSX.IntrinsicAttributes &
+                          React.ClassAttributes<HTMLSpanElement> &
+                          React.HTMLAttributes<HTMLSpanElement>,
+                        option: string[]
+                      ) => <span {...props}>{option[1] as string}</span>}
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       onChange={handleSelectLayer as any}
-                      renderInput={(params) => <TextField {...params} label={translations[displayLanguage].layerSelect} />}
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      renderInput={(params: any) => <TextField {...params} label={translations[displayLanguage].layerSelect} />}
                     />
                   )}
                   <br />

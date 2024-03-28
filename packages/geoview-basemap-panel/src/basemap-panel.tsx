@@ -2,7 +2,6 @@ import { TypeBasemapProps, TypeBasemapOptions } from 'geoview-core/src/geo/layer
 import { TypeJsonObject, TypeJsonArray, toJsonObject, SelectChangeEvent } from 'geoview-core/src/core/types/global-types';
 import { useMapProjection } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
 import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
-import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { TypeValidMapProjectionCodes, TypeDisplayLanguage } from 'geoview-core/src/geo/map/map-schema-types';
 import { getSxClasses } from './basemap-panel-style';
 
@@ -115,20 +114,20 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
     let description = '';
 
     if (basemapTypes.includes('transport')) {
-      name = getLocalizedMessage(mapId, 'basemapPanel.info.transport.name');
-      description = getLocalizedMessage(mapId, 'basemapPanel.info.transport.description');
+      name = myMap.getLocalizedMessage(mapId, 'basemapPanel.info.transport.name');
+      description = myMap.getLocalizedMessage(mapId, 'basemapPanel.info.transport.description');
     } else if (basemapTypes.includes('simple')) {
-      name = getLocalizedMessage(mapId, 'basemapPanel.info.simple.name');
+      name = myMap.getLocalizedMessage(mapId, 'basemapPanel.info.simple.name');
     } else if (basemapTypes.includes('shaded')) {
-      name = getLocalizedMessage(mapId, 'basemapPanel.info.shaded.name');
-      description = getLocalizedMessage(mapId, 'basemapPanel.info.shaded.description');
+      name = myMap.getLocalizedMessage(mapId, 'basemapPanel.info.shaded.name');
+      description = myMap.getLocalizedMessage(mapId, 'basemapPanel.info.shaded.description');
     } else if (basemapTypes.includes('osm')) {
-      name = getLocalizedMessage(mapId, 'basemapPanel.info.osm.name');
+      name = myMap.getLocalizedMessage(mapId, 'basemapPanel.info.osm.name');
     } else if (basemapTypes.includes('nogeom')) {
-      name = getLocalizedMessage(mapId, 'basemapPanel.info.nogeom.name');
+      name = myMap.getLocalizedMessage(mapId, 'basemapPanel.info.nogeom.name');
     }
 
-    if (basemapTypes.includes('label')) name = `${name} ${getLocalizedMessage(mapId, 'basemapPanel.info.label.name')}`;
+    if (basemapTypes.includes('label')) name = `${name} ${myMap.getLocalizedMessage(mapId, 'basemapPanel.info.label.name')}`;
 
     return { name, description };
   }
