@@ -25,6 +25,7 @@ import { getLocalizedValue } from '@/core/utils/utilities';
 import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 export interface TypeSourceCSVInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'CSV';
@@ -242,11 +243,11 @@ export class CSV extends AbstractGeoViewVector {
     }
     if (latIndex === undefined || lonIndex === undefined) {
       logger.logError(
-        `Could not find geographic data for ${getLocalizedValue(this.geoviewLayerName, MapEventProcessor.getDisplayLanguage(this.mapId))}`
+        `Could not find geographic data for ${getLocalizedValue(this.geoviewLayerName, AppEventProcessor.getDisplayLanguage(this.mapId))}`
       );
-      MapEventProcessor.showError(
-        this.mapId,
-        `Could not find geographic data for ${getLocalizedValue(this.geoviewLayerName, MapEventProcessor.getDisplayLanguage(this.mapId))}`
+      // TODO: find a more centralized way to trap error and display message
+      api.maps[this.mapId].notifications.showError(
+        `Could not find geographic data for ${getLocalizedValue(this.geoviewLayerName, AppEventProcessor.getDisplayLanguage(this.mapId))}`
       );
       layerConfig.layerStatus = 'error';
       return null;
@@ -290,7 +291,7 @@ export class CSV extends AbstractGeoViewVector {
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
     readOptions.dataProjection = (layerConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
-    sourceOptions.url = getLocalizedValue(layerConfig.source!.dataAccessPath!, MapEventProcessor.getDisplayLanguage(this.mapId));
+    sourceOptions.url = getLocalizedValue(layerConfig.source!.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
     sourceOptions.format = new FormatGeoJSON();
     const vectorSource = super.createVectorSource(layerConfig, sourceOptions, readOptions);
     return vectorSource;

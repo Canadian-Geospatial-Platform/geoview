@@ -34,7 +34,8 @@
       "south": "S"
     },
     "overviewmap": {
-      "toggle": "Toggle minimap"
+      "toggle": "Toggle minimap",
+      "error": "Error loading overview map"
     },
     "attribution": {
       "defaultnrcan": "© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources",

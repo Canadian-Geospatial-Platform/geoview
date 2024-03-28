@@ -11,7 +11,6 @@ import { logger } from '@/core/utils/logger';
 
 import { AbstractPlugin } from './abstract-plugin';
 import { TypePluginStructure } from './plugin-types';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 /**
  * Class to manage plugins
@@ -165,7 +164,7 @@ export class Plugin {
 
               // Log
               logger.logError(errorMessage);
-              MapEventProcessor.showError(mapId, errorMessage);
+              api.maps[mapId].notifications.showError(errorMessage);
             }
           }
         }
