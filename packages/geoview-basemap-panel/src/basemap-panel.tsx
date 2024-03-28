@@ -114,20 +114,21 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
     let description = '';
 
     if (basemapTypes.includes('transport')) {
-      name = myMap.getLocalizedMessage(mapId, 'basemapPanel.info.transport.name');
-      description = myMap.getLocalizedMessage(mapId, 'basemapPanel.info.transport.description');
+      name = api.utilities.core.getLocalizedMessage('basemapPanel.info.transport.name', language);
+      description = api.utilities.core.getLocalizedMessage('basemapPanel.info.transport.description', language);
     } else if (basemapTypes.includes('simple')) {
-      name = myMap.getLocalizedMessage(mapId, 'basemapPanel.info.simple.name');
+      name = api.utilities.core.getLocalizedMessage('basemapPanel.info.simple.name', language);
     } else if (basemapTypes.includes('shaded')) {
-      name = myMap.getLocalizedMessage(mapId, 'basemapPanel.info.shaded.name');
-      description = myMap.getLocalizedMessage(mapId, 'basemapPanel.info.shaded.description');
+      name = api.utilities.core.getLocalizedMessage('basemapPanel.info.shaded.name', language);
+      description = api.utilities.core.getLocalizedMessage('basemapPanel.info.shaded.description', language);
     } else if (basemapTypes.includes('osm')) {
-      name = myMap.getLocalizedMessage(mapId, 'basemapPanel.info.osm.name');
+      name = api.utilities.core.getLocalizedMessage('basemapPanel.info.osm.name', language);
     } else if (basemapTypes.includes('nogeom')) {
-      name = myMap.getLocalizedMessage(mapId, 'basemapPanel.info.nogeom.name');
+      name = api.utilities.core.getLocalizedMessage('basemapPanel.info.nogeom.name', language);
     }
 
-    if (basemapTypes.includes('label')) name = `${name} ${myMap.getLocalizedMessage(mapId, 'basemapPanel.info.label.name')}`;
+    if (basemapTypes.includes('label'))
+      name = `${name} ${api.utilities.core.getLocalizedMessage('basemapPanel.info.label.name', language)}`;
 
     return { name, description };
   }
@@ -182,13 +183,15 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
       // eslint-disable-next-line no-await-in-loop
       const basemap = await api.maps[mapId].basemap.createCoreBasemap(basemapOptions as unknown as TypeBasemapOptions, projection);
 
-      // get thumbnail and info (name and description) for core basemap
-      const { name, description } = getInfo(basemap.type.split('-'));
-      basemap.thumbnailUrl = getThumbnailUrl(basemap.type.split('-'), storeProjection, language);
-      basemap.name = name;
-      basemap.description = description;
+      if (basemap) {
+        // get thumbnail and info (name and description) for core basemap
+        const { name, description } = getInfo(basemap.type.split('-'));
+        basemap.thumbnailUrl = getThumbnailUrl(basemap.type.split('-'), storeProjection, language);
+        basemap.name = name;
+        basemap.description = description;
 
-      if (basemap) setBasemapList((prevArray) => [...prevArray, basemap]);
+        setBasemapList((prevArray) => [...prevArray, basemap]);
+      }
 
       // set basemap if previously selected in previous projection
       const id = `${basemapOptions.shaded ? 'shaded' : ''}${basemapOptions.id}${basemapOptions.labeled ? 'label' : ''}`;

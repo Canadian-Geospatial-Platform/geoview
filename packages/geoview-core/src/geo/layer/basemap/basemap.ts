@@ -248,7 +248,10 @@ export class Basemap {
             url: basemapLayer.url as string,
             jsonUrl: basemapLayer.jsonUrl as string,
             source: new XYZ({
-              attributions: MapEventProcessor.getLocalizedMessage(this.mapId, 'mapctrl.attribution.defaultnrcan'),
+              attributions: api.utilities.core.getLocalizedMessage(
+                'mapctrl.attribution.defaultnrcan',
+                AppEventProcessor.getDisplayLanguage(this.mapId)
+              ),
               projection: api.utilities.projection.projections[urlProj],
               url: basemapLayer.url as string,
               crossOrigin: 'Anonymous',
@@ -410,8 +413,19 @@ export class Basemap {
           type: basemaplayerTypes.join('-'),
           attribution:
             coreBasemapOptions.basemapId === 'osm'
-              ? ['© OpenStreetMap', MapEventProcessor.getLocalizedMessage(this.mapId, 'mapctrl.attribution.defaultnrcan')]
-              : [MapEventProcessor.getLocalizedMessage(this.mapId, 'mapctrl.attribution.defaultnrcan')],
+              ? [
+                  '© OpenStreetMap',
+                  api.utilities.core.getLocalizedMessage(
+                    'mapctrl.attribution.defaultnrcan',
+                    AppEventProcessor.getDisplayLanguage(this.mapId)
+                  ),
+                ]
+              : [
+                  api.utilities.core.getLocalizedMessage(
+                    'mapctrl.attribution.defaultnrcan',
+                    AppEventProcessor.getDisplayLanguage(this.mapId)
+                  ),
+                ],
           zoomLevels: {
             min: minZoom,
             max: maxZoom,

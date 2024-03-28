@@ -26,6 +26,7 @@ import { logger } from '@/core/utils/logger';
 import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'WFS';
@@ -122,7 +123,7 @@ export class WFS extends AbstractGeoViewVector {
    */
   protected fetchServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      let metadataUrl = getLocalizedValue(this.metadataAccessPath, MapEventProcessor.getDisplayLanguage(this.mapId)) as string;
+      let metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId)) as string;
 
       // check if url contains metadata parameters for the getCapabilities request and reformat the urls
       const getCapabilitiesUrl =
@@ -232,7 +233,7 @@ export class WFS extends AbstractGeoViewVector {
    */
   protected async processLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     try {
-      let queryUrl = getLocalizedValue(layerConfig.source!.dataAccessPath, MapEventProcessor.getDisplayLanguage(this.mapId));
+      let queryUrl = getLocalizedValue(layerConfig.source!.dataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
 
       // check if url contains metadata parameters for the getCapabilities request and reformat the urls
       queryUrl = queryUrl!.indexOf('?') > -1 ? queryUrl!.substring(0, queryUrl!.indexOf('?')) : queryUrl;
@@ -357,7 +358,7 @@ export class WFS extends AbstractGeoViewVector {
 
     sourceOptions.url = (extent): string => {
       // check if url contains metadata parameters for the getCapabilities request and reformat the urls
-      let sourceUrl = getLocalizedValue(layerConfig.source!.dataAccessPath!, MapEventProcessor.getDisplayLanguage(this.mapId));
+      let sourceUrl = getLocalizedValue(layerConfig.source!.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
       sourceUrl = sourceUrl!.indexOf('?') > -1 ? sourceUrl!.substring(0, sourceUrl!.indexOf('?')) : sourceUrl;
       sourceUrl = `${sourceUrl}?service=WFS&request=getFeature&version=${this.version}`;
       sourceUrl = `${sourceUrl}&typeName=${layerConfig.layerId}`;

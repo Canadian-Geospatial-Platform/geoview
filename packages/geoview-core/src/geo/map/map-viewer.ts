@@ -629,9 +629,9 @@ export class MapViewer {
       if (resetLayer) {
         if (AppEventProcessor.getSupportedLanguages(this.mapId).includes(displayLanguage)) {
           logger.logInfo('reset layers not implemented yet');
-        } else this.addNotificationError(this.getLocalizedMessage('validation.changeDisplayLanguageLayers'));
+        } else this.addNotificationError(api.utilities.core.getLocalizedMessage('validation.changeDisplayLanguageLayers', displayLanguage));
       }
-    } else this.addNotificationError(this.getLocalizedMessage('validation.changeDisplayLanguage'));
+    } else this.addNotificationError(api.utilities.core.getLocalizedMessage('validation.changeDisplayLanguage', displayLanguage));
   }
 
   /**
@@ -642,7 +642,10 @@ export class MapViewer {
   setProjection(projectionCode: TypeValidMapProjectionCodes): void {
     if (VALID_PROJECTION_CODES.includes(Number(projectionCode))) {
       MapEventProcessor.setProjection(this.mapId, projectionCode);
-    } else this.addNotificationError(this.getLocalizedMessage('validation.changeDisplayProjection'));
+    } else
+      this.addNotificationError(
+        api.utilities.core.getLocalizedMessage('validation.changeDisplayProjection', AppEventProcessor.getDisplayLanguage(this.mapId))
+      );
   }
 
   /**
@@ -653,7 +656,10 @@ export class MapViewer {
   setTheme(displayTheme: TypeDisplayTheme): void {
     if (VALID_DISPLAY_THEME.includes(displayTheme)) {
       AppEventProcessor.setDisplayTheme(this.mapId, displayTheme);
-    } else this.addNotificationError(this.getLocalizedMessage('validation.changeDisplayTheme'));
+    } else
+      this.addNotificationError(
+        api.utilities.core.getLocalizedMessage('validation.changeDisplayTheme', AppEventProcessor.getDisplayLanguage(this.mapId))
+      );
   }
 
   /**
@@ -1131,18 +1137,6 @@ export class MapViewer {
     if (withNotification) this.addNotificationError(message);
   }
   // #endregion NOTIFICATION MESSAGES
-
-  /**
-   * Return proper language Geoview localized values from map i18n instance
-   *
-   * @param {string} localizedKey localize key to get
-   * @returns {string} message with values replaced
-   */
-  getLocalizedMessage(localizedKey: string): string {
-    const lang = this.getDisplayLanguage();
-    const trans = this.#i18nInstance.getFixedT(lang);
-    return trans(localizedKey);
-  }
 }
 
 /**

@@ -35,6 +35,7 @@ import {
 } from '@/geo/map/map-schema-types';
 import { QueryType, TypeFeatureInfoEntry, TypeLocation, codedValueType, rangeDomainType } from '@/geo/utils/layer-set';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 // Constant used to define the default layer names
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
@@ -367,7 +368,10 @@ export abstract class AbstractGeoViewLayer {
         logger.logError(error);
       }
     } else {
-      const message = replaceParams([this.mapId], MapEventProcessor.getLocalizedMessage(this.mapId, 'validation.layer.createtwice'));
+      const message = replaceParams(
+        [this.mapId],
+        api.utilities.core.getLocalizedMessage('validation.layer.createtwice', AppEventProcessor.getDisplayLanguage(this.mapId))
+      );
       MapEventProcessor.showError(this.mapId, message);
       // Log
       logger.logError(`Can not execute twice the createGeoViewLayers method for the map ${this.mapId}`);
@@ -407,7 +411,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected async fetchServiceMetadata(): Promise<void> {
-    const metadataUrl = getLocalizedValue(this.metadataAccessPath, MapEventProcessor.getDisplayLanguage(this.mapId));
+    const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
     if (metadataUrl) {
       try {
         const metadataString = await getXMLHttpRequest(`${metadataUrl}?f=json`);
@@ -1185,11 +1189,11 @@ export abstract class AbstractGeoViewLayer {
       const fieldTypes = featureInfo?.fieldTypes?.split(',') as ('string' | 'number' | 'date')[];
       const outfields = getLocalizedValue(
         featureInfo?.outfields as TypeLocalizedString,
-        MapEventProcessor.getDisplayLanguage(this.mapId)
+        AppEventProcessor.getDisplayLanguage(this.mapId)
       )?.split(',');
       const aliasFields = getLocalizedValue(
         featureInfo?.aliasFields as TypeLocalizedString,
-        MapEventProcessor.getDisplayLanguage(this.mapId)
+        AppEventProcessor.getDisplayLanguage(this.mapId)
       )?.split(',');
       const queryResult: TypeFeatureInfoEntry[] = [];
       let featureKeyCounter = 0;
@@ -1222,7 +1226,7 @@ export abstract class AbstractGeoViewLayer {
             nameField:
               getLocalizedValue(
                 layerConfig?.source?.featureInfo?.nameField as TypeLocalizedString,
-                MapEventProcessor.getDisplayLanguage(this.mapId)
+                AppEventProcessor.getDisplayLanguage(this.mapId)
               ) || null,
           };
 

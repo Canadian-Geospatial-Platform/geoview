@@ -30,6 +30,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
 import { TileLayerEntryConfig } from '@/core/utils/config/validation-classes/tile-layer-entry-config';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 // TODO: Implement method to validate Vector Tiles service
 // TODO: Add more customization (minZoom, maxZoom, TMS)
@@ -115,7 +116,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     const fieldDefinitions = this.layerMetadata[layerConfig.layerPath].source.featureInfo;
     const fieldIndex = getLocalizedValue(
       Cast<TypeLocalizedString>(fieldDefinitions.outfields),
-      MapEventProcessor.getDisplayLanguage(this.mapId)
+      AppEventProcessor.getDisplayLanguage(this.mapId)
     )
       ?.split(',')
       .indexOf(fieldName);
@@ -162,7 +163,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     // GV            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
     const sourceOptions: SourceOptions<Feature> = {
-      url: getLocalizedValue(layerConfig.source.dataAccessPath as TypeLocalizedString, MapEventProcessor.getDisplayLanguage(this.mapId)),
+      url: getLocalizedValue(layerConfig.source.dataAccessPath as TypeLocalizedString, AppEventProcessor.getDisplayLanguage(this.mapId)),
     };
 
     if (
@@ -217,7 +218,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     if (this.metadata?.defaultStyles)
       applyStyle(
         layerConfig.olLayer as VectorTileLayer,
-        `${getLocalizedValue(this.metadataAccessPath, MapEventProcessor.getDisplayLanguage(this.mapId))}${
+        `${getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId))}${
           this.metadata.defaultStyles
         }/root.json`,
         { resolutions: resolutions?.length ? resolutions : [] }

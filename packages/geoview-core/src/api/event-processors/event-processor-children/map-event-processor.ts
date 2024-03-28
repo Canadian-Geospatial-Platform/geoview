@@ -7,7 +7,6 @@ import { KeyboardPan } from 'ol/interaction';
 import { Coordinate } from 'ol/coordinate';
 import { api } from '@/app';
 import {
-  TypeDisplayLanguage,
   TypeGeoviewLayerConfig,
   TypeHighlightColors,
   TypeInteraction,
@@ -616,13 +615,5 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static showMessage = (mapId: string, message: string, snakcbar = true): void => {
     api.maps[mapId].showMessage(message, snakcbar);
-  };
-
-  static getDisplayLanguage = (mapId: string): TypeDisplayLanguage => {
-    return api.maps[mapId].getDisplayLanguage();
-  };
-
-  static getLocalizedMessage = (mapId: string, message: string): string => {
-    return api.maps[mapId].getLocalizedMessage(message);
   };
 }
