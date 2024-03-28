@@ -9,4 +9,9 @@ export const getSxClasses = (theme: Theme) => ({
   geochartInstructionsBody: {
     fontSize: '1rem',
   },
+  geoChartLayoutContainer: {
+    '& .MuiGrid-item:has(> .chart-container)': {
+      maxHeight: '900px !important',
+    },
+  },
 });
