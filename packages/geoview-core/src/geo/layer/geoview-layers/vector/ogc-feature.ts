@@ -27,6 +27,7 @@ import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-class
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { getLocalizedValue } from '@/core/utils/utilities';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'featureAPI';
@@ -126,7 +127,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    */
   protected fetchServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      const metadataUrl = getLocalizedValue(this.metadataAccessPath, MapEventProcessor.getDisplayLanguage(this.mapId));
+      const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
       if (metadataUrl) {
         const queryUrl = metadataUrl.endsWith('/') ? `${metadataUrl}collections?f=json` : `${metadataUrl}/collections?f=json`;
         axios
@@ -222,7 +223,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    */
   protected async processLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     try {
-      const metadataUrl = getLocalizedValue(this.metadataAccessPath, MapEventProcessor.getDisplayLanguage(this.mapId));
+      const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
       if (metadataUrl) {
         const queryUrl = metadataUrl.endsWith('/')
           ? `${metadataUrl}collections/${String(layerConfig.layerId)}/queryables?f=json`
@@ -302,7 +303,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
     readOptions.dataProjection = (layerConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
-    sourceOptions.url = getLocalizedValue(layerConfig.source!.dataAccessPath!, MapEventProcessor.getDisplayLanguage(this.mapId));
+    sourceOptions.url = getLocalizedValue(layerConfig.source!.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
     sourceOptions.url = `${sourceOptions.url}/collections/${layerConfig.layerId}/items?f=json`;
     sourceOptions.format = new FormatGeoJSON();
     const vectorSource = super.createVectorSource(layerConfig, sourceOptions, readOptions);

@@ -3,7 +3,8 @@ import { isJsonString, removeCommentsFromJSON, replaceParams } from '@/core/util
 import { logger } from '@/core/utils/logger';
 import { ConfigValidation } from '@/core/utils/config/config-validation';
 import { UUIDmapConfigReader } from './uuid-config-reader';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { api } from '@/app';
 
 /**
  * A class to read the configuration of the GeoView map features from an online div. The configuration is provided in an HTML div
@@ -76,10 +77,10 @@ export class InlineDivConfigReader {
             logger.logError('Failed to get the GeoView layers from url keys', mapElement.getAttribute('data-geocore-keys'), error);
             const message = replaceParams(
               [error as TypeJsonValue, mapId],
-              MapEventProcessor.getLocalizedMessage(mapId, 'validation.layer.loadfailed')
+              api.utilities.core.getLocalizedMessage('validation.layer.loadfailed', AppEventProcessor.getDisplayLanguage(mapId))
             );
             // TODO: config should not push message to map... only to console and as return value.. map will be responsible to throw notification
-            MapEventProcessor.showError(mapId, message);
+            api.maps[mapId].notifications.showError(message);
           }
         }
 
@@ -90,7 +91,10 @@ export class InlineDivConfigReader {
       // Log
       logger.logWarning(`- Map: ${mapId} - Invalid JSON configuration object in div, a fallback strategy will be used -`);
       // TODO: config should not push message to map... only to console and as return value.. map will be responsible to throw notification
-      MapEventProcessor.showError(mapId, MapEventProcessor.getLocalizedMessage(mapId, 'validation.invalidConfig'), true);
+      api.maps[mapId].notifications.showError(
+        api.utilities.core.getLocalizedMessage('validation.invalidConfig', AppEventProcessor.getDisplayLanguage(mapId)),
+        true
+      );
     }
 
     // None

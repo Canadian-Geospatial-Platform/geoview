@@ -59,7 +59,8 @@ import { EsriImageLayerEntryConfig } from './validation-classes/raster-validatio
 import { GroupLayerEntryConfig } from './validation-classes/group-layer-entry-config';
 import { ConfigBaseClass } from './validation-classes/config-base-class';
 import { CONFIG_GEOCORE_URL, CONFIG_GEOLOCATOR_URL } from '@/core/utils/constant';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { api } from '@/app';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -373,7 +374,9 @@ export class ConfigValidation {
 
     setTimeout(() => {
       // TODO: config should not push message to map... only to console and as return value.. map will be responsible to throw notification
-      MapEventProcessor.showError(this.mapId, MapEventProcessor.getLocalizedMessage(this.mapId, 'validation.schema.notFound'));
+      api.maps[this.mapId].notifications.showError(
+        api.utilities.core.getLocalizedMessage('validation.schema.notFound', AppEventProcessor.getDisplayLanguage(this.mapId))
+      );
     }, 2000);
   }
 
@@ -390,10 +393,13 @@ export class ConfigValidation {
 
     if (!validate) {
       setTimeout(() => {
-        const message = replaceParams([schemaPath], MapEventProcessor.getLocalizedMessage(this.mapId, 'validation.schema.wrongPath'));
+        const message = replaceParams(
+          [schemaPath],
+          api.utilities.core.getLocalizedMessage('validation.schema.wrongPath', AppEventProcessor.getDisplayLanguage(this.mapId))
+        );
         logger.logWarning(`- Map ${this.mapId}: ${message}`);
         // TODO: config should not push message to map... only to console and as return value.. map will be responsible to throw notification
-        MapEventProcessor.showError(this.mapId, message);
+        api.maps[this.mapId].notifications.showError(message);
       }, 2000);
       return false;
     }
@@ -430,10 +436,13 @@ export class ConfigValidation {
 
       if (!validate) {
         setTimeout(() => {
-          const message = replaceParams([schemaPath], MapEventProcessor.getLocalizedMessage(this.mapId, 'validation.schema.wrongPath'));
+          const message = replaceParams(
+            [schemaPath],
+            api.utilities.core.getLocalizedMessage('validation.schema.wrongPath', AppEventProcessor.getDisplayLanguage(this.mapId))
+          );
           logger.logWarning(`- Map ${this.mapId}: ${message}`);
           // TODO: config should not push message to map... only to console and as return value.. map will be responsible to throw notification
-          MapEventProcessor.showError(this.mapId, message);
+          api.maps[this.mapId].notifications.showError(message);
         }, 2000);
         return false;
       }

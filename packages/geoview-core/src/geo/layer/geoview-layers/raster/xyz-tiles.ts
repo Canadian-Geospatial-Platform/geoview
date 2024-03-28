@@ -21,6 +21,7 @@ import { Cast, toJsonObject } from '@/core/types/global-types';
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
 // TODO: Implement method to validate XYZ tile service
@@ -110,7 +111,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     const fieldDefinitions = this.layerMetadata[layerConfig.layerPath].source.featureInfo;
     const fieldIndex = getLocalizedValue(
       Cast<TypeLocalizedString>(fieldDefinitions.outfields),
-      MapEventProcessor.getDisplayLanguage(this.mapId)
+      AppEventProcessor.getDisplayLanguage(this.mapId)
     )
       ?.split(',')
       .indexOf(fieldName);
@@ -181,7 +182,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     // GV            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
     const sourceOptions: SourceOptions = {
-      url: getLocalizedValue(layerConfig.source.dataAccessPath as TypeLocalizedString, MapEventProcessor.getDisplayLanguage(this.mapId)),
+      url: getLocalizedValue(layerConfig.source.dataAccessPath as TypeLocalizedString, AppEventProcessor.getDisplayLanguage(this.mapId)),
     };
     if (layerConfig.source.crossOrigin) {
       sourceOptions.crossOrigin = layerConfig.source.crossOrigin;

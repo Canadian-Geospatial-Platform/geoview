@@ -6,7 +6,7 @@ import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 import { LayerSet, QueryType, TypeLayerData } from './layer-set';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 /**
  * A class containing a set of layers associated with a TypeLayerData object, which will receive the result of a
@@ -55,10 +55,10 @@ export class AllFeatureInfoLayerSet extends LayerSet {
 
     const layerConfig = this.layerApi.registeredLayers[layerPath];
     this.resultSet[layerPath] = {
-      layerName: getLocalizedValue(layerConfig.layerName, MapEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
+      layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
       layerStatus: layerConfig.layerStatus!,
       data: {
-        layerName: getLocalizedValue(layerConfig.layerName, MapEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
+        layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
         layerStatus: layerConfig.layerStatus!,
         eventListenerEnabled: true,
         queryStatus: 'processed',

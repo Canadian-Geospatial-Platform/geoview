@@ -1,5 +1,7 @@
 import { Root, createRoot } from 'react-dom/client';
 
+import i18n from 'i18next';
+
 import sanitizeHtml from 'sanitize-html';
 
 import { TypeDisplayLanguage, TypeLocalizedString } from '@/geo/map/map-schema-types';
@@ -30,6 +32,18 @@ export function createLocalizedString(value: string) {
 export function getLocalizedValue(localizedString: TypeLocalizedString | undefined, language: TypeDisplayLanguage): string | undefined {
   if (localizedString) return localizedString[language];
   return undefined;
+}
+
+/**
+ * Return proper language Geoview localized values from map i18n instance
+ *
+ * @param {string} mapId the map to get the i18n
+ * @param {string} localizedKey localize key to get
+ * @returns {string} message with values replaced
+ */
+export function getLocalizedMessage(localizedKey: string, language: TypeDisplayLanguage): string {
+  const trans = i18n.getFixedT(language);
+  return trans(localizedKey);
 }
 
 /**

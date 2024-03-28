@@ -41,6 +41,8 @@ import { LayerSet } from '@/geo/utils/layer-set';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from '@/geo/map/map-viewer';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { api } from '@/app';
 
 export type TypeRegisteredLayers = { [layerPath: string]: TypeLayerEntryConfig };
 
@@ -246,9 +248,10 @@ export class LayerApi {
   private printDuplicateGeoviewLayerConfigError(mapConfigLayerEntry: MapConfigLayerEntry) {
     const message = replaceParams(
       [mapConfigLayerEntry.geoviewLayerId, this.mapId],
-      MapEventProcessor.getLocalizedMessage(this.mapId, 'validation.layer.usedtwice')
+      api.utilities.core.getLocalizedMessage('validation.layer.usedtwice', AppEventProcessor.getDisplayLanguage(this.mapId))
     );
-    MapEventProcessor.showError(this.mapId, message);
+    // TODO: find a more centralized way to trap error and display message
+    api.maps[this.mapId].notifications.showError(message);
     // Log
     logger.logError(`Duplicate use of geoview layer identifier ${mapConfigLayerEntry.geoviewLayerId} on map ${this.mapId}`);
   }
@@ -426,9 +429,10 @@ export class LayerApi {
 
         const message = replaceParams(
           [layer, this.mapId],
-          MapEventProcessor.getLocalizedMessage(this.mapId, 'validation.layer.loadfailed')
+          api.utilities.core.getLocalizedMessage('validation.layer.loadfailed', AppEventProcessor.getDisplayLanguage(this.mapId))
         );
-        MapEventProcessor.showError(this.mapId, message);
+        // TODO: find a more centralized way to trap error and display message
+        api.maps[this.mapId].notifications.showError(message);
       });
     }
 

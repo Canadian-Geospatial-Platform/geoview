@@ -20,6 +20,7 @@ import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.IMAGE_STATIC;
@@ -119,7 +120,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
 
       let legendUrl: string | undefined = getLocalizedValue(
         layerConfig.source.dataAccessPath,
-        MapEventProcessor.getDisplayLanguage(this.mapId)
+        AppEventProcessor.getDisplayLanguage(this.mapId)
       );
 
       if (legendUrl) {
@@ -252,7 +253,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
 
     if (!layerConfig?.source?.extent) throw new Error('Parameter extent is not defined in source element of layerConfig.');
     const sourceOptions: SourceOptions = {
-      url: getLocalizedValue(layerConfig.source.dataAccessPath, MapEventProcessor.getDisplayLanguage(this.mapId)) || '',
+      url: getLocalizedValue(layerConfig.source.dataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId)) || '',
       imageExtent: layerConfig.source.extent,
     };
 

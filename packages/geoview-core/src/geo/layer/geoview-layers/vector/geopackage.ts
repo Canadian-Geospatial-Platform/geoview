@@ -34,6 +34,7 @@ import { GeoPackageLayerEntryConfig } from '@/core/utils/config/validation-class
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 export interface TypeSourceGeoPackageInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'GeoPackage';
@@ -259,7 +260,7 @@ export class GeoPackage extends AbstractGeoViewVector {
     readOptions: ReadOptions = {}
   ): Promise<[layerData[], sldsInterface]> {
     const promisedGeopackageData = new Promise<[layerData[], sldsInterface]>((resolve) => {
-      const url = getLocalizedValue(layerConfig.source!.dataAccessPath!, MapEventProcessor.getDisplayLanguage(this.mapId));
+      const url = getLocalizedValue(layerConfig.source!.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
       if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
       const layersInfo: layerData[] = [];
       const styleSlds: sldsInterface = {};

@@ -174,7 +174,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorEmpty = (textField: string) => {
     setIsLoading(false);
-    MapEventProcessor.showError(mapId, `${textField} ${t('layers.errorEmpty')}`, false);
+    api.maps[mapId].notifications.showError(`${textField} ${t('layers.errorEmpty')}`, false);
   };
 
   /**
@@ -184,7 +184,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorNone = () => {
     setIsLoading(false);
-    MapEventProcessor.showError(mapId, t('layers.errorNone'), false);
+    api.maps[mapId].notifications.showError(t('layers.errorNone'), false);
   };
 
   /**
@@ -193,7 +193,7 @@ export function AddNewLayer(): JSX.Element {
    * @param textField label for the TextField input that cannot be empty
    */
   const emitErrorFile = () => {
-    MapEventProcessor.showError(mapId, t('layers.errorFile'), false);
+    api.maps[mapId].notifications.showError(t('layers.errorFile'), false);
   };
 
   /**
@@ -203,7 +203,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorServer = (serviceName: string) => {
     setIsLoading(false);
-    MapEventProcessor.showError(mapId, `${serviceName} ${t('layers.errorServer')}`, false);
+    api.maps[mapId].notifications.showError(`${serviceName} ${t('layers.errorServer')}`, false);
   };
 
   /**
@@ -215,7 +215,7 @@ export function AddNewLayer(): JSX.Element {
   const emitErrorProj = (serviceName: string, proj: string | undefined, supportedProj: TypeJsonArray | string[]) => {
     setIsLoading(false);
     const message = `${serviceName} ${t('layers.errorProj')} ${proj}, ${t('layers.only')} ${supportedProj.join(', ')}`;
-    MapEventProcessor.showError(mapId, message, false);
+    api.maps[mapId].notifications.showError(message, false);
   };
 
   /**
@@ -843,7 +843,7 @@ export function AddNewLayer(): JSX.Element {
     else if (layerBeingAdded?.allLayerStatusAreGreaterThanOrEqualTo('loaded'))
       message = api.utilities.core.replaceParams([layerName], t('layers.layerAdded'));
     else message = api.utilities.core.replaceParams([layerName], t('layers.layerAddedAndLoading'));
-    MapEventProcessor.showMessage(mapId, message);
+    api.maps[mapId].notifications.showMessage(message);
   };
 
   /**

@@ -125,7 +125,10 @@ export class Basemap {
 
     if (overviewMap) this.overviewMap = overviewMap;
     else {
-      MapEventProcessor.showError(this.mapId, 'Error loading overview map');
+      // TODO: find a more centralized way to trap error and display message
+      api.maps[this.mapId].notifications.showError(
+        api.utilities.core.getLocalizedMessage('mapctrl.overviewmap.error', AppEventProcessor.getDisplayLanguage(this.mapId))
+      );
     }
   }
 
@@ -248,7 +251,10 @@ export class Basemap {
             url: basemapLayer.url as string,
             jsonUrl: basemapLayer.jsonUrl as string,
             source: new XYZ({
-              attributions: MapEventProcessor.getLocalizedMessage(this.mapId, 'mapctrl.attribution.defaultnrcan'),
+              attributions: api.utilities.core.getLocalizedMessage(
+                'mapctrl.attribution.defaultnrcan',
+                AppEventProcessor.getDisplayLanguage(this.mapId)
+              ),
               projection: api.utilities.projection.projections[urlProj],
               url: basemapLayer.url as string,
               crossOrigin: 'Anonymous',
@@ -410,8 +416,19 @@ export class Basemap {
           type: basemaplayerTypes.join('-'),
           attribution:
             coreBasemapOptions.basemapId === 'osm'
-              ? ['© OpenStreetMap', MapEventProcessor.getLocalizedMessage(this.mapId, 'mapctrl.attribution.defaultnrcan')]
-              : [MapEventProcessor.getLocalizedMessage(this.mapId, 'mapctrl.attribution.defaultnrcan')],
+              ? [
+                  '© OpenStreetMap',
+                  api.utilities.core.getLocalizedMessage(
+                    'mapctrl.attribution.defaultnrcan',
+                    AppEventProcessor.getDisplayLanguage(this.mapId)
+                  ),
+                ]
+              : [
+                  api.utilities.core.getLocalizedMessage(
+                    'mapctrl.attribution.defaultnrcan',
+                    AppEventProcessor.getDisplayLanguage(this.mapId)
+                  ),
+                ],
           zoomLevels: {
             min: minZoom,
             max: maxZoom,
