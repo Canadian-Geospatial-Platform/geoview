@@ -186,7 +186,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           controls,
           layerId: layerPathNodes[currentLevel],
           layerPath: entryLayerPath,
-          layerAttribution: api.maps[mapId].layer.geoviewLayers[layerPathNodes[0]].attributions,
+          layerAttribution: api.maps[mapId].layer.geoviewLayers[layerPathNodes[0]]?.attributions,
           layerName:
             legendResultSetEntry.layerName ||
             getLocalizedValue(layerConfig.layerName, mapId) ||
@@ -215,7 +215,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
         const myLayer = api.maps[mapId].layer.geoviewLayers[layerPathNodes[0]];
         // TODO: calculateBounds issue will be tackle ASAP in a next PR
-        newLegendLayer.bounds = myLayer.allLayerStatusAreGreaterThanOrEqualTo('loaded') ? myLayer.calculateBounds(layerPath) : undefined;
+        newLegendLayer.bounds = myLayer?.allLayerStatusAreGreaterThanOrEqualTo('loaded') ? myLayer.calculateBounds(layerPath) : undefined;
       }
     };
 

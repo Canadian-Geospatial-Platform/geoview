@@ -71,7 +71,7 @@ export class LayerSet {
 
       if (['processed', 'error'].includes(layerStatus) && !this.resultSet[layerPath].layerName) {
         const layerConfig = this.layerApi.registeredLayers[layerPath];
-        const layerName = getLocalizedValue(layerConfig.layerName, this.mapId);
+        const layerName = getLocalizedValue(layerConfig?.layerName, this.mapId);
         if (layerName) this.resultSet[layerPath].layerName = layerName;
         else {
           this.resultSet[layerPath].layerName = getLocalizedValue(
@@ -85,7 +85,9 @@ export class LayerSet {
         }
 
         // Synchronize the layer name property in the config and the layer set object when the geoview instance is ready.
-        if (!layerConfig.layerName) layerConfig.layerName = createLocalizedString(this.resultSet[layerPath].layerName!);
+        if (layerConfig && !layerConfig.layerName) {
+          layerConfig.layerName = createLocalizedString(this.resultSet[layerPath].layerName!);
+        }
       }
 
       // Inform that the layer set has been updated
@@ -105,7 +107,7 @@ export class LayerSet {
       this.resultSet[layerPath] = {
         data: undefined,
         layerStatus: 'newInstance',
-        layerName: getLocalizedValue(layerConfig.layerName, this.mapId),
+        layerName: getLocalizedValue(layerConfig?.layerName, this.mapId),
       };
 
       // Call the registration function for the layer-set. This method is different for each child.
