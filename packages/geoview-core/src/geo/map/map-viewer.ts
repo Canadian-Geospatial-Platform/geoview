@@ -8,6 +8,7 @@ import { Extent } from 'ol/extent';
 import BaseLayer from 'ol/layer/Base';
 import Collection from 'ol/Collection';
 import { Source } from 'ol/source';
+import { Coordinate } from 'ol/coordinate';
 
 import queryString from 'query-string';
 import { removeGeoviewStore } from '@/core/stores/stores-managers';
@@ -33,7 +34,9 @@ import { Translate } from '@/geo/interaction/translate';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
-import { addNotificationError, generateId, getLocalizedMessage } from '@/core/utils/utilities';
+import { ISnackbarButton, SnackbarType } from '@/api/events/payloads';
+import { NotificationType } from '@/core/components/notifications/notifications';
+import { generateId } from '@/core/utils/utilities';
 import {
   TypeDisplayLanguage,
   TypeViewSettings,
@@ -45,6 +48,7 @@ import {
   TypeInteraction,
   TypeValidMapProjectionCodes,
 } from '@/geo/map/map-schema-types';
+import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 import { TypeMapFeaturesConfig, TypeHTMLElement, TypeJsonObject } from '@/core/types/global-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
@@ -625,9 +629,9 @@ export class MapViewer {
       if (resetLayer) {
         if (AppEventProcessor.getSupportedLanguages(this.mapId).includes(displayLanguage)) {
           logger.logInfo('reset layers not implemented yet');
-        } else addNotificationError(this.mapId, getLocalizedMessage(this.mapId, 'validation.changeDisplayLanguageLayers'));
+        } else this.addNotificationError(this.getLocalizedMessage('validation.changeDisplayLanguageLayers'));
       }
-    } else addNotificationError(this.mapId, getLocalizedMessage(this.mapId, 'validation.changeDisplayLanguage'));
+    } else this.addNotificationError(this.getLocalizedMessage('validation.changeDisplayLanguage'));
   }
 
   /**
@@ -638,7 +642,7 @@ export class MapViewer {
   setProjection(projectionCode: TypeValidMapProjectionCodes): void {
     if (VALID_PROJECTION_CODES.includes(Number(projectionCode))) {
       MapEventProcessor.setProjection(this.mapId, projectionCode);
-    } else addNotificationError(this.mapId, getLocalizedMessage(this.mapId, 'validation.changeDisplayProjection'));
+    } else this.addNotificationError(this.getLocalizedMessage('validation.changeDisplayProjection'));
   }
 
   /**
@@ -649,7 +653,7 @@ export class MapViewer {
   setTheme(displayTheme: TypeDisplayTheme): void {
     if (VALID_DISPLAY_THEME.includes(displayTheme)) {
       AppEventProcessor.setDisplayTheme(this.mapId, displayTheme);
-    } else addNotificationError(this.mapId, getLocalizedMessage(this.mapId, 'validation.changeDisplayTheme'));
+    } else this.addNotificationError(this.getLocalizedMessage('validation.changeDisplayTheme'));
   }
 
   /**
@@ -663,9 +667,9 @@ export class MapViewer {
     viewOptions.projection = mapView.projection ? `EPSG:${mapView.projection}` : currentView.getProjection();
     viewOptions.zoom = mapView.zoom ? mapView.zoom : currentView.getZoom();
     viewOptions.center = mapView.center
-      ? api.projection.transformFromLonLat([mapView.center[0], mapView.center[1]], viewOptions.projection)
-      : api.projection.transformFromLonLat(
-          api.projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
+      ? api.utilities.projection.transformFromLonLat([mapView.center[0], mapView.center[1]], viewOptions.projection)
+      : api.utilities.projection.transformFromLonLat(
+          api.utilities.projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
           viewOptions.projection
         );
     viewOptions.minZoom = mapView.minZoom ? mapView.minZoom : currentView.getMinZoom();
@@ -826,11 +830,16 @@ export class MapViewer {
     if (bounds) {
       const { currentProjection } = this.getMapState();
       mapBounds = projectionCode
-        ? api.projection.transformExtent(bounds, `EPSG:${projectionCode}`, api.projection.projections[currentProjection], 20)
-        : api.projection.transformExtent(
+        ? api.utilities.projection.transformExtent(
             bounds,
-            api.projection.projections[currentProjection],
-            api.projection.projections[currentProjection],
+            `EPSG:${projectionCode}`,
+            api.utilities.projection.projections[currentProjection],
+            20
+          )
+        : api.utilities.projection.transformExtent(
+            bounds,
+            api.utilities.projection.projections[currentProjection],
+            api.utilities.projection.projections[currentProjection],
             25
           );
     } else {
@@ -945,6 +954,195 @@ export class MapViewer {
     return snap;
   }
   // #endregion
+
+  /**
+   * Check if north is visible. This is not a perfect solution and is more a work around
+   *
+   * @returns {boolean} true if visible, false otherwise
+   */
+  checkNorth(): boolean {
+    // Check the container value for top middle of the screen
+    // Convert this value to a lat long coordinate
+    const pointXY = [this.map.getSize()![0] / 2, 1];
+    const pt = api.utilities.projection.transformToLonLat(this.map.getCoordinateFromPixel(pointXY), this.map.getView().getProjection());
+
+    // If user is pass north, long value will start to be positive (other side of the earth).
+    // This will work only for LCC Canada.
+    return pt ? pt[0] > 0 : true;
+  }
+
+  /**
+   * Get north arrow bearing. Angle use to rotate north arrow for non Web Mercator projection
+   * https://www.movable-type.co.uk/scripts/latlong.html
+   *
+   * @returns {string} the arrow angle
+   */
+  getNorthArrowAngle(): string {
+    try {
+      // north value
+      const pointA = { x: NORTH_POLE_POSITION[1], y: NORTH_POLE_POSITION[0] };
+
+      // map center (we use botton parallel to introduce less distortion)
+      const extent = this.map.getView().calculateExtent();
+      const center: Coordinate = api.utilities.projection.transformToLonLat(
+        [(extent[0] + extent[2]) / 2, extent[1]],
+        this.map.getView().getProjection()
+      );
+      const pointB = { x: center[0], y: center[1] };
+
+      // set info on longitude and latitude
+      const dLon = ((pointB.x - pointA.x) * Math.PI) / 180;
+      const lat1 = (pointA.y * Math.PI) / 180;
+      const lat2 = (pointB.y * Math.PI) / 180;
+
+      // calculate bearing
+      const y = Math.sin(dLon) * Math.cos(lat2);
+      const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+      const bearing = (Math.atan2(y, x) * 180) / Math.PI;
+
+      // return angle (180 is pointing north)
+      return ((bearing + 360) % 360).toFixed(1);
+    } catch (error) {
+      return '180.0';
+    }
+  }
+
+  // #region NOTIFICATION MESSAGES
+  /**
+   * Reusable utility function to send event to add a notification in the notifications manager
+   *
+   * @param {NotificationType} type optional, the type of message (info, success, warning, error), info by default
+   * @param {string} message optional, the message string
+   */
+  // eslint-disable-next-line no-underscore-dangle, default-param-last
+  #addNotification(type: NotificationType = 'info', message: string): void {
+    const notification = {
+      key: generateId(),
+      notificationType: type,
+      message,
+      count: 1,
+    };
+
+    AppEventProcessor.addAppNotification(this.mapId, notification);
+  }
+
+  /**
+   * Add a notification message
+   *
+   * @param {string} message the message string
+   */
+  addNotificationMessage(message: string): void {
+    // Redirect
+    this.#addNotification('info', message);
+  }
+
+  /**
+   * Add a notification success
+   *
+   * @param {string} message the message string
+   */
+  addNotificationSuccess(message: string): void {
+    // Redirect
+    this.#addNotification('success', message);
+  }
+
+  /**
+   * Add a notification warning
+   *
+   * @param {string} message the message string
+   */
+  addNotificationWarning(message: string): void {
+    // Redirect
+    this.#addNotification('warning', message);
+  }
+
+  /**
+   * Add a notification error
+   *
+   * @param {string} message the message string
+   */
+  addNotificationError(message: string): void {
+    // Redirect
+    this.#addNotification('error', message);
+  }
+
+  /**
+   * Reusable utility function to send event to display a message in the snackbar
+   *
+   * @param {SnackbarType} snackbarType the  type of snackbar
+   * @param {string} message the snackbar message
+   * @param {ISnackbarButton} button optional snackbar button
+   */
+  // eslint-disable-next-line no-underscore-dangle
+  #showSnackbarMessage(type: SnackbarType, message: string, button?: ISnackbarButton): void {
+    // Emit
+    api.event.emitSnackbarOpen(this.mapId, type, message, button);
+  }
+
+  /**
+   * Display a message in the snackbar
+   *
+   * @param {string} message the message string
+   * @param {string} withNotification optional, indicates if the message should also be added as a notification, default true
+   * @param {ISnackbarButton} button optional snackbar button
+   */
+  showMessage(message: string, withNotification = true, button = {}): void {
+    // Redirect
+    this.#showSnackbarMessage('info', message, button);
+    if (withNotification) this.addNotificationMessage(message);
+  }
+
+  /**
+   * Display an success message in the snackbar
+   *
+   * @param {string} message the message string
+   * @param {string} withNotification optional, indicates if the message should also be added as a notification, default true
+   * @param {ISnackbarButton} button optional snackbar button
+   */
+  showSuccess(message: string, withNotification = true, button = {}): void {
+    // Redirect
+    this.#showSnackbarMessage('success', message, button);
+    if (withNotification) this.addNotificationSuccess(message);
+  }
+
+  /**
+   * Display an warning message in the snackbar
+   *
+   * @param {string} message the message string
+   * @param {string} withNotification optional, indicates if the message should also be added as a notification, default true
+   * @param {ISnackbarButton} button optional snackbar button
+   */
+  showWarning(message: string, withNotification = true, button = {}): void {
+    // Redirect
+    this.#showSnackbarMessage('warning', message, button);
+    if (withNotification) this.addNotificationWarning(message);
+  }
+
+  /**
+   * Display an error message in the snackbar
+   *
+   * @param {string} message the message string
+   * @param {string} withNotification optional, indicates if the message should also be added as a notification, default true
+   * @param {ISnackbarButton} button optional snackbar button
+   */
+  showError(message: string, withNotification = true, button = {}): void {
+    // Redirect
+    this.#showSnackbarMessage('error', message, button);
+    if (withNotification) this.addNotificationError(message);
+  }
+  // #endregion NOTIFICATION MESSAGES
+
+  /**
+   * Return proper language Geoview localized values from map i18n instance
+   *
+   * @param {string} localizedKey localize key to get
+   * @returns {string} message with values replaced
+   */
+  getLocalizedMessage(localizedKey: string): string {
+    const lang = this.getDisplayLanguage();
+    const trans = this.#i18nInstance.getFixedT(lang);
+    return trans(localizedKey);
+  }
 }
 
 /**

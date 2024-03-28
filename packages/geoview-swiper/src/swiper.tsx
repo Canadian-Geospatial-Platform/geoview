@@ -3,7 +3,6 @@ import Draggable from 'react-draggable';
 import { RefObject } from 'geoview-core';
 import { MapViewer } from 'geoview-core/src/geo/map/map-viewer';
 import { useSwiperLayerPaths } from 'geoview-core/src/core/stores/store-interface-and-intial-values/swiper-state';
-import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
 import { getRenderPixel } from 'ol/render';
@@ -279,7 +278,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
           nodeRef={swiperRef as RefObject<HTMLElement>}
         >
           <Box sx={[orientation === 'vertical' ? sxClasses.vertical : sxClasses.horizontal, sxClasses.bar]} tabIndex={0} ref={swiperRef}>
-            <Tooltip title={getLocalizedMessage(mapId, 'swiper.tooltip')}>
+            <Tooltip title={mapViewer.getLocalizedMessage('swiper.tooltip')}>
               <Box className="handleContainer">
                 <HandleIcon sx={sxClasses.handle} className="handleL" />
                 <HandleIcon sx={sxClasses.handle} className="handleR" />

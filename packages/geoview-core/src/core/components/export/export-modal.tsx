@@ -198,7 +198,7 @@ export default function ExportModal(): JSX.Element {
             ))}
           </Box>
           <Box textAlign="center" sx={{ marginBottom: '1rem' }}>
-            {api.dateUtilities.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A')}
+            {api.utilities.date.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A')}
           </Box>
         </Box>
       </DialogContent>

@@ -1,14 +1,10 @@
-import {
-  TypeJsonValue,
-  TypeJsonArray,
-  toJsonObject,
-  TypeJsonObject,
-  AbstractGeoViewLayer,
-  geoviewLayerIsWMS,
-  geoviewLayerIsEsriDynamic,
-  geoviewLayerIsEsriFeature,
-  getLocalizedValue,
-} from 'geoview-core';
+import { TypeJsonValue, TypeJsonArray, toJsonObject, TypeJsonObject } from 'geoview-core';
+
+import { AbstractGeoViewLayer } from 'geoview-core/src/geo/layer/geoview-layers/abstract-geoview-layers';
+import { geoviewLayerIsWMS } from 'geoview-core/src/geo/layer/geoview-layers/raster/wms';
+import { geoviewLayerIsEsriDynamic } from 'geoview-core/src/geo/layer/geoview-layers/raster/esri-dynamic';
+import { geoviewLayerIsEsriFeature } from 'geoview-core/src/geo/layer/geoview-layers/vector/esri-feature';
+import { getLocalizedValue } from 'geoview-core/src/core/utils/utilities';
 
 import { sxClasses } from './layers-list.style';
 
@@ -76,7 +72,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
     Object.values(layers).forEach(async (layer) => {
       if (geoviewLayerIsWMS(layer)) {
         const dataUrl = await layer.getLegendGraphic();
-        const name = getLocalizedValue(layer.metadataAccessPath, layer.mapId)!.includes('/MapServer') ? layer.geoviewLayerName : '';
+        const name = getLocalizedValue(layer.metadataAccessPath, 'en')!.includes('/MapServer') ? layer.geoviewLayerName : '';
         const legend = [{ name, dataUrl }];
         setLayerLegend((state) => ({ ...state, [layer.geoviewLayerId]: legend }));
       } else if (geoviewLayerIsEsriDynamic(layer) || geoviewLayerIsEsriFeature(layer)) {
@@ -332,11 +328,14 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                     size="small"
                     value={layerOpacity[layer.geoviewLayerId]}
                     valueLabelDisplay="auto"
-                    customOnChange={(value) => onSliderChange(value as number, layer)}
+                    customOnChange={(value: number) => onSliderChange(value as number, layer)}
                   />
                 </Box>
                 <Tooltip title={translations[displayLanguage].visibility as string}>
-                  <Checkbox checked={layerVisibility[layer.geoviewLayerId]} onChange={(e) => onVisibilityChange(e.target.checked, layer)} />
+                  <Checkbox
+                    checked={layerVisibility[layer.geoviewLayerId]}
+                    onChange={(e: { target: { checked: boolean } }) => onVisibilityChange(e.target.checked, layer)}
+                  />
                 </Tooltip>
               </Box>
               {(layerLegend[layer.geoviewLayerId] as TypeJsonArray).map((subLayer, index: number) => (
@@ -350,7 +349,9 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                       <Tooltip title={translations[displayLanguage].visibility as string}>
                         <Checkbox
                           checked={subLayerVisibility[layer.geoviewLayerId].includes(subLayer.layerId as number)}
-                          onChange={(e) => onSubVisibilityChange(e.target.checked, layer, subLayer.layerId as number)}
+                          onChange={(e: { target: { checked: boolean } }) =>
+                            onSubVisibilityChange(e.target.checked, layer, subLayer.layerId as number)
+                          }
                         />
                       </Tooltip>
                     </Box>

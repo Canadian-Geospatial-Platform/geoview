@@ -220,12 +220,13 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         });
 
         // on map center coord change, update north arrow parameters
+        // TODO: this will be refactor by the work done by Alex
         set({
           mapState: {
             ...get().mapState,
             northArrowElement: {
-              degreeRotation: api.geoUtilities.getNorthArrowAngle(get().mapState.mapElement!),
-              isNorthVisible: api.geoUtilities.checkNorth(get().mapState.mapElement!),
+              degreeRotation: api.maps[get().mapId].getNorthArrowAngle(),
+              isNorthVisible: api.maps[get().mapId].checkNorth(),
             },
           },
         });
@@ -239,7 +240,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
               pointerPosition: {
                 projected: coords,
                 pixel: get().mapState.mapElement!.getPixelFromCoordinate(coords),
-                lnglat: api.projection.transformPoints([coords], `EPSG:${get().mapState.currentProjection}`, `EPSG:4326`)[0],
+                lnglat: api.utilities.projection.transformPoints([coords], `EPSG:${get().mapState.currentProjection}`, `EPSG:4326`)[0],
                 dragging: false,
               },
             },
@@ -254,7 +255,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
               pointerPosition: {
                 projected: (event as MapBrowserEvent<UIEvent>).coordinate,
                 pixel: (event as MapBrowserEvent<UIEvent>).pixel,
-                lnglat: api.projection.transformPoints(
+                lnglat: api.utilities.projection.transformPoints(
                   [(event as MapBrowserEvent<UIEvent>).coordinate],
                   `EPSG:${get().mapState.currentProjection}`,
                   `EPSG:4326`
@@ -283,7 +284,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
               clickCoordinates: {
                 projected: (event as MapBrowserEvent<UIEvent>).coordinate,
                 pixel: (event as MapBrowserEvent<UIEvent>).pixel,
-                lnglat: api.projection.transformPoints(
+                lnglat: api.utilities.projection.transformPoints(
                   [(event as MapBrowserEvent<UIEvent>).coordinate],
                   `EPSG:${get().mapState.currentProjection}`,
                   `EPSG:4326`
@@ -535,7 +536,11 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         get().mapState.mapElement!.getView().animate({ zoom, duration });
       },
       showClickMarker: (marker: TypeClickMarker) => {
-        const projectedCoords = api.projection.transformPoints([marker.lnglat], `EPSG:4326`, `EPSG:${get().mapState.currentProjection}`);
+        const projectedCoords = api.utilities.projection.transformPoints(
+          [marker.lnglat],
+          `EPSG:4326`,
+          `EPSG:${get().mapState.currentProjection}`
+        );
 
         // GV need to use state because it changes store and do action at the same time
         get().mapState.mapElement!.getOverlayById(`${get().mapId}-clickmarker`)!.setPosition(projectedCoords[0]);
@@ -583,7 +588,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         });
       },
       transformPoints: (coords: Coordinate[], outputProjection: number): Coordinate[] => {
-        return api.projection.transformPoints(coords, `EPSG:${get().mapState.currentProjection}`, `EPSG:${outputProjection}`);
+        return api.utilities.projection.transformPoints(coords, `EPSG:${get().mapState.currentProjection}`, `EPSG:${outputProjection}`);
       },
       zoomToExtent: (extent: Extent, options?: FitOptions): Promise<void> => {
         return MapEventProcessor.zoomToExtent(get().mapId, extent, options);

@@ -13,7 +13,6 @@ import { useAppStoreActions } from '@/core/stores/store-interface-and-intial-val
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapElement } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
-import { disableScrolling } from '@/core/utils/utilities';
 
 /**
  * Interface for the focus trap properties
@@ -58,6 +57,20 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   // ? use reference HTML element to disable scrolling - happen because the value is used inside an event listener
   const mapHTMLElementRef = useRef<HTMLElement>();
   if (mapElementRef.current !== undefined) mapHTMLElementRef.current = mapElementRef.current.getTargetElement();
+
+  /**
+   * Disable scrolling on keydown space, so that screen doesnt scroll down.
+   * when focus is set to map and arrows and enter keys are used to navigate the map
+   * @param {KeyboardEvent} e - keyboard event like, tab, space
+   * @param {MutableRefObject} elem - mutable reference object of html elements.
+   */
+  function disableScrolling(e: KeyboardEvent, elem: MutableRefObject<HTMLElement | undefined>): void {
+    if (elem.current === document.activeElement) {
+      if (e.code === 'Space') {
+        e.preventDefault();
+      }
+    }
+  }
 
   /**
    * Disable scrolling on space keydown when focus-trap

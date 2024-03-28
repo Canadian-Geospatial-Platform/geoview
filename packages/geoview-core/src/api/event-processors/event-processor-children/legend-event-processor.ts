@@ -21,6 +21,7 @@ import {
   isUniqueValueStyleConfig,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
+import { MapEventProcessor } from './map-event-processor';
 
 export class LegendEventProcessor extends AbstractEventProcessor {
   // **********************************************************
@@ -164,8 +165,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             layerStatus: legendResultSetEntry.layerStatus,
             layerName:
               legendResultSetEntry.layerName ||
-              getLocalizedValue(layerConfig.layerName, mapId) ||
-              getLocalizedValue(layerConfig.geoviewLayerInstance?.geoviewLayerName, mapId) ||
+              getLocalizedValue(layerConfig.layerName, MapEventProcessor.getDisplayLanguage(mapId)) ||
+              getLocalizedValue(layerConfig.geoviewLayerInstance?.geoviewLayerName, MapEventProcessor.getDisplayLanguage(mapId)) ||
               layerConfig.layerPath,
             type: layerConfig.entryType as TypeGeoviewLayerType,
             canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
@@ -189,8 +190,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           layerAttribution: api.maps[mapId].layer.geoviewLayers[layerPathNodes[0]].attributions,
           layerName:
             legendResultSetEntry.layerName ||
-            getLocalizedValue(layerConfig.layerName, mapId) ||
-            getLocalizedValue(layerConfig.geoviewLayerInstance?.geoviewLayerName, mapId) ||
+            getLocalizedValue(layerConfig.layerName, MapEventProcessor.getDisplayLanguage(mapId)) ||
+            getLocalizedValue(layerConfig.geoviewLayerInstance?.geoviewLayerName, MapEventProcessor.getDisplayLanguage(mapId)) ||
             layerConfig.layerPath,
           layerStatus: legendResultSetEntry.layerStatus,
           styleConfig: legendResultSetEntry.data?.styleConfig,

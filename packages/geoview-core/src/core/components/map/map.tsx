@@ -87,18 +87,22 @@ export function Map(): JSX.Element {
     logger.logTraceUseCallback('map.initMap');
 
     // create map projection object from code
-    const projection = api.projection.projections[projectionCode];
+    const projection = api.utilities.projection.projections[projectionCode];
 
     let extentProjected: Extent | undefined;
     if (mapStoreConfig?.map.viewSettings.extent)
-      extentProjected = api.projection.transformExtent(mapStoreConfig?.map.viewSettings.extent, 'EPSG:4326', projection.getCode());
+      extentProjected = api.utilities.projection.transformExtent(
+        mapStoreConfig?.map.viewSettings.extent,
+        'EPSG:4326',
+        projection.getCode()
+      );
 
     const initialMap = new OLMap({
       target: mapElement.current as string | HTMLElement | undefined,
       layers: [createEmptyBasemap()],
       view: new View({
         projection,
-        center: api.projection.transformFromLonLat(
+        center: api.utilities.projection.transformFromLonLat(
           [mapStoreConfig?.map.viewSettings.center[0] || -105, mapStoreConfig?.map.viewSettings.center[1] || 60],
           projection
         ),

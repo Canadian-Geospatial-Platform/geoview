@@ -1,6 +1,5 @@
 import { useTheme } from '@mui/material/styles';
 import { TypeWindow } from 'geoview-core/src/core/types/global-types';
-import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { ChartType, SchemaValidator } from 'geochart';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
 import { TypeLayerData } from 'geoview-core/src/geo/utils/layer-set';
@@ -14,6 +13,7 @@ import {
   useGeochartStoreSelectedLayerPath,
 } from 'geoview-core/src/core/stores';
 import { logger } from 'geoview-core/src/core/utils/logger';
+import { MapViewer } from 'geoview-core/src/geo/map/map-viewer';
 
 import { GeoChart } from './geochart';
 import { GeoViewGeoChartConfig } from './geochart-types';
@@ -37,11 +37,14 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
   const { cgpv } = window as TypeWindow;
   const { mapId, provideCallbackRedraw } = props;
-  const { react } = cgpv;
+  const { api, react } = cgpv;
   const { useState, useCallback, useMemo, useEffect, useRef } = react;
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+
+  // TODO: pass the message object as props instead of the whole viewer
+  const mapViewer = api.maps[mapId] as MapViewer;
 
   // Get states and actions from store
   const configObj = useGeochartConfigs();
@@ -106,8 +109,9 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
       logger.logTraceUseCallback('GEOCHART-PANEL - getNumFeaturesLabel');
 
       const numOfFeatures = layer.features?.length ?? 0;
-      return `${numOfFeatures} ${getLocalizedMessage(mapId, 'geochart.panel.chart')}${numOfFeatures > 1 ? 's' : ''}`;
+      return `${numOfFeatures} ${mapViewer.getLocalizedMessage('geochart.panel.chart')}${numOfFeatures > 1 ? 's' : ''}`;
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [mapId]
   );
 
@@ -264,10 +268,10 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
           {!selectedLayerPath && (
             <Paper sx={{ padding: '2rem' }}>
               <Typography variant="h3" gutterBottom sx={sxClasses.geochartInstructionsTitle}>
-                {getLocalizedMessage(mapId, 'geochart.panel.clickMap')}
+                {mapViewer.getLocalizedMessage('geochart.panel.clickMap')}
               </Typography>
               <Typography component="p" sx={sxClasses.geochartInstructionsBody}>
-                {getLocalizedMessage(mapId, 'geochart.panel.clickMap')}
+                {mapViewer.getLocalizedMessage('geochart.panel.clickMap')}
               </Typography>
             </Paper>
           )}
@@ -276,7 +280,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     }
 
     // Loading UI
-    return <Typography>{getLocalizedMessage(mapId, 'geochart.panel.loadingUI')}</Typography>;
+    return <Typography>{mapViewer.getLocalizedMessage('geochart.panel.loadingUI')}</Typography>;
   };
 
   // Render

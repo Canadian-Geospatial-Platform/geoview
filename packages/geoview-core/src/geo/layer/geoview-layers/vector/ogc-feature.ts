@@ -20,13 +20,13 @@ import {
   TypeBaseSourceVectorInitialConfig,
 } from '@/geo/map/map-schema-types';
 
-import { getLocalizedValue } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
 import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { getLocalizedValue } from '@/core/utils/utilities';
 
 export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'featureAPI';
@@ -126,7 +126,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    */
   protected fetchServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+      const metadataUrl = getLocalizedValue(this.metadataAccessPath, MapEventProcessor.getDisplayLanguage(this.mapId));
       if (metadataUrl) {
         const queryUrl = metadataUrl.endsWith('/') ? `${metadataUrl}collections?f=json` : `${metadataUrl}/collections?f=json`;
         axios
@@ -191,7 +191,7 @@ export class OgcFeature extends AbstractGeoViewVector {
 
         const { currentProjection } = MapEventProcessor.getMapState(this.mapId);
         if (layerConfig.initialSettings?.extent)
-          layerConfig.initialSettings.extent = api.projection.transformExtent(
+          layerConfig.initialSettings.extent = api.utilities.projection.transformExtent(
             layerConfig.initialSettings.extent,
             'EPSG:4326',
             `EPSG:${currentProjection}`
@@ -199,9 +199,9 @@ export class OgcFeature extends AbstractGeoViewVector {
 
         if (!layerConfig.initialSettings?.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
           // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-          layerConfig.initialSettings!.bounds = api.projection.transformExtent(
+          layerConfig.initialSettings!.bounds = api.utilities.projection.transformExtent(
             foundCollection.extent.spatial.bbox[0] as number[],
-            api.projection.getProjection(foundCollection.extent.spatial.crs as string)!,
+            api.utilities.projection.getProjection(foundCollection.extent.spatial.crs as string)!,
             `EPSG:${currentProjection}`
           );
         }
@@ -222,7 +222,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    */
   protected async processLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     try {
-      const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+      const metadataUrl = getLocalizedValue(this.metadataAccessPath, MapEventProcessor.getDisplayLanguage(this.mapId));
       if (metadataUrl) {
         const queryUrl = metadataUrl.endsWith('/')
           ? `${metadataUrl}collections/${String(layerConfig.layerId)}/queryables?f=json`
@@ -302,7 +302,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
     readOptions.dataProjection = (layerConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
-    sourceOptions.url = getLocalizedValue(layerConfig.source!.dataAccessPath!, this.mapId);
+    sourceOptions.url = getLocalizedValue(layerConfig.source!.dataAccessPath!, MapEventProcessor.getDisplayLanguage(this.mapId));
     sourceOptions.url = `${sourceOptions.url}/collections/${layerConfig.layerId}/items?f=json`;
     sourceOptions.format = new FormatGeoJSON();
     const vectorSource = super.createVectorSource(layerConfig, sourceOptions, readOptions);

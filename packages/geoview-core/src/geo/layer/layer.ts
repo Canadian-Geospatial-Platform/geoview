@@ -7,7 +7,7 @@ import { FeatureHighlight } from '@/geo/utils/feature-highlight';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 import { Config } from '@/core/utils/config/config';
-import { generateId, showError, replaceParams, getLocalizedMessage, whenThisThen } from '@/core/utils/utilities';
+import { generateId, replaceParams, whenThisThen } from '@/core/utils/utilities';
 import { ConfigBaseClass, LayerStatusChangedEvent } from '@/core/utils/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
 import { AbstractGeoViewLayer, GeoViewLayerRegistrationEvent } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -246,9 +246,9 @@ export class LayerApi {
   private printDuplicateGeoviewLayerConfigError(mapConfigLayerEntry: MapConfigLayerEntry) {
     const message = replaceParams(
       [mapConfigLayerEntry.geoviewLayerId, this.mapId],
-      getLocalizedMessage(this.mapId, 'validation.layer.usedtwice')
+      MapEventProcessor.getLocalizedMessage(this.mapId, 'validation.layer.usedtwice')
     );
-    showError(this.mapId, message);
+    MapEventProcessor.showError(this.mapId, message);
     // Log
     logger.logError(`Duplicate use of geoview layer identifier ${mapConfigLayerEntry.geoviewLayerId} on map ${this.mapId}`);
   }
@@ -424,8 +424,11 @@ export class LayerApi {
         // Log the details in the console
         logger.logError(loggerMessage);
 
-        const message = replaceParams([layer, this.mapId], getLocalizedMessage(this.mapId, 'validation.layer.loadfailed'));
-        showError(this.mapId, message);
+        const message = replaceParams(
+          [layer, this.mapId],
+          MapEventProcessor.getLocalizedMessage(this.mapId, 'validation.layer.loadfailed')
+        );
+        MapEventProcessor.showError(this.mapId, message);
       });
     }
 

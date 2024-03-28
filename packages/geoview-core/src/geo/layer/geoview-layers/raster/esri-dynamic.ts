@@ -11,10 +11,11 @@ import { Extent } from 'ol/extent';
 import Feature from 'ol/Feature';
 import Geometry from 'ol/geom/Geometry';
 
-import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
+import { getLocalizedValue } from '@/core/utils/utilities';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { api } from '@/app';
+import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
@@ -228,7 +229,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     super.processOneLayerEntry(layerConfig);
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
-    sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, this.mapId);
+    sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, MapEventProcessor.getDisplayLanguage(this.mapId));
     sourceOptions.params = { LAYERS: `show:${layerConfig.layerId}` };
     if (layerConfig.source.transparent) Object.defineProperty(sourceOptions.params, 'transparent', layerConfig.source.transparent!);
     if (layerConfig.source.format) Object.defineProperty(sourceOptions.params, 'format', layerConfig.source.format!);
@@ -284,7 +285,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The promised feature info table.
    */
   protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const convertedLocation = api.projection.transform(
+    const convertedLocation = api.utilities.projection.transform(
       location,
       `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`,
       'EPSG:4326'
@@ -307,7 +308,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       if (!this.getVisible(layerPath)) return [];
       if (!layerConfig.source?.featureInfo?.queryable) return [];
 
-      let identifyUrl = getLocalizedValue(layerConfig.source?.dataAccessPath, this.mapId);
+      let identifyUrl = getLocalizedValue(layerConfig.source?.dataAccessPath, MapEventProcessor.getDisplayLanguage(this.mapId));
       if (!identifyUrl) return [];
 
       identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
@@ -315,7 +316,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       const { currentProjection } = MapEventProcessor.getMapState(this.mapId);
       const size = mapLayer.getSize()!;
       let bounds = mapLayer.getView().calculateExtent();
-      bounds = api.projection.transformExtent(bounds, `EPSG:${currentProjection}`, 'EPSG:4326');
+      bounds = api.utilities.projection.transformExtent(bounds, `EPSG:${currentProjection}`, 'EPSG:4326');
 
       const extent = { xmin: bounds[0], ymin: bounds[1], xmax: bounds[2], ymax: bounds[3] };
 
@@ -472,7 +473,9 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns {string} The resulting field value.
    */
   private formatFieldValue(fieldName: string, rawValue: string | number | Date, sourceFeatureInfo: TypeFeatureInfoLayerConfig): string {
-    const fieldIndex = getLocalizedValue(sourceFeatureInfo.outfields, this.mapId)?.split(',').indexOf(fieldName);
+    const fieldIndex = getLocalizedValue(sourceFeatureInfo.outfields, MapEventProcessor.getDisplayLanguage(this.mapId))
+      ?.split(',')
+      .indexOf(fieldName);
     const fieldType = sourceFeatureInfo.fieldTypes?.split(',')[fieldIndex!];
     switch (fieldType) {
       case 'date':
@@ -718,7 +721,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     searchDateEntry.forEach((dateFound) => {
       // If the date has a time zone, keep it as is, otherwise reverse its time zone by changing its sign
       const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
-      let reformattedDate = api.dateUtilities.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
+      let reformattedDate = api.utilities.date.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
       // ESRI Dynamic layers doesn't accept the ISO date format. The time zone must be removed. The 'T' separator
       // normally placed between the date and the time must be replaced by a space.
       reformattedDate = reformattedDate.slice(0, reformattedDate.length === 20 ? -1 : -6); // drop time zone.
@@ -756,7 +759,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     if (layerBounds) {
       let transformedBounds = layerBounds;
       if (this.metadata?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.mapId).currentProjection) {
-        transformedBounds = api.projection.transformExtent(
+        transformedBounds = api.utilities.projection.transformExtent(
           layerBounds,
           `EPSG:${projection}`,
           `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`

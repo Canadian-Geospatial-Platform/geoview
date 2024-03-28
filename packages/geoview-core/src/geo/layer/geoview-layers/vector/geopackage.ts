@@ -259,7 +259,7 @@ export class GeoPackage extends AbstractGeoViewVector {
     readOptions: ReadOptions = {}
   ): Promise<[layerData[], sldsInterface]> {
     const promisedGeopackageData = new Promise<[layerData[], sldsInterface]>((resolve) => {
-      const url = getLocalizedValue(layerConfig.source!.dataAccessPath!, this.mapId);
+      const url = getLocalizedValue(layerConfig.source!.dataAccessPath!, MapEventProcessor.getDisplayLanguage(this.mapId));
       if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
       const layersInfo: layerData[] = [];
       const styleSlds: sldsInterface = {};

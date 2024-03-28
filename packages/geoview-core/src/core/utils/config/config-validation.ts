@@ -42,7 +42,7 @@ import { CONST_GEOVIEW_SCHEMA_BY_TYPE, CONST_LAYER_TYPES, TypeGeoviewLayerType }
 import { geoviewEntryIsEsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { logger } from '@/core/utils/logger';
 
-import { generateId, replaceParams, getLocalizedMessage, showError } from '@/core/utils/utilities';
+import { generateId, replaceParams } from '@/core/utils/utilities';
 import schema from '../../../../schema.json';
 import { WfsLayerEntryConfig } from './validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { OgcFeatureLayerEntryConfig } from './validation-classes/vector-validation-classes/ogc-layer-entry-config';
@@ -59,6 +59,7 @@ import { EsriImageLayerEntryConfig } from './validation-classes/raster-validatio
 import { GroupLayerEntryConfig } from './validation-classes/group-layer-entry-config';
 import { ConfigBaseClass } from './validation-classes/config-base-class';
 import { CONFIG_GEOCORE_URL, CONFIG_GEOLOCATOR_URL } from '@/core/utils/constant';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -371,7 +372,8 @@ export class ConfigValidation {
     }
 
     setTimeout(() => {
-      showError(this.mapId, getLocalizedMessage(this.mapId, 'validation.schema.notFound'));
+      // TODO: config should not push message to map... only to console and as return value.. map will be responsible to throw notification
+      MapEventProcessor.showError(this.mapId, MapEventProcessor.getLocalizedMessage(this.mapId, 'validation.schema.notFound'));
     }, 2000);
   }
 
@@ -388,9 +390,10 @@ export class ConfigValidation {
 
     if (!validate) {
       setTimeout(() => {
-        const message = replaceParams([schemaPath], getLocalizedMessage(this.mapId, 'validation.schema.wrongPath'));
+        const message = replaceParams([schemaPath], MapEventProcessor.getLocalizedMessage(this.mapId, 'validation.schema.wrongPath'));
         logger.logWarning(`- Map ${this.mapId}: ${message}`);
-        showError(this.mapId, message);
+        // TODO: config should not push message to map... only to console and as return value.. map will be responsible to throw notification
+        MapEventProcessor.showError(this.mapId, message);
       }, 2000);
       return false;
     }
@@ -427,9 +430,10 @@ export class ConfigValidation {
 
       if (!validate) {
         setTimeout(() => {
-          const message = replaceParams([schemaPath], getLocalizedMessage(this.mapId, 'validation.schema.wrongPath'));
+          const message = replaceParams([schemaPath], MapEventProcessor.getLocalizedMessage(this.mapId, 'validation.schema.wrongPath'));
           logger.logWarning(`- Map ${this.mapId}: ${message}`);
-          showError(this.mapId, message);
+          // TODO: config should not push message to map... only to console and as return value.. map will be responsible to throw notification
+          MapEventProcessor.showError(this.mapId, message);
         }, 2000);
         return false;
       }
