@@ -256,9 +256,9 @@
       });
 
       // Get the style based on the group
-      let styleForGroup = cgpv.api.geoUtilities.getDefaultDrawingStyle('blue');
-      if (groupKey == 'geomGroupB') styleForGroup = cgpv.api.geoUtilities.getDefaultDrawingStyle('green');
-      else if (groupKey == 'geomGroupC') styleForGroup = cgpv.api.geoUtilities.getDefaultDrawingStyle('red');
+      let styleForGroup = cgpv.api.utilities.geo.getDefaultDrawingStyle('blue');
+      if (groupKey == 'geomGroupB') styleForGroup = cgpv.api.utilities.geo.getDefaultDrawingStyle('green');
+      else if (groupKey == 'geomGroupC') styleForGroup = cgpv.api.utilities.geo.getDefaultDrawingStyle('red');
 
       // Set the default styling for the vector layer itself as well, that is, once the drawing is done
       map1.layer.geometry.getGeometryGroup(groupKey).vectorLayer.setStyle(styleForGroup);

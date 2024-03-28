@@ -7,7 +7,6 @@ import TileLayer from 'ol/layer/Tile';
 
 import { api } from '@/app';
 import { TypeJsonObject, toJsonObject, TypeJsonArray } from '@/core/types/global-types';
-import { getLocalizedMessage, showError } from '@/core/utils/utilities';
 import { TypeBasemapProps, TypeBasemapOptions, TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import { TypeDisplayLanguage, TypeValidMapProjectionCodes } from '@/geo/map/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -126,7 +125,7 @@ export class Basemap {
 
     if (overviewMap) this.overviewMap = overviewMap;
     else {
-      showError(this.mapId, 'Error loading overview map');
+      MapEventProcessor.showError(this.mapId, 'Error loading overview map');
     }
   }
 
@@ -249,8 +248,8 @@ export class Basemap {
             url: basemapLayer.url as string,
             jsonUrl: basemapLayer.jsonUrl as string,
             source: new XYZ({
-              attributions: getLocalizedMessage(this.mapId, 'mapctrl.attribution.defaultnrcan'),
-              projection: api.projection.projections[urlProj],
+              attributions: MapEventProcessor.getLocalizedMessage(this.mapId, 'mapctrl.attribution.defaultnrcan'),
+              projection: api.utilities.projection.projections[urlProj],
               url: basemapLayer.url as string,
               crossOrigin: 'Anonymous',
               tileGrid: new TileGrid({
@@ -411,8 +410,8 @@ export class Basemap {
           type: basemaplayerTypes.join('-'),
           attribution:
             coreBasemapOptions.basemapId === 'osm'
-              ? ['© OpenStreetMap', getLocalizedMessage(this.mapId, 'mapctrl.attribution.defaultnrcan')]
-              : [getLocalizedMessage(this.mapId, 'mapctrl.attribution.defaultnrcan')],
+              ? ['© OpenStreetMap', MapEventProcessor.getLocalizedMessage(this.mapId, 'mapctrl.attribution.defaultnrcan')]
+              : [MapEventProcessor.getLocalizedMessage(this.mapId, 'mapctrl.attribution.defaultnrcan')],
           zoomLevels: {
             min: minZoom,
             max: maxZoom,
@@ -472,7 +471,7 @@ export class Basemap {
         url: languageCode === 'en' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
         source: new XYZ({
           attributions: attribution[languageCode],
-          projection: api.projection.projections[projection],
+          projection: api.utilities.projection.projections[projection],
           url: languageCode === 'en' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
           crossOrigin: 'Anonymous',
           tileGrid: new TileGrid({

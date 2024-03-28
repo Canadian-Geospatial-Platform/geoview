@@ -7,6 +7,7 @@ import { KeyboardPan } from 'ol/interaction';
 import { Coordinate } from 'ol/coordinate';
 import { api } from '@/app';
 import {
+  TypeDisplayLanguage,
   TypeGeoviewLayerConfig,
   TypeHighlightColors,
   TypeInteraction,
@@ -129,7 +130,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // add map overlays
     // create overlay for north pole icon
     const northPoleId = `${mapId}-northpole`;
-    const projectionPosition = api.projection.transformFromLonLat(
+    const projectionPosition = api.utilities.projection.transformFromLonLat(
       [NORTH_POLE_POSITION[1], NORTH_POLE_POSITION[0]],
       `EPSG:${store.getState().mapState.currentProjection}`
     );
@@ -350,7 +351,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       const currentView = api.maps[mapId].map.getView();
       const currentCenter = currentView.getCenter();
       const currentProjection = currentView.getProjection().getCode();
-      const newCenter = api.projection.transformPoints([currentCenter!], currentProjection, 'EPSG:4326')[0];
+      const newCenter = api.utilities.projection.transformPoints([currentCenter!], currentProjection, 'EPSG:4326')[0];
       const newProjection = projectionCode as TypeValidMapProjectionCodes;
 
       // create new view
@@ -358,7 +359,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         zoom: currentView.getZoom() as number,
         minZoom: currentView.getMinZoom(),
         maxZoom: currentView.getMaxZoom(),
-        center: api.projection.transformPoints([newCenter], 'EPSG:4326', `EPSG:${newProjection}`)[0] as [number, number],
+        center: api.utilities.projection.transformPoints([newCenter], 'EPSG:4326', `EPSG:${newProjection}`)[0] as [number, number],
         projection: `EPSG:${newProjection}`,
       });
 
@@ -647,12 +648,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
       (indicatorBox[i] as HTMLElement).style.display = 'none';
     }
 
-    const projectionConfig = api.projection.projections[this.getMapState(mapId).currentProjection];
+    const projectionConfig = api.utilities.projection.projections[this.getMapState(mapId).currentProjection];
     if (bbox) {
       // GV There were issues with fromLonLat in rare cases in LCC projections, transformExtent seems to solve them.
       // GV fromLonLat and transformExtent give differing results in many cases, fromLonLat had issues with the first
       // GV three results from a geolocator search for "vancouver river"
-      const convertedExtent = api.projection.transformExtent(bbox, 'EPSG:4326', projectionConfig);
+      const convertedExtent = api.utilities.projection.transformExtent(bbox, 'EPSG:4326', projectionConfig);
 
       // Highlight
       api.maps[mapId].layer.featureHighlight.highlightGeolocatorBBox(convertedExtent);
@@ -670,7 +671,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         (indicatorBox[i] as HTMLElement).style.display = '';
       }
     } else {
-      const projectedCoords = api.projection.transformPoints(
+      const projectedCoords = api.utilities.projection.transformPoints(
         [coords],
         `EPSG:4326`,
         `EPSG:${this.getMapStateProtected(mapId).currentProjection}`
@@ -692,7 +693,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static zoomToInitialExtent(mapId: string): Promise<void> {
     const { center, zoom } = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings;
-    const projectedCoords = api.projection.transformPoints(
+    const projectedCoords = api.utilities.projection.transformPoints(
       [center],
       `EPSG:4326`,
       `EPSG:${this.getMapStateProtected(mapId).currentProjection}`
@@ -705,7 +706,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static zoomToMyLocation(mapId: string, position: GeolocationPosition): Promise<void> {
     const coord: Coordinate = [position.coords.longitude, position.coords.latitude];
-    const projectedCoords = api.projection.transformPoints(
+    const projectedCoords = api.utilities.projection.transformPoints(
       [coord],
       `EPSG:4326`,
       `EPSG:${this.getMapStateProtected(mapId).currentProjection}`
@@ -739,4 +740,23 @@ export class MapEventProcessor extends AbstractEventProcessor {
   };
 
   // #endregion
+
+  // TODO: Delete this temporary functions when we pass the mapviewer/utilities object to all ts files
+  // TD.CONT we should have a utilities object attacht to all elements... for the moments, these functions
+  // TD.CONT are attached to map-viewer... they are utilities, theur shoudl be in their own class linked to map id
+  static showError = (mapId: string, message: string, snakcbar = true): void => {
+    api.maps[mapId].showError(message, snakcbar);
+  };
+
+  static showMessage = (mapId: string, message: string, snakcbar = true): void => {
+    api.maps[mapId].showMessage(message, snakcbar);
+  };
+
+  static getDisplayLanguage = (mapId: string): TypeDisplayLanguage => {
+    return api.maps[mapId].getDisplayLanguage();
+  };
+
+  static getLocalizedMessage = (mapId: string, message: string): string => {
+    return api.maps[mapId].getLocalizedMessage(message);
+  };
 }

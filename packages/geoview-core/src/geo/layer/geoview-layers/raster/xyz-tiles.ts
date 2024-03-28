@@ -15,7 +15,8 @@ import {
   layerEntryIsGroupLayer,
   TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
-import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
+import { getMinOrMaxExtents } from '@/geo/utils/utilities';
+import { getLocalizedValue } from '@/core/utils/utilities';
 import { Cast, toJsonObject } from '@/core/types/global-types';
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -107,7 +108,12 @@ export class XYZTiles extends AbstractGeoViewRaster {
    */
   protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
     const fieldDefinitions = this.layerMetadata[layerConfig.layerPath].source.featureInfo;
-    const fieldIndex = getLocalizedValue(Cast<TypeLocalizedString>(fieldDefinitions.outfields), this.mapId)?.split(',').indexOf(fieldName);
+    const fieldIndex = getLocalizedValue(
+      Cast<TypeLocalizedString>(fieldDefinitions.outfields),
+      MapEventProcessor.getDisplayLanguage(this.mapId)
+    )
+      ?.split(',')
+      .indexOf(fieldName);
     if (!fieldIndex || fieldIndex === -1) return 'string';
     return (fieldDefinitions.fieldTypes as string).split(',')[fieldIndex!] as 'string' | 'date' | 'number';
   }
@@ -175,7 +181,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     // GV            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
     const sourceOptions: SourceOptions = {
-      url: getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId),
+      url: getLocalizedValue(layerConfig.source.dataAccessPath as TypeLocalizedString, MapEventProcessor.getDisplayLanguage(this.mapId)),
     };
     if (layerConfig.source.crossOrigin) {
       sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
@@ -236,7 +242,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
       if (layerConfig.initialSettings?.extent)
         // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings.extent = api.projection.transformExtent(
+        layerConfig.initialSettings.extent = api.utilities.projection.transformExtent(
           layerConfig.initialSettings.extent,
           'EPSG:4326',
           `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
@@ -263,7 +269,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     if (layerBounds) {
       let transformedBounds = layerBounds;
       if (this.metadata?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.mapId).currentProjection) {
-        transformedBounds = api.projection.transformExtent(
+        transformedBounds = api.utilities.projection.transformExtent(
           layerBounds,
           `EPSG:${projection}`,
           `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`

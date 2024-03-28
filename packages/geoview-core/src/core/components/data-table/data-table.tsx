@@ -262,8 +262,8 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
    */
   const getDateColumnTooltip = (date: Date) => {
     return (
-      <Tooltip title={api.dateUtilities.formatDate(date, 'YYYY-MM-DDThh:mm:ss')} arrow>
-        <Box>{api.dateUtilities.formatDate(date, 'YYYY-MM-DDThh:mm:ss')}</Box>
+      <Tooltip title={api.utilities.date.formatDate(date, 'YYYY-MM-DDThh:mm:ss')} arrow>
+        <Box>{api.utilities.date.formatDate(date, 'YYYY-MM-DDThh:mm:ss')}</Box>
       </Tooltip>
     );
   };
@@ -494,7 +494,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
       if (typeof filterValue === 'object' && filterValue) {
         const dateOpr = tableState?.columnFilterFns[filterId] || 'equals';
         const dateFilter = DATE_FILTER[dateOpr] as string;
-        const date = api.dateUtilities.applyInputDateFormat(`${(filterValue as Date).toISOString().slice(0, -5)}Z`);
+        const date = api.utilities.date.applyInputDateFormat(`${(filterValue as Date).toISOString().slice(0, -5)}Z`);
         const formattedDate = date.slice(0, -1);
         return `${filterId} ${dateFilter.replace('value', formattedDate)}`;
       }
