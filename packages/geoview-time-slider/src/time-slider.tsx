@@ -2,7 +2,7 @@ import { useTheme } from '@mui/material/styles';
 import { FormControl, InputLabel, NativeSelect } from '@mui/material';
 import { useTimeSliderLayers, useTimeSliderStoreActions } from 'geoview-core/src/core/stores';
 import { getLocalizedValue } from 'geoview-core/src/core/utils/utilities';
-import { MapViewer } from 'geoview-core/src/geo/map/map-viewer';
+import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { getSxClasses } from './time-slider-style';
 import { ConfigProps } from './time-slider-types';
 
@@ -43,9 +43,6 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  // TODO: pass the message object as props instead of the whole viewer
-  const mapViewer = api.maps[mapId] as MapViewer;
-
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const playIntervalRef = useRef<number>();
 
@@ -57,6 +54,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
   // TODO: evaluate best option to set value by layer path.... trough a getter?
   const { setTitle, setDefaultValue, setDescription, setValues, setLocked, setReversed, setDelay, setFiltering } =
     useTimeSliderStoreActions();
+  const displayLanguage = useAppDisplayLanguage();
 
   // TODO: check performance as we should technically have one selector by constant
   const {
@@ -81,9 +79,8 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
   useEffect(() => {
     // TODO: add mechanism to initialize these values during store onInitialize
     const sliderConfig = config?.sliders?.find((o: { layerPaths: string[] }) => o.layerPaths.includes(layerPath));
-    if (title === undefined) setTitle(layerPath, getLocalizedValue(sliderConfig?.title, mapViewer.getDisplayLanguage()) || '');
-    if (description === undefined)
-      setDescription(layerPath, getLocalizedValue(sliderConfig?.description, mapViewer.getDisplayLanguage()) || '');
+    if (title === undefined) setTitle(layerPath, getLocalizedValue(sliderConfig?.title, displayLanguage) || '');
+    if (description === undefined) setDescription(layerPath, getLocalizedValue(sliderConfig?.description, displayLanguage) || '');
     if (locked === undefined) setLocked(layerPath, sliderConfig?.locked !== undefined ? sliderConfig?.locked : false);
     if (reversed === undefined) setReversed(layerPath, sliderConfig?.reversed !== undefined ? sliderConfig?.reversed : false);
     if (defaultValue === undefined) setDefaultValue(layerPath, sliderConfig?.defaultValue || '');
@@ -318,13 +315,13 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
   function returnLockTooltip(): string {
     if (reversed) {
       const text = locked
-        ? mapViewer.getLocalizedMessage('timeSlider.slider.unlockRight')
-        : mapViewer.getLocalizedMessage('timeSlider.slider.lockRight');
+        ? api.utilities.core.getLocalizedMessage('timeSlider.slider.unlockRight', displayLanguage)
+        : api.utilities.core.getLocalizedMessage('timeSlider.slider.lockRight', displayLanguage);
       return text;
     }
     const text = locked
-      ? mapViewer.getLocalizedMessage('timeSlider.slider.unlockLeft')
-      : mapViewer.getLocalizedMessage('timeSlider.slider.lockLeft');
+      ? api.utilities.core.getLocalizedMessage('timeSlider.slider.unlockLeft', displayLanguage)
+      : api.utilities.core.getLocalizedMessage('timeSlider.slider.lockLeft', displayLanguage);
     return text;
   }
 
@@ -344,8 +341,8 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               <Tooltip
                 title={
                   filtering
-                    ? mapViewer.getLocalizedMessage('timeSlider.slider.disableFilter')
-                    : mapViewer.getLocalizedMessage('timeSlider.slider.enableFilter')
+                    ? api.utilities.core.getLocalizedMessage('timeSlider.slider.disableFilter', displayLanguage)
+                    : api.utilities.core.getLocalizedMessage('timeSlider.slider.enableFilter', displayLanguage)
                 }
                 placement="top"
                 enterDelay={1000}
@@ -387,7 +384,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
             )}
             <IconButton
               className="style1"
-              aria-label={mapViewer.getLocalizedMessage('timeSlider.slider.back') as string}
+              aria-label={api.utilities.core.getLocalizedMessage('timeSlider.slider.back', displayLanguage) as string}
               tooltip="timeSlider.slider.back"
               tooltipPlacement="top"
               disabled={isPlaying || !filtering}
@@ -399,8 +396,8 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               className="style1"
               aria-label={
                 isPlaying
-                  ? (mapViewer.getLocalizedMessage('timeSlider.slider.pauseAnimation') as string)
-                  : (mapViewer.getLocalizedMessage('timeSlider.slider.playAnimation') as string)
+                  ? (api.utilities.core.getLocalizedMessage('timeSlider.slider.pauseAnimation', displayLanguage) as string)
+                  : (api.utilities.core.getLocalizedMessage('timeSlider.slider.playAnimation', displayLanguage) as string)
               }
               tooltip={isPlaying ? 'timeSlider.slider.pauseAnimation' : 'timeSlider.slider.playAnimation'}
               tooltipPlacement="top"
@@ -411,7 +408,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
             </IconButton>
             <IconButton
               className="style1"
-              aria-label={mapViewer.getLocalizedMessage('timeSlider.slider.forward') as string}
+              aria-label={api.utilities.core.getLocalizedMessage('timeSlider.slider.forward', displayLanguage) as string}
               tooltip="timeSlider.slider.forward"
               tooltipPlacement="top"
               disabled={isPlaying || !filtering}
@@ -421,7 +418,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
             </IconButton>
             <IconButton
               className="style1"
-              aria-label={mapViewer.getLocalizedMessage('timeSlider.slider.changeDirection') as string}
+              aria-label={api.utilities.core.getLocalizedMessage('timeSlider.slider.changeDirection', displayLanguage) as string}
               tooltip="timeSlider.slider.changeDirection"
               tooltipPlacement="top"
               onClick={() => handleReverse()}
@@ -429,7 +426,9 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               {reversed ? <SwitchRightIcon /> : <SwitchLeftIcon />}
             </IconButton>
             <FormControl sx={{ width: '150px' }}>
-              <InputLabel variant="standard">{mapViewer.getLocalizedMessage('timeSlider.slider.timeDelay')}</InputLabel>
+              <InputLabel variant="standard">
+                {api.utilities.core.getLocalizedMessage('timeSlider.slider.timeDelay', displayLanguage)}
+              </InputLabel>
               <NativeSelect
                 defaultValue={delay}
                 inputProps={{

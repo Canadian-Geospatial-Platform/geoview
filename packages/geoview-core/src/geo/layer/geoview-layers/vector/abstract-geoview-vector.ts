@@ -31,6 +31,7 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
 import { Cast } from '@/core/types/global-types';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 /* *******************************************************************************************************************************
  * AbstractGeoViewVector types
@@ -78,7 +79,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     const fieldDefinitions = this.layerMetadata[layerConfig.layerPath].source.featureInfo;
     const fieldIndex = getLocalizedValue(
       Cast<TypeLocalizedString>(fieldDefinitions.outfields),
-      MapEventProcessor.getDisplayLanguage(this.mapId)
+      AppEventProcessor.getDisplayLanguage(this.mapId)
     )
       ?.split(',')
       .indexOf(fieldName);
@@ -164,7 +165,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           if (layerConfig.source?.featureInfo?.queryable && features) {
             const featureInfo = (layerConfig.source as TypeBaseSourceVectorInitialConfig).featureInfo!;
             const fieldTypes = featureInfo.fieldTypes?.split(',');
-            const fieldNames = getLocalizedValue(featureInfo.outfields, MapEventProcessor.getDisplayLanguage(this.mapId))!.split(',');
+            const fieldNames = getLocalizedValue(featureInfo.outfields, AppEventProcessor.getDisplayLanguage(this.mapId))!.split(',');
             const dateFields = fieldTypes?.reduce<string[]>((accumulator, entryFieldType, i) => {
               if (entryFieldType === 'date') accumulator.push(fieldNames![i]);
               return accumulator;

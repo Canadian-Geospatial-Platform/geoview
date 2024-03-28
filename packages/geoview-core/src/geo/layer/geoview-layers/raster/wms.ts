@@ -32,7 +32,7 @@ import {
   CONST_LAYER_ENTRY_TYPES,
   TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
-import { xmlToJson, replaceParams, getLocalizedValue } from '@/core/utils/utilities';
+import { xmlToJson, getLocalizedValue } from '@/core/utils/utilities';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -41,6 +41,7 @@ import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/r
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
@@ -114,7 +115,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected async fetchServiceMetadata(): Promise<void> {
-    const metadataUrl = getLocalizedValue(this.metadataAccessPath, MapEventProcessor.getDisplayLanguage(this.mapId));
+    const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
     if (metadataUrl) {
       const metadataAccessPathIsXmlFile = metadataUrl.slice(-4).toLowerCase() === '.xml';
       if (metadataAccessPathIsXmlFile) {
@@ -496,7 +497,7 @@ export class WMS extends AbstractGeoViewRaster {
       if (layerCapabilities) {
         const dataAccessPath = getLocalizedValue(
           layerConfig.source.dataAccessPath as TypeLocalizedString,
-          MapEventProcessor.getDisplayLanguage(this.mapId)
+          AppEventProcessor.getDisplayLanguage(this.mapId)
         )!;
 
         let styleToUse = '';
@@ -554,11 +555,8 @@ export class WMS extends AbstractGeoViewRaster {
         return Promise.resolve(layerConfig.olLayer);
       }
 
-      const message = replaceParams(
-        [layerConfig.layerId, this.geoviewLayerId],
-        MapEventProcessor.getLocalizedMessage(this.mapId, 'validation.layer.notfound')
-      );
-      MapEventProcessor.showError(this.mapId, message);
+      // TODO: find a more centralized way to trap error and display message
+      api.maps[this.mapId].notifications.showError('validation.layer.notfound', [layerConfig.layerId, this.geoviewLayerId]);
       return Promise.resolve(null);
     }
 
@@ -786,7 +784,7 @@ export class WMS extends AbstractGeoViewRaster {
       else if (Object.keys(this.metadata!.Capability.Request).includes('GetLegendGraphic'))
         queryUrl = `${getLocalizedValue(
           this.metadataAccessPath,
-          MapEventProcessor.getDisplayLanguage(this.mapId)
+          AppEventProcessor.getDisplayLanguage(this.mapId)
         )!}service=WMS&version=1.3.0&request=GetLegendGraphic&FORMAT=image/png&layer=${layerConfig.layerId}`;
 
       if (queryUrl) {
@@ -934,12 +932,12 @@ export class WMS extends AbstractGeoViewRaster {
     const featureInfo = layerConfig?.source?.featureInfo;
     const outfields = getLocalizedValue(
       featureInfo?.outfields as TypeLocalizedString,
-      MapEventProcessor.getDisplayLanguage(this.mapId)
+      AppEventProcessor.getDisplayLanguage(this.mapId)
     )?.split(',');
     const fieldTypes = featureInfo?.fieldTypes?.split(',');
     const aliasFields = getLocalizedValue(
       featureInfo?.aliasFields as TypeLocalizedString,
-      MapEventProcessor.getDisplayLanguage(this.mapId)
+      AppEventProcessor.getDisplayLanguage(this.mapId)
     )?.split(',');
     const queryResult: TypeFeatureInfoEntry[] = [];
 

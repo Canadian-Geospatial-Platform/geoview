@@ -44,6 +44,7 @@ import {
   commonProcessTemporalDimension,
   commonValidateListOfLayerEntryConfig,
 } from '@/geo/layer/geoview-layers/esri-layer-common';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_DYNAMIC;
@@ -229,7 +230,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     super.processOneLayerEntry(layerConfig);
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
-    sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, MapEventProcessor.getDisplayLanguage(this.mapId));
+    sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
     sourceOptions.params = { LAYERS: `show:${layerConfig.layerId}` };
     if (layerConfig.source.transparent) Object.defineProperty(sourceOptions.params, 'transparent', layerConfig.source.transparent!);
     if (layerConfig.source.format) Object.defineProperty(sourceOptions.params, 'format', layerConfig.source.format!);
@@ -308,7 +309,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       if (!this.getVisible(layerPath)) return [];
       if (!layerConfig.source?.featureInfo?.queryable) return [];
 
-      let identifyUrl = getLocalizedValue(layerConfig.source?.dataAccessPath, MapEventProcessor.getDisplayLanguage(this.mapId));
+      let identifyUrl = getLocalizedValue(layerConfig.source?.dataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
       if (!identifyUrl) return [];
 
       identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
@@ -473,7 +474,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns {string} The resulting field value.
    */
   private formatFieldValue(fieldName: string, rawValue: string | number | Date, sourceFeatureInfo: TypeFeatureInfoLayerConfig): string {
-    const fieldIndex = getLocalizedValue(sourceFeatureInfo.outfields, MapEventProcessor.getDisplayLanguage(this.mapId))
+    const fieldIndex = getLocalizedValue(sourceFeatureInfo.outfields, AppEventProcessor.getDisplayLanguage(this.mapId))
       ?.split(',')
       .indexOf(fieldName);
     const fieldType = sourceFeatureInfo.fieldTypes?.split(',')[fieldIndex!];

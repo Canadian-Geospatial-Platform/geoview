@@ -1,5 +1,7 @@
 import { Root, createRoot } from 'react-dom/client';
 
+import i18n from 'i18next';
+
 import sanitizeHtml from 'sanitize-html';
 
 import { TypeDisplayLanguage, TypeLocalizedString } from '@/geo/map/map-schema-types';
@@ -33,6 +35,18 @@ export function getLocalizedValue(localizedString: TypeLocalizedString | undefin
 }
 
 /**
+ * Return proper language Geoview localized values from map i18n instance
+ *
+ * @param {string} mapId the map to get the i18n
+ * @param {string} localizedKey localize key to get
+ * @returns {string} message with values replaced
+ */
+export function getLocalizedMessage(localizedKey: string, language: TypeDisplayLanguage): string {
+  const trans = i18n.getFixedT(language);
+  return trans(localizedKey);
+}
+
+/**
  * Generate a unique id if an id was not provided
  * @param {string} id an id to return if it was already passed
  * @returns {string} the generated id
@@ -44,11 +58,11 @@ export function generateId(id?: string | null): string {
 }
 
 /**
- * Take string like "My strins is __param__" and replace parameters (__param__) from array of values
+ * Take string like "My string is __param__" and replace parameters (__param__) from array of values
  *
- * @param {string[]} params array of parameters to replace, i.e. ['short']
- * @param {string} message original message, i.e. "My strins is __param__"
- * @returns {string} message with values replaced "My strins is short"
+ * @param {TypeJsonValue[] | TypeJsonArray | string[]} params array of parameters to replace, i.e. ['short']
+ * @param {string} message original message, i.e. "My string is __param__"
+ * @returns {string} message with values replaced "My string is short"
  */
 export function replaceParams(params: TypeJsonValue[] | TypeJsonArray | string[], message: string): string {
   let tmpMess = message;
