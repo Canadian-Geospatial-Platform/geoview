@@ -1,0 +1,141 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>WMS Layers</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/></td></tr><tr><td><p>This page is used to showcase how the viewer may show WMS layer types</p></td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HLYR1">1. Many WMS Layers</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible active">Map Status Flags</button><pre id="HLYR1-state" class="panel map-title-holder"></pre><div id="LYR1" class="llwp-map" triggerreadycallback="true" data-lang="en" data-config="{
+            'map': {
+              'interaction': 'dynamic',
+              'viewSettings': {
+                'zoom': 4,
+                'center': [-100, 60],
+                'projection': 3857
+              },
+              'basemapOptions': {
+                'basemapId': 'transport',
+                'shaded': false,
+                'labeled': true
+              },
+              'listOfGeoviewLayerConfig': [
+                {
+                  'geoviewLayerId': 'wmsLYR1-Root',
+                  'geoviewLayerName': { 'en': 'Weather Group' },
+                  'metadataAccessPath': { 'en': 'https://geo.weather.gc.ca/geomet' },
+                  'geoviewLayerType': 'ogcWms',
+                  'listOfLayerEntryConfig': [
+                    {
+                      'entryType': 'group',
+                      'layerId': 'wmsLYR1-Group',
+                      'layerName': { 'en': 'Group' },
+                      'listOfLayerEntryConfig': [
+                        {
+                          'layerId': 'CURRENT_CONDITIONS',
+                          'source': {
+                            'featureInfo': {
+                              'queryable': true,
+                              'nameField': { 'en': 'plain_text', 'fr': 'plain_texte' },
+                              'fieldTypes': 'string',
+                              'outfields': { 'en': 'plain_text', 'fr': 'plain_texte' },
+                              'aliasFields':  { 'en': 'Forcast', 'fr': 'Prévision' }
+                            }
+                          }
+                        },
+                        {
+                          'layerId': 'CGSL.ETA_ICEC',
+                          'layerFilter': 'time = date \'2023-04-18T07:00:00-04:00\''
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  'geoviewLayerId': 'wmsLYR1-msi',
+                  'geoviewLayerName': { 'en': 'MSI' },
+                  'metadataAccessPath': { 'en': 'https://datacube.services.geo.ca/ows/msi' },
+                  'geoviewLayerType': 'ogcWms',
+                  'listOfLayerEntryConfig': [
+                    {
+                      'layerId': 'msi-94-or-more',
+                      'layerName': { 'en': 'Permanent Snow' },
+                      'source': {
+                        'style': 'msi-binary',
+                        'featureInfo': {
+                          'queryable': true,
+                          'nameField': { 'en': 'band-0-pixel-value', 'fr': 'band-0-pixel-value' },
+                          'fieldTypes': 'number',
+                          'outfields': { 'en': 'band-0-pixel-value', 'fr': 'band-0-pixel-value' },
+                          'aliasFields':  { 'en': 'Pixel value', 'fr': 'Valeur du pixel' }
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  'geoviewLayerId': 'wmsLYR1-spatiotemporel',
+                  'geoviewLayerName': { 'en': 'Spatiotemporel' },
+                  'metadataAccessPath': { 'en': 'https://geo.weather.gc.ca/geomet' },
+                  'geoviewLayerType': 'ogcWms',
+                  'listOfLayerEntryConfig': [
+                    {
+                      'layerId': 'RADAR_1KM_RSNO',
+                      'layerName': { 'en': 'Test Spatiotemporel' }
+                    }
+                  ]
+                }
+              ]
+            },
+            'components': ['overview-map'],
+            'corePackages': [],
+            'theme': 'dark',
+            'suportedLanguages': ['en']
+          }"></div><button type="button" class="collapsible">Visibility and filters</button><pre id="layer1-buttons-pre" class="panel"></pre><button class="collapsible">Get Legend</button><pre id="LegendsId1-table-pre" class="panel"></pre><button type="button" class="collapsible">Get Feature Info</button><pre id="ResultSetId1-click" class="panel">Click on feature on the map</pre><hr/><p>This map has a wms layer added from configuration.</p><button type="button" class="collapsible">Configuration Snippet</button><pre id="LYR1CS" class="panel"></pre><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script src="layerlib.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function (mapId) {
+        console.log(`api is ready for ${mapId}`);
+
+        if (mapId === 'allMaps') {
+          //create snippets
+          createCodeSnippet();
+          createConfigSnippet();
+
+          createTableOfFilter('LYR1');
+
+          //LYR1 ===================================================================================================================
+          const featureInfoLayerSet1 = cgpv.api.getFeatureInfoLayerSet('LYR1');
+          cgpv.api.event.on(
+            cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+            (payload) => {
+              const { layerSetId, resultSets, eventType } = payload;
+              createInfoTable('LYR1', 'ResultSetId1', resultSets, eventType);
+            },
+            'LYR1/FeatureInfoLayerSet'
+          );
+
+          // ========================================================================================================================
+          // Cycle through the temporal data
+          let i = 0;
+          window.setInterval(() => {
+            const layerConfig = cgpv.api.maps.LYR1.layer.registeredLayers['wmsLYR1-spatiotemporel/RADAR_1KM_RSNO'];
+            const temporalData =
+              cgpv.api.maps.LYR1.layer.geoviewLayers['wmsLYR1-spatiotemporel'].layerTemporalDimension[
+                'wmsLYR1-spatiotemporel/RADAR_1KM_RSNO'
+              ];
+            if (temporalData) {
+              cgpv.api.maps.LYR1.layer.geoviewLayers['wmsLYR1-spatiotemporel'].applyViewFilter(
+                layerConfig,
+                `time=date '${temporalData.range.range[i]}'`
+              );
+              if (++i === temporalData.range.range.length) i = 0;
+            }
+          }, 2500);
+
+          let j = 0;
+          window.setInterval(() => {
+            const layerConfig = cgpv.api.maps.LYR1.layer.registeredLayers['wmsLYR1-msi/msi-94-or-more'];
+            const temporalData = cgpv.api.maps.LYR1.layer.geoviewLayers['wmsLYR1-msi'].layerTemporalDimension['wmsLYR1-msi/msi-94-or-more'];
+            if (temporalData) {
+              cgpv.api.maps.LYR1.layer.geoviewLayers['wmsLYR1-msi'].applyViewFilter(
+                layerConfig,
+                `time=date '${temporalData.range.range[j]}'`
+              );
+              if (++j === temporalData.range.range.length) j = 0;
+            }
+          }, 2500);
+        }
+      });
+
+      listenToLegendLayerSetChanges('HLYR1-state', 'LYR1/LegendsLayerSet');</script></body></html>

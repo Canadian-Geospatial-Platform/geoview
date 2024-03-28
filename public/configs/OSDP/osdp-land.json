@@ -1,0 +1,52 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "zoom": 8,
+      "center": [-113, 57.5],
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "LYR1",
+        "geoviewLayerName": { "en": "2010 Land Cover of Canada" },
+        "metadataAccessPath": {
+          "en": "https://datacube.services.geo.ca/web/landcover.xml"
+        },
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "landcover-2010"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR2",
+        "geoviewLayerName": { "en": "2015 Land Cover of Canada" },
+        "metadataAccessPath": {
+          "en": "https://datacube.services.geo.ca/web/landcover.xml"
+        },
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "landcover-2015"
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["north-arrow", "overview-map"],
+  "footerBar": {
+    "tabs": {
+      "core": ["legend", "layers", "details", "data-table"]
+    }
+  },
+  "corePackages": [ "swiper"],
+  "theme": "geo.ca",
+  "suportedLanguages": ["en"]
+  }

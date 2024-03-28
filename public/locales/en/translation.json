@@ -1,0 +1,226 @@
+{
+  "general": {
+    "add": "Add",
+    "close": "Close",
+    "exit": "Exit",
+    "layers": "Layers",
+    "name": "Name",
+    "open": "Open",
+    "remove": "Remove",
+    "view": "View"
+  },
+  "mapnav": {
+    "arianavbar": "vertical button group for map navigation",
+    "fullscreen": "Full Screen",
+    "home": "Reset to initial view",
+    "export": "Export map as PNG",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "coordinates": "Toggle Coordinates format",
+    "scale": "Toggle between scale and resolution",
+    "location": "Zoom to my location",
+    "collapseBtn": "Collapse",
+    "expandBtn": "Expand"
+  },
+  "mapctrl": {
+    "rotation": {
+      "resetRotation": "Reset Rotation",
+      "fixedNorth": "Fix North"
+    },
+    "mouseposition": {
+      "east": "E",
+      "west": "W",
+      "north": "N",
+      "south": "S"
+    },
+    "overviewmap": {
+      "toggle": "Toggle minimap"
+    },
+    "attribution": {
+      "defaultnrcan": "© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources",
+      "tooltip": "Attribution"
+    },
+    "crosshair": "Use <strong>Arrows</strong>, <strong>+</strong> and <strong>-</strong> keys to navigate the map, <strong>Enter</strong> to select and <strong>Shift+Arrow</strong> <strong>Up</strong> or <strong>Down</strong> to modify the pan value."
+  },
+  "appbar": {
+    "export": "Export",
+    "geolocator": "Geolocator",
+    "notifications": "Notifications",
+    "no_notifications_available": "No notifications available",
+    "fullscreen": "Full Screen",
+    "help": "Help",
+    "layers": "Layers",
+    "share": "Share",
+    "version": "About GeoView",
+    "repoLink": "Repo link"
+  },
+  "legend": {
+    "title": "Legend",
+    "unknown": "Unknown Layer Title",
+    "removeLayer": "Remove Layer",
+    "toggleOpacity": "Toggle Opacity DEPRECATED",
+    "zoomTo": "Zoom to Layer",
+    "addLayer": "Add Layer",
+    "sortLayers": "Sort Layers",
+    "sort": "Sort",
+    "layerError": "Layer has an error...",
+    "layerLoading": "Layer is loading...",
+    "tableDetails": "Table details",
+    "refreshLayer": "Refresh layer",
+    "highlightLayer": "Highlight layer",
+    "subLayersCount": "{count} sub-layers",
+    "itemsCount": "{count} of {totalCount} items",
+    "legendInstructions": "Legend Instructions"
+  },
+  "layers": {
+    "title": "Layers",
+    "subLayersList": "Sub-Layers List",
+    "removingLayers": "Removing Layers",
+    "reArrangeLayers": "Re-arrange Layers",
+    "addingNewLayer": "Adding a new layer",
+    "removeLayerDescription": "To remove a layer, click on the delete icon to the right of the layer.",
+    "sortingDescription": "<p>To sort the layers you can simply drag and drop each layer panel.</p><h4>Using the keyboard for drag and drop</h4><p>If you using the keyboard for sorting layers, note the following;</p><ul><li>When the layer panel has focus use the spacebar to lift the panel. This will start the drag.</li><li>Once the drag has started you can use the up and down arrows to move the panel</li><li>You can use the spacebar to drop the panel.</li><li>Use the ESC key to cancel drag</li></ul>",
+    "addingNewLayerDescription": "To add a layer, click on the add layer button at the top of the layer list. This will open a dialog where you can select the layer you want to add.",
+    "completeTable": "For complete data, please check data table tabs.",
+    "dataModalFeaturesDisplayed": "{numberOfFeatures} of {totalNumberOfFeatures} features displayed.",
+    "finish": "Finish",
+    "continue": "Continue",
+    "back": "Back",
+    "or": "or",
+    "dropzone": "Drop Here",
+    "upload": "Choose a File",
+    "drop": "Drop the file to upload",
+    "url": "Enter URL or UUID",
+    "layer": "Layer",
+    "stepOne": "Upload a File or enter URL/UUID",
+    "stepTwo": "Select format",
+    "stepThree": "Configure layer",
+    "stepFour": "Enter Name",
+    "service": "Service Type",
+    "name": "Name",
+    "layerSelect": "Select Layer",
+    "errorEmpty": "cannot be empty",
+    "errorNone": "No file or source added",
+    "errorFile": "Only geoJSON and GeoPackage files can be used",
+    "errorServer": "source is not valid",
+    "errorNotLoaded": "An error occured when loading the geoview layer",
+    "errorProj": "does not support current map projection",
+    "only": "only",
+    "opacity": "Opacity",
+    "opacityMax": "Maximum from parent",
+    "reloadLayer": "Reload layer",
+    "visibilityIsAlways": "Visibility is always enabled",
+    "toggleVisibility": "Toggle visibility",
+    "toggleCollapse": "Toggle collapse",
+    "querying": "Querying",
+    "layerAdded": "Layer __param__ added",
+    "instructionsNoLayersTitle": "No layers visible",
+    "instructionsNoLayersBody": "Add visible layers on the map."
+  },
+  "details": {
+    "title": "Details",
+    "zoomTo": "Zoom to feature",
+    "select": "Highlight feature on map",
+    "externalLink": "External Link",
+    "detailsView": "Details View",
+    "selectVisbleLayer": "Click on a feature on the map to view its details",
+    "feature": "feature",
+    "clickOnMap": "Click on map",
+    "nextFeatureBtn": "Next feature",
+    "previousFeatureBtn": "Previous feature",
+    "clearAllfeatures": "Clear all feature highlights",
+    "highlightFeaturesOnMap": "Highlight features on map",
+    "keepFeatureSelected": "Keep feature highlighted",
+    "detailsInstructions": "Details Instructions",
+    "loadingUI": "Loading user interface",
+    "featureDetailsTitle": "Feature {count} of {total}"
+  },
+  "lightbox": {
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "download": "Download"
+  },
+  "keyboardnav": {
+    "start": "Skip after map element",
+    "end": "Skip before map element",
+    "focusdialog": {
+      "title": "Keyboard Navigation",
+      "main": "If enable, we will keep focus locked on the viewer.\nTo exit, press <strong>CTRL + Q</strong>",
+      "button": {
+        "enable": "Enable",
+        "skip": "Skip"
+      }
+    }
+  },
+  "validation": {
+    "layer": {
+      "loadfailed": "Layer [__param__] failed to load on map __param__.",
+      "notfound": "The sublayer __param__ of the GeoView layer __param__ does not exist on the server",
+      "createtwice": "Can not execute twice the createGeoViewRasterLayers method for the map __param__",
+      "usedtwice": "Duplicate use of geoview layer identifier [__param__] on map __param__",
+      "multipleUUID": "GeoCore layers may only have one GeoCore UUID per layer"
+    },
+    "schema": {
+      "notFound": "A schema error was found, check the console to see what is wrong.",
+      "wrongPath": "Cannot find schema ([__param__])"
+    },
+    "changeDisplayLanguageLayers": "Layers can not be relaoded because the configuration does not support this language",
+    "changeDisplayLanguage": "Only 'en' and 'fr' are supported",
+    "changeDisplayTheme": "Theme unsuported",
+    "changeDisplayProjection": "Projection unsuported",
+    "invalidConfig": "Invalid JSON config, default configuration applied"
+  },
+  "exportModal": {
+    "title": "Export Map as PNG",
+    "cancelBtn": "Cancel",
+    "exportBtn": "Export",
+    "exportTitle": "Title",
+    "approx": "approx"
+  },
+  "geolocator": {
+    "search": "Search",
+    "errorMessage": "No matches found for",
+    "province": "Province",
+    "category": "Category",
+    "clearFilters": "Clear Filters",
+    "noFilter": "No Filter"
+  },
+  "hovertooltip": {
+    "alticon": "Selected feature icon"
+  },
+  "dataTable": {
+    "title": "Data Table",
+    "icon": "ICON",
+    "zoom": "ZOOM",
+    "exportBtn": "Export",
+    "jsonExportBtn": "Download GeoJSON",
+    "downloadAsCSV": "Download as CSV",
+    "filterMap": "Filter Map",
+    "stopFilterMap": "Stop Filter Map",
+    "rowsSelected": "{rowsSelected} of {totalRows} row(s) selected",
+    "rowsFiltered": "{rowsFiltered} of {totalRows} row(s) filtered",
+    "enlargeBtn": "Enlarge",
+    "reduceBtn": "Reduce",
+    "features": "feature(s)",
+    "featureFiltered": "features filtered",
+    "images": "Images",
+    "close": "Close",
+    "dataTableInstructions": "Data Table Instructions",
+    "selectVisbleLayer": "Click on a layer to view the data table",
+    "noFeatures": "unknown..."
+  },
+  "geoChart": {
+    "noChartAvailable": "Click on the map layer with chart"
+  },
+  "guide": {
+    "title": "Guide",
+    "errorMessage": "Sorry, unable to find the help document!"
+  },
+  "footerBar": {
+    "focusToMap": "Focus to map",
+    "focusToFooter": "Focus to footer",
+    "resizeTooltip": "Resize",
+    "noTab": "No Tab"
+  }
+}

@@ -1,0 +1,71 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Events</strong></h1></td></tr><tr><td><a href="./index.html">Main</a><br/><a href="#HLNG1">1. Snackbar Notification</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page is used to showcase how emit and listen to events from the API works</td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HEVNT1">1. Snackbar Notification</h4><a class="ref-link" href="#top">Top</a></div><div id="EVNT1" class="llwp-map" data-lang="en" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            }
+          },
+          'components': [],
+          'corePackages': [],
+          'theme': 'dark',
+          'suportedLanguages': ['en']
+        }"></div><div><button id="success-notif-but">Success Notification</button> <button id="info-notif-but">Info Notification</button> <button id="error-notif-but">Error Notification</button> <button id="warning-notif-but">Warning Notification</button></div><p>This script tag will trigger a basic notification on load and another with a custom function every 20 seconds.</p><p>Accessing map center from outside of the core viewer on Map MOVE event using api event listeners:</p><pre class="maps-position"></pre><button type="button" class="collapsible">Configuration Snippet</button><pre id="EVNT1CS" class="panel"></pre><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function () {
+        console.log('api is ready');
+
+        //get map posiion panel
+        const mapsPosition = document.getElementsByClassName('maps-position');
+
+        document.getElementById('success-notif-but').addEventListener('click', function (e) {
+          cgpv.api.utilities.addNotificationSuccess('EVNT1', 'this is a success notification title');
+        });
+
+        document.getElementById('info-notif-but').addEventListener('click', function (e) {
+          cgpv.api.utilities.addNotificationMessage('EVNT1', 'this is an info notification');
+        });
+
+        document.getElementById('warning-notif-but').addEventListener('click', function (e) {
+          cgpv.api.utilities.addNotificationWarning('EVNT1', 'this is an warning notification');
+        });
+
+        document.getElementById('error-notif-but').addEventListener('click', function (e) {
+          cgpv.api.utilities.addNotificationError('EVNT1', 'this is an error notification');
+        });
+
+        // listen to map moveend event
+        cgpv.api.event.on(
+          cgpv.api.eventNames.MAP.EVENT_MAP_MOVE_END,
+          (payload) => {
+            if (cgpv.types.cgpv.types.payloadIsALngLat(payload)) {
+              mapsPosition[0].innerHTML =
+                mapsPosition[0].innerHTML = `<p>Map ${payload.handlerName} with latitude ${payload.lnglat[1]} and longitude ${payload.lnglat[0]}</p>`;
+            }
+          },
+          'EVNT1'
+        );
+
+        // snackbar notification
+        cgpv.api.utilities.showWarning('EVNT1', 'This is my first snackbar!');
+
+        setInterval(() => {
+          cgpv.api.utilities.showMessage('EVNT1', 'I can even apply a function', false, {
+            label: 'Click me!',
+            action: () => {
+              alert('You clicked me!');
+            },
+          });
+
+          cgpv.api.utilities.addNotificationSuccess('EVNT1', 'this is a success notification title');
+        }, 20000);
+
+        //create snippets
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

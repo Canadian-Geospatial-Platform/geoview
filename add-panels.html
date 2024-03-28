@@ -1,0 +1,119 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Add Panels</strong></h1></td></tr><tr><td><a href="./index.html">Main</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page is used to showcase adding panels to the app-bar and adding panels and buttons to the navbar.</td></tr></tbody></table></div><div class="toolbar"><button class="add-appbar-panel-btn">Add Appbar Panel</button> <button class="add-navbar-panel-btn">Add Navbar Panel</button> <button class="add-navbar-button-btn">Add Navbar Button</button> <button class="add-navbar-button-group-btn">Add Navbar Panel New Group</button></div><div id="mapWM" class="llwp-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'zoom': 4,
+            'center': [-100, 60],
+            'projection': 3857
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': true
+          }
+        },
+        'navBar': ['zoom', 'fullscreen', 'home', 'location', 'export'],
+        'appBar': ['geolocator', 'export'],
+        'components': ['overview-map'],
+        'corePackages': [],
+        'theme': 'dark',
+        'suportedLanguages': ['en']
+      }"></div><p></p><button type="button" class="collapsible">Configuration Snippet</button><pre id="mapWMCS" class="panel"></pre><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function () {
+        console.log('api is ready');
+
+        //config snippets
+        createConfigSnippet();
+
+        //create snippets
+        createCodeSnippet();
+
+        // get add panel button element for WM map
+        var addAppbarPanelBtn = document.getElementsByClassName('add-appbar-panel-btn')[0];
+
+        // add app-bar panel btn click event handler
+        // button will open a panel on the app-bar
+        addAppbarPanelBtn.addEventListener('click', function (e) {
+          const button = {
+            id: 'AppbarPanelButtonId',
+            tooltip: 'Test',
+            tooltipPlacement: 'right',
+            children: cgpv.react.createElement(cgpv.ui.elements.AppsIcon),
+          };
+
+          const panel = {
+            panelId: 'AppbarPanelId',
+            title: 'Test',
+            content: `<div>Test content</div>`,
+            width: 200,
+          };
+
+          // call an api function to add a panel with a button in the default group
+          cgpv.api.maps['mapWM'].appBarButtons.createAppbarPanel(button, panel, null);
+        });
+
+        // get add nav-bar panel button element for WM map
+        var addNavbarPanelBtn = document.getElementsByClassName('add-navbar-panel-btn')[0];
+
+        // add nav-bar panel btn click event handler
+        // button will open a panel on the nav-bar
+        addNavbarPanelBtn.addEventListener('click', function (e) {
+          const button = {
+            tooltip: 'Test',
+            children: cgpv.react.createElement(cgpv.ui.elements.AppsIcon),
+            tooltipPlacement: 'left',
+          };
+
+          const panel = {
+            title: 'Test',
+            content: `<div>Test content</div>`,
+            width: 200,
+          };
+
+          // call an api function to add a panel with a button
+          cgpv.api.maps['mapWM'].navBarButtons.createNavbarButtonPanel(button, panel, null);
+        });
+
+        // get add nav-bar button element for WM map
+        var addNavbarButtonBtn = document.getElementsByClassName('add-navbar-button-btn')[0];
+
+        // add nav-bar button btn click event handler
+        // button will call a function
+        addNavbarButtonBtn.addEventListener('click', function (e) {
+          const button = {
+            tooltip: 'Test',
+            children: cgpv.react.createElement(cgpv.ui.elements.OpenInBrowserIcon),
+            tooltipPlacement: 'left',
+            onClick: function () {
+              alert('test function');
+            },
+          };
+
+          // call an api function to add a panel with a button
+          cgpv.api.maps['mapWM'].navBarButtons.createNavbarButton(button, null);
+        });
+
+        // get add nav-bar button group element for WM map
+        var addNavbarButtonGroupBtn = document.getElementsByClassName('add-navbar-button-group-btn')[0];
+
+        // add nav-bar button group btn click event handler
+        // button will add a button panel on the nav-bar in a new group
+        addNavbarButtonGroupBtn.addEventListener('click', function (e) {
+          const button = {
+            id: 'id',
+            tooltip: 'Group',
+            tooltipPlacement: 'left',
+            children: cgpv.react.createElement(cgpv.ui.elements.GroupIcon), // comment
+          };
+
+          const panel = {
+            panelId: 'panerId',
+            title: 'Group',
+            content: `<div>Test content</div>`,
+            width: 400,
+          };
+
+          // call an api function to add a new button panel in the nav-bar in a new group
+          cgpv.api.maps['mapWM'].navBarButtons.createNavbarButtonPanel(button, panel, 'newGroup');
+        });
+      });</script></body></html>

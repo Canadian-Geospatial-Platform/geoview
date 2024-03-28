@@ -1,0 +1,64 @@
+{
+  "copyrightText": "© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources",
+  "listOfLayerEntryConfig": [
+    {
+      "layerId": "execution",
+      "layerName": { "en": "Raster Drill process", "fr": "Raster Drill process" },
+      "source": {
+        "dataAccessPath": {
+          "en": "https://api.weather.gc.ca/processes/raster-drill/execution",
+          "fr": "https://api.weather.gc.ca/processes/raster-drill/execution"
+        },
+        "postSettings": {
+          "header": {
+            "accept": "application/json",
+            "Content-Type": "application/json"
+          },
+          "data": {
+            "inputs": {
+              "layer": "CMIP5.TT.RCP26.YEAR.ANO_PCTL50",
+              "x": -114.74968888274337,
+              "y": 51.132831196692806,
+              "format": "GeoJSON"
+            }
+          }
+        },
+        "featureInfo": {
+          "queryable": "true",
+          "nameField": {
+            "en": "label_en",
+            "fr": "label_fr"
+          },
+          "outfields": {
+            "en": "label_en,percentile_en,period_en,scenario_en,time_begin,time_end,time_step,uom,value_type_en,variable_en,values",
+            "fr": "label_fr,percentile_fr,period_fr,scenario_fr,time_begin,time_end,time_step,uom,value_type_fr,variable_fr,values"
+          },
+          "fieldTypes": "string,string,string,string,date,date,string,string,string,string,number",
+          "aliasFields": {
+            "en": "label_en,percentile_en,period_en,scenario_en,time_begin,time_end,time_step,uom,value_type_en,variable_en,values",
+            "fr": "label_fr,percentile_fr,period_fr,scenario_fr,time_begin,time_end,time_step,uom,value_type_fr,variable_fr,values"
+          }
+        }
+      },
+      "initialSettings": {
+        "visible": "yes",
+        "extent": [-177.29275972275843, 34.301384132573055, -9.977229778239453, 84.400481529465]
+      },
+      "style": {
+        "Point": {
+          "styleType": "simple",
+          "label": "Raster Drill process",
+          "settings": {
+            "color": "rgba(128,0,0,0.25)",
+            "type": "simpleSymbol",
+            "symbol": "star",
+            "stroke": {
+              "color": "rgba(128,0,0,1)",
+              "lineStyle": "solid"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

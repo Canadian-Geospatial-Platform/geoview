@@ -1,0 +1,323 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Legend</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page demonstrates the legend component</td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HUC1">1. Legend Core Component</h4><a class="ref-link" href="#top">Top</a></div><div id="UC1" class="llwp-map" data-lang="en" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'UC1-Layer1',
+                'geoviewLayerName': { 'en': 'Cities L2 (Esri-feature SIMPLE / base64 img)' },
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/Overlays/Cities/MapServer'
+                },
+                'geoviewLayerType': 'esriFeature',
+                'listOfLayerEntryConfig': [
+                  { 'layerId': '2' }
+                ]
+              },
+              {
+                'geoviewLayerId': 'UC1-Layer2',
+                'geoviewLayerName': {
+                  'en': 'Première Nation / First Nation (WMS)',
+                  'fr': 'Première Nation / First Nationz'
+                },
+                'metadataAccessPath': {
+                  'en': 'https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer',
+                  'fr': 'https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer'
+                },
+                'geoviewLayerType': 'ogcWms',
+                'listOfLayerEntryConfig': [{ 'layerId': '0' }]
+              },
+              {
+                'geoviewLayerId': 'UC1-Layer3',
+                'geoviewLayerName': {
+                  'en': 'Geomet (WMS)',
+                  'fr': 'Geomet'
+                },
+                'metadataAccessPath': {
+                  'en': 'https://geo.weather.gc.ca/geomet',
+                  'fr': 'https://geo.weather.gc.ca/geomet'
+                },
+                'geoviewLayerType': 'ogcWms',
+                'listOfLayerEntryConfig': [{ 'layerId': 'RAQDPS-FW.CE_PM2.5-DIFF-YAvg' }]
+              },
+              {
+                'geoviewLayerId': 'UC1-Layer4',
+                'geoviewLayerName': { 'en': 'Provinces (Esri-feature SIMPLE / vector)' },
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/Overlays/Provinces/MapServer'
+                },
+                'geoviewLayerType': 'esriFeature',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': '0',
+                    'style': {
+                      'Polygon': {
+                        'styleType': 'simple',
+                        'label': 'Polygon label',
+                        'settings': {
+                          'type': 'filledPolygon',
+                          'paternSize': 10,
+                          'paternWidth': 2,
+                          'fillStyle': 'null',
+                          'stroke': {
+                            'color': 'rgba(0,128,128,1)',
+                            'lineStyle': 'shortDash-dot-dot'
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                'geoviewLayerId': 'UC1-Layer5',
+                'geoviewLayerName': { 'en': 'Water quality at monitoring sites (Esri-feature UNIQUE VALUES)' },
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer'
+                },
+                'geoviewLayerType': 'esriFeature',
+                'listOfLayerEntryConfig': [
+                  { 'layerId': '5' }
+                ]
+              }
+            ]
+          },
+          'theme': 'light',
+          'navBar': ['zoom', 'focus'],
+          'components': [],
+          'corePackages': ['footer-panel'],
+          'suportedLanguages': ['en']
+        }"></div><p>Add a legend component.</p><button type="button" class="collapsible">Configuration Snippet</button><pre id="UC1CS" class="panel"></pre><div class="map-title-holder"><h4 id="HUC2">2. Class Break Style Legend</h4><a class="ref-link" href="#top">Top</a></div><div id="UC2" class="llwp-map" data-lang="en" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'UC2-Layer1',
+                'geoviewLayerName': {
+                  'en': 'Water quality at monitoring sites',
+                  'fr': 'Water quality at monitoring sites'
+                },
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer',
+                  'fr': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer'
+                },
+                'geoviewLayerType': 'esriDynamic',
+                'listOfLayerEntryConfig': [
+                  {'layerId': '8'}
+                ]
+              }
+            ]
+          },
+          'theme': 'dark',
+          'navBar': ['zoom', 'focus'],
+          'components': [],
+          'corePackages': ['footer-panel'],
+          'suportedLanguages': ['en']
+        }"></div><p>Add a legend component.</p><button type="button" class="collapsible">Configuration Snippet</button><pre id="UC2CS" class="panel"></pre><div class="map-title-holder"><h4 id="HUC3">3. Group Layer</h4><a class="ref-link" href="#top">Top</a></div><div id="UC3" class="llwp-map" data-lang="en" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'UC3-Layer1',
+                'geoviewLayerName': {
+                  'en': 'Energy (Esri-dynamic)',
+                  'fr': 'Energy'
+                },
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer',
+                  'fr': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer'
+                },
+                'geoviewLayerType': 'esriDynamic',
+                'listOfLayerEntryConfig': [
+                  {'layerId': '8'}
+                ]
+              }
+            ]
+          },
+          'components': [],
+          'navBar': ['zoom', 'focus'],
+          'corePackages': ['footer-panel'],
+          'theme': 'dark',
+          'suportedLanguages': ['en']
+        }"></div><p>Add a legend component.</p><button type="button" class="collapsible">Configuration Snippet</button><pre id="UC3CS" class="panel"></pre><div class="map-title-holder"><h4 id="HUC4">4. WMS Group</h4><a class="ref-link" href="#top">Top</a></div><div id="UC4" class="llwp-map" data-lang="en" data-config="{
+      'map': {
+        'interaction': 'dynamic',
+        'viewSettings': {
+          'zoom': 4,
+          'center': [
+            -100,
+            60
+          ],
+          'projection': 3857
+        },
+        'basemapOptions': {
+          'basemapId': 'transport',
+          'shaded': false,
+          'labeled': true
+        },
+        'listOfGeoviewLayerConfig': [
+          {
+            'geoviewLayerId': 'UC4Layer1-Root',
+            'geoviewLayerName': {
+              'en': 'Root'
+            },
+            'metadataAccessPath': {
+              'en': 'https://ows.mundialis.de/services/service'
+            },
+            'geoviewLayerType': 'ogcWms',
+            'initialSettings': {
+              'visible': 'yes'
+            },
+            'listOfLayerEntryConfig': [
+              {
+                'entryType': 'group',
+                'layerId': 'UC4Layer1-Group',
+                'layerName': {
+                  'en': 'Group'
+                },
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'OSM-WMS'
+                  },
+                  {
+                    'layerId': 'TOPO-OSM-WMS'
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            'geoviewLayerId': 'UC4Layer2-msi',
+            'geoviewLayerName': {
+              'en': 'MSI'
+            },
+            'metadataAccessPath': {
+              'en': 'https://datacube.services.geo.ca/ows/msi'
+            },
+            'geoviewLayerType': 'ogcWms',
+            'listOfLayerEntryConfig': [
+              {
+                'layerId': 'msi-94-or-more'
+              }
+            ]
+          }
+        ]
+      },
+      'components': [],
+      'navBar': ['zoom', 'focus'],
+      'corePackages': [],
+      'theme': 'dark',
+      'suportedLanguages': [
+        'en'
+      ]
+  }"></div><p>Add a legend component in Panel from the HTML script tag with custom width.</p><div id="legend-item-example"></div><p>Add a single legend item component in div.</p><button type="button" class="collapsible">Configuration Snippet</button><pre id="UC4CS" class="panel"></pre><script src="codedoc.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function () {
+        console.log('api is ready');
+
+        //create snippets
+        createCodeSnippet();
+        createConfigSnippet();
+
+        // import react and api from the core
+        const { react, createRoot, api, ui } = cgpv;
+
+        // define the map id
+        const mapIdOne = 'UC1';
+
+        // import footerTabs from the core for the current map
+        const { footerTabs: ft1 } = api.maps[mapIdOne];
+
+        const legendOne = api
+          .maps[mapIdOne]
+          .legend.createLegend({ layerIds: ['UC1-Layer1', 'UC1-Layer2', 'UC1-Layer3', 'UC1-Layer4', 'UC1-Layer5'] });
+
+        // create new tab and add the LegendComponent to the footer tab
+        ft1.createFooterTab({
+          value: 0,
+          label: 'Legend',
+          content: () => legendOne,
+        });
+
+        const mapIdTwo = 'UC2';
+
+        // import footerTabs from the core for the current map
+        const { footerTabs: ft2 } = api.maps[mapIdTwo];
+
+        const legendTwo = api.maps[mapIdTwo].legend.createLegend({ layerIds: ['UC2-Layer1'] });
+
+        // create new tab and add the LegendComponent to the footer tab
+        ft2.createFooterTab({
+          value: 0,
+          label: 'Legend',
+          content: () => legendTwo,
+        });
+
+        const mapIdThree = 'UC3';
+
+        // import footerTabs from the core for the current map
+        const { footerTabs: ft3 } = api.maps[mapIdThree];
+
+        const legendThree = api.maps[mapIdThree].legend.createLegend({ layerIds: ['UC3-Layer1'] });
+
+        // create new tab and add the LegendComponent to the footer tab
+        ft3.createFooterTab({
+          value: 0,
+          label: 'Legend',
+          content: () => legendThree,
+        });
+
+        // Legend in a panel
+        const mapIdFour = 'UC4';
+        const legendFour = api.maps[mapIdFour].legend.createLegend({ layerIds: ['UC4Layer1-Root', 'UC4Layer2-msi'] });
+        const button = {
+          id: 'AppbarPanelButtonId',
+          tooltip: 'Legend',
+          tooltipPlacement: 'right',
+          children: react.createElement(ui.elements.LayersIcon),
+        };
+
+        const panel = {
+          panelId: 'AppbarPanelId',
+          title: 'Legend',
+          content: legendFour,
+          width: 500,
+        };
+
+        // call an api function to add a panel with a button in the default group
+        api.maps[mapIdFour].appBarButtons.createAppbarPanel(button, panel, null);
+
+        const legendDiv = document.getElementById('legend-item-example');
+        // TODO: The legend component does not render properly
+        const legendItemOutside = api.maps[mapIdFour].legend.createLegendItem({ layerId: 'UC4Layer2-msi' });
+        const root = createRoot(legendDiv);
+        root.render(legendItemOutside);
+      });</script></body></html>

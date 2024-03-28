@@ -1,0 +1,109 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><style>/* The device with borders */
+    .device {
+      position: relative;
+      margin: auto;
+      border: 16px black solid;
+      border-top-width: 60px;
+      border-bottom-width: 60px;
+      border-radius: 36px;
+    }
+
+    .smaprtphoneframe {
+      width: 360px;
+      height: 640px;
+    }
+
+    /* The device with borders */
+    .tabletframe {
+      width: 960px;
+      height: 1024px;
+    }
+
+    .pcframe {
+      position: relative;
+      margin: auto;
+      border: 16px black solid;
+      width: 1366px;
+      height: 800px;
+    }
+
+    /* The horizontal line on the top of the device */
+    .device:before {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 5px;
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #333;
+      border-radius: 10px;
+    }
+
+    /* The circle on the bottom of the device */
+    .device:after {
+      content: '';
+      display: block;
+      width: 35px;
+      height: 35px;
+      position: absolute;
+      left: 50%;
+      bottom: -65px;
+      transform: translate(-50%, -50%);
+      background: #333;
+      border-radius: 50%;
+    }
+
+    /* The screen (or content) of the device */
+    .smartphone {
+      width: 360px;
+      height: 640px;
+      background: white;
+    }
+
+    .ToolAvailability {
+      display: flex;
+      justify-content: center;
+    }
+
+    /* The screen (or content) of the device */
+    .tablet {
+      width: 959px;
+      height: 1024px;
+      background: white;
+      margin: -1px;
+    }
+
+    .pc {
+      width: 1366px;
+      height: 800px;
+      background: white;
+      margin: -1px;
+    }
+
+    iframe {
+      margin-top: 0px;
+      width: 100%;
+      height: 500px;
+    }
+
+    #iframecpu {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    #iframeram {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+    }</style><script src="cgpv-main.js"></script></head><body onload="adjustVisibilityofMaps"><div class="header-table"><table><tbody><tr><td><img class="logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Responsive Page</strong></h1></td></tr><tr><td><a href="./index.html">Main</a><br/><a href="#HRP1">1. Smart Phone</a><br/><a href="#HRP2">2. Tablet</a><br/><a href="#HRP3">3. Desktop</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page is used to showcase how the viewer may show different map Projections</td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HRP1">1. Smart Phone</h4><a class="ref-link" href="#top">Top</a></div><p>Small Screen Size 640px of width or less</p><div class="device smaprtphoneframe"><div class="smartphone"><iframe id="iframe1" src="responsive_page_map.html" style="width: 100%; border: none; height: 100%"></iframe></div></div><hr/><div class="map-title-holder"><h4 id="HRP2">2. Tablet</h4><a class="ref-link" href="#top">Top</a></div><p>Medium Screen Size 640px to 960px of width</p><div class="device tabletframe"><div class="tablet"><iframe id="iframe2" src="responsive_page_map.html" style="width: 100%; border: none; height: 100%"></iframe></div></div><hr/><div class="map-title-holder"><h4 id="HRP3">3. Desktop</h4><a class="ref-link" href="#top">Top</a></div><p>Big Screen Size 960px of width or up</p><div class="pcframe"><div class="pc"><iframe id="iframe3" src="responsive_page_map.html" style="width: 100%; border: none; height: 100%"></iframe></div></div><hr/><div class="map-title-holder"><h4>Tool Availability</h4><a class="ref-link" href="#top">Top</a></div><div class="ToolAvailability"><br/><table style="width: 713px; border-color: black; float: left" border="1" cellpadding="10"><tbody><tr style="background-color: grey"><td>Tools</td><td>Smart Phone</td><td>Tablet</td><td>PC/Laptop</td></tr><tr><td>Scale Control</td><td><img purpose="img" placement="inline" alt="Verified" title="Verified" src="./img/Check.png"/></td><td><img purpose="img" placement="inline" alt="Verified" title="Verified" src="./img/Check.png"/></td><td><img purpose="img" placement="inline" alt="Verified" title="Verified" src="./img/Check.png"/></td></tr><tr><td>Zoom Control</td><td><img purpose="img" placement="inline" alt="Verified" title="Verified" src="./img/Check.png"/></td><td><img purpose="img" placement="inline" alt="Verified" title="Verified" src="./img/Check.png"/></td><td><img purpose="img" placement="inline" alt="Verified" title="Verified" src="./img/Check.png"/></td></tr><tr><td>Maximum Bound Control</td><td><img purpose="img" placement="inline" alt="Verified" title="Verified" src="./img/Check.png"/></td><td><img purpose="img" placement="inline" alt="Verified" title="Verified" src="./img/Check.png"/></td><td><img purpose="img" placement="inline" alt="Verified" title="Verified" src="./img/Check.png"/></td></tr><tr><td>Home Control</td><td><img purpose="img" placement="inline" alt="Verified" title="Verified" src="./img/Check.png"/></td><td><img purpose="img" placement="inline" alt="Verified" title="Verified" src="./img/Check.png"/></td><td><img purpose="img" placement="inline" alt="Verified" title="Verified" src="./img/Check.png"/></td></tr><tr><td>Application Bar</td><td><img purpose="img" placement="inline" alt="Verified" title="Verified" src="./img/Check.png"/></td><td><img purpose="img" placement="inline" alt="Verified" title="Verified" src="./img/Check.png"/></td><td><img purpose="img" placement="inline" alt="Verified" title="Verified" src="./img/Check.png"/></td></tr><tr><td>North Arrow</td><td><img purpose="img" placement="inline" alt="Verified" title="Verified" src="./img/Check.png"/></td><td><img purpose="img" placement="inline" alt="Verified" title="Verified" src="./img/Check.png"/></td><td><img purpose="img" placement="inline" alt="Verified" title="Verified" src="./img/Check.png"/></td></tr><tr><td>Overview Map</td><td></td><td></td><td><img purpose="img" placement="inline" alt="Verified" title="Verified" src="./img/Check.png"/></td></tr><tr><td>Mouse Position</td><td></td><td></td><td><img purpose="img" placement="inline" alt="Verified" title="Verified" src="./img/Check.png"/></td></tr><tr><td>Map Attribution</td><td>&nbsp;</td><td>&nbsp;</td><td><img purpose="img" placement="inline" alt="Verified" title="Verified" src="./img/Check.png"/></td></tr></tbody></table></div><script>// change map height to fit in each device
+    function adjustVisibilityofMaps() {
+      document.getElementById('iframe1').contentWindow.document.getElementById('RPT1').style.height = '500px';
+      document.getElementById('iframe3').contentWindow.document.getElementById('RPT1').style.height = '650px';
+      document.getElementById('iframe2').contentWindow.document.getElementById('RPT1').style.height = '800px';
+    }
+    window.onload = adjustVisibilityofMaps;</script></body></html>

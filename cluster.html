@@ -1,0 +1,97 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Clustering</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/><a href="#Hcluster-config">1. Clusters loaded from config file</a><br/><a href="#Hcluster-set">2. Clusters loaded from HTML</a><br/><a href="#Hflood-cluster">3. Flood data with clustering</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page is used to demonstate clustering</td></tr></tbody></table></div><div class="map-title-holder"><h4 id="Hcluster-config">1. Clusters loaded from config file</h4><a class="ref-link" href="#top">Top</a></div><hr/><div id="cluster-config" class="llwp-map" data-lang="en" data-config-url="./configs/cluster-config.json"></div><hr/><div class="map-title-holder"><h4 id="Hcluster-set">2. Clusters loaded from HTML</h4><a class="ref-link" href="#top">Top</a></div><div id="cluster-set" class="llwp-map" data-lang="en" data-config="{
+      'map': {
+        'interaction': 'dynamic',
+        'viewSettings': {
+          'zoom': 4,
+          'center': [-100, 60],
+          'projection': 3978
+        },
+        'basemapOptions': {
+          'basemapId': 'transport',
+          'shaded': true,
+          'labeled': true
+        },
+        'listOfGeoviewLayerConfig': [
+          {
+            'geoviewLayerId': 'geojsonEndPoint',
+            'geoviewLayerName': {
+              'en': 'GeoJSON Service End Point Sample',
+              'fr': 'Exemple Service GeoJSON'
+            },
+            'geoviewLayerType': 'GeoJSON',
+            'listOfLayerEntryConfig': [
+              {
+                'layerId': 'items?lang=en_US&f=json&limit=5000',
+                'source': {
+                  'dataAccessPath': {
+                    'en': 'https://geo-api.riskprofiler.ca/collections/opendrr_dsra_acm4p9_capilano5_shakemap/',
+                    'fr': 'https://geo-api.riskprofiler.ca/collections/opendrr_dsra_acm4p9_capilano5_shakemap/'
+                  },
+                  'cluster': {
+                    'enable': true
+                  }
+                }
+              },
+              {
+                'layerId': 'lines.json',
+                'source': {
+                  'dataAccessPath': {
+                    'en': './geojson/',
+                    'fr': './geojson/'
+                  },
+                  'cluster': {
+                    'enable': true,
+                    'textColor': 'black'
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      'components': [],
+      'corePackages': ['layers-panel', 'details-panel'],
+      'theme': 'dark',
+      'suportedLanguages': ['en']
+    }"></div><hr/><div class="map-title-holder"><h4 id="Hflood-cluster">3. Flood data with clustering</h4><a class="ref-link" href="#top">Top</a></div><div id="flood-cluster" class="llwp-map" data-lang="en" data-config="{
+      'map': {
+        'interaction': 'dynamic',
+        'viewSettings': {
+          'zoom': 4,
+          'center': [-100, 60],
+          'projection': 3978
+        },
+        'basemapOptions': {
+          'basemapId': 'transport',
+          'shaded': false,
+          'labeled': true
+        },
+        'listOfGeoviewLayerConfig': [
+          {
+            'geoviewLayerId': 'historical-flood',
+            'geoviewLayerName': { 'en': 'Historical Flood Events (HFE)' },
+            'metadataAccessPath': {
+              'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer'
+            },
+            'geoviewLayerType': 'esriFeature',
+            'listOfLayerEntryConfig': [
+              { 'layerId': '0',
+                'source': {
+                  'cluster': {'enable': true}
+                }
+              }
+            ]
+          }
+        ]
+      },
+      'components': ['overview-map', 'north-arrow'],
+      'corePackages': ['layers-panel', 'details-panel'],
+      'theme': 'dark',
+      'suportedLanguages': ['en']
+    }"></div><hr/><script src="codedoc.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function () {
+        console.log('api is ready');
+
+        //create snippets
+        createConfigSnippet();
+      });</script></body></html>

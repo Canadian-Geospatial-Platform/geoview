@@ -1,0 +1,272 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><style>/* Style the tab */
+      .tab {
+        overflow: hidden;
+        border: 1px solid #ccc;
+        background-color: #f1f1f1;
+      }
+
+      /* Style the buttons inside the tab */
+      .tab button {
+        background-color: inherit;
+        float: left;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 14px 16px;
+        transition: 0.3s;
+        font-size: 17px;
+      }
+
+      /* Change background color of buttons on hover */
+      .tab button:hover {
+        background-color: #ddd;
+      }
+
+      /* Create an active/current tablink class */
+      .tab button.active {
+        background-color: #ccc;
+      }
+
+      /* Style the tab content */
+      .tabcontent {
+        display: none;
+        padding: 6px 12px;
+        border: 1px solid #ccc;
+        border-top: none;
+      }
+
+      .load-test-params {
+        display: inline;
+      }
+
+      input,
+      label,
+      button {
+        margin: 5px;
+      }
+
+      #url {
+        width: 500px;
+      }</style><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Load Test</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page is used to showcase how the viewer may implement different vector functions</td></tr></tbody></table></div><br/><div style="display: none"><span>Add Layers</span><br/><div id="sourcedLayers" class="load-test-params"><label>Layer Type</label> <select name="layerType" id="layerType"><option value="ogcWms">WMS Layer</option><option value="esriFeature">Esri Feature Layer</option><option value="esriDynamic">Esri Dynamic Layer</option><option value="geoJSONPoint">GeoJson Point Layer</option><option value="geoJSONLine">GeoJson Line Layer</option><option value="geoJSONPolygon">GeoJson Polygon Layer</option></select> <label id="URLlbl">URL</label><input id="url"/> <label id="entrieslbl">entries</label> <input id="entries"/> <label>No of layers to load</label><input id="layerCount"/> <button id="load-btn">Load Data</button></div></div><br/><br/><span>Add GeoJSON Features</span><br/><div id="jsonFeatures" class="load-test-params"><label id="featuretype">Geometry</label> <select name="jsonfeaturetype" id="jsonfeaturetype"><option value="jsonPoint">Point</option><option value="jsonLine">Line</option><option value="jsonPolygon">Polygon</option></select> <label id="featureCntlbl">Count</label> <input id="featureCnt"/> <button id="load-features-btn">Load Data</button><br/></div><br/><span>Time to render: </span><span id="timer"></span><br/><span>Time to zoom : </span><span id="zoomtime"></span><br/><div id="mapWM" class="llwp-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'zoom': 4,
+            'center': [-100, 60],
+            'projection': 3978
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': true
+          }
+        },
+        'components': [],
+        'corePackages': [],
+        'theme': 'dark',
+        'suportedLanguages': ['en']
+      }"></div><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script>let tzoom0 = 0;
+      const layerOptionValues = ['ogcWms', 'esriFeature', 'esriDynamic', 'geoJSONPoint', 'geoJSONLine', 'geoJSONPolygon'];
+      const jsonFeatureOptionValues = ['jsonPoint', 'jsonLine', 'jsonPolygon'];
+
+      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function () {
+        console.log('api is ready');
+
+        setTimeout(() => cgpv.api.maps.mapWM.map.on('movestart', () => (tzoom0 = performance.now())), 1000);
+        setTimeout(
+          () =>
+            cgpv.api.maps.mapWM.map.on('moveend', () => {
+              var tzoom1 = performance.now();
+              document.getElementById('zoomtime').innerText = Math.round(tzoom1 - tzoom0) / 1000 + ' Seconds';
+            }),
+          1000
+        );
+
+        //create snippets
+        createCodeSnippet();
+      });
+
+      // find the button element by ID
+      var addwmsButton = document.getElementById('load-wms-btn');
+
+      function updateURL() {
+        // TODO: repair when layer populate automatically child element
+        switch (layerOptionValues[document.getElementById('layerType').selectedIndex]) {
+          case 'esriFeature':
+            document.getElementById('url').value =
+              'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/1';
+            document.getElementById('entries').value = '---';
+            break;
+          case 'esriDynamic':
+            document.getElementById('url').value =
+              'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer';
+            document.getElementById('entries').value = '0, 2, 4, 5';
+            break;
+          case 'ogcWms':
+            document.getElementById('url').value =
+              'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer';
+            document.getElementById('entries').value = '0';
+            break;
+          case 'geoJSONPoint':
+            document.getElementById('url').value = './geojson/';
+            document.getElementById('entries').value = 'points.json';
+            break;
+          case 'geoJSONLine':
+            document.getElementById('url').value = './geojson/';
+            document.getElementById('entries').value = 'lines.json';
+            break;
+          case 'geoJSONPolygon':
+            document.getElementById('url').value = './geojson/';
+            document.getElementById('entries').value = 'polygons.json';
+            break;
+        }
+      }
+
+      var layerTypeCbo = document.getElementById('layerType');
+      layerTypeCbo.addEventListener('change', function (e) {
+        updateURL();
+      });
+      setTimeout(() => updateURL(), 1000);
+
+      var addFeatureButton = document.getElementById('load-btn');
+      addFeatureButton.addEventListener('click', function (e) {
+        if (typeof parseInt(document.getElementById('layerCount').value) === 'number') {
+          let type = layerOptionValues[document.getElementById('layerType').selectedIndex];
+          type = type.indexOf('geoJSON') === -1 ? type : 'GeoJSON';
+
+          let listOfLayerEntryConfig = [];
+          let entriesValue = document.getElementById('entries').value;
+
+          if (entriesValue) {
+            listOfLayerEntryConfig = entriesValue.split(',').map((entry) => {
+              return {
+                layerId: entry,
+              };
+            });
+          }
+
+          var t0 = performance.now();
+
+          for (j = 0; j < parseInt(document.getElementById('layerCount').value); j++) {
+            cgpv.api.maps['mapWM'].layer.addGeoviewLayer({
+              geoviewLayerId: new Date().getTime().toString(),
+              geoviewLayerName: {
+                en: 'test',
+                fr: 'test',
+              },
+              geoviewLayerType: type,
+              listOfLayerEntryConfig,
+              metadaAccessPath: {
+                en: document.getElementById('url').value,
+                fr: document.getElementById('url').value,
+              },
+            });
+          }
+
+          var t1 = performance.now();
+          document.getElementById('timer').innerText = Math.round(t1 - t0) / 1000 + ' Seconds';
+        }
+      });
+
+      // ADD GEOJSON FEATURE SECTION
+      var addFeatureButton = document.getElementById('load-features-btn');
+      addFeatureButton.addEventListener('click', function (e) {
+        var t0 = performance.now();
+
+        switch (jsonFeatureOptionValues[document.getElementById('jsonfeaturetype').selectedIndex]) {
+          case 'jsonPoint':
+            addJSONPoint();
+            break;
+          case 'jsonLine':
+            addJSONLine();
+            break;
+          default:
+            addJSONPolygon();
+        }
+
+        var t1 = performance.now();
+        document.getElementById('timer').innerText = Math.round(t1 - t0) / 1000 + ' Seconds';
+      });
+
+      function addJSONPoint() {
+        for (j = 0; j < parseInt(document.getElementById('featureCnt').value); j++) {
+          const coord = generateRandomCoord();
+
+          // call an api function to draw a polygon
+          const circle = cgpv.api.maps['mapWM'].layer.geometry.addCircle([coord[0], coord[1]], {
+            style: {
+              strokeColor: 'red',
+              strokeOpacity: 0.15,
+              fillColor: '#f03',
+              fillOpacity: 0.15,
+              radius: 1,
+            },
+          });
+        }
+      }
+
+      function addJSONLine() {
+        for (j = 0; j < parseInt(document.getElementById('featureCnt').value); j++) {
+          const ptStart = generateRandomCoord();
+          const ptEnd = generateRandomCoord();
+          const line = [];
+
+          // add 10 vertices
+          for (k = 0; k < 10; k++) {
+            line.push(
+              generateRandomCoord(
+                ptStart[0] < ptEnd[0] ? ptStart[0] : ptEnd[0],
+                Math.abs(ptStart[1] < ptEnd[1] ? ptStart[1] : ptEnd[1]),
+                ptEnd[0] > ptStart[0] ? ptEnd[0] : ptStart[0],
+                Math.abs(ptEnd[1] > ptStart[1] ? ptEnd[1] : ptStart[1])
+              )
+            );
+          }
+          line.push(ptEnd);
+          line.unshift(ptStart);
+
+          const polyline = cgpv.api.maps['mapWM'].layer.geometry.addPolyline(line, {
+            style: {
+              strokeColor: '#000',
+              strokeWidth: 1,
+              strokeOpacity: 0.8,
+            },
+          });
+        }
+      }
+
+      function addJSONPolygon() {
+        for (j = 0; j < parseInt(document.getElementById('featureCnt').value); j++) {
+          const center = generateRandomCoord();
+          const factor = (Math.random() * 100 + 1) / 10;
+
+          // call an api function to draw a polygon
+          const polygon = cgpv.api.maps['mapWM'].layer.geometry.addPolygon(
+            [
+              [
+                [center[0] + factor / 2, center[1] + factor],
+                [center[0] + factor / 2, center[1] - factor],
+                [center[0] - factor / 2, center[1] - factor],
+                [center[0] - factor / 2, center[1] + factor],
+              ],
+            ],
+            {
+              style: {
+                strokeColor: '#000',
+                strokeWidth: 1,
+                strokeOpacity: 0.8,
+                fillColor: '#666',
+                fillOpacity: 0.2,
+              },
+            }
+          );
+        }
+      }
+
+      function generateRandomCoord(minY = 40, minX = 45, maxY = 85, maxX = 140) {
+        const lat = parseFloat(((Math.random() * (maxY * 100 - minY * 100 + 1) + minY * 100) / 100).toFixed(3));
+        const long = parseFloat(((Math.random() * (maxX * 100 - minX * 100 + 1) + minX * 100) / 100).toFixed(3));
+
+        return [-long, lat];
+      }</script></body></html>

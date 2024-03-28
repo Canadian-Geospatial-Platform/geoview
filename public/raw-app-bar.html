@@ -1,0 +1,11 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Panel - Feature Info</strong></h1></td></tr><tr><td><a href="./index.html">Main</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page is used to test the creation and integration of the Feature Info component in a responsive design.</td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HUC1">1. Basic Map English Geo.ca theme</h4><a class="ref-link" href="#top">Top</a></div><div id="mapWM1" class="geoview-map" data-lang="en" data-config-url="./configs/raw-app-bar.json"></div><script src="codedoc.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+    cgpv.init((mapId) => {
+      if (mapId === 'allMaps') {
+        // Write code here...
+        // ...
+
+        // create snippets
+        createCodeSnippet();
+        createConfigSnippet();
+      }
+    });</script></body></html>
