@@ -70,7 +70,6 @@
         try {
           if (document.getElementById('CHARTPLUGINCONFIG').value) config = JSON.parse(document.getElementById('CHARTPLUGINCONFIG').value);
         } catch (ex) {
-          cgpv.api.utilities.showError(mapId, 'Failed to create JSON from input data text area.');
           console.error(ex);
         }
 

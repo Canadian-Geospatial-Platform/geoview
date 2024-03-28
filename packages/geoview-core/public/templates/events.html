@@ -101,19 +101,19 @@
           const mapRotation = document.getElementsByClassName('maps-rotation')[0];
 
           document.getElementById('success-notif-but').addEventListener('click', function (e) {
-            cgpv.api.utilities.addNotificationSuccess('EVNT1', 'this is a success notification title');
+            cgpv.api.maps['EVNT1'].notifications.addNotificationSuccess('this is a success notification title');
           });
 
           document.getElementById('info-notif-but').addEventListener('click', function (e) {
-            cgpv.api.utilities.addNotificationMessage('EVNT1', 'this is an info notification');
+            cgpv.api.maps['EVNT1'].notifications.addNotificationMessage('this is an info notification');
           });
 
           document.getElementById('warning-notif-but').addEventListener('click', function (e) {
-            cgpv.api.utilities.addNotificationWarning('EVNT1', 'this is an warning notification');
+            cgpv.api.maps['EVNT1'].notifications.addNotificationWarning('this is an warning notification');
           });
 
           document.getElementById('error-notif-but').addEventListener('click', function (e) {
-            cgpv.api.utilities.addNotificationError('EVNT1', 'this is an error notification');
+            cgpv.api.maps['EVNT1'].notifications.addNotificationError('this is an error notification');
           });
 
           // listen to map moveend event
@@ -127,17 +127,17 @@
           });
 
           // snackbar notification
-          cgpv.api.utilities.showWarning('EVNT1', 'This is my first snackbar!');
+          cgpv.api.maps['EVNT1'].notifications.showWarning('This is my first snackbar!');
 
           setInterval(() => {
-            cgpv.api.utilities.showMessage('EVNT1', 'I can even apply a function', false, {
+            cgpv.api.maps['EVNT1'].notifications.showMessage('I can even apply a function', [], false, {
               label: 'Click me!',
               action: () => {
                 alert('You clicked me!');
               },
             });
 
-            cgpv.api.utilities.addNotificationSuccess('EVNT1', 'this is a success notification title');
+            cgpv.api.maps['EVNT1'].notifications.addNotificationSuccess('this is a success notification title');
           }, 10000);
 
           // create snippets

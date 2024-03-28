@@ -7,7 +7,6 @@ import { KeyboardPan } from 'ol/interaction';
 import { Coordinate } from 'ol/coordinate';
 import { api } from '@/app';
 import {
-  TypeDisplayLanguage,
   TypeGeoviewLayerConfig,
   TypeHighlightColors,
   TypeInteraction,
@@ -740,23 +739,4 @@ export class MapEventProcessor extends AbstractEventProcessor {
   };
 
   // #endregion
-
-  // TODO: Delete this temporary functions when we pass the mapviewer/utilities object to all ts files
-  // TD.CONT we should have a utilities object attacht to all elements... for the moments, these functions
-  // TD.CONT are attached to map-viewer... they are utilities, theur shoudl be in their own class linked to map id
-  static showError = (mapId: string, message: string, snakcbar = true): void => {
-    api.maps[mapId].showError(message, snakcbar);
-  };
-
-  static showMessage = (mapId: string, message: string, snakcbar = true): void => {
-    api.maps[mapId].showMessage(message, snakcbar);
-  };
-
-  static getDisplayLanguage = (mapId: string): TypeDisplayLanguage => {
-    return api.maps[mapId].getDisplayLanguage();
-  };
-
-  static getLocalizedMessage = (mapId: string, message: string): string => {
-    return api.maps[mapId].getLocalizedMessage(message);
-  };
 }

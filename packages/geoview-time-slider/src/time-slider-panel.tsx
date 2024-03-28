@@ -2,11 +2,11 @@ import { useTheme } from '@mui/material/styles';
 import { TypeWindow } from 'geoview-core/src/core/types/global-types';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
 import { TypeTimeSliderValues, useMapVisibleLayers, useTimeSliderLayers } from 'geoview-core/src/core/stores';
+import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { Box, Paper, Typography } from 'geoview-core/src/ui';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
 import { ReactNode } from 'react';
-import { MapViewer } from 'geoview-core/src/geo/map/map-viewer';
 import { TimeSlider } from './time-slider';
 import { ConfigProps } from './time-slider-types';
 import { getSxClasses } from './time-slider-style';
@@ -31,15 +31,13 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  // TODO: pass the message object as props instead of the whole viewer
-  const mapViewer = api.maps[mapId] as MapViewer;
-
   // internal state
   const [selectedLayerPath, setSelectedLayerPath] = useState<string>();
 
   // get values from store
   const visibleLayers = useMapVisibleLayers() as string[];
   const timeSliderLayers = useTimeSliderLayers();
+  const displayLanguage = useAppDisplayLanguage();
 
   /**
    * handle Layer list when clicked on each layer.
@@ -121,10 +119,10 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       {!selectedLayerPath && (
         <Paper sx={{ padding: '2rem' }}>
           <Typography variant="h3" gutterBottom sx={sxClasses.timeSliderInstructionsTitle}>
-            {mapViewer.getLocalizedMessage('timeSlider.instructions')}
+            {api.utilities.core.getLocalizedMessage('timeSlider.instructions', displayLanguage)}
           </Typography>
           <Typography component="p" sx={sxClasses.timeSliderInstructionsBody}>
-            {mapViewer.getLocalizedMessage('timeSlider.instructions')}
+            {api.utilities.core.getLocalizedMessage('timeSlider.instructions', displayLanguage)}
           </Typography>
         </Paper>
       )}

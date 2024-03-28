@@ -7,7 +7,7 @@ import { FeatureHighlight } from '@/geo/utils/feature-highlight';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 import { Config } from '@/core/utils/config/config';
-import { generateId, replaceParams, whenThisThen } from '@/core/utils/utilities';
+import { generateId, whenThisThen } from '@/core/utils/utilities';
 import { ConfigBaseClass, LayerStatusChangedEvent } from '@/core/utils/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
 import { AbstractGeoViewLayer, GeoViewLayerRegistrationEvent } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -41,6 +41,7 @@ import { LayerSet } from '@/geo/utils/layer-set';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from '@/geo/map/map-viewer';
+import { api } from '@/app';
 
 export type TypeRegisteredLayers = { [layerPath: string]: TypeLayerEntryConfig };
 
@@ -246,11 +247,8 @@ export class LayerApi {
    * @private
    */
   #printDuplicateGeoviewLayerConfigError(mapConfigLayerEntry: MapConfigLayerEntry) {
-    const message = replaceParams(
-      [mapConfigLayerEntry.geoviewLayerId, this.mapId],
-      MapEventProcessor.getLocalizedMessage(this.mapId, 'validation.layer.usedtwice')
-    );
-    MapEventProcessor.showError(this.mapId, message);
+    // TODO: find a more centralized way to trap error and display message
+    api.maps[this.mapId].notifications.showError('validation.layer.usedtwice', [mapConfigLayerEntry.geoviewLayerId, this.mapId]);
     // Log
     logger.logError(`Duplicate use of geoview layer identifier ${mapConfigLayerEntry.geoviewLayerId} on map ${this.mapId}`);
   }
@@ -430,11 +428,8 @@ export class LayerApi {
         // Log the details in the console
         logger.logError(loggerMessage);
 
-        const message = replaceParams(
-          [layer, this.mapId],
-          MapEventProcessor.getLocalizedMessage(this.mapId, 'validation.layer.loadfailed')
-        );
-        MapEventProcessor.showError(this.mapId, message);
+        // TODO: find a more centralized way to trap error and display message
+        api.maps[this.mapId].notifications.showError('validation.layer.loadfailed', [layer, this.mapId]);
       });
     }
 

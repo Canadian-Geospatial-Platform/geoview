@@ -58,6 +58,7 @@ export class API {
   /**
    * Apply outline to elements when keyboard is use to navigate
    * Code from: https://github.com/MaxMaeder/keyboardFocus.js
+   * @private
    */
   #manageKeyboardFocus = (): void => {
     // Remove the 'keyboard-focused' class from any elements that have it

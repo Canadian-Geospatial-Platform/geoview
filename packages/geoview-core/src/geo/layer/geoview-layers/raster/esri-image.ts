@@ -33,6 +33,7 @@ import {
   commonProcessLayerMetadata,
   commonProcessTemporalDimension,
 } from '@/geo/layer/geoview-layers/esri-layer-common';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
@@ -134,7 +135,7 @@ export class EsriImage extends AbstractGeoViewRaster {
       if (!layerConfig) return null;
       const legendUrl = `${getLocalizedValue(
         layerConfig.geoviewLayerConfig.metadataAccessPath,
-        MapEventProcessor.getDisplayLanguage(this.mapId)
+        AppEventProcessor.getDisplayLanguage(this.mapId)
       )}/legend?f=pjson`;
       const response = await fetch(legendUrl);
       const legendJson: TypeEsriImageLayerLegend = await response.json();
@@ -299,7 +300,7 @@ export class EsriImage extends AbstractGeoViewRaster {
     super.processOneLayerEntry(layerConfig);
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
-    sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, MapEventProcessor.getDisplayLanguage(this.mapId));
+    sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
     sourceOptions.params = { LAYERS: `show:${layerConfig.layerId}` };
     if (layerConfig.source.transparent) Object.defineProperty(sourceOptions.params, 'transparent', layerConfig.source.transparent!);
     if (layerConfig.source.format) Object.defineProperty(sourceOptions.params, 'format', layerConfig.source.format!);

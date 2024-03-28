@@ -57,6 +57,7 @@ import { TypeMapFeaturesConfig, TypeHTMLElement, TypeJsonObject } from '@/core/t
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
+import { Notifications } from '@/core/utils/notifications';
 
 interface TypeDocument extends Document {
   webkitExitFullscreen: () => void;
@@ -103,6 +104,9 @@ export class MapViewer {
 
   // used to access basemap functions
   basemap: Basemap;
+
+  // used to attach the notification class
+  notifications: Notifications;
 
   // used to access layers functions
   // Note: The '!' is used here, because it's being created just a bit late, but not late enough that we want to keep checking for undefined throughout the code base
@@ -201,6 +205,7 @@ export class MapViewer {
     this.appBarApi = new AppbarApi(this.mapId);
     this.navBarApi = new NavbarApi(this.mapId);
     this.footerBarApi = new FooterBarApi(this.mapId);
+    this.notifications = new Notifications(this.mapId);
 
     this.modal = new ModalApi(this.mapId);
     this.modal.onModalOpened((sender, modalEvent) => api.event.emitModalOpen(this.mapId, modalEvent.modalId));
@@ -1005,9 +1010,13 @@ export class MapViewer {
       if (resetLayer) {
         if (AppEventProcessor.getSupportedLanguages(this.mapId).includes(displayLanguage)) {
           logger.logInfo('reset layers not implemented yet');
-        } else this.addNotificationError(this.getLocalizedMessage('validation.changeDisplayLanguageLayers'));
+        } else
+          this.notifications.addNotificationError(
+            api.utilities.core.getLocalizedMessage('validation.changeDisplayLanguageLayers', displayLanguage)
+          );
       }
-    } else this.addNotificationError(this.getLocalizedMessage('validation.changeDisplayLanguage'));
+    } else
+      this.notifications.addNotificationError(api.utilities.core.getLocalizedMessage('validation.changeDisplayLanguage', displayLanguage));
   }
 
   /**
@@ -1022,7 +1031,7 @@ export class MapViewer {
 
       // TODO: Emit to outside
       // this.#emitMapInit...
-    } else this.addNotificationError(this.getLocalizedMessage('validation.changeDisplayProjection'));
+    } else this.notifications.addNotificationError('validation.changeDisplayProjection');
   }
 
   /**
@@ -1043,7 +1052,10 @@ export class MapViewer {
   setTheme(displayTheme: TypeDisplayTheme): void {
     if (VALID_DISPLAY_THEME.includes(displayTheme)) {
       AppEventProcessor.setDisplayTheme(this.mapId, displayTheme);
-    } else this.addNotificationError(this.getLocalizedMessage('validation.changeDisplayTheme'));
+    } else
+      this.notifications.addNotificationError(
+        api.utilities.core.getLocalizedMessage('validation.changeDisplayTheme', this.getDisplayLanguage())
+      );
   }
 
   /**
@@ -1405,143 +1417,6 @@ export class MapViewer {
     } catch (error) {
       return '180.0';
     }
-  }
-
-  // #region NOTIFICATION MESSAGES
-  /**
-   * Reusable utility function to send event to add a notification in the notifications manager
-   *
-   * @param {NotificationType} type optional, the type of message (info, success, warning, error), info by default
-   * @param {string} message optional, the message string
-   */
-  // eslint-disable-next-line no-underscore-dangle, default-param-last
-  #addNotification(type: NotificationType = 'info', message: string): void {
-    const notification = {
-      key: generateId(),
-      notificationType: type,
-      message,
-      count: 1,
-    };
-
-    AppEventProcessor.addAppNotification(this.mapId, notification);
-  }
-
-  /**
-   * Add a notification message
-   *
-   * @param {string} message the message string
-   */
-  addNotificationMessage(message: string): void {
-    // Redirect
-    this.#addNotification('info', message);
-  }
-
-  /**
-   * Add a notification success
-   *
-   * @param {string} message the message string
-   */
-  addNotificationSuccess(message: string): void {
-    // Redirect
-    this.#addNotification('success', message);
-  }
-
-  /**
-   * Add a notification warning
-   *
-   * @param {string} message the message string
-   */
-  addNotificationWarning(message: string): void {
-    // Redirect
-    this.#addNotification('warning', message);
-  }
-
-  /**
-   * Add a notification error
-   *
-   * @param {string} message the message string
-   */
-  addNotificationError(message: string): void {
-    // Redirect
-    this.#addNotification('error', message);
-  }
-
-  /**
-   * Reusable utility function to send event to display a message in the snackbar
-   *
-   * @param {SnackbarType} snackbarType the  type of snackbar
-   * @param {string} message the snackbar message
-   * @param {ISnackbarButton} button optional snackbar button
-   */
-  // eslint-disable-next-line no-underscore-dangle
-  #showSnackbarMessage(type: SnackbarType, message: string, button?: ISnackbarButton): void {
-    // Emit
-    api.event.emitSnackbarOpen(this.mapId, type, message, button);
-  }
-
-  /**
-   * Display a message in the snackbar
-   *
-   * @param {string} message the message string
-   * @param {string} withNotification optional, indicates if the message should also be added as a notification, default true
-   * @param {ISnackbarButton} button optional snackbar button
-   */
-  showMessage(message: string, withNotification = true, button = {}): void {
-    // Redirect
-    this.#showSnackbarMessage('info', message, button);
-    if (withNotification) this.addNotificationMessage(message);
-  }
-
-  /**
-   * Display an success message in the snackbar
-   *
-   * @param {string} message the message string
-   * @param {string} withNotification optional, indicates if the message should also be added as a notification, default true
-   * @param {ISnackbarButton} button optional snackbar button
-   */
-  showSuccess(message: string, withNotification = true, button = {}): void {
-    // Redirect
-    this.#showSnackbarMessage('success', message, button);
-    if (withNotification) this.addNotificationSuccess(message);
-  }
-
-  /**
-   * Display an warning message in the snackbar
-   *
-   * @param {string} message the message string
-   * @param {string} withNotification optional, indicates if the message should also be added as a notification, default true
-   * @param {ISnackbarButton} button optional snackbar button
-   */
-  showWarning(message: string, withNotification = true, button = {}): void {
-    // Redirect
-    this.#showSnackbarMessage('warning', message, button);
-    if (withNotification) this.addNotificationWarning(message);
-  }
-
-  /**
-   * Display an error message in the snackbar
-   *
-   * @param {string} message the message string
-   * @param {string} withNotification optional, indicates if the message should also be added as a notification, default true
-   * @param {ISnackbarButton} button optional snackbar button
-   */
-  showError(message: string, withNotification = true, button = {}): void {
-    // Redirect
-    this.#showSnackbarMessage('error', message, button);
-    if (withNotification) this.addNotificationError(message);
-  }
-  // #endregion NOTIFICATION MESSAGES
-
-  /**
-   * Return proper language Geoview localized values from map i18n instance
-   *
-   * @param {string} localizedKey localize key to get
-   * @returns {string} message with values replaced
-   */
-  getLocalizedMessage(localizedKey: string): string {
-    const lang = this.getDisplayLanguage();
-    const trans = this.#i18nInstance.getFixedT(lang);
-    return trans(localizedKey);
   }
 }
 

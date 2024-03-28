@@ -9,7 +9,7 @@ import { Extent } from 'ol/extent';
 import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
 import Feature from 'ol/Feature';
 
-import { generateId, getXMLHttpRequest, replaceParams, createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
+import { generateId, getXMLHttpRequest, createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { LayerApi } from '@/geo/layer/layer';
 import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
@@ -34,7 +34,7 @@ import {
   CONST_LAYER_ENTRY_TYPES,
 } from '@/geo/map/map-schema-types';
 import { QueryType, TypeFeatureInfoEntry, TypeLocation, codedValueType, rangeDomainType } from '@/geo/utils/layer-set';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 // Constant used to define the default layer names
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
@@ -370,8 +370,8 @@ export abstract class AbstractGeoViewLayer {
         logger.logError(error);
       }
     } else {
-      const message = replaceParams([this.mapId], MapEventProcessor.getLocalizedMessage(this.mapId, 'validation.layer.createtwice'));
-      MapEventProcessor.showError(this.mapId, message);
+      // TODO: find a more centralized way to trap error and display message
+      api.maps[this.mapId].notifications.showError('validation.layer.createtwice', [this.mapId]);
       // Log
       logger.logError(`Can not execute twice the createGeoViewLayers method for the map ${this.mapId}`);
     }
@@ -410,7 +410,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected async fetchServiceMetadata(): Promise<void> {
-    const metadataUrl = getLocalizedValue(this.metadataAccessPath, MapEventProcessor.getDisplayLanguage(this.mapId));
+    const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
     if (metadataUrl) {
       try {
         const metadataString = await getXMLHttpRequest(`${metadataUrl}?f=json`);
@@ -1182,11 +1182,11 @@ export abstract class AbstractGeoViewLayer {
       const fieldTypes = featureInfo?.fieldTypes?.split(',') as ('string' | 'number' | 'date')[];
       const outfields = getLocalizedValue(
         featureInfo?.outfields as TypeLocalizedString,
-        MapEventProcessor.getDisplayLanguage(this.mapId)
+        AppEventProcessor.getDisplayLanguage(this.mapId)
       )?.split(',');
       const aliasFields = getLocalizedValue(
         featureInfo?.aliasFields as TypeLocalizedString,
-        MapEventProcessor.getDisplayLanguage(this.mapId)
+        AppEventProcessor.getDisplayLanguage(this.mapId)
       )?.split(',');
       const queryResult: TypeFeatureInfoEntry[] = [];
       let featureKeyCounter = 0;
@@ -1219,7 +1219,7 @@ export abstract class AbstractGeoViewLayer {
             nameField:
               getLocalizedValue(
                 layerConfig?.source?.featureInfo?.nameField as TypeLocalizedString,
-                MapEventProcessor.getDisplayLanguage(this.mapId)
+                AppEventProcessor.getDisplayLanguage(this.mapId)
               ) || null,
           };
 

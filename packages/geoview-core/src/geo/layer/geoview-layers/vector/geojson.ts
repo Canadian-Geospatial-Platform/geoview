@@ -25,6 +25,7 @@ import { getLocalizedValue } from '@/core/utils/utilities';
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'GeoJSON';
@@ -172,7 +173,7 @@ export class GeoJSON extends AbstractGeoViewVector {
         // config dataAccessPath value.
         let metadataAccessPathRoot = getLocalizedValue(
           layerConfig.geoviewLayerConfig?.metadataAccessPath as TypeLocalizedString,
-          MapEventProcessor.getDisplayLanguage(this.mapId)
+          AppEventProcessor.getDisplayLanguage(this.mapId)
         );
         if (metadataAccessPathRoot) {
           metadataAccessPathRoot =
@@ -182,11 +183,11 @@ export class GeoJSON extends AbstractGeoViewVector {
             metadataAccessPathRootPlusLayerId ===
               getLocalizedValue(
                 layerConfig.source?.dataAccessPath as TypeLocalizedString,
-                MapEventProcessor.getDisplayLanguage(this.mapId)
+                AppEventProcessor.getDisplayLanguage(this.mapId)
               ) &&
             getLocalizedValue(
               layerMetadataFound.source?.dataAccessPath as TypeLocalizedString,
-              MapEventProcessor.getDisplayLanguage(this.mapId)
+              AppEventProcessor.getDisplayLanguage(this.mapId)
             )
           ) {
             layerConfig.source!.dataAccessPath = { ...layerMetadataFound.source!.dataAccessPath } as TypeLocalizedString;
@@ -221,7 +222,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     readOptions.dataProjection = (layerConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
     sourceOptions.url = getLocalizedValue(
       layerConfig.source!.dataAccessPath! as TypeLocalizedString,
-      MapEventProcessor.getDisplayLanguage(this.mapId)
+      AppEventProcessor.getDisplayLanguage(this.mapId)
     );
     sourceOptions.format = new FormatGeoJSON();
     const vectorSource = super.createVectorSource(layerConfig, sourceOptions, readOptions);

@@ -34,7 +34,8 @@
       "south": "S"
     },
     "overviewmap": {
-      "toggle": "Basculer la mini-carte"
+      "toggle": "Basculer la carte d'aperçu",
+      "error": "Erreur lors du chargement de la carte d'aperçu"
     },
     "attribution": {
       "defaultnrcan": "© Sa Majesté le Roi du Chef du Canada, représentée par le ministre des Ressources naturelle",
