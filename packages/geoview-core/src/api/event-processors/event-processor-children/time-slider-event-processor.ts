@@ -9,6 +9,7 @@ import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { api } from '@/app';
 import { TypeFeatureInfoLayerConfig } from '@/geo/map/map-schema-types';
+import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 
 export class TimeSliderEventProcessor extends AbstractEventProcessor {
   /**
@@ -128,21 +129,26 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   static getInitialTimeSliderValues(mapId: string, layerPath: string): TimeSliderLayerSet {
     const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath];
     const name = getLocalizedValue(layerConfig.layerName, mapId) || layerConfig.layerId;
-    const temporalDimensionInfo = api.maps[mapId].layer.geoviewLayer(layerPath).getTemporalDimension();
+    const temporalDimensionInfo = api.maps[mapId].layer.geoviewLayer(layerPath).getTemporalDimension(layerPath);
     const { range } = temporalDimensionInfo.range;
     const defaultValueIsArray = Array.isArray(temporalDimensionInfo.default);
     const defaultValue = defaultValueIsArray ? temporalDimensionInfo.default[0] : temporalDimensionInfo.default;
     const minAndMax: number[] = [new Date(range[0]).getTime(), new Date(range[range.length - 1]).getTime()];
-    const { field, singleHandle } = temporalDimensionInfo;
+    const { field, singleHandle, nearestValues } = temporalDimensionInfo;
 
     // If the field type has an alias, use that as a label
     let fieldAlias = field;
-    const { featureInfo } = api.maps[mapId].layer.registeredLayers[layerPath].source!;
-    const { aliasFields, outfields } = featureInfo as TypeFeatureInfoLayerConfig;
-    const localizedOutFields = getLocalizedValue(outfields, mapId)?.split(',');
-    const localizedAliasFields = getLocalizedValue(aliasFields, mapId)?.split(',');
+    let localizedAliasFields;
+    let localizedOutFields;
+    const { featureInfo } = layerConfig.source!;
+    if (featureInfo) {
+      const { aliasFields, outfields } = featureInfo as TypeFeatureInfoLayerConfig;
+      localizedOutFields = getLocalizedValue(outfields, mapId)?.split(',');
+      localizedAliasFields = getLocalizedValue(aliasFields, mapId)?.split(',');
+    }
     const fieldIndex = localizedOutFields ? localizedOutFields.indexOf(field) : -1;
-    if (fieldIndex !== -1 && localizedAliasFields?.length === localizedOutFields?.length) fieldAlias = localizedAliasFields![fieldIndex];
+    if (fieldIndex !== -1 && localizedAliasFields && localizedOutFields && localizedAliasFields?.length === localizedOutFields?.length)
+      fieldAlias = localizedAliasFields![fieldIndex];
 
     // eslint-disable-next-line no-nested-ternary
     const values = singleHandle
@@ -156,6 +162,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
         name,
         range,
         defaultValue,
+        discreteValues: nearestValues === 'discrete',
         minAndMax,
         field,
         fieldAlias,
@@ -204,23 +211,31 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       if (filtering) {
         const newValue = `${new Date(values[0]).toISOString().slice(0, new Date(values[0]).toISOString().length - 5)}Z`;
         const filter = `${field}=date '${newValue}'`;
-        (api.maps[mapId].layer.geoviewLayer(layerPath) as WMS).applyViewFilter(filter);
+        (api.maps[mapId].layer.geoviewLayer(layerPath) as WMS).applyViewFilter(layerPath, filter);
       } else {
         const filter = `${field}=date '${defaultValue}'`;
-        (api.maps[mapId].layer.geoviewLayer(layerPath) as WMS).applyViewFilter(filter);
+        (api.maps[mapId].layer.geoviewLayer(layerPath) as WMS).applyViewFilter(layerPath, filter);
+      }
+    } else if (layerType === CONST_LAYER_TYPES.ESRI_IMAGE) {
+      if (filtering) {
+        const filter = `time=${minAndMax[0]},${values[0]}`;
+        (api.maps[mapId].layer.geoviewLayer(layerPath) as EsriImage).applyViewFilter(layerPath, filter);
+      } else {
+        const filter = `time=${minAndMax[0]},${defaultValue}`;
+        (api.maps[mapId].layer.geoviewLayer(layerPath) as EsriImage).applyViewFilter(layerPath, filter);
       }
     } else if (filtering) {
       let filter = `${field} >= date '${new Date(values[0]).toISOString()}'`;
       if (values.length > 1) {
         filter += ` and ${field} <= date '${new Date(values[1]).toISOString()}'`;
       }
-      (api.maps[mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter(filter);
+      (api.maps[mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter(layerPath, filter);
     } else {
       let filter = `${field} >= date '${new Date(minAndMax[0]).toISOString()}'`;
       if (values.length > 1) {
         filter += `and ${field} <= date '${new Date(minAndMax[1]).toISOString()}'`;
       }
-      (api.maps[mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter(filter);
+      (api.maps[mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter(layerPath, filter);
     }
   }
   // #endregion
