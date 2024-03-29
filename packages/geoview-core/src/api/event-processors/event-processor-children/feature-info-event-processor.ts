@@ -1,7 +1,7 @@
 import { GeoviewStoreType, IFeatureInfoState } from '@/core/stores';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoResultSet } from '@/geo/utils/feature-info-layer-set';
-import { TypeHoverFeatureInfoResultSet } from '@/geo/utils/hover-feature-info-layer-set';
+import { TypeHoverFeatureInfoResultSet, TypeHoverLayerData } from '@/geo/utils/hover-feature-info-layer-set';
 import { EventType, TypeLayerData } from '@/geo/utils/layer-set';
 
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
@@ -135,7 +135,11 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath The layer path to delete
    * @param {(layerArray: TypeLayerData[]) => void} onDeleteCallback The callback executed when the array is updated
    */
-  private static deleteFromArray(layerArray: TypeLayerData[], layerPath: string, onDeleteCallback: (layerArray: TypeLayerData[]) => void) {
+  private static deleteFromArray<T extends TypeLayerData | TypeHoverLayerData>(
+    layerArray: T[],
+    layerPath: string,
+    onDeleteCallback: (layerArray: T[]) => void
+  ) {
     // Find the layer data info to delete from the array
     const layerDataInfoToDelIndex = layerArray.findIndex((layerInfo) => layerInfo.layerPath === layerPath);
 
@@ -194,9 +198,11 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
        */
       const hoverDataArray = [...featureInfoState.hoverDataArray];
       if (!hoverDataArray.find((layerEntry) => layerEntry.layerPath === layerPath)) {
-        hoverDataArray.push(resultSet?.[layerPath]?.data as TypeLayerData);
-        featureInfoState.actions.setHoverDataArray(hoverDataArray);
+        hoverDataArray.push(resultSet?.[layerPath]?.data as TypeHoverLayerData);
       }
+
+      // Update the layer data array in the store, all the time
+      featureInfoState.actions.setHoverDataArray(hoverDataArray);
     } else if (eventType === 'all-features') {
       /**
        * Create a get all features info object for each layer which is then used to render layers
@@ -204,8 +210,10 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       const allFeaturesDataArray = [...featureInfoState.allFeaturesDataArray];
       if (!allFeaturesDataArray.find((layerEntry) => layerEntry.layerPath === layerPath)) {
         allFeaturesDataArray.push((resultSet as TypeFeatureInfoResultSet)?.[layerPath]?.data);
-        featureInfoState.actions.setAllFeaturesDataArray(allFeaturesDataArray);
       }
+
+      // Update the layer data array in the store, all the time
+      featureInfoState.actions.setAllFeaturesDataArray(allFeaturesDataArray);
     }
   }
 
