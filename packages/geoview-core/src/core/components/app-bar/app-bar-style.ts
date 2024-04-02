@@ -10,7 +10,6 @@ export const getSxClasses = (theme: Theme) => ({
     backgroundColor: theme.palette.geoViewColor.bgColor.main,
     border: theme.palette.geoViewColor.primary.light[100],
 
-
     '&.interaction-static': {
       position: 'absolute',
       left: 0,
@@ -21,8 +20,8 @@ export const getSxClasses = (theme: Theme) => ({
       paddingBottom: '60px',
       '&>div': {
         border: 'unset !important',
-      }
-    }
+      },
+    },
   },
   appBarList: {
     width: 60,

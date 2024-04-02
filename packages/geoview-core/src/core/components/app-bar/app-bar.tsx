@@ -329,7 +329,7 @@ export function Appbar(): JSX.Element {
         )}
         <Box sx={sxClasses.versionButtonDiv}>
           <List sx={sxClasses.appBarList}>
-            { interaction !== 'static' && <hr /> }
+            {interaction !== 'static' && <hr />}
             <ListItem>
               <Notifications />
             </ListItem>

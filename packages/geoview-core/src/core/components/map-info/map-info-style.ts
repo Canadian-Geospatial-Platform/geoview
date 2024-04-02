@@ -33,8 +33,8 @@ export const getSxClasses = (theme: Theme) => ({
       },
       '& button span': {
         color: `${theme.palette.geoViewColor.grey.dark[900]} !important`,
-      }
-    }
+      },
+    },
   },
   mouseScaleControlsContainer: {
     display: 'flex',

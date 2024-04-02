@@ -40,7 +40,12 @@ export function MapInfo(): JSX.Element {
   const interaction = useMapInteraction();
 
   return (
-    <Box id={`${mapId}-mapInfo`} className={`interaction-${interaction}`} sx={sxClasses.mapInfoContainer} ref={mapInfoRef as MutableRefObject<HTMLDivElement>}>
+    <Box
+      id={`${mapId}-mapInfo`}
+      className={`interaction-${interaction}`}
+      sx={sxClasses.mapInfoContainer}
+      ref={mapInfoRef as MutableRefObject<HTMLDivElement>}
+    >
       <MapInfoExpandButton />
       <Grid container justifyContent="space-between">
         <Grid item md={1}>
