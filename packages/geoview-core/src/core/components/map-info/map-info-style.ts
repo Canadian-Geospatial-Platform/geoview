@@ -22,10 +22,18 @@ export const getSxClasses = (theme: Theme) => ({
     '&.interaction-static': {
       backgroundColor: 'unset',
       color: `${theme.palette.geoViewColor.grey.dark[900]} !important`,
+      fill: `${theme.palette.geoViewColor.grey.dark[900]} !important`,
       position: 'absolute',
       width: 'calc(100% - 60px)',
       bottom: 0,
       left: '60px',
+
+      '& button svg': {
+        fill: `${theme.palette.geoViewColor.grey.dark[900]} !important`,
+      },
+      '& button span': {
+        color: `${theme.palette.geoViewColor.grey.dark[900]} !important`,
+      }
     }
   },
   mouseScaleControlsContainer: {
