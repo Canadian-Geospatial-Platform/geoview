@@ -55,11 +55,10 @@ export class FeatureHighlight {
   }
 
   /**
-   * Change the highlight color
-   *
+   * Changes the highlight color
    * @param {TypeHighlightColor} color the new color
    */
-  changeHighlightColor(color: TypeHighlightColors) {
+  changeHighlightColor(color: TypeHighlightColors): void {
     this.highlightColor = color;
     if (this.highlightColor === 'white') {
       this.highlightFill.setColor([255, 255, 255, 0.3]);
@@ -85,12 +84,12 @@ export class FeatureHighlight {
   }
 
   /**
-   * Style and register feature for highlighting
-   *
+   * Styles and registers feature for highlighting
    * @param {Feature} feature the feature to add
    * @param {string} id the id of the feature
+   * @private
    */
-  private styleHighlightedFeature(feature: Feature, id: string) {
+  private styleHighlightedFeature(feature: Feature, id: string): void {
     feature.setStyle(this.highlightStyle);
     feature.setId(id);
     this.highlightedFeatureIds.push(id);
@@ -98,11 +97,10 @@ export class FeatureHighlight {
   }
 
   /**
-   * Remove feature highlight(s)
-   *
+   * Removes feature highlight(s)
    * @param {string} id the Uid of the feature to deselect, or 'all' to clear all
    */
-  removeHighlight(id: string) {
+  removeHighlight(id: string): void {
     if (id === 'all' && this.highlightedFeatureIds.length) {
       for (let i = 0; i < this.highlightedFeatureIds.length; i++) {
         this.highlighSource.removeFeature(this.highlighSource.getFeatureById(this.highlightedFeatureIds[i]) as Feature);
@@ -120,11 +118,10 @@ export class FeatureHighlight {
   }
 
   /**
-   * Highlight a feature with a plain overlay
-   *
+   * Highlights a feature with a plain overlay
    * @param {TypeFeatureInfoEntry} feature the feature to highlight
    */
-  highlightFeature(feature: TypeFeatureInfoEntry) {
+  highlightFeature(feature: TypeFeatureInfoEntry): void {
     const geometry = feature.geometry!.getGeometry();
     if (geometry instanceof Polygon) {
       const newPolygon = feature.geometry!.getGeometry();
@@ -186,12 +183,11 @@ export class FeatureHighlight {
   }
 
   /**
-   * Highlight a bounding box
-   *
+   * Highlights a bounding box
    * @param {Extent} extent the extent to highlight
    * @param {boolean} isLayerHighlight optional if it is a layer highlight
    */
-  highlightGeolocatorBBox(extent: Extent, isLayerHighlight = false) {
+  highlightGeolocatorBBox(extent: Extent, isLayerHighlight = false): void {
     if (this.highlighSource.getFeatureById('geoLocatorFeature')) {
       this.highlighSource.removeFeature(this.highlighSource.getFeatureById('geoLocatorFeature') as Feature);
       clearTimeout(this.bboxTimeout as NodeJS.Timeout);
@@ -210,9 +206,9 @@ export class FeatureHighlight {
   }
 
   /**
-   * Remove bounding box highlight
+   * Removes bounding box highlight
    */
-  removeBBoxHighlight() {
+  removeBBoxHighlight(): void {
     this.highlighSource.removeFeature(this.highlighSource.getFeatureById('geoLocatorFeature') as Feature);
   }
 }

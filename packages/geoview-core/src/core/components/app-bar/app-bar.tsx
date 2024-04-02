@@ -199,7 +199,7 @@ export function Appbar(): JSX.Element {
     api.event.onRemoveAppBarPanel(mapId, handleRemoveButtonPanel);
 
     return () => {
-      // Unwire the events
+      // Unregister events
       api.event.offCreateAppBarPanel(mapId, handleAddButtonPanel);
       api.event.offRemoveAppBarPanel(mapId, handleRemoveButtonPanel);
     };

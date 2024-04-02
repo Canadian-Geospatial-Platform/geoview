@@ -13,7 +13,7 @@ import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 
 export class TimeSliderEventProcessor extends AbstractEventProcessor {
   /**
-   * Override the initialization process to wire subscriptions and return them so they can be destroyed later.
+   * Override the initialization process to register store subscriptions handlers and return them so they can be destroyed later.
    */
   protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
     const { mapId } = store.getState();

@@ -148,7 +148,7 @@ export class Event {
   };
 
   /**
-   * Helper function to wire an EventStringId and check the payload on response before calling back.
+   * Helper function to register an EventStringId and check the payload on response before calling back.
    * @param mapId The map Id
    * @param eventStringId The Event String Id
    * @param checkCallback The callback executed when validating the payload
@@ -160,7 +160,7 @@ export class Event {
     checkCallback: (payload: PayloadBaseClass<EventStringId>) => boolean,
     callback: (typedPayload: T) => void
   ) => {
-    // Wire
+    // Register a generic event
     this.on(
       eventStringId,
       (payload: PayloadBaseClass<EventStringId>) => {
@@ -196,12 +196,12 @@ export class Event {
   };
 
   onCreateAppBarPanel = (mapId: string, callback: (buttonPanel: ButtonPanelPayload) => void) => {
-    // Wire
+    // Register the event callback
     this.onMapHelperHandler(mapId, EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, payloadIsAButtonPanel, callback);
   };
 
   offCreateAppBarPanel = (mapId: string, callback: (buttonPanel: ButtonPanelPayload) => void) => {
-    // Unwire
+    // Unregister the event callback
     this.off(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, mapId, callback as TypeEventHandlerFunction);
   };
 
@@ -215,12 +215,12 @@ export class Event {
   };
 
   onRemoveAppBarPanel = (mapId: string, callback: (buttonPanel: ButtonPanelPayload) => void) => {
-    // Wire
+    // Register the event callback
     this.onMapHelperHandler(mapId, EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, payloadIsAButtonPanel, callback);
   };
 
   offRemoveAppBarPanel = (mapId: string, callback: (buttonPanel: ButtonPanelPayload) => void) => {
-    // Unwire
+    // Unregister the event callback
     this.off(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, mapId, callback as TypeEventHandlerFunction);
   };
 
@@ -234,12 +234,12 @@ export class Event {
   };
 
   onCreateNavBarPanel = (mapId: string, callback: (buttonPanel: ButtonPanelPayload) => void) => {
-    // Wire
+    // Register the event callback
     this.onMapHelperHandler(mapId, EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE, payloadIsAButtonPanel, callback);
   };
 
   offCreateNavBarPanel = (mapId: string, callback: (buttonPanel: ButtonPanelPayload) => void) => {
-    // Unwire
+    // Unregister the event callback
     this.off(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE, mapId, callback as TypeEventHandlerFunction);
   };
 
@@ -253,12 +253,12 @@ export class Event {
   };
 
   onRemoveNavBarPanel = (mapId: string, callback: (buttonPanel: ButtonPanelPayload) => void) => {
-    // Wire
+    // Register the event callback
     this.onMapHelperHandler(mapId, EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, payloadIsAButtonPanel, callback);
   };
 
   offRemoveNavBarPanel = (mapId: string, callback: (buttonPanel: ButtonPanelPayload) => void) => {
-    // Unwire
+    // Unregister the event callback
     this.off(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, mapId, callback as TypeEventHandlerFunction);
   };
 
@@ -272,12 +272,12 @@ export class Event {
   };
 
   onCreateFooterBarPanel = (mapId: string, callback: (footerBarPayload: FooterBarPayload) => void) => {
-    // Wire
+    // Register the event callback
     this.onMapHelperHandler(mapId, EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_CREATE, payloadIsAFooterBar, callback);
   };
 
   offCreateFooterBarPanel = (mapId: string, callback: (footerBarPayload: FooterBarPayload) => void) => {
-    // Unwire
+    // Unregister the event callback
     this.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_CREATE, mapId, callback as TypeEventHandlerFunction);
   };
 
@@ -291,12 +291,12 @@ export class Event {
   };
 
   onRemoveFooterBarPanel = (mapId: string, callback: (footerBarPayload: FooterBarPayload) => void) => {
-    // Wire
+    // Register the event callback
     this.onMapHelperHandler(mapId, EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_REMOVE, payloadIsAFooterBar, callback);
   };
 
   offRemoveFooterBarPanel = (mapId: string, callback: (footerBarPayload: FooterBarPayload) => void) => {
-    // Unwire
+    // Unregister the event callback
     this.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_TAB_REMOVE, mapId, callback as TypeEventHandlerFunction);
   };
 
@@ -310,12 +310,12 @@ export class Event {
   };
 
   onSnackbarOpen = (mapId: string, callback: (snackbarPayload: SnackbarMessagePayload) => void) => {
-    // Wire
+    // Register the event callback
     this.onMapHelperHandler(mapId, EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, payloadIsASnackbarMessage, callback);
   };
 
   offSnackbarOpen = (mapId: string, callback: (snackbarPayload: SnackbarMessagePayload) => void) => {
-    // Unwire
+    // Unregister the event callback
     this.off(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, callback as TypeEventHandlerFunction);
   };
 
@@ -329,12 +329,12 @@ export class Event {
   };
 
   onCreateComponent = (mapId: string, callback: (mapComponentPayload: MapComponentPayload) => void) => {
-    // Wire
+    // Register the event callback
     this.onMapHelperHandler(mapId, EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, payloadIsAMapComponent, callback);
   };
 
   offCreateComponent = (mapId: string, callback: (mapComponentPayload: MapComponentPayload) => void) => {
-    // Unwire
+    // Unregister the event callback
     this.off(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, mapId, callback as TypeEventHandlerFunction);
   };
 
@@ -348,12 +348,12 @@ export class Event {
   };
 
   onRemoveComponent = (mapId: string, callback: (mapComponentPayload: MapComponentPayload) => void) => {
-    // Wire
+    // Register the event callback
     this.onMapHelperHandler(mapId, EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, payloadIsAMapComponent, callback);
   };
 
   offRemoveComponent = (mapId: string, callback: (mapComponentPayload: MapComponentPayload) => void) => {
-    // Unwire
+    // Unregister the event callback
     this.off(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, mapId, callback as TypeEventHandlerFunction);
   };
 
@@ -375,12 +375,12 @@ export class Event {
   };
 
   onModalOpen = (mapId: string, callback: (modalPayload: ModalPayload) => void) => {
-    // Wire
+    // Register the event callback
     this.onMapHelperHandler(mapId, EVENT_NAMES.MODAL.EVENT_MODAL_OPEN, payloadIsAModal, callback);
   };
 
   offModalOpen = (mapId: string, callback: (modalPayload: ModalPayload) => void) => {
-    // Unwire
+    // Unregister the event callback
     this.off(EVENT_NAMES.MODAL.EVENT_MODAL_OPEN, mapId, callback as TypeEventHandlerFunction);
   };
 
@@ -394,12 +394,12 @@ export class Event {
   };
 
   onModalClose = (mapId: string, callback: (modalPayload: ModalPayload) => void) => {
-    // Wire
+    // Register the event callback
     this.onMapHelperHandler(mapId, EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE, payloadIsAModal, callback);
   };
 
   offModalClose = (mapId: string, callback: (modalPayload: ModalPayload) => void) => {
-    // Unwire
+    // Unregister the event callback
     this.off(EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE, mapId, callback as TypeEventHandlerFunction);
   };
 
@@ -413,12 +413,12 @@ export class Event {
   };
 
   onMapInKeyFocus = (mapId: string, callback: () => void) => {
-    // Wire
+    // Register the event callback
     this.onMapHelperHandler(mapId, EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, payloadIsAInKeyfocus, callback);
   };
 
   offMapInKeyFocus = (mapId: string, callback: () => void) => {
-    // Unwire
+    // Unregister the event callback
     this.off(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId, callback as TypeEventHandlerFunction);
   };
 
@@ -434,12 +434,12 @@ export class Event {
   };
 
   onMapReload = (mapId: string, callback: (mapFeaturesPayload: MapFeaturesPayload) => void) => {
-    // Wire
+    // Register the event callback
     this.onMapHelperHandler(mapId, EVENT_NAMES.MAP.EVENT_MAP_RELOAD, payloadIsAmapFeaturesConfig, callback);
   };
 
   offMapReload = (mapId: string, callback: (mapFeaturesPayload: MapFeaturesPayload) => void) => {
-    // Unwire
+    // Unregister the event callback
     this.off(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, mapId, callback as TypeEventHandlerFunction);
   };
 
@@ -453,12 +453,12 @@ export class Event {
   };
 
   onMapRemove = (mapId: string, callback: (mapFeaturesPayload: MapFeaturesPayload) => void) => {
-    // Wire
+    // Register the event callback
     this.onMapHelperHandler(`${mapId}/delete_old_map`, EVENT_NAMES.MAP.EVENT_MAP_RELOAD, payloadIsAmapFeaturesConfig, callback);
   };
 
   offMapRemove = (mapId: string, callback: (mapFeaturesPayload: MapFeaturesPayload) => void) => {
-    // Unwire
+    // Unregister the event callback
     this.off(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, `${mapId}/delete_old_map`, callback as TypeEventHandlerFunction);
   };
 
