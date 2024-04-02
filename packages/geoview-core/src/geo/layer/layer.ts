@@ -218,6 +218,7 @@ export class LayerApi {
    * Validates the geoview layer configuration array to eliminate duplicate entries and inform the user.
    * @param {MapConfigLayerEntry[]} mapConfigLayerEntries The Map Config Layer Entries to validate.
    * @returns {MapConfigLayerEntry[]} The new configuration with duplicate entries eliminated.
+   * @private
    */
   #deleteDuplicatAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries?: MapConfigLayerEntry[]): MapConfigLayerEntry[] {
     if (mapConfigLayerEntries && mapConfigLayerEntries.length > 0) {
@@ -242,6 +243,7 @@ export class LayerApi {
   /**
    * Prints an error message for the duplicate geoview layer configuration.
    * @param {MapConfigLayerEntry} geoviewLayerConfig The Map Config Layer Entry in error.
+   * @private
    */
   #printDuplicateGeoviewLayerConfigError(mapConfigLayerEntry: MapConfigLayerEntry) {
     const message = replaceParams(
@@ -336,6 +338,7 @@ export class LayerApi {
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The geoview layer configuration to add
    * @returns {GeoViewLayerAddedResult | undefined} The result of the addition of the geoview layer.
    * The result contains the instanciated GeoViewLayer along with a promise that will resolve when the layer will be officially on the map.
+   * @private
    */
   #addGeoviewLayerStep2(geoviewLayerConfig: TypeGeoviewLayerConfig): GeoViewLayerAddedResult | undefined {
     // TODO: Refactor - Here the function should use the structure created by validation config with the metadata fetch and no need to pass the validation.
@@ -415,6 +418,7 @@ export class LayerApi {
    * Continues the addition of the geoview layer.
    * Adds the layer to the map if valid. If not (is a string) emits an error.
    * @param {any} geoviewLayer the layer config
+   * @private
    */
   #addToMap(geoviewLayer: AbstractGeoViewLayer): void {
     // if the returned layer object has something in the layerLoadError, it is because an error was detected
@@ -449,6 +453,7 @@ export class LayerApi {
    * This handle is called when the geoview layer is ready to be registered in the layer set.
    * @param {AbstractGeoViewLayer} geoviewLayer The Geoview layer to register
    * @param {GeoViewLayerRegistrationEvent} registrationEvent The registration event
+   * @private
    */
   #handleLayerRegistration(geoviewLayer: AbstractGeoViewLayer, registrationEvent: GeoViewLayerRegistrationEvent): void {
     // The layer is ready to be registered, take care of it
@@ -475,6 +480,7 @@ export class LayerApi {
    * This handle is called when the geoview layer is being added.
    * @param {AbstractGeoViewLayer} geoviewLayer The Geoview layer to register
    * @param {GeoViewLayerRegistrationEvent} registrationEvent The registration event
+   * @private
    */
   #handleLayerStatusChanged(config: ConfigBaseClass, layerStatusEvent: LayerStatusChangedEvent) {
     // The layer status has changed for the given config/layer, take care of it

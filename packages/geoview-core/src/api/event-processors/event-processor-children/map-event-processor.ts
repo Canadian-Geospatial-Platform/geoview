@@ -99,7 +99,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return [unsubMapHighlightedFeatures, unsubOrderedLayerInfo];
   }
 
-  // GV THIS IS THE ONLY FUNCTION TO SET STORE DIRECTLY
+  /**
+   * Initializes the map controls
+   * @param {string} mapId - The map id being initialized
+   */
   static async initMapControls(mapId: string): Promise<void> {
     // Log
     logger.logTraceCore('MAP EVENT PROCESSOR - initMapControls', mapId);
@@ -296,6 +299,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   static setClickCoordinates(mapId: string, clickCoordinates: TypeMapMouseInfo): void {
+    // Perform query via the feature info layer set process
+    api.maps[mapId].layer.featureInfoLayerSet.queryLayers(clickCoordinates.lnglat);
+
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setClickCoordinates(clickCoordinates);
   }

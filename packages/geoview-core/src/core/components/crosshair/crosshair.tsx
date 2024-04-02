@@ -4,13 +4,11 @@ import { useTheme } from '@mui/material/styles';
 
 import { useTranslation } from 'react-i18next';
 
-import { api } from '@/app';
 import { Box, Fade, Typography } from '@/ui';
 import { getSxClasses } from './crosshair-style';
 import { CrosshairIcon } from './crosshair-icon';
 import { useAppCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useMapElement, useMapPointerPosition, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -20,8 +18,6 @@ import { logger } from '@/core/utils/logger';
 export function Crosshair(): JSX.Element {
   // Log
   logger.logTraceRender('components/crosshair/crosshair');
-
-  const mapId = useGeoViewMapId();
 
   const { t } = useTranslation<string>();
 
@@ -48,12 +44,9 @@ export function Crosshair(): JSX.Element {
       if (event.key === 'Enter' && pointerPosition) {
         // Update the store
         setClickCoordinates(pointerPosition);
-
-        // Perform query via the feature info layer set process
-        api.maps[mapId].layer.featureInfoLayerSet.queryLayers(pointerPosition.lnglat);
       }
     },
-    [mapId, pointerPosition, setClickCoordinates]
+    [pointerPosition, setClickCoordinates]
   );
 
   /**

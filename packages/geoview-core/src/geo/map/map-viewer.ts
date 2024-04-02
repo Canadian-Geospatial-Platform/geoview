@@ -1221,7 +1221,7 @@ export class MapViewer {
    * @param {string | number | undefined} projectionCode - Optional projection code used by the bounds.
    */
   // TODO: only use in the layers panel package... see if still needed and if it is the right place
-  fitBounds(bounds?: Extent, projectionCode: string | number | undefined = undefined) {
+  fitBounds(bounds?: Extent, projectionCode: string | number | undefined = undefined): void {
     let mapBounds: Extent | undefined;
     if (bounds) {
       const { currentProjection } = this.getMapState();

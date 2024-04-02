@@ -369,8 +369,8 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
        * @param {TypeMapMouseInfo} pointerPosition - The pointer position.
        */
       setClickCoordinates: (pointerPosition: TypeMapMouseInfo): void => {
-        // Redirect to setter using the pointerPosition value
-        get().mapState.setterActions.setClickCoordinates(pointerPosition);
+        // Redirect to processor
+        MapEventProcessor.setClickCoordinates(get().mapId, pointerPosition);
       },
 
       /**
