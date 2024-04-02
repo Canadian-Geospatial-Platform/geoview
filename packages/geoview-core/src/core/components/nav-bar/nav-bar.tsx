@@ -141,7 +141,7 @@ export function Navbar(): JSX.Element {
     api.event.onRemoveNavBarPanel(mapId, handleRemoveButtonPanel);
 
     return () => {
-      // Unwire events
+      // Unregister events
       api.event.offCreateNavBarPanel(mapId, handleAddButtonPanel);
       api.event.offRemoveNavBarPanel(mapId, handleRemoveButtonPanel);
     };
