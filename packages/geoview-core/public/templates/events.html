@@ -121,7 +121,7 @@
             mapPosition.innerHTML = mapPosition.innerHTML = `<p>Map ${sender.mapId} with latitude ${payload.lnglat[1]} and longitude ${payload.lnglat[0]}</p>`;
           });
 
-          // listen to map moveend event
+          // listen to map rotation event
           cgpv.api.maps['EVNT1'].onMapRotation((sender, payload) => {
             mapRotation.innerHTML = mapRotation.innerHTML = `<p>Map ${sender.mapId} rotation ${payload.rotation}</p>`;
           });
