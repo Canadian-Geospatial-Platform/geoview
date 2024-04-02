@@ -18,6 +18,15 @@ export const getSxClasses = (theme: Theme) => ({
     pointerEvents: 'all',
     gap: 0.5,
     order: 3,
+
+    '&.interaction-static': {
+      backgroundColor: 'unset',
+      color: `${theme.palette.geoViewColor.grey.dark[900]} !important`,
+      position: 'absolute',
+      width: 'calc(100% - 60px)',
+      bottom: 0,
+      left: '60px',
+    }
   },
   mouseScaleControlsContainer: {
     display: 'flex',
