@@ -235,7 +235,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static clickMarkerIconShow(mapId: string, marker: TypeClickMarker): void {
     // Project coords
-    const projectedCoords = api.projection.transformPoints(
+    const projectedCoords = api.utilities.projection.transformPoints(
       [marker.lnglat],
       `EPSG:4326`,
       `EPSG:${this.getMapStateProtected(mapId).currentProjection}`

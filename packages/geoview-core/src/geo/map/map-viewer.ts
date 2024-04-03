@@ -12,7 +12,6 @@ import { Extent } from 'ol/extent';
 import BaseLayer from 'ol/layer/Base';
 import Collection from 'ol/Collection';
 import { Source } from 'ol/source';
-import { Coordinate } from 'ol/coordinate';
 
 import queryString from 'query-string';
 import { removeGeoviewStore } from '@/core/stores/stores-managers';
@@ -273,15 +272,15 @@ export class MapViewer {
     const pointerPosition = {
       projected: centerCoordinates,
       pixel: this.map.getPixelFromCoordinate(centerCoordinates),
-      lnglat: api.projection.transformPoints([centerCoordinates], projCode, `EPSG:4326`)[0],
+      lnglat: api.utilities.projection.transformPoints([centerCoordinates], projCode, `EPSG:4326`)[0],
       dragging: false,
     };
 
     // Get the degree rotation
-    const degreeRotation = api.geoUtilities.getNorthArrowAngle(this.map);
+    const degreeRotation = this.getNorthArrowAngle();
 
     // Get the north visibility
-    const isNorthVisible = api.geoUtilities.checkNorth(this.map);
+    const isNorthVisible = this.checkNorth();
 
     // Get the scale information
     const scale = await MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
@@ -306,7 +305,7 @@ export class MapViewer {
     const pointerPosition = {
       projected: (event as MapBrowserEvent<UIEvent>).coordinate,
       pixel: (event as MapBrowserEvent<UIEvent>).pixel,
-      lnglat: api.projection.transformPoints([(event as MapBrowserEvent<UIEvent>).coordinate], projCode, `EPSG:4326`)[0],
+      lnglat: api.utilities.projection.transformPoints([(event as MapBrowserEvent<UIEvent>).coordinate], projCode, `EPSG:4326`)[0],
       dragging: (event as MapBrowserEvent<UIEvent>).dragging,
     };
 
@@ -330,7 +329,7 @@ export class MapViewer {
     const clickCoordinates = {
       projected: (event as MapBrowserEvent<UIEvent>).coordinate,
       pixel: (event as MapBrowserEvent<UIEvent>).pixel,
-      lnglat: api.projection.transformPoints([(event as MapBrowserEvent<UIEvent>).coordinate], projCode, `EPSG:4326`)[0],
+      lnglat: api.utilities.projection.transformPoints([(event as MapBrowserEvent<UIEvent>).coordinate], projCode, `EPSG:4326`)[0],
       dragging: (event as MapBrowserEvent<UIEvent>).dragging,
     };
 
