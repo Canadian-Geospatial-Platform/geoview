@@ -19,7 +19,6 @@ export * from '@/core/utils/date-mgt';
 export * from '@/core/utils/utilities';
 
 export * from '@/api';
-export * from '@/api/events/payloads';
 
 export * from '@/core/components';
 export * from '@/core/stores';

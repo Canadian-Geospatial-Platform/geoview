@@ -18,11 +18,11 @@ interface TimeSliderPanelProps {
  * @param {TimeSliderPanelProps} TimeSliderPanelProps time slider panel properties
  * @returns {JSX.Element} the slider panel
  */
-export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
+export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps): JSX.Element {
   const { cgpv } = window;
   const { config, layerPath, mapId } = TimeSliderPanelProps;
   const { api, react, ui } = cgpv;
-  const { useState, useRef, useEffect } = react;
+  const { useState, useRef, useEffect, useCallback } = react;
   const {
     Grid,
     Slider,
@@ -292,13 +292,6 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
     }
   }
 
-  function handleSliderChange(event: number | number[]): void {
-    clearTimeout(playIntervalRef.current);
-    setIsPlaying(false);
-    sliderDeltaRef.current = undefined;
-    setValues(layerPath, event as number[]);
-  }
-
   function handleTimeChange(event: React.ChangeEvent<HTMLSelectElement>): void {
     setDelay(layerPath, event.target.value as unknown as number);
   }
@@ -324,6 +317,16 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
       : api.utilities.core.getLocalizedMessage('timeSlider.slider.lockLeft', displayLanguage);
     return text;
   }
+
+  const handleSliderChange = useCallback(
+    (event: number | number[]): void => {
+      clearTimeout(playIntervalRef.current);
+      setIsPlaying(false);
+      sliderDeltaRef.current = undefined;
+      setValues(layerPath, event as number[]);
+    },
+    [layerPath, setValues]
+  );
 
   return (
     <Grid>
@@ -364,7 +367,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               valueLabelFormat={(value: number) => valueLabelFormat(value)}
               marks={sliderMarks}
               step={!discreteValues ? null : 0.1}
-              customOnChange={(event: number | number[]) => handleSliderChange(event)}
+              customOnChange={handleSliderChange}
               key={values[1] ? values[1] + values[0] : values[0]}
             />
           </div>
