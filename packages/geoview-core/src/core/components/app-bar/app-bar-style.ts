@@ -79,6 +79,13 @@ export const getSxClasses = (theme: Theme) => ({
   versionButtonDiv: {
     position: 'absolute',
     bottom: 0,
+
+    '&.interaction-static': {
+      backgroundColor: theme.palette.geoViewColor.grey.lighten(0.8, 0.7),
+      paddingRight: 5,
+      borderTop: `3px solid ${theme.palette.geoViewColor.primary.darken(0, 0.5)}`,
+      borderRight: `3px solid ${theme.palette.geoViewColor.primary.darken(0, 0.5)}`,
+    }
   },
   appBarPanels: {},
 });

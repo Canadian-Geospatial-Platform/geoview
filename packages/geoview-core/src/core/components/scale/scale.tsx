@@ -6,7 +6,7 @@ import { useTheme } from '@mui/material/styles';
 
 import { CheckIcon, Tooltip, Box, Button } from '@/ui';
 import { getSxClasses } from './scale-style';
-import { useMapScale } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapInteraction, useMapScale } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
@@ -39,6 +39,7 @@ export function Scale(): JSX.Element {
   // get the values from store
   const expanded = useUIMapInfoExpanded();
   const scale = useMapScale();
+  const interaction = useMapInteraction();
 
   /**
    * Switch the scale mode
@@ -85,6 +86,7 @@ export function Scale(): JSX.Element {
           ) : (
             <Box
               component="span"
+              className={`interaction-${interaction}`}
               sx={{
                 ...sxClasses.scaleText,
                 borderBottom: !scaleValues[scaleMode].borderBottom ? 'none' : '1px solid',

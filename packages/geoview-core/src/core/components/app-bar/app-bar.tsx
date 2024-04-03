@@ -327,7 +327,7 @@ export function Appbar(): JSX.Element {
             </List>
           </Box>
         )}
-        <Box sx={sxClasses.versionButtonDiv}>
+        <Box sx={sxClasses.versionButtonDiv} className={`interaction-${interaction}`}>
           <List sx={sxClasses.appBarList}>
             {interaction === 'dynamic' && <hr />}
             <ListItem>
