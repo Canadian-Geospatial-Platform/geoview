@@ -15,6 +15,7 @@ export const getSxClasses = (theme: Theme) => ({
     },
     '&.interaction-static': {
       paddingBottom: '30px',
+      backdropFilter: 'blur(5px)',
     },
   },
   scaleExpandedContainer: {
