@@ -31,6 +31,7 @@ import {
   isSimpleStyleConfig,
   TypeListOfLayerEntryConfig,
   TypeFeatureInfoLayerConfig,
+  TypeSourceImageEsriInitialConfig,
 } from '@/geo/map/map-schema-types';
 import { TypeFeatureInfoEntry, codedValueType, rangeDomainType } from '@/geo/utils/layer-set';
 
@@ -90,9 +91,7 @@ export const geoviewLayerIsEsriDynamic = (verifyIfGeoViewLayer: AbstractGeoViewL
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const geoviewEntryIsEsriDynamic = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is EsriDynamicLayerEntryConfig => {
+export const geoviewEntryIsEsriDynamic = (verifyIfGeoViewEntry: ConfigBaseClass): verifyIfGeoViewEntry is EsriDynamicLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 };
 
@@ -142,7 +141,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {boolean} true if an error is detected.
    */
-  esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig): boolean {
+  esriChildHasDetectedAnError(layerConfig: ConfigBaseClass): boolean {
     if (!this.metadata!.supportsDynamicLayers) {
       this.layerLoadError.push({
         layer: layerConfig.layerPath,
@@ -220,26 +219,27 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   /** ****************************************************************************************************************************
    * This method creates a GeoView EsriDynamic layer using the definition provided in the layerConfig parameter.
    *
-   * @param {EsriDynamicLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  protected processOneLayerEntry(layerConfig: EsriDynamicLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
+    const layerConfigSource = layerConfig.source as TypeSourceImageEsriInitialConfig;
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
     sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
     sourceOptions.params = { LAYERS: `show:${layerConfig.layerId}` };
-    if (layerConfig.source.transparent) Object.defineProperty(sourceOptions.params, 'transparent', layerConfig.source.transparent!);
-    if (layerConfig.source.format) Object.defineProperty(sourceOptions.params, 'format', layerConfig.source.format!);
-    if (layerConfig.source.crossOrigin) {
-      sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
+    if (layerConfigSource.transparent) Object.defineProperty(sourceOptions.params, 'transparent', layerConfigSource.transparent!);
+    if (layerConfigSource.format) Object.defineProperty(sourceOptions.params, 'format', layerConfigSource.format!);
+    if (layerConfigSource.crossOrigin) {
+      sourceOptions.crossOrigin = layerConfigSource.crossOrigin;
     } else {
       sourceOptions.crossOrigin = 'Anonymous';
     }
-    if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
+    if (layerConfigSource.projection) sourceOptions.projection = `EPSG:${layerConfigSource.projection}`;
 
     const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
       source: new ImageArcGISRest(sourceOptions),
@@ -343,7 +343,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         { features: jsonResponse.results },
         { dataProjection: 'EPSG:4326', featureProjection: `EPSG:${currentProjection}` }
       ) as Feature<Geometry>[];
-      const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig);
+      const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig as AbstractBaseLayerEntryConfig);
       return arrayOfFeatureInfoEntries;
     } catch (error) {
       // Log

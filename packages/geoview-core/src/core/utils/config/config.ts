@@ -15,6 +15,7 @@ import { InlineDivConfigReader } from '@/core/utils/config/reader/div-config-rea
 import { JsonConfigReader } from '@/core/utils/config/reader/json-config-reader';
 import { URLmapConfigReader } from '@/core/utils/config/reader/url-config-reader';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { AbstractBaseLayerEntryConfig } from './validation-classes/abstract-base-layer-entry-config';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -144,7 +145,7 @@ export class Config {
   private setLayerEntryType(listOfLayerEntryConfig: TypeListOfLayerEntryConfig, geoviewLayerType: TypeGeoviewLayerType): void {
     listOfLayerEntryConfig?.forEach((layerConfig) => {
       if (layerEntryIsGroupLayer(layerConfig as ConfigBaseClass))
-        this.setLayerEntryType(layerConfig.listOfLayerEntryConfig!, geoviewLayerType);
+        this.setLayerEntryType((layerConfig as AbstractBaseLayerEntryConfig).listOfLayerEntryConfig!, geoviewLayerType);
       else {
         // eslint-disable-next-line no-param-reassign
         layerConfig.schemaTag = geoviewLayerType;

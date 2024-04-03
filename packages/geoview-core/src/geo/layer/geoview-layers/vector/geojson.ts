@@ -72,7 +72,7 @@ export const geoviewLayerIsGeoJSON = (verifyIfGeoViewLayer: AbstractGeoViewLayer
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const geoviewEntryIsGeoJSON = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is GeoJSONLayerEntryConfig => {
+export const geoviewEntryIsGeoJSON = (verifyIfGeoViewEntry: ConfigBaseClass): verifyIfGeoViewEntry is GeoJSONLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
 };
 
@@ -103,7 +103,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
+    listOfLayerEntryConfig.forEach((layerConfig: ConfigBaseClass) => {
       const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
         this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
@@ -128,7 +128,9 @@ export class GeoJSON extends AbstractGeoViewVector {
         const metadataLayerList = Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
         const foundEntry = metadataLayerList.find(
           (layerMetadata) =>
-            layerMetadata.layerId === layerConfig.layerId && layerMetadata.layerIdExtension === layerConfig.layerIdExtension
+            layerMetadata.layerId === layerConfig.layerId &&
+            (layerMetadata as AbstractBaseLayerEntryConfig).layerIdExtension ===
+              (layerConfig as AbstractBaseLayerEntryConfig).layerIdExtension
         );
         if (!foundEntry) {
           this.layerLoadError.push({

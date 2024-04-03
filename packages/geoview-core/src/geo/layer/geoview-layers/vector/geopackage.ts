@@ -98,9 +98,7 @@ export const geoviewLayerIsGeoPackage = (verifyIfGeoViewLayer: AbstractGeoViewLa
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const geoviewEntryIsGeoPackage = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is GeoPackageLayerEntryConfig => {
+export const geoviewEntryIsGeoPackage = (verifyIfGeoViewEntry: ConfigBaseClass): verifyIfGeoViewEntry is GeoPackageLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.GEOPACKAGE;
 };
 
@@ -193,11 +191,11 @@ export class GeoPackage extends AbstractGeoViewVector {
       } else if (listOfLayerEntryConfig.length > 1) {
         if (!layerGroup)
           layerGroup = this.createLayerGroup(
-            listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig,
-            listOfLayerEntryConfig[0].initialSettings!
+            listOfLayerEntryConfig[0].geoviewLayerInstance?.getParentConfig(listOfLayerEntryConfig[0].layerPath) as TypeLayerEntryConfig,
+            (listOfLayerEntryConfig[0] as AbstractBaseLayerEntryConfig).initialSettings!
           );
 
-        listOfLayerEntryConfig.forEach((layerConfig) => {
+        listOfLayerEntryConfig.forEach((layerConfig: ConfigBaseClass) => {
           if (layerEntryIsGroupLayer(layerConfig)) {
             const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings!);
             this.processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!, newLayerGroup).then((groupReturned) => {
@@ -567,14 +565,14 @@ export class GeoPackage extends AbstractGeoViewVector {
           });
         } else {
           layerConfig.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
-          (layerConfig as TypeLayerEntryConfig).listOfLayerEntryConfig = [];
+          (layerConfig as GroupLayerEntryConfig).listOfLayerEntryConfig = [];
           const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings!);
           for (let i = 0; i < layers.length; i++) {
             const newLayerEntryConfig = cloneDeep(layerConfig) as AbstractBaseLayerEntryConfig;
             newLayerEntryConfig.layerId = layers[i].name;
             newLayerEntryConfig.layerName = createLocalizedString(layers[i].name);
             newLayerEntryConfig.entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
-            newLayerEntryConfig.parentLayerConfig = Cast<GroupLayerEntryConfig>(layerConfig);
+            newLayerEntryConfig.parentLayerConfig = layerConfig.layerPath;
 
             this.processOneGeopackageLayer(newLayerEntryConfig, layers[i], slds).then((baseLayer) => {
               if (baseLayer) {

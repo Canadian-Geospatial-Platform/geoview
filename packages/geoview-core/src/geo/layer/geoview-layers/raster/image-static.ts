@@ -13,6 +13,7 @@ import {
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
+  TypeSourceImageStaticInitialConfig,
 } from '@/geo/map/map-schema-types';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
@@ -62,9 +63,7 @@ export const geoviewLayerIsImageStatic = (verifyIfGeoViewLayer: AbstractGeoViewL
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const geoviewEntryIsImageStatic = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is ImageStaticLayerEntryConfig => {
+export const geoviewEntryIsImageStatic = (verifyIfGeoViewEntry: ConfigBaseClass): verifyIfGeoViewEntry is ImageStaticLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.IMAGE_STATIC;
 };
 
@@ -244,27 +243,28 @@ export class ImageStatic extends AbstractGeoViewRaster {
   /** ****************************************************************************************************************************
    * This method creates a GeoView Image Static layer using the definition provided in the layerConfig parameter.
    *
-   * @param {ImageStaticLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  processOneLayerEntry(layerConfig: ImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     super.processOneLayerEntry(layerConfig);
+    const layerConfigSource = layerConfig?.source as TypeSourceImageStaticInitialConfig;
 
-    if (!layerConfig?.source?.extent) throw new Error('Parameter extent is not defined in source element of layerConfig.');
+    if (!layerConfigSource?.extent) throw new Error('Parameter extent is not defined in source element of layerConfig.');
     const sourceOptions: SourceOptions = {
       url: getLocalizedValue(layerConfig.source.dataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId)) || '',
       imageExtent: layerConfig.source.extent,
     };
 
-    if (layerConfig?.source?.crossOrigin) {
-      sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
+    if (layerConfigSource?.crossOrigin) {
+      sourceOptions.crossOrigin = layerConfigSource.crossOrigin;
     } else {
       sourceOptions.crossOrigin = 'Anonymous';
     }
 
-    if (layerConfig?.source?.projection) {
-      sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
+    if (layerConfigSource?.projection) {
+      sourceOptions.projection = `EPSG:${layerConfigSource.projection}`;
     } else throw new Error('Parameter projection is not define in source element of layerConfig.');
 
     const staticImageOptions: ImageOptions<Static> = { source: new Static(sourceOptions) };
