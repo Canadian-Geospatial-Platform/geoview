@@ -22,7 +22,7 @@ export const getSxClasses = (theme: Theme) => ({
     flexDirection: 'column',
     justifyContent: 'center',
     height: '100%',
-    gap: theme.spacing(5)
+    gap: theme.spacing(5),
   },
   scaleExpandedCheckmarkText: {
     display: 'flex',
@@ -45,7 +45,7 @@ export const getSxClasses = (theme: Theme) => ({
 
     '&.interaction-static': {
       fontSize: theme.palette.geoViewFontSize.md,
-      fontWeight: 'bold'
+      fontWeight: 'bold',
     },
   },
   scaleCheckmark: {
