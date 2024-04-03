@@ -48,9 +48,11 @@ export function MapInfo(): JSX.Element {
     >
       {interaction === 'dynamic' && <MapInfoExpandButton />}
       <Grid container justifyContent="space-between">
-        { interaction === 'dynamic' && <Grid item md={1}>
-          <Attribution />
-        </Grid>}
+        {interaction === 'dynamic' && (
+          <Grid item md={1}>
+            <Attribution />
+          </Grid>
+        )}
 
         <Grid container item md={11} spacing={2}>
           <Grid
