@@ -6,8 +6,6 @@ import { Box, List, ListItem, Panel, IconButton, TypeIconButtonProps, SchoolIcon
 
 import { api } from '@/app';
 
-import { ButtonPanelPayload } from '@/api/events/payloads';
-
 import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import ExportButton from '@/core/components/export/export-modal-button';
 import {
@@ -18,7 +16,7 @@ import {
 import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
-import { GuidePanel, Legend, DetailsPanel } from '@/core/components';
+import { GuidePanel, Legend, DetailsPanel, AppbarApi, AppbarCreatedEvent, AppbarRemovedEvent } from '@/core/components';
 import Notifications from '@/core/components/notifications/notifications';
 
 import Geolocator from './buttons/geolocator';
@@ -93,7 +91,6 @@ export function Appbar(): JSX.Element {
         // if in focus trap mode, trigger the event
         if (mapCont.closest('.geoview-map')?.classList.contains('map-focus-trap')) {
           mapCont.classList.add('keyboard-focus');
-          api.event.emitMapInKeyFocus(mapId);
         }
       };
 
@@ -152,17 +149,17 @@ export function Appbar(): JSX.Element {
   }, [selectedAppBarButtonId, closePanelById]);
 
   const handleAddButtonPanel = useCallback(
-    (payload: ButtonPanelPayload) => {
+    (sender: AppbarApi, event: AppbarCreatedEvent) => {
       // Log
-      logger.logTraceUseCallback('APP-BAR - handleAddButtonPanel');
+      logger.logTraceUseCallback('APP-BAR - handleAddButtonPanel', event);
 
       setButtonPanelGroups((prevState) => {
         return {
           ...prevState,
           ...buttonPanelGroups,
-          [payload.appBarGroupName]: {
-            ...buttonPanelGroups[payload.appBarGroupName],
-            [payload.appBarId]: payload.buttonPanel as TypeButtonPanel,
+          [event.group]: {
+            ...buttonPanelGroups[event.group],
+            [event.buttonPanelId]: event.buttonPanel,
           },
         };
       });
@@ -171,16 +168,16 @@ export function Appbar(): JSX.Element {
   );
 
   const handleRemoveButtonPanel = useCallback(
-    (payload: ButtonPanelPayload) => {
+    (sender: AppbarApi, event: AppbarRemovedEvent) => {
       // Log
-      logger.logTraceUseCallback('APP-BAR - handleRemoveButtonPanel');
+      logger.logTraceUseCallback('APP-BAR - handleRemoveButtonPanel', event);
 
       setButtonPanelGroups((prevState) => {
         const state = { ...prevState };
 
-        const group = state[payload.appBarGroupName];
+        const group = state[event.group];
 
-        delete group[payload.appBarId];
+        delete group[event.buttonPanelId];
 
         return state;
       });
@@ -192,16 +189,14 @@ export function Appbar(): JSX.Element {
     // Log
     logger.logTraceUseEffect('APP-BAR - mount', mapId);
 
-    // listen to new panel creation
-    api.event.onCreateAppBarPanel(mapId, handleAddButtonPanel);
-
-    // listen on panel removal
-    api.event.onRemoveAppBarPanel(mapId, handleRemoveButtonPanel);
+    // Register appbar created/removed handlers
+    api.maps[mapId].appBarApi.onAppbarCreated(handleAddButtonPanel);
+    api.maps[mapId].appBarApi.onAppbarRemoved(handleRemoveButtonPanel);
 
     return () => {
       // Unregister events
-      api.event.offCreateAppBarPanel(mapId, handleAddButtonPanel);
-      api.event.offRemoveAppBarPanel(mapId, handleRemoveButtonPanel);
+      api.maps[mapId].appBarApi.offAppbarCreated(handleAddButtonPanel);
+      api.maps[mapId].appBarApi.offAppbarRemoved(handleRemoveButtonPanel);
     };
   }, [mapId, handleAddButtonPanel, handleRemoveButtonPanel, selectedAppBarButtonId]);
 
