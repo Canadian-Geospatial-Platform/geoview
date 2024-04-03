@@ -1,28 +1,27 @@
-import { ISnackbarButton, SnackbarType } from '@/api/events/payloads/snackbar-message-payload';
 import { NotificationType } from '@/core/components/notifications/notifications';
 import { generateId, getLocalizedMessage, replaceParams } from './utilities';
 import { TypeJsonArray, TypeJsonValue } from '@/core/types/global-types';
-import { api } from '@/app';
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { logger } from './logger';
 
 /**
- * Class used to send message to user for a map. CAn be a notification or a snackbar message
+ * Class used to send message to user for a map. Can be a notification and/or a snackbar message
  * @class Notifications
  * @exports
  */
 export class Notifications {
   mapId;
 
+  // Keep all callback delegate references
+  #onSnackbarOpendHandlers: SnackBarOpenDelegate[] = [];
+
   /**
-   * Construct a new notification class
+   * The class constructor to instanciate a notification class
    * @param {string} mapId - The map id
    */
   constructor(mapId: string) {
     this.mapId = mapId;
   }
-
-  // #region NOTIFICATION MESSAGES
 
   /**
    * Check if message is a valid local key and apply paramter replacement.
@@ -35,16 +34,13 @@ export class Notifications {
     // if message is a key, get localized value, if not return the string
     let localMessage = getLocalizedMessage(message, AppEventProcessor.getDisplayLanguage(this.mapId));
 
-    if (localMessage === undefined) {
-      logger.logDebug('ADD NOTIFICATION', `no valid locale key for ${message}`);
-    } else localMessage = message;
-
     // if params provided, replace them
     if (params.length > 0) localMessage = replaceParams(params, localMessage);
 
     return localMessage;
   }
 
+  // #region NOTIFICATIONS
   /**
    * Reusable utility function to send event to add a notification in the notifications manager
    *
@@ -107,7 +103,9 @@ export class Notifications {
     // Redirect
     this.#addNotification('error', message, params);
   }
+  // #endregion NOTIFICATIONS
 
+  // #region MESSAGES
   /**
    * Reusable utility function to send event to display a message in the snackbar
    *
@@ -123,8 +121,13 @@ export class Notifications {
     params: TypeJsonValue[] | TypeJsonArray | string[],
     button?: ISnackbarButton
   ): void {
+    const snackbar: SnackBarOpenEvent = {
+      snackbarType: type,
+      message: this.#formatMessage(message, params),
+      button,
+    };
     // Emit
-    api.event.emitSnackbarOpen(this.mapId, type, this.#formatMessage(message, params), button);
+    this.#emitSnackbarOpen(snackbar);
   }
 
   /**
@@ -182,5 +185,59 @@ export class Notifications {
     this.#showSnackbarMessage('error', message, params, button);
     if (withNotification) this.addNotificationError(message);
   }
-  // #endregion NOTIFICATION MESSAGES
+  // #endregion MESSAGES
+
+  // #region EVENTS
+  /**
+   * Emits a snackbar open event to all handlers.
+   * @param {SnackBarOpenDelegate} event - The event to emit
+   * @private
+   */
+  #emitSnackbarOpen(event: SnackBarOpenEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onSnackbarOpendHandlers, event);
+  }
+
+  /**
+   * Registers a snackbar open event handler.
+   * @param {SnackBarOpenDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onSnackbarOpen(callback: SnackBarOpenDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onSnackbarOpendHandlers, callback);
+  }
+
+  /**
+   * Unregisters a snackbar open event handler.
+   * @param {SnackBarOpenDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offSnackbarOpen(callback: SnackBarOpenDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onSnackbarOpendHandlers, callback);
+  }
+  // #endregion EVENTS
 }
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type SnackBarOpenDelegate = EventDelegateBase<Notifications, SnackBarOpenEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type SnackBarOpenEvent = {
+  snackbarType: SnackbarType;
+  message: string;
+  button?: ISnackbarButton;
+};
+
+/**
+ * Snackbar button properties interface
+ */
+interface ISnackbarButton {
+  label?: string;
+  action?: () => void;
+}
+
+export type SnackbarType = 'success' | 'error' | 'info' | 'warning';

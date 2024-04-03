@@ -4,4 +4,3 @@ export * from './map-constants';
 export * from './modal-constants';
 export * from './nav-bar-constants';
 export * from './slider-constants';
-export * from './snackbar-constants';
