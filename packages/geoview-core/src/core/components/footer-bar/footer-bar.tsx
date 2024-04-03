@@ -4,7 +4,6 @@ import { useTheme } from '@mui/material/styles';
 
 import { Box, IconButton, Tabs, TypeTabs, MoveDownRoundedIcon, MoveUpRoundedIcon } from '@/ui';
 import { api } from '@/app';
-import { FooterBarPayload } from '@/api/events/payloads';
 import { getSxClasses } from './footer-bar-style';
 import { ResizeFooterPanel } from '@/core/components/resize-footer-panel/resize-footer-panel';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -16,6 +15,7 @@ import {
   useUIStoreActions,
   useUIActiveTrapGeoView,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { FooterBarApi, FooterTabCreatedEvent, FooterTabRemovedEvent } from '@/core/components';
 
 import { toJsonObject, TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
@@ -169,11 +169,11 @@ export function FooterBar(): JSX.Element | null {
    * Add a tab
    */
   const handleAddTab = useCallback(
-    (payload: FooterBarPayload) => {
+    (sender: FooterBarApi, event: FooterTabCreatedEvent) => {
       // Log
-      logger.logTraceUseCallback('FOOTER-BAR - handleAddTab', payload);
+      logger.logTraceUseCallback('FOOTER-BAR - handleAddTab', event);
 
-      const newTab = { [payload.tab.id]: { icon: payload.tab.icon, content: payload.tab.content } } as Record<string, Tab>;
+      const newTab = { [event.tab.id]: { icon: event.tab.icon, content: event.tab.content } } as Record<string, Tab>;
       setTabsList({ ...tabsList, ...newTab });
     },
     [tabsList]
@@ -182,14 +182,14 @@ export function FooterBar(): JSX.Element | null {
   /**
    * Remove a tab
    */
-  const handleRemoveTab = useCallback((payload: FooterBarPayload) => {
+  const handleRemoveTab = useCallback((sender: FooterBarApi, event: FooterTabRemovedEvent) => {
     // Log
-    logger.logTraceUseCallback('FOOTER-BAR - handleRemoveTab', payload);
+    logger.logTraceUseCallback('FOOTER-BAR - handleRemoveTab', event);
 
     // remove the tab from the list
     setTabsList((prevState) => {
       const state = { ...prevState };
-      delete state[payload.tab.id];
+      delete state[event.tabid];
       return state;
     });
   }, []);
@@ -290,16 +290,14 @@ export function FooterBar(): JSX.Element | null {
     // Log
     logger.logTraceUseEffect('FOOTER-BAR - mount', mapId);
 
-    // listen to new tab creation
-    api.event.onCreateFooterBarPanel(mapId, handleAddTab);
-
-    // listen on tab removal
-    api.event.onRemoveFooterBarPanel(mapId, handleRemoveTab);
+    // Register footerbar tab created/removed handlers
+    api.maps[mapId].footerBarApi.onFooterTabCreated(handleAddTab);
+    api.maps[mapId].footerBarApi.onFooterTabRemoved(handleRemoveTab);
 
     return () => {
       // Unregister events
-      api.event.offCreateFooterBarPanel(mapId, handleAddTab);
-      api.event.offRemoveFooterBarPanel(mapId, handleRemoveTab);
+      api.maps[mapId].footerBarApi.offFooterTabCreated(handleAddTab);
+      api.maps[mapId].footerBarApi.offFooterTabRemoved(handleRemoveTab);
     };
   }, [mapId, handleAddTab, handleRemoveTab]);
 

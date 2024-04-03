@@ -81,9 +81,10 @@ export class MapViewer {
   mapFeaturesConfig: TypeMapFeaturesConfig;
 
   // the id of the map
-  mapId!: string;
+  mapId: string;
 
   // the openlayer map
+  // Note: The '!' is used here, because it's being created just a bit late, but not late enough that we want to keep checking for undefined throughout the code base
   map!: OLMap;
 
   // plugins attach to the map
@@ -109,7 +110,6 @@ export class MapViewer {
 
   // used to access layers functions
   // Note: The '!' is used here, because it's being created just a bit late, but not late enough that we want to keep checking for undefined throughout the code base
-  // Should probably refactor that a bit later..
   layer!: LayerApi;
 
   // modals creation
@@ -163,6 +163,12 @@ export class MapViewer {
   // Keep all callback delegates references
   #onMapChangeSizeHandlers: MapChangeSizeDelegate[] = [];
 
+  // Keep all callback delegates references
+  #onMapComponentAddedHandlers: MapComponentAddedDelegate[] = [];
+
+  // Keep all callback delegates references
+  #onMapComponentRemovedHandlers: MapComponentRemovedDelegate[] = [];
+
   // Getter for map is init
   get mapInit(): boolean {
     return this.#mapInit;
@@ -207,8 +213,6 @@ export class MapViewer {
     this.notifications = new Notifications(this.mapId);
 
     this.modal = new ModalApi(this.mapId);
-    this.modal.onModalOpened((sender, modalEvent) => api.event.emitModalOpen(this.mapId, modalEvent.modalId));
-    this.modal.onModalClosed((sender, modalEvent) => api.event.emitModalClose(this.mapId, modalEvent.modalId));
 
     this.geoviewRenderer = new GeoviewRenderer(this.mapId);
 
@@ -869,6 +873,60 @@ export class MapViewer {
   }
 
   /**
+   * Emits a component added event to all handlers.
+   * @private
+   */
+  #emitMapComponentAdded(event: MapComponentAddedEvent): void {
+    // Emit the component added event for all handlers
+    EventHelper.emitEvent(this, this.#onMapComponentAddedHandlers, event);
+  }
+
+  /**
+   * Registers a component added event callback.
+   * @param {MapComponentAddedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onMapComponentAdded(callback: MapComponentAddedDelegate): void {
+    // Register the component added event handler
+    EventHelper.onEvent(this.#onMapComponentAddedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a component added event callback.
+   * @param {MapComponentAddedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offMapComponentAdded(callback: MapComponentAddedDelegate): void {
+    // Unregister the component added event handler
+    EventHelper.offEvent(this.#onMapComponentAddedHandlers, callback);
+  }
+
+  /**
+   * Emits a component removed event to all handlers.
+   * @private
+   */
+  #emitMapComponentRemoved(event: MapComponentRemovedEvent): void {
+    // Emit the component removed event for all handlers
+    EventHelper.emitEvent(this, this.#onMapComponentRemovedHandlers, event);
+  }
+
+  /**
+   * Registers a component removed event callback.
+   * @param {MapComponentRemovedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onMapComponentRemoved(callback: MapComponentRemovedDelegate): void {
+    // Register the component removed event handler
+    EventHelper.onEvent(this.#onMapComponentRemovedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a component removed event callback.
+   * @param {MapComponentRemovedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offMapComponentRemoved(callback: MapComponentRemovedDelegate): void {
+    // Unregister the component removed event handler
+    EventHelper.offEvent(this.#onMapComponentRemovedHandlers, callback);
+  }
+
+  /**
    * Add a new custom component to the map
    *
    * @param {string} mapComponentId - An id to the new component
@@ -877,7 +935,7 @@ export class MapViewer {
   addComponent(mapComponentId: string, component: JSX.Element): void {
     if (mapComponentId && component) {
       // emit an event to add the component
-      api.event.emitCreateComponent(this.mapId, mapComponentId, component);
+      this.#emitMapComponentAdded({ mapComponentId, component });
     }
   }
 
@@ -889,7 +947,7 @@ export class MapViewer {
   removeComponent(mapComponentId: string): void {
     if (mapComponentId) {
       // emit an event to add the component
-      api.event.emitRemoveComponent(this.mapId, mapComponentId);
+      this.#emitMapComponentRemoved({ mapComponentId });
     }
   }
 
@@ -1506,3 +1564,28 @@ export type MapChangeSizeEvent = {
  * Define a delegate for the event handler function signature
  */
 type MapChangeSizeDelegate = EventDelegateBase<MapViewer, MapChangeSizeEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type MapComponentAddedEvent = {
+  mapComponentId: string;
+  component: JSX.Element;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapComponentAddedDelegate = EventDelegateBase<MapViewer, MapComponentAddedEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type MapComponentRemovedEvent = {
+  mapComponentId: string;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapComponentRemovedDelegate = EventDelegateBase<MapViewer, MapComponentRemovedEvent>;
