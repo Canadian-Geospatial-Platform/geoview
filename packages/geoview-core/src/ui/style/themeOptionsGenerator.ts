@@ -296,9 +296,25 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
             },
             '&.style3': {
               // used for app-bar buttons
-              backgroundColor: `tranparent`,
+              backgroundColor: `transparent`,
               border: `2px solid transparent`,
               color: `${geoViewColors.primary.main}`,
+              '&:hover, &:active, &.active': {
+                backgroundColor: `${geoViewColors.primary.main}`,
+                border: `2px solid ${geoViewColors.primary.light[500]}`,
+                color: `${geoViewColors.white}`,
+                boxShadow: 1,
+              },
+              '&:disabled': {
+                color: `${geoViewColors.bgColor.dark[450]}`,
+              },
+            },
+            '&.style4': {
+              // used for app-bar buttons
+              backgroundColor: `${geoViewColors.bgColor.dark[100]}`,
+              border: `2px solid ${geoViewColors.primary.light[500]}`,
+              color: `${geoViewColors.primary.dark[100]}`,
+              boxShadow: 1,
               '&:hover, &:active, &.active': {
                 backgroundColor: `${geoViewColors.primary.main}`,
                 border: `2px solid ${geoViewColors.primary.light[500]}`,

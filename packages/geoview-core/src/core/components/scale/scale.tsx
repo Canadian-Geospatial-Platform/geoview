@@ -67,7 +67,7 @@ export function Scale(): JSX.Element {
       <Box sx={{ minWidth: 120 }}>
         <Box id={`${mapId}-scaleControlBar`} sx={sxClasses.scaleControl} />
         <Box id={`${mapId}-scaleControlLine`} sx={sxClasses.scaleControl} />
-        <Button onClick={() => switchScale()} type="text" sx={sxClasses.scaleContainer} disableRipple>
+        <Button onClick={() => switchScale()} type="text" sx={sxClasses.scaleContainer} disableRipple className={`interaction-${interaction}`}>
           {expanded ? (
             <Box sx={sxClasses.scaleExpandedContainer}>
               {scaleValues.map((value, index) => {
