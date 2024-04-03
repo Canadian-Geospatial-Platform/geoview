@@ -24,7 +24,6 @@ import {
   layerEntryIsGroupLayer,
   TypeGeoviewLayerConfig,
   TypeDisplayLanguage,
-  TypeLayerEntryConfig,
   TypeLocalizedString,
   TypeValidMapProjectionCodes,
   TypeValidVersions,
@@ -44,20 +43,20 @@ import { logger } from '@/core/utils/logger';
 
 import { generateId, replaceParams, getLocalizedMessage, showError } from '../utilities';
 import schema from '../../../../schema.json';
-import { WfsLayerEntryConfig } from './validation-classes/vector-validation-classes/wfs-layer-entry-config';
-import { OgcFeatureLayerEntryConfig } from './validation-classes/vector-validation-classes/ogc-layer-entry-config';
-import { CsvLayerEntryConfig } from './validation-classes/vector-validation-classes/csv-layer-entry-config';
-import { VectorTilesLayerEntryConfig } from './validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
-import { GeoJSONLayerEntryConfig } from './validation-classes/vector-validation-classes/geojson-layer-entry-config';
-import { EsriFeatureLayerEntryConfig } from './validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
-import { GeoPackageLayerEntryConfig } from './validation-classes/vector-validation-classes/geopackage-layer-config-entry';
-import { XYZTilesLayerEntryConfig } from './validation-classes/raster-validation-classes/xyz-layer-entry-config';
-import { OgcWmsLayerEntryConfig } from './validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { ImageStaticLayerEntryConfig } from './validation-classes/raster-validation-classes/image-static-layer-entry-config';
-import { EsriDynamicLayerEntryConfig } from './validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { EsriImageLayerEntryConfig } from './validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import { GroupLayerEntryConfig } from './validation-classes/group-layer-entry-config';
-import { ConfigBaseClass } from './validation-classes/config-base-class';
+import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
+import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
+import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
+import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import { GeoPackageLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geopackage-layer-config-entry';
+import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
+import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { CONFIG_GEOCORE_URL, CONFIG_GEOLOCATOR_URL } from '../constant';
 
 // ******************************************************************************************************************************
@@ -79,7 +78,7 @@ export class ConfigValidation {
   private _displayLanguage: TypeDisplayLanguage;
 
   /** default configuration if provided configuration is missing or wrong */
-  private _defaultMapFeaturesConfig: TypeMapFeaturesConfig = {
+  #defaultMapFeaturesConfig: TypeMapFeaturesConfig = {
     mapId: '',
     map: {
       interaction: 'dynamic',
@@ -145,9 +144,9 @@ export class ConfigValidation {
    */
   constructor() {
     this._mapId = generateId();
-    this._defaultMapFeaturesConfig.mapId = this.mapId;
-    this._displayLanguage = this._defaultMapFeaturesConfig.displayLanguage!;
-    this._triggerReadyCallback = this._defaultMapFeaturesConfig.triggerReadyCallback!;
+    this.#defaultMapFeaturesConfig.mapId = this.mapId;
+    this._displayLanguage = this.#defaultMapFeaturesConfig.displayLanguage!;
+    this._triggerReadyCallback = this.#defaultMapFeaturesConfig.triggerReadyCallback!;
   }
 
   /** ***************************************************************************************************************************
@@ -156,7 +155,8 @@ export class ConfigValidation {
    * @returns {TypeMapFeaturesConfig} The map features configuration.
    */
   get defaultMapFeaturesConfig(): TypeMapFeaturesConfig {
-    return this._defaultMapFeaturesConfig;
+    this.#defaultMapFeaturesConfig.mapId = generateId();
+    return this.#defaultMapFeaturesConfig;
   }
 
   /** ***************************************************************************************************************************
@@ -174,7 +174,7 @@ export class ConfigValidation {
    */
   set mapId(mapId: string) {
     this._mapId = mapId;
-    this._defaultMapFeaturesConfig.mapId = this.mapId;
+    this.#defaultMapFeaturesConfig.mapId = this.mapId;
   }
 
   /** ***************************************************************************************************************************
@@ -222,17 +222,17 @@ export class ConfigValidation {
     if (projection && basemapOptions) {
       const basemapId = this._basemapId[projection].includes(basemapOptions.basemapId)
         ? basemapOptions.basemapId
-        : this._defaultMapFeaturesConfig.map.basemapOptions.basemapId;
+        : this.#defaultMapFeaturesConfig.map.basemapOptions.basemapId;
       const shaded = this._basemapShaded[projection].includes(basemapOptions.shaded)
         ? basemapOptions.shaded
-        : this._defaultMapFeaturesConfig.map.basemapOptions.shaded;
+        : this.#defaultMapFeaturesConfig.map.basemapOptions.shaded;
       const labeled = this._basemaplabeled[projection].includes(basemapOptions.labeled)
         ? basemapOptions.labeled
-        : this._defaultMapFeaturesConfig.map.basemapOptions.labeled;
+        : this.#defaultMapFeaturesConfig.map.basemapOptions.labeled;
 
       return { basemapId, shaded, labeled };
     }
-    return this._defaultMapFeaturesConfig.map.basemapOptions;
+    return this.#defaultMapFeaturesConfig.map.basemapOptions;
   }
 
   /** ***************************************************************************************************************************
@@ -242,7 +242,7 @@ export class ConfigValidation {
    * @returns {TypeValidVersions} A valid version.
    */
   validateVersion(version?: TypeValidVersions): TypeValidVersions {
-    return version && VALID_VERSIONS.includes(version) ? version : this._defaultMapFeaturesConfig.schemaVersionUsed!;
+    return version && VALID_VERSIONS.includes(version) ? version : this.#defaultMapFeaturesConfig.schemaVersionUsed!;
   }
 
   /** ***************************************************************************************************************************
@@ -255,9 +255,9 @@ export class ConfigValidation {
     if (language && VALID_DISPLAY_LANGUAGE.includes(language)) return language;
 
     logger.logWarning(
-      `- Map: ${this.mapId} - Invalid display language code ${language} replaced by ${this._defaultMapFeaturesConfig.displayLanguage} -`
+      `- Map: ${this.mapId} - Invalid display language code ${language} replaced by ${this.#defaultMapFeaturesConfig.displayLanguage} -`
     );
-    return this._defaultMapFeaturesConfig.displayLanguage!;
+    return this.#defaultMapFeaturesConfig.displayLanguage!;
   }
 
   /** ***************************************************************************************************************************
@@ -267,7 +267,7 @@ export class ConfigValidation {
    * @returns {number} A valid zoom level.
    */
   private validateZoom(zoom?: number): number {
-    return zoom && !Number.isNaN(zoom) && zoom >= 0 && zoom <= 18 ? zoom : this._defaultMapFeaturesConfig.map.viewSettings.zoom;
+    return zoom && !Number.isNaN(zoom) && zoom >= 0 && zoom <= 18 ? zoom : this.#defaultMapFeaturesConfig.map.viewSettings.zoom;
   }
 
   /** ***************************************************************************************************************************
@@ -299,7 +299,7 @@ export class ConfigValidation {
   private validateProjection(projection?: TypeValidMapProjectionCodes): TypeValidMapProjectionCodes {
     return projection && VALID_PROJECTION_CODES.includes(projection)
       ? projection
-      : this._defaultMapFeaturesConfig.map.viewSettings.projection;
+      : this.#defaultMapFeaturesConfig.map.viewSettings.projection;
   }
 
   /** ***************************************************************************************************************************
@@ -317,15 +317,15 @@ export class ConfigValidation {
       const x =
         !Number.isNaN(xVal) && xVal > this._center[projection].long[0] && xVal < this._center[projection].long[1]
           ? xVal
-          : this._defaultMapFeaturesConfig.map.viewSettings.center[0];
+          : this.#defaultMapFeaturesConfig.map.viewSettings.center[0];
       const y =
         !Number.isNaN(yVal) && yVal > this._center[projection].lat[0] && yVal < this._center[projection].lat[1]
           ? yVal
-          : this._defaultMapFeaturesConfig.map.viewSettings.center[1];
+          : this.#defaultMapFeaturesConfig.map.viewSettings.center[1];
 
       return [x, y];
     }
-    return this._defaultMapFeaturesConfig.map.viewSettings.center;
+    return this.#defaultMapFeaturesConfig.map.viewSettings.center;
   }
 
   /** ***************************************************************************************************************************
@@ -443,9 +443,10 @@ export class ConfigValidation {
     }
 
     for (let i = 0; i < listOfLayerEntryConfig.length; i++) {
+      const layerEntryConfig = listOfLayerEntryConfig[i];
       if (
-        layerEntryIsGroupLayer(listOfLayerEntryConfig[i] as ConfigBaseClass) &&
-        !this.IsValidTypeListOfLayerEntryConfig(geoviewLayerType, listOfLayerEntryConfig[i].listOfLayerEntryConfig!, validator)
+        layerEntryIsGroupLayer(layerEntryConfig) &&
+        !this.IsValidTypeListOfLayerEntryConfig(geoviewLayerType, layerEntryConfig.listOfLayerEntryConfig!, validator)
       )
         return false;
     }
@@ -505,7 +506,7 @@ export class ConfigValidation {
       }
     } else {
       validMapFeaturesConfig = {
-        ...this._defaultMapFeaturesConfig,
+        ...this.#defaultMapFeaturesConfig,
         mapId: this.mapId,
         displayLanguage: this._displayLanguage as TypeDisplayLanguage,
       };
@@ -596,31 +597,24 @@ export class ConfigValidation {
    * Process recursively the layer entries to create layers and layer groups.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to adjust and validate.
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entry configurations to process.
-   * @param {TypeGeoviewLayerConfig | GroupLayerEntryConfig} parentLayerConfig The parent layer configuration of all the
-   * layer entry configurations found in the list of layer entries.
+   * @param {GroupLayerEntryConfig} parentLayerConfig The parent layer path.
    */
   private processLayerEntryConfig(
     geoviewLayerConfig: TypeGeoviewLayerConfig,
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
     parentLayerConfig?: GroupLayerEntryConfig
   ) {
-    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig, i: number) => {
-      // links the entry to its GeoView layer config.
-      layerConfig.geoviewLayerConfig = geoviewLayerConfig;
-      // links the entry to its parent layer configuration.
-      layerConfig.parentLayerConfig = parentLayerConfig;
-      // layerConfig.initialSettings attributes that are not defined inherits parent layer settings that are defined.
-      layerConfig.initialSettings = defaultsDeep(
-        layerConfig.initialSettings,
-        layerConfig.parentLayerConfig?.initialSettings || layerConfig.geoviewLayerConfig?.initialSettings
+    for (let i = 0; i < listOfLayerEntryConfig.length; i++) {
+      (listOfLayerEntryConfig[i] as ConfigBaseClass).geoviewLayerConfig = geoviewLayerConfig;
+      // The following line sets the layerPath of the config
+      const layerConfig = new ConfigBaseClass(
+        listOfLayerEntryConfig[i] as ConfigBaseClass,
+        parentLayerConfig?.layerPath || geoviewLayerConfig.geoviewLayerId
       );
-
-      if (layerEntryIsGroupLayer(layerConfig as ConfigBaseClass)) {
-        // We must set the parents of all elements in the group.
-        this.recursivelySetChildParent(geoviewLayerConfig, [layerConfig], parentLayerConfig);
-        const parent = new GroupLayerEntryConfig(layerConfig as GroupLayerEntryConfig);
-        listOfLayerEntryConfig[i] = parent;
-        this.processLayerEntryConfig(geoviewLayerConfig, parent.listOfLayerEntryConfig, parent);
+      if (layerEntryIsGroupLayer(layerConfig)) {
+        const groupLayerConfig = new GroupLayerEntryConfig(layerConfig as GroupLayerEntryConfig, layerConfig.parentLayerConfig!);
+        listOfLayerEntryConfig[i] = groupLayerConfig;
+        this.processLayerEntryConfig(geoviewLayerConfig, groupLayerConfig.listOfLayerEntryConfig, groupLayerConfig);
       } else if (geoviewEntryIsWMS(layerConfig)) {
         listOfLayerEntryConfig[i] = new OgcWmsLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsImageStatic(layerConfig)) {
@@ -648,17 +642,24 @@ export class ConfigValidation {
       } else {
         // Unknown
         logger.logWarning('Unknown layer entry config type', layerConfig);
+        return;
       }
-    });
+      layerConfig.initialSettings = defaultsDeep(
+        layerConfig.initialSettings,
+        parentLayerConfig?.initialSettings || layerConfig.geoviewLayerConfig?.initialSettings
+      );
+    }
   }
 
-  /** ***************************************************************************************************************************
+  // TODO: DELETE THIS
+  /*
+  / ** ***************************************************************************************************************************
    * Process recursively the layer entries to set the parents of each entries.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration.
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entry configurations to process.
    * @param {GroupLayerEntryConfig} parentLayerConfig The parent layer configuration of all the
    * layer configurations found in the list of layer entries.
-   */
+   * /
   private recursivelySetChildParent(
     geoviewLayerConfig: TypeGeoviewLayerConfig,
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
@@ -671,6 +672,7 @@ export class ConfigValidation {
         this.recursivelySetChildParent(geoviewLayerConfig, layerConfig.listOfLayerEntryConfig!, layerConfig as GroupLayerEntryConfig);
     });
   }
+  */
 
   /** ***************************************************************************************************************************
    * Synchronize the English and French strings.
@@ -757,7 +759,7 @@ export class ConfigValidation {
   private adjustMapConfiguration(mapFeaturesConfigToAdjuste: TypeMapFeaturesConfig): TypeMapFeaturesConfig {
     // merge default and provided configuration in a temporary object.
     const tempMapFeaturesConfig: TypeMapFeaturesConfig = {
-      ...this._defaultMapFeaturesConfig,
+      ...this.#defaultMapFeaturesConfig,
       ...mapFeaturesConfigToAdjuste,
     };
 

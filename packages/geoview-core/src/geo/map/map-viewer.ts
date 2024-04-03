@@ -49,6 +49,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 interface TypeDocument extends Document {
   webkitExitFullscreen: () => void;
@@ -350,7 +351,7 @@ export class MapViewer {
           let allGood = true;
           Object.entries(this.layer.registeredLayers).forEach(([layerPath, registeredLayer]) => {
             // If not queryable, don't expect a result set
-            if (!registeredLayer.source?.featureInfo?.queryable) return;
+            if (!(registeredLayer as AbstractBaseLayerEntryConfig).source?.featureInfo?.queryable) return;
 
             const { resultSet } = this.layer.featureInfoLayerSet;
             const layerResultSetReady = Object.keys(resultSet).includes(layerPath);

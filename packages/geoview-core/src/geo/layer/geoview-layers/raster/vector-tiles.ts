@@ -29,6 +29,8 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
 import { TileLayerEntryConfig } from '@/core/utils/config/validation-classes/tile-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 // TODO: Implement method to validate Vector Tiles service
 // TODO: Add more customization (minZoom, maxZoom, TMS)
@@ -76,9 +78,7 @@ export const geoviewLayerIsVectorTiles = (verifyIfGeoViewLayer: AbstractGeoViewL
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const geoviewEntryIsVectorTiles = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is VectorTilesLayerEntryConfig => {
+export const geoviewEntryIsVectorTiles = (verifyIfGeoViewEntry: ConfigBaseClass): verifyIfGeoViewEntry is VectorTilesLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.VECTOR_TILES;
 };
 
@@ -324,6 +324,9 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @param {string} styleUrl The url of the styles to apply.
    */
   setVectorTileStyle(layerPath: string, styleUrl: string) {
-    applyStyle(api.maps[this.mapId].layer.registeredLayers[layerPath].olLayer as VectorTileLayer, styleUrl);
+    applyStyle(
+      (api.maps[this.mapId].layer.registeredLayers[layerPath] as AbstractBaseLayerEntryConfig).olLayer as VectorTileLayer,
+      styleUrl
+    );
   }
 }

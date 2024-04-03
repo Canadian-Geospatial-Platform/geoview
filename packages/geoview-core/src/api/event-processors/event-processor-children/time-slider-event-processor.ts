@@ -10,6 +10,7 @@ import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { api } from '@/app';
 import { TypeFeatureInfoLayerConfig } from '@/geo/map/map-schema-types';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 export class TimeSliderEventProcessor extends AbstractEventProcessor {
   /**
@@ -138,7 +139,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
 
     // If the field type has an alias, use that as a label
     let fieldAlias = field;
-    const { featureInfo } = api.maps[mapId].layer.registeredLayers[layerPath].source!;
+    const { featureInfo } = (api.maps[mapId].layer.registeredLayers[layerPath] as AbstractBaseLayerEntryConfig).source!;
     const { aliasFields, outfields } = featureInfo as TypeFeatureInfoLayerConfig;
     const localizedOutFields = getLocalizedValue(outfields, mapId)?.split(',');
     const localizedAliasFields = getLocalizedValue(aliasFields, mapId)?.split(',');

@@ -27,6 +27,8 @@ import { logger } from '@/core/utils/logger';
 import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'featureAPI';
@@ -74,9 +76,7 @@ export const geoviewLayerIsOgcFeature = (verifyIfGeoViewLayer: AbstractGeoViewLa
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const geoviewEntryIsOgcFeature = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is OgcFeatureLayerEntryConfig => {
+export const geoviewEntryIsOgcFeature = (verifyIfGeoViewEntry: ConfigBaseClass): verifyIfGeoViewEntry is OgcFeatureLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE;
 };
 
@@ -155,51 +155,53 @@ export class OgcFeature extends AbstractGeoViewVector {
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      const { layerPath } = layerConfig;
-      if (layerEntryIsGroupLayer(layerConfig)) {
-        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
-        if (!layerConfig.listOfLayerEntryConfig.length) {
+      const castLayerConfig = layerConfig as AbstractBaseLayerEntryConfig;
+      const { layerPath } = castLayerConfig;
+      if (layerEntryIsGroupLayer(castLayerConfig)) {
+        const layerGroupConfig = castLayerConfig as GroupLayerEntryConfig;
+        this.validateListOfLayerEntryConfig(layerGroupConfig.listOfLayerEntryConfig);
+        if (!layerGroupConfig.listOfLayerEntryConfig.length) {
           this.layerLoadError.push({
             layer: layerPath,
             loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          layerConfig.layerStatus = 'error';
+          layerGroupConfig.layerStatus = 'error';
           return;
         }
       }
 
-      layerConfig.layerStatus = 'processing';
+      castLayerConfig.layerStatus = 'processing';
 
       // Note that the code assumes ogc-feature collections does not contains metadata layer group. If you need layer group,
       // you can define them in the configuration section.
       if (Array.isArray(this.metadata!.collections)) {
-        const foundCollection = this.metadata!.collections.find((layerMetadata) => layerMetadata.id === layerConfig.layerId);
+        const foundCollection = this.metadata!.collections.find((layerMetadata) => layerMetadata.id === castLayerConfig.layerId);
         if (!foundCollection) {
           this.layerLoadError.push({
             layer: layerPath,
             loggerMessage: `OGC feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          layerConfig.layerStatus = 'error';
+          castLayerConfig.layerStatus = 'error';
           return;
         }
 
         if (foundCollection.description)
-          layerConfig.layerName = {
+          castLayerConfig.layerName = {
             en: foundCollection.description as string,
             fr: foundCollection.description as string,
           };
 
         const { currentProjection } = MapEventProcessor.getMapState(this.mapId);
-        if (layerConfig.initialSettings?.extent)
-          layerConfig.initialSettings.extent = api.projection.transformExtent(
-            layerConfig.initialSettings.extent,
+        if (castLayerConfig.initialSettings?.extent)
+          castLayerConfig.initialSettings.extent = api.projection.transformExtent(
+            castLayerConfig.initialSettings.extent,
             'EPSG:4326',
             `EPSG:${currentProjection}`
           );
 
-        if (!layerConfig.initialSettings?.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
-          // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-          layerConfig.initialSettings!.bounds = api.projection.transformExtent(
+        if (!castLayerConfig.initialSettings?.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
+          // castLayerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+          castLayerConfig.initialSettings!.bounds = api.projection.transformExtent(
             foundCollection.extent.spatial.bbox[0] as number[],
             api.projection.getProjection(foundCollection.extent.spatial.crs as string)!,
             `EPSG:${currentProjection}`

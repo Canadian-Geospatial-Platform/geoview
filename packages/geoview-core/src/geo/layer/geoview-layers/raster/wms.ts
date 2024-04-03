@@ -30,6 +30,8 @@ import {
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
   CONST_LAYER_ENTRY_TYPES,
+  TypeSourceImageWmsInitialConfig,
+  TypeFeatureInfoLayerConfig,
 } from '@/geo/map/map-schema-types';
 import { getLocalizedValue, getMinOrMaxExtents, xmlToJson, showError, replaceParams, getLocalizedMessage } from '@/core/utils/utilities';
 import { api } from '@/app';
@@ -39,6 +41,7 @@ import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/r
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
@@ -80,7 +83,7 @@ export const geoviewLayerIsWMS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): v
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const geoviewEntryIsWMS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is OgcWmsLayerEntryConfig => {
+export const geoviewEntryIsWMS = (verifyIfGeoViewEntry: ConfigBaseClass): verifyIfGeoViewEntry is OgcWmsLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.WMS;
 };
 
@@ -223,8 +226,8 @@ export class WMS extends AbstractGeoViewRaster {
           listOfLayerEntryConfig.forEach((layerConfig) => {
             if (layerEntryIsGroupLayer(layerConfig)) setDataAccessPath(layerConfig.listOfLayerEntryConfig);
             else {
-              layerConfig.source!.dataAccessPath!.en = dataAccessPath;
-              layerConfig.source!.dataAccessPath!.fr = dataAccessPath;
+              (layerConfig as AbstractBaseLayerEntryConfig).source!.dataAccessPath!.en = dataAccessPath;
+              (layerConfig as AbstractBaseLayerEntryConfig).source!.dataAccessPath!.fr = dataAccessPath;
             }
           });
         };
@@ -370,7 +373,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-    listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
+    listOfLayerEntryConfig.forEach((layerConfig: ConfigBaseClass) => {
       const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
         this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
@@ -427,7 +430,7 @@ export class WMS extends AbstractGeoViewRaster {
       // Log for pertinent debugging purposes
       logger.logTraceCore('WMS - createGroupLayer', 'Cloning the layer config', layerConfig.layerPath);
       const subLayerEntryConfig: TypeLayerEntryConfig = cloneDeep(layerConfig);
-      subLayerEntryConfig.parentLayerConfig = Cast<GroupLayerEntryConfig>(layerConfig);
+      subLayerEntryConfig.parentLayerConfig = layerConfig.layerPath;
       subLayerEntryConfig.layerId = subLayer.Name as string;
       subLayerEntryConfig.layerName = {
         en: subLayer.Title as string,
@@ -733,6 +736,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   private getLegendUrlFromCapabilities(layerConfig: OgcWmsLayerEntryConfig, chosenStyle?: string): TypeJsonObject | null {
     const layerCapabilities = this.getLayerMetadataEntry(layerConfig.layerId);
+    const layerConfigSource = layerConfig.source as TypeSourceImageWmsInitialConfig;
     if (Array.isArray(layerCapabilities?.Style)) {
       let legendStyle;
       if (chosenStyle) {
@@ -741,7 +745,7 @@ export class WMS extends AbstractGeoViewRaster {
         });
       } else {
         legendStyle = layerCapabilities?.Style.find((style) => {
-          if (layerConfig?.source?.style && !Array.isArray(layerConfig?.source?.style)) return layerConfig.source.style === style.Name;
+          if (layerConfigSource?.style && !Array.isArray(layerConfigSource?.style)) return layerConfigSource.style === style.Name;
           return style.Name === 'default';
         });
       }
@@ -916,17 +920,17 @@ export class WMS extends AbstractGeoViewRaster {
    * Translate the get feature information result set to the TypeFeatureInfoEntry[] used by GeoView.
    *
    * @param {TypeJsonObject} featureMember An object formatted using the query syntax.
-   * @param {OgcWmsLayerEntryConfig} layerConfig The layer configuration.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer configuration.
    * @param {Coordinate} clickCoordinate The coordinate where the user has clicked.
    *
    * @returns {TypeFeatureInfoEntry[]} The feature info table.
    */
   private formatWmsFeatureInfoResult(
     featureMember: TypeJsonObject,
-    layerConfig: OgcWmsLayerEntryConfig,
+    layerConfig: AbstractBaseLayerEntryConfig,
     clickCoordinate: Coordinate
   ): TypeFeatureInfoEntry[] {
-    const featureInfo = layerConfig?.source?.featureInfo;
+    const featureInfo = layerConfig?.source?.featureInfo as TypeFeatureInfoLayerConfig;
     const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
     const fieldTypes = featureInfo?.fieldTypes?.split(',');
     const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');

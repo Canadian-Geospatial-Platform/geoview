@@ -4,7 +4,6 @@ import {
   CONST_LAYER_ENTRY_TYPES,
   TypeLayerInitialSettings,
   TypeListOfLayerEntryConfig,
-  TypeLocalizedString,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { logger } from '@/core/utils/logger';
@@ -14,17 +13,8 @@ import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-b
  * Type used to define a layer group.
  */
 export class GroupLayerEntryConfig extends ConfigBaseClass {
-  /** Tag used to link the entry to a specific schema is not used by groups. */
-  declare schemaTag: never;
-
   /** Layer entry data type. */
   entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
-
-  /** The ending element of the layer configuration path is not used on groups. */
-  declare layerIdExtension: never;
-
-  /** The display name of the layer (English/French). */
-  layerName?: TypeLocalizedString;
 
   /**
    * Initial settings to apply to the GeoView layer entry at creation time. Initial settings are inherited from the parent in the
@@ -32,18 +22,16 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
    */
   initialSettings?: TypeLayerInitialSettings;
 
-  /** Source settings to apply to the GeoView vector layer source at creation time is not used by groups. */
-  declare source: never;
-
   /** The list of layer entry configurations to use from the GeoView layer group. */
   listOfLayerEntryConfig: TypeListOfLayerEntryConfig = [];
 
   /**
    * The class constructor.
    * @param {GroupLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+   * @param {string} parentLayerPath The layer path to the parent configuration.
    */
-  constructor(layerConfig: GroupLayerEntryConfig) {
-    super(layerConfig);
+  constructor(layerConfig: GroupLayerEntryConfig, parentLayerPath?: string) {
+    super(layerConfig, parentLayerPath);
     Object.assign(this, layerConfig);
   }
 

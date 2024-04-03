@@ -38,6 +38,8 @@ import { LegendsLayerSet } from '../utils/legends-layer-set';
 import { FeatureInfoLayerSet } from '../utils/feature-info-layer-set';
 import { LayerSet } from '../utils/layer-set';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 
 export type TypeRegisteredLayers = { [layerPath: string]: TypeLayerEntryConfig };
 
@@ -119,41 +121,52 @@ export class LayerApi {
   generateArrayOfLayerOrderInfo(geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig): TypeOrderedLayerInfo[] {
     const newOrderedLayerInfos: TypeOrderedLayerInfo[] = [];
 
-    const addSubLayerPathToLayerOrder = (layerEntryConfig: TypeLayerEntryConfig, layerPath: string): void => {
-      const subLayerPath = layerPath.endsWith(layerEntryConfig.layerId) ? layerPath : `${layerPath}/${layerEntryConfig.layerId}`;
+    const addSubLayerPathToLayerOrder = (layerConfig: AbstractBaseLayerEntryConfig | TypeGeoviewLayerConfig, layerPath: string): void => {
+      // GV: In very rare cases (~ 0.0001%), the complete layerPath ends with layerId.layerIdExtension and
+      // GV: TypeGeoviewLayerConfig doesn't have a layerPath.
+      let subLayerPath: string;
+      if ('geoviewLayerId' in layerConfig) subLayerPath = layerPath;
+      else {
+        const layerEntryConfig = layerConfig as AbstractBaseLayerEntryConfig;
+        const completeLayerId = layerEntryConfig.layerIdExtension
+          ? `${layerEntryConfig.layerId}.${layerEntryConfig.layerIdExtension}`
+          : layerEntryConfig.layerId;
+        subLayerPath = layerPath.endsWith(completeLayerId) ? layerPath : `${layerPath}/${completeLayerId}`;
+      }
       const layerInfo: TypeOrderedLayerInfo = {
         layerPath: subLayerPath,
-        visible: layerEntryConfig.initialSettings?.states?.visible !== false,
-        queryable: layerEntryConfig.source?.featureInfo?.queryable !== undefined ? layerEntryConfig.source?.featureInfo?.queryable : true,
-        hoverable:
-          layerEntryConfig.initialSettings?.states?.hoverable !== undefined ? layerEntryConfig.initialSettings?.states?.hoverable : true,
+        visible: layerConfig.initialSettings?.states?.visible !== false,
+        queryable:
+          (layerConfig as AbstractBaseLayerEntryConfig).source?.featureInfo?.queryable !== undefined
+            ? (layerConfig as AbstractBaseLayerEntryConfig).source?.featureInfo?.queryable
+            : true,
+        hoverable: layerConfig.initialSettings?.states?.hoverable !== undefined ? layerConfig.initialSettings?.states?.hoverable : true,
       };
       newOrderedLayerInfos.push(layerInfo);
-      if (layerEntryConfig.listOfLayerEntryConfig?.length) {
-        layerEntryConfig.listOfLayerEntryConfig?.forEach((subLayerEntryConfig) => {
-          addSubLayerPathToLayerOrder(subLayerEntryConfig, subLayerPath);
+      if (layerEntryIsGroupLayer(layerConfig as AbstractBaseLayerEntryConfig)) {
+        (layerConfig as GroupLayerEntryConfig).listOfLayerEntryConfig?.forEach((subLayerEntryConfig) => {
+          addSubLayerPathToLayerOrder(subLayerEntryConfig as AbstractBaseLayerEntryConfig, subLayerPath);
         });
       }
     };
 
-    if ((geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId) {
-      if ((geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig.length > 1) {
-        const layerPath = `${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}/${
-          (geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId
-        }`;
+    if ('geoviewLayerId' in geoviewLayerConfig) {
+      const castedGeoviewLayerConfig = geoviewLayerConfig as TypeGeoviewLayerConfig;
+      if (castedGeoviewLayerConfig.listOfLayerEntryConfig.length > 1) {
+        const layerPath = `${castedGeoviewLayerConfig.geoviewLayerId}/${castedGeoviewLayerConfig.geoviewLayerId}`;
         const layerInfo: TypeOrderedLayerInfo = {
           layerPath,
-          visible: geoviewLayerConfig.initialSettings?.states?.visible !== false,
+          visible: castedGeoviewLayerConfig.initialSettings?.states?.visible !== false,
         };
         newOrderedLayerInfos.push(layerInfo);
-        (geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig.forEach((layerEntryConfig) => {
-          addSubLayerPathToLayerOrder(layerEntryConfig, layerPath);
+        castedGeoviewLayerConfig.listOfLayerEntryConfig.forEach((layerEntryConfig) => {
+          addSubLayerPathToLayerOrder(layerEntryConfig as AbstractBaseLayerEntryConfig, layerPath);
         });
       } else {
-        const layerEntryConfig = (geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig[0];
-        addSubLayerPathToLayerOrder(layerEntryConfig, layerEntryConfig.layerPath);
+        const layerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0];
+        addSubLayerPathToLayerOrder(layerEntryConfig as AbstractBaseLayerEntryConfig, layerEntryConfig.layerPath);
       }
-    } else addSubLayerPathToLayerOrder(geoviewLayerConfig as TypeLayerEntryConfig, (geoviewLayerConfig as TypeLayerEntryConfig).layerPath);
+    } else addSubLayerPathToLayerOrder(geoviewLayerConfig as AbstractBaseLayerEntryConfig, geoviewLayerConfig.layerPath);
 
     return newOrderedLayerInfos;
   }
@@ -554,11 +567,12 @@ export class LayerApi {
 
     // initialize these two constant now because we will delete the information used to get their values.
     const indexToDelete = this.registeredLayers[partialLayerPath]
-      ? this.registeredLayers[partialLayerPath].parentLayerConfig?.listOfLayerEntryConfig.findIndex(
-          (layerConfig) => layerConfig === this.registeredLayers?.[partialLayerPath]
-        )
+      ? this.registeredLayers[partialLayerPath].geoviewLayerInstance
+          ?.getParentConfig(partialLayerPath)
+          ?.listOfLayerEntryConfig.findIndex((layerConfig) => layerConfig === this.registeredLayers?.[partialLayerPath])
       : undefined;
-    const listOfLayerEntryConfigAffected = this.registeredLayers[partialLayerPath]?.parentLayerConfig?.listOfLayerEntryConfig;
+    const listOfLayerEntryConfigAffected =
+      this.registeredLayers[partialLayerPath]?.geoviewLayerInstance?.getParentConfig(partialLayerPath)?.listOfLayerEntryConfig;
 
     Object.keys(this.registeredLayers).forEach((completeLayerPath) => {
       const completeLayerPathNodes = completeLayerPath.split('/');
@@ -642,7 +656,7 @@ export class LayerApi {
    */
   getOLLayerByLayerPath = (layerPath: string): BaseLayer | LayerGroup => {
     // Return the olLayer object from the registered layers
-    const olLayer = this.registeredLayers[layerPath]?.olLayer;
+    const olLayer = (this.registeredLayers[layerPath] as AbstractBaseLayerEntryConfig)?.olLayer;
     if (olLayer) return olLayer;
     throw new Error(`Layer at path ${layerPath} not found.`);
   };
@@ -659,7 +673,7 @@ export class LayerApi {
     // Make sure the open layer has been created, sometimes it can still be in the process of being created
     const promisedLayer = await whenThisThen(
       () => {
-        return this.registeredLayers[layerPath]?.olLayer;
+        return (this.registeredLayers[layerPath] as AbstractBaseLayerEntryConfig)?.olLayer;
       },
       timeout,
       checkFrequency
@@ -713,7 +727,7 @@ export class LayerApi {
         ) {
           const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
           this.geoviewLayer(registeredLayerPath).setOpacity((otherOpacity || 1) * 0.25);
-        } else this.registeredLayers[registeredLayerPath].olLayer!.setZIndex(999);
+        } else (this.registeredLayers[registeredLayerPath] as AbstractBaseLayerEntryConfig).olLayer!.setZIndex(999);
       });
     } else {
       Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
@@ -726,7 +740,7 @@ export class LayerApi {
           this.geoviewLayer(registeredLayerPath).setOpacity((otherOpacity || 1) * 0.25);
         }
       });
-      this.registeredLayers[layerPath].olLayer!.setZIndex(999);
+      (this.registeredLayers[layerPath] as AbstractBaseLayerEntryConfig).olLayer!.setZIndex(999);
     }
   }
 
@@ -737,7 +751,7 @@ export class LayerApi {
     this.featureHighlight.removeBBoxHighlight();
     if (this.highlightedLayer.layerPath !== undefined) {
       const { layerPath, originalOpacity } = this.highlightedLayer;
-      if (layerEntryIsGroupLayer(this.registeredLayers[layerPath] as TypeLayerEntryConfig)) {
+      if (layerEntryIsGroupLayer(this.registeredLayers[layerPath])) {
         Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
           if (
             !registeredLayerPath.startsWith(layerPath) &&

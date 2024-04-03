@@ -25,6 +25,7 @@ import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
 import { EsriFeature, geoviewEntryIsEsriFeature } from './vector/esri-feature';
 import { EsriBaseRenderer, getStyleFromEsriRenderer } from '@/geo/renderer/esri-renderer';
 import { EsriImage } from './raster/esri-image';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
@@ -59,10 +60,10 @@ export async function commonfetchServiceMetadata(this: EsriDynamic | EsriFeature
  * with a numeric layerId and creates a group entry when a layer is a group.
  *
  * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
- * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
+ * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
  */
-export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFeature, listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
-  listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig, i) => {
+export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFeature, listOfLayerEntryConfig: ConfigBaseClass[]) {
+  listOfLayerEntryConfig.forEach((layerConfig: ConfigBaseClass, i) => {
     if (layerConfig.layerStatus === 'error') return;
     const { layerPath } = layerConfig;
 
@@ -124,7 +125,7 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
         const subLayerEntryConfig: TypeLayerEntryConfig = geoviewEntryIsEsriDynamic(layerConfig)
           ? new EsriDynamicLayerEntryConfig(layerConfig as EsriDynamicLayerEntryConfig)
           : new EsriFeatureLayerEntryConfig(layerConfig as EsriFeatureLayerEntryConfig);
-        subLayerEntryConfig.parentLayerConfig = groupLayerConfig;
+        subLayerEntryConfig.parentLayerConfig = groupLayerConfig.layerPath;
         subLayerEntryConfig.layerId = `${layerId}`;
         subLayerEntryConfig.layerName = {
           en: this.metadata!.layers[layerId as number].name as string,

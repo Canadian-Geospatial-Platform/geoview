@@ -465,7 +465,7 @@ export function AddNewLayer(): JSX.Element {
           : new EsriFeature(mapId, esriGeoviewLayerConfig as TypeEsriFeatureLayerConfig);
       // Synchronize the geoviewLayerId.
       esriGeoviewLayerConfig.geoviewLayerId = esriGeoviewLayerInstance.geoviewLayerId;
-      setGeoviewLayerInstance(esriGeoviewLayerInstance);
+      setGeoviewLayerInstance(esriGeoviewLayerInstance as AbstractGeoViewLayer);
       await esriGeoviewLayerInstance.createGeoViewLayers();
       const esriMetadata = esriGeoviewLayerInstance.metadata!;
       if (!esriMetadata) throw new Error('Cannot get metadata');

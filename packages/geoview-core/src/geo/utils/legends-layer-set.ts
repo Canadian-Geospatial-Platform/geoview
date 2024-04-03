@@ -7,6 +7,7 @@ import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/gr
 import { logger } from '@/core/utils/logger';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 /**
  * A class to hold a set of layers associated with an array of TypeLegend. When this class is instantiated, all layers already
@@ -95,12 +96,14 @@ export class LegendsLayerSet extends LayerSet {
    * @param {TypeLayerStatus} currentLayerStatus The layer status that triggered the check on the parent(s)
    */
   private changeLayerStatusOfParentsRecursive(currentLayerConfig: TypeLayerEntryConfig, currentLayerStatus: TypeLayerStatus): void {
+    const parentGroupLayer = (currentLayerConfig as AbstractBaseLayerEntryConfig).geoviewLayerInstance!.getParentConfig(
+      currentLayerConfig.layerPath
+    ) as GroupLayerEntryConfig | undefined;
     // If layer has a parent
-    if (currentLayerConfig.parentLayerConfig) {
+    if (parentGroupLayer) {
       // If the current status to set is at least loaded (or error), make the parent loaded
       if (['loaded', 'error'].includes(currentLayerStatus)) {
         // Get the parent config
-        const parentGroupLayer = currentLayerConfig.parentLayerConfig as GroupLayerEntryConfig;
 
         // Update the status on the parent
         parentGroupLayer.layerStatus = 'loaded';
@@ -121,9 +124,12 @@ export class LegendsLayerSet extends LayerSet {
   protected onLayerSetUpdatedProcess(layerPath: string): void {
     if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerPath) === -1) {
       const layerConfig = this.layerApi.registeredLayers[layerPath];
+      const parentLayerConfig = (layerConfig as AbstractBaseLayerEntryConfig).geoviewLayerInstance!.getParentConfig(
+        layerConfig.layerPath
+      ) as TypeLayerEntryConfig;
       if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerPath.split('.')[1]) !== -1) {
         MapEventProcessor.replaceOrderedLayerInfo(this.mapId, layerConfig, layerPath.split('.')[1]);
-      } else if (layerConfig.parentLayerConfig) {
+      } else if (parentLayerConfig) {
         const parentLayerPathArray = layerPath.split('/');
         parentLayerPathArray.pop();
         const parentLayerPath = parentLayerPathArray.join('/');
@@ -132,7 +138,13 @@ export class LegendsLayerSet extends LayerSet {
           layerInfo.layerPath.startsWith(parentLayerPath)
         ).length;
         if (parentLayerIndex !== -1) MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig, parentLayerIndex + numberOfLayers);
-        else MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig.parentLayerConfig!);
+        else
+          MapEventProcessor.addOrderedLayerInfo(
+            this.mapId,
+            (layerConfig as AbstractBaseLayerEntryConfig).geoviewLayerInstance!.getParentConfig(
+              layerConfig.layerPath
+            ) as TypeLayerEntryConfig
+          );
       } else MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig);
     }
 

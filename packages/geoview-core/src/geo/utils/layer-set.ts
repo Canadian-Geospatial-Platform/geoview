@@ -6,12 +6,13 @@ import RenderFeature from 'ol/render/Feature';
 import { LayerApi } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeLayerStatus, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 import { TypeHoverLayerData } from './hover-feature-info-layer-set';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 /**
  * A class to hold a set of layers associated with an value of any type.
@@ -160,7 +161,7 @@ export class LayerSet {
    * Process a layer result set data to query features on it, if said layer path can be queried.
    *
    * @param {TypeLayerData | TypeHoverLayerData} data
-   * @param {TypeLayerEntryConfig} layerConfig
+   * @param {AbstractBaseLayerEntryConfig} layerConfig
    * @param {string} layerPath
    * @param {QueryType} queryType
    * @param {TypeLocation} location
@@ -169,7 +170,7 @@ export class LayerSet {
    */
   protected queryLayerFeatures = (
     data: TypeLayerData | TypeHoverLayerData,
-    layerConfig: TypeLayerEntryConfig,
+    layerConfig: AbstractBaseLayerEntryConfig,
     layerPath: string,
     queryType: QueryType,
     location: TypeLocation
@@ -177,7 +178,7 @@ export class LayerSet {
     // If event listener is enabled, query status isn't in error, and geoview layer instance is defined
     if (data.eventListenerEnabled && data.queryStatus !== 'error' && layerConfig.geoviewLayerInstance) {
       // If source is queryable
-      if (layerConfig?.source?.featureInfo?.queryable) {
+      if ((layerConfig as AbstractBaseLayerEntryConfig)?.source?.featureInfo?.queryable) {
         // Get Feature Info
         return Promise.resolve(layerConfig.geoviewLayerInstance.getFeatureInfo(queryType, layerPath, location));
       }

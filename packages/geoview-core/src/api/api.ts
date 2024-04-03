@@ -14,6 +14,7 @@ import * as Utilities from '../core/utils/utilities';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
 import { initMapDivFromFunctionCall } from '@/core/types/cgpv-types';
+import { ConfigApi } from '@/core/utils/new-config/configApi';
 
 /**
  * Class used to handle api calls (events, functions etc...)
@@ -22,6 +23,9 @@ import { initMapDivFromFunctionCall } from '@/core/types/cgpv-types';
  * @class API
  */
 export class API {
+  // object used to validate the configurations against the schema.
+  configApi = new ConfigApi();
+
   // event object used to handle triggering events, subscribing to an event etc...
   event: Event;
 

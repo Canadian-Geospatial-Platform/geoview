@@ -6,6 +6,7 @@ import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 import { LayerSet, QueryType, TypeLayerData } from './layer-set';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 /**
  * A class containing a set of layers associated with a TypeLayerData object, which will receive the result of a
@@ -39,7 +40,7 @@ export class AllFeatureInfoLayerSet extends LayerSet {
       return false;
 
     const layerConfig = this.layerApi.registeredLayers[layerPath];
-    const queryable = layerConfig?.source?.featureInfo?.queryable;
+    const queryable = (layerConfig as AbstractBaseLayerEntryConfig)?.source?.featureInfo?.queryable;
     return !!queryable;
   };
 
@@ -116,7 +117,7 @@ export class AllFeatureInfoLayerSet extends LayerSet {
     // If valid layer path
     if (this.layerApi.registeredLayers[layerPath] && this.resultSet[layerPath]) {
       const { data } = this.resultSet[layerPath];
-      const layerConfig = this.layerApi.registeredLayers[layerPath];
+      const layerConfig = this.layerApi.registeredLayers[layerPath] as AbstractBaseLayerEntryConfig;
 
       // Query and event types of what we're doing
       const eventType = 'all-features';

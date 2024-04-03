@@ -25,6 +25,7 @@ import { logger } from '@/core/utils/logger';
 import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 export interface TypeSourceCSVInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'CSV';
@@ -72,7 +73,7 @@ export const geoviewLayerIsCSV = (verifyIfGeoViewLayer: AbstractGeoViewLayer): v
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const geoviewEntryIsCSV = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is CsvLayerEntryConfig => {
+export const geoviewEntryIsCSV = (verifyIfGeoViewEntry: ConfigBaseClass): verifyIfGeoViewEntry is CsvLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.CSV;
 };
 

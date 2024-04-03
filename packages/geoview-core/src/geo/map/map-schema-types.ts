@@ -432,7 +432,7 @@ export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceImageInit
 /** ******************************************************************************************************************************
  * Initial settings for static image sources.
  */
-export interface TypeSourceImageStaticInitialConfig extends Omit<TypeBaseSourceImageInitialConfig, 'featureInfo'> {
+export interface TypeSourceImageStaticInitialConfig extends TypeBaseSourceImageInitialConfig {
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. We only use queryable and
    * it must be set to false if specified.
    */
@@ -480,7 +480,7 @@ export type TypeTileGrid = {
 /** ******************************************************************************************************************************
  * Initial settings for tile image sources.
  */
-export interface TypeSourceTileInitialConfig extends Omit<TypeBaseSourceImageInitialConfig, 'featureInfo'> {
+export interface TypeSourceTileInitialConfig extends TypeBaseSourceImageInitialConfig {
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. We only use queryable and
    * it must be set to false if specified.
    */
@@ -501,16 +501,19 @@ export interface TypeVectorTileSourceInitialConfig extends TypeBaseSourceVectorI
  * Layer config type.
  */
 export type TypeLayerEntryConfig =
-  | AbstractBaseLayerEntryConfig
-  | VectorHeatmapLayerEntryConfig
-  | VectorLayerEntryConfig
-  | VectorLayerEntryConfig
-  | OgcWmsLayerEntryConfig
-  | EsriDynamicLayerEntryConfig
-  | EsriImageLayerEntryConfig
-  | ImageStaticLayerEntryConfig
-  | TileLayerEntryConfig
-  | GroupLayerEntryConfig;
+  | (ConfigBaseClass & GroupLayerEntryConfig)
+  | (ConfigBaseClass &
+      AbstractBaseLayerEntryConfig &
+      (
+        | VectorHeatmapLayerEntryConfig
+        | VectorLayerEntryConfig
+        | VectorLayerEntryConfig
+        | OgcWmsLayerEntryConfig
+        | EsriDynamicLayerEntryConfig
+        | EsriImageLayerEntryConfig
+        | ImageStaticLayerEntryConfig
+        | TileLayerEntryConfig
+      ));
 
 /** ******************************************************************************************************************************
  * List of layers. Corresponds to the layerList defined in the schema.
@@ -545,6 +548,17 @@ export type TypeGeoviewLayerConfig = {
   serviceDateFormat?: string;
   /** Date format used by the getFeatureInfo to output date variable. */
   externalDateFormat?: string;
+  /**
+   * Initial settings to apply to the GeoView layer at creation time.
+   * This attribute is allowed only if listOfLayerEntryConfig.length > 1.
+   */
+  initialSettings?: TypeLayerInitialSettings;
+
+  /** The layer entries to use from the GeoView layer. */
+  listOfLayerEntryConfig: TypeListOfLayerEntryConfig;
+};
+
+export type TypeSharedLayerProps = {
   /**
    * Initial settings to apply to the GeoView layer at creation time.
    * This attribute is allowed only if listOfLayerEntryConfig.length > 1.

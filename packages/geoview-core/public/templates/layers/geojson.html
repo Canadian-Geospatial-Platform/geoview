@@ -130,6 +130,8 @@
     <pre id="ResultSetId1-click" class="panel">Click on feature on the map</pre>
     <button type="button" class="collapsible" id="AllFeatureInfo1">Get All Feature Info (geojsonLYR1/geojsonLYR1/polygons.json)</button>
     <pre id="ResultSetId1-all-features" class="panel"></pre>
+    <button class="collapsible active">Map config</button>
+    <pre id="LYR1-config" class="panel map-title-holder"></pre>
     <hr />
     <p>This map has a wms layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
@@ -237,6 +239,27 @@
           // Layers are loaded
           createTableOfFilter('LYR1');
         }
+      });
+
+      // =======================================================================================================================
+      // GV: This is a temporary section for testing the API
+      var configOutput = document.getElementById('LYR1-config');
+      cgpv.api.configApi.getMapConfig(getMapElement('LYR1')).then((mapConfig) => {
+        let jsonString;
+        const serialize = (objectToSerialize) => {
+          try {
+            const jsonString = JSON.stringify(objectToSerialize, (key, value) => {
+              if (['geoviewLayerConfig', 'layerStatusWeight', '_olLayer', '_layerStatus', 'waitForProcessedBeforeSendingLoaded'].includes(key)) {
+                return undefined;
+              }
+              return value;
+            }, 2);
+          configOutput.innerText = jsonString;
+          } catch (error) {
+              console.error("Erreur lors de la sérialisation JSON :", error);
+          }
+        }
+        jsonString = serialize(mapConfig);
       });
 
       // =======================================================================================================================

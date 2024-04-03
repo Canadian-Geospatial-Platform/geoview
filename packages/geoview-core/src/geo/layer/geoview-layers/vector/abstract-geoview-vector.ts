@@ -123,7 +123,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       if (typeof url === 'function') url = url(extent, resolution, projection);
 
       const xhr = new XMLHttpRequest();
-      if ((layerConfig?.source as TypeBaseSourceVectorInitialConfig)?.postSettings) {
+      if (((layerConfig as AbstractBaseLayerEntryConfig)?.source as TypeBaseSourceVectorInitialConfig)?.postSettings) {
         const { postSettings } = layerConfig.source as TypeBaseSourceVectorInitialConfig;
         xhr.open('POST', url as string);
         if (postSettings!.header)
@@ -279,7 +279,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       const layerConfig = this.getLayerConfig(layerPath) as VectorLayerEntryConfig;
       const layerFilter = (layer: BaseLayer) => {
         const layerSource = layer.get('layerConfig')?.source;
-        const configSource = layerConfig?.source;
+        const configSource = (layerConfig as AbstractBaseLayerEntryConfig)?.source;
         return layerSource !== undefined && configSource !== undefined && layerSource === configSource;
       };
       const { map } = api.maps[this.mapId];

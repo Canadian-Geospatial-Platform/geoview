@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
@@ -9,20 +10,15 @@ import {
   TypeLayerStatus,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
-import { logger } from '@/core/utils/logger';
-import { Cast, TypeJsonValue, api } from '@/core/types/cgpv-types';
-import { GroupLayerEntryConfig } from './group-layer-entry-config';
+import { Cast, TypeJsonValue, TypeLocalizedString, api } from '@/core/types/cgpv-types';
 import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
 
 /** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
  */
 export class ConfigBaseClass {
-  /** The identifier of the layer to display on the map. This element is part of the schema. */
-  private _layerId = '';
-
-  /** The ending extension (element) of the layer identifier. This element is part of the schema. */
-  layerIdExtension?: string;
+  /** The display name of the layer (English/French). */
+  layerName?: TypeLocalizedString;
 
   /** Tag used to link the entry to a specific schema. This element is part of the schema. */
   schemaTag?: TypeGeoviewLayerType;
@@ -43,10 +39,13 @@ export class ConfigBaseClass {
   isMetadataLayerGroup?: boolean;
 
   /** It is used to link the layer entry config to the parent's layer config. */
-  parentLayerConfig?: TypeGeoviewLayerConfig | GroupLayerEntryConfig;
+  parentLayerConfig?: string;
+
+  /** The identifier of the layer to display on the map. This element is part of the schema. */
+  private _layerId = '';
 
   /** The layer path to this instance. */
-  protected _layerPath = '';
+  private _layerPath = '';
 
   // TODO: Refactor - There shouldn't be a coupling to an OpenLayers `BaseLayer` inside a Configuration class.
   // TO.DOCONT: That logic should be elsewhere so that the Configuration class remains portable and immutable.
@@ -56,7 +55,7 @@ export class ConfigBaseClass {
   /** It is used to identified unprocessed layers and shows the final layer state */
   protected _layerStatus: TypeLayerStatus = 'newInstance';
 
-  protected layerStatusWeight = {
+  layerStatusWeight = {
     newInstance: 10,
     registered: 20,
     processing: 30,
@@ -75,41 +74,31 @@ export class ConfigBaseClass {
   /**
    * The class constructor.
    * @param {ConfigBaseClass} layerConfig The layer configuration we want to instanciate.
+   * @param {string} parentLayerPath The layer path to the parent configuration.
    */
-  constructor(layerConfig: ConfigBaseClass) {
+  constructor(layerConfig: ConfigBaseClass, parentLayerPath?: string) {
     Object.assign(this, layerConfig);
-    // eslint-disable-next-line no-underscore-dangle
-    if (this.geoviewLayerConfig) this._layerPath = ConfigBaseClass.evaluateLayerPath(layerConfig);
-    else logger.logError("Couldn't calculate layerPath because geoviewLayerConfig has an invalid value");
+    this.parentLayerConfig = parentLayerPath;
+    if ('layerIdExtension' in this) {
+      const completeLayerId = this.layerIdExtension ? `${this._layerId}.${this.layerIdExtension}` : this._layerId;
+      this._layerPath = `${parentLayerPath}/${completeLayerId}`;
+    } else {
+      this._layerPath = `${parentLayerPath}/${this._layerId}`;
+    }
   }
 
   /**
    * The layerPath getter method for the ConfigBaseClass class and its descendant classes.
    */
   get layerPath() {
-    // eslint-disable-next-line no-underscore-dangle
-    this._layerPath = ConfigBaseClass.evaluateLayerPath(this);
-    // eslint-disable-next-line no-underscore-dangle
     return this._layerPath;
   }
 
   /**
-   * Getter for the layer Path of the layer configuration parameter.
-   * @param {ConfigBaseClass} layerConfig The layer configuration for which we want to get the layer path.
-   * @param {string} layerPath Internal parameter used to build the layer path (should not be used by the user).
-   *
-   * @returns {string} Returns the layer path.
+   * The layerPath setter method for the ConfigBaseClass class and its descendant classes.
    */
-  static evaluateLayerPath(layerConfig: ConfigBaseClass, layerPath?: string): string {
-    let pathEnding = layerPath;
-    if (pathEnding === undefined)
-      pathEnding =
-        layerConfig.layerIdExtension === undefined ? layerConfig.layerId : `${layerConfig.layerId}.${layerConfig.layerIdExtension}`;
-    if (!layerConfig.parentLayerConfig) return `${layerConfig.geoviewLayerConfig!.geoviewLayerId!}/${pathEnding}`;
-    return this.evaluateLayerPath(
-      layerConfig.parentLayerConfig as GroupLayerEntryConfig,
-      `${(layerConfig.parentLayerConfig as GroupLayerEntryConfig).layerId}/${pathEnding}`
-    );
+  protected set layerPath(newLayerPath) {
+    this._layerPath = newLayerPath;
   }
 
   /**
@@ -125,14 +114,15 @@ export class ConfigBaseClass {
    * @param {string} newLayerId The new layerId value.
    */
   set layerId(newLayerId: string) {
-    // eslint-disable-next-line no-underscore-dangle
     this._layerId = newLayerId;
-    // eslint-disable-next-line no-underscore-dangle
-    this._layerPath = ConfigBaseClass.evaluateLayerPath(this);
+    if ('layerIdExtension' in this) {
+      const completeLayerId = this.layerIdExtension ? `${this._layerId}.${this.layerIdExtension}` : this._layerId;
+      this._layerPath = `${this.parentLayerConfig}/${completeLayerId}`;
+    } else this._layerPath = `${this.parentLayerConfig}/${this._layerId}`;
   }
 
   /**
-   * The layerId getter method for the ConfigBaseClass class and its descendant classes.
+   * The layerStatus getter method for the ConfigBaseClass class and its descendant classes.
    */
   get layerStatus() {
     // eslint-disable-next-line no-underscore-dangle
@@ -156,19 +146,23 @@ export class ConfigBaseClass {
     if (!this.IsGreaterThanOrEqualTo(newLayerStatus)) {
       // eslint-disable-next-line no-underscore-dangle
       this._layerStatus = newLayerStatus;
-      // TODO: Refactor - Suggestion to hold the layer status elsewhere than in a configuration file. Can it be on the layer itself?
-      // TO.DOCONT: It'd be "nicer" to have a configuration file that doesn't raise events
-      this.emitLayerStatusChanged({ layerPath: this.layerPath, layerStatus: newLayerStatus });
+      // TODO: Refactor - Layer status must be moved elsewhere than in a configuration file. Can it be on the layer itself?
+      // TO.DOCONT: Also, it'd be "nicer" to have a configuration file that doesn't raise events
+      this.emitLayerStatusChanged({ layerPath: this._layerPath, layerStatus: newLayerStatus });
     }
     if (newLayerStatus === 'processed' && this.waitForProcessedBeforeSendingLoaded) this.layerStatus = 'loaded';
 
+    const parentConfig = this.geoviewLayerInstance!.getParentConfig(this.parentLayerConfig!);
     if (
       // eslint-disable-next-line no-underscore-dangle
       this._layerStatus === 'loaded' &&
-      this.parentLayerConfig &&
-      this.geoviewLayerInstance!.allLayerStatusAreGreaterThanOrEqualTo('loaded', [this.parentLayerConfig as GroupLayerEntryConfig])
+      parentConfig &&
+      this.geoviewLayerInstance!.allLayerStatusAreGreaterThanOrEqualTo('loaded', [parentConfig])
     )
-      (this.parentLayerConfig as GroupLayerEntryConfig).layerStatus = 'loaded';
+      // TODO: To keep things working, this is how we retreive the parent configuration.
+      // TO.DOCONT: We must find a way to do that without using this.geoviewLayerInstance! because
+      // TO.DOCONT: layer Config in ConfigApi are not supposed to be linked to a map or a geoviewLayerInstance.
+      this.geoviewLayerInstance!.getParentConfig(this._layerPath)!.layerStatus = 'loaded';
   }
 
   /**
@@ -204,10 +198,15 @@ export class ConfigBaseClass {
    * @returns {boolean} Returns false if the layer configuration can't be registered.
    */
 
+  // TODO: This method must be removed from the config validation.
+  // TO.DOCONT: Suggest to create a method in ConfigApi named getSelectedLayerConfig that will return the same thing registeredLayers
+  // TO.DOCONT: A similar method in ConfigApi named getMetadataLayerTree can be coded to return the layerConfig retreived from the metadata
+  // TO.DOCONT: Any other suggestions are welcome.
+
   registerLayerConfig(): boolean {
     const { registeredLayers } = api.maps[this.geoviewLayerInstance!.mapId].layer;
-    if (registeredLayers[this.layerPath]) return false;
-    (registeredLayers[this.layerPath] as ConfigBaseClass) = this;
+    if (registeredLayers[this._layerPath]) return false;
+    (registeredLayers[this._layerPath] as ConfigBaseClass) = this;
 
     // TODO: Check - Move this registerToLayerSets closer to the others, when I comment the line it seems good, except
     // TO.DOCONT: for an 'Anonymous' group layer that never got 'loaded'. See if we can fix this elsewhere and remove this.
@@ -259,7 +258,6 @@ export class ConfigBaseClass {
    */
   onSerialize(): TypeJsonValue {
     return {
-      layerIdExtension: this.layerIdExtension,
       schemaTag: this.schemaTag,
       entryType: this.entryType,
       layerStatus: this.layerStatus,

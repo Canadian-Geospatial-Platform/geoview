@@ -13,6 +13,7 @@ import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 import { LayerSet, TypeFieldEntry, TypeGeometry, TypeQueryStatus } from './layer-set';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 /**
  * A class containing a set of layers associated with a TypeLayerData object, which will receive the result of a
@@ -48,7 +49,7 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
     logger.logTraceCore('HOVER-FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerPath, Object.keys(this.resultSet));
 
     const layerConfig = this.layerApi.registeredLayers[layerPath];
-    const queryable = layerConfig?.source?.featureInfo?.queryable;
+    const queryable = (layerConfig as AbstractBaseLayerEntryConfig)?.source?.featureInfo?.queryable;
     return !!queryable;
   };
 
@@ -113,7 +114,7 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
     // Reinitialize the resultSet
     // Loop on each layer path in the resultSet
     Object.keys(this.resultSet).forEach((layerPath) => {
-      const layerConfig = this.layerApi.registeredLayers[layerPath];
+      const layerConfig = this.layerApi.registeredLayers[layerPath] as AbstractBaseLayerEntryConfig;
       const { data } = this.resultSet[layerPath];
       if (!data.eventListenerEnabled) return;
       if (layerConfig.layerStatus === 'loaded') {
