@@ -1,16 +1,12 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme, Theme } from '@mui/material/styles';
-import { getUid } from 'ol/util';
 
 import { Box } from '@/ui';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { logger } from '@/core/utils/logger';
-import { TypeHoverFeatureInfo } from '@/geo/utils/hover-feature-info-layer-set';
-import { useDetailsStoreHoverDataArray } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { MapPointerMoveEvent, MapViewer, api } from '@/app';
+import { useMapHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 /**
  * Hover tooltip component to show name field information on hover
@@ -60,56 +56,43 @@ export function HoverTooltip(): JSX.Element {
   const [tooltipValue, setTooltipValue] = useState<string>('');
   const [tooltipIcon, setTooltipIcon] = useState<string>('');
   const [showTooltip, setShowTooltip] = useState<boolean>(false);
-  // Currently selected feature - will not show tooltip
-  const selectedFeature = useRef<TypeHoverFeatureInfo>();
 
   // store state
-  const hoverDataArray = useDetailsStoreHoverDataArray();
-
-  /**
-   * Handles when the pointer moves on the map
-   * @param {MapViewer} sender - The MapViewer raising the event
-   * @param {MapPointerMoveEvent} event - The pointer move event
-   */
-  const handleMapPointerMove = (sender: MapViewer, event: MapPointerMoveEvent): void => {
-    setShowTooltip(false);
-    setTooltipValue('');
-    setPixel(event.pixel as [number, number]);
-  };
+  const hoverFeatureInfo = useMapHoverFeatureInfo();
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('HOVER-TOOLTIP - hoverDataArray', hoverDataArray);
+    logger.logTraceUseEffect('HOVER-TOOLTIP - hoverFeatureInfo', hoverFeatureInfo);
 
-    // eslint-disable-next-line no-restricted-syntax
-    for (const data of hoverDataArray) {
-      // if there is a result and layer is not ogcWms, and it is not selected, show tooltip
-      if (
-        data?.feature &&
-        data.feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS &&
-        !(selectedFeature.current && getUid(data.feature.geometry) === getUid(selectedFeature.current?.geometry))
-      ) {
-        const item = data.feature;
-        const nameField = item.nameField || Object.entries(item.fieldInfo)[0];
-        const field = item.fieldInfo[nameField as string];
-        setTooltipValue(field?.value as string | '');
-        setTooltipIcon(item.featureIcon.toDataURL());
-        setShowTooltip(true);
-        break;
-      }
+    if (hoverFeatureInfo !== undefined) {
+      setTooltipValue(hoverFeatureInfo!.fieldInfo?.value as string | '');
+      setTooltipIcon(hoverFeatureInfo!.featureIcon.toDataURL());
+      setShowTooltip(true);
     }
-  }, [hoverDataArray]);
+  }, [hoverFeatureInfo]);
 
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('HOVER-TOOLTIP - mount');
 
-    // Register a map pointer move
-    api.maps[mapId].onMapPointerMove(handleMapPointerMove);
+    // if pointer position changed, reset tooltip
+    const unsubPointerPosition = getGeoViewStore(mapId).subscribe(
+      (state) => state.mapState.pointerPosition,
+      (curPos, prevPos) => {
+        // Log - commented, too anoying
+        // logger.logTraceCoreStoreSubscription('HOVER-TOOLTIP - pointer position', curPos);
+
+        setPixel(curPos!.pixel as [number, number]);
+        if (curPos !== prevPos) {
+          setTooltipValue('');
+          setTooltipIcon('');
+          setShowTooltip(false);
+        }
+      }
+    );
 
     return () => {
-      // Unregister the map pointer move
-      api.maps[mapId].offMapPointerMove(handleMapPointerMove);
+      unsubPointerPosition();
     };
   }, [mapId]);
 

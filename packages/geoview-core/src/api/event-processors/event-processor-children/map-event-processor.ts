@@ -29,6 +29,7 @@ import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeClickMarker } from '@/core/components';
 import { TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores';
 import { TypeBasemapOptions, TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
+import { TypeHoverFeatureInfo } from '@/geo/utils/hover-feature-info-layer-set';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.
@@ -442,6 +443,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static setMapLayerHoverable(mapId: string, layerPath: string, hoverable: boolean): void {
     this.getMapStateProtected(mapId).setterActions.setHoverable(layerPath, hoverable);
+  }
+
+  static setMapHoverFeatureInfo(mapId: string, hoverFeatureInfo: TypeHoverFeatureInfo): void {
+    this.getMapStateProtected(mapId).setterActions.setHoverFeatureInfo(hoverFeatureInfo);
   }
 
   static setMapOrderedLayerInfo(mapId: string, orderedLayerInfo: TypeOrderedLayerInfo[]): void {

@@ -17,6 +17,7 @@ import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { TypeBasemapOptions } from '@/geo/layer/basemap/basemap-types';
+import { TypeHoverFeatureInfo } from '@/geo/utils/hover-feature-info-layer-set';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with MapEventProcessor vs MapState
 
@@ -30,6 +31,7 @@ export interface IMapState {
   fixNorth: boolean;
   highlightColor?: TypeHighlightColors;
   highlightedFeatures: TypeFeatureInfoEntry[];
+  hoverFeatureInfo: TypeHoverFeatureInfo | undefined | null;
   interaction: TypeInteraction;
   mapElement?: OLMap;
   mapExtent: Extent | undefined;
@@ -106,6 +108,7 @@ export interface IMapState {
     setHoverable: (layerPath: string, hoverable: boolean) => void;
     setQueryable: (layerPath: string, queryable: boolean) => void;
     setClickMarker: (coord: number[] | undefined) => void;
+    setHoverFeatureInfo: (hoverFeatureInfo: TypeHoverFeatureInfo) => void;
   };
 }
 
@@ -124,6 +127,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     currentProjection: 3857 as TypeValidMapProjectionCodes,
     fixNorth: false,
     highlightedFeatures: [],
+    hoverFeatureInfo: undefined,
     interaction: 'static',
     mapExtent: undefined,
     mapLoaded: false,
@@ -406,7 +410,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
     setterActions: {
       // #region SETTER ACTIONS
-
       /**
        * Sets the map size and scale.
        * @param {[number, number]} size - The size of the map.
@@ -714,6 +717,14 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         });
       },
 
+      setHoverFeatureInfo(hoverFeatureInfo: TypeHoverFeatureInfo) {
+        set({
+          mapState: {
+            ...get().mapState,
+            hoverFeatureInfo,
+          },
+        });
+      },
       // #endregion SETTER ACTIONS
     },
   } as IMapState;
@@ -752,6 +763,7 @@ export const useMapExtent = () => useStore(useGeoViewStore(), (state) => state.m
 export const useMapFixNorth = () => useStore(useGeoViewStore(), (state) => state.mapState.fixNorth);
 export const useMapInteraction = () => useStore(useGeoViewStore(), (state) => state.mapState.interaction);
 export const useMapHiglightColor = () => useStore(useGeoViewStore(), (state) => state.mapState.highlightColor);
+export const useMapHoverFeatureInfo = () => useStore(useGeoViewStore(), (state) => state.mapState.hoverFeatureInfo);
 export const useMapLoaded = () => useStore(useGeoViewStore(), (state) => state.mapState.mapLoaded);
 export const useMapNorthArrow = () => useStore(useGeoViewStore(), (state) => state.mapState.northArrow);
 export const useMapNorthArrowElement = () => useStore(useGeoViewStore(), (state) => state.mapState.northArrowElement);
