@@ -14,9 +14,9 @@ import Location from './buttons/location';
 import { api } from '@/app';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { Panel, ButtonGroup, IconButton, Box } from '@/ui';
-import { ButtonPanelPayload } from '@/api/events/payloads';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
+import { NavbarApi, NavbarCreatedEvent, NavbarRemovedEvent } from '@/core/components';
 import { helpCloseAll, helpClosePanelById, helpOpenPanelById } from '@/core/components/app-bar/app-bar-helper';
 import { useUIMapInfoExpanded, useUINavbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
@@ -98,15 +98,15 @@ export function Navbar(): JSX.Element {
   );
 
   const handleAddButtonPanel = useCallback(
-    (payload: ButtonPanelPayload) => {
+    (sender: NavbarApi, event: NavbarCreatedEvent) => {
       // Log
-      logger.logTraceUseCallback('NAV-BAR - handleAddButtonPanel', payload);
+      logger.logTraceUseCallback('NAV-BAR - handleAddButtonPanel', event);
 
       setButtonPanelGroups({
         ...buttonPanelGroups,
-        [payload.appBarGroupName]: {
-          ...buttonPanelGroups[payload.appBarGroupName],
-          [payload.appBarId]: payload.buttonPanel as TypeButtonPanel,
+        [event.group]: {
+          ...buttonPanelGroups[event.group],
+          [event.buttonPanelId]: event.buttonPanel,
         },
       });
     },
@@ -114,15 +114,15 @@ export function Navbar(): JSX.Element {
   );
 
   const handleRemoveButtonPanel = useCallback(
-    (payload: ButtonPanelPayload) => {
+    (sender: NavbarApi, event: NavbarRemovedEvent) => {
       // Log
-      logger.logTraceUseCallback('NAV-BAR - handleRemoveButtonPanel', payload);
+      logger.logTraceUseCallback('NAV-BAR - handleRemoveButtonPanel', event);
 
       setButtonPanelGroups((prevState) => {
         const state = { ...prevState };
-        const group = state[payload.appBarGroupName];
+        const group = state[event.group];
 
-        delete group[payload.appBarId];
+        delete group[event.buttonPanelId];
 
         return state;
       });
@@ -134,16 +134,14 @@ export function Navbar(): JSX.Element {
     // Log
     logger.logTraceUseEffect('NAV-BAR - mount', mapId);
 
-    // listen to new nav-bar panel creation
-    api.event.onCreateNavBarPanel(mapId, handleAddButtonPanel);
-
-    // listen to new nav-bar panel removal
-    api.event.onRemoveNavBarPanel(mapId, handleRemoveButtonPanel);
+    // Register navbar created/removed handlers
+    api.maps[mapId].navBarApi.onNavbarCreated(handleAddButtonPanel);
+    api.maps[mapId].navBarApi.onNavbarRemoved(handleRemoveButtonPanel);
 
     return () => {
       // Unregister events
-      api.event.offCreateNavBarPanel(mapId, handleAddButtonPanel);
-      api.event.offRemoveNavBarPanel(mapId, handleRemoveButtonPanel);
+      api.maps[mapId].navBarApi.offNavbarCreated(handleAddButtonPanel);
+      api.maps[mapId].navBarApi.offNavbarRemoved(handleRemoveButtonPanel);
     };
   }, [mapId, handleAddButtonPanel, handleRemoveButtonPanel]);
 
