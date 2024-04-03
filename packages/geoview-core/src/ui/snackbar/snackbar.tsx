@@ -4,7 +4,7 @@ import { Alert as MaterialAlert, AlertProps, Snackbar as MaterialSnackbar } from
 
 import { animated } from '@react-spring/web';
 import { useFadeIn } from '@/core/utils/useSpringAnimations';
-import { SnackbarType } from '@/api/events/payloads/snackbar-message-payload';
+import { SnackbarType } from '@/core/utils/notifications';
 import { logger } from '@/core/utils/logger';
 
 /**

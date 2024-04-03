@@ -13,7 +13,7 @@ import { MapInfo } from '@/core/components/map-info/map-info';
 
 import { api } from '@/app';
 import { Box, CircularProgress, Link, Modal, Snackbar, Button, TypeModalProps } from '@/ui';
-import { MapComponentPayload, ModalPayload, SnackbarMessagePayload, SnackbarType } from '@/api/events/payloads';
+import { MapComponentPayload, ModalPayload } from '@/api/events/payloads';
 import { getShellSxClasses } from './containers-style';
 import { useMapInteraction, useMapLoaded } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useAppCircularProgressActive } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -28,6 +28,7 @@ import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 import { FocusTrapDialog } from './focus-trap';
+import { Notifications, SnackBarOpenDelegate, SnackBarOpenEvent, SnackbarType } from '@/core/utils/notifications';
 
 /**
  * Create a shell component to wrap the map and other components not inside the map
@@ -122,9 +123,9 @@ export function Shell(): JSX.Element {
 
   /**
    * Handles when a SnackBar needs to open
-   * @param {SnackbarMessagePayload} payload The snackbar information to open
+   * @param {SnackBarOpenEvent} payload The snackbar information to open
    */
-  const handleSnackBarOpen = (payload: SnackbarMessagePayload) => {
+  const handleSnackBarOpen: SnackBarOpenDelegate = (sender: Notifications, payload: SnackBarOpenEvent) => {
     // create button
     const myButton = payload.button?.label ? (
       <Button type="icon" onClick={payload.button.action}>
@@ -170,8 +171,8 @@ export function Shell(): JSX.Element {
     // Log
     logger.logTraceUseEffect('SHELL - mount', mapId, geoviewConfig, components);
 
-    // listen to API event when app wants to show message
-    api.event.onSnackbarOpen(mapId, handleSnackBarOpen);
+    // listen to Notifications event when app wants to show message
+    api.maps[mapId].notifications.onSnackbarOpen(handleSnackBarOpen);
 
     // to close the modal
     api.event.onModalClose(mapId, handleModalClose);
@@ -194,7 +195,7 @@ export function Shell(): JSX.Element {
       api.event.offRemoveComponent(mapId, handleMapRemoveComponent);
       api.event.offModalOpen(mapId, handleModalOpen);
       api.event.offModalClose(mapId, handleModalClose);
-      api.event.offSnackbarOpen(mapId, handleSnackBarOpen);
+      api.maps[mapId].notifications.offSnackbarOpen(handleSnackBarOpen);
     };
   }, [components, mapId, geoviewConfig, updateShell, handleMapRemoveComponent, handleModalOpen, handleMapReload]);
 

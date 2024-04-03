@@ -14,11 +14,6 @@ import {
   payloadIsAFooterBar,
   inKeyfocusPayload,
   payloadIsAInKeyfocus,
-  payloadIsASnackbarMessage,
-  snackbarMessagePayload,
-  SnackbarType,
-  SnackbarMessagePayload,
-  ISnackbarButton,
   ModalPayload,
   modalPayload,
   payloadIsAModal,
@@ -301,23 +296,6 @@ export class Event {
   };
 
   // #endregion
-
-  // #region EVENT_SNACKBAR_OPEN --------------------------------------------------------------------------------------
-
-  emitSnackbarOpen = (mapId: string, type: SnackbarType, message: string, button?: ISnackbarButton) => {
-    // Emit
-    this.emit(snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, type, message, button));
-  };
-
-  onSnackbarOpen = (mapId: string, callback: (snackbarPayload: SnackbarMessagePayload) => void) => {
-    // Register the event callback
-    this.onMapHelperHandler(mapId, EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, payloadIsASnackbarMessage, callback);
-  };
-
-  offSnackbarOpen = (mapId: string, callback: (snackbarPayload: SnackbarMessagePayload) => void) => {
-    // Unregister the event callback
-    this.off(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, callback as TypeEventHandlerFunction);
-  };
 
   // #endregion
 

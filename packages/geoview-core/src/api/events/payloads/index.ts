@@ -6,4 +6,3 @@ export * from './map-config-payload';
 export * from './modal-payload';
 export * from './payload-base-class';
 export * from './slider-payload';
-export * from './snackbar-message-payload';
