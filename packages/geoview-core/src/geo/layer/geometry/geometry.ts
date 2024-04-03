@@ -183,7 +183,7 @@ export class GeometryApi {
 
     const featureId = generateId(optionalFeatureId);
 
-    // create a line geometry
+    // create a polygon geometry
     const polygon = new Feature({
       geometry: new Polygon(points, polygonOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
@@ -255,15 +255,18 @@ export class GeometryApi {
 
     const featureId = generateId(optionalFeatureId);
 
-    // get radius, if not define, set default
+    const projectedCoordinates = api.utilities.projection.transform(
+      coordinate,
+      `EPSG:${options?.projection || 4326}`,
+      api.utilities.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
+    );
+
+    // get radius, if not defined, set default
     const radius = circleOptions.style !== undefined ? circleOptions.style.radius || 1 : 1;
 
-    // create a line geometry
+    // create a circle geometry
     const circle = new Feature({
-      geometry: new Circle(coordinate, radius, circleOptions.geometryLayout).transform(
-        `EPSG:${options?.projection || 4326}`,
-        api.utilities.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
-      ),
+      geometry: new Circle(projectedCoordinates, radius * 10000, circleOptions.geometryLayout),
     });
 
     // if style is provided then set override the vector layer style for this feature
