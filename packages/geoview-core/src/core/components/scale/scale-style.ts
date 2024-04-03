@@ -42,8 +42,8 @@ export const getSxClasses = (theme: Theme) => ({
 
     '&.interaction-static': {
       fontSize: theme.palette.geoViewFontSize.md,
-      fontWeight: 'bold'
-    }
+      fontWeight: 'bold',
+    },
   },
   scaleCheckmark: {
     paddingRight: 5,

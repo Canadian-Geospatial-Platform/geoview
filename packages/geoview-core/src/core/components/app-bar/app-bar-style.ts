@@ -85,7 +85,7 @@ export const getSxClasses = (theme: Theme) => ({
       paddingRight: 5,
       borderTop: `3px solid ${theme.palette.geoViewColor.primary.darken(0, 0.5)}`,
       borderRight: `3px solid ${theme.palette.geoViewColor.primary.darken(0, 0.5)}`,
-    }
+    },
   },
   appBarPanels: {},
 });
