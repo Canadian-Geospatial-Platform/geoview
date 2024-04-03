@@ -35,13 +35,17 @@ export class Projection {
    */
   projections: Record<string, olProjection> = {};
 
+  projectionNames;
+
   /**
    * initialize projections
    */
   constructor() {
-    this.initCRS84Projection();
-    this.initWMProjection();
-    this.initLCCProjection();
+    this.#initCRS84Projection();
+    this.#initWMProjection();
+    this.#initLCCProjection();
+
+    this.projectionNames = PROJECTION_NAMES;
 
     proj4.defs('EPSG:4617', '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs');
     register(proj4);
@@ -51,7 +55,7 @@ export class Projection {
   /**
    * Initialize WM Projection
    */
-  private initCRS84Projection() {
+  #initCRS84Projection() {
     const newDefinition = proj4.defs('EPSG:4326');
     newDefinition.axis = 'neu';
     proj4.defs('http://www.opengis.net/def/crs/OGC/1.3/CRS84', newDefinition);
@@ -63,7 +67,7 @@ export class Projection {
   /**
    * Initialize WM Projection
    */
-  private initWMProjection() {
+  #initWMProjection() {
     const projection = olGetProjection('EPSG:3857');
 
     if (projection) this.projections['3857'] = projection;
@@ -72,7 +76,7 @@ export class Projection {
   /**
    * initialize LCC projection
    */
-  private initLCCProjection() {
+  #initLCCProjection() {
     // define 3978 projection
     proj4.defs(
       'EPSG:3978',

@@ -12,7 +12,7 @@ import { Cast, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '@/co
 import { UUIDmapConfigReader } from './uuid-config-reader';
 import { ConfigValidation } from '@/core/utils/config/config-validation';
 import { logger } from '@/core/utils/logger';
-import { getLocalizedMessage, replaceParams, showError } from '@/core/utils/utilities';
+import { api } from '@/app';
 
 /**
  * A class to process GeoView map features configuration from a URL.
@@ -140,8 +140,8 @@ export class URLmapConfigReader {
         } catch (error) {
           // Log
           logger.logError('Failed to get the GeoView layers from url keys', urlParams.keys, error);
-          const message = replaceParams([error as TypeJsonValue, mapId], getLocalizedMessage(mapId, 'validation.layer.loadfailed'));
-          showError(mapId, message);
+          // TODO: config should not push message to map... only to console and as return value.. map will be responsible to throw notification
+          api.maps[mapId].notifications.showError('validation.layer.loadfailed', [error as TypeJsonValue, mapId]);
         }
       }
 

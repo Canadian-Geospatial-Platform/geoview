@@ -1,8 +1,8 @@
 import { useTheme } from '@mui/material/styles';
 import { TypeWindow } from 'geoview-core/src/core/types/global-types';
-import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
 import { TypeTimeSliderValues, useMapVisibleLayers, useTimeSliderLayers } from 'geoview-core/src/core/stores';
+import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { Box, Paper, Typography } from 'geoview-core/src/ui';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
@@ -25,7 +25,7 @@ interface TypeTimeSliderProps {
 export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const { mapId, configObj } = props;
   const { cgpv } = window as TypeWindow;
-  const { react } = cgpv;
+  const { api, react } = cgpv;
   const { useState, useCallback, useMemo, useEffect } = react;
 
   const theme = useTheme();
@@ -37,6 +37,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   // get values from store
   const visibleLayers = useMapVisibleLayers() as string[];
   const timeSliderLayers = useTimeSliderLayers();
+  const displayLanguage = useAppDisplayLanguage();
 
   /**
    * handle Layer list when clicked on each layer.
@@ -118,10 +119,10 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       {!selectedLayerPath && (
         <Paper sx={{ padding: '2rem' }}>
           <Typography variant="h3" gutterBottom sx={sxClasses.timeSliderInstructionsTitle}>
-            {getLocalizedMessage(mapId, 'timeSlider.instructions')}
+            {api.utilities.core.getLocalizedMessage('timeSlider.instructions', displayLanguage)}
           </Typography>
           <Typography component="p" sx={sxClasses.timeSliderInstructionsBody}>
-            {getLocalizedMessage(mapId, 'timeSlider.instructions')}
+            {api.utilities.core.getLocalizedMessage('timeSlider.instructions', displayLanguage)}
           </Typography>
         </Paper>
       )}

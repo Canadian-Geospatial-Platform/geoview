@@ -4,7 +4,8 @@ import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Image as ImageLayer } from 'ol/layer';
 import { Extent } from 'ol/extent';
 
-import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
+import { getLocalizedValue } from '@/core/utils/utilities';
+import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeJsonObject } from '@/core/types/global-types';
@@ -32,6 +33,7 @@ import {
   commonProcessLayerMetadata,
   commonProcessTemporalDimension,
 } from '@/geo/layer/geoview-layers/esri-layer-common';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
@@ -131,7 +133,10 @@ export class EsriImage extends AbstractGeoViewRaster {
     try {
       const layerConfig = this.getLayerConfig(layerPath) as EsriImageLayerEntryConfig | undefined | null;
       if (!layerConfig) return null;
-      const legendUrl = `${getLocalizedValue(layerConfig.geoviewLayerConfig.metadataAccessPath, this.mapId)}/legend?f=pjson`;
+      const legendUrl = `${getLocalizedValue(
+        layerConfig.geoviewLayerConfig.metadataAccessPath,
+        AppEventProcessor.getDisplayLanguage(this.mapId)
+      )}/legend?f=pjson`;
       const response = await fetch(legendUrl);
       const legendJson: TypeEsriImageLayerLegend = await response.json();
       let legendInfo;
@@ -295,7 +300,7 @@ export class EsriImage extends AbstractGeoViewRaster {
     super.processOneLayerEntry(layerConfig);
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
-    sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, this.mapId);
+    sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
     sourceOptions.params = { LAYERS: `show:${layerConfig.layerId}` };
     if (layerConfig.source.transparent) Object.defineProperty(sourceOptions.params, 'transparent', layerConfig.source.transparent!);
     if (layerConfig.source.format) Object.defineProperty(sourceOptions.params, 'format', layerConfig.source.format!);
@@ -367,7 +372,7 @@ export class EsriImage extends AbstractGeoViewRaster {
         searchDateEntry.forEach((dateFound) => {
           // If the date has a time zone, keep it as is, otherwise reverse its time zone by changing its sign
           const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
-          const reformattedDate = api.dateUtilities.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
+          const reformattedDate = api.utilities.date.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
           filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index! - 6)}${reformattedDate}${filterValueToUse!.slice(
             dateFound.index! + dateFound[0].length + 2
           )}`;
@@ -401,7 +406,7 @@ export class EsriImage extends AbstractGeoViewRaster {
     if (layerBounds) {
       let transformedBounds = layerBounds;
       if (this.metadata?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.mapId).currentProjection) {
-        transformedBounds = api.projection.transformExtent(
+        transformedBounds = api.utilities.projection.transformExtent(
           layerBounds,
           `EPSG:${projection}`,
           `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`

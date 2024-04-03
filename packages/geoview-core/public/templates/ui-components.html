@@ -135,7 +135,7 @@
              * RANGE SLIDER UI SECTION START
              */
             // add a slider component and link it to a map with mapId props
-            cgpv.api.utilities.addUiComponent(
+            cgpv.api.utilities.core.addUiComponent(
               'UI1-rangeslider1',
               cgpv.react.createElement(cgpv.ui.elements.Slider, {
                 mapId: 'UI1',
@@ -167,20 +167,18 @@
              */
             // set min max
             function setSliderMinMax() {
-              cgpv.api.event.emit(
-                cgpv.types.sliderPayload(cgpv.api.eventNames.SLIDER.EVENT_SLIDER_SET_MINMAX, 'UI1-slider1', { min: 2, max: 16 })
-              );
+              cgpv.api.event.emit({ event: 'slider/set_min_max', handlerName: 'UI1-slider1', sliderValues: { min: 2, max: 16 }})
             }
             document.getElementById('sliderminmax').addEventListener('click', setSliderMinMax, false);
 
             // set values
             function setSliderValues() {
-              cgpv.api.event.emit(cgpv.types.sliderPayload(cgpv.api.eventNames.SLIDER.EVENT_SLIDER_SET_VALUES, 'UI1-slider1', { value: 8 }));
+              cgpv.api.event.emit({ event: 'slider/set_values', handlerName: 'UI1-slider1', sliderValues: { min: 2, max: 16, value: 8 }})
             }
             document.getElementById('slidervalues').addEventListener('click', setSliderValues, false);
 
             // add a slider component and link it to a map with mapId props
-            cgpv.api.utilities.addUiComponent(
+            cgpv.api.utilities.core.addUiComponent(
               'UI1-slider1',
               cgpv.react.createElement(cgpv.ui.elements.Slider, {
                 mapId: 'UI1',
@@ -219,7 +217,7 @@
             );
 
             // add a slider component and DO NOT link it to a map
-            cgpv.api.utilities.addUiComponent(
+            cgpv.api.utilities.core.addUiComponent(
               'UI1-slider2',
               cgpv.react.createElement(cgpv.ui.elements.Slider, {
                 id: 'UI1-slider2',

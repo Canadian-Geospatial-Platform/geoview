@@ -30,8 +30,10 @@ import {
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
   CONST_LAYER_ENTRY_TYPES,
+  TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
-import { getLocalizedValue, getMinOrMaxExtents, xmlToJson, showError, replaceParams, getLocalizedMessage } from '@/core/utils/utilities';
+import { xmlToJson, getLocalizedValue } from '@/core/utils/utilities';
+import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
@@ -39,6 +41,7 @@ import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/r
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
@@ -112,7 +115,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected async fetchServiceMetadata(): Promise<void> {
-    const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+    const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
     if (metadataUrl) {
       const metadataAccessPathIsXmlFile = metadataUrl.slice(-4).toLowerCase() === '.xml';
       if (metadataAccessPathIsXmlFile) {
@@ -492,7 +495,10 @@ export class WMS extends AbstractGeoViewRaster {
     if (geoviewEntryIsWMS(layerConfig)) {
       const layerCapabilities = this.getLayerMetadataEntry(layerConfig.layerId);
       if (layerCapabilities) {
-        const dataAccessPath = getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId)!;
+        const dataAccessPath = getLocalizedValue(
+          layerConfig.source.dataAccessPath as TypeLocalizedString,
+          AppEventProcessor.getDisplayLanguage(this.mapId)
+        )!;
 
         let styleToUse = '';
         if (Array.isArray(layerConfig.source?.style) && layerConfig.source?.style) {
@@ -549,11 +555,8 @@ export class WMS extends AbstractGeoViewRaster {
         return Promise.resolve(layerConfig.olLayer);
       }
 
-      const message = replaceParams(
-        [layerConfig.layerId, this.geoviewLayerId],
-        getLocalizedMessage(this.mapId, 'validation.layer.notfound')
-      );
-      showError(this.mapId, message);
+      // TODO: find a more centralized way to trap error and display message
+      api.maps[this.mapId].notifications.showError('validation.layer.notfound', [layerConfig.layerId, this.geoviewLayerId]);
       return Promise.resolve(null);
     }
 
@@ -581,7 +584,7 @@ export class WMS extends AbstractGeoViewRaster {
         // if (layerConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
         //   layerConfig.initialSettings.maxZoom = layerCapabilities.MaxScaleDenominator as number;
         if (layerConfig.initialSettings?.extent)
-          layerConfig.initialSettings.extent = api.projection.transformExtent(
+          layerConfig.initialSettings.extent = api.utilities.projection.transformExtent(
             layerConfig.initialSettings.extent,
             'EPSG:4326',
             `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
@@ -609,7 +612,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected processTemporalDimension(wmsTimeDimension: TypeJsonObject, layerConfig: OgcWmsLayerEntryConfig) {
     if (wmsTimeDimension !== undefined) {
-      this.layerTemporalDimension[layerConfig.layerPath] = api.dateUtilities.createDimensionFromOGC(wmsTimeDimension);
+      this.layerTemporalDimension[layerConfig.layerPath] = api.utilities.date.createDimensionFromOGC(wmsTimeDimension);
     }
   }
 
@@ -635,7 +638,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The promised feature info table.
    */
   protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const convertedLocation = api.projection.transform(
+    const convertedLocation = api.utilities.projection.transform(
       location,
       `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`,
       'EPSG:4326'
@@ -659,7 +662,7 @@ export class WMS extends AbstractGeoViewRaster {
 
       const viewResolution = api.maps[this.mapId].getView().getResolution() as number;
       const crs = `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`;
-      const clickCoordinate = api.projection.transform(lnglat, 'EPSG:4326', crs);
+      const clickCoordinate = api.utilities.projection.transform(lnglat, 'EPSG:4326', crs);
       if (
         lnglat[0] < layerConfig.initialSettings!.bounds![0] ||
         layerConfig.initialSettings!.bounds![2] < lnglat[0] ||
@@ -781,7 +784,7 @@ export class WMS extends AbstractGeoViewRaster {
       else if (Object.keys(this.metadata!.Capability.Request).includes('GetLegendGraphic'))
         queryUrl = `${getLocalizedValue(
           this.metadataAccessPath,
-          this.mapId
+          AppEventProcessor.getDisplayLanguage(this.mapId)
         )!}service=WMS&version=1.3.0&request=GetLegendGraphic&FORMAT=image/png&layer=${layerConfig.layerId}`;
 
       if (queryUrl) {
@@ -927,9 +930,15 @@ export class WMS extends AbstractGeoViewRaster {
     clickCoordinate: Coordinate
   ): TypeFeatureInfoEntry[] {
     const featureInfo = layerConfig?.source?.featureInfo;
-    const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
+    const outfields = getLocalizedValue(
+      featureInfo?.outfields as TypeLocalizedString,
+      AppEventProcessor.getDisplayLanguage(this.mapId)
+    )?.split(',');
     const fieldTypes = featureInfo?.fieldTypes?.split(',');
-    const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
+    const aliasFields = getLocalizedValue(
+      featureInfo?.aliasFields as TypeLocalizedString,
+      AppEventProcessor.getDisplayLanguage(this.mapId)
+    )?.split(',');
     const queryResult: TypeFeatureInfoEntry[] = [];
 
     let featureKeyCounter = 0;
@@ -1047,7 +1056,7 @@ export class WMS extends AbstractGeoViewRaster {
         searchDateEntry.forEach((dateFound) => {
           // If the date has a time zone, keep it as is, otherwise reverse its time zone by changing its sign
           const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
-          const reformattedDate = api.dateUtilities.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
+          const reformattedDate = api.utilities.date.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
           filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index! - 6)}${reformattedDate}${filterValueToUse!.slice(
             dateFound.index! + dateFound[0].length + 2
           )}`;
@@ -1072,7 +1081,7 @@ export class WMS extends AbstractGeoViewRaster {
       (layerConfig?.olLayer as ImageLayer<Static>)?.getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
       MapEventProcessor.getMapState(this.mapId).currentProjection;
     let layerBounds = layerConfig?.initialSettings?.bounds || [];
-    layerBounds = api.projection.transformExtent(layerBounds, 'EPSG:4326', `EPSG:${projection}`);
+    layerBounds = api.utilities.projection.transformExtent(layerBounds, 'EPSG:4326', `EPSG:${projection}`);
     const boundingBoxes = this.metadata?.Capability.Layer.BoundingBox;
     let bbExtent: Extent | undefined;
 

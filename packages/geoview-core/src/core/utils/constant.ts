@@ -37,6 +37,8 @@ export const LAYER_STATUS = {
   ERROR: 'error',
 } as const;
 
+export const VECTOR_LAYER = { csv: '', esriFeature: '', GeoJSON: '', GeoPackage: '', ogcFeature: '', ogcWfs: '' };
+
 export const ARROW_KEY_CODES: string[] = ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLefts'];
 export const ARROW_KEYS_WITH_SPACE: string[] = [...ARROW_KEY_CODES, 'Space'];
 

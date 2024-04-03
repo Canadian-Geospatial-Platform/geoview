@@ -9,15 +9,7 @@ import { Extent } from 'ol/extent';
 import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
 import Feature from 'ol/Feature';
 
-import {
-  generateId,
-  getLocalizedValue,
-  getXMLHttpRequest,
-  showError,
-  replaceParams,
-  getLocalizedMessage,
-  createLocalizedString,
-} from '@/core/utils/utilities';
+import { generateId, getXMLHttpRequest, createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { LayerApi } from '@/geo/layer/layer';
 import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
@@ -42,6 +34,7 @@ import {
   CONST_LAYER_ENTRY_TYPES,
 } from '@/geo/map/map-schema-types';
 import { QueryType, TypeFeatureInfoEntry, TypeLocation, codedValueType, rangeDomainType } from '@/geo/utils/layer-set';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 // Constant used to define the default layer names
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
@@ -155,9 +148,9 @@ export abstract class AbstractGeoViewLayer {
     if (mapLayerConfig.metadataAccessPath?.fr) this.metadataAccessPath.fr = mapLayerConfig.metadataAccessPath.fr.trim();
     this.initialSettings = mapLayerConfig.initialSettings;
     this.serverDateFragmentsOrder = mapLayerConfig.serviceDateFormat
-      ? api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.serviceDateFormat)
+      ? api.utilities.date.getDateFragmentsOrder(mapLayerConfig.serviceDateFormat)
       : undefined;
-    this.externalFragmentsOrder = api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.externalDateFormat);
+    this.externalFragmentsOrder = api.utilities.date.getDateFragmentsOrder(mapLayerConfig.externalDateFormat);
     this.setListOfLayerEntryConfig(mapLayerConfig, mapLayerConfig.listOfLayerEntryConfig);
   }
 
@@ -377,8 +370,8 @@ export abstract class AbstractGeoViewLayer {
         logger.logError(error);
       }
     } else {
-      const message = replaceParams([this.mapId], getLocalizedMessage(this.mapId, 'validation.layer.createtwice'));
-      showError(this.mapId, message);
+      // TODO: find a more centralized way to trap error and display message
+      api.maps[this.mapId].notifications.showError('validation.layer.createtwice', [this.mapId]);
       // Log
       logger.logError(`Can not execute twice the createGeoViewLayers method for the map ${this.mapId}`);
     }
@@ -417,7 +410,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected async fetchServiceMetadata(): Promise<void> {
-    const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+    const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
     if (metadataUrl) {
       try {
         const metadataString = await getXMLHttpRequest(`${metadataUrl}?f=json`);
@@ -929,7 +922,7 @@ export abstract class AbstractGeoViewLayer {
     if (layerConfig) {
       if (Array.isArray(layerConfig)) processGroupLayerBounds(layerConfig);
       else processGroupLayerBounds([layerConfig]);
-      if (projectionCode && bounds) return api.projection.transformExtent(bounds, `EPSG:4326`, `EPSG:${projectionCode}`);
+      if (projectionCode && bounds) return api.utilities.projection.transformExtent(bounds, `EPSG:4326`, `EPSG:${projectionCode}`);
     }
     return bounds;
   }
@@ -1156,15 +1149,15 @@ export abstract class AbstractGeoViewLayer {
     if (fieldType === 'date') {
       if (typeof fieldValue === 'string') {
         if (!this.serverDateFragmentsOrder)
-          this.serverDateFragmentsOrder = api.dateUtilities.getDateFragmentsOrder(api.dateUtilities.deduceDateFormat(fieldValue));
-        returnValue = api.dateUtilities.applyInputDateFormat(fieldValue, this.serverDateFragmentsOrder);
+          this.serverDateFragmentsOrder = api.utilities.date.getDateFragmentsOrder(api.utilities.date.deduceDateFormat(fieldValue));
+        returnValue = api.utilities.date.applyInputDateFormat(fieldValue, this.serverDateFragmentsOrder);
       } else {
         // All vector dates are kept internally in UTC.
-        returnValue = api.dateUtilities.convertToUTC(`${api.dateUtilities.convertMilisecondsToDate(fieldValue)}Z`);
+        returnValue = api.utilities.date.convertToUTC(`${api.utilities.date.convertMilisecondsToDate(fieldValue)}Z`);
       }
       const reverseTimeZone = true;
       if (this.externalFragmentsOrder)
-        returnValue = api.dateUtilities.applyOutputDateFormat(returnValue, this.externalFragmentsOrder, reverseTimeZone);
+        returnValue = api.utilities.date.applyOutputDateFormat(returnValue, this.externalFragmentsOrder, reverseTimeZone);
       return returnValue;
     }
     return fieldValue;
@@ -1187,8 +1180,14 @@ export abstract class AbstractGeoViewLayer {
 
       const featureInfo = layerConfig?.source?.featureInfo;
       const fieldTypes = featureInfo?.fieldTypes?.split(',') as ('string' | 'number' | 'date')[];
-      const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
-      const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
+      const outfields = getLocalizedValue(
+        featureInfo?.outfields as TypeLocalizedString,
+        AppEventProcessor.getDisplayLanguage(this.mapId)
+      )?.split(',');
+      const aliasFields = getLocalizedValue(
+        featureInfo?.aliasFields as TypeLocalizedString,
+        AppEventProcessor.getDisplayLanguage(this.mapId)
+      )?.split(',');
       const queryResult: TypeFeatureInfoEntry[] = [];
       let featureKeyCounter = 0;
       let fieldKeyCounter = 0;
@@ -1217,7 +1216,11 @@ export abstract class AbstractGeoViewLayer {
             geometry: feature,
             featureIcon: canvas,
             fieldInfo: {},
-            nameField: getLocalizedValue(layerConfig?.source?.featureInfo?.nameField, this.mapId) || null,
+            nameField:
+              getLocalizedValue(
+                layerConfig?.source?.featureInfo?.nameField as TypeLocalizedString,
+                AppEventProcessor.getDisplayLanguage(this.mapId)
+              ) || null,
           };
 
           const featureFields = (feature as Feature).getKeys();

@@ -10,6 +10,7 @@ import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { LayerSet, TypeFieldEntry, TypeGeometry, TypeQueryStatus } from './layer-set';
 import { LayerApi } from '@/geo/layer/layer';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 /**
  * A class containing a set of layers associated with a TypeLayerData object, which will receive the result of a
@@ -63,10 +64,10 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
 
     const layerConfig = this.layerApi.registeredLayers[layerPath];
     this.resultSet[layerPath] = {
-      layerName: getLocalizedValue(layerConfig.layerName, this.mapId) ?? '',
+      layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
       layerStatus: layerConfig.layerStatus!,
       data: {
-        layerName: getLocalizedValue(layerConfig.layerName, this.mapId) ?? '',
+        layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
         layerStatus: layerConfig.layerStatus!,
         eventListenerEnabled: true,
         queryStatus: 'processed',

@@ -4,7 +4,6 @@ import { MAP } from './constants/map-constants';
 import { MODAL } from './constants/modal-constants';
 import { NAVBAR } from './constants/nav-bar-constants';
 import { SLIDER } from './constants/slider-constants';
-import { SNACKBAR } from './constants/snackbar-constants';
 
 /**
  * constant contains event names
@@ -16,7 +15,6 @@ export const EVENT_NAMES = {
   MODAL,
   NAVBAR,
   SLIDER,
-  SNACKBAR,
 };
 
 /**
@@ -39,5 +37,4 @@ export type EventStringId =
   | 'navbar/button_panel_remove'
   | 'slider/on_change_value'
   | 'slider/set_min_max'
-  | 'slider/set_values'
-  | 'snackbar/open';
+  | 'slider/set_values';
