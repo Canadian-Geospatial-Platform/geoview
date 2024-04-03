@@ -73,7 +73,7 @@ export const geoviewLayerIsCSV = (verifyIfGeoViewLayer: AbstractGeoViewLayer): v
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const geoviewEntryIsCSV = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is CsvLayerEntryConfig => {
+export const geoviewEntryIsCSV = (verifyIfGeoViewEntry: ConfigBaseClass): verifyIfGeoViewEntry is CsvLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.CSV;
 };
 

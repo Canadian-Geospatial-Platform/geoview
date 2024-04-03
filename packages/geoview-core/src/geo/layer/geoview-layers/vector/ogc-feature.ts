@@ -75,9 +75,7 @@ export const geoviewLayerIsOgcFeature = (verifyIfGeoViewLayer: AbstractGeoViewLa
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const geoviewEntryIsOgcFeature = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is OgcFeatureLayerEntryConfig => {
+export const geoviewEntryIsOgcFeature = (verifyIfGeoViewEntry: ConfigBaseClass): verifyIfGeoViewEntry is OgcFeatureLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE;
 };
 
@@ -156,36 +154,38 @@ export class OgcFeature extends AbstractGeoViewVector {
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
-      const { layerPath } = layerConfig;
-      if (layerEntryIsGroupLayer(layerConfig)) {
-        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
-        if (!layerConfig.listOfLayerEntryConfig.length) {
+      const castLayerConfig = layerConfig as AbstractBaseLayerEntryConfig;
+      const { layerPath } = castLayerConfig;
+      if (layerEntryIsGroupLayer(castLayerConfig)) {
+        const layerGroupConfig = castLayerConfig as GroupLayerEntryConfig;
+        this.validateListOfLayerEntryConfig(layerGroupConfig.listOfLayerEntryConfig);
+        if (!layerGroupConfig.listOfLayerEntryConfig.length) {
           this.layerLoadError.push({
             layer: layerPath,
             loggerMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          layerConfig.layerStatus = 'error';
+          layerGroupConfig.layerStatus = 'error';
           return;
         }
       }
 
-      layerConfig.layerStatus = 'processing';
+      castLayerConfig.layerStatus = 'processing';
 
       // Note that the code assumes ogc-feature collections does not contains metadata layer group. If you need layer group,
       // you can define them in the configuration section.
       if (Array.isArray(this.metadata!.collections)) {
-        const foundCollection = this.metadata!.collections.find((layerMetadata) => layerMetadata.id === layerConfig.layerId);
+        const foundCollection = this.metadata!.collections.find((layerMetadata) => layerMetadata.id === castLayerConfig.layerId);
         if (!foundCollection) {
           this.layerLoadError.push({
             layer: layerPath,
             loggerMessage: `OGC feature layer not found (mapId:  ${this.mapId}, layerPath: ${layerPath})`,
           });
-          layerConfig.layerStatus = 'error';
+          castLayerConfig.layerStatus = 'error';
           return;
         }
 
         if (foundCollection.description)
-          layerConfig.layerName = {
+          castLayerConfig.layerName = {
             en: foundCollection.description as string,
             fr: foundCollection.description as string,
           };

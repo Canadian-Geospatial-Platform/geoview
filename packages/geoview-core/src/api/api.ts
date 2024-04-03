@@ -21,6 +21,9 @@ import { initMapDivFromFunctionCall } from '@/app';
  * @class API
  */
 export class API {
+  // object used to validate the configurations against the schema.
+  configApi = new ConfigApi();
+
   // event object used to handle triggering events, subscribing to an event etc...
   event: Event;
 

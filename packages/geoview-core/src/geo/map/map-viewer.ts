@@ -568,7 +568,7 @@ export class MapViewer {
           let allGood = true;
           Object.entries(this.layer.registeredLayers).forEach(([layerPath, registeredLayer]) => {
             // If not queryable, don't expect a result set
-            if (!registeredLayer.source?.featureInfo?.queryable) return;
+            if (!(registeredLayer as AbstractBaseLayerEntryConfig).source?.featureInfo?.queryable) return;
 
             const { resultSet } = this.layer.featureInfoLayerSet;
             const layerResultSetReady = Object.keys(resultSet).includes(layerPath);

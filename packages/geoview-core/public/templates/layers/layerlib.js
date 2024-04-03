@@ -4,6 +4,16 @@
 // Many functions name needs the eslint escape no-unused-vars.
 // It is an utilities file for demo purpose. It is the reason why we keep it global...
 // ==========================================================================================================================
+function getMapElement(mapId) {
+  const mapElements = document.getElementsByClassName('geoview-map');
+
+  // loop through map elements
+  for (let i = 0; i < mapElements.length; i += 1) if (mapElements[i].getAttribute('id') === mapId) return mapElements[i];
+
+  return undefined;
+}
+
+// ==========================================================================================================================
 function listenToLegendLayerSetChanges(elementId, handlerName) {
   const mapId = handlerName.split('/')[0];
   cgpv.api.maps[mapId].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {

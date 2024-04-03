@@ -95,11 +95,10 @@ export class LegendsLayerSet extends LayerSet {
    */
   #changeLayerStatusOfParentsRecursive(currentLayerConfig: TypeLayerEntryConfig, currentLayerStatus: TypeLayerStatus): void {
     // If layer has a parent
-    if (currentLayerConfig.parentLayerConfig) {
+    if (parentGroupLayer) {
       // If the current status to set is at least loaded (or error), make the parent loaded
       if (['loaded', 'error'].includes(currentLayerStatus)) {
         // Get the parent config
-        const parentGroupLayer = currentLayerConfig.parentLayerConfig as GroupLayerEntryConfig;
 
         // Update the status on the parent
         parentGroupLayer.layerStatus = 'loaded';
@@ -120,9 +119,12 @@ export class LegendsLayerSet extends LayerSet {
   protected onLayerSetUpdatedProcess(layerPath: string): void {
     if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerPath) === -1) {
       const layerConfig = this.layerApi.registeredLayers[layerPath];
+      const parentLayerConfig = (layerConfig as AbstractBaseLayerEntryConfig).geoviewLayerInstance!.getParentConfig(
+        layerConfig.layerPath
+      ) as TypeLayerEntryConfig;
       if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerPath.split('.')[1]) !== -1) {
         MapEventProcessor.replaceOrderedLayerInfo(this.mapId, layerConfig, layerPath.split('.')[1]);
-      } else if (layerConfig.parentLayerConfig) {
+      } else if (parentLayerConfig) {
         const parentLayerPathArray = layerPath.split('/');
         parentLayerPathArray.pop();
         const parentLayerPath = parentLayerPathArray.join('/');
@@ -131,7 +133,13 @@ export class LegendsLayerSet extends LayerSet {
           layerInfo.layerPath.startsWith(parentLayerPath)
         ).length;
         if (parentLayerIndex !== -1) MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig, parentLayerIndex + numberOfLayers);
-        else MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig.parentLayerConfig!);
+        else
+          MapEventProcessor.addOrderedLayerInfo(
+            this.mapId,
+            (layerConfig as AbstractBaseLayerEntryConfig).geoviewLayerInstance!.getParentConfig(
+              layerConfig.layerPath
+            ) as TypeLayerEntryConfig
+          );
       } else MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig);
     }
 

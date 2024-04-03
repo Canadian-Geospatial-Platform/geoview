@@ -5,7 +5,7 @@ import Feature from 'ol/Feature';
 import RenderFeature from 'ol/render/Feature';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeLayerStatus, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
@@ -169,7 +169,7 @@ export class LayerSet {
    */
   protected queryLayerFeatures(
     data: TypeLayerData | TypeHoverLayerData,
-    layerConfig: TypeLayerEntryConfig,
+    layerConfig: AbstractBaseLayerEntryConfig,
     layerPath: string,
     queryType: QueryType,
     location: TypeLocation
@@ -177,7 +177,7 @@ export class LayerSet {
     // If event listener is enabled, query status isn't in error, and geoview layer instance is defined
     if (data.eventListenerEnabled && data.queryStatus !== 'error' && layerConfig.geoviewLayerInstance) {
       // If source is queryable
-      if (layerConfig?.source?.featureInfo?.queryable) {
+      if ((layerConfig as AbstractBaseLayerEntryConfig)?.source?.featureInfo?.queryable) {
         // Get Feature Info
         return Promise.resolve(layerConfig.geoviewLayerInstance.getFeatureInfo(queryType, layerPath, location));
       }
