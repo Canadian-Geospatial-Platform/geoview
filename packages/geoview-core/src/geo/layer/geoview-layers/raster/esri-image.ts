@@ -23,6 +23,7 @@ import {
   layerEntryIsGroupLayer,
   TypeUniqueValueStyleInfo,
   TypeStyleConfig,
+  TypeSourceImageEsriInitialConfig,
 } from '@/geo/map/map-schema-types';
 
 import {
@@ -96,7 +97,7 @@ export const geoviewLayerIsEsriImage = (verifyIfGeoViewLayer: AbstractGeoViewLay
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const geoviewEntryIsEsriImage = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is EsriImageLayerEntryConfig => {
+export const geoviewEntryIsEsriImage = (verifyIfGeoViewEntry: ConfigBaseClass): verifyIfGeoViewEntry is EsriImageLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_IMAGE;
 };
 
@@ -294,22 +295,23 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  protected processOneLayerEntry(layerConfig: EsriImageLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
+    const layerConfigSource = layerConfig.source as TypeSourceImageEsriInitialConfig;
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
     sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
     sourceOptions.params = { LAYERS: `show:${layerConfig.layerId}` };
-    if (layerConfig.source.transparent) Object.defineProperty(sourceOptions.params, 'transparent', layerConfig.source.transparent!);
-    if (layerConfig.source.format) Object.defineProperty(sourceOptions.params, 'format', layerConfig.source.format!);
-    if (layerConfig.source.crossOrigin) {
-      sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
+    if (layerConfigSource.transparent) Object.defineProperty(sourceOptions.params, 'transparent', layerConfigSource.transparent!);
+    if (layerConfigSource.format) Object.defineProperty(sourceOptions.params, 'format', layerConfigSource.format!);
+    if (layerConfigSource.crossOrigin) {
+      sourceOptions.crossOrigin = layerConfigSource.crossOrigin;
     } else {
       sourceOptions.crossOrigin = 'Anonymous';
     }
-    if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
+    if (layerConfigSource.projection) sourceOptions.projection = `EPSG:${layerConfigSource.projection}`;
 
     const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
       source: new ImageArcGISRest(sourceOptions),

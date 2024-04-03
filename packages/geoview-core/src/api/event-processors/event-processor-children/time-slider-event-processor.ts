@@ -11,6 +11,7 @@ import { api } from '@/app';
 import { TypeFeatureInfoLayerConfig } from '@/geo/map/map-schema-types';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { AppEventProcessor } from './app-event-processor';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 export class TimeSliderEventProcessor extends AbstractEventProcessor {
   /**
@@ -128,7 +129,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * @returns {TimeSliderLayer}
    */
   static getInitialTimeSliderValues(mapId: string, layerPath: string): TimeSliderLayerSet {
-    const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath];
+    const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath] as AbstractBaseLayerEntryConfig;
     const name = getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(mapId)) || layerConfig.layerId;
     const temporalDimensionInfo = api.maps[mapId].layer.geoviewLayer(layerPath).getTemporalDimension(layerPath);
     const { range } = temporalDimensionInfo.range;

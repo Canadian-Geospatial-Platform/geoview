@@ -29,6 +29,7 @@ import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeClickMarker } from '@/core/components';
 import { TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores';
 import { TypeBasemapOptions, TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.
@@ -527,9 +528,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
     layerPathToReplace?: string
   ): void {
     const { orderedLayerInfo } = this.getMapStateProtected(mapId);
-    const layerPath = (geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId
-      ? `${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}/${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}`
-      : (geoviewLayerConfig as TypeLayerEntryConfig).layerPath;
+    const layerPath =
+      'geoviewLayerId' in geoviewLayerConfig
+        ? `${geoviewLayerConfig.geoviewLayerId}/${(geoviewLayerConfig as TypeGeoviewLayerConfig).geoviewLayerId}`
+        : geoviewLayerConfig.layerPath;
     const index = this.getMapIndexFromOrderedLayerInfo(mapId, layerPathToReplace || layerPath);
     const replacedLayers = orderedLayerInfo.filter((layerInfo) => layerInfo.layerPath.startsWith(layerPathToReplace || layerPath));
     const newOrderedLayerInfo = api.maps[mapId].layer.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
@@ -725,8 +727,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static setLayerZIndices = (mapId: string) => {
     const reversedLayers = [...this.getMapStateProtected(mapId).orderedLayerInfo].reverse();
     reversedLayers.forEach((orderedLayerInfo, index) => {
-      if (api.maps[mapId].layer.registeredLayers[orderedLayerInfo.layerPath]?.olLayer)
-        api.maps[mapId].layer.registeredLayers[orderedLayerInfo.layerPath].olLayer?.setZIndex(index + 10);
+      if ((api.maps[mapId].layer.registeredLayers[orderedLayerInfo.layerPath] as AbstractBaseLayerEntryConfig)?.olLayer)
+        (api.maps[mapId].layer.registeredLayers[orderedLayerInfo.layerPath] as AbstractBaseLayerEntryConfig).olLayer?.setZIndex(index + 10);
     });
   };
 

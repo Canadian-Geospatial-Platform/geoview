@@ -41,7 +41,7 @@ export class AllFeatureInfoLayerSet extends LayerSet {
       return false;
 
     const layerConfig = this.layerApi.registeredLayers[layerPath];
-    const queryable = layerConfig?.source?.featureInfo?.queryable;
+    const queryable = (layerConfig as AbstractBaseLayerEntryConfig)?.source?.featureInfo?.queryable;
     return !!queryable;
   }
 
@@ -119,7 +119,7 @@ export class AllFeatureInfoLayerSet extends LayerSet {
     // If valid layer path
     if (this.layerApi.registeredLayers[layerPath] && this.resultSet[layerPath]) {
       const { data } = this.resultSet[layerPath];
-      const layerConfig = this.layerApi.registeredLayers[layerPath];
+      const layerConfig = this.layerApi.registeredLayers[layerPath] as AbstractBaseLayerEntryConfig;
 
       // Query and event types of what we're doing
       const eventType = 'all-features';

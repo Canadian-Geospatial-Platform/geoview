@@ -75,9 +75,7 @@ export const geoviewLayerIsEsriFeature = (verifyIfGeoViewLayer: AbstractGeoViewL
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const geoviewEntryIsEsriFeature = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
-): verifyIfGeoViewEntry is EsriFeatureLayerEntryConfig => {
+export const geoviewEntryIsEsriFeature = (verifyIfGeoViewEntry: ConfigBaseClass): verifyIfGeoViewEntry is EsriFeatureLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE;
 };
 
@@ -127,7 +125,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @returns {boolean} true if an error is detected.
    */
-  esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig, esriIndex: number): boolean {
+  esriChildHasDetectedAnError(layerConfig: ConfigBaseClass, esriIndex: number): boolean {
     if (this.metadata!.layers[esriIndex].type !== 'Feature Layer') {
       this.layerLoadError.push({
         layer: layerConfig.layerPath,
