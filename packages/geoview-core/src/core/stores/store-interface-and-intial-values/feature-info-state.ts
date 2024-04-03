@@ -3,14 +3,12 @@ import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { api } from '@/app';
 import { QueryType, TypeLayerData, TypeFeatureInfoEntry, TypeGeometry } from '@/geo/utils/layer-set';
-import { TypeHoverLayerData } from '@/geo/utils/hover-feature-info-layer-set';
 
 export interface IFeatureInfoState {
   checkedFeatures: Array<TypeFeatureInfoEntry>;
   layerDataArray: TypeLayerData[];
   layerDataArrayBatch: TypeLayerData[];
   layerDataArrayBatchLayerPathBypass: string;
-  hoverDataArray: TypeHoverLayerData[];
   allFeaturesDataArray: TypeLayerData[];
   selectedLayerPath: string;
 
@@ -20,7 +18,6 @@ export interface IFeatureInfoState {
     setLayerDataArray: (layerDataArray: TypeLayerData[]) => void;
     setLayerDataArrayBatch: (layerDataArray: TypeLayerData[]) => void;
     setLayerDataArrayBatchLayerPathBypass: (layerPath: string) => void;
-    setHoverDataArray: (hoverDataArray: TypeHoverLayerData[]) => void;
     setAllFeaturesDataArray: (allFeaturesDataArray: TypeLayerData[]) => void;
     setSelectedLayerPath: (selectedLayerPath: string) => void;
     triggerGetAllFeatureInfo: (layerPath: string, queryType: QueryType) => void;
@@ -33,7 +30,6 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
     layerDataArray: [],
     layerDataArrayBatch: [],
     layerDataArrayBatchLayerPathBypass: '',
-    hoverDataArray: [],
     allFeaturesDataArray: [],
     selectedLayerPath: '',
 
@@ -85,14 +81,6 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
           },
         });
       },
-      setHoverDataArray(hoverDataArray: TypeHoverLayerData[]) {
-        set({
-          detailsState: {
-            ...get().detailsState,
-            hoverDataArray,
-          },
-        });
-      },
       setAllFeaturesDataArray(allFeaturesDataArray: TypeLayerData[]) {
         set({
           detailsState: {
@@ -125,6 +113,5 @@ export const useDetailsStoreLayerDataArray = () => useStore(useGeoViewStore(), (
 export const useDetailsStoreLayerDataArrayBatch = () => useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArrayBatch);
 export const useDetailsStoreSelectedLayerPath = () => useStore(useGeoViewStore(), (state) => state.detailsState.selectedLayerPath);
 export const useDetailsStoreAllFeaturesDataArray = () => useStore(useGeoViewStore(), (state) => state.detailsState.allFeaturesDataArray);
-export const useDetailsStoreHoverDataArray = () => useStore(useGeoViewStore(), (state) => state.detailsState.hoverDataArray);
 
 export const useDetailsStoreActions = () => useStore(useGeoViewStore(), (state) => state.detailsState.actions);

@@ -118,10 +118,6 @@ export abstract class AbstractGeoViewLayer {
   /** Date format object used to translate internal UTC ISO format to the external format, the one used by the user */
   externalFragmentsOrder: TypeDateFragments;
 
-  // LayerPath to use when we want to call a GeoView layer's method using the following syntaxe:
-  // api.maps[mapId].layer.geoviewLayer(layerPath).getVisible()
-  layerPathAssociatedToTheGeoviewLayer = '';
-
   // Keep all callback delegate references
   #onGeoViewLayerRegistrationHandlers: GeoViewLayerRegistrationDelegate[] = [];
 
