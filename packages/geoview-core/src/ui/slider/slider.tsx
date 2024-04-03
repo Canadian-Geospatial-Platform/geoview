@@ -1,12 +1,8 @@
 /* eslint-disable react/require-default-props */
-import { useState, useEffect, CSSProperties, useLayoutEffect } from 'react';
+import { useState, useEffect, useCallback, CSSProperties, useLayoutEffect } from 'react';
 
 import { useTheme } from '@mui/material/styles';
 import { Slider as MaterialSlider, SliderProps } from '@mui/material';
-
-import { api } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { sliderPayload, payloadIsASlider, SliderTypePayload, PayloadBaseClass } from '@/api/events/payloads';
 import { logger } from '@/core/utils/logger';
 
 import { getSxClasses } from './slider-style';
@@ -29,6 +25,10 @@ interface TypeSliderProps extends SliderProps {
   // custom onChange callback
   customOnChange?: (value: number[] | number) => void;
 
+  // callback when slider value changes
+  // TODO: Refactor - Probably good to see what's the intended difference vs customOnChange (which btw should be renamed to onCustomChanged)
+  onSliderValueChanged?: (value: SliderTypeEvent) => void;
+
   // MUI optional props
   disabled?: boolean;
   marks?: Array<{ label?: string; value: number }>;
@@ -49,19 +49,38 @@ interface TypeSliderProps extends SliderProps {
  * @returns {JSX.Element} the created Slider element
  */
 export function Slider(props: TypeSliderProps): JSX.Element {
-  // TODO: Refactor - Remove any coupling to 'api' from inside that ui component
-
-  const { ...properties } = props;
+  const { value: parentValue, min, max, customOnChange, onSliderValueChanged, ...properties } = props;
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
   const containerId = `${properties.mapId}-${properties.sliderId}` || '';
 
   // internal state
-  const [min, setMin] = useState<number>(properties.min);
-  const [max, setMax] = useState<number>(properties.max);
-  const [value, setValue] = useState<number[] | number>(properties.value);
+  const [value, setValue] = useState<number[] | number>(parentValue);
   const [activeThumb, setActiveThumb] = useState<number>(-1);
+
+  // Raises the value changed events
+  const onValueChanged = useCallback(
+    (newValue: number | number[]) => {
+      // Log
+      logger.logTraceUseCallback('UI.SLIDER - onValueChanged', min, max, newValue, activeThumb);
+
+      // run the custon onChange function
+      customOnChange?.(newValue);
+
+      // create the payload
+      const sliderValues: SliderTypeEvent = {
+        min,
+        max,
+        value: newValue,
+        activeThumb,
+      };
+
+      // Callback
+      onSliderValueChanged?.(sliderValues);
+    },
+    [min, max, activeThumb, customOnChange, onSliderValueChanged]
+  );
 
   // handle constant change on the slider to set active thumb and instant values
   const handleChange = (event: React.SyntheticEvent | Event, newValue: number | number[], newActiveThumb: number) => {
@@ -73,59 +92,8 @@ export function Slider(props: TypeSliderProps): JSX.Element {
   const handleChangeCommitted = (event: React.SyntheticEvent | Event, newValue: number | number[]) => {
     setValue(newValue);
 
-    // run the custon onChange function
-    if (properties.customOnChange !== undefined) properties.customOnChange(newValue);
-
-    // create the payload
-    const sliderValues: SliderTypePayload = {
-      min,
-      max,
-      value: newValue,
-      activeThumb,
-    };
-
-    // emit the slider values change event to the api
-    api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, properties.sliderId, sliderValues));
-  };
-
-  const sliderSetMinMaxListenerFunction = (payload: PayloadBaseClass) => {
-    // Log
-    logger.logTraceCoreAPIEvent('UI.SLIDER - sliderSetMinMaxListenerFunction', payload);
-
-    if (payloadIsASlider(payload)) {
-      setMin(payload.sliderValues.min);
-      setMax(payload.sliderValues.max);
-
-      // emit the slider values change event to the api
-      const sliderValues: SliderTypePayload = {
-        min: payload.sliderValues.min,
-        max: payload.sliderValues.max,
-        value,
-        activeThumb,
-      };
-      api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, properties.sliderId, sliderValues));
-    }
-  };
-
-  const sliderSetValuesListenerFunction = (payload: PayloadBaseClass) => {
-    // Log
-    logger.logTraceCoreAPIEvent('UI.SLIDER - sliderSetValuesListenerFunction', payload);
-
-    if (payloadIsASlider(payload)) {
-      setValue(payload.sliderValues.value);
-
-      // run the custon onChange function
-      if (properties.customOnChange !== undefined) properties.customOnChange(payload.sliderValues.value);
-
-      // emit the slider values change event to the api
-      const sliderValues: SliderTypePayload = {
-        min,
-        max,
-        value: payload.sliderValues.value,
-        activeThumb,
-      };
-      api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, properties.sliderId, sliderValues));
-    }
+    // Raise about the change
+    onValueChanged(newValue);
   };
 
   const checkOverlap = (prev: Element | null, curr: Element, next: Element | null, orientation: string | undefined = 'horizontal') => {
@@ -152,7 +120,7 @@ export function Slider(props: TypeSliderProps): JSX.Element {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const removeLabelOverlap = () => {
     // Log
-    logger.logTraceCore('UI.SLIDER - window resize event');
+    logger.logTraceCore('UI.SLIDER - removeLabelOverlap');
 
     // get slider labels
     const markers = containerId
@@ -207,6 +175,14 @@ export function Slider(props: TypeSliderProps): JSX.Element {
     }
   };
 
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('UI.SLIDER - parent value', parentValue);
+
+    // Update it internally when the parent has updated the value
+    setValue(parentValue);
+  }, [parentValue]);
+
   useLayoutEffect(() => {
     // remove overlaping labels
     removeLabelOverlap();
@@ -214,23 +190,6 @@ export function Slider(props: TypeSliderProps): JSX.Element {
     window.addEventListener('resize', () => removeLabelOverlap);
     return () => window.removeEventListener('resize', () => removeLabelOverlap);
   }, [removeLabelOverlap]);
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('UI.SLIDER - minmax', min, max, value);
-
-    // on set min/max, update slider
-    api.event.on(EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_MINMAX, sliderSetMinMaxListenerFunction, properties.id);
-
-    // on set values update slider
-    api.event.on(EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_VALUES, sliderSetValuesListenerFunction, properties.id);
-
-    return () => {
-      api.event.off(EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_MINMAX, properties.id, sliderSetMinMaxListenerFunction);
-      api.event.off(EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_VALUES, properties.id, sliderSetValuesListenerFunction);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [min, max, value]);
 
   // TODO: better implement WCAG on slider
   return (
@@ -259,3 +218,18 @@ export function Slider(props: TypeSliderProps): JSX.Element {
     />
   );
 }
+
+/**
+ * Define an event for the callback
+ */
+export type SliderTypeEvent = {
+  // limits (min max)
+  min: number;
+  max: number;
+
+  // value(s)
+  value: number[] | number;
+
+  // active thumb
+  activeThumb: number;
+};

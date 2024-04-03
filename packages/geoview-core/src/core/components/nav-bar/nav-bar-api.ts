@@ -1,8 +1,7 @@
-import { api } from '@/app';
-
 import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { generateId } from '@/core/utils/utilities';
 
 /**
@@ -11,54 +10,104 @@ import { generateId } from '@/core/utils/utilities';
  * @exports
  * @class
  */
-export class NavbarApi {
-  mapId!: string;
+export class NavBarApi {
+  mapId: string;
 
   // group of array to hold all buttons, button panels created on the nav-bar
   buttons: Record<string, Record<string, TypeButtonPanel>> = {};
 
+  /** Callback handlers for the NavBar created event. */
+  #onNavBarCreatedHandlers: NavBarCreatedDelegate[] = [];
+
+  /** Callback handlers for the NavBar removed event. */
+  #onNavBarRemovedHandlers: NavBarRemovedDelegate[] = [];
+
   /**
-   * Create default buttons, button panels
+   * Instantiates a NavbarApi class.
    *
-   * @param {string} mapId the current map
+   * @param {string} mapId - The map id this NavBarApi belongs to
    */
   constructor(mapId: string) {
     this.mapId = mapId;
 
-    this.createDefaultButtonPanels();
+    this.#createDefaultButtonPanels();
+  }
+
+  /**
+   * Emits an event to all registered NavBar created event handlers.
+   * @param {NavBarCreatedEvent} event - The event to emit.
+   * @private
+   */
+  #emitNavbarCreated(event: NavBarCreatedEvent): void {
+    // Emit the NavBar created event
+    EventHelper.emitEvent(this, this.#onNavBarCreatedHandlers, event);
+  }
+
+  /**
+   * Registers an event handler for NavBar created events.
+   * @param {NavBarCreatedDelegate} callback - The callback to be executed whenever the event is emitted.
+   */
+  onNavbarCreated(callback: NavBarCreatedDelegate): void {
+    // Register the NavBar created event callback
+    EventHelper.onEvent(this.#onNavBarCreatedHandlers, callback);
+  }
+
+  /**
+   * Unregisters an event handler for NavBar created events.
+   * @param {NavBarCreatedDelegate} callback - The callback to stop being called whenever the event is emitted.
+   */
+  offNavbarCreated(callback: NavBarCreatedDelegate): void {
+    // Unregister the NavBar created event callback
+    EventHelper.offEvent(this.#onNavBarCreatedHandlers, callback);
+  }
+
+  /**
+   * Emits an event to all registered NavBar removed event handlers.
+   * @param {NavBarRemovedEvent} event - The event to emit.
+   * @private
+   */
+  #emitNavbarRemoved(event: NavBarRemovedEvent): void {
+    // Emit the NavBar removed event
+    EventHelper.emitEvent(this, this.#onNavBarRemovedHandlers, event);
+  }
+
+  /**
+   * Registers an event handler for NavBar removed events.
+   * @param {NavBarRemovedDelegate} callback - The callback to be executed whenever the event is emitted.
+   */
+  onNavbarRemoved(callback: NavBarRemovedDelegate): void {
+    // Register the NavBar removed event callback
+    EventHelper.onEvent(this.#onNavBarRemovedHandlers, callback);
+  }
+
+  /**
+   * Unregisters an event handler for NavBar removed events.
+   * @param {NavBarRemovedDelegate} callback - The callback to stop being called whenever the event is emitted.
+   */
+  offNavbarRemoved(callback: NavBarRemovedDelegate): void {
+    // Unregister the NavBar removed event callback
+    EventHelper.offEvent(this.#onNavBarRemovedHandlers, callback);
   }
 
   /**
    * Function used to create default buttons, button panels
+   * @private
    */
-  private createDefaultButtonPanels = () => {
+  #createDefaultButtonPanels(): void {
     // create default group for nav-bar buttons
     this.buttons.default = {};
-  };
+  }
 
   /**
-   * Create a group for the nav-bar buttons
+   * Creates either a button or a button panel on the nav-bar
    *
-   * @param {string} groupName a group name to be used to manage the group of nav-bar buttons
+   * @param {TypeIconButtonProps} buttonProps - Button properties
+   * @param {TypePanelProps | undefined} panelProps - Optional panel properties
+   * @param {string} groupName - The group to place the button / panel in
+   * @returns {TypeButtonPanel | null} The created button / button panel
+   * @private
    */
-  createNavbarButtonGroup = (groupName: string): void => {
-    this.buttons[groupName] = {};
-  };
-
-  /**
-   * Create either a button or a button panel on the nav-bar
-   *
-   * @param {TypeButtonProps} buttonProps button properties
-   * @param {TypePanelProps} panelProps panel properties
-   * @param {string} groupName the group to place the button / panel in
-   *
-   * @returns the create button / button panel
-   */
-  private createButtonPanel = (
-    buttonProps: TypeIconButtonProps,
-    panelProps: TypePanelProps | undefined,
-    groupName: string
-  ): TypeButtonPanel | null => {
+  #createButtonPanel(buttonProps: TypeIconButtonProps, panelProps: TypePanelProps | undefined, groupName: string): TypeButtonPanel | null {
     if (buttonProps) {
       // generate an id if not provided
       const buttonPanelId = generateId(buttonProps.id);
@@ -88,46 +137,44 @@ export class NavbarApi {
       if (group !== '__proto__' && buttonPanelId !== '__proto__') this.buttons[group][buttonPanelId] = buttonPanel;
 
       // trigger an event that a new button or button panel has been created to update the state and re-render
-      api.event.emitCreateNavBarPanel(this.mapId, buttonPanelId, group, buttonPanel);
+      this.#emitNavbarCreated({ buttonPanelId, group, buttonPanel });
 
       return buttonPanel;
     }
 
     return null;
-  };
+  }
 
   /**
-   * Create a nav-bar button panel
+   * Creates a nav-bar button panel
    *
-   * @param {TypeButtonProps} buttonProps button properties
-   * @param {TypePanelProps} panelProps panel properties
-   * @param {string} groupName group name to add the button panel to
-   *
-   * @returns the created button panel
+   * @param {TypeIconButtonProps} buttonProps - Button properties
+   * @param {TypePanelProps} panelProps - Panel properties
+   * @param {string} groupName - Group name to add the button panel to
+   * @returns {TypeButtonPanel | null} The created button panel
    */
-  createNavbarButtonPanel = (buttonProps: TypeIconButtonProps, panelProps: TypePanelProps, groupName: string): TypeButtonPanel | null => {
-    return this.createButtonPanel(buttonProps, panelProps, groupName);
-  };
+  createNavbarButtonPanel(buttonProps: TypeIconButtonProps, panelProps: TypePanelProps, groupName: string): TypeButtonPanel | null {
+    return this.#createButtonPanel(buttonProps, panelProps, groupName);
+  }
 
   /**
-   * Create a new nav-bar button that will trigger a callback when clicked
+   * Creates a new nav-bar button that will trigger a callback when clicked
    *
-   * @param {TypeButtonProps} buttonProps button properties
-   * @param {string} groupName group name to add button to
-   *
-   * @returns the create button
+   * @param {TypeButtonProps} buttonProps - Button properties
+   * @param {string} groupName - Group name to add button to
+   * @returns {TypeButtonPanel | null} The created button
    */
-  createNavbarButton = (buttonProps: TypeIconButtonProps, groupName: string): TypeButtonPanel | null => {
-    return this.createButtonPanel(buttonProps, undefined, groupName);
-  };
+  createNavbarButton(buttonProps: TypeIconButtonProps, groupName: string): TypeButtonPanel | null {
+    return this.#createButtonPanel(buttonProps, undefined, groupName);
+  }
 
   /**
-   * Get a button panel from the nav-bar by using it's id
+   * Gets a button panel from the nav-bar by using its id
    *
-   * @param {string} id the id of the button panel to get
-   * @returns {TypeButtonPanel} the returned button panel
+   * @param {string} buttonPanelId - The id of the button panel to get
+   * @returns {TypeButtonPanel | null} The Button panel
    */
-  getNavBarButtonPanelById = (buttonPanelId: string): TypeButtonPanel | null => {
+  getNavBarButtonPanelById(buttonPanelId: string): TypeButtonPanel | null {
     // loop through groups of app-bar button panels
     for (let i = 0; i < Object.keys(this.buttons).length; i++) {
       const group = this.buttons[Object.keys(this.buttons)[i]];
@@ -142,14 +189,14 @@ export class NavbarApi {
     }
 
     return null;
-  };
+  }
 
   /**
-   * Remove a nav-bar button or panel using it's id
+   * Removes a nav-bar button or panel using its id
    *
-   * @param {string} id the id of the panel or button to remove
+   * @param {string} buttonPanelId - The id of the panel or button to remove
    */
-  removeNavbarButtonPanel = (buttonPanelId: string): void => {
+  removeNavbarButtonPanel(buttonPanelId: string): void {
     // loop through groups
     Object.keys(this.buttons).forEach((groupName) => {
       const group = this.buttons[groupName];
@@ -158,7 +205,34 @@ export class NavbarApi {
       delete group[buttonPanelId];
 
       // trigger an event that a button or panel has been removed to update the state and re-render
-      api.event.emitRemoveNavBarPanel(this.mapId, buttonPanelId, groupName, group[buttonPanelId]);
+      this.#emitNavbarRemoved({ buttonPanelId, group: groupName });
     });
-  };
+  }
 }
+
+/**
+ * Define an event for the delegate
+ */
+export type NavBarCreatedEvent = {
+  buttonPanelId: string;
+  group: string;
+  buttonPanel: TypeButtonPanel;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type NavBarCreatedDelegate = EventDelegateBase<NavBarApi, NavBarCreatedEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type NavBarRemovedEvent = {
+  buttonPanelId: string;
+  group: string;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type NavBarRemovedDelegate = EventDelegateBase<NavBarApi, NavBarRemovedEvent>;

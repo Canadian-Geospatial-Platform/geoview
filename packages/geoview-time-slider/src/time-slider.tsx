@@ -3,6 +3,7 @@ import { FormControl, InputLabel, NativeSelect } from '@mui/material';
 import { useTimeSliderLayers, useTimeSliderStoreActions } from 'geoview-core/src/core/stores';
 import { getLocalizedValue } from 'geoview-core/src/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
+import { logger } from 'geoview-core/src/core/utils/logger';
 import { getSxClasses } from './time-slider-style';
 import { ConfigProps } from './time-slider-types';
 
@@ -18,11 +19,11 @@ interface TimeSliderPanelProps {
  * @param {TimeSliderPanelProps} TimeSliderPanelProps time slider panel properties
  * @returns {JSX.Element} the slider panel
  */
-export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
+export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps): JSX.Element {
   const { cgpv } = window;
   const { config, layerPath, mapId } = TimeSliderPanelProps;
   const { api, react, ui } = cgpv;
-  const { useState, useRef, useEffect } = react;
+  const { useState, useRef, useEffect, useCallback } = react;
   const {
     Grid,
     Slider,
@@ -77,6 +78,9 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
 
   // slider config
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('TIME-SLIDER - mount');
+
     // TODO: add mechanism to initialize these values during store onInitialize
     const sliderConfig = config?.sliders?.find((o: { layerPaths: string[] }) => o.layerPaths.includes(layerPath));
     if (title === undefined) setTitle(layerPath, getLocalizedValue(sliderConfig?.title, displayLanguage) || '');
@@ -88,6 +92,9 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
   }, []);
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('TIME-SLIDER - config layerPath', config, layerPath);
+
     const sliderConfig = config?.sliders?.find((o: { layerPaths: string[] }) => o.layerPaths.includes(layerPath));
     if (sliderConfig?.defaultValue) {
       // update values based on slider's default value
@@ -243,6 +250,9 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
 
   // #region USE EFFECT
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('TIME-SLIDER - values filtering', values, filtering);
+
     // If slider cycle is active, pause before advancing to next increment
     if (isPlaying) {
       if (reversed) playIntervalRef.current = window.setTimeout(() => moveBack(), delay);
@@ -253,6 +263,9 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
 
   // When slider cycle is activated, advance to first increment without delay
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('TIME-SLIDER - isPlaying', isPlaying);
+
     if (isPlaying) {
       if (reversed) moveBack();
       else moveForward();
@@ -292,13 +305,6 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
     }
   }
 
-  function handleSliderChange(event: number | number[]): void {
-    clearTimeout(playIntervalRef.current);
-    setIsPlaying(false);
-    sliderDeltaRef.current = undefined;
-    setValues(layerPath, event as number[]);
-  }
-
   function handleTimeChange(event: React.ChangeEvent<HTMLSelectElement>): void {
     setDelay(layerPath, event.target.value as unknown as number);
   }
@@ -324,6 +330,19 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
       : api.utilities.core.getLocalizedMessage('timeSlider.slider.lockLeft', displayLanguage);
     return text;
   }
+
+  const handleSliderChange = useCallback(
+    (event: number | number[]): void => {
+      // Log
+      logger.logTraceUseCallback('TIME-SLIDER - handleSliderChange', layerPath);
+
+      clearTimeout(playIntervalRef.current);
+      setIsPlaying(false);
+      sliderDeltaRef.current = undefined;
+      setValues(layerPath, event as number[]);
+    },
+    [layerPath, setValues]
+  );
 
   return (
     <Grid>
@@ -364,7 +383,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
               valueLabelFormat={(value: number) => valueLabelFormat(value)}
               marks={sliderMarks}
               step={!discreteValues ? null : 0.1}
-              customOnChange={(event: number | number[]) => handleSliderChange(event)}
+              customOnChange={handleSliderChange}
               key={values[1] ? values[1] + values[0] : values[0]}
             />
           </div>

@@ -1,4 +1,3 @@
-import { EVENT_NAMES } from './events/event-types';
 import { Event } from './events/event';
 
 import { Projection } from '@/geo/projection/projection';
@@ -23,10 +22,6 @@ import { initMapDivFromFunctionCall } from '@/app';
 export class API {
   // event object used to handle triggering events, subscribing to an event etc...
   event: Event;
-
-  // TODO: refactor - once we have no more genereic event, we can remove eventNames
-  // available event names
-  eventNames = EVENT_NAMES;
 
   // list of available maps
   maps: Record<string, MapViewer> = {};
