@@ -115,7 +115,7 @@ export class GeometryApi {
     const polyline = new Feature({
       geometry: new LineString(points, polylineOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        api.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
+        api.utilities.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
       ),
     });
 
@@ -187,7 +187,7 @@ export class GeometryApi {
     const polygon = new Feature({
       geometry: new Polygon(points, polygonOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        api.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
+        api.utilities.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
       ),
     });
 
@@ -262,7 +262,7 @@ export class GeometryApi {
     const circle = new Feature({
       geometry: new Circle(coordinate, radius, circleOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        api.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
+        api.utilities.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
       ),
     });
 
@@ -344,7 +344,7 @@ export class GeometryApi {
     const marker = new Feature({
       geometry: new Point(coordinate, markerOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        api.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
+        api.utilities.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
       ),
     });
 

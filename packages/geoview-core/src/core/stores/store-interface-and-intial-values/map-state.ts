@@ -361,7 +361,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
        */
       transformPoints: (coords: Coordinate[], outputProjection: number): Coordinate[] => {
         // Project the points and return the result
-        return api.projection.transformPoints(coords, `EPSG:${get().mapState.currentProjection}`, `EPSG:${outputProjection}`);
+        return api.utilities.projection.transformPoints(coords, `EPSG:${get().mapState.currentProjection}`, `EPSG:${outputProjection}`);
       },
 
       /**

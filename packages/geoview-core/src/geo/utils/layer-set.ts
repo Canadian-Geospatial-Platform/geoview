@@ -12,6 +12,7 @@ import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-b
 
 import { TypeHoverLayerData } from './hover-feature-info-layer-set';
 import { LayerApi } from '@/geo/layer/layer';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 /**
  * A class to hold a set of layers associated with a value of any type.
@@ -70,7 +71,7 @@ export class LayerSet {
 
       if (['processed', 'error'].includes(layerStatus) && !this.resultSet[layerPath].layerName) {
         const layerConfig = this.layerApi.registeredLayers[layerPath];
-        const layerName = getLocalizedValue(layerConfig.layerName, this.mapId);
+        const layerName = getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId));
         if (layerName) this.resultSet[layerPath].layerName = layerName;
         else {
           this.resultSet[layerPath].layerName = getLocalizedValue(
@@ -78,7 +79,7 @@ export class LayerSet {
               en: `Anonymous Layer ${this.anonymousSequenceNumber}`,
               fr: `Couche Anonyme ${this.anonymousSequenceNumber}`,
             },
-            this.mapId
+            AppEventProcessor.getDisplayLanguage(this.mapId)
           );
           this.anonymousSequenceNumber++;
         }
@@ -105,7 +106,7 @@ export class LayerSet {
       this.resultSet[layerPath] = {
         data: undefined,
         layerStatus: 'newInstance',
-        layerName: getLocalizedValue(layerConfig.layerName, this.mapId),
+        layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)),
       };
 
       // Call the registration function for the layer-set. This method is different for each child.

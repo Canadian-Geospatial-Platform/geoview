@@ -32,10 +32,6 @@
       "projectFolder": "packages/geoview-geochart"
     },
     {
-      "packageName": "geoview-layers-panel",
-      "projectFolder": "packages/geoview-layers-panel"
-    },
-    {
       "packageName": "geoview-swiper",
       "projectFolder": "packages/geoview-swiper"
     },

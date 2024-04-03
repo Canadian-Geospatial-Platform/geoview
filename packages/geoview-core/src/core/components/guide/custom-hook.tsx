@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { addNotificationError } from '@/core/utils/utilities';
+import { logger } from '@/core/utils/logger';
 
 export const useFetchAndParseMarkdown = (
   mapId: string,
@@ -43,7 +43,7 @@ export const useFetchAndParseMarkdown = (
 
         setResult(resultObject);
       } catch (error) {
-        addNotificationError(mapId, errorMessage);
+        logger.logError(mapId, errorMessage);
       }
     };
 

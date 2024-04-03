@@ -37,7 +37,7 @@ import { Translate } from '@/geo/interaction/translate';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
-import { addNotificationError, delay, generateId, getLocalizedMessage } from '@/core/utils/utilities';
+import { delay, generateId } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import {
   TypeDisplayLanguage,
@@ -51,10 +51,12 @@ import {
   TypeValidMapProjectionCodes,
   TypeMapMouseInfo,
 } from '@/geo/map/map-schema-types';
+import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 import { TypeMapFeaturesConfig, TypeHTMLElement, TypeJsonObject } from '@/core/types/global-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
+import { Notifications } from '@/core/utils/notifications';
 
 interface TypeDocument extends Document {
   webkitExitFullscreen: () => void;
@@ -101,6 +103,9 @@ export class MapViewer {
 
   // used to access basemap functions
   basemap: Basemap;
+
+  // used to attach the notification class
+  notifications: Notifications;
 
   // used to access layers functions
   // Note: The '!' is used here, because it's being created just a bit late, but not late enough that we want to keep checking for undefined throughout the code base
@@ -199,6 +204,7 @@ export class MapViewer {
     this.appBarApi = new AppbarApi(this.mapId);
     this.navBarApi = new NavbarApi(this.mapId);
     this.footerBarApi = new FooterBarApi(this.mapId);
+    this.notifications = new Notifications(this.mapId);
 
     this.modal = new ModalApi(this.mapId);
     this.modal.onModalOpened((sender, modalEvent) => api.event.emitModalOpen(this.mapId, modalEvent.modalId));
@@ -266,15 +272,15 @@ export class MapViewer {
     const pointerPosition = {
       projected: centerCoordinates,
       pixel: this.map.getPixelFromCoordinate(centerCoordinates),
-      lnglat: api.projection.transformPoints([centerCoordinates], projCode, `EPSG:4326`)[0],
+      lnglat: api.utilities.projection.transformPoints([centerCoordinates], projCode, `EPSG:4326`)[0],
       dragging: false,
     };
 
     // Get the degree rotation
-    const degreeRotation = api.geoUtilities.getNorthArrowAngle(this.map);
+    const degreeRotation = this.getNorthArrowAngle();
 
     // Get the north visibility
-    const isNorthVisible = api.geoUtilities.checkNorth(this.map);
+    const isNorthVisible = this.checkNorth();
 
     // Get the scale information
     const scale = await MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
@@ -299,7 +305,7 @@ export class MapViewer {
     const pointerPosition = {
       projected: (event as MapBrowserEvent<UIEvent>).coordinate,
       pixel: (event as MapBrowserEvent<UIEvent>).pixel,
-      lnglat: api.projection.transformPoints([(event as MapBrowserEvent<UIEvent>).coordinate], projCode, `EPSG:4326`)[0],
+      lnglat: api.utilities.projection.transformPoints([(event as MapBrowserEvent<UIEvent>).coordinate], projCode, `EPSG:4326`)[0],
       dragging: (event as MapBrowserEvent<UIEvent>).dragging,
     };
 
@@ -323,7 +329,7 @@ export class MapViewer {
     const clickCoordinates = {
       projected: (event as MapBrowserEvent<UIEvent>).coordinate,
       pixel: (event as MapBrowserEvent<UIEvent>).pixel,
-      lnglat: api.projection.transformPoints([(event as MapBrowserEvent<UIEvent>).coordinate], projCode, `EPSG:4326`)[0],
+      lnglat: api.utilities.projection.transformPoints([(event as MapBrowserEvent<UIEvent>).coordinate], projCode, `EPSG:4326`)[0],
       dragging: (event as MapBrowserEvent<UIEvent>).dragging,
     };
 
@@ -1003,9 +1009,13 @@ export class MapViewer {
       if (resetLayer) {
         if (AppEventProcessor.getSupportedLanguages(this.mapId).includes(displayLanguage)) {
           logger.logInfo('reset layers not implemented yet');
-        } else addNotificationError(this.mapId, getLocalizedMessage(this.mapId, 'validation.changeDisplayLanguageLayers'));
+        } else
+          this.notifications.addNotificationError(
+            api.utilities.core.getLocalizedMessage('validation.changeDisplayLanguageLayers', displayLanguage)
+          );
       }
-    } else addNotificationError(this.mapId, getLocalizedMessage(this.mapId, 'validation.changeDisplayLanguage'));
+    } else
+      this.notifications.addNotificationError(api.utilities.core.getLocalizedMessage('validation.changeDisplayLanguage', displayLanguage));
   }
 
   /**
@@ -1020,7 +1030,7 @@ export class MapViewer {
 
       // TODO: Emit to outside
       // this.#emitMapInit...
-    } else addNotificationError(this.mapId, getLocalizedMessage(this.mapId, 'validation.changeDisplayProjection'));
+    } else this.notifications.addNotificationError('validation.changeDisplayProjection');
   }
 
   /**
@@ -1041,7 +1051,10 @@ export class MapViewer {
   setTheme(displayTheme: TypeDisplayTheme): void {
     if (VALID_DISPLAY_THEME.includes(displayTheme)) {
       AppEventProcessor.setDisplayTheme(this.mapId, displayTheme);
-    } else addNotificationError(this.mapId, getLocalizedMessage(this.mapId, 'validation.changeDisplayTheme'));
+    } else
+      this.notifications.addNotificationError(
+        api.utilities.core.getLocalizedMessage('validation.changeDisplayTheme', this.getDisplayLanguage())
+      );
   }
 
   /**
@@ -1055,9 +1068,9 @@ export class MapViewer {
     viewOptions.projection = mapView.projection ? `EPSG:${mapView.projection}` : currentView.getProjection();
     viewOptions.zoom = mapView.zoom ? mapView.zoom : currentView.getZoom();
     viewOptions.center = mapView.center
-      ? api.projection.transformFromLonLat([mapView.center[0], mapView.center[1]], viewOptions.projection)
-      : api.projection.transformFromLonLat(
-          api.projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
+      ? api.utilities.projection.transformFromLonLat([mapView.center[0], mapView.center[1]], viewOptions.projection)
+      : api.utilities.projection.transformFromLonLat(
+          api.utilities.projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
           viewOptions.projection
         );
     viewOptions.minZoom = mapView.minZoom ? mapView.minZoom : currentView.getMinZoom();
@@ -1226,11 +1239,16 @@ export class MapViewer {
     if (bounds) {
       const { currentProjection } = this.getMapState();
       mapBounds = projectionCode
-        ? api.projection.transformExtent(bounds, `EPSG:${projectionCode}`, api.projection.projections[currentProjection], 20)
-        : api.projection.transformExtent(
+        ? api.utilities.projection.transformExtent(
             bounds,
-            api.projection.projections[currentProjection],
-            api.projection.projections[currentProjection],
+            `EPSG:${projectionCode}`,
+            api.utilities.projection.projections[currentProjection],
+            20
+          )
+        : api.utilities.projection.transformExtent(
+            bounds,
+            api.utilities.projection.projections[currentProjection],
+            api.utilities.projection.projections[currentProjection],
             25
           );
     } else {
@@ -1347,6 +1365,58 @@ export class MapViewer {
   }
 
   // #endregion
+
+  /**
+   * Check if north is visible. This is not a perfect solution and is more a work around
+   *
+   * @returns {boolean} true if visible, false otherwise
+   */
+  checkNorth(): boolean {
+    // Check the container value for top middle of the screen
+    // Convert this value to a lat long coordinate
+    const pointXY = [this.map.getSize()![0] / 2, 1];
+    const pt = api.utilities.projection.transformToLonLat(this.map.getCoordinateFromPixel(pointXY), this.map.getView().getProjection());
+
+    // If user is pass north, long value will start to be positive (other side of the earth).
+    // This will work only for LCC Canada.
+    return pt ? pt[0] > 0 : true;
+  }
+
+  /**
+   * Get north arrow bearing. Angle use to rotate north arrow for non Web Mercator projection
+   * https://www.movable-type.co.uk/scripts/latlong.html
+   *
+   * @returns {string} the arrow angle
+   */
+  getNorthArrowAngle(): string {
+    try {
+      // north value
+      const pointA = { x: NORTH_POLE_POSITION[1], y: NORTH_POLE_POSITION[0] };
+
+      // map center (we use botton parallel to introduce less distortion)
+      const extent = this.map.getView().calculateExtent();
+      const center: Coordinate = api.utilities.projection.transformToLonLat(
+        [(extent[0] + extent[2]) / 2, extent[1]],
+        this.map.getView().getProjection()
+      );
+      const pointB = { x: center[0], y: center[1] };
+
+      // set info on longitude and latitude
+      const dLon = ((pointB.x - pointA.x) * Math.PI) / 180;
+      const lat1 = (pointA.y * Math.PI) / 180;
+      const lat2 = (pointB.y * Math.PI) / 180;
+
+      // calculate bearing
+      const y = Math.sin(dLon) * Math.cos(lat2);
+      const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+      const bearing = (Math.atan2(y, x) * 180) / Math.PI;
+
+      // return angle (180 is pointing north)
+      return ((bearing + 360) % 360).toFixed(1);
+    } catch (error) {
+      return '180.0';
+    }
+  }
 }
 
 /**

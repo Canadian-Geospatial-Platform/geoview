@@ -10,6 +10,7 @@ import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { api } from '@/app';
 import { TypeFeatureInfoLayerConfig } from '@/geo/map/map-schema-types';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
+import { AppEventProcessor } from './app-event-processor';
 
 export class TimeSliderEventProcessor extends AbstractEventProcessor {
   /**
@@ -128,7 +129,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    */
   static getInitialTimeSliderValues(mapId: string, layerPath: string): TimeSliderLayerSet {
     const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath];
-    const name = getLocalizedValue(layerConfig.layerName, mapId) || layerConfig.layerId;
+    const name = getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(mapId)) || layerConfig.layerId;
     const temporalDimensionInfo = api.maps[mapId].layer.geoviewLayer(layerPath).getTemporalDimension(layerPath);
     const { range } = temporalDimensionInfo.range;
     const defaultValueIsArray = Array.isArray(temporalDimensionInfo.default);
@@ -143,8 +144,8 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     const { featureInfo } = layerConfig.source!;
     if (featureInfo) {
       const { aliasFields, outfields } = featureInfo as TypeFeatureInfoLayerConfig;
-      localizedOutFields = getLocalizedValue(outfields, mapId)?.split(',');
-      localizedAliasFields = getLocalizedValue(aliasFields, mapId)?.split(',');
+      localizedOutFields = getLocalizedValue(outfields, AppEventProcessor.getDisplayLanguage(mapId))?.split(',');
+      localizedAliasFields = getLocalizedValue(aliasFields, AppEventProcessor.getDisplayLanguage(mapId))?.split(',');
     }
     const fieldIndex = localizedOutFields ? localizedOutFields.indexOf(field) : -1;
     if (fieldIndex !== -1 && localizedAliasFields && localizedOutFields && localizedAliasFields?.length === localizedOutFields?.length)
