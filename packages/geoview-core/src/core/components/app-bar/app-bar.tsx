@@ -318,7 +318,7 @@ export function Appbar(): JSX.Element {
             </List>
           );
         })}
-        {appBarComponents.includes('export') && (
+        {appBarComponents.includes('export') && interaction === 'dynamic' && (
           <Box>
             <List sx={sxClasses.appBarList}>
               <ListItem>
@@ -329,7 +329,7 @@ export function Appbar(): JSX.Element {
         )}
         <Box sx={sxClasses.versionButtonDiv}>
           <List sx={sxClasses.appBarList}>
-            {interaction !== 'static' && <hr />}
+            {interaction === 'dynamic' && <hr />}
             <ListItem>
               <Notifications />
             </ListItem>

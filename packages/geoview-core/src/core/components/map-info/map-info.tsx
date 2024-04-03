@@ -46,11 +46,11 @@ export function MapInfo(): JSX.Element {
       sx={sxClasses.mapInfoContainer}
       ref={mapInfoRef as MutableRefObject<HTMLDivElement>}
     >
-      <MapInfoExpandButton />
+      {interaction === 'dynamic' && <MapInfoExpandButton />}
       <Grid container justifyContent="space-between">
-        <Grid item md={1}>
+        { interaction === 'dynamic' && <Grid item md={1}>
           <Attribution />
-        </Grid>
+        </Grid>}
 
         <Grid container item md={11} spacing={2}>
           <Grid

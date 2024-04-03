@@ -20,6 +20,7 @@ export const getSxClasses = (theme: Theme) => ({
     order: 3,
 
     '&.interaction-static': {
+      backdropFilter: 'unset',
       backgroundColor: 'unset',
       color: `${theme.palette.geoViewColor.grey.dark[900]} !important`,
       fill: `${theme.palette.geoViewColor.grey.dark[900]} !important`,
