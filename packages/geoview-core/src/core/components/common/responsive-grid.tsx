@@ -1,6 +1,6 @@
 import { ReactNode, forwardRef } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { Grid, GridProps, SxProps } from '@/ui';
+import { Box, Grid, GridProps, SxProps } from '@/ui';
 
 interface ResponsiveGridProps extends GridProps {
   children: ReactNode;
@@ -12,6 +12,7 @@ interface ResponsiveGridPanelProps extends GridProps {
   sxProps?: SxProps | undefined;
   isEnlarged: boolean;
   fullWidth?: boolean;
+  isFullScreen?: boolean;
 }
 
 /**
@@ -81,8 +82,8 @@ ResponsiveGridLeftPanel.displayName = 'ResponsiveGridLeftPanel';
  * @param {boolean} isEnlarged panel is enlarge
  * @returns
  */
-const getRightPanelSize = (fullWidth: boolean, isLayersPanelVisible: boolean, isEnlarged: boolean) => {
-  if (fullWidth) {
+const getRightPanelSize = (isFullScreen: boolean, fullWidth: boolean, isLayersPanelVisible: boolean, isEnlarged: boolean) => {
+  if (fullWidth || isFullScreen) {
     return { xs: 12 };
   }
   return {
@@ -101,26 +102,54 @@ const getRightPanelSize = (fullWidth: boolean, isLayersPanelVisible: boolean, is
  * @returns JSX.Element
  */
 const ResponsiveGridRightPanel = forwardRef(
-  ({ children, isLayersPanelVisible = false, sxProps = {}, isEnlarged, fullWidth = false, ...rest }: ResponsiveGridPanelProps, ref) => {
+  ({ children, isLayersPanelVisible = false, sxProps = {}, isEnlarged, isFullScreen = false, fullWidth = false, ...rest }: ResponsiveGridPanelProps, ref) => {
     const theme = useTheme();
-    return (
-      <Grid
-        item
-        {...getRightPanelSize(fullWidth, isLayersPanelVisible, isEnlarged)}
-        sx={{
-          position: 'relative',
-          [theme.breakpoints.up('md')]: { paddingLeft: '1rem' },
-          ...(!fullWidth && { [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'none' : 'block' } }),
-          ...(fullWidth && { display: !isLayersPanelVisible ? 'none' : 'block' }),
-          ...sxProps,
-        }}
-        component="div"
-        ref={ref}
-        {...rest}
-      >
-        {children}
-      </Grid>
-    );
+
+    const getRightPanelContent = () => {
+      return (
+        <Grid
+          item
+          {...getRightPanelSize(isFullScreen, fullWidth, isLayersPanelVisible, isEnlarged)}
+          sx={{
+            position: 'relative',
+            [theme.breakpoints.up('md')]: { paddingLeft: '1rem' },
+            ...(!fullWidth && { [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'none' : 'block' } }),
+            ...(fullWidth && { display: !isLayersPanelVisible ? 'none' : 'block' }),
+            ...sxProps,
+          }}
+          component="div"
+          ref={ref}
+          {...rest}
+        >
+          {children}
+        </Grid>
+      );
+    };
+
+    if(isFullScreen) {
+      const fullScreeSx = {
+        position: 'fixed',
+        overflow:'scroll',
+        top: 0,
+        left: 0,
+        width:'100dvw',
+        maxWidth: '100dvw',
+        height: '100dvh',
+        maxHeight: '100dvh',
+        zIndex:'99999',
+        insert: '0px',
+        backgroundColor: 'white',
+        padding: '10px'
+      };
+      
+      return (
+        <Box sx={fullScreeSx}>
+          {getRightPanelContent()}
+        </Box>
+      );
+    } else {
+      return getRightPanelContent();
+    }
   }
 );
 ResponsiveGridRightPanel.displayName = 'ResponsiveGridRightPanel';

@@ -7,7 +7,9 @@
     "exit": "Sortir",
     "open": "Ouvrir",
     "remove": "Retirer",
-    "view": "Vue"
+    "view": "Vue",
+    "openFullscreen": "Ouvrir en plein écran",
+    "closeFullscreen": "Fermer le plein écran"
   },
   "mapnav": {
     "arianavbar": "groupe de buttons vertical pour navigation sur la carte",

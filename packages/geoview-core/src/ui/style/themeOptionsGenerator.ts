@@ -9,6 +9,69 @@ function tooltipsPopperContainer() {
   return document.fullscreenElement ?? document.body;
 }
 
+const getButtonStyleOverrides = (geoViewColors: IGeoViewColors) => ({
+  '&.style1': {
+    backgroundColor: 'transparent',
+    border: `3px solid transparent`,
+    color: `${geoViewColors.primary.main}`,
+    '&:hover, &:active, &.active': {
+      backgroundColor: `${geoViewColors.bgColor.dark[100]}`,
+      border: `3px solid ${geoViewColors.primary.light[500]}`,
+      color: `${geoViewColors.primary.dark[100]}`,
+      boxShadow: 1,
+    },
+    '&:disabled': {
+      color: `${geoViewColors.bgColor.dark[450]}`,
+      backgroundColor: 'transparent',
+    },
+  },
+  '&.style2': {
+    backgroundColor: `${geoViewColors.primary.main}`,
+    border: `3px solid transparent`,
+    color: `${geoViewColors.white}`,
+    '&:hover, &:active, &.active': {
+      backgroundColor: `${geoViewColors.primary.light[800]}`,
+      border: `3px solid ${geoViewColors.primary.light[500]}`,
+      color: `${geoViewColors.primary.dark[100]}`,
+      boxShadow: 1,
+    },
+    '&:disabled': {
+      color: `${geoViewColors.bgColor.dark[450]}`,
+    },
+  },
+  '&.style3': {
+    // used for app-bar buttons
+    backgroundColor: `transparent`,
+    border: `2px solid transparent`,
+    color: `${geoViewColors.primary.main}`,
+    '&:hover, &:active, &.active': {
+      backgroundColor: `${geoViewColors.primary.main}`,
+      border: `2px solid ${geoViewColors.primary.light[500]}`,
+      color: `${geoViewColors.white}`,
+      boxShadow: 1,
+    },
+    '&:disabled': {
+      color: `${geoViewColors.bgColor.dark[450]}`,
+    },
+  },
+  '&.style4': {
+    // used for app-bar buttons
+    backgroundColor: `${geoViewColors.bgColor.dark[100]}`,
+    border: `2px solid ${geoViewColors.primary.light[500]}`,
+    color: `${geoViewColors.primary.dark[100]}`,
+    boxShadow: 1,
+    '&:hover, &:active, &.active': {
+      backgroundColor: `${geoViewColors.primary.main}`,
+      border: `2px solid ${geoViewColors.primary.light[500]}`,
+      color: `${geoViewColors.white}`,
+      boxShadow: 1,
+    },
+    '&:disabled': {
+      color: `${geoViewColors.bgColor.dark[450]}`,
+    },
+  },
+});
+
 export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoViewColors): ThemeOptions => {
   const themeOptions: ThemeOptions = {
     palette: {
@@ -261,70 +324,17 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
           },
         },
       },
-      MuiButton: {},
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            ...getButtonStyleOverrides(geoViewColors),
+          },
+        }
+      },
       MuiIconButton: {
         styleOverrides: {
           root: {
-            '&.style1': {
-              backgroundColor: 'transparent',
-              border: `3px solid transparent`,
-              color: `${geoViewColors.primary.main}`,
-              '&:hover, &:active, &.active': {
-                backgroundColor: `${geoViewColors.bgColor.dark[100]}`,
-                border: `3px solid ${geoViewColors.primary.light[500]}`,
-                color: `${geoViewColors.primary.dark[100]}`,
-                boxShadow: 1,
-              },
-              '&:disabled': {
-                color: `${geoViewColors.bgColor.dark[450]}`,
-                backgroundColor: 'transparent',
-              },
-            },
-            '&.style2': {
-              backgroundColor: `${geoViewColors.primary.main}`,
-              border: `3px solid transparent`,
-              color: `${geoViewColors.white}`,
-              '&:hover, &:active, &.active': {
-                backgroundColor: `${geoViewColors.primary.light[800]}`,
-                border: `3px solid ${geoViewColors.primary.light[500]}`,
-                color: `${geoViewColors.primary.dark[100]}`,
-                boxShadow: 1,
-              },
-              '&:disabled': {
-                color: `${geoViewColors.bgColor.dark[450]}`,
-              },
-            },
-            '&.style3': {
-              // used for app-bar buttons
-              backgroundColor: `transparent`,
-              border: `2px solid transparent`,
-              color: `${geoViewColors.primary.main}`,
-              '&:hover, &:active, &.active': {
-                backgroundColor: `${geoViewColors.primary.main}`,
-                border: `2px solid ${geoViewColors.primary.light[500]}`,
-                color: `${geoViewColors.white}`,
-                boxShadow: 1,
-              },
-              '&:disabled': {
-                color: `${geoViewColors.bgColor.dark[450]}`,
-              },
-            },
-            '&.style4': {
-              // used for app-bar buttons
-              backgroundColor: `${geoViewColors.bgColor.dark[100]}`,
-              border: `2px solid ${geoViewColors.primary.light[500]}`,
-              color: `${geoViewColors.primary.dark[100]}`,
-              boxShadow: 1,
-              '&:hover, &:active, &.active': {
-                backgroundColor: `${geoViewColors.primary.main}`,
-                border: `2px solid ${geoViewColors.primary.light[500]}`,
-                color: `${geoViewColors.white}`,
-                boxShadow: 1,
-              },
-              '&:disabled': {
-                color: `${geoViewColors.bgColor.dark[450]}`,
-              },
-            },
+            ...getButtonStyleOverrides(geoViewColors),
           },
         },
       },

@@ -7,7 +7,9 @@
     "name": "Name",
     "open": "Open",
     "remove": "Remove",
-    "view": "View"
+    "view": "View",
+    "openFullscreen": "Open in fullscreen",
+    "closeFullscreen": "Close fullscreen"
   },
   "mapnav": {
     "arianavbar": "vertical button group for map navigation",
