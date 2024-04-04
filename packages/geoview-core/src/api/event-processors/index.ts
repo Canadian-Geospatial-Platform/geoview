@@ -5,7 +5,7 @@ import { LegendEventProcessor } from '@/api/event-processors/event-processor-chi
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
-import { DataTableProcessor } from '@/api/event-processors/event-processor-children/data-table-processor';
+import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import { SwiperEventProcessor } from './event-processor-children/swiper-event-processor';
 
 // core
@@ -13,7 +13,7 @@ const appEventProcessor = new AppEventProcessor();
 const featureInfoEventProcessor = new FeatureInfoEventProcessor();
 const legendEventProcessor = new LegendEventProcessor();
 const mapEventProcessor = new MapEventProcessor();
-const dataTableProcessor = new DataTableProcessor();
+const dataTableEventProcessor = new DataTableEventProcessor();
 
 // packages
 const timeSliderEventProcessor = new TimeSliderEventProcessor();
@@ -26,7 +26,7 @@ export function initializeEventProcessors(store: GeoviewStoreType) {
   featureInfoEventProcessor.initialize(store);
   legendEventProcessor.initialize(store);
   mapEventProcessor.initialize(store);
-  dataTableProcessor.initialize(store);
+  dataTableEventProcessor.initialize(store);
 
   // package stores, only create if needed
   // TODO: Change this check for something more generic that checks in appBar too
@@ -41,7 +41,7 @@ export function destroyEventProcessors(store: GeoviewStoreType) {
   featureInfoEventProcessor.destroy();
   legendEventProcessor.destroy();
   mapEventProcessor.destroy();
-  dataTableProcessor.destroy();
+  dataTableEventProcessor.destroy();
 
   // package stores, only destroy if created
   // TODO: Change this check for something more generic that checks in appBar too

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Box, CircularProgressBase, DeleteOutlineIcon, IconButton, UndoIcon } from '@/ui';
 import { TypeLegendLayer } from '@/core/components/layers/types';
-import { useLayerStoreActions, useMapStoreActions } from '@/core/stores';
+import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 
 interface DeleteUndoButtonProps {

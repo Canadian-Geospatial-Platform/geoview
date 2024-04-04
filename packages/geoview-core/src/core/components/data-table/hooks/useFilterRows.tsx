@@ -1,8 +1,8 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { type MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
 import {
+  TypeColumnFiltersState,
   useDataTableStoreActions,
-  useDataTableStoreColumnFilteredRecord,
+  useDataTableLayerSettings,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
 
@@ -16,14 +16,14 @@ export interface UseFilterRowsProps {
  * @returns {Object}
  */
 export function useFilterRows({ layerPath }: UseFilterRowsProps): {
-  columnFilters: MRTColumnFiltersState;
-  setColumnFilters: Dispatch<SetStateAction<MRTColumnFiltersState>>;
+  columnFilters: TypeColumnFiltersState;
+  setColumnFilters: Dispatch<SetStateAction<TypeColumnFiltersState>>;
 } {
-  const columnFiltersRecord = useDataTableStoreColumnFilteredRecord();
+  const datatableSettings = useDataTableLayerSettings();
 
   const { setColumnFiltersEntry } = useDataTableStoreActions();
 
-  const [columnFilters, setColumnFilters] = useState<MRTColumnFiltersState>(columnFiltersRecord[layerPath] || []);
+  const [columnFilters, setColumnFilters] = useState<TypeColumnFiltersState>(datatableSettings[layerPath].columnFiltersRecord || []);
 
   // update store column filters
   useEffect(() => {

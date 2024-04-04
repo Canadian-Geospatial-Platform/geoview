@@ -8,7 +8,7 @@ import { FooterBarPayload } from '@/api/events/payloads';
 import { getSxClasses } from './footer-bar-style';
 import { ResizeFooterPanel } from '@/core/components/resize-footer-panel/resize-footer-panel';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useDetailsStoreLayerDataArrayBatch } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { useDetailsLayerDataArrayBatch } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import {
   useUIActiveFooterBarTabId,
   useUIFooterPanelResizeValue,
@@ -73,7 +73,7 @@ export function FooterBar(): JSX.Element | null {
 
   // get store values and actions
   const isMapFullScreen = useAppFullscreenActive();
-  const arrayOfLayerDataBatch = useDetailsStoreLayerDataArrayBatch();
+  const arrayOfLayerDataBatch = useDetailsLayerDataArrayBatch();
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
   const footerPanelResizeValues = useUIFooterPanelResizeValues();
   const selectedTab = useUIActiveFooterBarTabId();

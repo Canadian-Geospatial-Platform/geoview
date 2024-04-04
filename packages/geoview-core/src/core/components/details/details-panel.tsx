@@ -12,13 +12,12 @@ import {
   Paper,
 } from '@/ui';
 import {
-  useMapStoreActions,
-  useMapVisibleLayers,
   useDetailsStoreActions,
-  useDetailsStoreCheckedFeatures,
-  useDetailsStoreLayerDataArrayBatch,
-  useDetailsStoreSelectedLayerPath,
-} from '@/core/stores';
+  useDetailsCheckedFeatures,
+  useDetailsLayerDataArrayBatch,
+  useDetailsSelectedLayerPath,
+} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { useMapStoreActions, useMapVisibleLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/utils/layer-set';
 
@@ -45,9 +44,9 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   // Get states and actions from store
-  const selectedLayerPath = useDetailsStoreSelectedLayerPath();
-  const arrayOfLayerDataBatch = useDetailsStoreLayerDataArrayBatch();
-  const checkedFeatures = useDetailsStoreCheckedFeatures();
+  const selectedLayerPath = useDetailsSelectedLayerPath();
+  const arrayOfLayerDataBatch = useDetailsLayerDataArrayBatch();
+  const checkedFeatures = useDetailsCheckedFeatures();
   const visibleLayers = useMapVisibleLayers();
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
   const { addHighlightedFeature, removeHighlightedFeature } = useMapStoreActions();
