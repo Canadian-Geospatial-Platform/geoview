@@ -1,7 +1,6 @@
 import { GeoviewStoreType, IFeatureInfoState } from '@/core/stores';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoResultSet } from '@/geo/utils/feature-info-layer-set';
-import { TypeHoverFeatureInfoResultSet, TypeHoverLayerData } from '@/geo/utils/hover-feature-info-layer-set';
 import { EventType, TypeLayerData } from '@/geo/utils/layer-set';
 
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
@@ -52,9 +51,6 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
               // Remove it from feature info array
               FeatureInfoEventProcessor.#deleteFeatureInfo(store.getState().mapId, layerPath);
 
-              // Remove it from hover array
-              FeatureInfoEventProcessor.#deleteFeatureHoverInfo(store.getState().mapId, layerPath);
-
               // Remove it from all features array
               FeatureInfoEventProcessor.#deleteFeatureAllInfo(store.getState().mapId, layerPath);
 
@@ -99,23 +95,6 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Deletes the specified layer path from the hover layers sets in the store
-   * @param {string} mapId - The map identifier
-   * @param {string} layerPath - The layer path to delete
-   * @private
-   */
-  static #deleteFeatureHoverInfo(mapId: string, layerPath: string) {
-    // The feature info state
-    const featureInfoState = this.getFeatureInfoState(mapId);
-
-    // Redirect to helper function
-    this.#deleteFromArray(featureInfoState.hoverDataArray, layerPath, (layerArrayResult) => {
-      // Update the layer data array in the store
-      featureInfoState.actions.setHoverDataArray(layerArrayResult);
-    });
-  }
-
-  /**
    * Deletes the specified layer path from the all features layers sets in the store
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to delete
@@ -139,11 +118,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {(layerArray: TypeLayerData[]) => void} onDeleteCallback - The callback executed when the array is updated
    * @private
    */
-  static #deleteFromArray<T extends TypeLayerData | TypeHoverLayerData>(
-    layerArray: T[],
-    layerPath: string,
-    onDeleteCallback: (layerArray: T[]) => void
-  ) {
+  static #deleteFromArray<T extends TypeLayerData>(layerArray: T[], layerPath: string, onDeleteCallback: (layerArray: T[]) => void) {
     // Find the layer data info to delete from the array
     const layerDataInfoToDelIndex = layerArray.findIndex((layerInfo) => layerInfo.layerPath === layerPath);
 
@@ -165,12 +140,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {EventType} eventType - The event type that triggered the layer set update.
    * @param {TypeFeatureInfoResultSet} resultSet - The result set associated to the map.
    */
-  static propagateFeatureInfoToStore(
-    mapId: string,
-    layerPath: string,
-    eventType: EventType,
-    resultSet: TypeFeatureInfoResultSet | TypeHoverFeatureInfoResultSet
-  ) {
+  static propagateFeatureInfoToStore(mapId: string, layerPath: string, eventType: EventType, resultSet: TypeFeatureInfoResultSet) {
     // The feature info state
     const featureInfoState = this.getFeatureInfoState(mapId);
 
@@ -196,17 +166,6 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
 
       // Also propagate in the batched array
       FeatureInfoEventProcessor.#propagateFeatureInfoToStoreBatch(mapId, layerDataArray);
-    } else if (eventType === 'hover') {
-      /**
-       * Create a hover object for each layer which is then used to render layers
-       */
-      const hoverDataArray = [...featureInfoState.hoverDataArray];
-      if (!hoverDataArray.find((layerEntry) => layerEntry.layerPath === layerPath)) {
-        hoverDataArray.push(resultSet?.[layerPath]?.data as TypeHoverLayerData);
-      }
-
-      // Update the layer data array in the store, all the time
-      featureInfoState.actions.setHoverDataArray(hoverDataArray);
     } else if (eventType === 'all-features') {
       /**
        * Create a get all features info object for each layer which is then used to render layers

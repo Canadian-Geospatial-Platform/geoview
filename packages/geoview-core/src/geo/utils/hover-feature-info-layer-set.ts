@@ -1,16 +1,13 @@
 import debounce from 'lodash/debounce';
 
-import Feature from 'ol/Feature';
 import { Coordinate } from 'ol/coordinate';
-import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { logger } from '@/core/utils/logger';
-import { getLocalizedValue } from '@/core/utils/utilities';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { LayerSet, TypeFieldEntry, TypeGeometry, TypeQueryStatus } from './layer-set';
+import { LayerSet, TypeFieldEntry, TypeQueryStatus } from './layer-set';
 import { LayerApi } from '@/geo/layer/layer';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 /**
  * A class containing a set of layers associated with a TypeLayerData object, which will receive the result of a
@@ -48,6 +45,8 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
     // Log
     logger.logTraceCore('HOVER-FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerPath, Object.keys(this.resultSet));
 
+    // TODO: refactor layer - get flag from layer itself, not config
+    // TD.CONT: we should use the layerPath associated to thelayer we register and do not use layerPath parameter
     const layerConfig = this.layerApi.registeredLayers[layerPath];
     const queryable = layerConfig?.source?.featureInfo?.queryable;
     return !!queryable;
@@ -62,20 +61,21 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
     // Log
     logger.logTraceCore('HOVER-FEATURE-INFO-LAYER-SET - onRegisterLayer', layerPath, Object.keys(this.resultSet));
 
+    // TODO: refactor layer - we should use the layerPath associated to thelayer we register and do not use layerPath parameter
     const layerConfig = this.layerApi.registeredLayers[layerPath];
     this.resultSet[layerPath] = {
-      layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
+      // layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
       layerStatus: layerConfig.layerStatus!,
       data: {
-        layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
+        // layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
         layerStatus: layerConfig.layerStatus!,
         eventListenerEnabled: true,
         queryStatus: 'processed',
         feature: undefined,
-        layerPath,
+        // layerPath,
       },
     };
-    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, 'hover', this.resultSet);
+    // FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, 'hover', this.resultSet);
   }
 
   /**
@@ -92,10 +92,8 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
         // Call parent. After this call, this.resultSet?.[layerPath]?.layerStatus may have changed!
         super.onProcessLayerStatusChanged(config, layerPath, layerStatus);
 
-        const layerConfig = this.layerApi.registeredLayers[layerPath];
         if (this?.resultSet?.[layerPath]?.data) {
           this.resultSet[layerPath].data.layerStatus = layerStatus;
-          FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerConfig.layerPath, 'hover', this.resultSet);
         }
       }
     }
@@ -106,9 +104,8 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
    * @param {Coordinate} pixelCoordinate - The pixel coordinate where to query the features
    */
   queryLayers(pixelCoordinate: Coordinate): void {
-    // Query and event types of what we're doing
+    // Query types of what we're doing
     const queryType = 'at_pixel';
-    const eventType = 'hover';
 
     // Reinitialize the resultSet
     // Loop on each layer path in the resultSet
@@ -128,12 +125,14 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
             this.resultSet[layerPath].data.feature = null;
           } else {
             if (arrayOfRecords?.length) {
+              const nameField = arrayOfRecords![0].nameField || (Object.entries(arrayOfRecords![0].fieldInfo)[0] as unknown as string);
+              const fieldInfo = arrayOfRecords![0].fieldInfo[nameField as string];
+
               data.feature = {
                 featureIcon: arrayOfRecords![0].featureIcon,
-                fieldInfo: arrayOfRecords![0].fieldInfo,
-                geometry: arrayOfRecords![0].geometry,
+                fieldInfo,
                 geoviewLayerType: arrayOfRecords![0].geoviewLayerType,
-                nameField: arrayOfRecords![0].nameField,
+                nameField,
               };
             } else {
               data.feature = undefined;
@@ -143,7 +142,7 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
           }
 
           // Propagate to the store
-          FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, eventType, this.resultSet);
+          MapEventProcessor.setMapHoverFeatureInfo(this.mapId, this.resultSet[layerPath].data.feature);
         });
       } else {
         data.feature = null;
@@ -200,27 +199,20 @@ export type TypeHoverFeatureInfo =
   | {
       geoviewLayerType: TypeGeoviewLayerType;
       featureIcon: HTMLCanvasElement;
-      geometry: TypeGeometry | Feature | null;
-      fieldInfo: Partial<Record<string, TypeFieldEntry>>;
+      fieldInfo: TypeFieldEntry | undefined;
       nameField: string | null;
     }
   | undefined
   | null;
 
 export type TypeHoverLayerData = {
-  layerPath: string;
-  layerName: string;
   layerStatus: TypeLayerStatus;
   eventListenerEnabled: boolean;
-  // When property features is undefined, we are waiting for the query result.
-  // when Array.isArray(features) is true, the features property contains the query result.
-  // when property features is null, the query ended with an error.
   queryStatus: TypeQueryStatus;
   feature: TypeHoverFeatureInfo;
 };
 
 export type TypeHoverFeatureInfoResultSetEntry = {
-  layerName?: string;
   layerStatus: TypeLayerStatus;
   data: TypeHoverLayerData;
 };
