@@ -3,10 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useTheme, Theme } from '@mui/material/styles';
 
 import { Box } from '@/ui';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { logger } from '@/core/utils/logger';
-import { useMapHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapHoverFeatureInfo, useMapPointerPosition } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 /**
  * Hover tooltip component to show name field information on hover
@@ -14,10 +12,8 @@ import { useMapHoverFeatureInfo } from '@/core/stores/store-interface-and-intial
  * @returns {JSX.Element} the hover tooltip component
  */
 export function HoverTooltip(): JSX.Element {
-  // Log too annoying
+  // Log, commented too annoying
   // logger.logTraceRender('components/hover-tooltip/hover-tooltip');
-
-  const mapId = useGeoViewMapId();
 
   const { t } = useTranslation<string>();
 
@@ -59,7 +55,9 @@ export function HoverTooltip(): JSX.Element {
 
   // store state
   const hoverFeatureInfo = useMapHoverFeatureInfo();
+  const pointerPosition = useMapPointerPosition();
 
+  // Update tooltip when store value change from propagation by hover-layer-set to map-event-processor
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('HOVER-TOOLTIP - hoverFeatureInfo', hoverFeatureInfo);
@@ -71,30 +69,17 @@ export function HoverTooltip(): JSX.Element {
     }
   }, [hoverFeatureInfo]);
 
+  // clear the tooltip and mouse move and set pixel location
   useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('HOVER-TOOLTIP - mount');
+    // Log, commented too annoying
+    // logger.logTraceUseEffect('HOVER-TOOLTIP - pointerPosition', pointerPosition);
 
-    // if pointer position changed, reset tooltip
-    const unsubPointerPosition = getGeoViewStore(mapId).subscribe(
-      (state) => state.mapState.pointerPosition,
-      (curPos, prevPos) => {
-        // Log - commented, too anoying
-        // logger.logTraceCoreStoreSubscription('HOVER-TOOLTIP - pointer position', curPos);
+    setTooltipValue('');
+    setTooltipIcon('');
+    setShowTooltip(false);
 
-        setPixel(curPos!.pixel as [number, number]);
-        if (curPos !== prevPos) {
-          setTooltipValue('');
-          setTooltipIcon('');
-          setShowTooltip(false);
-        }
-      }
-    );
-
-    return () => {
-      unsubPointerPosition();
-    };
-  }, [mapId]);
+    if (pointerPosition !== undefined) setPixel(pointerPosition.pixel as [number, number]);
+  }, [pointerPosition]);
 
   return (
     <Box
