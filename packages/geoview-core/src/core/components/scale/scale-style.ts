@@ -14,7 +14,7 @@ export const getSxClasses = (theme: Theme) => ({
       color: theme.palette.geoViewColor.white,
     },
     '&.interaction-static': {
-      paddingBottom: '30px',
+      padding: '5px',
       backdropFilter: 'blur(5px)',
     },
   },
@@ -47,6 +47,7 @@ export const getSxClasses = (theme: Theme) => ({
     '&.interaction-static': {
       fontSize: theme.palette.geoViewFontSize.md,
       fontWeight: 'bold',
+      borderBottom: '2px solid',
     },
   },
   scaleCheckmark: {

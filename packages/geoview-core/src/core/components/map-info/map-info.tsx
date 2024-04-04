@@ -54,7 +54,7 @@ export function MapInfo(): JSX.Element {
           </Grid>
         )}
 
-        <Grid container item md={11} spacing={2}>
+        <Grid container item md={interaction === 'dynamic' ? 11 : 12} spacing={2}>
           <Grid
             container
             justifyContent="flex-end"
@@ -64,7 +64,7 @@ export function MapInfo(): JSX.Element {
               },
             }}
           >
-            <Grid item md={10}>
+            <Grid item md={interaction === 'dynamic' ? 10 : 12}>
               <Box id="mouseAndScaleControls" sx={sxClasses.mouseScaleControlsContainer}>
                 {interaction === 'dynamic' && <MousePosition />}
                 <Scale />
