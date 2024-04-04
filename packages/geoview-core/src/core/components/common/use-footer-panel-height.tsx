@@ -1,14 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIActiveFooterBarTabId, useUIFooterPanelResizeValue } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useDetailsLayerDataArray } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import {
-  useDetailsStoreAllFeaturesDataArray,
-  useDetailsStoreLayerDataArray,
-} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+  useDataTableAllFeaturesDataArray,
+  useDataTableStoreActions,
+} from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
-import { useDataTableStoreActions } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { TABS } from '@/core/utils/constant';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 interface UseFooterPanelHeightType {
   footerPanelTab: 'layers' | 'details' | 'data-table' | 'legend' | 'default' | 'guide';
@@ -28,8 +28,8 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
   const isMapFullScreen = useAppFullscreenActive();
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
   const activeFooterBarTabId = useUIActiveFooterBarTabId();
-  const arrayOfLayerData = useDetailsStoreLayerDataArray();
-  const allFeaturesLayerData = useDetailsStoreAllFeaturesDataArray();
+  const arrayOfLayerData = useDetailsLayerDataArray();
+  const allFeaturesLayerData = useDataTableAllFeaturesDataArray();
   const { setTableHeight } = useDataTableStoreActions();
 
   useEffect(() => {

@@ -4,7 +4,7 @@ import { Coordinate } from 'ol/coordinate';
 import { logger } from '@/core/utils/logger';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
-import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { LayerSet, TypeFieldEntry, TypeQueryStatus } from './layer-set';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -48,7 +48,7 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
     // TODO: refactor layer - get flag from layer itself, not config
     // TD.CONT: we should use the layerPath associated to thelayer we register and do not use layerPath parameter
     const layerConfig = this.layerApi.registeredLayers[layerPath];
-    const queryable = layerConfig?.source?.featureInfo?.queryable;
+    const queryable = layerConfig.schemaTag === CONST_LAYER_TYPES.WMS ? false : layerConfig?.source?.featureInfo?.queryable;
     return !!queryable;
   }
 
@@ -61,21 +61,17 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
     // Log
     logger.logTraceCore('HOVER-FEATURE-INFO-LAYER-SET - onRegisterLayer', layerPath, Object.keys(this.resultSet));
 
-    // TODO: refactor layer - we should use the layerPath associated to thelayer we register and do not use layerPath parameter
+    // TODO: refactor layer - we should use the layerPath associated to the layer we register and do not use layerPath parameter
     const layerConfig = this.layerApi.registeredLayers[layerPath];
     this.resultSet[layerPath] = {
-      // layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
       layerStatus: layerConfig.layerStatus!,
       data: {
-        // layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
         layerStatus: layerConfig.layerStatus!,
         eventListenerEnabled: true,
         queryStatus: 'processed',
         feature: undefined,
-        // layerPath,
       },
     };
-    // FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, 'hover', this.resultSet);
   }
 
   /**
@@ -85,6 +81,7 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
    * @param {string} layerStatus - The new layer status
    */
   protected onProcessLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
+    // TODO: layer api should manage the add and remove from layer related to the layer status
     // if layer's status flag exists and is different than the new one
     if (this.resultSet?.[layerPath]?.layerStatus && this.resultSet?.[layerPath]?.layerStatus !== layerStatus) {
       if (layerStatus === 'error') delete this.resultSet[layerPath];
