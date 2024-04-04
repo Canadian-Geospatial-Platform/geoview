@@ -276,7 +276,7 @@ export function Appbar(): JSX.Element {
   // #endregion
 
   return (
-    <Box sx={sxClasses.appBar} ref={appBar}>
+    <Box sx={sxClasses.appBar} className={`interaction-${interaction}`} ref={appBar}>
       <Box sx={sxClasses.appBarButtons}>
         {appBarComponents.includes('geolocator') && interaction === 'dynamic' && (
           <Box>
@@ -318,7 +318,7 @@ export function Appbar(): JSX.Element {
             </List>
           );
         })}
-        {appBarComponents.includes('export') && (
+        {appBarComponents.includes('export') && interaction === 'dynamic' && (
           <Box>
             <List sx={sxClasses.appBarList}>
               <ListItem>
@@ -329,7 +329,7 @@ export function Appbar(): JSX.Element {
         )}
         <Box sx={sxClasses.versionButtonDiv}>
           <List sx={sxClasses.appBarList}>
-            <hr />
+            {interaction === 'dynamic' && <hr />}
             <ListItem>
               <Notifications />
             </ListItem>
