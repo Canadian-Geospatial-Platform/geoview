@@ -102,7 +102,18 @@ const getRightPanelSize = (isFullScreen: boolean, fullWidth: boolean, isLayersPa
  * @returns JSX.Element
  */
 const ResponsiveGridRightPanel = forwardRef(
-  ({ children, isLayersPanelVisible = false, sxProps = {}, isEnlarged, isFullScreen = false, fullWidth = false, ...rest }: ResponsiveGridPanelProps, ref) => {
+  (
+    {
+      children,
+      isLayersPanelVisible = false,
+      sxProps = {},
+      isEnlarged,
+      isFullScreen = false,
+      fullWidth = false,
+      ...rest
+    }: ResponsiveGridPanelProps,
+    ref
+  ) => {
     const theme = useTheme();
 
     const getRightPanelContent = () => {
@@ -126,30 +137,25 @@ const ResponsiveGridRightPanel = forwardRef(
       );
     };
 
-    if(isFullScreen) {
+    if (isFullScreen) {
       const fullScreeSx = {
         position: 'fixed',
-        overflow:'scroll',
+        overflow: 'scroll',
         top: 0,
         left: 0,
-        width:'100dvw',
+        width: '100dvw',
         maxWidth: '100dvw',
         height: '100dvh',
         maxHeight: '100dvh',
-        zIndex:'99999',
+        zIndex: '99999',
         insert: '0px',
         backgroundColor: 'white',
-        padding: '10px'
+        padding: '10px',
       };
-      
-      return (
-        <Box sx={fullScreeSx}>
-          {getRightPanelContent()}
-        </Box>
-      );
-    } else {
-      return getRightPanelContent();
+
+      return <Box sx={fullScreeSx}>{getRightPanelContent()}</Box>;
     }
+    return getRightPanelContent();
   }
 );
 ResponsiveGridRightPanel.displayName = 'ResponsiveGridRightPanel';

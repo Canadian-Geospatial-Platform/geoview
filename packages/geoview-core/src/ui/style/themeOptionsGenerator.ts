@@ -329,7 +329,7 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
           root: {
             ...getButtonStyleOverrides(geoViewColors),
           },
-        }
+        },
       },
       MuiIconButton: {
         styleOverrides: {
