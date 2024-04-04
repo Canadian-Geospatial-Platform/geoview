@@ -1,6 +1,9 @@
 import { useTheme } from '@mui/material/styles';
 import { FormControl, InputLabel, NativeSelect } from '@mui/material';
-import { useTimeSliderLayers, useTimeSliderStoreActions } from 'geoview-core/src/core/stores';
+import {
+  useTimeSliderLayers,
+  useTimeSliderStoreActions,
+} from 'geoview-core/src/core/stores/store-interface-and-intial-values/time-slider-state';
 import { getLocalizedValue } from 'geoview-core/src/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from 'geoview-core/src/core/utils/logger';

@@ -26,16 +26,16 @@ import {
   useLayerDisplayState,
   useLayerSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useDataTableStoreMapFilteredRecord } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { DeleteUndoButton } from './delete-undo-button';
 import { LayersList } from './layers-list';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { logger } from '@/core/utils/logger';
 import {
-  useDetailsStoreActions,
-  useDetailsStoreAllFeaturesDataArray,
-} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+  useDataTableLayerSettings,
+  useDataTableStoreActions,
+  useDataTableAllFeaturesDataArray,
+} from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { LAYER_STATUS } from '@/core/utils/constant';
 
 interface SingleLayerProps {
@@ -57,10 +57,11 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   const { getVisibilityFromOrderedLayerInfo, setOrToggleLayerVisibility } = useMapStoreActions();
   const selectedLayerPath = useLayerSelectedLayerPath();
   const displayState = useLayerDisplayState();
-  const mapFiltered = useDataTableStoreMapFilteredRecord();
-  const layerData = useDetailsStoreAllFeaturesDataArray();
+  const datatableSettings = useDataTableLayerSettings();
 
-  const { triggerGetAllFeatureInfo } = useDetailsStoreActions();
+  const layerData = useDataTableAllFeaturesDataArray();
+
+  const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
 
   // if any of the chiild layers is selected return true
   const isLayerChildSelected = (startingLayer: TypeLegendLayer): boolean => {
@@ -114,7 +115,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     const totalCount = layer.items.length;
     const itemsLengthDesc = t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
 
-    if (mapFiltered[layer.layerPath]) {
+    if (datatableSettings[layer.layerPath]) {
       return (
         <Box style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'left', gap: 1 }}>
           <span>{itemsLengthDesc} </span>
@@ -148,7 +149,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
         !layerData.filter((layers) => layers.layerPath === layer.layerPath && !!layers?.features?.length).length ||
         layer.layerStatus === LAYER_STATUS.ERROR
       ) {
-        triggerGetAllFeatureInfo(layer.layerPath, 'all');
+        triggerGetAllFeatureInfo(layer.layerPath);
       }
     }
   };

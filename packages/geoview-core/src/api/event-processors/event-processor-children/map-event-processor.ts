@@ -27,7 +27,7 @@ import { AppEventProcessor } from './app-event-processor';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeClickMarker } from '@/core/components';
-import { TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores';
+import { TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { TypeBasemapOptions, TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
 import { TypeHoverFeatureInfo } from '@/geo/utils/hover-feature-info-layer-set';
 
