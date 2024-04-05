@@ -10,10 +10,10 @@ export const getSxClasses = (theme: Theme) => ({
     maxHeight: '600px',
 
     '&.fullscreen-mode': {
-      maxHeight: 'unset',
+      maxHeight: 'calc(100vh - 150px)',
 
       '& .MuiTableContainer-root': {
-        maxHeight: 'unset',
+        maxHeight: 'calc(100vh - 200px)',
       },
     },
 
