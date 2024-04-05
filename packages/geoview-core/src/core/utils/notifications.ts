@@ -1,8 +1,9 @@
 import { NotificationType } from '@/core/components/notifications/notifications';
-import { generateId, getLocalizedMessage, replaceParams } from './utilities';
 import { TypeJsonArray, TypeJsonValue } from '@/core/types/global-types';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { generateId, getLocalizedMessage, replaceParams } from './utilities';
+import { logger } from './logger';
 
 /**
  * Class used to send message to user for a map. Can be a notification and/or a snackbar message
@@ -57,7 +58,10 @@ export class Notifications {
       count: 1,
     };
 
-    AppEventProcessor.addNotification(this.mapId, notification);
+    AppEventProcessor.addNotification(this.mapId, notification).catch((error) => {
+      // Log
+      logger.logPromiseFailed('addNotification in Notifications', error);
+    });
   }
 
   /**

@@ -3,6 +3,7 @@ import { TypeJsonObject, TypeJsonArray, toJsonObject, SelectChangeEvent } from '
 import { useMapProjection } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
 import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { TypeValidMapProjectionCodes, TypeDisplayLanguage } from 'geoview-core/src/geo/map/map-schema-types';
+import { logger } from 'geoview-core/src/core/utils/logger';
 import { getSxClasses } from './basemap-panel-style';
 
 interface BaseMapPanelProps {
@@ -178,29 +179,49 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
       }
     }
 
-    // create the core basemap
+    // Create the core basemap
+    const promiseBasemaps = [];
     for (let basemapIndex = 0; basemapIndex < (basemapsArray.coreBasemaps.length as number); basemapIndex++) {
-      const basemapOptions = basemapsArray.coreBasemaps[basemapIndex] as TypeJsonObject;
-      // eslint-disable-next-line no-await-in-loop
-      const basemap = await api.maps[mapId].basemap.createCoreBasemap(basemapOptions as unknown as TypeBasemapOptions, projection);
+      const basemapOptions = basemapsArray.coreBasemaps[basemapIndex];
 
-      if (basemap) {
-        // get thumbnail and info (name and description) for core basemap
-        const { name, description } = getInfo(basemap.type.split('-'));
-        basemap.thumbnailUrl = getThumbnailUrl(basemap.type.split('-'), storeProjection, language);
-        basemap.name = name;
-        basemap.description = description;
-
-        setBasemapList((prevArray) => [...prevArray, basemap]);
-      }
-
-      // set basemap if previously selected in previous projection
-      const id = `${basemapOptions.shaded ? 'shaded' : ''}${basemapOptions.id}${basemapOptions.labeled ? 'label' : ''}`;
-      if (basemap && id === activeBasemapId && !isInit) {
-        setBasemap(activeBasemapId);
-        isInit = true;
-      }
+      // Create the core basemap and add to the promise array
+      promiseBasemaps.push(api.maps[mapId].basemap.createCoreBasemap(basemapOptions as unknown as TypeBasemapOptions, projection));
     }
+
+    // When all basemaps have been gathered
+    await Promise.allSettled(promiseBasemaps)
+      .then((promiseBasemap) => {
+        // Only work with the basemaps that fullfilled
+        promiseBasemap
+          .filter((promise) => promise.status === 'fulfilled')
+          .map((promise) => promise as PromiseFulfilledResult<TypeBasemapProps | undefined>)
+          .forEach((promise) => {
+            // If any response
+            if (promise.value) {
+              // Get the value
+              const basemap = promise.value;
+
+              // get thumbnail and info (name and description) for core basemap
+              const { name, description } = getInfo(basemap.type.split('-'));
+              basemap.thumbnailUrl = getThumbnailUrl(basemap.type.split('-'), storeProjection, language);
+              basemap.name = name;
+              basemap.description = description;
+
+              setBasemapList((prevArray) => [...prevArray, basemap]);
+
+              // set basemap if previously selected in previous projection
+              const id = `${basemap.basemapOptions.shaded ? 'shaded' : ''}${basemap.basemapOptions.labeled ? 'label' : ''}`;
+              if (basemap && id === activeBasemapId && !isInit) {
+                setBasemap(activeBasemapId);
+                isInit = true;
+              }
+            }
+          });
+      })
+      .catch((error) => {
+        // Log
+        logger.logPromiseFailed('promiseBasemaps in createBasemapArray in BasemapPanel', error);
+      });
 
     // if previous basemap does not exist in previous projection, init first one
     if (!isInit) setBasemap(basemapList[0] as unknown as string);
@@ -218,17 +239,25 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
     setBasemap('nogeom');
     setMapProjection(projection as TypeValidMapProjectionCodes);
 
-    createBasemapArray(projection);
-
-    // emit an event to let know map view projection as changed
-    myMap.setProjection(projection);
+    createBasemapArray(projection)
+      .then(() => {
+        // emit an event to let know map view projection as changed
+        myMap.setProjection(projection);
+      })
+      .catch((error) => {
+        // Log
+        logger.logPromiseFailed('createBasemapArray in setSelectedProjection in basemap-panel', error);
+      });
   };
 
   /**
    * load existing basemaps and create new basemaps
    */
   useEffect(() => {
-    createBasemapArray(mapProjection);
+    createBasemapArray(mapProjection).catch((error) => {
+      // Log
+      logger.logPromiseFailed('createBasemapArray in useEffect in basemap-panel', error);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language]);
 

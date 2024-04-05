@@ -28,6 +28,7 @@ export type TypeBasemapOptions = {
  */
 export type TypeBasemapProps = {
   basemapId?: string;
+  basemapOptions: TypeBasemapOptions;
   name: string;
   type: string;
   description: string;

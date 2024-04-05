@@ -36,7 +36,7 @@ export interface ILayerState {
     setLayerDeleteInProgress: (newVal: boolean) => void;
     getLayerDeleteInProgress: () => boolean;
     deleteLayer: (layerPath: string) => void;
-    zoomToLayerExtent: (layerPath: string) => void;
+    zoomToLayerExtent: (layerPath: string) => Promise<void>;
   };
 }
 
@@ -243,11 +243,12 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
         api.maps[get().mapId].layer.removeLayersUsingPath(layerPath);
       },
-      zoomToLayerExtent: (layerPath: string) => {
+      zoomToLayerExtent: (layerPath: string): Promise<void> => {
         const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
         const layer = findLayerByPath(get().layerState.legendLayers, layerPath);
         const { bounds } = layer as TypeLegendLayer;
-        if (bounds) MapEventProcessor.zoomToExtent(get().mapId, bounds, options);
+        if (bounds) return MapEventProcessor.zoomToExtent(get().mapId, bounds, options);
+        return Promise.resolve();
       },
     },
   } as ILayerState;

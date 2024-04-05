@@ -355,14 +355,23 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       api.plugin
         .loadScript('time-slider')
         .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
-          api.plugin.addPlugin(
-            'time-slider',
-            mapId,
-            constructor,
-            toJsonObject({
+          api.plugin
+            .addPlugin(
+              'time-slider',
               mapId,
-            })
-          );
+              constructor,
+              toJsonObject({
+                mapId,
+              })
+            )
+            .catch((error) => {
+              // Log
+              logger.logPromiseFailed('api.plugin.addPlugin(time-slider) in useEffect in FooterBar', error);
+            });
+        })
+        .catch((error) => {
+          // Log
+          logger.logPromiseFailed('api.plugin.loadScript(time-slider) in useEffect in FooterBar', error);
         });
     }
 
@@ -371,14 +380,23 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       api.plugin
         .loadScript('geochart')
         .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
-          api.plugin.addPlugin(
-            'geochart',
-            mapId,
-            constructor,
-            toJsonObject({
+          api.plugin
+            .addPlugin(
+              'geochart',
               mapId,
-            })
-          );
+              constructor,
+              toJsonObject({
+                mapId,
+              })
+            )
+            .catch((error) => {
+              // Log
+              logger.logPromiseFailed('api.plugin.addPlugin(geochart) in useEffect in FooterBar', error);
+            });
+        })
+        .catch((error) => {
+          // Log
+          logger.logPromiseFailed('api.plugin.loadScript(geochart) in useEffect in FooterBar', error);
         });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
