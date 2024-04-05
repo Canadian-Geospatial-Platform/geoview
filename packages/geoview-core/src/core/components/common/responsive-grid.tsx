@@ -21,7 +21,7 @@ interface ResponsiveGridPanelProps extends GridProps {
  * @returns JSX.Element
  */
 const ResponsiveGridRoot = forwardRef(({ children, ...rest }: ResponsiveGridProps, ref) => (
-  <Grid component="div" container {...rest} paddingLeft={12} paddingRight={12} ref={ref}>
+  <Grid component="div" container {...rest} paddingLeft={12} paddingRight={12} paddingBottom={12} ref={ref}>
     {children}
   </Grid>
 ));
