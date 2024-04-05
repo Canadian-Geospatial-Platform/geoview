@@ -3,10 +3,11 @@ import { FormControl, InputLabel, NativeSelect } from '@mui/material';
 import { useTimeSliderLayers, useTimeSliderStoreActions } from 'geoview-core/src/core/stores';
 import { getLocalizedValue } from 'geoview-core/src/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
+import { logger } from 'geoview-core/src/core/utils/logger';
 import { getSxClasses } from './time-slider-style';
 import { ConfigProps } from './time-slider-types';
 
-interface TimeSliderPanelProps {
+interface TimeSliderProps {
   config: ConfigProps;
   mapId: string;
   layerPath: string;
@@ -15,14 +16,17 @@ interface TimeSliderPanelProps {
 /**
  * Creates a panel with time sliders
  *
- * @param {TimeSliderPanelProps} TimeSliderPanelProps time slider panel properties
+ * @param {TimeSliderProps} props - Time slider properties
  * @returns {JSX.Element} the slider panel
  */
-export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
+export function TimeSlider(props: TimeSliderProps): JSX.Element {
+  // Log
+  logger.logTraceRender('geoview-time-slider/time-slider', props);
+
   const { cgpv } = window;
-  const { config, layerPath, mapId } = TimeSliderPanelProps;
+  const { config, layerPath, mapId } = props;
   const { api, react, ui } = cgpv;
-  const { useState, useRef, useEffect } = react;
+  const { useState, useRef, useEffect, useCallback } = react;
   const {
     Grid,
     Slider,
@@ -77,6 +81,9 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
 
   // slider config
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('TIME-SLIDER - mount');
+
     // TODO: add mechanism to initialize these values during store onInitialize
     const sliderConfig = config?.sliders?.find((o: { layerPaths: string[] }) => o.layerPaths.includes(layerPath));
     if (title === undefined) setTitle(layerPath, getLocalizedValue(sliderConfig?.title, displayLanguage) || '');
@@ -88,6 +95,9 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
   }, []);
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('TIME-SLIDER - config layerPath', config, layerPath);
+
     const sliderConfig = config?.sliders?.find((o: { layerPaths: string[] }) => o.layerPaths.includes(layerPath));
     if (sliderConfig?.defaultValue) {
       // update values based on slider's default value
@@ -135,19 +145,6 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
         ? `${timeframe === 'day' ? new Date(timeMarks[i]).toTimeString().split(' ')[0] : new Date(timeMarks[i]).toISOString().slice(5, 10)}`
         : new Date(timeMarks[i]).toISOString().slice(0, 10),
     });
-  }
-
-  /**
-   * Create labels for values on slider
-   *
-   * @param {number} value The value of the slider handle
-   * @returns {string} A formatted time string or ISO date string
-   */
-  function valueLabelFormat(value: number): string {
-    // If timeframe is a single day, use time. If it is a single year, drop year from dates.
-    if (timeframe === 'day') return new Date(value).toTimeString().split(' ')[0].replace(/^0/, '');
-    if (timeframe === 'year') return new Date(value).toISOString().slice(5, 10);
-    return new Date(value).toISOString().slice(0, 10);
   }
 
   /**
@@ -243,6 +240,9 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
 
   // #region USE EFFECT
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('TIME-SLIDER - values filtering', values, filtering);
+
     // If slider cycle is active, pause before advancing to next increment
     if (isPlaying) {
       if (reversed) playIntervalRef.current = window.setTimeout(() => moveBack(), delay);
@@ -253,6 +253,9 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
 
   // When slider cycle is activated, advance to first increment without delay
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('TIME-SLIDER - isPlaying', isPlaying);
+
     if (isPlaying) {
       if (reversed) moveBack();
       else moveForward();
@@ -292,13 +295,6 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
     }
   }
 
-  function handleSliderChange(event: number | number[]): void {
-    clearTimeout(playIntervalRef.current);
-    setIsPlaying(false);
-    sliderDeltaRef.current = undefined;
-    setValues(layerPath, event as number[]);
-  }
-
   function handleTimeChange(event: React.ChangeEvent<HTMLSelectElement>): void {
     setDelay(layerPath, event.target.value as unknown as number);
   }
@@ -325,6 +321,38 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
     return text;
   }
 
+  const handleSliderChange = useCallback(
+    (newValues: number | number[]): void => {
+      // Log
+      logger.logTraceUseCallback('TIME-SLIDER - handleSliderChange', layerPath);
+
+      clearTimeout(playIntervalRef.current);
+      setIsPlaying(false);
+      sliderDeltaRef.current = undefined;
+      setValues(layerPath, newValues as number[]);
+    },
+    [layerPath, setValues]
+  );
+
+  /**
+   * Create labels for values on slider
+   *
+   * @param {number} theValue - The value of the slider handle
+   * @returns {string} A formatted time string or ISO date string
+   */
+  const handleLabelFormat = useCallback(
+    (theValue: number): string => {
+      // Log
+      logger.logTraceUseCallback('TIME-SLIDER - handleLabelFormat', timeframe);
+
+      // If timeframe is a single day, use time. If it is a single year, drop year from dates.
+      if (timeframe === 'day') return new Date(theValue).toTimeString().split(' ')[0].replace(/^0/, '');
+      if (timeframe === 'year') return new Date(theValue).toISOString().slice(5, 10);
+      return new Date(theValue).toISOString().slice(0, 10);
+    },
+    [timeframe]
+  );
+
   return (
     <Grid>
       <div style={sxClasses.rightPanelContainer}>
@@ -347,7 +375,7 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
                 placement="top"
                 enterDelay={1000}
               >
-                <Checkbox checked={filtering} onChange={(event: never, child: boolean) => handleCheckbox(child)} />
+                <Checkbox checked={filtering} onChange={(event: never, child: boolean): void => handleCheckbox(child)} />
               </Tooltip>
             </div>
           </Grid>
@@ -355,17 +383,17 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps) {
         <Grid item xs={12}>
           <div style={{ textAlign: 'center', paddingTop: '20px' }}>
             <Slider
+              key={values[1] ? values[1] + values[0] : values[0]}
               sliderId={layerPath}
               mapId={mapId}
               style={{ width: '80%', color: 'primary' }}
               min={minAndMax[0]}
               max={minAndMax[1]}
               value={values}
-              valueLabelFormat={(value: number) => valueLabelFormat(value)}
               marks={sliderMarks}
               step={!discreteValues ? null : 0.1}
-              customOnChange={(event: number | number[]) => handleSliderChange(event)}
-              key={values[1] ? values[1] + values[0] : values[0]}
+              onChangeCommitted={handleSliderChange}
+              onValueDisplay={handleLabelFormat}
             />
           </div>
         </Grid>

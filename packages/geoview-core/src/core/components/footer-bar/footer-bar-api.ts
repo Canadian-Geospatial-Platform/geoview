@@ -1,8 +1,7 @@
-import { api } from '@/app';
-
 import { TypeTabs } from '@/ui/tabs/tabs';
 import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { sanitizeHtmlContent } from '@/core/utils/utilities';
 
 /**
@@ -12,27 +11,89 @@ import { sanitizeHtmlContent } from '@/core/utils/utilities';
  * @class
  */
 export class FooterBarApi {
-  mapId!: string;
+  mapId: string;
 
   // array that hold added tabs
   tabs: TypeTabs[] = [];
 
+  /** Callback handlers for the footerbar tab created event. */
+  #onFooterTabCreatedHandlers: FooterTabCreatedDelegate[] = [];
+
+  /** Callback handlers for the footerbar tab removed event. */
+  #onFooterTabRemovedHandlers: FooterTabRemovedDelegate[] = [];
+
   /**
-   * initialize the footer tabs api
+   * Instantiates a FooterBarApi class.
    *
-   * @param mapId the id of the map this footer tabs belongs to
+   * @param {string} mapId - The map id this footer bar api belongs to
    */
   constructor(mapId: string) {
     this.mapId = mapId;
   }
 
   /**
-   * Create a tab on the footer bar
+   * Emits an event to all registered footerbar tab created event handlers.
+   * @param {FooterTabCreatedEvent} event - The event to emit.
+   * @private
+   */
+  #emitFooterTabCreated(event: FooterTabCreatedEvent): void {
+    // Emit the footerbar tab created event
+    EventHelper.emitEvent(this, this.#onFooterTabCreatedHandlers, event);
+  }
+
+  /**
+   * Registers an event handler for footerbar tab created events.
+   * @param {FooterTabCreatedDelegate} callback - The callback to be executed whenever the event is emitted.
+   */
+  onFooterTabCreated(callback: FooterTabCreatedDelegate): void {
+    // Register the footerbar tab created event callback
+    EventHelper.onEvent(this.#onFooterTabCreatedHandlers, callback);
+  }
+
+  /**
+   * Unregisters an event handler for footerbar tab created events.
+   * @param {FooterTabCreatedDelegate} callback - The callback to stop being called whenever the event is emitted.
+   */
+  offFooterTabCreated(callback: FooterTabCreatedDelegate): void {
+    // Unregister the footerbar tab created event callback
+    EventHelper.offEvent(this.#onFooterTabCreatedHandlers, callback);
+  }
+
+  /**
+   * Emits an event to all registered footerbar tab removed event handlers.
+   * @param {FooterTabRemovedEvent} event - The event to emit.
+   * @private
+   */
+  #emitFooterTabRemoved(event: FooterTabRemovedEvent): void {
+    // Emit the footerbar tab removed event
+    EventHelper.emitEvent(this, this.#onFooterTabRemovedHandlers, event);
+  }
+
+  /**
+   * Registers an event handler for footerbar tab removed events.
+   * @param {FooterTabRemovedDelegate} callback - The callback to be executed whenever the event is emitted.
+   */
+  onFooterTabRemoved(callback: FooterTabRemovedDelegate): void {
+    // Register the footerbar tab removed event callback
+    EventHelper.onEvent(this.#onFooterTabRemovedHandlers, callback);
+  }
+
+  /**
+   * Unregisters an event handler for footerbar removed events.
+   * @param {FooterTabRemovedDelegate} callback - The callback to stop being called whenever the event is emitted.
+   */
+  offFooterTabRemoved(callback: FooterTabRemovedDelegate): void {
+    // Unregister the footerbar removed event callback
+    EventHelper.offEvent(this.#onFooterTabRemovedHandlers, callback);
+  }
+
+  /**
+   * Creates a tab on the footer bar
    *
-   * @param {TypeTabs} tabProps the properties of the tab to be created
+   * @param {TypeTabs} tabProps - The properties of the tab to be created
    *
    */
-  createTab = (tabProps: TypeTabs) => {
+  createTab(tabProps: TypeTabs): void {
     if (tabProps) {
       // find if tab value exists
       const tab = this.tabs.find((t) => t.id === tabProps.id);
@@ -47,17 +108,17 @@ export class FooterBarApi {
         this.tabs.push(tabProps);
 
         // trigger an event that a new tab has been created
-        api.event.emitCreateFooterBarPanel(this.mapId, tabProps);
+        this.#emitFooterTabCreated({ tab: tabProps });
       }
     }
-  };
+  }
 
   /**
-   * Remove a tab by value
+   * Removes a tab by id
    *
-   * @param {string} id the id of the tab to be removed
+   * @param {string} id - The id of the tab to be removed
    */
-  removeTab = (id: string): void => {
+  removeTab(id: string): void {
     // find the tab to be removed
     const tabToRemove = this.tabs.find((tab) => tab.id === id);
 
@@ -66,20 +127,44 @@ export class FooterBarApi {
       this.tabs = this.tabs.filter((tab) => tab.id !== id);
 
       // trigger an event that a tab has been removed
-      api.event.emitRemoveFooterBarPanel(this.mapId, tabToRemove);
+      this.#emitFooterTabRemoved({ tabid: id });
     }
-  };
+  }
 
   /**
-   * Select a tab by id
+   * Selects a tab by id
    *
-   * @param {string} id the id of the tab to be selected
+   * @param {string} id - The id of the tab to be selected
    */
-  selectTab = (id: string): void => {
+  selectTab(id: string): void {
     // find the tab to be selected
     const tabToSelect = this.tabs.find((tab) => tab.id === id);
     if (tabToSelect) {
       UIEventProcessor.setActiveFooterBarTab(this.mapId, id);
     }
-  };
+  }
 }
+
+/**
+ * Define an event for the delegate
+ */
+export type FooterTabCreatedEvent = {
+  tab: TypeTabs;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type FooterTabCreatedDelegate = EventDelegateBase<FooterBarApi, FooterTabCreatedEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type FooterTabRemovedEvent = {
+  tabid: string;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type FooterTabRemovedDelegate = EventDelegateBase<FooterBarApi, FooterTabRemovedEvent>;
