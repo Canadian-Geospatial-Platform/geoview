@@ -142,11 +142,13 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
           fullWidth={fullWidth}
           isFullScreen={isFullScreen}
         >
-          {isFullScreen && <Box sx={{ position: 'relative', top: '10px', left: '10px', zIndex: 100 }}>
-            <FullScreenToggleButton isFullScreen={isFullScreen} onSetIsFullScreen={setIsFullScreen} />
-          </Box>}
+          {isFullScreen && (
+            <Box sx={{ position: 'relative', top: '10px', left: '10px', zIndex: 100 }}>
+              <FullScreenToggleButton isFullScreen={isFullScreen} onSetIsFullScreen={setIsFullScreen} />
+            </Box>
+          )}
 
-          <Box sx={sxClasses.rightGridContent} className={`${isFullScreen ? 'is-fullscreen': 'no-fullscreen'}`} >
+          <Box sx={sxClasses.rightGridContent} className={`${isFullScreen ? 'is-fullscreen' : 'no-fullscreen'}`}>
             {children}
           </Box>
         </ResponsiveGrid.Right>

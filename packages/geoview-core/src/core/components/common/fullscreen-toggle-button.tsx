@@ -1,8 +1,7 @@
-import React, { useState, useCallback, useEffect, Dispatch } from 'react';
-import { Box, FullscreenExitIcon, FullscreenIcon, IconButton } from '@/ui';
-import { logger } from '@/core/utils/logger';
+import React, { useEffect, Dispatch } from 'react';
 import { useTranslation } from 'react-i18next';
-
+import { FullscreenExitIcon, FullscreenIcon, IconButton } from '@/ui';
+import { logger } from '@/core/utils/logger';
 
 interface FullScreenToggleProps {
   isFullScreen: boolean;
@@ -15,7 +14,7 @@ interface FullScreenToggleProps {
  * @param {function} onSetIsFullScreen
  * @returns JSX.element
  */
-const FullScreenToggleButton = ({ isFullScreen, onSetIsFullScreen } : FullScreenToggleProps) => {
+function FullScreenToggleButton({ isFullScreen, onSetIsFullScreen }: FullScreenToggleProps) {
   const { t } = useTranslation();
 
   const toggleFullScreen = () => {
@@ -48,6 +47,6 @@ const FullScreenToggleButton = ({ isFullScreen, onSetIsFullScreen } : FullScreen
       {!isFullScreen ? <FullscreenIcon /> : <FullscreenExitIcon />}
     </IconButton>
   );
-};
+}
 
 export default FullScreenToggleButton;
