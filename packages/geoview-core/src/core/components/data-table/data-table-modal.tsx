@@ -129,8 +129,7 @@ export default function DataTableModal(): JSX.Element {
     return (layer?.features?.slice(0, 99).map((feature) => {
       return feature.fieldInfo;
     }) ?? []) as unknown as ColumnsType[];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layer?.fieldInfos]);
+  }, [layer?.features, layer?.fieldInfos]);
 
   useEffect(() => {
     // Log
