@@ -1,10 +1,8 @@
 import { useStore } from 'zustand';
-// import { type MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeLayerData } from '@/geo/utils/layer-set';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
-import { api } from '@/app';
 
 // Import { MRTColumnFiltersState } from 'material-react-table' fails - This is likely not portable. a type annotation is necessary
 // Create a type to mimic
@@ -166,8 +164,8 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
         });
       },
       triggerGetAllFeatureInfo(layerPath: string) {
-        // TODO: do not use api... pass layer object to data table event processor... or use api.... in processor
-        api.maps[get().mapId].layer.allFeatureInfoLayerSet.queryLayer(layerPath, 'all');
+        // Redirect to event processor
+        DataTableEventProcessor.triggerGetAllFeatureInfo(get().mapId, layerPath);
       },
     },
     // #endregion ACTIONS
@@ -181,9 +179,5 @@ export const useDataTableAllFeaturesDataArray = () => useStore(useGeoViewStore()
 export const useDataTableSelectedLayerPath = () => useStore(useGeoViewStore(), (state) => state.dataTableState.selectedLayerPath);
 export const useDataTableLayerSettings = () => useStore(useGeoViewStore(), (state) => state.dataTableState.layersDataTableSetting);
 export const useDatatableTableHeight = () => useStore(useGeoViewStore(), (state) => state.dataTableState.tableHeight);
-
-// TODO: not used anywhere... remove? check action as well
-// export const useDataTableIsEnlargeDataTable = () => useStore(useGeoViewStore(), (state) => state.dataTableState.isEnlargeDataTable);
-// export const useDatatableLayersData = () => useStore(useGeoViewStore(), (state) => state.dataTableState.activeLayerData);
 
 export const useDataTableStoreActions = () => useStore(useGeoViewStore(), (state) => state.dataTableState.actions);
