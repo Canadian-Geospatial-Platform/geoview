@@ -30,7 +30,7 @@ export function IconButton(props: TypeIconButtonProps): JSX.Element {
 
   const { t } = useTranslation<string>();
 
-  function getMaterialIconButton() {
+  function getMaterialIconButton(): JSX.Element {
     return (
       <MaterialIconButton
         id={id}

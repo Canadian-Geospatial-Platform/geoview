@@ -11,7 +11,7 @@ import { LeftPanel } from './left-panel/left-panel';
 import { logger } from '@/core/utils/logger';
 import { useAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
 
-export function LayersPanel() {
+export function LayersPanel(): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/layers-panel');
 
@@ -40,7 +40,7 @@ export function LayersPanel() {
   // Custom hook for calculating the height of footer panel
   const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'layers' });
 
-  const leftPanel = () => {
+  const leftPanel = (): JSX.Element => {
     return (
       <Box>
         <LeftPanel setIsLayersListPanelVisible={setIsLayersListPanelVisible} />
@@ -48,7 +48,7 @@ export function LayersPanel() {
     );
   };
 
-  const rightPanel = () => {
+  const rightPanel = (): JSX.Element | null => {
     if (selectedLayer && displayState === 'view') {
       return <LayerDetails layerDetails={selectedLayer} />;
     }

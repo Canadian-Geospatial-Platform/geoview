@@ -31,7 +31,7 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
     getIndexFromOrderedLayerInfo(a.layerPath) > getIndexFromOrderedLayerInfo(b.layerPath) ? 1 : -1
   );
 
-  const onDragEnd = (result: DropResult) => {
+  const onDragEnd = (result: DropResult): void => {
     // dropped outside the list
     if (!result.destination) {
       return;
@@ -46,7 +46,9 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
       .replace(/\s+/g, '-'); // Replace spaces with hyphens
   };
 
-  const getItemStyle = (isDragging: boolean, draggableStyle: DraggingStyle | NotDraggingStyle | undefined) => {
+  // ? I doubt we want to define an explicit type for style properties?
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getItemStyle = (isDragging: boolean, draggableStyle: DraggingStyle | NotDraggingStyle | undefined): any => {
     if (isDragging) {
       return {
         cursor: 'grab',
@@ -57,7 +59,9 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
     return { ...draggableStyle };
   };
 
-  const getListStyle = (isDraggingOver: boolean) => {
+  // ? I doubt we want to define an explicit type for style properties?
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getListStyle = (isDraggingOver: boolean): any => {
     if (isDraggingOver) {
       return {
         background: theme.palette.geoViewColor.grey.darken(0.5, 0.5),
@@ -68,7 +72,9 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
     };
   };
 
-  const getListClass = () => {
+  // ? I doubt we want to define an explicit type for style properties?
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getListClass = (): any => {
     if (depth === 0) {
       return sxClasses.list;
     }

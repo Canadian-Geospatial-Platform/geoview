@@ -12,9 +12,9 @@ interface LayerTitleProp {
  * @param {string} children the name of the layer.
  * @param {boolean} hideTitle hide the layer title for desktop view.
  * @param {boolean} fullWidth show and hide title when width of container is maximum.
- * @returns JSX.Element
+ * @returns {JSX.Element}
  */
-export function LayerTitle({ children, hideTitle, fullWidth }: LayerTitleProp) {
+export function LayerTitle({ children, hideTitle, fullWidth }: LayerTitleProp): JSX.Element {
   const theme = useTheme();
 
   return (

@@ -31,11 +31,11 @@ export function Attribution(): JSX.Element {
   // getStore value
   const mapAttribution = useMapAttribution();
 
-  const handleOpenPopover = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleOpenPopover = (event: React.MouseEvent<HTMLButtonElement>): void => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClosePopover = () => {
+  const handleClosePopover = (): void => {
     setAnchorEl(null);
   };
 

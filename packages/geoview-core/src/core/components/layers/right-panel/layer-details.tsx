@@ -76,11 +76,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     };
   }, [layersData, layerDetails, selectedLayer]);
 
-  const handleZoomTo = () => {
+  const handleZoomTo = (): void => {
     zoomToLayerExtent(layerDetails.layerPath);
   };
 
-  const handleOpenTable = () => {
+  const handleOpenTable = (): void => {
     openModal({ activeElementId: 'layerDataTable', callbackElementId: `table-details` });
   };
 
@@ -89,16 +89,16 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     if (bounds) layerDetails.bounds = bounds;
   }
 
-  const handleRefreshLayer = () => {
+  const handleRefreshLayer = (): void => {
     // TODO: Refresh the layer symbology on the map based on the selected symbology in the UI?
     logger.logDebug('Refresh is not implemented');
   };
 
-  const handleHighlightLayer = () => {
+  const handleHighlightLayer = (): void => {
     setHighlightLayer(layerDetails.layerPath);
   };
 
-  const getSubTitle = () => {
+  const getSubTitle = (): string => {
     if (layerDetails.children.length > 0) {
       return t('legend.subLayersCount').replace('{count}', layerDetails.children.length.toString());
     }
@@ -107,11 +107,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     return t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
   };
 
-  const allItemsChecked = () => {
+  const allItemsChecked = (): boolean => {
     return _.every(layerDetails.items, (i) => i.isVisible !== false);
   };
 
-  function renderItemCheckbox(item: TypeLegendItem) {
+  function renderItemCheckbox(item: TypeLegendItem): JSX.Element | null {
     // no checkbox for simple style layers
     if (
       layerDetails.styleConfig?.LineString?.styleType === 'simple' ||
@@ -136,7 +136,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     );
   }
 
-  function renderHeaderCheckbox() {
+  function renderHeaderCheckbox(): JSX.Element {
     if (!layerDetails.canToggle) {
       return (
         <IconButton disabled>
@@ -153,7 +153,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     );
   }
 
-  function renderItems() {
+  function renderItems(): JSX.Element {
     return (
       <Grid container direction="column" spacing={0} sx={sxClasses.itemsGrid} justifyContent="left" justifyItems="stretch">
         {layerDetails.items.length > 1 && (
@@ -181,7 +181,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     );
   }
 
-  function renderLayers(startLayer: TypeLegendLayer) {
+  function renderLayers(startLayer: TypeLegendLayer): JSX.Element {
     return (
       <List>
         {startLayer.children.map((layer) => (
@@ -199,7 +199,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     );
   }
 
-  function renderDetailsButton() {
+  function renderDetailsButton(): JSX.Element {
     if (layerDetails.controls?.table !== false)
       return (
         <IconButton id="table-details" tooltip="legend.tableDetails" className="style1" onClick={handleOpenTable}>
@@ -213,7 +213,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     );
   }
 
-  function renderHighlightButton() {
+  function renderHighlightButton(): JSX.Element {
     if (layerDetails.controls?.highlight !== false)
       return (
         <IconButton
@@ -231,7 +231,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     );
   }
 
-  function renderZoomButton() {
+  function renderZoomButton(): JSX.Element {
     if (layerDetails.controls?.zoom !== false)
       return (
         <IconButton tooltip="legend.zoomTo" onClick={handleZoomTo} className="style1" disabled={layerDetails.bounds === undefined}>
@@ -245,7 +245,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     );
   }
 
-  function renderLayerButtons() {
+  function renderLayerButtons(): JSX.Element {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px' }}>
         {isDataTableVisible && selectedLayer?.features?.length && renderDetailsButton()}

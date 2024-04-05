@@ -63,8 +63,9 @@ function AppStart(props: AppStartProps): JSX.Element {
 
   /**
    * Create maps from inline configs with class name geoview-map
+   * returns {JSX.Element}
    */
-  function getInlineMaps() {
+  function getInlineMaps(): JSX.Element {
     const i18nInstance = i18n.cloneInstance({
       lng: language,
       fallbackLng: language,

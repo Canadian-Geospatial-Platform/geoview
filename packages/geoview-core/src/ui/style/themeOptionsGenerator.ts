@@ -4,12 +4,14 @@ import { font, headingStyles, opacity, geoViewColors as defaultGeoViewColors, ge
 
 // this function is fixing tooltips not appearing in fullscreen mode, #1685
 // https://github.com/mui/material-ui/issues/15618#issuecomment-1893503162
-function tooltipsPopperContainer() {
+function tooltipsPopperContainer(): Element | null {
   // Use the fullscreen element if in fullscreen mode, otherwise just the document's body
   return document.fullscreenElement ?? document.body;
 }
 
-const getButtonStyleOverrides = (geoViewColors: IGeoViewColors) => ({
+// ? I doubt we want to define an explicit type for style properties?
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getButtonStyleOverrides = (geoViewColors: IGeoViewColors): any => ({
   '&.style1': {
     backgroundColor: 'transparent',
     border: `3px solid transparent`,

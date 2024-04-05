@@ -2,13 +2,13 @@ import { ReactElement, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import { ExportToCsv } from 'export-to-csv';
+import { ExportToCsv, Options } from 'export-to-csv';
 
 import { type MRT_ColumnDef as MRTColumnDef } from 'material-react-table';
 
 import { IconButton, DownloadIcon, Tooltip, Menu, MenuItem } from '@/ui';
-import { ColumnsType } from './data-table';
 import { logger } from '@/core/utils/logger';
+import { ColumnsType } from './data-table';
 
 interface ExportButtonProps {
   rows: ColumnsType[];
@@ -21,7 +21,6 @@ interface ExportButtonProps {
  * @param {ColumnsType} rows list of rows to be displayed in data table
  * @param {MRTColumnDef<ColumnsType>[]} columns array of object represent column header data.
  * @param {ReactElement} children Menu item to be rendered in Menu.
- *
  * @returns {JSX.Element} returns export button
  *
  */
@@ -37,7 +36,7 @@ function ExportButton({ rows, columns, children }: ExportButtonProps): JSX.Eleme
    * Show export menu.
    */
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>): void => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -45,27 +44,29 @@ function ExportButton({ rows, columns, children }: ExportButtonProps): JSX.Eleme
    * Close export menu.
    */
 
-  const handleClose = () => {
+  const handleClose = (): void => {
     setAnchorEl(null);
   };
 
   /**
    * Build CSV Options for download.
    */
-  const getCsvOptions = () => ({
-    fieldSeparator: ',',
-    quoteStrings: '"',
-    decimalSeparator: '.',
-    showLabels: true,
-    useBom: true,
-    useKeysAsHeaders: false,
-    headers: columns.map((c) => c.id as string),
-  });
+  const getCsvOptions = (): Options => {
+    return {
+      fieldSeparator: ',',
+      quoteStrings: '"',
+      decimalSeparator: '.',
+      showLabels: true,
+      useBom: true,
+      useKeysAsHeaders: false,
+      headers: columns.map((c) => c.id as string),
+    };
+  };
 
   /**
    * Export data table in csv format.
    */
-  const handleExportData = () => {
+  const handleExportData = (): void => {
     // format the rows for csv.
     const csvRows = rows.map((row) => {
       const mappedRow = Object.keys(row).reduce((acc, curr) => {

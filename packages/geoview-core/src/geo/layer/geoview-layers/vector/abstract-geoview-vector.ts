@@ -139,7 +139,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
             xhr.setRequestHeader(headerParameter, postSettings!.header![headerParameter]);
           });
       } else xhr.open('GET', url as string);
-      const onError = () => {
+      const onError = (): void => {
         vectorSource.removeLoadedExtent(extent);
         if (failure) failure();
       };
@@ -285,7 +285,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     try {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig(layerPath) as VectorLayerEntryConfig;
-      const layerFilter = (layer: BaseLayer) => {
+      const layerFilter = (layer: BaseLayer): boolean => {
         const layerSource = layer.get('layerConfig')?.source;
         const configSource = layerConfig?.source;
         return layerSource !== undefined && configSource !== undefined && layerSource === configSource;
@@ -361,7 +361,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {string} filter A filter to be used in place of the getViewFilter value.
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath: string, filter: string, CombineLegendFilter = true) {
+  applyViewFilter(layerPath: string, filter: string, CombineLegendFilter = true): void {
     const layerConfig = this.getLayerConfig(layerPath) as VectorLayerEntryConfig;
     // Log
     logger.logTraceCore('ABSTRACT-GEOVIEW-VECTOR - applyViewFilter', layerPath);

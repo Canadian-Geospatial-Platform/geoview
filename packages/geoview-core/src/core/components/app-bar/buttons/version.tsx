@@ -34,12 +34,12 @@ export default function Version(): JSX.Element {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [open, setOpen] = useState(false);
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>): void => {
     setAnchorEl(event.currentTarget);
     setOpen(!open);
   };
 
-  const handleClickAway = () => {
+  const handleClickAway = (): void => {
     if (open) {
       setOpen(false);
       setAnchorEl(null);

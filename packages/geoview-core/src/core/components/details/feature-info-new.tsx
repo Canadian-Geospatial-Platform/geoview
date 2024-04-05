@@ -57,7 +57,7 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
     };
   });
 
-  const handleSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSelect = (e: React.ChangeEvent<HTMLInputElement>): void => {
     e.stopPropagation();
 
     if (!checked) {
@@ -67,7 +67,7 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
     }
   };
 
-  const handleZoomIn = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleZoomIn = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>): Promise<void> => {
     e.stopPropagation();
 
     // If the feature has an extent

@@ -54,8 +54,9 @@ export class Projection {
   // #region INITIALIZE SUPPORTED PROJECTIONS
   /**
    * Initialize WM Projection
+   * @private
    */
-  #initCRS84Projection() {
+  #initCRS84Projection(): void {
     const newDefinition = proj4.defs('EPSG:4326');
     newDefinition.axis = 'neu';
     proj4.defs('http://www.opengis.net/def/crs/OGC/1.3/CRS84', newDefinition);
@@ -66,8 +67,9 @@ export class Projection {
 
   /**
    * Initialize WM Projection
+   * @private
    */
-  #initWMProjection() {
+  #initWMProjection(): void {
     const projection = olGetProjection('EPSG:3857');
 
     if (projection) this.projections['3857'] = projection;
@@ -75,8 +77,9 @@ export class Projection {
 
   /**
    * initialize LCC projection
+   * @private
    */
-  #initLCCProjection() {
+  #initLCCProjection(): void {
     // define 3978 projection
     proj4.defs(
       'EPSG:3978',

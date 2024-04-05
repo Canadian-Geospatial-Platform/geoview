@@ -165,11 +165,11 @@ dayjs.extend(localizedFormat);
 const INVALID_DATE = 'Invalid Date';
 const INVALID_TIME_DIMENSION = 'Invalid Time Dimension';
 const INVALID_TIME_DIMENSION_DURATION = 'Invalid Time Dimension Duration';
-const isValidDate = (date: string) => dayjs(date).isValid();
-const isValidDuration = (durationCheck: string) => dayjs.isDuration(dayjs.duration(durationCheck));
-const isDiscreteRange = (ogcTimeDimension: string) => ogcTimeDimension.split(',').length > 1;
-const isAbsoluteRange = (ogcTimeDimension: string) => ogcTimeDimension.split('/').length === 3;
-const isRelativeRange = (ogcTimeDimension: string) => ogcTimeDimension.split('/').length === 2;
+const isValidDate = (date: string): boolean => dayjs(date).isValid();
+const isValidDuration = (durationCheck: string): boolean => dayjs.isDuration(dayjs.duration(durationCheck));
+const isDiscreteRange = (ogcTimeDimension: string): boolean => ogcTimeDimension.split(',').length > 1;
+const isAbsoluteRange = (ogcTimeDimension: string): boolean => ogcTimeDimension.split('/').length === 3;
+const isRelativeRange = (ogcTimeDimension: string): boolean => ogcTimeDimension.split('/').length === 2;
 
 /**
  * Class used to handle date as ISO 8601
@@ -298,7 +298,7 @@ export class DateMgt {
     const { startTimeField, timeExtent, timeInterval, timeIntervalUnits } = timeDimensionESRI;
 
     // create interval string
-    const calcDuration = () => {
+    const calcDuration = (): string => {
       let interval = '';
       if (timeIntervalUnits !== undefined && timeInterval !== undefined) {
         if (timeUnitsESRI[timeIntervalUnits] !== undefined) {

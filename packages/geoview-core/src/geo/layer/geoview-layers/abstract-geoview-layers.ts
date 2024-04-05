@@ -160,7 +160,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {TypeGeoviewLayer} mapLayerConfig The GeoView layer configuration options.
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration
    */
-  private setListOfLayerEntryConfig(mapLayerConfig: TypeGeoviewLayerConfig, listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
+  private setListOfLayerEntryConfig(mapLayerConfig: TypeGeoviewLayerConfig, listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
     if (listOfLayerEntryConfig.length === 0) return;
     if (listOfLayerEntryConfig.length === 1) this.listOfLayerEntryConfig = listOfLayerEntryConfig;
     else {
@@ -306,7 +306,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries to process.
    */
-  initRegisteredLayers(layerApi: LayerApi, listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig) {
+  initRegisteredLayers(layerApi: LayerApi, listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig, i) => {
       if (layerApi.isRegistered(layerConfig)) {
         this.layerLoadError.push({
@@ -827,8 +827,9 @@ export abstract class AbstractGeoViewLayer {
   /**
    * Queries the legend.
    * This function raises legend querying and queried events.
+   * @returns {Promise<TypeLegend | null>} The promise when the legend (or null) will be received
    */
-  queryLegend(layerPath: string) {
+  queryLegend(layerPath: string): Promise<TypeLegend | null> {
     // Emit that the legend has been queried
     this.#emitLegendQuerying({ layerPath });
 
@@ -893,7 +894,7 @@ export abstract class AbstractGeoViewLayer {
    */
   getMetadataBounds(layerPath: string, projectionCode: string | number | undefined = undefined): Extent | undefined {
     let bounds: Extent | undefined;
-    const processGroupLayerBounds = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {
+    const processGroupLayerBounds = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void => {
       listOfLayerEntryConfig.forEach((layerConfig) => {
         if (layerEntryIsGroupLayer(layerConfig)) processGroupLayerBounds(layerConfig.listOfLayerEntryConfig);
         else if (layerConfig.initialSettings?.bounds) {
@@ -979,7 +980,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {Extent} layerExtent The extent to assign to the layer.
    * @param {string} layerPath The layer path to the layer's configuration.
    */
-  setExtent(layerExtent: Extent, layerPath: string) {
+  setExtent(layerExtent: Extent, layerPath: string): void {
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) olLayer.setExtent(layerExtent);
   }
@@ -1003,7 +1004,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {string} layerPath The layer path to the layer's configuration.
    *
    */
-  setOpacity(layerOpacity: number, layerPath: string) {
+  setOpacity(layerOpacity: number, layerPath: string): void {
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) olLayer.setOpacity(layerOpacity);
   }
@@ -1026,7 +1027,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {boolean} layerVisibility The visibility of the layer.
    * @param {string} layerPath The layer path to the layer's configuration.
    */
-  setVisible(layerVisibility: boolean, layerPath: string) {
+  setVisible(layerVisibility: boolean, layerPath: string): void {
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) {
       olLayer.setVisible(layerVisibility);
@@ -1052,7 +1053,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {boolean} layerVisibility The min zoom of the layer.
    * @param {string} layerPath The layer path to the layer's configuration.
    */
-  setMinZoom(minZoom: number, layerPath: string) {
+  setMinZoom(minZoom: number, layerPath: string): void {
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) olLayer.setMinZoom(minZoom);
   }
@@ -1075,7 +1076,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {boolean} layerVisibility The max zoom of the layer.
    * @param {string} layerPath The layer path to the layer's configuration.
    */
-  setMaxZoom(maxZoom: number, layerPath: string) {
+  setMaxZoom(maxZoom: number, layerPath: string): void {
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) olLayer.setMaxZoom(maxZoom);
   }
@@ -1356,7 +1357,7 @@ export abstract class AbstractGeoViewLayer {
   calculateBounds(layerPath: string): Extent | undefined {
     try {
       let bounds: Extent | undefined;
-      const processGroupLayerBounds = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {
+      const processGroupLayerBounds = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void => {
         listOfLayerEntryConfig.forEach((layerConfig) => {
           if (layerEntryIsGroupLayer(layerConfig)) processGroupLayerBounds(layerConfig.listOfLayerEntryConfig);
           else {
@@ -1386,7 +1387,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer's configuration.
    * @param {string} errorMessage The error message.
    */
-  setAllLayerStatusTo(newStatus: TypeLayerStatus, listOfLayerEntryConfig: TypeListOfLayerEntryConfig, errorMessage?: string) {
+  setAllLayerStatusTo(newStatus: TypeLayerStatus, listOfLayerEntryConfig: TypeListOfLayerEntryConfig, errorMessage?: string): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       if (layerEntryIsGroupLayer(layerConfig)) this.setAllLayerStatusTo(newStatus, layerConfig.listOfLayerEntryConfig, errorMessage);
       else {
@@ -1408,7 +1409,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param {string} layerPath The layerpath to the node we want to delete.
    */
-  removeConfig(layerPath: string) {
+  removeConfig(layerPath: string): void {
     const layerConfigToRemove = this.getLayerConfig(layerPath) as AbstractBaseLayerEntryConfig;
     if (layerConfigToRemove.entryType !== CONST_LAYER_ENTRY_TYPES.GROUP) this.unregisterFromLayerSets(layerConfigToRemove);
     delete api.maps[this.mapId].layer.registeredLayers[layerPath];

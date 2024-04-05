@@ -144,7 +144,7 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
    * Removes the swiper functionality for all layer paths
    * @param {string} mapId The map ID
    */
-  static removeAll(mapId: string) {
+  static removeAll(mapId: string): void {
     // The processor needs an initialized layer paths store which is only initialized if the Swiper Plugin exists.
     // Therefore, we validate its existence first.
     if (!this.getSwiperState(mapId)) return;

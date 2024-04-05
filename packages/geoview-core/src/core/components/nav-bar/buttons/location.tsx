@@ -25,12 +25,12 @@ export default function Location(): JSX.Element {
   /**
    * Zoom to user location
    */
-  function zoomToMe() {
-    function success(position: GeolocationPosition) {
+  function zoomToMe(): void {
+    function success(position: GeolocationPosition): void {
       zoomToMyLocation(position);
     }
 
-    function error(err: GeolocationPositionError) {
+    function error(err: GeolocationPositionError): void {
       addNotification({
         key: 'location',
         message: `ERROR(${err.code}): ${err.message}`,
