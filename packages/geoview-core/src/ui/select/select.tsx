@@ -18,7 +18,6 @@ import { getSxClasses } from './select-style';
  * Custom MUI Select properties
  */
 type TypeSelectProps = SelectProps & {
-  mapId?: string;
   fullWidth?: boolean;
   menuItems: TypeMenuItemProps[];
   inputLabel: InputLabelProps;

@@ -30,7 +30,7 @@ const reactRoot: Record<string, Root> = {};
  *
  * @param {string} mapId - The map id to unmount
  */
-export function unmountMap(mapId: string) {
+export function unmountMap(mapId: string): void {
   // Unmount the react root
   reactRoot[mapId]?.unmount();
 }
