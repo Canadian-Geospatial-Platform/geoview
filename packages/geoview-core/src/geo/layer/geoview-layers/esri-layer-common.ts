@@ -64,7 +64,10 @@ export async function commonfetchServiceMetadata(this: EsriDynamic | EsriFeature
  * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
  * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
  */
-export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFeature, listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
+export function commonValidateListOfLayerEntryConfig(
+  this: EsriDynamic | EsriFeature,
+  listOfLayerEntryConfig: TypeListOfLayerEntryConfig
+): void {
   listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig, i) => {
     if (layerConfig.layerStatus === 'error') return;
     const { layerPath } = layerConfig;
@@ -214,7 +217,7 @@ export function commonProcessTemporalDimension(
   esriTimeDimension: TypeJsonObject,
   layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig,
   singleHandle?: boolean
-) {
+): void {
   if (esriTimeDimension !== undefined) {
     layer.layerTemporalDimension[layerConfig.layerPath] = api.utilities.date.createDimensionFromESRI(
       Cast<TimeDimensionESRI>(esriTimeDimension),
@@ -234,7 +237,7 @@ export function commonProcessTemporalDimension(
 export function commonProcessFeatureInfoConfig(
   this: EsriDynamic | EsriFeature | EsriImage,
   layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
-) {
+): void {
   const { layerPath } = layerConfig;
   const layerMetadata = this.layerMetadata[layerPath];
   const queryable = (layerMetadata.capabilities as string).includes('Query');
@@ -308,7 +311,7 @@ export function commonProcessFeatureInfoConfig(
 export function commonProcessInitialSettings(
   this: EsriDynamic | EsriFeature | EsriImage,
   layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
-) {
+): void {
   // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
   const layerMetadata = this.layerMetadata[layerConfig.layerPath];
   if (layerConfig.initialSettings?.states?.visible === undefined)

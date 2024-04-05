@@ -62,9 +62,9 @@ export default function DataTableModal(): JSX.Element {
    * Create data table body cell
    *
    * @param {string} cellValue cell value to be displayed in cell
-   * @returns JSX.Element
+   * @returns {JSX.Element}
    */
-  const getCellValue = (cellValue: string) => {
+  const getCellValue = (cellValue: string): JSX.Element => {
     return (
       <Box component="div" sx={sxClasses.tableCell}>
         {cellValue}

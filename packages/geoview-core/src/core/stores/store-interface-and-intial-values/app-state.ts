@@ -242,19 +242,25 @@ export interface TypeGuideObject {
 // **********************************************************
 // App state selectors
 // **********************************************************
-export const useAppCircularProgressActive = () => useStore(useGeoViewStore(), (state) => state.appState.isCircularProgressActive);
-export const useAppCrosshairsActive = () => useStore(useGeoViewStore(), (state) => state.appState.isCrosshairsActive);
-export const useAppDisplayLanguage = () => useStore(useGeoViewStore(), (state) => state.appState.displayLanguage);
-export const useAppDisplayTheme = () => useStore(useGeoViewStore(), (state) => state.appState.displayTheme);
-export const useAppFullscreenActive = () => useStore(useGeoViewStore(), (state) => state.appState.isFullscreenActive);
-export const useAppGeolocatorServiceURL = () => useStore(useGeoViewStore(), (state) => state.appState.geolocatorServiceURL);
-export const useAppGuide = () => useStore(useGeoViewStore(), (state) => state.appState.guide);
-export const useAppNotifications = () => useStore(useGeoViewStore(), (state) => state.appState.notifications);
-export const useAppSuportedLanguages = () => useStore(useGeoViewStore(), (state) => state.appState.suportedLanguages);
+export const useAppCircularProgressActive = (): boolean => useStore(useGeoViewStore(), (state) => state.appState.isCircularProgressActive);
+export const useAppCrosshairsActive = (): boolean => useStore(useGeoViewStore(), (state) => state.appState.isCrosshairsActive);
+export const useAppDisplayLanguage = (): TypeDisplayLanguage => useStore(useGeoViewStore(), (state) => state.appState.displayLanguage);
+export const useAppDisplayTheme = (): TypeDisplayTheme => useStore(useGeoViewStore(), (state) => state.appState.displayTheme);
+export const useAppFullscreenActive = (): boolean => useStore(useGeoViewStore(), (state) => state.appState.isFullscreenActive);
+export const useAppGeolocatorServiceURL = (): string | undefined =>
+  useStore(useGeoViewStore(), (state) => state.appState.geolocatorServiceURL);
+export const useAppGuide = (): TypeGuideObject | undefined => useStore(useGeoViewStore(), (state) => state.appState.guide);
+export const useAppNotifications = (): NotificationDetailsType[] => useStore(useGeoViewStore(), (state) => state.appState.notifications);
+export const useAppSuportedLanguages = (): TypeDisplayLanguage[] =>
+  useStore(useGeoViewStore(), (state) => state.appState.suportedLanguages);
 
 // GV these 2 selector are use in app-start.tsx before context is assigned to the map
 // GV DO NOT USE this technique elsewhere, it is only to reload language and theme
-export const useAppDisplayLanguageById = (mapId: string) => useStore(getGeoViewStore(mapId), (state) => state.appState.displayLanguage);
-export const useAppDisplayThemeById = (mapId: string) => useStore(getGeoViewStore(mapId), (state) => state.appState.displayTheme);
+export const useAppDisplayLanguageById = (mapId: string): TypeDisplayLanguage =>
+  useStore(getGeoViewStore(mapId), (state) => state.appState.displayLanguage);
+export const useAppDisplayThemeById = (mapId: string): TypeDisplayTheme =>
+  useStore(getGeoViewStore(mapId), (state) => state.appState.displayTheme);
 
-export const useAppStoreActions = () => useStore(useGeoViewStore(), (state) => state.appState.actions);
+// TODO: Refactor - We should explicit a type for the appState.actions
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const useAppStoreActions = (): any => useStore(useGeoViewStore(), (state) => state.appState.actions);

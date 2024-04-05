@@ -246,7 +246,7 @@ export class LayerApi {
    * @param {MapConfigLayerEntry} geoviewLayerConfig The Map Config Layer Entry in error.
    * @private
    */
-  #printDuplicateGeoviewLayerConfigError(mapConfigLayerEntry: MapConfigLayerEntry) {
+  #printDuplicateGeoviewLayerConfigError(mapConfigLayerEntry: MapConfigLayerEntry): void {
     // TODO: find a more centralized way to trap error and display message
     api.maps[this.mapId].notifications.showError('validation.layer.usedtwice', [mapConfigLayerEntry.geoviewLayerId, this.mapId]);
     // Log
@@ -480,7 +480,7 @@ export class LayerApi {
    * @param {GeoViewLayerRegistrationEvent} registrationEvent The registration event
    * @private
    */
-  #handleLayerStatusChanged(config: ConfigBaseClass, layerStatusEvent: LayerStatusChangedEvent) {
+  #handleLayerStatusChanged(config: ConfigBaseClass, layerStatusEvent: LayerStatusChangedEvent): void {
     // The layer status has changed for the given config/layer, take care of it
 
     // Log - leaving the line in comment as it can be pretty useful to uncomment it sometimes

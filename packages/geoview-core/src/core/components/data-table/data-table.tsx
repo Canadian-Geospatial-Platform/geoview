@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, memo, ReactNode, isValidElement } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, memo, isValidElement } from 'react';
 
 import { useTranslation } from 'react-i18next';
 import debounce from 'lodash/debounce';
@@ -117,10 +117,10 @@ const NUMBER_FILTER: Record<string, string> = {
  * @param {string} mapId id of the map.
  * @param {string} layerKey key of the layer.
  * @param {number} tableHeight Height of the container which contains all rows.
- * @return {ReactElement} Data table as react element.
+ * @returns {JSX.Element} Data table as react element.
  */
 
-function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
+function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps): JSX.Element {
   const { t } = useTranslation();
 
   const sxtheme = useTheme();
@@ -173,11 +173,11 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
 
   /**
    * Create image button which will trigger lightbox.
-   * @param {string | number | ReactNode} cellValue value to be rendered in cell.
+   * @param {string | number} cellValue value to be rendered in cell.
    * @param {string} cellId id of the column.
-   * @returns
+   * @returns {string | number | JSX.Element}
    */
-  const createLightBoxButton = (cellValue: string | number | ReactNode, cellId: string) => {
+  const createLightBoxButton = (cellValue: string | number, cellId: string): string | number | JSX.Element => {
     if (typeof cellValue === 'string' && isImage(cellValue)) {
       return (
         <Button
@@ -197,10 +197,10 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
   /**
    * Create data table body cell with tooltip
    *
-   * @param {string | number | ReactNode} cellValue cell value to be displayed in cell
-   * @returns JSX.Element
+   * @param {string | number | JSX.Element} cellValue - Cell value to be displayed in cell
+   * @returns {JSX.Element}
    */
-  const getCellValueWithTooltip = (cellValue: string | number | ReactNode, cellId: string) => {
+  const getCellValueWithTooltip = (cellValue: string | number | JSX.Element, cellId: string): JSX.Element => {
     return typeof cellValue === 'string' || typeof cellValue === 'number' ? (
       <Tooltip title={cellValue} placement="top" arrow>
         <Box component="span" sx={density === 'compact' ? sxClasses.tableCell : {}}>
@@ -217,10 +217,10 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
   /**
    * Create Date filter with Datepicker.
    *
-   * @param {MRTColumn<ColumnsType>} column filter column.
-   * @returns JSX.Element
+   * @param {MRTColumn<ColumnsType>} column - Filter column.
+   * @returns {JSX.Element}
    */
-  const getDateFilter = (column: MRTColumn<ColumnsType>) => {
+  const getDateFilter = (column: MRTColumn<ColumnsType>): JSX.Element => {
     // eslint-disable-next-line no-underscore-dangle
     const filterFn = startCase(column.columnDef._filterFn).replaceAll(' ', '');
     const key = `filter${filterFn}` as keyof MRTLocalization;
@@ -252,7 +252,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
    * @param {Date} date value to be shown in column.
    * @returns JSX.Element
    */
-  const getDateColumnTooltip = (date: Date) => {
+  const getDateColumnTooltip = (date: Date): JSX.Element => {
     return (
       <Tooltip title={api.utilities.date.formatDate(date, 'YYYY-MM-DDThh:mm:ss')} arrow>
         <Box>{api.utilities.date.formatDate(date, 'YYYY-MM-DDThh:mm:ss')}</Box>
@@ -303,7 +303,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
           ],
         }),
         Header: ({ column }) => getTableHeader(column.columnDef.header),
-        Cell: ({ cell }) => getCellValueWithTooltip(cell.getValue() as string | number | ReactNode, cell.id),
+        Cell: ({ cell }) => getCellValueWithTooltip(cell.getValue() as string | number | JSX.Element, cell.id),
         ...(value.dataType === 'date' && {
           accessorFn: (row) => new Date(row[key].value as string),
           sortingFn: 'datetime',

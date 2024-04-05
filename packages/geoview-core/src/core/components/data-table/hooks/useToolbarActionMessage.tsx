@@ -21,7 +21,7 @@ interface UseSelectedRowMessageProps {
  * @param {MRTTableInstance} tableInstance  object of the data table.
  * @param {MRTColumnFiltersState} columnFilters column filters set by the user on the table.
  */
-export function useToolbarActionMessage({ data, columnFilters, globalFilter, layerPath, tableInstance }: UseSelectedRowMessageProps) {
+export function useToolbarActionMessage({ data, columnFilters, globalFilter, layerPath, tableInstance }: UseSelectedRowMessageProps): void {
   const { t } = useTranslation();
 
   // get store values

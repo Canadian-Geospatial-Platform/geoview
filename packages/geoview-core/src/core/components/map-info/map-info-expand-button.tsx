@@ -23,14 +23,14 @@ export function MapInfoExpandButton(): JSX.Element {
 
   const tooltipAndAria = expanded ? 'mapnav.collapseBtn' : 'mapnav.expandBtn';
 
-  const handleTransitionEnd = () => {
+  const handleTransitionEnd = (): void => {
     setMapInfoExpanded(true);
   };
 
   /**
    * Expand the map information bar
    */
-  const expandMapInfo = () => {
+  const expandMapInfo = (): void => {
     const mapInfo = document.getElementById(`${mapId}-mapInfo`);
     if (mapInfo) {
       mapInfo.style.transition = 'max-height 300ms ease-in 0s';
@@ -51,7 +51,7 @@ export function MapInfoExpandButton(): JSX.Element {
   /**
    * Collapse map information
    */
-  const collapseMapInfo = () => {
+  const collapseMapInfo = (): void => {
     const mapInfo = document.getElementById(`${mapId}-mapInfo`);
 
     if (mapInfo) {

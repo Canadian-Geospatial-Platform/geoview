@@ -1,7 +1,9 @@
 import { Theme } from '@mui/material/styles';
 
 // TODO: Refactor Note - No theme when an external component (e.g. GeoChart) uses a CGPV UI component. I had to add the "?" to support when no theme are set (no map).
-export const getSxClasses = (theme: Theme) => ({
+// ? I doubt we want to define an explicit type for style properties?
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const getSxClasses = (theme: Theme): any => ({
   formControl: {
     fontSize: theme.palette.geoViewFontSize?.sm,
     width: '100%',

@@ -23,7 +23,7 @@ export const helpOpenClosePanelByIdState = (
   groupName: string | undefined,
   setterCallback: Dispatch<SetStateAction<Record<string, Record<string, TypeButtonPanel>>>>,
   status: boolean
-) => {
+): void => {
   // Read the group name
   const theGroupName = groupName || helpFindGroupName(buttonPanelGroups, buttonId);
   if (!theGroupName) return;
@@ -66,7 +66,7 @@ export const helpOpenPanelById = (
   groupName: string | undefined,
   setterCallback: Dispatch<SetStateAction<Record<string, Record<string, TypeButtonPanel>>>>,
   closeAllCallback: () => void
-) => {
+): void => {
   // Read the group name
   const theGroupName = groupName || helpFindGroupName(buttonPanelGroups, buttonId);
 
@@ -84,7 +84,7 @@ export const helpClosePanelById = (
   groupName: string | undefined,
   setterCallback: Dispatch<SetStateAction<Record<string, Record<string, TypeButtonPanel>>>>,
   focusWhenNoElementCallback?: () => void
-) => {
+): void => {
   // Read the group name
   const theGroupName = groupName || helpFindGroupName(buttonPanelGroups, buttonId);
 
@@ -104,7 +104,7 @@ export const helpClosePanelById = (
 export const helpCloseAll = (
   buttonPanelGroups: Record<string, Record<string, TypeButtonPanel>>,
   closeCallback: (buttonId: string, groupName: string | undefined) => void
-) => {
+): void => {
   // For each group
   Object.entries(buttonPanelGroups).forEach(([buttonPanelGroupName, buttonPanelGroup]) => {
     // For each button

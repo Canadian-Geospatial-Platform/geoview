@@ -134,7 +134,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath The layer path that changed.
    * @param {TypeLegendResultSetEntry} legendResultSetEntry The legend result set that triggered the propagation.
    */
-  public static propagateLegendToStore(mapId: string, layerPath: string, legendResultSetEntry: TypeLegendResultSetEntry) {
+  public static propagateLegendToStore(mapId: string, layerPath: string, legendResultSetEntry: TypeLegendResultSetEntry): void {
     const layerPathNodes = layerPath.split('/');
     const setLayerControls = (layerConfig: TypeLayerEntryConfig): TypeLayerControls => {
       const controls: TypeLayerControls = {
@@ -150,7 +150,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       };
       return controls;
     };
-    const createNewLegendEntries = (layerPathBeginning: string, currentLevel: number, existingEntries: TypeLegendLayer[]) => {
+    const createNewLegendEntries = (layerPathBeginning: string, currentLevel: number, existingEntries: TypeLegendLayer[]): void => {
       const entryLayerPath = `${layerPathBeginning}/${layerPathNodes[currentLevel]}`;
       const layerConfig = api.maps[mapId].layer.registeredLayers[entryLayerPath] as TypeLayerEntryConfig;
       let entryIndex = existingEntries.findIndex((entry) => entry.layerPath === entryLayerPath);

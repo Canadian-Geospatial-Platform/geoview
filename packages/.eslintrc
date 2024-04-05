@@ -10,6 +10,7 @@
     "plugin:prettier/recommended"
   ],
   "parser": "@typescript-eslint/parser",
+  // "parserOptions": { "project": "./tsconfig.eslint.json" },
   "env": {
     "browser": true
   },
@@ -34,7 +35,7 @@
     "react/jsx-uses-react": "off",
     "react/react-in-jsx-scope": "off",
     "react/jsx-filename-extension": [
-      1,
+      1, // Warning
       {
         "extensions": [".js", ".ts", ".tsx"]
       }
@@ -77,5 +78,21 @@
       }
     ],
     "require-await": 1 // warning
-  }
+  },
+  "overrides": [
+    {
+      // enable the rule specifically for TypeScript files
+      "files": ["*.ts", "*.mts", "*.cts", "*.tsx"],
+      "rules": {
+        // "@typescript-eslint/no-floating-promises": "error",
+        // "@typescript-eslint/no-misused-promises": "error",
+        "@typescript-eslint/explicit-function-return-type": [
+          1,
+          {
+            "allowExpressions": true
+          }
+        ]
+      }
+    }
+  ]
 }

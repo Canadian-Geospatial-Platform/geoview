@@ -11,7 +11,7 @@ import { ARROW_KEYS_WITH_SPACE } from '@/core/utils/constant';
 export function Popover(props: PopoverProps): JSX.Element {
   const { open } = props;
 
-  const handleKeyDown = (event: KeyboardEvent) => {
+  const handleKeyDown = (event: KeyboardEvent): void => {
     if (ARROW_KEYS_WITH_SPACE.includes(event.code as string)) {
       // disbale the default behaviour of key down if it's part of 'ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft', or 'Space'
       event.preventDefault();

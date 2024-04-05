@@ -8,7 +8,7 @@ interface FullScreenDialogProps extends DialogProps {
   children: ReactNode;
 }
 
-function FullScreenDialog(props: FullScreenDialogProps) {
+function FullScreenDialog(props: FullScreenDialogProps): JSX.Element {
   const { open, onClose, children } = props;
 
   return (
