@@ -12,14 +12,5 @@ export const getSxClasses = (theme: Theme) => ({
     '& .MuiPaper-root': {
       border: 'none',
     },
-
-    '&.is-fullscreen': {
-      marginTop: '30px',
-      maxHeight: 'unset',
-
-      '& .MuiTableContainer-root': {
-        maxHeight: 'calc(100vh - 200px)',
-      },
-    },
   },
 });
