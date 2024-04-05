@@ -12,9 +12,9 @@ function FullScreenDialog(props: FullScreenDialogProps) {
   const { open, onClose, children } = props;
 
   return (
-    <Dialog fullScreen maxWidth="xl" open={open} onClose={onClose}>
+    <Dialog fullScreen maxWidth="xl" open={open} onClose={onClose}  disablePortal>
       <DialogContent>
-        <IconButton onClick={onClose} color="primary" className="style2">
+        <IconButton onClick={onClose} color="primary" className="style2" sx={{marginBottom: '20px'}}>
           <CloseIcon />
         </IconButton>
         {children}

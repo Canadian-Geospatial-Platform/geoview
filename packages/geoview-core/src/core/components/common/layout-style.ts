@@ -9,6 +9,14 @@ export const getSxClasses = (theme: Theme) => ({
     overflow: 'auto',
     maxHeight: '600px',
 
+    '&.fullscreen-mode': {
+      maxHeight: 'unset',
+
+      '& .MuiTableContainer-root': {
+        maxHeight: 'unset',
+      }
+    },
+
     '& .MuiPaper-root': {
       border: 'none',
     },
