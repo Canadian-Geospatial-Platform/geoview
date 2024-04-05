@@ -1,46 +1,48 @@
-/* eslint-disable react/require-default-props */
-import { useState, useEffect, CSSProperties, useLayoutEffect } from 'react';
+import { useState, useEffect, CSSProperties, useLayoutEffect, ReactNode } from 'react';
 
 import { useTheme } from '@mui/material/styles';
-import { Slider as MaterialSlider, SliderProps } from '@mui/material';
-
-import { api } from '@/app';
-import { EVENT_NAMES } from '@/api/events/event-types';
-import { sliderPayload, payloadIsASlider, SliderTypePayload, PayloadBaseClass } from '@/api/events/payloads';
+import { Slider as MaterialSlider } from '@mui/material';
+import { Mark } from '@mui/base';
 import { logger } from '@/core/utils/logger';
 
 import { getSxClasses } from './slider-style';
+import { generateId } from '@/core/utils/utilities';
 
 /**
  * Properties for the Slider
  */
-interface TypeSliderProps extends SliderProps {
-  sliderId: string;
+type SliderProps = {
+  sliderId?: string;
+
+  // Important props: min, max, value
+  min: number;
+  max: number;
+  value: Array<number> | number;
 
   // custom slider classes and styles
   className?: string;
   style?: CSSProperties;
 
-  // default values (min, max, range)
-  min: number;
-  max: number;
-  value: Array<number> | number;
-
   // custom onChange callback
-  customOnChange?: (value: number[] | number) => void;
+  onChange?: (value: number | number[], activeThumb: number) => void;
+  onChangeCommitted?: (value: number | number[]) => void;
+  onValueDisplay?: (value: number, index: number) => string;
+  onValueDisplayAriaLabel?: (value: number, index: number) => string;
 
   // MUI optional props
   disabled?: boolean;
-  marks?: Array<{ label?: string; value: number }>;
-  orientation?: 'vertical' | 'horizontal' | undefined;
+  marks?: Mark[];
+  orientation?: 'vertical' | 'horizontal';
   step?: number | null;
   size?: 'small' | 'medium';
   track?: 'inverted' | 'normal' | false;
   ariaLabelledby?: string;
+  valueLabelFormat?: string | ((value: number, index: number) => ReactNode);
 
   // optional map id to link the slider to
+  // TODO: Refactor - No mapId inside a ui component in ui folder.
   mapId?: string;
-}
+};
 
 /**
  * Create a customized Material UI Slider (https://mui.com/material-ui/api/slider/)
@@ -48,87 +50,39 @@ interface TypeSliderProps extends SliderProps {
  * @param {TypeSliderProps} props the properties passed to the slider element
  * @returns {JSX.Element} the created Slider element
  */
-export function Slider(props: TypeSliderProps): JSX.Element {
-  // TODO: Refactor - Remove any coupling to 'api' from inside that ui component
-
-  const { ...properties } = props;
+export function Slider(props: SliderProps): JSX.Element {
+  const { value: parentValue, min, max, onChange, onChangeCommitted, onValueDisplay, onValueDisplayAriaLabel, ...properties } = props;
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
   const containerId = `${properties.mapId}-${properties.sliderId}` || '';
 
   // internal state
-  const [min, setMin] = useState<number>(properties.min);
-  const [max, setMax] = useState<number>(properties.max);
-  const [value, setValue] = useState<number[] | number>(properties.value);
+  const [value, setValue] = useState<number[] | number>(parentValue);
   const [activeThumb, setActiveThumb] = useState<number>(-1);
 
   // handle constant change on the slider to set active thumb and instant values
-  const handleChange = (event: React.SyntheticEvent | Event, newValue: number | number[], newActiveThumb: number) => {
+  const handleChange = (event: React.SyntheticEvent | Event, newValue: number | number[], newActiveThumb: number): void => {
+    // Update the internal state
     setActiveThumb(newActiveThumb);
     setValue(newValue);
+
+    // Callback
+    onChange?.(newValue, activeThumb);
   };
 
   // handle the commit change event when mouseup is fired
-  const handleChangeCommitted = (event: React.SyntheticEvent | Event, newValue: number | number[]) => {
-    setValue(newValue);
-
-    // run the custon onChange function
-    if (properties.customOnChange !== undefined) properties.customOnChange(newValue);
-
-    // create the payload
-    const sliderValues: SliderTypePayload = {
-      min,
-      max,
-      value: newValue,
-      activeThumb,
-    };
-
-    // emit the slider values change event to the api
-    api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, properties.sliderId, sliderValues));
+  const handleChangeCommitted = (event: React.SyntheticEvent | Event, newValue: number | number[]): void => {
+    // Callback
+    onChangeCommitted?.(newValue);
   };
 
-  const sliderSetMinMaxListenerFunction = (payload: PayloadBaseClass) => {
-    // Log
-    logger.logTraceCoreAPIEvent('UI.SLIDER - sliderSetMinMaxListenerFunction', payload);
-
-    if (payloadIsASlider(payload)) {
-      setMin(payload.sliderValues.min);
-      setMax(payload.sliderValues.max);
-
-      // emit the slider values change event to the api
-      const sliderValues: SliderTypePayload = {
-        min: payload.sliderValues.min,
-        max: payload.sliderValues.max,
-        value,
-        activeThumb,
-      };
-      api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, properties.sliderId, sliderValues));
-    }
-  };
-
-  const sliderSetValuesListenerFunction = (payload: PayloadBaseClass) => {
-    // Log
-    logger.logTraceCoreAPIEvent('UI.SLIDER - sliderSetValuesListenerFunction', payload);
-
-    if (payloadIsASlider(payload)) {
-      setValue(payload.sliderValues.value);
-
-      // run the custon onChange function
-      if (properties.customOnChange !== undefined) properties.customOnChange(payload.sliderValues.value);
-
-      // emit the slider values change event to the api
-      const sliderValues: SliderTypePayload = {
-        min,
-        max,
-        value: payload.sliderValues.value,
-        activeThumb,
-      };
-      api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, properties.sliderId, sliderValues));
-    }
-  };
-
-  const checkOverlap = (prev: Element | null, curr: Element, next: Element | null, orientation: string | undefined = 'horizontal') => {
+  const checkOverlap = (
+    prev: Element | null,
+    curr: Element,
+    next: Element | null,
+    orientation: string | undefined = 'horizontal'
+  ): boolean => {
     const labelPadding = 10;
     const prevDim = prev ? prev.getBoundingClientRect() : null;
     const currDim = curr.getBoundingClientRect();
@@ -150,9 +104,9 @@ export function Slider(props: TypeSliderProps): JSX.Element {
   };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const removeLabelOverlap = () => {
+  const removeLabelOverlap = (): void => {
     // Log
-    logger.logTraceCore('UI.SLIDER - window resize event');
+    logger.logTraceCore('UI.SLIDER - removeLabelOverlap');
 
     // get slider labels
     const markers = containerId
@@ -182,7 +136,7 @@ export function Slider(props: TypeSliderProps): JSX.Element {
       if (checkOverlap(null, markers[currIdx], markers[nextIdx])) {
         markers[currIdx].classList.add('MuiSlider-markLabel-overlap');
       } else {
-        // if there is no  collision and reset the curIndex to be the one before the testIndex
+        // if there is no collision and reset the curIndex to be the one before the testIndex
         nextIdx = nextIdx - currIdx !== 1 ? currIdx : nextIdx - 1;
         firstVisibleInSecondHalf = currIdx;
       }
@@ -191,21 +145,32 @@ export function Slider(props: TypeSliderProps): JSX.Element {
     middleIndices.push(lastVisibleInFirstHalf, firstVisibleInSecondHalf);
     middleIndices = [...new Set(middleIndices)].sort((a, b) => a - b);
 
-    // Check middle elements
-    for (let testIdx = 0, currIdx = 1; currIdx < middleIndices.length; currIdx++) {
-      if (
-        checkOverlap(
-          markers[middleIndices[testIdx]],
-          markers[middleIndices[currIdx]],
-          currIdx === middleIndices.length - 1 ? null : markers[middleIndices[currIdx + 1]]
-        )
-      ) {
-        markers[middleIndices[currIdx]].classList.add('MuiSlider-markLabel-overlap');
-      } else {
-        testIdx = currIdx - testIdx !== 1 ? currIdx : testIdx + 1;
+    // If any middle elements
+    if (markers.length > 2) {
+      // Check middle elements
+      for (let testIdx = 0, currIdx = 1; currIdx < middleIndices.length; currIdx++) {
+        if (
+          checkOverlap(
+            markers[middleIndices[testIdx]],
+            markers[middleIndices[currIdx]],
+            currIdx === middleIndices.length - 1 ? null : markers[middleIndices[currIdx + 1]]
+          )
+        ) {
+          markers[middleIndices[currIdx]].classList.add('MuiSlider-markLabel-overlap');
+        } else {
+          testIdx = currIdx - testIdx !== 1 ? currIdx : testIdx + 1;
+        }
       }
     }
   };
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('UI.SLIDER - parent value', parentValue);
+
+    // Update it internally when the parent has updated the value
+    setValue(parentValue);
+  }, [parentValue]);
 
   useLayoutEffect(() => {
     // remove overlaping labels
@@ -215,23 +180,6 @@ export function Slider(props: TypeSliderProps): JSX.Element {
     return () => window.removeEventListener('resize', () => removeLabelOverlap);
   }, [removeLabelOverlap]);
 
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('UI.SLIDER - minmax', min, max, value);
-
-    // on set min/max, update slider
-    api.event.on(EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_MINMAX, sliderSetMinMaxListenerFunction, properties.id);
-
-    // on set values update slider
-    api.event.on(EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_VALUES, sliderSetValuesListenerFunction, properties.id);
-
-    return () => {
-      api.event.off(EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_MINMAX, properties.id, sliderSetMinMaxListenerFunction);
-      api.event.off(EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_VALUES, properties.id, sliderSetValuesListenerFunction);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [min, max, value]);
-
   // TODO: better implement WCAG on slider
   return (
     <MaterialSlider
@@ -239,14 +187,10 @@ export function Slider(props: TypeSliderProps): JSX.Element {
       sx={{ ...(!properties.className ? sxClasses.slider : {}) }}
       className={properties.className !== undefined ? properties.className : ''}
       style={properties.style}
-      getAriaLabel={() => 'To implement with translation'}
-      getAriaValueText={() => 'To implement with translation'}
       aria-labelledby={properties.ariaLabelledby}
       value={value}
       min={min}
       max={max}
-      onChange={handleChange}
-      onChangeCommitted={handleChangeCommitted}
       disabled={properties.disabled}
       marks={properties.marks}
       track={properties.track}
@@ -255,7 +199,36 @@ export function Slider(props: TypeSliderProps): JSX.Element {
       size={properties.size}
       disableSwap={false}
       valueLabelDisplay="auto"
-      valueLabelFormat={properties.valueLabelFormat}
+      onChange={handleChange}
+      onChangeCommitted={handleChangeCommitted}
+      valueLabelFormat={onValueDisplay}
+      getAriaLabel={(): string => 'To implement with translation'}
+      getAriaValueText={onValueDisplayAriaLabel}
     />
   );
 }
+
+/**
+ * The default props
+ */
+Slider.defaultProps = {
+  sliderId: generateId(),
+  className: undefined,
+  style: undefined,
+
+  disabled: false,
+  marks: undefined,
+  orientation: undefined,
+  step: undefined,
+  size: undefined,
+  track: undefined,
+  ariaLabelledby: undefined,
+  valueLabelFormat: undefined,
+
+  onChange: undefined,
+  onChangeCommitted: undefined,
+  onValueDisplay: undefined,
+  onValueDisplayAriaLabel: undefined,
+
+  mapId: undefined,
+};

@@ -12,10 +12,9 @@ import * as UI from '@/ui';
 
 import AppStart from '@/core/app-start';
 import { API } from '@/api/api';
-import { Cast, TypeCGPV, TypeWindow } from '@/core/types/global-types';
+import { Cast, TypeCGPV, TypeMapFeaturesConfig, TypeWindow } from '@/core/types/global-types';
 import { Config } from '@/core/utils/config/config';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
-import { MapFeaturesPayload } from '@/api/events/payloads';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
 import { logger } from '@/core/utils/logger';
 
@@ -29,22 +28,21 @@ const reactRoot: Record<string, Root> = {};
 /**
  * Function to unmount a map element
  *
- * @param {string} mapId the map id to unmount
+ * @param {string} mapId - The map id to unmount
  */
-export function unmountMap(mapId: string) {
+export function unmountMap(mapId: string): void {
   // Unmount the react root
   reactRoot[mapId]?.unmount();
 }
 
 /**
- * Handles when the map reload needs to happen. The map component is linked to a specific mapId. When we modify something on the map, the
+ * Handles when the map reconstruction needs to happen. The map component is linked to a specific mapId. When we modify something on the map, the
  * changes spread throughout the data structure. We therefore need to reload the entire map configuration to ensure that
  * all changes made to the map are applied.
  *
- * @param {string} mapId the map id to reload
+ * @param {TypeMapFeaturesConfig} mapFeaturesConfig - The map features config to reload
  */
-const handleReload = (payload: MapFeaturesPayload) => {
-  const { mapFeaturesConfig } = payload;
+const handleReconstruct = (mapFeaturesConfig: TypeMapFeaturesConfig): void => {
   if (mapFeaturesConfig) {
     const map = api.maps[mapFeaturesConfig.mapId].remove(false);
 
@@ -71,7 +69,7 @@ const handleReload = (payload: MapFeaturesPayload) => {
 /**
  * Function to render the map for inline map and map create from a function call
  *
- * @param mapElement {Element} The htlm element div who will contain the map
+ * @param {Element} mapElement - The html element div who will contain the map
  */
 async function renderMap(mapElement: Element): Promise<void> {
   // create a new config for this map element
@@ -90,13 +88,13 @@ async function renderMap(mapElement: Element): Promise<void> {
     // render the map with the config
     reactRoot[mapId] = createRoot(mapElement!);
 
-    // Register a handle when the map reloads
-    api.event.onMapRemove(mapId, handleReload);
+    // Register a handle when the api wants to reconstruct the map
+    api.event.onMapReconstruct(mapId, handleReconstruct);
 
     // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
     return new Promise<void>((resolve) => {
       // TODO: Refactor #1810 - Activate <React.StrictMode> here or in app-start.tsx?
-      reactRoot[mapId].render(<AppStart mapFeaturesConfig={configObj} onMapViewerInit={() => resolve()} />);
+      reactRoot[mapId].render(<AppStart mapFeaturesConfig={configObj} onMapViewerInit={(): void => resolve()} />);
       // reactRoot[mapId].render(
       //   <React.StrictMode>
       //     <AppStart mapFeaturesConfig={configObj} />
@@ -114,8 +112,8 @@ async function renderMap(mapElement: Element): Promise<void> {
  * GV The div MUST NOT have a geoview-map class or a warning will be shown.
  * If is present, the div will be created with a default config
  *
- * @param {Element} mapDiv The basic div to initialise
- * @param {string} mapConfig the new config passed in from the function call
+ * @param {HTMLElement} mapDiv - The basic div to initialise
+ * @param {string} mapConfig - The new config passed in from the function call
  */
 export async function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig: string): Promise<void> {
   // If the div doesn't have a geoview-map class (therefore isn't supposed to be loaded via init())
@@ -145,8 +143,8 @@ export async function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig:
 /**
  * Initialize the cgpv and render it to root element
  *
- * @param {Function} callbackMapInit optional callback function to run once the map rendering is ready
- * @param {Function} callbackMapLayersLoaded optional callback function to run once layers are loaded on the map
+ * @param {(mapId: string) => void} callbackMapInit optional callback function to run once the map rendering is ready
+ * @param {(mapId: string) => void} callbackMapLayersLoaded optional callback function to run once layers are loaded on the map
  */
 async function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded?: (mapId: string) => void): Promise<void> {
   const mapElements = document.getElementsByClassName('geoview-map');

@@ -70,6 +70,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     onCloseKeyboard,
     TabContentVisibilty = 'inherit',
   } = props;
+  // TODO: Refactor - No mapId inside a ui component in ui folder.
   const mapId = useGeoViewMapId();
   const mapElem = document.getElementById(`shell-${mapId}`);
   const { t } = useTranslation<string>();

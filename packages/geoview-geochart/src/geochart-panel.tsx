@@ -33,7 +33,7 @@ interface GeoChartPanelProps {
  */
 export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   // Log
-  logger.logTraceRender('geochart/geochart-panel');
+  logger.logTraceRender('geoview-geochart/geochart-panel');
 
   const { cgpv } = window as TypeWindow;
   const { mapId, provideCallbackRedraw } = props;
