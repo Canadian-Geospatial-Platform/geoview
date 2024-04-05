@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Mark } from '@mui/base';
 import { getSxClasses } from './layer-opacity-control-styles';
-import { Box, SliderBase, Typography } from '@/ui';
+import { Box, Slider, Typography } from '@/ui';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
@@ -30,7 +30,8 @@ export function LayerOpacityControl(props: LayerOpacityControlProps): JSX.Elemen
     marks = [{ value: layerDetails.opacityFromParent * 100, label: t('layers.opacityMax') }];
   }
 
-  const handleSetOpacity = (event: Event, opacityValue: number | number[]) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleSetOpacity = (opacityValue: number | number[], activeThumb: number) => {
     const val = Array.isArray(opacityValue) ? opacityValue[0] : opacityValue;
 
     if (layerDetails.opacityFromParent && layerDetails.opacityFromParent !== 1 && val / 100 >= layerDetails.opacityFromParent) {
@@ -44,7 +45,7 @@ export function LayerOpacityControl(props: LayerOpacityControlProps): JSX.Elemen
     <div style={{ padding: '16px 17px 16px 23px' }}>
       <Box sx={sxClasses.layerOpacityControl}>
         <Typography sx={{ fontWeight: 'bold' }}>{t('layers.opacity')}</Typography>
-        <SliderBase
+        <Slider
           min={0}
           max={100}
           step={1}

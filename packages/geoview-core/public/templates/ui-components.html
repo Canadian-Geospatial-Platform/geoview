@@ -133,9 +133,9 @@
         const compSlider = cgpv.react.createElement(cgpv.ui.elements.Slider, propsSlider);
 
         // Update the component
-        // GV Ideally, we'd like to reuse the root and just do root.render(), but it is unstable, because react doesn't know if you want to actually change the state inside the Sliper component or not.
+        // GV Ideally, we'd like to reuse the root and just do root.render(), but it is unstable, because react doesn't know if you want to actually change the state inside the Slider component or not.
         // It'll even try to guess based on the props you've sent it originally. This can be proven with the Math.random() below.
-        // This can lead to unexpected results. So, I've ended up just unmounting and recreating from scratch to make sure all state is reset inside Sliper.
+        // This can lead to unexpected results. So, I've ended up just unmounting and recreating from scratch to make sure all state is reset inside Slider.
         // In any case, jumping into react behavior from pure JavaScript calls seems counter-pattern and will need careful design and consideration on how to
         // bridge the gap between React's declarative model and imperative JavaScript code. This pattern might lead to more issues like this down the road.
         // If we really want to do that, I'm afraid we'll need explicit callbacks provided back via props - to pretend we're in React when we're not.
@@ -186,7 +186,7 @@
                   { value: 2023, label: '2023' },
                 ],
                 track: 'normal',
-                customOnChange: (dates) => {
+                onChange: (dates) => {
                   const field = cgpv.api.maps.UI1.layer.geoviewLayer('historical-flood/0').getTemporalDimension('historical-flood/0').field;
                   cgpv.api.maps.UI1.layer.geoviewLayer('historical-flood/0').applyViewFilter('historical-flood/0', `${field} >= date '${dates[0]}-01-01' and ${field} <= date '${dates[1]}-12-31'`);
                 }
@@ -218,7 +218,7 @@
               ],
               track: false,
               // TODO: setting the view zoom level create bugs with the overview map
-              customOnChange: (zoomLevel) => {
+              onChange: (zoomLevel) => {
                 const lat = 50;
                 const lng = -95;
                 cgpv.api.maps['UI1'].getView().animate({ zoom: zoomLevel });
@@ -258,10 +258,8 @@
                 { value: 8, label: 'Level 8' },
                 { value: 18, label: 'Max Level 18' },
               ],
-              onSliderValueChanged: (sliderValues) => {
-                sliderPosition2[0].innerHTML = `<p>Slider min ${sliderValues.min}, max ${sliderValues.max}, values ${
-                  sliderValues.value
-                } and active thumb ${sliderValues.activeThumb === 0 ? 'left' : 'right'}</p>`;
+              onChange: (sliderValues, activeThumb) => {
+                sliderPosition2[0].innerHTML = `<p>Slider values ${sliderValues} and active thumb ${activeThumb === 0 ? 'left' : 'right'}</p>`;
               },
             };
 

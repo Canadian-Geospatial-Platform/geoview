@@ -30,7 +30,7 @@ const reactRoot: Record<string, Root> = {};
  *
  * @param {string} mapId - The map id to unmount
  */
-export function unmountMap(mapId: string) {
+export function unmountMap(mapId: string): void {
   // Unmount the react root
   reactRoot[mapId]?.unmount();
 }
@@ -94,7 +94,7 @@ async function renderMap(mapElement: Element): Promise<void> {
     // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
     return new Promise<void>((resolve) => {
       // TODO: Refactor #1810 - Activate <React.StrictMode> here or in app-start.tsx?
-      reactRoot[mapId].render(<AppStart mapFeaturesConfig={configObj} onMapViewerInit={() => resolve()} />);
+      reactRoot[mapId].render(<AppStart mapFeaturesConfig={configObj} onMapViewerInit={(): void => resolve()} />);
       // reactRoot[mapId].render(
       //   <React.StrictMode>
       //     <AppStart mapFeaturesConfig={configObj} />

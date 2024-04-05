@@ -2,7 +2,7 @@ import { ChangeEvent, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import debounce from 'lodash/debounce';
 import { useTheme } from '@mui/material';
-import { CloseIcon, SearchIcon, AppBar, Box, Divider, IconButton, ProgressBar, Toolbar } from '@/ui';
+import { CloseIcon, SearchIcon, AppBarUI, Box, Divider, IconButton, ProgressBar, Toolbar } from '@/ui';
 import { StyledInputField, sxClasses } from './geolocator-style';
 import { OL_ZOOM_DURATION } from '@/core/utils/constant';
 import { useUIAppbarGeolocatorActive } from '@/core/stores/store-interface-and-intial-values/ui-state';
@@ -151,7 +151,7 @@ export function Geolocator() {
   return (
     <Box sx={sxClasses.root} visibility={active ? 'visible' : 'hidden'} id="geolocator-search">
       <Box sx={sxClasses.geolocator}>
-        <AppBar position="static">
+        <AppBarUI position="static">
           <Toolbar
             variant="dense"
             // attach event handler to toolbar when search input is hidden.
@@ -199,7 +199,7 @@ export function Geolocator() {
               </Box>
             </form>
           </Toolbar>
-        </AppBar>
+        </AppBarUI>
       </Box>
       {isLoading && (
         <Box sx={sxClasses.progressBar}>
