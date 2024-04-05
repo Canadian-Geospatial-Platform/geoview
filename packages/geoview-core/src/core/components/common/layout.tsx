@@ -1,7 +1,7 @@
 import { useState, useCallback, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { Box, FullscreenExitIcon, FullscreenIcon, IconButton } from '@/ui';
+import { Box } from '@/ui';
 import { logger } from '@/core/utils/logger';
 import { LayerList, LayerListEntry } from './layer-list';
 import { ResponsiveGrid } from './responsive-grid';
@@ -10,6 +10,7 @@ import { EnlargeButton } from './enlarge-button';
 import { CloseButton } from './close-button';
 import { useFooterPanelHeight } from './use-footer-panel-height';
 import { getSxClasses } from './layout-style';
+import FullScreenToggleButton from './fullscreen-toggle-button';
 
 interface LayoutProps {
   children?: ReactNode;
@@ -65,26 +66,6 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
     [onIsEnlargeClicked]
   );
 
-  const toggleFullScreen = useCallback(() => {
-    // Log
-    logger.logTraceUseCallback('LAYOUT - toggleFullScreen');
-    setIsFullScreen(!isFullScreen);
-  }, [isFullScreen]);
-
-  const fullScreenButton = () => {
-    return (
-      <IconButton
-        size="small"
-        onClick={toggleFullScreen}
-        tooltip={isFullScreen ? t('general.closeFullscreen')! : t('general.openFullscreen')!}
-        className="style2"
-        color="primary"
-      >
-        {!isFullScreen ? <FullscreenIcon /> : <FullscreenExitIcon />}
-      </IconButton>
-    );
-  };
-
   /**
    * Render group layers as list.
    *
@@ -131,7 +112,7 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
 
             <Box sx={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
               {!fullWidth && <EnlargeButton isEnlarged={isEnlarged} onSetIsEnlarged={handleIsEnlarge} />}
-              {fullScreenButton()}
+              <FullScreenToggleButton isFullScreen={isFullScreen} onSetIsFullScreen={setIsFullScreen} />
               {!!layerList.length && (
                 <CloseButton
                   isLayersPanelVisible={isLayersPanelVisible}
@@ -161,7 +142,9 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
           fullWidth={fullWidth}
           isFullScreen={isFullScreen}
         >
-          {isFullScreen && <Box sx={{ position: 'relative', top: '10px', left: '10px', zIndex: 100 }}>{fullScreenButton()}</Box>}
+          {isFullScreen && <Box sx={{ position: 'relative', top: '10px', left: '10px', zIndex: 100 }}>
+            <FullScreenToggleButton isFullScreen={isFullScreen} onSetIsFullScreen={setIsFullScreen} />
+          </Box>}
 
           <Box sx={sxClasses.rightGridContent} className={`${isFullScreen ? 'is-fullscreen': 'no-fullscreen'}`} >
             {children}

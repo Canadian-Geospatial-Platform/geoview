@@ -10,8 +10,12 @@ export const getSxClasses = (theme: Theme) => ({
     overflow: 'auto',
     maxHeight: '600px',
 
+    '& .MuiPaper-root': {
+      border: 'none'
+    },
+
     '&.is-fullscreen': {
-      paddingTop: '20px',
+      marginTop: '30px',
       maxHeight: 'unset',
     },
 
