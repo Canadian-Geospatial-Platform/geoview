@@ -1,6 +1,6 @@
-import { Button, DialogProps } from '@mui/material';
+import { DialogProps } from '@mui/material';
 import { ReactNode } from 'react';
-import { Box, CloseIcon, Dialog, DialogContent, IconButton } from '@/ui';
+import { CloseIcon, Dialog, DialogContent, IconButton } from '@/ui';
 
 interface FullScreenDialogProps extends DialogProps {
   open: boolean;
@@ -9,7 +9,7 @@ interface FullScreenDialogProps extends DialogProps {
 }
 
 function FullScreenDialog(props: FullScreenDialogProps) {
-  const { open, onClose, children, ...rest } = props;
+  const { open, onClose, children } = props;
 
   return (
     <Dialog fullScreen maxWidth="xl" open={open} onClose={onClose}>

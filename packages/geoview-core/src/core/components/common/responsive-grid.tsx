@@ -103,29 +103,24 @@ const getRightPanelSize = (fullWidth: boolean, isLayersPanelVisible: boolean, is
 const ResponsiveGridRightPanel = forwardRef(
   ({ children, isLayersPanelVisible = false, sxProps = {}, isEnlarged, fullWidth = false, ...rest }: ResponsiveGridPanelProps, ref) => {
     const theme = useTheme();
-
-    const getRightPanelContent = () => {
-      return (
-        <Grid
-          item
-          {...getRightPanelSize(fullWidth, isLayersPanelVisible, isEnlarged)}
-          sx={{
-            position: 'relative',
-            [theme.breakpoints.up('md')]: { paddingLeft: '1rem' },
-            ...(!fullWidth && { [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'none' : 'block' } }),
-            ...(fullWidth && { display: !isLayersPanelVisible ? 'none' : 'block' }),
-            ...sxProps,
-          }}
-          component="div"
-          ref={ref}
-          {...rest}
-        >
-          {children}
-        </Grid>
-      );
-    };
-
-    return getRightPanelContent();
+    return (
+      <Grid
+        item
+        {...getRightPanelSize(fullWidth, isLayersPanelVisible, isEnlarged)}
+        sx={{
+          position: 'relative',
+          [theme.breakpoints.up('md')]: { paddingLeft: '1rem' },
+          ...(!fullWidth && { [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'none' : 'block' } }),
+          ...(fullWidth && { display: !isLayersPanelVisible ? 'none' : 'block' }),
+          ...sxProps,
+        }}
+        component="div"
+        ref={ref}
+        {...rest}
+      >
+        {children}
+      </Grid>
+    );
   }
 );
 ResponsiveGridRightPanel.displayName = 'ResponsiveGridRightPanel';
