@@ -91,12 +91,14 @@ export class AppEventProcessor extends AbstractEventProcessor {
     this.getAppState(mapId).setterActions.setCrosshairActive(isActive);
   }
 
-  static setDisplayLanguage(mapId: string, lang: TypeDisplayLanguage): void {
+  static setDisplayLanguage(mapId: string, lang: TypeDisplayLanguage): Promise<[void, void]> {
     this.getAppState(mapId).setterActions.setDisplayLanguage(lang);
     // reload the basemap from new language
-    MapEventProcessor.resetBasemap(mapId);
+    const promiseResetBasemap = MapEventProcessor.resetBasemap(mapId);
     // load guide in new language
-    AppEventProcessor.setGuide(mapId);
+    const promiseSetGuide = AppEventProcessor.setGuide(mapId);
+    // Return promise of both promises to resolve
+    return Promise.all([promiseResetBasemap, promiseSetGuide]);
   }
 
   static setDisplayTheme(mapId: string, theme: TypeDisplayTheme): void {

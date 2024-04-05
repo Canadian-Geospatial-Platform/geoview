@@ -1,8 +1,9 @@
 import { useStore } from 'zustand';
-import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { TypeFeatureInfoEntry, TypeLayerData } from '@/geo/utils/layer-set';
-import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
+import { TypeAllFeatureInfoResultSet } from '@/geo/utils/all-feature-info-layer-set';
+import { TypeFeatureInfoEntry, TypeLayerData } from '@/geo/utils/layer-set';
+import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
+import { useGeoViewStore } from '@/core/stores/stores-managers';
 
 // GV Important: See notes in header of DataTableEventProcessor file for information on the paradigm to apply when working with DataTableEventProcessor vs DataTaleState
 
@@ -41,7 +42,7 @@ export interface IDataTableState {
     setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
     setTableHeight: (tableHeight: number) => void;
     setSelectedLayerPath: (layerPath: string) => void;
-    triggerGetAllFeatureInfo: (layerPath: string) => void;
+    triggerGetAllFeatureInfo: (layerPath: string) => Promise<TypeAllFeatureInfoResultSet | void>;
     setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
     setSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
   };
@@ -114,9 +115,9 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
         // Redirect to setter
         get().dataTableState.setterActions.setSelectedLayerPath(layerPath);
       },
-      triggerGetAllFeatureInfo(layerPath: string) {
+      triggerGetAllFeatureInfo(layerPath: string): Promise<TypeAllFeatureInfoResultSet | void> {
         // Redirect to event processor
-        DataTableEventProcessor.triggerGetAllFeatureInfo(get().mapId, layerPath);
+        return DataTableEventProcessor.triggerGetAllFeatureInfo(get().mapId, layerPath);
       },
       setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => {
         // Redirect to setter

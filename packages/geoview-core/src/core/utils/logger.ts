@@ -293,6 +293,16 @@ export class ConsoleLogger {
   }
 
   /**
+   * Logs that a promise has been unresolved and crashed somewhere in the application
+   * @param {string} stackIndication - The call stack indications where the promise has crashed
+   * @param {unknown[]} messages - The messages to log
+   */
+  logPromiseFailed(stackIndication: string, ...messages: unknown[]): void {
+    // Redirect
+    this.logError('Unresolved promise failed', stackIndication, ...messages);
+  }
+
+  /**
    * Logs general flow of the application.
    * Shows all the time.
    * @param {unknown[]} messages - The messages to log

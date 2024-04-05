@@ -32,6 +32,7 @@ import { TypeClickMarker } from '@/core/components';
 import { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { TypeBasemapOptions, TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
 import { TypeHoverFeatureInfo } from '@/geo/utils/hover-feature-info-layer-set';
+import { TypeFeatureInfoResultSet } from '@/geo/utils/feature-info-layer-set';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.
@@ -301,12 +302,15 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapStateProtected(mapId).setterActions.setPointerPosition(pointerPosition);
   }
 
-  static setClickCoordinates(mapId: string, clickCoordinates: TypeMapMouseInfo): void {
+  static setClickCoordinates(mapId: string, clickCoordinates: TypeMapMouseInfo): Promise<TypeFeatureInfoResultSet> {
     // Perform query via the feature info layer set process
-    api.maps[mapId].layer.featureInfoLayerSet.queryLayers(clickCoordinates.lnglat);
+    const promise = api.maps[mapId].layer.featureInfoLayerSet.queryLayers(clickCoordinates.lnglat);
 
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setClickCoordinates(clickCoordinates);
+
+    // Return the promise
+    return promise;
   }
 
   static setZoom(mapId: string, zoom: number): void {
@@ -372,7 +376,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       this.getMapStateProtected(mapId).setterActions.setProjection(projectionCode);
 
       // reload the basemap from new projection
-      this.resetBasemap(mapId);
+      await this.resetBasemap(mapId);
 
       // refresh layers so new projection is render properly and await on it
       await api.maps[mapId].refreshLayers();
@@ -594,11 +598,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return api.maps[mapId].basemap.getOverviewMap();
   }
 
-  static resetBasemap(mapId: string): void {
+  static resetBasemap(mapId: string): Promise<void> {
     // reset basemap will use the current display language and projection and recreate the basemap
     const language = AppEventProcessor.getDisplayLanguage(mapId);
     const projection = this.getMapState(mapId).currentProjection as TypeValidMapProjectionCodes;
-    api.maps[mapId].basemap.loadDefaultBasemaps(projection, language);
+    return api.maps[mapId].basemap.loadDefaultBasemaps(projection, language);
   }
 
   static setMapKeyboardPanInteractions(mapId: string, panDelta: number): void {

@@ -50,7 +50,13 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
             // If it was in the layer data array and is not anymore
             if (prevOrderedLayerPaths.includes(layerPath) && !curOrderedLayerPaths.includes(layerPath)) {
               // Remove it from feature info array
-              FeatureInfoEventProcessor.#deleteFeatureInfo(store.getState().mapId, layerPath);
+              FeatureInfoEventProcessor.#deleteFeatureInfo(store.getState().mapId, layerPath).catch((error) => {
+                // Log
+                logger.logPromiseFailed(
+                  'FeatureInfoEventProcessor.#deleteFeatureInfo in unsubLayerRemoved subscription in featureInfoEventProcessor',
+                  error
+                );
+              });
 
               // Log
               logger.logInfo('Removed Feature Info in stores for layer path:', layerPath);
@@ -76,19 +82,20 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * Deletes the specified layer path from the layer sets in the store
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to delete
+   * @returns {Promise<void>}
    * @private
    */
-  static #deleteFeatureInfo(mapId: string, layerPath: string): void {
+  static #deleteFeatureInfo(mapId: string, layerPath: string): Promise<void> {
     // The feature info state
     const featureInfoState = this.getFeatureInfoState(mapId);
 
     // Redirect to helper function
-    this.#deleteFromArray(featureInfoState.layerDataArray, layerPath, (layerArrayResult) => {
+    return this.#deleteFromArray(featureInfoState.layerDataArray, layerPath, (layerArrayResult) => {
       // Update the layer data array in the store
       featureInfoState.actions.setLayerDataArray(layerArrayResult);
 
       // Also propagate in the batched array
-      FeatureInfoEventProcessor.#propagateFeatureInfoToStoreBatch(mapId, layerArrayResult);
+      return FeatureInfoEventProcessor.#propagateFeatureInfoToStoreBatch(mapId, layerArrayResult);
     });
   }
 
@@ -97,9 +104,14 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {TypeLayerData[]} layerArray - The layer array to work with
    * @param {string} layerPath - The layer path to delete
    * @param {(layerArray: TypeLayerData[]) => void} onDeleteCallback - The callback executed when the array is updated
+   * @returns {Promise<void>}
    * @private
    */
-  static #deleteFromArray<T extends TypeLayerData>(layerArray: T[], layerPath: string, onDeleteCallback: (layerArray: T[]) => void): void {
+  static #deleteFromArray<T extends TypeLayerData>(
+    layerArray: T[],
+    layerPath: string,
+    onDeleteCallback: (layerArray: T[]) => Promise<void>
+  ): Promise<void> {
     // Find the layer data info to delete from the array
     const layerDataInfoToDelIndex = layerArray.findIndex((layerInfo) => layerInfo.layerPath === layerPath);
 
@@ -109,8 +121,11 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       layerArray.splice(layerDataInfoToDelIndex, 1);
 
       // Callback with updated array
-      onDeleteCallback(layerArray);
+      return onDeleteCallback(layerArray);
     }
+
+    // Nothing to do
+    return Promise.resolve();
   }
 
   /**
@@ -120,8 +135,14 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath - The layer path that has changed.
    * @param {EventType} eventType - The event type that triggered the layer set update.
    * @param {TypeFeatureInfoResultSet} resultSet - The result set associated to the map.
+   * @returns {Promise<void>}
    */
-  static propagateFeatureInfoToStore(mapId: string, layerPath: string, eventType: EventType, resultSet: TypeFeatureInfoResultSet): void {
+  static propagateFeatureInfoToStore(
+    mapId: string,
+    layerPath: string,
+    eventType: EventType,
+    resultSet: TypeFeatureInfoResultSet
+  ): Promise<void> {
     // The feature info state
     const featureInfoState = this.getFeatureInfoState(mapId);
 
@@ -146,8 +167,11 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       }
 
       // Also propagate in the batched array
-      FeatureInfoEventProcessor.#propagateFeatureInfoToStoreBatch(mapId, layerDataArray);
+      return FeatureInfoEventProcessor.#propagateFeatureInfoToStoreBatch(mapId, layerDataArray);
     }
+
+    // Nothing to do
+    return Promise.resolve();
   }
 
   /**

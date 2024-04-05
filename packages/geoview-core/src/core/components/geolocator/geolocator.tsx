@@ -119,7 +119,10 @@ export function Geolocator(): JSX.Element {
    * @returns void
    */
   const doRequest = debounce((searchTerm: string) => {
-    getGeolocations(searchTerm);
+    getGeolocations(searchTerm).catch((errorInside) => {
+      // Log
+      logger.logPromiseFailed('getGeolocations in deRequest in Geolocator', errorInside);
+    });
   }, OL_ZOOM_DURATION);
 
   /**
@@ -163,7 +166,10 @@ export function Geolocator(): JSX.Element {
                 e.preventDefault();
                 // cancel the debounce fn, when enter key clicked before wait time.
                 doRequest.cancel();
-                getGeolocations(searchValue);
+                getGeolocations(searchValue).catch((errorInside) => {
+                  // Log
+                  logger.logPromiseFailed('getGeolocations in rendering (1) in Geolocator', errorInside);
+                });
               }}
             >
               {isSearchInputVisible && (
@@ -182,7 +188,10 @@ export function Geolocator(): JSX.Element {
                       setIsSearchInputVisible(true);
                     } else if (searchValue.length) {
                       doRequest.cancel();
-                      getGeolocations(searchValue);
+                      getGeolocations(searchValue).catch((errorInside) => {
+                        // Log
+                        logger.logPromiseFailed('getGeolocations in rendering (2) in Geolocator', errorInside);
+                      });
                     }
                   }}
                 >

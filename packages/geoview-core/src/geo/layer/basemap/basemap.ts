@@ -11,6 +11,7 @@ import { TypeBasemapProps, TypeBasemapOptions, TypeBasemapLayer } from '@/geo/la
 import { TypeDisplayLanguage, TypeValidMapProjectionCodes } from '@/geo/map/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { logger } from '@/core/utils/logger';
 
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
@@ -54,7 +55,10 @@ export class Basemap {
     this.basemapOptions = basemapOptions;
 
     // create the overview default basemap (no label, no shaded)
-    this.setOverviewMap();
+    this.setOverviewMap().catch((error) => {
+      // Log
+      logger.logPromiseFailed('setOverviewMap in constructor of layer/basemap', error);
+    });
   }
 
   /**
@@ -197,6 +201,7 @@ export class Basemap {
     if (rest && (basemapLayer.jsonUrl as string)) {
       try {
         // get info from server
+        // TODO: Check/Refactor - Document the necessity to explicitely reject after 3000ms and likely move this value in a constant/config easily accessible/visible
         const request = await requestBasemap(basemapLayer.jsonUrl as string, 3000);
 
         if (request) {
@@ -288,167 +293,164 @@ export class Basemap {
    *
    * @return {Promise<TypeBasemapProps | undefined>} the core basemap
    */
-  createCoreBasemap(
+  async createCoreBasemap(
     basemapOptions: TypeBasemapOptions,
     projection?: TypeValidMapProjectionCodes,
     language?: TypeDisplayLanguage
   ): Promise<TypeBasemapProps | undefined> {
-    // eslint-disable-next-line no-async-promise-executor
-    return new Promise(async (resolve) => {
-      const basemapLayers: TypeBasemapLayer[] = [];
-      const basemaplayerTypes: string[] = [];
-      const defaultOpacity = 1;
+    const basemapLayers: TypeBasemapLayer[] = [];
+    const basemaplayerTypes: string[] = [];
+    const defaultOpacity = 1;
 
-      let defaultOrigin: number[] | undefined;
-      let defaultExtent: Extent | undefined;
-      let defaultResolutions: number[] | undefined;
-      let minZoom = 0;
-      let maxZoom = 17;
+    let defaultOrigin: number[] | undefined;
+    let defaultExtent: Extent | undefined;
+    let defaultResolutions: number[] | undefined;
+    let minZoom = 0;
+    let maxZoom = 17;
 
-      // check if projection is provided for the basemap creation
-      const projectionCode = projection === undefined ? MapEventProcessor.getMapState(this.mapId).currentProjection : projection;
+    // check if projection is provided for the basemap creation
+    const projectionCode = projection === undefined ? MapEventProcessor.getMapState(this.mapId).currentProjection : projection;
 
-      // check if language is provided for the basemap creation
-      const languageCode = language === undefined ? AppEventProcessor.getDisplayLanguage(this.mapId) : language;
+    // check if language is provided for the basemap creation
+    const languageCode = language === undefined ? AppEventProcessor.getDisplayLanguage(this.mapId) : language;
 
-      // check if basemap options are provided for the basemap creation
-      const coreBasemapOptions = basemapOptions === undefined ? this.basemapOptions : basemapOptions;
+    // check if basemap options are provided for the basemap creation
+    const coreBasemapOptions = basemapOptions === undefined ? this.basemapOptions : basemapOptions;
 
-      if (coreBasemapOptions) {
-        // create shaded layer
-        if (coreBasemapOptions.shaded && this.basemapsList[projectionCode].shaded) {
-          const shadedLayer = await this.createBasemapLayer('shaded', this.basemapsList[projectionCode].shaded, defaultOpacity, true);
-          if (shadedLayer) {
-            basemapLayers.push(shadedLayer);
-            basemaplayerTypes.push('shaded');
-          }
-        }
-
-        // create transport layer
-        if (coreBasemapOptions.basemapId === 'transport' && this.basemapsList[projectionCode].transport) {
-          const transportLayer = await this.createBasemapLayer(
-            'transport',
-            this.basemapsList[projectionCode].transport,
-            coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
-            true
-          );
-          if (transportLayer) {
-            basemapLayers.push(transportLayer);
-            basemaplayerTypes.push('transport');
-
-            // set default origin,extent,resolutions from layer
-            defaultOrigin = transportLayer.origin;
-            defaultExtent = transportLayer.extent;
-            defaultResolutions = transportLayer.resolutions;
-            minZoom = transportLayer.minScale;
-            maxZoom = transportLayer.maxScale;
-          }
-        }
-
-        // create simple layer
-        if (coreBasemapOptions.basemapId === 'simple' && this.basemapsList[projectionCode].simple) {
-          const simpleLayer = await this.createBasemapLayer(
-            'simple',
-            this.basemapsList[projectionCode].simple,
-            coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
-            true
-          );
-
-          if (simpleLayer) {
-            basemapLayers.push(simpleLayer);
-            basemaplayerTypes.push('simple');
-
-            // set default origin,extent,resolutions from layer
-            defaultOrigin = simpleLayer.origin;
-            defaultExtent = simpleLayer.extent;
-            defaultResolutions = simpleLayer.resolutions;
-            minZoom = simpleLayer.minScale;
-            maxZoom = simpleLayer.maxScale;
-          }
-        }
-
-        // create open street maps layer
-        if (coreBasemapOptions.basemapId === 'osm') {
-          basemapLayers.push({
-            basemapId: 'osm',
-            type: 'osm',
-            source: new OSM({ crossOrigin: 'Anonymous' }),
-            opacity: coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
-            origin: [],
-            extent: [],
-            resolutions: [],
-            minScale: minZoom,
-            maxScale: maxZoom,
-          });
-          basemaplayerTypes.push('osm');
-        }
-
-        // no geometry basemap layer
-        if (coreBasemapOptions.basemapId === 'nogeom') {
-          basemaplayerTypes.push('nogeom');
-        }
-
-        if (basemapLayers.length && coreBasemapOptions.labeled) {
-          const labelLayer = await this.createBasemapLayer(
-            'label',
-            toJsonObject({
-              url: (this.basemapsList[projectionCode].label.url as string)?.replaceAll('xxxx', languageCode === 'en' ? 'CBMT' : 'CBCT'),
-              jsonUrl: (this.basemapsList[projectionCode].label.jsonUrl as string)?.replaceAll(
-                'xxxx',
-                languageCode === 'en' ? 'CBMT' : 'CBCT'
-              ),
-            }),
-            0.8,
-            true
-          );
-          if (labelLayer) {
-            basemapLayers.push(labelLayer);
-            basemaplayerTypes.push('label');
-          }
+    if (coreBasemapOptions) {
+      // create shaded layer
+      if (coreBasemapOptions.shaded && this.basemapsList[projectionCode].shaded) {
+        const shadedLayer = await this.createBasemapLayer('shaded', this.basemapsList[projectionCode].shaded, defaultOpacity, true);
+        if (shadedLayer) {
+          basemapLayers.push(shadedLayer);
+          basemaplayerTypes.push('shaded');
         }
       }
 
-      if (basemapLayers.length > 0 || (basemapLayers.length === 0 && coreBasemapOptions.basemapId === 'nogeom')) {
-        // id and type are derived from the basemap type composition (shaded, label, transport, simple)
-        const basemap = {
-          basemapId: basemaplayerTypes.join(''),
-          layers: basemapLayers,
-          type: basemaplayerTypes.join('-'),
-          attribution:
-            coreBasemapOptions.basemapId === 'osm'
-              ? [
-                  '© OpenStreetMap',
-                  api.utilities.core.getLocalizedMessage(
-                    'mapctrl.attribution.defaultnrcan',
-                    AppEventProcessor.getDisplayLanguage(this.mapId)
-                  ),
-                ]
-              : [
-                  api.utilities.core.getLocalizedMessage(
-                    'mapctrl.attribution.defaultnrcan',
-                    AppEventProcessor.getDisplayLanguage(this.mapId)
-                  ),
-                ],
-          zoomLevels: {
-            min: minZoom,
-            max: maxZoom,
-          },
-          defaultExtent,
-          defaultOrigin,
-          defaultResolutions,
-          name: '',
-          description: '',
-          descSummary: '',
-          altText: '',
-          thumbnailUrl: '',
-        };
+      // create transport layer
+      if (coreBasemapOptions.basemapId === 'transport' && this.basemapsList[projectionCode].transport) {
+        const transportLayer = await this.createBasemapLayer(
+          'transport',
+          this.basemapsList[projectionCode].transport,
+          coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
+          true
+        );
+        if (transportLayer) {
+          basemapLayers.push(transportLayer);
+          basemaplayerTypes.push('transport');
 
-        resolve(basemap);
-      } else {
-        // if no basemap set, resolve to undefined
-        resolve(undefined);
+          // set default origin,extent,resolutions from layer
+          defaultOrigin = transportLayer.origin;
+          defaultExtent = transportLayer.extent;
+          defaultResolutions = transportLayer.resolutions;
+          minZoom = transportLayer.minScale;
+          maxZoom = transportLayer.maxScale;
+        }
       }
-    });
+
+      // create simple layer
+      if (coreBasemapOptions.basemapId === 'simple' && this.basemapsList[projectionCode].simple) {
+        const simpleLayer = await this.createBasemapLayer(
+          'simple',
+          this.basemapsList[projectionCode].simple,
+          coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
+          true
+        );
+
+        if (simpleLayer) {
+          basemapLayers.push(simpleLayer);
+          basemaplayerTypes.push('simple');
+
+          // set default origin,extent,resolutions from layer
+          defaultOrigin = simpleLayer.origin;
+          defaultExtent = simpleLayer.extent;
+          defaultResolutions = simpleLayer.resolutions;
+          minZoom = simpleLayer.minScale;
+          maxZoom = simpleLayer.maxScale;
+        }
+      }
+
+      // create open street maps layer
+      if (coreBasemapOptions.basemapId === 'osm') {
+        basemapLayers.push({
+          basemapId: 'osm',
+          type: 'osm',
+          source: new OSM({ crossOrigin: 'Anonymous' }),
+          opacity: coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
+          origin: [],
+          extent: [],
+          resolutions: [],
+          minScale: minZoom,
+          maxScale: maxZoom,
+        });
+        basemaplayerTypes.push('osm');
+      }
+
+      // no geometry basemap layer
+      if (coreBasemapOptions.basemapId === 'nogeom') {
+        basemaplayerTypes.push('nogeom');
+      }
+
+      if (basemapLayers.length && coreBasemapOptions.labeled) {
+        const labelLayer = await this.createBasemapLayer(
+          'label',
+          toJsonObject({
+            url: (this.basemapsList[projectionCode].label.url as string)?.replaceAll('xxxx', languageCode === 'en' ? 'CBMT' : 'CBCT'),
+            jsonUrl: (this.basemapsList[projectionCode].label.jsonUrl as string)?.replaceAll(
+              'xxxx',
+              languageCode === 'en' ? 'CBMT' : 'CBCT'
+            ),
+          }),
+          0.8,
+          true
+        );
+        if (labelLayer) {
+          basemapLayers.push(labelLayer);
+          basemaplayerTypes.push('label');
+        }
+      }
+    }
+
+    if (basemapLayers.length > 0 || (basemapLayers.length === 0 && coreBasemapOptions.basemapId === 'nogeom')) {
+      // id and type are derived from the basemap type composition (shaded, label, transport, simple)
+      const basemap = {
+        basemapId: basemaplayerTypes.join(''),
+        layers: basemapLayers,
+        type: basemaplayerTypes.join('-'),
+        attribution:
+          coreBasemapOptions.basemapId === 'osm'
+            ? [
+                '© OpenStreetMap',
+                api.utilities.core.getLocalizedMessage(
+                  'mapctrl.attribution.defaultnrcan',
+                  AppEventProcessor.getDisplayLanguage(this.mapId)
+                ),
+              ]
+            : [
+                api.utilities.core.getLocalizedMessage(
+                  'mapctrl.attribution.defaultnrcan',
+                  AppEventProcessor.getDisplayLanguage(this.mapId)
+                ),
+              ],
+        zoomLevels: {
+          min: minZoom,
+          max: maxZoom,
+        },
+        defaultExtent,
+        defaultOrigin,
+        defaultResolutions,
+        name: '',
+        description: '',
+        descSummary: '',
+        altText: '',
+        thumbnailUrl: '',
+      };
+
+      return basemap;
+    }
+
+    // No basemap set
+    return undefined;
   }
 
   /**

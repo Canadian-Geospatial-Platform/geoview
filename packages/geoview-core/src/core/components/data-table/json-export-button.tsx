@@ -54,7 +54,7 @@ function JSONExportButton({ features, layerPath }: JSONExportButtonProps): JSX.E
   };
 
   /**
-   * Build the JSON file
+   * Builds the JSON file
    * @returns {string} Json file content as string
    *
    */

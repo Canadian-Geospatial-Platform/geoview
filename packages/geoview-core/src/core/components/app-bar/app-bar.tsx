@@ -228,14 +228,23 @@ export function AppBar(props: AppBarProps): JSX.Element {
       api.plugin
         .loadScript('basemap-panel')
         .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
-          api.plugin.addPlugin(
-            'basemap-panel',
-            mapId,
-            constructor,
-            toJsonObject({
+          api.plugin
+            .addPlugin(
+              'basemap-panel',
               mapId,
-            })
-          );
+              constructor,
+              toJsonObject({
+                mapId,
+              })
+            )
+            .catch((error) => {
+              // Log
+              logger.logPromiseFailed('api.plugin.addPlugin in useEffect in app-bar', error);
+            });
+        })
+        .catch((error) => {
+          // Log
+          logger.logPromiseFailed('api.plugin.loadScript in useEffect in app-bar', error);
         });
     }
   }, [appBarConfig, mapId]);

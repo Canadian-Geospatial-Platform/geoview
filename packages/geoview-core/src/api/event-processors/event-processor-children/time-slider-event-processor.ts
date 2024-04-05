@@ -31,9 +31,9 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     // Wait for the map to 'appear' in the maps container
     whenThisThenThat(
       () => api.maps[mapId],
-      async (mapViewer) => {
+      (mapViewer) => {
         // Wait for the layers to be processed so that their 'layerTemporalDimension' information is set
-        await mapViewer.onMapLayersProcessed(() => {
+        mapViewer.onMapLayersProcessed(() => {
           // Now the layerTemporalDimension should be good on the layers
           const orderedLayers = store.getState().mapState.orderedLayerInfo.map((info) => info.layerPath);
           const initialTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, orderedLayers);
