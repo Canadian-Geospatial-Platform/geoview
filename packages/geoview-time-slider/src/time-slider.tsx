@@ -16,12 +16,15 @@ interface TimeSliderPanelProps {
 /**
  * Creates a panel with time sliders
  *
- * @param {TimeSliderPanelProps} TimeSliderPanelProps time slider panel properties
+ * @param {TimeSliderPanelProps} timeSliderProps - Time slider panel properties
  * @returns {JSX.Element} the slider panel
  */
-export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps): JSX.Element {
+export function TimeSlider(timeSliderProps: TimeSliderPanelProps): JSX.Element {
+  // Log
+  logger.logTraceRender('TIME-SLIDER', timeSliderProps);
+
   const { cgpv } = window;
-  const { config, layerPath, mapId } = TimeSliderPanelProps;
+  const { config, layerPath, mapId } = timeSliderProps;
   const { api, react, ui } = cgpv;
   const { useState, useRef, useEffect, useCallback } = react;
   const {
@@ -142,19 +145,6 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps): JSX.Elem
         ? `${timeframe === 'day' ? new Date(timeMarks[i]).toTimeString().split(' ')[0] : new Date(timeMarks[i]).toISOString().slice(5, 10)}`
         : new Date(timeMarks[i]).toISOString().slice(0, 10),
     });
-  }
-
-  /**
-   * Create labels for values on slider
-   *
-   * @param {number} value The value of the slider handle
-   * @returns {string} A formatted time string or ISO date string
-   */
-  function valueLabelFormat(value: number): string {
-    // If timeframe is a single day, use time. If it is a single year, drop year from dates.
-    if (timeframe === 'day') return new Date(value).toTimeString().split(' ')[0].replace(/^0/, '');
-    if (timeframe === 'year') return new Date(value).toISOString().slice(5, 10);
-    return new Date(value).toISOString().slice(0, 10);
   }
 
   /**
@@ -332,16 +322,32 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps): JSX.Elem
   }
 
   const handleSliderChange = useCallback(
-    (event: number | number[]): void => {
+    (newValues: number | number[]): void => {
       // Log
       logger.logTraceUseCallback('TIME-SLIDER - handleSliderChange', layerPath);
 
       clearTimeout(playIntervalRef.current);
       setIsPlaying(false);
       sliderDeltaRef.current = undefined;
-      setValues(layerPath, event as number[]);
+      setValues(layerPath, newValues as number[]);
     },
     [layerPath, setValues]
+  );
+
+  /**
+   * Create labels for values on slider
+   *
+   * @param {number} theValue - The value of the slider handle
+   * @returns {string} A formatted time string or ISO date string
+   */
+  const handleLabelFormat = useCallback(
+    (theValue: number): string => {
+      // If timeframe is a single day, use time. If it is a single year, drop year from dates.
+      if (timeframe === 'day') return new Date(theValue).toTimeString().split(' ')[0].replace(/^0/, '');
+      if (timeframe === 'year') return new Date(theValue).toISOString().slice(5, 10);
+      return new Date(theValue).toISOString().slice(0, 10);
+    },
+    [timeframe]
   );
 
   return (
@@ -374,17 +380,17 @@ export function TimeSlider(TimeSliderPanelProps: TimeSliderPanelProps): JSX.Elem
         <Grid item xs={12}>
           <div style={{ textAlign: 'center', paddingTop: '20px' }}>
             <Slider
+              key={values[1] ? values[1] + values[0] : values[0]}
               sliderId={layerPath}
               mapId={mapId}
               style={{ width: '80%', color: 'primary' }}
               min={minAndMax[0]}
               max={minAndMax[1]}
               value={values}
-              valueLabelFormat={(value: number) => valueLabelFormat(value)}
               marks={sliderMarks}
               step={!discreteValues ? null : 0.1}
-              customOnChange={handleSliderChange}
-              key={values[1] ? values[1] + values[0] : values[0]}
+              onChangeCommitted={handleSliderChange}
+              onValueDisplay={handleLabelFormat}
             />
           </div>
         </Grid>

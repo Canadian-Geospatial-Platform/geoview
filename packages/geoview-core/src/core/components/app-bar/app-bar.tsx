@@ -87,7 +87,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
       logger.logTraceUseCallback('APP-BAR - closePanelById', buttonId);
 
       // Callback when removing and focus is lost
-      const focusWhenNoElementCallback = () => {
+      const focusWhenNoElementCallback = (): void => {
         const mapCont = api.maps[mapId].map.getTargetElement();
         mapCont.focus();
 
@@ -242,7 +242,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('APP-BAR - create group of AppBar buttons', mapId);
+    logger.logTraceUseEffect('APP-BAR - create group of AppBar buttons');
 
     // render footer bar tabs
     (appBarConfig?.tabs.core ?? [])
@@ -267,9 +267,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
         };
         return [button, panel, tab];
       })
-      .forEach((footerGroup) => api.maps[mapId].appBarApi.createAppbarPanel(footerGroup[0], footerGroup[1], footerGroup[2]));
+      .forEach((footerGroup) => appBarApi.createAppbarPanel(footerGroup[0], footerGroup[1], footerGroup[2]));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appBarConfig?.tabs.core, mapId]); // Not exhaustive, because it'd be dangerous to trigger on `panels` or on `t`, because of how the AppBar panels are just recreated all the time (should refactor this, maybe..)
+  }, [appBarConfig?.tabs.core, appBarApi]); // Not exhaustive, because it'd be dangerous to trigger on `panels` or on `t`, because of how the AppBar panels are just recreated all the time (should refactor this, maybe..)
 
   // #endregion
 
@@ -305,7 +305,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                         tooltipPlacement="right"
                         className={`style3 ${selectedAppBarButtonId === buttonPanel.button.id ? 'active' : ''}`}
                         size="small"
-                        onClick={() => handleButtonClicked(buttonPanel.button.id!, groupName)}
+                        onClick={(): void => handleButtonClicked(buttonPanel.button.id!, groupName)}
                       >
                         {buttonPanel.button.children}
                       </IconButton>

@@ -186,7 +186,7 @@
                   { value: 2023, label: '2023' },
                 ],
                 track: 'normal',
-                customOnChange: (dates) => {
+                onChange: (dates) => {
                   const field = cgpv.api.maps.UI1.layer.geoviewLayer('historical-flood/0').getTemporalDimension('historical-flood/0').field;
                   cgpv.api.maps.UI1.layer.geoviewLayer('historical-flood/0').applyViewFilter('historical-flood/0', `${field} >= date '${dates[0]}-01-01' and ${field} <= date '${dates[1]}-12-31'`);
                 }
@@ -218,7 +218,7 @@
               ],
               track: false,
               // TODO: setting the view zoom level create bugs with the overview map
-              customOnChange: (zoomLevel) => {
+              onChange: (zoomLevel) => {
                 const lat = 50;
                 const lng = -95;
                 cgpv.api.maps['UI1'].getView().animate({ zoom: zoomLevel });
@@ -258,10 +258,8 @@
                 { value: 8, label: 'Level 8' },
                 { value: 18, label: 'Max Level 18' },
               ],
-              onSliderValueChanged: (sliderValues) => {
-                sliderPosition2[0].innerHTML = `<p>Slider min ${sliderValues.min}, max ${sliderValues.max}, values ${
-                  sliderValues.value
-                } and active thumb ${sliderValues.activeThumb === 0 ? 'left' : 'right'}</p>`;
+              onChange: (sliderValues, activeThumb) => {
+                sliderPosition2[0].innerHTML = `<p>Slider values ${sliderValues} and active thumb ${activeThumb === 0 ? 'left' : 'right'}</p>`;
               },
             };
 

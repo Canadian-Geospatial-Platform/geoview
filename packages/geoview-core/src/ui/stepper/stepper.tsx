@@ -16,8 +16,6 @@ import { getSxClasses } from './stepper-style';
  * Custom MUI Stepper Props
  */
 interface TypeStepperProps extends StepperProps {
-  // eslint-disable-next-line react/require-default-props
-  mapId?: string;
   steps: (TypeStep | null)[];
 }
 
