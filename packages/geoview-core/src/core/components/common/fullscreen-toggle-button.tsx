@@ -34,7 +34,7 @@ function FullScreenToggleButton({ isFullScreen, onSetIsFullScreen }: FullScreenT
     return () => {
       document.removeEventListener('keydown', handleEscKey);
     };
-  }, []);
+  }, [isFullScreen, onSetIsFullScreen]);
 
   return (
     <IconButton
