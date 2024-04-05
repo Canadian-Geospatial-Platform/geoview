@@ -150,7 +150,9 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
           fullWidth={fullWidth}
         >
           <FullScreenDialog open={isFullScreen} onClose={() => setIsFullScreen(false)}>
-            <Box sx={sxClasses.rightGridContent} className="fullscreen-mode">{children}</Box>
+            <Box sx={sxClasses.rightGridContent} className="fullscreen-mode">
+              {children}
+            </Box>
           </FullScreenDialog>
 
           <Box sx={sxClasses.rightGridContent}>{children}</Box>

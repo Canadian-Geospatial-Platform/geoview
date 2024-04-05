@@ -14,7 +14,7 @@ export const getSxClasses = (theme: Theme) => ({
 
       '& .MuiTableContainer-root': {
         maxHeight: 'unset',
-      }
+      },
     },
 
     '& .MuiPaper-root': {
