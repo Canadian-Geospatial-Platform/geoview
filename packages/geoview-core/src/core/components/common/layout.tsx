@@ -112,7 +112,7 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
 
             <Box sx={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
               {!fullWidth && <EnlargeButton isEnlarged={isEnlarged} onSetIsEnlarged={handleIsEnlarge} />}
-              <FullScreenToggleButton isFullScreen={isFullScreen} onSetIsFullScreen={setIsFullScreen} />
+              {!isFullScreen && <FullScreenToggleButton isFullScreen={isFullScreen} onSetIsFullScreen={setIsFullScreen} />}
               {!!layerList.length && (
                 <CloseButton
                   isLayersPanelVisible={isLayersPanelVisible}
