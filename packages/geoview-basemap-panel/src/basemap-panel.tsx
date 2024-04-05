@@ -3,6 +3,7 @@ import { TypeJsonObject, TypeJsonArray, toJsonObject, SelectChangeEvent } from '
 import { useMapProjection } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
 import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { TypeValidMapProjectionCodes, TypeDisplayLanguage } from 'geoview-core/src/geo/map/map-schema-types';
+import { logger } from 'geoview-core/src/core/utils/logger';
 import { getSxClasses } from './basemap-panel-style';
 
 interface BaseMapPanelProps {
@@ -181,6 +182,8 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
     // create the core basemap
     for (let basemapIndex = 0; basemapIndex < (basemapsArray.coreBasemaps.length as number); basemapIndex++) {
       const basemapOptions = basemapsArray.coreBasemaps[basemapIndex] as TypeJsonObject;
+      // TODO: Check - Should probably move the await outside of the loop so that all core basemaps start processing in parallel?
+      // TO.DOCONT: If doing so, be mindful of the isInit which seems to prioritize the first basemap in the list (and maybe why this await is in the loop?)
       // eslint-disable-next-line no-await-in-loop
       const basemap = await api.maps[mapId].basemap.createCoreBasemap(basemapOptions as unknown as TypeBasemapOptions, projection);
 
@@ -218,17 +221,25 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
     setBasemap('nogeom');
     setMapProjection(projection as TypeValidMapProjectionCodes);
 
-    createBasemapArray(projection);
-
-    // emit an event to let know map view projection as changed
-    myMap.setProjection(projection);
+    createBasemapArray(projection)
+      .then(() => {
+        // emit an event to let know map view projection as changed
+        myMap.setProjection(projection);
+      })
+      .catch((error) => {
+        // Log
+        logger.logPromiseFailed('createBasemapArray in setSelectedProjection in basemap-panel', error);
+      });
   };
 
   /**
    * load existing basemaps and create new basemaps
    */
   useEffect(() => {
-    createBasemapArray(mapProjection);
+    createBasemapArray(mapProjection).catch((error) => {
+      // Log
+      logger.logPromiseFailed('createBasemapArray in useEffect in basemap-panel', error);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language]);
 

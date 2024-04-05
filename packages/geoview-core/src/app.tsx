@@ -145,6 +145,7 @@ export async function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig:
  *
  * @param {(mapId: string) => void} callbackMapInit optional callback function to run once the map rendering is ready
  * @param {(mapId: string) => void} callbackMapLayersLoaded optional callback function to run once layers are loaded on the map
+ * @returns {Promise<void>}
  */
 async function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded?: (mapId: string) => void): Promise<void> {
   const mapElements = document.getElementsByClassName('geoview-map');
@@ -158,13 +159,18 @@ async function init(callbackMapInit?: (mapId: string) => void, callbackMapLayers
       const promiseMapInit = renderMap(mapElement);
 
       // When the map init is done
-      promiseMapInit.then(() => {
-        // Log
-        logger.logInfo('Map initialized', mapElement.getAttribute('id')!);
+      promiseMapInit
+        .then(() => {
+          // Log
+          logger.logInfo('Map initialized', mapElement.getAttribute('id')!);
 
-        // Callback about it
-        callbackMapInit?.(mapElement.getAttribute('id')!);
-      });
+          // Callback about it
+          callbackMapInit?.(mapElement.getAttribute('id')!);
+        })
+        .catch((error) => {
+          // Log
+          logger.logPromiseFailed('promiseMapInit in init in App', error);
+        });
 
       // Push the promise in the list of all maps being rendered
       promises.push(promiseMapInit);

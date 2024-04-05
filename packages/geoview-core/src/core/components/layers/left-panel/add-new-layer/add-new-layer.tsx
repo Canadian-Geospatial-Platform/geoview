@@ -793,29 +793,39 @@ export function AddNewLayer(): JSX.Element {
 
   /**
    * Handle the behavior of the 'Continue' button in the Stepper UI
-   * @returns {Promise<void>}
    */
-  const handleStep2 = async (): Promise<void> => {
+  const handleStep2 = (): void => {
     setIsLoading(true);
-    let valid = true;
+
+    let promise;
     if (layerType === undefined) {
-      valid = false;
       setIsLoading(false);
       emitErrorEmpty(t('layers.service'));
-    } else if (layerType === WMS) valid = await wmsValidation();
-    else if (layerType === WFS) valid = await wfsValidation();
-    else if (layerType === OGC_FEATURE) valid = await ogcFeatureValidation();
-    else if (layerType === XYZ_TILES) valid = await xyzValidation();
-    else if (layerType === ESRI_DYNAMIC) valid = await esriValidation(ESRI_DYNAMIC);
-    else if (layerType === ESRI_FEATURE) valid = await esriValidation(ESRI_FEATURE);
-    else if (layerType === ESRI_IMAGE) valid = await esriImageValidation();
-    else if (layerType === GEOJSON) valid = await geoJSONValidation();
-    else if (layerType === GEOPACKAGE) valid = geoPackageValidation();
-    else if (layerType === GEOCORE) valid = await geocoreValidation();
-    else if (layerType === CSV) valid = await csvValidation();
-    if (valid) {
-      setIsLoading(false);
-      setActiveStep(2);
+    } else if (layerType === WMS) promise = wmsValidation();
+    else if (layerType === WFS) promise = wfsValidation();
+    else if (layerType === OGC_FEATURE) promise = ogcFeatureValidation();
+    else if (layerType === XYZ_TILES) promise = xyzValidation();
+    else if (layerType === ESRI_DYNAMIC) promise = esriValidation(ESRI_DYNAMIC);
+    else if (layerType === ESRI_FEATURE) promise = esriValidation(ESRI_FEATURE);
+    else if (layerType === ESRI_IMAGE) promise = esriImageValidation();
+    else if (layerType === GEOJSON) promise = geoJSONValidation();
+    else if (layerType === GEOPACKAGE) promise = Promise.resolve(geoPackageValidation());
+    else if (layerType === GEOCORE) promise = geocoreValidation();
+    else if (layerType === CSV) promise = csvValidation();
+
+    // If we have a promise of a layer validation
+    if (promise) {
+      promise
+        .then((isValid) => {
+          if (isValid) {
+            setIsLoading(false);
+            setActiveStep(2);
+          }
+        })
+        .catch((error) => {
+          // Log
+          logger.logPromiseFailed('promise of layer validation in handleStep2 in AddNewLayer', error);
+        });
     }
   };
 
@@ -848,9 +858,8 @@ export function AddNewLayer(): JSX.Element {
 
   /**
    * Handle the behavior of the 'Finish' button in the Stepper UI
-   * @returns {Promise<void>}
    */
-  const handleStepLast = async (): Promise<void> => {
+  const handleStepLast = (): void => {
     setIsLoading(true);
     if (layerType === GEOCORE) {
       // TODO: Refactor - When reworking on this component, fix this weird thing of layerList vs layerEntries confusion for GeoCore
@@ -868,11 +877,16 @@ export function AddNewLayer(): JSX.Element {
       }
 
       // When each promise is done
-      Promise.allSettled(addedLayers.map((addedLayer) => addedLayer.promiseLayer)).then(() => {
-        // Done adding
-        doneAdding();
-        addedLayers.forEach((addedLayer) => doneAddedShowMessage(addedLayer.layer));
-      });
+      Promise.allSettled(addedLayers.map((addedLayer) => addedLayer.promiseLayer))
+        .then(() => {
+          // Done adding
+          doneAdding();
+          addedLayers.forEach((addedLayer) => doneAddedShowMessage(addedLayer.layer));
+        })
+        .catch((error) => {
+          // Log
+          logger.logPromiseFailed('Promise.allSettled in handleStepLast in AddNewLayer', error);
+        });
     } else if (geoviewLayerInstance) {
       // Get config
       const { geoviewLayerConfig } = layerEntries[0] as TypeLayerEntryConfig;
@@ -894,11 +908,16 @@ export function AddNewLayer(): JSX.Element {
       const addedLayer = api.maps[mapId].layer.addGeoviewLayer(geoviewLayerConfig);
       if (addedLayer) {
         // Wait on the promise
-        await addedLayer.promiseLayer;
-
-        // Done adding
-        doneAdding();
-        doneAddedShowMessage(addedLayer.layer);
+        addedLayer.promiseLayer
+          .then(() => {
+            // Done adding
+            doneAdding();
+            doneAddedShowMessage(addedLayer.layer);
+          })
+          .catch((error) => {
+            // Log
+            logger.logPromiseFailed('addedLayer.promiseLayer in handleStepLast in AddNewLayer', error);
+          });
       } else {
         // Failed to add, remove spinning, but stay on the add ui
         setIsLoading(false);

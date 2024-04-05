@@ -295,10 +295,10 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  protected processOneLayerEntry(layerConfig: EsriImageLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected async processOneLayerEntry(layerConfig: EsriImageLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
-    super.processOneLayerEntry(layerConfig);
+    await super.processOneLayerEntry(layerConfig);
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
     sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
@@ -348,9 +348,10 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
   applyViewFilter(layerPath: string, filter: string, CombineLegendFilter?: boolean): void {
-    const layerConfig = this.getLayerConfig(layerPath) as EsriImageLayerEntryConfig;
     // Log
     logger.logTraceCore('ESRIImage - applyViewFilter', layerPath);
+
+    const layerConfig = this.getLayerConfig(layerPath) as EsriImageLayerEntryConfig;
 
     // Get source
     const source = (layerConfig.olLayer as ImageLayer<ImageArcGISRest>).getSource();

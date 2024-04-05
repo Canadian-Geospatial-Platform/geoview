@@ -115,32 +115,37 @@ export class HoverFeatureInfoLayerSet extends LayerSet {
         data.queryStatus = 'init';
 
         // Process query on results data
-        this.queryLayerFeatures(data, layerConfig, layerPath, queryType, pixelCoordinate).then((arrayOfRecords) => {
-          if (arrayOfRecords === null) {
-            this.resultSet[layerPath].data.queryStatus = 'error';
-            this.resultSet[layerPath].data.layerStatus = layerConfig.layerStatus!;
-            this.resultSet[layerPath].data.feature = null;
-          } else {
-            if (arrayOfRecords?.length) {
-              const nameField = arrayOfRecords![0].nameField || (Object.entries(arrayOfRecords![0].fieldInfo)[0] as unknown as string);
-              const fieldInfo = arrayOfRecords![0].fieldInfo[nameField as string];
-
-              data.feature = {
-                featureIcon: arrayOfRecords![0].featureIcon,
-                fieldInfo,
-                geoviewLayerType: arrayOfRecords![0].geoviewLayerType,
-                nameField,
-              };
+        this.queryLayerFeatures(data, layerConfig, layerPath, queryType, pixelCoordinate)
+          .then((arrayOfRecords) => {
+            if (arrayOfRecords === null) {
+              this.resultSet[layerPath].data.queryStatus = 'error';
+              this.resultSet[layerPath].data.layerStatus = layerConfig.layerStatus!;
+              this.resultSet[layerPath].data.feature = null;
             } else {
-              data.feature = undefined;
-            }
-            data.layerStatus = layerConfig.layerStatus!;
-            data.queryStatus = 'processed';
-          }
+              if (arrayOfRecords?.length) {
+                const nameField = arrayOfRecords![0].nameField || (Object.entries(arrayOfRecords![0].fieldInfo)[0] as unknown as string);
+                const fieldInfo = arrayOfRecords![0].fieldInfo[nameField as string];
 
-          // Propagate to the store
-          MapEventProcessor.setMapHoverFeatureInfo(this.mapId, this.resultSet[layerPath].data.feature);
-        });
+                data.feature = {
+                  featureIcon: arrayOfRecords![0].featureIcon,
+                  fieldInfo,
+                  geoviewLayerType: arrayOfRecords![0].geoviewLayerType,
+                  nameField,
+                };
+              } else {
+                data.feature = undefined;
+              }
+              data.layerStatus = layerConfig.layerStatus!;
+              data.queryStatus = 'processed';
+            }
+
+            // Propagate to the store
+            MapEventProcessor.setMapHoverFeatureInfo(this.mapId, this.resultSet[layerPath].data.feature);
+          })
+          .catch((error) => {
+            // Log
+            logger.logPromiseFailed('queryLayerFeatures in queryLayers in hoverFeatureInfoLayerSet', error);
+          });
       } else {
         data.feature = null;
         data.queryStatus = 'error';

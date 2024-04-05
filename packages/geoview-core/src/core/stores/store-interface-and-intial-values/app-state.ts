@@ -1,10 +1,11 @@
 import { useStore } from 'zustand';
+import { TypeDisplayLanguage, TypeDisplayTheme } from '@/geo/map/map-schema-types';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { TypeDisplayLanguage, TypeDisplayTheme } from '@/geo/map/map-schema-types';
 import { NotificationDetailsType } from '@/core/components/notifications/notifications';
 import { TypeHTMLElement, TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { logger } from '@/core/utils/logger';
 
 export interface IAppState {
   displayLanguage: TypeDisplayLanguage;
@@ -22,7 +23,7 @@ export interface IAppState {
   actions: {
     addNotification: (notif: NotificationDetailsType) => void;
     setCrosshairActive: (active: boolean) => void;
-    setDisplayLanguage: (lang: TypeDisplayLanguage) => void;
+    setDisplayLanguage: (lang: TypeDisplayLanguage) => Promise<[void, void]>;
     setDisplayTheme: (theme: TypeDisplayTheme) => void;
     setFullScreenActive: (active: boolean, element?: TypeHTMLElement) => void;
     removeNotification: (key: string) => void;
@@ -74,11 +75,14 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     actions: {
       /**
        * Adds a notification.
-       * @returns {NotificationDetailsType} notif The notification to add.
+       * @param {NotificationDetailsType} notif - The notification to add.
        */
       addNotification: (notif: NotificationDetailsType): void => {
         // Redirect to processor
-        AppEventProcessor.addNotification(get().mapId, notif);
+        AppEventProcessor.addNotification(get().mapId, notif).catch((error) => {
+          // Log
+          logger.logPromiseFailed('AppEventProcessor.addNotification in actions.addNotification in appState', error);
+        });
       },
 
       /**
@@ -93,17 +97,18 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
       /**
        * Sets the display language.
        * @param {TypeDisplayLanguage} lang - The new display language.
+       * @returns {Promise<[void, void]>}
        */
-      setDisplayLanguage: (lang: TypeDisplayLanguage) => {
+      setDisplayLanguage: (lang: TypeDisplayLanguage): Promise<[void, void]> => {
         // Redirect to processor
-        AppEventProcessor.setDisplayLanguage(get().mapId, lang);
+        return AppEventProcessor.setDisplayLanguage(get().mapId, lang);
       },
 
       /**
        * Sets the theme.
        * @param {TypeDisplayTheme} theme - The new theme.
        */
-      setDisplayTheme: (theme: TypeDisplayTheme) => {
+      setDisplayTheme: (theme: TypeDisplayTheme): void => {
         // Redirect to setter
         get().appState.setterActions.setDisplayTheme(theme);
       },
@@ -113,7 +118,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
        * @param {boolean} active - New full screen state.
        * @param {TypeHTMLElement} element - The element to make full screen.
        */
-      setFullScreenActive: (active: boolean, element?: TypeHTMLElement) => {
+      setFullScreenActive: (active: boolean, element?: TypeHTMLElement): void => {
         // Redirect to processor
         AppEventProcessor.setFullscreen(get().mapId, active, element);
       },
@@ -122,7 +127,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
        * Remove a notification.
        * @param {string} key - The key of the notification to remove.
        */
-      removeNotification: (key: string) => {
+      removeNotification: (key: string): void => {
         // Redirect to processor
         AppEventProcessor.removeNotification(get().mapId, key);
       },

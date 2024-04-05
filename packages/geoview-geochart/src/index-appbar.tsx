@@ -1,4 +1,6 @@
-import { Cast, AnySchemaObject, TypeIconButtonProps, TypePanelProps, toJsonObject, TypeJsonObject } from 'geoview-core';
+import { Cast, AnySchemaObject, toJsonObject, TypeJsonObject } from 'geoview-core';
+import { TypeIconButtonProps } from 'geoview-core/src/ui/icon-button/icon-button-types';
+import { TypePanelProps } from 'geoview-core/src/ui/panel/panel-types';
 import { AppBarPlugin } from 'geoview-core/src/api/plugin/appbar-plugin';
 import { ChartIcon } from 'geoview-core/src/ui/icons';
 
@@ -56,10 +58,6 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
       title: 'chartPanel.title',
       icon: <ChartIcon />,
       width: '80vw',
-      onPanelOpened: () => {
-        // Redraw the chart, because of the canvas rendering
-        this.redrawChart();
-      },
     };
   }
 

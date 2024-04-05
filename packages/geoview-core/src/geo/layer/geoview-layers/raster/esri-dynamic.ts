@@ -224,10 +224,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  protected processOneLayerEntry(layerConfig: EsriDynamicLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected async processOneLayerEntry(layerConfig: EsriDynamicLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
-    super.processOneLayerEntry(layerConfig);
+    await super.processOneLayerEntry(layerConfig);
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
     sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
