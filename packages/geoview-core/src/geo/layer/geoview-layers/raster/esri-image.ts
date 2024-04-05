@@ -207,7 +207,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
    */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
+  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
@@ -253,7 +253,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
    * @param {EsriImageLayerEntryConfig} layerConfig The layer entry to configure
    */
-  protected processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: EsriImageLayerEntryConfig) {
+  protected processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: EsriImageLayerEntryConfig): void {
     commonProcessTemporalDimension(this, esriTimeDimension, layerConfig, true);
   }
 
@@ -262,7 +262,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @param {EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
    */
-  processFeatureInfoConfig = (layerConfig: EsriImageLayerEntryConfig) => {
+  processFeatureInfoConfig = (layerConfig: EsriImageLayerEntryConfig): void => {
     commonProcessFeatureInfoConfig.call(this, layerConfig);
   };
 
@@ -272,7 +272,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {EsriImage} this The ESRI layer instance pointer.
    * @param {EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
    */
-  processInitialSettings(layerConfig: EsriImageLayerEntryConfig) {
+  processInitialSettings(layerConfig: EsriImageLayerEntryConfig): void {
     commonProcessInitialSettings.call(this, layerConfig);
   }
 
@@ -347,7 +347,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath: string, filter: string, CombineLegendFilter?: boolean) {
+  applyViewFilter(layerPath: string, filter: string, CombineLegendFilter?: boolean): void {
     const layerConfig = this.getLayerConfig(layerPath) as EsriImageLayerEntryConfig;
     // Log
     logger.logTraceCore('ESRIImage - applyViewFilter', layerPath);

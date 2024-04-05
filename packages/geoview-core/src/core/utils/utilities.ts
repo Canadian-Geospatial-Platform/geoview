@@ -12,14 +12,11 @@ import { logger } from '@/core/utils/logger';
 
 /**
  * Create a localized string and set its "en" and "fr" properties to the same value.
- *
  * @param {TypeLocalizedString} localizedString the localized string to process.
- *
- * @returns {string} The string value according to the map display language,
+ * @returns {TypeLocalizedString} The localized (en/fr) object
  */
-export function createLocalizedString(value: string) {
-  const localizedString: TypeLocalizedString = { en: value, fr: value };
-  return localizedString;
+export function createLocalizedString(value: string): TypeLocalizedString {
+  return { en: value, fr: value };
 }
 
 /**
@@ -206,10 +203,10 @@ export function addUiComponent(targetDivId: string, component: React.ReactElemen
 /**
  * Sanitize HTML to remove threat
  *
- * @param {string} contentHtml HTML content to sanitize
+ * @param {string} contentHtml - HTML content to sanitize
  * @returns {string} sanitze HTLM or empty string if all dirty
  */
-export function sanitizeHtmlContent(contentHtml: string) {
+export function sanitizeHtmlContent(contentHtml: string): string {
   const clean = sanitizeHtml(contentHtml);
   return clean;
 }

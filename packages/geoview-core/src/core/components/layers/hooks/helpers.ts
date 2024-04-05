@@ -6,12 +6,13 @@ import { TypeLegendLayer, TypeLegendItem } from '@/core/components/layers/types'
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { generateId } from '@/core/utils/utilities';
 
-export function useLegendHelpers() {
+// ? I doubt we want to define an explicit type for this helper?
+export function useLegendHelpers(): unknown {
   const store = useGeoViewStore();
 
   const { mapId } = store.getState();
 
-  function populateLegendStoreWithFakeData() {
+  function populateLegendStoreWithFakeData(): void {
     const layerItems: TypeLegendItem[] = [
       {
         geometryType: 'Point',

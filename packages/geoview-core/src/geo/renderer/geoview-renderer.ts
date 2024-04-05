@@ -348,7 +348,7 @@ function createStrokeOptions(settings: TypeSimpleSymbolVectorConfig | TypeLineSt
  * @param {FilterNodeType} operator - Operator to execute.
  * @param {FilterNodeArrayType} dataStack - Data stack to use for the operator execution.
  */
-function executeOperator(operator: FilterNodeType, dataStack: FilterNodeArrayType) {
+function executeOperator(operator: FilterNodeType, dataStack: FilterNodeArrayType): void {
   if (operator.nodeType === NodeType.binary) {
     if (dataStack.length < 2 || dataStack[dataStack.length - 2].nodeValue === '(')
       throw new Error(`binary operator error - operator = '${operator.nodeValue}'`);

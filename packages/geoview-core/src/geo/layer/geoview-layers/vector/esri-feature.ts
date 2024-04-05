@@ -116,7 +116,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
-  validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
+  validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
     commonValidateListOfLayerEntryConfig.call(this, listOfLayerEntryConfig);
   }
 
@@ -167,8 +167,8 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
    * @param {EsriFeatureLayerEntryConfig} layerConfig The layer entry to configure
    */
-  protected processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: EsriFeatureLayerEntryConfig) {
-    return commonProcessTemporalDimension(this, esriTimeDimension, layerConfig);
+  protected processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: EsriFeatureLayerEntryConfig): void {
+    commonProcessTemporalDimension(this, esriTimeDimension, layerConfig);
   }
 
   /** ***************************************************************************************************************************
@@ -176,7 +176,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @param {EsriFeatureLayerEntryConfig} layerConfig The layer entry to configure.
    */
-  processFeatureInfoConfig = (layerConfig: EsriFeatureLayerEntryConfig) => {
+  processFeatureInfoConfig = (layerConfig: EsriFeatureLayerEntryConfig): void => {
     commonProcessFeatureInfoConfig.call(this, layerConfig);
   };
 
@@ -186,8 +186,8 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {EsriFeature} this The ESRI layer instance pointer.
    * @param {EsriFeatureLayerEntryConfig} layerConfig The layer entry to configure.
    */
-  processInitialSettings(layerConfig: EsriFeatureLayerEntryConfig) {
-    return commonProcessInitialSettings.call(this, layerConfig);
+  processInitialSettings(layerConfig: EsriFeatureLayerEntryConfig): void {
+    commonProcessInitialSettings.call(this, layerConfig);
   }
 
   /** ***************************************************************************************************************************

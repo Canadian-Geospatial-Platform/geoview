@@ -94,7 +94,8 @@ export function AddNewLayer(): JSX.Element {
   const layersList = useLayerLegendLayers();
   const { setDisplayState } = useLayerStoreActions();
 
-  const isMultiple = () => hasMetadata && (layerType === ESRI_DYNAMIC || layerType === WFS || layerType === WMS || layerType === GEOJSON);
+  const isMultiple = (): boolean =>
+    hasMetadata && (layerType === ESRI_DYNAMIC || layerType === WFS || layerType === WMS || layerType === GEOJSON);
 
   /**
    * List of layer types and labels
@@ -172,7 +173,7 @@ export function AddNewLayer(): JSX.Element {
    *
    * @param textField label for the TextField input that cannot be empty
    */
-  const emitErrorEmpty = (textField: string) => {
+  const emitErrorEmpty = (textField: string): void => {
     setIsLoading(false);
     api.maps[mapId].notifications.showError(`${textField} ${t('layers.errorEmpty')}`, [], false);
   };
@@ -182,7 +183,7 @@ export function AddNewLayer(): JSX.Element {
    *
    * @param textField label for the TextField input that cannot be empty
    */
-  const emitErrorNone = () => {
+  const emitErrorNone = (): void => {
     setIsLoading(false);
     api.maps[mapId].notifications.showError('layers.errorNone', [], false);
   };
@@ -192,7 +193,7 @@ export function AddNewLayer(): JSX.Element {
    *
    * @param textField label for the TextField input that cannot be empty
    */
-  const emitErrorFile = () => {
+  const emitErrorFile = (): void => {
     api.maps[mapId].notifications.showError('layers.errorFile', [], false);
   };
 
@@ -201,7 +202,7 @@ export function AddNewLayer(): JSX.Element {
    *
    * @param serviceName type of service provided by the URL
    */
-  const emitErrorServer = (serviceName: string) => {
+  const emitErrorServer = (serviceName: string): void => {
     setIsLoading(false);
     api.maps[mapId].notifications.showError(`${serviceName} ${t('layers.errorServer')}`, [], false);
   };
@@ -212,7 +213,7 @@ export function AddNewLayer(): JSX.Element {
    * @param serviceName type of service provided by the URL
    * @param proj current map projection
    */
-  const emitErrorProj = (serviceName: string, proj: string | undefined, supportedProj: TypeJsonArray | string[]) => {
+  const emitErrorProj = (serviceName: string, proj: string | undefined, supportedProj: TypeJsonArray | string[]): void => {
     setIsLoading(false);
     const message = `${serviceName} ${t('layers.errorProj')} ${proj}, ${t('layers.only')} ${supportedProj.join(', ')}`;
     api.maps[mapId].notifications.showError(message, [], false);
@@ -260,7 +261,7 @@ export function AddNewLayer(): JSX.Element {
 
       const layers: OgcWmsLayerEntryConfig[] = [];
 
-      const hasChildLayers = (layer: TypeJsonObject) => {
+      const hasChildLayers = (layer: TypeJsonObject): void => {
         if (layer.Layer && (layer.Layer as TypeJsonArray).length > 0) {
           (layer.Layer as TypeJsonObject[]).forEach((childLayer: TypeJsonObject) => {
             hasChildLayers(childLayer);
@@ -746,7 +747,7 @@ export function AddNewLayer(): JSX.Element {
   /**
    * Attempt to determine the layer type based on the URL format
    */
-  const bestGuessLayerType = () => {
+  const bestGuessLayerType = (): void => {
     const layerTokens = displayURL.toUpperCase().split('/');
     const layerId = parseInt(layerTokens[layerTokens.length - 1], 10);
     if (displayURL.toUpperCase().endsWith('MAPSERVER') || displayURL.toUpperCase().endsWith('MAPSERVER/')) {
@@ -778,7 +779,7 @@ export function AddNewLayer(): JSX.Element {
   /**
    * Handle the behavior of the 'Continue' button in the Stepper UI
    */
-  const handleStep1 = () => {
+  const handleStep1 = (): void => {
     let valid = true;
     if (layerURL.trim() === '') {
       valid = false;
@@ -792,8 +793,9 @@ export function AddNewLayer(): JSX.Element {
 
   /**
    * Handle the behavior of the 'Continue' button in the Stepper UI
+   * @returns {Promise<void>}
    */
-  const handleStep2 = async () => {
+  const handleStep2 = async (): Promise<void> => {
     setIsLoading(true);
     let valid = true;
     if (layerType === undefined) {
@@ -820,7 +822,7 @@ export function AddNewLayer(): JSX.Element {
   /**
    * Handle the behavior of the 'Step3' button in the Stepper UI
    */
-  const handleStep3 = () => {
+  const handleStep3 = (): void => {
     let valid = true;
     if (layerEntries.length === 0) {
       valid = false;
@@ -829,14 +831,14 @@ export function AddNewLayer(): JSX.Element {
     if (valid) setActiveStep(3);
   };
 
-  const doneAdding = () => {
+  const doneAdding = (): void => {
     // Done adding
     setIsLoading(false);
     setDisplayState('view');
     MapEventProcessor.setLayerZIndices(mapId);
   };
 
-  const doneAddedShowMessage = (layerBeingAdded: AbstractGeoViewLayer) => {
+  const doneAddedShowMessage = (layerBeingAdded: AbstractGeoViewLayer): void => {
     if (layerBeingAdded.allLayerStatusAreGreaterThanOrEqualTo('error'))
       api.maps[mapId].notifications.showMessage('layers.layerAddedWithError', [layerName]);
     else if (layerBeingAdded?.allLayerStatusAreGreaterThanOrEqualTo('loaded'))
@@ -846,8 +848,9 @@ export function AddNewLayer(): JSX.Element {
 
   /**
    * Handle the behavior of the 'Finish' button in the Stepper UI
+   * @returns {Promise<void>}
    */
-  const handleStepLast = async () => {
+  const handleStepLast = async (): Promise<void> => {
     setIsLoading(true);
     if (layerType === GEOCORE) {
       // TODO: Refactor - When reworking on this component, fix this weird thing of layerList vs layerEntries confusion for GeoCore
@@ -906,16 +909,16 @@ export function AddNewLayer(): JSX.Element {
   /**
    * Handle the behavior of the 'Back' button in the Stepper UI
    */
-  const handleBack = () => {
+  const handleBack = (): void => {
     setActiveStep((prevActiveStep: number) => prevActiveStep - 1);
   };
 
   /**
    * Set layer URL from file input
    *
-   * @param {File} file uploaded file
+   * @param {File} file - Uploaded file
    */
-  const handleFile = (file: File) => {
+  const handleFile = (file: File): void => {
     const fileURL = URL.createObjectURL(file);
     setDisplayURL(file.name);
     setLayerURL(fileURL);
@@ -929,9 +932,9 @@ export function AddNewLayer(): JSX.Element {
   /**
    * Set layer URL from form input
    *
-   * @param e TextField event
+   * @param {ChangeEvent<HTMLInputElement>} event - TextField event
    */
-  const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleInput = (event: ChangeEvent<HTMLInputElement>): void => {
     setDisplayURL(event.target.value.trim());
     setLayerURL(event.target.value.trim());
     setLayerType('');
@@ -943,9 +946,9 @@ export function AddNewLayer(): JSX.Element {
   /**
    * Set layerType from form input
    *
-   * @param {SelectChangeEvent} event TextField event
+   * @param {SelectChangeEvent<unknown>} event - TextField event
    */
-  const handleSelectType = (event: SelectChangeEvent<unknown>) => {
+  const handleSelectType = (event: SelectChangeEvent<unknown>): void => {
     setLayerType(event.target.value as TypeGeoviewLayerTypeWithGeoCore);
     setLayerList([]);
     setLayerEntries([]);
@@ -954,11 +957,11 @@ export function AddNewLayer(): JSX.Element {
   /**
    * Set the currently selected layer from a list
    *
-   * @param event Select event
+   * @param {Event} event - Select event
    *
    * @param newValue value/label pairs of select options
    */
-  const handleSelectLayer = (event: Event, newValue: TypeListOfLayerEntryConfig | TypeLayerEntryConfig) => {
+  const handleSelectLayer = (event: Event, newValue: TypeListOfLayerEntryConfig | TypeLayerEntryConfig): void => {
     if (isMultiple()) {
       setLayerEntries(newValue as TypeListOfLayerEntryConfig);
       setLayerName(
@@ -973,18 +976,18 @@ export function AddNewLayer(): JSX.Element {
   /**
    * Set the layer name from form input
    *
-   * @param e TextField event
+   * @param {ChangeEvent<HTMLInputElement>} event - TextField event
    */
-  const handleNameLayer = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleNameLayer = (event: ChangeEvent<HTMLInputElement>): void => {
     setLayerName(event.target.value);
   };
 
   /**
    * Handle file dragged into dropzone
    *
-   * @param {DragEvent<HTMLDivElement>} event Drag event
+   * @param {DragEvent<HTMLDivElement>} event - Drag event
    */
-  const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
+  const handleDragEnter = (event: React.DragEvent<HTMLDivElement>): void => {
     event.preventDefault();
     event.stopPropagation();
     if (event.target !== dragPopover.current) {
@@ -995,9 +998,9 @@ export function AddNewLayer(): JSX.Element {
   /**
    * Handle file dragged out of dropzone
    *
-   * @param {DragEvent<HTMLDivElement>} event Drag event
+   * @param {DragEvent<HTMLDivElement>} event - Drag event
    */
-  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>): void => {
     event.preventDefault();
     event.stopPropagation();
     if (event.target === dragPopover.current) setDrag(false);
@@ -1006,9 +1009,9 @@ export function AddNewLayer(): JSX.Element {
   /**
    * Prevent default behaviour when file dragged over dropzone
    *
-   * @param {DragEvent<HTMLDivElement>} event Drag event
+   * @param {DragEvent<HTMLDivElement>} event - Drag event
    */
-  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>): void => {
     event.preventDefault();
     event.stopPropagation();
   };
@@ -1016,9 +1019,9 @@ export function AddNewLayer(): JSX.Element {
   /**
    * Handle file drop
    *
-   * @param {DragEvent<HTMLDivElement>} event Drag event
+   * @param {DragEvent<HTMLDivElement>} event - Drag event
    */
-  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>): void => {
     event.preventDefault();
     event.stopPropagation();
     setDrag(false);

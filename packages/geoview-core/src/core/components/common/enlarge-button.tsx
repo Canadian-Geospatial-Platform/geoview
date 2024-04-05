@@ -12,9 +12,9 @@ interface EnlargeButtonProps {
  * Create enlarge button
  * @param {boolean} isEnlarged
  * @param {function} setIsEnlarged
- * @returns JSX.element
+ * @returns {JSX.element}
  */
-export function EnlargeButton({ isEnlarged, onSetIsEnlarged }: EnlargeButtonProps) {
+export function EnlargeButton({ isEnlarged, onSetIsEnlarged }: EnlargeButtonProps): JSX.Element {
   const { t } = useTranslation<string>();
 
   const theme = useTheme();

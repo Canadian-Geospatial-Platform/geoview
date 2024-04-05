@@ -303,7 +303,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
   /**
    * Handles click to remove all features in right panel.
    */
-  const handleClearAllHighlights = () => {
+  const handleClearAllHighlights = (): void => {
     // clear all highlights from features on the map in all layers
     removeHighlightedFeature('all');
     // clear checked features array
@@ -345,7 +345,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
    * the previously selected feature index so that in the useEffect, later, the component can udpate
    * the selected features with the store.
    */
-  const resetCurrentIndex = () => {
+  const resetCurrentIndex = (): void => {
     // Keep reference on previously selected layer
     prevLayerSelected.current = arrayOfLayerDataBatch.find((layer) => layer.layerPath === selectedLayerPathLocal);
     // Keep reference on previously selected features
@@ -378,9 +378,9 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
 
   /**
    * Renders the complete Details Panel component
-   * @returns JSX.Element
+   * @returns {JSX.Element}
    */
-  const renderComplete = () => {
+  const renderComplete = (): JSX.Element => {
     if (memoLayersList) {
       const featureTitleDetails = t('details.featureDetailsTitle')
         .replace('{count}', `${currentFeatureIndex + 1}`)

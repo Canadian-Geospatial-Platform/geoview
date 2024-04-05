@@ -255,10 +255,15 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
 // **********************************************************
 // Data-table state selectors
 // **********************************************************
-export const useDataTableAllFeaturesDataArray = () => useStore(useGeoViewStore(), (state) => state.dataTableState.allFeaturesDataArray);
-export const useDataTableSelectedLayerPath = () => useStore(useGeoViewStore(), (state) => state.dataTableState.selectedLayerPath);
-export const useDataTableLayerSettings = () => useStore(useGeoViewStore(), (state) => state.dataTableState.layersDataTableSetting);
-export const useDataTableTableHeight = () => useStore(useGeoViewStore(), (state) => state.dataTableState.tableHeight);
-export const useDataTableSelectedFeature = () => useStore(useGeoViewStore(), (state) => state.dataTableState.selectedFeature);
+export const useDataTableAllFeaturesDataArray = (): TypeLayerData[] =>
+  useStore(useGeoViewStore(), (state) => state.dataTableState.allFeaturesDataArray);
+export const useDataTableSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.dataTableState.selectedLayerPath);
+export const useDataTableLayerSettings = (): Record<string, IDataTableSettings> =>
+  useStore(useGeoViewStore(), (state) => state.dataTableState.layersDataTableSetting);
+export const useDataTableTableHeight = (): number => useStore(useGeoViewStore(), (state) => state.dataTableState.tableHeight);
+export const useDataTableSelectedFeature = (): TypeFeatureInfoEntry | null =>
+  useStore(useGeoViewStore(), (state) => state.dataTableState.selectedFeature);
 
-export const useDataTableStoreActions = () => useStore(useGeoViewStore(), (state) => state.dataTableState.actions);
+// TODO: Refactor - We should explicit a type for the layerState.actions
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const useDataTableStoreActions = (): any => useStore(useGeoViewStore(), (state) => state.dataTableState.actions);

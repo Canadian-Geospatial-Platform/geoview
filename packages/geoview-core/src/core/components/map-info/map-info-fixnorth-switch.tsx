@@ -35,7 +35,7 @@ export function MapInfoFixNorthSwitch(): JSX.Element {
   /**
    * Emit an event to specify the map to rotate to keep north straight
    */
-  const fixNorth = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const fixNorth = (event: React.ChangeEvent<HTMLInputElement>): void => {
     // this event will be listen by the north-arrow.tsx component
     setFixNorth(event.target.checked);
 

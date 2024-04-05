@@ -130,7 +130,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
+  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
@@ -297,7 +297,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
   }
 
   // TODO: This section needs documentation (a header at least). Also, is it normal to have things hardcoded like that?
-  addVectorTileLayer() {
+  addVectorTileLayer(): void {
     // GV from code sandbox https://codesandbox.io/s/vector-tile-info-forked-g28jud?file=/main.js it works good
     // GV from inside GEoView, even when not use, something is wrong.
     olms(
@@ -321,7 +321,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @param {string} layerPath Path of layer to style.
    * @param {string} styleUrl The url of the styles to apply.
    */
-  setVectorTileStyle(layerPath: string, styleUrl: string) {
+  setVectorTileStyle(layerPath: string, styleUrl: string): void {
     applyStyle(api.maps[this.mapId].layer.registeredLayers[layerPath].olLayer as VectorTileLayer, styleUrl);
   }
 }

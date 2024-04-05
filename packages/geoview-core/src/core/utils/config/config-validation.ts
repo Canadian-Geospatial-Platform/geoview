@@ -359,7 +359,7 @@ export class ConfigValidation {
    * @param {AnyValidateFunction<unknown>} validate The Ajv validator.
    * @param {any} objectAffected Object that was validated.
    */
-  private printSchemaError(validate: AnyValidateFunction<unknown>, objectAffected: unknown) {
+  private printSchemaError(validate: AnyValidateFunction<unknown>, objectAffected: unknown): void {
     for (let i = 0; i < validate.errors!.length; i += 1) {
       const error = validate.errors![i];
       const { instancePath } = error;
@@ -542,7 +542,7 @@ export class ConfigValidation {
    * @param {MapConfigLayerEntry[]} listOfMapConfigLayerEntry The list of Map Config Layer Entry configuration to adjust and
    * validate.
    */
-  private doExtraValidation(listOfMapConfigLayerEntry?: MapConfigLayerEntry[]) {
+  private doExtraValidation(listOfMapConfigLayerEntry?: MapConfigLayerEntry[]): void {
     if (listOfMapConfigLayerEntry) {
       listOfMapConfigLayerEntry
         .filter((geoviewLayerConfig) => !mapConfigLayerEntryIsGeoCore(geoviewLayerConfig))
@@ -581,7 +581,7 @@ export class ConfigValidation {
    * Verify that the metadataAccessPath has a value.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to validate.
    */
-  private metadataAccessPathIsMandatory(geoviewLayerConfig: TypeGeoviewLayerConfig) {
+  private metadataAccessPathIsMandatory(geoviewLayerConfig: TypeGeoviewLayerConfig): void {
     if (!geoviewLayerConfig.metadataAccessPath) {
       throw new Error(
         `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.geoviewLayerId} of type ${geoviewLayerConfig.geoviewLayerType}.`
@@ -593,7 +593,7 @@ export class ConfigValidation {
    * Verify that the geoviewLayerId has a value.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to validate.
    */
-  private geoviewLayerIdIsMandatory(geoviewLayerConfig: TypeGeoviewLayerConfig) {
+  private geoviewLayerIdIsMandatory(geoviewLayerConfig: TypeGeoviewLayerConfig): void {
     if (!geoviewLayerConfig.geoviewLayerId) {
       throw new Error(`geoviewLayerId is mandatory for GeoView layer of type ${geoviewLayerConfig.geoviewLayerType}.`);
     }
@@ -610,7 +610,7 @@ export class ConfigValidation {
     geoviewLayerConfig: TypeGeoviewLayerConfig,
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
     parentLayerConfig?: GroupLayerEntryConfig
-  ) {
+  ): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig, i: number) => {
       // links the entry to its GeoView layer config.
       layerConfig.geoviewLayerConfig = geoviewLayerConfig;
@@ -670,7 +670,7 @@ export class ConfigValidation {
     geoviewLayerConfig: TypeGeoviewLayerConfig,
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
     parentLayerConfig?: GroupLayerEntryConfig
-  ) {
+  ): void {
     listOfLayerEntryConfig.forEach((layerConfig) => {
       layerConfig.parentLayerConfig = parentLayerConfig;
       layerConfig.geoviewLayerConfig = geoviewLayerConfig;
@@ -691,7 +691,7 @@ export class ConfigValidation {
     localizedString: TypeLocalizedString,
     sourceKey: TypeDisplayLanguage,
     destinationKey: TypeDisplayLanguage
-  ) {
+  ): void {
     localizedString[destinationKey] = localizedString[sourceKey];
   }
 
@@ -703,7 +703,7 @@ export class ConfigValidation {
    */
   private processLocalizedString(suportedLanguages: TypeListOfLocalizedLanguages, listOfMapConfigLayerEntry?: MapConfigLayerEntry[]): void {
     if (suportedLanguages.includes('en') && suportedLanguages.includes('fr') && listOfMapConfigLayerEntry) {
-      const validateLocalizedString = (config: TypeJsonObject) => {
+      const validateLocalizedString = (config: TypeJsonObject): void => {
         if (typeof config === 'object') {
           Object.keys(config).forEach((key) => {
             if (!key.startsWith('_') && typeof config[key] === 'object') {
@@ -736,7 +736,7 @@ export class ConfigValidation {
     }
 
     if (listOfMapConfigLayerEntry) {
-      const propagateLocalizedString = (config: TypeJsonObject) => {
+      const propagateLocalizedString = (config: TypeJsonObject): void => {
         if (typeof config === 'object') {
           Object.keys(config).forEach((key) => {
             if (!key.startsWith('_') && typeof config[key] === 'object') {

@@ -587,7 +587,7 @@ export type MapConfigLayerEntry = TypeGeoviewLayerConfig | GeoCoreLayerConfig;
  * @param {MapConfigLayerEntry} layerConfigEntryOption The layer entry config to check
  * @returns {boolean} True if the layer type if GeoCore
  */
-export const mapConfigLayerEntryIsGeoCore = (layerConfigEntryOption: MapConfigLayerEntry) => {
+export const mapConfigLayerEntryIsGeoCore = (layerConfigEntryOption: MapConfigLayerEntry): boolean => {
   return layerConfigEntryOption.geoviewLayerType === CONST_LAYER_ENTRY_TYPES.GEOCORE;
 };
 

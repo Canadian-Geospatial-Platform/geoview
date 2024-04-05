@@ -55,13 +55,13 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   const { deleteLayer, setLayerDeleteInProgress, getLayerDeleteInProgress } = useLayerStoreActions();
   const { getVisibilityFromOrderedLayerInfo, setOrToggleLayerVisibility } = useMapStoreActions();
 
-  const handleDeleteClick = () => {
+  const handleDeleteClick = (): void => {
     if (getVisibilityFromOrderedLayerInfo(layer.layerPath)) setOrToggleLayerVisibility(layer.layerPath);
     setInUndoState(true);
     setLayerDeleteInProgress(true);
   };
 
-  const handleUndoClick = () => {
+  const handleUndoClick = (): void => {
     setOrToggleLayerVisibility(layer.layerPath);
     setInUndoState(false);
     setLayerDeleteInProgress(false);

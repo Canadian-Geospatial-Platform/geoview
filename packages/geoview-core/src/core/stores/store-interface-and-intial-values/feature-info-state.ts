@@ -92,9 +92,13 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
 // **********************************************************
 // Details state selectors
 // **********************************************************
-export const useDetailsCheckedFeatures = () => useStore(useGeoViewStore(), (state) => state.detailsState.checkedFeatures);
-export const useDetailsLayerDataArray = () => useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArray);
-export const useDetailsLayerDataArrayBatch = () => useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArrayBatch);
-export const useDetailsSelectedLayerPath = () => useStore(useGeoViewStore(), (state) => state.detailsState.selectedLayerPath);
+export const useDetailsCheckedFeatures = (): TypeFeatureInfoEntry[] =>
+  useStore(useGeoViewStore(), (state) => state.detailsState.checkedFeatures);
+export const useDetailsLayerDataArray = (): TypeLayerData[] => useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArray);
+export const useDetailsLayerDataArrayBatch = (): TypeLayerData[] =>
+  useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArrayBatch);
+export const useDetailsSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.detailsState.selectedLayerPath);
 
-export const useDetailsStoreActions = () => useStore(useGeoViewStore(), (state) => state.detailsState.actions);
+// TODO: Refactor - We should explicit a type for the layerState.actions
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const useDetailsStoreActions = (): any => useStore(useGeoViewStore(), (state) => state.detailsState.actions);

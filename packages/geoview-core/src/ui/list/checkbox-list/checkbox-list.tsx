@@ -44,7 +44,7 @@ export function CheckboxList(props: CheckboxListProps): JSX.Element {
   // internal state
   const [checked, setChecked] = useState(checkedValues);
 
-  const handleToggle = (value: string) => {
+  const handleToggle = (value: string): void => {
     let newCheckedValues: string[];
     if (multiselect) {
       const currentIndex = checked.indexOf(value);
@@ -70,7 +70,7 @@ export function CheckboxList(props: CheckboxListProps): JSX.Element {
    * Helper function to stop propagation on click of the right-side content
    * @param e React.MouseEvent<HTMLElement> The mouse click event
    */
-  const handleClickContent = (e: React.MouseEvent<HTMLElement>) => {
+  const handleClickContent = (e: React.MouseEvent<HTMLElement>): void => {
     e.stopPropagation();
   };
 
