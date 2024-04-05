@@ -10,8 +10,6 @@ import { TypeModalProps } from './modal';
  * @class ModalApi
  */
 export class ModalApi {
-  mapId: string;
-
   modals: Record<string, TypeModalProps> = {};
 
   // Keep all callback delegates references
@@ -19,15 +17,6 @@ export class ModalApi {
 
   // Keep all callback delegates references
   #onModalClosedHandlers: ModalClosedDelegate[] = [];
-
-  /**
-   * constructor to initiate the map id
-   *
-   * @param { string } mapId the id of the map where the modal is to be generated
-   */
-  constructor(mapId: string) {
-    this.mapId = mapId;
-  }
 
   /**
    * Function that creates the modal

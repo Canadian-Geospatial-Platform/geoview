@@ -212,7 +212,7 @@ export class MapViewer {
     this.footerBarApi = new FooterBarApi(this.mapId);
     this.notifications = new Notifications(this.mapId);
 
-    this.modal = new ModalApi(this.mapId);
+    this.modal = new ModalApi();
 
     this.geoviewRenderer = new GeoviewRenderer(this.mapId);
 
