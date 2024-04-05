@@ -31,9 +31,11 @@ ResponsiveGridRoot.displayName = 'ResponsiveGridRoot';
  * @param {boolean} fullWidth panel with is maximum.
  * @param {boolean} isLayersPanelVisible layer panel is visibel
  * @param {boolean} isEnlarged panel is enlarge
- * @returns
+ * @returns {any}
  */
-const getLeftPanelSize = (fullWidth: boolean, isLayersPanelVisible: boolean, isEnlarged: boolean) => {
+// ? I doubt we want to define an explicit type for style properties?
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getLeftPanelSize = (fullWidth: boolean, isLayersPanelVisible: boolean, isEnlarged: boolean): any => {
   if (fullWidth) {
     return { xs: 12 };
   }
@@ -79,9 +81,11 @@ ResponsiveGridLeftPanel.displayName = 'ResponsiveGridLeftPanel';
  * @param {boolean} fullWidth panel with is maximum.
  * @param {boolean} isLayersPanelVisible layer panel is visibel
  * @param {boolean} isEnlarged panel is enlarge
- * @returns
+ * @returns {any}
  */
-const getRightPanelSize = (fullWidth: boolean, isLayersPanelVisible: boolean, isEnlarged: boolean) => {
+// ? I doubt we want to define an explicit type for style properties?
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getRightPanelSize = (fullWidth: boolean, isLayersPanelVisible: boolean, isEnlarged: boolean): any => {
   if (fullWidth) {
     return { xs: 12 };
   }

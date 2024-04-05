@@ -6,9 +6,9 @@ export const useFetchAndParseMarkdown = (
   filePath: string,
   errorMessage: string,
   setResult: (result: Record<string, string>) => void
-) => {
+): void => {
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (): Promise<void> => {
       try {
         const response = await fetch(filePath);
         const content = await response.text();
@@ -29,7 +29,7 @@ export const useFetchAndParseMarkdown = (
             "!How map scales work?",
             "\n### Learn about map scale:\nLorem Ipsum is simply dummy text of\n\n",
             "!Footer",
-            "\n%legend%\n### Legend help section\n- List 1 in legend\n- List 
+            "\n%legend%\n### Legend help section\n- List 1 in legend\n- List
           ]
          */
 

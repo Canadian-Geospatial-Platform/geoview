@@ -47,6 +47,8 @@ export function initializeSwiperState(set: TypeSetStore, get: TypeGetStore): ISw
 // **********************************************************
 // Swiper state selectors
 // **********************************************************
-export const useSwiperLayerPaths = () => useStore(useGeoViewStore(), (state) => state.swiperState.layerPaths);
+export const useSwiperLayerPaths = (): string[] => useStore(useGeoViewStore(), (state) => state.swiperState.layerPaths);
 
-export const useSwiperStoreActions = () => useStore(useGeoViewStore(), (state) => state.swiperState.actions);
+// TODO: Refactor - We should explicit a type for the swiperState.actions
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const useSwiperStoreActions = (): any => useStore(useGeoViewStore(), (state) => state.swiperState.actions);

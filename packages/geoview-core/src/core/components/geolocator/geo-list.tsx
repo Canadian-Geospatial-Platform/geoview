@@ -37,9 +37,9 @@ const getTooltipTitle = ({ name, province, category }: tooltipProp): string => {
  * @param {string} title list title in search result
  * @param {string} searchValue value with user did the search
  * @param {string} province province of the list title in search result
- * @returns string
+ * @returns {JSX.Element}
  */
-const transformListTitle = (_title: string, _searchValue: string, province: string) => {
+const transformListTitle = (_title: string, _searchValue: string, province: string): JSX.Element => {
   const title = _title.toUpperCase();
   const searchValue = _searchValue.toUpperCase();
   const idx = title.indexOf(searchValue);
@@ -64,9 +64,9 @@ const transformListTitle = (_title: string, _searchValue: string, province: stri
  * Create list of items to display under search.
  * @param {GeoListItem[]} geoListItems - items to display
  * @param {string} searchValue - search text
- * @returns {JSX} - React JSX element
+ * @returns {JSX.Element} React JSX element
  */
-export default function GeoList({ geoListItems, searchValue }: GeoListProps) {
+export default function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Element {
   const { zoomToGeoLocatorLocation } = useMapStoreActions();
 
   return (

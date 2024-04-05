@@ -166,5 +166,8 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
 // **********************************************************
 // Layer state selectors
 // **********************************************************
-export const useTimeSliderLayers = () => useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers);
-export const useTimeSliderStoreActions = () => useStore(useGeoViewStore(), (state) => state.timeSliderState.actions);
+export const useTimeSliderLayers = (): TimeSliderLayerSet => useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers);
+
+// TODO: Refactor - We should explicit a type for the timeSliderState.actions
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const useTimeSliderStoreActions = (): any => useStore(useGeoViewStore(), (state) => state.timeSliderState.actions);

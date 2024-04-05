@@ -90,36 +90,40 @@ export function CustomStepper(props: TypeCustomStepperProps): JSX.Element {
 
   /**
    * Gets the total number of steps in the stepper
+   * @returns {number | undefined}
    */
-  const totalSteps = () => {
+  const totalSteps = (): number | undefined => {
     return steps && steps.length;
   };
 
   /**
    * Returns an array of the completed steps
+   * @returns {number}
    */
-  const completedSteps = () => {
+  const completedSteps = (): number => {
     return Object.keys(completed).length;
   };
 
   /**
    * Checks if it is the last step
+   * @returns {boolean}
    */
-  const isLastStep = () => {
+  const isLastStep = (): boolean => {
     return activeStep === totalSteps()! - 1;
   };
 
   /**
    * Checks if all the steps are completed
+   * @returns {boolean}
    */
-  const allStepsCompleted = () => {
+  const allStepsCompleted = (): boolean => {
     return completedSteps() === totalSteps();
   };
 
   /**
    * Moves the stepper status to next step
    */
-  const handleNext = () => {
+  const handleNext = (): void => {
     if (nonLinear) {
       const newActiveStep =
         isLastStep() && !allStepsCompleted()
@@ -147,7 +151,7 @@ export function CustomStepper(props: TypeCustomStepperProps): JSX.Element {
   /**
    * Moves the stepper stuts to previous step
    */
-  const handleBack = () => {
+  const handleBack = (): void => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
@@ -161,7 +165,7 @@ export function CustomStepper(props: TypeCustomStepperProps): JSX.Element {
   /**
    * When the complete step button is clicked to mark it as complete
    */
-  const handleComplete = () => {
+  const handleComplete = (): void => {
     const newCompleted: any = completed;
     newCompleted[activeStep] = true;
     setCompleted(newCompleted);
@@ -171,7 +175,7 @@ export function CustomStepper(props: TypeCustomStepperProps): JSX.Element {
   /**
    * Resets the stepper progress
    */
-  const handleReset = () => {
+  const handleReset = (): void => {
     setActiveStep(0);
     setCompleted({});
     setIsReset(false);

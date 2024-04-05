@@ -89,8 +89,9 @@ export class ConfigBaseClass {
 
   /**
    * The layerPath getter method for the ConfigBaseClass class and its descendant classes.
+   * @returns {string} The layer path
    */
-  get layerPath() {
+  get layerPath(): string {
     // eslint-disable-next-line no-underscore-dangle
     this._layerPath = ConfigBaseClass.evaluateLayerPath(this);
     // eslint-disable-next-line no-underscore-dangle
@@ -118,8 +119,9 @@ export class ConfigBaseClass {
 
   /**
    * The layerId getter method for the ConfigBaseClass class and its descendant classes.
+   * @retuns {string} The layer id
    */
-  get layerId() {
+  get layerId(): string {
     // eslint-disable-next-line no-underscore-dangle
     return this._layerId;
   }
@@ -137,8 +139,9 @@ export class ConfigBaseClass {
 
   /**
    * The layerId getter method for the ConfigBaseClass class and its descendant classes.
+   * @retuns {TypeLayerStatus} The layer status
    */
-  get layerStatus() {
+  get layerStatus(): TypeLayerStatus {
     // eslint-disable-next-line no-underscore-dangle
     return this._layerStatus;
   }

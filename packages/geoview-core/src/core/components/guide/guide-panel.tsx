@@ -75,7 +75,7 @@ export function GuidePanel({ fullWidth }: GuidePanelType): JSX.Element {
     });
   });
 
-  const handleGuideItemClick = (layer: LayerListEntry) => {
+  const handleGuideItemClick = (layer: LayerListEntry): void => {
     const index: number = helpItems.findIndex((item) => item.layerName === layer.layerName);
     setGuideItemIndex(index);
     setSelectedLayerPath(layer.layerPath);

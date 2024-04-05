@@ -20,7 +20,7 @@ export interface GeoListItem {
   category: string;
 }
 
-export function Geolocator() {
+export function Geolocator(): JSX.Element {
   // Log
   logger.logTraceRender('components/geolocator/geolocator');
 
@@ -81,9 +81,9 @@ export function Geolocator() {
   /**
    * Send fetch call to the service for given search term.
    * @param {string} searchTerm the search term entered by the user
-   * @returns void
+   * @returns {Promise<void>}
    */
-  const getGeolocations = async (searchTerm: string) => {
+  const getGeolocations = async (searchTerm: string): Promise<void> => {
     try {
       setIsLoading(true);
       const response = await fetch(`${urlRef.current}&q=${encodeURIComponent(`${searchTerm}*`)}`);
@@ -135,7 +135,7 @@ export function Geolocator() {
    * @param {ChangeEvent<HTMLInputElement>} e HTML Change event handler
    * @returns void
    */
-  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const onChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const { value } = e.target;
     setSearchValue(value);
     // do fetch request when user enter at least 3 characters.

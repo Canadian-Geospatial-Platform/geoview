@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Box, FilterAltIcon, Paper, Skeleton, Typography } from '@/ui';
@@ -28,10 +28,10 @@ interface DataPanelType {
 }
 /**
  * Build Data panel from map.
- * @return {ReactElement} Data table as react element.
+ * @returns {JSX.Element} Data table as react element.
  */
 
-export function Datapanel({ fullWidth }: DataPanelType) {
+export function Datapanel({ fullWidth }: DataPanelType): JSX.Element {
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
@@ -111,7 +111,7 @@ export function Datapanel({ fullWidth }: DataPanelType) {
    * @param {string} layerPath the path of the layer.
    * @returns
    */
-  const getLayerTooltip = (layerName: string, layerPath: string): ReactNode => {
+  const getLayerTooltip = (layerName: string, layerPath: string): JSX.Element => {
     return (
       <Box sx={{ display: 'flex', alignContent: 'center', '& svg ': { width: '0.75em', height: '0.75em' } }}>
         {`${layerName}, ${getFeaturesOfLayer(layerPath)}`}

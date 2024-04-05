@@ -89,7 +89,7 @@ export function Shell(props: ShellProps): JSX.Element {
    * Handles when a component is being added to the map
    * @param {MapComponentPayload} payload The map component being added
    */
-  const handleMapAddComponent = (sender: MapViewer, event: MapComponentAddedEvent) => {
+  const handleMapAddComponent = (sender: MapViewer, event: MapComponentAddedEvent): void => {
     setComponents((tempComponents) => ({
       ...tempComponents,
       [event.mapComponentId]: event.component,
@@ -128,7 +128,7 @@ export function Shell(props: ShellProps): JSX.Element {
    * Handles when the modal needs to close (only 1 at a time is allowed)
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleModalClose = (sender: ModalApi, event: ModalEvent) => {
+  const handleModalClose = (sender: ModalApi, event: ModalEvent): void => {
     setModalOpen(false);
   };
 
@@ -136,7 +136,7 @@ export function Shell(props: ShellProps): JSX.Element {
    * Handles when a SnackBar needs to open
    * @param {SnackBarOpenEvent} payload The snackbar information to open
    */
-  const handleSnackBarOpen = (sender: Notifications, payload: SnackBarOpenEvent) => {
+  const handleSnackBarOpen = (sender: Notifications, payload: SnackBarOpenEvent): void => {
     // create button
     const myButton = payload.button?.label ? (
       <Button type="icon" onClick={payload.button.action}>

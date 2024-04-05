@@ -60,7 +60,7 @@ export function Legend({ fullWidth }: LegendType): JSX.Element {
    * @param {TypeLegendLayer} layers array of layers.
    * @returns List of array of layers
    */
-  const updateLegendLayerListByWindowSize = (layers: TypeLegendLayer[]) => {
+  const updateLegendLayerListByWindowSize = (layers: TypeLegendLayer[]): void => {
     const arrSize = getLegendLayerListSize();
 
     // create list of arrays based on size of the window.
@@ -100,7 +100,7 @@ export function Legend({ fullWidth }: LegendType): JSX.Element {
     logger.logTraceUseEffect('LEGEND - legendLayers', legendLayers);
 
     // update subsets of list when window size updated.
-    const formatLegendLayerList = () => {
+    const formatLegendLayerList = (): void => {
       // Log
       logger.logTraceCore('LEGEND - window resize event');
 

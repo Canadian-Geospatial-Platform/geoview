@@ -223,7 +223,7 @@ export class WMS extends AbstractGeoViewRaster {
         this.metadataAccessPath.en = metadataAccessPath;
         this.metadataAccessPath.fr = metadataAccessPath;
         const dataAccessPath = this.metadata.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
-        const setDataAccessPath = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {
+        const setDataAccessPath = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void => {
           listOfLayerEntryConfig.forEach((layerConfig) => {
             if (layerEntryIsGroupLayer(layerConfig)) setDataAccessPath(layerConfig.listOfLayerEntryConfig);
             else {
@@ -288,7 +288,7 @@ export class WMS extends AbstractGeoViewRaster {
     metadataLayerPathToAdd: number[],
     metadataLayer: TypeJsonObject | undefined,
     layerToAdd: TypeJsonObject
-  ) {
+  ): void {
     if (metadataLayerPathToAdd.length === 0 || !metadataLayer) return;
     if (metadataLayerPathToAdd[0] === -1)
       this.addLayerToMetadataInstance(metadataLayerPathToAdd.slice(1), metadataLayer.Layer, layerToAdd.Layer);
@@ -313,7 +313,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   private getLayersToQuery(): TypeLayerEntryConfig[] {
     const arrayOfLayerIds: TypeLayerEntryConfig[] = [];
-    const gatherLayerIds = (listOfLayerEntryConfig = this.listOfLayerEntryConfig) => {
+    const gatherLayerIds = (listOfLayerEntryConfig = this.listOfLayerEntryConfig): void => {
       if (listOfLayerEntryConfig.length) {
         listOfLayerEntryConfig.forEach((layerConfig) => {
           if (layerEntryIsGroupLayer(layerConfig)) gatherLayerIds(layerConfig.listOfLayerEntryConfig);
@@ -331,7 +331,10 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeJsonObject} parentLayer The parent layer that contains the inherited values
    * @param {TypeJsonObject | undefined} layer The layer property from the metadata that will inherit the values
    */
-  private processMetadataInheritance(parentLayer?: TypeJsonObject, layer: TypeJsonObject | undefined = this.metadata?.Capability?.Layer) {
+  private processMetadataInheritance(
+    parentLayer?: TypeJsonObject,
+    layer: TypeJsonObject | undefined = this.metadata?.Capability?.Layer
+  ): void {
     if (parentLayer && layer) {
       // Table 7 — Inheritance of Layer properties specified in the standard with 'replace' behaviour.
       if (layer.EX_GeographicBoundingBox === undefined) layer.EX_GeographicBoundingBox = parentLayer.EX_GeographicBoundingBox;
@@ -373,7 +376,7 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
+  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
@@ -421,7 +424,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeJsonObject} layer The dynamic group layer metadata.
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer configurstion associated to the dynamic group.
    */
-  private createGroupLayer(layer: TypeJsonObject, layerConfig: AbstractBaseLayerEntryConfig) {
+  private createGroupLayer(layer: TypeJsonObject, layerConfig: AbstractBaseLayerEntryConfig): void {
     // TODO: Refactor - createGroup is the same thing for all the layers type? group is a geoview structure.
     // TO.DOCONT: Should it be handle upper in abstract class to loop in structure and launch the creation of a leaf?
     const newListOfLayerEntryConfig: TypeListOfLayerEntryConfig = [];
@@ -611,7 +614,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeJsonObject} wmsTimeDimension The WMS time dimension object
    * @param {OgcWmsLayerEntryConfig} layerConfig The layer entry to configure
    */
-  protected processTemporalDimension(wmsTimeDimension: TypeJsonObject, layerConfig: OgcWmsLayerEntryConfig) {
+  protected processTemporalDimension(wmsTimeDimension: TypeJsonObject, layerConfig: OgcWmsLayerEntryConfig): void {
     if (wmsTimeDimension !== undefined) {
       this.layerTemporalDimension[layerConfig.layerPath] = api.utilities.date.createDimensionFromOGC(wmsTimeDimension);
     }
@@ -954,7 +957,7 @@ export class WMS extends AbstractGeoViewRaster {
       fieldInfo: {},
       nameField: null,
     };
-    const createFieldEntries = (entry: TypeJsonObject, prefix = '') => {
+    const createFieldEntries = (entry: TypeJsonObject, prefix = ''): void => {
       const keys = Object.keys(entry);
       keys.forEach((key) => {
         if (!key.endsWith('Geometry') && !key.startsWith('@')) {
@@ -1014,7 +1017,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {string} wmsStyleId The style identifier that will be used.
    * @param {string} layerPath The layer path to the layer's configuration.
    */
-  setWmsStyle(wmsStyleId: string, layerPath: string) {
+  setWmsStyle(wmsStyleId: string, layerPath: string): void {
     const layerConfig = this.getLayerConfig(layerPath) as OgcWmsLayerEntryConfig | undefined | null;
     // TODO: Verify if we can apply more than one style at the same time since the parameter name is STYLES
     if (layerConfig?.olLayer) (layerConfig.olLayer as ImageLayer<ImageWMS>).getSource()?.updateParams({ STYLES: wmsStyleId });
@@ -1031,7 +1034,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath: string, filter: string, CombineLegendFilter = true) {
+  applyViewFilter(layerPath: string, filter: string, CombineLegendFilter = true): void {
     const layerConfig = this.getLayerConfig(layerPath) as OgcWmsLayerEntryConfig;
     // Log
     logger.logTraceCore('WMS - applyViewFilter', layerPath);

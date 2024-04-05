@@ -76,14 +76,14 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
         let loadErrorListener: () => void;
 
         // Definition of the load end listener functions
-        const loadEndListener = () => {
+        const loadEndListener = (): void => {
           this.loadedFunction();
           this.layerStatus = 'loaded';
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (this._olLayer! as any).get('source').un(`${loadEndListenerType}loaderror`, loadErrorListener);
         };
 
-        loadErrorListener = () => {
+        loadErrorListener = (): void => {
           this.layerStatus = 'error';
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (this._olLayer! as any).get('source').un(`${loadEndListenerType}loadend`, loadEndListener);
@@ -101,8 +101,9 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * The olLayer getter method for the ConfigBaseClass class and its descendant classes.
    * All layerConfig has an olLayer property, but the olLayer setter can only be use on group layers.
+   * @returns {BaseLayer | LayerGroup | null} The OL layer
    */
-  get olLayer() {
+  get olLayer(): BaseLayer | LayerGroup | null {
     return this._olLayer;
   }
 
@@ -121,7 +122,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Method to execute when the layer is loaded.
    */
-  loadedFunction() {
+  loadedFunction(): void {
     // Update registration based on metadata that were read since the first registration.
     // TODO: Check - Commenting this line for now as part of big refactor (2024-03-17). It seems good to me without it so far.
     // TO.DOCONT: Maybe there was a reason for it. I'd like to see it.

@@ -44,7 +44,7 @@ export function Scale(): JSX.Element {
   /**
    * Switch the scale mode
    */
-  const switchScale = () => {
+  const switchScale = (): void => {
     setScaleMode((scaleMode + 1) % 2);
   };
 

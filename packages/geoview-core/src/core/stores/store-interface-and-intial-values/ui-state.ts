@@ -6,7 +6,7 @@ import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 
 // GV Important: See notes in header of UIEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
-type focusItemProps = {
+type FocusItemProps = {
   activeElementId: string | false;
   callbackElementId: string | false;
 };
@@ -16,7 +16,7 @@ export interface IUIState {
   activeTrapGeoView: boolean;
   appBarComponents: TypeValidAppBarCoreProps;
   corePackagesComponents: TypeMapCorePackages;
-  focusITem: focusItemProps;
+  focusITem: FocusItemProps;
   geoLocatorActive: boolean;
   mapInfoExpanded: boolean;
   navBarComponents: TypeNavBarProps;
@@ -26,7 +26,7 @@ export interface IUIState {
 
   actions: {
     closeModal: () => void;
-    openModal: (uiFocus: focusItemProps) => void;
+    openModal: (uiFocus: FocusItemProps) => void;
     setActiveFooterBarTab: (id: string) => void;
     setActiveTrapGeoView: (active: boolean) => void;
     setGeolocatorActive: (active: boolean) => void;
@@ -36,7 +36,7 @@ export interface IUIState {
 
   setterActions: {
     closeModal: () => void;
-    openModal: (uiFocus: focusItemProps) => void;
+    openModal: (uiFocus: FocusItemProps) => void;
     setActiveFooterBarTab: (id: string) => void;
     setActiveTrapGeoView: (active: boolean) => void;
     setGeolocatorActive: (active: boolean) => void;
@@ -75,7 +75,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         // Redirect to setter
         get().uiState.setterActions.closeModal();
       },
-      openModal: (uiFocus: focusItemProps) => {
+      openModal: (uiFocus: FocusItemProps) => {
         // Redirect to setter
         get().uiState.setterActions.openModal(uiFocus);
       },
@@ -111,7 +111,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
         });
       },
-      openModal: (uiFocus: focusItemProps) => {
+      openModal: (uiFocus: FocusItemProps) => {
         set({
           uiState: {
             ...get().uiState,
@@ -168,15 +168,18 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
 // **********************************************************
 // UI state selectors
 // **********************************************************
-export const useUIActiveFocusItem = () => useStore(useGeoViewStore(), (state) => state.uiState.focusITem);
-export const useUIActiveFooterBarTabId = () => useStore(useGeoViewStore(), (state) => state.uiState.activeFooterBarTabId);
-export const useUIActiveTrapGeoView = () => useStore(useGeoViewStore(), (state) => state.uiState.activeTrapGeoView);
-export const useUIAppbarComponents = () => useStore(useGeoViewStore(), (state) => state.uiState.appBarComponents);
-export const useUIAppbarGeolocatorActive = () => useStore(useGeoViewStore(), (state) => state.uiState.geoLocatorActive);
-export const useUICorePackagesComponents = () => useStore(useGeoViewStore(), (state) => state.uiState.corePackagesComponents);
-export const useUIFooterPanelResizeValue = () => useStore(useGeoViewStore(), (state) => state.uiState.footerPanelResizeValue);
-export const useUIFooterPanelResizeValues = () => useStore(useGeoViewStore(), (state) => state.uiState.footerPanelResizeValues);
-export const useUIMapInfoExpanded = () => useStore(useGeoViewStore(), (state) => state.uiState.mapInfoExpanded);
-export const useUINavbarComponents = () => useStore(useGeoViewStore(), (state) => state.uiState.navBarComponents);
+export const useUIActiveFocusItem = (): FocusItemProps => useStore(useGeoViewStore(), (state) => state.uiState.focusITem);
+export const useUIActiveFooterBarTabId = (): string => useStore(useGeoViewStore(), (state) => state.uiState.activeFooterBarTabId);
+export const useUIActiveTrapGeoView = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.activeTrapGeoView);
+export const useUIAppbarComponents = (): TypeValidAppBarCoreProps => useStore(useGeoViewStore(), (state) => state.uiState.appBarComponents);
+export const useUIAppbarGeolocatorActive = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.geoLocatorActive);
+export const useUICorePackagesComponents = (): TypeMapCorePackages =>
+  useStore(useGeoViewStore(), (state) => state.uiState.corePackagesComponents);
+export const useUIFooterPanelResizeValue = (): number => useStore(useGeoViewStore(), (state) => state.uiState.footerPanelResizeValue);
+export const useUIFooterPanelResizeValues = (): number[] => useStore(useGeoViewStore(), (state) => state.uiState.footerPanelResizeValues);
+export const useUIMapInfoExpanded = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.mapInfoExpanded);
+export const useUINavbarComponents = (): TypeNavBarProps => useStore(useGeoViewStore(), (state) => state.uiState.navBarComponents);
 
-export const useUIStoreActions = () => useStore(useGeoViewStore(), (state) => state.uiState.actions);
+// TODO: Refactor - We should explicit a type for the swiperState.actions
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const useUIStoreActions = (): any => useStore(useGeoViewStore(), (state) => state.uiState.actions);

@@ -26,7 +26,7 @@ export function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIcon
   const iconImageStacked: string = iconData && iconData.length > 1 ? iconData[1] : '';
   const numOfIcons: number | undefined = iconData?.length;
 
-  const iconStackContent = () => {
+  const iconStackContent = (): JSX.Element | null => {
     // TODO: refactor - try to remove the nested ternary to simplify reading
     // eslint-disable-next-line no-nested-ternary
     return numOfIcons === 1 ? (

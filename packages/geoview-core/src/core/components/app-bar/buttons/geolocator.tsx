@@ -12,7 +12,7 @@ export default function Geolocator(): JSX.Element {
 
   const { setGeolocatorActive } = useUIStoreActions();
 
-  const click = () => {
+  const click = (): void => {
     setActive(!active);
 
     setGeolocatorActive(active);

@@ -97,9 +97,13 @@ export function initializeGeochartState(set: TypeSetStore, get: TypeGetStore): I
 // **********************************************************
 // Layer state selectors
 // **********************************************************
-export const useGeochartConfigs = () => useStore(useGeoViewStore(), (state) => state.geochartState.geochartChartsConfig);
-export const useGeochartLayerDataArray = () => useStore(useGeoViewStore(), (state) => state.geochartState.layerDataArray);
-export const useGeochartLayerDataArrayBatch = () => useStore(useGeoViewStore(), (state) => state.geochartState.layerDataArrayBatch);
-export const useGeochartSelectedLayerPath = () => useStore(useGeoViewStore(), (state) => state.geochartState.selectedLayerPath);
+export const useGeochartConfigs = (): GeoChartStoreByLayerPath =>
+  useStore(useGeoViewStore(), (state) => state.geochartState.geochartChartsConfig);
+export const useGeochartLayerDataArray = (): TypeLayerData[] => useStore(useGeoViewStore(), (state) => state.geochartState.layerDataArray);
+export const useGeochartLayerDataArrayBatch = (): TypeLayerData[] =>
+  useStore(useGeoViewStore(), (state) => state.geochartState.layerDataArrayBatch);
+export const useGeochartSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.geochartState.selectedLayerPath);
 
-export const useGeochartStoreActions = () => useStore(useGeoViewStore(), (state) => state.geochartState.actions);
+// TODO: Refactor - We should explicit a type for the swiperState.actions
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const useGeochartStoreActions = (): any => useStore(useGeoViewStore(), (state) => state.geochartState.actions);
