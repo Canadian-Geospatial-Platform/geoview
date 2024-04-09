@@ -163,7 +163,7 @@ export class FeatureHighlight {
         const id = `${featureUid}-${i}`;
         this.styleHighlightedFeature(newFeature, id);
       }
-    } else {
+    } else if (feature.extent) {
       const { height, width } = feature.featureIcon;
       const radius = Math.min(height, width) / 2 - 2 < 7 ? 7 : Math.min(height, width) / 2 - 2;
       const center = getCenter(feature.extent);
