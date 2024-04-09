@@ -4,6 +4,8 @@ import { TypeLayerData } from '@/geo/utils/layer-set';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 
+// GV Important: See notes in header of DataTableEventProcessor file for information on the paradigm to apply when working with DataTableEventProcessor vs DataTaleState
+
 // Import { MRTColumnFiltersState } from 'material-react-table' fails - This is likely not portable. a type annotation is necessary
 // Create a type to mimic
 export type TypeColumnFiltersState = ColumnFilter[];
@@ -32,7 +34,6 @@ export interface IDataTableState {
     setActiveLayersData: (layers: TypeLayerData[]) => void;
     setAllFeaturesDataArray: (allFeaturesDataArray: TypeLayerData[]) => void;
     setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
-    setInitiallayerDataTableSetting: (layerPath: string) => void;
     setIsEnlargeDataTable: (isEnlarge: boolean) => void;
     setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
     setRowsFilteredEntry: (rows: number, layerPath: string) => void;
@@ -40,6 +41,10 @@ export interface IDataTableState {
     setTableHeight: (tableHeight: number) => void;
     setSelectedLayerPath: (layerPath: string) => void;
     triggerGetAllFeatureInfo: (layerPath: string) => void;
+  };
+
+  setterActions: {
+    setInitiallayerDataTableSetting: (layerPath: string) => void;
   };
 }
 
@@ -90,21 +95,6 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
           },
         });
       },
-      setInitiallayerDataTableSetting: (layerPath: string) => {
-        const layerSettings = {
-          columnFiltersRecord: [],
-          mapFilteredRecord: false,
-          rowsFilteredRecord: 0,
-          toolbarRowSelectedMessageRecord: '',
-        };
-
-        set({
-          dataTableState: {
-            ...get().dataTableState,
-            layersDataTableSetting: { ...get().dataTableState.layersDataTableSetting, [layerPath]: layerSettings },
-          },
-        });
-      },
       setIsEnlargeDataTable: (isEnlarge: boolean) => {
         set({
           dataTableState: {
@@ -123,7 +113,6 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
             layersDataTableSetting: { ...get().dataTableState.layersDataTableSetting, [layerPath]: layerSettings },
           },
         });
-        // TODO: Apply the filter to the layer in map event processor
       },
       setRowsFilteredEntry: (rows: number, layerPath: string) => {
         const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
@@ -169,6 +158,24 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
       },
     },
     // #endregion ACTIONS
+
+    setterActions: {
+      setInitiallayerDataTableSetting: (layerPath: string) => {
+        const layerSettings = {
+          columnFiltersRecord: [],
+          mapFilteredRecord: false,
+          rowsFilteredRecord: 0,
+          toolbarRowSelectedMessageRecord: '',
+        };
+
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            layersDataTableSetting: { ...get().dataTableState.layersDataTableSetting, [layerPath]: layerSettings },
+          },
+        });
+      },
+    },
   } as IDataTableState;
 }
 
