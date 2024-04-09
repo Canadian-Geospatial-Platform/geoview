@@ -43,8 +43,16 @@ export interface IDataTableState {
   };
 
   setterActions: {
+    setActiveLayersData: (layers: TypeLayerData[]) => void;
     setAllFeaturesDataArray: (allFeaturesDataArray: TypeLayerData[]) => void;
+    setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
     setInitiallayerDataTableSetting: (layerPath: string) => void;
+    setIsEnlargeDataTable: (isEnlarge: boolean) => void;
+    setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
+    setRowsFilteredEntry: (rows: number, layerPath: string) => void;
+    setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
+    setTableHeight: (tableHeight: number) => void;
+    setSelectedLayerPath: (layerPath: string) => void;
   };
 }
 
@@ -69,10 +77,85 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
         );
       },
       setActiveLayersData: (activeLayerData: TypeLayerData[]) => {
+        // Redirect to setter
+        get().dataTableState.setterActions.setActiveLayersData(activeLayerData);
+      },
+      setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => {
+        const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
+        layerSettings.columnFiltersRecord = filtered;
+
+        // Redirect to setter
+        get().dataTableState.setterActions.setColumnFiltersEntry(filtered, layerPath);
+      },
+      setIsEnlargeDataTable: (isEnlarge: boolean) => {
+        // Redirect to setter
+        get().dataTableState.setterActions.setIsEnlargeDataTable(isEnlarge);
+      },
+      setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => {
+        const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
+        layerSettings.mapFilteredRecord = mapFiltered;
+
+        // Redirect to setter
+        get().dataTableState.setterActions.setMapFilteredEntry(mapFiltered, layerPath);
+      },
+      setRowsFilteredEntry: (rows: number, layerPath: string) => {
+        const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
+        layerSettings.rowsFilteredRecord = rows;
+
+        // Redirect to setter
+        get().dataTableState.setterActions.setRowsFilteredEntry(rows, layerPath);
+      },
+      setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => {
+        const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
+        layerSettings.toolbarRowSelectedMessageRecord = message;
+
+        // Redirect to setter
+        get().dataTableState.setterActions.setToolbarRowSelectedMessageEntry(message, layerPath);
+      },
+      setTableHeight: (tableHeight: number): void => {
+        // Redirect to setter
+        get().dataTableState.setterActions.setTableHeight(tableHeight);
+      },
+      setSelectedLayerPath: (layerPath: string) => {
+        // Redirect to setter
+        get().dataTableState.setterActions.setSelectedLayerPath(layerPath);
+      },
+      triggerGetAllFeatureInfo(layerPath: string) {
+        // Redirect to event processor
+        DataTableEventProcessor.triggerGetAllFeatureInfo(get().mapId, layerPath);
+      },
+    },
+    // #endregion ACTIONS
+
+    setterActions: {
+      setActiveLayersData: (activeLayerData: TypeLayerData[]) => {
         set({
           dataTableState: {
             ...get().dataTableState,
             activeLayerData,
+          },
+        });
+      },
+      setAllFeaturesDataArray(allFeaturesDataArray: TypeLayerData[]) {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            allFeaturesDataArray,
+          },
+        });
+      },
+      setInitiallayerDataTableSetting: (layerPath: string) => {
+        const layerSettings = {
+          columnFiltersRecord: [],
+          mapFilteredRecord: false,
+          rowsFilteredRecord: 0,
+          toolbarRowSelectedMessageRecord: '',
+        };
+
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            layersDataTableSetting: { ...get().dataTableState.layersDataTableSetting, [layerPath]: layerSettings },
           },
         });
       },
@@ -141,37 +224,6 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
           dataTableState: {
             ...get().dataTableState,
             selectedLayerPath: layerPath,
-          },
-        });
-      },
-      triggerGetAllFeatureInfo(layerPath: string) {
-        // Redirect to event processor
-        DataTableEventProcessor.triggerGetAllFeatureInfo(get().mapId, layerPath);
-      },
-    },
-    // #endregion ACTIONS
-
-    setterActions: {
-      setAllFeaturesDataArray(allFeaturesDataArray: TypeLayerData[]) {
-        set({
-          dataTableState: {
-            ...get().dataTableState,
-            allFeaturesDataArray,
-          },
-        });
-      },
-      setInitiallayerDataTableSetting: (layerPath: string) => {
-        const layerSettings = {
-          columnFiltersRecord: [],
-          mapFilteredRecord: false,
-          rowsFilteredRecord: 0,
-          toolbarRowSelectedMessageRecord: '',
-        };
-
-        set({
-          dataTableState: {
-            ...get().dataTableState,
-            layersDataTableSetting: { ...get().dataTableState.layersDataTableSetting, [layerPath]: layerSettings },
           },
         });
       },
