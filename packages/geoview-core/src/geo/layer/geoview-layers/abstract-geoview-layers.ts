@@ -1189,15 +1189,19 @@ export abstract class AbstractGeoViewLayer {
       let fieldKeyCounter = 0;
       const promisedAllCanvasFound: Promise<{ feature: Feature; canvas: HTMLCanvasElement | undefined }>[] = [];
       features.forEach((featureNeedingItsCanvas) => {
-        promisedAllCanvasFound.push(
-          new Promise<{ feature: Feature; canvas: HTMLCanvasElement | undefined }>((resolveCanvas) => {
-            api.maps[this.mapId].geoviewRenderer
-              .getFeatureCanvas(featureNeedingItsCanvas, layerConfig as VectorLayerEntryConfig)
-              .then((canvas) => {
-                resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
-              });
-          })
-        );
+        // If the feature even has a geometry
+        if (featureNeedingItsCanvas.getGeometry()) {
+          // Fetch the canvas in a promise
+          promisedAllCanvasFound.push(
+            new Promise<{ feature: Feature; canvas: HTMLCanvasElement | undefined }>((resolveCanvas) => {
+              api.maps[this.mapId].geoviewRenderer
+                .getFeatureCanvas(featureNeedingItsCanvas, layerConfig as VectorLayerEntryConfig)
+                .then((canvas) => {
+                  resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
+                });
+            })
+          );
+        }
       });
       const arrayOfFeatureInfo = await Promise.all(promisedAllCanvasFound);
       arrayOfFeatureInfo.forEach(({ canvas, feature }) => {
@@ -1219,7 +1223,7 @@ export abstract class AbstractGeoViewLayer {
               ) || null,
           };
 
-          const featureFields = (feature as Feature).getKeys();
+          const featureFields = feature.getKeys();
           featureFields.forEach((fieldName) => {
             if (fieldName !== 'geometry') {
               if (outfields?.includes(fieldName)) {
