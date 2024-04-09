@@ -6,7 +6,6 @@ export const getSxClasses = (theme: Theme) => ({
     paddingBottom: '1rem',
   },
   rightPanelContainer: {
-    backgroundColor: theme.palette.geoViewColor.bgColor.light[500],
     color: theme.palette.geoViewColor.textColor.main,
   },
   guideBox: {

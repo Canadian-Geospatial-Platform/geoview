@@ -419,7 +419,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
     enableColumnVirtualization: true,
     enablePagination: false,
     enableRowVirtualization: true,
-    muiTableContainerProps: { sx: { maxHeight: `${tableHeight - 65}px` } },
+    muiTableContainerProps: { sx: { maxHeight: `${tableHeight - 75}px` } },
     rowVirtualizerInstanceRef,
     rowVirtualizerOptions: { overscan: 5 },
     columnVirtualizerOptions: { overscan: 2 },
