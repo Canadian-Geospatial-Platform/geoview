@@ -5,6 +5,8 @@ import {
   TypeLocalizedString,
   TypeSourceImageEsriInitialConfig,
   TypeStyleConfig,
+  TypeStyleGeometry,
+  TypeStyleSettings,
 } from '@/geo/map/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
@@ -37,6 +39,22 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // if layerConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
     if (!this.source) this.source = {};
     if (!this.source.dataAccessPath) this.source.dataAccessPath = { ...this.geoviewLayerConfig.metadataAccessPath } as TypeLocalizedString;
+  }
+
+  /**
+   * Guesses the TypeStyleGeometry associated with the style as could be read from the layer config metadata.
+   * @returns {TypeStyleGeometry} The guessed TypeStyleGeometry
+   */
+  getTypeGeometry(): TypeStyleGeometry {
+    return Object.keys(this.style!)[0] as TypeStyleGeometry;
+  }
+
+  /**
+   * Guesses the TypeStyleSettings associated with the style as could be read from the layer config metadata.
+   * @returns {TypeStyleSettings} The guessed TypeStyleSettings
+   */
+  getStyleSettings(): TypeStyleSettings | undefined {
+    return this.style?.[this.getTypeGeometry()];
   }
 
   /**

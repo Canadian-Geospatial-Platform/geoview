@@ -484,8 +484,8 @@
     <pre id="LegendsId1-table-pre" class="panel"></pre>
     <button type="button" class="collapsible">Get Feature Info</button>
     <pre id="ResultSetId1-click" class="panel">Click on feature on the map</pre>
-    <button type="button" class="collapsible">Get All Feature Info</button>
-    <pre id="ResultSetId1-all" class="panel">Comming soon!</pre>
+    <button type="button" class="collapsible" id="AllFeatureInfo1">Get All Feature Info (uniqueValueId/1)</button>
+    <pre id="ResultSetId1-all-features" class="panel"></pre>
     <hr />
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="LYR1CS" class="panel"></pre>
@@ -546,8 +546,8 @@
     <pre id="LegendsId2-table-pre" class="panel"></pre>
     <button type="button" class="collapsible" >Get Feature Info</button>
     <pre id="ResultSetId2-click" class="panel">Click on feature on the map</pre>
-    <button type="button" class="collapsible">Get All Feature Info</button>
-    <pre id="ResultSetId2-all" class="panel">Comming soon!</pre>
+    <button type="button" class="collapsible" id="AllFeatureInfo2">Get All Feature Info (historical/flood/0)</button>
+    <pre id="ResultSetId2-all-features" class="panel"></pre>
     <hr />
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="LYR2CS" class="panel"></pre>
@@ -607,8 +607,8 @@
     <pre id="LegendsId3-table-pre" class="panel"></pre>
     <button type="button" class="collapsible" >Get Feature Info</button>
     <pre id="ResultSetId3-click" class="panel">Click on feature on the map</pre>
-    <button type="button" class="collapsible">Get All Feature Info</button>
-    <pre id="ResultSetId3-all" class="panel">Comming soon!</pre>
+    <button type="button" class="collapsible" id="AllFeatureInfo3">Get All Feature Info (historical/flood/0)</button>
+    <pre id="ResultSetId3-all-features" class="panel"></pre>
     <hr />
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="LYR3CS" class="panel"></pre>
@@ -1104,6 +1104,24 @@
           createTableOfFilter('LYR1');
           createTableOfFilter('LYR2');
           createTableOfFilter('LYR3');
+
+          const getAllFeatureInfo1 = document.getElementById('AllFeatureInfo1');
+          getAllFeatureInfo1.addEventListener('click', async () => {
+            const resultSet = await cgpv.api.maps['LYR1'].layer.allFeatureInfoLayerSet.queryLayer('uniqueValueId/1');
+            createInfoTable('LYR1', 'ResultSetId1', resultSet, 'all-features');
+          });
+
+          const getAllFeatureInfo2 = document.getElementById('AllFeatureInfo2');
+          getAllFeatureInfo2.addEventListener('click', async () => {
+            const resultSet = await cgpv.api.maps['LYR2'].layer.allFeatureInfoLayerSet.queryLayer('historical-flood/0');
+            createInfoTable('LYR2', 'ResultSetId2', resultSet, 'all-features');
+          });
+
+          const getAllFeatureInfo3 = document.getElementById('AllFeatureInfo3');
+          getAllFeatureInfo3.addEventListener('click', async () => {
+            const resultSet = await cgpv.api.maps['LYR3'].layer.allFeatureInfoLayerSet.queryLayer('historical-flood/0');
+            createInfoTable('LYR3', 'ResultSetId3', resultSet, 'all-features');
+          });
 
           const field1 = cgpv.api.maps.LYR2.layer.geoviewLayer('historical-flood/0').getTemporalDimension('historical-flood/0').field;
           const LYR2_FILTERS = [`${field1} >= date '01/01/2018 05:00:00' and ${field1} <= date '12/31/2019 19:00:00-05:00'`,

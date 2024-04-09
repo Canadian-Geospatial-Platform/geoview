@@ -227,6 +227,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       properties: { layerConfig },
       source: vectorSource as VectorSource<Feature>,
       style: (feature) => {
+        // TODO: Refactor - Remove the dependency on api.maps[]. We shouldn't need a MapViewer to do rendering.
+        // TO.DOCONT: The geoviewRenderer functions should be accessed directly (static - see TODO in that class)
         if ('style' in layerConfig) {
           return getFeatureStyle(feature as Feature, layerConfig, language);
         }
