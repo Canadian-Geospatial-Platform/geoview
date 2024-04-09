@@ -7,7 +7,7 @@ import {
   useDataTableSelectedLayerPath,
   useDataTableAllFeaturesDataArray,
   useDataTableLayerSettings,
-  useDatatableTableHeight,
+  useDataTableTableHeight,
   useDataTableStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useMapVisibleLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -40,7 +40,7 @@ export function Datapanel({ fullWidth }: DataPanelType) {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const tableHeight = useDatatableTableHeight();
+  const tableHeight = useDataTableTableHeight();
   const selectedLayerPath = useDataTableSelectedLayerPath();
   const datatableSettings = useDataTableLayerSettings();
   const { setSelectedLayerPath } = useDataTableStoreActions();

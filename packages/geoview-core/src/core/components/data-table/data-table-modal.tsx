@@ -147,7 +147,7 @@ export default function DataTableModal(): JSX.Element {
   }, [isLoading, selectedLayer]);
 
   return (
-    <Dialog open={activeModalId === 'layerDatatable'} onClose={closeModal} maxWidth="xl">
+    <Dialog open={activeModalId === 'layerDataTable'} onClose={closeModal} maxWidth="xl">
       <DialogTitle>{`${t('legend.tableDetails')} ${layer?.layerName ?? selectedLayer}`}</DialogTitle>
       <DialogContent sx={{ overflow: 'hidden' }}>
         {isLoading && (
