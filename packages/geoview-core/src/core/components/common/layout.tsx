@@ -110,7 +110,7 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
               {layerList.find((layer) => layer.layerPath === selectedLayerPath)?.layerName ?? ''}
             </LayerTitle>
 
-            <Box sx={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'row', gap: '0.6rem' }}>
               {!fullWidth && <EnlargeButton isEnlarged={isEnlarged} onSetIsEnlarged={handleIsEnlarge} />}
               <IconButton
                 size="small"
