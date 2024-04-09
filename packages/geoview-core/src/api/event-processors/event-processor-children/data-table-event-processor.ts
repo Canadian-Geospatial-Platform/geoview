@@ -9,6 +9,20 @@ import { IDataTableState } from '@/core/stores/store-interface-and-intial-values
 import { logger } from '@/core/utils/logger';
 import { TypeLayerData } from '@/geo/utils/layer-set';
 
+// GV The paradigm when working with DataTableEventProcessor vs DataTableState goes like this:
+// GV DataTableState provides: 'state values', 'actions' and 'setterActions'.
+// GV Whereas Zustand would suggest having 'state values' and 'actions', in GeoView, we have a 'DataTableEventProcessor' in the middle.
+// GV This is because we wanted to have centralized code between UI actions and backend actions via a DataTableEventProcessor.
+// GV In summary:
+// GV The UI components should use DataTableState's 'state values' to read and 'actions' to set states (which simply redirect to DataTableEventProcessor).
+// GV The back-end code should use DataTableEventProcessor which uses 'state values' and 'setterActions'
+// GV Essentially 3 main call-stacks:
+// GV   - DataTableEventProcessor ---calls---> DataTableState.setterActions
+// GV   - UI Component ---calls---> DataTableState.actions ---calls---> DataTableEventProcessor ---calls---> DataTableState.setterActions
+// GV   - DataTableEventProcessor ---triggers---> DataTableViewer events ---calls---> DataTableState.setterActions
+// GV The reason for this pattern is so that UI components and processes performing back-end code
+// GV both end up running code in DataTableEventProcessor (UI: via 'actions' and back-end code via 'DataTableEventProcessor')
+
 export class DataTableEventProcessor extends AbstractEventProcessor {
   // TODO: refactor - we should centralize the propagation to store from where the remove layer happend... this code is repeated
   // TD.CONT: qhen we do this, clean other obejct at the same time... each processor has a clean function called from where the remove
@@ -91,7 +105,7 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath - Path of the layer
    */
   static setInitialSettings(mapId: string, layerPath: string): void {
-    this.getDataTableState(mapId).actions.setInitiallayerDataTableSetting(layerPath);
+    this.getDataTableState(mapId).setterActions.setInitiallayerDataTableSetting(layerPath);
   }
 
   /**
