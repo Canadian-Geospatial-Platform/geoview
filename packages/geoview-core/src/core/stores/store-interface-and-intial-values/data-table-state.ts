@@ -32,7 +32,6 @@ export interface IDataTableState {
   actions: {
     applyMapFilters: (filterStrings: string) => void;
     setActiveLayersData: (layers: TypeLayerData[]) => void;
-    setAllFeaturesDataArray: (allFeaturesDataArray: TypeLayerData[]) => void;
     setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
     setIsEnlargeDataTable: (isEnlarge: boolean) => void;
     setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
@@ -44,6 +43,7 @@ export interface IDataTableState {
   };
 
   setterActions: {
+    setAllFeaturesDataArray: (allFeaturesDataArray: TypeLayerData[]) => void;
     setInitiallayerDataTableSetting: (layerPath: string) => void;
   };
 }
@@ -73,14 +73,6 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
           dataTableState: {
             ...get().dataTableState,
             activeLayerData,
-          },
-        });
-      },
-      setAllFeaturesDataArray(allFeaturesDataArray: TypeLayerData[]) {
-        set({
-          dataTableState: {
-            ...get().dataTableState,
-            allFeaturesDataArray,
           },
         });
       },
@@ -160,6 +152,14 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
     // #endregion ACTIONS
 
     setterActions: {
+      setAllFeaturesDataArray(allFeaturesDataArray: TypeLayerData[]) {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            allFeaturesDataArray,
+          },
+        });
+      },
       setInitiallayerDataTableSetting: (layerPath: string) => {
         const layerSettings = {
           columnFiltersRecord: [],

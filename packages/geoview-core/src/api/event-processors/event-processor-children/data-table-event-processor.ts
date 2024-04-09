@@ -114,7 +114,6 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath - Layer path to apply filter.
    */
   static triggerGetAllFeatureInfo(mapId: string, layerPath: string): void {
-    // TODO: do not use api... pass layer object to data table event processor... or use api.... in processor
     api.maps[mapId].layer.allFeatureInfoLayerSet.queryLayer(layerPath, 'all');
   }
 
@@ -135,7 +134,7 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
     }
 
     // Update the layer data array in the store, all the time
-    this.getDataTableState(mapId).actions.setAllFeaturesDataArray(allFeaturesDataArray);
+    this.getDataTableState(mapId).setterActions.setAllFeaturesDataArray(allFeaturesDataArray);
   }
 
   /**
@@ -148,7 +147,7 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
     // Redirect to helper function
     this.#deleteFromArray(this.getDataTableState(mapId).allFeaturesDataArray, layerPath, (layerArrayResult) => {
       // Update the layer data array in the store
-      this.getDataTableState(mapId).actions.setAllFeaturesDataArray(layerArrayResult);
+      this.getDataTableState(mapId).setterActions.setAllFeaturesDataArray(layerArrayResult);
     });
   }
 
