@@ -192,6 +192,7 @@ export class GeoviewRenderer {
    * @param {string} mapId The identifier of the map that uses the geoview renderer instance.
    */
   constructor(mapId: string) {
+    // TODO: Refactor - This whole class should be all static functions. Remove these 2 class attributes, adjusting the code accordingly
     this.mapId = mapId;
     this.defaultColorIndex = 0;
   }
@@ -1082,7 +1083,7 @@ export class GeoviewRenderer {
       for (let j = 0, isEqual = true; j < fields.length && isEqual; j++) {
         // For obscure reasons, it seems that sometimes the field names in the feature do not have the same case as those in the
         // unique value definition.
-        const fieldName = (feature as Feature).getKeys().find((key) => {
+        const fieldName = feature.getKeys().find((key) => {
           return key.toLowerCase() === fields[j].toLowerCase();
         });
         if (fieldName) {

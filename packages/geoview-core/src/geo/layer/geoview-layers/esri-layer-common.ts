@@ -20,6 +20,7 @@ import {
   layerEntryIsGroupLayer,
   TypeLayerEntryConfig,
   TypeListOfLayerEntryConfig,
+  TypeStyleGeometry,
 } from '@/geo/map/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
@@ -417,7 +418,7 @@ export function parseFeatureInfoEntries(records: TypeJsonObject[]): TypeFeatureI
  * @param {url} string An Esri url indicating a feature layer to query
  * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
  */
-export async function queryRecordsByUrl(url: string): Promise<TypeFeatureInfoEntryPartial[] | null> {
+export async function queryRecordsByUrl(url: string): Promise<TypeFeatureInfoEntryPartial[]> {
   // TODO: Refactor - Suggestion to rework this function and the one in EsriDynamic.getFeatureInfoAtLongLat(), making
   // TO.DO.CONT: the latter redirect to this one here and merge some logic between the 2 functions ideally making this
   // TO.DO.CONT: one here return a TypeFeatureInfoEntry[] with options to have returnGeometry=true or false and such.
@@ -425,18 +426,17 @@ export async function queryRecordsByUrl(url: string): Promise<TypeFeatureInfoEnt
   try {
     const response = await fetch(url);
     const respJson = await response.json();
-    const jsonResponse = await response.json();
-    if (jsonResponse.error) {
+    if (respJson.error) {
       logger.logInfo('There is a problem with this query: ', url);
-      throw new Error(`Error code = ${jsonResponse.error.code} ${jsonResponse.error.message}` || '');
+      throw new Error(`Error code = ${respJson.error.code} ${respJson.error.message}` || '');
     }
 
     // Return the array of TypeFeatureInfoEntryPartial
     return parseFeatureInfoEntries(respJson.features);
   } catch (error) {
     // Log
-    logger.logError('esri-layer-common.queryRelatedRecordsByUrl()\n', error);
-    return null;
+    logger.logError('esri-layer-common.queryRecordsByUrl()\n', error);
+    throw error;
   }
 }
 
@@ -446,15 +446,14 @@ export async function queryRecordsByUrl(url: string): Promise<TypeFeatureInfoEnt
  * @param {recordGroupIndex} number The group index of the relationship layer on which to read the related records
  * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
  */
-export async function queryRelatedRecordsByUrl(url: string, recordGroupIndex: number): Promise<TypeFeatureInfoEntryPartial[] | null> {
+export async function queryRelatedRecordsByUrl(url: string, recordGroupIndex: number): Promise<TypeFeatureInfoEntryPartial[]> {
   // Query the data
   try {
     const response = await fetch(url);
     const respJson = await response.json();
-    const jsonResponse = await response.json();
-    if (jsonResponse.error) {
+    if (respJson.error) {
       logger.logInfo('There is a problem with this query: ', url);
-      throw new Error(`Error code = ${jsonResponse.error.code} ${jsonResponse.error.message}` || '');
+      throw new Error(`Error code = ${respJson.error.code} ${respJson.error.message}` || '');
     }
 
     // If any related record groups found
@@ -465,6 +464,26 @@ export async function queryRelatedRecordsByUrl(url: string, recordGroupIndex: nu
   } catch (error) {
     // Log
     logger.logError('esri-layer-common.queryRelatedRecordsByUrl()\n', error);
-    return null;
+    throw error;
+  }
+}
+
+/**
+ * Converts an esri geometry type string to a TypeStyleGeometry.
+ * @param {string} esriGeometryType - The esri geometry type to convert
+ * @returns {TypeStyleGeometry} The corresponding TypeStyleGeometry
+ */
+export function convertEsriGeometryTypeToOLGeometryType(esriGeometryType: string): TypeStyleGeometry {
+  switch (esriGeometryType) {
+    case 'esriGeometryPoint':
+    case 'esriGeometryMultipoint':
+      return 'Point';
+    case 'esriGeometryPolyline':
+      return 'LineString';
+    case 'esriGeometryPolygon':
+    case 'esriGeometryMultiPolygon':
+      return 'Polygon';
+    default:
+      throw new Error('Unsupported geometry type');
   }
 }
