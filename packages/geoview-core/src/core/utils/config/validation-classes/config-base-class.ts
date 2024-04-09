@@ -10,9 +10,10 @@ import {
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { logger } from '@/core/utils/logger';
-import { Cast, TypeJsonValue, api } from '@/core/types/cgpv-types';
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
+import { Cast, TypeJsonValue } from '@/core/types/global-types';
+import { api } from '@/app';
 
 /** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
@@ -158,7 +159,7 @@ export class ConfigBaseClass {
       this._layerStatus = newLayerStatus;
       // TODO: Refactor - Suggestion to hold the layer status elsewhere than in a configuration file. Can it be on the layer itself?
       // TO.DOCONT: It'd be "nicer" to have a configuration file that doesn't raise events
-      this.emitLayerStatusChanged({ layerPath: this.layerPath, layerStatus: newLayerStatus });
+      this.#emitLayerStatusChanged({ layerPath: this.layerPath, layerStatus: newLayerStatus });
     }
     if (newLayerStatus === 'processed' && this.waitForProcessedBeforeSendingLoaded) this.layerStatus = 'loaded';
 
@@ -174,36 +175,36 @@ export class ConfigBaseClass {
   /**
    * Emits an event to all handlers.
    * @param {LayerStatusChangedEvent} event The event to emit
+   * @private
    */
-  emitLayerStatusChanged = (event: LayerStatusChangedEvent) => {
+  #emitLayerStatusChanged(event: LayerStatusChangedEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerStatusChangedHandlers, event);
-  };
+  }
 
   /**
-   * Wires an event handler.
+   * Registers a layer status changed event handler.
    * @param {LayerStatusChangedDelegate} callback The callback to be executed whenever the event is emitted
    */
-  onLayerStatusChanged = (callback: LayerStatusChangedDelegate): void => {
-    // Wire the event handler
+  onLayerStatusChanged(callback: LayerStatusChangedDelegate): void {
+    // Register the event handler
     EventHelper.onEvent(this.#onLayerStatusChangedHandlers, callback);
-  };
+  }
 
   /**
-   * Unwires an event handler.
+   * Unregisters a layer status changed event handler.
    * @param {LayerStatusChangedDelegate} callback The callback to stop being called whenever the event is emitted
    */
-  offLayerStatusChanged = (callback: LayerStatusChangedDelegate): void => {
-    // Unwire the event handler
+  offLayerStatusChanged(callback: LayerStatusChangedDelegate): void {
+    // Unregister the event handler
     EventHelper.offEvent(this.#onLayerStatusChangedHandlers, callback);
-  };
+  }
 
   /**
    * Register the layer identifier. Duplicate identifier are not allowed.
    *
    * @returns {boolean} Returns false if the layer configuration can't be registered.
    */
-
   registerLayerConfig(): boolean {
     const { registeredLayers } = api.maps[this.geoviewLayerInstance!.mapId].layer;
     if (registeredLayers[this.layerPath]) return false;

@@ -30,8 +30,10 @@ import {
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
   CONST_LAYER_ENTRY_TYPES,
+  TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
-import { getLocalizedValue, getMinOrMaxExtents, xmlToJson, showError, replaceParams, getLocalizedMessage } from '@/core/utils/utilities';
+import { xmlToJson, getLocalizedValue } from '@/core/utils/utilities';
+import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
@@ -39,6 +41,7 @@ import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/r
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
@@ -112,7 +115,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected async fetchServiceMetadata(): Promise<void> {
-    const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+    const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
     if (metadataUrl) {
       const metadataAccessPathIsXmlFile = metadataUrl.slice(-4).toLowerCase() === '.xml';
       if (metadataAccessPathIsXmlFile) {
@@ -492,7 +495,10 @@ export class WMS extends AbstractGeoViewRaster {
     if (geoviewEntryIsWMS(layerConfig)) {
       const layerCapabilities = this.getLayerMetadataEntry(layerConfig.layerId);
       if (layerCapabilities) {
-        const dataAccessPath = getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId)!;
+        const dataAccessPath = getLocalizedValue(
+          layerConfig.source.dataAccessPath as TypeLocalizedString,
+          AppEventProcessor.getDisplayLanguage(this.mapId)
+        )!;
 
         let styleToUse = '';
         if (Array.isArray(layerConfig.source?.style) && layerConfig.source?.style) {
@@ -549,11 +555,8 @@ export class WMS extends AbstractGeoViewRaster {
         return Promise.resolve(layerConfig.olLayer);
       }
 
-      const message = replaceParams(
-        [layerConfig.layerId, this.geoviewLayerId],
-        getLocalizedMessage(this.mapId, 'validation.layer.notfound')
-      );
-      showError(this.mapId, message);
+      // TODO: find a more centralized way to trap error and display message
+      api.maps[this.mapId].notifications.showError('validation.layer.notfound', [layerConfig.layerId, this.geoviewLayerId]);
       return Promise.resolve(null);
     }
 
@@ -581,7 +584,7 @@ export class WMS extends AbstractGeoViewRaster {
         // if (layerConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
         //   layerConfig.initialSettings.maxZoom = layerCapabilities.MaxScaleDenominator as number;
         if (layerConfig.initialSettings?.extent)
-          layerConfig.initialSettings.extent = api.projection.transformExtent(
+          layerConfig.initialSettings.extent = api.utilities.projection.transformExtent(
             layerConfig.initialSettings.extent,
             'EPSG:4326',
             `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
@@ -609,7 +612,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected processTemporalDimension(wmsTimeDimension: TypeJsonObject, layerConfig: OgcWmsLayerEntryConfig) {
     if (wmsTimeDimension !== undefined) {
-      this.layerTemporalDimension[layerConfig.layerPath] = api.dateUtilities.createDimensionFromOGC(wmsTimeDimension);
+      this.layerTemporalDimension[layerConfig.layerPath] = api.utilities.date.createDimensionFromOGC(wmsTimeDimension);
     }
   }
 
@@ -635,7 +638,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The promised feature info table.
    */
   protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const convertedLocation = api.projection.transform(
+    const convertedLocation = api.utilities.projection.transform(
       location,
       `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`,
       'EPSG:4326'
@@ -659,7 +662,7 @@ export class WMS extends AbstractGeoViewRaster {
 
       const viewResolution = api.maps[this.mapId].getView().getResolution() as number;
       const crs = `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`;
-      const clickCoordinate = api.projection.transform(lnglat, 'EPSG:4326', crs);
+      const clickCoordinate = api.utilities.projection.transform(lnglat, 'EPSG:4326', crs);
       if (
         lnglat[0] < layerConfig.initialSettings!.bounds![0] ||
         layerConfig.initialSettings!.bounds![2] < lnglat[0] ||
@@ -781,7 +784,7 @@ export class WMS extends AbstractGeoViewRaster {
       else if (Object.keys(this.metadata!.Capability.Request).includes('GetLegendGraphic'))
         queryUrl = `${getLocalizedValue(
           this.metadataAccessPath,
-          this.mapId
+          AppEventProcessor.getDisplayLanguage(this.mapId)
         )!}service=WMS&version=1.3.0&request=GetLegendGraphic&FORMAT=image/png&layer=${layerConfig.layerId}`;
 
       if (queryUrl) {
@@ -927,9 +930,15 @@ export class WMS extends AbstractGeoViewRaster {
     clickCoordinate: Coordinate
   ): TypeFeatureInfoEntry[] {
     const featureInfo = layerConfig?.source?.featureInfo;
-    const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
+    const outfields = getLocalizedValue(
+      featureInfo?.outfields as TypeLocalizedString,
+      AppEventProcessor.getDisplayLanguage(this.mapId)
+    )?.split(',');
     const fieldTypes = featureInfo?.fieldTypes?.split(',');
-    const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
+    const aliasFields = getLocalizedValue(
+      featureInfo?.aliasFields as TypeLocalizedString,
+      AppEventProcessor.getDisplayLanguage(this.mapId)
+    )?.split(',');
     const queryResult: TypeFeatureInfoEntry[] = [];
 
     let featureKeyCounter = 0;
@@ -1011,30 +1020,6 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToTheGeoviewLayer property stored
-   * in the layer instance associated to the map. The legend filters are derived from the uniqueValue or classBreaks style of the
-   * layer. When the layer config is invalid, nothing is done.
-   *
-   * @param {string} filter An optional filter to be used in place of the getViewFilter value.
-   * @param {never} notUsed1 This parameter must not be provided. It is there to allow overloading of the method signature.
-   * @param {never} notUsed2 This parameter must not be provided. It is there to allow overloading of the method signature.
-   */
-  applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): void;
-
-  /** ***************************************************************************************************************************
-   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToTheGeoviewLayer property stored
-   * in the layer instance associated to the map. When the CombineLegendFilter flag is false, the filter paramater is used alone
-   * to display the features. Otherwise, the legend filter and the filter parameter are combined together to define the view
-   * filter. The legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is
-   * invalid, nothing is done.
-   *
-   * @param {string} filter An optional filter to be used in place of the getViewFilter value.
-   * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
-   * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
-   */
-  applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): void;
-
-  /** ***************************************************************************************************************************
    * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
    * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
    * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
@@ -1045,56 +1030,8 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath: string, filter?: string, CombineLegendFilter?: boolean): void;
-
-  // See above headers for signification of the parameters. The first lines of the method select the template
-  // used based on the parameter types received.
-
-  applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never) {
-    // At the beginning, we assume that:
-    // 1- the layer path was saved in this.layerPathAssociatedToTheGeoviewLayer using a call to
-    //    api.maps[mapId].layer.geoviewLayer(layerPath);
-    // 2- the filter is empty;
-    // 3- the combine legend filters is true
-    let layerPath = this.layerPathAssociatedToTheGeoviewLayer;
-    let filter = '';
-    let CombineLegendFilter = true;
-
-    // Method signature detection
-    if (typeof parameter3 === 'boolean') {
-      // Signature detected is: applyViewFilter(layerPath: string, filter?: string, combineLegendFilter?: boolean): void;
-      layerPath = parameter1;
-      filter = parameter2 as string;
-      CombineLegendFilter = parameter3;
-    } else if (parameter2 !== undefined && parameter3 === undefined) {
-      if (typeof parameter2 === 'boolean') {
-        // Signature detected is: applyViewFilter(filter: string, CombineLegendFilter: boolean): void;
-        filter = parameter1;
-        CombineLegendFilter = parameter2;
-      } else {
-        // Signature detected is: applyViewFilter(layerPath: string, filter: string): void;
-        layerPath = parameter1;
-        filter = parameter2;
-      }
-    } else if (parameter2 === undefined && parameter3 === undefined) {
-      // Signature detected is: applyViewFilter(filter: string): void;
-      filter = parameter1;
-    }
-
+  applyViewFilter(layerPath: string, filter: string, CombineLegendFilter = true) {
     const layerConfig = this.getLayerConfig(layerPath) as OgcWmsLayerEntryConfig;
-    if (!layerConfig) {
-      // GV Things important to know about the applyViewFilter usage:
-      logger.logError(
-        `
-        The applyViewFilter method must never be called by GeoView code before the layer refered by the layerPath has reached the 'loaded' status.\n
-        It will never be called by the GeoView internal code except in the layerConfig.loadedFunction() that is called right after the 'loaded' signal.\n
-        If you are a user, you can set the layer filter in the configuration or using code called in the cgpv.init() method of the viewer.\n
-        It appeares that the layer refered by the layerPath "${layerPath} does not respect these rules.\n
-      `.replace(/\s+/g, ' ')
-      );
-      return;
-    }
-
     // Log
     logger.logTraceCore('WMS - applyViewFilter', layerPath);
 
@@ -1119,7 +1056,7 @@ export class WMS extends AbstractGeoViewRaster {
         searchDateEntry.forEach((dateFound) => {
           // If the date has a time zone, keep it as is, otherwise reverse its time zone by changing its sign
           const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
-          const reformattedDate = api.dateUtilities.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
+          const reformattedDate = api.utilities.date.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
           filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index! - 6)}${reformattedDate}${filterValueToUse!.slice(
             dateFound.index! + dateFound[0].length + 2
           )}`;
@@ -1131,36 +1068,20 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Get the bounds of the layer represented in the layerConfig pointed to by the cached layerPath, returns updated bounds
-   *
-   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
-   * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
-   *
-   * @returns {Extent} The new layer bounding box.
-   */
-  protected getBounds(bounds: Extent, notUsed?: never): Extent | undefined;
-
-  /** ***************************************************************************************************************************
    * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
    *
    * @param {string} layerPath The Layer path to the layer's configuration.
    * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
-   * @returns {Extent} The new layer bounding box.
+   * @returns {Extent | undefined} The new layer bounding box.
    */
-  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined;
-
-  // See above headers for signification of the parameters. The first lines of the method select the template
-  // used based on the parameter types received.
-  protected getBounds(parameter1?: string | Extent, parameter2?: Extent): Extent | undefined {
-    const layerPath = typeof parameter1 === 'string' ? parameter1 : this.layerPathAssociatedToTheGeoviewLayer;
-    let bounds = typeof parameter1 !== 'string' ? parameter1 : parameter2;
+  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
     const layerConfig = this.getLayerConfig(layerPath);
     const projection =
       (layerConfig?.olLayer as ImageLayer<Static>)?.getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
       MapEventProcessor.getMapState(this.mapId).currentProjection;
     let layerBounds = layerConfig?.initialSettings?.bounds || [];
-    layerBounds = api.projection.transformExtent(layerBounds, 'EPSG:4326', `EPSG:${projection}`);
+    layerBounds = api.utilities.projection.transformExtent(layerBounds, 'EPSG:4326', `EPSG:${projection}`);
     const boundingBoxes = this.metadata?.Capability.Layer.BoundingBox;
     let bbExtent: Extent | undefined;
 

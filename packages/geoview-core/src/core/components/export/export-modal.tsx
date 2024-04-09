@@ -9,7 +9,7 @@ import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-int
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { NorthArrowIcon } from '@/core/components/north-arrow/north-arrow-icon';
 import { useMapAttribution, useMapNorthArrow, useMapScale } from '@/core/stores/store-interface-and-intial-values/map-state';
-import useManageArrow from '../north-arrow/hooks/useManageArrow';
+import useManageArrow from '@/core/components/north-arrow/hooks/useManageArrow';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
 
@@ -198,7 +198,7 @@ export default function ExportModal(): JSX.Element {
             ))}
           </Box>
           <Box textAlign="center" sx={{ marginBottom: '1rem' }}>
-            {api.dateUtilities.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A')}
+            {api.utilities.date.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A')}
           </Box>
         </Box>
       </DialogContent>
@@ -210,6 +210,7 @@ export default function ExportModal(): JSX.Element {
           role="button"
           tabIndex={-1}
           autoFocus
+          aria-hidden="true"
           sx={{
             width: 'inherit',
             fontSize: theme.palette.geoViewFontSize.sm,

@@ -7,7 +7,7 @@ import { FitOptions } from 'ol/View';
 
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeLayersViewDisplayState, TypeLegendLayer } from '@/core/components/layers/types';
-import { TypeGetStore, TypeSetStore } from '../geoview-store';
+import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import { TypeClassBreakStyleConfig, TypeStyleGeometry, TypeUniqueValueStyleConfig } from '@/geo/map/map-schema-types';
 import { api } from '@/app';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
@@ -63,7 +63,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         return layer;
       },
       getLayerBounds: (layerPath: string) => {
-        const layer = api.maps[get().mapId].layer.getGeoviewLayerById(layerPath.split('/')[0]);
+        const layer = api.maps[get().mapId].layer.geoviewLayer(layerPath);
         if (layer) {
           const bounds = layer.calculateBounds(layerPath);
           if (bounds) return bounds;
@@ -141,7 +141,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
               item.isVisible = !item.isVisible; // eslint-disable-line no-param-reassign
 
               if (item.isVisible && MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(get().mapId, layerPath)) {
-                MapEventProcessor.setOrToggleMapVisibility(get().mapId, layerPath, true);
+                MapEventProcessor.setOrToggleMapLayerVisibility(get().mapId, layerPath, true);
               }
 
               // assign value to registered layer. This is use by applyFilter function to set visibility
@@ -162,7 +162,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           });
 
           // apply filter to layer
-          (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter('');
+          (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter(layerPath, '');
         }
         set({
           layerState: {
@@ -172,7 +172,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         });
       },
       setAllItemsVisibility: (layerPath: string, visibility: boolean) => {
-        MapEventProcessor.setOrToggleMapVisibility(get().mapId, layerPath, true);
+        MapEventProcessor.setOrToggleMapLayerVisibility(get().mapId, layerPath, true);
         const curLayers = get().layerState.legendLayers;
 
         const registeredLayer = api.maps[get().mapId].layer.registeredLayers[layerPath] as VectorLayerEntryConfig;
@@ -218,7 +218,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         // GV try to make reusable store actions....
         // GV we can have always item.... we cannot set visibility so if present we will need to trap. Need more use case
         // GV create a function setItemVisibility called with layer path and this function set the registered layer (from store values) then apply the filter.
-        (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter('');
+        (api.maps[get().mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter(layerPath, '');
       },
       getLayerDeleteInProgress: () => get().layerState.layerDeleteInProgress,
       setLayerDeleteInProgress: (newVal: boolean) => {

@@ -72,11 +72,6 @@ const config = {
       dependOn: 'cgpv-main',
       filename: 'corePackages/[name].js',
     },
-    'geoview-layers-panel': {
-      import: '../geoview-layers-panel/src/index.tsx',
-      dependOn: 'cgpv-main',
-      filename: 'corePackages/[name].js',
-    },
     'geoview-time-slider': {
       import: '../geoview-time-slider/src/index.tsx',
       dependOn: 'cgpv-main',

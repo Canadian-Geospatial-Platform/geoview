@@ -1,11 +1,10 @@
 import { useTheme } from '@mui/material/styles';
 
 import { IconButton, EmojiPeopleIcon } from '@/ui';
-import { api } from '@/app';
-import { getSxClasses } from '../nav-bar-style';
+import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from '@/core/utils/logger';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 /**
  * Create a location button to zoom to user location
@@ -16,13 +15,12 @@ export default function Location(): JSX.Element {
   // Log
   logger.logTraceRender('components/nav-bar/buttons/location');
 
-  const mapId = useGeoViewMapId();
-
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
   // get store actions
   const { zoomToMyLocation } = useMapStoreActions();
+  const { addNotification } = useAppStoreActions();
 
   /**
    * Zoom to user location
@@ -33,7 +31,12 @@ export default function Location(): JSX.Element {
     }
 
     function error(err: GeolocationPositionError) {
-      api.utilities.showWarning(mapId, `ERROR(${err.code}): ${err.message}`, true);
+      addNotification({
+        key: 'location',
+        message: `ERROR(${err.code}): ${err.message}`,
+        notificationType: 'warning',
+        count: 0,
+      });
     }
 
     navigator.geolocation.getCurrentPosition(success, error);

@@ -6,7 +6,7 @@ import { useState, CSSProperties } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Box, Stepper as MaterialStepper, Step, StepButton, StepContent, StepLabel, Typography } from '@mui/material';
 
-import { Button } from '../button/button';
+import { Button } from '@/ui/button/button';
 
 import { HtmlToReact } from '@/core/containers/html-to-react';
 import { getSxClasses } from './custom-stepper-style';

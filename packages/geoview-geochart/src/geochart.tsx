@@ -1,5 +1,7 @@
 import { GeoChart as GeoChartComponent, GeoChartConfig, ChartType, GeoChartDefaultColors, SchemaValidator, GeoChartAction } from 'geochart';
-import { TypeWindow, TypeLayerEntryConfig, useAppDisplayLanguageById } from 'geoview-core';
+import { useAppDisplayLanguageById, useAppStoreActions } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
+import { TypeWindow } from 'geoview-core/src/core/types/global-types';
+import { TypeLayerEntryConfig } from 'geoview-core/src/geo/map/map-schema-types';
 import { logger } from 'geoview-core/src/core/utils/logger';
 import { TypeLayerData, TypeFeatureInfoEntry } from 'geoview-core/src/geo/utils/layer-set';
 import { findLayerDataAndConfigFromQueryResults, loadDatasources } from './geochart-parsing';
@@ -52,6 +54,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
 
   // Use Store
   const displayLanguage = useAppDisplayLanguageById(mapId);
+  const addNotification = useAppStoreActions();
 
   // #endregion
 
@@ -93,9 +96,9 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
       logger.logTraceUseCallback('GEOVIEW-GEOCHART - handleError', mapId, error);
 
       // Show error
-      cgpv.api.utilities.showError(mapId, error);
+      addNotification({ key: 'geochart', message: error, notificationType: 'error' });
     },
-    [cgpv.api.utilities, mapId]
+    [addNotification, mapId]
   );
 
   /**

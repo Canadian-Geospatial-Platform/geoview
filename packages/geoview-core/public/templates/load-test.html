@@ -168,7 +168,6 @@
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init((mapId) => {
-
         if (mapId === 'allMaps') {
           setTimeout(() => cgpv.api.maps.mapWM.map.on('movestart', () => (tzoom0 = performance.now())), 1000);
           setTimeout(
@@ -299,7 +298,7 @@
               strokeOpacity: 0.15,
               fillColor: '#f03',
               fillOpacity: 0.15,
-              radius: 1,
+              radius: 4,
             },
           });
         }

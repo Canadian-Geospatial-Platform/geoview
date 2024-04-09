@@ -1,11 +1,12 @@
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '@mui/material';
+import { SelectChangeEvent, useTheme } from '@mui/material';
 import {
   Autocomplete,
   Box,
   Button,
   ButtonGroup,
+  ButtonPropsLayerPanel,
   CheckBoxIcon,
   CheckBoxOutlineBlankIcon,
   Checkbox,
@@ -20,7 +21,7 @@ import { OgcFeature, TypeOgcFeatureLayerConfig } from '@/geo/layer/geoview-layer
 import { TypeWMSLayerConfig, WMS as WmsGeoviewClass } from '@/geo/layer/geoview-layers/raster/wms';
 import { TypeWFSLayerConfig, WFS as WfsGeoviewClass } from '@/geo/layer/geoview-layers/vector/wfs';
 import { TypeCSVLayerConfig, CSV as CsvGeoviewClass } from '@/geo/layer/geoview-layers/vector/csv';
-import { ButtonPropsLayerPanel, Cast, SelectChangeEvent, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
+import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { createLocalizedString } from '@/core/utils/utilities';
 import { useLayerStoreActions, useLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -173,7 +174,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorEmpty = (textField: string) => {
     setIsLoading(false);
-    api.utilities.showError(mapId, `${textField} ${t('layers.errorEmpty')}`, false);
+    api.maps[mapId].notifications.showError(`${textField} ${t('layers.errorEmpty')}`, [], false);
   };
 
   /**
@@ -183,7 +184,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorNone = () => {
     setIsLoading(false);
-    api.utilities.showError(mapId, t('layers.errorNone'), false);
+    api.maps[mapId].notifications.showError('layers.errorNone', [], false);
   };
 
   /**
@@ -192,7 +193,7 @@ export function AddNewLayer(): JSX.Element {
    * @param textField label for the TextField input that cannot be empty
    */
   const emitErrorFile = () => {
-    api.utilities.showError(mapId, t('layers.errorFile'), false);
+    api.maps[mapId].notifications.showError('layers.errorFile', [], false);
   };
 
   /**
@@ -202,7 +203,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorServer = (serviceName: string) => {
     setIsLoading(false);
-    api.utilities.showError(mapId, `${serviceName} ${t('layers.errorServer')}`, false);
+    api.maps[mapId].notifications.showError(`${serviceName} ${t('layers.errorServer')}`, [], false);
   };
 
   /**
@@ -214,7 +215,7 @@ export function AddNewLayer(): JSX.Element {
   const emitErrorProj = (serviceName: string, proj: string | undefined, supportedProj: TypeJsonArray | string[]) => {
     setIsLoading(false);
     const message = `${serviceName} ${t('layers.errorProj')} ${proj}, ${t('layers.only')} ${supportedProj.join(', ')}`;
-    api.utilities.showError(mapId, message, false);
+    api.maps[mapId].notifications.showError(message, [], false);
   };
 
   /**
@@ -227,7 +228,7 @@ export function AddNewLayer(): JSX.Element {
   // TODO: Move all the validations in a utility add layer file inside geo. Also delete old utilities that were used
   // TODOCONT: in the previous version.
   const wmsValidation = async (): Promise<boolean> => {
-    const proj = api.projection.projections[api.maps[mapId].getMapState().currentProjection].getCode();
+    const proj = api.utilities.projection.projections[api.maps[mapId].getMapState().currentProjection].getCode();
     let supportedProj: string[] = [];
 
     try {
@@ -836,13 +837,11 @@ export function AddNewLayer(): JSX.Element {
   };
 
   const doneAddedShowMessage = (layerBeingAdded: AbstractGeoViewLayer) => {
-    let message = '';
     if (layerBeingAdded.allLayerStatusAreGreaterThanOrEqualTo('error'))
-      message = api.utilities.replaceParams([layerName], t('layers.layerAddedWithError'));
+      api.maps[mapId].notifications.showMessage('layers.layerAddedWithError', [layerName]);
     else if (layerBeingAdded?.allLayerStatusAreGreaterThanOrEqualTo('loaded'))
-      message = api.utilities.replaceParams([layerName], t('layers.layerAdded'));
-    else message = api.utilities.replaceParams([layerName], t('layers.layerAddedAndLoading'));
-    api.utilities.showMessage(mapId, message, false);
+      api.maps[mapId].notifications.showMessage('layers.layerAdded', [layerName]);
+    else api.maps[mapId].notifications.showMessage('layers.layerAddedAndLoading', [layerName]);
   };
 
   /**

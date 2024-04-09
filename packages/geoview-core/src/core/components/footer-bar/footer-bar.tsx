@@ -4,9 +4,8 @@ import { useTheme } from '@mui/material/styles';
 
 import { Box, IconButton, Tabs, TypeTabs, MoveDownRoundedIcon, MoveUpRoundedIcon } from '@/ui';
 import { api } from '@/app';
-import { FooterBarPayload } from '@/api/events/payloads';
 import { getSxClasses } from './footer-bar-style';
-import { ResizeFooterPanel } from '../resize-footer-panel/resize-footer-panel';
+import { ResizeFooterPanel } from '@/core/components/resize-footer-panel/resize-footer-panel';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useDetailsStoreLayerDataArrayBatch } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import {
@@ -16,6 +15,7 @@ import {
   useUIStoreActions,
   useUIActiveTrapGeoView,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { FooterBarApi, FooterTabCreatedEvent, FooterTabRemovedEvent } from '@/core/components';
 
 import { toJsonObject, TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
@@ -42,17 +42,20 @@ interface Tab {
   content: ReactNode;
 }
 
+type FooterBarProps = {
+  api: FooterBarApi;
+};
+
 /**
  * The FooterBar component is used to display a list of tabs and their content.
  *
  * @returns {JSX.Element} returns the FooterBar Tabs component
  */
-export function FooterBar(): JSX.Element | null {
-  // ? No props for this component. Same logic in AppBar and NavBar.
-  // ? We are handling the logic via api.event management, via footer-bar-api, once this component is mounted.
-
+export function FooterBar(props: FooterBarProps): JSX.Element | null {
   // Log
   logger.logTraceRender('components/footer-bar/footer-bar');
+
+  const { api: footerBarApi } = props;
 
   const mapId = useGeoViewMapId();
 
@@ -169,11 +172,11 @@ export function FooterBar(): JSX.Element | null {
    * Add a tab
    */
   const handleAddTab = useCallback(
-    (payload: FooterBarPayload) => {
+    (sender: FooterBarApi, event: FooterTabCreatedEvent) => {
       // Log
-      logger.logTraceUseCallback('FOOTER-BAR - handleAddTab', payload);
+      logger.logTraceUseCallback('FOOTER-BAR - handleAddTab', event);
 
-      const newTab = { [payload.tab.id]: { icon: payload.tab.icon, content: payload.tab.content } } as Record<string, Tab>;
+      const newTab = { [event.tab.id]: { icon: event.tab.icon, content: event.tab.content } } as Record<string, Tab>;
       setTabsList({ ...tabsList, ...newTab });
     },
     [tabsList]
@@ -182,14 +185,14 @@ export function FooterBar(): JSX.Element | null {
   /**
    * Remove a tab
    */
-  const handleRemoveTab = useCallback((payload: FooterBarPayload) => {
+  const handleRemoveTab = useCallback((sender: FooterBarApi, event: FooterTabRemovedEvent) => {
     // Log
-    logger.logTraceUseCallback('FOOTER-BAR - handleRemoveTab', payload);
+    logger.logTraceUseCallback('FOOTER-BAR - handleRemoveTab', event);
 
     // remove the tab from the list
     setTabsList((prevState) => {
       const state = { ...prevState };
-      delete state[payload.tab.id];
+      delete state[event.tabid];
       return state;
     });
   }, []);
@@ -288,20 +291,18 @@ export function FooterBar(): JSX.Element | null {
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('FOOTER-BAR - mount', mapId);
+    logger.logTraceUseEffect('FOOTER-BAR - mount');
 
-    // listen to new tab creation
-    api.event.onCreateFooterBarPanel(mapId, handleAddTab);
-
-    // listen on tab removal
-    api.event.onRemoveFooterBarPanel(mapId, handleRemoveTab);
+    // Register footerbar tab created/removed handlers
+    footerBarApi.onFooterTabCreated(handleAddTab);
+    footerBarApi.onFooterTabRemoved(handleRemoveTab);
 
     return () => {
-      // Unwire
-      api.event.offCreateFooterBarPanel(mapId, handleAddTab);
-      api.event.offRemoveFooterBarPanel(mapId, handleRemoveTab);
+      // Unregister events
+      footerBarApi.offFooterTabCreated(handleAddTab);
+      footerBarApi.offFooterTabRemoved(handleRemoveTab);
     };
-  }, [mapId, handleAddTab, handleRemoveTab]);
+  }, [footerBarApi, handleAddTab, handleRemoveTab]);
 
   /**
    * Update map and footer panel height when switch to fullscreen

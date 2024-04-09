@@ -1,4 +1,4 @@
-import { TimeDimension } from 'geoview-core';
+import { TimeDimension } from 'geoview-core/src/core/utils/date-mgt';
 import { TypeLocalizedString } from 'geoview-core/src/geo/map/map-schema-types';
 
 export type SliderProps = {

@@ -1,9 +1,8 @@
-import { api } from '@/app';
-
 import { CONST_PANEL_TYPES, TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 
 import { generateId } from '@/core/utils/utilities';
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 
 /**
  * Class to manage buttons on the app-bar
@@ -11,54 +10,106 @@ import { generateId } from '@/core/utils/utilities';
  * @exports
  * @class
  */
-export class AppbarApi {
-  mapId!: string;
+export class AppBarApi {
+  mapId: string;
 
   // groups of array of button panels to hold all buttons created on the app-bar
   buttons: Record<string, Record<string, TypeButtonPanel>> = {};
 
+  /** Callback handlers for the AppBar created event. */
+  #onAppBarCreatedHandlers: AppBarCreatedDelegate[] = [];
+
+  /** Callback handlers for the AppBar removed event. */
+  #onAppBarRemovedHandlers: AppBarRemovedDelegate[] = [];
+
   /**
-   * initialize the buttons for the app-bar
+   * Instantiates an AppBarApi class.
    *
-   * @param mapId the id of the map this app-bar belongs to
+   * @param {string} mapId - The map id this AppBarApi belongs to
    */
   constructor(mapId: string) {
     this.mapId = mapId;
 
-    this.createDefaultButtonPanels();
+    this.#createDefaultButtonPanels();
+  }
+
+  /**
+   * Emits an event to all registered AppBar created event handlers.
+   * @param {AppBarCreatedEvent} event - The event to emit.
+   * @private
+   */
+  #emitAppBarCreated(event: AppBarCreatedEvent): void {
+    // Emit the AppBar created event
+    EventHelper.emitEvent(this, this.#onAppBarCreatedHandlers, event);
+  }
+
+  /**
+   * Registers an event handler for AppBar created events.
+   * @param {AppBarCreatedDelegate} callback - The callback to be executed whenever the event is emitted.
+   */
+  onAppBarCreated(callback: AppBarCreatedDelegate): void {
+    // Register the AppBar created event callback
+    EventHelper.onEvent(this.#onAppBarCreatedHandlers, callback);
+  }
+
+  /**
+   * Unregisters an event handler for AppBar created events.
+   * @param {AppBarCreatedDelegate} callback - The callback to stop being called whenever the event is emitted.
+   */
+  offAppBarCreated(callback: AppBarCreatedDelegate): void {
+    // Unregister the AppBar created event callback
+    EventHelper.offEvent(this.#onAppBarCreatedHandlers, callback);
+  }
+
+  /**
+   * Emits an event to all registered AppBar removed event handlers.
+   * @param {AppBarRemovedEvent} event - The event to emit.
+   * @private
+   */
+  #emitAppBarRemoved(event: AppBarRemovedEvent): void {
+    // Emit the AppBar removed event
+    EventHelper.emitEvent(this, this.#onAppBarRemovedHandlers, event);
+  }
+
+  /**
+   * Registers an event handler for AppBar removed events.
+   * @param {AppBarRemovedDelegate} callback - The callback to be executed whenever the event is emitted.
+   */
+  onAppBarRemoved(callback: AppBarRemovedDelegate): void {
+    // Register the AppBar removed event callback
+    EventHelper.onEvent(this.#onAppBarRemovedHandlers, callback);
+  }
+
+  /**
+   * Unregisters an event handler for AppBar removed events.
+   * @param {AppBarRemovedDelegate} callback - The callback to stop being called whenever the event is emitted.
+   */
+  offAppBarRemoved(callback: AppBarRemovedDelegate): void {
+    // Unregister the AppBar removed event callback
+    EventHelper.offEvent(this.#onAppBarRemovedHandlers, callback);
   }
 
   /**
    * Function used to create default buttons, button panels
    */
-  private createDefaultButtonPanels = () => {
+  #createDefaultButtonPanels(): void {
     // create default group for app-bar button panels
     this.buttons.default = {};
-  };
+  }
 
   /**
-   * Create a group for the app-bar buttons
+   * Creates a button on the app-bar that will open a panel
    *
-   * @param {string} groupName a group name to be used to manage the group of app-bar buttons
+   * @param {TypeIconButtonProps} buttonProps - Button properties (icon, tooltip)
+   * @param {TypePanelProps} panelProps - Panel properties (icon, title, content)
+   * @param {string | null | undefined} groupName - Optional value to set this button in a group
+   * @returns {TypeButtonPanel | null} The created panel
    */
-  createAppbarButtonGroup = (groupName: string): void => {
-    this.buttons[groupName] = {};
-  };
-
-  /**
-   * Create a button on the app-bar that will open a panel
-   *
-   * @param {TypeIconButtonProps} buttonProps button properties (icon, tooltip)
-   * @param {TypePanelProps} panelProps panel properties (icon, title, content)
-   * @param {string} groupName optional value to set this button in a group
-   *
-   * @returns the created panel
-   */
-  createAppbarPanel = (
+  createAppbarPanel(
     buttonProps: TypeIconButtonProps,
     panelProps: TypePanelProps,
     groupName?: string | null | undefined
-  ): TypeButtonPanel | null => {
+  ): TypeButtonPanel | null {
     if (buttonProps && panelProps) {
       const buttonPanelId = generateId(buttonProps.id);
 
@@ -92,21 +143,21 @@ export class AppbarApi {
       if (group !== '__proto__' && buttonPanelId !== '__proto__') this.buttons[group][buttonPanelId] = buttonPanel;
 
       // trigger an event that a new button panel has been created to update the state and re-render
-      api.event.emitCreateAppBarPanel(this.mapId, buttonPanelId, group, buttonPanel);
+      this.#emitAppBarCreated({ buttonPanelId, group, buttonPanel });
 
       return buttonPanel;
     }
 
     return null;
-  };
+  }
 
   /**
-   * Get a button panel from the app-bar by using it's id
+   * Gets a button panel from the app-bar by using it's id
    *
-   * @param {string} buttonPanelId the id of the button panel to get
-   * @returns {TypeButtonPanel} the returned button panel
+   * @param {string} buttonPanelId - The id of the button panel to get
+   * @returns {TypeButtonPanel | null} The button panel
    */
-  getAppBarButtonPanelById = (buttonPanelId: string): TypeButtonPanel | null => {
+  getAppBarButtonPanelById(buttonPanelId: string): TypeButtonPanel | null {
     // loop through groups of app-bar button panels
     for (let i = 0; i < Object.keys(this.buttons).length; i++) {
       const group = this.buttons[Object.keys(this.buttons)[i]];
@@ -121,14 +172,14 @@ export class AppbarApi {
     }
 
     return null;
-  };
+  }
 
   /**
-   * Get all created buttons panels regardless of group
+   * Gets all created buttons panels regardless of group
    *
-   * @returns {Record<string, TypeButtonPanels>} an object with all the button panels
+   * @returns {Record<string, TypeButtonPanels>} An object with all the button panels
    */
-  getAllButtonPanels = (): Record<string, TypeButtonPanel> => {
+  getAllButtonPanels(): Record<string, TypeButtonPanel> {
     const buttonPanels: Record<string, TypeButtonPanel> = {};
 
     for (let i = 0; i < Object.keys(this.buttons).length; i += 1) {
@@ -142,14 +193,14 @@ export class AppbarApi {
     }
 
     return buttonPanels;
-  };
+  }
 
   /**
-   * Remove an app-bar panel using an id
+   * Removes an app-bar panel using an id
    *
-   * @param {string} buttonPanelId the id of the panel to remove
+   * @param {string} buttonPanelId - The id of the panel to remove
    */
-  removeAppbarPanel = (buttonPanelId: string): void => {
+  removeAppbarPanel(buttonPanelId: string): void {
     // loop through groups of app-bar button panels
     Object.keys(this.buttons).forEach((groupName) => {
       const group = this.buttons[groupName];
@@ -158,7 +209,34 @@ export class AppbarApi {
       delete group[buttonPanelId];
 
       // trigger an event that a panel has been removed to update the state and re-render
-      api.event.emitRemoveAppBarPanel(this.mapId, buttonPanelId, groupName, group[buttonPanelId]);
+      this.#emitAppBarRemoved({ buttonPanelId, group: groupName });
     });
-  };
+  }
 }
+
+/**
+ * Define an event for the delegate
+ */
+export type AppBarCreatedEvent = {
+  buttonPanelId: string;
+  group: string;
+  buttonPanel: TypeButtonPanel;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type AppBarCreatedDelegate = EventDelegateBase<AppBarApi, AppBarCreatedEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type AppBarRemovedEvent = {
+  buttonPanelId: string;
+  group: string;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type AppBarRemovedDelegate = EventDelegateBase<AppBarApi, AppBarRemovedEvent>;

@@ -1,9 +1,9 @@
 import { TypeJsonValue, TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { getLocalizedMessage, isJsonString, removeCommentsFromJSON, replaceParams, showError } from '@/core/utils/utilities';
+import { isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { api } from '@/app';
-import { ConfigValidation } from '../config-validation';
+import { ConfigValidation } from '@/core/utils/config/config-validation';
 import { UUIDmapConfigReader } from './uuid-config-reader';
+import { api } from '@/app';
 
 /**
  * A class to read the configuration of the GeoView map features from an online div. The configuration is provided in an HTML div
@@ -74,8 +74,8 @@ export class InlineDivConfigReader {
           } catch (error) {
             // Log
             logger.logError('Failed to get the GeoView layers from url keys', mapElement.getAttribute('data-geocore-keys'), error);
-            const message = replaceParams([error as TypeJsonValue, mapId], getLocalizedMessage(mapId, 'validation.layer.loadfailed'));
-            showError(mapId, message);
+            // TODO: config should not push message to map... only to console and as return value.. map will be responsible to throw notification
+            api.maps[mapId].notifications.showError('validation.layer.loadfailed', [error as TypeJsonValue, mapId]);
           }
         }
 
@@ -85,7 +85,8 @@ export class InlineDivConfigReader {
 
       // Log
       logger.logWarning(`- Map: ${mapId} - Invalid JSON configuration object in div, a fallback strategy will be used -`);
-      api.utilities.showError(mapId, api.utilities.getLocalizedMessage(mapId, 'validation.invalidConfig'), true);
+      // TODO: config should not push message to map... only to console and as return value.. map will be responsible to throw notification
+      api.maps[mapId].notifications.showError('validation.invalidConfig', [], true);
     }
 
     // None

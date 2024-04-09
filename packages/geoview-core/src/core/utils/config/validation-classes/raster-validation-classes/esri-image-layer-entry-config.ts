@@ -6,7 +6,7 @@ import {
   TypeSourceImageEsriInitialConfig,
   TypeStyleConfig,
 } from '@/geo/map/map-schema-types';
-import { AbstractBaseLayerEntryConfig } from '../abstract-base-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.

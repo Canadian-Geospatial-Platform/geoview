@@ -3,7 +3,6 @@ import Draggable from 'react-draggable';
 import { RefObject } from 'geoview-core';
 import { MapViewer } from 'geoview-core/src/geo/map/map-viewer';
 import { useSwiperLayerPaths } from 'geoview-core/src/core/stores/store-interface-and-intial-values/swiper-state';
-import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
 import { getRenderPixel } from 'ol/render';
@@ -14,6 +13,7 @@ import BaseEvent from 'ol/events/Event';
 
 import debounce from 'lodash/debounce';
 
+import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { sxClasses } from './swiper-style';
 
 type SwiperProps = {
@@ -46,6 +46,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
   // Get store values
   const layerPaths = useSwiperLayerPaths();
+  const displayLanguage = useAppDisplayLanguage();
 
   /**
    * Pre compose, Pre render event callback
@@ -279,7 +280,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
           nodeRef={swiperRef as RefObject<HTMLElement>}
         >
           <Box sx={[orientation === 'vertical' ? sxClasses.vertical : sxClasses.horizontal, sxClasses.bar]} tabIndex={0} ref={swiperRef}>
-            <Tooltip title={getLocalizedMessage(mapId, 'swiper.tooltip')}>
+            <Tooltip title={api.utilities.core.getLocalizedMessage('swiper.tooltip', displayLanguage)}>
               <Box className="handleContainer">
                 <HandleIcon sx={sxClasses.handle} className="handleL" />
                 <HandleIcon sx={sxClasses.handle} className="handleR" />

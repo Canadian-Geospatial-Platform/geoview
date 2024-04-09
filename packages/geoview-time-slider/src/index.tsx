@@ -1,4 +1,7 @@
-import { AnySchemaObject, api, Cast, TimeDimension, toJsonObject, TypeJsonObject, TypeTabs } from 'geoview-core';
+import { TypeJsonObject, toJsonObject, Cast, AnySchemaObject } from 'geoview-core/src/core/types/global-types';
+import { TimeDimension } from 'geoview-core/src/core/utils/date-mgt';
+import { TypeTabs } from 'geoview-core/src/ui/tabs/tabs';
+import { api } from 'geoview-core';
 import { TimeSliderIcon } from 'geoview-core/src/ui';
 import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
 
@@ -105,7 +108,7 @@ class TimeSliderPlugin extends FooterPlugin {
           default: obj.temporalDimension.default,
           unitSymbol: obj.temporalDimension.unitSymbol,
           nearestValues: obj.temporalDimension.nearestValues,
-          range: api.dateUtilities.createRangeOGC(obj.temporalDimension.range as unknown as string),
+          range: api.utilities.date.createRangeOGC(obj.temporalDimension.range as unknown as string),
           singleHandle: obj.temporalDimension.singleHandle,
         };
 

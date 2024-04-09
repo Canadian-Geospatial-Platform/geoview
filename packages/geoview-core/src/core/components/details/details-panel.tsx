@@ -22,7 +22,7 @@ import {
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/utils/layer-set';
 
-import { LayerListEntry, Layout } from '../common';
+import { LayerListEntry, Layout } from '@/core/components/common';
 import { getSxClasses } from './details-style';
 import { FeatureInfo } from './feature-info-new';
 
@@ -290,7 +290,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
         // Log
         logger.logDebug('DETAILS-PANEL', 'select none', memoLayerSelectedItem);
         // None found, select none
-        //  TODO:: Investigate infinte loop in appbar for statement.
+        //  TODO:: Investigate infinte loop in AppBar for statement.
         // setSelectedLayerPath('');
       }
     }

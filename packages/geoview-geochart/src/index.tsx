@@ -1,4 +1,4 @@
-import { Cast, AnySchemaObject, toJsonObject, TypeJsonObject } from 'geoview-core';
+import { Cast, AnySchemaObject, TypeJsonObject, toJsonObject } from 'geoview-core/src/core/types/global-types';
 import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
 import { TypeTabs } from 'geoview-core/src/ui/tabs/tabs';
 import { ChartIcon } from 'geoview-core/src/ui/icons';

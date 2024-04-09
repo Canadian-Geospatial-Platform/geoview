@@ -5,15 +5,14 @@ import { useTheme } from '@mui/material/styles';
 import { FocusTrap } from '@mui/base/FocusTrap';
 
 import { Map } from '@/core/components/map/map';
-import { Appbar } from '@/core/components/app-bar/app-bar';
-import { Navbar } from '@/core/components/nav-bar/nav-bar';
+import { AppBar } from '@/core/components/app-bar/app-bar';
+import { NavBar } from '@/core/components/nav-bar/nav-bar';
 import { FooterBar } from '@/core/components/footer-bar/footer-bar';
 import { Geolocator } from '@/core/components/geolocator/geolocator';
 import { MapInfo } from '@/core/components/map-info/map-info';
 
 import { api } from '@/app';
-import { Box, CircularProgress, Link, Modal, Snackbar, Button, TypeModalProps } from '@/ui';
-import { MapComponentPayload, ModalPayload, SnackbarMessagePayload, SnackbarType } from '@/api/events/payloads';
+import { Box, CircularProgress, Link, Modal, Snackbar, Button, TypeModalProps, ModalApi, ModalEvent } from '@/ui';
 import { getShellSxClasses } from './containers-style';
 import { useMapInteraction, useMapLoaded } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useAppCircularProgressActive } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -22,19 +21,31 @@ import {
   useUIActiveTrapGeoView,
   useUIAppbarComponents,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import ExportModal from '@/core/components/export/export-modal';
 import DataTableModal from '@/core/components/data-table/data-table-modal';
-import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useGeoViewConfig } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
+import { MapViewer, MapComponentAddedEvent, MapComponentRemovedEvent } from '@/geo/map/map-viewer';
 
 import { FocusTrapDialog } from './focus-trap';
+import { Notifications, SnackBarOpenEvent, SnackbarType } from '@/core/utils/notifications';
+
+type ShellProps = {
+  mapViewer: MapViewer;
+};
 
 /**
  * Create a shell component to wrap the map and other components not inside the map
  * @param {ShellProps} props the shell properties
  * @returns {JSX.Element} the shell component
  */
-export function Shell(): JSX.Element {
+export function Shell(props: ShellProps): JSX.Element {
+  // Log
+  logger.logTraceRender('core/containers/shell');
+
+  const { mapViewer } = props;
+
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
@@ -56,7 +67,6 @@ export function Shell(): JSX.Element {
   const mapLoaded = useMapLoaded();
   const circularProgressActive = useAppCircularProgressActive();
   const activeTrapGeoView = useUIActiveTrapGeoView();
-  const mapId = useGeoViewMapId();
   const interaction = useMapInteraction();
   const appBarComponents = useUIAppbarComponents();
   const geoviewConfig = useGeoViewConfig();
@@ -78,10 +88,10 @@ export function Shell(): JSX.Element {
    * Handles when a component is being added to the map
    * @param {MapComponentPayload} payload The map component being added
    */
-  const handleMapAddComponent = (payload: MapComponentPayload) => {
+  const handleMapAddComponent = (sender: MapViewer, event: MapComponentAddedEvent) => {
     setComponents((tempComponents) => ({
       ...tempComponents,
-      [payload.mapComponentId]: payload.component!,
+      [event.mapComponentId]: event.component,
     }));
   };
 
@@ -90,9 +100,9 @@ export function Shell(): JSX.Element {
    * @param {MapComponentPayload} payload The map component being removed (component is empty, only mapComponentId is set)
    */
   const handleMapRemoveComponent = useCallback(
-    (payload: MapComponentPayload) => {
+    (sender: MapViewer, event: MapComponentRemovedEvent) => {
       const tempComponents: Record<string, JSX.Element> = { ...components };
-      delete tempComponents[payload.mapComponentId];
+      delete tempComponents[event.mapComponentId];
 
       setComponents(() => ({
         ...tempComponents,
@@ -106,25 +116,26 @@ export function Shell(): JSX.Element {
    * @param {ModalPayload} payload The modal being opened
    */
   const handleModalOpen = useCallback(
-    (payload: ModalPayload) => {
-      setModalProps(api.maps[mapId].modal.modals[payload.modalId] as TypeModalProps);
+    (sender: ModalApi, event: ModalEvent) => {
+      setModalProps(mapViewer.modal.modals[event.modalId]);
       setModalOpen(true);
     },
-    [mapId]
+    [mapViewer]
   );
 
   /**
    * Handles when the modal needs to close (only 1 at a time is allowed)
    */
-  const handleModalClose = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleModalClose = (sender: ModalApi, event: ModalEvent) => {
     setModalOpen(false);
   };
 
   /**
    * Handles when a SnackBar needs to open
-   * @param {SnackbarMessagePayload} payload The snackbar information to open
+   * @param {SnackBarOpenEvent} payload The snackbar information to open
    */
-  const handleSnackBarOpen = (payload: SnackbarMessagePayload) => {
+  const handleSnackBarOpen = (sender: Notifications, payload: SnackBarOpenEvent) => {
     // create button
     const myButton = payload.button?.label ? (
       <Button type="icon" onClick={payload.button.action}>
@@ -157,78 +168,80 @@ export function Shell(): JSX.Element {
   /**
    * Handles when the map needs to reload
    */
-  const handleMapReload = useCallback(() => {
-    // TODO: use store config when we reload the map
-    // Emit a map reload removal
-    api.event.emitMapRemove(mapId, geoviewConfig!);
+  const handleMapReload = useCallback(
+    (mapFeaturesPayload: TypeMapFeaturesConfig) => {
+      // Emit a map reconstruction
+      api.event.emitMapReconstruct(mapViewer.mapId, mapFeaturesPayload);
 
-    // Update the Shell
-    updateShell();
-  }, [geoviewConfig, mapId, updateShell]);
+      // Update the Shell
+      updateShell();
+    },
+    [mapViewer, updateShell]
+  );
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('SHELL - mount', mapId, geoviewConfig, components);
+    logger.logTraceUseEffect('SHELL - mount');
 
-    // listen to API event when app wants to show message
-    api.event.onSnackbarOpen(mapId, handleSnackBarOpen);
-
-    // to close the modal
-    api.event.onModalClose(mapId, handleModalClose);
+    // listen to Notifications event when app wants to show message
+    mapViewer.notifications.onSnackbarOpen(handleSnackBarOpen);
 
     // to open the modal
-    api.event.onModalOpen(mapId, handleModalOpen);
+    mapViewer.modal.onModalOpened(handleModalOpen);
 
-    // listen to removing a component events
-    api.event.onRemoveComponent(mapId, handleMapRemoveComponent);
+    // to close the modal
+    mapViewer.modal.onModalClosed(handleModalClose);
 
-    // listen to adding a new component events
-    api.event.onCreateComponent(mapId, handleMapAddComponent);
+    // listen to adding a component event
+    mapViewer.onMapComponentAdded(handleMapAddComponent);
+
+    // listen to removing a component event
+    mapViewer.onMapComponentRemoved(handleMapRemoveComponent);
 
     // listen to map reload
-    api.event.onMapReload(mapId, handleMapReload);
+    api.event.onMapReload(mapViewer.mapId, handleMapReload);
 
     return () => {
-      api.event.offMapReload(mapId, handleMapReload);
-      api.event.offCreateComponent(mapId, handleMapAddComponent);
-      api.event.offRemoveComponent(mapId, handleMapRemoveComponent);
-      api.event.offModalOpen(mapId, handleModalOpen);
-      api.event.offModalClose(mapId, handleModalClose);
-      api.event.offSnackbarOpen(mapId, handleSnackBarOpen);
+      api.event.offMapReload(mapViewer.mapId, handleMapReload);
+      mapViewer.offMapComponentRemoved(handleMapRemoveComponent);
+      mapViewer.onMapComponentAdded(handleMapAddComponent);
+      mapViewer.modal.offModalClosed(handleModalClose);
+      mapViewer.modal.offModalOpened(handleModalOpen);
+      mapViewer.notifications.offSnackbarOpen(handleSnackBarOpen);
     };
-  }, [components, mapId, geoviewConfig, updateShell, handleMapRemoveComponent, handleModalOpen, handleMapReload]);
+  }, [mapViewer, handleMapRemoveComponent, handleModalOpen, handleMapReload]);
 
   return (
     <Box sx={sxClasses.all}>
-      <Link id={`toplink-${mapId}`} href={`#bottomlink-${mapId}`} tabIndex={0} sx={[sxClasses.skip, { top: '0px' }]}>
+      <Link id={`toplink-${mapViewer.mapId}`} href={`#bottomlink-${mapViewer.mapId}`} tabIndex={0} sx={[sxClasses.skip, { top: '0px' }]}>
         {t('keyboardnav.start')}
       </Link>
       <FocusTrap open={activeTrapGeoView}>
-        <Box id={`shell-${mapId}`} sx={sxClasses.shell} className="geoview-shell" key={update} tabIndex={-1}>
+        <Box id={`shell-${mapViewer.mapId}`} sx={sxClasses.shell} className="geoview-shell" key={update} tabIndex={-1} aria-hidden="true">
           <CircularProgress isLoaded={mapLoaded} />
           <CircularProgress isLoaded={!circularProgressActive} />
-          <Box id={`map-${mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer">
-            <Appbar />
+          <Box id={`map-${mapViewer.mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer">
+            <AppBar api={mapViewer.appBarApi} />
             {/* load geolocator component if config includes in list of components in appBar */}
             {appBarComponents.includes('geolocator') && interaction === 'dynamic' && <Geolocator />}
             <Box sx={sxClasses.mapContainer}>
               <Map />
               <MapInfo />
             </Box>
-            {interaction === 'dynamic' && <Navbar />}
+            {interaction === 'dynamic' && <NavBar api={mapViewer.navBarApi} />}
           </Box>
-          {geoviewConfig!.footerBar !== undefined && <FooterBar />}
-          {Object.keys(api.maps[mapId].modal.modals).map((modalId) => (
+          {geoviewConfig!.footerBar !== undefined && <FooterBar api={mapViewer.footerBarApi} />}
+          {Object.keys(mapViewer.modal.modals).map((modalId) => (
             <Modal
               key={modalId}
               modalId={modalId}
               open={modalOpen}
               modalProps={modalProps}
-              container={document.querySelector(`#${mapId}`) || undefined}
+              container={document.querySelector(`#${mapViewer.mapId}`) || undefined}
             />
           ))}
           {/* modal section start */}
-          <FocusTrapDialog mapId={mapId} focusTrapId={mapId} />
+          <FocusTrapDialog mapId={mapViewer.mapId} focusTrapId={mapViewer.mapId} />
           <ExportModal />
           {focusItem.activeElementId === 'layerDatatable' && <DataTableModal />}
           {/* modal section end */}
@@ -236,7 +249,7 @@ export function Shell(): JSX.Element {
             return <Fragment key={key}>{components[key]}</Fragment>;
           })}
           <Snackbar
-            snackBarId={mapId}
+            snackBarId={mapViewer.mapId}
             message={snackbarMessage}
             open={snackbarOpen}
             type={snackbarType}
@@ -245,7 +258,7 @@ export function Shell(): JSX.Element {
           />
         </Box>
       </FocusTrap>
-      <Link id={`bottomlink-${mapId}`} href={`#toplink-${mapId}`} tabIndex={0} sx={[sxClasses.skip, { bottom: '0px' }]}>
+      <Link id={`bottomlink-${mapViewer.mapId}`} href={`#toplink-${mapViewer.mapId}`} tabIndex={0} sx={[sxClasses.skip, { bottom: '0px' }]}>
         {t('keyboardnav.end')}
       </Link>
     </Box>

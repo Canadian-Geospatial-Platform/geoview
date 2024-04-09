@@ -1,13 +1,10 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme, Theme } from '@mui/material/styles';
 
-import { getGeoViewStore } from '@/core/stores/stores-managers';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
-
 import { Box } from '@/ui';
 import { logger } from '@/core/utils/logger';
-import { TypeHoverFeatureInfo } from '@/geo/utils/hover-feature-info-layer-set';
+import { useMapHoverFeatureInfo, useMapPointerPosition } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 /**
  * Hover tooltip component to show name field information on hover
@@ -15,10 +12,8 @@ import { TypeHoverFeatureInfo } from '@/geo/utils/hover-feature-info-layer-set';
  * @returns {JSX.Element} the hover tooltip component
  */
 export function HoverTooltip(): JSX.Element {
-  // Log too annoying
+  // Log, commented too annoying
   // logger.logTraceRender('components/hover-tooltip/hover-tooltip');
-
-  const mapId = useGeoViewMapId();
 
   const { t } = useTranslation<string>();
 
@@ -55,103 +50,36 @@ export function HoverTooltip(): JSX.Element {
   // internal component state
   const [pixel, setPixel] = useState<[number, number]>([0, 0]);
   const [tooltipValue, setTooltipValue] = useState<string>('');
-  const [tooltipIcon] = useState<string>('');
+  const [tooltipIcon, setTooltipIcon] = useState<string>('');
   const [showTooltip, setShowTooltip] = useState<boolean>(false);
-  // Currently selected feature - will not show tooltip
-  const selectedFeature = useRef<TypeHoverFeatureInfo>();
 
-  // TODO: Refactor - Revisit the way to query the features under the mouse cursor. No more using ALL_QUERIES_DONE (remove dead code below).
-  // const allHoverQueriesDoneListenerFunciton = (payload: PayloadBaseClass) => {
-  //   // Log
-  //   logger.logTraceCoreAPIEvent('HOVER-TOOLTIP - allHoverQueriesDoneListenerFunciton', payload);
+  // store state
+  const hoverFeatureInfo = useMapHoverFeatureInfo();
+  const pointerPosition = useMapPointerPosition();
 
-  //   if (payloadIsAllQueriesDone(payload)) {
-  //     const resultSet = payload.resultSet as TypeHoverFeatureInfoResultSet;
-  //     // eslint-disable-next-line no-restricted-syntax
-  //     for (const [, value] of Object.entries(resultSet)) {
-  //       // if there is a result and layer is not ogcWms, and it is not selected, show tooltip
-  //       if (
-  //         value?.data?.feature &&
-  //         value.data.feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS &&
-  //         !(selectedFeature.current && getUid(value.data.feature.geometry) === getUid(selectedFeature.current?.geometry))
-  //       ) {
-  //         const item = value.data.feature;
-  //         const nameField = item.nameField || Object.entries(item.fieldInfo)[0];
-  //         const field = item.fieldInfo[nameField as string];
-  //         setTooltipValue(field?.value as string | '');
-  //         setTooltipIcon(item.featureIcon.toDataURL());
-  //         setShowTooltip(true);
-  //         break;
-  //       }
-  //     }
-  //   }
-  // };
-
-  // const allQueriesDoneListenerFunction = (payload: PayloadBaseClass) => {
-  //   // Log
-  //   logger.logTraceCoreAPIEvent('HOVER-TOOLTIP - allQueriesDoneListenerFunction', payload);
-
-  //   if (payloadIsAllQueriesDone(payload)) {
-  //     const { resultSet } = payload;
-  //     Object.keys(resultSet).every((layerPath) => {
-  //       const feature = (resultSet as TypeHoverFeatureInfoResultSet)[layerPath]?.data?.feature;
-  //       if (feature && feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS) {
-  //         selectedFeature.current = feature;
-  //         return false;
-  //       }
-  //       return true;
-  //     });
-  //   }
-  // };
-
+  // Update tooltip when store value change from propagation by hover-layer-set to map-event-processor
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('HOVER-TOOLTIP - mount');
+    logger.logTraceUseEffect('HOVER-TOOLTIP - hoverFeatureInfo', hoverFeatureInfo);
 
-    // if pointerPosition changed, map pointer event has been triggered
-    const unsubMapPointer = getGeoViewStore(mapId).subscribe(
-      (state) => state.mapState.pointerPosition,
-      (curPos, prevPos) => {
-        // Log too annoying
-        // logger.logTraceCoreStoreSubscription('CLICK-MARKER - pointerPosition', mapId, curPos);
+    if (hoverFeatureInfo !== undefined) {
+      setTooltipValue(hoverFeatureInfo!.fieldInfo?.value as string | '');
+      setTooltipIcon(hoverFeatureInfo!.featureIcon.toDataURL());
+      setShowTooltip(true);
+    }
+  }, [hoverFeatureInfo]);
 
-        if (curPos !== prevPos) {
-          setShowTooltip(false);
-          setTooltipValue('');
-          setPixel(curPos!.pixel as [number, number]);
-        }
-      }
-    );
+  // clear the tooltip and mouse move and set pixel location
+  useEffect(() => {
+    // Log, commented too annoying
+    // logger.logTraceUseEffect('HOVER-TOOLTIP - pointerPosition', pointerPosition);
 
-    // if mapClickCoordinates changed, single click event has been triggered
-    const unsubMapSingleClick = getGeoViewStore(mapId).subscribe(
-      (state) => state.mapState.clickCoordinates,
-      (curClick, prevClick) => {
-        // Log
-        logger.logTraceCoreStoreSubscription('CLICK-MARKER - clickCoordinates', mapId, curClick);
+    setTooltipValue('');
+    setTooltipIcon('');
+    setShowTooltip(false);
 
-        if (curClick !== prevClick) {
-          selectedFeature.current = undefined;
-          setShowTooltip(false);
-          setTooltipValue('');
-        }
-      }
-    );
-
-    // TODO: Refactor - Revisit the way to query the features under the mouse cursor.
-    // TO.DOCONT: No more using ALL_QUERIES_DONE. Use AbstractGeoViewLayer.getFeatureInfoAtPixel().
-    // api.event.on(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, allQueriesDoneListenerFunction, `${mapId}/click/FeatureInfoLayerSet`);
-    // api.event.on(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, allHoverQueriesDoneListenerFunciton, `${mapId}/hover/FeatureInfoLayerSet`);
-
-    return () => {
-      // api.event.off(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, mapId, allQueriesDoneListenerFunction);
-      // api.event.off(EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE, mapId, allHoverQueriesDoneListenerFunciton);
-      unsubMapPointer();
-      unsubMapSingleClick();
-    };
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (pointerPosition !== undefined) setPixel(pointerPosition.pixel as [number, number]);
+  }, [pointerPosition]);
 
   return (
     <Box

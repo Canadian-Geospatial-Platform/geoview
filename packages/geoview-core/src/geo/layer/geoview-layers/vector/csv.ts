@@ -18,13 +18,14 @@ import {
   layerEntryIsGroupLayer,
   TypeBaseSourceVectorInitialConfig,
 } from '@/geo/map/map-schema-types';
-import { addNotificationError, getLocalizedValue } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
+import { getLocalizedValue } from '@/core/utils/utilities';
 import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 export interface TypeSourceCSVInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'CSV';
@@ -241,8 +242,13 @@ export class CSV extends AbstractGeoViewVector {
       if (lonList.includes(headers[i].toLowerCase())) lonIndex = i;
     }
     if (latIndex === undefined || lonIndex === undefined) {
-      logger.logError(`Could not find geographic data for ${getLocalizedValue(this.geoviewLayerName, this.mapId)}`);
-      addNotificationError(this.mapId, `Could not find geographic data for ${getLocalizedValue(this.geoviewLayerName, this.mapId)}`);
+      logger.logError(
+        `Could not find geographic data for ${getLocalizedValue(this.geoviewLayerName, AppEventProcessor.getDisplayLanguage(this.mapId))}`
+      );
+      // TODO: find a more centralized way to trap error and display message
+      api.maps[this.mapId].notifications.showError(
+        `Could not find geographic data for ${getLocalizedValue(this.geoviewLayerName, AppEventProcessor.getDisplayLanguage(this.mapId))}`
+      );
       layerConfig.layerStatus = 'error';
       return null;
     }
@@ -258,7 +264,8 @@ export class CSV extends AbstractGeoViewVector {
       const lon = currentRow[lonIndex] ? Number(currentRow[lonIndex]) : Infinity;
       const lat = currentRow[latIndex] ? Number(currentRow[latIndex]) : Infinity;
       if (Number.isFinite(lon) && Number.isFinite(lat)) {
-        const coordinates = inProjection !== outProjection ? api.projection.transform([lon, lat], inProjection, outProjection) : [lon, lat];
+        const coordinates =
+          inProjection !== outProjection ? api.utilities.projection.transform([lon, lat], inProjection, outProjection) : [lon, lat];
         const feature = new Feature({
           geometry: new Point(coordinates),
           ...properties,
@@ -284,7 +291,7 @@ export class CSV extends AbstractGeoViewVector {
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
     readOptions.dataProjection = (layerConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
-    sourceOptions.url = getLocalizedValue(layerConfig.source!.dataAccessPath!, this.mapId);
+    sourceOptions.url = getLocalizedValue(layerConfig.source!.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
     sourceOptions.format = new FormatGeoJSON();
     const vectorSource = super.createVectorSource(layerConfig, sourceOptions, readOptions);
     return vectorSource;

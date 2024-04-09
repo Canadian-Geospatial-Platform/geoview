@@ -9,7 +9,6 @@ export interface IFeatureInfoState {
   layerDataArray: TypeLayerData[];
   layerDataArrayBatch: TypeLayerData[];
   layerDataArrayBatchLayerPathBypass: string;
-  hoverDataArray: TypeLayerData[];
   allFeaturesDataArray: TypeLayerData[];
   selectedLayerPath: string;
 
@@ -19,7 +18,6 @@ export interface IFeatureInfoState {
     setLayerDataArray: (layerDataArray: TypeLayerData[]) => void;
     setLayerDataArrayBatch: (layerDataArray: TypeLayerData[]) => void;
     setLayerDataArrayBatchLayerPathBypass: (layerPath: string) => void;
-    setHoverDataArray: (hoverDataArray: TypeLayerData[]) => void;
     setAllFeaturesDataArray: (allFeaturesDataArray: TypeLayerData[]) => void;
     setSelectedLayerPath: (selectedLayerPath: string) => void;
     triggerGetAllFeatureInfo: (layerPath: string, queryType: QueryType) => void;
@@ -32,7 +30,6 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
     layerDataArray: [],
     layerDataArrayBatch: [],
     layerDataArrayBatchLayerPathBypass: '',
-    hoverDataArray: [],
     allFeaturesDataArray: [],
     selectedLayerPath: '',
 
@@ -81,14 +78,6 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
           detailsState: {
             ...get().detailsState,
             layerDataArrayBatchLayerPathBypass,
-          },
-        });
-      },
-      setHoverDataArray(hoverDataArray: TypeLayerData[]) {
-        set({
-          detailsState: {
-            ...get().detailsState,
-            hoverDataArray,
           },
         });
       },

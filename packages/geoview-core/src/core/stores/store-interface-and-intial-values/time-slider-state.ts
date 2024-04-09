@@ -1,6 +1,6 @@
 import { useStore } from 'zustand';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
-import { TypeGetStore, TypeSetStore } from '../geoview-store';
+import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 
 // #region TYPES & INTERFACES
@@ -9,20 +9,21 @@ export type TimeSliderLayerSet = {
 };
 
 export interface TypeTimeSliderValues {
-  title?: string;
-  description?: string;
-  name: string;
-  range: string[];
   defaultValue: string;
-  minAndMax: number[];
+  delay: number;
+  description?: string;
+  discreteValues: boolean;
   field: string;
   fieldAlias: string;
-  singleHandle: boolean;
-  values: number[];
   filtering: boolean;
-  delay: number;
   locked?: boolean;
+  minAndMax: number[];
+  name: string;
+  range: string[];
   reversed?: boolean;
+  singleHandle: boolean;
+  title?: string;
+  values: number[];
 }
 
 export interface ITimeSliderState {

@@ -1,12 +1,11 @@
 import { LayerSet } from '@/geo/utils/layer-set';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { TypeLayerEntryConfig, TypeLegend } from '@/core/types/cgpv-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { logger } from '@/core/utils/logger';
-import { TypeLayerStatus } from '@/geo/map/map-schema-types';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeLayerEntryConfig, TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { AbstractGeoViewLayer, TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 /**
  * A class to hold a set of layers associated with an array of TypeLegend. When this class is instantiated, all layers already
@@ -21,8 +20,8 @@ export class LegendsLayerSet extends LayerSet {
 
   /**
    * Overrides the behavior to apply when a legends-layer-set wants to register a layer in its set.
-   * @param {AbstractGeoViewLayer} geoviewLayer The geoview layer being registered
-   * @param {string} layerPath The layer path
+   * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
+   * @param {string} layerPath - The layer path
    */
   onRegisterLayer = (geoviewLayer: AbstractGeoViewLayer, layerPath: string): void => {
     // Log
@@ -34,9 +33,9 @@ export class LegendsLayerSet extends LayerSet {
 
   /**
    * Overrides the behavior to apply when a layer status changed for a legends-layer-set.
-   * @param {ConfigBaseClass} config The layer config class
-   * @param {string} layerPath The layer path being affected
-   * @param {string} layerStatus The new layer status
+   * @param {ConfigBaseClass} config - The layer config class
+   * @param {string} layerPath - The layer path being affected
+   * @param {string} layerStatus - The new layer status
    */
   protected onProcessLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
     // Check some variables as received
@@ -56,7 +55,7 @@ export class LegendsLayerSet extends LayerSet {
         const legendPromise = this.layerApi.geoviewLayer(layerPath).queryLegend(layerPath);
 
         // Whenever the legend response comes in
-        legendPromise.then((legend) => {
+        legendPromise.then((legend: TypeLegend | null | undefined) => {
           // If legend received
           if (legend) {
             // Query completed keep it
@@ -79,7 +78,7 @@ export class LegendsLayerSet extends LayerSet {
         // TODO: Check - I'm not sure where the logic to set layer status for the parent to loaded when a child is loaded/error is, but
         // TO.DOCONT: I had to add this as part of the refactor to make it work
         // Possibly update the layer status(es) of the parent(s)
-        this.changeLayerStatusOfParentsRecursive(layerConfig, layerStatus);
+        this.#changeLayerStatusOfParentsRecursive(layerConfig, layerStatus);
 
         // Propagate to store
         LegendEventProcessor.propagateLegendToStore(this.mapId, layerPath, this.resultSet[layerPath]);
@@ -90,11 +89,11 @@ export class LegendsLayerSet extends LayerSet {
   /**
    * Recursively tries to set the layer status on the parent group layer(s), depending if the layer entry has a parent and
    * if the current layer status is loaded or error.
-   *
-   * @param {TypeLayerEntryConfig} currentLayerConfig The current layer config being checked
-   * @param {TypeLayerStatus} currentLayerStatus The layer status that triggered the check on the parent(s)
+   * @param {TypeLayerEntryConfig} currentLayerConfig - The current layer config being checked
+   * @param {TypeLayerStatus} currentLayerStatus - The layer status that triggered the check on the parent(s)
+   * @private
    */
-  private changeLayerStatusOfParentsRecursive(currentLayerConfig: TypeLayerEntryConfig, currentLayerStatus: TypeLayerStatus): void {
+  #changeLayerStatusOfParentsRecursive(currentLayerConfig: TypeLayerEntryConfig, currentLayerStatus: TypeLayerStatus): void {
     // If layer has a parent
     if (currentLayerConfig.parentLayerConfig) {
       // If the current status to set is at least loaded (or error), make the parent loaded
@@ -108,7 +107,7 @@ export class LegendsLayerSet extends LayerSet {
         // If has another parent, go recursive
         if (parentGroupLayer.parentLayerConfig) {
           // Going recursive
-          this.changeLayerStatusOfParentsRecursive(parentGroupLayer, currentLayerStatus);
+          this.#changeLayerStatusOfParentsRecursive(parentGroupLayer, currentLayerStatus);
         }
       }
     }
@@ -116,7 +115,7 @@ export class LegendsLayerSet extends LayerSet {
 
   /**
    * Overrides the behavior to apply when a layer set was updated for a legends-layer-set.
-   * @param {string} layerPath The layer path which triggered the layer set update
+   * @param {string} layerPath - The layer path which triggered the layer set update
    */
   protected onLayerSetUpdatedProcess(layerPath: string): void {
     if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerPath) === -1) {

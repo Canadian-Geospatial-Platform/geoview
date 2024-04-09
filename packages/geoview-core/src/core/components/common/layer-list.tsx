@@ -58,7 +58,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
         // If there's a layer path
         if (layer.layerPath) {
           return (
-            <ListItemIcon>
+            <ListItemIcon aria-hidden="true">
               <LayerIcon layer={layer} />
             </ListItemIcon>
           );
@@ -109,7 +109,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
 
       default:
         return (
-          <IconButton edge="end" size="small" className="style1" disabled={isDisabled}>
+          <IconButton edge="end" size="small" className="style1" disabled={isDisabled} tabIndex={-1} aria-hidden="true">
             <ChevronRightIcon />
           </IconButton>
         );
@@ -132,18 +132,24 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
     to: { opacity: 1 },
   });
 
+  const handleLayerKeyDown = (e: React.KeyboardEvent, selectedLayer: LayerListEntry) => {
+    if (e.key === 'Enter') onListItemClick(selectedLayer);
+  };
+
   const AnimatedPaper = animated(Paper);
 
   return (
     <AnimatedPaper sx={{ marginBottom: '1rem' }} style={listItemSpring} className={getContainerClass()}>
       <Tooltip title={layer.tooltip} placement="top" arrow>
         <Box>
-          <ListItem disablePadding>
+          <ListItem disablePadding onKeyDown={(e) => handleLayerKeyDown(e, layer)} tabIndex={0}>
             <ListItemButton
+              tabIndex={-1}
               selected={isSelected}
               // disable when layer features has null value.
               disabled={isDisabled || isLoading}
               onClick={() => onListItemClick(layer)}
+              aria-label={layer.layerName}
             >
               {renderLayerIcon()}
               {renderLayerBody()}

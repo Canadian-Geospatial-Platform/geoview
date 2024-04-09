@@ -1,16 +1,8 @@
-import {
-  toJsonObject,
-  TypeBasemapProps,
-  TypeJsonObject,
-  TypeJsonArray,
-  SelectChangeEvent,
-  TypeBasemapOptions,
-  TypeValidMapProjectionCodes,
-  TypeDisplayLanguage,
-  useAppDisplayLanguage,
-  getLocalizedMessage,
-} from 'geoview-core';
+import { TypeBasemapProps, TypeBasemapOptions } from 'geoview-core/src/geo/layer/basemap/basemap-types';
+import { TypeJsonObject, TypeJsonArray, toJsonObject, SelectChangeEvent } from 'geoview-core/src/core/types/global-types';
 import { useMapProjection } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
+import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
+import { TypeValidMapProjectionCodes, TypeDisplayLanguage } from 'geoview-core/src/geo/map/map-schema-types';
 import { getSxClasses } from './basemap-panel-style';
 
 interface BaseMapPanelProps {
@@ -122,20 +114,21 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
     let description = '';
 
     if (basemapTypes.includes('transport')) {
-      name = getLocalizedMessage(mapId, 'basemapPanel.info.transport.name');
-      description = getLocalizedMessage(mapId, 'basemapPanel.info.transport.description');
+      name = api.utilities.core.getLocalizedMessage('basemapPanel.info.transport.name', language);
+      description = api.utilities.core.getLocalizedMessage('basemapPanel.info.transport.description', language);
     } else if (basemapTypes.includes('simple')) {
-      name = getLocalizedMessage(mapId, 'basemapPanel.info.simple.name');
+      name = api.utilities.core.getLocalizedMessage('basemapPanel.info.simple.name', language);
     } else if (basemapTypes.includes('shaded')) {
-      name = getLocalizedMessage(mapId, 'basemapPanel.info.shaded.name');
-      description = getLocalizedMessage(mapId, 'basemapPanel.info.shaded.description');
+      name = api.utilities.core.getLocalizedMessage('basemapPanel.info.shaded.name', language);
+      description = api.utilities.core.getLocalizedMessage('basemapPanel.info.shaded.description', language);
     } else if (basemapTypes.includes('osm')) {
-      name = getLocalizedMessage(mapId, 'basemapPanel.info.osm.name');
+      name = api.utilities.core.getLocalizedMessage('basemapPanel.info.osm.name', language);
     } else if (basemapTypes.includes('nogeom')) {
-      name = getLocalizedMessage(mapId, 'basemapPanel.info.nogeom.name');
+      name = api.utilities.core.getLocalizedMessage('basemapPanel.info.nogeom.name', language);
     }
 
-    if (basemapTypes.includes('label')) name = `${name} ${getLocalizedMessage(mapId, 'basemapPanel.info.label.name')}`;
+    if (basemapTypes.includes('label'))
+      name = `${name} ${api.utilities.core.getLocalizedMessage('basemapPanel.info.label.name', language)}`;
 
     return { name, description };
   }
@@ -190,13 +183,15 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
       // eslint-disable-next-line no-await-in-loop
       const basemap = await api.maps[mapId].basemap.createCoreBasemap(basemapOptions as unknown as TypeBasemapOptions, projection);
 
-      // get thumbnail and info (name and description) for core basemap
-      const { name, description } = getInfo(basemap.type.split('-'));
-      basemap.thumbnailUrl = getThumbnailUrl(basemap.type.split('-'), storeProjection, language);
-      basemap.name = name;
-      basemap.description = description;
+      if (basemap) {
+        // get thumbnail and info (name and description) for core basemap
+        const { name, description } = getInfo(basemap.type.split('-'));
+        basemap.thumbnailUrl = getThumbnailUrl(basemap.type.split('-'), storeProjection, language);
+        basemap.name = name;
+        basemap.description = description;
 
-      if (basemap) setBasemapList((prevArray) => [...prevArray, basemap]);
+        setBasemapList((prevArray) => [...prevArray, basemap]);
+      }
 
       // set basemap if previously selected in previous projection
       const id = `${basemapOptions.shaded ? 'shaded' : ''}${basemapOptions.id}${basemapOptions.labeled ? 'label' : ''}`;
@@ -207,7 +202,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
     }
 
     // if previous basemap does not exist in previous projection, init first one
-    if (!isInit) setBasemap(basemapList[0] as string);
+    if (!isInit) setBasemap(basemapList[0] as unknown as string);
   };
 
   /**

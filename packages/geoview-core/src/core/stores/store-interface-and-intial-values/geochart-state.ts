@@ -3,7 +3,7 @@ import { GeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
 import { TypeLayerData } from '@/geo/utils/layer-set';
 
 import { useGeoViewStore } from '@/core/stores/stores-managers';
-import { TypeGetStore, TypeSetStore } from '../geoview-store';
+import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 
 export type GeoChartStoreByLayerPath = {
   [layerPath: string]: GeoChartConfig;

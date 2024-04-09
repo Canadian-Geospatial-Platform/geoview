@@ -122,7 +122,7 @@ export interface ModalActionsType {
  */
 export function Modal(props: TypeDialogProps): JSX.Element {
   // Log
-  logger.logTraceRender('MODAL', props);
+  logger.logTraceRender('ui/modal/modal', props);
 
   const {
     modalId,

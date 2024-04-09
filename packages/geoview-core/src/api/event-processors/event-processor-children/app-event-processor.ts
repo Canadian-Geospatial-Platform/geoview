@@ -1,6 +1,8 @@
-import { NotificationDetailsType, TypeDisplayLanguage, TypeHTMLElement, TypeDisplayTheme, IAppState } from '@/core/types/cgpv-types';
-
-import { AbstractEventProcessor } from '../abstract-event-processor';
+import { IAppState } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
+import { NotificationDetailsType } from '@/core/components';
+import { TypeDisplayLanguage, TypeDisplayTheme } from '@/geo/map/map-schema-types';
+import { TypeHTMLElement } from '@/core/types/global-types';
 
 export class AppEventProcessor extends AbstractEventProcessor {
   // Static functions for Typescript files to access store actions
@@ -63,6 +65,11 @@ export class AppEventProcessor extends AbstractEventProcessor {
   static setFullscreen(mapId: string, active: boolean, element: TypeHTMLElement): void {
     this.getAppState(mapId).actions.setFullScreenActive(active, element);
   }
+
+  static setCircularProgress(mapId: string, active: boolean): void {
+    this.getAppState(mapId).actions.setCircularProgress(active);
+  }
+
   // #endregion
 
   // **********************************************************
