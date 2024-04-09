@@ -70,19 +70,22 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
   const handleZoomIn = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
 
-    // Project
-    const center = getCenter(feature.extent);
-    const newCenter = transformPoints([center], 4326)[0];
+    // If the feature has an extent
+    if (feature.extent) {
+      // Project
+      const center = getCenter(feature.extent);
+      const newCenter = transformPoints([center], 4326)[0];
 
-    // Zoom to extent and wait for it to finish
-    await zoomToExtent(feature.extent);
+      // Zoom to extent and wait for it to finish
+      await zoomToExtent(feature.extent);
 
-    // Typically, the click marker is removed after a zoom, so wait a bit here and re-add it...
-    // TODO: Refactor - Zoom ClickMarker - Improve the logic in general of when/if a click marker should be removed after a zoom
-    await delay(150);
+      // Typically, the click marker is removed after a zoom, so wait a bit here and re-add it...
+      // TODO: Refactor - Zoom ClickMarker - Improve the logic in general of when/if a click marker should be removed after a zoom
+      await delay(150);
 
-    // Add (back?) a click marker
-    showClickMarker({ lnglat: newCenter });
+      // Add (back?) a click marker
+      showClickMarker({ lnglat: newCenter });
+    }
   };
 
   useEffect(() => {

@@ -11,6 +11,7 @@ import { Extent } from 'ol/extent';
 import Feature from 'ol/Feature';
 import Geometry from 'ol/geom/Geometry';
 
+import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
@@ -23,7 +24,6 @@ import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-clas
 import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
-  TypeStyleGeometry,
   isUniqueValueStyleConfig,
   isClassBreakStyleConfig,
   TypeUniqueValueStyleConfig,
@@ -262,6 +262,48 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     layerConfig.geoviewLayerInstance = this;
 
     return Promise.resolve(layerConfig.olLayer);
+  }
+
+  /** ***************************************************************************************************************************
+   * Returns feature information for all the features stored in the layer.
+   * @param {string} layerPath - The layer path to the layer's configuration.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
+   */
+  protected async getAllFeatureInfo(layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+    try {
+      // Get the layer config in a loaded phase
+      const layerConfig = this.getLayerConfig(layerPath)! as EsriDynamicLayerEntryConfig;
+
+      // Guess the geometry type
+      const geometryType = layerConfig.getTypeGeometry();
+
+      // Fetch the features
+      const url = `${layerConfig.geoviewLayerConfig.metadataAccessPath![AppEventProcessor.getDisplayLanguage(this.mapId)]!}/${
+        layerConfig.layerId
+      }/query?where=1=1&outFields=*&f=json&geometry=true`;
+
+      const response = await fetch(url);
+      const jsonResponse = await response.json();
+
+      // Parse the JSON response and create features
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const features = jsonResponse.features.map((featureData: any) => {
+        let geometry;
+        if (featureData.geometry) {
+          const coordinates = featureData.geometry.points || featureData.geometry.paths || featureData.geometry.rings; // Point or Line or Polygon schema
+          geometry = GeometryApi.createGeometryFromType(geometryType, coordinates);
+        }
+        const properties = featureData.attributes;
+        return new Feature({ ...properties, geometry });
+      });
+
+      // Format and return the result
+      return this.formatFeatureInfoResult(features, layerConfig);
+    } catch (error) {
+      // Log
+      logger.logError('esri-dynamic.getAllFeatureInfo()\n', error);
+      return null;
+    }
   }
 
   /** ***************************************************************************************************************************
@@ -559,7 +601,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         return allVisible;
       };
 
-      const styleSettings = layerConfig.style[Object.keys(layerConfig.style)[0] as TypeStyleGeometry]!;
+      const styleSettings = layerConfig.getStyleSettings()!;
 
       if (isSimpleStyleConfig(styleSettings)) {
         return layerFilter || '(1=1)';
