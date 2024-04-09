@@ -8,7 +8,7 @@ import { IAppState, initializeAppState } from './store-interface-and-intial-valu
 import { IFeatureInfoState, initFeatureInfoState } from './store-interface-and-intial-values/feature-info-state';
 import { ILayerState, initializeLayerState } from './store-interface-and-intial-values/layer-state';
 import { IMapState, initializeMapState } from './store-interface-and-intial-values/map-state';
-import { IMapDataTableState, initialDataTableState } from './store-interface-and-intial-values/data-table-state';
+import { IDataTableState, initialDataTableState } from './store-interface-and-intial-values/data-table-state';
 import { ITimeSliderState, initializeTimeSliderState } from './store-interface-and-intial-values/time-slider-state';
 import { IGeochartState, initializeGeochartState } from './store-interface-and-intial-values/geochart-state';
 import { ISwiperState, initializeSwiperState } from './store-interface-and-intial-values/swiper-state';
@@ -32,7 +32,7 @@ export interface IGeoviewState {
   // core state interfaces
   appState: IAppState;
   detailsState: IFeatureInfoState;
-  dataTableState: IMapDataTableState;
+  dataTableState: IDataTableState;
   layerState: ILayerState;
   mapState: IMapState;
   uiState: IUIState;

@@ -1,4 +1,4 @@
-import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
+import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import { logger } from '@/core/utils/logger';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { getLocalizedValue } from '@/core/utils/utilities';
@@ -68,7 +68,8 @@ export class AllFeatureInfoLayerSet extends LayerSet {
       },
     };
 
-    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, 'all-features', this.resultSet);
+    DataTableEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, this.resultSet);
+    DataTableEventProcessor.setInitialSettings(this.mapId, layerPath);
   }
 
   /**
@@ -95,7 +96,7 @@ export class AllFeatureInfoLayerSet extends LayerSet {
         const layerConfig = this.layerApi.registeredLayers[layerPath];
         if (this?.resultSet?.[layerPath]?.data) {
           this.resultSet[layerPath].data.layerStatus = layerStatus;
-          FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerConfig.layerPath, 'all-features', this.resultSet);
+          DataTableEventProcessor.propagateFeatureInfoToStore(this.mapId, layerConfig.layerPath, this.resultSet);
         }
       }
     }
@@ -120,9 +121,6 @@ export class AllFeatureInfoLayerSet extends LayerSet {
     if (this.layerApi.registeredLayers[layerPath] && this.resultSet[layerPath]) {
       const { data } = this.resultSet[layerPath];
       const layerConfig = this.layerApi.registeredLayers[layerPath];
-
-      // Query and event types of what we're doing
-      const eventType = 'all-features';
 
       if (!this.resultSet[layerPath].data.eventListenerEnabled) return Promise.resolve();
 
@@ -150,7 +148,7 @@ export class AllFeatureInfoLayerSet extends LayerSet {
       }
 
       // Propagate to the store
-      FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, eventType, this.resultSet);
+      DataTableEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, this.resultSet);
 
       // Return the resultsSet
       return this.resultSet;
