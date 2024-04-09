@@ -46,7 +46,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const [isDataTableVisible, setIsDatatableVisible] = useState(false);
+  const [isDataTableVisible, setIsDataTableVisible] = useState(false);
 
   // get store actions
   const highlightedLayer = useLayerHighlightedLayer();
@@ -64,14 +64,14 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     // thats why we need to update the state so that layers data is fetched again from store.
     let timer: NodeJS.Timeout;
     if (!selectedLayer) {
-      setIsDatatableVisible(true);
+      setIsDataTableVisible(true);
     } else {
       timer = setTimeout(() => {
-        setIsDatatableVisible(true);
+        setIsDataTableVisible(true);
       }, 100);
     }
     return () => {
-      setIsDatatableVisible(false);
+      setIsDataTableVisible(false);
       if (timer) clearTimeout(timer);
     };
   }, [layersData, layerDetails, selectedLayer]);
@@ -81,7 +81,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   };
 
   const handleOpenTable = () => {
-    openModal({ activeElementId: 'layerDatatable', callbackElementId: `table-details` });
+    openModal({ activeElementId: 'layerDataTable', callbackElementId: `table-details` });
   };
 
   if (layerDetails.bounds === undefined || layerDetails.bounds![0] === Infinity) {

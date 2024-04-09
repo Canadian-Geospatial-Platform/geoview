@@ -243,7 +243,7 @@ export function Shell(props: ShellProps): JSX.Element {
           {/* modal section start */}
           <FocusTrapDialog mapId={mapViewer.mapId} focusTrapId={mapViewer.mapId} />
           <ExportModal />
-          {focusItem.activeElementId === 'layerDatatable' && <DataTableModal />}
+          {focusItem.activeElementId === 'layerDataTable' && <DataTableModal />}
           {/* modal section end */}
           {Object.keys(components).map((key: string) => {
             return <Fragment key={key}>{components[key]}</Fragment>;

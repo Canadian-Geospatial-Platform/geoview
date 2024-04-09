@@ -178,6 +178,6 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
 export const useDataTableAllFeaturesDataArray = () => useStore(useGeoViewStore(), (state) => state.dataTableState.allFeaturesDataArray);
 export const useDataTableSelectedLayerPath = () => useStore(useGeoViewStore(), (state) => state.dataTableState.selectedLayerPath);
 export const useDataTableLayerSettings = () => useStore(useGeoViewStore(), (state) => state.dataTableState.layersDataTableSetting);
-export const useDatatableTableHeight = () => useStore(useGeoViewStore(), (state) => state.dataTableState.tableHeight);
+export const useDataTableTableHeight = () => useStore(useGeoViewStore(), (state) => state.dataTableState.tableHeight);
 
 export const useDataTableStoreActions = () => useStore(useGeoViewStore(), (state) => state.dataTableState.actions);
