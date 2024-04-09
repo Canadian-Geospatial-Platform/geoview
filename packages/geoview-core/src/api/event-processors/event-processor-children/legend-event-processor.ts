@@ -43,7 +43,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     return super.getState(mapId).layerState;
   }
 
-  private static getLayerIconImage(mapId: string, layerPath: string, layerLegend: TypeLegend | null): TypeLegendLayerIcons | undefined {
+  static getLayerIconImage(layerLegend: TypeLegend | null): TypeLegendLayerIcons | undefined {
     const iconDetails: TypeLegendLayerIcons = [];
     if (layerLegend) {
       if (layerLegend.legend === null) {
@@ -200,7 +200,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           opacity: layerConfig.initialSettings?.states?.opacity || 1,
           items: [] as TypeLegendItem[],
           children: [] as TypeLegendLayer[],
-          icons: LegendEventProcessor.getLayerIconImage(mapId, layerPath, legendResultSetEntry.data!),
+          icons: LegendEventProcessor.getLayerIconImage(legendResultSetEntry.data!),
         };
 
         newLegendLayer.items = [];

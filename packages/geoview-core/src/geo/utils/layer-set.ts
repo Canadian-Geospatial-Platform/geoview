@@ -277,7 +277,7 @@ export interface TypeGeometry extends RenderFeature {
 export type TypeFeatureInfoEntry = {
   featureKey: number;
   geoviewLayerType: TypeGeoviewLayerType;
-  extent: Extent;
+  extent: Extent | undefined;
   geometry: TypeGeometry | Feature | null;
   featureIcon: HTMLCanvasElement;
   fieldInfo: Partial<Record<string, TypeFieldEntry>>;

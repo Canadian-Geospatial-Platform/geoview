@@ -342,8 +342,8 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
    *
    */
   const handleZoomIn = useCallback(
-    (extent: Extent) => {
-      zoomToExtent(extent);
+    (extent: Extent | undefined) => {
+      if (extent) zoomToExtent(extent);
     },
     [zoomToExtent]
   );
@@ -368,7 +368,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
           />
         ),
         ZOOM: (
-          <IconButton color="primary" onClick={() => handleZoomIn(feature.extent!)}>
+          <IconButton color="primary" onClick={() => handleZoomIn(feature.extent)} disabled={!feature.extent}>
             <ZoomInSearchIcon />
           </IconButton>
         ),
