@@ -1219,7 +1219,7 @@ export abstract class AbstractGeoViewLayer {
               ) || null,
           };
 
-          const featureFields = (feature as Feature).getKeys();
+          const featureFields = feature.getKeys();
           featureFields.forEach((fieldName) => {
             if (fieldName !== 'geometry') {
               if (outfields?.includes(fieldName)) {
