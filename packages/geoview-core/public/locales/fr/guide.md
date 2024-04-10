@@ -1,6 +1,6 @@
-=!Navigation Controls=
+=1!navigationControls=
 
-### Navigation Controls:
+### Navigation Controls
 
 Navigation controls are used for changing the viewing extent of the map.
 
@@ -23,7 +23,9 @@ To reset the map orientation, click the reset rotation arrow located at the righ
 
 Note that the map **must be** focused for key binding to work.
 
-## Overview Map
+=2!overviewMap=
+
+### Overview Map
 
 Some maps display an overview map, a generalised view of the main map at a smaller scale. It can be found in the top right corner of the map.
 
@@ -31,7 +33,9 @@ Some maps display an overview map, a generalised view of the main map at a small
 
 Click-hold on the box in the overview map and drag it to change the extent of the main map. Clicking on the toggle icon ![](img/guide/navigation/chevron_overview.png) in the top right corner of the overview map will expand or contract it.
 
-## Keyboard Navigation
+=2!keyboardNavigation=
+
+### Keyboard Navigation
 
 Keyboard functionality is provided as an alternative for users who are unable to use a mouse. Use the Tab key to navigate forward to links and controls on the page. Press Shift+Tab to go back one step. Use the Enter or Spacebar keys to activate links and controls.
 
@@ -51,13 +55,11 @@ Press CTRL Q to exit keyboard navigation.
 
 Note that the map **must be** focused for key binding to work. The map has focus when the crosshairs marker is present.
 
-## Navigation Information
+=1!mapInformationBar=
 
-The navigation information is located in the Map Information Bar at the bottom of the map. Click the up chevron icon ![](img/guide/navigation/chevron_up.svg) on the left to expand/collapse the bar.
+### Map Information Bar
 
-=! Map Information Bar=
-
-### Map Information Bar:
+Click the up chevron icon ![](img/guide/navigation/chevron_up.svg) on the left to expand/collapse the bar.
 
 ![](img/guide/navigation/map_info.png)
 
@@ -71,9 +73,9 @@ The following navigation information can be found in the Map Information Bar (ma
 | <img src="img/guide/navigation/up_arrow.svg" width="30"/>  | Reset rotation          | Click on reset rotation to return map to the initial orientation. Note: Fix North must be Off.                                                                           |
 | <img src="img/guide/navigation/fix_north.png" width="30"/> | Fix North               | On or Off. Set to On to keep map oriented with North to the top. Only available with some projections (eg. LCC) Note: Reset rotation will not work when Fix North is On. |
 
-=!Sidebar=
+=1!sidebar=
 
-### Sidebar:
+### Sidebar
 
 The sidebar to the left of the map shows the available tools.
 
@@ -92,13 +94,52 @@ _The tools shown in the Sidebar vary depending on the map._
 | <img src="img/guide/sidebar/notifications.svg" width="30"/> | Notifications | Display messages and notifications for the map                                                     |
 | <img src="img/guide/sidebar/about.svg" width="30"/>         | About Geoview | Display information about Geoview viewer                                                           |
 
-## ![](img/guide/sidebar/geolocator.svg) Geolocator
+=2!geolocator=
 
-The geolocator component functions to allow users to search for places in Canada. When the geolocator icon ![](img/guide/geosearch/geolocator_20.svg) in the Sidebar is clicked, an input field for search keywords will appear on the map
+### ![](img/guide/sidebar/geolocator.svg) Geolocator
 
-Select the **Geolocator** panel for more information.
+The geolocator component functions to allow users to search for places in Canada. When the geolocator icon ![](img/guide/geosearch/geolocator_20.svg) in the Sidebar is clicked, an input field for search keywords will appear on the map:
 
-## ![](img/guide/sidebar/basemap_30.svg)Basemap Selector
+![](img/guide/geosearch/searchbar_en.png)
+
+=3!supportedSearchTypes=
+
+### Supported Search Types
+
+**Keyword search**: Type any keyword into geolocator search bar to display a list of results that contains the keyword (minimum 3 characters).
+
+- each search result consists of: location name (with keyword highlighted), location province, and location category (lake, city, town, etc.)
+- click on any individual result to mark its coordinates and zoom the map to center around this location
+
+**FSA search**: A **forward sortation area (FSA)** is a way to designate a geographical area based on the first three characters in a Canadian postal code. All postal codes that start with the same three characters are considered an **FSA**.
+
+- click to zoom and center the map on the FSA
+- example: type in **M3H**
+
+**Latitude/Longitude search**: Search using lat/long coordinates to display a list of results in the vicinity of that map point.
+
+- similarly to FSA search, the first result will be a location of those coordinates entered, click this to zoom and center the map on the map point
+- lat/long search recognizes spaces, commas, semicolons, or vertical bars (|) to separate the co-ordinates
+- example: type in **54.3733,-91.7417**
+
+**NTS search**: **National Topographic System (NTS)** is a system used for providing general topographic maps of the country, producing details on landforms, lakes/rivers, forests, roads and railways, etc.
+
+- the NTS is split into three major zones: "Southern zone" - latitudes between 40°N and 68°N, "Arctic zone" - latitudes between 68°N and 80°N, and the "High Arctic zone" - latitudes between 80°N and 88°N
+- an NTS map number consists of a string containing a number identifying a map sheet, a letter identifying a map area, and a number identifying the scale map sheet
+- likewise, the first result will be a location of the NTS map number, click to center map on this area
+- example: type in **030M13**
+
+**Street address**: Search using direct street addresses should return results
+
+=3!geosearchFiltering=
+
+### Geosearch Filtering
+
+When searching for a location, a results panel will appear below the search box. This results panel contains two dropdown boxes that allow you to filter the search results by their **province** and by their **category** (lake, town, river, etc.). To the right of these two boxes is a **Clear Filters** ![](img/guide/geosearch/clear.svg) button, which when clicked clears the selected filter options.
+
+=2!basemapSelector=
+
+### ![](img/guide/sidebar/basemap_30.svg) Basemap Selector
 
 The basemap selector modifies the underlying basemap to provide a variety of geographical contexts.
 
@@ -106,7 +147,9 @@ The basemap selector modifies the underlying basemap to provide a variety of geo
 
 Click on the basemap selector icon. You will be presented with one or more basemaps to choose from, separated by their projection types.
 
-## ![](img/guide/sidebar/legend_30.svg) Legend
+=2!legend=
+
+### ![](img/guide/sidebar/legend_30.svg) Legend
 
 The Legend tab displays the symbology associated with the layers displayed on the map.
 
@@ -116,7 +159,9 @@ For complex feature layers (i.e. those with multiple symbols used per layer) the
 
 The symbology for the layer can be toggled open and closed which is expanded beneath the layer name. WMS layers may optionally have a graphical legend defined, if one is present it will be displayed in the same drop down manner.
 
-## ![](img/guide/sidebar/export_30.svg) Export
+=2!export=
+
+### ![](img/guide/sidebar/export_30.svg) Export
 
 You can export an image of the map and its visible layers along with a legend, title, north arrow with scalebar, custom footnote<sup>\*</sup>, and a timestamp.
 
@@ -126,21 +171,13 @@ Click on the Export button at the bottom to get the final generated map image.
 
 <sup>\*</sup>Please note that the footnote may not be available depending on the map. <br/>
 
-=!Footer Panel=
+=1!footerPanel=
 
 ### Footer Panel
 
 The Footer Panel appears below the map. The Footer Panel can be expanded or collapsed by clicking on a tab in the Footer Panel menu bar (collapse by clicking active tab).
 
-![](img/guide/footer/footer.png)
-
 The Footer Panel menu bar has the following tabs:
-
-_Depending on viewer configuration some tabs may not be available_
-
-**_Note: Some tabs in the Footer Panel are also available as tools in the Sidebar, such as Legend or Details. A tool opened from the Sidebar is displayed on the map, in a condensed 'mobile' view (single column). The same tab opened in the Footer Panel is displayed below the map in a fully expanded view._**
-
-![](img/guide/footer/footer_tabs.png)
 
 - Legend
 - Layers
@@ -150,7 +187,13 @@ _Depending on viewer configuration some tabs may not be available_
 - Time Slider
 - Chart
 
-## ![](img/guide/sidebar/legend_25.svg) Legend
+_Depending on viewer configuration some tabs may not be available_
+
+**_Note: Some tabs in the Footer Panel are also available as tools in the Sidebar, such as Legend or Details. A tool opened from the Sidebar is displayed on the map, in a condensed 'mobile' view (single column). The same tab opened in the Footer Panel is displayed below the map in a fully expanded view._**
+
+=2!legend=
+
+### ![](img/guide/sidebar/legend_25.svg) Legend
 
 The Legend tab displays the symbology associated with the layers displayed on the map.
 
@@ -160,22 +203,22 @@ For complex feature layers (i.e. those with multiple symbols used per layer) the
 
 The symbology for the layer can be toggled open and closed which is expanded beneath the layer name. WMS layers may optionally have a graphical legend defined, if one is present it will be displayed in the same drop down manner.
 
-## ![](img/guide/footer/layers_30.svg) Layers
+=2!layers=
+
+### ![](img/guide/footer/layers_30.svg) Layers
 
 The Layers tab has the following sub menu options:
-
-![](img/guide/layers/view.png)
 
 - View
 - Add
 - Sort
 - Remove
 
+=3!view=
+
 ### ![](img/guide/footer/view_25.svg) View
 
 The View sub menu option under the Layers tab consists of two sections. The left section lists all the layers displayed on the map. Click on a layer and the right section lists the layer settings (available options for that layer).
-
-![](img/guide/footer/footer.png)
 
 ### Layer Icons
 
@@ -184,8 +227,6 @@ Each layer has some symbology associated with it. For simple feature layers a si
 ### Group layers
 
 The group layer icon ![](img/guide/layers/group.svg) denotes a group of layers. Click on the group layer to expand the list of sub layers. Sub layers may also be group layers.
-
-![](img/guide/layers/group.png)
 
 ### Layer Visibility
 
@@ -208,13 +249,13 @@ Layers can either be in raster format or vector format. The following layer type
 
 Note that if a layer fails to load correctly it will be identified by an error notice in the notifications tool on the Sidebar. Instead of the standard layer actions you can select to either reload the layer (this is particularly helpful if there is a temporary network connectivity issue) or remove the layer. If a layer is removed it will be taken out of the layer selector completely.
 
-## Layer Settings
+=3!layerSettings=
+
+### Layer Settings
 
 Click a layer in the left section of the layers view tab, and the layer settings are displayed in right section.
 
 _Note: some settings may not be available depending on various factors such as layer type or configuration._
-
-![](img/guide/layers/settings.png)
 
 |                           Symbol                           | Name                   | Description                                                                             |
 | :--------------------------------------------------------: | ---------------------- | --------------------------------------------------------------------------------------- |
@@ -230,11 +271,11 @@ Categories for the layer are listed in the layer settings if available. Select t
 
 The number of categories visible is displayed under the layer name.
 
-## ![](img/guide/layers/add_25.svg) Add
+=3!add=
 
-Additional layers can be added to the map viewer. Click the Add tab in the Layers submenu.
+### ![](img/guide/layers/add_25.svg) Add
 
-![](img/guide/layers/add_layer.png)
+Additional layers can be added to the map viewer through the Add tab in the Layers submenu.
 
 Usage:
 
@@ -245,6 +286,8 @@ Usage:
 - Click the 'Continue' button to proceed. The file type (eg. CSV) may be displayed.
 - Depending on the type of dataset being loaded, various parameters can be set in this final phase.
 - Click the 'Continue' button to insert the layer into the map and closes the Add Layer menu.
+
+=3!sort=
 
 ### ![](img/guide/layers/sort_25.svg) Sort
 
@@ -257,35 +300,37 @@ If you using the keyboard for sorting layers, note the following;
 - You can use the spacebar to drop the panel.
 - Use the ESC key to cancel drag
 
+=3!remove=
+
 ### ![](img/guide/layers/remove_25.svg) Remove
 
 To remove a layer, click on the delete icon ![](img/guide/layers/remove_25.svg) to the right of the layer after selecting the 'Remove' tab.
 
-## ![](img/guide/sidebar/details_30.svg) Details
+=2!details=
+
+### ![](img/guide/sidebar/details_30.svg) Details
 
 The Details tab has two sections. The available layers for the map are listed in the left section, and the feature details for each layer are displayed in the right section.
 
 _**Note a feature on the map must be selected to enable the layer in the list. Otherwise layers are disabled (greyed out).**_
 
-![](img/guide/footer/details.png)
-
 Click on a layer to see its feature details.
 
 The number of features for the selected layer is shown in the upper left of the details section.
 
-Use the left and right arrows in the upper right of the details section to browse through the features for the selected layer.
+Use the left and right arrows ![](img/guide/navigation/chevron_left.svg) in the upper right of the details section to browse through the features for the selected layer.
 
-The zoom icon will zoom the map to the selected feature.
+The zoom icon ![](img/guide/datatable/zoom.svg) will zoom the map to the selected feature.
 
-Check the highlight box to keep the feature highlighted on the map.
+Check the highlight box ![](img/guide/layers/check.png) to keep the feature highlighted on the map.
 
-## Data Table
+=2!dataTable=
+
+### ![](img/guide/footer/data_table.svg) Data Table
 
 The Data Table tab has two sections. The layers are listed on the left and the layer data on the right. Click on a layer to show the layer data in the table on the right.
 
-![](img/guide/footer/datatable.png)
-
-### Data Table Controls:
+### Data Table Controls
 
 The Data Table controls are shown in the upper right section of the layer data panel.
 
@@ -316,9 +361,9 @@ Click the action icon ![](img/guide/datatable/column_action.svg) beside the colu
 - Show and/or hide columns by clicking on the _Hide Columns_ icon ![](img/guide/datatable/column_hide_25.svg)
 - Navigate the table using a keyboard
 
-Click on a layer and the number of available features is displayed below the layer title:
+Click on a layer and the number of available features is displayed below the layer title.
 
-![](img/guide/datatable/layer_features.png)
+=3!sortingAndReordering=
 
 ### Sorting and Reordering
 
@@ -330,7 +375,9 @@ For each column in the data table, there may be a set of arrows associated with 
 - a downward arrow ![](img/guide/navigation/down_arrow_20.svg) next to the column title indicates that the column data is being sorted in descending order or reverse alphabetical order
 - no arrow next to the column title means that there is no sort applied to current column
 
-### Filter data
+=3!filterData=
+
+### Filter Data
 
 Data can be filtered by column. To show filters, click on the open filters icon ![](img/guide/datatable/filter_toggle_25.svg). A column is filterable if there is an input field under the title of the header:
 
@@ -344,9 +391,9 @@ There are 3 types of filters:
   - If, for example, only a minimum is defined, it will perform the operation _greater than_
 - **Date**: Similar to the numeric field but uses dates
 
-Additional filters (varying by column data type) may be found by clicking the action icon ![](img/guide/datatable/column_action.svg) beside the column heading.
+Additional filters (varying by column data type) may be found by clicking the action icon ![](img/guide/datatable/column_action.svg) beside the column heading, and clicking on **Filter by ...**
 
-![](img/guide/datatable/action_icon_filters.png)
+=3!keyboardNavigation=
 
 ### Keyboard Navigation
 
@@ -360,11 +407,11 @@ Once any major group is focused on, you can use the arrow keys to navigate throu
 
 To access the buttons and/or input fields within a cell, make sure the cell is highlighted (by using arrow keys as above) and use 'Tab' to navigate between its children.
 
-## ![](img/guide/footer/time_slider_30.svg) Time Slider
+=2!timeSlider=
+
+### ![](img/guide/footer/time_slider_30.svg) Time Slider
 
 The Time Slider tab on the Footer Panel has two sections. Layers with a time dimension are listed in the left section. Click on a layer to display its Time Slider in the right section:
-
-![](img/guide/footer/time_slider.png)
 
 The Time Slider section displays a slider bar with one or two draggable handles. A point in time layer will show one handle. A time period layer will show two handles, to adjust the start and end time of the period.
 
@@ -380,13 +427,13 @@ Click the time delay dropdown to choose the slider animation time delay. Some la
 
 The field being filtered on is displayed in the lower left of the Time Slider section. Custom descriptions may also be displayed in this area.
 
-## ![](img/guide/footer/chart_30.svg) Chart
+=2!chart=
+
+### ![](img/guide/footer/chart_30.svg) Chart
 
 The Chart tab on the Footer Panel has two sections. Layers with a chart are listed in the left section. Select a feature on the map to display its chart in the right section.
 
 _**Note a feature on the map must be selected to enable the layer in the list. Otherwise layers are disabled (greyed out).**_
-
-![](img/guide/footer/chart1.png)
 
 The Feature dropdown (upper left of the chart section), can be used to select a feature. This is useful when features are close together on the map, making it difficult to click on the desired one.
 
@@ -396,33 +443,21 @@ The visibility of data displayed on the chart can be toggled by clicking the che
 
 Select from the Download dropdown (upper right of chart section) to download chart data in JSON format. Select Download All for all data and Download Visible for only data currently visible on the chart.
 
-There are 3 types of charts:
+=3!chartTypes=
 
-- Line charts
-- Bar charts
-- Pie charts
+### Available Chart Types:
 
-### Line charts
-
-![](img/guide/footer/chart.png)
+- Line Chart
+- Bar Charts
+- Pie Charts
 
 Points on line charts can be changed to steps, by selecting from the Steps dropdown in the upper left of the chart section.
 
-Click hold and drag the handles on the the slider bars to change the X or Y axis values displayed for the chart.
+Click hold and drag the handles on the the line chart slider bars to change the X or Y axis values displayed for the chart.
 
-![](img/guide/footer/chart_x.png)
+=1!keyboardNavigation=
 
-### Bar charts
-
-![](img/guide/footer/bar_chart.png)
-
-### Pie charts
-
-![](img/guide/footer/pie_chart.png)
-
-=!Keyboard Navigation=
-
-### Keyboard Navigation:
+### Keyboard Navigation
 
 Keyboard functionality is provided as an alternative for users who are unable to use a mouse. Use the Tab key to navigate forward to links and controls on the page. Press Shift+Tab to go back one step. Use the Enter or Spacebar keys to activate links and controls.
 
@@ -436,9 +471,9 @@ Tooltips will be shown for supported features when the crosshair is positioned o
 
 This page is WCAG 2.0 AA compliant.
 
-=!Issues=
+=1!issues=
 
-# Load Times / Unanticipated Behaviour
+### Load Times / Unanticipated Behaviour
 
 Load times may vary based on:
 
@@ -450,46 +485,3 @@ Load times may vary based on:
 Unanticipated behaviour may occur if any map interactions occur before data is fully loaded. Please allow the map to load completely before triggering any map functions.
 
 **Note:** If the loading spinner is visible for a layer, please wait for it to disappear before triggering any function on the map.
-
-=!Geolocator=
-
-### Geolocation Search
-
-### General Use
-
-The geolocator component functions to allow users to search for places in Canada. When the geolocator icon ![](img/guide/geosearch/geolocator_20.svg) in the Sidebar is clicked, an input field for search keywords will appear on the map:
-
-![](img/guide/geosearch/searchbar_en.png)
-
-#### Supported Search Types
-
-**Keyword search**: Type any keyword into geolocator search bar to display a list of results that contains the keyword (minimum 3 characters).
-
-- each search result consists of: location name (with keyword highlighted), location province, and location category (lake, city, town, etc.)
-- click on any individual result to mark its coordinates and zoom the map to center around this location
-
-**FSA search**: A **forward sortation area (FSA)** is a way to designate a geographical area based on the first three characters in a Canadian postal code. All postal codes that start with the same three characters are considered an **FSA**.
-
-- click to zoom and center the map on the FSA
-- example: type in **M3H**
-
-**Latitude/Longitude search**: Search using lat/long coordinates to display a list of results in the vicinity of that map point.
-
-- similarly to FSA search, the first result will be a location of those coordinates entered, click this to zoom and center the map on the map point
-- lat/long search recognizes spaces, commas, semicolons, or vertical bars (|) to separate the co-ordinates
-- example: type in **54.3733,-91.7417**
-
-**NTS search**: **National Topographic System (NTS)** is a system used for providing general topographic maps of the country, producing details on landforms, lakes/rivers, forests, roads and railways, etc.
-
-- the NTS is split into three major zones: "Southern zone" - latitudes between 40°N and 68°N, "Arctic zone" - latitudes between 68°N and 80°N, and the "High Arctic zone" - latitudes between 80°N and 88°N
-- an NTS map number consists of a string containing a number identifying a map sheet, a letter identifying a map area, and a number identifying the scale map sheet
-- likewise, the first result will be a location of the NTS map number, click to center map on this area
-- example: type in **030M13**
-
-**Street address**: Search using direct street addresses should return results
-
-### Geosearch Filtering
-
-When searching for a location, a results panel will appear below the search box. This results panel contains two dropdown boxes that allow you to filter the search results by their **province** and by their **category** (lake, town, river, etc.). To the right of these two boxes is a **Clear Filters** ![](img/guide/geosearch/clear.svg) button, which when clicked clears the selected filter options.
-
-![](img/guide/geosearch/geofilter_en.png)

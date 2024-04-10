@@ -9,6 +9,7 @@ import { LayerIcon } from './layer-icon';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 
 export interface LayerListEntry {
+  content?: string | ReactNode;
   layerName: string;
   layerPath: string;
   layerStatus: TypeLayerStatus;
@@ -55,6 +56,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
         return null;
 
       default:
+        if (layer.content) return null;
         // If there's a layer path
         if (layer.layerPath) {
           return (
