@@ -13,7 +13,7 @@ export const getSxClasses = (theme: Theme) => ({
       maxHeight: 'calc(100vh - 150px)',
 
       '& .MuiTableContainer-root': {
-        maxHeight: 'calc(100vh - 200px)',
+        maxHeight: 'calc(100vh - 260px)',
       },
     },
 
