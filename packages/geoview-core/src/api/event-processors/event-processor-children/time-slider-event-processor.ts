@@ -2,14 +2,12 @@ import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-pr
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { ITimeSliderState, TypeTimeSliderValues } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { getLocalizedValue } from '@/core/utils/utilities';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
-import { api } from '@/app';
 import { TypeFeatureInfoLayerConfig, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { AppEventProcessor } from './app-event-processor';
-import { MapEventProcessor } from './map-event-processor';
 
 export class TimeSliderEventProcessor extends AbstractEventProcessor {
   // **********************************************************
@@ -35,29 +33,40 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   /**
    * Checks if the layer has time slider values. If there are, adds the time slider layer and applies filters.
    * @param {string} mapId - The map id of the state to act on
+   * @param {AbstractGeoViewLayer} geoviewLayer - The GeoView layer to act on
    * @param {TypeLayerEntryConfig} layerConfig - The layer path of the layer to add to the state
    */
-  static checkInitTimeSliderLayerAndApplyFilters(mapId: string, layerConfig: TypeLayerEntryConfig): void {
+  static checkInitTimeSliderLayerAndApplyFilters(
+    mapId: string,
+    geoviewLayer: AbstractGeoViewLayer,
+    layerConfig: TypeLayerEntryConfig
+  ): void {
     // If there is no TimeSlider
     if (!this.getTimesliderState(mapId)) return;
 
     // Get the time slider values
-    const timeSliderValues = TimeSliderEventProcessor.getInitialTimeSliderValues(mapId, layerConfig.layerPath);
+    const timeSliderValues = this.getInitialTimeSliderValues(mapId, geoviewLayer, layerConfig);
 
     // If any
     if (timeSliderValues) {
       // Add the time slider in store
-      TimeSliderEventProcessor.addTimeSliderLayerAndApplyFilters(mapId, layerConfig.layerPath, timeSliderValues);
+      this.addTimeSliderLayerAndApplyFilters(mapId, geoviewLayer, layerConfig.layerPath, timeSliderValues);
     }
   }
 
   /**
    * Adds a time slider layer to the state
    * @param {string} mapId - The map id of the state to act on
+   * @param {AbstractGeoViewLayer} geoviewLayer - The GeoView layer to act on
    * @param {string} layerPath - The layer path of the layer to add to the state
    * @param {TypeTimeSliderValues} timeSliderValues - The time slider values to add and apply filters
    */
-  static addTimeSliderLayerAndApplyFilters(mapId: string, layerPath: string, timeSliderValues: TypeTimeSliderValues): void {
+  static addTimeSliderLayerAndApplyFilters(
+    mapId: string,
+    geoviewLayer: AbstractGeoViewLayer,
+    layerPath: string,
+    timeSliderValues: TypeTimeSliderValues
+  ): void {
     // If there is no TimeSlider
     if (!this.getTimesliderState(mapId)) return;
 
@@ -68,7 +77,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     this.getTimesliderState(mapId)?.actions.addTimeSliderLayer(timeSliderLayer);
 
     const { defaultValue, field, filtering, minAndMax, values } = timeSliderLayer[layerPath];
-    TimeSliderEventProcessor.applyFilters(mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
+    this.applyFilters(geoviewLayer, layerPath, defaultValue, field, filtering, minAndMax, values);
   }
 
   /**
@@ -85,13 +94,17 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * Get initial values for a layer's time slider states
    *
    * @param {string} mapId - The id of the map
-   * @param {string} layerPath - The path of the layer to add to time slider
+   * @param {AbstractGeoViewLayer} geoviewLayer - The GeoView layer to act on
+   * @param {TypeLayerEntryConfig} layerConfig - The layer path of the layer to add to the state
    * @returns {TimeSliderLayer | undefined}
    */
-  static getInitialTimeSliderValues(mapId: string, layerPath: string): TypeTimeSliderValues | undefined {
-    const layerConfig = api.maps[mapId].layer.registeredLayers[layerPath];
+  static getInitialTimeSliderValues(
+    mapId: string,
+    geoviewLayer: AbstractGeoViewLayer,
+    layerConfig: TypeLayerEntryConfig
+  ): TypeTimeSliderValues | undefined {
     const name = getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(mapId)) || layerConfig.layerId;
-    const temporalDimensionInfo = api.maps[mapId].layer.geoviewLayer(layerPath).getTemporalDimension(layerPath);
+    const temporalDimensionInfo = geoviewLayer.getTemporalDimension(layerConfig.layerPath);
     if (!temporalDimensionInfo || !temporalDimensionInfo.range) return undefined;
     const { range } = temporalDimensionInfo.range;
     const defaultValueIsArray = Array.isArray(temporalDimensionInfo.default);
@@ -148,17 +161,17 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   /**
    * Filter the layer provided in the layerPath variable according to current states (filtering and values)
    *
-   * @param {string} mapId The map to filter
-   * @param {string} layerPath The path of the layer to filter
-   * @param {string} defaultValue The default value to use if filters are off
-   * @param {string} field The field to filter the layer by
-   * @param {boolean} filtering Whether the layer should be filtered or returned to default
-   * @param {number[]} minAndMax Minimum and maximum values of slider
-   * @param {number[]} values Filter values to apply
+   * @param {AbstractGeoViewLayer} geoviewLayer - The GeoView layer to act on
+   * @param {string} layerPath - The path of the layer to filter
+   * @param {string} defaultValue - The default value to use if filters are off
+   * @param {string} field - The field to filter the layer by
+   * @param {boolean} filtering - Whether the layer should be filtered or returned to default
+   * @param {number[]} minAndMax - Minimum and maximum values of slider
+   * @param {number[]} values - Filter values to apply
    * @returns {void}
    */
   static applyFilters(
-    mapId: string,
+    geoviewLayer: AbstractGeoViewLayer,
     layerPath: string,
     defaultValue: string,
     field: string,
@@ -166,42 +179,36 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     minAndMax: number[],
     values: number[]
   ): void {
-    const layerType = api.maps[mapId].layer.geoviewLayer(layerPath).type;
+    const layerType = geoviewLayer.type;
     if (layerType === CONST_LAYER_TYPES.WMS) {
       if (filtering) {
         const newValue = `${new Date(values[0]).toISOString().slice(0, new Date(values[0]).toISOString().length - 5)}Z`;
         const filter = `${field}=date '${newValue}'`;
-        (api.maps[mapId].layer.geoviewLayer(layerPath) as WMS).applyViewFilter(layerPath, filter);
+        (geoviewLayer as WMS).applyViewFilter(layerPath, filter);
       } else {
         const filter = `${field}=date '${defaultValue}'`;
-        (api.maps[mapId].layer.geoviewLayer(layerPath) as WMS).applyViewFilter(layerPath, filter);
+        (geoviewLayer as WMS).applyViewFilter(layerPath, filter);
       }
     } else if (layerType === CONST_LAYER_TYPES.ESRI_IMAGE) {
       if (filtering) {
         const filter = `time=${minAndMax[0]},${values[0]}`;
-        (api.maps[mapId].layer.geoviewLayer(layerPath) as EsriImage).applyViewFilter(layerPath, filter);
+        (geoviewLayer as EsriImage).applyViewFilter(layerPath, filter);
       } else {
         const filter = `time=${minAndMax[0]},${defaultValue}`;
-        (api.maps[mapId].layer.geoviewLayer(layerPath) as EsriImage).applyViewFilter(layerPath, filter);
+        (geoviewLayer as EsriImage).applyViewFilter(layerPath, filter);
       }
     } else if (filtering) {
       let filter = `${field} >= date '${new Date(values[0]).toISOString()}'`;
       if (values.length > 1) {
         filter += ` and ${field} <= date '${new Date(values[1]).toISOString()}'`;
       }
-      (MapEventProcessor.getMapViewerLayerAPI(mapId).geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter(
-        layerPath,
-        filter
-      );
+      (geoviewLayer as AbstractGeoViewVector | EsriDynamic).applyViewFilter(layerPath, filter);
     } else {
       let filter = `${field} >= date '${new Date(minAndMax[0]).toISOString()}'`;
       if (values.length > 1) {
         filter += `and ${field} <= date '${new Date(minAndMax[1]).toISOString()}'`;
       }
-      (MapEventProcessor.getMapViewerLayerAPI(mapId).geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter(
-        layerPath,
-        filter
-      );
+      (geoviewLayer as AbstractGeoViewVector | EsriDynamic).applyViewFilter(layerPath, filter);
     }
   }
   // #endregion

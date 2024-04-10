@@ -23,6 +23,7 @@ import {
   TypeTileGrid,
 } from '@/geo/map/map-schema-types';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
+import { Projection } from '@/geo/utils/projection';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { api } from '@/app';
@@ -256,7 +257,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
 
       if (layerConfig.initialSettings?.extent)
         // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings.extent = api.utilities.projection.transformExtent(
+        layerConfig.initialSettings.extent = Projection.transformExtent(
           layerConfig.initialSettings.extent,
           'EPSG:4326',
           `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
@@ -283,7 +284,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     if (layerBounds) {
       let transformedBounds = layerBounds;
       if (this.metadata?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.mapId).currentProjection) {
-        transformedBounds = api.utilities.projection.transformExtent(
+        transformedBounds = Projection.transformExtent(
           layerBounds,
           `EPSG:${projection}`,
           `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`

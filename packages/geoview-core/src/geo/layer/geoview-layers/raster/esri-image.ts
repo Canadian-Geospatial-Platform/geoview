@@ -6,15 +6,16 @@ import { Extent } from 'ol/extent';
 
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
-import { api } from '@/app';
+import { DateMgt } from '@/core/utils/date-mgt';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/layer-set';
+import { codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
+import { Projection } from '@/geo/utils/projection';
 import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
@@ -374,7 +375,7 @@ export class EsriImage extends AbstractGeoViewRaster {
         searchDateEntry.forEach((dateFound) => {
           // If the date has a time zone, keep it as is, otherwise reverse its time zone by changing its sign
           const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
-          const reformattedDate = api.utilities.date.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
+          const reformattedDate = DateMgt.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
           filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index! - 6)}${reformattedDate}${filterValueToUse!.slice(
             dateFound.index! + dateFound[0].length + 2
           )}`;
@@ -408,7 +409,7 @@ export class EsriImage extends AbstractGeoViewRaster {
     if (layerBounds) {
       let transformedBounds = layerBounds;
       if (this.metadata?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.mapId).currentProjection) {
-        transformedBounds = api.utilities.projection.transformExtent(
+        transformedBounds = Projection.transformExtent(
           layerBounds,
           `EPSG:${projection}`,
           `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`

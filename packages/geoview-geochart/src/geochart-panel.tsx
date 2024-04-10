@@ -1,7 +1,7 @@
 import { TypeWindow } from 'geoview-core/src/core/types/global-types';
 import { ChartType, SchemaValidator } from 'geochart';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
-import { TypeLayerData } from 'geoview-core/src/geo/utils/layer-set';
+import { TypeLayerData } from 'geoview-core/src/geo/layer/layer-sets/abstract-layer-set';
 import { Typography } from 'geoview-core/src/ui/typography/typography';
 import { Box } from 'geoview-core/src/ui';
 import { useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
@@ -12,6 +12,7 @@ import {
   useGeochartSelectedLayerPath,
 } from 'geoview-core/src/core/stores/store-interface-and-intial-values/geochart-state';
 import { useAppDisplayLanguage, useAppGuide } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
+import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
 import Markdown from 'markdown-to-jsx';
@@ -36,7 +37,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
   const { cgpv } = window as TypeWindow;
   const { mapId, provideCallbackRedraw } = props;
-  const { api, react } = cgpv;
+  const { react } = cgpv;
   const { useState, useCallback, useMemo, useEffect, useRef } = react;
 
   // Get states and actions from store
@@ -104,9 +105,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
       logger.logTraceUseCallback('GEOCHART-PANEL - getNumFeaturesLabel');
 
       const numOfFeatures = layer.features?.length ?? 0;
-      return `${numOfFeatures} ${api.utilities.core.getLocalizedMessage('geochart.panel.chart', displayLanguage)}${
-        numOfFeatures > 1 ? 's' : ''
-      }`;
+      return `${numOfFeatures} ${getLocalizedMessage('geochart.panel.chart', displayLanguage)}${numOfFeatures > 1 ? 's' : ''}`;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [mapId]
@@ -273,7 +272,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     }
 
     // Loading UI
-    return <Typography>{api.utilities.core.getLocalizedMessage('geochart.panel.loadingUI', displayLanguage)}</Typography>;
+    return <Typography>{getLocalizedMessage('geochart.panel.loadingUI', displayLanguage)}</Typography>;
   };
 
   // Render

@@ -12,7 +12,7 @@ import {
 import { useMapStoreActions, useMapVisibleLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from '@/core/utils/logger';
-import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/layer/layer-sets/layer-set';
+import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/layer/layer-sets/abstract-layer-set';
 
 import { LayerListEntry, Layout } from '@/core/components/common';
 import { getSxClasses } from './details-style';

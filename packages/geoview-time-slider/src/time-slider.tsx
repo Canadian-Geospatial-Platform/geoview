@@ -4,9 +4,10 @@ import {
   useTimeSliderLayers,
   useTimeSliderStoreActions,
 } from 'geoview-core/src/core/stores/store-interface-and-intial-values/time-slider-state';
-import { getLocalizedValue } from 'geoview-core/src/core/utils/utilities';
+import { getLocalizedValue, getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from 'geoview-core/src/core/utils/logger';
+
 import { getSxClasses } from './time-slider-style';
 import { ConfigProps } from './time-slider-types';
 
@@ -28,7 +29,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
   const { cgpv } = window;
   const { config, layerPath, mapId } = props;
-  const { api, react, ui } = cgpv;
+  const { react, ui } = cgpv;
   const { useState, useRef, useEffect, useCallback } = react;
   const {
     Grid,
@@ -314,13 +315,13 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   function returnLockTooltip(): string {
     if (reversed) {
       const text = locked
-        ? api.utilities.core.getLocalizedMessage('timeSlider.slider.unlockRight', displayLanguage)
-        : api.utilities.core.getLocalizedMessage('timeSlider.slider.lockRight', displayLanguage);
+        ? getLocalizedMessage('timeSlider.slider.unlockRight', displayLanguage)
+        : getLocalizedMessage('timeSlider.slider.lockRight', displayLanguage);
       return text;
     }
     const text = locked
-      ? api.utilities.core.getLocalizedMessage('timeSlider.slider.unlockLeft', displayLanguage)
-      : api.utilities.core.getLocalizedMessage('timeSlider.slider.lockLeft', displayLanguage);
+      ? getLocalizedMessage('timeSlider.slider.unlockLeft', displayLanguage)
+      : getLocalizedMessage('timeSlider.slider.lockLeft', displayLanguage);
     return text;
   }
 
@@ -372,8 +373,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
               <Tooltip
                 title={
                   filtering
-                    ? api.utilities.core.getLocalizedMessage('timeSlider.slider.disableFilter', displayLanguage)
-                    : api.utilities.core.getLocalizedMessage('timeSlider.slider.enableFilter', displayLanguage)
+                    ? getLocalizedMessage('timeSlider.slider.disableFilter', displayLanguage)
+                    : getLocalizedMessage('timeSlider.slider.enableFilter', displayLanguage)
                 }
                 placement="top"
                 enterDelay={1000}
@@ -415,7 +416,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
             )}
             <IconButton
               className="style1"
-              aria-label={api.utilities.core.getLocalizedMessage('timeSlider.slider.back', displayLanguage) as string}
+              aria-label={getLocalizedMessage('timeSlider.slider.back', displayLanguage) as string}
               tooltip="timeSlider.slider.back"
               tooltipPlacement="top"
               disabled={isPlaying || !filtering}
@@ -427,8 +428,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
               className="style1"
               aria-label={
                 isPlaying
-                  ? (api.utilities.core.getLocalizedMessage('timeSlider.slider.pauseAnimation', displayLanguage) as string)
-                  : (api.utilities.core.getLocalizedMessage('timeSlider.slider.playAnimation', displayLanguage) as string)
+                  ? (getLocalizedMessage('timeSlider.slider.pauseAnimation', displayLanguage) as string)
+                  : (getLocalizedMessage('timeSlider.slider.playAnimation', displayLanguage) as string)
               }
               tooltip={isPlaying ? 'timeSlider.slider.pauseAnimation' : 'timeSlider.slider.playAnimation'}
               tooltipPlacement="top"
@@ -439,7 +440,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
             </IconButton>
             <IconButton
               className="style1"
-              aria-label={api.utilities.core.getLocalizedMessage('timeSlider.slider.forward', displayLanguage) as string}
+              aria-label={getLocalizedMessage('timeSlider.slider.forward', displayLanguage) as string}
               tooltip="timeSlider.slider.forward"
               tooltipPlacement="top"
               disabled={isPlaying || !filtering}
@@ -449,7 +450,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
             </IconButton>
             <IconButton
               className="style1"
-              aria-label={api.utilities.core.getLocalizedMessage('timeSlider.slider.changeDirection', displayLanguage) as string}
+              aria-label={getLocalizedMessage('timeSlider.slider.changeDirection', displayLanguage) as string}
               tooltip="timeSlider.slider.changeDirection"
               tooltipPlacement="top"
               onClick={() => handleReverse()}
@@ -457,9 +458,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
               {reversed ? <SwitchRightIcon /> : <SwitchLeftIcon />}
             </IconButton>
             <FormControl sx={{ width: '150px' }}>
-              <InputLabel variant="standard">
-                {api.utilities.core.getLocalizedMessage('timeSlider.slider.timeDelay', displayLanguage)}
-              </InputLabel>
+              <InputLabel variant="standard">{getLocalizedMessage('timeSlider.slider.timeDelay', displayLanguage)}</InputLabel>
               <NativeSelect
                 defaultValue={delay}
                 inputProps={{

@@ -20,16 +20,17 @@ import {
   TypeListOfLayerEntryConfig,
   TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
-import { api } from '@/app';
 import { getLocalizedValue } from '@/core/utils/utilities';
+import { DateMgt } from '@/core/utils/date-mgt';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
+import { Projection } from '@/geo/utils/projection';
 import { NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { CSV } from './csv';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/layer-set';
+import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { Cast } from '@/core/types/global-types';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { analyzeLayerFilter, getFeatureStyle } from '@/geo/utils/renderer/geoview-renderer';
@@ -176,16 +177,14 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
                 dateFields.forEach((fieldName) => {
                   let fieldValue = feature.get(fieldName);
                   if (typeof fieldValue === 'number') {
-                    let dateString = api.utilities.date.convertMilisecondsToDate(fieldValue);
-                    dateString = api.utilities.date.applyInputDateFormat(dateString, this.serverDateFragmentsOrder);
-                    (feature as Feature).set(fieldName, api.utilities.date.convertToMilliseconds(dateString), true);
+                    let dateString = DateMgt.convertMilisecondsToDate(fieldValue);
+                    dateString = DateMgt.applyInputDateFormat(dateString, this.serverDateFragmentsOrder);
+                    (feature as Feature).set(fieldName, DateMgt.convertToMilliseconds(dateString), true);
                   } else {
                     if (!this.serverDateFragmentsOrder)
-                      this.serverDateFragmentsOrder = api.utilities.date.getDateFragmentsOrder(
-                        api.utilities.date.deduceDateFormat(fieldValue)
-                      );
-                    fieldValue = api.utilities.date.applyInputDateFormat(fieldValue, this.serverDateFragmentsOrder);
-                    (feature as Feature).set(fieldName, api.utilities.date.convertToMilliseconds(fieldValue), true);
+                      this.serverDateFragmentsOrder = DateMgt.getDateFragmentsOrder(DateMgt.deduceDateFormat(fieldValue));
+                    fieldValue = DateMgt.applyInputDateFormat(fieldValue, this.serverDateFragmentsOrder);
+                    (feature as Feature).set(fieldName, DateMgt.convertToMilliseconds(fieldValue), true);
                   }
                 });
               });
@@ -323,7 +322,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   protected getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     const { map } = MapEventProcessor.getMapViewer(this.mapId);
-    const convertedLocation = api.utilities.projection.transform(
+    const convertedLocation = Projection.transform(
       location,
       'EPSG:4326',
       `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
@@ -380,7 +379,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     searchDateEntry.forEach((dateFound) => {
       // If the date has a time zone, keep it as is, otherwise reverse its time zone by changing its sign
       const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
-      const reformattedDate = api.utilities.date.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
+      const reformattedDate = DateMgt.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
       filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index)}${reformattedDate}${filterValueToUse!.slice(
         dateFound.index! + dateFound[0].length
       )}`;

@@ -1,4 +1,4 @@
-import { LayerSet } from '@/geo/layer/layer-sets/layer-set';
+import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
@@ -13,7 +13,7 @@ import { AbstractGeoViewLayer, TypeLegend } from '@/geo/layer/geoview-layers/abs
  *
  * @class LegendsLayerSet
  */
-export class LegendsLayerSet extends LayerSet {
+export class LegendsLayerSet extends AbstractLayerSet {
   /** The resultSet object as existing in the base class, retyped here as a TypeLegendResultSet */
   declare resultSet: TypeLegendResultSet;
 

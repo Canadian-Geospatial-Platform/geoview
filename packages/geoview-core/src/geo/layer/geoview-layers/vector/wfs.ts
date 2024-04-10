@@ -21,7 +21,7 @@ import {
 
 import { getLocalizedValue, getXMLHttpRequest, xmlToJson, findPropertyNameByRegex } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { api } from '@/app';
+import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
 import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
@@ -206,7 +206,7 @@ export class WFS extends AbstractGeoViewVector {
 
         const { currentProjection } = MapEventProcessor.getMapState(this.mapId);
         if (layerConfig.initialSettings?.extent)
-          layerConfig.initialSettings.extent = api.utilities.projection.transformExtent(
+          layerConfig.initialSettings.extent = Projection.transformExtent(
             layerConfig.initialSettings.extent,
             'EPSG:4326',
             `EPSG:${currentProjection}`
@@ -217,7 +217,7 @@ export class WFS extends AbstractGeoViewVector {
           const upperCorner = (foundMetadata['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'] as string).split(' ');
           const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
           // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-          layerConfig.initialSettings!.bounds = api.utilities.projection.transformExtent(bounds, 'EPSG:4326', `EPSG:${currentProjection}`);
+          layerConfig.initialSettings!.bounds = Projection.transformExtent(bounds, 'EPSG:4326', `EPSG:${currentProjection}`);
         }
       }
     });

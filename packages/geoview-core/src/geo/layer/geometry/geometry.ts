@@ -7,11 +7,11 @@ import { Fill, Stroke, Style, Icon } from 'ol/style';
 import { Options as VectorLayerOptions } from 'ol/layer/BaseVector';
 import { asArray, asString } from 'ol/color';
 
-import { api } from '@/app';
 import { MapViewer } from '@/geo/map/map-viewer';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { generateId, setAlphaColor } from '@/core/utils/utilities';
 import { TypeStyleGeometry } from '@/geo/map/map-schema-types';
+import { Projection } from '@/geo/utils/projection';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 
@@ -120,7 +120,7 @@ export class GeometryApi {
     const polyline = new Feature({
       geometry: new LineString(points, polylineOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        api.utilities.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
+        Projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
       ),
     });
 
@@ -192,7 +192,7 @@ export class GeometryApi {
     const polygon = new Feature({
       geometry: new Polygon(points, polygonOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        api.utilities.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
+        Projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
       ),
     });
 
@@ -260,10 +260,10 @@ export class GeometryApi {
 
     const featureId = generateId(optionalFeatureId);
 
-    const projectedCoordinates = api.utilities.projection.transform(
+    const projectedCoordinates = Projection.transform(
       coordinate,
       `EPSG:${options?.projection || 4326}`,
-      api.utilities.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
+      Projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
     );
 
     // get radius, if not defined, set default
@@ -352,7 +352,7 @@ export class GeometryApi {
     const marker = new Feature({
       geometry: new Point(coordinate, markerOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        api.utilities.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
+        Projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
       ),
     });
 

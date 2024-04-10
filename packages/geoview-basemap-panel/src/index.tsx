@@ -119,7 +119,7 @@ class BasemapPanelPlugin extends AppBarPlugin {
    */
   onRemoved(): void {
     // reset basemaps array
-    this.api.maps[this.pluginProps.mapId].basemap.basemaps = [];
+    this.mapViewer().basemap.basemaps = [];
   }
 }
 

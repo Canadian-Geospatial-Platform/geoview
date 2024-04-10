@@ -18,7 +18,7 @@ import {
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { Cast, toJsonObject } from '@/core/types/global-types';
-import { api } from '@/app';
+import { Projection } from '@/geo/utils/projection';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
@@ -243,7 +243,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
       if (layerConfig.initialSettings?.extent)
         // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings.extent = api.utilities.projection.transformExtent(
+        layerConfig.initialSettings.extent = Projection.transformExtent(
           layerConfig.initialSettings.extent,
           'EPSG:4326',
           `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
@@ -270,7 +270,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     if (layerBounds) {
       let transformedBounds = layerBounds;
       if (this.metadata?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.mapId).currentProjection) {
-        transformedBounds = api.utilities.projection.transformExtent(
+        transformedBounds = Projection.transformExtent(
           layerBounds,
           `EPSG:${projection}`,
           `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`

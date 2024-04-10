@@ -5,7 +5,7 @@ import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-pr
 import { TypeFeatureInfoResultSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
 import { IDataTableState } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
-import { TypeLayerData } from '@/geo/layer/layer-sets/layer-set';
+import { TypeLayerData } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { TypeAllFeatureInfoResultSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
 import { MapEventProcessor } from './map-event-processor';
 
@@ -52,9 +52,11 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
    * @param {boolean} isMapRecordExist - Filtered Map switch is on off.
    */
   static applyFilters(mapId: string, layerPath: string, filterStrings: string, isMapRecordExist: boolean): void {
+    // TODO: Refactor - Take a look at the TimeSliderEventProcessor.applyFilters and do same here, passing geoviewLayer in params to save a MapEventProcessor (api.maps[] in disguise)?
     const geoviewLayerInstance = MapEventProcessor.getMapViewerLayerAPI(mapId).geoviewLayer(layerPath);
     const filterLayerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).registeredLayers[layerPath] as TypeLayerEntryConfig;
 
+    // TODO: Check - Is the condition `filterLayerConfig !== undefined` really necessary here if it's not to be used after anyways?
     if (isMapRecordExist && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined && filterStrings.length) {
       (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(layerPath, filterStrings);
     } else {

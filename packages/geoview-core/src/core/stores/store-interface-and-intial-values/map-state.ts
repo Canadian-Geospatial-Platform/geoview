@@ -6,11 +6,11 @@ import { FitOptions } from 'ol/View'; // only for typing
 import { useStore } from 'zustand';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/layer-set';
+import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { Projection } from '@/geo/utils/projection';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeInteraction, TypeValidMapProjectionCodes, TypeMapMouseInfo } from '@/geo/map/map-schema-types';
 
-import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { TypeBasemapOptions } from '@/geo/layer/basemap/basemap-types';
@@ -353,7 +353,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
        */
       transformPoints: (coords: Coordinate[], outputProjection: number): Coordinate[] => {
         // Project the points and return the result
-        return api.utilities.projection.transformPoints(coords, `EPSG:${get().mapState.currentProjection}`, `EPSG:${outputProjection}`);
+        return Projection.transformPoints(coords, `EPSG:${get().mapState.currentProjection}`, `EPSG:${outputProjection}`);
       },
 
       /**

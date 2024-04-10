@@ -11,7 +11,7 @@ import { Config } from '@/core/utils/config/config';
 import { generateId, whenThisThen } from '@/core/utils/utilities';
 import { ConfigBaseClass, LayerStatusChangedEvent } from '@/core/utils/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
-import { AbstractGeoViewLayer, GeoViewLayerRegistrationEvent } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer, LayerRegistrationEvent } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   MapConfigLayerEntry,
   TypeGeoviewLayerConfig,
@@ -38,7 +38,7 @@ import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-i
 import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
 import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
 import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
-import { LayerSet } from '@/geo/layer/layer-sets/layer-set';
+import { GeoViewLayerCreatedTwiceError, GeoViewLayerNotCreatedError } from '@/geo/layer/exceptions/layer-exceptions';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
@@ -213,12 +213,47 @@ export class LayerApi {
         .forEach((promise) => {
           // For each layer
           promise.value.forEach((geocoreGVLayer) => {
-            // Generate array of layer order information
-            const layerInfos = this.generateArrayOfLayerOrderInfo(geocoreGVLayer);
-            orderedLayerInfos.push(...layerInfos);
+            try {
+              // Generate array of layer order information
+              const layerInfos = this.generateArrayOfLayerOrderInfo(geocoreGVLayer);
+              orderedLayerInfos.push(...layerInfos);
 
-            // Add it
-            this.addGeoviewLayer(geocoreGVLayer);
+              // Add it
+              const addedResult = this.addGeoviewLayer(geocoreGVLayer);
+
+              // If processed far enough to have a result with a promise
+              if (addedResult) {
+                // Catch a problem with the promise if any
+                addedResult.promiseLayer.catch((error) => {
+                  // Layer failed inside its promise to be added to the map
+
+                  // Log
+                  logger.logError(error);
+
+                  // If the error is a GeoViewLayerCreatedTwiceError
+                  if (error instanceof GeoViewLayerCreatedTwiceError) {
+                    this.mapViewer.notifications.showError('validation.layer.createtwice', [
+                      (error as GeoViewLayerCreatedTwiceError).geoviewLayerId,
+                      this.mapId,
+                    ]);
+                  } else {
+                    // TODO: Use a generic error message
+                    this.mapViewer.notifications.showError('validation.layer.genericError', [this.mapId]);
+                  }
+                });
+              } else {
+                // Layer failed to get created
+                throw new GeoViewLayerNotCreatedError(geocoreGVLayer.geoviewLayerId, this.mapId);
+              }
+            } catch (error) {
+              // Layer encountered a generic error when being created and added to the map
+
+              // Log
+              logger.logError(error);
+
+              // TODO: Use a generic error message
+              this.mapViewer.notifications.showError('validation.layer.genericError', [this.mapId]);
+            }
           });
         });
       MapEventProcessor.setMapOrderedLayerInfo(this.mapId, orderedLayerInfos);
@@ -313,6 +348,7 @@ export class LayerApi {
   ): GeoViewLayerAddedResult | undefined {
     // eslint-disable-next-line no-param-reassign
     geoviewLayerConfig.geoviewLayerId = generateId(geoviewLayerConfig.geoviewLayerId);
+
     // TODO: Refactor - We should not create a new config here.
     // TO.DOCONT: The layer class should receive an instance of configuration in is constructor.
     // TO.DOCONT: Here the function sends the config to this class to get the structure to use to generate layers.
@@ -327,12 +363,6 @@ export class LayerApi {
 
     if (geoviewLayerConfig.geoviewLayerId in this.geoviewLayers) this.#printDuplicateGeoviewLayerConfigError(geoviewLayerConfig);
     else {
-      // Adds the configuration to the list in map
-      // TODO: Refactor - Figure out why doing this - and then not do this
-      // TO.DOCONT: 2024-03-20 as part of the layers refactoring, this has been commented out, leave it commented for a bit
-      // TO.DOCONT: until things are confirmed to be still working
-      // this.mapViewer.mapFeaturesConfig.map.listOfGeoviewLayerConfig!.push(geoviewLayerConfig);
-
       // Process the addition of the layer
       return this.#addGeoviewLayerStep2(geoviewLayerConfig);
     }
@@ -385,7 +415,7 @@ export class LayerApi {
       this.geoviewLayers[layerBeingAdded.geoviewLayerId] = layerBeingAdded;
 
       // Register a handle when the layer wants to register
-      layerBeingAdded.onGeoViewLayerRegistration((geoviewLayer: AbstractGeoViewLayer, registrationEvent: GeoViewLayerRegistrationEvent) => {
+      layerBeingAdded.onGeoViewLayerRegistration((geoviewLayer: AbstractGeoViewLayer, registrationEvent: LayerRegistrationEvent) => {
         this.#handleLayerRegistration(geoviewLayer, registrationEvent);
       });
 
@@ -409,7 +439,7 @@ export class LayerApi {
             this.#emitLayerAdded({ layer: layerBeingAdded! });
           })
           .catch((error) => {
-            // Reject
+            // Reject it higher, because that's not where we want to handle the promise failure, we're returning the promise higher
             reject(error);
           });
       });
@@ -463,7 +493,7 @@ export class LayerApi {
    * @param {GeoViewLayerRegistrationEvent} registrationEvent - The registration event
    * @private
    */
-  #handleLayerRegistration(geoviewLayer: AbstractGeoViewLayer, registrationEvent: GeoViewLayerRegistrationEvent): void {
+  #handleLayerRegistration(geoviewLayer: AbstractGeoViewLayer, registrationEvent: LayerRegistrationEvent): void {
     try {
       // The layer is ready to be registered, take care of it
 
@@ -499,13 +529,18 @@ export class LayerApi {
         this.#unregisterFromSwiper(registrationEvent.layerConfig);
       }
 
+      // TODO: Uncomment this when visibility logic handle within orchestrator rather than too close to the store
+      // Register an event on the layer visible changed
+      // geoviewLayer.onVisibleChanged((layer, event) => {
+      //   // Propagate in the store
+      //   MapEventProcessor.setOrToggleMapLayerVisibility(this.mapId, registrationEvent.layerPath, event.visible);
+      // });
+
       // Tell the layer sets about it
-      [this.legendsLayerSet, this.hoverFeatureInfoLayerSet, this.allFeatureInfoLayerSet, this.featureInfoLayerSet].forEach(
-        (layerSet: LayerSet) => {
-          // Register or Unregister the layer
-          layerSet.registerOrUnregisterLayer(geoviewLayer, registrationEvent.layerPath, registrationEvent.action);
-        }
-      );
+      [this.legendsLayerSet, this.hoverFeatureInfoLayerSet, this.allFeatureInfoLayerSet, this.featureInfoLayerSet].forEach((layerSet) => {
+        // Register or Unregister the layer
+        layerSet.registerOrUnregisterLayer(geoviewLayer, registrationEvent.layerPath, registrationEvent.action);
+      });
     } catch (error) {
       // Log
       logger.logError(error);
@@ -582,8 +617,11 @@ export class LayerApi {
     // Wait until the layer is loaded (or processed?)
     await whenThisThen(() => layerConfig.IsGreaterThanOrEqualTo('loaded'), LayerApi.#MAX_WAIT_TIME_SLIDER_REGISTRATION);
 
+    // Get the geoview layer
+    const geoviewLayer = this.geoviewLayer(layerConfig.layerPath);
+
     // Check and add time slider layer when needed
-    TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.mapId, layerConfig);
+    TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.mapId, geoviewLayer, layerConfig);
   }
 
   /**
@@ -631,12 +669,10 @@ export class LayerApi {
       // logger.logDebug('LAYER STATUS CHANGED', layerStatusEvent.layerPath, layerStatusEvent.layerStatus, config);
 
       // Tell the layer sets about it
-      [this.legendsLayerSet, this.hoverFeatureInfoLayerSet, this.allFeatureInfoLayerSet, this.featureInfoLayerSet].forEach(
-        (layerSet: LayerSet) => {
-          // Process the layer status change
-          layerSet.processLayerStatusChanged(config, layerStatusEvent.layerPath, layerStatusEvent.layerStatus);
-        }
-      );
+      [this.legendsLayerSet, this.hoverFeatureInfoLayerSet, this.allFeatureInfoLayerSet, this.featureInfoLayerSet].forEach((layerSet) => {
+        // Process the layer status change
+        layerSet.processLayerStatusChanged(config, layerStatusEvent.layerPath, layerStatusEvent.layerStatus);
+      });
     } catch (error) {
       // Log
       logger.logError('CAUGHT in handleLayerStatusChanged', config.layerPath, error);

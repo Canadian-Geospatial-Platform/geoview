@@ -36,13 +36,13 @@ export abstract class FooterPlugin extends AbstractPlugin {
     // No need to log, parent class does it well already via added() function.
 
     // Set value to length of tabs(?)
-    this.value = this.map()?.footerBarApi.tabs.length;
+    this.value = this.mapViewer().footerBarApi.tabs.length;
 
     // Create props
     this.footerProps = this.onCreateContentProps();
 
     // Create tab with the props
-    this.map()?.footerBarApi.createTab(this.footerProps);
+    this.mapViewer().footerBarApi.createTab(this.footerProps);
   }
 
   /**
@@ -53,7 +53,7 @@ export abstract class FooterPlugin extends AbstractPlugin {
     // No need to log, parent class does it well already via removed() function.
 
     // Remove the footer tab
-    if (this.value) this.map()?.footerBarApi.removeTab(this.footerProps!.id);
+    if (this.value) this.mapViewer().footerBarApi.removeTab(this.footerProps!.id);
   }
 
   /**

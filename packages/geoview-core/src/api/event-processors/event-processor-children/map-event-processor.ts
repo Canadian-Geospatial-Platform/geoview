@@ -19,12 +19,13 @@ import {
 } from '@/geo/map/map-schema-types';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { Projection } from '@/geo/utils/projection';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { whenThisThen } from '@/core/utils/utilities';
-import { TypeFeatureInfoEntry, TypeGeometry } from '@/geo/layer/layer-sets/layer-set';
+import { TypeFeatureInfoEntry, TypeGeometry } from '@/geo/layer/layer-sets/abstract-layer-set';
 
 import { AppEventProcessor } from './app-event-processor';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
@@ -137,7 +138,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // add map overlays
     // create overlay for north pole icon
     const northPoleId = `${mapId}-northpole`;
-    const projectionPosition = api.utilities.projection.transformFromLonLat(
+    const projectionPosition = Projection.transformFromLonLat(
       [NORTH_POLE_POSITION[1], NORTH_POLE_POSITION[0]],
       `EPSG:${store.getState().mapState.currentProjection}`
     );
@@ -282,7 +283,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static clickMarkerIconShow(mapId: string, marker: TypeClickMarker): void {
     // Project coords
-    const projectedCoords = api.utilities.projection.transformPoints(
+    const projectedCoords = Projection.transformPoints(
       [marker.lnglat],
       `EPSG:4326`,
       `EPSG:${this.getMapStateProtected(mapId).currentProjection}`
@@ -402,7 +403,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       const currentView = this.getMapViewer(mapId).map.getView();
       const currentCenter = currentView.getCenter();
       const currentProjection = currentView.getProjection().getCode();
-      const newCenter = api.utilities.projection.transformPoints([currentCenter!], currentProjection, 'EPSG:4326')[0];
+      const newCenter = Projection.transformPoints([currentCenter!], currentProjection, 'EPSG:4326')[0];
       const newProjection = projectionCode as TypeValidMapProjectionCodes;
 
       // create new view
@@ -410,7 +411,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         zoom: currentView.getZoom() as number,
         minZoom: currentView.getMinZoom(),
         maxZoom: currentView.getMaxZoom(),
-        center: api.utilities.projection.transformPoints([newCenter], 'EPSG:4326', `EPSG:${newProjection}`)[0] as [number, number],
+        center: Projection.transformPoints([newCenter], 'EPSG:4326', `EPSG:${newProjection}`)[0] as [number, number],
         projection: `EPSG:${newProjection}`,
       });
 
@@ -516,9 +517,16 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     layerInfos.forEach((layerInfo) => {
       if (layerInfo) {
-        // eslint-disable-next-line no-param-reassign
-        layerInfo!.visible = newValue || !layerVisibility;
-        this.getMapViewerLayerAPI(mapId).geoviewLayer(layerInfo.layerPath).setVisible(layerInfo.visible, layerInfo.layerPath);
+        // Determine the outcome of the new visibility based on parameters
+        const newVisibility = newValue !== undefined ? newValue : !layerVisibility;
+
+        // If the new visibility is different than before
+        if (newVisibility !== layerVisibility) {
+          // Go for it
+          // eslint-disable-next-line no-param-reassign
+          layerInfo.visible = newVisibility;
+          api.maps[mapId].layer.geoviewLayer(layerInfo.layerPath).setVisible(layerInfo.visible, layerInfo.layerPath);
+        }
       }
     });
 
@@ -693,12 +701,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
       (indicatorBox[i] as HTMLElement).style.display = 'none';
     }
 
-    const projectionConfig = api.utilities.projection.projections[this.getMapState(mapId).currentProjection];
+    const projectionConfig = Projection.projections[this.getMapState(mapId).currentProjection];
     if (bbox) {
       // GV There were issues with fromLonLat in rare cases in LCC projections, transformExtent seems to solve them.
       // GV fromLonLat and transformExtent give differing results in many cases, fromLonLat had issues with the first
       // GV three results from a geolocator search for "vancouver river"
-      const convertedExtent = api.utilities.projection.transformExtent(bbox, 'EPSG:4326', projectionConfig);
+      const convertedExtent = Projection.transformExtent(bbox, 'EPSG:4326', projectionConfig);
 
       // Highlight
       this.getMapViewerLayerAPI(mapId).featureHighlight.highlightGeolocatorBBox(convertedExtent);
@@ -716,7 +724,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         (indicatorBox[i] as HTMLElement).style.display = '';
       }
     } else {
-      const projectedCoords = api.utilities.projection.transformPoints(
+      const projectedCoords = Projection.transformPoints(
         [coords],
         `EPSG:4326`,
         `EPSG:${this.getMapStateProtected(mapId).currentProjection}`
@@ -739,11 +747,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static zoomToInitialExtent(mapId: string): Promise<void> {
     const center = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter![1];
     const zoom = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter![0];
-    const projectedCoords = api.utilities.projection.transformPoints(
-      [center],
-      `EPSG:4326`,
-      `EPSG:${this.getMapStateProtected(mapId).currentProjection}`
-    );
+    const projectedCoords = Projection.transformPoints([center], `EPSG:4326`, `EPSG:${this.getMapStateProtected(mapId).currentProjection}`);
     const extent: Extent = [...projectedCoords[0], ...projectedCoords[0]];
     const options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: zoom, duration: OL_ZOOM_DURATION };
 
@@ -752,11 +756,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static zoomToMyLocation(mapId: string, position: GeolocationPosition): Promise<void> {
     const coord: Coordinate = [position.coords.longitude, position.coords.latitude];
-    const projectedCoords = api.utilities.projection.transformPoints(
-      [coord],
-      `EPSG:4326`,
-      `EPSG:${this.getMapStateProtected(mapId).currentProjection}`
-    );
+    const projectedCoords = Projection.transformPoints([coord], `EPSG:4326`, `EPSG:${this.getMapStateProtected(mapId).currentProjection}`);
 
     const extent: Extent = [...projectedCoords[0], ...projectedCoords[0]];
     const options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: 13, duration: OL_ZOOM_DURATION };
