@@ -1,4 +1,3 @@
-import { useTheme } from '@mui/material/styles';
 import { TypeWindow } from 'geoview-core/src/core/types/global-types';
 import { ChartType, SchemaValidator } from 'geochart';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
@@ -12,12 +11,12 @@ import {
   useGeochartLayerDataArrayBatch,
   useGeochartSelectedLayerPath,
 } from 'geoview-core/src/core/stores/store-interface-and-intial-values/geochart-state';
-import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
+import { useAppDisplayLanguage, useAppGuide } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
+import Markdown from 'markdown-to-jsx';
 import { GeoChart } from './geochart';
 import { GeoViewGeoChartConfig } from './geochart-types';
-import { getSxClasses } from './geochart-style';
 
 interface GeoChartPanelProps {
   mapId: string;
@@ -40,9 +39,6 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const { api, react } = cgpv;
   const { useState, useCallback, useMemo, useEffect, useRef } = react;
 
-  const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
-
   // Get states and actions from store
   const configObj = useGeochartConfigs();
   const visibleLayers = useMapVisibleLayers() as string[];
@@ -50,6 +46,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const selectedLayerPath = useGeochartSelectedLayerPath() as string;
   const { setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass } = useGeochartStoreActions();
   const displayLanguage = useAppDisplayLanguage();
+  const guide = useAppGuide();
 
   // Create the validator shared for all the charts in the footer
   const [schemaValidator] = useState<SchemaValidator>(new SchemaValidator());
@@ -266,12 +263,9 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
           )}
           {!selectedLayerPath && (
             <Paper sx={{ padding: '2rem' }}>
-              <Typography variant="h3" gutterBottom sx={sxClasses.geochartInstructionsTitle}>
-                {api.utilities.core.getLocalizedMessage('geochart.panel.clickMap', displayLanguage)}
-              </Typography>
-              <Typography component="p" sx={sxClasses.geochartInstructionsBody}>
-                {api.utilities.core.getLocalizedMessage('geochart.panel.clickMap', displayLanguage)}
-              </Typography>
+              <Box className="guideBox">
+                <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.chart!.content}</Markdown>
+              </Box>
             </Paper>
           )}
         </Layout>
