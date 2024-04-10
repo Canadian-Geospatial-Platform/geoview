@@ -38,7 +38,6 @@ class GeoChartFooterPlugin extends FooterPlugin {
         title: 'Chart',
         panel: {
           chart: 'chart',
-          clickMap: 'Click on the map on a layer with a graph',
           loadingUI: 'Loading the Chart panel',
         },
       },
@@ -48,7 +47,6 @@ class GeoChartFooterPlugin extends FooterPlugin {
         title: 'Graphique',
         panel: {
           chart: 'graphique',
-          clickMap: 'Cliquez sur la map sur la couche ayant un graphique',
           loadingUI: "Chargement de l'interface pour graphique",
         },
       },
