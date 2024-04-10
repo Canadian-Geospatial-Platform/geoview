@@ -5,7 +5,7 @@ import { FlatStyle } from 'ol/style/flat';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
-import { GeoUtilities } from '@/geo//utils/utilities';
+import { convertTypeFeatureStyleToOpenLayersStyle } from '@/geo//utils/utilities';
 
 import { Interaction, InteractionOptions } from './interaction';
 
@@ -22,25 +22,26 @@ export type DrawOptions = InteractionOptions & {
 /**
  * Class used for drawing features on a map
  *
- * @exports
  * @class Draw
+ * @extends {Interaction}
+ * @exports
  */
 export class Draw extends Interaction {
-  // The embedded Open Layers Draw component
-  ol_draw: OLDraw;
+  /** The embedded OpenLayers Draw component. */
+  #ol_draw: OLDraw;
 
-  // Keep all callback delegates references
-  private onDrawStartHandlers: DrawDelegate[] = [];
+  /** Callback handlers for the drawstart event. */
+  #onDrawStartHandlers: DrawDelegate[] = [];
 
-  // Keep all callback delegates references
-  private onDrawEndHandlers: DrawDelegate[] = [];
+  /** Callback handlers for the drawend event. */
+  #onDrawEndHandlers: DrawDelegate[] = [];
 
-  // Keep all callback delegates references
-  private onDrawAbortHandlers: DrawDelegate[] = [];
+  /** Callback handlers for the drawabort event. */
+  #onDrawAbortHandlers: DrawDelegate[] = [];
 
   /**
-   * Initialize Draw component
-   * @param {DrawOptions} options object to configure the initialization of the Draw interaction
+   * Initializes a Draw component.
+   * @param {DrawOptions} options - Object to configure the initialization of the Draw interaction.
    */
   constructor(options: DrawOptions) {
     super(options);
@@ -53,115 +54,118 @@ export class Draw extends Interaction {
     const olOptions: OLDrawOptions = {
       source: geomGroup?.vectorSource,
       type: (options.type as OLGeomType) || 'Polygon',
-      style: new GeoUtilities().convertTypeFeatureStyleToOpenLayersStyle(options.style) as FlatStyle,
+      style: convertTypeFeatureStyleToOpenLayersStyle(options.style) as FlatStyle,
       freehand: options.freehand,
     };
 
-    // Create the Open Layers Draw component
-    this.ol_draw = new OLDraw(olOptions);
+    // Instantiate the OpenLayers Draw interaction
+    this.#ol_draw = new OLDraw(olOptions);
 
-    // Wire handler when drawing starts
-    this.ol_draw.on('drawstart', this.emitDrawStart);
-    this.ol_draw.on('drawend', this.emitDrawEnd);
-    this.ol_draw.on('drawabort', this.emitDrawAbort);
+    // Register handlers for draw events
+    this.#ol_draw.on('drawstart', this.#emitDrawStart.bind(this));
+    this.#ol_draw.on('drawend', this.#emitDrawEnd.bind(this));
+    this.#ol_draw.on('drawabort', this.#emitDrawAbort.bind(this));
   }
 
   /**
    * Starts the interaction on the map
    */
-  public startInteraction() {
-    // Redirect
-    super.startInteraction(this.ol_draw);
+  startInteraction(): void {
+    // Redirect to super method to start interaction
+    super.startInteraction(this.#ol_draw);
   }
 
   /**
    * Stops the interaction on the map
    */
-  public stopInteraction() {
-    // Redirect
-    super.stopInteraction(this.ol_draw);
+  stopInteraction(): void {
+    // Redirect to super method to stop interaction
+    super.stopInteraction(this.#ol_draw);
   }
 
   /**
-   * Emits an event to all handlers.
-   * @param {OLDrawEvent} event The event to emit
+   * Emits the drawstart event the all registered handlers.
+   * @param {OLDrawEvent} event - The event to emit.
+   * @private
    */
-  emitDrawStart = (event: OLDrawEvent) => {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onDrawStartHandlers, event);
-  };
+  #emitDrawStart(event: OLDrawEvent): void {
+    // Emit the drawstart event
+    EventHelper.emitEvent(this, this.#onDrawStartHandlers, event);
+  }
 
   /**
-   * Wires an event handler.
-   * @param {DrawDelegate} callback The callback to be executed whenever the event is emitted
+   * Registers a callback handler for the drawstart event.
+   * @param {DrawDelegate} callback - The callback to be executed whenever the event is emitted.
    */
-  onDrawStart = (callback: DrawDelegate): void => {
-    // Wire the event handler
-    EventHelper.onEvent(this.onDrawStartHandlers, callback);
-  };
+  onDrawStart(callback: DrawDelegate): void {
+    // Register the drawstart event callback
+    EventHelper.onEvent(this.#onDrawStartHandlers, callback);
+  }
 
   /**
-   * Unwires an event handler.
-   * @param {DrawDelegate} callback The callback to stop being called whenever the event is emitted
+   * Unregisters a callback handler for the drawstart event.
+   * @param {DrawDelegate} callback - The callback to stop being called whenever the event is emitted.
    */
-  offDrawStart = (callback: DrawDelegate): void => {
-    // Unwire the event handler
-    EventHelper.offEvent(this.onDrawStartHandlers, callback);
-  };
+  offDrawStart(callback: DrawDelegate): void {
+    // Unregister the drawstart event callback
+    EventHelper.offEvent(this.#onDrawStartHandlers, callback);
+  }
 
   /**
-   * Emits an event to all handlers.
-   * @param {OLDrawEvent} event The event to emit
+   * Emits the drawend event the all registered handlers.
+   * @param {OLDrawEvent} event - The event to emit.
+   * @private
    */
-  emitDrawEnd = (event: OLDrawEvent) => {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onDrawEndHandlers, event);
-  };
+  #emitDrawEnd(event: OLDrawEvent): void {
+    // Emit the drawend event
+    EventHelper.emitEvent(this, this.#onDrawEndHandlers, event);
+  }
 
   /**
-   * Wires an event handler.
-   * @param {DrawDelegate} callback The callback to be executed whenever the event is emitted
+   * Registers a callback handler for the drawend event.
+   * @param {DrawDelegate} callback - The callback to be executed whenever the event is emitted.
    */
-  onDrawEnd = (callback: DrawDelegate): void => {
-    // Wire the event handler
-    EventHelper.onEvent(this.onDrawEndHandlers, callback);
-  };
+  onDrawEnd(callback: DrawDelegate): void {
+    // Register the drawend event callback
+    EventHelper.onEvent(this.#onDrawEndHandlers, callback);
+  }
 
   /**
-   * Unwires an event handler.
-   * @param {DrawDelegate} callback The callback to stop being called whenever the event is emitted
+   * Unregisters a callback handler for the drawend event.
+   * @param {DrawDelegate} callback - The callback to stop being called whenever the event is emitted.
    */
-  offDrawEnd = (callback: DrawDelegate): void => {
-    // Unwire the event handler
-    EventHelper.offEvent(this.onDrawEndHandlers, callback);
-  };
+  offDrawEnd(callback: DrawDelegate): void {
+    // Unregister the drawend event callback
+    EventHelper.offEvent(this.#onDrawEndHandlers, callback);
+  }
 
   /**
-   * Emits an event to all handlers.
-   * @param {OLDrawEvent} event The event to emit
+   * Emits the drawabort event the all registered handlers.
+   * @param {OLDrawEvent} event - The event to emit.
+   * @private
    */
-  emitDrawAbort = (event: OLDrawEvent) => {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onDrawAbortHandlers, event);
-  };
+  #emitDrawAbort(event: OLDrawEvent): void {
+    // Emit the drawabort event
+    EventHelper.emitEvent(this, this.#onDrawAbortHandlers, event);
+  }
 
   /**
-   * Wires an event handler.
-   * @param {DrawDelegate} callback The callback to be executed whenever the event is emitted
+   * Registers a callback handler for the drawabort event.
+   * @param {DrawDelegate} callback - The callback to be executed whenever the event is emitted.
    */
-  onDrawAbort = (callback: DrawDelegate): void => {
-    // Wire the event handler
-    EventHelper.onEvent(this.onDrawAbortHandlers, callback);
-  };
+  onDrawAbort(callback: DrawDelegate): void {
+    // Register the drawabort event callback
+    EventHelper.onEvent(this.#onDrawAbortHandlers, callback);
+  }
 
   /**
-   * Unwires an event handler.
-   * @param {DrawDelegate} callback The callback to stop being called whenever the event is emitted
+   * Unregisters a callback handler for the drawabort event.
+   * @param {DrawDelegate} callback - The callback to stop being called whenever the event is emitted.
    */
-  offDrawAbort = (callback: DrawDelegate): void => {
-    // Unwire the event handler
-    EventHelper.offEvent(this.onDrawAbortHandlers, callback);
-  };
+  offDrawAbort(callback: DrawDelegate): void {
+    // Unregister the drawabort event callback
+    EventHelper.offEvent(this.#onDrawAbortHandlers, callback);
+  }
 }
 
 /**

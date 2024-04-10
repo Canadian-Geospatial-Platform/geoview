@@ -1,20 +1,21 @@
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import { GeoCore } from '@/geo/layer/other/geocore';
-import { Geometry } from '@/geo/layer/geometry/geometry';
+import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { FeatureHighlight } from '@/geo/utils/feature-highlight';
 
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 import { Config } from '@/core/utils/config/config';
-import { generateId, showError, replaceParams, getLocalizedMessage, whenThisThen } from '@/core/utils/utilities';
-import { MapConfigLayerEntry, MapViewer, TypeListOfGeoviewLayerConfig, TypeOrderedLayerInfo } from '@/core/types/cgpv-types';
+import { generateId, whenThisThen } from '@/core/utils/utilities';
 import { ConfigBaseClass, LayerStatusChangedEvent } from '@/core/utils/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
 import { AbstractGeoViewLayer, GeoViewLayerRegistrationEvent } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
+  MapConfigLayerEntry,
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
+  TypeListOfGeoviewLayerConfig,
   TypeListOfLocalizedLanguages,
   layerEntryIsGroupLayer,
   mapConfigLayerEntryIsGeoCore,
@@ -32,17 +33,21 @@ import { layerConfigIsXYZTiles, XYZTiles } from '@/geo/layer/geoview-layers/rast
 import { layerConfigIsVectorTiles, VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { CSV, layerConfigIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
 
-import { HoverFeatureInfoLayerSet } from '../utils/hover-feature-info-layer-set';
-import { AllFeatureInfoLayerSet } from '../utils/all-feature-info-layer-set';
-import { LegendsLayerSet } from '../utils/legends-layer-set';
-import { FeatureInfoLayerSet } from '../utils/feature-info-layer-set';
-import { LayerSet } from '../utils/layer-set';
+import { HoverFeatureInfoLayerSet } from '@/geo/utils/hover-feature-info-layer-set';
+import { AllFeatureInfoLayerSet } from '@/geo/utils/all-feature-info-layer-set';
+import { LegendsLayerSet } from '@/geo/utils/legends-layer-set';
+import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
+import { LayerSet } from '@/geo/utils/layer-set';
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
+import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { MapViewer } from '@/geo/map/map-viewer';
+import { api } from '@/app';
 
 export type TypeRegisteredLayers = { [layerPath: string]: TypeLayerEntryConfig };
 
 export type GeoViewLayerAddedResult = {
-  layerBeingAdded: AbstractGeoViewLayer;
-  promiseLayerOnMap: Promise<void>;
+  layer: AbstractGeoViewLayer;
+  promiseLayer: Promise<void>;
 };
 
 /**
@@ -59,15 +64,15 @@ export class LayerApi {
   geoviewLayers: { [geoviewLayerId: string]: AbstractGeoViewLayer } = {};
 
   // used to access geometry API to create and manage geometries
-  geometry: Geometry | undefined;
+  geometry: GeometryApi;
 
   // order to load layers
   initialLayerOrder: Array<TypeOrderedLayerInfo> = [];
 
   /** used to reference the map viewer */
-  private mapViewer: MapViewer;
+  mapViewer: MapViewer;
 
-  private get mapId(): string {
+  get mapId(): string {
     return this.mapViewer.mapId;
   }
 
@@ -92,18 +97,21 @@ export class LayerApi {
   // Feature info layer set associated to the map
   featureInfoLayerSet: FeatureInfoLayerSet;
 
+  // Keep all callback delegates references
+  #onLayerAddedHandlers: LayerAddedDelegate[] = [];
+
   /**
    * Initializes layer types and listen to add/remove layer events from outside
    * @param {MapViewer} mapViewer a reference to the map viewer
    */
   constructor(mapViewer: MapViewer) {
     this.mapViewer = mapViewer;
-    this.legendsLayerSet = LegendsLayerSet.get(this, this.mapId);
-    this.hoverFeatureInfoLayerSet = HoverFeatureInfoLayerSet.get(this, this.mapId);
-    this.allFeatureInfoLayerSet = AllFeatureInfoLayerSet.get(this, this.mapId);
-    this.featureInfoLayerSet = FeatureInfoLayerSet.get(this, this.mapId);
+    this.legendsLayerSet = new LegendsLayerSet(this);
+    this.hoverFeatureInfoLayerSet = new HoverFeatureInfoLayerSet(this);
+    this.allFeatureInfoLayerSet = new AllFeatureInfoLayerSet(this);
+    this.featureInfoLayerSet = new FeatureInfoLayerSet(this);
 
-    this.geometry = new Geometry(this.mapId);
+    this.geometry = new GeometryApi(this.mapId);
     this.featureHighlight = new FeatureHighlight(this.mapId);
   }
 
@@ -119,11 +127,10 @@ export class LayerApi {
       const subLayerPath = layerPath.endsWith(layerEntryConfig.layerId) ? layerPath : `${layerPath}/${layerEntryConfig.layerId}`;
       const layerInfo: TypeOrderedLayerInfo = {
         layerPath: subLayerPath,
-        alwaysVisible: layerEntryConfig.initialSettings?.visible === 'always',
-        visible: layerEntryConfig.initialSettings?.visible !== 'no',
-        removable: layerEntryConfig.initialSettings?.removable !== undefined ? layerEntryConfig.initialSettings?.removable : true,
+        visible: layerEntryConfig.initialSettings?.states?.visible !== false,
         queryable: layerEntryConfig.source?.featureInfo?.queryable !== undefined ? layerEntryConfig.source?.featureInfo?.queryable : true,
-        hoverable: layerEntryConfig.initialSettings?.hoverable !== undefined ? layerEntryConfig.initialSettings?.hoverable : true,
+        hoverable:
+          layerEntryConfig.initialSettings?.states?.hoverable !== undefined ? layerEntryConfig.initialSettings?.states?.hoverable : true,
       };
       newOrderedLayerInfos.push(layerInfo);
       if (layerEntryConfig.listOfLayerEntryConfig?.length) {
@@ -140,9 +147,7 @@ export class LayerApi {
         }`;
         const layerInfo: TypeOrderedLayerInfo = {
           layerPath,
-          alwaysVisible: geoviewLayerConfig.initialSettings?.visible === 'always',
-          visible: geoviewLayerConfig.initialSettings?.visible !== 'no',
-          removable: geoviewLayerConfig.initialSettings?.removable !== undefined ? geoviewLayerConfig.initialSettings?.removable : true,
+          visible: geoviewLayerConfig.initialSettings?.states?.visible !== false,
         };
         newOrderedLayerInfos.push(layerInfo);
         (geoviewLayerConfig as TypeGeoviewLayerConfig).listOfLayerEntryConfig.forEach((layerEntryConfig) => {
@@ -162,7 +167,7 @@ export class LayerApi {
    * @param {MapConfigLayerEntry[]} mapConfigLayerEntries an optional array containing layers passed within the map config
    */
   loadListOfGeoviewLayer(mapConfigLayerEntries?: MapConfigLayerEntry[]): void {
-    const validGeoviewLayerConfigs = this.deleteDuplicatAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries);
+    const validGeoviewLayerConfigs = this.#deleteDuplicatAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries);
 
     // set order for layers to appear on the map according to config
     const promisesOfGeoCoreGeoviewLayers: Promise<TypeListOfGeoviewLayerConfig>[] = [];
@@ -214,8 +219,9 @@ export class LayerApi {
    * Validates the geoview layer configuration array to eliminate duplicate entries and inform the user.
    * @param {MapConfigLayerEntry[]} mapConfigLayerEntries The Map Config Layer Entries to validate.
    * @returns {MapConfigLayerEntry[]} The new configuration with duplicate entries eliminated.
+   * @private
    */
-  private deleteDuplicatAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries?: MapConfigLayerEntry[]): MapConfigLayerEntry[] {
+  #deleteDuplicatAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries?: MapConfigLayerEntry[]): MapConfigLayerEntry[] {
     if (mapConfigLayerEntries && mapConfigLayerEntries.length > 0) {
       const validGeoviewLayerConfigs = mapConfigLayerEntries.filter((geoviewLayerConfigToCreate, configToCreateIndex) => {
         for (let configToTestIndex = 0; configToTestIndex < mapConfigLayerEntries.length; configToTestIndex++) {
@@ -224,7 +230,7 @@ export class LayerApi {
             // We keep the first instance of the duplicate entry.
             configToCreateIndex > configToTestIndex
           ) {
-            this.printDuplicateGeoviewLayerConfigError(geoviewLayerConfigToCreate);
+            this.#printDuplicateGeoviewLayerConfigError(geoviewLayerConfigToCreate);
             return false;
           }
         }
@@ -238,37 +244,25 @@ export class LayerApi {
   /**
    * Prints an error message for the duplicate geoview layer configuration.
    * @param {MapConfigLayerEntry} geoviewLayerConfig The Map Config Layer Entry in error.
+   * @private
    */
-  private printDuplicateGeoviewLayerConfigError(mapConfigLayerEntry: MapConfigLayerEntry) {
-    const message = replaceParams(
-      [mapConfigLayerEntry.geoviewLayerId, this.mapId],
-      getLocalizedMessage(this.mapId, 'validation.layer.usedtwice')
-    );
-    showError(this.mapId, message);
+  #printDuplicateGeoviewLayerConfigError(mapConfigLayerEntry: MapConfigLayerEntry) {
+    // TODO: find a more centralized way to trap error and display message
+    api.maps[this.mapId].notifications.showError('validation.layer.usedtwice', [mapConfigLayerEntry.geoviewLayerId, this.mapId]);
     // Log
     logger.logError(`Duplicate use of geoview layer identifier ${mapConfigLayerEntry.geoviewLayerId} on map ${this.mapId}`);
   }
 
   /**
-   * Returns the GeoView instance associated to a specific layer path. The first element of the layerPath
+   * Returns the GeoView instance associated to the layer path. The first element of the layerPath
    * is the geoviewLayerId.
    * @param {string} layerPath The layer path to the layer's configuration.
    *
    * @returns {AbstractGeoViewLayer} Returns the geoview instance associated to the layer path.
    */
   geoviewLayer(layerPath: string): AbstractGeoViewLayer {
-    // TODO: Refactor - Move this method next to the getGeoviewLayerByLayerPath equivalent. And then rename it?
     // The first element of the layerPath is the geoviewLayerId
-    const geoviewLayerInstance = this.geoviewLayers[layerPath.split('/')[0]];
-
-    // TODO: Check #1857 - Why set the `layerPathAssociatedToTheGeoviewLayer` property on the fly? Should likely set this somewhere else than in this function that looks more like a getter.
-    // TO.DOCONT: It seems `layerPathAssociatedToTheGeoviewLayer` is indeed used many places, notably in applyFilters logic.
-    // TO.DOCONT: If all those places rely on the `layerPathAssociatedToTheGeoviewLayer` to be set, that logic using layerPathAssociatedToTheGeoviewLayer should be moved over there.
-    // TO.DOCONT: If there's more other places relying on the `layerPathAssociatedToTheGeoviewLayer`, then it's not ideal,
-    // TO.DOCONT: because it's assuming/relying on the fact that all those other places use this specific geoviewLayer() prior to do their work.
-    // TO.DOCONT: There's likely some separation of logic to apply here. Make this function more evident that it 'sets' something, not just 'gets' a GeoViewLayer.
-    geoviewLayerInstance.layerPathAssociatedToTheGeoviewLayer = layerPath;
-    return geoviewLayerInstance;
+    return this.geoviewLayers[layerPath.split('/')[0]];
   }
 
   /**
@@ -286,14 +280,14 @@ export class LayerApi {
    * @param mapId The map id to add to
    * @param uuid The GeoCore UUID
    */
-  addGeoviewLayerByGeoCoreUUID = async (uuid: string): Promise<void> => {
+  async addGeoviewLayerByGeoCoreUUID(uuid: string): Promise<void> {
     const geoCoreGeoviewLayerInstance = new GeoCore(this.mapId, this.mapViewer.getDisplayLanguage());
     const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(uuid);
     layers.forEach((geoviewLayerConfig) => {
       // Redirect
       this.addGeoviewLayer(geoviewLayerConfig);
     });
-  };
+  }
 
   /**
    * Adds a layer to the map. This is the main method to add a GeoView Layer on the map.
@@ -303,39 +297,49 @@ export class LayerApi {
    * @returns {GeoViewLayerAddedResult | undefined} The result of the addition of the geoview layer.
    * The result contains the instanciated GeoViewLayer along with a promise that will resolve when the layer will be officially on the map.
    */
-  addGeoviewLayer = (
+  addGeoviewLayer(
     geoviewLayerConfig: TypeGeoviewLayerConfig,
     optionalSuportedLanguages?: TypeListOfLocalizedLanguages
-  ): GeoViewLayerAddedResult | undefined => {
+  ): GeoViewLayerAddedResult | undefined {
     // eslint-disable-next-line no-param-reassign
     geoviewLayerConfig.geoviewLayerId = generateId(geoviewLayerConfig.geoviewLayerId);
+    // TODO: Refactor - We should not create a new config here.
+    // TO.DOCONT: The layer class should receive an instance of configuration in is constructor.
+    // TO.DOCONT: Here the function sends the config to this class to get the structure to use to generate layers.
+    // TO.DOCONT: We should not have link to config anymore...
     // create a new config object for this map element
     const config = new Config(this.mapViewer.map.getTargetElement());
 
     const suportedLanguages = optionalSuportedLanguages || config.configValidation.defaultMapFeaturesConfig.suportedLanguages;
+
+    // TODO: Refactor - This should be deal with the config classes and this class pushes the structure ready for consumption by layer orchestrator
     config.configValidation.validateListOfGeoviewLayerConfig(suportedLanguages, [geoviewLayerConfig]);
 
-    if (geoviewLayerConfig.geoviewLayerId in this.geoviewLayers) this.printDuplicateGeoviewLayerConfigError(geoviewLayerConfig);
+    if (geoviewLayerConfig.geoviewLayerId in this.geoviewLayers) this.#printDuplicateGeoviewLayerConfigError(geoviewLayerConfig);
     else {
       // Adds the configuration to the list in map
       // TODO: Refactor - Figure out why doing this - and then not do this
-      this.mapViewer.mapFeaturesConfig.map.listOfGeoviewLayerConfig!.push(geoviewLayerConfig);
+      // TO.DOCONT: 2024-03-20 as part of the layers refactoring, this has been commented out, leave it commented for a bit
+      // TO.DOCONT: until things are confirmed to be still working
+      // this.mapViewer.mapFeaturesConfig.map.listOfGeoviewLayerConfig!.push(geoviewLayerConfig);
 
       // Process the addition of the layer
-      return this.#onAddGeoviewLayer(geoviewLayerConfig);
+      return this.#addGeoviewLayerStep2(geoviewLayerConfig);
     }
 
     // Not added
     return undefined;
-  };
+  }
 
   /**
    * Continues the addition of the geoview layer.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The geoview layer configuration to add
    * @returns {GeoViewLayerAddedResult | undefined} The result of the addition of the geoview layer.
    * The result contains the instanciated GeoViewLayer along with a promise that will resolve when the layer will be officially on the map.
+   * @private
    */
-  #onAddGeoviewLayer = (geoviewLayerConfig: TypeGeoviewLayerConfig): GeoViewLayerAddedResult | undefined => {
+  #addGeoviewLayerStep2(geoviewLayerConfig: TypeGeoviewLayerConfig): GeoViewLayerAddedResult | undefined {
+    // TODO: Refactor - Here the function should use the structure created by validation config with the metadata fetch and no need to pass the validation.
     let layerBeingAdded: AbstractGeoViewLayer | undefined;
     if (layerConfigIsGeoJSON(geoviewLayerConfig)) {
       layerBeingAdded = new GeoJSON(this.mapId, geoviewLayerConfig);
@@ -370,15 +374,17 @@ export class LayerApi {
       // Add in the geoviewLayers set
       this.geoviewLayers[layerBeingAdded.geoviewLayerId] = layerBeingAdded;
 
-      // Wire a handle when the layer wants to register
-      layerBeingAdded.onGeoViewLayerRegistration(this.#handleLayerRegistration.bind(this));
+      // Register a handle when the layer wants to register
+      layerBeingAdded.onGeoViewLayerRegistration((geoviewLayer: AbstractGeoViewLayer, registrationEvent: GeoViewLayerRegistrationEvent) =>
+        this.#handleLayerRegistration(geoviewLayer, registrationEvent)
+      );
 
       // Prepare mandatory registrations
       // TODO: Refactor - this shouldn't have to be mandatory! And not a function of the layer.
       layerBeingAdded.initRegisteredLayers(this);
 
       // Create a promise about the layer will be on the map
-      const promiseLayerOnMap = new Promise<void>((resolve, reject) => {
+      const promiseLayer = new Promise<void>((resolve, reject) => {
         // Continue the addition process
         layerBeingAdded!
           .createGeoViewLayers()
@@ -388,6 +394,9 @@ export class LayerApi {
 
             // Resolve, done
             resolve();
+
+            // Emit about it
+            this.#emitLayerAdded({ layer: layerBeingAdded! });
           })
           .catch((error) => {
             // Reject
@@ -396,19 +405,20 @@ export class LayerApi {
       });
 
       // Return the layer with the promise it'll be on the map
-      return { layerBeingAdded, promiseLayerOnMap };
+      return { layer: layerBeingAdded, promiseLayer };
     }
 
     // Not added
     return undefined;
-  };
+  }
 
   /**
    * Continues the addition of the geoview layer.
    * Adds the layer to the map if valid. If not (is a string) emits an error.
    * @param {any} geoviewLayer the layer config
+   * @private
    */
-  #addToMap = (geoviewLayer: AbstractGeoViewLayer): void => {
+  #addToMap(geoviewLayer: AbstractGeoViewLayer): void {
     // if the returned layer object has something in the layerLoadError, it is because an error was detected
     // do not add the layer to the map
     if (geoviewLayer.layerLoadError.length !== 0) {
@@ -418,8 +428,8 @@ export class LayerApi {
         // Log the details in the console
         logger.logError(loggerMessage);
 
-        const message = replaceParams([layer, this.mapId], getLocalizedMessage(this.mapId, 'validation.layer.loadfailed'));
-        showError(this.mapId, message);
+        // TODO: find a more centralized way to trap error and display message
+        api.maps[this.mapId].notifications.showError('validation.layer.loadfailed', [layer, this.mapId]);
       });
     }
 
@@ -430,27 +440,29 @@ export class LayerApi {
     }
 
     // Log
-    logger.logInfo(`GeoView Layer added on map ${geoviewLayer.geoviewLayerId}`, geoviewLayer);
+    logger.logInfo(`GeoView Layer ${geoviewLayer.geoviewLayerId} added to map ${this.mapId}`, geoviewLayer);
 
     // Set the layer z indices
-    // TODO: Check - Confirm if this is still working, moved here as part of a refactor
     MapEventProcessor.setLayerZIndices(this.mapId);
-  };
+  }
 
   /**
    * Handles the registration of a geoview layer as part of its addition on the map.
    * This handle is called when the geoview layer is ready to be registered in the layer set.
    * @param {AbstractGeoViewLayer} geoviewLayer The Geoview layer to register
    * @param {GeoViewLayerRegistrationEvent} registrationEvent The registration event
+   * @private
    */
-  #handleLayerRegistration = (geoviewLayer: AbstractGeoViewLayer, registrationEvent: GeoViewLayerRegistrationEvent): void => {
+  #handleLayerRegistration(geoviewLayer: AbstractGeoViewLayer, registrationEvent: GeoViewLayerRegistrationEvent): void {
     // The layer is ready to be registered, take care of it
 
     // Log - leaving the line in comment as it can be pretty useful to uncomment it sometimes
     // logger.logDebug('REGISTERING LAYER', registrationEvent.action, registrationEvent.layerPath, registrationEvent.layerConfig);
 
-    // Wire handler on the layer config to track the status changed
-    registrationEvent.layerConfig.onLayerStatusChanged(this.#handleLayerStatusChanged.bind(this));
+    // Register a handler on the layer config to track the status changed
+    registrationEvent.layerConfig.onLayerStatusChanged((config: ConfigBaseClass, layerStatusEvent: LayerStatusChangedEvent) => {
+      this.#handleLayerStatusChanged(config, layerStatusEvent);
+    });
 
     // Tell the layer sets about it
     [this.legendsLayerSet, this.hoverFeatureInfoLayerSet, this.allFeatureInfoLayerSet, this.featureInfoLayerSet].forEach(
@@ -459,47 +471,78 @@ export class LayerApi {
         layerSet.registerOrUnregisterLayer(geoviewLayer, registrationEvent.layerPath, registrationEvent.action);
       }
     );
-  };
+  }
 
   /**
    * Handles when the layer status changes on a given layer/configuration as part of its addition on the map.
    * This handle is called when the geoview layer is being added.
    * @param {AbstractGeoViewLayer} geoviewLayer The Geoview layer to register
    * @param {GeoViewLayerRegistrationEvent} registrationEvent The registration event
+   * @private
    */
-  #handleLayerStatusChanged = (config: ConfigBaseClass, layerStatusEvent: LayerStatusChangedEvent) => {
+  #handleLayerStatusChanged(config: ConfigBaseClass, layerStatusEvent: LayerStatusChangedEvent) {
+    // The layer status has changed for the given config/layer, take care of it
+
     // Log - leaving the line in comment as it can be pretty useful to uncomment it sometimes
     // logger.logDebug('LAYER STATUS CHANGED', layerStatusEvent.layerPath, layerStatusEvent.layerStatus, config);
 
-    // The layer status has changed for the given config/layer, take care of it
+    // Tell the layer sets about it
     [this.legendsLayerSet, this.hoverFeatureInfoLayerSet, this.allFeatureInfoLayerSet, this.featureInfoLayerSet].forEach(
       (layerSet: LayerSet) => {
         // Process the layer status change
         layerSet.processLayerStatusChanged(config, layerStatusEvent.layerPath, layerStatusEvent.layerStatus);
       }
     );
-  };
+  }
+
+  /**
+   * Emits an event to all handlers.
+   * @param {LayerAddedEvent} event The event to emit
+   * @private
+   */
+  #emitLayerAdded(event: LayerAddedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerAddedHandlers, event);
+  }
+
+  /**
+   * Registers a layer added event handler.
+   * @param {LayerAddedDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onLayerAdded(callback: LayerAddedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerAddedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer added event handler.
+   * @param {LayerAddedDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offLayerAdded(callback: LayerAddedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerAddedHandlers, callback);
+  }
 
   /**
    * Removes all geoview layers from the map
    */
-  removeAllGeoviewLayers = (): void => {
+  removeAllGeoviewLayers(): void {
     // For each Geoview layers
     Object.values(this.geoviewLayers).forEach((layer: AbstractGeoViewLayer) => {
       // Remove it
       this.removeGeoviewLayer(layer.geoviewLayerId);
     });
-  };
+  }
 
   /**
    * Removes a geoview layer from the map
    *
    * @param {TypeGeoviewLayerConfig} geoviewLayer the layer configuration to remove
    */
-  removeGeoviewLayer = (geoviewLayerId: string): void => {
+  removeGeoviewLayer(geoviewLayerId: string): void {
     // Redirect (weird, but at the time of writing for this refactor - this was what it was doing)
     this.removeLayersUsingPath(geoviewLayerId);
-  };
+  }
 
   /**
    * Removes a layer from the map using its layer path. The path may point to the root geoview layer
@@ -507,7 +550,7 @@ export class LayerApi {
    *
    * @param {string} partialLayerPath the path of the layer to be removed
    */
-  removeLayersUsingPath = (partialLayerPath: string): void => {
+  removeLayersUsingPath(partialLayerPath: string): void {
     // A layer path is a slash seperated string made of the GeoView layer Id followed by the layer Ids
     const partialLayerPathNodes = partialLayerPath.split('/');
 
@@ -524,7 +567,7 @@ export class LayerApi {
       const pathBeginningAreEqual = partialLayerPathNodes.reduce<boolean>((areEqual, partialLayerPathNode, nodeIndex) => {
         return areEqual && partialLayerPathNode === completeLayerPathNodes[nodeIndex];
       }, true);
-      if (pathBeginningAreEqual) this.geoviewLayer(completeLayerPath).removeConfig();
+      if (pathBeginningAreEqual) this.geoviewLayer(completeLayerPath).removeConfig(completeLayerPath);
     });
     if (listOfLayerEntryConfigAffected) listOfLayerEntryConfigAffected.splice(indexToDelete!, 1);
 
@@ -540,23 +583,13 @@ export class LayerApi {
 
     // Log
     logger.logInfo(`Layer removed for ${partialLayerPath}`);
-  };
-
-  /**
-   * Searches for a layer using its id and return the layer data
-   *
-   * @param {string} geoviewLayerId the layer id to look for
-   * @returns the found layer data object
-   */
-  getGeoviewLayerById = (geoviewLayerId: string): AbstractGeoViewLayer | null => {
-    return this.geoviewLayers?.[geoviewLayerId] || null;
-  };
+  }
 
   /**
    * Asynchronously gets a layer using its id and return the layer data.
    * If the layer we're searching for has to be processed, set mustBeProcessed to true when awaiting on this method.
    * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
-   * Note this function uses the 'Async' suffix to differentiate it from 'getGeoviewLayerById'.
+   * Note this function uses the 'Async' suffix to differentiate it from 'geoviewLayer()'.
    *
    * @param {string} layerID the layer id to look for
    * @param {string} mustBeProcessed indicate if the layer we're searching for must be found only once processed
@@ -565,14 +598,14 @@ export class LayerApi {
    * @returns a promise with the AbstractGeoViewLayer
    * @throws an exception when the layer for the layer id couldn't be found, or waiting time expired
    */
-  getGeoviewLayerByIdAsync = async (
+  async getGeoviewLayerByIdAsync(
     geoviewLayerId: string,
     mustBeProcessed: boolean,
     timeout?: number,
     checkFrequency?: number
-  ): Promise<AbstractGeoViewLayer> => {
+  ): Promise<AbstractGeoViewLayer> {
     // Redirects
-    const layer = this.getGeoviewLayerById(geoviewLayerId);
+    const layer = this.geoviewLayer(geoviewLayerId);
 
     // If layer was found
     if (layer) {
@@ -591,7 +624,7 @@ export class LayerApi {
 
     // Throw
     throw new Error(`Layer ${geoviewLayerId} not found.`);
-  };
+  }
 
   /**
    * Returns the OpenLayer layer associated to a specific layer path.
@@ -599,12 +632,12 @@ export class LayerApi {
    *
    * @returns {BaseLayer | LayerGroup} Returns the OpenLayer layer associated to the layer path.
    */
-  getOLLayerByLayerPath = (layerPath: string): BaseLayer | LayerGroup => {
+  getOLLayerByLayerPath(layerPath: string): BaseLayer | LayerGroup {
     // Return the olLayer object from the registered layers
     const olLayer = this.registeredLayers[layerPath]?.olLayer;
     if (olLayer) return olLayer;
     throw new Error(`Layer at path ${layerPath} not found.`);
-  };
+  }
 
   /**
    * Asynchronously returns the OpenLayer layer associated to a specific layer path.
@@ -614,7 +647,7 @@ export class LayerApi {
    *
    * @returns {BaseLayer | LayerGroup} Returns the OpenLayer layer associated to the layer path.
    */
-  getOLLayerByLayerPathAsync = async (layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer | LayerGroup> => {
+  async getOLLayerByLayerPathAsync(layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer | LayerGroup> {
     // Make sure the open layer has been created, sometimes it can still be in the process of being created
     const promisedLayer = await whenThisThen(
       () => {
@@ -625,7 +658,7 @@ export class LayerApi {
     );
     // Here, the layer resolved
     return promisedLayer!;
-  };
+  }
 
   /**
    * Returns a Promise that will be resolved once the given layer is in a processed phase.
@@ -636,11 +669,11 @@ export class LayerApi {
    * @param {string} checkFrequency optionally indicate the frequency at which to check for the condition on the layer
    * @throws an exception when the layer failed to become in processed phase before the timeout expired
    */
-  waitForAllLayerStatusAreGreaterThanOrEqualTo = async (
+  async waitForAllLayerStatusAreGreaterThanOrEqualTo(
     geoviewLayerConfig: AbstractGeoViewLayer,
     timeout?: number,
     checkFrequency?: number
-  ): Promise<void> => {
+  ): Promise<void> {
     // Wait for the processed phase
     await whenThisThen(
       () => {
@@ -652,7 +685,7 @@ export class LayerApi {
 
     // Resolve successfully, otherwise an exception has been thrown already
     return Promise.resolve();
-  };
+  }
 
   /**
    * Highlights layer or sublayer on map
@@ -661,8 +694,8 @@ export class LayerApi {
    */
   highlightLayer(layerPath: string): void {
     this.removeHighlightLayer();
-    this.highlightedLayer = { layerPath, originalOpacity: this.geoviewLayer(layerPath).getOpacity() };
-    this.geoviewLayer(layerPath).setOpacity(1);
+    this.highlightedLayer = { layerPath, originalOpacity: this.geoviewLayer(layerPath).getOpacity(layerPath) };
+    this.geoviewLayer(layerPath).setOpacity(1, layerPath);
     // If it is a group layer, highlight sublayers
     if (layerEntryIsGroupLayer(this.registeredLayers[layerPath] as TypeLayerEntryConfig)) {
       Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
@@ -670,8 +703,8 @@ export class LayerApi {
           !registeredLayerPath.startsWith(layerPath) &&
           !layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath] as TypeLayerEntryConfig)
         ) {
-          const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
-          this.geoviewLayer(registeredLayerPath).setOpacity((otherOpacity || 1) * 0.25);
+          const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity(registeredLayerPath);
+          this.geoviewLayer(registeredLayerPath).setOpacity((otherOpacity || 1) * 0.25, registeredLayerPath);
         } else this.registeredLayers[registeredLayerPath].olLayer!.setZIndex(999);
       });
     } else {
@@ -681,8 +714,8 @@ export class LayerApi {
           registeredLayerPath !== layerPath &&
           !layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath] as TypeLayerEntryConfig)
         ) {
-          const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
-          this.geoviewLayer(registeredLayerPath).setOpacity((otherOpacity || 1) * 0.25);
+          const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity(registeredLayerPath);
+          this.geoviewLayer(registeredLayerPath).setOpacity((otherOpacity || 1) * 0.25, registeredLayerPath);
         }
       });
       this.registeredLayers[layerPath].olLayer!.setZIndex(999);
@@ -702,9 +735,9 @@ export class LayerApi {
             !registeredLayerPath.startsWith(layerPath) &&
             !layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath] as TypeLayerEntryConfig)
           ) {
-            const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
-            this.geoviewLayer(registeredLayerPath).setOpacity(otherOpacity ? otherOpacity * 4 : 1);
-          } else this.geoviewLayer(registeredLayerPath).setOpacity(originalOpacity || 1);
+            const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity(registeredLayerPath);
+            this.geoviewLayer(registeredLayerPath).setOpacity(otherOpacity ? otherOpacity * 4 : 1, registeredLayerPath);
+          } else this.geoviewLayer(registeredLayerPath).setOpacity(originalOpacity || 1, registeredLayerPath);
         });
       } else {
         Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
@@ -713,9 +746,9 @@ export class LayerApi {
             registeredLayerPath !== layerPath &&
             !layerEntryIsGroupLayer(this.registeredLayers[registeredLayerPath] as TypeLayerEntryConfig)
           ) {
-            const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity();
-            this.geoviewLayer(registeredLayerPath).setOpacity(otherOpacity ? otherOpacity * 4 : 1);
-          } else this.geoviewLayer(registeredLayerPath).setOpacity(originalOpacity || 1);
+            const otherOpacity = this.geoviewLayer(registeredLayerPath).getOpacity(registeredLayerPath);
+            this.geoviewLayer(registeredLayerPath).setOpacity(otherOpacity ? otherOpacity * 4 : 1, registeredLayerPath);
+          } else this.geoviewLayer(registeredLayerPath).setOpacity(originalOpacity || 1, registeredLayerPath);
         });
       }
       MapEventProcessor.setLayerZIndices(this.mapId);
@@ -724,3 +757,16 @@ export class LayerApi {
     }
   }
 }
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerAddedDelegate = EventDelegateBase<LayerApi, LayerAddedEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerAddedEvent = {
+  // The added layer
+  layer: AbstractGeoViewLayer;
+};

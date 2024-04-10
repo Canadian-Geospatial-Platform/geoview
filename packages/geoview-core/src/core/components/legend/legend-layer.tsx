@@ -17,7 +17,7 @@ import {
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { useMapStoreActions } from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
-import { LayerIcon } from '../common/layer-icon';
+import { LayerIcon } from '@/core/components/common/layer-icon';
 import { logger } from '@/core/utils/logger';
 
 interface LegendLayerProps {
@@ -55,7 +55,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
       return t('legend.subLayersCount').replace('{count}', getLayerChildren().length.toString());
     }
     if (layer.items.length) {
-      const count = layer.items.filter((d) => d.isVisible !== 'no').length;
+      const count = layer.items.filter((d) => d.isVisible !== false).length;
       const totalCount = layer.items.length;
       return t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
     }
@@ -88,7 +88,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
     return (
       <List sx={{ width: '100%' }}>
         {layer.items
-          .filter((d) => d.isVisible !== 'no')
+          .filter((d) => d.isVisible !== false)
           .map((item) => (
             <ListItem key={item.icon} className={!item.isVisible ? 'unchecked' : ''}>
               <ListItemIcon>{item.icon ? <img alt={item.name} src={item.icon} /> : <BrowserNotSupportedIcon />}</ListItemIcon>

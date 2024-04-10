@@ -14,9 +14,6 @@
           "aliasFields": { "en": "Province,Creation Date,My Images", "fr": "Province,Date de création,Mes images" }
         }
       },
-      "initialSettings": {
-        "visible": "yes"
-      },
       "style": {
         "Polygon": {
           "styleId": "uniqueValueId",
@@ -33,7 +30,7 @@
               "lineStyle": "dot"
             }
           },
-          "defaultVisible": "yes",
+          "defaultVisible": true,
           "fields": ["Province"],
           "uniqueValueStyleInfo": [
             {
@@ -50,7 +47,7 @@
                 }
               },
               "values": ["Quebec"],
-              "visible": "always"
+              "visible": true
             },
             {
               "label": "Alberta",
@@ -66,7 +63,7 @@
                 }
               },
               "values": ["Alberta"],
-              "visible": "no"
+              "visible": false
             }
           ]
         }
@@ -83,9 +80,6 @@
           "fieldTypes": "number,string,date",
           "aliasFields": { "en": "Road Number,Province,Creation Date", "fr": "Numéro de route,Province,Date de création" }
         }
-      },
-      "initialSettings": {
-        "visible": "yes"
       },
       "style": {
         "LineString": {
@@ -112,9 +106,6 @@
           "aliasFields": { "en": "data,label,Creation Date", "fr": "données,étiquette,Date de création" }
         }
       },
-      "initialSettings": {
-        "visible": "yes"
-      },
       "style": {
         "Point": {
           "styleType": "simple",
@@ -140,9 +131,6 @@
           "aliasFields": { "en": "Red,Green,Blue,Yellow,Orange,Creation Date", "fr": "Rouge,Vert,Bleu,Jaune,Orange,Date de création" }
         }
       },
-      "initialSettings": {
-        "visible": "yes"
-      },
       "style": {
         "Point": {
           "styleType": "simple",
@@ -165,9 +153,6 @@
           "fieldTypes": "number,number,number,number,number,date",
           "aliasFields": { "en": "Red,Green,Blue,Yellow,Orange,Creation Date", "fr": "Rouge,Vert,Bleu,Jaune,Orange,Date de création" }
         }
-      },
-      "initialSettings": {
-        "visible": "yes"
       },
       "style": {
         "Point": {
@@ -192,9 +177,6 @@
           "aliasFields": { "en": "Red,Green,Blue,Yellow,Orange,Creation Date", "fr": "Rouge,Vert,Bleu,Jaune,Orange,Date de création" }
         }
       },
-      "initialSettings": {
-        "visible": "yes"
-      },
       "style": {
         "Point": {
           "styleType": "simple",
@@ -217,9 +199,6 @@
           "fieldTypes": "number,number,number,number,number,date",
           "aliasFields": { "en": "Red,Green,Blue,Yellow,Orange,Creation Date", "fr": "Rouge,Vert,Bleu,Jaune,Orange,Date de création" }
         }
-      },
-      "initialSettings": {
-        "visible": "yes"
       },
       "style": {
         "Point": {

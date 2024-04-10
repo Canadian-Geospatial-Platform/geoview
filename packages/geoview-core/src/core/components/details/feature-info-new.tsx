@@ -4,7 +4,7 @@ import { getCenter } from 'ol/extent';
 
 import { useTheme, Theme } from '@mui/material/styles';
 import { List, ZoomInSearchIcon, Tooltip, IconButton, Checkbox, Paper, Box, Typography } from '@/ui';
-import { useDetailsStoreCheckedFeatures, useDetailsStoreActions } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { useDetailsCheckedFeatures, useDetailsStoreActions } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { delay } from '@/core/utils/utilities';
@@ -43,7 +43,7 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
   const nameFieldValue = feature?.nameField ? (feature?.fieldInfo?.[feature.nameField]?.value as string) || '' : 'No name';
 
   // states from store
-  const checkedFeatures = useDetailsStoreCheckedFeatures();
+  const checkedFeatures = useDetailsCheckedFeatures();
   const { addCheckedFeature, removeCheckedFeature } = useDetailsStoreActions();
   const { zoomToExtent, transformPoints, showClickMarker } = useMapStoreActions();
 
@@ -95,7 +95,7 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
       })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checkedFeatures, feature]); // ! Check if feature is necessary in this dependency array? If so explain it in comment? Should be featurUid?
+  }, [checkedFeatures, feature]); // GV Check if feature is necessary in this dependency array? If so explain it in comment? Should be featurUid?
 
   return (
     <Paper sx={{ boxShadow: 'none', border: 'none', paddingTop: '0.5rem' }}>

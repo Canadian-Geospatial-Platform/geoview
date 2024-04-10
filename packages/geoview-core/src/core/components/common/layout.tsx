@@ -1,6 +1,7 @@
 import { useState, useCallback, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { Box } from '@/ui';
+import { Box, FullscreenIcon, IconButton } from '@/ui';
 import { logger } from '@/core/utils/logger';
 import { LayerList, LayerListEntry } from './layer-list';
 import { ResponsiveGrid } from './responsive-grid';
@@ -8,6 +9,8 @@ import { LayerTitle } from './layer-title';
 import { EnlargeButton } from './enlarge-button';
 import { CloseButton } from './close-button';
 import { useFooterPanelHeight } from './use-footer-panel-height';
+import { getSxClasses } from './layout-style';
+import FullScreenDialog from './full-screen-dialog';
 
 interface LayoutProps {
   children?: ReactNode;
@@ -20,9 +23,12 @@ interface LayoutProps {
 
 export function Layout({ children, layerList, selectedLayerPath, onLayerListClicked, onIsEnlargeClicked, fullWidth }: LayoutProps) {
   const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
+  const { t } = useTranslation<string>();
 
   const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
   const [isEnlarged, setIsEnlarged] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   // Custom hook for calculating the height of footer panel
   const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'default' });
@@ -86,7 +92,8 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
     <Box>
       <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
         {!fullWidth && (
-          <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlarged}>
+          <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlarged} aria-hidden={!isLayersPanelVisible}>
+            {/* This panel is hidden from screen readers when not visible */}
             {null}
           </ResponsiveGrid.Left>
         )}
@@ -103,13 +110,23 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
               {layerList.find((layer) => layer.layerPath === selectedLayerPath)?.layerName ?? ''}
             </LayerTitle>
 
-            <Box>
+            <Box sx={{ display: 'flex', flexDirection: 'row', gap: '0.6rem' }}>
               {!fullWidth && <EnlargeButton isEnlarged={isEnlarged} onSetIsEnlarged={handleIsEnlarge} />}
+              <IconButton
+                size="small"
+                onClick={() => setIsFullScreen(!isFullScreen)}
+                tooltip={isFullScreen ? t('general.closeFullscreen')! : t('general.openFullscreen')!}
+                className="style2"
+                color="primary"
+              >
+                <FullscreenIcon />
+              </IconButton>
               {!!layerList.length && (
                 <CloseButton
                   isLayersPanelVisible={isLayersPanelVisible}
                   onSetIsLayersPanelVisible={setIsLayersPanelVisible}
                   fullWidth={fullWidth}
+                  aria-label={t('general.close')}
                 />
               )}
             </Box>
@@ -122,6 +139,7 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
           isEnlarged={isEnlarged}
           isLayersPanelVisible={isLayersPanelVisible}
           fullWidth={fullWidth}
+          aria-hidden={!isLayersPanelVisible}
         >
           {renderLayerList()}
         </ResponsiveGrid.Left>
@@ -131,7 +149,13 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
           isLayersPanelVisible={isLayersPanelVisible}
           fullWidth={fullWidth}
         >
-          {children}
+          <FullScreenDialog open={isFullScreen} onClose={() => setIsFullScreen(false)}>
+            <Box sx={sxClasses.rightGridContent} className="fullscreen-mode">
+              {children}
+            </Box>
+          </FullScreenDialog>
+
+          <Box sx={sxClasses.rightGridContent}>{children}</Box>
         </ResponsiveGrid.Right>
       </ResponsiveGrid.Root>
     </Box>

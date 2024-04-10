@@ -11,7 +11,6 @@ import { getLocalizedValue, getXMLHttpRequest } from '@/core/utils/utilities';
 import { TimeDimensionESRI } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
@@ -22,11 +21,12 @@ import {
   TypeLayerEntryConfig,
   TypeListOfLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
-
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
 import { EsriFeature, geoviewEntryIsEsriFeature } from './vector/esri-feature';
-import { EsriBaseRenderer, getStyleFromEsriRenderer } from '../../renderer/esri-renderer';
+import { EsriBaseRenderer, getStyleFromEsriRenderer } from '@/geo/renderer/esri-renderer';
 import { EsriImage } from './raster/esri-image';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
@@ -36,7 +36,7 @@ import { EsriImage } from './raster/esri-image';
  * @returns {Promise<void>} A promise that the execution is completed.
  */
 export async function commonfetchServiceMetadata(this: EsriDynamic | EsriFeature): Promise<void> {
-  const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+  const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
   if (metadataUrl) {
     try {
       const metadataString = await getXMLHttpRequest(`${metadataUrl}?f=json`);
@@ -108,8 +108,6 @@ export function commonValidateListOfLayerEntryConfig(this: EsriDynamic | EsriFea
     if (this.metadata!.layers[esriIndex]?.subLayerIds?.length) {
       // We will create dynamically a group layer.
       const newListOfLayerEntryConfig: TypeListOfLayerEntryConfig = [];
-      // Group layer are not registered to layer sets.
-      if (this.registerToLayerSetListenerFunctions[layerPath]) this.unregisterFromLayerSets(layerConfig as AbstractBaseLayerEntryConfig);
       const switchToGroupLayer = Cast<GroupLayerEntryConfig>(cloneDeep(layerConfig));
       switchToGroupLayer.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
       switchToGroupLayer.layerName = {
@@ -205,18 +203,21 @@ export function commonGetFieldDomain(
 /** ***************************************************************************************************************************
  * This method will create a Geoview temporal dimension if it exist in the service metadata
  *
- * @param {EsriDynamic | EsriFeature} this The ESRI layer instance pointer.
+ * @param {EsriDynamic | EsriFeature} layer The ESRI layer instance pointer.
  * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
  * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig The layer entry to configure
+ * @param {boolean} singleHandle True for ESRI Image
  */
 export function commonProcessTemporalDimension(
-  this: EsriDynamic | EsriFeature | EsriImage,
+  layer: EsriDynamic | EsriFeature | EsriImage,
   esriTimeDimension: TypeJsonObject,
-  layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
+  layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig,
+  singleHandle?: boolean
 ) {
   if (esriTimeDimension !== undefined) {
-    this.layerTemporalDimension[layerConfig.layerPath] = api.dateUtilities.createDimensionFromESRI(
-      Cast<TimeDimensionESRI>(esriTimeDimension)
+    layer.layerTemporalDimension[layerConfig.layerPath] = api.utilities.date.createDimensionFromESRI(
+      Cast<TimeDimensionESRI>(esriTimeDimension),
+      singleHandle
     );
   }
 }
@@ -262,7 +263,7 @@ export function commonProcessFeatureInfoConfig(
       }
       if (processAliasFields) layerConfig.source.featureInfo.aliasFields = { en: '' };
       (layerMetadata.fields as TypeJsonArray).forEach((fieldEntry) => {
-        if (fieldEntry.name === layerMetadata.geometryField.name) return;
+        if (fieldEntry?.name === layerMetadata.geometryField.name) return;
         if (processOutField) {
           layerConfig.source.featureInfo!.outfields!.en = `${layerConfig.source.featureInfo!.outfields!.en}${fieldEntry.name},`;
           const fieldType = commonGetFieldType.call(this, fieldEntry.name as string, layerConfig);
@@ -309,13 +310,13 @@ export function commonProcessInitialSettings(
 ) {
   // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
   const layerMetadata = this.layerMetadata[layerConfig.layerPath];
-  if (layerConfig.initialSettings?.visible === undefined)
-    layerConfig.initialSettings!.visible = layerMetadata.defaultVisibility ? 'yes' : 'no';
-  // ! TODO: The solution implemented in the following two lines is not right. scale and zoom are not the same things.
-  // ! if (layerConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerConfig.initialSettings.minZoom = minScale;
-  // ! if (layerConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerConfig.initialSettings.maxZoom = maxScale;
+  if (layerConfig.initialSettings?.states?.visible === undefined)
+    layerConfig.initialSettings!.states = { visible: !!layerMetadata.defaultVisibility };
+  // GV TODO: The solution implemented in the following two lines is not right. scale and zoom are not the same things.
+  // GV if (layerConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerConfig.initialSettings.minZoom = minScale;
+  // GV if (layerConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerConfig.initialSettings.maxZoom = maxScale;
   if (layerConfig.initialSettings?.extent)
-    layerConfig.initialSettings.extent = api.projection.transformExtent(
+    layerConfig.initialSettings.extent = api.utilities.projection.transformExtent(
       layerConfig.initialSettings.extent,
       'EPSG:4326',
       `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
@@ -349,9 +350,10 @@ export async function commonProcessLayerMetadata(
   if (layerEntryIsGroupLayer(layerConfig) && !layerConfig.isMetadataLayerGroup) return layerConfig;
   const { layerPath } = layerConfig;
 
-  let queryUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+  let queryUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
   if (queryUrl) {
-    queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
+    if (layerConfig.geoviewLayerConfig.geoviewLayerType !== CONST_LAYER_TYPES.ESRI_IMAGE)
+      queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
     try {
       const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=pjson`);
       if (data?.error) {
@@ -368,8 +370,13 @@ export async function commonProcessLayerMetadata(
         }
         this.processFeatureInfoConfig(layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig);
         this.processInitialSettings(layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig);
-        commonProcessTemporalDimension.call(this, data.timeInfo as TypeJsonObject, EsriLayerConfig);
       }
+      commonProcessTemporalDimension(
+        this,
+        data.timeInfo as TypeJsonObject,
+        EsriLayerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig,
+        this.type === CONST_LAYER_TYPES.ESRI_IMAGE
+      );
     } catch (error) {
       layerConfig.layerStatus = 'error';
       logger.logError('Error in commonProcessLayerMetadata', layerConfig, error);
@@ -412,7 +419,8 @@ export function parseFeatureInfoEntries(records: TypeJsonObject[]): TypeFeatureI
  */
 export async function queryRecordsByUrl(url: string): Promise<TypeFeatureInfoEntryPartial[] | null> {
   // TODO: Refactor - Suggestion to rework this function and the one in EsriDynamic.getFeatureInfoAtLongLat(), making
-  // TO.DO.CONT: the latter redirect to this one here and merge some logic between the 2 functions ideally making this one here return a TypeFeatureInfoEntry[] with options to have returnGeometry=true or false and such.
+  // TO.DO.CONT: the latter redirect to this one here and merge some logic between the 2 functions ideally making this
+  // TO.DO.CONT: one here return a TypeFeatureInfoEntry[] with options to have returnGeometry=true or false and such.
   // Query the data
   try {
     const response = await fetch(url);

@@ -38,7 +38,7 @@ import {
   isClassBreakStyleConfig,
   TypeUniqueValueStyleConfig,
   TypeClassBreakStyleConfig,
-} from '../map/map-schema-types';
+} from '@/geo/map/map-schema-types';
 import {
   binaryKeywors,
   defaultColor,
@@ -51,12 +51,13 @@ import {
   operatorPriority,
   unaryKeywords,
 } from './geoview-renderer-types';
-import { TypeVectorLayerStyles } from '../layer/geoview-layers/abstract-geoview-layers';
+import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 type TypeStyleProcessor = (
   styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
@@ -1117,9 +1118,9 @@ export class GeoviewRenderer {
     if (isUniqueValueStyleConfig(styleSettings)) {
       const { defaultSettings, fields, uniqueValueStyleInfo } = styleSettings;
       const i = this.searchUniqueValueEntry(fields, uniqueValueStyleInfo, feature!);
-      if (i !== undefined && (legendFilterIsOff || uniqueValueStyleInfo[i].visible !== 'no'))
+      if (i !== undefined && (legendFilterIsOff || uniqueValueStyleInfo[i].visible !== false))
         return this.processSimplePoint(uniqueValueStyleInfo[i].settings);
-      if (i === undefined && defaultSettings !== undefined && (legendFilterIsOff || styleSettings.defaultVisible !== 'no'))
+      if (i === undefined && defaultSettings !== undefined && (legendFilterIsOff || styleSettings.defaultVisible !== false))
         return this.processSimplePoint(defaultSettings);
     }
     return undefined;
@@ -1147,9 +1148,9 @@ export class GeoviewRenderer {
     if (isUniqueValueStyleConfig(styleSettings)) {
       const { defaultSettings, fields, uniqueValueStyleInfo } = styleSettings;
       const i = this.searchUniqueValueEntry(fields, uniqueValueStyleInfo, feature!);
-      if (i !== undefined && (legendFilterIsOff || uniqueValueStyleInfo[i].visible !== 'no'))
+      if (i !== undefined && (legendFilterIsOff || uniqueValueStyleInfo[i].visible !== false))
         return this.processSimpleLineString(uniqueValueStyleInfo[i].settings, feature);
-      if (i === undefined && defaultSettings !== undefined && (legendFilterIsOff || styleSettings.defaultVisible !== 'no'))
+      if (i === undefined && defaultSettings !== undefined && (legendFilterIsOff || styleSettings.defaultVisible !== false))
         return this.processSimpleLineString(defaultSettings, feature);
     }
     return undefined;
@@ -1177,9 +1178,9 @@ export class GeoviewRenderer {
     if (isUniqueValueStyleConfig(styleSettings)) {
       const { defaultSettings, fields, uniqueValueStyleInfo } = styleSettings;
       const i = this.searchUniqueValueEntry(fields, uniqueValueStyleInfo, feature!);
-      if (i !== undefined && (legendFilterIsOff || uniqueValueStyleInfo[i].visible !== 'no'))
+      if (i !== undefined && (legendFilterIsOff || uniqueValueStyleInfo[i].visible !== false))
         return this.processSimplePolygon(uniqueValueStyleInfo[i].settings, feature);
-      if (i === undefined && defaultSettings !== undefined && (legendFilterIsOff || styleSettings.defaultVisible !== 'no'))
+      if (i === undefined && defaultSettings !== undefined && (legendFilterIsOff || styleSettings.defaultVisible !== false))
         return this.processSimplePolygon(defaultSettings, feature);
     }
     return undefined;
@@ -1234,9 +1235,9 @@ export class GeoviewRenderer {
     if (isClassBreakStyleConfig(styleSettings)) {
       const { defaultSettings, field, classBreakStyleInfo } = styleSettings;
       const i = this.searchClassBreakEntry(field, classBreakStyleInfo, feature!);
-      if (i !== undefined && (legendFilterIsOff || classBreakStyleInfo[i].visible !== 'no'))
+      if (i !== undefined && (legendFilterIsOff || classBreakStyleInfo[i].visible !== false))
         return this.processSimplePoint(classBreakStyleInfo[i].settings);
-      if (i === undefined && defaultSettings !== undefined && (legendFilterIsOff || styleSettings.defaultVisible !== 'no'))
+      if (i === undefined && defaultSettings !== undefined && (legendFilterIsOff || styleSettings.defaultVisible !== false))
         return this.processSimplePoint(defaultSettings);
     }
     return undefined;
@@ -1264,9 +1265,9 @@ export class GeoviewRenderer {
     if (isClassBreakStyleConfig(styleSettings)) {
       const { defaultSettings, field, classBreakStyleInfo } = styleSettings;
       const i = this.searchClassBreakEntry(field, classBreakStyleInfo, feature!);
-      if (i !== undefined && (legendFilterIsOff || classBreakStyleInfo[i].visible !== 'no'))
+      if (i !== undefined && (legendFilterIsOff || classBreakStyleInfo[i].visible !== false))
         return this.processSimpleLineString(classBreakStyleInfo[i].settings, feature);
-      if (i === undefined && defaultSettings !== undefined && (legendFilterIsOff || styleSettings.defaultVisible !== 'no'))
+      if (i === undefined && defaultSettings !== undefined && (legendFilterIsOff || styleSettings.defaultVisible !== false))
         return this.processSimpleLineString(defaultSettings, feature);
     }
     return undefined;
@@ -1294,9 +1295,9 @@ export class GeoviewRenderer {
     if (isClassBreakStyleConfig(styleSettings)) {
       const { defaultSettings, field, classBreakStyleInfo } = styleSettings;
       const i = this.searchClassBreakEntry(field, classBreakStyleInfo, feature!);
-      if (i !== undefined && (legendFilterIsOff || classBreakStyleInfo[i].visible !== 'no'))
+      if (i !== undefined && (legendFilterIsOff || classBreakStyleInfo[i].visible !== false))
         return this.processSimplePolygon(classBreakStyleInfo[i].settings, feature);
-      if (i === undefined && defaultSettings !== undefined && (legendFilterIsOff || styleSettings.defaultVisible !== 'no'))
+      if (i === undefined && defaultSettings !== undefined && (legendFilterIsOff || styleSettings.defaultVisible !== false))
         return this.processSimplePolygon(defaultSettings, feature);
     }
     return undefined;
@@ -1315,7 +1316,7 @@ export class GeoviewRenderer {
     layerConfig: VectorTilesLayerEntryConfig | VectorLayerEntryConfig
   ): TypeStyleConfig | undefined {
     if (layerConfig.style === undefined) layerConfig.style = {};
-    const label = getLocalizedValue(layerConfig.layerName, this.mapId) || layerConfig.layerId;
+    const label = getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) || layerConfig.layerId;
     if (geometryType === 'Point') {
       const settings: TypeSimpleSymbolVectorConfig = {
         type: 'simpleSymbol',
@@ -1606,10 +1607,10 @@ export class GeoviewRenderer {
             if (operand.nodeValue === null) dataStack.push(operand);
             else if (typeof operand.nodeValue !== 'string') throw new Error(`DATE operator error`);
             else {
-              operand.nodeValue = api.dateUtilities.applyInputDateFormat(operand.nodeValue);
+              operand.nodeValue = api.utilities.date.applyInputDateFormat(operand.nodeValue);
               dataStack.push({
                 nodeType: NodeType.variable,
-                nodeValue: api.dateUtilities.convertToMilliseconds(api.dateUtilities.convertToUTC(operand.nodeValue)),
+                nodeValue: api.utilities.date.convertToMilliseconds(api.utilities.date.convertToUTC(operand.nodeValue)),
               });
             }
             break;

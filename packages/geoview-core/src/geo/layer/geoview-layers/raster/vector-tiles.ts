@@ -22,13 +22,15 @@ import {
   TypeLocalizedString,
   TypeTileGrid,
 } from '@/geo/map/map-schema-types';
-import { getLocalizedValue, getMinOrMaxExtents, showError } from '@/core/utils/utilities';
+import { getMinOrMaxExtents } from '@/geo/utils/utilities';
+import { getLocalizedValue } from '@/core/utils/utilities';
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
 import { TileLayerEntryConfig } from '@/core/utils/config/validation-classes/tile-layer-entry-config';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 // TODO: Implement method to validate Vector Tiles service
 // TODO: Add more customization (minZoom, maxZoom, TMS)
@@ -112,7 +114,12 @@ export class VectorTiles extends AbstractGeoViewRaster {
    */
   protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
     const fieldDefinitions = this.layerMetadata[layerConfig.layerPath].source.featureInfo;
-    const fieldIndex = getLocalizedValue(Cast<TypeLocalizedString>(fieldDefinitions.outfields), this.mapId)?.split(',').indexOf(fieldName);
+    const fieldIndex = getLocalizedValue(
+      Cast<TypeLocalizedString>(fieldDefinitions.outfields),
+      AppEventProcessor.getDisplayLanguage(this.mapId)
+    )
+      ?.split(',')
+      .indexOf(fieldName);
     if (!fieldIndex || fieldIndex === -1) return 'string';
     return (fieldDefinitions.fieldTypes as string).split(',')[fieldIndex!] as 'string' | 'date' | 'number';
   }
@@ -152,18 +159,21 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
   protected processOneLayerEntry(layerConfig: VectorTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
-    // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
-    // !            layerStatus values is correctly sequenced.
+    // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
+    // GV            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
     const sourceOptions: SourceOptions<Feature> = {
-      url: getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId),
+      url: getLocalizedValue(layerConfig.source.dataAccessPath as TypeLocalizedString, AppEventProcessor.getDisplayLanguage(this.mapId)),
     };
 
     if (
       this.metadata?.tileInfo?.spatialReference?.wkid &&
       MapEventProcessor.getMapState(this.mapId).currentProjection !== this.metadata.tileInfo.spatialReference.wkid
     ) {
-      showError(this.mapId, `Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
+      // TODO: find a more centralized way to trap error and display message
+      api.maps[this.mapId].notifications.showError(
+        `Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`
+      );
       logger.logError(`Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
       // eslint-disable-next-line no-param-reassign
       layerConfig.layerStatus = 'error';
@@ -187,13 +197,13 @@ export class VectorTiles extends AbstractGeoViewRaster {
     sourceOptions.tileGrid = new TileGrid(layerConfig.source!.tileGrid!);
     const tileLayerOptions: TileOptions<VectorTileSource> = { source: new VectorTileSource(sourceOptions) };
     // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-    if (layerConfig.initialSettings?.className !== undefined) tileLayerOptions.className = layerConfig.initialSettings?.className;
-    if (layerConfig.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerConfig.initialSettings?.extent;
-    if (layerConfig.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
-    if (layerConfig.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerConfig.initialSettings?.minZoom;
-    if (layerConfig.initialSettings?.opacity !== undefined) tileLayerOptions.opacity = layerConfig.initialSettings?.opacity;
-    // ! IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
-    // !            in the 'loading' state if the flag value is 'no'.
+    if (layerConfig.initialSettings?.className !== undefined) tileLayerOptions.className = layerConfig.initialSettings.className;
+    if (layerConfig.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerConfig.initialSettings.extent;
+    if (layerConfig.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
+    if (layerConfig.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
+    if (layerConfig.initialSettings?.states?.opacity !== undefined) tileLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
+    // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
+    // GV            in the 'loading' state if the flag value is false.
 
     // TODO remove after demoing again
     const declutter = this.mapId !== 'LYR2';
@@ -211,7 +221,9 @@ export class VectorTiles extends AbstractGeoViewRaster {
     if (this.metadata?.defaultStyles)
       applyStyle(
         layerConfig.olLayer as VectorTileLayer,
-        `${getLocalizedValue(this.metadataAccessPath, this.mapId)}${this.metadata.defaultStyles}/root.json`,
+        `${getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId))}${
+          this.metadata.defaultStyles
+        }/root.json`,
         { resolutions: resolutions?.length ? resolutions : [] }
       );
 
@@ -241,7 +253,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
 
       if (layerConfig.initialSettings?.extent)
         // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings.extent = api.projection.transformExtent(
+        layerConfig.initialSettings.extent = api.utilities.projection.transformExtent(
           layerConfig.initialSettings.extent,
           'EPSG:4326',
           `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
@@ -251,30 +263,14 @@ export class VectorTiles extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Get the bounds of the layer represented in the layerConfig pointed to by the cached layerPath, returns updated bounds
-   *
-   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
-   * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
-   *
-   * @returns {Extent} The new layer bounding box.
-   */
-  protected getBounds(bounds: Extent, notUsed?: never): Extent | undefined;
-
-  /** ***************************************************************************************************************************
    * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
    *
    * @param {string} layerPath The Layer path to the layer's configuration.
    * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
-   * @returns {Extent} The new layer bounding box.
+   * @returns {Extent | undefined} The new layer bounding box.
    */
-  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined;
-
-  // See above headers for signification of the parameters. The first lines of the method select the template
-  // used based on the parameter types received.
-  protected getBounds(parameter1?: string | Extent, parameter2?: Extent): Extent | undefined {
-    const layerPath = typeof parameter1 === 'string' ? parameter1 : this.layerPathAssociatedToTheGeoviewLayer;
-    let bounds = typeof parameter1 !== 'string' ? parameter1 : parameter2;
+  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
     const layerConfig = this.getLayerConfig(layerPath);
     const layerBounds = (layerConfig?.olLayer as TileLayer<VectorTileSource>).getSource()?.getTileGrid()?.getExtent();
     const projection =
@@ -284,14 +280,16 @@ export class VectorTiles extends AbstractGeoViewRaster {
     if (layerBounds) {
       let transformedBounds = layerBounds;
       if (this.metadata?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.mapId).currentProjection) {
-        transformedBounds = api.projection.transformExtent(
+        transformedBounds = api.utilities.projection.transformExtent(
           layerBounds,
           `EPSG:${projection}`,
           `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
         );
       }
 
+      // eslint-disable-next-line no-param-reassign
       if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
+      // eslint-disable-next-line no-param-reassign
       else bounds = getMinOrMaxExtents(bounds, transformedBounds);
     }
 
@@ -300,8 +298,8 @@ export class VectorTiles extends AbstractGeoViewRaster {
 
   // TODO: This section needs documentation (a header at least). Also, is it normal to have things hardcoded like that?
   addVectorTileLayer() {
-    // ! from code sandbox https://codesandbox.io/s/vector-tile-info-forked-g28jud?file=/main.js it works good
-    // ! from inside GEoView, even when not use, something is wrong.
+    // GV from code sandbox https://codesandbox.io/s/vector-tile-info-forked-g28jud?file=/main.js it works good
+    // GV from inside GEoView, even when not use, something is wrong.
     olms(
       'LYR3',
       'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/resources/styles/root.json?f=json'

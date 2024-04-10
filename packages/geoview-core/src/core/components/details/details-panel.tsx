@@ -12,17 +12,16 @@ import {
   Paper,
 } from '@/ui';
 import {
-  useMapStoreActions,
-  useMapVisibleLayers,
   useDetailsStoreActions,
-  useDetailsStoreCheckedFeatures,
-  useDetailsStoreLayerDataArrayBatch,
-  useDetailsStoreSelectedLayerPath,
-} from '@/core/stores';
+  useDetailsCheckedFeatures,
+  useDetailsLayerDataArrayBatch,
+  useDetailsSelectedLayerPath,
+} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { useMapStoreActions, useMapVisibleLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/utils/layer-set';
 
-import { LayerListEntry, Layout } from '../common';
+import { LayerListEntry, Layout } from '@/core/components/common';
 import { getSxClasses } from './details-style';
 import { FeatureInfo } from './feature-info-new';
 
@@ -45,9 +44,9 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   // Get states and actions from store
-  const selectedLayerPath = useDetailsStoreSelectedLayerPath();
-  const arrayOfLayerDataBatch = useDetailsStoreLayerDataArrayBatch();
-  const checkedFeatures = useDetailsStoreCheckedFeatures();
+  const selectedLayerPath = useDetailsSelectedLayerPath();
+  const arrayOfLayerDataBatch = useDetailsLayerDataArrayBatch();
+  const checkedFeatures = useDetailsCheckedFeatures();
   const visibleLayers = useMapVisibleLayers();
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
   const { addHighlightedFeature, removeHighlightedFeature } = useMapStoreActions();
@@ -290,7 +289,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
         // Log
         logger.logDebug('DETAILS-PANEL', 'select none', memoLayerSelectedItem);
         // None found, select none
-        //  TODO:: Investigate infinte loop in appbar for statement.
+        //  TODO:: Investigate infinte loop in AppBar for statement.
         // setSelectedLayerPath('');
       }
     }
@@ -395,7 +394,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
           fullWidth={fullWidth}
         >
           {memoSelectedLayerDataFeatures && (
-            <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer, maxHeight: '600px' }}>
+            <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer }}>
               <Grid container sx={sxClasses.rightPanelBtnHolder}>
                 <Grid item xs={6}>
                   <Box style={{ marginLeft: '22px' }}>
@@ -443,7 +442,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
             </Box>
           )}
           {!memoSelectedLayerDataFeatures && (
-            <Paper sx={{ padding: '2rem' }} className="bordered">
+            <Paper sx={{ padding: '2rem' }} className="unbordered">
               <Typography variant="h3" gutterBottom sx={sxClasses.detailsInstructionsTitle}>
                 {t('details.detailsInstructions')}
               </Typography>

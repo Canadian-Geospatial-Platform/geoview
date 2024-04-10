@@ -70,7 +70,6 @@
         try {
           if (document.getElementById('CHARTPLUGINCONFIG').value) config = JSON.parse(document.getElementById('CHARTPLUGINCONFIG').value);
         } catch (ex) {
-          cgpv.api.utilities.showError(mapId, 'Failed to create JSON from input data text area.');
           console.error(ex);
         }
 
@@ -114,15 +113,15 @@
       }
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init(async function () {
-        console.log('api is ready');
+      cgpv.init(async function (mapId) {
+        if (mapId === 'allMaps') {
+          // Load config
+          await importConfig();
 
-        // Load config
-        await importConfig();
-
-        //create snippets
-        createConfigSnippet();
-        createCodeSnippetUsingIDs();
+          // create snippets
+          createConfigSnippet();
+          createCodeSnippetUsingIDs();
+        }
       });
     </script>
   </body>

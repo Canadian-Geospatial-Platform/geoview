@@ -4,23 +4,20 @@ import { useTheme } from '@mui/material/styles';
 import { Box, FilterAltIcon, Paper, Skeleton, Typography } from '@/ui';
 import DataTable from './data-table';
 import {
+  useDataTableSelectedLayerPath,
+  useDataTableAllFeaturesDataArray,
+  useDataTableLayerSettings,
+  useDataTableTableHeight,
   useDataTableStoreActions,
-  useDataTableStoreMapFilteredRecord,
-  useDataTableStoreRowsFiltered,
-  useDataTableStoreSelectedLayerPath,
-  useDetailsStoreActions,
-  useDetailsStoreAllFeaturesDataArray,
-  useUIActiveFooterBarTabId,
-  useDatatableStoreTableHeight,
-  useMapVisibleLayers,
-} from '@/core/stores';
-import { LayerListEntry, Layout } from '../common';
+} from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useMapVisibleLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useUIActiveFooterBarTabId } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { LayerListEntry, Layout } from '@/core/components/common';
 import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
-import { LAYER_STATUS, TABS } from '@/app';
 import { TypeFieldEntry, TypeLayerData } from '@/geo/utils/layer-set';
-
 import { getSxClasses } from './data-table-style';
+import { LAYER_STATUS, TABS } from '@/core/utils/constant';
 
 export interface MappedLayerDataType extends TypeLayerData {
   fieldInfos: Record<string, TypeFieldEntry | undefined>;
@@ -39,16 +36,15 @@ export function Datapanel({ fullWidth }: DataPanelType) {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const layerData = useDetailsStoreAllFeaturesDataArray();
+  const layerData = useDataTableAllFeaturesDataArray();
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const tableHeight = useDatatableStoreTableHeight();
-  const selectedLayerPath = useDataTableStoreSelectedLayerPath();
-  const mapFiltered = useDataTableStoreMapFilteredRecord();
-  const rowsFiltered = useDataTableStoreRowsFiltered();
+  const tableHeight = useDataTableTableHeight();
+  const selectedLayerPath = useDataTableSelectedLayerPath();
+  const datatableSettings = useDataTableLayerSettings();
   const { setSelectedLayerPath } = useDataTableStoreActions();
-  const { triggerGetAllFeatureInfo } = useDetailsStoreActions();
+  const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
   const selectedTab = useUIActiveFooterBarTabId();
   const visibleLayers = useMapVisibleLayers();
 
@@ -78,7 +74,7 @@ export function Datapanel({ fullWidth }: DataPanelType) {
         !orderedLayerData.filter((layers) => layers.layerPath === _layer.layerPath && !!layers?.features?.length).length ||
         _layer.layerStatus === LAYER_STATUS.ERROR
       ) {
-        triggerGetAllFeatureInfo(_layer.layerPath, 'all');
+        triggerGetAllFeatureInfo(_layer.layerPath);
       }
     },
     [orderedLayerData, setSelectedLayerPath, triggerGetAllFeatureInfo]
@@ -89,7 +85,8 @@ export function Datapanel({ fullWidth }: DataPanelType) {
    * @param {string} layerPath The path of the layer
    * @returns boolean
    */
-  const isMapFilteredSelectedForLayer = (layerPath: string): boolean => !!mapFiltered[layerPath] && !!rowsFiltered[layerPath];
+  const isMapFilteredSelectedForLayer = (layerPath: string): boolean =>
+    !!datatableSettings[layerPath].mapFilteredRecord && !!datatableSettings[layerPath].rowsFilteredRecord;
 
   /**
    * Get number of features of a layer with filtered or selected layer or unknown when data table is loaded.
@@ -97,8 +94,8 @@ export function Datapanel({ fullWidth }: DataPanelType) {
    * @returns
    */
   const getFeaturesOfLayer = (layerPath: string): string => {
-    if (rowsFiltered && rowsFiltered[layerPath]) {
-      return `${rowsFiltered[layerPath]} ${t('dataTable.featureFiltered')}`;
+    if (datatableSettings[layerPath] && datatableSettings[layerPath].rowsFilteredRecord) {
+      return `${datatableSettings[layerPath].rowsFilteredRecord} ${t('dataTable.featureFiltered')}`;
     }
     let featureStr = t('dataTable.noFeatures');
     const features = orderedLayerData?.find((layer) => layer.layerPath === layerPath)?.features?.length ?? 0;

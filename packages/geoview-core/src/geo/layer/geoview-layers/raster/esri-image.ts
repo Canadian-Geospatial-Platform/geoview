@@ -1,11 +1,11 @@
-// We have many reassign for layerPath-layerConfig. We keep it global...
 import { ImageArcGISRest } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Image as ImageLayer } from 'ol/layer';
 import { Extent } from 'ol/extent';
 
-import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
+import { getLocalizedValue } from '@/core/utils/utilities';
+import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeJsonObject } from '@/core/types/global-types';
@@ -32,9 +32,10 @@ import {
   commonProcessInitialSettings,
   commonProcessLayerMetadata,
   commonProcessTemporalDimension,
-} from '../esri-layer-common';
+} from '@/geo/layer/geoview-layers/esri-layer-common';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
-export interface TypeEsriImageLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
+export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
   listOfLayerEntryConfig: EsriImageLayerEntryConfig[];
 }
@@ -132,7 +133,10 @@ export class EsriImage extends AbstractGeoViewRaster {
     try {
       const layerConfig = this.getLayerConfig(layerPath) as EsriImageLayerEntryConfig | undefined | null;
       if (!layerConfig) return null;
-      const legendUrl = `${getLocalizedValue(layerConfig.geoviewLayerConfig.metadataAccessPath, this.mapId)}/legend?f=pjson`;
+      const legendUrl = `${getLocalizedValue(
+        layerConfig.geoviewLayerConfig.metadataAccessPath,
+        AppEventProcessor.getDisplayLanguage(this.mapId)
+      )}/legend?f=pjson`;
       const response = await fetch(legendUrl);
       const legendJson: TypeEsriImageLayerLegend = await response.json();
       let legendInfo;
@@ -249,7 +253,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {EsriImageLayerEntryConfig} layerConfig The layer entry to configure
    */
   protected processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: EsriImageLayerEntryConfig) {
-    commonProcessTemporalDimension.call(this, esriTimeDimension, layerConfig);
+    commonProcessTemporalDimension(this, esriTimeDimension, layerConfig, true);
   }
 
   /** ***************************************************************************************************************************
@@ -291,12 +295,12 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
   protected processOneLayerEntry(layerConfig: EsriImageLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
-    // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
-    // !            layerStatus values is correctly sequenced.
+    // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
+    // GV            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
-    sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, this.mapId);
+    sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
     sourceOptions.params = { LAYERS: `show:${layerConfig.layerId}` };
     if (layerConfig.source.transparent) Object.defineProperty(sourceOptions.params, 'transparent', layerConfig.source.transparent!);
     if (layerConfig.source.format) Object.defineProperty(sourceOptions.params, 'format', layerConfig.source.format!);
@@ -312,11 +316,11 @@ export class EsriImage extends AbstractGeoViewRaster {
       properties: { layerConfig },
     };
     // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-    if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings?.className;
-    if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings?.extent;
-    if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings?.maxZoom;
-    if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings?.minZoom;
-    if (layerConfig.initialSettings?.opacity !== undefined) imageLayerOptions.opacity = layerConfig.initialSettings?.opacity;
+    if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings.className;
+    if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings.extent;
+    if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
+    if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
+    if (layerConfig.initialSettings?.states?.opacity !== undefined) imageLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
     // If a layer on the map has an initialSettings.visible set to false, its status will never reach the status 'loaded' because
     // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
     // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
@@ -333,14 +337,51 @@ export class EsriImage extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Get the bounds of the layer represented in the layerConfig pointed to by the cached layerPath, returns updated bounds
+   * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
+   * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
+   * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
+   * is done.
    *
-   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
-   * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
-   *
-   * @returns {Extent} The new layer bounding box.
+   * @param {string} layerPath The layer path to the layer's configuration.
+   * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+   * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  protected getBounds(bounds: Extent, notUsed?: never): Extent | undefined;
+  applyViewFilter(layerPath: string, filter: string, CombineLegendFilter?: boolean) {
+    const layerConfig = this.getLayerConfig(layerPath) as EsriImageLayerEntryConfig;
+    // Log
+    logger.logTraceCore('ESRIImage - applyViewFilter', layerPath);
+
+    // Get source
+    const source = (layerConfig.olLayer as ImageLayer<ImageArcGISRest>).getSource();
+    if (source) {
+      let filterValueToUse = filter;
+      layerConfig.olLayer!.set('legendFilterIsOff', !CombineLegendFilter);
+      if (CombineLegendFilter) layerConfig.olLayer?.set('layerFilter', filter);
+
+      if (filterValueToUse) {
+        filterValueToUse = filterValueToUse.replaceAll(/\s{2,}/g, ' ').trim();
+        const queryElements = filterValueToUse.split(/(?<=\b)\s*=/);
+        const dimension = queryElements[0].trim();
+        filterValueToUse = queryElements[1].trim();
+
+        // Convert date constants using the externalFragmentsOrder derived from the externalDateFormat
+        const searchDateEntry = [
+          ...`${filterValueToUse} `.matchAll(/(?<=^date\b\s')[\d/\-T\s:+Z]{4,25}(?=')|(?<=[(\s]date\b\s')[\d/\-T\s:+Z]{4,25}(?=')/gi),
+        ];
+        searchDateEntry.reverse();
+        searchDateEntry.forEach((dateFound) => {
+          // If the date has a time zone, keep it as is, otherwise reverse its time zone by changing its sign
+          const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
+          const reformattedDate = api.utilities.date.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
+          filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index! - 6)}${reformattedDate}${filterValueToUse!.slice(
+            dateFound.index! + dateFound[0].length + 2
+          )}`;
+        });
+        source.updateParams({ [dimension]: filterValueToUse.replace(/\s*/g, '') });
+        layerConfig.olLayer!.changed();
+      }
+    }
+  }
 
   /** ***************************************************************************************************************************
    * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
@@ -348,15 +389,9 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {string} layerPath The Layer path to the layer's configuration.
    * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
-   * @returns {Extent} The new layer bounding box.
+   * @returns {Extent | undefined} The new layer bounding box.
    */
-  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined;
-
-  // See above headers for signification of the parameters. The first lines of the method select the template
-  // used based on the parameter types received.
-  protected getBounds(parameter1?: string | Extent, parameter2?: Extent): Extent | undefined {
-    const layerPath = typeof parameter1 === 'string' ? parameter1 : this.layerPathAssociatedToTheGeoviewLayer;
-    let bounds = typeof parameter1 !== 'string' ? parameter1 : parameter2;
+  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
     const layerConfig = this.getLayerConfig(layerPath);
     const layerBounds = layerConfig?.initialSettings?.bounds || [];
     const projection = this.metadata?.fullExtent?.spatialReference?.wkid || MapEventProcessor.getMapState(this.mapId).currentProjection;
@@ -371,14 +406,16 @@ export class EsriImage extends AbstractGeoViewRaster {
     if (layerBounds) {
       let transformedBounds = layerBounds;
       if (this.metadata?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.mapId).currentProjection) {
-        transformedBounds = api.projection.transformExtent(
+        transformedBounds = api.utilities.projection.transformExtent(
           layerBounds,
           `EPSG:${projection}`,
           `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
         );
       }
 
+      // eslint-disable-next-line no-param-reassign
       if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
+      // eslint-disable-next-line no-param-reassign
       else bounds = getMinOrMaxExtents(bounds, transformedBounds);
     }
 

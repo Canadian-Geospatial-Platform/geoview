@@ -21,6 +21,7 @@ import { getSxClasses } from './notifications-style';
 import { useAppNotifications, useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
+import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 export type NotificationDetailsType = {
   key: string;
@@ -54,7 +55,7 @@ export default function Notifications(): JSX.Element {
 
   // get values from the store
   const notifications = useAppNotifications();
-
+  const interaction = useMapInteraction();
   const { removeNotification } = useAppStoreActions();
   const notificationsCount = _.sumBy(notifications, (n) => n.count);
 
@@ -118,7 +119,7 @@ export default function Notifications(): JSX.Element {
             tooltip="appbar.notifications"
             tooltipPlacement="bottom-end"
             onClick={handleOpenPopover}
-            className={`style3 ${open ? 'active' : ''}`}
+            className={`${interaction === 'dynamic' ? 'style3' : 'style4'} ${open ? 'active' : ''}`}
             color="primary"
           >
             <NotificationsIcon />

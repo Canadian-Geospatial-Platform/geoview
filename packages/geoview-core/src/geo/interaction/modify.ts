@@ -6,7 +6,7 @@ import { FlatStyle } from 'ol/style/flat';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
-import { GeoUtilities } from '@/geo/utils/utilities';
+import { convertTypeFeatureStyleToOpenLayersStyle } from '@/geo/utils/utilities';
 
 import { Interaction, InteractionOptions } from './interaction';
 
@@ -20,24 +20,24 @@ export type ModifyOptions = InteractionOptions & {
 };
 
 /**
- * Class used for modifying features on a map
- *
- * @exports
+ * Class used for modifying features on a map.
  * @class Modify
+ * @extends {Interaction}
+ * @exports
  */
 export class Modify extends Interaction {
-  // The embedded Open Layers Modify component
-  ol_modify: OLModify;
+  /** The embedded OpenLayers Modify component. */
+  #ol_modify: OLModify;
 
-  // Keep all callback delegates references
-  private onModifyStartedHandlers: ModifyDelegate[] = [];
+  /** Callback handlers for the modifystart event. */
+  #onModifyStartedHandlers: ModifyDelegate[] = [];
 
-  // Keep all callback delegates references
-  private onModifyEndedHandlers: ModifyDelegate[] = [];
+  /** Callback handlers for the modifyend event. */
+  #onModifyEndedHandlers: ModifyDelegate[] = [];
 
   /**
-   * Initialize Modify component
-   * @param {ModifyOptions} options object to configure the initialization of the Modify interaction
+   * Initializes a Modify component.
+   * @param {ModifyOptions} options - Object to configure the initialization of the Modify interaction.
    */
   constructor(options: ModifyOptions) {
     super(options);
@@ -45,7 +45,7 @@ export class Modify extends Interaction {
     // The OpenLayers Modify options
     // TODO: Enhancements - Add support for more modifying options
     const olOptions: OLModifyOptions = {
-      style: new GeoUtilities().convertTypeFeatureStyleToOpenLayersStyle(options.style) as FlatStyle,
+      style: convertTypeFeatureStyleToOpenLayersStyle(options.style) as FlatStyle,
     };
 
     // If a list of features is specified
@@ -59,84 +59,85 @@ export class Modify extends Interaction {
       olOptions.source = geomGroup?.vectorSource;
     }
 
-    // Activate the OpenLayers Modify module
-    this.ol_modify = new OLModify(olOptions);
+    // Instantiate the OpenLayers Modify interaction
+    this.#ol_modify = new OLModify(olOptions);
 
-    // Wire handler when modification is started
-    this.ol_modify.on('modifystart', this.emitModifyStarted);
-    // Wire handler when modification is ended
-    this.ol_modify.on('modifyend', this.emitModifyEnded);
+    // Register handlers for modify events
+    this.#ol_modify.on('modifystart', this.#emitModifyStarted.bind(this));
+    this.#ol_modify.on('modifyend', this.#emitModifyEnded.bind(this));
   }
 
   /**
-   * Starts the interaction on the map
+   * Starts the interaction on the map.
    */
-  public startInteraction() {
-    // Redirect
-    super.startInteraction(this.ol_modify);
+  startInteraction(): void {
+    // Redirect to super method to start interaction
+    super.startInteraction(this.#ol_modify);
   }
 
   /**
-   * Stops the interaction on the map
+   * Stops the interaction on the map.
    */
-  public stopInteraction() {
-    // Redirect
-    super.stopInteraction(this.ol_modify);
+  stopInteraction(): void {
+    // Redirect to super method to stop interaction
+    super.stopInteraction(this.#ol_modify);
   }
 
   /**
-   * Emits an event to all handlers.
-   * @param {OLModifyEvent} event The event to emit
+   * Emits the modifystart event the all registered handlers.
+   * @param {OLModifyEvent} event - The event to emit.
+   * @private
    */
-  emitModifyStarted = (event: OLModifyEvent) => {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onModifyStartedHandlers, event);
-  };
+  #emitModifyStarted(event: OLModifyEvent): void {
+    // Emit the modifystarted event
+    EventHelper.emitEvent(this, this.#onModifyStartedHandlers, event);
+  }
 
   /**
-   * Wires an event handler.
-   * @param {ModifyDelegate} callback The callback to be executed whenever the event is emitted
+   * Registers a callback handler for the modifystart event.
+   * @param {ModifyDelegate} callback - The callback to be executed whenever the event is emitted.
    */
-  onModifyStarted = (callback: ModifyDelegate): void => {
-    // Wire the event handler
-    EventHelper.onEvent(this.onModifyStartedHandlers, callback);
-  };
+  onModifyStarted(callback: ModifyDelegate): void {
+    // Register the modifystarted event callback
+    EventHelper.onEvent(this.#onModifyStartedHandlers, callback);
+  }
 
   /**
-   * Unwires an event handler.
-   * @param {ModifyDelegate} callback The callback to stop being called whenever the event is emitted
+   * Unregisters a callback handler for the modifystart event.
+   * @param {ModifyDelegate} callback - The callback to stop being called whenever the event is emitted.
    */
-  offModifyStarted = (callback: ModifyDelegate): void => {
-    // Unwire the event handler
-    EventHelper.offEvent(this.onModifyStartedHandlers, callback);
-  };
+  offModifyStarted(callback: ModifyDelegate): void {
+    // Unregister the modifystarted event callback
+    EventHelper.offEvent(this.#onModifyStartedHandlers, callback);
+  }
 
   /**
-   * Emits an event to all handlers.
-   * @param {OLModifyEvent} event The event to emit
+   * Emits the modifyend event the all registered handlers.
+   * @param {OLModifyEvent} event - The event to emit.
+   * @private
    */
-  emitModifyEnded = (event: OLModifyEvent) => {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onModifyEndedHandlers, event);
-  };
+  #emitModifyEnded(event: OLModifyEvent): void {
+    // Emit the modifyended event
+    EventHelper.emitEvent(this, this.#onModifyEndedHandlers, event);
+  }
 
   /**
-   * Wires an event handler.
-   * @param {ModifyDelegate} callback The callback to be executed whenever the event is emitted
+   * Registers a callback handler for the modifyend event.
+   * @param {ModifyDelegate} callback - The callback to be executed whenever the event is emitted.
    */
-  onModifyEnded = (callback: ModifyDelegate): void => {
-    // Wire the event handler
-    EventHelper.onEvent(this.onModifyEndedHandlers, callback);
-  };
+  onModifyEnded(callback: ModifyDelegate): void {
+    // Register the modifyended event callback
+    EventHelper.onEvent(this.#onModifyEndedHandlers, callback);
+  }
 
   /**
-   * Unwires an event handler.
-   * @param {ModifyDelegate} callback The callback to stop being called whenever the event is emitted
+   * Unregisters a callback handler for the modifyend event.
+   * @param {ModifyDelegate} callback - The callback to stop being called whenever the event is emitted.
    */
-  offModifyEnded = (callback: ModifyDelegate): void => {
-    // Unwire the event handler
-    EventHelper.offEvent(this.onModifyEndedHandlers, callback);
-  };
+  offModifyEnded(callback: ModifyDelegate): void {
+    // Unregister the modifyended event callback
+    EventHelper.offEvent(this.#onModifyEndedHandlers, callback);
+  }
 }
 
 /**

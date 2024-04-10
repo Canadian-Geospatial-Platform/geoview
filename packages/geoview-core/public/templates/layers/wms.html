@@ -580,35 +580,75 @@
     <script src="layerlib.js"></script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init(function (mapId) {
-        console.log(`api is ready for ${mapId}`);
-
+      cgpv.init((mapId) => {
         if (mapId === 'allMaps') {
+          // Wire a handle when all queries done after a map click
+          cgpv.api.maps['LYR1'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
+            const { coordinate, resultSet, eventType } = payload;
+            createInfoTable('LYR1', 'ResultSetId1', resultSet, eventType);
+          });
+          cgpv.api.maps['LYR1'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+            const { resultSet } = payload;
+            displayLegend('LegendsId1', resultSet);
+          });
+          // Wire a handle when all queries done after a map click
+          cgpv.api.maps['LYR2'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
+            const { coordinate, resultSet, eventType } = payload;
+            createInfoTable('LYR2', 'ResultSetId2', resultSet, eventType);
+          });
+          cgpv.api.maps['LYR2'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+            const { resultSet } = payload;
+            displayLegend('LegendsId2', resultSet);
+          });
+          // Wire a handle when all queries done after a map click
+          cgpv.api.maps['LYR3'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
+            const { coordinate, resultSet, eventType } = payload;
+            createInfoTable('LYR3', 'ResultSetId3', resultSet, eventType);
+          });
+          cgpv.api.maps['LYR3'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+            const { resultSet } = payload;
+            displayLegend('LegendsId3', resultSet);
+          });
+          cgpv.api.maps['LYR4'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+            const { resultSet } = payload;
+            displayLegend('LegendsId4', resultSet);
+          });
+
+          listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
+          listenToLegendLayerSetChanges('HLYR2-state', 'LYR2');
+          listenToLegendLayerSetChanges('HLYR3-state', 'LYR3');
+          listenToLegendLayerSetChanges('HLYR4-state', 'LYR4');
+          listenToLegendLayerSetChanges('HLYR5-state', 'LYR5');
+
+          // create snippets
+          createCodeSnippet();
+          createConfigSnippet();
+        }
+      }, (mapId) => {
+        if (mapId === 'allMaps') {
+          // Layers are loaded
           createTableOfFilter('LYR1');
           createTableOfFilter('LYR2');
           createTableOfFilter('LYR4');
 
           const intervalId = window.setInterval(() => {
-            // If metadata are processed
-            if (cgpv.api.maps.LYR3?.layer?.geoviewLayers?.['wmsLYR3-Root']?.allLayerStatusAreGreaterThanOrEqualTo('processed')) {
-              const lyr3LayerConfig = cgpv.api.maps.LYR3.layer.registeredLayers['wmsLYR3-Root/landcover_2015_19classes'];
-              if (Array.isArray(lyr3LayerConfig?.source?.style)) {
-                const dropDownContent = document.getElementById('style');
-                lyr3LayerConfig.source.style.forEach((style) => {
-                  element = document.createElement('option');
-                  element.value = style;
-                  element.innerText = style;
-                  dropDownContent.appendChild(element);
-                });
-                dropDownContent.addEventListener('click', (e) => {
-                  cgpv.api.maps.LYR3.layer.geoviewLayers['wmsLYR3-Root'].setStyle(
-                    dropDownContent.value,
-                    'wmsLYR3-Root/landcover_2015_19classes'
-                  );
-                });
-              }
-              clearInterval(intervalId);
+            const lyr3LayerConfig = cgpv.api.maps.LYR3.layer.registeredLayers['wmsLYR3-Root/landcover_2015_19classes'];
+            if (Array.isArray(lyr3LayerConfig?.source?.style)) {
+              const dropDownContent = document.getElementById('style');
+              lyr3LayerConfig.source.style.forEach((style) => {
+                element = document.createElement('option');
+                element.value = style;
+                element.innerText = style;
+                dropDownContent.appendChild(element);
+              });
+              dropDownContent.addEventListener('click', (e) => {
+                cgpv.api.maps.LYR3.layer.geoviewLayers['wmsLYR3-Root'].setStyle(
+                  dropDownContent.value,
+                  'wmsLYR3-Root/landcover_2015_19classes'
+                );
+              });
             }
+            clearInterval(intervalId);
           }, 1000);
 
           // ========================================================================================================================
@@ -616,9 +656,9 @@
           let i = 0;
           window.setInterval(() => {
             const layerConfig = cgpv.api.maps.LYR1.layer.registeredLayers['wmsLYR1-spatiotemporel/RADAR_1KM_RSNO'];
-            const temporalData = cgpv.api.maps.LYR1.layer.geoviewLayer('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO').getTemporalDimension();
+            const temporalData = cgpv.api.maps.LYR1.layer.geoviewLayer('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO').getTemporalDimension('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO');
             if (temporalData) {
-              cgpv.api.maps.LYR1.layer.geoviewLayer('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO').applyViewFilter(
+              cgpv.api.maps.LYR1.layer.geoviewLayer('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO').applyViewFilter('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO',
                 `time=date '${temporalData.range.range[i]}'`
               );
               if (++i === temporalData.range.range.length) i = 0;
@@ -628,36 +668,16 @@
           let j = 0;
           window.setInterval(() => {
             const layerConfig = cgpv.api.maps.LYR1.layer.registeredLayers['wmsLYR1-msi/msi-94-or-more'];
-            const temporalData = cgpv.api.maps.LYR1.layer.geoviewLayer('wmsLYR1-msi/msi-94-or-more').getTemporalDimension();
+            const temporalData = cgpv.api.maps.LYR1.layer.geoviewLayer('wmsLYR1-msi/msi-94-or-more').getTemporalDimension('wmsLYR1-msi/msi-94-or-more');
             if (temporalData) {
-              cgpv.api.maps.LYR1.layer.geoviewLayer('wmsLYR1-msi/msi-94-or-more').applyViewFilter(
+              cgpv.api.maps.LYR1.layer.geoviewLayer('wmsLYR1-msi/msi-94-or-more').applyViewFilter('wmsLYR1-msi/msi-94-or-more',
                 `time=date '${temporalData.range.range[j]}'`
               );
               if (++j === temporalData.range.range.length) j = 0;
             }
           }, 2500);
-        }
+       }
       });
-
-      //LYR1 ===================================================================================================================
-      // Note: ALL_QUERIES_DONE is obsolete, a replacement is coming (upcoming PR)
-      // cgpv.api.event.on(
-      //   cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-      //   (payload) => {
-      //     const { layerSetId, resultSet, eventType } = payload;
-      //     createInfoTable('LYR1', 'ResultSetId1', resultSet, eventType);
-      //   },
-      //   'LYR1/click/FeatureInfoLayerSet'
-      // );
-
-      cgpv.api.event.on(
-        cgpv.api.eventNames.LAYER_SET.UPDATED,
-        (payload) => {
-          const { resultSet } = payload;
-          displayLegend('LegendsId1', resultSet);
-        },
-        'LYR1/LegendsLayerSet'
-      );
 
       // ========================================================================================================================
       // Test a refresh WMS from projection change
@@ -665,71 +685,6 @@
       testRefreshBtn.addEventListener('click', function (e) {
         cgpv.api.maps['LYR1'].setProjection(3978);
       });
-
-      listenToLegendLayerSetChanges('HLYR1-state', 'LYR1/LegendsLayerSet');
-
-      // LYR2 ===================================================================================================================
-      // Note: ALL_QUERIES_DONE is obsolete, a replacement is coming (upcoming PR)
-      // cgpv.api.event.on(
-      //   cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-      //   (payload) => {
-      //     const { layerSetId, resultSet, eventType } = payload;
-      //     createInfoTable('LYR2', 'ResultSetId2', resultSet, eventType);
-      //   },
-      //   'LYR2/click/FeatureInfoLayerSet'
-      // );
-
-      cgpv.api.event.on(
-        cgpv.api.eventNames.LAYER_SET.UPDATED,
-        (payload) => {
-          const { resultSet } = payload;
-          displayLegend('LegendsId2', resultSet);
-        },
-        'LYR2/LegendsLayerSet'
-      );
-
-      listenToLegendLayerSetChanges('HLYR2-state', 'LYR2/LegendsLayerSet');
-
-      // LYR3 ===================================================================================================================
-      // Note: ALL_QUERIES_DONE is obsolete, a replacement is coming (upcoming PR)
-      // cgpv.api.event.on(
-      //   cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-      //   (payload) => {
-      //     const { layerSetId, resultSet, eventType } = payload;
-      //     createInfoTable('LYR3', 'ResultSetId3', resultSet, eventType);
-      //   },
-      //   'LYR3/click/FeatureInfoLayerSet'
-      // );
-
-      cgpv.api.event.on(
-        cgpv.api.eventNames.LAYER_SET.UPDATED,
-        (payload) => {
-          const { resultSet } = payload;
-          displayLegend('LegendsId3', resultSet);
-        },
-        'LYR3/LegendsLayerSet'
-      );
-
-      listenToLegendLayerSetChanges('HLYR3-state', 'LYR3/LegendsLayerSet');
-
-      //LYR4 ===================================================================================================================
-      cgpv.api.event.on(
-        cgpv.api.eventNames.LAYER_SET.UPDATED,
-        (payload) => {
-          const { resultSet } = payload;
-          displayLegend('LegendsId4', resultSet);
-        },
-        'LYR4/LegendsLayerSet'
-      );
-
-      listenToLegendLayerSetChanges('HLYR4-state', 'LYR4/LegendsLayerSet');
-
-      // LYR5 ===================================================================================================================
-      listenToLegendLayerSetChanges('HLYR5-state', 'LYR5/LegendsLayerSet');
-
-      //create snippets
-      createCodeSnippet();
-      createConfigSnippet();
     </script>
   </body>
 </html>

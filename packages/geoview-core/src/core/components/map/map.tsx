@@ -24,8 +24,9 @@ import {
   useMapStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
-import { api, toJsonObject } from '@/app';
+import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
+import { toJsonObject } from '@/core/types/global-types';
 
 export function Map(): JSX.Element {
   // Log
@@ -86,18 +87,22 @@ export function Map(): JSX.Element {
     logger.logTraceUseCallback('map.initMap');
 
     // create map projection object from code
-    const projection = api.projection.projections[projectionCode];
+    const projection = api.utilities.projection.projections[projectionCode];
 
     let extentProjected: Extent | undefined;
     if (mapStoreConfig?.map.viewSettings.extent)
-      extentProjected = api.projection.transformExtent(mapStoreConfig?.map.viewSettings.extent, 'EPSG:4326', projection.getCode());
+      extentProjected = api.utilities.projection.transformExtent(
+        mapStoreConfig?.map.viewSettings.extent,
+        'EPSG:4326',
+        projection.getCode()
+      );
 
     const initialMap = new OLMap({
       target: mapElement.current as string | HTMLElement | undefined,
       layers: [createEmptyBasemap()],
       view: new View({
         projection,
-        center: api.projection.transformFromLonLat(
+        center: api.utilities.projection.transformFromLonLat(
           [mapStoreConfig?.map.viewSettings.center[0] || -105, mapStoreConfig?.map.viewSettings.center[1] || 60],
           projection
         ),

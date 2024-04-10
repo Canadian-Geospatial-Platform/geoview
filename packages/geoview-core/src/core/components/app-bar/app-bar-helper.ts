@@ -1,4 +1,5 @@
-import { Dispatch, SetStateAction, TypeButtonPanel } from '@/core/types/global-types';
+import { Dispatch, SetStateAction } from 'react';
+import { TypeButtonPanel } from '@/ui/panel/panel-types';
 
 export const helpFindGroupName = (
   buttonPanelGroups: Record<string, Record<string, TypeButtonPanel>>,

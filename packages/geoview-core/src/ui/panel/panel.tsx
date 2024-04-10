@@ -7,12 +7,12 @@ import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
 import { useTheme } from '@mui/material/styles';
 import { HtmlToReact } from '@/core/containers/html-to-react';
-import { useUIActiveTrapGeoView } from '@/app';
 import { IconButton, CloseIcon, Box, TypePanelProps } from '..';
 import { logger } from '@/core/utils/logger';
 
-import { TypeIconButtonProps } from '../icon-button/icon-button-types';
+import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 import { getSxClasses } from './panel-style';
+import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 /**
  * Interface for panel properties

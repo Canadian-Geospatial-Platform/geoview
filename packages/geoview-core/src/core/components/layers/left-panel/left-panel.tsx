@@ -1,9 +1,10 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { useLayerDisplayState, useLayerLegendLayers, useMapOrderedLayerInfo, useMapStoreActions } from '@/core/stores';
+import { useLayerDisplayState, useLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useMapOrderedLayerInfo, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { LayersList } from './layers-list';
 import { AddNewLayer } from './add-new-layer/add-new-layer';
 import { logger } from '@/core/utils/logger';
-import { TypeLegendLayer } from '../types';
+import { TypeLegendLayer } from '@/core/components/layers/types';
 
 interface LeftPanelProps {
   setIsLayersListPanelVisible: Dispatch<SetStateAction<boolean>>;

@@ -79,7 +79,6 @@
               'geoviewLayerName': { 'en': 'GeoJSON Sample' },
               'metadataAccessPath': { 'en': './datasets/geojson/metadata.json' },
               'geoviewLayerType': 'GeoJSON',
-              'initialSettings': { 'visible': 'yes' },
               'listOfLayerEntryConfig': [
                 {
                   'layerId': 'polygons.json',
@@ -99,7 +98,7 @@
                     {
                       'layerId': 'icon_points.json',
                       'layerName': { 'en': 'Icons' },
-                      'initialSettings': { 'visible': 'no' },
+                      'initialSettings': { 'states': {'visible' : false} },
                       'layerFilter': 'creationDate >= date \'2020-01-14T12:00:01-05:00\''
                     },
                     {
@@ -129,8 +128,8 @@
     </pre>
     <button type="button" class="collapsible">Get Feature Info</button>
     <pre id="ResultSetId1-click" class="panel">Click on feature on the map</pre>
-    <button type="button" class="collapsible" id="AllFeatureInfo1">Get All Feature Info</button>
-    <pre id="ResultSetId1-all" class="panel"></pre>
+    <button type="button" class="collapsible" id="AllFeatureInfo1">Get All Feature Info (geojsonLYR1/geojsonLYR1/polygons.json)</button>
+    <pre id="ResultSetId1-all-features" class="panel"></pre>
     <hr />
     <p>This map has a wms layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
@@ -169,7 +168,6 @@
               'geoviewLayerName': { 'en': 'GeoJSON Sample' },
               'metadataAccessPath': { 'en': './datasets/geojson/metadata.json' },
               'geoviewLayerType': 'GeoJSON',
-              'initialSettings': { 'visible': 'yes' },
               'listOfLayerEntryConfig': [
                 {
                   'layerId': 'polygons.json',
@@ -187,7 +185,7 @@
                     {
                       'layerId': 'icon_points.json',
                       'layerName': { 'en': 'Icons' },
-                      'initialSettings': { 'visible': 'no' }
+                      'initialSettings': { 'states': {'visible' : false} }
                     },
                     {
                       'layerId': 'points.json',
@@ -216,10 +214,27 @@
     <script src="layerlib.js"></script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init(function (mapId) {
-        console.log(`api is ready for ${mapId}`);
-
+      cgpv.init((mapId) => {
         if (mapId === 'allMaps') {
+          // Wire a handle when all queries done after a map click
+          cgpv.api.maps['LYR1'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
+            const { coordinate, resultSet, eventType } = payload;
+            createInfoTable('LYR1', 'ResultSetId1', resultSet, eventType);
+          });
+          cgpv.api.maps['LYR1'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+            const { resultSet } = payload;
+            displayLegend('LegendsId1', resultSet);
+          });
+          listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
+          listenToLegendLayerSetChanges('HLYR2-state', 'LYR2');
+
+          // create snippets
+          createCodeSnippet();
+          createConfigSnippet();
+        }
+      }, (mapId) => {
+        if (mapId === 'allMaps') {
+          // Layers are loaded
           createTableOfFilter('LYR1');
         }
       });
@@ -228,9 +243,9 @@
       var addGeoJSONButton = document.getElementById('add-geojson');
 
       // add an event listener when a button is clicked
-      addGeoJSONButton.addEventListener('click', function (e) {
+      addGeoJSONButton.addEventListener('click', async () => {
         // adding a geojson layer requires a type of geojson and url
-        const layerID = cgpv.api.maps['LYR1'].layer.addGeoviewLayer(
+        const addResult = cgpv.api.maps['LYR1'].layer.addGeoviewLayer(
           {
             geoviewLayerId: 'geoJsonSample',
             geoviewLayerName: {
@@ -260,14 +275,12 @@
           },
           ['en', 'fr']
         );
-        document.getElementById('new-layer-id-label').innerText = layerID;
-        cgpv.api.event.once(
-          cgpv.api.eventNames.LAYER.EVENT_LAYER_ADDED,
-            (payload) => {
-              createTableOfFilter('LYR1');
-            },
-            'LYR1/geoJsonSample'
-          );
+
+        // Wait for the full response
+        await addResult.promiseLayer;
+
+        document.getElementById('new-layer-id-label').innerText = addResult.layer.geoviewLayerId;
+        createTableOfFilter('LYR1');
       });
 
       // =======================================================================================================================
@@ -280,42 +293,14 @@
         if (layerPath) cgpv.api.maps['LYR1'].layer.removeLayersUsingPath(layerPath);
         document.getElementById('new-layer-id-label').innerText = '';
         createTableOfFilter('LYR1');
-
       });
 
       // LYR1 ===================================================================================================================
       const getAllFeatureInfo1 = document.getElementById('AllFeatureInfo1');
-      getAllFeatureInfo1.addEventListener('click', function (e) {
-            cgpv.api.event.emit({ event: 'map/get_all_features', handlerName: 'LYR1' });
-          });
-
-      // Note: ALL_QUERIES_DONE is obsolete, a replacement is coming (upcoming PR)
-      // cgpv.api.event.on(
-      //   cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-      //   (payload) => {
-      //     const { layerSetId, resultSet, eventType } = payload;
-      //     createInfoTable('LYR1', 'ResultSetId1', resultSet, eventType);
-      //   },
-      //   'LYR1/click/FeatureInfoLayerSet'
-      // );
-
-      cgpv.api.event.on(
-        cgpv.api.eventNames.LAYER_SET.UPDATED,
-        (payload) => {
-          const { resultSet } = payload;
-          displayLegend('LegendsId1', resultSet);
-        },
-        'LYR1/LegendsLayerSet'
-      );
-
-      listenToLegendLayerSetChanges('HLYR1-state', 'LYR1/LegendsLayerSet');
-
-      // LYR2 ===================================================================================================================
-      listenToLegendLayerSetChanges('HLYR2-state', 'LYR2/LegendsLayerSet');
-
-      //create snippets
-      createCodeSnippet();
-      createConfigSnippet();
+      getAllFeatureInfo1.addEventListener('click', async () => {
+        const resultSet = await cgpv.api.maps['LYR1'].layer.allFeatureInfoLayerSet.queryLayer('geojsonLYR1/geojsonLYR1/polygons.json');
+        createInfoTable('LYR1', 'ResultSetId1', resultSet, 'all-features');
+      });
     </script>
   </body>
 </html>

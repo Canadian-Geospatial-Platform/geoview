@@ -1,30 +1,35 @@
-import { TypeLegendResultSetEntry } from '@/api/events/payloads';
+import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import {
-  isClassBreakStyleConfig,
+  CONST_LAYER_TYPES,
+  TypeGeoviewLayerType,
+  TypeLegend,
   isImageStaticLegend,
-  isSimpleStyleConfig,
-  isUniqueValueStyleConfig,
   isVectorLegend,
   isWmsLegend,
-  layerEntryIsGroupLayer,
-  TypeGeoviewLayerType,
+} from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeLegendResultSetEntry } from '@/geo/utils/legends-layer-set';
+import { api } from '@/app';
+import { ILayerState } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { getLocalizedValue } from '@/core/utils/utilities';
+import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
+import {
+  TypeLayerControls,
   TypeLayerEntryConfig,
-  TypeLegend,
   TypeStyleGeometry,
-} from '@/geo';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
-import { api, getLocalizedValue, ILayerState } from '@/app';
-
-import { AbstractEventProcessor } from '../abstract-event-processor';
+  isClassBreakStyleConfig,
+  isSimpleStyleConfig,
+  isUniqueValueStyleConfig,
+  layerEntryIsGroupLayer,
+} from '@/geo/map/map-schema-types';
+import { AppEventProcessor } from './app-event-processor';
 
 export class LegendEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // Static functions for Typescript files to access store actions
   // **********************************************************
-  //! Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
-  //! Some action does state modifications AND map actions.
-  //! ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+  // GV Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
+  // GV Some action does state modifications AND map actions.
+  // GV ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
 
   // #region
 
@@ -65,8 +70,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
               geometryType,
               icon: iconDetailsEntry.iconImage,
               name: iconDetailsEntry.name,
-              isVisible: 'yes',
-              default: true,
+              isVisible: true,
             };
             iconDetailsEntry.iconList = [legendLayerListItem];
             iconDetails.push(iconDetailsEntry);
@@ -79,7 +83,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
                   icon: canvas ? canvas.toDataURL() : null,
                   name: styleSettings.classBreakStyleInfo[i].label,
                   isVisible: styleSettings.classBreakStyleInfo[i].visible!,
-                  default: false,
                 };
                 return legendLayerListItem;
               });
@@ -89,7 +92,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
                   icon: styleRepresentation.defaultCanvas.toDataURL(),
                   name: styleSettings.defaultLabel!,
                   isVisible: styleSettings.defaultVisible!,
-                  default: true,
                 };
                 iconDetailsEntry.iconList.push(legendLayerListItem);
               }
@@ -99,8 +101,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
                   geometryType,
                   icon: canvas ? canvas.toDataURL() : null,
                   name: styleSettings.uniqueValueStyleInfo[i].label,
-                  isVisible: styleSettings.uniqueValueStyleInfo[i].visible || 'yes',
-                  default: false,
+                  isVisible: styleSettings.uniqueValueStyleInfo[i].visible !== false,
                 };
                 return legendLayerListItem;
               });
@@ -110,7 +111,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
                   icon: styleRepresentation.defaultCanvas.toDataURL(),
                   name: styleSettings.defaultLabel!,
                   isVisible: styleSettings.defaultVisible!,
-                  default: true,
                 };
                 iconDetailsEntry.iconList.push(legendLayerListItem);
               }
@@ -136,25 +136,41 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    */
   public static propagateLegendToStore(mapId: string, layerPath: string, legendResultSetEntry: TypeLegendResultSetEntry) {
     const layerPathNodes = layerPath.split('/');
+    const setLayerControls = (layerConfig: TypeLayerEntryConfig): TypeLayerControls => {
+      const controls: TypeLayerControls = {
+        highlight: layerConfig.initialSettings?.controls?.highlight !== undefined ? layerConfig.initialSettings?.controls?.highlight : true,
+        hover: layerConfig.initialSettings?.controls?.hover !== undefined ? layerConfig.initialSettings?.controls?.hover : true,
+        opacity: layerConfig.initialSettings?.controls?.opacity !== undefined ? layerConfig.initialSettings?.controls?.opacity : true,
+        query: layerConfig.initialSettings?.controls?.query !== undefined ? layerConfig.initialSettings?.controls?.query : true,
+        remove: layerConfig.initialSettings?.controls?.remove !== undefined ? layerConfig.initialSettings?.controls?.remove : true,
+        table: layerConfig.initialSettings?.controls?.table !== undefined ? layerConfig.initialSettings?.controls?.table : true,
+        visibility:
+          layerConfig.initialSettings?.controls?.visibility !== undefined ? layerConfig.initialSettings?.controls?.visibility : true,
+        zoom: layerConfig.initialSettings?.controls?.zoom !== undefined ? layerConfig.initialSettings?.controls?.zoom : true,
+      };
+      return controls;
+    };
     const createNewLegendEntries = (layerPathBeginning: string, currentLevel: number, existingEntries: TypeLegendLayer[]) => {
       const entryLayerPath = `${layerPathBeginning}/${layerPathNodes[currentLevel]}`;
       const layerConfig = api.maps[mapId].layer.registeredLayers[entryLayerPath] as TypeLayerEntryConfig;
       let entryIndex = existingEntries.findIndex((entry) => entry.layerPath === entryLayerPath);
       if (layerEntryIsGroupLayer(layerConfig)) {
+        const controls: TypeLayerControls = setLayerControls(layerConfig);
         if (entryIndex === -1) {
           const legendLayerEntry: TypeLegendLayer = {
             bounds: undefined,
+            controls,
             layerId: layerConfig.layerId,
             layerPath: entryLayerPath,
             layerStatus: legendResultSetEntry.layerStatus,
             layerName:
               legendResultSetEntry.layerName ||
-              getLocalizedValue(layerConfig.layerName, mapId) ||
-              getLocalizedValue(layerConfig.geoviewLayerInstance?.geoviewLayerName, mapId) ||
+              getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(mapId)) ||
+              getLocalizedValue(layerConfig.geoviewLayerInstance?.geoviewLayerName, AppEventProcessor.getDisplayLanguage(mapId)) ||
               layerConfig.layerPath,
             type: layerConfig.entryType as TypeGeoviewLayerType,
             canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
-            opacity: layerConfig.initialSettings?.opacity ? layerConfig.initialSettings.opacity : 1,
+            opacity: layerConfig.initialSettings?.states?.opacity ? layerConfig.initialSettings.states.opacity : 1,
             items: [] as TypeLegendItem[],
             children: [] as TypeLegendLayer[],
           };
@@ -165,22 +181,23 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         else existingEntries[entryIndex].layerStatus = layerConfig.layerStatus;
         createNewLegendEntries(entryLayerPath, currentLevel + 1, existingEntries[entryIndex].children);
       } else if (layerConfig) {
+        const controls: TypeLayerControls = setLayerControls(layerConfig);
         const newLegendLayer: TypeLegendLayer = {
           bounds: undefined,
+          controls,
           layerId: layerPathNodes[currentLevel],
           layerPath: entryLayerPath,
           layerAttribution: api.maps[mapId].layer.geoviewLayers[layerPathNodes[0]].attributions,
           layerName:
             legendResultSetEntry.layerName ||
-            getLocalizedValue(layerConfig.layerName, mapId) ||
-            getLocalizedValue(layerConfig.geoviewLayerInstance?.geoviewLayerName, mapId) ||
+            getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(mapId)) ||
+            getLocalizedValue(layerConfig.geoviewLayerInstance?.geoviewLayerName, AppEventProcessor.getDisplayLanguage(mapId)) ||
             layerConfig.layerPath,
           layerStatus: legendResultSetEntry.layerStatus,
-          querySent: legendResultSetEntry.querySent,
           styleConfig: legendResultSetEntry.data?.styleConfig,
           type: legendResultSetEntry.data?.type,
           canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
-          opacity: layerConfig.initialSettings?.opacity || 1,
+          opacity: layerConfig.initialSettings?.states?.opacity || 1,
           items: [] as TypeLegendItem[],
           children: [] as TypeLegendLayer[],
           icons: LegendEventProcessor.getLayerIconImage(mapId, layerPath, legendResultSetEntry.data!),
@@ -217,6 +234,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // Static functions for Store Map State to action on API
   // **********************************************************
-  //! NEVER add a store action who does set state AND map action at a same time.
-  //! Review the action in store state to make sure
+  // GV NEVER add a store action who does set state AND map action at a same time.
+  // GV Review the action in store state to make sure
 }

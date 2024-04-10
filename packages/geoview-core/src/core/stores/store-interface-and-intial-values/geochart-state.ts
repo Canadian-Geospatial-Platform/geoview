@@ -2,8 +2,8 @@ import { useStore } from 'zustand';
 import { GeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
 import { TypeLayerData } from '@/geo/utils/layer-set';
 
-import { useGeoViewStore } from '../stores-managers';
-import { TypeGetStore, TypeSetStore } from '../geoview-store';
+import { useGeoViewStore } from '@/core/stores/stores-managers';
+import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 
 export type GeoChartStoreByLayerPath = {
   [layerPath: string]: GeoChartConfig;
@@ -98,8 +98,8 @@ export function initializeGeochartState(set: TypeSetStore, get: TypeGetStore): I
 // Layer state selectors
 // **********************************************************
 export const useGeochartConfigs = () => useStore(useGeoViewStore(), (state) => state.geochartState.geochartChartsConfig);
-export const useGeochartStoreLayerDataArray = () => useStore(useGeoViewStore(), (state) => state.geochartState.layerDataArray);
-export const useGeochartStoreLayerDataArrayBatch = () => useStore(useGeoViewStore(), (state) => state.geochartState.layerDataArrayBatch);
-export const useGeochartStoreSelectedLayerPath = () => useStore(useGeoViewStore(), (state) => state.geochartState.selectedLayerPath);
+export const useGeochartLayerDataArray = () => useStore(useGeoViewStore(), (state) => state.geochartState.layerDataArray);
+export const useGeochartLayerDataArrayBatch = () => useStore(useGeoViewStore(), (state) => state.geochartState.layerDataArrayBatch);
+export const useGeochartSelectedLayerPath = () => useStore(useGeoViewStore(), (state) => state.geochartState.selectedLayerPath);
 
 export const useGeochartStoreActions = () => useStore(useGeoViewStore(), (state) => state.geochartState.actions);

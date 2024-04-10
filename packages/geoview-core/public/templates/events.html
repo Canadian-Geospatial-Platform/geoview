@@ -77,10 +77,13 @@
       <button id="error-notif-but">Error Notification</button>
       <button id="warning-notif-but">Warning Notification</button>
     </div>
-    <p>This script tag will trigger a basic notification on load and another with a custom function every 20 seconds.</p>
+    <p>This script tag will trigger a basic notification on load and another with a custom function every 10 seconds.</p>
 
     <p>Accessing map center from outside of the core viewer on Map MOVE event using api event listeners:</p>
-    <pre class="maps-position"></pre>
+    <pre class="maps-position"><p>Map EVNT1 move end</p></pre>
+
+    <p>Accessing map rotation from outside of the core viewer on Map ROTATION event using api event listeners:</p>
+    <pre class="maps-rotation"><p>Map EVNT1 rotation 0</p></pre>
 
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="EVNT1CS" class="panel"></pre>
@@ -91,57 +94,56 @@
     <script src="codedoc.js"></script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init(function () {
-        console.log('api is ready');
+      cgpv.init((mapId) => {
+        if (mapId === 'allMaps') {
+          //get map position panel
+          const mapPosition = document.getElementsByClassName('maps-position')[0];
+          const mapRotation = document.getElementsByClassName('maps-rotation')[0];
 
-        //get map posiion panel
-        const mapsPosition = document.getElementsByClassName('maps-position');
-
-        document.getElementById('success-notif-but').addEventListener('click', function (e) {
-          cgpv.api.utilities.addNotificationSuccess('EVNT1', 'this is a success notification title');
-        });
-
-        document.getElementById('info-notif-but').addEventListener('click', function (e) {
-          cgpv.api.utilities.addNotificationMessage('EVNT1', 'this is an info notification');
-        });
-
-        document.getElementById('warning-notif-but').addEventListener('click', function (e) {
-          cgpv.api.utilities.addNotificationWarning('EVNT1', 'this is an warning notification');
-        });
-
-        document.getElementById('error-notif-but').addEventListener('click', function (e) {
-          cgpv.api.utilities.addNotificationError('EVNT1', 'this is an error notification');
-        });
-
-        // listen to map moveend event
-        cgpv.api.event.on(
-          cgpv.api.eventNames.MAP.EVENT_MAP_MOVE_END,
-          (payload) => {
-            if (cgpv.types.cgpv.types.payloadIsALngLat(payload)) {
-              mapsPosition[0].innerHTML =
-                mapsPosition[0].innerHTML = `<p>Map ${payload.handlerName} with latitude ${payload.lnglat[1]} and longitude ${payload.lnglat[0]}</p>`;
-            }
-          },
-          'EVNT1'
-        );
-
-        // snackbar notification
-        cgpv.api.utilities.showWarning('EVNT1', 'This is my first snackbar!');
-
-        setInterval(() => {
-          cgpv.api.utilities.showMessage('EVNT1', 'I can even apply a function', false, {
-            label: 'Click me!',
-            action: () => {
-              alert('You clicked me!');
-            },
+          document.getElementById('success-notif-but').addEventListener('click', function (e) {
+            cgpv.api.maps['EVNT1'].notifications.addNotificationSuccess('this is a success notification title');
           });
 
-          cgpv.api.utilities.addNotificationSuccess('EVNT1', 'this is a success notification title');
-        }, 20000);
+          document.getElementById('info-notif-but').addEventListener('click', function (e) {
+            cgpv.api.maps['EVNT1'].notifications.addNotificationMessage('this is an info notification');
+          });
 
-        //create snippets
-        createCodeSnippet();
-        createConfigSnippet();
+          document.getElementById('warning-notif-but').addEventListener('click', function (e) {
+            cgpv.api.maps['EVNT1'].notifications.addNotificationWarning('this is an warning notification');
+          });
+
+          document.getElementById('error-notif-but').addEventListener('click', function (e) {
+            cgpv.api.maps['EVNT1'].notifications.addNotificationError('this is an error notification');
+          });
+
+          // listen to map moveend event
+          cgpv.api.maps['EVNT1'].onMapMoveEnd((sender, payload) => {
+            mapPosition.innerHTML = mapPosition.innerHTML = `<p>Map ${sender.mapId} with latitude ${payload.lnglat[1]} and longitude ${payload.lnglat[0]}</p>`;
+          });
+
+          // listen to map rotation event
+          cgpv.api.maps['EVNT1'].onMapRotation((sender, payload) => {
+            mapRotation.innerHTML = mapRotation.innerHTML = `<p>Map ${sender.mapId} rotation ${payload.rotation}</p>`;
+          });
+
+          // snackbar notification
+          cgpv.api.maps['EVNT1'].notifications.showWarning('This is my first snackbar!');
+
+          setInterval(() => {
+            cgpv.api.maps['EVNT1'].notifications.showMessage('I can even apply a function', [], false, {
+              label: 'Click me!',
+              action: () => {
+                alert('You clicked me!');
+              },
+            });
+
+            cgpv.api.maps['EVNT1'].notifications.addNotificationSuccess('this is a success notification title');
+          }, 10000);
+
+          // create snippets
+          createCodeSnippet();
+          createConfigSnippet();
+        }
       });
     </script>
   </body>

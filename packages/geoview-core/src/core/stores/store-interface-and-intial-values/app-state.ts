@@ -1,16 +1,11 @@
 import { useStore } from 'zustand';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-
-import {
-  NotificationDetailsType,
-  TypeDisplayLanguage,
-  TypeHTMLElement,
-  TypeMapFeaturesConfig,
-  TypeDisplayTheme,
-} from '@/core/types/cgpv-types';
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { TypeDisplayLanguage, TypeDisplayTheme } from '@/geo/map/map-schema-types';
+import { NotificationDetailsType } from '@/core/components/notifications/notifications';
+import { TypeHTMLElement, TypeMapFeaturesConfig } from '@/core/types/global-types';
 
 export interface IAppState {
   displayLanguage: TypeDisplayLanguage;
@@ -128,7 +123,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
           },
         });
 
-        //! we need to keep the call to the api map object because there is a state involve
+        // GV we need to keep the call to the api map object because there is a state involve
         if (element !== undefined) api.maps[get().mapId].setFullscreen(active, element);
       },
       removeNotification: (key: string) => {
@@ -155,8 +150,8 @@ export const useAppGeolocatorServiceURL = () => useStore(useGeoViewStore(), (sta
 export const useAppNotifications = () => useStore(useGeoViewStore(), (state) => state.appState.notifications);
 export const useAppSuportedLanguages = () => useStore(useGeoViewStore(), (state) => state.appState.suportedLanguages);
 
-//! these 2 selector are use in app-start.tsx before context is assigned to the map
-//! DO NOT USE this technique elsewhere, it is only to reload language and theme
+// GV these 2 selector are use in app-start.tsx before context is assigned to the map
+// GV DO NOT USE this technique elsewhere, it is only to reload language and theme
 export const useAppDisplayLanguageById = (mapId: string) => useStore(getGeoViewStore(mapId), (state) => state.appState.displayLanguage);
 export const useAppDisplayThemeById = (mapId: string) => useStore(getGeoViewStore(mapId), (state) => state.appState.displayTheme);
 

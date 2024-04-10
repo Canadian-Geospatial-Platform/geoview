@@ -11,8 +11,9 @@ import { Shell } from '@/core/containers/shell';
 import { getTheme, cgpvTheme } from '@/ui/style/theme';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { api, useAppDisplayLanguageById, useAppDisplayThemeById } from '@/app';
+import { api } from '@/app';
 import { logger } from './utils/logger';
+import { useAppDisplayLanguageById, useAppDisplayThemeById } from './stores/store-interface-and-intial-values/app-state';
 
 // create a state that will hold map config information
 // TODO: use store, only keep map id on context for store manager to gather right store on hooks
@@ -55,7 +56,7 @@ function AppStart(props: AppStartProps): JSX.Element {
     return { mapId };
   }, [mapId]);
 
-  //! get store values by id because context is not set.... it is the only 2 atomic selector by id
+  // GV get store values by id because context is not set.... it is the only 2 atomic selector by id
   // once context is define, map id is available
   const language = useAppDisplayLanguageById(mapId);
   const theme = useAppDisplayThemeById(mapId);
@@ -73,7 +74,7 @@ function AppStart(props: AppStartProps): JSX.Element {
     // TODO: use store, remove the use of feature by viewer class and use state to gather values
     if (!('mapId' in api.maps)) api.maps[mapId] = new MapViewer(mapFeaturesConfig, i18nInstance);
 
-    // Wire handler for when the map viewer will get initialized.
+    // Register a handler (which will only happen once) for when the map viewer will get initialized.
     // At the time of writing, this happens later, asynchronously, via the components/map/map.tsx when 'MapViewer.initMap()' is called.
     // That should be fixed eventually, but that refactoring is out of the scope at the time of writing. So, I'm doing like this for now.
     api.maps[mapId].onMapInit((mapViewer) => {
@@ -87,7 +88,7 @@ function AppStart(props: AppStartProps): JSX.Element {
         <MapContext.Provider value={mapContextValue}>
           <ThemeProvider theme={getTheme(theme)}>
             {/* <StrictMode> */}
-            <Shell />
+            <Shell mapViewer={api.maps[mapId]} />
             {/* </StrictMode> */}
           </ThemeProvider>
         </MapContext.Provider>

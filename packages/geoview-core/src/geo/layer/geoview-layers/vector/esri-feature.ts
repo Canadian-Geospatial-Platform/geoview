@@ -8,7 +8,6 @@ import { getLocalizedValue } from '@/core/utils/utilities';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import {
   TypeLayerEntryConfig,
@@ -28,7 +27,8 @@ import {
   commonProcessLayerMetadata,
   commonProcessTemporalDimension,
   commonValidateListOfLayerEntryConfig,
-} from '../esri-layer-common';
+} from '@/geo/layer/geoview-layers/esri-layer-common';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'EsriJSON';
@@ -165,13 +165,10 @@ export class EsriFeature extends AbstractGeoViewVector {
   /** ***************************************************************************************************************************
    * This method will create a Geoview temporal dimension if it exist in the service metadata
    * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
-   * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
+   * @param {EsriFeatureLayerEntryConfig} layerConfig The layer entry to configure
    */
-  protected processTemporalDimension(
-    esriTimeDimension: TypeJsonObject,
-    layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig // TODO: why feature layer is dynamic config not in common
-  ) {
-    return commonProcessTemporalDimension.call(this, esriTimeDimension, layerConfig);
+  protected processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: EsriFeatureLayerEntryConfig) {
+    return commonProcessTemporalDimension(this, esriTimeDimension, layerConfig);
   }
 
   /** ***************************************************************************************************************************
@@ -223,7 +220,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     // eslint-disable-next-line no-var
     var vectorSource: VectorSource<Feature>;
     // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = getLocalizedValue(layerConfig.source!.dataAccessPath!, this.mapId);
+    sourceOptions.url = getLocalizedValue(layerConfig.source!.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
     // eslint-disable-next-line no-param-reassign
     sourceOptions.url = `${sourceOptions.url}/${String(layerConfig.layerId)}/query?f=pjson&outfields=*&where=1%3D1`;
     // eslint-disable-next-line no-param-reassign

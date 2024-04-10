@@ -2,13 +2,13 @@ import { useTheme } from '@mui/material';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Paper, Typography } from '@/ui';
-import { useLayerLegendLayers, useMapVisibleLayers, useLayerStoreActions } from '@/core/stores/';
+import { useLayerLegendLayers, useMapVisibleLayers, useLayerStoreActions, useGeoViewMapId } from '@/core/stores/';
 import { logger } from '@/core/utils/logger';
 
 import { getSxClasses } from './legend-styles';
 import { LegendLayer } from './legend-layer';
-import { TypeLegendLayer } from '../layers/types';
-import { useFooterPanelHeight } from '../common';
+import { TypeLegendLayer } from '@/core/components/layers/types';
+import { useFooterPanelHeight } from '@/core/components/common';
 
 interface LegendType {
   fullWidth?: boolean;
@@ -18,6 +18,7 @@ export function Legend({ fullWidth }: LegendType): JSX.Element {
   // Log
   logger.logTraceRender('components/legend/legend');
 
+  const mapId = useGeoViewMapId();
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
@@ -111,7 +112,7 @@ export function Legend({ fullWidth }: LegendType): JSX.Element {
   }, [legendLayers]);
 
   return (
-    <Box sx={sxClasses.container} {...(!fullWidth && { ref: leftPanelRef })} id="legendContainer">
+    <Box sx={sxClasses.container} {...(!fullWidth && { ref: leftPanelRef })} id={`${mapId}-legendContainer`}>
       <Box display="flex" flexDirection="row" flexWrap="wrap">
         {!!legendLayers.length &&
           formattedLegendLayerList.map((layers, idx) => {

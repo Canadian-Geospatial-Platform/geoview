@@ -101,7 +101,9 @@
               'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer'
             },
             'geoviewLayerType': 'esriFeature',
-            'initialSettings': { 'visible': 'always' },
+            'initialSettings': { 
+              'controls': {'visibility': false}
+            },
             'listOfLayerEntryConfig': [
               {
                 'layerId': '8'
@@ -155,8 +157,7 @@
                 'listOfLayerEntryConfig': [
                   {
                     'layerId': 'icon_points.json',
-                    'layerName': { 'en': 'Icons' },
-                    'initialSettings': { 'visible': 'yes' }
+                    'layerName': { 'en': 'Icons' }
                   },
                   {
                     'layerId': 'points.json',
@@ -256,12 +257,10 @@
           <li class="source-link">https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev/collections/lakes</li>
         </ul>
       </div>
-      <div style="margin-bottom:20px;">
-        <div>
-          GeoCore UUID Layer
-        </div>
-        <div style="margin-top:10px; margin-left:20px;">
-          <input id='selectGeoCore' list="geocoreids" style="width:300px;">
+      <div style="margin-bottom: 20px">
+        <div>GeoCore UUID Layer</div>
+        <div style="margin-top: 10px; margin-left: 20px">
+          <input id="selectGeoCore" list="geocoreids" style="width: 300px" />
           <datalist id="geocoreids">
             <option value="21b821cf-0f1c-40ee-8925-eab12d357668"></option>
             <option value="ccc75c12-5acc-4a6a-959f-ef6f621147b9"></option>
@@ -352,12 +351,12 @@
       }
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init(function () {
-        console.log('api is ready');
-
-        //create snippets
-        createConfigSnippet();
-        createCodeSnippet();
+      cgpv.init((mapId) => {
+        if (mapId === 'allMaps') {
+          // create snippets
+          createCodeSnippet();
+          createConfigSnippet();
+        }
       });
     </script>
   </body>

@@ -28,9 +28,9 @@ interface FeatureCollection {
  * Class used to manage vector geometries (Polyline, Polygon, Circle, Marker...)
  *
  * @exports
- * @class Geometry
+ * @class GeometryApi
  */
-export class Geometry {
+export class GeometryApi {
   // reference to the map id
   #mapId: string;
 
@@ -47,7 +47,7 @@ export class Geometry {
   activeGeometryGroupIndex = 0;
 
   // Keep all callback delegates references
-  private onGeometryAddedHandlers: GeometryAddedDelegate[] = [];
+  #onGeometryAddedHandlers: GeometryAddedDelegate[] = [];
 
   /**
    * Constructs a Geometry class and creates a geometry group in the process.
@@ -64,29 +64,30 @@ export class Geometry {
   /**
    * Emits an event to all handlers.
    * @param {GeometryAddedEvent} event The event to emit
+   * @private
    */
-  emitGeometryAdded = (event: GeometryAddedEvent) => {
+  #emitGeometryAdded(event: GeometryAddedEvent): void {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onGeometryAddedHandlers, event);
-  };
+    EventHelper.emitEvent(this, this.#onGeometryAddedHandlers, event);
+  }
 
   /**
-   * Wires an event handler.
+   * Registers a geometry added event handler.
    * @param {GeometryAddedDelegate} callback The callback to be executed whenever the event is emitted
    */
-  onGeometryAdded = (callback: GeometryAddedDelegate): void => {
-    // Wire the event handler
-    EventHelper.onEvent(this.onGeometryAddedHandlers, callback);
-  };
+  onGeometryAdded(callback: GeometryAddedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onGeometryAddedHandlers, callback);
+  }
 
   /**
-   * Unwires an event handler.
+   * Unregisters a geometry added event handler.
    * @param {GeometryAddedDelegate} callback The callback to stop being called whenever the event is emitted
    */
-  offGeometryAdded = (callback: GeometryAddedDelegate): void => {
-    // Unwire the event handler
-    EventHelper.offEvent(this.onGeometryAddedHandlers, callback);
-  };
+  offGeometryAdded(callback: GeometryAddedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onGeometryAddedHandlers, callback);
+  }
 
   /**
    * Create a polyline using an array of lng/lat points
@@ -97,7 +98,7 @@ export class Geometry {
    *
    * @returns {Feature} a geometry containing the id and the created geometry
    */
-  addPolyline = (
+  addPolyline(
     points: Coordinate,
     options?: {
       projection?: number;
@@ -105,7 +106,7 @@ export class Geometry {
       style?: TypeFeatureStyle;
     },
     id?: string
-  ): Feature => {
+  ): Feature {
     const polylineOptions = options || {};
 
     const featureId = generateId(id);
@@ -114,7 +115,7 @@ export class Geometry {
     const polyline = new Feature({
       geometry: new LineString(points, polylineOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        api.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
+        api.utilities.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
       ),
     });
 
@@ -155,10 +156,10 @@ export class Geometry {
     this.geometries.push(polyline);
 
     // emit an event that a geometry has been added
-    this.emitGeometryAdded(polyline);
+    this.#emitGeometryAdded(polyline);
 
     return polyline;
-  };
+  }
 
   /**
    * Create a new polygon
@@ -169,7 +170,7 @@ export class Geometry {
    *
    * @returns {Feature} a geometry containing the id and the created geometry
    */
-  addPolygon = (
+  addPolygon(
     points: number[] | Coordinate[][],
     options?: {
       projection?: number;
@@ -177,16 +178,16 @@ export class Geometry {
       style?: TypeFeatureStyle;
     },
     optionalFeatureId?: string
-  ): Feature => {
+  ): Feature {
     const polygonOptions = options || {};
 
     const featureId = generateId(optionalFeatureId);
 
-    // create a line geometry
+    // create a polygon geometry
     const polygon = new Feature({
       geometry: new Polygon(points, polygonOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        api.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
+        api.utilities.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
       ),
     });
 
@@ -227,10 +228,10 @@ export class Geometry {
     this.geometries.push(polygon);
 
     // emit an event that a geometry has been added
-    this.emitGeometryAdded(polygon);
+    this.#emitGeometryAdded(polygon);
 
     return polygon;
-  };
+  }
 
   /**
    * Create a new circle
@@ -254,15 +255,18 @@ export class Geometry {
 
     const featureId = generateId(optionalFeatureId);
 
-    // get radius, if not define, set default
+    const projectedCoordinates = api.utilities.projection.transform(
+      coordinate,
+      `EPSG:${options?.projection || 4326}`,
+      api.utilities.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
+    );
+
+    // get radius, if not defined, set default
     const radius = circleOptions.style !== undefined ? circleOptions.style.radius || 1 : 1;
 
-    // create a line geometry
+    // create a circle geometry
     const circle = new Feature({
-      geometry: new Circle(coordinate, radius, circleOptions.geometryLayout).transform(
-        `EPSG:${options?.projection || 4326}`,
-        api.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
-      ),
+      geometry: new Circle(projectedCoordinates, radius * 10000, circleOptions.geometryLayout),
     });
 
     // if style is provided then set override the vector layer style for this feature
@@ -302,7 +306,7 @@ export class Geometry {
     this.geometries.push(circle);
 
     // emit an event that a geometry has been added
-    this.emitGeometryAdded(circle);
+    this.#emitGeometryAdded(circle);
 
     return circle;
   }
@@ -316,7 +320,7 @@ export class Geometry {
    *
    * @returns {Feature} a geometry containing the id and the created geometry
    */
-  addMarkerIcon = (
+  addMarkerIcon(
     coordinate: Coordinate,
     options?: {
       projection?: number;
@@ -324,7 +328,7 @@ export class Geometry {
       style?: TypeIconStyle;
     },
     optionalFeatureId?: string
-  ): Feature => {
+  ): Feature {
     // Read the params and set defaults when needed
     const markerOptions = options || {
       style: {
@@ -343,7 +347,7 @@ export class Geometry {
     const marker = new Feature({
       geometry: new Point(coordinate, markerOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        api.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
+        api.utilities.projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
       ),
     });
 
@@ -366,10 +370,10 @@ export class Geometry {
     this.geometries.push(marker);
 
     // emit an event that a geometry has been added
-    this.emitGeometryAdded(marker);
+    this.#emitGeometryAdded(marker);
 
     return marker;
-  };
+  }
 
   /**
    * Find a feature using it's id
@@ -378,16 +382,16 @@ export class Geometry {
    *
    * @returns {Feature} a feature having the specified id
    */
-  getGeometry = (featureId: string): Feature => {
+  getGeometry(featureId: string): Feature {
     return this.geometries.filter((layer) => layer.get('featureId') === featureId)[0];
-  };
+  }
 
   /**
    * Delete a feature using the id and delete it from the groups and the map
    *
    * @param {string} featureId the id of the feature to delete
    */
-  deleteGeometry = (featureId: string): void => {
+  deleteGeometry(featureId: string): void {
     for (let i = 0; i < this.geometries.length; i++) {
       if (this.geometries[i].get('featureId') === featureId) {
         this.deleteGeometryFromGroups(featureId);
@@ -399,7 +403,7 @@ export class Geometry {
         break;
       }
     }
-  };
+  }
 
   /**
    * Create a new geometry group to manage multiple geometries at once
@@ -448,7 +452,7 @@ export class Geometry {
    *
    * @param {string} id optional the id of the group to set as active
    */
-  setActiveGeometryGroup = (id?: string): void => {
+  setActiveGeometryGroup(id?: string): void {
     // if group name not give, add to default group
     const geometryGroupId = id || this.defaultGeometryGroupId;
     for (let i = 0; i < this.geometryGroups.length; i++) {
@@ -457,16 +461,16 @@ export class Geometry {
         break;
       }
     }
-  };
+  }
 
   /**
    * Get the active geometry group
    *
    * @returns {FeatureCollection} the active geometry group
    */
-  getActiveGeometryGroup = (): FeatureCollection => {
+  getActiveGeometryGroup(): FeatureCollection {
     return this.geometryGroups[this.activeGeometryGroupIndex];
-  };
+  }
 
   /**
    * Get the geometry group by using the ID specified when the group was created
@@ -492,7 +496,7 @@ export class Geometry {
    *
    * @returns {FeatureCollection[]} the groups that contain the geometry
    */
-  getGeometryGroupsByFeatureId = (featureId: string): FeatureCollection[] => {
+  getGeometryGroupsByFeatureId(featureId: string): FeatureCollection[] {
     const returnValue: FeatureCollection[] = [];
     for (let i = 0; i < this.geometryGroups.length; i++) {
       const geometries = this.geometryGroups[i].vectorLayer.getSource()?.getFeatures() || [];
@@ -504,7 +508,7 @@ export class Geometry {
     }
 
     return returnValue;
-  };
+  }
 
   /**
    * Show the identified geometry group on the map
@@ -512,12 +516,12 @@ export class Geometry {
    *
    * @param {string} geometryGroupId optional the id of the group to show on the map
    */
-  setGeometryGroupAsVisible = (geometryGroupId?: string): void => {
+  setGeometryGroupAsVisible(geometryGroupId?: string): void {
     const geometryGroup = this.getGeometryGroup(geometryGroupId)!;
 
     geometryGroup.vectorLayer.setVisible(true);
     geometryGroup.vectorLayer.changed();
-  };
+  }
 
   /**
    * hide the identified geometry group from the map
@@ -525,12 +529,12 @@ export class Geometry {
    *
    * @param {string} geometryGroupId optional the id of the group to show on the map
    */
-  setGeometryGroupAsInvisible = (geometryGroupId?: string): void => {
+  setGeometryGroupAsInvisible(geometryGroupId?: string): void {
     const geometryGroup = this.getGeometryGroup(geometryGroupId)!;
 
     geometryGroup.vectorLayer.setVisible(false);
     geometryGroup.vectorLayer.changed();
-  };
+  }
 
   /**
    * Add a new geometry to the group whose identifier is equal to geometryGroupId.
@@ -540,7 +544,7 @@ export class Geometry {
    * @param {Feature} geometry the geometry to be added to the group
    * @param {string} geometryGroupId optional id of the group to add the geometry to
    */
-  addToGeometryGroup = (geometry: Feature, geometryGroupId?: string): void => {
+  addToGeometryGroup(geometry: Feature, geometryGroupId?: string): void {
     let geometryGroup: FeatureCollection;
     if (geometryGroupId) {
       // create geometry group if it does not exist
@@ -555,14 +559,14 @@ export class Geometry {
     } catch (error) {
       logger.logError(`Error adding geometry to group ${geometryGroupId}`, error);
     }
-  };
+  }
 
   /**
    * Find the groups that the feature exists in and delete the feature from those groups
    *
    * @param {string} featureId the geometry id
    */
-  deleteGeometryFromGroups = (featureId: string): void => {
+  deleteGeometryFromGroups(featureId: string): void {
     const geometry = this.getGeometry(featureId);
     for (let i = 0; i < this.geometryGroups.length; i++) {
       this.geometryGroups[i].vectorLayer
@@ -575,7 +579,7 @@ export class Geometry {
         });
       this.geometryGroups[i].vectorLayer.changed();
     }
-  };
+  }
 
   /**
    * Delete a specific feature from a group using the feature id
@@ -584,7 +588,7 @@ export class Geometry {
    * @param {string} featureId the feature id to be deleted
    * @param {string} geometryGroupid optional group id
    */
-  deleteGeometryFromGroup = (featureId: string, geometryGroupid?: string): void => {
+  deleteGeometryFromGroup(featureId: string, geometryGroupid?: string): void {
     const geometry = this.getGeometry(featureId);
     const geometryGroup = this.getGeometryGroup(geometryGroupid)!;
     geometryGroup.vectorLayer
@@ -596,7 +600,7 @@ export class Geometry {
         }
       });
     geometryGroup.vectorLayer.changed();
-  };
+  }
 
   /**
    * Delete all geometries from the geometry group but keep the group
@@ -605,7 +609,7 @@ export class Geometry {
    * @param {string} geometryGroupid optional group id
    * @returns {FeatureCollection} the group with empty layers
    */
-  deleteGeometriesFromGroup = (geometryGroupid?: string): FeatureCollection => {
+  deleteGeometriesFromGroup(geometryGroupid?: string): FeatureCollection {
     const geometryGroup = this.getGeometryGroup(geometryGroupid)!;
     geometryGroup.vectorLayer
       .getSource()
@@ -616,7 +620,7 @@ export class Geometry {
     geometryGroup.vectorLayer.changed();
 
     return geometryGroup;
-  };
+  }
 
   /**
    * Delete a geometry group and all the geometries from the map.
@@ -625,7 +629,7 @@ export class Geometry {
    *
    * @param {string} geometryGroupid optional id of the geometry group to delete
    */
-  deleteGeometryGroup = (geometryGroupid?: string): void => {
+  deleteGeometryGroup(geometryGroupid?: string): void {
     const geometryGroup = this.deleteGeometriesFromGroup(geometryGroupid);
     if (geometryGroup.geometryGroupId !== this.defaultGeometryGroupId) {
       for (let i = 0; i < this.geometryGroups.length; i++) {
@@ -634,15 +638,15 @@ export class Geometry {
         }
       }
     }
-  };
+  }
 }
 
 /**
  * Define a delegate for the event handler function signature
  */
-type GeometryAddedDelegate = EventDelegateBase<Geometry, GeometryAddedEvent>;
+type GeometryAddedDelegate = EventDelegateBase<GeometryApi, GeometryAddedEvent>;
 
 /**
  * Event interface for GeometryAdded
  */
-type GeometryAddedEvent<T extends OLGeometry = OLGeometry> = Feature<T>;
+export type GeometryAddedEvent<T extends OLGeometry = OLGeometry> = Feature<T>;

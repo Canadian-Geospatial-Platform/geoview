@@ -1,7 +1,8 @@
 import { ReactNode } from 'react';
 import { TooltipProps, ButtonProps, TextFieldProps } from '@mui/material';
 
-import { TypeIconButtonProps, TypeJsonValue } from '@/core/types/global-types';
+import { TypeJsonValue } from '@/core/types/global-types';
+import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 
 /** ******************************************************************************************************************************
  * Interface used to initialize a button panel.
@@ -80,7 +81,7 @@ export interface TypeTextFieldProps extends Omit<TextFieldProps, 'type'> {
   tooltipPlacement?: TooltipProps['placement'];
 }
 
-// ! Check if it must be deleted.
+// GV Check if it must be deleted.
 // TODO: used in layer-panel packages... check if we can merge
 /** ******************************************************************************************************************************
  * Interface for the button properties used when creating a new button.

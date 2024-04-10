@@ -1,13 +1,10 @@
 import { useEffect } from 'react';
 import { type MRT_TableInstance as MRTTableInstance, type MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
 import { useTranslation } from 'react-i18next';
-import {
-  useDataTableStoreActions,
-  useDataTableStoreToolbarRowSelectedMessageRecord,
-} from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { ColumnsType } from '../data-table';
+import { useDataTableStoreActions, useDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
-import { MappedLayerDataType } from '../data-panel';
+import { MappedLayerDataType } from '@/core/components/data-table/data-panel';
+import { ColumnsType } from '@/core/components/data-table/data-table';
 
 interface UseSelectedRowMessageProps {
   data: MappedLayerDataType;
@@ -28,7 +25,7 @@ export function useToolbarActionMessage({ data, columnFilters, globalFilter, lay
   const { t } = useTranslation();
 
   // get store values
-  const toolbarRowSelectedMessageRecord = useDataTableStoreToolbarRowSelectedMessageRecord();
+  const datatableSettings = useDataTableLayerSettings();
 
   const { setToolbarRowSelectedMessageEntry, setRowsFilteredEntry } = useDataTableStoreActions();
 
@@ -37,7 +34,7 @@ export function useToolbarActionMessage({ data, columnFilters, globalFilter, lay
     // Log
     logger.logTraceUseEffect('USETOOLBARACTIONMESSAGE - rowSelection');
 
-    let message = toolbarRowSelectedMessageRecord[layerPath] ?? '';
+    let message = datatableSettings[layerPath].toolbarRowSelectedMessageRecord ?? '';
     if (tableInstance && tableInstance.getFilteredRowModel().rows.length !== data.features?.length) {
       message = t('dataTable.rowsFiltered')
         .replace('{rowsFiltered}', tableInstance.getFilteredRowModel().rows.length.toString())
@@ -55,7 +52,7 @@ export function useToolbarActionMessage({ data, columnFilters, globalFilter, lay
     // Log
     logger.logTraceUseEffect('USETOOLBARACTIONMESSAGE - columnFilters', columnFilters);
 
-    let message = toolbarRowSelectedMessageRecord[layerPath] ?? '';
+    let message = datatableSettings[layerPath].toolbarRowSelectedMessageRecord ?? '';
     let length = 0;
     if (tableInstance) {
       const rowsFiltered = tableInstance.getFilteredRowModel();

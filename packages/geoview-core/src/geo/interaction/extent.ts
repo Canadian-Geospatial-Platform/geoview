@@ -4,7 +4,7 @@ import { shiftKeyOnly } from 'ol/events/condition';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
-import { GeoUtilities } from '@/geo/utils/utilities';
+import { convertTypeFeatureStyleToOpenLayersStyle } from '@/geo/utils/utilities';
 
 import { Interaction, InteractionOptions } from './interaction';
 
@@ -17,81 +17,82 @@ export type ExtentOptions = InteractionOptions & {
 };
 
 /**
- * Class used for drawing extent on a map
- *
- * @exports
+ * Class used for drawing an extent on a map.
  * @class Extent
+ * @extends {Interaction}
+ * @exports
  */
 export class Extent extends Interaction {
-  // The embedded Open Layers Extent component
-  ol_extent: OLExtent;
+  /** The embedded OpenLayers Extent component */
+  #ol_extent: OLExtent;
 
-  // Keep all callback delegates references
-  private onExtentChangedHandlers: ExtentDelegate[] = [];
+  /** Callback handlers for the extentchanged event. */
+  #onExtentChangedHandlers: ExtentDelegate[] = [];
 
   /**
-   * Initialize Extent component
-   * @param {ExtentOptions} options object to configure the initialization of the Extent interaction
+   * Initializes an Extent component.
+   * @param {ExtentOptions} options - An object to configure the initialization of the Extent interaction.
    */
   constructor(options: ExtentOptions) {
     super(options);
 
-    // The OpenLayers Extent options
+    // Configure OpenLayers Extent options
     const olOptions: OLExtentOptions = {
       condition: shiftKeyOnly,
-      boxStyle: new GeoUtilities().convertTypeFeatureStyleToOpenLayersStyle(options.boxStyle),
+      boxStyle: convertTypeFeatureStyleToOpenLayersStyle(options.boxStyle),
       pixelTolerance: options.pixelTolerance || 0,
     };
 
-    // Activate the OpenLayers Extent module
-    this.ol_extent = new OLExtent(olOptions);
+    // Instantiate the OpenLayers Extent interaction
+    this.#ol_extent = new OLExtent(olOptions);
 
-    // Wire handler when drawing of extent is changed
-    this.ol_extent.on('extentchanged', this.emitExtentChanged);
+    // Register event handler for extent change
+    this.#ol_extent.on('extentchanged', this.#emitExtentChanged.bind(this));
   }
 
   /**
-   * Starts the interaction on the map
+   * Starts the interaction on the map.
    */
-  public startInteraction() {
-    // Redirect
-    super.startInteraction(this.ol_extent);
+  startInteraction(): void {
+    // Redirect to super method to start interaction
+    super.startInteraction(this.#ol_extent);
   }
 
   /**
-   * Stops the interaction on the map
+   * Stops the interaction on the map.
    */
-  public stopInteraction() {
-    // Redirect
-    super.stopInteraction(this.ol_extent);
+  stopInteraction(): void {
+    // Redirect to super method to stop interaction
+    super.stopInteraction(this.#ol_extent);
   }
 
   /**
-   * Emits an event to all handlers.
-   * @param {OLExtentEvent} event The event to emit
+   * Emits an event to all registered extent change event handlers.
+   * @param {OLExtentEvent} event - The event to emit.
+   * @private
    */
-  emitExtentChanged = (event: OLExtentEvent) => {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onExtentChangedHandlers, event);
-  };
+  #emitExtentChanged(event: OLExtentEvent): void {
+    // Emit the extentchanged event
+    EventHelper.emitEvent(this, this.#onExtentChangedHandlers, event);
+  }
 
   /**
-   * Wires an event handler.
-   * @param {ExtentDelegate} callback The callback to be executed whenever the event is emitted
+   * Registers an event handler for extent change events.
+   * @param {ExtentDelegate} callback - The callback to be executed whenever the event is emitted.
    */
-  onExtentChanged = (callback: ExtentDelegate): void => {
-    // Wire the event handler
-    EventHelper.onEvent(this.onExtentChangedHandlers, callback);
-  };
+  onExtentChanged(callback: ExtentDelegate): void {
+    // Register the extentchanged event callback
+    EventHelper.onEvent(this.#onExtentChangedHandlers, callback);
+  }
 
   /**
-   * Unwires an event handler.
-   * @param {ExtentDelegate} callback The callback to stop being called whenever the event is emitted
+   * Unregisters an event handler for extent change events.
+   * @param {ExtentDelegate} callback - The callback to stop being called whenever the event is emitted.
    */
-  offExtentChanged = (callback: ExtentDelegate): void => {
-    // Unwire the event handler
-    EventHelper.offEvent(this.onExtentChangedHandlers, callback);
-  };
+  offExtentChanged(callback: ExtentDelegate): void {
+    // Unregister the extentchanged event callback
+    EventHelper.offEvent(this.#onExtentChangedHandlers, callback);
+  }
 }
 
 /**

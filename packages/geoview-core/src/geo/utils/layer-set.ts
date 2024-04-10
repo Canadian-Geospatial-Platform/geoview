@@ -3,79 +3,67 @@ import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import Feature from 'ol/Feature';
 import RenderFeature from 'ol/render/Feature';
-import { TypeResultSet } from '@/api/events/payloads';
-import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { api, LayerApi } from '@/app';
-import { TypeLayerStatus, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
+import { TypeLayerStatus, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 import { TypeHoverLayerData } from './hover-feature-info-layer-set';
+import { LayerApi } from '@/geo/layer/layer';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
-/** ***************************************************************************************************************************
- * A class to hold a set of layers associated with an value of any type. When this class is instantiated, all layers already
- * loaded on the specified map that have a return value equal to true when the registrationConditionFunction is called using
- * the layer path as a parameter will be added to the set. Layers added afterwards will be added to the set if the
- * registrationConditionFunction returns true. Deleted layers will be removed from the set.
- *
+/**
+ * A class to hold a set of layers associated with a value of any type.
+ * Layers are added/removed to the layer-set via the registerOrUnregisterLayer function.
  * @class LayerSet
+ * @exports
  */
 export class LayerSet {
   /** The LayerApi to work with */
   protected layerApi: LayerApi;
 
-  /** The map identifier the layer set belongs to. */
-  protected mapId: string;
-
-  /** The layer set identifier. */
-  layerSetId: string;
-
   /** An object containing the result sets indexed using the layer path */
-  resultSet: TypeResultSet;
-
-  /** Function used to determine if the layerPath can be added to the layer set. */
-  protected registrationConditionFunction: (layerPath: string) => boolean;
-
-  /** Function used to initialise the data property of the layer path entry. */
-  protected registrationUserInitialisation?: (layerPath: string) => void;
+  resultSet: TypeResultSet = {};
 
   /** Sequence number to append to the layer name when we declare a layer as anonymous. */
   protected anonymousSequenceNumber = 1;
 
+  // Keep all callback delegates references
+  #onLayerSetUpdatedHandlers: LayerSetUpdatedDelegate[] = [];
+
   /**
-   * The class constructor that instanciate a set of layer.
-   *
-   * @param {LayerApi} layerApi The layer Api to work with.
-   * @param {string} mapId The map identifier the layer set belongs to.
-   * @param {string} layerSetIdentifier The layer set identifier.
-   * @param {TypeResultSet} resultSet An object that will contain the result sets indexed using the layer path.
-   * @param {(layerPath: string) => boolean} registrationConditionFunction A function to decide if the layer can be added.
-   * @param {(layerPath: string) => void} registrationUserInitialisation A function to initialise the data property of the layer path entry.
+   * Constructs a new LayerSet instance.
+   * @param {LayerApi} layerApi - The LayerApi instance to work with.
    */
-  constructor(
-    layerApi: LayerApi,
-    mapId: string,
-    layerSetIdentifier: string,
-    resultSet: TypeResultSet,
-    registrationConditionFunction?: (layerPath: string) => boolean,
-    registrationUserInitialisation?: (layerPath: string) => void
-  ) {
+  constructor(layerApi: LayerApi) {
     this.layerApi = layerApi;
-    this.mapId = mapId;
-    this.layerSetId = layerSetIdentifier;
-    this.resultSet = resultSet;
-    this.registrationConditionFunction = registrationConditionFunction || (() => true); // The function or a function that's always true
-    this.registrationUserInitialisation = registrationUserInitialisation;
+  }
+
+  // Shortcut to get the map id
+  protected get mapId() {
+    return this.layerApi.mapId;
   }
 
   /**
-   * The listener that will handle the CHANGE_LAYER_STATUS event triggered on the map.
-   *
-   * @param {string} layerPath The layer path being affected
-   * @param {string} layerStatus The new layer status
+   * Processes the layer status change in the layer-set.
+   * @param {ConfigBaseClass} config - The layer config class
+   * @param {string} layerPath - The layer path being affected
+   * @param {TypeLayerStatus} layerStatus - The new layer status
    */
-  protected changeLayerStatusListenerFunctions(layerPath: string, layerStatus: TypeLayerStatus): void {
+  public processLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
+    // Call the overridable function to process a layer status changed
+    this.onProcessLayerStatusChanged(config, layerPath, layerStatus);
+  }
+
+  /**
+   * An overridable function for a layer-set to process a layer status changed event.
+   * @param {ConfigBaseClass} config - The layer config class
+   * @param {string} layerPath - The layer path being affected
+   * @param {TypeLayerStatus} layerStatus - The new layer status
+   */
+  protected onProcessLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
     // if layer's status flag exists and is different than the new one
     if (this.resultSet?.[layerPath]?.layerStatus && this.resultSet?.[layerPath]?.layerStatus !== layerStatus) {
       // Change the layer status!
@@ -83,7 +71,7 @@ export class LayerSet {
 
       if (['processed', 'error'].includes(layerStatus) && !this.resultSet[layerPath].layerName) {
         const layerConfig = this.layerApi.registeredLayers[layerPath];
-        const layerName = getLocalizedValue(layerConfig.layerName, this.mapId);
+        const layerName = getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId));
         if (layerName) this.resultSet[layerPath].layerName = layerName;
         else {
           this.resultSet[layerPath].layerName = getLocalizedValue(
@@ -91,7 +79,7 @@ export class LayerSet {
               en: `Anonymous Layer ${this.anonymousSequenceNumber}`,
               fr: `Couche Anonyme ${this.anonymousSequenceNumber}`,
             },
-            this.mapId
+            AppEventProcessor.getDisplayLanguage(this.mapId)
           );
           this.anonymousSequenceNumber++;
         }
@@ -100,83 +88,92 @@ export class LayerSet {
         if (!layerConfig.layerName) layerConfig.layerName = createLocalizedString(this.resultSet[layerPath].layerName!);
       }
 
-      // Emit layer set updated
-      api.event.emitLayerSetUpdated(this.layerSetId, layerPath, this.resultSet);
+      // Inform that the layer set has been updated
+      this.onLayerSetUpdatedProcess(layerPath);
     }
-  }
-
-  /**
-   * Processes the layer status change in the system, notably making sure to propagate in the store.
-   */
-  public processLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
-    // Redirect for the children classes
-    this.changeLayerStatusListenerFunctions.call(this, layerPath, layerStatus);
   }
 
   /**
    * Registers or Unregisters the layer in the layer-set, making sure the layer-set is aware of the layer.
-   * @param {AbstractGeoViewLayer} geoviewLayer The layer to register/unregister
-   * @param {string} action The action to register(add) or unregister(remove) the layer
+   * @param {AbstractGeoViewLayer} geoviewLayer - The layer to register/unregister
+   * @param {string} layerPath - The path of the layer
+   * @param {'add' | 'remove'} action - The action to perform: 'add' to register or 'remove' to unregister
    */
   public registerOrUnregisterLayer(geoviewLayer: AbstractGeoViewLayer, layerPath: string, action: 'add' | 'remove'): void {
     // Update the registration of all layer sets if !payload.layerSetId or update only the specified layer set
-    if (action === 'add' && this.registrationConditionFunction(layerPath) && !(layerPath in this.resultSet)) {
+    if (action === 'add' && this.onRegisterLayerCheck(geoviewLayer, layerPath) && !(layerPath in this.resultSet)) {
       const layerConfig = this.layerApi.registeredLayers[layerPath];
       this.resultSet[layerPath] = {
         data: undefined,
         layerStatus: 'newInstance',
-        layerName: getLocalizedValue(layerConfig.layerName, this.mapId),
+        layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)),
       };
-      this.registrationUserInitialisation?.(layerPath);
+
+      // Call the registration function for the layer-set. This method is different for each child.
+      this.onRegisterLayer(geoviewLayer, layerPath);
+
+      // Inform that the layer set has been updated
+      this.onLayerSetUpdatedProcess(layerPath);
     } else if (action === 'remove' && layerPath in this.resultSet) {
       MapEventProcessor.removeOrderedLayerInfo(this.mapId, layerPath);
       delete this.resultSet[layerPath];
+
+      // Inform that the layer set has been updated
+      this.onLayerSetUpdatedProcess(layerPath);
     }
-
-    // Emit layer set updated
-    api.event.emitLayerSetUpdated(this.layerSetId, layerPath, this.resultSet);
   }
 
   /**
-   * Helper function used to instanciate a LayerSet object. This function
-   * avoids the "new LayerSet" syntax.
-   *
-   * @param {LayerApi} layerApi The layer Api to work with.
-   * @param {string} mapId The map identifier the layer set belongs to.
-   * @param {string} layerSetId The layer set identifier.
-   * @param {TypeResultSet} resultSet An object that will contain the result sets indexed using the layer path.
-   * @param {(layerPath: string) => boolean} registrationConditionFunction A function to decide if the layer can be added.
-   *
-   * @returns {LayerSet} the LayerSet object created
+   * An overridable registration condition function for a layer-set to check if the registration
+   * should happen for a specific geoview layer and layer path.
+   * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
+   * @param {string} layerPath - The layer path
+   * @returns {boolean} True if the layer should be registered, false otherwise
    */
-  static create(
-    layerApi: LayerApi,
-    mapId: string,
-    layerSetId: string,
-    resultSet: TypeResultSet,
-    registrationConditionFunction: (layerPath: string) => boolean
-  ): LayerSet {
-    return new LayerSet(layerApi, mapId, layerSetId, resultSet, registrationConditionFunction);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected onRegisterLayerCheck(geoviewLayer: AbstractGeoViewLayer, layerPath: string): boolean {
+    // Override this function to perform registration condition logic in the inherited classes
+    // By default, a layer-set always registers layers
+    return true;
   }
 
   /**
-   * Process a layer result set data to query features on it, if said layer path can be queried.
-   *
-   * @param {TypeLayerData | TypeHoverLayerData} data
-   * @param {TypeLayerEntryConfig} layerConfig
-   * @param {string} layerPath
-   * @param {QueryType} queryType
-   * @param {TypeLocation} location
-   *
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} promise of the results
+   * An overridable registration function for a layer-set that the registration process will use to
+   * create a new entry in the layer set for a specific geoview layer and layer path.
+   * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
+   * @param {string} layerPath - The layer path
    */
-  processQueryResultSetData = (
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected onRegisterLayer(geoviewLayer: AbstractGeoViewLayer, layerPath: string): void {
+    // Override this function to perform registration logic in the inherited classes
+    throw new Error("Not implemented exception. A 'onRegisterLayer' function was not implemented by a layer-set.");
+  }
+
+  /**
+   * An overridable layer set updated function for a layer-set to indicate the layer set has been updated.
+   * @param {string} layerPath - The layer path
+   */
+  protected onLayerSetUpdatedProcess(layerPath: string): void {
+    // Emit layer set updated event to the outside
+    this.#emitLayerSetUpdated({ layerPath, resultSet: this.resultSet });
+  }
+
+  /**
+   * Processes layer data to query features on it, if the layer path can be queried.
+   * @param {TypeLayerData | TypeHoverLayerData} data - The layer data
+   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration
+   * @param {string} layerPath - The layer path
+   * @param {QueryType} queryType - The query type
+   * @param {TypeLocation} location - The location for the query
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise resolving to the query results
+   */
+  protected queryLayerFeatures(
     data: TypeLayerData | TypeHoverLayerData,
     layerConfig: TypeLayerEntryConfig,
     layerPath: string,
     queryType: QueryType,
     location: TypeLocation
-  ): Promise<TypeFeatureInfoEntry[] | undefined | null> => {
+  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // If event listener is enabled, query status isn't in error, and geoview layer instance is defined
     if (data.eventListenerEnabled && data.queryStatus !== 'error' && layerConfig.geoviewLayerInstance) {
       // If source is queryable
@@ -187,11 +184,44 @@ export class LayerSet {
     }
     // No query made
     return Promise.resolve(null);
-  };
+  }
+
+  /**
+   * Emits an event to all registered handlers.
+   * @param {LayerSetUpdatedEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerSetUpdated(event: LayerSetUpdatedEvent): void {
+    // Emit the layersetupdated event
+    EventHelper.emitEvent(this, this.#onLayerSetUpdatedHandlers, event);
+  }
+
+  /**
+   * Registers a callback to be executed whenever the layer set is updated.
+   * @param {LayerSetUpdatedDelegate} callback - The callback function
+   */
+  onLayerSetUpdated(callback: LayerSetUpdatedDelegate): void {
+    // Register the layersetupdated event callback
+    EventHelper.onEvent(this.#onLayerSetUpdatedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a callback from being called whenever the layer set is updated.
+   * @param {LayerSetUpdatedDelegate} callback - The callback function to unregister
+   */
+  offLayerSetUpdated(callback: LayerSetUpdatedDelegate): void {
+    // Unregister the layersetupdated event callback
+    EventHelper.offEvent(this.#onLayerSetUpdatedHandlers, callback);
+  }
 }
 
+// TODO: Rename this type to something like 'store-container-type' as it is now mostly used to indicate in which store to propagate the result set
+// TO.DOCONT: Be mindful if you rename the eventType property in the event payload to the outside! Because lots of templates expect an 'eventType' in the payload.
+// TO.DOCONT: Ideally, get rid of it completely. The templates should be self aware of the layer-set that responded to their request now.
 export type EventType = 'click' | 'hover' | 'all-features';
+
 export const ArrayOfEventTypes: EventType[] = ['click', 'hover', 'all-features'];
+
 export type QueryType = 'at_pixel' | 'at_coordinate' | 'at_long_lat' | 'using_a_bounding_box' | 'using_a_polygon' | 'all';
 
 export type TypeQueryStatus = 'init' | 'processing' | 'processed' | 'error';
@@ -260,3 +290,26 @@ export type TypeFeatureInfoEntry = {
  * to add more information on one or the other and keep things loosely linked together.
  */
 export type TypeFeatureInfoEntryPartial = Pick<TypeFeatureInfoEntry, 'fieldInfo'>;
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerSetUpdatedDelegate = EventDelegateBase<LayerSet, LayerSetUpdatedEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerSetUpdatedEvent = {
+  layerPath: string;
+  resultSet: TypeResultSet;
+};
+
+export type TypeResultSetEntry = {
+  layerName?: string;
+  layerStatus: TypeLayerStatus;
+  data: unknown;
+};
+
+export type TypeResultSet = {
+  [layerPath: string]: TypeResultSetEntry;
+};

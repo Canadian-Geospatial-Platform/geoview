@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { addNotificationError } from '@/core/utils/utilities';
+import { logger } from '@/core/utils/logger';
 
 export const useFetchAndParseMarkdown = (
   mapId: string,
@@ -12,10 +12,9 @@ export const useFetchAndParseMarkdown = (
       try {
         const response = await fetch(filePath);
         const content = await response.text();
-        const sections = content.split(/=([^=]+)=/);
+        const sections = content.split(/=(?=!)(.*?)=/);
 
-        // TODO review line below, if we can get rid of logic === ''
-        if (sections[0].trim() === '') {
+        if (!sections[0].trim()) {
           sections.shift();
         }
         // Example for variable sections
@@ -44,7 +43,7 @@ export const useFetchAndParseMarkdown = (
 
         setResult(resultObject);
       } catch (error) {
-        addNotificationError(mapId, errorMessage);
+        logger.logError(mapId, errorMessage);
       }
     };
 

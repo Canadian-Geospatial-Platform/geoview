@@ -1,4 +1,3 @@
-import { TypeJsonValue, getLocalizedMessage, replaceParams, showError } from '@/app';
 import { UUIDmapConfigReader } from '@/core/utils/config/reader/uuid-config-reader';
 import { ConfigValidation } from '@/core/utils/config/config-validation';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
@@ -6,7 +5,9 @@ import { GeochartEventProcessor } from '@/api/event-processors/event-processor-c
 import { logger } from '@/core/utils/logger';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
-import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage } from '../../map/map-schema-types';
+import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage } from '@/geo/map/map-schema-types';
+import { TypeJsonValue } from '@/core/types/global-types';
+import { api } from '@/app';
 
 /**
  * Class used to add geoCore layer to the map
@@ -61,8 +62,9 @@ export class GeoCore {
     } catch (error) {
       // Log
       logger.logError(`Failed to get the GeoView layer from UUI ${uuid}`, error);
-      const message = replaceParams([error as TypeJsonValue, this.mapId], getLocalizedMessage(this.mapId, 'validation.layer.loadfailed'));
-      showError(this.mapId, message);
+
+      // TODO: find a more centralized way to trap error and display message
+      api.maps[this.mapId].notifications.showError('validation.layer.loadfailed', [error as TypeJsonValue, this.mapId]);
       throw error;
     }
   }

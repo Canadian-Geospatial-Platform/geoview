@@ -10,10 +10,10 @@ import {
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { logger } from '@/core/utils/logger';
-import { Cast, TypeJsonValue, api } from '@/core/types/cgpv-types';
-
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
+import { Cast, TypeJsonValue } from '@/core/types/global-types';
+import { api } from '@/app';
 
 /** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
@@ -71,7 +71,7 @@ export class ConfigBaseClass {
   protected waitForProcessedBeforeSendingLoaded = false;
 
   // Keep all callback delegates references
-  private onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
+  #onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
 
   /**
    * The class constructor.
@@ -157,7 +157,9 @@ export class ConfigBaseClass {
     if (!this.IsGreaterThanOrEqualTo(newLayerStatus)) {
       // eslint-disable-next-line no-underscore-dangle
       this._layerStatus = newLayerStatus;
-      this.emitLayerStatusChanged({ layerPath: this.layerPath, layerStatus: newLayerStatus });
+      // TODO: Refactor - Suggestion to hold the layer status elsewhere than in a configuration file. Can it be on the layer itself?
+      // TO.DOCONT: It'd be "nicer" to have a configuration file that doesn't raise events
+      this.#emitLayerStatusChanged({ layerPath: this.layerPath, layerStatus: newLayerStatus });
     }
     if (newLayerStatus === 'processed' && this.waitForProcessedBeforeSendingLoaded) this.layerStatus = 'loaded';
 
@@ -173,58 +175,63 @@ export class ConfigBaseClass {
   /**
    * Emits an event to all handlers.
    * @param {LayerStatusChangedEvent} event The event to emit
+   * @private
    */
-  emitLayerStatusChanged = (event: LayerStatusChangedEvent) => {
+  #emitLayerStatusChanged(event: LayerStatusChangedEvent): void {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.onLayerStatusChangedHandlers, event);
-  };
+    EventHelper.emitEvent(this, this.#onLayerStatusChangedHandlers, event);
+  }
 
   /**
-   * Wires an event handler.
+   * Registers a layer status changed event handler.
    * @param {LayerStatusChangedDelegate} callback The callback to be executed whenever the event is emitted
    */
-  onLayerStatusChanged = (callback: LayerStatusChangedDelegate): void => {
-    // Wire the event handler
-    EventHelper.onEvent(this.onLayerStatusChangedHandlers, callback);
-  };
+  onLayerStatusChanged(callback: LayerStatusChangedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerStatusChangedHandlers, callback);
+  }
 
   /**
-   * Unwires an event handler.
+   * Unregisters a layer status changed event handler.
    * @param {LayerStatusChangedDelegate} callback The callback to stop being called whenever the event is emitted
    */
-  offLayerStatusChanged = (callback: LayerStatusChangedDelegate): void => {
-    // Unwire the event handler
-    EventHelper.offEvent(this.onLayerStatusChangedHandlers, callback);
-  };
+  offLayerStatusChanged(callback: LayerStatusChangedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerStatusChangedHandlers, callback);
+  }
 
   /**
    * Register the layer identifier. Duplicate identifier are not allowed.
    *
    * @returns {boolean} Returns false if the layer configuration can't be registered.
    */
-
   registerLayerConfig(): boolean {
     const { registeredLayers } = api.maps[this.geoviewLayerInstance!.mapId].layer;
     if (registeredLayers[this.layerPath]) return false;
     (registeredLayers[this.layerPath] as ConfigBaseClass) = this;
+
+    // TODO: Check - Move this registerToLayerSets closer to the others, when I comment the line it seems good, except
+    // TO.DOCONT: for an 'Anonymous' group layer that never got 'loaded'. See if we can fix this elsewhere and remove this.
     if (this.entryType !== CONST_LAYER_ENTRY_TYPES.GROUP)
       (this.geoviewLayerInstance as AbstractGeoViewLayer).registerToLayerSets(Cast<AbstractBaseLayerEntryConfig>(this));
+
     this.layerStatus = 'registered';
     return true;
   }
 
-  /**
-   * This method returns the GeoView instance associated to a specific layer path. The first element of the layerPath
-   * is the geoviewLayerId.
-   * @param {string} layerPath The layer path to the layer's configuration.
-   *
-   * @returns {AbstractGeoViewLayer} Returns the geoview instance associated to the layer path.
-   */
-  // TODO: Check - Is this still used? Remove it and favor the homonymous method in `layer`?
-  geoviewLayer(layerPath?: string): AbstractGeoViewLayer {
-    this.geoviewLayerInstance!.layerPathAssociatedToTheGeoviewLayer = layerPath || this.layerPath;
-    return this.geoviewLayerInstance!;
-  }
+  // TODO: Check - Is this still used? Remove it and favor the homonymous method in `layer`? (which also should be deleted)
+  // TO.DOCONT: I'm commenting it in this big refactor (2024-03-17) to see if anything crashes and if so, where. Seems good to me without it so far.
+  // /**
+  //  * This method returns the GeoView instance associated to a specific layer path. The first element of the layerPath
+  //  * is the geoviewLayerId.
+  //  * @param {string} layerPath The layer path to the layer's configuration.
+  //  *
+  //  * @returns {AbstractGeoViewLayer} Returns the geoview instance associated to the layer path.
+  //  */
+  //   geoviewLayer(layerPath?: string): AbstractGeoViewLayer {
+  //   this.geoviewLayerInstance!.layerPathAssociatedToTheGeoviewLayer = layerPath || this.layerPath;
+  //   return this.geoviewLayerInstance!;
+  // }
 
   /**
    * This method compares the internal layer status of the config with the layer status passed as a parameter and it

@@ -1,17 +1,13 @@
 import { useStore } from 'zustand';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { api } from '@/app';
-import { QueryType, TypeLayerData, TypeFeatureInfoEntry, TypeGeometry } from '@/geo/utils/layer-set';
-
-import { useGeoViewStore } from '../stores-managers';
+import { useGeoViewStore } from '@/core/stores/stores-managers';
+import { TypeLayerData, TypeFeatureInfoEntry, TypeGeometry } from '@/geo/utils/layer-set';
 
 export interface IFeatureInfoState {
   checkedFeatures: Array<TypeFeatureInfoEntry>;
   layerDataArray: TypeLayerData[];
   layerDataArrayBatch: TypeLayerData[];
   layerDataArrayBatchLayerPathBypass: string;
-  hoverDataArray: TypeLayerData[];
-  allFeaturesDataArray: TypeLayerData[];
   selectedLayerPath: string;
 
   actions: {
@@ -20,10 +16,7 @@ export interface IFeatureInfoState {
     setLayerDataArray: (layerDataArray: TypeLayerData[]) => void;
     setLayerDataArrayBatch: (layerDataArray: TypeLayerData[]) => void;
     setLayerDataArrayBatchLayerPathBypass: (layerPath: string) => void;
-    setHoverDataArray: (hoverDataArray: TypeLayerData[]) => void;
-    setAllFeaturesDataArray: (allFeaturesDataArray: TypeLayerData[]) => void;
     setSelectedLayerPath: (selectedLayerPath: string) => void;
-    triggerGetAllFeatureInfo: (layerPath: string, queryType: QueryType) => void;
   };
 }
 
@@ -33,8 +26,6 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
     layerDataArray: [],
     layerDataArrayBatch: [],
     layerDataArrayBatchLayerPathBypass: '',
-    hoverDataArray: [],
-    allFeaturesDataArray: [],
     selectedLayerPath: '',
 
     // #region ACTIONS
@@ -85,22 +76,6 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
           },
         });
       },
-      setHoverDataArray(hoverDataArray: TypeLayerData[]) {
-        set({
-          detailsState: {
-            ...get().detailsState,
-            hoverDataArray,
-          },
-        });
-      },
-      setAllFeaturesDataArray(allFeaturesDataArray: TypeLayerData[]) {
-        set({
-          detailsState: {
-            ...get().detailsState,
-            allFeaturesDataArray,
-          },
-        });
-      },
       setSelectedLayerPath(selectedLayerPath: string) {
         set({
           detailsState: {
@@ -108,9 +83,6 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
             selectedLayerPath,
           },
         });
-      },
-      triggerGetAllFeatureInfo(layerPath: string, queryType: QueryType = 'all') {
-        api.maps[get().mapId].layer.allFeatureInfoLayerSet.queryLayer(layerPath, queryType);
       },
     },
     // #endregion ACTIONS
@@ -120,10 +92,9 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
 // **********************************************************
 // Details state selectors
 // **********************************************************
-export const useDetailsStoreCheckedFeatures = () => useStore(useGeoViewStore(), (state) => state.detailsState.checkedFeatures);
-export const useDetailsStoreLayerDataArray = () => useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArray);
-export const useDetailsStoreLayerDataArrayBatch = () => useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArrayBatch);
-export const useDetailsStoreSelectedLayerPath = () => useStore(useGeoViewStore(), (state) => state.detailsState.selectedLayerPath);
-export const useDetailsStoreAllFeaturesDataArray = () => useStore(useGeoViewStore(), (state) => state.detailsState.allFeaturesDataArray);
+export const useDetailsCheckedFeatures = () => useStore(useGeoViewStore(), (state) => state.detailsState.checkedFeatures);
+export const useDetailsLayerDataArray = () => useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArray);
+export const useDetailsLayerDataArrayBatch = () => useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArrayBatch);
+export const useDetailsSelectedLayerPath = () => useStore(useGeoViewStore(), (state) => state.detailsState.selectedLayerPath);
 
 export const useDetailsStoreActions = () => useStore(useGeoViewStore(), (state) => state.detailsState.actions);

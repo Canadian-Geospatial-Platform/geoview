@@ -256,9 +256,9 @@
       });
 
       // Get the style based on the group
-      let styleForGroup = cgpv.api.geoUtilities.defaultDrawingStyle('blue');
-      if (groupKey == 'geomGroupB') styleForGroup = cgpv.api.geoUtilities.defaultDrawingStyle('green');
-      else if (groupKey == 'geomGroupC') styleForGroup = cgpv.api.geoUtilities.defaultDrawingStyle('red');
+      let styleForGroup = cgpv.api.utilities.geo.getDefaultDrawingStyle('blue');
+      if (groupKey == 'geomGroupB') styleForGroup = cgpv.api.utilities.geo.getDefaultDrawingStyle('green');
+      else if (groupKey == 'geomGroupC') styleForGroup = cgpv.api.utilities.geo.getDefaultDrawingStyle('red');
 
       // Set the default styling for the vector layer itself as well, that is, once the drawing is done
       map1.layer.geometry.getGeometryGroup(groupKey).vectorLayer.setStyle(styleForGroup);
@@ -363,15 +363,13 @@
     }
 
     // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-    cgpv.init(function (mapId) {
+    cgpv.init((mapId) => {
       // If all maps initialized
       if (mapId === 'allMaps') {
-        console.log('api is ready');
-
         // Init map
         initMap1(cgpv.api.maps['MAP1']);
 
-        //create snippets
+        // create snippets
         createCodeSnippet();
         createConfigSnippet();
       }

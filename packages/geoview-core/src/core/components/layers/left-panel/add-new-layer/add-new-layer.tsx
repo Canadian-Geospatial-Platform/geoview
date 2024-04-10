@@ -1,11 +1,12 @@
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '@mui/material';
+import { SelectChangeEvent, useTheme } from '@mui/material';
 import {
   Autocomplete,
   Box,
   Button,
   ButtonGroup,
+  ButtonPropsLayerPanel,
   CheckBoxIcon,
   CheckBoxOutlineBlankIcon,
   Checkbox,
@@ -16,36 +17,15 @@ import {
   Stepper,
   TextField,
 } from '@/ui';
-import {
-  EsriDynamic,
-  EsriFeature,
-  GeoCore,
-  GeoJSON,
-  GeoPackage,
-  GeoViewLayerAddedResult,
-  TypeEsriDynamicLayerConfig,
-  TypeEsriFeatureLayerConfig,
-  TypeGeoJSONLayerConfig,
-  TypeGeoPackageLayerConfig,
-  TypeGeoviewLayerConfig,
-  TypeGeoviewLayerTypeWithGeoCore,
-  TypeLayerEntryConfig,
-  TypeListOfGeoviewLayerConfig,
-  TypeListOfLayerEntryConfig,
-  TypeXYZTilesConfig,
-  XYZTiles,
-} from '@/geo';
-import { CONST_LAYER_ENTRY_TYPES } from '@/geo/map/map-schema-types';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { OgcFeature, TypeOgcFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { TypeWMSLayerConfig, WMS as WmsGeoviewClass } from '@/geo/layer/geoview-layers/raster/wms';
 import { TypeWFSLayerConfig, WFS as WfsGeoviewClass } from '@/geo/layer/geoview-layers/vector/wfs';
 import { TypeCSVLayerConfig, CSV as CsvGeoviewClass } from '@/geo/layer/geoview-layers/vector/csv';
-import { ButtonPropsLayerPanel, SelectChangeEvent, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
+import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { createLocalizedString } from '@/core/utils/utilities';
 import { useLayerStoreActions, useLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { Cast, Config, api } from '@/app';
+import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
 import { EsriImage, TypeEsriImageLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -59,6 +39,26 @@ import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { GeoPackage, TypeGeoPackageLayerConfig } from '@/geo/layer/geoview-layers/vector/geopackage';
+import { GeoCore } from '@/geo/layer/other/geocore';
+import { GeoViewLayerAddedResult } from '@/geo/layer/layer';
+import {
+  CONST_LAYER_TYPES,
+  TypeGeoviewLayerTypeWithGeoCore,
+  AbstractGeoViewLayer,
+} from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import {
+  CONST_LAYER_ENTRY_TYPES,
+  TypeListOfGeoviewLayerConfig,
+  TypeLayerEntryConfig,
+  TypeListOfLayerEntryConfig,
+  TypeGeoviewLayerConfig,
+} from '@/geo/map/map-schema-types';
+import { EsriDynamic, TypeEsriDynamicLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
+import { TypeXYZTilesConfig, XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
+import { EsriFeature, TypeEsriFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import { GeoJSON, TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
+import { Config } from '@/core/utils/config/config';
 
 type EsriOptions = {
   err: string;
@@ -174,7 +174,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorEmpty = (textField: string) => {
     setIsLoading(false);
-    api.utilities.showError(mapId, `${textField} ${t('layers.errorEmpty')}`, false);
+    api.maps[mapId].notifications.showError(`${textField} ${t('layers.errorEmpty')}`, [], false);
   };
 
   /**
@@ -184,7 +184,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorNone = () => {
     setIsLoading(false);
-    api.utilities.showError(mapId, t('layers.errorNone'), false);
+    api.maps[mapId].notifications.showError('layers.errorNone', [], false);
   };
 
   /**
@@ -193,7 +193,7 @@ export function AddNewLayer(): JSX.Element {
    * @param textField label for the TextField input that cannot be empty
    */
   const emitErrorFile = () => {
-    api.utilities.showError(mapId, t('layers.errorFile'), false);
+    api.maps[mapId].notifications.showError('layers.errorFile', [], false);
   };
 
   /**
@@ -203,7 +203,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorServer = (serviceName: string) => {
     setIsLoading(false);
-    api.utilities.showError(mapId, `${serviceName} ${t('layers.errorServer')}`, false);
+    api.maps[mapId].notifications.showError(`${serviceName} ${t('layers.errorServer')}`, [], false);
   };
 
   /**
@@ -215,7 +215,7 @@ export function AddNewLayer(): JSX.Element {
   const emitErrorProj = (serviceName: string, proj: string | undefined, supportedProj: TypeJsonArray | string[]) => {
     setIsLoading(false);
     const message = `${serviceName} ${t('layers.errorProj')} ${proj}, ${t('layers.only')} ${supportedProj.join(', ')}`;
-    api.utilities.showError(mapId, message, false);
+    api.maps[mapId].notifications.showError(message, [], false);
   };
 
   /**
@@ -228,7 +228,7 @@ export function AddNewLayer(): JSX.Element {
   // TODO: Move all the validations in a utility add layer file inside geo. Also delete old utilities that were used
   // TODOCONT: in the previous version.
   const wmsValidation = async (): Promise<boolean> => {
-    const proj = api.projection.projections[api.maps[mapId].getMapState().currentProjection].getCode();
+    const proj = api.utilities.projection.projections[api.maps[mapId].getMapState().currentProjection].getCode();
     let supportedProj: string[] = [];
 
     try {
@@ -837,13 +837,11 @@ export function AddNewLayer(): JSX.Element {
   };
 
   const doneAddedShowMessage = (layerBeingAdded: AbstractGeoViewLayer) => {
-    let message = '';
     if (layerBeingAdded.allLayerStatusAreGreaterThanOrEqualTo('error'))
-      message = api.utilities.replaceParams([layerName], t('layers.layerAddedWithError'));
+      api.maps[mapId].notifications.showMessage('layers.layerAddedWithError', [layerName]);
     else if (layerBeingAdded?.allLayerStatusAreGreaterThanOrEqualTo('loaded'))
-      message = api.utilities.replaceParams([layerName], t('layers.layerAdded'));
-    else message = api.utilities.replaceParams([layerName], t('layers.layerAddedAndLoading'));
-    api.utilities.showMessage(mapId, message, false);
+      api.maps[mapId].notifications.showMessage('layers.layerAdded', [layerName]);
+    else api.maps[mapId].notifications.showMessage('layers.layerAddedAndLoading', [layerName]);
   };
 
   /**
@@ -867,10 +865,10 @@ export function AddNewLayer(): JSX.Element {
       }
 
       // When each promise is done
-      Promise.allSettled(addedLayers.map((addedLayer) => addedLayer.promiseLayerOnMap)).then(() => {
+      Promise.allSettled(addedLayers.map((addedLayer) => addedLayer.promiseLayer)).then(() => {
         // Done adding
         doneAdding();
-        addedLayers.forEach((addedLayer) => doneAddedShowMessage(addedLayer.layerBeingAdded));
+        addedLayers.forEach((addedLayer) => doneAddedShowMessage(addedLayer.layer));
       });
     } else if (geoviewLayerInstance) {
       // Get config
@@ -893,11 +891,11 @@ export function AddNewLayer(): JSX.Element {
       const addedLayer = api.maps[mapId].layer.addGeoviewLayer(geoviewLayerConfig);
       if (addedLayer) {
         // Wait on the promise
-        await addedLayer.promiseLayerOnMap;
+        await addedLayer.promiseLayer;
 
         // Done adding
         doneAdding();
-        doneAddedShowMessage(addedLayer.layerBeingAdded);
+        doneAddedShowMessage(addedLayer.layer);
       } else {
         // Failed to add, remove spinning, but stay on the add ui
         setIsLoading(false);

@@ -8,11 +8,10 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { Modal, Button } from '@/ui';
 import { HtmlToReact } from './html-to-react';
 import { getFocusTrapSxClasses } from './containers-style';
-import { disableScrolling } from '@/app';
 import { ARROW_KEY_CODES } from '@/core/utils/constant';
-import { useAppStoreActions } from '../stores/store-interface-and-intial-values/app-state';
-import { useUIStoreActions } from '../stores/store-interface-and-intial-values/ui-state';
-import { useMapElement } from '../stores/store-interface-and-intial-values/map-state';
+import { useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useMapElement } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -60,6 +59,20 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   if (mapElementRef.current !== undefined) mapHTMLElementRef.current = mapElementRef.current.getTargetElement();
 
   /**
+   * Disable scrolling on keydown space, so that screen doesnt scroll down.
+   * when focus is set to map and arrows and enter keys are used to navigate the map
+   * @param {KeyboardEvent} e - keyboard event like, tab, space
+   * @param {MutableRefObject} elem - mutable reference object of html elements.
+   */
+  function disableScrolling(e: KeyboardEvent, elem: MutableRefObject<HTMLElement | undefined>): void {
+    if (elem.current === document.activeElement) {
+      if (e.code === 'Space') {
+        e.preventDefault();
+      }
+    }
+  }
+
+  /**
    * Disable scrolling on space keydown when focus-trap
    *
    * @param {KeyboardEvent} evt the keyboard event to trap
@@ -77,7 +90,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     // the user escape the trap, remove it, put back skip link in focus cycle and zoom to top link
     setActiveTrapGeoView(false);
     mapHTMLElement.classList.remove('map-focus-trap');
-    // mapHTMLElement.removeEventListener('keydown',handleExit); //! can't remove because of eslint @typescript-eslint/no-use-before-define
+    // mapHTMLElement.removeEventListener('keydown',handleExit); // GV can't remove because of eslint @typescript-eslint/no-use-before-define
     document.removeEventListener('keydown', handleScrolling);
 
     // update store and focus to top link

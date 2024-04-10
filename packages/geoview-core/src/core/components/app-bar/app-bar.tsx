@@ -4,9 +4,7 @@ import { capitalize } from 'lodash';
 import { useTheme } from '@mui/material/styles';
 import { Box, List, ListItem, Panel, IconButton, TypeIconButtonProps, SchoolIcon, InfoOutlinedIcon, HubOutlinedIcon } from '@/ui';
 
-import { AbstractPlugin, TypeJsonObject, TypeJsonValue, api, toJsonObject } from '@/app';
-
-import { ButtonPanelPayload } from '@/api/events/payloads';
+import { api } from '@/app';
 
 import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import ExportButton from '@/core/components/export/export-modal-button';
@@ -18,28 +16,33 @@ import {
 import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
-import { GuidePanel, Legend, DetailsPanel } from '@/core/components';
+import { GuidePanel, Legend, DetailsPanel, AppBarApi, AppBarCreatedEvent, AppBarRemovedEvent } from '@/core/components';
 import Notifications from '@/core/components/notifications/notifications';
 
 import Geolocator from './buttons/geolocator';
 import Version from './buttons/version';
 import { getSxClasses } from './app-bar-style';
 import { helpCloseAll, helpClosePanelById, helpOpenPanelById } from './app-bar-helper';
+import { TypeJsonObject, TypeJsonValue, toJsonObject } from '@/core/types/global-types';
+import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 
 interface GroupPanelType {
   icon: ReactNode;
   content: ReactNode;
 }
 
+type AppBarProps = {
+  api: AppBarApi;
+};
+
 /**
  * Create an app-bar with buttons that can open a panel
  */
-export function Appbar(): JSX.Element {
-  // ? No props for this component. Same logic in FooterBar and NavBar.
-  // ? We are handling the logic via api.event management, via app-bar-api, once this component is mounted.
-
+export function AppBar(props: AppBarProps): JSX.Element {
   // Log
   logger.logTraceRender('components/app-bar/app-bar');
+
+  const { api: appBarApi } = props;
 
   const mapId = useGeoViewMapId();
 
@@ -58,7 +61,7 @@ export function Appbar(): JSX.Element {
   const interaction = useMapInteraction();
   const appBarComponents = useUIAppbarComponents();
   const { hideClickMarker } = useMapStoreActions();
-  // TODO: remove active footerTab Id and create new one for appbar id.
+  // TODO: remove active footerTab Id and create new one for AppBar id.
   const activeFooterTabId = useUIActiveFooterBarTabId();
 
   // get store config for app bar to add (similar logic as in footer-bar)
@@ -84,14 +87,13 @@ export function Appbar(): JSX.Element {
       logger.logTraceUseCallback('APP-BAR - closePanelById', buttonId);
 
       // Callback when removing and focus is lost
-      const focusWhenNoElementCallback = () => {
+      const focusWhenNoElementCallback = (): void => {
         const mapCont = api.maps[mapId].map.getTargetElement();
         mapCont.focus();
 
         // if in focus trap mode, trigger the event
         if (mapCont.closest('.geoview-map')?.classList.contains('map-focus-trap')) {
           mapCont.classList.add('keyboard-focus');
-          api.event.emitMapInKeyFocus(mapId);
         }
       };
 
@@ -150,17 +152,17 @@ export function Appbar(): JSX.Element {
   }, [selectedAppBarButtonId, closePanelById]);
 
   const handleAddButtonPanel = useCallback(
-    (payload: ButtonPanelPayload) => {
+    (sender: AppBarApi, event: AppBarCreatedEvent) => {
       // Log
-      logger.logTraceUseCallback('APP-BAR - handleAddButtonPanel');
+      logger.logTraceUseCallback('APP-BAR - handleAddButtonPanel', event);
 
       setButtonPanelGroups((prevState) => {
         return {
           ...prevState,
           ...buttonPanelGroups,
-          [payload.appBarGroupName]: {
-            ...buttonPanelGroups[payload.appBarGroupName],
-            [payload.appBarId]: payload.buttonPanel as TypeButtonPanel,
+          [event.group]: {
+            ...buttonPanelGroups[event.group],
+            [event.buttonPanelId]: event.buttonPanel,
           },
         };
       });
@@ -169,16 +171,16 @@ export function Appbar(): JSX.Element {
   );
 
   const handleRemoveButtonPanel = useCallback(
-    (payload: ButtonPanelPayload) => {
+    (sender: AppBarApi, event: AppBarRemovedEvent) => {
       // Log
-      logger.logTraceUseCallback('APP-BAR - handleRemoveButtonPanel');
+      logger.logTraceUseCallback('APP-BAR - handleRemoveButtonPanel', event);
 
       setButtonPanelGroups((prevState) => {
         const state = { ...prevState };
 
-        const group = state[payload.appBarGroupName];
+        const group = state[event.group];
 
-        delete group[payload.appBarId];
+        delete group[event.buttonPanelId];
 
         return state;
       });
@@ -188,26 +190,24 @@ export function Appbar(): JSX.Element {
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('APP-BAR - mount', mapId);
+    logger.logTraceUseEffect('APP-BAR - mount');
 
-    // listen to new panel creation
-    api.event.onCreateAppBarPanel(mapId, handleAddButtonPanel);
-
-    // listen on panel removal
-    api.event.onRemoveAppBarPanel(mapId, handleRemoveButtonPanel);
+    // Register AppBar created/removed handlers
+    appBarApi.onAppBarCreated(handleAddButtonPanel);
+    appBarApi.onAppBarRemoved(handleRemoveButtonPanel);
 
     return () => {
-      // Unwire the events
-      api.event.offCreateAppBarPanel(mapId, handleAddButtonPanel);
-      api.event.offRemoveAppBarPanel(mapId, handleRemoveButtonPanel);
+      // Unregister events
+      appBarApi.offAppBarCreated(handleAddButtonPanel);
+      appBarApi.offAppBarRemoved(handleRemoveButtonPanel);
     };
-  }, [mapId, handleAddButtonPanel, handleRemoveButtonPanel, selectedAppBarButtonId]);
+  }, [appBarApi, handleAddButtonPanel, handleRemoveButtonPanel]);
 
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('APP-BAR - open detail panel when clicked on map', mapId);
-    // TODO: remove active footerTab Id and create new one for appbar id.
-    // open appbar detail drawer when click on map.
+    // TODO: remove active footerTab Id and create new one for AppBar id.
+    // open AppBar detail drawer when click on map.
     if (activeFooterTabId === 'details' && buttonPanelGroups?.details?.AppbarPanelButtonDetails?.panel) {
       // Open it
       openPanelById(buttonPanelGroups?.details?.AppbarPanelButtonDetails?.button?.id || '', undefined);
@@ -242,7 +242,7 @@ export function Appbar(): JSX.Element {
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('APP-BAR - create group of appbar buttons', mapId);
+    logger.logTraceUseEffect('APP-BAR - create group of AppBar buttons');
 
     // render footer bar tabs
     (appBarConfig?.tabs.core ?? [])
@@ -267,14 +267,14 @@ export function Appbar(): JSX.Element {
         };
         return [button, panel, tab];
       })
-      .forEach((footerGroup) => api.maps[mapId].appBarApi.createAppbarPanel(footerGroup[0], footerGroup[1], footerGroup[2]));
+      .forEach((footerGroup) => appBarApi.createAppbarPanel(footerGroup[0], footerGroup[1], footerGroup[2]));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appBarConfig?.tabs.core, mapId]); // Not exhaustive, because it'd be dangerous to trigger on `panels` or on `t`, because of how the appbar panels are just recreated all the time (should refactor this, maybe..)
+  }, [appBarConfig?.tabs.core, appBarApi]); // Not exhaustive, because it'd be dangerous to trigger on `panels` or on `t`, because of how the AppBar panels are just recreated all the time (should refactor this, maybe..)
 
   // #endregion
 
   return (
-    <Box sx={sxClasses.appBar} ref={appBar}>
+    <Box sx={sxClasses.appBar} className={`interaction-${interaction}`} ref={appBar}>
       <Box sx={sxClasses.appBarButtons}>
         {appBarComponents.includes('geolocator') && interaction === 'dynamic' && (
           <Box>
@@ -305,7 +305,7 @@ export function Appbar(): JSX.Element {
                         tooltipPlacement="right"
                         className={`style3 ${selectedAppBarButtonId === buttonPanel.button.id ? 'active' : ''}`}
                         size="small"
-                        onClick={() => handleButtonClicked(buttonPanel.button.id!, groupName)}
+                        onClick={(): void => handleButtonClicked(buttonPanel.button.id!, groupName)}
                       >
                         {buttonPanel.button.children}
                       </IconButton>
@@ -316,7 +316,7 @@ export function Appbar(): JSX.Element {
             </List>
           );
         })}
-        {appBarComponents.includes('export') && (
+        {appBarComponents.includes('export') && interaction === 'dynamic' && (
           <Box>
             <List sx={sxClasses.appBarList}>
               <ListItem>
@@ -327,7 +327,7 @@ export function Appbar(): JSX.Element {
         )}
         <Box sx={sxClasses.versionButtonDiv}>
           <List sx={sxClasses.appBarList}>
-            <hr />
+            {interaction === 'dynamic' && <hr />}
             <ListItem>
               <Notifications />
             </ListItem>
@@ -344,11 +344,13 @@ export function Appbar(): JSX.Element {
         // display the panels in the list
         return (
           <Fragment key={groupName}>
-            {Object.keys(buttonPanels).map((buttonPanelsKey) => {
+            {Object.keys(buttonPanels).map((buttonPanelsKey, index) => {
               const buttonPanel = buttonPanels[buttonPanelsKey];
+
               return buttonPanel?.panel ? (
                 <Panel
-                  key={buttonPanel.panel.panelId}
+                  // eslint-disable-next-line react/no-array-index-key
+                  key={`panel-${index}`}
                   panel={buttonPanel.panel}
                   button={buttonPanel.button}
                   onPanelOpened={buttonPanel.onPanelOpened}

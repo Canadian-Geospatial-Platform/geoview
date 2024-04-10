@@ -41,9 +41,8 @@ import { Cast, toJsonObject, TypeJsonObject, TypeMapFeaturesConfig } from '@/cor
 import { CONST_GEOVIEW_SCHEMA_BY_TYPE, CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { geoviewEntryIsEsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { logger } from '@/core/utils/logger';
-import { CONFIG_GEOCORE_URL, CONFIG_GEOLOCATOR_URL } from '@/app';
 
-import { generateId, replaceParams, getLocalizedMessage, showError } from '../utilities';
+import { generateId, replaceParams } from '@/core/utils/utilities';
 import schema from '../../../../schema.json';
 import { WfsLayerEntryConfig } from './validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { OgcFeatureLayerEntryConfig } from './validation-classes/vector-validation-classes/ogc-layer-entry-config';
@@ -59,6 +58,8 @@ import { EsriDynamicLayerEntryConfig } from './validation-classes/raster-validat
 import { EsriImageLayerEntryConfig } from './validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GroupLayerEntryConfig } from './validation-classes/group-layer-entry-config';
 import { ConfigBaseClass } from './validation-classes/config-base-class';
+import { CONFIG_GEOCORE_URL, CONFIG_GEOLOCATOR_URL } from '@/core/utils/constant';
+import { api } from '@/app';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -370,8 +371,10 @@ export class ConfigValidation {
       logger.logWarning(this.mapId, '='.repeat(200), 'Schema error: ', this.mapId, error, 'Object affected: ', this.mapId, node);
     }
 
+    // TODO: refactor - remove setTimeout (dont know what it is used for)
     setTimeout(() => {
-      showError(this.mapId, getLocalizedMessage(this.mapId, 'validation.schema.notFound'));
+      // TODO: config should not push message to map... only to console and as return value.. map will be responsible to throw notification
+      api.maps[this.mapId].notifications.showError('validation.schema.notFound');
     }, 2000);
   }
 
@@ -387,10 +390,12 @@ export class ConfigValidation {
     const validate = validator.getSchema(schemaPath);
 
     if (!validate) {
+      // TODO: refactor - remove setTimeout (dont know what it is used for)
       setTimeout(() => {
-        const message = replaceParams([schemaPath], getLocalizedMessage(this.mapId, 'validation.schema.wrongPath'));
+        const message = replaceParams([schemaPath], api.utilities.core.getLocalizedMessage('validation.schema.wrongPath', 'en'));
         logger.logWarning(`- Map ${this.mapId}: ${message}`);
-        showError(this.mapId, message);
+        // TODO: config should not push message to map... only to console and as return value.. map will be responsible to throw notification
+        api.maps[this.mapId].notifications.showError('validation.schema.wrongPath', [schemaPath]);
       }, 2000);
       return false;
     }
@@ -426,10 +431,12 @@ export class ConfigValidation {
       const validate = validator.getSchema(schemaPath);
 
       if (!validate) {
+        // TODO: refactor - remove setTimeout (dont know what it is used for)
         setTimeout(() => {
-          const message = replaceParams([schemaPath], getLocalizedMessage(this.mapId, 'validation.schema.wrongPath'));
+          const message = replaceParams([schemaPath], api.utilities.core.getLocalizedMessage('validation.schema.wrongPath', 'en'));
           logger.logWarning(`- Map ${this.mapId}: ${message}`);
-          showError(this.mapId, message);
+          // TODO: config should not push message to map... only to console and as return value.. map will be responsible to throw notification
+          api.maps[this.mapId].notifications.showError('validation.schema.wrongPath', [schemaPath]);
         }, 2000);
         return false;
       }
@@ -542,7 +549,7 @@ export class ConfigValidation {
         .forEach((geoviewLayerConfig) => {
           // The default value for geoviewLayerConfig.initialSettings.visible is true.
           const geoviewLayerConfigCasted = geoviewLayerConfig as TypeGeoviewLayerConfig;
-          if (!geoviewLayerConfigCasted.initialSettings) geoviewLayerConfigCasted.initialSettings = { visible: 'yes' };
+          if (!geoviewLayerConfigCasted.initialSettings) geoviewLayerConfigCasted.initialSettings = { states: { visible: true } };
           switch (geoviewLayerConfig.geoviewLayerType) {
             case CONST_LAYER_TYPES.CSV:
             case CONST_LAYER_TYPES.GEOJSON:

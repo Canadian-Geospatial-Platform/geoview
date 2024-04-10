@@ -20,8 +20,9 @@ import {
   TypeListOfLayerEntryConfig,
   TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
-import { Cast, api } from '@/app';
-import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
+import { api } from '@/app';
+import { getLocalizedValue } from '@/core/utils/utilities';
+import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { NodeType } from '@/geo/renderer/geoview-renderer-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
@@ -29,6 +30,8 @@ import { CSV } from './csv';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
+import { Cast } from '@/core/types/global-types';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 /* *******************************************************************************************************************************
  * AbstractGeoViewVector types
@@ -74,7 +77,12 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
     const fieldDefinitions = this.layerMetadata[layerConfig.layerPath].source.featureInfo;
-    const fieldIndex = getLocalizedValue(Cast<TypeLocalizedString>(fieldDefinitions.outfields), this.mapId)?.split(',').indexOf(fieldName);
+    const fieldIndex = getLocalizedValue(
+      Cast<TypeLocalizedString>(fieldDefinitions.outfields),
+      AppEventProcessor.getDisplayLanguage(this.mapId)
+    )
+      ?.split(',')
+      .indexOf(fieldName);
     if (!fieldIndex || fieldIndex === -1) return 'string';
     return (fieldDefinitions.fieldTypes as string).split(',')[fieldIndex!] as 'string' | 'date' | 'number';
   }
@@ -87,8 +95,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
    */
   protected processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | null> {
-    // ! IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
-    // !            layerStatus values is correctly sequenced.
+    // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
+    // GV            layerStatus values is correctly sequenced.
     super.processOneLayerEntry(layerConfig);
     const vectorSource = this.createVectorSource(layerConfig);
     const vectorLayer = this.createVectorLayer(layerConfig as VectorLayerEntryConfig, vectorSource);
@@ -157,7 +165,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           if (layerConfig.source?.featureInfo?.queryable && features) {
             const featureInfo = (layerConfig.source as TypeBaseSourceVectorInitialConfig).featureInfo!;
             const fieldTypes = featureInfo.fieldTypes?.split(',');
-            const fieldNames = getLocalizedValue(featureInfo.outfields, this.mapId)!.split(',');
+            const fieldNames = getLocalizedValue(featureInfo.outfields, AppEventProcessor.getDisplayLanguage(this.mapId))!.split(',');
             const dateFields = fieldTypes?.reduce<string[]>((accumulator, entryFieldType, i) => {
               if (entryFieldType === 'date') accumulator.push(fieldNames![i]);
               return accumulator;
@@ -167,16 +175,16 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
                 dateFields.forEach((fieldName) => {
                   let fieldValue = feature.get(fieldName);
                   if (typeof fieldValue === 'number') {
-                    let dateString = api.dateUtilities.convertMilisecondsToDate(fieldValue);
-                    dateString = api.dateUtilities.applyInputDateFormat(dateString, this.serverDateFragmentsOrder);
-                    (feature as Feature).set(fieldName, api.dateUtilities.convertToMilliseconds(dateString), true);
+                    let dateString = api.utilities.date.convertMilisecondsToDate(fieldValue);
+                    dateString = api.utilities.date.applyInputDateFormat(dateString, this.serverDateFragmentsOrder);
+                    (feature as Feature).set(fieldName, api.utilities.date.convertToMilliseconds(dateString), true);
                   } else {
                     if (!this.serverDateFragmentsOrder)
-                      this.serverDateFragmentsOrder = api.dateUtilities.getDateFragmentsOrder(
-                        api.dateUtilities.deduceDateFormat(fieldValue)
+                      this.serverDateFragmentsOrder = api.utilities.date.getDateFragmentsOrder(
+                        api.utilities.date.deduceDateFormat(fieldValue)
                       );
-                    fieldValue = api.dateUtilities.applyInputDateFormat(fieldValue, this.serverDateFragmentsOrder);
-                    (feature as Feature).set(fieldName, api.dateUtilities.convertToMilliseconds(fieldValue), true);
+                    fieldValue = api.utilities.date.applyInputDateFormat(fieldValue, this.serverDateFragmentsOrder);
+                    (feature as Feature).set(fieldName, api.utilities.date.convertToMilliseconds(fieldValue), true);
                   }
                 });
               });
@@ -230,10 +238,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     };
     layerConfig.geoviewLayerInstance = this;
 
-    if (layerConfig.initialSettings?.extent !== undefined) this.setExtent(layerConfig.initialSettings?.extent, layerPath);
-    if (layerConfig.initialSettings?.maxZoom !== undefined) this.setMaxZoom(layerConfig.initialSettings?.maxZoom, layerPath);
-    if (layerConfig.initialSettings?.minZoom !== undefined) this.setMinZoom(layerConfig.initialSettings?.minZoom, layerPath);
-    if (layerConfig.initialSettings?.opacity !== undefined) this.setOpacity(layerConfig.initialSettings?.opacity, layerPath);
+    if (layerConfig.initialSettings?.extent !== undefined) this.setExtent(layerConfig.initialSettings.extent, layerPath);
+    if (layerConfig.initialSettings?.maxZoom !== undefined) this.setMaxZoom(layerConfig.initialSettings.maxZoom, layerPath);
+    if (layerConfig.initialSettings?.minZoom !== undefined) this.setMinZoom(layerConfig.initialSettings.minZoom, layerPath);
+    if (layerConfig.initialSettings?.states?.opacity !== undefined) this.setOpacity(layerConfig.initialSettings.states.opacity, layerPath);
     // If a layer on the map has an initialSettings.visible set to false, its status will never reach the status 'loaded' because
     // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
     // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
@@ -248,8 +256,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-  protected async getAllFeatureInfo(layerPath?: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
+  protected async getAllFeatureInfo(layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig(layerPath) as VectorLayerEntryConfig;
@@ -271,8 +278,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table or null if an error occured.
    */
-  protected async getFeatureInfoAtPixel(location: Pixel, layerPath?: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
+  protected async getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig(layerPath) as VectorLayerEntryConfig;
@@ -299,8 +305,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-  protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath?: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
+  protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     const { map } = api.maps[this.mapId];
     return this.getFeatureInfoAtPixel(map.getPixelFromCoordinate(location as Coordinate), layerPath);
   }
@@ -313,10 +318,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-  protected getFeatureInfoAtLongLat(location: Coordinate, layerPath?: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    layerPath = layerPath || this.layerPathAssociatedToTheGeoviewLayer;
+  protected getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     const { map } = api.maps[this.mapId];
-    const convertedLocation = api.projection.transform(
+    const convertedLocation = api.utilities.projection.transform(
       location,
       'EPSG:4326',
       `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
@@ -325,30 +329,14 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Get the bounds of the layer represented in the layerConfig pointed to by the cached layerPath, returns updated bounds
-   *
-   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
-   * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
-   *
-   * @returns {Extent} The new layer bounding box.
-   */
-  protected getBounds(bounds: Extent, notUsed?: never): Extent | undefined;
-
-  /** ***************************************************************************************************************************
    * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
    *
    * @param {string} layerPath The Layer path to the layer's configuration.
    * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
-   * @returns {Extent} The new layer bounding box.
+   * @returns {Extent | undefined} The new layer bounding box.
    */
-  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined;
-
-  // See above headers for signification of the parameters. The first lines of the method select the template
-  // used based on the parameter types received.
-  protected getBounds(parameter1?: string | Extent, parameter2?: Extent): Extent | undefined {
-    const layerPath = typeof parameter1 === 'string' ? parameter1 : this.layerPathAssociatedToTheGeoviewLayer;
-    let bounds = typeof parameter1 !== 'string' ? parameter1 : parameter2;
+  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
     const layerConfig = this.getLayerConfig(layerPath);
     const layerBounds = (layerConfig?.olLayer as VectorLayer<VectorSource>)?.getSource()?.getExtent();
 
@@ -361,31 +349,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToTheGeoviewLayer property stored
-   * in the layer instance associated to the map. The legend filters are derived from the uniqueValue or classBreaks style of the
-   * layer. When the layer config is invalid, nothing is done.
-   *
-   * @param {string} filter A filter to be used in place of the getViewFilter value.
-   * @param {never} notUsed1 This parameter must not be provided. It is there to allow overloading of the method signature.
-   * @param {never} notUsed2 This parameter must not be provided. It is there to allow overloading of the method signature.
-   */
-  applyViewFilter(filter: string, notUsed1?: never, notUsed2?: never): void;
-
-  /** ***************************************************************************************************************************
-   * Apply a view filter to the layer identified by the path stored in the layerPathAssociatedToTheGeoviewLayer property stored
-   * in the layer instance associated to the map. When the CombineLegendFilter flag is false, the filter paramater is used alone
-   * to display the features. Otherwise, the legend filter and the filter parameter are combined together to define the view
-   * filter. The legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is
-   * invalid, nothing is done.
-   *
-   * @param {string} filter A filter to be used in place of the getViewFilter value.
-   * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
-   * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
-   */
-  applyViewFilter(filter: string, CombineLegendFilter: boolean, notUsed?: never): void;
-
-  /** ***************************************************************************************************************************
-   * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
+   * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter parameter is used alone to display
    * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
    * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
    * is done.
@@ -394,56 +358,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {string} filter A filter to be used in place of the getViewFilter value.
    * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath: string, filter?: string, CombineLegendFilter?: boolean): void;
-
-  // See above headers for signification of the parameters. The first lines of the method select the template
-  // used based on the parameter types received.
-
-  applyViewFilter(parameter1: string, parameter2?: string | boolean | never, parameter3?: boolean | never) {
-    // At the beginning, we assume that:
-    // 1- the layer path was saved in this.layerPathAssociatedToTheGeoviewLayer using a call to
-    //    api.maps[mapId].layer.geoviewLayer(layerPath);
-    // 2- the filter is empty;
-    // 3- the combine legend filters is true
-    let layerPath = this.layerPathAssociatedToTheGeoviewLayer;
-    let filter = '';
-    let CombineLegendFilter = true;
-
-    // Method signature detection
-    if (typeof parameter3 === 'boolean') {
-      // Signature detected is: applyViewFilter(layerPath: string, filter?: string, combineLegendFilter?: boolean): void;
-      layerPath = parameter1;
-      filter = parameter2 as string;
-      CombineLegendFilter = parameter3;
-    } else if (parameter2 !== undefined && parameter3 === undefined) {
-      if (typeof parameter2 === 'boolean') {
-        // Signature detected is: applyViewFilter(filter: string, CombineLegendFilter: boolean): void;
-        filter = parameter1;
-        CombineLegendFilter = parameter2;
-      } else {
-        // Signature detected is: applyViewFilter(layerPath: string, filter: string): void;
-        layerPath = parameter1;
-        filter = parameter2;
-      }
-    } else if (parameter2 === undefined && parameter3 === undefined) {
-      // Signature detected is: applyViewFilter(filter: string): void;
-      filter = parameter1;
-    }
-
+  applyViewFilter(layerPath: string, filter: string, CombineLegendFilter = true) {
     const layerConfig = this.getLayerConfig(layerPath) as VectorLayerEntryConfig;
-    if (!layerConfig) {
-      // ! Things important to know about the applyViewFilter usage:
-      logger.logError(
-        `
-        The applyViewFilter method must never be called by GeoView code before the layer refered by the layerPath has reached the 'loaded' status.\n
-        It will never be called by the GeoView internal code except in the layerConfig.loadedFunction() that is called right after the 'loaded' signal.\n
-        If you are a user, you can set the layer filter in the configuration or using code called in the cgpv.init() method of the viewer.\n
-        It appeares that the layer refered by the layerPath "${layerPath} does not respect these rules.\n
-      `.replace(/\s+/g, ' ')
-      );
-      return;
-    }
-
     // Log
     logger.logTraceCore('ABSTRACT-GEOVIEW-VECTOR - applyViewFilter', layerPath);
 
@@ -461,7 +377,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     searchDateEntry.forEach((dateFound) => {
       // If the date has a time zone, keep it as is, otherwise reverse its time zone by changing its sign
       const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
-      const reformattedDate = api.dateUtilities.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
+      const reformattedDate = api.utilities.date.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
       filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index)}${reformattedDate}${filterValueToUse!.slice(
         dateFound.index! + dateFound[0].length
       )}`;
