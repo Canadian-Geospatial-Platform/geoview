@@ -3,6 +3,9 @@ import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-pr
 import { NotificationDetailsType } from '@/core/components';
 import { TypeDisplayLanguage, TypeDisplayTheme } from '@/geo/map/map-schema-types';
 import { TypeHTMLElement } from '@/core/types/global-types';
+import { MapEventProcessor } from './map-event-processor';
+import { createGuideObject } from '@/core/utils/utilities';
+import { api } from '@/app';
 
 export class AppEventProcessor extends AbstractEventProcessor {
   // Static functions for Typescript files to access store actions
@@ -24,7 +27,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
 
   /**
    * Shortcut to get the App state for a given map id
-   * @param {string} mapId The mapId
+   * @param {string} mapId - The mapId
    * @returns {IAppState} The App state.
    */
   protected static async getAppStateAsync(mapId: string): Promise<IAppState> {
@@ -32,42 +35,91 @@ export class AppEventProcessor extends AbstractEventProcessor {
     return (await super.getStateAsync(mapId)).appState;
   }
 
-  static async addAppNotification(mapId: string, notification: NotificationDetailsType): Promise<void> {
-    // because notification is called before map is created, we use the async
-    // version of getAppStateAsync
-    (await this.getAppStateAsync(mapId)).actions.addNotification(notification);
-  }
-
+  /**
+   * Shortcut to get the display language for a given map id
+   * @param {string} mapId - The mapId
+   * @returns {TypeDisplayLanguage} The display language.
+   */
   static getDisplayLanguage(mapId: string): TypeDisplayLanguage {
     return this.getAppState(mapId).displayLanguage;
   }
 
+  /**
+   * Shortcut to get the display theme for a given map id
+   * @param {string} mapId - The mapId
+   * @returns {TypeDisplayTheme} The display theme.
+   */
   static getDisplayTheme(mapId: string): TypeDisplayTheme {
     return this.getAppState(mapId).displayTheme;
   }
 
+  /**
+   * Shortcut to get the supported languages for a given map id
+   * @param {string} mapId - The mapId
+   * @returns {TypeDisplayLanguage[]} The supported languages.
+   */
   static getSupportedLanguages(mapId: string): TypeDisplayLanguage[] {
     return this.getAppState(mapId).suportedLanguages;
   }
 
+  static async addNotification(mapId: string, notif: NotificationDetailsType): Promise<void> {
+    // because notification is called before map is created, we use the async
+    // version of getAppStateAsync
+    const appState = await this.getAppStateAsync(mapId);
+    const curNotifications = appState.notifications;
+    // if the notification already exist, we increment the count
+    const existingNotif = curNotifications.find(
+      (item) => item.message === notif.message && item.notificationType === notif.notificationType
+    );
+
+    if (!existingNotif) {
+      curNotifications.push({ key: notif.key, notificationType: notif.notificationType, message: notif.message, count: 1 });
+    } else {
+      existingNotif.count += 1;
+    }
+
+    this.getAppState(mapId).setterActions.setNotifications(curNotifications);
+  }
+
+  static removeNotification(mapId: string, key: string): void {
+    // filter out notification
+    const notifications = this.getAppState(mapId).notifications.filter((item: NotificationDetailsType) => item.key !== key);
+    this.getAppState(mapId).setterActions.setNotifications(notifications);
+  }
+
   static setAppIsCrosshairActive(mapId: string, isActive: boolean): void {
-    this.getAppState(mapId).actions.setCrosshairActive(isActive);
+    this.getAppState(mapId).setterActions.setCrosshairActive(isActive);
   }
 
   static setDisplayLanguage(mapId: string, lang: TypeDisplayLanguage): void {
-    this.getAppState(mapId).actions.setDisplayLanguage(lang);
+    this.getAppState(mapId).setterActions.setDisplayLanguage(lang);
+    // reload the basemap from new language
+    MapEventProcessor.resetBasemap(mapId);
+    // load guide in new language
+    AppEventProcessor.setGuide(mapId);
   }
 
   static setDisplayTheme(mapId: string, theme: TypeDisplayTheme): void {
-    this.getAppState(mapId).actions.setDisplayTheme(theme);
+    this.getAppState(mapId).setterActions.setDisplayTheme(theme);
   }
 
-  static setFullscreen(mapId: string, active: boolean, element: TypeHTMLElement): void {
-    this.getAppState(mapId).actions.setFullScreenActive(active, element);
+  static setFullscreen(mapId: string, active: boolean, element?: TypeHTMLElement): void {
+    this.getAppState(mapId).setterActions.setFullScreenActive(active);
+    if (element !== undefined) api.maps[mapId].setFullscreen(active, element);
   }
 
   static setCircularProgress(mapId: string, active: boolean): void {
-    this.getAppState(mapId).actions.setCircularProgress(active);
+    this.getAppState(mapId).setterActions.setCircularProgress(active);
+  }
+
+  /**
+   * Process the guide .md file and add the object to the store.
+   * @param {string} mapId - ID of map to create guide object for.
+   */
+  static async setGuide(mapId: string): Promise<void> {
+    const language = AppEventProcessor.getDisplayLanguage(mapId);
+    const guide = await createGuideObject(mapId, language);
+    if (guide !== undefined) this.getAppState(mapId).setterActions.setGuide(guide);
   }
 
   // #endregion

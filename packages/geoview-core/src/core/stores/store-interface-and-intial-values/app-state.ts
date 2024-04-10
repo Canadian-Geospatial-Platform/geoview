@@ -1,15 +1,15 @@
 import { useStore } from 'zustand';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { api } from '@/app';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeDisplayLanguage, TypeDisplayTheme } from '@/geo/map/map-schema-types';
 import { NotificationDetailsType } from '@/core/components/notifications/notifications';
 import { TypeHTMLElement, TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 export interface IAppState {
   displayLanguage: TypeDisplayLanguage;
   displayTheme: TypeDisplayTheme;
+  guide: TypeGuideObject | undefined;
   isCircularProgressActive: boolean;
   isCrosshairsActive: boolean;
   isFullscreenActive: boolean;
@@ -21,19 +21,35 @@ export interface IAppState {
 
   actions: {
     addNotification: (notif: NotificationDetailsType) => void;
-    setCircularProgress: (active: boolean) => void;
     setCrosshairActive: (active: boolean) => void;
     setDisplayLanguage: (lang: TypeDisplayLanguage) => void;
     setDisplayTheme: (theme: TypeDisplayTheme) => void;
     setFullScreenActive: (active: boolean, element?: TypeHTMLElement) => void;
     removeNotification: (key: string) => void;
   };
+
+  setterActions: {
+    setCircularProgress: (active: boolean) => void;
+    setCrosshairActive: (active: boolean) => void;
+    setDisplayLanguage: (lang: TypeDisplayLanguage) => void;
+    setDisplayTheme: (theme: TypeDisplayTheme) => void;
+    setFullScreenActive: (active: boolean) => void;
+    setGuide: (guide: TypeGuideObject) => void;
+    setNotifications: (notifications: NotificationDetailsType[]) => void;
+  };
 }
 
+/**
+ * Initializes an App State and provide functions which use the get/set Zustand mechanisms.
+ * @param {TypeSetStore} set - The setter callback to be used by this state
+ * @param {TypeGetStore} get - The getter callback to be used by this state
+ * @returns The initialized Map State
+ */
 export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppState {
   return {
     displayLanguage: 'en' as TypeDisplayLanguage,
     displayTheme: 'geo.ca',
+    guide: {},
     isCircularProgressActive: false,
     isCrosshairsActive: false,
     isFullscreenActive: false,
@@ -54,27 +70,71 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
       });
     },
 
+    // #region ACTIONS
     actions: {
-      addNotification: (notif: NotificationDetailsType) => {
-        const curNotifications = get().appState.notifications;
-        // if the notification already exist, we increment the count
-        const existingNotif = curNotifications.find(
-          (item) => item.message === notif.message && item.notificationType === notif.notificationType
-        );
-
-        if (!existingNotif) {
-          curNotifications.push({ key: notif.key, notificationType: notif.notificationType, message: notif.message, count: 1 });
-        } else {
-          existingNotif.count += 1;
-        }
-
-        set({
-          appState: {
-            ...get().appState,
-            notifications: [...curNotifications],
-          },
-        });
+      /**
+       * Adds a notification.
+       * @returns {NotificationDetailsType} notif The notification to add.
+       */
+      addNotification: (notif: NotificationDetailsType): void => {
+        // Redirect to processor
+        AppEventProcessor.addNotification(get().mapId, notif);
       },
+
+      /**
+       * Sets the isCrosshairsActive state.
+       * @param {boolean} active - The interaction type.
+       */
+      setCrosshairActive: (active: boolean) => {
+        // Redirect to setter
+        get().appState.setterActions.setCrosshairActive(active);
+      },
+
+      /**
+       * Sets the display language.
+       * @param {TypeDisplayLanguage} lang - The new display language.
+       */
+      setDisplayLanguage: (lang: TypeDisplayLanguage) => {
+        // Redirect to processor
+        AppEventProcessor.setDisplayLanguage(get().mapId, lang);
+      },
+
+      /**
+       * Sets the theme.
+       * @param {TypeDisplayTheme} theme - The new theme.
+       */
+      setDisplayTheme: (theme: TypeDisplayTheme) => {
+        // Redirect to setter
+        get().appState.setterActions.setDisplayTheme(theme);
+      },
+
+      /**
+       * Set full screen state.
+       * @param {boolean} active - New full screen state.
+       * @param {TypeHTMLElement} element - The element to make full screen.
+       */
+      setFullScreenActive: (active: boolean, element?: TypeHTMLElement) => {
+        // Redirect to processor
+        AppEventProcessor.setFullscreen(get().mapId, active, element);
+      },
+
+      /**
+       * Remove a notification.
+       * @param {string} key - The key of the notification to remove.
+       */
+      removeNotification: (key: string) => {
+        // Redirect to processor
+        AppEventProcessor.removeNotification(get().mapId, key);
+      },
+    },
+    // #endregion ACTIONS
+
+    // #region SETTER ACTIONS
+    setterActions: {
+      /**
+       * Sets the circularProgress state.
+       * @param {boolean} active - The new state.
+       */
       setCircularProgress: (active: boolean) => {
         set({
           appState: {
@@ -83,6 +143,11 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
           },
         });
       },
+
+      /**
+       * Sets the isCrosshairsActive state.
+       * @param {boolean} active - The new state.
+       */
       setCrosshairActive: (active: boolean) => {
         set({
           appState: {
@@ -91,18 +156,25 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
           },
         });
       },
-      setDisplayLanguage: (lang: TypeDisplayLanguage) => {
+
+      /**
+       * Sets the display language.
+       * @param {TypeDisplayLanguage} lang - The new language.
+       */
+      setDisplayLanguage: (lang: TypeDisplayLanguage): void => {
         set({
           appState: {
             ...get().appState,
             displayLanguage: lang,
           },
         });
-
-        // reload the basemap from new language
-        MapEventProcessor.resetBasemap(get().mapId);
       },
-      setDisplayTheme: (theme: TypeDisplayTheme) => {
+
+      /**
+       * Sets the display theme.
+       * @param {TypeDisplayTheme} theme - The new theme.
+       */
+      setDisplayTheme: (theme: TypeDisplayTheme): void => {
         set({
           appState: {
             ...get().appState,
@@ -115,27 +187,56 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
         config!.theme = theme;
         set({ mapConfig: config });
       },
-      setFullScreenActive: (active: boolean, element?: TypeHTMLElement) => {
+
+      /**
+       * Sets the isFullscreenActive state.
+       * @param {boolean} active - The new state.
+       */
+      setFullScreenActive: (active: boolean): void => {
         set({
           appState: {
             ...get().appState,
             isFullscreenActive: active,
           },
         });
-
-        // GV we need to keep the call to the api map object because there is a state involve
-        if (element !== undefined) api.maps[get().mapId].setFullscreen(active, element);
       },
-      removeNotification: (key: string) => {
+
+      /**
+       * Sets the guide.
+       * @param {TypeGuideObject} guide - The new guide object.
+       */
+      setGuide: (guide: TypeGuideObject): void => {
         set({
           appState: {
             ...get().appState,
-            notifications: get().appState.notifications.filter((item: NotificationDetailsType) => item.key !== key),
+            guide,
+          },
+        });
+      },
+
+      /**
+       * Sets the notifications.
+       * @param {NotificationDetailsType[]} notifications - The new notifications.
+       */
+      setNotifications: (notifications: NotificationDetailsType[]): void => {
+        set({
+          appState: {
+            ...get().appState,
+            notifications: [...notifications],
           },
         });
       },
     },
+    // #endregion SETTER ACTIONS
   } as IAppState;
+}
+
+export interface TypeGuideObject {
+  [heading: string]: {
+    content: string;
+    heading: string;
+    children?: TypeGuideObject;
+  };
 }
 
 // **********************************************************
@@ -147,6 +248,7 @@ export const useAppDisplayLanguage = () => useStore(useGeoViewStore(), (state) =
 export const useAppDisplayTheme = () => useStore(useGeoViewStore(), (state) => state.appState.displayTheme);
 export const useAppFullscreenActive = () => useStore(useGeoViewStore(), (state) => state.appState.isFullscreenActive);
 export const useAppGeolocatorServiceURL = () => useStore(useGeoViewStore(), (state) => state.appState.geolocatorServiceURL);
+export const useAppGuide = () => useStore(useGeoViewStore(), (state) => state.appState.guide);
 export const useAppNotifications = () => useStore(useGeoViewStore(), (state) => state.appState.notifications);
 export const useAppSuportedLanguages = () => useStore(useGeoViewStore(), (state) => state.appState.suportedLanguages);
 

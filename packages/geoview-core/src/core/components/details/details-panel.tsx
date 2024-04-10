@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
+import Markdown from 'markdown-to-jsx';
 import {
   IconButton,
   Grid,
@@ -18,6 +19,7 @@ import {
   useDetailsSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useMapStoreActions, useMapVisibleLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/utils/layer-set';
 
@@ -48,6 +50,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
   const arrayOfLayerDataBatch = useDetailsLayerDataArrayBatch();
   const checkedFeatures = useDetailsCheckedFeatures();
   const visibleLayers = useMapVisibleLayers();
+  const guide = useAppGuide();
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
   const { addHighlightedFeature, removeHighlightedFeature } = useMapStoreActions();
 
@@ -442,14 +445,13 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
             </Box>
           )}
           {!memoSelectedLayerDataFeatures && (
-            <Paper sx={{ padding: '2rem' }} className="unbordered">
-              <Typography variant="h3" gutterBottom sx={sxClasses.detailsInstructionsTitle}>
-                {t('details.detailsInstructions')}
-              </Typography>
-              <Typography component="p" sx={sxClasses.detailsInstructionsBody}>
-                {t('details.selectVisbleLayer')}
-              </Typography>
-            </Paper>
+            <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer, maxHeight: '600px' }}>
+              <Paper sx={{ padding: '20px' }}>
+                <Box className="guideBox">
+                  <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.details!.content}</Markdown>
+                </Box>
+              </Paper>
+            </Box>
           )}
         </Layout>
       );
