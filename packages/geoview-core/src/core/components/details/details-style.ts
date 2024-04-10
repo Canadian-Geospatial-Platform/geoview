@@ -54,4 +54,12 @@ export const getSxClasses = (theme: Theme) => ({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  guideBox: {
+    ml: '30px',
+    mb: '18px',
+    td: {
+      width: 'auto',
+      paddingLeft: '15px',
+    },
+  },
 });

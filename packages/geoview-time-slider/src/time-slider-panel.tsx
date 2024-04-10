@@ -6,9 +6,10 @@ import {
   useTimeSliderLayers,
 } from 'geoview-core/src/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
-import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
-import { Box, Paper, Typography } from 'geoview-core/src/ui';
+import { useAppDisplayLanguage, useAppGuide } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
+import { Box, Paper } from 'geoview-core/src/ui';
 import { logger } from 'geoview-core/src/core/utils/logger';
+import Markdown from 'markdown-to-jsx';
 
 import { ReactNode } from 'react';
 import { TimeSlider } from './time-slider';
@@ -42,6 +43,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const visibleLayers = useMapVisibleLayers() as string[];
   const timeSliderLayers = useTimeSliderLayers();
   const displayLanguage = useAppDisplayLanguage();
+  const guide = useAppGuide();
 
   /**
    * handle Layer list when clicked on each layer.
@@ -111,7 +113,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     logger.logTraceUseEffect('TIME-SLIDER-PANEL - memoLayersList', memoLayersList, selectedLayerPath);
 
     // If the selected layer path isn't in the list of layers possible, clear it
-    if (selectedLayerPath && !memoLayersList.map((layer) => layer.layerPath).includes(selectedLayerPath)) {
+    if (selectedLayerPath && !memoLayersList.map((layer: { layerPath: string }) => layer.layerPath).includes(selectedLayerPath)) {
       // Clear the selected layer path
       setSelectedLayerPath('');
     }
@@ -122,12 +124,12 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       {selectedLayerPath && <TimeSlider mapId={mapId} config={configObj} layerPath={selectedLayerPath} key={selectedLayerPath} />}
       {!selectedLayerPath && (
         <Paper sx={{ padding: '2rem' }}>
-          <Typography variant="h3" gutterBottom sx={sxClasses.timeSliderInstructionsTitle}>
-            {api.utilities.core.getLocalizedMessage('timeSlider.instructions', displayLanguage)}
-          </Typography>
-          <Typography component="p" sx={sxClasses.timeSliderInstructionsBody}>
-            {api.utilities.core.getLocalizedMessage('timeSlider.instructions', displayLanguage)}
-          </Typography>
+          <Box sx={sxClasses.guideBox}>
+            <Markdown options={{ wrapper: 'article' }}>
+              {guide?.footerPanel?.children?.timeSlider?.content ||
+                api.utilities.core.getLocalizedMessage('timeSlider.instructions', displayLanguage)}
+            </Markdown>
+          </Box>
         </Paper>
       )}
     </Layout>

@@ -12,9 +12,10 @@ import {
   useGeochartLayerDataArrayBatch,
   useGeochartSelectedLayerPath,
 } from 'geoview-core/src/core/stores/store-interface-and-intial-values/geochart-state';
-import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
+import { useAppDisplayLanguage, useAppGuide } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
+import Markdown from 'markdown-to-jsx';
 import { GeoChart } from './geochart';
 import { GeoViewGeoChartConfig } from './geochart-types';
 import { getSxClasses } from './geochart-style';
@@ -50,6 +51,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const selectedLayerPath = useGeochartSelectedLayerPath() as string;
   const { setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass } = useGeochartStoreActions();
   const displayLanguage = useAppDisplayLanguage();
+  const guide = useAppGuide();
 
   // Create the validator shared for all the charts in the footer
   const [schemaValidator] = useState<SchemaValidator>(new SchemaValidator());
@@ -266,12 +268,12 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
           )}
           {!selectedLayerPath && (
             <Paper sx={{ padding: '2rem' }}>
-              <Typography variant="h3" gutterBottom sx={sxClasses.geochartInstructionsTitle}>
-                {api.utilities.core.getLocalizedMessage('geochart.panel.clickMap', displayLanguage)}
-              </Typography>
-              <Typography component="p" sx={sxClasses.geochartInstructionsBody}>
-                {api.utilities.core.getLocalizedMessage('geochart.panel.clickMap', displayLanguage)}
-              </Typography>
+              <Box sx={sxClasses.guideBox}>
+                <Markdown options={{ wrapper: 'article' }}>
+                  {guide?.footerPanel?.children?.chart?.content ||
+                    api.utilities.core.getLocalizedMessage('geochart.panel.clickMap', displayLanguage)}
+                </Markdown>
+              </Box>
             </Paper>
           )}
         </Layout>

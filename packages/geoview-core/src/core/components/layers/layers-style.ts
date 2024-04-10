@@ -15,4 +15,16 @@ export const getSxClasses = (theme: Theme) => ({
       margin: '0 3px',
     },
   },
+  guideBox: {
+    ml: '30px',
+    mb: '18px',
+    td: {
+      width: 'auto',
+      paddingLeft: '15px',
+    },
+    th: {
+      textAlign: 'left',
+      paddingLeft: '15px',
+    },
+  },
 });
