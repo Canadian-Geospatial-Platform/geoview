@@ -9,6 +9,7 @@ import { TypeDisplayLanguage, TypeLocalizedString } from '@/geo/map/map-schema-t
 import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { Config } from '@/core/utils/config/config';
 import { logger } from '@/core/utils/logger';
+import { TypeGuideObject } from '../stores/store-interface-and-intial-values/app-state';
 
 /**
  * Create a localized string and set its "en" and "fr" properties to the same value.
@@ -415,4 +416,81 @@ export const delay = (ms: number): Promise<void> => {
  */
 export function escapeRegExp(text: string): string {
   return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
+
+/**
+ * Extract heading from guide content.
+ * @param {string} content - Guide content to get heading from.
+ * @returns {string} Content section heading
+ */
+function getSectionHeading(content: string): string {
+  const firstLine = content.split('\n')[0].trim().split(' ');
+  return firstLine.filter((string) => !string.startsWith('#') && !string.startsWith('!')).join(' ');
+}
+
+/**
+ * Create guide object from .md file.
+ * @param {string} mapId - ID of map.
+ * @param {TypeDisplayLanguage} language - Language to use for guide.
+ * @returns {Promise<TypeGuideObject | undefined>} The guide object
+ */
+export async function createGuideObject(mapId: string, language: TypeDisplayLanguage): Promise<TypeGuideObject | undefined> {
+  try {
+    const response = await fetch(`./locales/${language}/guide.md`);
+    const content = await response.text();
+    // Split by first level sections (Split with =1!<key>=)
+    const sections = content.split(/=(?=1!)(.*?)=/);
+
+    if (!sections[0].trim()) {
+      sections.shift();
+    }
+
+    const guideObject: TypeGuideObject = {};
+    for (let i = 0; i < sections.length; i += 2) {
+      // Remove "1!" and whitespace from the key
+      const key = sections[i].trim().substring(2);
+      const fullSectionContent = sections[i + 1].trim();
+      const heading = getSectionHeading(fullSectionContent);
+      // Split by second level sections (Split with =2!<key>=)
+      const subSections = fullSectionContent.split(/=(?=2!)(.*?)=/);
+      // Content for top level is the first subsection
+      const sectionContent = subSections[0];
+      const children: TypeGuideObject = {};
+
+      // Get level two sections
+      if (subSections.length > 1) {
+        for (let j = 1; j < subSections.length; j += 2) {
+          // Remove "2!" and whitespace from the key
+          const childKey = subSections[j].trim().substring(2);
+          const fullChildContent = subSections[j + 1].trim();
+          const childHeading = getSectionHeading(fullChildContent);
+          const subSubSections = fullChildContent.split(/=(?=3!)(.*?)=/);
+          // Content for child level is the first subsection
+          const childContent = subSubSections[0];
+          const grandChildren: TypeGuideObject = {};
+
+          // Get level three sections
+          for (let k = 1; k < subSubSections.length; k += 2) {
+            // Remove "3!" and whitespace from the key
+            const grandChildKey = subSubSections[k].trim().substring(2);
+            // Highest possible level, so all that remains is content
+            const grandChildContent = subSubSections[k + 1].trim();
+            const grandChildHeading = getSectionHeading(grandChildContent);
+            grandChildren[grandChildKey] = { heading: grandChildHeading, content: grandChildContent };
+          }
+
+          children[childKey] = {
+            heading: childHeading,
+            content: childContent,
+            children: grandChildren,
+          };
+        }
+      }
+      guideObject[key] = { heading, content: sectionContent, children };
+    }
+    return guideObject;
+  } catch (error) {
+    logger.logError(mapId, error);
+    return undefined;
+  }
 }

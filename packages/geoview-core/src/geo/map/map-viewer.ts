@@ -433,6 +433,7 @@ export class MapViewer {
 
           // Load the Map itself and the UI controls
           await MapEventProcessor.initMapControls(this.mapId);
+          await AppEventProcessor.setGuide(this.mapId);
 
           // Now that the map dom is loaded, register a handle when size is changing
           this.map.on('change:size', this.#handleMapChangeSize.bind(this));

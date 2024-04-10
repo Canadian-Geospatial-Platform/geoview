@@ -20,5 +20,17 @@ export const getSxClasses = (theme: Theme) => ({
     '& .MuiPaper-root': {
       border: 'none',
     },
+    '& .guideBox': {
+      ml: '30px',
+      mb: '18px',
+      td: {
+        width: 'auto',
+        paddingLeft: '15px',
+      },
+      th: {
+        textAlign: 'left',
+        paddingLeft: '15px',
+      },
+    },
   },
 });
