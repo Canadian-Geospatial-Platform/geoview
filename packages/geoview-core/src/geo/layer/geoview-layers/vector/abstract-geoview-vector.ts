@@ -32,6 +32,7 @@ import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-cla
 import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
 import { Cast } from '@/core/types/global-types';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { analyzeLayerFilter, getFeatureStyle } from '@/geo/renderer/geoview-renderer';
 
 /* *******************************************************************************************************************************
  * AbstractGeoViewVector types
@@ -219,13 +220,15 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   protected createVectorLayer(layerConfig: VectorLayerEntryConfig, vectorSource: VectorSource<Feature>): VectorLayer<VectorSource> {
     const { layerPath } = layerConfig;
 
+    // TODO: remove link to language, layer should be created in one language and recreated if needed to change
+    const language = AppEventProcessor.getDisplayLanguage(this.mapId);
+
     const layerOptions: VectorLayerOptions<VectorSource> = {
       properties: { layerConfig },
       source: vectorSource as VectorSource<Feature>,
       style: (feature) => {
         if ('style' in layerConfig) {
-          const { geoviewRenderer } = api.maps[this.mapId];
-          return geoviewRenderer.getFeatureStyle(feature as Feature, layerConfig);
+          return getFeatureStyle(feature as Feature, layerConfig, language);
         }
 
         return undefined;
@@ -384,9 +387,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     });
 
     try {
-      const filterEquation = api.maps[this.mapId].geoviewRenderer.analyzeLayerFilter([
-        { nodeType: NodeType.unprocessedNode, nodeValue: filterValueToUse },
-      ]);
+      const filterEquation = analyzeLayerFilter([{ nodeType: NodeType.unprocessedNode, nodeValue: filterValueToUse }]);
       layerConfig.olLayer?.set('filterEquation', filterEquation);
     } catch (error) {
       throw new Error(

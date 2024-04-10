@@ -35,6 +35,7 @@ import {
 } from '@/geo/map/map-schema-types';
 import { QueryType, TypeFeatureInfoEntry, TypeLocation, codedValueType, rangeDomainType } from '@/geo/utils/layer-set';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { getLegendStyles, getFeatureCanvas } from '@/geo/renderer/geoview-renderer';
 
 // Constant used to define the default layer names
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
@@ -1119,7 +1120,7 @@ export abstract class AbstractGeoViewLayer {
         layerPath,
         layerName: layerConfig?.layerName,
         styleConfig: layerConfig?.style,
-        legend: await api.maps[this.mapId].geoviewRenderer.getLegendStyles(layerConfig),
+        legend: await getLegendStyles(layerConfig),
       };
       return legend;
     } catch (error) {
@@ -1191,11 +1192,9 @@ export abstract class AbstractGeoViewLayer {
       features.forEach((featureNeedingItsCanvas) => {
         promisedAllCanvasFound.push(
           new Promise<{ feature: Feature; canvas: HTMLCanvasElement | undefined }>((resolveCanvas) => {
-            api.maps[this.mapId].geoviewRenderer
-              .getFeatureCanvas(featureNeedingItsCanvas, layerConfig as VectorLayerEntryConfig)
-              .then((canvas) => {
-                resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
-              });
+            getFeatureCanvas(featureNeedingItsCanvas, layerConfig as VectorLayerEntryConfig).then((canvas) => {
+              resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
+            });
           })
         );
       });
