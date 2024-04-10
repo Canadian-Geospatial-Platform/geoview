@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { Box, FilterAltIcon, Paper, Skeleton, Typography } from '@/ui';
+import Markdown from 'markdown-to-jsx';
+import { Box, FilterAltIcon, Paper, Skeleton } from '@/ui';
 import DataTable from './data-table';
 import {
   useDataTableSelectedLayerPath,
@@ -12,6 +13,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useMapVisibleLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useUIActiveFooterBarTabId } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { LayerListEntry, Layout } from '@/core/components/common';
 import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
@@ -46,6 +48,7 @@ export function Datapanel({ fullWidth }: DataPanelType) {
   const { setSelectedLayerPath } = useDataTableStoreActions();
   const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
   const selectedTab = useUIActiveFooterBarTabId();
+  const guide = useAppGuide();
   const visibleLayers = useMapVisibleLayers();
 
   // Create columns for data table.
@@ -207,14 +210,17 @@ export function Datapanel({ fullWidth }: DataPanelType) {
 
       {/* show data table instructions when all layers has no features */}
       {((!isLoading && isAllLayersNoFeatures()) || isLayerDisabled() || selectedLayerPath === '') && (
-        <Paper sx={{ padding: '2rem' }}>
-          <Typography variant="h3" gutterBottom sx={sxClasses.dataTableInstructionsTitle}>
-            {t('dataTable.dataTableInstructions')}
-          </Typography>
-          <Typography component="p" sx={sxClasses.dataTableInstructionsBody}>
-            {t('dataTable.selectVisbleLayer')}
-          </Typography>
-        </Paper>
+        <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer, maxHeight: '600px' }}>
+          <Paper sx={{ padding: '2rem' }}>
+            <Box className="guideBox">
+              <Markdown options={{ wrapper: 'article' }}>{`${guide!.footerPanel!.children!.dataTable!.content}\n${
+                guide!.footerPanel!.children!.dataTable!.children!.filterData!.content
+              }\n${guide!.footerPanel!.children!.dataTable!.children!.sortingAndReordering!.content}\n\n${
+                guide!.footerPanel!.children!.dataTable!.children!.keyboardNavigation!.content
+              }`}</Markdown>
+            </Box>
+          </Paper>
+        </Box>
       )}
     </Layout>
   );

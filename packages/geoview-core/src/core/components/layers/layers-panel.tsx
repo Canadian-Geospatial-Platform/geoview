@@ -1,20 +1,21 @@
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
+import Markdown from 'markdown-to-jsx';
 import { CloseButton, ResponsiveGrid, useFooterPanelHeight } from '@/core/components/common';
-import { Box, DeleteOutlineIcon, IconButton, Paper } from '@/ui';
+import { Box, Paper } from '@/ui';
 import { getSxClasses } from './layers-style';
 import { useLayerDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayersToolbar } from './layers-toolbar';
 import { LayerDetails } from './right-panel/layer-details';
 import { LeftPanel } from './left-panel/left-panel';
 import { logger } from '@/core/utils/logger';
+import { useAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 export function LayersPanel() {
   // Log
   logger.logTraceRender('components/layers/layers-panel');
 
-  const { t } = useTranslation<string>();
+  const guide = useAppGuide();
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
@@ -51,52 +52,45 @@ export function LayersPanel() {
     if (selectedLayer && displayState === 'view') {
       return <LayerDetails layerDetails={selectedLayer} />;
     }
-    if (displayState === 'remove') {
-      // TODO: refactor - remove the need for markup and danger Eslint
-      const markup = { __html: t('layers.removeLayerDescription') };
+    if (!selectedLayer && displayState === 'view') {
+      const markDown = (
+        <Markdown options={{ wrapper: 'article' }}>
+          {`${guide!.footerPanel!.children!.layers!.children!.view!.content}\n${
+            guide!.footerPanel!.children!.layers!.children!.layerSettings!.content
+          }`}
+        </Markdown>
+      );
       return (
-        // eslint-disable-next-line react/no-danger
+        <Paper sx={{ padding: '20px', overflow: 'auto' }}>
+          <Box className="guideBox">{markDown}</Box>
+        </Paper>
+      );
+    }
+    if (displayState === 'remove') {
+      const markDown = (
+        <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.layers!.children!.remove!.content}</Markdown>
+      );
+      return (
         <Paper sx={{ padding: '20px' }}>
-          <h3>{t('layers.removingLayers')}</h3>
-          <Box sx={{ display: 'flex', flexDirection: 'row', gap: '2', alignItems: 'center' }}>
-            <IconButton edge="end" size="small">
-              <DeleteOutlineIcon color="error" />
-            </IconButton>
-            <Box>
-              {
-                /* eslint-disable-next-line react/no-danger */
-                <div dangerouslySetInnerHTML={markup} />
-              }
-            </Box>
-          </Box>
+          <Box className="guideBox">{markDown}</Box>
         </Paper>
       );
     }
     if (displayState === 'order') {
-      const markup = { __html: t('layers.sortingDescription') };
+      const markDown = (
+        <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.layers!.children!.sort!.content}</Markdown>
+      );
       return (
         <Paper sx={{ padding: '20px' }}>
-          <h3>{t('layers.reArrangeLayers')}</h3>
-          <Box sx={sxClasses.buttonDescriptionContainer}>
-            {
-              /* eslint-disable-next-line react/no-danger */
-              <div dangerouslySetInnerHTML={markup} />
-            }
-          </Box>
+          <Box className="guideBox">{markDown}</Box>
         </Paper>
       );
     }
     if (displayState === 'add') {
-      const markup = { __html: t('layers.addingNewLayerDescription') };
+      const markDown = <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.layers!.children!.add!.content}</Markdown>;
       return (
         <Paper sx={{ padding: '20px' }}>
-          <h3>{t('layers.addingNewLayer')}</h3>
-          <Box sx={sxClasses.buttonDescriptionContainer}>
-            {
-              /* eslint-disable-next-line react/no-danger */
-              <div dangerouslySetInnerHTML={markup} />
-            }
-          </Box>
+          <Box className="guideBox">{markDown}</Box>
         </Paper>
       );
     }

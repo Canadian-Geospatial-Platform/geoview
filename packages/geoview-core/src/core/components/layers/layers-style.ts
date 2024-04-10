@@ -4,6 +4,18 @@ export const getSxClasses = (theme: Theme) => ({
   layersPanelContainer: {
     background: theme.palette.geoViewColor.bgColor.main,
     paddingBottom: '1rem',
+    '& .guideBox': {
+      ml: '30px',
+      mb: '18px',
+      td: {
+        width: 'auto',
+        paddingLeft: '15px',
+      },
+      th: {
+        textAlign: 'left',
+        paddingLeft: '15px',
+      },
+    },
   },
   // descriptions for right panel with buttons(describing what each panel does)
   buttonDescriptionContainer: {
