@@ -62,7 +62,7 @@ export function HoverTooltip(): JSX.Element {
     // Log
     logger.logTraceUseEffect('HOVER-TOOLTIP - hoverFeatureInfo', hoverFeatureInfo);
 
-    if (hoverFeatureInfo !== undefined) {
+    if (hoverFeatureInfo) {
       setTooltipValue(hoverFeatureInfo!.fieldInfo?.value as string | '');
       setTooltipIcon(hoverFeatureInfo!.featureIcon.toDataURL());
       setShowTooltip(true);

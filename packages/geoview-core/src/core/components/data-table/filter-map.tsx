@@ -5,10 +5,7 @@ import { useTheme } from '@mui/material/styles';
 
 import { Tooltip } from '@/ui';
 import { getSxClasses } from './data-table-style';
-import {
-  useDataTableStoreActions,
-  useDataTableStoreMapFilteredRecord,
-} from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useDataTableStoreActions, useDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
 
 interface FilterMapProps {
@@ -29,16 +26,16 @@ function FilterMap({ layerPath }: FilterMapProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const mapFiltered = useDataTableStoreMapFilteredRecord();
+  const datatableSettings = useDataTableLayerSettings();
   const { setMapFilteredEntry } = useDataTableStoreActions();
 
   const { t } = useTranslation();
   return (
-    <Tooltip title={mapFiltered[layerPath] ? t('dataTable.stopFilterMap') : t('dataTable.filterMap')}>
+    <Tooltip title={datatableSettings[layerPath] ? t('dataTable.stopFilterMap') : t('dataTable.filterMap')}>
       <Switch
         size="medium"
-        onChange={() => setMapFilteredEntry(!mapFiltered[layerPath] ?? true, layerPath)}
-        checked={!!mapFiltered[layerPath]}
+        onChange={() => setMapFilteredEntry(!datatableSettings[layerPath].mapFilteredRecord ?? true, layerPath)}
+        checked={!!datatableSettings[layerPath].mapFilteredRecord}
         sx={sxClasses.filterMap}
       />
     </Tooltip>

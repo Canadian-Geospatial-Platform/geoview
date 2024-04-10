@@ -1,7 +1,11 @@
 import { useTheme } from '@mui/material/styles';
 import { TypeWindow } from 'geoview-core/src/core/types/global-types';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
-import { TypeTimeSliderValues, useMapVisibleLayers, useTimeSliderLayers } from 'geoview-core/src/core/stores';
+import {
+  TypeTimeSliderValues,
+  useTimeSliderLayers,
+} from 'geoview-core/src/core/stores/store-interface-and-intial-values/time-slider-state';
+import { useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
 import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { Box, Paper, Typography } from 'geoview-core/src/ui';
 import { logger } from 'geoview-core/src/core/utils/logger';

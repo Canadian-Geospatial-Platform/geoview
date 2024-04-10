@@ -1,13 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIActiveFooterBarTabId, useUIFooterPanelResizeValue } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useDetailsLayerDataArray } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import {
-  useDetailsStoreAllFeaturesDataArray,
-  useDetailsStoreLayerDataArray,
-} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+  useDataTableAllFeaturesDataArray,
+  useDataTableStoreActions,
+} from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
-import { useDataTableStoreActions } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { TABS } from '@/core/utils/constant';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 interface UseFooterPanelHeightType {
   footerPanelTab: 'layers' | 'details' | 'data-table' | 'legend' | 'default' | 'guide';
@@ -19,6 +20,7 @@ interface UseFooterPanelHeightType {
  * @returns list of ref objects that are attached to DOM.
  */
 export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightType) {
+  const mapId = useGeoViewMapId();
   const leftPanelRef = useRef<HTMLDivElement>(null);
   const rightPanelRef = useRef<HTMLDivElement>(null);
   const panelTitleRef = useRef<HTMLDivElement>(null);
@@ -26,8 +28,8 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
   const isMapFullScreen = useAppFullscreenActive();
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
   const activeFooterBarTabId = useUIActiveFooterBarTabId();
-  const arrayOfLayerData = useDetailsStoreLayerDataArray();
-  const allFeaturesLayerData = useDetailsStoreAllFeaturesDataArray();
+  const arrayOfLayerData = useDetailsLayerDataArray();
+  const allFeaturesLayerData = useDataTableAllFeaturesDataArray();
   const { setTableHeight } = useDataTableStoreActions();
 
   useEffect(() => {
@@ -38,8 +40,9 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
 
     if (leftPanelRef.current && isMapFullScreen && (activeFooterBarTabId === footerPanelTab || footerPanelTab === 'default')) {
       const panelTitleHeight = panelTitleRef.current?.clientHeight ?? 0;
-      const tabsContainer = document.getElementById(`mapId-tabsContainer`)!;
+      const tabsContainer = document.getElementById(`${mapId}-tabsContainer`)!;
       const firstChild = tabsContainer?.firstElementChild?.firstElementChild;
+
       const firstChildHeight = firstChild?.clientHeight ?? 0;
       const leftPanelHeight = (window.screen.height * footerPanelResizeValue) / 100 - panelTitleHeight - firstChildHeight;
 
@@ -55,6 +58,7 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
         rightPanelRef.current.style.paddingBottom = `24px`;
       } else {
         const rightPanel = (rightPanelRef.current?.firstElementChild ?? null) as HTMLElement | null;
+
         if (rightPanel) {
           rightPanel.style.maxHeight = `${leftPanelHeight}px`;
           rightPanel.style.paddingBottom = `24px`;
@@ -85,6 +89,7 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
     arrayOfLayerData,
     allFeaturesLayerData,
     setTableHeight,
+    mapId,
   ]);
 
   return { leftPanelRef, rightPanelRef, panelTitleRef };

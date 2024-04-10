@@ -5,14 +5,14 @@ import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common'
 import { TypeLayerData } from 'geoview-core/src/geo/utils/layer-set';
 import { Typography } from 'geoview-core/src/ui/typography/typography';
 import { Box, Paper } from 'geoview-core/src/ui';
+import { useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
 import {
-  useMapVisibleLayers,
   useGeochartConfigs,
   useGeochartStoreActions,
-  useGeochartStoreLayerDataArrayBatch,
-  useGeochartStoreSelectedLayerPath,
-  useAppDisplayLanguage,
-} from 'geoview-core/src/core/stores';
+  useGeochartLayerDataArrayBatch,
+  useGeochartSelectedLayerPath,
+} from 'geoview-core/src/core/stores/store-interface-and-intial-values/geochart-state';
+import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
 import { GeoChart } from './geochart';
@@ -46,8 +46,8 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   // Get states and actions from store
   const configObj = useGeochartConfigs();
   const visibleLayers = useMapVisibleLayers() as string[];
-  const storeArrayOfLayerData = useGeochartStoreLayerDataArrayBatch() as TypeLayerData[];
-  const selectedLayerPath = useGeochartStoreSelectedLayerPath() as string;
+  const storeArrayOfLayerData = useGeochartLayerDataArrayBatch() as TypeLayerData[];
+  const selectedLayerPath = useGeochartSelectedLayerPath() as string;
   const { setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass } = useGeochartStoreActions();
   const displayLanguage = useAppDisplayLanguage();
 

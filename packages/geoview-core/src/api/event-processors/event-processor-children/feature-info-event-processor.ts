@@ -1,4 +1,5 @@
-import { GeoviewStoreType, IFeatureInfoState } from '@/core/stores';
+import { GeoviewStoreType } from '@/core/stores';
+import { IFeatureInfoState } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoResultSet } from '@/geo/utils/feature-info-layer-set';
 import { EventType, TypeLayerData } from '@/geo/utils/layer-set';
@@ -51,9 +52,6 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
               // Remove it from feature info array
               FeatureInfoEventProcessor.#deleteFeatureInfo(store.getState().mapId, layerPath);
 
-              // Remove it from all features array
-              FeatureInfoEventProcessor.#deleteFeatureAllInfo(store.getState().mapId, layerPath);
-
               // Log
               logger.logInfo('Removed Feature Info in stores for layer path:', layerPath);
             }
@@ -91,23 +89,6 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
 
       // Also propagate in the batched array
       FeatureInfoEventProcessor.#propagateFeatureInfoToStoreBatch(mapId, layerArrayResult);
-    });
-  }
-
-  /**
-   * Deletes the specified layer path from the all features layers sets in the store
-   * @param {string} mapId - The map identifier
-   * @param {string} layerPath - The layer path to delete
-   * @private
-   */
-  static #deleteFeatureAllInfo(mapId: string, layerPath: string) {
-    // The feature info state
-    const featureInfoState = this.getFeatureInfoState(mapId);
-
-    // Redirect to helper function
-    this.#deleteFromArray(featureInfoState.allFeaturesDataArray, layerPath, (layerArrayResult) => {
-      // Update the layer data array in the store
-      featureInfoState.actions.setAllFeaturesDataArray(layerArrayResult);
     });
   }
 
@@ -166,17 +147,6 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
 
       // Also propagate in the batched array
       FeatureInfoEventProcessor.#propagateFeatureInfoToStoreBatch(mapId, layerDataArray);
-    } else if (eventType === 'all-features') {
-      /**
-       * Create a get all features info object for each layer which is then used to render layers
-       */
-      const allFeaturesDataArray = [...featureInfoState.allFeaturesDataArray];
-      if (!allFeaturesDataArray.find((layerEntry) => layerEntry.layerPath === layerPath)) {
-        allFeaturesDataArray.push((resultSet as TypeFeatureInfoResultSet)?.[layerPath]?.data);
-      }
-
-      // Update the layer data array in the store, all the time
-      featureInfoState.actions.setAllFeaturesDataArray(allFeaturesDataArray);
     }
   }
 
