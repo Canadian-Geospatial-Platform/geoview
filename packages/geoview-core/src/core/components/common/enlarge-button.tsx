@@ -24,6 +24,7 @@ export function EnlargeButton({ isEnlarged, onSetIsEnlarged }: EnlargeButtonProp
       size="small"
       color="primary"
       variant="contained"
+      className="style2"
       startIcon={isEnlarged ? <ArrowForwardIcon /> : <ArrowBackIcon />}
       sx={{ height: '40px', borderRadius: '1.5rem', [theme.breakpoints.down('md')]: { display: 'none' } }}
       onClick={() => onSetIsEnlarged(!isEnlarged)}

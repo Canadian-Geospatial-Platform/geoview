@@ -18,9 +18,6 @@ export const getSxClasses = (theme: Theme) => ({
     fontWeight: '600',
   },
   rightPanelContainer: {
-    overflowY: 'auto',
-    border: `2px solid ${theme.palette.geoViewColor.primary.main}`,
-    borderRadius: '5px',
     color: theme.palette.geoViewColor.textColor.main,
   },
   rightPanelBtnHolder: {

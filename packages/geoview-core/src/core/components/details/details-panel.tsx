@@ -394,7 +394,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
           fullWidth={fullWidth}
         >
           {memoSelectedLayerDataFeatures && (
-            <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer, maxHeight: '600px' }}>
+            <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer }}>
               <Grid container sx={sxClasses.rightPanelBtnHolder}>
                 <Grid item xs={6}>
                   <Box style={{ marginLeft: '22px' }}>
@@ -442,7 +442,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
             </Box>
           )}
           {!memoSelectedLayerDataFeatures && (
-            <Paper sx={{ padding: '2rem' }} className="bordered">
+            <Paper sx={{ padding: '2rem' }} className="unbordered">
               <Typography variant="h3" gutterBottom sx={sxClasses.detailsInstructionsTitle}>
                 {t('details.detailsInstructions')}
               </Typography>
