@@ -177,13 +177,13 @@ const isRelativeRange = (ogcTimeDimension: string): boolean => ogcTimeDimension.
  * @exports
  * @class DateMgt
  */
-export class DateMgt {
+export abstract class DateMgt {
   /**
    * Convert a UTC date to a local date
    * @param {Date | string} date date to use
    * @returns {string} local date
    */
-  convertToLocal(date: Date | string): string {
+  static convertToLocal(date: Date | string): string {
     // check if it is a valid date
     if (typeof date === 'string' && !isValidDate(date)) throw new Error(`${INVALID_DATE} (convertToLocal)`);
 
@@ -197,7 +197,7 @@ export class DateMgt {
    * @param {string} format format of the date.
    * @returns {string} formatted date
    */
-  formatDate(date: Date | string, format: string): string {
+  static formatDate(date: Date | string, format: string): string {
     // check if it is a valid date
     if (typeof date === 'string' && !isValidDate(date)) throw new Error(`${INVALID_DATE} (convertToLocal)`);
 
@@ -209,7 +209,7 @@ export class DateMgt {
    * @param {Date | string} date date to use
    * @returns {string} UTC date
    */
-  convertToUTC(date: Date | string): string {
+  static convertToUTC(date: Date | string): string {
     // check if it is a valid date
     if (typeof date === 'string' && !isValidDate(date)) throw new Error(`${INVALID_DATE} (convertToUTC)`);
 
@@ -224,7 +224,7 @@ export class DateMgt {
    * @param {TimePrecision}timePattern the time precision pattern to use
    * @returns {string} formatted date
    */
-  format(date: Date | string, datePattern: DatePrecision, timePattern?: TimePrecision): string {
+  static format(date: Date | string, datePattern: DatePrecision, timePattern?: TimePrecision): string {
     // check if it is a valid date
     if (typeof date === 'string' && !isValidDate(date)) throw new Error(`${INVALID_DATE} (format)`);
 
@@ -240,7 +240,7 @@ export class DateMgt {
    * @param {Date | string} date date to use
    * @returns {number} date as milliseconds
    */
-  convertToMilliseconds(date: Date | string): number {
+  static convertToMilliseconds(date: Date | string): number {
     // check if it is a valid date
     if (typeof date === 'string' && !isValidDate(date)) throw new Error(`${INVALID_DATE} (convertToMilliseconds)`);
 
@@ -252,7 +252,7 @@ export class DateMgt {
    * @param {number} date milliseconds date
    * @returns {string} date string
    */
-  convertMilisecondsToDate(date: number, dateFormat = 'YYYY-MM-DDTHH:mm:ss'): string {
+  static convertMilisecondsToDate(date: number, dateFormat = 'YYYY-MM-DDTHH:mm:ss'): string {
     return dayjs(date).utc(false).format(dateFormat);
   }
 
@@ -261,7 +261,7 @@ export class DateMgt {
    * @param {string} dateOGC date as an ISO 8601 date
    * @returns {string} the formatted date
    */
-  extractDateFormat(dateOGC: string): string {
+  static extractDateFormat(dateOGC: string): string {
     // check if it is a valid date
     if (typeof dateOGC === 'string' && !isValidDate(dateOGC)) throw new Error(`${INVALID_DATE} (extractDateFormat)`);
 
@@ -294,7 +294,7 @@ export class DateMgt {
    *
    * @returns {TimeDimension} the Geoview time dimension
    */
-  createDimensionFromESRI(timeDimensionESRI: TimeDimensionESRI, singleHandle = false): TimeDimension {
+  static createDimensionFromESRI(timeDimensionESRI: TimeDimensionESRI, singleHandle = false): TimeDimension {
     const { startTimeField, timeExtent, timeInterval, timeIntervalUnits } = timeDimensionESRI;
 
     // create interval string
@@ -330,7 +330,7 @@ export class DateMgt {
    * @param {TypeJsonObject | string} ogcTimeDimension The OGC time dimension object or string
    * @returns {TimeDimension} the Geoview time dimension
    */
-  createDimensionFromOGC(ogcTimeDimension: TypeJsonObject | string): TimeDimension {
+  static createDimensionFromOGC(ogcTimeDimension: TypeJsonObject | string): TimeDimension {
     const dimensionObject = typeof ogcTimeDimension === 'object' ? ogcTimeDimension : JSON.parse(<string>ogcTimeDimension);
     const timeDimension: TimeDimension = {
       field: dimensionObject.name,
@@ -349,7 +349,7 @@ export class DateMgt {
    * @param {string} ogcTimeDimension OGC time dimension values following
    * @returns {RangeItems} array of date from the dimension
    */
-  createRangeOGC(ogcTimeDimensionValues: string): RangeItems {
+  static createRangeOGC(ogcTimeDimensionValues: string): RangeItems {
     let rangeItems: RangeItems = { type: 'none', range: [] };
 
     // find what type of dimension it is:
@@ -377,7 +377,7 @@ export class DateMgt {
    * @param locale {string} locale to use (fr-CA or en-CA)
    * @returns {string} locale tooltip
    */
-  createDateLocaleTooltip(date: string, locale: TypeLocalizedLanguages): string {
+  static createDateLocaleTooltip(date: string, locale: TypeLocalizedLanguages): string {
     // Handle locale for date label
     const tooltips = dayjs(date)
       .locale(`${locale}-CA`)
@@ -392,7 +392,7 @@ export class DateMgt {
    * @param ogcTimeDimension {string} OGC time dimension following ISO 8001
    * @returns {string[]} array of date from the dimension
    */
-  #createAbsoluteInterval(ogcTimeDimension: string): string[] {
+  static #createAbsoluteInterval(ogcTimeDimension: string): string[] {
     // Absolute interval:
     // A client may request information over an interval instead of a single instant by specifying a start and end time, separated by a / character with a duration.
     // 2002-09-01T00:00:00.0Z/2002-09-30T23:59:59.999Z/P1D
@@ -446,7 +446,7 @@ export class DateMgt {
    * @param ogcTimeDimension {string} OGC time dimension following ISO 8001
    * @returns {string[]} array of date from the dimension
    */
-  #createRelativeIntervale(ogcTimeDimension: string): string[] {
+  static #createRelativeIntervale(ogcTimeDimension: string): string[] {
     // Relative interval:
     // A client may request information over a relative time interval instead of a set time range by specifying a start or end time with an associated duration, separated by a / character.
     // A client may request information over a continuous interval instead of a single instant by specifying a start and end time, separated by a / character.
@@ -475,7 +475,7 @@ export class DateMgt {
    * @returns {TypeDateFragments} array of index indicating the field position in the format. index 0 is for
    * year, 1 for month, 2 for day and 4 for time. A value of -1 indicates theat the fragment is missing.
    */
-  getDateFragmentsOrder(dateFormat?: string): TypeDateFragments {
+  static getDateFragmentsOrder(dateFormat?: string): TypeDateFragments {
     /*
       The structure of the date fragments is:
         index 0 for the input format;
@@ -553,7 +553,7 @@ export class DateMgt {
    * @param reverseTimeZone {boolean} Flag indicating that we must change the time zone sign before the conversion.
    * @returns {string} The reformatted date string.
    */
-  applyInputDateFormat(date: string, dateFragmentsOrder = ISO_UTC_DATE_FRAGMENTS_ORDER, reverseTimeZone = false): string {
+  static applyInputDateFormat(date: string, dateFragmentsOrder = ISO_UTC_DATE_FRAGMENTS_ORDER, reverseTimeZone = false): string {
     if (!date) return date;
     const index = dateFragmentsOrder[0];
     const separators = dateFragmentsOrder[2];
@@ -605,7 +605,7 @@ export class DateMgt {
    * @param reverseTimeZone {boolean} Flag indicating that we must change the time zone sign before the conversion.
    * @returns {string} The reformatted date string.
    */
-  applyOutputDateFormat(date: string, dateFragmentsOrder?: TypeDateFragments, reverseTimeZone = false): string {
+  static applyOutputDateFormat(date: string, dateFragmentsOrder?: TypeDateFragments, reverseTimeZone = false): string {
     if (!date) return date;
     if (dateFragmentsOrder) {
       const index = dateFragmentsOrder[1];
@@ -640,7 +640,7 @@ export class DateMgt {
    *
    * @returns {string} The date format.
    */
-  deduceDateFormat(dateString: string): string {
+  static deduceDateFormat(dateString: string): string {
     let dateFormat = dateString.toUpperCase().replaceAll('/', '-').replaceAll(' ', 'T');
     dateFormat = dateFormat
       .replace(/\d{4}/, 'YYYY')

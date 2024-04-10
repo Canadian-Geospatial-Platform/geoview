@@ -3,7 +3,7 @@ import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { animated, useSpring } from '@react-spring/web';
 import { Box, List, ListItem, ListItemButton, ListItemIcon, Paper, Tooltip, Typography } from '@/ui';
-import { TypeFeatureInfoEntry, TypeQueryStatus } from '@/geo/layer/layer-sets/layer-set';
+import { TypeFeatureInfoEntry, TypeQueryStatus } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { getSxClasses } from './layer-list-style';
 import { LayerIcon } from './layer-icon';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';

@@ -5,7 +5,7 @@ import { logger } from '@/core/utils/logger';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLayerEntryConfig, TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { LayerSet, TypeFieldEntry, TypeQueryStatus } from './layer-set';
+import { AbstractLayerSet, TypeFieldEntry, TypeQueryStatus } from './abstract-layer-set';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
@@ -15,7 +15,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
  *
  * @class HoverFeatureInfoLayerSet
  */
-export class HoverFeatureInfoLayerSet extends LayerSet {
+export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   /** The resultSet object as existing in the base class, retyped here as a TypeHoverFeatureInfoResultSet */
   declare resultSet: TypeHoverFeatureInfoResultSet;
 

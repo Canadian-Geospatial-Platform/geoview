@@ -14,11 +14,7 @@ export abstract class MapPlugin extends AbstractPlugin {
     // Override this to create panel..
 
     // Return dummy content
-    return this.react!.createElement(
-      'div',
-      undefined,
-      `<div>Content for Map Plugin on map id ${this.pluginProps.mapId} goes here...</div>`
-    );
+    return this.react.createElement('div', undefined, `<div>Content for Map Plugin on map id ${this.pluginProps.mapId} goes here...</div>`);
   }
 
   /**

@@ -32,7 +32,7 @@ export abstract class AppBarPlugin extends AbstractPlugin {
       id: 'somePluginButton',
       tooltip: 'Some tooltip',
       tooltipPlacement: 'right',
-      children: this.react!.createElement(MapIcon),
+      children: this.react.createElement(MapIcon),
       visible: true,
     };
   }
@@ -61,7 +61,7 @@ export abstract class AppBarPlugin extends AbstractPlugin {
     // Override this to create panel..
 
     // Return dummy content
-    return this.react!.createElement('div', undefined, `Content for AppBar Plugin on map id ${this.pluginProps.mapId} goes here...`);
+    return this.react.createElement('div', undefined, `Content for AppBar Plugin on map id ${this.pluginProps.mapId} goes here...`);
   }
 
   /**
@@ -78,7 +78,7 @@ export abstract class AppBarPlugin extends AbstractPlugin {
     this.panelProps.content = this.onCreateContent();
 
     // Create a new button panel on the app-bar
-    this.buttonPanel = this.map()?.appBarApi.createAppbarPanel(this.buttonProps!, this.panelProps, null) || undefined;
+    this.buttonPanel = this.mapViewer().appBarApi.createAppbarPanel(this.buttonProps!, this.panelProps, null) || undefined;
   }
 
   /**
@@ -88,7 +88,7 @@ export abstract class AppBarPlugin extends AbstractPlugin {
     // If cgpv exists
     if (this.api && this.buttonPanel) {
       // Remove the app bar panel
-      this.map()?.appBarApi.removeAppbarPanel(this.buttonPanel.buttonPanelId);
+      this.mapViewer().appBarApi.removeAppbarPanel(this.buttonPanel.buttonPanelId);
     }
   }
 }

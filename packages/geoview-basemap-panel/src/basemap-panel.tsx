@@ -4,6 +4,7 @@ import { useMapProjection } from 'geoview-core/src/core/stores/store-interface-a
 import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { TypeValidMapProjectionCodes, TypeDisplayLanguage } from 'geoview-core/src/geo/map/map-schema-types';
 import { logger } from 'geoview-core/src/core/utils/logger';
+import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { getSxClasses } from './basemap-panel-style';
 
 interface BaseMapPanelProps {
@@ -115,21 +116,20 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
     let description = '';
 
     if (basemapTypes.includes('transport')) {
-      name = api.utilities.core.getLocalizedMessage('basemapPanel.info.transport.name', language);
-      description = api.utilities.core.getLocalizedMessage('basemapPanel.info.transport.description', language);
+      name = getLocalizedMessage('basemapPanel.info.transport.name', language);
+      description = getLocalizedMessage('basemapPanel.info.transport.description', language);
     } else if (basemapTypes.includes('simple')) {
-      name = api.utilities.core.getLocalizedMessage('basemapPanel.info.simple.name', language);
+      name = getLocalizedMessage('basemapPanel.info.simple.name', language);
     } else if (basemapTypes.includes('shaded')) {
-      name = api.utilities.core.getLocalizedMessage('basemapPanel.info.shaded.name', language);
-      description = api.utilities.core.getLocalizedMessage('basemapPanel.info.shaded.description', language);
+      name = getLocalizedMessage('basemapPanel.info.shaded.name', language);
+      description = getLocalizedMessage('basemapPanel.info.shaded.description', language);
     } else if (basemapTypes.includes('osm')) {
-      name = api.utilities.core.getLocalizedMessage('basemapPanel.info.osm.name', language);
+      name = getLocalizedMessage('basemapPanel.info.osm.name', language);
     } else if (basemapTypes.includes('nogeom')) {
-      name = api.utilities.core.getLocalizedMessage('basemapPanel.info.nogeom.name', language);
+      name = getLocalizedMessage('basemapPanel.info.nogeom.name', language);
     }
 
-    if (basemapTypes.includes('label'))
-      name = `${name} ${api.utilities.core.getLocalizedMessage('basemapPanel.info.label.name', language)}`;
+    if (basemapTypes.includes('label')) name = `${name} ${getLocalizedMessage('basemapPanel.info.label.name', language)}`;
 
     return { name, description };
   }

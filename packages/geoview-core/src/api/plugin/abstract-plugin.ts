@@ -30,14 +30,14 @@ export abstract class AbstractPlugin {
   // In this refactoring at the time of coding, I'm, simply, explicitely, writing them here so it's clear that this AbstractPlugin class has (and expects) those attributes.
   // See plugin.addPlugin function for more details.
 
-  // Plugin config object
-  configObj?: TypeJsonObject;
+  // Plugin config object. The '!' is used, because it's not set by the constructor, it's set by the note above.
+  configObj!: TypeJsonObject;
 
-  // Plugin api object
-  api?: API;
+  // Plugin api object. The '!' is used, because it's not set by the constructor, it's set by the note above.
+  api!: API;
 
-  // Plugin react object
-  react?: typeof React;
+  // Plugin react object. The '!' is used, because it's not set by the constructor, it's set by the note above.
+  react!: typeof React;
 
   // Plugin translate object
   // TODO: Refactor - Plugin - Maybe translate is not necessary here.. This might get removed eventually. Don't forget to remove in plugin class too in 'Object.defineProperties'(!)
@@ -63,8 +63,8 @@ export abstract class AbstractPlugin {
    * Returns the MapViewer used by this Plugin
    * @returns MapViewer The MapViewer used by this Plugin
    */
-  map(): MapViewer | undefined {
-    return this.api?.maps[this.pluginProps.mapId];
+  mapViewer(): MapViewer {
+    return this.api.maps[this.pluginProps.mapId];
   }
 
   /**

@@ -4,7 +4,7 @@ import { MapEventProcessor } from 'geoview-core/src/api/event-processors/event-p
 import { TypeWindow } from 'geoview-core/src/core/types/global-types';
 import { TypeLayerEntryConfig } from 'geoview-core/src/geo/map/map-schema-types';
 import { logger } from 'geoview-core/src/core/utils/logger';
-import { TypeLayerData, TypeFeatureInfoEntry } from 'geoview-core/src/geo/utils/layer-set';
+import { TypeLayerData, TypeFeatureInfoEntry } from 'geoview-core/src/geo/layer/layer-sets/abstract-layer-set';
 import { findLayerDataAndConfigFromQueryResults, loadDatasources } from './geochart-parsing';
 import { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
 

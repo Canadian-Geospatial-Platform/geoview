@@ -27,7 +27,7 @@ export * from './layer/geometry/geometry';
 export * from './layer/layer-sets/all-feature-info-layer-set';
 export * from './layer/layer-sets/feature-info-layer-set';
 export * from './layer/layer-sets/hover-feature-info-layer-set';
-export * from './layer/layer-sets/layer-set';
+export * from './layer/layer-sets/abstract-layer-set';
 export * from './layer/layer-sets/legends-layer-set';
 export * from './layer/layer';
 export * from './map/map-schema-types';
