@@ -42,6 +42,7 @@ import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-cla
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { loadImage } from '@/geo/renderer/geoview-renderer';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
@@ -824,7 +825,7 @@ export class WMS extends AbstractGeoViewRaster {
         return styleLegend;
       }
 
-      const styleImage = await api.maps[this.mapId].geoviewRenderer.loadImage(styleLegendImage as string);
+      const styleImage = await loadImage(styleLegendImage as string);
       if (styleImage) {
         const drawingCanvas = document.createElement('canvas');
         drawingCanvas.width = styleImage.width;
@@ -882,7 +883,7 @@ export class WMS extends AbstractGeoViewRaster {
       }
 
       if (legendImage) {
-        const image = await api.maps[this.mapId].geoviewRenderer.loadImage(legendImage as string);
+        const image = await loadImage(legendImage as string);
         if (image) {
           const drawingCanvas = document.createElement('canvas');
           drawingCanvas.width = image.width;

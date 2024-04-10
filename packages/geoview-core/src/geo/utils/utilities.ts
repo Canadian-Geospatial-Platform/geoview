@@ -12,8 +12,11 @@ import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { xmlToJson } from '@/core/utils/utilities';
 
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { VECTOR_LAYER } from '@/core/utils/constant';
+import { getLegendStyles } from '@/geo/renderer/geoview-renderer';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { TypeStyleConfig } from '@/geo/map/map-schema-types';
 
 /**
  * Interface used for css style declarations
@@ -198,6 +201,21 @@ export function getDefaultDrawingStyle(strokeColor?: Color | string, strokeWidth
   });
 }
 // #endregion GEOMETRY
+
+/** ***************************************************************************************************************************
+ * This method gets the legend styles used by the the layer as specified by the style configuration.
+ *
+ * @param {AbstractBaseLayerEntryConfig & {style: TypeStyleConfig;}} layerConfig - Layer configuration.
+ *
+ * @returns {Promise<TypeVectorLayerStyles>} A promise that the layer styles are processed.
+ */
+export function getLegendStylesFromConfig(
+  layerConfig: AbstractBaseLayerEntryConfig & {
+    style: TypeStyleConfig;
+  }
+): Promise<TypeVectorLayerStyles> {
+  return getLegendStyles(layerConfig);
+}
 
 /**
  * Gets computed translate values

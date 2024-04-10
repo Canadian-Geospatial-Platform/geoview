@@ -206,8 +206,7 @@ const createTableOfFilter = (mapId) => {
     Object.keys(cgpv.api.maps[mapId].layer.registeredLayers).forEach((layerPath) => {
       if (layerPath.startsWith(geoviewLayerId)) {
         const layerConfig = cgpv.api.maps[mapId].layer.registeredLayers[layerPath];
-        const { geoviewRenderer } = cgpv.api.maps[mapId];
-        geoviewRenderer.getLegendStyles(layerConfig).then((legendStyle) => {
+        cgpv.api.utilities.geo.getLegendStylesFromConfig(layerConfig).then((legendStyle) => {
           mapButtonsDiv = document.createElement('td');
           // mapButtonsDiv.style.width = '16.66%';
           mapButtonsDiv.border = '1px solid black';

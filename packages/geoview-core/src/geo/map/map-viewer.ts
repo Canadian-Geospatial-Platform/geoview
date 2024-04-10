@@ -27,7 +27,6 @@ import { AppBarApi } from '@/core/components/app-bar/app-bar-api';
 import { NavBarApi } from '@/core/components/nav-bar/nav-bar-api';
 import { FooterBarApi } from '@/core/components/footer-bar/footer-bar-api';
 
-import { GeoviewRenderer } from '@/geo/renderer/geoview-renderer';
 import { Select } from '@/geo/interaction/select';
 import { Draw } from '@/geo/interaction/draw';
 import { Extent as ExtentInteraction } from '@/geo/interaction/extent';
@@ -115,9 +114,6 @@ export class MapViewer {
   // modals creation
   modal: ModalApi;
 
-  // GeoView renderer
-  geoviewRenderer: GeoviewRenderer;
-
   // i18n instance
   #i18nInstance: i18n;
 
@@ -196,7 +192,6 @@ export class MapViewer {
    * - i18n
    * - AppBar, NavBar, FooterBar
    * - modalApi
-   * - geoviewRenderer
    * - basemap
    * @param {TypeMapFeaturesConfig} mapFeaturesConfig map properties
    * @param {i18n} i18instance language instance
@@ -213,8 +208,6 @@ export class MapViewer {
     this.notifications = new Notifications(this.mapId);
 
     this.modal = new ModalApi();
-
-    this.geoviewRenderer = new GeoviewRenderer(this.mapId);
 
     // create basemap and pass in the map id to be able to access the map instance
     this.basemap = new Basemap(MapEventProcessor.getBasemapOptions(this.mapId), this.mapId);
