@@ -24,7 +24,7 @@ import {
   MRT_ShowHideColumnsButton as MRTShowHideColumnsButton,
   MRT_ToggleFiltersButton as MRTToggleFiltersButton,
   MRT_ToggleFullScreenButton as MRTFullScreenToggleButton,
-  MRT_ToggleGlobalFilterButton as MRTToggleGlobalFilterButton,
+  MRT_GlobalFilterTextField as MRTGlobalFilterTextField,
   type MRT_SortingState as MRTSortingState,
   type MRT_RowVirtualizer as MRTRowVirtualizer,
   type MRT_ColumnFiltersState as MRTColumnFiltersState,
@@ -330,7 +330,14 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
           ],
         }),
         ...([t('dataTable.icon'), t('dataTable.zoom'), t('dataTable.detail')].includes(value.alias)
-          ? { size: 80, enableColumnFilter: false, enableColumnActions: false, enableSorting: false, enableResizing: false }
+          ? {
+              size: 80,
+              enableColumnFilter: false,
+              enableColumnActions: false,
+              enableSorting: false,
+              enableResizing: false,
+              enableGlobalFilter: false,
+            }
           : {}),
       });
     });
@@ -412,21 +419,26 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
     onGlobalFilterChange: setGlobalFilter,
     enableBottomToolbar: false,
     positionToolbarAlertBanner: 'none', // hide existing row count
-    renderTopToolbarCustomActions: () => {
-      // show rowSelection/Filter message on top-left corner of the table
-      return <Box sx={sxClasses.selectedRows}>{datatableSettings[layerPath].toolbarRowSelectedMessageRecord}</Box>;
-    },
-    renderToolbarInternalActions: ({ table }) => (
-      <Box>
-        <MRTToggleGlobalFilterButton className="style1" table={table} />
-        <MRTToggleFiltersButton className="style1" table={table} />
-        <FilterMap layerPath={layerPath} />
-        <MRTShowHideColumnsButton className="style1" table={table} />
-        <MRTToggleDensePaddingButton className="style1" table={table} />
-        <MRTFullScreenToggleButton className="style1" table={table} />
-        <ExportButton rows={rows} columns={columns}>
-          <JSONExportButton features={data.features as TypeFeatureInfoEntry[]} layerPath={layerPath} />
-        </ExportButton>
+    renderTopToolbar: ({ table }) => (
+      <Box display="flex" justifyContent="space-between" p={4}>
+        <Box>
+          <Box sx={sxClasses.selectedRows}>{datatableSettings[layerPath].toolbarRowSelectedMessageRecord}</Box>
+        </Box>
+        <Box>
+          <Box>
+            <MRTToggleFiltersButton className="style1" table={table} />
+            <FilterMap layerPath={layerPath} />
+            <MRTShowHideColumnsButton className="style1" table={table} />
+            <MRTToggleDensePaddingButton className="style1" table={table} />
+            <MRTFullScreenToggleButton className="style1" table={table} />
+            <ExportButton rows={rows} columns={columns}>
+              <JSONExportButton features={data.features as TypeFeatureInfoEntry[]} layerPath={layerPath} />
+            </ExportButton>
+          </Box>
+          <Box sx={{ marginLeft: 'auto', maxWidth: '15rem', marginRight: '1rem' }}>
+            <MRTGlobalFilterTextField className="style1" table={table} />
+          </Box>
+        </Box>
       </Box>
     ),
     enableFilterMatchHighlighting: true,
