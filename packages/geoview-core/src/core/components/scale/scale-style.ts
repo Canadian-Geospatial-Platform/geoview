@@ -13,6 +13,10 @@ export const getSxClasses = (theme: Theme) => ({
       backgroundColor: 'transparent',
       color: theme.palette.geoViewColor.white,
     },
+    '&.interaction-static': {
+      padding: '5px',
+      backdropFilter: 'blur(5px)',
+    },
   },
   scaleExpandedContainer: {
     display: 'flex',
@@ -39,6 +43,12 @@ export const getSxClasses = (theme: Theme) => ({
     borderLeft: 'none',
     borderRight: 'none',
     textTransform: 'lowercase',
+
+    '&.interaction-static': {
+      fontSize: theme.palette.geoViewFontSize.md,
+      fontWeight: 'bold',
+      borderBottom: '2px solid',
+    },
   },
   scaleCheckmark: {
     paddingRight: 5,

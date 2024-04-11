@@ -5,6 +5,7 @@ import { Typography, Box, Link, Theme, SvgIcon, ClickAwayListener, Paper } from 
 import { GITHUB_REPO, GEO_URL_TEXT } from '@/core/utils/constant';
 import { GeoCaIcon, IconButton, Popper } from '@/ui';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 // eslint-disable-next-line no-underscore-dangle
 declare const __VERSION__: TypeAppVersion;
@@ -27,6 +28,7 @@ export default function Version(): JSX.Element {
   const { t } = useTranslation<string>();
 
   const mapId = useGeoViewMapId();
+  const interaction = useMapInteraction();
   const mapElem = document.getElementById(`shell-${mapId}`);
 
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -76,7 +78,7 @@ export default function Version(): JSX.Element {
           tooltip="appbar.version"
           tooltipPlacement="bottom-end"
           onClick={handleClick}
-          className={`style3 ${open ? 'active' : ''}`}
+          className={`${interaction === 'dynamic' ? 'style3' : 'style4'} ${open ? 'active' : ''}`}
         >
           <SvgIcon viewBox="-4 -2 38 36">
             <GeoCaIcon />

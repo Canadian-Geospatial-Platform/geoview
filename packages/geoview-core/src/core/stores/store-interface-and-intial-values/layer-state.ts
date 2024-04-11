@@ -141,7 +141,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
               item.isVisible = !item.isVisible; // eslint-disable-line no-param-reassign
 
               if (item.isVisible && MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(get().mapId, layerPath)) {
-                MapEventProcessor.setOrToggleMapVisibility(get().mapId, layerPath, true);
+                MapEventProcessor.setOrToggleMapLayerVisibility(get().mapId, layerPath, true);
               }
 
               // assign value to registered layer. This is use by applyFilter function to set visibility
@@ -172,7 +172,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         });
       },
       setAllItemsVisibility: (layerPath: string, visibility: boolean) => {
-        MapEventProcessor.setOrToggleMapVisibility(get().mapId, layerPath, true);
+        MapEventProcessor.setOrToggleMapLayerVisibility(get().mapId, layerPath, true);
         const curLayers = get().layerState.legendLayers;
 
         const registeredLayer = api.maps[get().mapId].layer.registeredLayers[layerPath] as VectorLayerEntryConfig;

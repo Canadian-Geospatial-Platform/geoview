@@ -7,7 +7,9 @@
     "name": "Name",
     "open": "Open",
     "remove": "Remove",
-    "view": "View"
+    "view": "View",
+    "openFullscreen": "Open in fullscreen",
+    "closeFullscreen": "Close fullscreen"
   },
   "mapnav": {
     "arianavbar": "vertical button group for map navigation",
@@ -34,7 +36,8 @@
       "south": "S"
     },
     "overviewmap": {
-      "toggle": "Toggle minimap"
+      "toggle": "Toggle minimap",
+      "error": "Error loading overview map"
     },
     "attribution": {
       "defaultnrcan": "© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources",

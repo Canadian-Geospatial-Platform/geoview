@@ -40,14 +40,21 @@ export function MapInfo(): JSX.Element {
   const interaction = useMapInteraction();
 
   return (
-    <Box id={`${mapId}-mapInfo`} sx={sxClasses.mapInfoContainer} ref={mapInfoRef as MutableRefObject<HTMLDivElement>}>
-      <MapInfoExpandButton />
+    <Box
+      id={`${mapId}-mapInfo`}
+      className={`interaction-${interaction}`}
+      sx={sxClasses.mapInfoContainer}
+      ref={mapInfoRef as MutableRefObject<HTMLDivElement>}
+    >
+      {interaction === 'dynamic' && <MapInfoExpandButton />}
       <Grid container justifyContent="space-between">
-        <Grid item md={1}>
-          <Attribution />
-        </Grid>
+        {interaction === 'dynamic' && (
+          <Grid item md={1}>
+            <Attribution />
+          </Grid>
+        )}
 
-        <Grid container item md={11} spacing={2}>
+        <Grid container item md={interaction === 'dynamic' ? 11 : 12} spacing={2}>
           <Grid
             container
             justifyContent="flex-end"
@@ -57,7 +64,7 @@ export function MapInfo(): JSX.Element {
               },
             }}
           >
-            <Grid item md={10}>
+            <Grid item md={interaction === 'dynamic' ? 10 : 12}>
               <Box id="mouseAndScaleControls" sx={sxClasses.mouseScaleControlsContainer}>
                 {interaction === 'dynamic' && <MousePosition />}
                 <Scale />

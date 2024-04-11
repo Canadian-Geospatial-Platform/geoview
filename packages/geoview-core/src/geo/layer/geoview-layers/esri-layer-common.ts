@@ -26,6 +26,7 @@ import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
 import { EsriFeature, geoviewEntryIsEsriFeature } from './vector/esri-feature';
 import { EsriBaseRenderer, getStyleFromEsriRenderer } from '@/geo/renderer/esri-renderer';
 import { EsriImage } from './raster/esri-image';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 /** ***************************************************************************************************************************
  * This method reads the service metadata from the metadataAccessPath.
@@ -35,7 +36,7 @@ import { EsriImage } from './raster/esri-image';
  * @returns {Promise<void>} A promise that the execution is completed.
  */
 export async function commonfetchServiceMetadata(this: EsriDynamic | EsriFeature): Promise<void> {
-  const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+  const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
   if (metadataUrl) {
     try {
       const metadataString = await getXMLHttpRequest(`${metadataUrl}?f=json`);
@@ -214,7 +215,7 @@ export function commonProcessTemporalDimension(
   singleHandle?: boolean
 ) {
   if (esriTimeDimension !== undefined) {
-    layer.layerTemporalDimension[layerConfig.layerPath] = api.dateUtilities.createDimensionFromESRI(
+    layer.layerTemporalDimension[layerConfig.layerPath] = api.utilities.date.createDimensionFromESRI(
       Cast<TimeDimensionESRI>(esriTimeDimension),
       singleHandle
     );
@@ -315,7 +316,7 @@ export function commonProcessInitialSettings(
   // GV if (layerConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerConfig.initialSettings.minZoom = minScale;
   // GV if (layerConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerConfig.initialSettings.maxZoom = maxScale;
   if (layerConfig.initialSettings?.extent)
-    layerConfig.initialSettings.extent = api.projection.transformExtent(
+    layerConfig.initialSettings.extent = api.utilities.projection.transformExtent(
       layerConfig.initialSettings.extent,
       'EPSG:4326',
       `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
@@ -349,7 +350,7 @@ export async function commonProcessLayerMetadata(
   if (layerEntryIsGroupLayer(layerConfig) && !layerConfig.isMetadataLayerGroup) return layerConfig;
   const { layerPath } = layerConfig;
 
-  let queryUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+  let queryUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
   if (queryUrl) {
     if (layerConfig.geoviewLayerConfig.geoviewLayerType !== CONST_LAYER_TYPES.ESRI_IMAGE)
       queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;

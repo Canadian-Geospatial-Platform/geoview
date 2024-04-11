@@ -4,7 +4,7 @@ import * as translate from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import Ajv from 'ajv';
 
-import { whenThisThen, showError } from '@/core/utils/utilities';
+import { whenThisThen } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
@@ -164,7 +164,7 @@ export class Plugin {
 
               // Log
               logger.logError(errorMessage);
-              showError(mapId, errorMessage);
+              api.maps[mapId].notifications.showError(errorMessage);
             }
           }
         }

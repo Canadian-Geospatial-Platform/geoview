@@ -1,18 +1,18 @@
 import { useTheme } from '@mui/material/styles';
 import { TypeWindow } from 'geoview-core/src/core/types/global-types';
-import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { ChartType, SchemaValidator } from 'geochart';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
 import { TypeLayerData } from 'geoview-core/src/geo/utils/layer-set';
 import { Typography } from 'geoview-core/src/ui/typography/typography';
 import { Box, Paper } from 'geoview-core/src/ui';
+import { useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
 import {
-  useMapVisibleLayers,
   useGeochartConfigs,
   useGeochartStoreActions,
-  useGeochartStoreLayerDataArrayBatch,
-  useGeochartStoreSelectedLayerPath,
-} from 'geoview-core/src/core/stores';
+  useGeochartLayerDataArrayBatch,
+  useGeochartSelectedLayerPath,
+} from 'geoview-core/src/core/stores/store-interface-and-intial-values/geochart-state';
+import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
 import { GeoChart } from './geochart';
@@ -33,11 +33,11 @@ interface GeoChartPanelProps {
  */
 export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   // Log
-  logger.logTraceRender('geochart/geochart-panel');
+  logger.logTraceRender('geoview-geochart/geochart-panel');
 
   const { cgpv } = window as TypeWindow;
   const { mapId, provideCallbackRedraw } = props;
-  const { react } = cgpv;
+  const { api, react } = cgpv;
   const { useState, useCallback, useMemo, useEffect, useRef } = react;
 
   const theme = useTheme();
@@ -46,9 +46,10 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   // Get states and actions from store
   const configObj = useGeochartConfigs();
   const visibleLayers = useMapVisibleLayers() as string[];
-  const storeArrayOfLayerData = useGeochartStoreLayerDataArrayBatch() as TypeLayerData[];
-  const selectedLayerPath = useGeochartStoreSelectedLayerPath() as string;
+  const storeArrayOfLayerData = useGeochartLayerDataArrayBatch() as TypeLayerData[];
+  const selectedLayerPath = useGeochartSelectedLayerPath() as string;
   const { setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass } = useGeochartStoreActions();
+  const displayLanguage = useAppDisplayLanguage();
 
   // Create the validator shared for all the charts in the footer
   const [schemaValidator] = useState<SchemaValidator>(new SchemaValidator());
@@ -106,8 +107,11 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
       logger.logTraceUseCallback('GEOCHART-PANEL - getNumFeaturesLabel');
 
       const numOfFeatures = layer.features?.length ?? 0;
-      return `${numOfFeatures} ${getLocalizedMessage(mapId, 'geochart.panel.chart')}${numOfFeatures > 1 ? 's' : ''}`;
+      return `${numOfFeatures} ${api.utilities.core.getLocalizedMessage('geochart.panel.chart', displayLanguage)}${
+        numOfFeatures > 1 ? 's' : ''
+      }`;
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [mapId]
   );
 
@@ -250,11 +254,10 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
           onIsEnlargeClicked={handleIsEnlargeClicked}
         >
           {selectedLayerPath && (
-            <Box sx={{ height: '600px' }}>
+            <Box>
               {Object.entries(configObj).map(([layerPath, layerChartConfig], index) => {
-                const sx: React.CSSProperties = { position: 'absolute', top: '0px' };
                 if (layerPath === selectedLayerPath) {
-                  return renderChart(layerChartConfig as GeoViewGeoChartConfig<ChartType>, sx, index.toString());
+                  return renderChart(layerChartConfig as GeoViewGeoChartConfig<ChartType>, {}, index.toString());
                 }
                 // eslint-disable-next-line react/jsx-no-useless-fragment
                 return <></>;
@@ -264,10 +267,10 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
           {!selectedLayerPath && (
             <Paper sx={{ padding: '2rem' }}>
               <Typography variant="h3" gutterBottom sx={sxClasses.geochartInstructionsTitle}>
-                {getLocalizedMessage(mapId, 'geochart.panel.clickMap')}
+                {api.utilities.core.getLocalizedMessage('geochart.panel.clickMap', displayLanguage)}
               </Typography>
               <Typography component="p" sx={sxClasses.geochartInstructionsBody}>
-                {getLocalizedMessage(mapId, 'geochart.panel.clickMap')}
+                {api.utilities.core.getLocalizedMessage('geochart.panel.clickMap', displayLanguage)}
               </Typography>
             </Paper>
           )}
@@ -276,7 +279,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     }
 
     // Loading UI
-    return <Typography>{getLocalizedMessage(mapId, 'geochart.panel.loadingUI')}</Typography>;
+    return <Typography>{api.utilities.core.getLocalizedMessage('geochart.panel.loadingUI', displayLanguage)}</Typography>;
   };
 
   // Render

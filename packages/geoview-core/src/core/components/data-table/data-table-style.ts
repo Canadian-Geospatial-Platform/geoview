@@ -18,10 +18,6 @@ export const getSxClasses = (theme: Theme) => ({
   },
   tableCell: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
   dataTableWrapper: {
-    '& .MuiPaper-root': {
-      border: `2px solid ${theme.palette.geoViewColor.primary.main}`,
-      borderRadius: '6px',
-    },
     '& .MuiTableContainer-root': {
       borderRadius: '6px',
     },

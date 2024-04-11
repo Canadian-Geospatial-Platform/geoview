@@ -38,11 +38,7 @@ import {
 } from '@/ui';
 import { api } from '@/app';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
-import {
-  useDataTableStoreActions,
-  useDataTableStoreMapFilteredRecord,
-  useDataTableStoreToolbarRowSelectedMessageRecord,
-} from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useDataTableStoreActions, useDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
@@ -125,24 +121,21 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
   const sxtheme = useTheme();
   const sxClasses = getSxClasses(sxtheme);
 
+  // internal state
+  const [density, setDensity] = useState<MRTDensityState>('compact');
+  const rowVirtualizerInstanceRef = useRef<MRTRowVirtualizer>(null);
+  const [sorting, setSorting] = useState<MRTSortingState>([]);
+
   // get store actions and values
   const { zoomToExtent } = useMapStoreActions();
   const { applyMapFilters } = useDataTableStoreActions();
   const language = useAppDisplayLanguage();
+  const datatableSettings = useDataTableLayerSettings();
 
   const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
 
   const iconColumn = { alias: t('dataTable.icon'), dataType: 'string', id: t('dataTable.icon') };
   const zoomColumn = { alias: t('dataTable.zoom'), dataType: 'string', id: t('dataTable.zoom') };
-
-  const toolbarRowSelectedMessageRecord = useDataTableStoreToolbarRowSelectedMessageRecord();
-
-  const mapFilteredRecord = useDataTableStoreMapFilteredRecord();
-
-  const [density, setDensity] = useState<MRTDensityState>('compact');
-  const rowVirtualizerInstanceRef = useRef<MRTRowVirtualizer>(null);
-
-  const [sorting, setSorting] = useState<MRTSortingState>([]);
 
   // #region REACT CUSTOM HOOKS
   const { initLightBox, LightBoxComponent } = useLightBox();
@@ -262,8 +255,8 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
    */
   const getDateColumnTooltip = (date: Date) => {
     return (
-      <Tooltip title={api.dateUtilities.formatDate(date, 'YYYY-MM-DDThh:mm:ss')} arrow>
-        <Box>{api.dateUtilities.formatDate(date, 'YYYY-MM-DDThh:mm:ss')}</Box>
+      <Tooltip title={api.utilities.date.formatDate(date, 'YYYY-MM-DDThh:mm:ss')} arrow>
+        <Box>{api.utilities.date.formatDate(date, 'YYYY-MM-DDThh:mm:ss')}</Box>
       </Tooltip>
     );
   };
@@ -400,7 +393,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
     positionToolbarAlertBanner: 'none', // hide existing row count
     renderTopToolbarCustomActions: () => {
       // show rowSelection/Filter message on top-left corner of the table
-      return <Box sx={sxClasses.selectedRows}>{toolbarRowSelectedMessageRecord[layerPath]}</Box>;
+      return <Box sx={sxClasses.selectedRows}>{datatableSettings[layerPath].toolbarRowSelectedMessageRecord}</Box>;
     },
     renderToolbarInternalActions: ({ table }) => (
       <Box>
@@ -419,7 +412,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
     enableColumnVirtualization: true,
     enablePagination: false,
     enableRowVirtualization: true,
-    muiTableContainerProps: { sx: { maxHeight: `${tableHeight - 60}px` } },
+    muiTableContainerProps: { sx: { maxHeight: `${tableHeight - 75}px` } },
     rowVirtualizerInstanceRef,
     rowVirtualizerOptions: { overscan: 5 },
     columnVirtualizerOptions: { overscan: 2 },
@@ -494,7 +487,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
       if (typeof filterValue === 'object' && filterValue) {
         const dateOpr = tableState?.columnFilterFns[filterId] || 'equals';
         const dateFilter = DATE_FILTER[dateOpr] as string;
-        const date = api.dateUtilities.applyInputDateFormat(`${(filterValue as Date).toISOString().slice(0, -5)}Z`);
+        const date = api.utilities.date.applyInputDateFormat(`${(filterValue as Date).toISOString().slice(0, -5)}Z`);
         const formattedDate = date.slice(0, -1);
         return `${filterId} ${dateFilter.replace('value', formattedDate)}`;
       }
@@ -520,14 +513,18 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
   }, 1000);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedColumnFilters = useCallback((filters: MRTColumnFiltersState) => filterMap(filters), [mapFilteredRecord[layerPath]]);
+  const debouncedColumnFilters = useCallback(
+    (filters: MRTColumnFiltersState) => filterMap(filters),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [datatableSettings[layerPath].mapFilteredRecord]
+  );
 
   // update map when column filters change
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('DATA-TABLE - columnFilters', columnFilters);
 
-    if (columnFilters && mapFilteredRecord[layerPath]) {
+    if (columnFilters && datatableSettings[layerPath].mapFilteredRecord) {
       debouncedColumnFilters(columnFilters);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -536,11 +533,11 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
   // Update map when filter map switch is toggled.
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('DATA-TABLE - mapFilteredRecord', mapFilteredRecord[layerPath]);
+    logger.logTraceUseEffect('DATA-TABLE - mapFilteredRecord', datatableSettings[layerPath].mapFilteredRecord);
 
     filterMap(columnFilters);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapFilteredRecord[layerPath]]);
+  }, [datatableSettings[layerPath].mapFilteredRecord]);
 
   // set toolbar custom action message in store.
   useToolbarActionMessage({ data, columnFilters, layerPath, tableInstance: useTable });

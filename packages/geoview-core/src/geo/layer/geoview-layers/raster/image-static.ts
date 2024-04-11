@@ -14,11 +14,13 @@ import {
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
-import { getLocalizedValue, getMinOrMaxExtents } from '@/core/utils/utilities';
+import { getLocalizedValue } from '@/core/utils/utilities';
+import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.IMAGE_STATIC;
@@ -116,7 +118,10 @@ export class ImageStatic extends AbstractGeoViewRaster {
           reader.readAsDataURL(blob);
         });
 
-      let legendUrl: string | undefined = getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId);
+      let legendUrl: string | undefined = getLocalizedValue(
+        layerConfig.source.dataAccessPath,
+        AppEventProcessor.getDisplayLanguage(this.mapId)
+      );
 
       if (legendUrl) {
         legendUrl = legendUrl.toLowerCase().startsWith('http:') ? `https${legendUrl.slice(4)}` : legendUrl;
@@ -248,7 +253,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
 
     if (!layerConfig?.source?.extent) throw new Error('Parameter extent is not defined in source element of layerConfig.');
     const sourceOptions: SourceOptions = {
-      url: getLocalizedValue(layerConfig.source.dataAccessPath, this.mapId) || '',
+      url: getLocalizedValue(layerConfig.source.dataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId)) || '',
       imageExtent: layerConfig.source.extent,
     };
 
@@ -300,7 +305,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
     if (layerBounds) {
       let transformedBounds = layerBounds;
       if (this.metadata?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.mapId).currentProjection) {
-        transformedBounds = api.projection.transformExtent(
+        transformedBounds = api.utilities.projection.transformExtent(
           layerBounds,
           `EPSG:${projection}`,
           `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`

@@ -7,7 +7,9 @@
     "exit": "Sortir",
     "open": "Ouvrir",
     "remove": "Retirer",
-    "view": "Vue"
+    "view": "Vue",
+    "openFullscreen": "Ouvrir en plein écran",
+    "closeFullscreen": "Fermer le plein écran"
   },
   "mapnav": {
     "arianavbar": "groupe de buttons vertical pour navigation sur la carte",
@@ -34,7 +36,8 @@
       "south": "S"
     },
     "overviewmap": {
-      "toggle": "Basculer la mini-carte"
+      "toggle": "Basculer la carte d'aperçu",
+      "error": "Erreur lors du chargement de la carte d'aperçu"
     },
     "attribution": {
       "defaultnrcan": "© Sa Majesté le Roi du Chef du Canada, représentée par le ministre des Ressources naturelle",

@@ -6,7 +6,7 @@ import { Geometry } from 'ol/geom';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
-import { GeoUtilities } from '@/geo/utils/utilities';
+import { convertTypeFeatureStyleToOpenLayersStyle } from '@/geo/utils/utilities';
 
 import { Interaction, InteractionOptions } from './interaction';
 
@@ -20,21 +20,21 @@ export type SelectOptions = InteractionOptions & {
 };
 
 /**
- * Class used for selecting features on a map
- *
- * @exports
+ * Class used for selecting features on a map.
  * @class Select
+ * @extends {Interaction}
+ * @exports
  */
 export class Select extends Interaction {
-  // The embedded Open Layers Select component
+  // The embedded OpenLayers Select component
   #ol_select: OLSelect;
 
-  // Keep all callback delegates references
+  /** Callback handlers for the selectchanged event. */
   #onSelectChangedHandlers: SelectChangedDelegate[] = [];
 
   /**
-   * Initialize Select component
-   * @param {SelectOptions} options object to configure the initialization of the Select interaction
+   * Initializes a Select component.
+   * @param {SelectOptions} options - Object to configure the initialization of the Select interaction.
    */
   constructor(options: SelectOptions) {
     super(options);
@@ -43,67 +43,68 @@ export class Select extends Interaction {
     // TODO: Enhancements - Add support for more selection options
     const olOptions: OLSelectOptions = {
       features: options.features,
-      style: new GeoUtilities().convertTypeFeatureStyleToOpenLayersStyle(options.style),
+      style: convertTypeFeatureStyleToOpenLayersStyle(options.style),
       hitTolerance: options.hitTolerance || 0,
     };
 
-    // Activate the OpenLayers Select module
+    // Instantiate the OpenLayers Select interaction
     this.#ol_select = new OLSelect(olOptions);
 
-    // Wire handler when drawing is changed and immediately re-emit
-    this.#ol_select.on('select', this.emitSelectChanged);
+    // Register a handler when select is changed and immediately re-emit
+    this.#ol_select.on('select', this.#emitSelectChanged.bind(this));
   }
 
   /**
-   * Starts the interaction on the map
+   * Starts the interaction on the map.
    */
-  public startInteraction() {
-    // Redirect
+  startInteraction(): void {
+    // Redirect to super method to start interaction
     super.startInteraction(this.#ol_select);
   }
 
   /**
-   * Stops the interaction on the map
+   * Stops the interaction on the map.
    */
-  public stopInteraction() {
-    // Redirect
+  stopInteraction(): void {
+    // Redirect to super method to stop interaction
     super.stopInteraction(this.#ol_select);
   }
 
   /**
-   * Gets the selected features
-   * @returns {Collection<Feature<Geometry>>} The selected features
+   * Gets the selected features.
+   * @returns {Collection<Feature<Geometry>>} The selected features.
    */
   public getFeatures(): Collection<Feature<Geometry>> {
     return this.#ol_select.getFeatures();
   }
 
   /**
-   * Emits an event to all handlers.
-   * @param {OLSelectEvent} event The event to emit
+   * Emits an event the all registered handlers.
+   * @param {OLSelectEvent} event - The event to emit.
+   * @private
    */
-  emitSelectChanged = (event: OLSelectEvent) => {
-    // Emit the event for all handlers
+  #emitSelectChanged(event: OLSelectEvent): void {
+    // Emit the select changed event
     EventHelper.emitEvent(this, this.#onSelectChangedHandlers, event);
-  };
+  }
 
   /**
-   * Wires an event handler.
-   * @param {SelectChangedDelegate} callback The callback to be executed whenever the event is emitted
+   * Registers a select changed event handler.
+   * @param {SelectChangedDelegate} callback - The callback to be executed whenever the event is emitted.
    */
-  onSelectChanged = (callback: SelectChangedDelegate): void => {
-    // Wire the event handler
+  onSelectChanged(callback: SelectChangedDelegate): void {
+    // Register the select changed event callback
     EventHelper.onEvent(this.#onSelectChangedHandlers, callback);
-  };
+  }
 
   /**
-   * Unwires an event handler.
-   * @param {SelectChangedDelegate} callback The callback to stop being called whenever the event is emitted
+   * Unregisters a select changed event handler.
+   * @param {SelectChangedDelegate} callback - The callback to stop being called whenever the event is emitted.
    */
-  offSelectChanged = (callback: SelectChangedDelegate): void => {
-    // Unwire the event handler
+  offSelectChanged(callback: SelectChangedDelegate): void {
+    // Unregister the select changed event callback
     EventHelper.offEvent(this.#onSelectChangedHandlers, callback);
-  };
+  }
 }
 
 /**

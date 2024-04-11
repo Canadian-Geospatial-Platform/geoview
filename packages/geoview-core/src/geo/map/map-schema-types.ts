@@ -6,7 +6,6 @@ import { Coordinate } from 'ol/coordinate';
 
 import { TypeBasemapOptions } from '@/geo/layer/basemap/basemap-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeMapMouseInfo } from '@/api/events/payloads';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
@@ -709,6 +708,14 @@ export const VALID_LOCALIZED_LANGUAGES: TypeListOfLocalizedLanguages = ['en', 'f
 export type TypeValidVersions = '1.0';
 /** Constante mainly use for version validation. */
 export const VALID_VERSIONS: TypeValidVersions[] = ['1.0'];
+
+/** Type used to define the map mouse information  */
+export type TypeMapMouseInfo = {
+  lnglat: Coordinate;
+  pixel: Coordinate;
+  projected: Coordinate;
+  dragging: boolean;
+};
 
 /** ******************************************************************************************************************************
  *  Definition of map state to attach to the map object for reference.

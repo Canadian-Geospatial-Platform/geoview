@@ -1,8 +1,5 @@
-import debounce from 'lodash/debounce';
-
-import { Map as OLMap, MapEvent, MapBrowserEvent, View } from 'ol';
+import { Map as OLMap } from 'ol';
 import { Coordinate } from 'ol/coordinate'; // only for typing
-import { ObjectEvent } from 'ol/Object'; // only for typing
 import Overlay from 'ol/Overlay';
 import { Extent } from 'ol/extent'; // only for Typing
 import { FitOptions } from 'ol/View'; // only for typing
@@ -12,18 +9,730 @@ import { XYZ } from 'ol/source'; // only for typing
 import { useStore } from 'zustand';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { TypeFeatureInfoEntry, TypeGeometry } from '@/geo/utils/layer-set';
+import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { TypeMapMouseInfo } from '@/api/events/payloads';
-import { TypeInteraction, TypeHighlightColors, TypeValidMapProjectionCodes } from '@/geo/map/map-schema-types';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeInteraction, TypeHighlightColors, TypeValidMapProjectionCodes, TypeMapMouseInfo } from '@/geo/map/map-schema-types';
+
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { TypeBasemapOptions } from '@/geo/layer/basemap/basemap-types';
+import { TypeHoverFeatureInfo } from '@/geo/utils/hover-feature-info-layer-set';
 
-// #region INTERFACES
-interface TypeScaleInfo {
+// GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with MapEventProcessor vs MapState
+
+export interface IMapState {
+  attribution: string[];
+  basemapOptions: TypeBasemapOptions;
+  centerCoordinates: Coordinate;
+  clickCoordinates?: TypeMapMouseInfo;
+  clickMarker: TypeClickMarker | undefined;
+  currentProjection: TypeValidMapProjectionCodes;
+  fixNorth: boolean;
+  highlightColor?: TypeHighlightColors;
+  highlightedFeatures: TypeFeatureInfoEntry[];
+  hoverFeatureInfo: TypeHoverFeatureInfo | undefined | null;
+  interaction: TypeInteraction;
+  mapElement?: OLMap;
+  mapExtent: Extent | undefined;
+  mapLoaded: boolean;
+  northArrow: boolean;
+  northArrowElement: TypeNorthArrow;
+  orderedLayerInfo: TypeOrderedLayerInfo[];
+  overlayClickMarker?: Overlay;
+  overlayNorthMarker?: Overlay;
+  overviewMap: boolean;
+  overviewMapHideZoom: number;
+  pointerPosition?: TypeMapMouseInfo;
+  rotation: number;
+  scale: TypeScaleInfo;
+  size: [number, number];
+  visibleLayers: string[];
+  zoom: number;
+
+  setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
+
+  actions: {
+    createBaseMapFromOptions: () => void;
+    createEmptyBasemap: () => TileLayer<XYZ>;
+    getPixelFromCoordinate: (coord: Coordinate) => [number, number];
+    getIndexFromOrderedLayerInfo: (layerPath: string) => number;
+    getVisibilityFromOrderedLayerInfo: (layerPath: string) => boolean;
+    showClickMarker: (marker: TypeClickMarker) => void;
+    hideClickMarker: () => void;
+    highlightBBox: (extent: Extent, isLayerHighlight?: boolean) => void;
+    addHighlightedFeature: (feature: TypeFeatureInfoEntry) => void;
+    removeHighlightedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
+    reorderLayer: (layerPath: string, move: number) => void;
+    setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean) => void;
+    setMapKeyboardPanInteractions: (panDelta: number) => void;
+    setZoom: (zoom: number, duration?: number) => void;
+    setInteraction: (interaction: TypeInteraction) => void;
+    setRotation: (rotation: number) => void;
+    zoomToExtent: (extent: Extent, options?: FitOptions) => void;
+    zoomToInitialExtent: () => void;
+    zoomToGeoLocatorLocation: (coords: [number, number], bbox?: [number, number, number, number]) => void;
+    zoomToMyLocation: (position: GeolocationPosition) => void;
+    transformPoints: (coords: Coordinate[], outputProjection: number) => Coordinate[];
+    setClickCoordinates: (pointerPosition: TypeMapMouseInfo) => void;
+    setFixNorth: (ifFix: boolean) => void;
+    setOverlayClickMarkerRef: (htmlRef: HTMLElement) => void;
+    setOverlayNorthMarkerRef: (htmlRef: HTMLElement) => void;
+  };
+
+  setterActions: {
+    setMapChangeSize: (size: [number, number], scale: TypeScaleInfo) => void;
+    setMapElement: (mapElem: OLMap, zoom: number, scale: TypeScaleInfo) => void;
+    setMapLoaded: (mapLoaded: boolean) => void;
+    setAttribution: (attribution: string[]) => void;
+    setInteraction: (interaction: TypeInteraction) => void;
+    setZoom: (zoom: number) => void;
+    setRotation: (rotation: number) => void;
+    setOverlayClickMarker: (overlay: Overlay) => void;
+    setOverlayNorthMarker: (overlay: Overlay) => void;
+    setProjection: (projectionCode: TypeValidMapProjectionCodes) => void;
+    setMapMoveEnd: (
+      centerCoordinates: Coordinate,
+      pointerPosition: TypeMapMouseInfo,
+      degreeRotation: string,
+      isNorthVisible: boolean,
+      scale: TypeScaleInfo
+    ) => void;
+    setPointerPosition: (pointerPosition: TypeMapMouseInfo) => void;
+    setClickCoordinates: (clickCoordinates: TypeMapMouseInfo) => void;
+    setFixNorth: (ifFix: boolean) => void;
+    setHighlightedFeatures: (highlightedFeatures: TypeFeatureInfoEntry[]) => void;
+    setHighlightColor: (color: TypeHighlightColors) => void;
+    setVisibleLayers: (newOrder: string[]) => void;
+    setOrderedLayerInfo: (newOrderedLayerInfo: TypeOrderedLayerInfo[]) => void;
+    setHoverable: (layerPath: string, hoverable: boolean) => void;
+    setQueryable: (layerPath: string, queryable: boolean) => void;
+    setClickMarker: (coord: number[] | undefined) => void;
+    setHoverFeatureInfo: (hoverFeatureInfo: TypeHoverFeatureInfo) => void;
+  };
+}
+
+/**
+ * Initializes a Map State and provide functions which use the get/set Zustand mechanisms.
+ * @param {TypeSetStore} set - The setter callback to be used by this state
+ * @param {TypeGetStore} get - The getter callback to be used by this state
+ * @returns The initialized Map State
+ */
+export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapState {
+  const init = {
+    attribution: [],
+    basemapOptions: { basemapId: 'transport', shaded: true, labeled: true },
+    centerCoordinates: [0, 0] as Coordinate,
+    clickMarker: undefined,
+    currentProjection: 3857 as TypeValidMapProjectionCodes,
+    fixNorth: false,
+    highlightedFeatures: [],
+    hoverFeatureInfo: undefined,
+    interaction: 'static',
+    mapExtent: undefined,
+    mapLoaded: false,
+    northArrow: false,
+    northArrowElement: { degreeRotation: '180.0', isNorthVisible: true } as TypeNorthArrow,
+    orderedLayerInfo: [],
+    overviewMap: false,
+    overviewMapHideZoom: 0,
+    pointerPosition: undefined,
+    rotation: 0,
+    scale: { lineWidth: '', labelGraphic: '', labelNumeric: '' } as TypeScaleInfo,
+    size: [0, 0] as [number, number],
+    visibleLayers: [],
+    zoom: 0,
+
+    /**
+     * Initializes default stores section from config information when store receive configuration file
+     */
+    setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
+      set({
+        mapState: {
+          ...get().mapState,
+          basemapOptions: geoviewConfig.map.basemapOptions,
+          centerCoordinates: geoviewConfig.map.viewSettings.center as Coordinate,
+          currentProjection: geoviewConfig.map.viewSettings.projection,
+          highlightColor: geoviewConfig.map.highlightColor || 'black',
+          interaction: geoviewConfig.map.interaction || 'dynamic',
+          mapExtent: geoviewConfig.map.viewSettings.extent,
+          northArrow: geoviewConfig.components!.indexOf('north-arrow') > -1 || false,
+          overviewMap: geoviewConfig.components!.indexOf('overview-map') > -1 || false,
+          overviewMapHideZoom: geoviewConfig.overviewMap !== undefined ? geoviewConfig.overviewMap.hideOnZoom : 0,
+          rotation: geoviewConfig.map.viewSettings.rotation || 0,
+          zoom: geoviewConfig.map.viewSettings.zoom,
+        },
+      });
+    },
+
+    // #region ACTIONS
+    actions: {
+      /**
+       * Resets the base map.
+       */
+      createBaseMapFromOptions: (): void => {
+        // Redirect to processor
+        MapEventProcessor.resetBasemap(get().mapId);
+      },
+
+      /**
+       * Creates an empty base map.
+       * @returns {TileLayer<XYZ>} The empty base map layer.
+       */
+      createEmptyBasemap: (): TileLayer<XYZ> => {
+        // Redirect to processor and return the result
+        return MapEventProcessor.createEmptyBasemap(get().mapId);
+      },
+
+      /**
+       * Retrieves the pixel from a coordinate.
+       * @param {Coordinate} coord - The coordinate.
+       * @returns {[number, number]} - The pixel coordinates.
+       */
+      getPixelFromCoordinate: (coord: Coordinate): [number, number] => {
+        // Redirect to processor and return the result
+        return MapEventProcessor.getPixelFromCoordinate(get().mapId, coord);
+      },
+
+      /**
+       * Retrieves the index from ordered layer information.
+       * @param {string} layerPath - The path of the layer.
+       * @returns {number} The index of the layer.
+       */
+      getIndexFromOrderedLayerInfo: (layerPath: string): number => {
+        // Redirect to processor and return the result
+        return MapEventProcessor.getMapIndexFromOrderedLayerInfo(get().mapId, layerPath);
+      },
+
+      /**
+       * Retrieves the visibility from ordered layer information.
+       * @param {string} layerPath - The path of the layer.
+       * @returns {boolean} The visibility of the layer.
+       */
+      getVisibilityFromOrderedLayerInfo: (layerPath: string): boolean => {
+        // Redirect to processor and return the result
+        return MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(get().mapId, layerPath);
+      },
+
+      /**
+       * Shows a click marker.
+       * @param {TypeClickMarker} marker - The click marker to show.
+       */
+      showClickMarker: (marker: TypeClickMarker): void => {
+        // Redirect to processor
+        MapEventProcessor.clickMarkerIconShow(get().mapId, marker);
+      },
+
+      /**
+       * Hides the click marker.
+       */
+      hideClickMarker: (): void => {
+        // Redirect to processor
+        MapEventProcessor.clickMarkerIconHide(get().mapId);
+      },
+
+      /**
+       * Highlights a bounding box.
+       * @param {Extent} extent - The extent to highlight.
+       * @param {boolean} [isLayerHighlight] - Flag indicating if it's a layer highlight.
+       */
+      highlightBBox: (extent: Extent, isLayerHighlight?: boolean): void => {
+        // Redirect to processor
+        MapEventProcessor.highlightBBox(get().mapId, extent, isLayerHighlight);
+      },
+
+      /**
+       * Adds a highlighted feature.
+       * @param {TypeFeatureInfoEntry} feature The feature to highlight.
+       */
+      addHighlightedFeature: (feature: TypeFeatureInfoEntry): void => {
+        // Redirect to processor
+        MapEventProcessor.addHighlightedFeature(get().mapId, feature);
+      },
+
+      /**
+       * Removes a highlighted feature.
+       * @param {TypeFeatureInfoEntry | 'all'} feature - The feature to remove or 'all' to remove all.
+       */
+      removeHighlightedFeature: (feature: TypeFeatureInfoEntry | 'all'): void => {
+        // Redirect to processor
+        MapEventProcessor.removeHighlightedFeature(get().mapId, feature);
+      },
+
+      /**
+       * Reorders the layer.
+       * @param {string} layerPath - The path of the layer.
+       * @param {number} move - The move value.
+       */
+      reorderLayer: (layerPath: string, move: number): void => {
+        // Redirect to processor
+        MapEventProcessor.reorderLayer(get().mapId, layerPath, move);
+      },
+
+      /**
+       * Sets or toggles the visibility of a layer.
+       * @param {string} layerPath - The path of the layer.
+       * @param {boolean} [newValue] - The new value of visibility.
+       */
+      setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean): void => {
+        // Redirect to processor
+        MapEventProcessor.setOrToggleMapLayerVisibility(get().mapId, layerPath, newValue);
+      },
+
+      /**
+       * Sets the map keyboard pan interactions.
+       * @param {number} panDelta - The pan delta value.
+       */
+      setMapKeyboardPanInteractions: (panDelta: number): void => {
+        // Redirect to processor
+        MapEventProcessor.setMapKeyboardPanInteractions(get().mapId, panDelta);
+      },
+
+      /**
+       * Sets the zoom level.
+       * @param {number} zoom - The zoom level.
+       * @param {number} [duration] - The duration of zoom animation.
+       */
+      setZoom: (zoom: number, duration?: number): void => {
+        // Redirect to processor
+        MapEventProcessor.zoom(get().mapId, zoom, duration);
+      },
+
+      /**
+       * Sets the interaction.
+       * @param {TypeInteraction} interaction - The interaction type.
+       */
+      setInteraction: (interaction: TypeInteraction): void => {
+        // Redirect to processor
+        MapEventProcessor.setInteraction(get().mapId, interaction);
+      },
+
+      /**
+       * Sets the rotation.
+       * @param {number} rotation - The rotation angle.
+       */
+      setRotation: (rotation: number): void => {
+        // Redirect to processor
+        MapEventProcessor.rotate(get().mapId, rotation);
+      },
+
+      /**
+       * Zooms to the specified extent.
+       * @param {Extent} extent - The extent to zoom to.
+       * @param {FitOptions} [options] - The fit options.
+       * @returns {Promise<void>} A promise that resolves when the zoom operation completes.
+       */
+      zoomToExtent: (extent: Extent, options?: FitOptions): Promise<void> => {
+        // Redirect to processor and return the result
+        return MapEventProcessor.zoomToExtent(get().mapId, extent, options);
+      },
+
+      /**
+       * Zooms to the initial extent.
+       * @returns {Promise<void>} A promise that resolves when the zoom operation completes.
+       */
+      zoomToInitialExtent: (): Promise<void> => {
+        // Redirect to processor and return the result
+        return MapEventProcessor.zoomToInitialExtent(get().mapId);
+      },
+
+      /**
+       * Zooms to the specified geographic locator location.
+       * @param {Coordinate} coords - The coordinates to zoom to.
+       * @param {Extent} [bbox] - The bounding box.
+       * @returns {Promise<void>} A promise that resolves when the zoom operation completes.
+       */
+      zoomToGeoLocatorLocation: (coords: Coordinate, bbox?: Extent): Promise<void> => {
+        // Redirect to processor and return the result
+        return MapEventProcessor.zoomToGeoLocatorLocation(get().mapId, coords, bbox);
+      },
+
+      /**
+       * Zooms to the specified location.
+       * @param {GeolocationPosition} position - The geolocation position.
+       * @returns {Promise<void>} A promise that resolves when the zoom operation completes.
+       */
+      zoomToMyLocation: (position: GeolocationPosition): Promise<void> => {
+        // Redirect to processor and return the result
+        return MapEventProcessor.zoomToMyLocation(get().mapId, position);
+      },
+
+      /**
+       * Transforms points from one projection to another.
+       * @param {Coordinate[]} coords - The coordinates to transform.
+       * @param {number} outputProjection - The output projection code.
+       * @returns {Coordinate[]} The transformed coordinates.
+       */
+      transformPoints: (coords: Coordinate[], outputProjection: number): Coordinate[] => {
+        // Project the points and return the result
+        return api.utilities.projection.transformPoints(coords, `EPSG:${get().mapState.currentProjection}`, `EPSG:${outputProjection}`);
+      },
+
+      /**
+       * Sets the click coordinates.
+       * @param {TypeMapMouseInfo} pointerPosition - The pointer position.
+       */
+      setClickCoordinates: (pointerPosition: TypeMapMouseInfo): void => {
+        // Redirect to processor
+        MapEventProcessor.setClickCoordinates(get().mapId, pointerPosition);
+      },
+
+      /**
+       * Sets whether the map should fix to north.
+       * @param {boolean} ifFix - Flag indicating if map should fix to north.
+       */
+      setFixNorth: (ifFix: boolean): void => {
+        // Redirect to setter
+        get().mapState.setterActions.setFixNorth(ifFix);
+      },
+
+      /**
+       * Sets the click marker reference for overlay.
+       * @param {HTMLElement} htmlRef - The HTML element reference.
+       */
+      setOverlayClickMarkerRef: (htmlRef: HTMLElement): void => {
+        // Quick function to set the element on the overlay
+        const overlay = get().mapState.overlayClickMarker;
+        if (overlay !== undefined) overlay.setElement(htmlRef);
+      },
+
+      /**
+       * Sets the north marker reference for overlay.
+       * @param {HTMLElement} htmlRef - The HTML element reference.
+       */
+      setOverlayNorthMarkerRef: (htmlRef: HTMLElement): void => {
+        // Quick function to set the element on the overlay
+        const overlay = get().mapState.overlayNorthMarker;
+        if (overlay !== undefined) overlay.setElement(htmlRef);
+      },
+      // #endregion ACTIONS
+    },
+
+    setterActions: {
+      // #region SETTER ACTIONS
+      /**
+       * Sets the map size and scale.
+       * @param {[number, number]} size - The size of the map.
+       * @param {TypeScaleInfo} scale - The scale information.
+       */
+      setMapChangeSize: (size: [number, number], scale: TypeScaleInfo): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            size,
+            scale,
+          },
+        });
+      },
+
+      /**
+       * Sets the map element, zoom level, and scale.
+       * @param {OLMap} mapElement - The map element.
+       * @param {number} zoom - The zoom level.
+       * @param {TypeScaleInfo} scale - The scale information.
+       */
+      setMapElement: (mapElement: OLMap, zoom: number, scale: TypeScaleInfo): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            mapElement,
+            zoom,
+            scale,
+          },
+        });
+      },
+
+      /**
+       * Sets whether the map is loaded.
+       * @param {boolean} mapLoaded - Flag indicating if the map is loaded.
+       */
+      setMapLoaded: (mapLoaded: boolean): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            mapLoaded,
+          },
+        });
+      },
+
+      /**
+       * Sets the attribution of the map.
+       * @param {string[]} attribution - The attribution information.
+       */
+      setAttribution: (attribution: string[]): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            attribution,
+          },
+        });
+      },
+
+      /**
+       * Sets the interaction of the map.
+       * @param {TypeInteraction} interaction - The interaction type.
+       */
+      setInteraction: (interaction: TypeInteraction): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            interaction,
+          },
+        });
+      },
+
+      /**
+       * Sets the zoom level of the map.
+       * @param {number} zoom - The zoom level.
+       */
+      setZoom: (zoom: number): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            zoom,
+          },
+        });
+      },
+
+      /**
+       * Sets the rotation of the map.
+       * @param {number} rotation - The rotation angle.
+       */
+      setRotation: (rotation: number): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            rotation,
+          },
+        });
+      },
+
+      /**
+       * Sets the overlay click marker of the map.
+       * @param {Overlay} overlayClickMarker - The overlay click marker.
+       */
+      setOverlayClickMarker: (overlayClickMarker: Overlay): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            overlayClickMarker,
+          },
+        });
+      },
+
+      /**
+       * Sets the overlay north marker of the map.
+       * @param {Overlay} overlayNorthMarker - The overlay north marker.
+       */
+      setOverlayNorthMarker: (overlayNorthMarker: Overlay): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            overlayNorthMarker,
+          },
+        });
+      },
+
+      /**
+       * Sets the projection of the map.
+       * @param {TypeValidMapProjectionCodes} projectionCode - The projection code.
+       */
+      setProjection: (projectionCode: TypeValidMapProjectionCodes): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            currentProjection: projectionCode,
+          },
+        });
+      },
+
+      /**
+       * Sets map move end properties.
+       * @param {Coordinate} centerCoordinates - The center coordinates of the map.
+       * @param {TypeMapMouseInfo} pointerPosition - The pointer position information.
+       * @param {string} degreeRotation - The degree rotation.
+       * @param {boolean} isNorthVisible - Flag indicating if north is visible.
+       * @param {TypeScaleInfo} scale - The scale information.
+       */
+      setMapMoveEnd: (
+        centerCoordinates: Coordinate,
+        pointerPosition: TypeMapMouseInfo,
+        degreeRotation: string,
+        isNorthVisible: boolean,
+        scale: TypeScaleInfo
+      ): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            centerCoordinates,
+            northArrowElement: {
+              degreeRotation,
+              isNorthVisible,
+            },
+            scale,
+          },
+        });
+
+        // On map center coord change, hide click marker
+        get().mapState.setterActions.setClickMarker(undefined);
+
+        // If crosshair is active and user uses keyboard, update pointer position
+        // This will enable mouse position and hover tooltip
+        if (get().appState.isCrosshairsActive) {
+          get().mapState.setterActions.setPointerPosition(pointerPosition);
+        }
+      },
+
+      /**
+       * Sets the pointer position of the map.
+       * @param {TypeMapMouseInfo} pointerPosition - The pointer position.
+       */
+      setPointerPosition: (pointerPosition: TypeMapMouseInfo): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            pointerPosition,
+          },
+        });
+      },
+
+      /**
+       * Sets the click coordinates of the map.
+       * @param {TypeMapMouseInfo} clickCoordinates - The click coordinates.
+       */
+      setClickCoordinates: (clickCoordinates: TypeMapMouseInfo): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            clickCoordinates,
+          },
+        });
+      },
+
+      /**
+       * Sets whether the map is fixed to north.
+       * @param {boolean} fixNorth - Flag indicating if the map should be fixed to north.
+       */
+      setFixNorth: (fixNorth: boolean): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            fixNorth,
+          },
+        });
+      },
+
+      /**
+       * Sets the highlighted features of the map.
+       * @param {TypeFeatureInfoEntry[]} highlightedFeatures - The highlighted features.
+       */
+      setHighlightedFeatures: (highlightedFeatures: TypeFeatureInfoEntry[]): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            highlightedFeatures,
+          },
+        });
+      },
+
+      /**
+       * Sets the highlight color of the map.
+       * @param {TypeHighlightColors} highlightColor - The highlight color.
+       */
+      setHighlightColor: (highlightColor: TypeHighlightColors): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            highlightColor,
+          },
+        });
+      },
+
+      /**
+       * Sets the visible layers of the map.
+       * @param {string[]} visibleLayers - The visible layers.
+       */
+      setVisibleLayers: (visibleLayers: string[]): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            visibleLayers,
+          },
+        });
+      },
+
+      /**
+       * Sets the ordered layer information of the map.
+       * @param {TypeOrderedLayerInfo[]} orderedLayerInfo - The ordered layer information.
+       */
+      setOrderedLayerInfo: (orderedLayerInfo: TypeOrderedLayerInfo[]): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            orderedLayerInfo,
+          },
+        });
+      },
+
+      /**
+       * Sets whether a layer is hoverable.
+       * @param {string} layerPath - The path of the layer.
+       * @param {boolean} hoverable - Flag indicating if the layer should be hoverable.
+       */
+      setHoverable: (layerPath: string, hoverable: boolean): void => {
+        const curLayerInfo = get().mapState.orderedLayerInfo;
+        const layerInfo = curLayerInfo.find((info) => info.layerPath === layerPath);
+        if (layerInfo) {
+          layerInfo.hoverable = hoverable;
+
+          // Redirect
+          get().mapState.setterActions.setOrderedLayerInfo([...curLayerInfo]);
+        }
+      },
+
+      /**
+       * Sets whether a layer is queryable.
+       * @param {string} layerPath - The path of the layer.
+       * @param {boolean} queryable - Flag indicating if the layer should be queryable.
+       */
+      setQueryable: (layerPath: string, queryable: boolean): void => {
+        const curLayerInfo = get().mapState.orderedLayerInfo;
+        const layerInfo = curLayerInfo.find((info) => info.layerPath === layerPath);
+        if (layerInfo) {
+          layerInfo.queryable = queryable;
+          if (queryable) layerInfo.hoverable = queryable;
+
+          // Redirect
+          get().mapState.setterActions.setOrderedLayerInfo([...curLayerInfo]);
+        }
+      },
+
+      /**
+       * Sets the click marker of the map.
+       * @param {number[] | undefined} coord - The click marker coordinates.
+       */
+      setClickMarker: (coord: number[] | undefined): void => {
+        set({
+          mapState: { ...get().mapState, clickMarker: coord ? { lnglat: coord } : undefined },
+        });
+      },
+
+      setHoverFeatureInfo(hoverFeatureInfo: TypeHoverFeatureInfo) {
+        set({
+          mapState: {
+            ...get().mapState,
+            hoverFeatureInfo,
+          },
+        });
+      },
+      // #endregion SETTER ACTIONS
+    },
+  } as IMapState;
+
+  return init;
+}
+
+export interface TypeScaleInfo {
   lineWidth: string;
   labelGraphic: string;
   labelNumeric: string;
@@ -41,569 +750,6 @@ export interface TypeOrderedLayerInfo {
   visible: boolean;
 }
 
-export interface IMapState {
-  attribution: string[];
-  basemapOptions: TypeBasemapOptions;
-  centerCoordinates: Coordinate;
-  clickCoordinates?: TypeMapMouseInfo;
-  clickMarker: TypeClickMarker | undefined;
-  currentProjection: TypeValidMapProjectionCodes;
-  fixNorth: boolean;
-  highlightColor?: TypeHighlightColors;
-  highlightedFeatures: Array<TypeFeatureInfoEntry>;
-  interaction: TypeInteraction;
-  mapElement?: OLMap;
-  mapExtent: Extent | undefined;
-  mapLoaded: boolean;
-  northArrow: boolean;
-  northArrowElement: TypeNorthArrow;
-  orderedLayerInfo: Array<TypeOrderedLayerInfo>;
-  overlayClickMarker?: Overlay;
-  overlayNorthMarker?: Overlay;
-  overviewMap: boolean;
-  overviewMapHideZoom: number;
-  pointerPosition?: TypeMapMouseInfo;
-  rotation: number;
-  scale: TypeScaleInfo;
-  size: [number, number];
-  visibleLayers: string[];
-  zoom: number;
-
-  setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
-
-  events: {
-    onMapChangeSize: (event: ObjectEvent) => void;
-    onMapMoveEnd: (event: MapEvent) => void;
-    onMapPointerMove: (event: MapEvent) => void;
-    onMapRotation: (event: ObjectEvent) => void;
-    onMapSingleClick: (event: MapEvent) => void;
-    onMapZoomEnd: (event: ObjectEvent) => void;
-  };
-
-  actions: {
-    addHighlightedFeature: (feature: TypeFeatureInfoEntry) => void;
-    createBaseMapFromOptions: () => void;
-    createEmptyBasemap: () => TileLayer<XYZ>;
-    getIndexFromOrderedLayerInfo: (layerPath: string) => number;
-    getPixelFromCoordinate: (coord: Coordinate) => [number, number];
-    getVisibilityFromOrderedLayerInfo: (layerPath: string) => boolean;
-    hideClickMarker: () => void;
-    highlightBBox: (extent: Extent, isLayerHighlight?: boolean) => void;
-    removeHighlightedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
-    reorderLayer: (layerPath: string, move: number) => void;
-    setAttribution: (attribution: string[]) => void;
-    setClickCoordinates: () => void;
-    setFixNorth: (ifFix: boolean) => void;
-    setHighlightColor: (color: TypeHighlightColors) => void;
-    setHoverable: (layerPath: string, hoverable: boolean) => void;
-    setInteraction: (interaction: TypeInteraction) => void;
-    setMapElement: (mapElem: OLMap) => void;
-    setMapKeyboardPanInteractions: (panDelta: number) => void;
-    setOrderedLayerInfo: (newOrderedLayerInfo: Array<TypeOrderedLayerInfo>) => void;
-    setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean) => void;
-    setOverlayClickMarker: (overlay: Overlay) => void;
-    setOverlayClickMarkerRef: (htmlRef: HTMLElement) => void;
-    setOverlayNorthMarker: (overlay: Overlay) => void;
-    setOverlayNorthMarkerRef: (htmlRef: HTMLElement) => void;
-    setProjection: (projectionCode: TypeValidMapProjectionCodes, view: View) => void;
-    setQueryable: (layerPath: string, queryable: boolean) => void;
-    setRotation: (degree: number) => void;
-    setVisibleLayers: (newOrder: string[]) => void;
-    setZoom: (zoom: number, duration?: number) => void;
-    showClickMarker: (marker: TypeClickMarker) => void;
-    transformPoints: (coords: Coordinate[], outputProjection: number) => Coordinate[];
-    zoomToExtent: (extent: Extent, options?: FitOptions) => void;
-    zoomToInitialExtent: () => void;
-    zoomToGeoLocatorLocation: (coords: [number, number], bbox?: [number, number, number, number]) => void;
-    zoomToMyLocation: (position: GeolocationPosition) => void;
-  };
-}
-// #endregion INTERFACES
-
-function setScale(mapId: string): TypeScaleInfo {
-  const lineWidth = (document.getElementById(`${mapId}-scaleControlLine`)?.querySelector('.ol-scale-line-inner') as HTMLElement)?.style
-    .width as string;
-  const labelGraphic = document.getElementById(`${mapId}-scaleControlLine`)?.querySelector('.ol-scale-line-inner')?.innerHTML as string;
-  const labelNumeric = document.getElementById(`${mapId}-scaleControlBar`)?.querySelector('.ol-scale-text')?.innerHTML as string;
-
-  return { lineWidth, labelGraphic, labelNumeric };
-}
-
-export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapState {
-  const init = {
-    attribution: [],
-    basemapOptions: { basemapId: 'transport', shaded: true, labeled: true },
-    centerCoordinates: [0, 0] as Coordinate,
-    clickMarker: undefined,
-    currentProjection: 3857 as TypeValidMapProjectionCodes,
-    fixNorth: false,
-    highlightedFeatures: [],
-    interaction: 'static',
-    mapExtent: undefined,
-    mapLoaded: false,
-    northArrow: false,
-    northArrowElement: { degreeRotation: '180.0', isNorthVisible: true } as TypeNorthArrow,
-    orderedLayerInfo: [],
-    overviewMap: false,
-    overviewMapHideZoom: 0,
-    pointerPosition: undefined,
-    rotation: 0,
-    scale: { lineWidth: '', labelGraphic: '', labelNumeric: '' } as TypeScaleInfo,
-    size: [0, 0] as [number, number],
-    visibleLayers: [],
-    zoom: 0,
-
-    // initialize default stores section from config information when store receive configuration file
-    setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
-      set({
-        mapState: {
-          ...get().mapState,
-          basemapOptions: geoviewConfig.map.basemapOptions,
-          centerCoordinates: geoviewConfig.map.viewSettings.center as Coordinate,
-          currentProjection: geoviewConfig.map.viewSettings.projection as TypeValidMapProjectionCodes,
-          highlightColor: geoviewConfig.map.highlightColor || 'black',
-          interaction: geoviewConfig.map.interaction || 'dynamic',
-          mapExtent: geoviewConfig.map.viewSettings.extent,
-          northArrow: geoviewConfig.components!.indexOf('north-arrow') > -1 || false,
-          overviewMap: geoviewConfig.components!.indexOf('overview-map') > -1 || false,
-          overviewMapHideZoom: geoviewConfig.overviewMap !== undefined ? geoviewConfig.overviewMap.hideOnZoom : 0,
-          rotation: geoviewConfig.map.viewSettings.rotation || 0,
-          zoom: geoviewConfig.map.viewSettings.zoom,
-        },
-      });
-    },
-
-    // #region EVENTS
-    events: {
-      onMapChangeSize: () => {
-        set({
-          mapState: {
-            ...get().mapState,
-            size: get().mapState.mapElement?.getSize() as unknown as [number, number],
-          },
-        });
-
-        // on map size change, set the scale values... apply a timeout so it is set the first time sizew is set
-        // ? this timeout is 0ms only to make the call when map change size is really done
-        setTimeout(() => {
-          set({
-            mapState: {
-              ...get().mapState,
-              scale: setScale(get().mapId),
-            },
-          });
-        }, 0);
-      },
-      onMapMoveEnd: debounce((event: MapEvent) => {
-        const coords = event.map.getView().getCenter()!;
-        set({
-          mapState: {
-            ...get().mapState,
-            centerCoordinates: coords,
-          },
-        });
-
-        // on map center coord change, set the scale values
-        set({
-          mapState: {
-            ...get().mapState,
-            scale: setScale(get().mapId),
-          },
-        });
-
-        // on map center coord change, hide click marker
-        set({
-          mapState: {
-            ...get().mapState,
-            clickMarker: undefined,
-          },
-        });
-
-        // on map center coord change, update north arrow parameters
-        set({
-          mapState: {
-            ...get().mapState,
-            northArrowElement: {
-              degreeRotation: api.geoUtilities.getNorthArrowAngle(get().mapState.mapElement!),
-              isNorthVisible: api.geoUtilities.checkNorth(get().mapState.mapElement!),
-            },
-          },
-        });
-
-        // if crosshair is active and user use keyboard, update pointer position
-        // this will enable mouse position and hover tooltip
-        if (get().appState.isCrosshairsActive) {
-          set({
-            mapState: {
-              ...get().mapState,
-              pointerPosition: {
-                projected: coords,
-                pixel: get().mapState.mapElement!.getPixelFromCoordinate(coords),
-                lnglat: api.projection.transformPoints([coords], `EPSG:${get().mapState.currentProjection}`, `EPSG:4326`)[0],
-                dragging: false,
-              },
-            },
-          });
-        }
-      }, 100),
-      onMapPointerMove: debounce(
-        (event: MapEvent) => {
-          set({
-            mapState: {
-              ...get().mapState,
-              pointerPosition: {
-                projected: (event as MapBrowserEvent<UIEvent>).coordinate,
-                pixel: (event as MapBrowserEvent<UIEvent>).pixel,
-                lnglat: api.projection.transformPoints(
-                  [(event as MapBrowserEvent<UIEvent>).coordinate],
-                  `EPSG:${get().mapState.currentProjection}`,
-                  `EPSG:4326`
-                )[0],
-                dragging: (event as MapBrowserEvent<UIEvent>).dragging,
-              },
-            },
-          });
-        },
-        10,
-        { leading: true }
-      ),
-      onMapRotation: debounce((event: ObjectEvent) => {
-        set({
-          mapState: {
-            ...get().mapState,
-            rotation: (event.target as View).getRotation(),
-          },
-        });
-      }, 100),
-      onMapSingleClick: debounce(
-        (event: MapEvent) => {
-          set({
-            mapState: {
-              ...get().mapState,
-              clickCoordinates: {
-                projected: (event as MapBrowserEvent<UIEvent>).coordinate,
-                pixel: (event as MapBrowserEvent<UIEvent>).pixel,
-                lnglat: api.projection.transformPoints(
-                  [(event as MapBrowserEvent<UIEvent>).coordinate],
-                  `EPSG:${get().mapState.currentProjection}`,
-                  `EPSG:4326`
-                )[0],
-                dragging: (event as MapBrowserEvent<UIEvent>).dragging,
-              },
-            },
-          });
-        },
-        1500,
-        { leading: true }
-      ),
-      onMapZoomEnd: debounce((event: ObjectEvent) => {
-        set({
-          mapState: {
-            ...get().mapState,
-            zoom: event.target.getZoom()!,
-          },
-        });
-      }, 100),
-    },
-    // #endregion EVENTS
-
-    // #region ACTIONS
-    actions: {
-      addHighlightedFeature: (feature: TypeFeatureInfoEntry) => {
-        if (feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS) {
-          set({
-            mapState: {
-              ...get().mapState,
-              highlightedFeatures: [...get().mapState.highlightedFeatures, feature],
-            },
-          });
-        }
-      },
-      createBaseMapFromOptions: () => {
-        MapEventProcessor.resetBasemap(get().mapId);
-      },
-      createEmptyBasemap: (): TileLayer<XYZ> => {
-        return MapEventProcessor.createEmptyBasemap(get().mapId);
-      },
-
-      getIndexFromOrderedLayerInfo: (layerPath: string): number => {
-        const info = get().mapState.orderedLayerInfo;
-        for (let i = 0; i < info.length; i++) if (info[i].layerPath === layerPath) return i;
-        return -1;
-      },
-      getVisibilityFromOrderedLayerInfo: (layerPath: string): boolean => {
-        const info = get().mapState.orderedLayerInfo;
-        const pathInfo = info.find((item) => item.layerPath === layerPath);
-        return pathInfo?.visible !== false;
-      },
-      getPixelFromCoordinate: (coord: Coordinate): [number, number] => {
-        return get().mapState.mapElement!.getPixelFromCoordinate(coord) as unknown as [number, number];
-      },
-      hideClickMarker: () => {
-        set({
-          mapState: { ...get().mapState, clickMarker: undefined },
-        });
-      },
-      highlightBBox: (extent: Extent, isLayerHighlight?: boolean) => {
-        api.maps[get().mapId].layer.featureHighlight.highlightGeolocatorBBox(extent, isLayerHighlight);
-      },
-      removeHighlightedFeature: (feature: TypeFeatureInfoEntry | 'all') => {
-        if (feature === 'all' || feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS) {
-          set({
-            mapState: {
-              ...get().mapState,
-              highlightedFeatures:
-                feature === 'all'
-                  ? []
-                  : get().mapState.highlightedFeatures.filter(
-                      (featureInfoEntry: TypeFeatureInfoEntry) =>
-                        (featureInfoEntry.geometry as TypeGeometry).ol_uid !== (feature.geometry as TypeGeometry).ol_uid
-                    ),
-            },
-          });
-        }
-      },
-      reorderLayer: (layerPath: string, move: number) => {
-        const direction = move < 0 ? -1 : 1;
-        let absoluteMoves = Math.abs(move);
-        const orderedLayers = [...get().mapState.orderedLayerInfo];
-        let startingIndex = -1;
-        for (let i = 0; i < orderedLayers.length; i++) if (orderedLayers[i].layerPath === layerPath) startingIndex = i;
-        const layerInfo = orderedLayers[startingIndex];
-        const movedLayers = orderedLayers.filter((layer) => layer.layerPath.startsWith(layerPath));
-        orderedLayers.splice(startingIndex, movedLayers.length);
-        let nextIndex = startingIndex;
-        const pathLength = layerInfo.layerPath.split('/').length;
-        while (absoluteMoves > 0) {
-          nextIndex += direction;
-          if (nextIndex === orderedLayers.length || nextIndex === 0) {
-            absoluteMoves = 0;
-          } else if (orderedLayers[nextIndex].layerPath.split('/').length === pathLength) absoluteMoves--;
-        }
-        orderedLayers.splice(nextIndex, 0, ...movedLayers);
-        get().mapState.actions.setOrderedLayerInfo(orderedLayers);
-      },
-      setAttribution: (attribution: string[]) => {
-        set({
-          mapState: {
-            ...get().mapState,
-            attribution,
-          },
-        });
-      },
-      setClickCoordinates: () => {
-        set({
-          mapState: {
-            ...get().mapState,
-            clickCoordinates: get().mapState.pointerPosition, // trigger click event from pointer position
-          },
-        });
-      },
-      setFixNorth: (isFix: boolean) => {
-        set({
-          mapState: {
-            ...get().mapState,
-            fixNorth: isFix,
-          },
-        });
-      },
-      setHighlightColor: (color: TypeHighlightColors) => {
-        set({
-          mapState: {
-            ...get().mapState,
-            highlightColor: color,
-          },
-        });
-      },
-      setHoverable: (layerPath: string, hoverable: boolean) => {
-        const curLayerInfo = get().mapState.orderedLayerInfo;
-        const layerInfo = curLayerInfo.find((info) => info.layerPath === layerPath);
-        if (layerInfo) {
-          layerInfo.hoverable = hoverable;
-          set({
-            mapState: {
-              ...get().mapState,
-              orderedLayerInfo: [...curLayerInfo],
-            },
-          });
-        }
-      },
-      setInteraction: (interaction: TypeInteraction) => {
-        set({
-          mapState: {
-            ...get().mapState,
-            interaction,
-          },
-        });
-
-        // enable or disable map interaction when type of map interaction is set
-        get()
-          .mapState.mapElement!.getInteractions()
-          .forEach((x) => x.setActive(interaction === 'dynamic'));
-      },
-      setMapElement: (mapElem: OLMap) => {
-        set({
-          mapState: {
-            ...get().mapState,
-            mapLoaded: true,
-            mapElement: mapElem,
-            scale: setScale(get().mapId),
-            zoom: mapElem.getView().getZoom() as number,
-          },
-        });
-      },
-      setMapKeyboardPanInteractions: (panDelta: number) => {
-        MapEventProcessor.setMapKeyboardPanInteractions(get().mapId, panDelta);
-      },
-      setOverlayClickMarker: (overlay: Overlay) => {
-        set({
-          mapState: {
-            ...get().mapState,
-            overlayClickMarker: overlay,
-          },
-        });
-      },
-      setOrderedLayerInfo: (newOrderedLayerInfo: Array<TypeOrderedLayerInfo>) => {
-        set({
-          mapState: {
-            ...get().mapState,
-            orderedLayerInfo: newOrderedLayerInfo,
-          },
-        });
-        MapEventProcessor.setLayerZIndices(get().mapId);
-      },
-      setOverlayClickMarkerRef: (htmlRef: HTMLElement) => {
-        const overlay = get().mapState.overlayClickMarker;
-        if (overlay !== undefined) overlay.setElement(htmlRef);
-      },
-      setOverlayNorthMarker: (overlay: Overlay) => {
-        set({
-          mapState: {
-            ...get().mapState,
-            overlayNorthMarker: overlay,
-          },
-        });
-      },
-      setOverlayNorthMarkerRef: (htmlRef: HTMLElement) => {
-        const overlay = get().mapState.overlayNorthMarker;
-        if (overlay !== undefined) overlay.setElement(htmlRef);
-      },
-      setProjection: (projectionCode: TypeValidMapProjectionCodes, view: View) => {
-        set({
-          mapState: {
-            ...get().mapState,
-            currentProjection: projectionCode,
-          },
-        });
-
-        // set new view
-        get().mapState.mapElement!.setView(view);
-
-        // reload the basemap from new projection
-        MapEventProcessor.resetBasemap(get().mapId);
-      },
-      setQueryable: (layerPath: string, queryable: boolean) => {
-        const curLayerInfo = get().mapState.orderedLayerInfo;
-        const layerInfo = curLayerInfo.find((info) => info.layerPath === layerPath);
-        if (layerInfo) {
-          layerInfo.queryable = queryable;
-          if (queryable) layerInfo.hoverable = queryable;
-          set({
-            mapState: {
-              ...get().mapState,
-              orderedLayerInfo: [...curLayerInfo],
-            },
-          });
-        }
-      },
-      setRotation: (degree: number) => {
-        // set ol map rotation
-        // State is set by the map state store event 'onMapRotation'
-        get().mapState.mapElement!.getView().animate({ rotation: degree });
-      },
-      setVisibleLayers: (newOrder: string[]) => {
-        set({
-          mapState: {
-            ...get().mapState,
-            visibleLayers: newOrder,
-          },
-        });
-      },
-      setZoom: (zoom: number, duration?: number) => {
-        // set ol map zoom
-        // State is set by the map state store event 'onMapZoomEnd'
-        get().mapState.mapElement!.getView().animate({ zoom, duration });
-      },
-      showClickMarker: (marker: TypeClickMarker) => {
-        const projectedCoords = api.projection.transformPoints([marker.lnglat], `EPSG:4326`, `EPSG:${get().mapState.currentProjection}`);
-
-        // GV need to use state because it changes store and do action at the same time
-        get().mapState.mapElement!.getOverlayById(`${get().mapId}-clickmarker`)!.setPosition(projectedCoords[0]);
-
-        set({
-          mapState: { ...get().mapState, clickMarker: { lnglat: projectedCoords[0] } },
-        });
-      },
-      setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean): void => {
-        const curOrderedLayerInfo = get().mapState.orderedLayerInfo;
-        const layerVisibility = get().mapState.actions.getVisibilityFromOrderedLayerInfo(layerPath);
-        const layerInfos = curOrderedLayerInfo.filter((info) => info.layerPath.startsWith(layerPath));
-        const parentLayerPathArray = layerPath.split('/');
-        parentLayerPathArray.pop();
-        const parentLayerPath = parentLayerPathArray.join('/');
-        const parentLayerInfo = curOrderedLayerInfo.find((info) => info.layerPath === parentLayerPath);
-
-        layerInfos.forEach((layerInfo) => {
-          if (layerInfo) {
-            // eslint-disable-next-line no-param-reassign
-            layerInfo!.visible = newValue || !layerVisibility;
-            api.maps[get().mapId].layer.geoviewLayer(layerInfo.layerPath).setVisible(layerInfo.visible, layerInfo.layerPath);
-          }
-        });
-
-        if (parentLayerInfo !== undefined) {
-          const parentLayerVisibility = get().mapState.actions.getVisibilityFromOrderedLayerInfo(parentLayerPath);
-          if ((!layerVisibility || newValue) && parentLayerVisibility === false) {
-            if (parentLayerInfo) {
-              parentLayerInfo.visible = true;
-              api.maps[get().mapId].layer.geoviewLayer(parentLayerPath).setVisible(true, parentLayerPath);
-            }
-          }
-          const children = curOrderedLayerInfo.filter(
-            (info) => info.layerPath.startsWith(parentLayerPath) && info.layerPath !== parentLayerPath
-          );
-          if (!children.some((child) => child.visible === true)) get().mapState.actions.setOrToggleLayerVisibility(parentLayerPath, false);
-        }
-
-        set({
-          mapState: {
-            ...get().mapState,
-            orderedLayerInfo: [...curOrderedLayerInfo],
-          },
-        });
-      },
-      transformPoints: (coords: Coordinate[], outputProjection: number): Coordinate[] => {
-        return api.projection.transformPoints(coords, `EPSG:${get().mapState.currentProjection}`, `EPSG:${outputProjection}`);
-      },
-      zoomToExtent: (extent: Extent, options?: FitOptions): Promise<void> => {
-        return MapEventProcessor.zoomToExtent(get().mapId, extent, options);
-      },
-      zoomToInitialExtent: (): Promise<void> => {
-        return MapEventProcessor.zoomToInitialExtent(get().mapId);
-      },
-      zoomToGeoLocatorLocation: (coords: Coordinate, bbox?: Extent): Promise<void> => {
-        return MapEventProcessor.zoomToGeoLocatorLocation(get().mapId, coords, bbox);
-      },
-      zoomToMyLocation: (position: GeolocationPosition): Promise<void> => {
-        return MapEventProcessor.zoomToMyLocation(get().mapId, position);
-      },
-      // #endregion ACTIONS
-    },
-  } as IMapState;
-
-  return init;
-}
-
 // **********************************************************
 // Map state selectors
 // **********************************************************
@@ -611,11 +757,13 @@ export const useMapAttribution = () => useStore(useGeoViewStore(), (state) => st
 export const useMapBasemapOptions = () => useStore(useGeoViewStore(), (state) => state.mapState.basemapOptions);
 export const useMapCenterCoordinates = () => useStore(useGeoViewStore(), (state) => state.mapState.centerCoordinates);
 export const useMapClickMarker = () => useStore(useGeoViewStore(), (state) => state.mapState.clickMarker);
+// TODO: Refactor - Get rid of the mapElement in the store and this 'useMapElement'
 export const useMapElement = () => useStore(useGeoViewStore(), (state) => state.mapState.mapElement);
 export const useMapExtent = () => useStore(useGeoViewStore(), (state) => state.mapState.mapExtent);
 export const useMapFixNorth = () => useStore(useGeoViewStore(), (state) => state.mapState.fixNorth);
 export const useMapInteraction = () => useStore(useGeoViewStore(), (state) => state.mapState.interaction);
 export const useMapHiglightColor = () => useStore(useGeoViewStore(), (state) => state.mapState.highlightColor);
+export const useMapHoverFeatureInfo = () => useStore(useGeoViewStore(), (state) => state.mapState.hoverFeatureInfo);
 export const useMapLoaded = () => useStore(useGeoViewStore(), (state) => state.mapState.mapLoaded);
 export const useMapNorthArrow = () => useStore(useGeoViewStore(), (state) => state.mapState.northArrow);
 export const useMapNorthArrowElement = () => useStore(useGeoViewStore(), (state) => state.mapState.northArrowElement);

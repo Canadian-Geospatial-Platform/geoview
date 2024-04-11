@@ -1,4 +1,4 @@
-import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
+import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import { logger } from '@/core/utils/logger';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { getLocalizedValue } from '@/core/utils/utilities';
@@ -6,6 +6,7 @@ import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 import { LayerSet, QueryType, TypeLayerData } from './layer-set';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 /**
  * A class containing a set of layers associated with a TypeLayerData object, which will receive the result of a
@@ -19,10 +20,11 @@ export class AllFeatureInfoLayerSet extends LayerSet {
 
   /**
    * Overrides the behavior to apply when an all-feature-info-layer-set wants to check for condition to register a layer in its set.
-   * @param {AbstractGeoViewLayer} geoviewLayer The geoview layer being registered
-   * @param {string} layerPath The layer path
+   * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
+   * @param {string} layerPath - The layer path
+   * @returns {boolean} True when the layer should be registered to this all-feature-info-layer-set.
    */
-  protected onRegisterLayerCheck = (geoviewLayer: AbstractGeoViewLayer, layerPath: string): boolean => {
+  protected onRegisterLayerCheck(geoviewLayer: AbstractGeoViewLayer, layerPath: string): boolean {
     // Log
     logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerPath, Object.keys(this.resultSet));
 
@@ -41,23 +43,23 @@ export class AllFeatureInfoLayerSet extends LayerSet {
     const layerConfig = this.layerApi.registeredLayers[layerPath];
     const queryable = layerConfig?.source?.featureInfo?.queryable;
     return !!queryable;
-  };
+  }
 
   /**
    * Overrides the behavior to apply when an all-feature-info-layer-set wants to register a layer in its set.
-   * @param {AbstractGeoViewLayer} geoviewLayer The geoview layer being registered
-   * @param {string} layerPath The layer path
+   * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
+   * @param {string} layerPath - The layer path
    */
-  protected onRegisterLayer = (geoviewLayer: AbstractGeoViewLayer, layerPath: string): void => {
+  protected onRegisterLayer(geoviewLayer: AbstractGeoViewLayer, layerPath: string): void {
     // Log
     logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET - onRegisterLayer', layerPath, Object.keys(this.resultSet));
 
     const layerConfig = this.layerApi.registeredLayers[layerPath];
     this.resultSet[layerPath] = {
-      layerName: getLocalizedValue(layerConfig.layerName, this.mapId) ?? '',
+      layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
       layerStatus: layerConfig.layerStatus!,
       data: {
-        layerName: getLocalizedValue(layerConfig.layerName, this.mapId) ?? '',
+        layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
         layerStatus: layerConfig.layerStatus!,
         eventListenerEnabled: true,
         queryStatus: 'processed',
@@ -66,14 +68,15 @@ export class AllFeatureInfoLayerSet extends LayerSet {
       },
     };
 
-    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, 'all-features', this.resultSet);
-  };
+    DataTableEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, this.resultSet);
+    DataTableEventProcessor.setInitialSettings(this.mapId, layerPath);
+  }
 
   /**
    * Overrides the behavior to apply when a layer status changed for a all-feature-info-layer-set.
-   * @param {ConfigBaseClass} config The layer config class
-   * @param {string} layerPath The layer path being affected
-   * @param {string} layerStatus The new layer status
+   * @param {ConfigBaseClass} config - The layer config class
+   * @param {string} layerPath - The layer path being affected
+   * @param {string} layerStatus - The new layer status
    */
   protected onProcessLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
     // TODO: Refactor - This function (and the same function in feature-info-layer-set and hover-feature-info-layer-set) are all very similar if not identical
@@ -93,33 +96,31 @@ export class AllFeatureInfoLayerSet extends LayerSet {
         const layerConfig = this.layerApi.registeredLayers[layerPath];
         if (this?.resultSet?.[layerPath]?.data) {
           this.resultSet[layerPath].data.layerStatus = layerStatus;
-          FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerConfig.layerPath, 'all-features', this.resultSet);
+          DataTableEventProcessor.propagateFeatureInfoToStore(this.mapId, layerConfig.layerPath, this.resultSet);
         }
       }
     }
   }
 
   /**
-   * Helper function used to launch the query on a layer to get all of its feature information
-   *
-   * @param {string} layerPath The layerPath that will be queried.
-   * @param {QueryType} queryType the query's type to perform
+   * Helper function used to launch the query on a layer to get all of its feature information.
+   * @param {string} layerPath - The layerPath that will be queried
+   * @param {QueryType} queryType - The query's type to perform
+   * @returns {Promise<TypeAllFeatureInfoResultSet | void>} A promise which will hold the result of the query
    */
   // TODO: (futur development) The queryType is a door opened to allow the triggering using a bounding box or a polygon.
   async queryLayer(layerPath: string, queryType: QueryType = 'all'): Promise<TypeAllFeatureInfoResultSet | void> {
     // TODO: REFACTOR - Watch out for code reentrancy between queries!
+    // TO.DOCONT: Consider using a LIFO pattern, per layer path, as the race condition resolution
     // GV Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
     // GV As it is (and was like this befor events refactor), the this.resultSet is mutating between async calls.
 
-    // TODO: Refactor - Make this function throw an error instead of returning void as option of the promise
+    // TODO: Refactor - Make this function throw an error instead of returning void as option of the promise (to have same behavior as feature-info-layer-set)
 
     // If valid layer path
     if (this.layerApi.registeredLayers[layerPath] && this.resultSet[layerPath]) {
       const { data } = this.resultSet[layerPath];
       const layerConfig = this.layerApi.registeredLayers[layerPath];
-
-      // Query and event types of what we're doing
-      const eventType = 'all-features';
 
       if (!this.resultSet[layerPath].data.eventListenerEnabled) return Promise.resolve();
 
@@ -147,7 +148,7 @@ export class AllFeatureInfoLayerSet extends LayerSet {
       }
 
       // Propagate to the store
-      FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, eventType, this.resultSet);
+      DataTableEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, this.resultSet);
 
       // Return the resultsSet
       return this.resultSet;

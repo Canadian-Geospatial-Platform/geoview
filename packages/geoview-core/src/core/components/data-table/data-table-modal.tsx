@@ -19,7 +19,7 @@ import { useLayerSelectedLayerPath } from '@/core/stores/store-interface-and-int
 import { FieldInfos } from './data-table';
 import { getSxClasses } from './data-table-style';
 import { logger } from '@/core/utils/logger';
-import { useDetailsStoreAllFeaturesDataArray } from '@/core/stores';
+import { useDataTableAllFeaturesDataArray } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useFeatureFieldInfos } from './hooks';
 
 interface ColumnsType {
@@ -46,7 +46,7 @@ export default function DataTableModal(): JSX.Element {
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const selectedLayer = useLayerSelectedLayerPath();
 
-  const layersData = useDetailsStoreAllFeaturesDataArray();
+  const layersData = useDataTableAllFeaturesDataArray();
 
   // Create columns for data table.
   const mappedLayerData = useFeatureFieldInfos(layersData);
@@ -129,8 +129,7 @@ export default function DataTableModal(): JSX.Element {
     return (layer?.features?.slice(0, 99).map((feature) => {
       return feature.fieldInfo;
     }) ?? []) as unknown as ColumnsType[];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layer?.fieldInfos]);
+  }, [layer?.features, layer?.fieldInfos]);
 
   useEffect(() => {
     // Log
@@ -148,7 +147,7 @@ export default function DataTableModal(): JSX.Element {
   }, [isLoading, selectedLayer]);
 
   return (
-    <Dialog open={activeModalId === 'layerDatatable'} onClose={closeModal} maxWidth="xl">
+    <Dialog open={activeModalId === 'layerDataTable'} onClose={closeModal} maxWidth="xl">
       <DialogTitle>{`${t('legend.tableDetails')} ${layer?.layerName ?? selectedLayer}`}</DialogTitle>
       <DialogContent sx={{ overflow: 'hidden' }}>
         {isLoading && (

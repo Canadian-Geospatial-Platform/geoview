@@ -11,25 +11,27 @@ import Home from './buttons/home';
 import ExportButton from '@/core/components/export/export-modal-button';
 import Location from './buttons/location';
 
-import { api } from '@/app';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { Panel, ButtonGroup, IconButton, Box } from '@/ui';
-import { ButtonPanelPayload } from '@/api/events/payloads';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
+import { NavBarApi, NavBarCreatedEvent, NavBarRemovedEvent } from '@/core/components';
 import { helpCloseAll, helpClosePanelById, helpOpenPanelById } from '@/core/components/app-bar/app-bar-helper';
 import { useUIMapInfoExpanded, useUINavbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
 
+type NavBarProps = {
+  api: NavBarApi;
+};
+
 /**
  * Create a nav-bar with buttons that can call functions or open custom panels
  */
-export function Navbar(): JSX.Element {
-  // ? No props for this component. Same logic in FooterBar and AppBar.
-  // ? We are handling the logic via api.event management, via nav-bar-api, once this component is mounted.
-
+export function NavBar(props: NavBarProps): JSX.Element {
   // Log
   logger.logTraceRender('components/nav-bar/nav-bar');
+
+  const { api: navBarApi } = props;
 
   const mapId = useGeoViewMapId();
 
@@ -98,15 +100,15 @@ export function Navbar(): JSX.Element {
   );
 
   const handleAddButtonPanel = useCallback(
-    (payload: ButtonPanelPayload) => {
+    (sender: NavBarApi, event: NavBarCreatedEvent) => {
       // Log
-      logger.logTraceUseCallback('NAV-BAR - handleAddButtonPanel', payload);
+      logger.logTraceUseCallback('NAV-BAR - handleAddButtonPanel', event);
 
       setButtonPanelGroups({
         ...buttonPanelGroups,
-        [payload.appBarGroupName]: {
-          ...buttonPanelGroups[payload.appBarGroupName],
-          [payload.appBarId]: payload.buttonPanel as TypeButtonPanel,
+        [event.group]: {
+          ...buttonPanelGroups[event.group],
+          [event.buttonPanelId]: event.buttonPanel,
         },
       });
     },
@@ -114,15 +116,15 @@ export function Navbar(): JSX.Element {
   );
 
   const handleRemoveButtonPanel = useCallback(
-    (payload: ButtonPanelPayload) => {
+    (sender: NavBarApi, event: NavBarRemovedEvent) => {
       // Log
-      logger.logTraceUseCallback('NAV-BAR - handleRemoveButtonPanel', payload);
+      logger.logTraceUseCallback('NAV-BAR - handleRemoveButtonPanel', event);
 
       setButtonPanelGroups((prevState) => {
         const state = { ...prevState };
-        const group = state[payload.appBarGroupName];
+        const group = state[event.group];
 
-        delete group[payload.appBarId];
+        delete group[event.buttonPanelId];
 
         return state;
       });
@@ -132,20 +134,18 @@ export function Navbar(): JSX.Element {
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('NAV-BAR - mount', mapId);
+    logger.logTraceUseEffect('NAV-BAR - mount');
 
-    // listen to new nav-bar panel creation
-    api.event.onCreateNavBarPanel(mapId, handleAddButtonPanel);
-
-    // listen to new nav-bar panel removal
-    api.event.onRemoveNavBarPanel(mapId, handleRemoveButtonPanel);
+    // Register NavBar created/removed handlers
+    navBarApi.onNavbarCreated(handleAddButtonPanel);
+    navBarApi.onNavbarRemoved(handleRemoveButtonPanel);
 
     return () => {
-      // Unwire events
-      api.event.offCreateNavBarPanel(mapId, handleAddButtonPanel);
-      api.event.offRemoveNavBarPanel(mapId, handleRemoveButtonPanel);
+      // Unregister events
+      navBarApi.offNavbarCreated(handleAddButtonPanel);
+      navBarApi.offNavbarRemoved(handleRemoveButtonPanel);
     };
-  }, [mapId, handleAddButtonPanel, handleRemoveButtonPanel]);
+  }, [navBarApi, handleAddButtonPanel, handleRemoveButtonPanel]);
 
   // #endregion
 

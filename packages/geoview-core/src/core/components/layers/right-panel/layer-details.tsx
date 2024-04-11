@@ -23,7 +23,9 @@ import {
   ListItem,
   List,
 } from '@/ui';
-import { useLayerHighlightedLayer, useLayerStoreActions, useUIStoreActions, useDetailsStoreAllFeaturesDataArray } from '@/core/stores';
+import { useLayerHighlightedLayer, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useDataTableAllFeaturesDataArray } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { generateId } from '@/core/utils/utilities';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-control';
@@ -44,13 +46,13 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const [isDataTableVisible, setIsDatatableVisible] = useState(false);
+  const [isDataTableVisible, setIsDataTableVisible] = useState(false);
 
   // get store actions
   const highlightedLayer = useLayerHighlightedLayer();
   const { setAllItemsVisibility, toggleItemVisibility, setHighlightLayer, zoomToLayerExtent, getLayerBounds } = useLayerStoreActions();
   const { openModal } = useUIStoreActions();
-  const layersData = useDetailsStoreAllFeaturesDataArray();
+  const layersData = useDataTableAllFeaturesDataArray();
   const selectedLayer = layersData.find((_layer) => _layer.layerPath === layerDetails?.layerPath);
 
   useEffect(() => {
@@ -62,14 +64,14 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     // thats why we need to update the state so that layers data is fetched again from store.
     let timer: NodeJS.Timeout;
     if (!selectedLayer) {
-      setIsDatatableVisible(true);
+      setIsDataTableVisible(true);
     } else {
       timer = setTimeout(() => {
-        setIsDatatableVisible(true);
+        setIsDataTableVisible(true);
       }, 100);
     }
     return () => {
-      setIsDatatableVisible(false);
+      setIsDataTableVisible(false);
       if (timer) clearTimeout(timer);
     };
   }, [layersData, layerDetails, selectedLayer]);
@@ -79,7 +81,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   };
 
   const handleOpenTable = () => {
-    openModal({ activeElementId: 'layerDatatable', callbackElementId: `table-details` });
+    openModal({ activeElementId: 'layerDataTable', callbackElementId: `table-details` });
   };
 
   if (layerDetails.bounds === undefined || layerDetails.bounds![0] === Infinity) {

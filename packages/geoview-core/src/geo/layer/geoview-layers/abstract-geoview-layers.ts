@@ -9,15 +9,7 @@ import { Extent } from 'ol/extent';
 import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
 import Feature from 'ol/Feature';
 
-import {
-  generateId,
-  getLocalizedValue,
-  getXMLHttpRequest,
-  showError,
-  replaceParams,
-  getLocalizedMessage,
-  createLocalizedString,
-} from '@/core/utils/utilities';
+import { generateId, getXMLHttpRequest, createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { LayerApi } from '@/geo/layer/layer';
 import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
@@ -42,6 +34,7 @@ import {
   CONST_LAYER_ENTRY_TYPES,
 } from '@/geo/map/map-schema-types';
 import { QueryType, TypeFeatureInfoEntry, TypeLocation, codedValueType, rangeDomainType } from '@/geo/utils/layer-set';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 // Constant used to define the default layer names
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
@@ -125,10 +118,6 @@ export abstract class AbstractGeoViewLayer {
   /** Date format object used to translate internal UTC ISO format to the external format, the one used by the user */
   externalFragmentsOrder: TypeDateFragments;
 
-  // LayerPath to use when we want to call a GeoView layer's method using the following syntaxe:
-  // api.maps[mapId].layer.geoviewLayer(layerPath).getVisible()
-  layerPathAssociatedToTheGeoviewLayer = '';
-
   // Keep all callback delegate references
   #onGeoViewLayerRegistrationHandlers: GeoViewLayerRegistrationDelegate[] = [];
 
@@ -155,9 +144,9 @@ export abstract class AbstractGeoViewLayer {
     if (mapLayerConfig.metadataAccessPath?.fr) this.metadataAccessPath.fr = mapLayerConfig.metadataAccessPath.fr.trim();
     this.initialSettings = mapLayerConfig.initialSettings;
     this.serverDateFragmentsOrder = mapLayerConfig.serviceDateFormat
-      ? api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.serviceDateFormat)
+      ? api.utilities.date.getDateFragmentsOrder(mapLayerConfig.serviceDateFormat)
       : undefined;
-    this.externalFragmentsOrder = api.dateUtilities.getDateFragmentsOrder(mapLayerConfig.externalDateFormat);
+    this.externalFragmentsOrder = api.utilities.date.getDateFragmentsOrder(mapLayerConfig.externalDateFormat);
     this.setListOfLayerEntryConfig(mapLayerConfig, mapLayerConfig.listOfLayerEntryConfig);
   }
 
@@ -190,83 +179,86 @@ export abstract class AbstractGeoViewLayer {
   /**
    * Emits an event to all handlers.
    * @param {GeoViewLayerRegistrationEvent} event The event to emit
+   * @private
    */
-  emitGeoViewLayerRegistration = (event: GeoViewLayerRegistrationEvent) => {
+  #emitGeoViewLayerRegistration(event: GeoViewLayerRegistrationEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onGeoViewLayerRegistrationHandlers, event);
-  };
+  }
 
   /**
-   * Wires an event handler.
+   * Registers a geoview layer registration event handler.
    * @param {GeoViewLayerRegistrationDelegate} callback The callback to be executed whenever the event is emitted
    */
-  onGeoViewLayerRegistration = (callback: GeoViewLayerRegistrationDelegate): void => {
-    // Wire the event handler
+  onGeoViewLayerRegistration(callback: GeoViewLayerRegistrationDelegate): void {
+    // Register the event handler
     EventHelper.onEvent(this.#onGeoViewLayerRegistrationHandlers, callback);
-  };
+  }
 
   /**
-   * Unwires an event handler.
+   * Unregisters a geoview layer registration event handler.
    * @param {GeoViewLayerRegistrationDelegate} callback The callback to stop being called whenever the event is emitted
    */
-  offGeoViewLayerRegistration = (callback: GeoViewLayerRegistrationDelegate): void => {
-    // Unwire the event handler
+  offGeoViewLayerRegistration(callback: GeoViewLayerRegistrationDelegate): void {
+    // Unregister the event handler
     EventHelper.offEvent(this.#onGeoViewLayerRegistrationHandlers, callback);
-  };
+  }
 
   /**
    * Emits an event to all handlers.
    * @param {GeoViewLayerLegendQueryingEvent} event The event to emit
+   * @private
    */
-  emitLegendQuerying = (event: GeoViewLayerLegendQueryingEvent) => {
+  #emitLegendQuerying(event: GeoViewLayerLegendQueryingEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onGeoViewLayerLegendQueryingHandlers, event);
-  };
+  }
 
   /**
-   * Wires an event handler.
+   * Registers a legend querying event handler.
    * @param {GeoViewLayerLegendQueryingDelegate} callback The callback to be executed whenever the event is emitted
    */
-  onLegendQuerying = (callback: GeoViewLayerLegendQueryingDelegate): void => {
-    // Wire the event handler
+  onLegendQuerying(callback: GeoViewLayerLegendQueryingDelegate): void {
+    // Register the event handler
     EventHelper.onEvent(this.#onGeoViewLayerLegendQueryingHandlers, callback);
-  };
+  }
 
   /**
-   * Unwires an event handler.
+   * Unregisters a legend querying event handler.
    * @param {GeoViewLayerLegendQueryingDelegate} callback The callback to stop being called whenever the event is emitted
    */
-  offLegendQuerying = (callback: GeoViewLayerLegendQueryingDelegate): void => {
-    // Unwire the event handler
+  offLegendQuerying(callback: GeoViewLayerLegendQueryingDelegate): void {
+    // Unregister the event handler
     EventHelper.offEvent(this.#onGeoViewLayerLegendQueryingHandlers, callback);
-  };
+  }
 
   /**
    * Emits an event to all handlers.
    * @param {GeoViewLayerLegendQueriedEvent} event The event to emit
+   * @private
    */
-  emitLegendQueried = (event: GeoViewLayerLegendQueriedEvent) => {
+  #emitLegendQueried(event: GeoViewLayerLegendQueriedEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onGeoViewLayerLegendQueriedHandlers, event);
-  };
+  }
 
   /**
-   * Wires an event handler.
+   * Registers a legend queried event handler.
    * @param {GeoViewLayerLegendQueriedDelegate} callback The callback to be executed whenever the event is emitted
    */
-  onLegendQueried = (callback: GeoViewLayerLegendQueriedDelegate): void => {
-    // Wire the event handler
+  onLegendQueried(callback: GeoViewLayerLegendQueriedDelegate): void {
+    // Register the event handler
     EventHelper.onEvent(this.#onGeoViewLayerLegendQueriedHandlers, callback);
-  };
+  }
 
   /**
-   * Unwires an event handler.
+   * Unregisters a legend queried event handler.
    * @param {GeoViewLayerLegendQueriedDelegate} callback The callback to stop being called whenever the event is emitted
    */
-  offLegendQueried = (callback: GeoViewLayerLegendQueriedDelegate): void => {
-    // Unwire the event handler
+  offLegendQueried(callback: GeoViewLayerLegendQueriedDelegate): void {
+    // Unregister the event handler
     EventHelper.offEvent(this.#onGeoViewLayerLegendQueriedHandlers, callback);
-  };
+  }
 
   /** ***************************************************************************************************************************
    * Process recursively the list of layer entries to see if all of them are processed.
@@ -375,8 +367,8 @@ export abstract class AbstractGeoViewLayer {
         logger.logError(error);
       }
     } else {
-      const message = replaceParams([this.mapId], getLocalizedMessage(this.mapId, 'validation.layer.createtwice'));
-      showError(this.mapId, message);
+      // TODO: find a more centralized way to trap error and display message
+      api.maps[this.mapId].notifications.showError('validation.layer.createtwice', [this.mapId]);
       // Log
       logger.logError(`Can not execute twice the createGeoViewLayers method for the map ${this.mapId}`);
     }
@@ -415,7 +407,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected async fetchServiceMetadata(): Promise<void> {
-    const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+    const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
     if (metadataUrl) {
       try {
         const metadataString = await getXMLHttpRequest(`${metadataUrl}?f=json`);
@@ -720,7 +712,6 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-
   protected getAllFeatureInfo(layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getAllFeatureInfo is not implemented! for ${layerPath}`);
@@ -736,7 +727,6 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-
   protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoAtPixel is not implemented! for ${layerPath} - ${location}`);
@@ -752,7 +742,6 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-
   protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoAtCoordinate is not implemented! for ${layerPath} - ${location}`);
@@ -768,7 +757,6 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-
   protected getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoAtLongLat is not implemented for ${layerPath} - ${location}!`);
@@ -784,7 +772,6 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-
   protected getFeatureInfoUsingBBox(location: Coordinate[], layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoUsingBBox is not implemented! for ${layerPath} - ${location}`);
@@ -800,7 +787,6 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-
   protected getFeatureInfoUsingPolygon(location: Coordinate[], layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoUsingPolygon is not implemented! for ${layerPath} - ${location}`);
@@ -818,7 +804,7 @@ export abstract class AbstractGeoViewLayer {
 
     // Register to layer sets that are already created.
     // Emit the layer registration
-    this.emitGeoViewLayerRegistration({ layerPath: layerConfig.layerPath, layerConfig, action: 'add' });
+    this.#emitGeoViewLayerRegistration({ layerPath: layerConfig.layerPath, layerConfig, action: 'add' });
   }
 
   /** ***************************************************************************************************************************
@@ -832,16 +818,16 @@ export abstract class AbstractGeoViewLayer {
     const { layerPath } = layerConfig;
 
     // Emit the layer unregistration
-    this.emitGeoViewLayerRegistration({ layerPath, layerConfig, action: 'remove' });
+    this.#emitGeoViewLayerRegistration({ layerPath, layerConfig, action: 'remove' });
   }
 
   /**
    * Queries the legend.
    * This function raises legend querying and queried events.
    */
-  queryLegend = (layerPath: string) => {
+  queryLegend(layerPath: string) {
     // Emit that the legend has been queried
-    this.emitLegendQuerying({ layerPath });
+    this.#emitLegendQuerying({ layerPath });
 
     // Get the legend
     const promiseLegend = this.getLegend(layerPath);
@@ -851,13 +837,13 @@ export abstract class AbstractGeoViewLayer {
       // If legend was received
       if (legend) {
         // Emit legend information once retrieved
-        this.emitLegendQueried({ layerPath, legend });
+        this.#emitLegendQueried({ layerPath, legend });
       }
     });
 
     // Return the promise
     return promiseLegend;
-  };
+  }
 
   /** ***************************************************************************************************************************
    * This method create a layer group.
@@ -933,7 +919,7 @@ export abstract class AbstractGeoViewLayer {
     if (layerConfig) {
       if (Array.isArray(layerConfig)) processGroupLayerBounds(layerConfig);
       else processGroupLayerBounds([layerConfig]);
-      if (projectionCode && bounds) return api.projection.transformExtent(bounds, `EPSG:4326`, `EPSG:${projectionCode}`);
+      if (projectionCode && bounds) return api.utilities.projection.transformExtent(bounds, `EPSG:4326`, `EPSG:${projectionCode}`);
     }
     return bounds;
   }
@@ -1160,15 +1146,15 @@ export abstract class AbstractGeoViewLayer {
     if (fieldType === 'date') {
       if (typeof fieldValue === 'string') {
         if (!this.serverDateFragmentsOrder)
-          this.serverDateFragmentsOrder = api.dateUtilities.getDateFragmentsOrder(api.dateUtilities.deduceDateFormat(fieldValue));
-        returnValue = api.dateUtilities.applyInputDateFormat(fieldValue, this.serverDateFragmentsOrder);
+          this.serverDateFragmentsOrder = api.utilities.date.getDateFragmentsOrder(api.utilities.date.deduceDateFormat(fieldValue));
+        returnValue = api.utilities.date.applyInputDateFormat(fieldValue, this.serverDateFragmentsOrder);
       } else {
         // All vector dates are kept internally in UTC.
-        returnValue = api.dateUtilities.convertToUTC(`${api.dateUtilities.convertMilisecondsToDate(fieldValue)}Z`);
+        returnValue = api.utilities.date.convertToUTC(`${api.utilities.date.convertMilisecondsToDate(fieldValue)}Z`);
       }
       const reverseTimeZone = true;
       if (this.externalFragmentsOrder)
-        returnValue = api.dateUtilities.applyOutputDateFormat(returnValue, this.externalFragmentsOrder, reverseTimeZone);
+        returnValue = api.utilities.date.applyOutputDateFormat(returnValue, this.externalFragmentsOrder, reverseTimeZone);
       return returnValue;
     }
     return fieldValue;
@@ -1191,8 +1177,14 @@ export abstract class AbstractGeoViewLayer {
 
       const featureInfo = layerConfig?.source?.featureInfo;
       const fieldTypes = featureInfo?.fieldTypes?.split(',') as ('string' | 'number' | 'date')[];
-      const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
-      const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
+      const outfields = getLocalizedValue(
+        featureInfo?.outfields as TypeLocalizedString,
+        AppEventProcessor.getDisplayLanguage(this.mapId)
+      )?.split(',');
+      const aliasFields = getLocalizedValue(
+        featureInfo?.aliasFields as TypeLocalizedString,
+        AppEventProcessor.getDisplayLanguage(this.mapId)
+      )?.split(',');
       const queryResult: TypeFeatureInfoEntry[] = [];
       let featureKeyCounter = 0;
       let fieldKeyCounter = 0;
@@ -1221,7 +1213,11 @@ export abstract class AbstractGeoViewLayer {
             geometry: feature,
             featureIcon: canvas,
             fieldInfo: {},
-            nameField: getLocalizedValue(layerConfig?.source?.featureInfo?.nameField, this.mapId) || null,
+            nameField:
+              getLocalizedValue(
+                layerConfig?.source?.featureInfo?.nameField as TypeLocalizedString,
+                AppEventProcessor.getDisplayLanguage(this.mapId)
+              ) || null,
           };
 
           const featureFields = (feature as Feature).getKeys();
