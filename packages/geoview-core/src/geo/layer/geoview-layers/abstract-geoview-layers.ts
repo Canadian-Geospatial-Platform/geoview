@@ -1253,20 +1253,20 @@ export abstract class AbstractGeoViewLayer {
 
         const featureFields = feature.getKeys();
         featureFields.forEach((fieldName) => {
-          // Calculate the field domain if not already calculated
-          if (!(fieldName in dictFieldDomains)) {
-            // Calculate it
-            dictFieldDomains[fieldName] = this.getFieldDomain(fieldName, layerConfig);
-          }
-          const fieldDomain = dictFieldDomains[fieldName];
-
-          // Calculate the field type if not already calculated
-          if (!(fieldName in dictFieldTypes)) {
-            dictFieldTypes[fieldName] = this.getFieldType(fieldName, layerConfig);
-          }
-          const fieldType = dictFieldTypes[fieldName];
-
           if (fieldName !== 'geometry') {
+            // Calculate the field domain if not already calculated
+            if (!(fieldName in dictFieldDomains)) {
+              // Calculate it
+              dictFieldDomains[fieldName] = this.getFieldDomain(fieldName, layerConfig);
+            }
+            const fieldDomain = dictFieldDomains[fieldName];
+
+            // Calculate the field type if not already calculated
+            if (!(fieldName in dictFieldTypes)) {
+              dictFieldTypes[fieldName] = this.getFieldType(fieldName, layerConfig);
+            }
+            const fieldType = dictFieldTypes[fieldName];
+
             if (outfields?.includes(fieldName)) {
               const fieldIndex = outfields.indexOf(fieldName);
               featureInfoEntry.fieldInfo[fieldName] = {

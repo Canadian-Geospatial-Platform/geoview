@@ -278,27 +278,35 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       const geometryType = layerConfig.getTypeGeometry();
 
       // Fetch the features
-      const url = `${layerConfig.geoviewLayerConfig.metadataAccessPath![AppEventProcessor.getDisplayLanguage(this.mapId)]!}/${
-        layerConfig.layerId
-      }/query?where=1=1&outFields=*&f=json&geometry=true`;
+      let urlRoot = layerConfig.geoviewLayerConfig.metadataAccessPath![AppEventProcessor.getDisplayLanguage(this.mapId)]!;
+      if (!urlRoot.endsWith('/')) urlRoot += '/';
+      const url = `${urlRoot}${layerConfig.layerId}/query?where=1=1&outFields=*&f=json&returnGeometry=true`;
 
       const response = await fetch(url);
       const jsonResponse = await response.json();
 
-      // Parse the JSON response and create features
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const features = jsonResponse.features.map((featureData: any) => {
-        let geometry;
-        if (featureData.geometry) {
-          const coordinates = featureData.geometry.points || featureData.geometry.paths || featureData.geometry.rings; // Point or Line or Polygon schema
-          geometry = GeometryApi.createGeometryFromType(geometryType, coordinates);
-        }
-        const properties = featureData.attributes;
-        return new Feature({ ...properties, geometry });
-      });
+      // If any features
+      if (jsonResponse.features) {
+        // Parse the JSON response and create features
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const features = jsonResponse.features.map((featureData: any) => {
+          let geometry;
+          if (featureData.geometry) {
+            const coordinates = featureData.geometry.points ||
+              featureData.geometry.paths ||
+              featureData.geometry.rings || [featureData.geometry.x, featureData.geometry.y]; // MultiPoint or Line or Polygon or Point schema
+            geometry = GeometryApi.createGeometryFromType(geometryType, coordinates);
+          }
+          const properties = featureData.attributes;
+          return new Feature({ ...properties, geometry });
+        });
 
-      // Format and return the result
-      return this.formatFeatureInfoResult(features, layerConfig);
+        // Format and return the result
+        return this.formatFeatureInfoResult(features, layerConfig);
+      }
+
+      // Error
+      throw new Error('Error querying service. No features were returned.');
     } catch (error) {
       // Log
       logger.logError('esri-dynamic.getAllFeatureInfo()\n', error);
