@@ -486,6 +486,8 @@
     <pre id="ResultSetId1-click" class="panel">Click on feature on the map</pre>
     <button type="button" class="collapsible">Get All Feature Info</button>
     <pre id="ResultSetId1-all" class="panel">Comming soon!</pre>
+    <button class="collapsible active">Map config</button>
+    <pre id="LYR1-config" class="panel map-title-holder"></pre>
     <hr />
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="LYR1CS" class="panel"></pre>
@@ -1122,7 +1124,7 @@
               );
               if (++i === LYR2_FILTERS.length) i = 0;
             }
-          }, 3000)
+          }, 3000);
 
           const field2 = cgpv.api.maps.LYR3.layer.geoviewLayer('historical-flood/0').getTemporalDimension('historical-flood/0').field;
           const LYR3_FILTERS = [`${field2} >= date '2018-01-01T00:00:00' and ${field2} <= date '2020-01-01T00:00:00'`,
@@ -1141,7 +1143,7 @@
               );
               if (++j === LYR3_FILTERS.length) j = 0;
             }
-          }, 3000)
+          }, 3000);
 
           let k = 0;
           window.setInterval(() => {
@@ -1157,7 +1159,29 @@
               input.value = `Date < date '${temporalData.range.range[k]}'`;
               if (++k === temporalData.range.range.length) k = 0;
             }
-          }, 1000)
+          }, 1000);
+
+          // =======================================================================================================================
+          // GV: This is a temporary section for testing the API
+          var configOutput = document.getElementById('LYR1-config');
+          configApi.getMapConfig(getMapElement('LYR1')).then((mapConfig) => {
+            let jsonString;
+            const serialize = (objectToSerialize) => {
+              try {
+                const jsonString = JSON.stringify(objectToSerialize, (key, value) => {
+                  if (['geoviewLayerConfig', 'layerStatusWeight', '_olLayer', '_layerStatus', 'waitForProcessedBeforeSendingLoaded'].includes(key)) {
+                    return undefined;
+                  }
+                  return value;
+                }, 2);
+              configOutput.innerText = jsonString;
+              } catch (error) {
+                  console.error("Erreur lors de la sérialisation JSON :", error);
+              }
+            }
+            jsonString = serialize(mapConfig);
+          });
+          /**/
         }
       });
     </script>
