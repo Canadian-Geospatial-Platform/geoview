@@ -153,18 +153,6 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
 
   const { openModal } = useUIStoreActions();
 
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('DATA-TABLE - sorting', sorting);
-
-    // scroll to the top of the table when the sorting changes
-    try {
-      rowVirtualizerInstanceRef.current?.scrollToIndex?.(0);
-    } catch (error) {
-      logger.logError('Data table error on sorting action', error);
-    }
-  }, [sorting]);
-
   /**
    * Create table header cell
    * @param {string} header value to be displayed in cell
@@ -391,15 +379,17 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
           </IconButton>
         ),
         DETAILS: (
-          <IconButton
-            color="primary"
-            onClick={() => {
-              setSelectedFeature(feature);
-              openModal({ activeElementId: 'featureDetailDataTable', callbackElementId: 'table-details' });
-            }}
-          >
-            <InfoOutlinedIcon />
-          </IconButton>
+          <Box marginLeft="0.3rem">
+            <IconButton
+              color="primary"
+              onClick={() => {
+                setSelectedFeature(feature);
+                openModal({ activeElementId: 'featureDetailDataTable', callbackElementId: 'table-details' });
+              }}
+            >
+              <InfoOutlinedIcon />
+            </IconButton>
+          </Box>
         ),
         ...feature.fieldInfo,
       };
@@ -436,7 +426,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
         <Box>
           <Box>
             <MRTToggleFiltersButton className="style1" table={table} />
-            <FilterMap layerPath={layerPath} />
+            <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} />
             <MRTShowHideColumnsButton className="style1" table={table} />
             <MRTToggleDensePaddingButton className="style1" table={table} />
             <MRTFullScreenToggleButton className="style1" table={table} />
@@ -489,6 +479,23 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
       }),
     },
   });
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DATA-TABLE - sorting', sorting);
+
+    // update scroll index when there are some rows in the table.
+    const rowsCount = useTable!.getRowCount();
+    // scroll to the top of the table when the sorting changes
+    try {
+      if (rowsCount > 0) {
+        rowVirtualizerInstanceRef.current?.scrollToIndex?.(0);
+      }
+    } catch (error) {
+      logger.logError('Data table error on sorting action', error);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sorting]);
 
   /**
    * Convert the filter list from the Column Filter state to filter the map.

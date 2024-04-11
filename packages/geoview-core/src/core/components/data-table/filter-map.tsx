@@ -10,16 +10,17 @@ import { logger } from '@/core/utils/logger';
 
 interface FilterMapProps {
   layerPath: string;
+  isGlobalFilterOn: boolean;
 }
 
 /**
  * Custom Filter map toggle button.
  * @param {string} layerPath key of the layer displayed in the map.
- * @param {string} mapid id of the map
+ * @param {boolean} isGlobalFilterOn is global filter on
  * @returns {JSX.Element} returns Switch
  *
  */
-function FilterMap({ layerPath }: FilterMapProps): JSX.Element {
+function FilterMap({ layerPath, isGlobalFilterOn }: FilterMapProps): JSX.Element {
   // Log
   logger.logTraceRender('components/data-table/filter-map');
 
@@ -37,6 +38,7 @@ function FilterMap({ layerPath }: FilterMapProps): JSX.Element {
         onChange={() => setMapFilteredEntry(!datatableSettings[layerPath].mapFilteredRecord ?? true, layerPath)}
         checked={!!datatableSettings[layerPath].mapFilteredRecord}
         sx={sxClasses.filterMap}
+        disabled={isGlobalFilterOn}
       />
     </Tooltip>
   );
