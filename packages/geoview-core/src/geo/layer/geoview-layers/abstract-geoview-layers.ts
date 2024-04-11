@@ -1452,6 +1452,11 @@ export type TypeVectorLayerStyles = Partial<Record<TypeStyleGeometry, TypeStyleR
  * GeoViewAbstractLayers types
  */
 
+// GV: CONFIG EXTRACTION
+// GV: This section of code was extracted and copied to the geoview-config package
+// GV: |||||
+// GV: vvvvv
+
 // Definition of the keys used to create the constants of the GeoView layer
 // TODO: Refactor - Move this and related types/const below lower in the architecture? Say, to MapSchemaTypes? Otherwise, things circle..
 type LayerTypesKey =
@@ -1527,6 +1532,8 @@ export const CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<TypeGeoviewLayerType, string> 
   ogcWms: 'TypeOgcWmsLayerEntryConfig',
 };
 
+// GV: ^^^^^
+// GV: |||||
 const validVectorLayerLegendTypes: TypeGeoviewLayerType[] = [
   CONST_LAYER_TYPES.CSV,
   CONST_LAYER_TYPES.GEOJSON,

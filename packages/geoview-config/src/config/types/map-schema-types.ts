@@ -1,22 +1,12 @@
 // We use _ for layerPth and olLayer all over the file. We keep it global...
-import { Extent } from 'ol/extent';
-import BaseLayer from 'ol/layer/Base';
-import LayerGroup from 'ol/layer/Group';
-import { Coordinate } from 'ol/coordinate';
-
-import { TypeBasemapOptions } from '@/geo/layer/basemap/basemap-types';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
-import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { TileLayerEntryConfig } from '@/core/utils/config/validation-classes/tile-layer-entry-config';
-import { VectorHeatmapLayerEntryConfig } from '@/core/utils/config/validation-classes/heatmap-layer-entry-config';
-import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { TypeJsonValue } from '@/core/types/global-types';
+import { AbstractGeoviewLayerConfig } from './classes/geoview-config/abstract-geoview-layer-config';
+import { AbstractBaseLayerEntryConfig } from './classes/layer-tree-config/abstract-base-layer-entry-config';
+import { ConfigBaseClass } from './classes/layer-tree-config/config-base-class';
+import { GroupLayerEntryConfig } from './classes/layer-tree-config/group-layer-entry-config';
+import { EsriDynamicLayerEntryConfig } from './classes/layer-tree-config/raster-leaf/esri-dynamic-layer-entry-config';
+import { EsriFeatureLayerEntryConfig } from './classes/layer-tree-config/vector-leaf/esri-feature-layer-entry-config';
+import { CONST_LAYER_TYPES } from './config-constants';
+import { TypeGeoviewLayerType } from './config-types';
 
 // #region UTILITIES TYPES
 
@@ -45,6 +35,11 @@ export type TypeLocalizedStringFr = Pick<TypeLocalizedStringEnAndFr, 'fr'> & Par
  */
 export type TypeLocalizedStringEnAndFr = Required<Record<TypeDisplayLanguage, string>>;
 // #endregion UTILITIES TYPES
+
+/** ******************************************************************************************************************************
+ * An array of numbers representing an extent: `[minx, miny, maxx, maxy]`.
+ */
+export type Extent = Array<number>;
 
 /** ******************************************************************************************************************************
  * Initial settings to apply to the GeoView layer at creation time.
@@ -194,191 +189,10 @@ export type TypeBaseVectorConfig = {
   type: 'lineString' | 'filledPolygon' | 'simpleSymbol' | 'iconSymbol';
 };
 
-// Definition of the keys used to create the constants of the GeoView layer
-export type LayerEntryTypesKey = 'VECTOR' | 'VECTOR_TILE' | 'VECTOR_HEATMAP' | 'RASTER_TILE' | 'RASTER_IMAGE' | 'GROUP' | 'GEOCORE';
-
 /** ******************************************************************************************************************************
  * Type of Style to apply to the GeoView vector layer source at creation time.
  */
 export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'vector-heatmap' | 'raster-tile' | 'raster-image' | 'group' | 'geoCore';
-
-// Constants for the layer config types
-export const CONST_LAYER_ENTRY_TYPES: Record<LayerEntryTypesKey, TypeLayerEntryType> = {
-  VECTOR: 'vector',
-  VECTOR_TILE: 'vector-tile',
-  VECTOR_HEATMAP: 'vector-heatmap',
-  RASTER_TILE: 'raster-tile',
-  RASTER_IMAGE: 'raster-image',
-  GROUP: 'group',
-  GEOCORE: 'geoCore',
-};
-
-/**
- * Definition of the GeoView layer entry types for each type of Geoview layer
- */
-export const convertLayerTypeToEntry = (layerType: TypeGeoviewLayerType): TypeLayerEntryType => {
-  switch (layerType) {
-    case CONST_LAYER_TYPES.CSV:
-    case CONST_LAYER_TYPES.GEOJSON:
-    case CONST_LAYER_TYPES.GEOPACKAGE:
-    case CONST_LAYER_TYPES.OGC_FEATURE:
-    case CONST_LAYER_TYPES.WFS:
-    case CONST_LAYER_TYPES.ESRI_FEATURE:
-      return CONST_LAYER_ENTRY_TYPES.VECTOR;
-
-    case CONST_LAYER_TYPES.IMAGE_STATIC:
-    case CONST_LAYER_TYPES.ESRI_DYNAMIC:
-    case CONST_LAYER_TYPES.ESRI_IMAGE:
-    case CONST_LAYER_TYPES.WMS:
-      return CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE;
-    case CONST_LAYER_TYPES.XYZ_TILES:
-    case CONST_LAYER_TYPES.VECTOR_TILES:
-      return CONST_LAYER_ENTRY_TYPES.RASTER_TILE;
-    default:
-      // Throw unsupported error
-      throw new Error(`Unsupported layer type ${layerType} to convert to layer entry`);
-  }
-};
-
-/** ******************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a GroupLayerEntryConfig if the entryType attribute of the
- * verifyIfLayer parameter is CONST_LAYER_ENTRY_TYPES.GROUP. The type ascention applies only to the true block of the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerEntryIsGroupLayer = (verifyIfLayer: ConfigBaseClass): verifyIfLayer is GroupLayerEntryConfig => {
-  return verifyIfLayer?.entryType === CONST_LAYER_ENTRY_TYPES.GROUP;
-};
-
-/** ******************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a VectorLayerEntryConfig if the entryType attribute of
- * the verifyIfLayer parameter is 'vector'. The type ascention applies only to the true block of the if clause that use this
- * function.
- *
- * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerEntryIsVector = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is VectorLayerEntryConfig => {
-  return verifyIfLayer?.entryType === CONST_LAYER_ENTRY_TYPES.VECTOR;
-};
-
-/** ******************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TypeVectorHeatmapLayerEntryConfig if the entryType attribute of
- * the verifyIfLayer parameter is 'vectorHeatmap'. The type ascention applies only to the true block of the if clause that use this
- * function.
- *
- * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerEntryIsVectorHeatmap = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is VectorHeatmapLayerEntryConfig => {
-  return verifyIfLayer?.entryType === CONST_LAYER_ENTRY_TYPES.VECTOR_HEATMAP;
-};
-
-/** ******************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a VectorTileLayerEntryConfig if the entryType attribute of the
- * verifyIfLayer parameter is 'vector' and the object has a style attribute. The type ascention applies only to the true block
- * of the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerEntryIsVectorTile = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TileLayerEntryConfig => {
-  return verifyIfLayer?.entryType === CONST_LAYER_ENTRY_TYPES.VECTOR_TILE;
-};
-
-/** ******************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TileLayerEntryConfig if the entryType attribute of the
- * verifyIfLayer parameter is 'raster-tile'. The type ascention applies only to the true block of the if clause that use this
- * function.
- *
- * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerEntryIsRasterTile = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TileLayerEntryConfig => {
-  return verifyIfLayer?.entryType === CONST_LAYER_ENTRY_TYPES.RASTER_TILE;
-};
-
-/** ******************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a OgcWmsLayerEntryConfig if the schemaTag attribute of the
- * verifyIfLayer parameter is CONST_LAYER_TYPES.WMS. The type ascention applies only to the true block of the if clause that use this
- * function.
- *
- * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerEntryIsOgcWms = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is OgcWmsLayerEntryConfig => {
-  return verifyIfLayer?.schemaTag === CONST_LAYER_TYPES.WMS;
-};
-
-/** ******************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a EsriDynamicLayerEntryConfig if the schemaTag attribute of
- * the verifyIfLayer parameter is CONST_LAYER_TYPES.WMS. The type ascention applies only to the true block of the if clause that use this
- * function.
- *
- * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerEntryIsEsriDynamic = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is EsriDynamicLayerEntryConfig => {
-  return verifyIfLayer?.schemaTag === CONST_LAYER_TYPES.ESRI_DYNAMIC;
-};
-
-/** ******************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a EsriImageLayerEntryConfig if the schemaTag attribute of
- * the verifyIfLayer parameter is CONST_LAYER_TYPES.WMS. The type ascention applies only to the true block of the if clause that use this
- * function.
- *
- * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerEntryIsEsriimage = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is EsriImageLayerEntryConfig => {
-  return verifyIfLayer?.schemaTag === CONST_LAYER_TYPES.ESRI_IMAGE;
-};
-
-/** ******************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a ImageStaticLayerEntryConfig if the schemaTag attribute of
- * the verifyIfLayer parameter is CONST_LAYER_TYPES.WMS. The type ascention applies only to the true block of the if clause that use this
- * function.
- *
- * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerEntryIsImageStatic = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is ImageStaticLayerEntryConfig => {
-  return verifyIfLayer?.schemaTag === CONST_LAYER_TYPES.IMAGE_STATIC;
-};
-
-/** ******************************************************************************************************************************
- * Valid values for the layerStatus property.
- */
-// TODO: refactor - are all these statuses still good?
-export type TypeLayerStatus = 'registered' | 'newInstance' | 'processing' | 'processed' | 'loading' | 'loaded' | 'error';
-
-/** ******************************************************************************************************************************
- * Valid values for the loadEndListenerType.
- */
-export type TypeLoadEndListenerType = 'features' | 'tile' | 'image';
-
-/** ******************************************************************************************************************************
- * Type used to initialize the olLayer property and to setup the listeners.
- */
-export type TypeLayerAndListenerType = {
-  olLayer: BaseLayer | LayerGroup | null;
-  loadEndListenerType?: TypeLoadEndListenerType;
-};
-
-/** ******************************************************************************************************************************
- * Type used to allow a call to applyViewFilter from an AbstractGeoViewLayer.
- */
-export type GeoviewChild = AbstractGeoViewLayer & Record<'applyViewFilter', (layerPath: string, layerFilter: string) => void>;
 
 /** ******************************************************************************************************************************
  * Type that defines the domain of valid values for the ESRI format parameter.
@@ -500,163 +314,46 @@ export interface TypeVectorTileSourceInitialConfig extends TypeBaseSourceVectorI
  * Layer config type.
  */
 export type TypeLayerEntryConfig =
-  | AbstractBaseLayerEntryConfig
-  | VectorHeatmapLayerEntryConfig
-  | VectorLayerEntryConfig
-  | VectorLayerEntryConfig
-  | OgcWmsLayerEntryConfig
-  | EsriDynamicLayerEntryConfig
-  | EsriImageLayerEntryConfig
-  | ImageStaticLayerEntryConfig
-  | TileLayerEntryConfig
-  | GroupLayerEntryConfig;
-
-// GV: CONFIG EXTRACTION
-// GV: This section of code is not used by the new config validation code
-// GV: |||||
-// GV: vvvvv
-
-/** ******************************************************************************************************************************
- * List of layers. Corresponds to the layerList defined in the schema.
- */
-// TODO: Suggestion - Get rid of this type. Simply use TypeLayerEntryConfig[]. It'd simplify types management accross the source code.
-export type TypeListOfLayerEntryConfig = TypeLayerEntryConfig[];
-
-/** ******************************************************************************************************************************
- *  Definition of the Geoview layer list.
- */
-// TODO: Suggestion - Get rid of this type. Simply use TypeGeoviewLayerConfig[]. It'd simplify types management accross the source code.
-export type TypeListOfGeoviewLayerConfig = TypeGeoviewLayerConfig[];
-// GV: ^^^^^
-// GV: |||||
-
-// GV: CONFIG EXTRACTION
-// GV: This section of code was extracted and copied to the geoview-config package
-// GV: |||||
-// GV: vvvvv
+  | (ConfigBaseClass & GroupLayerEntryConfig)
+  | (ConfigBaseClass & AbstractBaseLayerEntryConfig & (EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig));
+// | VectorHeatmapLayerEntryConfig
+// | VectorLayerEntryConfig
+// | OgcWmsLayerEntryConfig
+// | EsriImageLayerEntryConfig
+// | ImageStaticLayerEntryConfig
+// | TileLayerEntryConfig
 
 /** ******************************************************************************************************************************
  *  Definition of a single Geoview layer configuration.
  */
 export type TypeGeoviewLayerConfig = {
-  /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
-  olLayer?: Promise<BaseLayer>;
   /** The GeoView layer identifier. */
   geoviewLayerId: string;
-  /**
-   * The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this
-   * information.
-   */
+
+  /** Flag used to indicate that the layer is a GeoCore layer. */
+  isGeocoreLayer: false;
+
   geoviewLayerName?: TypeLocalizedString;
+
   /** The GeoView layer access path (English/French). */
   metadataAccessPath?: TypeLocalizedString;
+
   /** Type of GeoView layer. */
   geoviewLayerType: TypeGeoviewLayerType;
+
   /** Date format used by the service endpoint. */
   serviceDateFormat?: string;
+
   /** Date format used by the getFeatureInfo to output date variable. */
   externalDateFormat?: string;
+
   /**
    * Initial settings to apply to the GeoView layer at creation time.
-   * This attribute is allowed only if listOfLayerEntryConfig.length > 1.
    */
   initialSettings?: TypeLayerInitialSettings;
 
-  /** The layer entries to use from the GeoView layer. */
-  listOfLayerEntryConfig: TypeListOfLayerEntryConfig;
-};
-
-// GV: ^^^^^
-// GV: |||||
-/**
- * Definition of a GeoCore layer configuration
- */
-export type GeoCoreLayerConfig = {
-  /** Type of GeoView layer. */
-  geoviewLayerType: typeof CONST_LAYER_ENTRY_TYPES.GEOCORE;
-
-  /** The GeoCore UUID. */
-  geoviewLayerId: string;
-
-  /**
-   * The display name of the layer (English/French). This overrides the default name coming from the GeoCore API.
-   */
-  // TODO: Bug - The geoviewLayerName doesn't override the name from GeoCore. Fix this.
-  // TO.DOCONT: On type we should have the initial setting as well. This is to override the information from service.
-  // TO.DOCONT: I think it is working with other type of layer. Now having geocore not a layer type anymore, we should be able to overrides.
-  // TO.DOCONT: For this we will need a little trick because when we create the config the setting are set at the root level and in our config it will take it from the layerID.
-  // TO.DOCONT: There is refactor to do to make this work for all layer type. Global setting should be cascade to child of the root layer.
-  geoviewLayerName: TypeLocalizedString;
-};
-
-/**
- * This type indicates the Layer entry possibilities. They can be either a regular GeoviewLayerConfig or a GeoCoreLayerConfig.
- * A {GeoCoreLayerConfig} isn't an official {TypeGeoviewLayerConfig}, but in the configuration they are treated as such.
- * This type, which presents the 2 options as 2 different types, helps to represent this and remain type safe.
- */
-export type MapConfigLayerEntry = TypeGeoviewLayerConfig | GeoCoreLayerConfig;
-
-/**
- * Returns true if the layer entry from the map configuration represents a GeoCore layer type.
- * @param {MapConfigLayerEntry} layerConfigEntryOption The layer entry config to check
- * @returns {boolean} True if the layer type if GeoCore
- */
-export const mapConfigLayerEntryIsGeoCore = (layerConfigEntryOption: MapConfigLayerEntry) => {
-  return layerConfigEntryOption.geoviewLayerType === CONST_LAYER_ENTRY_TYPES.GEOCORE;
-};
-
-/**
- * Temporary? function to serialize a geoview layer configuration to be able to send it to the store
- * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The geoviewlayer config to serialize
- * @returns TypeJsonValue The serialized config as pure JSON
- */
-export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLayerEntry): TypeJsonValue => {
-  // TODO: Create a 'serialize()' function inside `TypeGeoviewLayerConfig` when/if it's transformed to a class.
-  // TO.DOCONT: and copy this code in deleting this function here. For now, this explicit workaround function is necessary.
-
-  // If GeoCore layer entry
-  if (mapConfigLayerEntryIsGeoCore(geoviewLayerConfig)) {
-    // Serialize
-    return {
-      geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
-      geoviewLayerName: geoviewLayerConfig.geoviewLayerName,
-      geoviewLayerType: geoviewLayerConfig.geoviewLayerType,
-    } as GeoCoreLayerConfig as never;
-  }
-
-  // Cast
-  const geoviewLayerConfigCasted = geoviewLayerConfig as TypeGeoviewLayerConfig;
-
-  // Serialize
-  const serializedGeoviewLayerConfig = {
-    geoviewLayerId: geoviewLayerConfigCasted.geoviewLayerId,
-    geoviewLayerName: geoviewLayerConfigCasted.geoviewLayerName,
-    geoviewLayerType: geoviewLayerConfigCasted.geoviewLayerType,
-    metadataAccessPath: geoviewLayerConfigCasted.metadataAccessPath,
-    serviceDateFormat: geoviewLayerConfigCasted.serviceDateFormat,
-    externalDateFormat: geoviewLayerConfigCasted.externalDateFormat,
-    initialSettingss: geoviewLayerConfigCasted.initialSettings,
-    listOfLayerEntryConfig: [],
-  } as TypeGeoviewLayerConfig;
-
-  // Loop on the LayerEntryConfig to serialize further
-  for (let j = 0; j < (geoviewLayerConfigCasted.listOfLayerEntryConfig?.length || 0); j++) {
-    // TODO: Check - #1883 why some don't have the serialize funcion in here!? Maybe a Type vs Class thing!?
-    // Got to check if serialize exists, because some aren't classes!? Making it as any for now, as we can't trust it
-    if ('serialize' in geoviewLayerConfigCasted.listOfLayerEntryConfig[j]) {
-      // Serialize the TypeLayerEntryConfig
-      const serializedLayerEntryConfig = geoviewLayerConfigCasted.listOfLayerEntryConfig[j].serialize();
-
-      // Store as serialized
-      serializedGeoviewLayerConfig.listOfLayerEntryConfig.push(serializedLayerEntryConfig as never);
-    } else {
-      // Store as is for now
-      serializedGeoviewLayerConfig.listOfLayerEntryConfig.push(geoviewLayerConfigCasted.listOfLayerEntryConfig[j]);
-    }
-  }
-
-  // Return it
-  return serializedGeoviewLayerConfig as never;
+  /** An Array of sub layers to add to the GeoView layer. */
+  listOfLayerEntryConfig: ConfigBaseClass[];
 };
 
 // #region VIEWER CONFIG TYPES
@@ -665,42 +362,6 @@ export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLay
  */
 export type TypeDisplayTheme = 'dark' | 'light' | 'geo.ca';
 export const VALID_DISPLAY_THEME: TypeDisplayTheme[] = ['dark', 'light', 'geo.ca'];
-
-/** ******************************************************************************************************************************
- *  Definition of the map feature instance according to what is specified in the schema.
- */
-export type TypeMapFeaturesInstance = {
-  /** map configuration. */
-  map: TypeMapConfig;
-  /** Service URLs. */
-  serviceUrls: TypeServiceUrls;
-  /** Display theme, default = geo.ca. */
-  theme?: TypeDisplayTheme;
-  /** Nav bar properies. */
-  navBar?: TypeNavBarProps;
-  /** App bar properies. */
-  appBar?: TypeAppBarProps;
-  /** Footer bar properies. */
-  footerBar?: TypeFooterBarProps;
-  /** Overview map properies. */
-  overviewMap?: TypeOverviewMapProps;
-  /** Map components. */
-  components?: TypeMapComponents;
-  /** List of core packages. */
-  corePackages?: TypeMapCorePackages;
-  /** List of external packages. */
-  externalPackages?: TypeExternalPackages;
-  /**
-   * ISO 639-1 code indicating the languages supported by the configuration file. It will use value(s) provided here to
-   * access bilangual configuration nodes. For value(s) provided here, each bilingual configuration node MUST provide a value.
-   * */
-  suportedLanguages: TypeListOfLocalizedLanguages;
-  /**
-   * The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by
-   * this version of the viewer.
-   */
-  schemaVersionUsed?: '1.0';
-};
 
 /* *******************************************************************************************************************************
 /** ISO 639-1  language code prefix. */
@@ -723,23 +384,21 @@ export type TypeValidVersions = '1.0';
 /** Constante mainly use for version validation. */
 export const VALID_VERSIONS: TypeValidVersions[] = ['1.0'];
 
-/** Type used to define the map mouse information  */
-export type TypeMapMouseInfo = {
-  lnglat: Coordinate;
-  pixel: Coordinate;
-  projected: Coordinate;
-  dragging: boolean;
-};
+/** ******************************************************************************************************************************
+ *  Definition of the basemap options type.
+ */
+export type TypeBasemapId = 'transport' | 'osm' | 'simple' | 'nogeom' | 'shaded';
 
 /** ******************************************************************************************************************************
- *  Definition of map state to attach to the map object for reference.
+ *  Definition of the basemap options type.
  */
-export type TypeMapState = {
-  currentProjection: number;
-  currentZoom: number;
-  mapCenterCoordinates: Coordinate;
-  singleClickedPosition: TypeMapMouseInfo;
-  pointerPosition: TypeMapMouseInfo;
+export type TypeBasemapOptions = {
+  /** Id of the basemap to use. */
+  basemapId: TypeBasemapId;
+  /** Enable or disable shaded basemap (if basemap id is set to shaded then this should be false). */
+  shaded: boolean;
+  /** Enable or disable basemap labels. */
+  labeled: boolean;
 };
 
 /** ******************************************************************************************************************************
@@ -751,7 +410,7 @@ export type TypeMapConfig = {
   /** Type of interaction. */
   interaction: TypeInteraction;
   /** List of GeoView Layers in the order which they should be added to the map. */
-  listOfGeoviewLayerConfig?: MapConfigLayerEntry[];
+  listOfGeoviewLayerConfig: AbstractGeoviewLayerConfig[];
   /** View settings. */
   viewSettings: TypeViewSettings;
   /** Highlight color. */
@@ -848,7 +507,7 @@ export type TypeValidFooterBarTabsCoreProps = Array<'legend' | 'layers' | 'detai
 /** ******************************************************************************************************************************
  *  Overview map options. Default none.
  */
-export type TypeOverviewMapProps = { hideOnZoom: number } | undefined;
+export type TypeOverviewMapProps = { hideOnZoom: number };
 
 /** ******************************************************************************************************************************
  * Core components to initialize on viewer load. Default = ['north-arrow', 'overview-map'].

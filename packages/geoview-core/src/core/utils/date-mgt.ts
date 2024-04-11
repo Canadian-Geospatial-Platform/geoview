@@ -500,7 +500,7 @@ export class DateMgt {
     if (dateFormat) {
       const upperCaseDateFormat = dateFormat.toUpperCase().replace(/Z/, '+00:00');
       let formatToAnalyze = upperCaseDateFormat;
-      // Vallid date time formats match one of the following regular expression.
+      // Valid date time formats match one of the following regular expression.
       const numberOfBrackets = [...formatToAnalyze.matchAll(/[[\]]/g)];
       if (!(formatToAnalyze.startsWith('Y') ? [0, 2] : [0, 2, 4]).includes(numberOfBrackets.length))
         throw new Error(`The string "${dateFormat}" is an invalid date format.`);
