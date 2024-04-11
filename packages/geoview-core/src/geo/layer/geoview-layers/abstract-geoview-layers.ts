@@ -1214,10 +1214,9 @@ export abstract class AbstractGeoViewLayer {
       features.forEach((featureNeedingItsCanvas) => {
         promisedAllCanvasFound.push(
           new Promise((resolveCanvas) => {
-            getFeatureCanvas(featureNeedingItsCanvas, layerConfig, callbackToFetchDataUrl)
-              .then((canvas) => {
-                resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
-              });
+            getFeatureCanvas(featureNeedingItsCanvas, layerConfig, callbackToFetchDataUrl).then((canvas) => {
+              resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
+            });
           })
         );
       });
