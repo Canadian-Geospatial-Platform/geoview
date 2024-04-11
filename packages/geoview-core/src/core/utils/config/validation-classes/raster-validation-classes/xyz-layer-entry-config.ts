@@ -13,7 +13,7 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
     Object.assign(this, layerConfig);
 
     /** layerConfig.source.dataAccessPath is mandatory. */
-    if (!this.source.dataAccessPath) {
+    if (!layerConfig.source || !layerConfig.source.dataAccessPath) {
       throw new Error(
         `source.dataAccessPath on layer entry ${this.layerPath} is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} of type ${this.geoviewLayerConfig.geoviewLayerType}`
       );

@@ -1,11 +1,5 @@
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import {
-  CONST_LAYER_ENTRY_TYPES,
-  GeoviewChild,
-  TypeLocalizedString,
-  TypeSourceImageEsriInitialConfig,
-  TypeStyleConfig,
-} from '@/geo/map/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, GeoviewChild, TypeSourceImageEsriInitialConfig, TypeStyleConfig } from '@/geo/map/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 /** ******************************************************************************************************************************
@@ -39,8 +33,8 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
       throw new Error(`The layer entry with layerId equal to ${this.layerPath} must be an integer string`);
     }
     // if layerConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
-    if (!this.source) this.source = {};
-    if (!this.source.dataAccessPath) this.source.dataAccessPath = { ...this.geoviewLayerConfig.metadataAccessPath } as TypeLocalizedString;
+    this.source = {};
+    this.source.dataAccessPath = { ...layerConfig.geoviewLayerConfig.metadataAccessPath! };
   }
 
   /**
