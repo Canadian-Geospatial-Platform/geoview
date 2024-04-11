@@ -141,7 +141,7 @@ export class Notifications {
   showMessage(message: string, params: TypeJsonValue[] | TypeJsonArray | string[] = [], withNotification = true, button = {}): void {
     // Redirect
     this.#showSnackbarMessage('info', message, params, button);
-    if (withNotification) this.addNotificationMessage(message);
+    if (withNotification) this.addNotificationMessage(message, params);
   }
 
   /**
@@ -155,7 +155,7 @@ export class Notifications {
   showSuccess(message: string, params: TypeJsonValue[] | TypeJsonArray | string[] = [], withNotification = true, button = {}): void {
     // Redirect
     this.#showSnackbarMessage('success', message, params, button);
-    if (withNotification) this.addNotificationSuccess(message);
+    if (withNotification) this.addNotificationSuccess(message, params);
   }
 
   /**
@@ -169,7 +169,7 @@ export class Notifications {
   showWarning(message: string, params: TypeJsonValue[] | TypeJsonArray | string[] = [], withNotification = true, button = {}): void {
     // Redirect
     this.#showSnackbarMessage('warning', message, params, button);
-    if (withNotification) this.addNotificationWarning(message);
+    if (withNotification) this.addNotificationWarning(message, params);
   }
 
   /**
@@ -183,7 +183,7 @@ export class Notifications {
   showError(message: string, params: TypeJsonValue[] | TypeJsonArray | string[] = [], withNotification = true, button = {}): void {
     // Redirect
     this.#showSnackbarMessage('error', message, params, button);
-    if (withNotification) this.addNotificationError(message);
+    if (withNotification) this.addNotificationError(message, params);
   }
   // #endregion MESSAGES
 

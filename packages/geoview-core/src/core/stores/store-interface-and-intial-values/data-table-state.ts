@@ -72,7 +72,6 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
     tableHeight: 600,
     selectedFeature: null,
 
-    // #region ACTIONS
     actions: {
       applyMapFilters: (filterStrings: string): void => {
         const layerPath = get().dataTableState.selectedLayerPath;
@@ -128,7 +127,6 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
         get().dataTableState.setterActions.setSelectedFeature(feature);
       },
     },
-    // #endregion ACTIONS
 
     setterActions: {
       setActiveLayersData: (activeLayerData: TypeLayerData[]) => {
