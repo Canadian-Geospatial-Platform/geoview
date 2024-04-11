@@ -36,11 +36,15 @@ import {
   IconButton,
   Tooltip,
   ZoomInSearchIcon,
+  InfoOutlinedIcon,
 } from '@/ui';
 import { api } from '@/app';
+
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useDataTableStoreActions, useDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
 import { MappedLayerDataType } from './data-panel';
@@ -129,7 +133,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
 
   // get store actions and values
   const { zoomToExtent } = useMapStoreActions();
-  const { applyMapFilters } = useDataTableStoreActions();
+  const { applyMapFilters, setSelectedFeature } = useDataTableStoreActions();
   const language = useAppDisplayLanguage();
   const datatableSettings = useDataTableLayerSettings();
 
@@ -138,7 +142,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
   // #region PINNED Datatable columns
   const iconColumn = { alias: t('dataTable.icon'), dataType: 'string', id: t('dataTable.icon') };
   const zoomColumn = { alias: t('dataTable.zoom'), dataType: 'string', id: t('dataTable.zoom') };
-  const detailColumn = { alias: t('dataTable.detail'), dataType: 'string', id: t('dataTable.detail') };
+  const detailColumn = { alias: t('dataTable.details'), dataType: 'string', id: t('dataTable.details') };
   // #endregion
 
   // #region REACT CUSTOM HOOKS
@@ -146,6 +150,8 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
   const { columnFilters, setColumnFilters } = useFilterRows({ layerPath });
   const { globalFilter, setGlobalFilter } = useGlobalFilter({ layerPath });
   // #endregion
+
+  const { openModal } = useUIStoreActions();
 
   useEffect(() => {
     // Log
@@ -275,7 +281,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
     // Log
     logger.logTraceUseMemo('DATA-TABLE - columns', density);
 
-    const entries = Object.entries({ ICON: iconColumn, ZOOM: zoomColumn, DETAIL: detailColumn, ...data.fieldInfos });
+    const entries = Object.entries({ ICON: iconColumn, ZOOM: zoomColumn, DETAILS: detailColumn, ...data.fieldInfos });
     const columnList = [] as MRTColumnDef<ColumnsType>[];
     entries.forEach(([key, value]) => {
       columnList.push({
@@ -329,9 +335,9 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
             'notEmpty',
           ],
         }),
-        ...([t('dataTable.icon'), t('dataTable.zoom'), t('dataTable.detail')].includes(value.alias)
+        ...([t('dataTable.icon'), t('dataTable.zoom'), t('dataTable.details')].includes(value.alias)
           ? {
-              size: 80,
+              size: 70,
               enableColumnFilter: false,
               enableColumnActions: false,
               enableSorting: false,
@@ -384,18 +390,21 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
             <ZoomInSearchIcon />
           </IconButton>
         ),
-        DETAIL: (
-          <Button
-            type="text"
-            size="small"
-            sx={{ fontSize: '0.875rem', background: 'none', padding: 0, minWidth: 0, height: '1.25rem', '&:hover': { background: 'none' } }}
+        DETAILS: (
+          <IconButton
+            color="primary"
+            onClick={() => {
+              setSelectedFeature(feature);
+              openModal({ activeElementId: 'featureDetailDataTable', callbackElementId: 'table-details' });
+            }}
           >
-            Detail
-          </Button>
+            <InfoOutlinedIcon />
+          </IconButton>
         ),
         ...feature.fieldInfo,
       };
     }) as unknown as ColumnsType[];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.features, handleZoomIn]);
 
   const useTable = useMaterialReactTable({
@@ -409,7 +418,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
       sorting,
       columnFilters,
       density,
-      columnPinning: { left: ['ICON', 'ZOOM', 'DETAIL'] },
+      columnPinning: { left: ['ICON', 'ZOOM', 'DETAILS'] },
       globalFilter,
     },
     enableColumnFilterModes: true,

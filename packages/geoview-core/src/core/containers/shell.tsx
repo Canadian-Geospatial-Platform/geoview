@@ -24,6 +24,7 @@ import {
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import ExportModal from '@/core/components/export/export-modal';
 import DataTableModal from '@/core/components/data-table/data-table-modal';
+import FeatureDetailModal from '@/core/components/details/feature-detail-modal';
 import { useGeoViewConfig } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import { MapViewer, MapComponentAddedEvent, MapComponentRemovedEvent } from '@/geo/map/map-viewer';
@@ -244,6 +245,8 @@ export function Shell(props: ShellProps): JSX.Element {
           <FocusTrapDialog mapId={mapViewer.mapId} focusTrapId={mapViewer.mapId} />
           <ExportModal />
           {focusItem.activeElementId === 'layerDataTable' && <DataTableModal />}
+          {/* Show Feature Detail Modal when detail icon is clicked in datatable each row */}
+          {focusItem.activeElementId === 'featureDetailDataTable' && <FeatureDetailModal />}
           {/* modal section end */}
           {Object.keys(components).map((key: string) => {
             return <Fragment key={key}>{components[key]}</Fragment>;

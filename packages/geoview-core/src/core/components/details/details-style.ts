@@ -32,6 +32,10 @@ export const getSxClasses = (theme: Theme) => ({
     overflowY: 'auto',
     overflowX: 'hidden',
   },
+  featureDetailListContainer: {
+    overflowY: 'auto',
+    overflowX: 'hidden',
+  },
   selectFeatureCheckbox: {
     color: theme.palette.geoViewColor.primary.main,
     '&.Mui-checked': {
@@ -53,5 +57,12 @@ export const getSxClasses = (theme: Theme) => ({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  featureDetailModal: {
+    '& .MuiDialog-container': {
+      '& .MuiPaper-root': {
+        minWidth: '40rem',
+      },
+    },
   },
 });
