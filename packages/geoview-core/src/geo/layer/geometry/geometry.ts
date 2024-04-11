@@ -10,6 +10,7 @@ import { asArray, asString } from 'ol/color';
 import { api } from '@/app';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { generateId, setAlphaColor } from '@/core/utils/utilities';
+import { TypeStyleGeometry } from '@/geo/map/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 
@@ -637,6 +638,35 @@ export class GeometryApi {
           this.geometryGroups.splice(i, 1);
         }
       }
+    }
+  }
+
+  /**
+   * Creates a Geometry given a geometry type and coordinates expected in any logical format.
+   * @param geometryType - The geometry type to create
+   * @param coordinates - The coordinates to use to create the geometry
+   * @returns The OpenLayers Geometry
+   */
+  static createGeometryFromType(
+    geometryType: TypeStyleGeometry,
+    coordinates: Coordinate | Coordinate[] | Coordinate[][] | number[]
+  ): OLGeometry {
+    switch (geometryType) {
+      case 'Point':
+        // Create a point geometry
+        return new Point(coordinates as Coordinate);
+
+      case 'LineString':
+        // Create a line geometry
+        return new LineString(coordinates as Coordinate[] | number[]);
+
+      case 'Polygon':
+        // Create a polygon geometry
+        return new Polygon(coordinates as Coordinate[][] | number[]);
+
+      // Add support for other geometry types as needed
+      default:
+        throw new Error(`Unsupported geometry type: ${geometryType}`);
     }
   }
 }

@@ -637,7 +637,7 @@ export class ConfigValidation {
       } else if (geoviewEntryIsVectorTiles(layerConfig)) {
         listOfLayerEntryConfig[i] = new VectorTilesLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsEsriDynamic(layerConfig)) {
-        listOfLayerEntryConfig[i] = new EsriDynamicLayerEntryConfig(layerConfig as EsriDynamicLayerEntryConfig);
+        listOfLayerEntryConfig[i] = new EsriDynamicLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsEsriFeature(layerConfig)) {
         listOfLayerEntryConfig[i] = new EsriFeatureLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsEsriImage(layerConfig)) {
