@@ -4,6 +4,8 @@ import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeMapCorePackages, TypeNavBarProps, TypeValidAppBarCoreProps } from '@/geo/map/map-schema-types';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 
+// GV Important: See notes in header of UIEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
+
 type focusItemProps = {
   activeElementId: string | false;
   callbackElementId: string | false;
@@ -23,6 +25,16 @@ export interface IUIState {
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
+    closeModal: () => void;
+    openModal: (uiFocus: focusItemProps) => void;
+    setActiveFooterBarTab: (id: string) => void;
+    setActiveTrapGeoView: (active: boolean) => void;
+    setGeolocatorActive: (active: boolean) => void;
+    setFooterPanelResizeValue: (value: number) => void;
+    setMapInfoExpanded: (expanded: boolean) => void;
+  };
+
+  setterActions: {
     closeModal: () => void;
     openModal: (uiFocus: focusItemProps) => void;
     setActiveFooterBarTab: (id: string) => void;
@@ -58,8 +70,38 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
       });
     },
 
-    // #region ACTIONS
     actions: {
+      closeModal: () => {
+        // Redirect to setter
+        get().uiState.setterActions.closeModal();
+      },
+      openModal: (uiFocus: focusItemProps) => {
+        // Redirect to setter
+        get().uiState.setterActions.openModal(uiFocus);
+      },
+      setActiveFooterBarTab: (id: string) => {
+        // Redirect to setter
+        get().uiState.setterActions.setActiveFooterBarTab(id);
+      },
+      setActiveTrapGeoView: (active: boolean) => {
+        // Redirect to setter
+        get().uiState.setterActions.setActiveTrapGeoView(active);
+      },
+      setGeolocatorActive: (active: boolean) => {
+        // Redirect to setter
+        get().uiState.setterActions.setGeolocatorActive(active);
+      },
+      setFooterPanelResizeValue: (value) => {
+        // Redirect to setter
+        get().uiState.setterActions.setFooterPanelResizeValue(value);
+      },
+      setMapInfoExpanded: (expanded: boolean) => {
+        // Redirect to setter
+        get().uiState.setterActions.setMapInfoExpanded(expanded);
+      },
+    },
+
+    setterActions: {
       closeModal: () => {
         document.getElementById(get().uiState.focusITem.callbackElementId as string)?.focus();
         set({
@@ -118,7 +160,6 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         });
       },
     },
-    // #endregion ACTIONS
   } as IUIState;
 
   return init;

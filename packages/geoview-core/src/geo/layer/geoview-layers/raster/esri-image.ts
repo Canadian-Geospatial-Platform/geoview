@@ -34,6 +34,7 @@ import {
   commonProcessTemporalDimension,
 } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { getLegendStyles } from '@/geo/renderer/geoview-renderer';
 
 export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
@@ -185,7 +186,7 @@ export class EsriImage extends AbstractGeoViewRaster {
         layerPath,
         layerName: layerConfig?.layerName,
         styleConfig,
-        legend: await api.maps[this.mapId].geoviewRenderer.getLegendStyles(
+        legend: await getLegendStyles(
           layerConfig as AbstractBaseLayerEntryConfig & {
             style: TypeStyleConfig;
           }
