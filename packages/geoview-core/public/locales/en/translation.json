@@ -196,6 +196,7 @@
     "title": "Data Table",
     "icon": "ICON",
     "zoom": "ZOOM",
+    "detail": "DETAIL",
     "exportBtn": "Export",
     "jsonExportBtn": "Download GeoJSON",
     "downloadAsCSV": "Download as CSV",

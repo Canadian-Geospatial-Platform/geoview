@@ -135,8 +135,11 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
 
   const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
 
+  // #region PINNED Datatable columns
   const iconColumn = { alias: t('dataTable.icon'), dataType: 'string', id: t('dataTable.icon') };
   const zoomColumn = { alias: t('dataTable.zoom'), dataType: 'string', id: t('dataTable.zoom') };
+  const detailColumn = { alias: t('dataTable.detail'), dataType: 'string', id: t('dataTable.detail') };
+  // #endregion
 
   // #region REACT CUSTOM HOOKS
   const { initLightBox, LightBoxComponent } = useLightBox();
@@ -272,7 +275,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
     // Log
     logger.logTraceUseMemo('DATA-TABLE - columns', density);
 
-    const entries = Object.entries({ ICON: iconColumn, ZOOM: zoomColumn, ...data.fieldInfos });
+    const entries = Object.entries({ ICON: iconColumn, ZOOM: zoomColumn, DETAIL: detailColumn, ...data.fieldInfos });
     const columnList = [] as MRTColumnDef<ColumnsType>[];
     entries.forEach(([key, value]) => {
       columnList.push({
@@ -326,8 +329,8 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
             'notEmpty',
           ],
         }),
-        ...([t('dataTable.icon'), t('dataTable.zoom')].includes(value.alias)
-          ? { size: 100, enableColumnFilter: false, enableColumnActions: false, enableSorting: false, enableResizing: false }
+        ...([t('dataTable.icon'), t('dataTable.zoom'), t('dataTable.detail')].includes(value.alias)
+          ? { size: 80, enableColumnFilter: false, enableColumnActions: false, enableSorting: false, enableResizing: false }
           : {}),
       });
     });
@@ -374,6 +377,15 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
             <ZoomInSearchIcon />
           </IconButton>
         ),
+        DETAIL: (
+          <Button
+            type="text"
+            size="small"
+            sx={{ fontSize: '0.875rem', background: 'none', padding: 0, minWidth: 0, height: '1.25rem', '&:hover': { background: 'none' } }}
+          >
+            Detail
+          </Button>
+        ),
         ...feature.fieldInfo,
       };
     }) as unknown as ColumnsType[];
@@ -384,12 +396,13 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
     data: rows,
     enableDensityToggle: true,
     onDensityChange: setDensity,
-    initialState: { showColumnFilters: !!columnFilters.length },
+    // NOTE: showGlobalFilter as true when layer change and we want to show global filter by default
+    initialState: { showColumnFilters: !!columnFilters.length, showGlobalFilter: true },
     state: {
       sorting,
       columnFilters,
       density,
-      columnPinning: { left: ['ICON', 'ZOOM'] },
+      columnPinning: { left: ['ICON', 'ZOOM', 'DETAIL'] },
       globalFilter,
     },
     enableColumnFilterModes: true,

@@ -1,8 +1,5 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import {
-  useDataTableStoreActions,
-  useDatatableStoreGlobalFilteredRecord,
-} from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useDataTableStoreActions, useDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
 
 export interface UseGlobalFilterProps {
@@ -18,11 +15,11 @@ export function useGlobalFilter({ layerPath }: UseGlobalFilterProps): {
   globalFilter: string;
   setGlobalFilter: Dispatch<SetStateAction<string>>;
 } {
-  const globalFilteredRecord = useDatatableStoreGlobalFilteredRecord();
+  const datatableSettings = useDataTableLayerSettings();
 
   const { setGlobalFilteredEntry } = useDataTableStoreActions();
 
-  const [globalFilter, setGlobalFilter] = useState(globalFilteredRecord[layerPath] ?? '');
+  const [globalFilter, setGlobalFilter] = useState(datatableSettings[layerPath].globalFilterRecord ?? '');
 
   // update store column filters
   useEffect(() => {

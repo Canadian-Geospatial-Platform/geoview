@@ -19,6 +19,7 @@ interface IDataTableSettings {
   mapFilteredRecord: boolean;
   rowsFilteredRecord: number;
   toolbarRowSelectedMessageRecord: string;
+  globalFilterRecord: string;
 }
 
 export interface IDataTableState {
@@ -40,6 +41,7 @@ export interface IDataTableState {
     setTableHeight: (tableHeight: number) => void;
     setSelectedLayerPath: (layerPath: string) => void;
     triggerGetAllFeatureInfo: (layerPath: string) => void;
+    setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
   };
 
   setterActions: {
@@ -53,6 +55,7 @@ export interface IDataTableState {
     setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
     setTableHeight: (tableHeight: number) => void;
     setSelectedLayerPath: (layerPath: string) => void;
+    setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
   };
 }
 
@@ -81,9 +84,6 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
         get().dataTableState.setterActions.setActiveLayersData(activeLayerData);
       },
       setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => {
-        const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
-        layerSettings.columnFiltersRecord = filtered;
-
         // Redirect to setter
         get().dataTableState.setterActions.setColumnFiltersEntry(filtered, layerPath);
       },
@@ -92,23 +92,14 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
         get().dataTableState.setterActions.setIsEnlargeDataTable(isEnlarge);
       },
       setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => {
-        const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
-        layerSettings.mapFilteredRecord = mapFiltered;
-
         // Redirect to setter
         get().dataTableState.setterActions.setMapFilteredEntry(mapFiltered, layerPath);
       },
       setRowsFilteredEntry: (rows: number, layerPath: string) => {
-        const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
-        layerSettings.rowsFilteredRecord = rows;
-
         // Redirect to setter
         get().dataTableState.setterActions.setRowsFilteredEntry(rows, layerPath);
       },
       setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => {
-        const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
-        layerSettings.toolbarRowSelectedMessageRecord = message;
-
         // Redirect to setter
         get().dataTableState.setterActions.setToolbarRowSelectedMessageEntry(message, layerPath);
       },
@@ -123,6 +114,10 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
       triggerGetAllFeatureInfo(layerPath: string) {
         // Redirect to event processor
         DataTableEventProcessor.triggerGetAllFeatureInfo(get().mapId, layerPath);
+      },
+      setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => {
+        // Redirect to setter
+        get().dataTableState.setterActions.setGlobalFilteredEntry(globalFilterValue, layerPath);
       },
     },
     // #endregion ACTIONS
@@ -150,6 +145,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
           mapFilteredRecord: false,
           rowsFilteredRecord: 0,
           toolbarRowSelectedMessageRecord: '',
+          globalFilterRecord: '',
         };
 
         set({
@@ -224,6 +220,17 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
           dataTableState: {
             ...get().dataTableState,
             selectedLayerPath: layerPath,
+          },
+        });
+      },
+      setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => {
+        const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
+        layerSettings.globalFilterRecord = globalFilterValue;
+
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            layersDataTableSetting: { ...get().dataTableState.layersDataTableSetting, [layerPath]: layerSettings },
           },
         });
       },
