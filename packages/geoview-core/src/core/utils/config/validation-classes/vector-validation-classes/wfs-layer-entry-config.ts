@@ -1,5 +1,4 @@
 import { TypeSourceWFSVectorInitialConfig } from '@/geo/layer/geoview-layers/vector/wfs';
-import { TypeLocalizedString } from '@/geo/map/map-schema-types';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 
 export class WfsLayerEntryConfig extends VectorLayerEntryConfig {
@@ -14,12 +13,12 @@ export class WfsLayerEntryConfig extends VectorLayerEntryConfig {
     Object.assign(this, layerConfig);
 
     // Attribute 'style' must exist in layerConfig even if it is undefined
-    if (!('style' in this)) this.style = undefined;
+    if (!('style' in layerConfig)) this.style = undefined;
+
     // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
     // Value for this.source.format can only be WFS.
-    if (!this.source) this.source = { format: 'WFS' };
-    if (!this.source.format) this.source.format = 'WFS';
-    if (!this.source.dataAccessPath) this.source.dataAccessPath = { ...this.geoviewLayerConfig.metadataAccessPath } as TypeLocalizedString;
-    if (!this.source.dataProjection) this.source.dataProjection = 'EPSG:4326';
+    this.source = { format: 'WFS' };
+    this.source.dataAccessPath = { ...layerConfig.geoviewLayerConfig.metadataAccessPath! };
+    this.source.dataProjection = 'EPSG:4326';
   }
 }
