@@ -98,6 +98,10 @@ const getGeometryType = (feature: Feature): TypeStyleGeometry => {
   return (geometryType.startsWith('Multi') ? geometryType.slice(5) : geometryType) as TypeStyleGeometry;
 };
 
+/** The generic icon to use when failing to get a feature canvas */
+const FORMATTING_NO_LEGEND =
+  'data:image/png;base64,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';
+
 /** Table used to define line symbology to use when drawing lineString and polygon perimeters */
 const lineDashSettings: Record<TypeLineStyle, number[] | undefined> = {
   dash: [16, 4],
@@ -187,6 +191,33 @@ async function createIconCanvas(pointStyle?: Style): Promise<HTMLCanvasElement |
       drawingCanvas.height = height;
       const drawingContext = drawingCanvas.getContext('2d')!;
       drawingContext.globalAlpha = iconStyle.getOpacity();
+      drawingContext.drawImage(image, 0, 0);
+      return drawingCanvas;
+    }
+    return null;
+  } catch (error) {
+    logger.logError(`Error creating incon canvas for pointStyle`, error);
+    return null;
+  }
+}
+
+/** ***************************************************************************************************************************
+ * This method creates a canvas with the image data source (base64 image) provided.
+ *
+ * @param {string} imageDataSource The image source information (base64 image) of the image to load
+ *
+ * @returns {Promise<HTMLCanvasElement>} A promise that the canvas is created.
+ */
+async function createIconCanvasFromImageSource(imageDataSource: string): Promise<HTMLCanvasElement | null> {
+  try {
+    const image = await loadImage(imageDataSource);
+    if (image) {
+      const width = image.width || LEGEND_CANVAS_WIDTH;
+      const height = image.height || LEGEND_CANVAS_HEIGHT;
+      const drawingCanvas = document.createElement('canvas');
+      drawingCanvas.width = width;
+      drawingCanvas.height = height;
+      const drawingContext = drawingCanvas.getContext('2d')!;
       drawingContext.drawImage(image, 0, 0);
       return drawingCanvas;
     }
@@ -1263,7 +1294,7 @@ function searchUniqueValueEntry(fields: string[], uniqueValueStyleInfo: TypeUniq
     for (let j = 0, isEqual = true; j < fields.length && isEqual; j++) {
       // For obscure reasons, it seems that sometimes the field names in the feature do not have the same case as those in the
       // unique value definition.
-      const fieldName = (feature as Feature).getKeys().find((key) => {
+      const fieldName = feature.getKeys().find((key) => {
         return key.toLowerCase() === fields[j].toLowerCase();
       });
       if (fieldName) {
@@ -1541,26 +1572,29 @@ export function getFeatureStyle(
 
 /** ***************************************************************************************************************************
  * This method gets the canvas icon from the style of the feature using the layer entry config.
- *
- * @param {Feature} feature - Feature that need its canvas icon to be defined.
- * @param {AbstractBaseLayerEntryConfig | VectorTileLayerEntryConfig | VectorLayerEntryConfig} layerConfig - Layer
- * entry config that may have a style configuration for the feature.
- *
- * @returns {Promise<HTMLCanvasElement | undefined>} The canvas icon associated to the feature or undefined if not found.
+ * @param {Feature} feature - The feature that need its canvas icon to be defined.
+ * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config that may have a style configuration for the feature.
+ * @param {() => Promise<string | null>} callbackForDataUrl - An optional callback to execute when struggling to build a canvas and have to use a data url to make one
+ * @returns {Promise<HTMLCanvasElement>} The canvas icon associated to the feature or a default empty canvas.
  */
-export function getFeatureCanvas(
+export async function getFeatureCanvas(
   feature: Feature,
-  layerConfig: AbstractBaseLayerEntryConfig | VectorTilesLayerEntryConfig | VectorLayerEntryConfig
-): Promise<HTMLCanvasElement | undefined> {
-  const promisedCanvas = new Promise<HTMLCanvasElement | undefined>((resolve) => {
+  layerConfig: AbstractBaseLayerEntryConfig,
+  callbackForDataUrl?: () => Promise<string | null>
+): Promise<HTMLCanvasElement> {
+  // The canvas that will be returned (if calculated successfully)
+  let canvas: HTMLCanvasElement | undefined;
+
+  // If the feature has a geometry
+  if (feature.getGeometry()) {
     const geometryType = getGeometryType(feature);
     const { style } = layerConfig as VectorLayerEntryConfig;
+
     // Get the style accordingly to its type and geometry.
     if (style![geometryType] !== undefined) {
       const styleSettings = style![geometryType]!;
       const { styleType } = styleSettings;
-      const featureStyle = processStyle[styleType][geometryType].call(
-        '',
+      const featureStyle = processStyle[styleType][geometryType](
         styleSettings,
         feature,
         layerConfig.olLayer!.get('filterEquation'),
@@ -1574,18 +1608,39 @@ export function getFeatureCanvas(
               isSimpleSymbolVectorConfig((styleSettings as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[0].settings)) ||
             (isClassBreakStyleConfig(styleSettings) &&
               isSimpleSymbolVectorConfig((styleSettings as TypeClassBreakStyleConfig).classBreakStyleInfo[0].settings))
-          )
-            resolve(createPointCanvas(featureStyle));
-          else
-            createIconCanvas(featureStyle).then((canvas) => {
-              resolve(canvas || undefined);
-            });
-        } else if (geometryType === 'LineString') resolve(createLineStringCanvas(featureStyle));
-        else resolve(createPolygonCanvas(featureStyle));
-      } else resolve(undefined);
-    } else resolve(undefined);
-  });
-  return promisedCanvas;
+          ) {
+            canvas = createPointCanvas(featureStyle);
+          } else {
+            canvas = (await createIconCanvas(featureStyle)) || undefined;
+          }
+        } else if (geometryType === 'LineString') {
+          canvas = createLineStringCanvas(featureStyle);
+        } else {
+          canvas = createPolygonCanvas(featureStyle);
+        }
+      }
+    }
+  }
+
+  // If set, all good
+  if (canvas) return canvas;
+
+  // Here, it's still not set
+
+  // Callback to get the data url to use
+  const dataUrl = await callbackForDataUrl?.();
+
+  // If any data url can be used
+  if (dataUrl) {
+    // Build a canvas with it
+    canvas = (await createIconCanvasFromImageSource(dataUrl)) || undefined;
+
+    // If set, all good
+    if (canvas) return canvas;
+  }
+
+  // Here, nothing could be done, use the no_legend template
+  return (await createIconCanvasFromImageSource(FORMATTING_NO_LEGEND))!;
 }
 
 /** ***************************************************************************************************************************

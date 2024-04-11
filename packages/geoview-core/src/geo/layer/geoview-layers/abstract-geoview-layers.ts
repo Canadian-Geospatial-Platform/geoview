@@ -15,6 +15,7 @@ import { LayerApi } from '@/geo/layer/layer';
 import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
 import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
+import { AsyncSemaphore } from '@/core/utils/async-semaphore';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
@@ -36,6 +37,8 @@ import {
 import { QueryType, TypeFeatureInfoEntry, TypeLocation, codedValueType, rangeDomainType } from '@/geo/utils/layer-set';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { getLegendStyles, getFeatureCanvas } from '@/geo/renderer/geoview-renderer';
+
+import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 
 // Constant used to define the default layer names
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
@@ -1175,6 +1178,26 @@ export abstract class AbstractGeoViewLayer {
     try {
       if (!features.length) return [];
 
+      // Will hold the generic icon to use in formatting
+      let genericLegendInfo: string | null | undefined;
+      // We only want 1 task to fetch the generic legend (when we have to)
+      const semaphore = new AsyncSemaphore(1);
+
+      // Will be executed when we have to use a default canvas for a particular feature
+      const callbackToFetchDataUrl = (): Promise<string | null> => {
+        // Make sure one task at a time in this
+        return semaphore.withLock(async () => {
+          // Only execute this once in the callback. After this, once the semaphore is unlocked, it's either a string or null for as long as we're formatting
+          if (genericLegendInfo === undefined) {
+            genericLegendInfo = null; // Turn it to null, we are actively trying to find something (not undefined anymore)
+            const legend = await this.queryLegend(layerConfig.layerPath);
+            const legendIcons = LegendEventProcessor.getLayerIconImage(legend);
+            if (legendIcons) genericLegendInfo = legendIcons![0].iconImage || null;
+          }
+          return genericLegendInfo;
+        });
+      };
+
       const featureInfo = layerConfig?.source?.featureInfo;
       const fieldTypes = featureInfo?.fieldTypes?.split(',') as ('string' | 'number' | 'date')[];
       const outfields = getLocalizedValue(
@@ -1185,64 +1208,85 @@ export abstract class AbstractGeoViewLayer {
         featureInfo?.aliasFields as TypeLocalizedString,
         AppEventProcessor.getDisplayLanguage(this.mapId)
       )?.split(',');
-      const queryResult: TypeFeatureInfoEntry[] = [];
-      let featureKeyCounter = 0;
-      let fieldKeyCounter = 0;
-      const promisedAllCanvasFound: Promise<{ feature: Feature; canvas: HTMLCanvasElement | undefined }>[] = [];
+
+      // Loop on the features to build the array holding the promises for their canvas
+      const promisedAllCanvasFound: Promise<{ feature: Feature; canvas: HTMLCanvasElement }>[] = [];
       features.forEach((featureNeedingItsCanvas) => {
         promisedAllCanvasFound.push(
-          new Promise<{ feature: Feature; canvas: HTMLCanvasElement | undefined }>((resolveCanvas) => {
-            getFeatureCanvas(featureNeedingItsCanvas, layerConfig as VectorLayerEntryConfig).then((canvas) => {
+          new Promise((resolveCanvas) => {
+            getFeatureCanvas(featureNeedingItsCanvas, layerConfig, callbackToFetchDataUrl).then((canvas) => {
               resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
             });
           })
         );
       });
+
+      // Hold a dictionary built on the fly for the field domains
+      const dictFieldDomains: { [fieldName: string]: codedValueType | rangeDomainType | null } = {};
+      // Hold a dictionary build on the fly for the field types
+      const dictFieldTypes: { [fieldName: string]: 'string' | 'number' | 'date' } = {};
+
+      // Loop on the promised feature infos
+      let featureKeyCounter = 0;
+      let fieldKeyCounter = 0;
+      const queryResult: TypeFeatureInfoEntry[] = [];
       const arrayOfFeatureInfo = await Promise.all(promisedAllCanvasFound);
-      arrayOfFeatureInfo.forEach(({ canvas, feature }) => {
-        if (canvas) {
-          const extent = feature.getGeometry()!.getExtent();
+      arrayOfFeatureInfo.forEach(({ feature, canvas }) => {
+        let extent;
+        if (feature.getGeometry()) extent = feature.getGeometry()!.getExtent();
 
-          const featureInfoEntry: TypeFeatureInfoEntry = {
-            // feature key for building the data-grid
-            featureKey: featureKeyCounter++,
-            geoviewLayerType: this.type,
-            extent,
-            geometry: feature,
-            featureIcon: canvas,
-            fieldInfo: {},
-            nameField:
-              getLocalizedValue(
-                layerConfig?.source?.featureInfo?.nameField as TypeLocalizedString,
-                AppEventProcessor.getDisplayLanguage(this.mapId)
-              ) || null,
-          };
+        const featureInfoEntry: TypeFeatureInfoEntry = {
+          // feature key for building the data-grid
+          featureKey: featureKeyCounter++,
+          geoviewLayerType: this.type,
+          extent,
+          geometry: feature,
+          featureIcon: canvas,
+          fieldInfo: {},
+          nameField:
+            getLocalizedValue(
+              layerConfig?.source?.featureInfo?.nameField as TypeLocalizedString,
+              AppEventProcessor.getDisplayLanguage(this.mapId)
+            ) || null,
+        };
 
-          const featureFields = (feature as Feature).getKeys();
-          featureFields.forEach((fieldName) => {
-            if (fieldName !== 'geometry') {
-              if (outfields?.includes(fieldName)) {
-                const fieldIndex = outfields.indexOf(fieldName);
-                featureInfoEntry.fieldInfo[fieldName] = {
-                  fieldKey: fieldKeyCounter++,
-                  value: this.getFieldValue(feature, fieldName, fieldTypes![fieldIndex]),
-                  dataType: fieldTypes![fieldIndex] as 'string' | 'date' | 'number',
-                  alias: aliasFields![fieldIndex],
-                  domain: this.getFieldDomain(fieldName, layerConfig),
-                };
-              } else if (!outfields) {
-                featureInfoEntry.fieldInfo[fieldName] = {
-                  fieldKey: fieldKeyCounter++,
-                  value: this.getFieldValue(feature, fieldName, this.getFieldType(fieldName, layerConfig)),
-                  dataType: this.getFieldType(fieldName, layerConfig),
-                  alias: fieldName,
-                  domain: this.getFieldDomain(fieldName, layerConfig),
-                };
-              }
+        const featureFields = feature.getKeys();
+        featureFields.forEach((fieldName) => {
+          if (fieldName !== 'geometry') {
+            // Calculate the field domain if not already calculated
+            if (!(fieldName in dictFieldDomains)) {
+              // Calculate it
+              dictFieldDomains[fieldName] = this.getFieldDomain(fieldName, layerConfig);
             }
-          });
-          queryResult.push(featureInfoEntry);
-        }
+            const fieldDomain = dictFieldDomains[fieldName];
+
+            // Calculate the field type if not already calculated
+            if (!(fieldName in dictFieldTypes)) {
+              dictFieldTypes[fieldName] = this.getFieldType(fieldName, layerConfig);
+            }
+            const fieldType = dictFieldTypes[fieldName];
+
+            if (outfields?.includes(fieldName)) {
+              const fieldIndex = outfields.indexOf(fieldName);
+              featureInfoEntry.fieldInfo[fieldName] = {
+                fieldKey: fieldKeyCounter++,
+                value: this.getFieldValue(feature, fieldName, fieldTypes![fieldIndex]),
+                dataType: fieldTypes![fieldIndex] as 'string' | 'date' | 'number',
+                alias: aliasFields![fieldIndex],
+                domain: fieldDomain,
+              };
+            } else if (!outfields) {
+              featureInfoEntry.fieldInfo[fieldName] = {
+                fieldKey: fieldKeyCounter++,
+                value: this.getFieldValue(feature, fieldName, fieldType),
+                dataType: fieldType,
+                alias: fieldName,
+                domain: fieldDomain,
+              };
+            }
+          }
+        });
+        queryResult.push(featureInfoEntry);
       });
       return queryResult;
     } catch (error) {
