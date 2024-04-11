@@ -24,6 +24,7 @@ import {
   MRT_ShowHideColumnsButton as MRTShowHideColumnsButton,
   MRT_ToggleFiltersButton as MRTToggleFiltersButton,
   MRT_ToggleFullScreenButton as MRTFullScreenToggleButton,
+  MRT_GlobalFilterTextField as MRTGlobalFilterTextField,
   type MRT_SortingState as MRTSortingState,
   type MRT_RowVirtualizer as MRTRowVirtualizer,
   type MRT_ColumnFiltersState as MRTColumnFiltersState,
@@ -35,15 +36,19 @@ import {
   IconButton,
   Tooltip,
   ZoomInSearchIcon,
+  InfoOutlinedIcon,
 } from '@/ui';
 import { api } from '@/app';
+
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useDataTableStoreActions, useDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
 import { MappedLayerDataType } from './data-panel';
-import { useLightBox, useFilterRows, useToolbarActionMessage } from './hooks';
+import { useLightBox, useFilterRows, useToolbarActionMessage, useGlobalFilter } from './hooks';
 import { getSxClasses } from './data-table-style';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
@@ -128,31 +133,25 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
 
   // get store actions and values
   const { zoomToExtent } = useMapStoreActions();
-  const { applyMapFilters } = useDataTableStoreActions();
+  const { applyMapFilters, setSelectedFeature } = useDataTableStoreActions();
   const language = useAppDisplayLanguage();
   const datatableSettings = useDataTableLayerSettings();
 
   const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
 
+  // #region PINNED Datatable columns
   const iconColumn = { alias: t('dataTable.icon'), dataType: 'string', id: t('dataTable.icon') };
   const zoomColumn = { alias: t('dataTable.zoom'), dataType: 'string', id: t('dataTable.zoom') };
+  const detailColumn = { alias: t('dataTable.details'), dataType: 'string', id: t('dataTable.details') };
+  // #endregion
 
   // #region REACT CUSTOM HOOKS
   const { initLightBox, LightBoxComponent } = useLightBox();
   const { columnFilters, setColumnFilters } = useFilterRows({ layerPath });
+  const { globalFilter, setGlobalFilter } = useGlobalFilter({ layerPath });
   // #endregion
 
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('DATA-TABLE - sorting', sorting);
-
-    // scroll to the top of the table when the sorting changes
-    try {
-      rowVirtualizerInstanceRef.current?.scrollToIndex?.(0);
-    } catch (error) {
-      logger.logError('Data table error on sorting action', error);
-    }
-  }, [sorting]);
+  const { openModal } = useUIStoreActions();
 
   /**
    * Create table header cell
@@ -270,7 +269,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
     // Log
     logger.logTraceUseMemo('DATA-TABLE - columns', density);
 
-    const entries = Object.entries({ ICON: iconColumn, ZOOM: zoomColumn, ...data.fieldInfos });
+    const entries = Object.entries({ ICON: iconColumn, ZOOM: zoomColumn, DETAILS: detailColumn, ...data.fieldInfos });
     const columnList = [] as MRTColumnDef<ColumnsType>[];
     entries.forEach(([key, value]) => {
       columnList.push({
@@ -324,8 +323,15 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
             'notEmpty',
           ],
         }),
-        ...([t('dataTable.icon'), t('dataTable.zoom')].includes(value.alias)
-          ? { size: 100, enableColumnFilter: false, enableColumnActions: false, enableSorting: false, enableResizing: false }
+        ...([t('dataTable.icon'), t('dataTable.zoom'), t('dataTable.details')].includes(value.alias)
+          ? {
+              size: 70,
+              enableColumnFilter: false,
+              enableColumnActions: false,
+              enableSorting: false,
+              enableResizing: false,
+              enableGlobalFilter: false,
+            }
           : {}),
       });
     });
@@ -372,39 +378,66 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
             <ZoomInSearchIcon />
           </IconButton>
         ),
+        DETAILS: (
+          <Box marginLeft="0.3rem">
+            <IconButton
+              color="primary"
+              onClick={() => {
+                setSelectedFeature(feature);
+                openModal({ activeElementId: 'featureDetailDataTable', callbackElementId: 'table-details' });
+              }}
+            >
+              <InfoOutlinedIcon />
+            </IconButton>
+          </Box>
+        ),
         ...feature.fieldInfo,
       };
     }) as unknown as ColumnsType[];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.features, handleZoomIn]);
 
   const useTable = useMaterialReactTable({
     columns,
     data: rows,
-    enableGlobalFilter: false,
     enableDensityToggle: true,
     onDensityChange: setDensity,
-    initialState: { showColumnFilters: !!columnFilters.length },
-    state: { sorting, columnFilters, density, columnPinning: { left: ['ICON', 'ZOOM'] } },
+    // NOTE: showGlobalFilter as true when layer change and we want to show global filter by default
+    initialState: { showColumnFilters: !!columnFilters.length, showGlobalFilter: true },
+    state: {
+      sorting,
+      columnFilters,
+      density,
+      columnPinning: { left: ['ICON', 'ZOOM', 'DETAILS'] },
+      globalFilter,
+    },
     enableColumnFilterModes: true,
     enableColumnPinning: true,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
     enableBottomToolbar: false,
     positionToolbarAlertBanner: 'none', // hide existing row count
-    renderTopToolbarCustomActions: () => {
-      // show rowSelection/Filter message on top-left corner of the table
-      return <Box sx={sxClasses.selectedRows}>{datatableSettings[layerPath].toolbarRowSelectedMessageRecord}</Box>;
-    },
-    renderToolbarInternalActions: ({ table }) => (
-      <Box>
-        <MRTToggleFiltersButton className="style1" table={table} />
-        <FilterMap layerPath={layerPath} />
-        <MRTShowHideColumnsButton className="style1" table={table} />
-        <MRTToggleDensePaddingButton className="style1" table={table} />
-        <MRTFullScreenToggleButton className="style1" table={table} />
-        <ExportButton rows={rows} columns={columns}>
-          <JSONExportButton features={data.features as TypeFeatureInfoEntry[]} layerPath={layerPath} />
-        </ExportButton>
+    renderTopToolbar: ({ table }) => (
+      <Box display="flex" justifyContent="space-between" p={4}>
+        <Box>
+          <Box sx={sxClasses.selectedRows}>{datatableSettings[layerPath].toolbarRowSelectedMessageRecord}</Box>
+        </Box>
+        <Box>
+          <Box>
+            <MRTToggleFiltersButton className="style1" table={table} />
+            <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} />
+            <MRTShowHideColumnsButton className="style1" table={table} />
+            <MRTToggleDensePaddingButton className="style1" table={table} />
+            <MRTFullScreenToggleButton className="style1" table={table} />
+            <ExportButton rows={rows} columns={columns}>
+              <JSONExportButton features={data.features as TypeFeatureInfoEntry[]} layerPath={layerPath} />
+            </ExportButton>
+          </Box>
+          <Box sx={{ marginLeft: 'auto', maxWidth: '15rem', marginRight: '1rem' }}>
+            <MRTGlobalFilterTextField className="style1" table={table} />
+          </Box>
+        </Box>
       </Box>
     ),
     enableFilterMatchHighlighting: true,
@@ -446,6 +479,23 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
       }),
     },
   });
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DATA-TABLE - sorting', sorting);
+
+    // update scroll index when there are some rows in the table.
+    const rowsCount = useTable!.getRowCount();
+    // scroll to the top of the table when the sorting changes
+    try {
+      if (rowsCount > 0) {
+        rowVirtualizerInstanceRef.current?.scrollToIndex?.(0);
+      }
+    } catch (error) {
+      logger.logError('Data table error on sorting action', error);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sorting]);
 
   /**
    * Convert the filter list from the Column Filter state to filter the map.
@@ -540,7 +590,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps) {
   }, [datatableSettings[layerPath].mapFilteredRecord]);
 
   // set toolbar custom action message in store.
-  useToolbarActionMessage({ data, columnFilters, layerPath, tableInstance: useTable });
+  useToolbarActionMessage({ data, columnFilters, globalFilter, layerPath, tableInstance: useTable });
 
   return (
     <Box sx={sxClasses.dataTableWrapper}>

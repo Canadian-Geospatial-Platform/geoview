@@ -189,7 +189,7 @@ export function Datapanel({ fullWidth }: DataPanelType) {
       onLayerListClicked={handleLayerChange}
       fullWidth={fullWidth}
     >
-      {isLoading && <Skeleton variant="rounded" width="100%" height={400} />}
+      {isLoading && <Skeleton variant="rounded" width="100%" height={400} sx={{ bgcolor: theme.palette.grey[400] }} />}
 
       {!isLoading &&
         selectedTab === TABS.DATA_TABLE &&

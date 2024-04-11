@@ -11,6 +11,7 @@ interface UseSelectedRowMessageProps {
   layerPath: string;
   tableInstance: MRTTableInstance<ColumnsType>;
   columnFilters: MRTColumnFiltersState;
+  globalFilter: string;
 }
 
 /**
@@ -20,7 +21,7 @@ interface UseSelectedRowMessageProps {
  * @param {MRTTableInstance} tableInstance  object of the data table.
  * @param {MRTColumnFiltersState} columnFilters column filters set by the user on the table.
  */
-export function useToolbarActionMessage({ data, columnFilters, layerPath, tableInstance }: UseSelectedRowMessageProps) {
+export function useToolbarActionMessage({ data, columnFilters, globalFilter, layerPath, tableInstance }: UseSelectedRowMessageProps) {
   const { t } = useTranslation();
 
   // get store values
@@ -44,7 +45,7 @@ export function useToolbarActionMessage({ data, columnFilters, layerPath, tableI
 
     setToolbarRowSelectedMessageEntry(message, layerPath);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.features]);
+  }, [data.features, globalFilter]);
 
   // show row filtered message in the toolbar.
   useEffect(() => {
@@ -70,5 +71,5 @@ export function useToolbarActionMessage({ data, columnFilters, layerPath, tableI
     setToolbarRowSelectedMessageEntry(message, layerPath);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [columnFilters, data.features]);
+  }, [columnFilters, data.features, globalFilter]);
 }

@@ -1,6 +1,6 @@
 import { useStore } from 'zustand';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { TypeLayerData } from '@/geo/utils/layer-set';
+import { TypeFeatureInfoEntry, TypeLayerData } from '@/geo/utils/layer-set';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 
@@ -19,6 +19,7 @@ interface IDataTableSettings {
   mapFilteredRecord: boolean;
   rowsFilteredRecord: number;
   toolbarRowSelectedMessageRecord: string;
+  globalFilterRecord: string;
 }
 
 export interface IDataTableState {
@@ -28,6 +29,7 @@ export interface IDataTableState {
   layersDataTableSetting: Record<string, IDataTableSettings>;
   selectedLayerPath: string;
   tableHeight: number;
+  selectedFeature: TypeFeatureInfoEntry | null;
 
   actions: {
     applyMapFilters: (filterStrings: string) => void;
@@ -40,6 +42,8 @@ export interface IDataTableState {
     setTableHeight: (tableHeight: number) => void;
     setSelectedLayerPath: (layerPath: string) => void;
     triggerGetAllFeatureInfo: (layerPath: string) => void;
+    setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
+    setSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
   };
 
   setterActions: {
@@ -53,6 +57,8 @@ export interface IDataTableState {
     setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
     setTableHeight: (tableHeight: number) => void;
     setSelectedLayerPath: (layerPath: string) => void;
+    setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
+    setSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
   };
 }
 
@@ -64,6 +70,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
     layersDataTableSetting: {},
     selectedLayerPath: '',
     tableHeight: 600,
+    selectedFeature: null,
 
     actions: {
       applyMapFilters: (filterStrings: string): void => {
@@ -80,9 +87,6 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
         get().dataTableState.setterActions.setActiveLayersData(activeLayerData);
       },
       setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => {
-        const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
-        layerSettings.columnFiltersRecord = filtered;
-
         // Redirect to setter
         get().dataTableState.setterActions.setColumnFiltersEntry(filtered, layerPath);
       },
@@ -91,23 +95,14 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
         get().dataTableState.setterActions.setIsEnlargeDataTable(isEnlarge);
       },
       setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => {
-        const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
-        layerSettings.mapFilteredRecord = mapFiltered;
-
         // Redirect to setter
         get().dataTableState.setterActions.setMapFilteredEntry(mapFiltered, layerPath);
       },
       setRowsFilteredEntry: (rows: number, layerPath: string) => {
-        const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
-        layerSettings.rowsFilteredRecord = rows;
-
         // Redirect to setter
         get().dataTableState.setterActions.setRowsFilteredEntry(rows, layerPath);
       },
       setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => {
-        const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
-        layerSettings.toolbarRowSelectedMessageRecord = message;
-
         // Redirect to setter
         get().dataTableState.setterActions.setToolbarRowSelectedMessageEntry(message, layerPath);
       },
@@ -122,6 +117,14 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
       triggerGetAllFeatureInfo(layerPath: string) {
         // Redirect to event processor
         DataTableEventProcessor.triggerGetAllFeatureInfo(get().mapId, layerPath);
+      },
+      setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => {
+        // Redirect to setter
+        get().dataTableState.setterActions.setGlobalFilteredEntry(globalFilterValue, layerPath);
+      },
+      setSelectedFeature: (feature: TypeFeatureInfoEntry) => {
+        // Redirect to setter
+        get().dataTableState.setterActions.setSelectedFeature(feature);
       },
     },
 
@@ -148,6 +151,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
           mapFilteredRecord: false,
           rowsFilteredRecord: 0,
           toolbarRowSelectedMessageRecord: '',
+          globalFilterRecord: '',
         };
 
         set({
@@ -225,6 +229,25 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
           },
         });
       },
+      setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => {
+        const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
+        layerSettings.globalFilterRecord = globalFilterValue;
+
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            layersDataTableSetting: { ...get().dataTableState.layersDataTableSetting, [layerPath]: layerSettings },
+          },
+        });
+      },
+      setSelectedFeature: (feature: TypeFeatureInfoEntry) => {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            selectedFeature: feature,
+          },
+        });
+      },
     },
   } as IDataTableState;
 }
@@ -236,5 +259,6 @@ export const useDataTableAllFeaturesDataArray = () => useStore(useGeoViewStore()
 export const useDataTableSelectedLayerPath = () => useStore(useGeoViewStore(), (state) => state.dataTableState.selectedLayerPath);
 export const useDataTableLayerSettings = () => useStore(useGeoViewStore(), (state) => state.dataTableState.layersDataTableSetting);
 export const useDataTableTableHeight = () => useStore(useGeoViewStore(), (state) => state.dataTableState.tableHeight);
+export const useDataTableSelectedFeature = () => useStore(useGeoViewStore(), (state) => state.dataTableState.selectedFeature);
 
 export const useDataTableStoreActions = () => useStore(useGeoViewStore(), (state) => state.dataTableState.actions);

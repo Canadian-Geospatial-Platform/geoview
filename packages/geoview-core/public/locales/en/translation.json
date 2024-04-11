@@ -136,7 +136,8 @@
     "keepFeatureSelected": "Keep feature highlighted",
     "detailsInstructions": "Details Instructions",
     "loadingUI": "Loading user interface",
-    "featureDetailsTitle": "Feature {count} of {total}"
+    "featureDetailsTitle": "Feature {count} of {total}",
+    "featureDetailModalTitle": "Feature Detail"
   },
   "lightbox": {
     "next": "Next",
@@ -196,6 +197,7 @@
     "title": "Data Table",
     "icon": "ICON",
     "zoom": "ZOOM",
+    "details": "DETAILS",
     "exportBtn": "Export",
     "jsonExportBtn": "Download GeoJSON",
     "downloadAsCSV": "Download as CSV",

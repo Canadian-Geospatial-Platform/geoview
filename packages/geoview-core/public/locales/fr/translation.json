@@ -136,7 +136,8 @@
     "keepFeatureSelected": "Garder l'élément sélectionné",
     "detailsInstructions": "Instructions détaillées",
     "loadingUI": "Chargement de l'interface utilisateur",
-    "featureDetailsTitle": "Élément {count} sur {total}"
+    "featureDetailsTitle": "Élément {count} sur {total}",
+    "featureDetailModalTitle": "Item"
   },
   "lightbox": {
     "next": "Prochaine",
@@ -196,6 +197,7 @@
     "title": "Données",
     "icon": "ICÔNE",
     "zoom": "ZOOM",
+    "details": "DÉTAILS",
     "exportBtn": "Exporter",
     "jsonExportBtn": "Télécharger GeoJSON",
     "downloadAsCSV": "Télécharger la CSV",
