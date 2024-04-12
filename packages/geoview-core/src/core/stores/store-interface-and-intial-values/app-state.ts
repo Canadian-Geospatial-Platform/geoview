@@ -11,11 +11,12 @@ export interface IAppState {
   displayLanguage: TypeDisplayLanguage;
   displayTheme: TypeDisplayTheme;
   guide: TypeGuideObject | undefined;
+  geolocatorServiceURL: string | undefined;
+  geoviewHTMLElement: HTMLElement;
   isCircularProgressActive: boolean;
   isCrosshairsActive: boolean;
   isFullscreenActive: boolean;
   notifications: Array<NotificationDetailsType>;
-  geolocatorServiceURL: string | undefined;
   suportedLanguages: TypeDisplayLanguage[];
 
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
@@ -51,11 +52,12 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     displayLanguage: 'en' as TypeDisplayLanguage,
     displayTheme: 'geo.ca',
     guide: {},
+    geolocatorServiceURL: '',
+    geoviewHTMLElement: document.createElement('div'), // create an empty div before real one is assigned
     isCircularProgressActive: false,
     isCrosshairsActive: false,
     isFullscreenActive: false,
     notifications: [],
-    geolocatorServiceURL: '',
     suportedLanguages: [],
 
     // initialize default stores section from config information when store receive configuration file
@@ -66,6 +68,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
           displayLanguage: geoviewConfig.displayLanguage as TypeDisplayLanguage,
           displayTheme: geoviewConfig.theme || 'geo.ca',
           geolocatorServiceURL: geoviewConfig.serviceUrls?.geolocator,
+          geoviewHTMLElement: document.getElementById(get().mapId)!,
           suportedLanguages: geoviewConfig.suportedLanguages,
         },
       });
@@ -254,6 +257,7 @@ export const useAppDisplayTheme = (): TypeDisplayTheme => useStore(useGeoViewSto
 export const useAppFullscreenActive = (): boolean => useStore(useGeoViewStore(), (state) => state.appState.isFullscreenActive);
 export const useAppGeolocatorServiceURL = (): string | undefined =>
   useStore(useGeoViewStore(), (state) => state.appState.geolocatorServiceURL);
+export const useAppGeoviewHTMLElement = (): HTMLElement => useStore(useGeoViewStore(), (state) => state.appState.geoviewHTMLElement);
 export const useAppGuide = (): TypeGuideObject | undefined => useStore(useGeoViewStore(), (state) => state.appState.guide);
 export const useAppNotifications = (): NotificationDetailsType[] => useStore(useGeoViewStore(), (state) => state.appState.notifications);
 export const useAppSuportedLanguages = (): TypeDisplayLanguage[] =>
