@@ -113,8 +113,13 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
 
     const count = layer.items.filter((d) => d.isVisible !== false).length;
     const totalCount = layer.items.length;
-    const itemsLengthDesc = t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
 
+    if(totalCount  <= 1 && datatableSettings[layer.layerPath]) {
+      return null;
+    }
+
+    let itemsLengthDesc = t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
+    
     if (datatableSettings[layer.layerPath]) {
       return (
         <Box style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'left', gap: 1 }}>

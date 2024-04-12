@@ -2,7 +2,6 @@ import { Theme } from '@mui/material/styles';
 
 export const getSxClasses = (theme: Theme) => ({
   layersPanelContainer: {
-    background: theme.palette.geoViewColor.bgColor.main,
     paddingBottom: '1rem',
     '& .guideBox': {
       ml: '30px',
