@@ -2,8 +2,6 @@ import { Coordinate } from 'ol/coordinate'; // only for typing
 import Overlay from 'ol/Overlay';
 import { Extent } from 'ol/extent'; // only for Typing
 import { FitOptions } from 'ol/View'; // only for typing
-import TileLayer from 'ol/layer/Tile'; // only for typing
-import { XYZ } from 'ol/source'; // only for typing
 
 import { useStore } from 'zustand';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
@@ -52,7 +50,6 @@ export interface IMapState {
 
   actions: {
     createBaseMapFromOptions: () => void;
-    createEmptyBasemap: () => TileLayer<XYZ>;
     getPixelFromCoordinate: (coord: Coordinate) => [number, number];
     getIndexFromOrderedLayerInfo: (layerPath: string) => number;
     getVisibilityFromOrderedLayerInfo: (layerPath: string) => boolean;
@@ -170,15 +167,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       createBaseMapFromOptions: (): void => {
         // Redirect to processor
         MapEventProcessor.resetBasemap(get().mapId);
-      },
-
-      /**
-       * Creates an empty base map.
-       * @returns {TileLayer<XYZ>} The empty base map layer.
-       */
-      createEmptyBasemap: (): TileLayer<XYZ> => {
-        // Redirect to processor and return the result
-        return MapEventProcessor.createEmptyBasemap(get().mapId);
       },
 
       /**

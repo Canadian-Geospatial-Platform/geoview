@@ -7,10 +7,10 @@ import { LineString, MultiLineString, MultiPoint, MultiPolygon, Point, Polygon }
 import { Extent, getCenter } from 'ol/extent';
 import { fromExtent } from 'ol/geom/Polygon';
 import { Coordinate } from 'ol/coordinate';
-import { api } from '@/app';
 import { TypeHighlightColors } from '@/geo/map/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
+import { MapViewer } from '@/geo/map/map-viewer';
 import { TypeFeatureInfoEntry } from './layer-set';
 
 /** *****************************************************************************************************************************
@@ -47,9 +47,14 @@ export class FeatureHighlight {
   /** Timeout of the bounding box highlight */
   private bboxTimeout: NodeJS.Timeout | null = null;
 
-  constructor(mapId: string) {
-    this.mapId = mapId;
-    this.overlayLayer = new VectorLayer({ source: this.highlighSource, map: api.maps[this.mapId].map });
+  /**
+   * Initializes feature higlight classes
+   * @param {MapViewer} mapViewer a reference to the map viewer
+   */
+  constructor(mapViewer: MapViewer) {
+    this.mapId = mapViewer.mapId;
+
+    this.overlayLayer = new VectorLayer({ source: this.highlighSource, map: mapViewer.map });
     if (MapEventProcessor.getMapHighlightColor(this.mapId) !== undefined)
       this.changeHighlightColor(MapEventProcessor.getMapHighlightColor(this.mapId) as TypeHighlightColors);
   }

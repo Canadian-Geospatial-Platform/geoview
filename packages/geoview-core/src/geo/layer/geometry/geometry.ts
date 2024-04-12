@@ -8,6 +8,7 @@ import { Options as VectorLayerOptions } from 'ol/layer/BaseVector';
 import { asArray, asString } from 'ol/color';
 
 import { api } from '@/app';
+import { MapViewer } from '@/geo/map/map-viewer';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { generateId, setAlphaColor } from '@/core/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -46,16 +47,19 @@ export class GeometryApi {
   // index of the active geometry group used to add new geometries in the map
   activeGeometryGroupIndex = 0;
 
+  /** used to reference the map viewer */
+  mapViewer: MapViewer;
+
   // Keep all callback delegates references
   #onGeometryAddedHandlers: GeometryAddedDelegate[] = [];
 
   /**
    * Constructs a Geometry class and creates a geometry group in the process.
-   *
-   * @param {string} mapId map id
+   * @param {MapViewer} mapViewer a reference to the map viewer
    */
-  constructor(mapId: string) {
-    this.#mapId = mapId;
+  constructor(mapViewer: MapViewer) {
+    this.mapViewer = mapViewer;
+    this.#mapId = mapViewer.mapId;
 
     // create default geometry group
     this.createGeometryGroup(this.defaultGeometryGroupId);
@@ -437,7 +441,7 @@ export class GeometryApi {
       };
 
       if (geometryGroup.vectorLayer.getVisible()) {
-        api.maps[this.#mapId].map.addLayer(geometryGroup.vectorLayer);
+        this.mapViewer.map.addLayer(geometryGroup.vectorLayer);
         geometryGroup.vectorLayer.changed();
       }
       this.geometryGroups.push(geometryGroup);

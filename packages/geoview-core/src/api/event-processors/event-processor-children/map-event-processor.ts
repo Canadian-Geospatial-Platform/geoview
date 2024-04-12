@@ -579,11 +579,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // GV NEVER add a store action who does set state AND map action at a same time.
   // GV Review the action in store state to make sure
-  // #region
-  static createEmptyBasemap(mapId: string) {
-    return api.maps[mapId].basemap.createEmptyBasemap();
-  }
-
   static createOverviewMapBasemap(mapId: string): TypeBasemapProps | undefined {
     return api.maps[mapId].basemap.getOverviewMap();
   }
