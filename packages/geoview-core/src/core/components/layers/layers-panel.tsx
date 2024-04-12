@@ -9,13 +9,13 @@ import { LayersToolbar } from './layers-toolbar';
 import { LayerDetails } from './right-panel/layer-details';
 import { LeftPanel } from './left-panel/left-panel';
 import { logger } from '@/core/utils/logger';
-import { useAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { TypeFullGuide, useAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 export function LayersPanel() {
   // Log
   logger.logTraceRender('components/layers/layers-panel');
 
-  const guide = useAppGuide();
+  const guide = useAppGuide() as unknown as TypeFullGuide;
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
@@ -55,9 +55,7 @@ export function LayersPanel() {
     if (!selectedLayer && displayState === 'view') {
       const markDown = (
         <Markdown options={{ wrapper: 'article' }}>
-          {`${guide!.footerPanel!.children!.layers!.children!.view!.content}\n${
-            guide!.footerPanel!.children!.layers!.children!.layerSettings!.content
-          }`}
+          {`${guide.footerPanel.children.layers.children.view.content}\n${guide.footerPanel.children.layers.children.layerSettings.content}`}
         </Markdown>
       );
       return (
@@ -68,7 +66,7 @@ export function LayersPanel() {
     }
     if (displayState === 'remove') {
       const markDown = (
-        <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.layers!.children!.remove!.content}</Markdown>
+        <Markdown options={{ wrapper: 'article' }}>{`${guide.footerPanel.children.layers.children.remove.content}`}</Markdown>
       );
       return (
         <Paper sx={{ padding: '20px' }}>
@@ -77,9 +75,7 @@ export function LayersPanel() {
       );
     }
     if (displayState === 'order') {
-      const markDown = (
-        <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.layers!.children!.sort!.content}</Markdown>
-      );
+      const markDown = <Markdown options={{ wrapper: 'article' }}>{`${guide.footerPanel.children.layers.children.sort.content}`}</Markdown>;
       return (
         <Paper sx={{ padding: '20px' }}>
           <Box className="guideBox">{markDown}</Box>
@@ -87,7 +83,7 @@ export function LayersPanel() {
       );
     }
     if (displayState === 'add') {
-      const markDown = <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.layers!.children!.add!.content}</Markdown>;
+      const markDown = <Markdown options={{ wrapper: 'article' }}>{`${guide.footerPanel.children.layers.children.add.content}`}</Markdown>;
       return (
         <Paper sx={{ padding: '20px' }}>
           <Box className="guideBox">{markDown}</Box>

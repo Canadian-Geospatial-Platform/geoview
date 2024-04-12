@@ -19,7 +19,7 @@ import {
   useDetailsSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useMapStoreActions, useMapVisibleLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { TypeFullGuide, useAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/utils/layer-set';
 
@@ -50,7 +50,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
   const arrayOfLayerDataBatch = useDetailsLayerDataArrayBatch();
   const checkedFeatures = useDetailsCheckedFeatures();
   const visibleLayers = useMapVisibleLayers();
-  const guide = useAppGuide();
+  const guide = useAppGuide() as unknown as TypeFullGuide;
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
   const { addHighlightedFeature, removeHighlightedFeature } = useMapStoreActions();
 
@@ -448,7 +448,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
             <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer, maxHeight: '600px' }}>
               <Paper sx={{ padding: '20px' }}>
                 <Box className="guideBox">
-                  <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.details!.content}</Markdown>
+                  <Markdown options={{ wrapper: 'article' }}>{`${guide.footerPanel.children.details.content}`}</Markdown>
                 </Box>
               </Paper>
             </Box>

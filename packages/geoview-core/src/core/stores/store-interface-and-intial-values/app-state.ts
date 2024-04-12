@@ -9,7 +9,7 @@ import { AppEventProcessor } from '@/api/event-processors/event-processor-childr
 export interface IAppState {
   displayLanguage: TypeDisplayLanguage;
   displayTheme: TypeDisplayTheme;
-  guide: TypeGuideObject | undefined;
+  guide: TypeGuideObject;
   isCircularProgressActive: boolean;
   isCrosshairsActive: boolean;
   isFullscreenActive: boolean;
@@ -49,7 +49,138 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
   return {
     displayLanguage: 'en' as TypeDisplayLanguage,
     displayTheme: 'geo.ca',
-    guide: {},
+    guide: {
+      footerPanel: {
+        content: '',
+        heading: '',
+        children: {
+          chart: {
+            content: '',
+            heading: '',
+            children: {
+              chartTypes: {
+                content: '',
+                heading: '',
+              },
+            },
+          },
+          dataTable: {
+            content: '',
+            heading: '',
+            children: {
+              filterData: {
+                content: '',
+                heading: '',
+              },
+              sortingAndReordering: {
+                content: '',
+                heading: '',
+              },
+              keyboardNavigation: {
+                content: '',
+                heading: '',
+              },
+            },
+          },
+          details: {
+            content: '',
+            heading: '',
+          },
+          layers: {
+            content: '',
+            heading: '',
+            children: {
+              add: {
+                content: '',
+                heading: '',
+              },
+              layerSettings: {
+                content: '',
+                heading: '',
+              },
+              remove: {
+                content: '',
+                heading: '',
+              },
+              sort: {
+                content: '',
+                heading: '',
+              },
+              view: {
+                content: '',
+                heading: '',
+              },
+            },
+          },
+          legend: {
+            content: '',
+            heading: '',
+          },
+          timeSlider: {
+            content: '',
+            heading: '',
+          },
+        },
+      },
+      issues: {
+        content: '',
+        heading: '',
+      },
+      keyboardNavigation: {
+        content: '',
+        heading: '',
+      },
+      mapInformationBar: {
+        content: '',
+        heading: '',
+      },
+      navigationControls: {
+        content: '',
+        heading: '',
+        children: {
+          overviewMap: {
+            content: '',
+            heading: '',
+          },
+          keyboardNavigation: {
+            content: '',
+            heading: '',
+          },
+        },
+      },
+      sidebar: {
+        content: '',
+        heading: '',
+        children: {
+          basemapSelector: {
+            content: '',
+            heading: '',
+          },
+          export: {
+            content: '',
+            heading: '',
+          },
+          geolocator: {
+            content: '',
+            heading: '',
+            children: {
+              geosearchFiltering: {
+                content: '',
+                heading: '',
+              },
+              supportedSearchTypes: {
+                content: '',
+                heading: '',
+              },
+            },
+          },
+          legend: {
+            content: '',
+            heading: '',
+          },
+        },
+      },
+    },
     isCircularProgressActive: false,
     isCrosshairsActive: false,
     isFullscreenActive: false,
@@ -128,7 +259,6 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
       },
     },
     // #endregion ACTIONS
-
     // #region SETTER ACTIONS
     setterActions: {
       /**
@@ -228,7 +358,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
       },
     },
     // #endregion SETTER ACTIONS
-  } as IAppState;
+  } as unknown as IAppState;
 }
 
 export interface TypeGuideObject {
@@ -236,6 +366,73 @@ export interface TypeGuideObject {
     content: string;
     heading: string;
     children?: TypeGuideObject;
+  };
+}
+
+export interface TypeFullGuide {
+  footerPanel: {
+    content: string;
+    heading: string;
+    children: {
+      chart: {
+        content: string;
+        heading: string;
+        children: {
+          chartTypes: TypeGuideObject;
+        };
+      };
+      dataTable: {
+        content: string;
+        heading: string;
+        children: {
+          filterData: TypeGuideObject;
+          sortingAndReordering: TypeGuideObject;
+          keyboardNavigation: TypeGuideObject;
+        };
+      };
+      details: TypeGuideObject;
+      layers: {
+        content: string;
+        heading: string;
+        children: {
+          add: TypeGuideObject;
+          layerSettings: TypeGuideObject;
+          remove: TypeGuideObject;
+          sort: TypeGuideObject;
+          view: TypeGuideObject;
+        };
+      };
+      legend: TypeGuideObject;
+      timeSlider: TypeGuideObject;
+    };
+  };
+  issues: TypeGuideObject;
+  keyboardNavigation: TypeGuideObject;
+  mapInformationBar: TypeGuideObject;
+  navigationControls: {
+    content: string;
+    heading: string;
+    children: {
+      overviewMap: TypeGuideObject;
+      keyboardNavigation: TypeGuideObject;
+    };
+  };
+  sidebar: {
+    content: string;
+    heading: string;
+    children: {
+      basemapSelector: TypeGuideObject;
+      export: TypeGuideObject;
+      geolocator: {
+        content: string;
+        heading: string;
+        children: {
+          geosearchFiltering: TypeGuideObject;
+          supportedSearchTypes: TypeGuideObject;
+        };
+      };
+      legend: TypeGuideObject;
+    };
   };
 }
 

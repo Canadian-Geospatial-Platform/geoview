@@ -119,7 +119,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       {!selectedLayerPath && (
         <Paper sx={{ padding: '2rem' }}>
           <Box className="guideBox">
-            <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.timeSlider!.content}</Markdown>
+            <Markdown options={{ wrapper: 'article' }}>{guide.footerPanel.children.timeSlider.content}</Markdown>
           </Box>
         </Paper>
       )}

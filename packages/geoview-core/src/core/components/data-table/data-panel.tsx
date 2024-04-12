@@ -13,7 +13,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useMapVisibleLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useUIActiveFooterBarTabId } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { TypeFullGuide, useAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { LayerListEntry, Layout } from '@/core/components/common';
 import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
@@ -48,7 +48,7 @@ export function Datapanel({ fullWidth }: DataPanelType) {
   const { setSelectedLayerPath } = useDataTableStoreActions();
   const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
   const selectedTab = useUIActiveFooterBarTabId();
-  const guide = useAppGuide();
+  const guide = useAppGuide() as unknown as TypeFullGuide;
   const visibleLayers = useMapVisibleLayers();
 
   // Create columns for data table.
@@ -219,11 +219,9 @@ export function Datapanel({ fullWidth }: DataPanelType) {
         >
           <Paper sx={{ padding: '2rem' }}>
             <Box className="guideBox">
-              <Markdown options={{ wrapper: 'article' }}>{`${guide!.footerPanel!.children!.dataTable!.content}\n${
-                guide!.footerPanel!.children!.dataTable!.children!.filterData!.content
-              }\n${guide!.footerPanel!.children!.dataTable!.children!.sortingAndReordering!.content}\n\n${
-                guide!.footerPanel!.children!.dataTable!.children!.keyboardNavigation!.content
-              }`}</Markdown>
+              <Markdown
+                options={{ wrapper: 'article' }}
+              >{`${guide.footerPanel.children.dataTable.content}\n${guide.footerPanel.children.dataTable.children.filterData.content}\n${guide.footerPanel.children.dataTable.children.sortingAndReordering.content}\n\n${guide.footerPanel.children.dataTable.children.keyboardNavigation.content}`}</Markdown>
             </Box>
           </Paper>
         </Box>

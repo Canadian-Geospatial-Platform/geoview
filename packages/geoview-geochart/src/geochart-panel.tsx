@@ -264,9 +264,9 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
           {!selectedLayerPath && guide?.footerPanel && (
             <Paper sx={{ padding: '2rem' }}>
               <Box className="guideBox">
-                <Markdown options={{ wrapper: 'article' }}>{`${guide!.footerPanel!.children!.chart!.content}\n${
-                  guide!.footerPanel!.children!.chart!.children!.chartTypes!.content
-                }`}</Markdown>
+                <Markdown
+                  options={{ wrapper: 'article' }}
+                >{`${guide.footerPanel.children.chart.content}\n${guide.footerPanel.children.chart.children.chartTypes.content}`}</Markdown>
               </Box>
             </Paper>
           )}

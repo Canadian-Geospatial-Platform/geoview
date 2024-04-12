@@ -31,35 +31,33 @@ export function GuidePanel({ fullWidth }: GuidePanelType): JSX.Element {
   useEffect(() => {
     const helpItems: GuideListItem[] = [];
 
-    if (guide !== undefined) {
-      // TODO Add subsections to guide and replcae this code (Issue #2002)
-      Object.keys(guide).forEach((item: string) => {
-        let { content } = guide[item];
+    // TODO Add subsections to guide and replcae this code (Issue #2002)
+    Object.keys(guide).forEach((item: string) => {
+      let { content } = guide[item];
 
-        // Appends the subsection content to the section content
-        if (guide[item].children) {
-          Object.keys(guide[item].children as TypeGuideObject).forEach((child: string) => {
-            content += `\n${guide[item]!.children![child].content}`;
+      // Appends the subsection content to the section content
+      if (guide[item].children) {
+        Object.keys(guide[item].children as TypeGuideObject).forEach((child: string) => {
+          content += `\n${guide[item]!.children![child].content}`;
 
-            // Appends sub subsection content
-            if (guide[item]!.children![child].children) {
-              Object.keys(guide[item]!.children![child].children as TypeGuideObject).forEach((grandChild: string) => {
-                content += `\n${guide[item]!.children![child].children![grandChild].content}`;
-              });
-            }
-          });
-        }
-        helpItems.push({
-          layerName: guide[item].heading,
-          layerPath: item,
-          layerStatus: 'loaded',
-          queryStatus: 'processed',
-          content: <Markdown options={{ wrapper: 'article' }}>{content}</Markdown>,
+          // Appends sub subsection content
+          if (guide[item]!.children![child].children) {
+            Object.keys(guide[item]!.children![child].children as TypeGuideObject).forEach((grandChild: string) => {
+              content += `\n${guide[item]!.children![child].children![grandChild].content}`;
+            });
+          }
         });
+      }
+      helpItems.push({
+        layerName: guide[item].heading,
+        layerPath: item,
+        layerStatus: 'loaded',
+        queryStatus: 'processed',
+        content: <Markdown options={{ wrapper: 'article' }}>{content}</Markdown>,
       });
-      if (helpItems[0]?.layerPath) setSelectedLayerPath(helpItems[0].layerPath);
-      setLayersList(helpItems);
-    }
+    });
+    if (helpItems[0]?.layerPath) setSelectedLayerPath(helpItems[0].layerPath);
+    setLayersList(helpItems);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [guide]);
 
