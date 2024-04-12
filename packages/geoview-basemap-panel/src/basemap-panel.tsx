@@ -139,7 +139,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
    *
    * @param {string} id update the basemap on the map
    */
-  const setBasemap = (basemapId: string) => {
+  const setBasemap = (basemapId: string): void => {
     // get basemap from id
     const basemap = basemapList.find((item) => item.basemapId === basemapId);
 
@@ -154,8 +154,9 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
    *  Add basemaps from configuration for selected projection
    *
    * @param {number} projection the projection to create basemaps for
+   * @returns {Promise<void>}
    */
-  const createBasemapArray = async (projection: TypeValidMapProjectionCodes) => {
+  const createBasemapArray = async (projection: TypeValidMapProjectionCodes): Promise<void> => {
     const basemapsArray = toJsonObject(
       (config.supportedProjections as Array<TypeJsonObject>).find((obj: TypeJsonObject) => obj.projectionCode === projection)
     );
@@ -210,7 +211,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
    *
    * @param {SelectChangeEvent} event select change element event
    */
-  const setSelectedProjection = (event: SelectChangeEvent<unknown>) => {
+  const setSelectedProjection = (event: SelectChangeEvent<unknown>): void => {
     const projection = event.target.value as TypeValidMapProjectionCodes;
 
     // set basemap to no geom to clean up the view

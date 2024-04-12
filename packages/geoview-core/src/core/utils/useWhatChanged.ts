@@ -85,7 +85,7 @@ export const useWhatChanged = (hookId: string, dependency?: unknown[], dependenc
   const useEffectRan = useRef(false);
 
   // Logs footer information
-  function logFooter() {
+  function logFooter(): void {
     writeConsole(`%c----- END SECTION -----`, `background: ${backgroundColorRef.current}; color: white; font-size: 10px`, '\n');
     writeConsole('\n');
   }
@@ -99,7 +99,7 @@ export const useWhatChanged = (hookId: string, dependency?: unknown[], dependenc
     isFirstMount?: boolean;
     suffixText?: string;
     isBlankArrayAsDependency?: boolean;
-  }) {
+  }): void {
     if (CURRENT_ACTIVE) {
       writeConsole(`%c----- START SECTION -----`, `background: ${backgroundColorRef.current}; color: white; font-size: 10px`, '\n');
       writeConsole(

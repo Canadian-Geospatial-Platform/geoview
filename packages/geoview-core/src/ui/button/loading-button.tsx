@@ -5,6 +5,6 @@ interface LoadingButtonType extends LoadingButtonProps {
   children: ReactNode;
 }
 
-export function LoadingButton({ children, ...rest }: LoadingButtonType) {
+export function LoadingButton({ children, ...rest }: LoadingButtonType): JSX.Element {
   return <MaterialLoadingButton {...rest}>{children}</MaterialLoadingButton>;
 }

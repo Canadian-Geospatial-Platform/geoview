@@ -5,6 +5,7 @@ import { Geometry, Point, Polygon, LineString, MultiPoint } from 'ol/geom';
 import { MenuItem } from '@/ui';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
+import { TypeJsonObject } from '@/core/types/global-types';
 
 interface JSONExportButtonProps {
   features: TypeFeatureInfoEntry[];
@@ -25,13 +26,13 @@ function JSONExportButton({ features, layerPath }: JSONExportButtonProps): JSX.E
   const { transformPoints } = useMapStoreActions();
 
   /**
-   * Create a geometry json
+   * Creates a geometry json
    *
-   * @param {Geometry} geometry the geometry
-   * @return {TypeJsonObject} the geometry json
+   * @param {Geometry} geometry - The geometry
+   * @returns {TypeJsonObject} The geometry json
    *
    */
-  const buildGeometry = (geometry: Geometry) => {
+  const buildGeometry = (geometry: Geometry): TypeJsonObject => {
     let builtGeometry = {};
 
     if (geometry instanceof Polygon) {
@@ -53,8 +54,8 @@ function JSONExportButton({ features, layerPath }: JSONExportButtonProps): JSX.E
   };
 
   /**
-   * build the JSON file
-   * @return {JSON.stringify} Json file content
+   * Build the JSON file
+   * @returns {string} Json file content as string
    *
    */
   const getJson = (): string => {
@@ -72,11 +73,11 @@ function JSONExportButton({ features, layerPath }: JSONExportButtonProps): JSX.E
   };
 
   /**
-   * export the blob to a file
-   * @param {Blob} blob the blob to save to file
-   * @param {string} filename file name
+   * Exports the blob to a file
+   * @param {Blob} blob - The blob to save to file
+   * @param {string} filename - File name
    */
-  const exportBlob = (blob: Blob, filename: string) => {
+  const exportBlob = (blob: Blob, filename: string): void => {
     // Save the blob in a json file
     const url = URL.createObjectURL(blob);
 
@@ -89,9 +90,9 @@ function JSONExportButton({ features, layerPath }: JSONExportButtonProps): JSX.E
   };
 
   /**
-   * Export data table in csv format.
+   * Exports data table in csv format.
    */
-  const handleExportData = () => {
+  const handleExportData = (): void => {
     const jsonString = getJson();
     const blob = new Blob([jsonString], {
       type: 'text/json',

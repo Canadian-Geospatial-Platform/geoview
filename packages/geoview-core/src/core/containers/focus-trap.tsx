@@ -99,7 +99,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   }
 
   // handle FocusTrap states (Exit)
-  const handleExit = (evt: KeyboardEvent) => {
+  const handleExit = (evt: KeyboardEvent): void => {
     if (!ARROW_KEY_CODES.includes(evt.code as string)) {
       // remove the border from the map
       document.getElementById(`mapbox-${mapId}`)!.style.border = sxClasses.exitFocus.border;
@@ -127,13 +127,13 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   }
 
   // handle FocusTrap states (Enable, Skip)
-  const handleEnable = () => {
+  const handleEnable = (): void => {
     setOpen(false);
     setFocusTrap();
     document.getElementById(`mapbox-${mapId}`)!.style.border = sxClasses.enableFocus.border;
   };
 
-  const handleSkip = () => {
+  const handleSkip = (): void => {
     // because the process is about to focus the map, apply a timeout before shifting focus on bottom or top link
     setOpen(false);
     setTimeout(() => document.getElementById(navigationLinkRef.current!)?.focus(), 0);

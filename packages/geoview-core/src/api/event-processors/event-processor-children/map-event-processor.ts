@@ -5,6 +5,8 @@ import { Extent } from 'ol/extent';
 import View, { FitOptions } from 'ol/View';
 import { KeyboardPan } from 'ol/interaction';
 import { Coordinate } from 'ol/coordinate';
+import TileLayer from 'ol/layer/Tile';
+import { XYZ } from 'ol/source';
 import { api } from '@/app';
 import {
   TypeGeoviewLayerConfig,
@@ -27,7 +29,7 @@ import { AppEventProcessor } from './app-event-processor';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeClickMarker } from '@/core/components';
-import { TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { TypeBasemapOptions, TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
 import { TypeHoverFeatureInfo } from '@/geo/utils/hover-feature-info-layer-set';
 
@@ -176,9 +178,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
   /**
    * Shortcut to get the Map state for a given map id
    * @param {string} mapId The mapId
-   * @returns {ILayerState} The Map state
+   * @returns {IMapState} The Map state
    */
-  protected static getMapStateProtected(mapId: string) {
+  protected static getMapStateProtected(mapId: string): IMapState {
     // TODO: Refactor - Rename this function when we want to clarify the small confusion with getMapState function below
     // Return the map state
     return this.getState(mapId).mapState;
@@ -584,7 +586,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   // GV NEVER add a store action who does set state AND map action at a same time.
   // GV Review the action in store state to make sure
   // #region
-  static createEmptyBasemap(mapId: string) {
+  static createEmptyBasemap(mapId: string): TileLayer<XYZ> {
     return api.maps[mapId].basemap.createEmptyBasemap();
   }
 
@@ -592,7 +594,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return api.maps[mapId].basemap.getOverviewMap();
   }
 
-  static resetBasemap(mapId: string) {
+  static resetBasemap(mapId: string): void {
     // reset basemap will use the current display language and projection and recreate the basemap
     const language = AppEventProcessor.getDisplayLanguage(mapId);
     const projection = this.getMapState(mapId).currentProjection as TypeValidMapProjectionCodes;
@@ -727,7 +729,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    *
    * @param {string} mapId Id of map to set layer Z indices
    */
-  static setLayerZIndices = (mapId: string) => {
+  static setLayerZIndices = (mapId: string): void => {
     const reversedLayers = [...this.getMapStateProtected(mapId).orderedLayerInfo].reverse();
     reversedLayers.forEach((orderedLayerInfo, index) => {
       if (api.maps[mapId].layer.registeredLayers[orderedLayerInfo.layerPath]?.olLayer)
@@ -739,7 +741,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return api.maps[mapId].map.getPixelFromCoordinate(coord) as unknown as [number, number];
   };
 
-  static setClickMarkerOnPosition = (mapId: string, position: number[]) => {
+  static setClickMarkerOnPosition = (mapId: string, position: number[]): void => {
     api.maps[mapId].map.getOverlayById(`${mapId}-clickmarker`)!.setPosition(position);
   };
 

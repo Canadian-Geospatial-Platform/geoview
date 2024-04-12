@@ -60,12 +60,12 @@ export default function Notifications(): JSX.Element {
   const notificationsCount = _.sumBy(notifications, (n) => n.count);
 
   // handle open/close
-  const handleOpenPopover = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleOpenPopover = (event: React.MouseEvent<HTMLButtonElement>): void => {
     setAnchorEl(event.currentTarget);
     setOpen(!open);
   };
 
-  const handleClickAway = () => {
+  const handleClickAway = (): void => {
     if (open) {
       setOpen(false);
     }
@@ -74,11 +74,11 @@ export default function Notifications(): JSX.Element {
   /**
    * Remove a notification
    */
-  const handleRemoveNotificationClick = (notification: NotificationDetailsType) => {
+  const handleRemoveNotificationClick = (notification: NotificationDetailsType): void => {
     removeNotification(notification.key);
   };
 
-  function getNotificationIcon(notification: NotificationDetailsType) {
+  function getNotificationIcon(notification: NotificationDetailsType): JSX.Element {
     switch (notification.notificationType) {
       case 'success':
         return <CheckCircleIcon color="success" />;
@@ -91,7 +91,7 @@ export default function Notifications(): JSX.Element {
     }
   }
 
-  function renderNotification(notification: NotificationDetailsType, index: number) {
+  function renderNotification(notification: NotificationDetailsType, index: number): JSX.Element {
     return (
       <Box sx={sxClasses.notificationItem} key={index}>
         <Box>{getNotificationIcon(notification)}</Box>

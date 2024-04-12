@@ -84,7 +84,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
    * Post compose, Post render event callback
    * @param {Event | BaseEvent} event the post compose, post render event
    */
-  function postcompose(event: Event | BaseEvent) {
+  function postcompose(event: Event | BaseEvent): void {
     const evt = event as RenderEvent;
     const ctx: CanvasRenderingContext2D | WebGLRenderingContext = evt.context! as CanvasRenderingContext2D | WebGLRenderingContext;
     if (ctx instanceof WebGLRenderingContext) {
@@ -240,14 +240,14 @@ export function Swiper(props: SwiperProps): JSX.Element {
     // Grab reference
     const theSwiper = swiperRef?.current;
 
-    const handleFocusIn = () => {
+    const handleFocusIn = (): void => {
       // set listener for the focus in on swiper bar when on WCAG mode
       if (document.getElementById(mapId)!.classList.contains('map-focus-trap')) {
         theSwiper?.addEventListener('keydown', updateSwiper);
       }
     };
 
-    const handleFocusOut = () => {
+    const handleFocusOut = (): void => {
       // unset listener when focus is out of swiper bar
       theSwiper?.removeEventListener('keydown', updateSwiper);
     };

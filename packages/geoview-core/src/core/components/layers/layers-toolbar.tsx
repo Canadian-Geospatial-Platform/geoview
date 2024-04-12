@@ -36,7 +36,7 @@ function ResponsiveButton(props: ResponsiveButtonProps): JSX.Element {
     // Log
     logger.logTraceUseEffect('LAYERS-TOOLBAR - mount');
 
-    const handleResize = () => {
+    const handleResize = (): void => {
       // Log
       logger.logTraceCore('LAYERS-TOOLBAR - window resize event');
 

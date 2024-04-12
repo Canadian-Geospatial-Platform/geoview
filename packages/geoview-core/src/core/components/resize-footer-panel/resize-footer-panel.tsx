@@ -14,7 +14,7 @@ import { logger } from '@/core/utils/logger';
  * Popover to resize the map container and footer panel.
  * @returns
  */
-export function ResizeFooterPanel() {
+export function ResizeFooterPanel(): JSX.Element {
   const sxClasses = getSxClasses();
 
   const mapId = useGeoViewMapId();
@@ -35,16 +35,16 @@ export function ResizeFooterPanel() {
     return footerPanelResizeValues.map((value) => ({ value, label: `${value}%` }));
   }, [footerPanelResizeValues]);
 
-  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+  const handleClick = (event: MouseEvent<HTMLButtonElement>): void => {
     event.preventDefault();
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = () => {
+  const handleClose = (): void => {
     setAnchorEl(null);
   };
 
-  const handleOnSliderChange = (event: Event, value: number | number[]) => {
+  const handleOnSliderChange = (event: Event, value: number | number[]): void => {
     setFooterPanelResizeValue(value as number);
     handleClose();
   };

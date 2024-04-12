@@ -131,7 +131,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
-  validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
+  validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
     commonValidateListOfLayerEntryConfig.call(this, listOfLayerEntryConfig);
   }
 
@@ -182,7 +182,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
    * @param {EsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
    */
-  protected processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: EsriDynamicLayerEntryConfig) {
+  protected processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: EsriDynamicLayerEntryConfig): void {
     commonProcessTemporalDimension(this, esriTimeDimension, layerConfig);
   }
 
@@ -191,7 +191,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @param {EsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
    */
-  processFeatureInfoConfig = (layerConfig: EsriDynamicLayerEntryConfig) => {
+  processFeatureInfoConfig = (layerConfig: EsriDynamicLayerEntryConfig): void => {
     commonProcessFeatureInfoConfig.call(this, layerConfig);
   };
 
@@ -201,7 +201,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {EsriDynamic} this The ESRI layer instance pointer.
    * @param {EsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
    */
-  processInitialSettings(layerConfig: EsriDynamicLayerEntryConfig) {
+  processInitialSettings(layerConfig: EsriDynamicLayerEntryConfig): void {
     commonProcessInitialSettings.call(this, layerConfig);
   }
 
@@ -594,7 +594,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     const layerFilter = layerConfig.olLayer?.get('layerFilter');
 
     if (layerConfig?.style) {
-      const setAllUndefinedVisibilityFlagsToYes = (styleConfig: TypeUniqueValueStyleConfig | TypeClassBreakStyleConfig) => {
+      const setAllUndefinedVisibilityFlagsToYes = (styleConfig: TypeUniqueValueStyleConfig | TypeClassBreakStyleConfig): void => {
         // default value is true for all undefined visibility flags
         if (styleConfig.defaultVisible === undefined) styleConfig.defaultVisible = true;
         const settings = isUniqueValueStyleConfig(styleConfig) ? styleConfig.uniqueValueStyleInfo : styleConfig.classBreakStyleInfo;
@@ -754,7 +754,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} combineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath: string, filter: string, combineLegendFilter = true) {
+  applyViewFilter(layerPath: string, filter: string, combineLegendFilter = true): void {
     const layerConfig = this.getLayerConfig(layerPath) as EsriDynamicLayerEntryConfig;
     // Log
     logger.logTraceCore('ESRI-DYNAMIC - applyViewFilter', layerPath);

@@ -15,9 +15,9 @@ interface CloseButtonProps {
  * @param {boolean} isLayersPanelVisible show/hide the list in left panel
  * @param {function} setIsLayersPanelVisible dispatch function to update isLayersPanelVisible
  * @param {boolean} fullWidth show close button when full width is true
- * @returns JSX.element
+ * @returns {JSX.Element}
  */
-export function CloseButton({ isLayersPanelVisible, onSetIsLayersPanelVisible, fullWidth }: CloseButtonProps) {
+export function CloseButton({ isLayersPanelVisible, onSetIsLayersPanelVisible, fullWidth }: CloseButtonProps): JSX.Element {
   const { t } = useTranslation<string>();
 
   const theme = useTheme();

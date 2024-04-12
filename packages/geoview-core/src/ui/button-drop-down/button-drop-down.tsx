@@ -60,7 +60,7 @@ export function ButtonDropDown(props: ButtonDropDownProps): JSX.Element {
   /**
    * Handles a click in an item in the drop down menu
    */
-  const handleMenuItemClick = (event: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number) => {
+  const handleMenuItemClick = (event: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number): void => {
     setSelectedIndex(index);
     setOpen(false);
   };
@@ -68,7 +68,7 @@ export function ButtonDropDown(props: ButtonDropDownProps): JSX.Element {
   /**
    * Handles a when the user clicks away of the drop down
    */
-  const handleClickAway = (event: Event) => {
+  const handleClickAway = (event: Event): void => {
     if (anchorRef.current && anchorRef.current.contains(event.target as HTMLElement)) {
       return;
     }

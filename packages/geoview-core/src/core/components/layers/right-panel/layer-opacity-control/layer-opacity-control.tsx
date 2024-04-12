@@ -31,7 +31,7 @@ export function LayerOpacityControl(props: LayerOpacityControlProps): JSX.Elemen
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleSetOpacity = (opacityValue: number | number[], activeThumb: number) => {
+  const handleSetOpacity = (opacityValue: number | number[], activeThumb: number): void => {
     const val = Array.isArray(opacityValue) ? opacityValue[0] : opacityValue;
 
     if (layerDetails.opacityFromParent && layerDetails.opacityFromParent !== 1 && val / 100 >= layerDetails.opacityFromParent) {

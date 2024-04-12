@@ -16,7 +16,7 @@ export interface LayerListEntry {
   queryStatus: TypeQueryStatus;
   layerFeatures?: ReactNode;
   mapFilteredIcon?: ReactNode;
-  tooltip?: ReactNode;
+  tooltip?: JSX.Element | string;
   numOffeatures?: number;
   features?: TypeFeatureInfoEntry[] | undefined | null;
 }
@@ -50,7 +50,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
     layer.layerStatus === 'loading' ||
     layer.layerStatus === 'processing';
 
-  const renderLayerIcon = () => {
+  const renderLayerIcon = (): JSX.Element | null => {
     switch (layer.layerStatus) {
       case 'error':
         return null;
@@ -70,7 +70,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
     }
   };
 
-  const renderLayerStatus = () => {
+  const renderLayerStatus = (): JSX.Element | string | null => {
     switch (layer.layerStatus) {
       case 'error':
         return t('legend.layerError');
@@ -92,7 +92,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
     }
   };
 
-  const renderLayerBody = () => {
+  const renderLayerBody = (): JSX.Element => {
     return (
       <Box sx={sxClasses.listPrimaryText}>
         <Typography className="layerTitle">{layer.layerName}</Typography>
@@ -105,7 +105,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
     );
   };
 
-  const renderLayerButton = () => {
+  const renderLayerButton = (): JSX.Element | null => {
     switch (layer.layerStatus) {
       case 'error':
         return null;
@@ -119,7 +119,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
     }
   };
 
-  function getContainerClass() {
+  function getContainerClass(): string {
     const result: string[] = ['layer-panel', 'bordered', layer.layerStatus ?? '', `query-${layer.queryStatus}`];
 
     // if layer has selected child but its not itself selected
@@ -135,7 +135,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
     to: { opacity: 1 },
   });
 
-  const handleLayerKeyDown = (e: React.KeyboardEvent, selectedLayer: LayerListEntry) => {
+  const handleLayerKeyDown = (e: React.KeyboardEvent, selectedLayer: LayerListEntry): void => {
     if (e.key === 'Enter') onListItemClick(selectedLayer);
   };
 
@@ -185,9 +185,9 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
  * @param {number} selectedLayerIndex  Current index of list item selected.
  * @param {string} selectedLayerPath  Selected path of the layer.
  * @param {Function} onListItemClick  Callback function excecuted when list item is clicked.
- * @returns
+ * @returns {JSX.Element}
  */
-export function LayerList({ layerList, isEnlarged, selectedLayerPath, onListItemClick }: LayerListProps) {
+export function LayerList({ layerList, isEnlarged, selectedLayerPath, onListItemClick }: LayerListProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
   const { t } = useTranslation<string>();

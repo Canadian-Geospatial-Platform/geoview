@@ -57,7 +57,7 @@ export class API {
    */
   #manageKeyboardFocus = (): void => {
     // Remove the 'keyboard-focused' class from any elements that have it
-    function removeFocusedClass() {
+    function removeFocusedClass(): void {
       const previouslyFocusedElement = document.getElementsByClassName('keyboard-focused')[0];
       if (previouslyFocusedElement) previouslyFocusedElement.classList.toggle('keyboard-focused');
     }

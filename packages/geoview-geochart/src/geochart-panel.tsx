@@ -57,7 +57,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   /**
    * Redraws the GeoCharts in the Panel
    */
-  const redrawGeoCharts = () => {
+  const redrawGeoCharts = (): void => {
     // We need to redraw when the canvas isn't 'showing' in the DOM and when the user resizes the canvas placeholder.
     Object.entries(redrawGeochart.current).forEach(([, callback]) => {
       // Redraw
@@ -86,10 +86,10 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
   /**
    * Handles when the GeoChart child component is providing its callback to redraw itself
-   * @param {string} key The GeoChart unique key of the child component
-   * @param {Function} theCallbackRedraw The callback to execute whenever we want to redraw the GeoChart
+   * @param {string} key - The GeoChart unique key of the child component
+   * @param {Function} theCallbackRedraw - The callback to execute whenever we want to redraw the GeoChart
    */
-  const handleProvideCallbackRedraw = (key: string, theCallbackRedraw: () => void) => {
+  const handleProvideCallbackRedraw = (key: string, theCallbackRedraw: () => void): void => {
     // Keep the callback
     redrawGeochart.current[key] = theCallbackRedraw;
   };
@@ -115,7 +115,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   /**
    * Handles clicks to layers in left panel. Sets selected layer.
    *
-   * @param {LayerListEntry} layer The data of the selected layer
+   * @param {LayerListEntry} layer - The data of the selected layer
    */
   const handleLayerChange = useCallback(
     (layer: LayerListEntry): void => {
@@ -219,11 +219,11 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
   /**
    * Renders a single GeoChart component
-   * @param chartConfig PluginGeoChartConfig<ChartType> the Chart Config to assign the the GeoChart
-   * @param sx CSSProperties Styling to apply (basically if the GeoChart should be visible or not depending on the selected layer)
-   * @returns JSX.Element
+   * @param {PluginGeoChartConfig<ChartType>} chartConfig - The Chart Config to assign the the GeoChart
+   * @param {CSSProperties} sx - Styling to apply (basically if the GeoChart should be visible or not depending on the selected layer)
+   * @returns {JSX.Element}
    */
-  const renderChart = (chartConfig: GeoViewGeoChartConfig<ChartType>, sx: React.CSSProperties, key: string) => {
+  const renderChart = (chartConfig: GeoViewGeoChartConfig<ChartType>, sx: React.CSSProperties, key: string): JSX.Element => {
     return (
       <GeoChart
         sx={sx}
@@ -239,9 +239,9 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
   /**
    * Renders the complete GeoChart Panel component
-   * @returns JSX.Element
+   * @returns {JSX.Element}
    */
-  const renderComplete = () => {
+  const renderComplete = (): JSX.Element => {
     if (memoLayersList) {
       return (
         <Layout
