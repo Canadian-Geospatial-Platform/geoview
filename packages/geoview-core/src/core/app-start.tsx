@@ -73,7 +73,11 @@ function AppStart(props: AppStartProps): JSX.Element {
 
     // create a new map viewer instance and add it to the api
     // TODO: use store, remove the use of feature by viewer class and use state to gather values
-    if (!('mapId' in api.maps)) api.maps[mapId] = new MapViewer(mapFeaturesConfig, i18nInstance);
+    if (!('mapId' in api.maps)) {
+      const mapViewer = new MapViewer(mapFeaturesConfig, i18nInstance);
+      // mapViewer.createMap();
+      api.maps[mapId] = mapViewer;
+    }
 
     // Register a handler (which will only happen once) for when the map viewer will get initialized.
     // At the time of writing, this happens later, asynchronously, via the components/map/map.tsx when 'MapViewer.initMap()' is called.

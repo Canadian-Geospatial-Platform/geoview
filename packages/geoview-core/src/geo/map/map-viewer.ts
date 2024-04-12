@@ -37,6 +37,7 @@ import { Translate } from '@/geo/interaction/translate';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
 import { delay, generateId } from '@/core/utils/utilities';
+import { createEmptyBasemap } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import {
   TypeDisplayLanguage,
@@ -217,17 +218,51 @@ export class MapViewer {
     this.basemap = new Basemap(MapEventProcessor.getBasemapOptions(this.mapId), this.mapId);
   }
 
+  createMap(mapElement: HTMLElement): OLMap {
+    // config object
+    const { mapFeaturesConfig } = this;
+
+    // create map projection object from code
+    const projection = api.utilities.projection.projections[mapFeaturesConfig.map.viewSettings.projection];
+
+    let extentProjected: Extent | undefined;
+    if (mapFeaturesConfig?.map.viewSettings.extent)
+      extentProjected = api.utilities.projection.transformExtent(
+        mapFeaturesConfig?.map.viewSettings.extent,
+        'EPSG:4326',
+        projection.getCode()
+      );
+
+    const initialMap = new OLMap({
+      target: mapElement,
+      layers: [createEmptyBasemap()],
+      view: new View({
+        projection,
+        center: api.utilities.projection.transformFromLonLat(
+          [mapFeaturesConfig?.map.viewSettings.center[0] || -105, mapFeaturesConfig?.map.viewSettings.center[1] || 60],
+          projection
+        ),
+        zoom: mapFeaturesConfig?.map.viewSettings.zoom,
+        extent: extentProjected || undefined,
+        minZoom: mapFeaturesConfig?.map.viewSettings.minZoom || 0,
+        maxZoom: mapFeaturesConfig?.map.viewSettings.maxZoom || 17,
+      }),
+      controls: [],
+      keyboardEventTarget: document.getElementById(`map-${this.mapId}`) as HTMLElement,
+    });
+
+    // Set the map
+    this.map = initialMap;
+    this.initMap();
+
+    return initialMap;
+  }
+
   /**
    * Initializes map, layer class and geometries
    * @param {OLMap} cgpMap - The OpenLayers map object
    */
-  initMap(cgpMap: OLMap): void {
-    // Set the map
-    this.map = cgpMap;
-
-    // TODO: Refactor - Is it necessary to set the mapId again? It was set in constructor. Preferably set it at one or the other.
-    this.mapId = cgpMap.get('mapId');
-
+  initMap(): void {
     // Register essential map handlers
     this.map.on('moveend', this.#handleMapMoveEnd.bind(this));
     this.map.getView().on('change:resolution', debounce(this.#handleMapZoomEnd.bind(this), 100).bind(this));
@@ -252,8 +287,8 @@ export class MapViewer {
       logger.logPromiseFailed('loadListOfGeoviewLayer in initMap in MapViewer', error);
     });
 
-    // check if geometries are provided from url
-    this.loadGeometries();
+    // // check if geometries are provided from url
+    // this.loadGeometries();
 
     // Emit map init
     this.#mapInit = true;

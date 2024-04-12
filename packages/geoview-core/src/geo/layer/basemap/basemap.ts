@@ -143,30 +143,6 @@ export class Basemap {
   // #endregion
 
   // #region CREATE BASEMAPS
-  /**
-   * Create empty basemap tilelayer to use as initial basemap while we load basemap
-   * so the viewer will not fails if basemap is not avialable
-   *
-   * @returns {TileLayer<XYZ>} return the created basemap
-   */
-  createEmptyBasemap(): TileLayer<XYZ> {
-    // create empty tilelayer to use as initial basemap while we load basemap
-    const emptyBasemap: TypeBasemapLayer = {
-      basemapId: 'empty',
-      source: new XYZ(),
-      type: 'empty',
-      opacity: 0,
-      resolutions: [],
-      origin: [],
-      minScale: 0,
-      maxScale: 17,
-      extent: [0, 0, 0, 0],
-    };
-    const emptyLayer = new TileLayer(emptyBasemap);
-    emptyLayer.set('mapId', 'basemap');
-
-    return emptyLayer;
-  }
 
   /**
    * Create a basemap layer
