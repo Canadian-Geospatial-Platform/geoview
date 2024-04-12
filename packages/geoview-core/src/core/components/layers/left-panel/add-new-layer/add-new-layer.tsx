@@ -25,6 +25,7 @@ import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { createLocalizedString } from '@/core/utils/utilities';
 import { useLayerStoreActions, useLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
 import { EsriImage, TypeEsriImageLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-image';
@@ -93,6 +94,8 @@ export function AddNewLayer(): JSX.Element {
   const mapId = useGeoViewMapId();
   const layersList = useLayerLegendLayers();
   const { setDisplayState } = useLayerStoreActions();
+  const { addNotification } = useAppStoreActions();
+  addNotification({ message: 'test', notificationType: 'error', key: 'test', count: 1 });
 
   const isMultiple = (): boolean =>
     hasMetadata && (layerType === ESRI_DYNAMIC || layerType === WFS || layerType === WMS || layerType === GEOJSON);
