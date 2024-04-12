@@ -43,6 +43,7 @@
             <td>
               <a href="#HLYR1">1. Many GeoJSON Layers</a><br />
               <a href="#HLYR2">2. Many GeoJSON Layers - with footer bar</a><br />
+              <a href="#HLYR3">3. One Layer, multiple geometry types and styles</a><br />
             </td>
           </tr>
         </tbody>
@@ -210,6 +211,58 @@
         }"
     ></div>
 
+    <div class="map-title-holder">
+      <h4 id="HLYR3">3. One Layer, multiple geometry types and styles</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <button class="collapsible active">Map Status Flags</button>
+    <pre id="HLYR3-state" class="panel map-title-holder"></pre>
+    <div
+      id="LYR3"
+      class="geoview-map"
+      triggerReadyCallback="true"
+      data-lang="en"
+      data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'zoom': 4,
+            'center': [-100, 60],
+            'projection': 3978
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': true,
+            'labeled': false
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'geojsonLYR1',
+              'geoviewLayerName': { 'en': 'GeoJSON Sample' },
+              'metadataAccessPath': { 'en': './datasets/geojson/metadata1.json' },
+              'geoviewLayerType': 'GeoJSON',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'projects.json',
+                  'layerName': { 'en': 'Projects' }
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map'],
+        'overviewMap': {'hideOnZoom': 7},
+        'footerBar': {
+          'tabs': {
+            'core': ['legend', 'layers', 'details', 'data-table']
+          }
+        },
+        'corePackages': [],
+        'theme': 'geo.ca',
+        'suportedLanguages': ['en']
+        }"
+    ></div>
+
     <script src="codedoc.js"></script>
     <script src="layerlib.js"></script>
     <script>
@@ -227,6 +280,7 @@
           });
           listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
           listenToLegendLayerSetChanges('HLYR2-state', 'LYR2');
+          listenToLegendLayerSetChanges('HLYR3-state', 'LYR3');
 
           // create snippets
           createCodeSnippet();
