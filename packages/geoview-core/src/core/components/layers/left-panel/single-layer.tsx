@@ -124,7 +124,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
       return (
         <Box style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'left', gap: 1 }}>
           <span>{itemsLengthDesc} </span>
-          <TableViewIcon />
+          <TableViewIcon  fontSize="small" />
         </Box>
       );
     }
