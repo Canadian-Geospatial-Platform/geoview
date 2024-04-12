@@ -7,6 +7,8 @@ import { Style, Stroke, Fill, Circle } from 'ol/style';
 import { Color } from 'ol/color';
 import { getArea as getAreaOL } from 'ol/sphere';
 import { Extent } from 'ol/extent';
+import XYZ from 'ol/source/XYZ';
+import TileLayer from 'ol/layer/Tile';
 
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
@@ -17,6 +19,8 @@ import { VECTOR_LAYER } from '@/core/utils/constant';
 import { getLegendStyles } from '@/geo/renderer/geoview-renderer';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { TypeStyleConfig } from '@/geo/map/map-schema-types';
+
+import { TypeBasemapLayer } from '../layer/basemap/basemap-types';
 
 /**
  * Interface used for css style declarations
@@ -201,6 +205,31 @@ export function getDefaultDrawingStyle(strokeColor?: Color | string, strokeWidth
   });
 }
 // #endregion GEOMETRY
+
+/**
+ * Create empty basemap tilelayer to use as initial basemap while we load basemap
+ * so the viewer will not fails if basemap is not avialable
+ *
+ * @returns {TileLayer<XYZ>} return the created basemap
+ */
+export function createEmptyBasemap(): TileLayer<XYZ> {
+  // create empty tilelayer to use as initial basemap while we load basemap
+  const emptyBasemap: TypeBasemapLayer = {
+    basemapId: 'empty',
+    source: new XYZ(),
+    type: 'empty',
+    opacity: 0,
+    resolutions: [],
+    origin: [],
+    minScale: 0,
+    maxScale: 17,
+    extent: [0, 0, 0, 0],
+  };
+  const emptyLayer = new TileLayer(emptyBasemap);
+  emptyLayer.set('mapId', 'basemap');
+
+  return emptyLayer;
+}
 
 /** ***************************************************************************************************************************
  * This method gets the legend styles used by the the layer as specified by the style configuration.
