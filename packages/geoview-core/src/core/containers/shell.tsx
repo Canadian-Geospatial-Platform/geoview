@@ -225,7 +225,7 @@ export function Shell(props: ShellProps): JSX.Element {
             {/* load geolocator component if config includes in list of components in appBar */}
             {appBarComponents.includes('geolocator') && interaction === 'dynamic' && <Geolocator />}
             <Box sx={sxClasses.mapContainer}>
-              <Map />
+              <Map viewer={mapViewer} />
               <MapInfo />
             </Box>
             {interaction === 'dynamic' && <NavBar api={mapViewer.navBarApi} />}

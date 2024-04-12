@@ -1,4 +1,3 @@
-import { Map as OLMap } from 'ol';
 import { Coordinate } from 'ol/coordinate'; // only for typing
 import Overlay from 'ol/Overlay';
 import { Extent } from 'ol/extent'; // only for Typing
@@ -33,7 +32,6 @@ export interface IMapState {
   highlightedFeatures: TypeFeatureInfoEntry[];
   hoverFeatureInfo: TypeHoverFeatureInfo | undefined | null;
   interaction: TypeInteraction;
-  mapElement?: OLMap;
   mapExtent: Extent | undefined;
   mapLoaded: boolean;
   northArrow: boolean;
@@ -82,7 +80,6 @@ export interface IMapState {
 
   setterActions: {
     setMapChangeSize: (size: [number, number], scale: TypeScaleInfo) => void;
-    setMapElement: (mapElem: OLMap, zoom: number, scale: TypeScaleInfo) => void;
     setMapLoaded: (mapLoaded: boolean) => void;
     setAttribution: (attribution: string[]) => void;
     setInteraction: (interaction: TypeInteraction) => void;
@@ -426,23 +423,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       },
 
       /**
-       * Sets the map element, zoom level, and scale.
-       * @param {OLMap} mapElement - The map element.
-       * @param {number} zoom - The zoom level.
-       * @param {TypeScaleInfo} scale - The scale information.
-       */
-      setMapElement: (mapElement: OLMap, zoom: number, scale: TypeScaleInfo): void => {
-        set({
-          mapState: {
-            ...get().mapState,
-            mapElement,
-            zoom,
-            scale,
-          },
-        });
-      },
-
-      /**
        * Sets whether the map is loaded.
        * @param {boolean} mapLoaded - Flag indicating if the map is loaded.
        */
@@ -757,8 +737,6 @@ export const useMapAttribution = () => useStore(useGeoViewStore(), (state) => st
 export const useMapBasemapOptions = () => useStore(useGeoViewStore(), (state) => state.mapState.basemapOptions);
 export const useMapCenterCoordinates = () => useStore(useGeoViewStore(), (state) => state.mapState.centerCoordinates);
 export const useMapClickMarker = () => useStore(useGeoViewStore(), (state) => state.mapState.clickMarker);
-// TODO: Refactor - Get rid of the mapElement in the store and this 'useMapElement'
-export const useMapElement = () => useStore(useGeoViewStore(), (state) => state.mapState.mapElement);
 export const useMapExtent = () => useStore(useGeoViewStore(), (state) => state.mapState.mapExtent);
 export const useMapFixNorth = () => useStore(useGeoViewStore(), (state) => state.mapState.fixNorth);
 export const useMapInteraction = () => useStore(useGeoViewStore(), (state) => state.mapState.interaction);

@@ -80,7 +80,7 @@ export class API {
           activeEl?.closest('.geoview-shell') !== null ? activeEl?.closest('.geoview-shell')!.getAttribute('id')?.split('-')[1] : undefined;
 
         if (mapId !== undefined) {
-          const mapFocus = activeEl?.getAttribute('id') === `mapbox-${mapId}`;
+          const mapFocus = activeEl?.getAttribute('id') === `mapTargetElement-${mapId}`;
           logger.logInfo(`Map ${mapId} focus and crosshair is enabled`, [mapFocus]);
           AppEventProcessor.setAppIsCrosshairActive(mapId, mapFocus);
         }

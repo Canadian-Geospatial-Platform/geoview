@@ -104,7 +104,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Initializes the map controls
    * @param {string} mapId - The map id being initialized
    */
-  static async initMapControls(mapId: string): Promise<void> {
+  static initMapControls(mapId: string): void {
     // Log
     logger.logTraceCore('MAP EVENT PROCESSOR - initMapControls', mapId);
 
@@ -156,11 +156,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     });
     map.addOverlay(clickMarkerOverlay);
 
-    // Wait for the OpenLayers map to kick-start the scale control before saving the scale information in the store
-    const scaleInfo = await this.getScaleInfoFromDomElement(mapId);
-
     // Save in the store
-    store.getState().mapState.setterActions.setMapElement(map, map.getView().getZoom()!, scaleInfo);
     store.getState().mapState.setterActions.setOverlayNorthMarker(northPoleMarker);
     store.getState().mapState.setterActions.setOverlayClickMarker(clickMarkerOverlay);
 

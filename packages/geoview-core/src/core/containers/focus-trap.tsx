@@ -9,9 +9,8 @@ import { Modal, Button } from '@/ui';
 import { HtmlToReact } from './html-to-react';
 import { getFocusTrapSxClasses } from './containers-style';
 import { ARROW_KEY_CODES } from '@/core/utils/constant';
-import { useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppGeoviewHTMLElement, useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useMapElement } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -48,7 +47,8 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   // tracks if the last action was done through a keyboard (map navigation) or mouse (mouse movement)
   const { setCrosshairActive } = useAppStoreActions();
   const { setActiveTrapGeoView } = useUIStoreActions();
-  const mapElementStore = useMapElement();
+  const geoviewElement = useAppGeoviewHTMLElement();
+  const mapElementStore = geoviewElement.querySelector('[id^="mapTargetElement-"]') as HTMLElement;
 
   // ? useRef, if not mapElementStore is undefined - happen because the value is used inside an event listener
   const mapElementRef = useRef(mapElementStore);
@@ -56,7 +56,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   // ? use reference HTML element to disable scrolling - happen because the value is used inside an event listener
   const mapHTMLElementRef = useRef<HTMLElement>();
-  if (mapElementRef.current !== undefined) mapHTMLElementRef.current = mapElementRef.current.getTargetElement();
+  if (mapElementRef.current !== undefined) mapHTMLElementRef.current = mapElementRef.current;
 
   /**
    * Disable scrolling on keydown space, so that screen doesnt scroll down.
@@ -78,18 +78,16 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
    * @param {KeyboardEvent} evt the keyboard event to trap
    */
   function handleScrolling(evt: KeyboardEvent): void {
-    disableScrolling(evt, mapHTMLElementRef);
+    disableScrolling(evt, mapElementRef);
   }
 
   /**
    * Exit the focus trap
    */
   function exitFocus(): void {
-    const mapHTMLElement = mapHTMLElementRef.current!.closest('.geoview-shell') as HTMLElement;
-
     // the user escape the trap, remove it, put back skip link in focus cycle and zoom to top link
     setActiveTrapGeoView(false);
-    mapHTMLElement.classList.remove('map-focus-trap');
+    geoviewElement.classList.remove('map-focus-trap');
     // mapHTMLElement.removeEventListener('keydown',handleExit); // GV can't remove because of eslint @typescript-eslint/no-use-before-define
     document.removeEventListener('keydown', handleScrolling);
 
@@ -102,7 +100,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   const handleExit = (evt: KeyboardEvent) => {
     if (!ARROW_KEY_CODES.includes(evt.code as string)) {
       // remove the border from the map
-      document.getElementById(`mapbox-${mapId}`)!.style.border = sxClasses.exitFocus.border;
+      mapElementStore!.style.border = sxClasses.exitFocus.border;
     }
 
     if (evt.code === 'KeyQ' && evt.ctrlKey) {
@@ -114,7 +112,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
    * Set the focus trap
    */
   function setFocusTrap(): void {
-    const mapHTMLElement = mapHTMLElementRef.current!.closest('.geoview-shell') as HTMLElement;
+    const mapHTMLElement = geoviewElement.querySelector('.geoview-shell')!; // mapHTMLElementRef.current!.closest('.geoview-shell') as HTMLElement;
 
     // add a class to specify the viewer is in focus trap mode
     setActiveTrapGeoView(true);
@@ -122,7 +120,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     mapHTMLElement.addEventListener('keydown', handleExit);
 
     // update the store and focus to map
-    setTimeout(() => document.getElementById(`mapbox-${mapId}`)?.focus(), 0);
+    setTimeout(() => document.getElementById(`mapTargetElement-${mapId}`)?.focus(), 0);
     setCrosshairActive(true);
   }
 
@@ -130,7 +128,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   const handleEnable = () => {
     setOpen(false);
     setFocusTrap();
-    document.getElementById(`mapbox-${mapId}`)!.style.border = sxClasses.enableFocus.border;
+    document.getElementById(`mapTargetElement-${mapId}`)!.style.border = sxClasses.enableFocus.border;
   };
 
   const handleSkip = () => {
@@ -158,13 +156,13 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       // if user move the mouse over the map, cancel the dialog
       // remove the top and bottom link from focus cycle and start the FocusTrap
       document.addEventListener('keydown', handleScrolling);
-      mapHTMLElementRef.current!.closest('.geoview-shell')!.addEventListener(
+      geoviewElement.querySelector('.geoview-shell')!.addEventListener(
         'mousemove',
         () => {
           setOpen(false);
           exitFocus();
           // remove border from the map
-          document.getElementById(`mapbox-${mapId}`)!.style.border = sxClasses.exitFocus.border;
+          document.getElementById(`mapTargetElement-${mapId}`)!.style.border = sxClasses.exitFocus.border;
         },
         { once: true }
       );
