@@ -69,4 +69,8 @@ export const getSxClasses = (theme: Theme) => ({
   dataTableInstructionsBody: {
     fontSize: theme.palette.geoViewFontSize.sm,
   },
+  rightPanelContainer: {
+    overflowY: 'auto',
+    color: theme.palette.geoViewColor.textColor.main,
+  },
 });

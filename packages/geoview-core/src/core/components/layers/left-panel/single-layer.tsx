@@ -63,7 +63,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
 
   const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
 
-  // if any of the chiild layers is selected return true
+  // if any of the child layers is selected return true
   const isLayerChildSelected = (startingLayer: TypeLegendLayer): boolean => {
     if (displayState !== 'view') {
       return false;

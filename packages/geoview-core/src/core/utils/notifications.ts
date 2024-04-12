@@ -57,7 +57,7 @@ export class Notifications {
       count: 1,
     };
 
-    AppEventProcessor.addAppNotification(this.mapId, notification);
+    AppEventProcessor.addNotification(this.mapId, notification);
   }
 
   /**
