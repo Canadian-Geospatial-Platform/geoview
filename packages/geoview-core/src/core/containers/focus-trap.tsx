@@ -8,10 +8,11 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { Modal, Button } from '@/ui';
 import { HtmlToReact } from './html-to-react';
 import { getFocusTrapSxClasses } from './containers-style';
-import { ARROW_KEY_CODES } from '@/core/utils/constant';
+// import { ARROW_KEY_CODES } from '@/core/utils/constant';
 import { useAppGeoviewHTMLElement, useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
+import { ARROW_KEY_CODES } from '../utils/constant';
 
 /**
  * Interface for the focus trap properties
@@ -97,16 +98,16 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   }
 
   // handle FocusTrap states (Exit)
-  const handleExit = (evt: KeyboardEvent): void => {
-    if (!ARROW_KEY_CODES.includes(evt.code as string)) {
-      // remove the border from the map
-      mapElementStore!.style.border = sxClasses.exitFocus.border;
-    }
+  // const handleExit = (evt: KeyboardEvent): void => {
+  //   if (!ARROW_KEY_CODES.includes(evt.code as string)) {
+  //     // remove the border from the map
+  //     mapElementStore!.style.border = sxClasses.exitFocus.border;
+  //   }
 
-    if (evt.code === 'KeyQ' && evt.ctrlKey) {
-      exitFocus();
-    }
-  };
+  //   if (evt.code === 'KeyQ' && evt.ctrlKey) {
+  //     exitFocus();
+  //   }
+  // };
 
   /**
    * Set the focus trap
@@ -117,7 +118,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     // add a class to specify the viewer is in focus trap mode
     setActiveTrapGeoView(true);
     mapHTMLElement.classList.add('map-focus-trap');
-    mapHTMLElement.addEventListener('keydown', handleExit);
+    //  mapHTMLElement.addEventListener('keydown', handleExit); // TODO: this handle focus overload error
 
     // update the store and focus to map
     setTimeout(() => document.getElementById(`mapTargetElement-${mapId}`)?.focus(), 0);
