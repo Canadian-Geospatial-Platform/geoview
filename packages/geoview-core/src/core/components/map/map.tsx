@@ -28,9 +28,21 @@ import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
 import { toJsonObject } from '@/core/types/global-types';
 
-export function Map(): JSX.Element {
+type MapProps = {
+  viewer: MapViewer;
+};
+
+/**
+ * Create a map component
+ * @param {MapProps} props - Map props containing the viewer
+ *
+ * @return {JSX.Element} The map component
+ */
+export function Map(props: MapProps): JSX.Element {
   // Log
   logger.logTraceRender('components/map/map');
+
+  const { viewer } = props;
 
   const defaultTheme = useTheme();
 
@@ -46,10 +58,6 @@ export function Map(): JSX.Element {
   const mapStoreConfig = useGeoViewConfig();
   const projectionCode = useMapProjection();
   const { createEmptyBasemap, createBaseMapFromOptions } = useMapStoreActions();
-
-  // create a new map viewer instance
-  // TODO: use store
-  const viewer: MapViewer = api.maps[mapId];
 
   const initCGPVMap = useCallback(
     (cgpvMap: OLMap) => {
@@ -151,15 +159,15 @@ export function Map(): JSX.Element {
   return (
     // ? the map is focusable and needs to be tabbable for keyboard navigation
     /* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */
-    <Box id={`mapbox-${mapId}`} ref={mapElement as MutableRefObject<HTMLDivElement>} sx={sxClasses.mapContainer} tabIndex={0}>
+    <Box id={`mapTargetElement-${mapId}`} ref={mapElement as MutableRefObject<HTMLDivElement>} sx={sxClasses.mapContainer} tabIndex={0}>
       {mapLoaded && (
         <>
           {northArrow && <NorthArrow />}
           <NorthPoleFlag />
-          <Crosshair />
+          <Crosshair mapTargetElement={viewer.map.getTargetElement()} />
           <ClickMarker />
           <HoverTooltip />
-          {deviceSizeMedUp && overviewMap && <OverviewMap />}
+          {deviceSizeMedUp && overviewMap && <OverviewMap olMap={viewer.map} />}
         </>
       )}
     </Box>

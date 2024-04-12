@@ -28,7 +28,7 @@ export abstract class MapPlugin extends AbstractPlugin {
     // create the swiper container and insert it after top link
     const el = document.createElement('div');
     el.setAttribute('id', `${this.pluginProps.mapId}-${this.pluginId}`);
-    const mapElement = document.getElementById(`mapbox-${this.pluginProps.mapId}`);
+    const mapElement = document.getElementById(`mapTargetElement-${this.pluginProps.mapId}`);
     mapElement?.prepend(el);
 
     // create the swiper component and render
