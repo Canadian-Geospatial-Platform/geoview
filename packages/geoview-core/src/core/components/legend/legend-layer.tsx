@@ -13,7 +13,14 @@ import {
   IconButton,
   KeyboardArrowDownIcon,
   KeyboardArrowUpIcon,
+  Stack,
+  VisibilityOutlinedIcon,
+  HighlightOutlinedIcon,
+  ZoomInSearchIcon,
+  Typography,
+  VisibilityOffOutlinedIcon,
 } from '@/ui';
+import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { useMapStoreActions } from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
@@ -35,12 +42,11 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   const [isGroupOpen, setGroupOpen] = useState(true);
-  const { getVisibilityFromOrderedLayerInfo } = useMapStoreActions();
+  const { getVisibilityFromOrderedLayerInfo, setOrToggleLayerVisibility } = useMapStoreActions();
+  const { setHighlightLayer, zoomToLayerExtent } = useLayerStoreActions();
 
   const getLayerChildren = (): TypeLegendLayer[] => {
-    return layer.children?.filter(
-      (c) => getVisibilityFromOrderedLayerInfo(c.layerPath) && ['processed', 'loaded'].includes(c.layerStatus ?? '')
-    );
+    return layer.children?.filter((c) => ['processed', 'loaded'].includes(c.layerStatus ?? ''));
   };
 
   /**
@@ -50,17 +56,67 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
     setGroupOpen(!isGroupOpen);
   };
 
-  const getSecondaryText = (): string => {
+  /**
+   * Set the layer visivbility on the map
+   * @param {React.MouseEvent<HTMLButtonElement, MouseEvent>} e Mouse event
+   */
+  const handleToggleVisibility = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
+    e.stopPropagation();
+    setOrToggleLayerVisibility(layer.layerPath);
+  };
+
+  /**
+   * Set the highlight feature on the map for a layer
+   * @param {React.MouseEvent<HTMLButtonElement, MouseEvent>} e Mouse event
+   */
+  const handleHighlightLayer = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
+    e.stopPropagation();
+    setHighlightLayer(layer.layerPath);
+  };
+
+  /**
+   * Set the zoom on the map based on the layer path
+   * @param {React.MouseEvent<HTMLButtonElement, MouseEvent>} e Mouse event
+   */
+  const handleZoomTo = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
+    e.stopPropagation();
+    zoomToLayerExtent(layer.layerPath);
+  };
+  const visibility = !getVisibilityFromOrderedLayerInfo(layer.layerPath);
+
+  const getSecondaryText = (): JSX.Element => {
     if (getLayerChildren().length) {
-      return t('legend.subLayersCount').replace('{count}', getLayerChildren().length.toString());
+      return <>{t('legend.subLayersCount').replace('{count}', getLayerChildren().length.toString())}</>;
     }
     if (layer.items.length) {
-      const count = layer.items.filter((d) => d.isVisible !== false).length;
-      const totalCount = layer.items.length;
-      return t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
+      const items = t('legend.itemsCount')
+        .replace('{count}', layer.items.length.toString())
+        .replace('{totalCount}', layer.items.length.toString());
+
+      return (
+        <Stack direction="row" alignItems="center" sx={sxClasses.layerStackIcons}>
+          <Typography component="span" fontSize={14}>
+            {items}
+          </Typography>
+          <IconButton edge="end" tooltip="layers.visibilityIsAlways" className="style1" onClick={(e) => handleToggleVisibility(e)}>
+            {visibility ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
+          </IconButton>
+          <IconButton
+            tooltip="legend.highlightLayer"
+            sx={{ marginTop: '-0.3125rem' }}
+            className="style1"
+            onClick={(e) => handleHighlightLayer(e)}
+          >
+            <HighlightOutlinedIcon />
+          </IconButton>
+          <IconButton tooltip="legend.zoomTo" className="style1" onClick={(e) => handleZoomTo(e)}>
+            <ZoomInSearchIcon />
+          </IconButton>
+        </Stack>
+      );
     }
 
-    return '';
+    return <Box />;
   };
 
   // renders the layers children, if any
@@ -72,7 +128,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
     return (
       <List sx={{ width: '100%', padding: '20px', margin: '20px 0px' }}>
         {layer.children
-          .filter((d) => getVisibilityFromOrderedLayerInfo(d.layerPath) && !['error', 'processing'].includes(d.layerStatus ?? ''))
+          .filter((d) => !['error', 'processing'].includes(d.layerStatus ?? ''))
           .map((item) => (
             <LegendLayer layer={item} key={item.layerPath} />
           ))}
@@ -86,23 +142,22 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
       return null;
     }
     return (
-      <List sx={{ width: '100%' }}>
-        {layer.items
-          .filter((d) => d.isVisible !== false)
-          .map((item) => (
-            <ListItem key={item.icon} className={!item.isVisible ? 'unchecked' : ''}>
-              <ListItemIcon>{item.icon ? <img alt={item.name} src={item.icon} /> : <BrowserNotSupportedIcon />}</ListItemIcon>
-              <Tooltip title={item.name} placement="top" enterDelay={1000}>
-                <ListItemText primary={item.name} />
-              </Tooltip>
-            </ListItem>
-          ))}
+      <List sx={sxClasses.subList}>
+        {layer.items.map((item) => (
+          <ListItem key={item.icon} className={!item.isVisible ? 'unchecked' : ''}>
+            <ListItemIcon>{item.icon ? <Box component="img" alt={item.name} src={item.icon} /> : <BrowserNotSupportedIcon />}</ListItemIcon>
+            <Tooltip title={item.name} placement="top" enterDelay={1000}>
+              <ListItemText primary={item.name} />
+            </Tooltip>
+          </ListItem>
+        ))}
       </List>
     );
   }
 
   function renderCollapsible(): JSX.Element | null {
-    if (!(layer.children?.length || layer.items?.length)) {
+    // show sub items only when number of items are more than 1.
+    if (!(layer.children?.length > 1 || layer.items?.length > 1)) {
       return null;
     }
 
@@ -118,8 +173,8 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
     <Box sx={sxClasses.legendLayerListItem}>
       <ListItem key={layer.layerName} divider onClick={handleExpandGroupClick}>
         <LayerIcon layer={layer} />
-        <Tooltip title={layer.layerName} placement="top" enterDelay={1000}>
-          <>
+        <>
+          <Tooltip title={layer.layerName} placement="top">
             <ListItemText
               sx={{
                 '&:hover': {
@@ -130,12 +185,15 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
               className="layerTitle"
               secondary={getSecondaryText()}
             />
+          </Tooltip>
+          {!!(layer.children?.length > 1 || layer.items?.length > 1) && (
             <IconButton sx={{ marginBottom: '20px' }} className="style1" edge="end" size="small" tooltip="layers.toggleCollapse">
               {isGroupOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
             </IconButton>
-          </>
-        </Tooltip>
+          )}
+        </>
       </ListItem>
+
       {renderCollapsible()}
     </Box>
   );
