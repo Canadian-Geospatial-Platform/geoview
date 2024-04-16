@@ -326,6 +326,9 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @returns {Promise<unknown>}
    */
   setVectorTileStyle(layerPath: string, styleUrl: string): Promise<unknown> {
-    return applyStyle(api.maps[this.mapId].layer.registeredLayers[layerPath].olLayer as VectorTileLayer, styleUrl);
+    return applyStyle(
+      MapEventProcessor.getMapViewerLayerAPIInstance(this.mapId).registeredLayers[layerPath].olLayer as VectorTileLayer,
+      styleUrl
+    );
   }
 }

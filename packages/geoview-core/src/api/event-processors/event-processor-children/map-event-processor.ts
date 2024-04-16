@@ -5,7 +5,10 @@ import { Extent } from 'ol/extent';
 import View, { FitOptions } from 'ol/View';
 import { KeyboardPan } from 'ol/interaction';
 import { Coordinate } from 'ol/coordinate';
+
 import { api } from '@/app';
+import { LayerApi } from '@/geo/layer/layer';
+import { MapViewer } from '@/geo/map/map-viewer';
 import {
   TypeGeoviewLayerConfig,
   TypeHighlightColors,
@@ -15,6 +18,7 @@ import {
   TypeMapState,
   TypeValidMapProjectionCodes,
 } from '@/geo/map/map-schema-types';
+import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
@@ -172,13 +176,43 @@ export class MapEventProcessor extends AbstractEventProcessor {
   // #region
   /**
    * Shortcut to get the Map state for a given map id
-   * @param {string} mapId The mapId
+   * @param {string} mapId - map Id
    * @returns {IMapState} The Map state
    */
   protected static getMapStateProtected(mapId: string): IMapState {
     // TODO: Refactor - Rename this function when we want to clarify the small confusion with getMapState function below
     // Return the map state
     return this.getState(mapId).mapState;
+  }
+
+  /**
+   * Shortcut to get the Map Viewer instance for a given map id
+   * This is use to reduce the use of api.maps[mapId] and be more explicit
+   * @param {string} mapId - map Id
+   * @returns {MapViewer} The Map viewer instance
+   */
+  static getMapViewerInstance(mapId: string): MapViewer {
+    return api.maps[mapId];
+  }
+
+  /**
+   * Shortcut to get the Map Viewer layer api instance for a given map id
+   * This is use to reduce the use of api.maps[mapId] and be more explicit
+   * @param {string} mapId - map Id
+   * @returns {LayerApi} The Map viewer layer API instance
+   */
+  static getMapViewerLayerAPIInstance(mapId: string): LayerApi {
+    return api.maps[mapId].layer;
+  }
+
+  /**
+   * Shortcut to get the Map Viewer plugins instance for a given map id
+   * This is use to reduce the use of api.maps[mapId] and be more explicit
+   * @param {string} mapId - map Id
+   * @returns {TypeRecordOfPlugin} The map plugins record
+   */
+  static getMapViewerPluginsInstance(mapId: string): TypeRecordOfPlugin {
+    return api.maps[mapId].plugins;
   }
 
   /**
