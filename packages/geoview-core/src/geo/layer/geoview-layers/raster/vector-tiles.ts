@@ -35,12 +35,20 @@ import { AppEventProcessor } from '@/api/event-processors/event-processor-childr
 // TODO: Implement method to validate Vector Tiles service
 // TODO: Add more customization (minZoom, maxZoom, TMS)
 
+// GV: CONFIG EXTRACTION
+// GV: This section of code must be deleted because we already have another type guard that does the same thing
+// GV: |||||
+// GV: vvvvv
+
 export type TypeSourceVectorTilesInitialConfig = TypeSourceTileInitialConfig;
 
 export interface TypeVectorTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.VECTOR_TILES;
   listOfLayerEntryConfig: VectorTilesLayerEntryConfig[];
 }
+
+// GV: ^^^^^
+// GV: |||||
 
 /** *****************************************************************************************************************************
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeVectorTilesConfig if the geoviewLayerType attribute of the
@@ -158,10 +166,10 @@ export class VectorTiles extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  protected processOneLayerEntry(layerConfig: VectorTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected async processOneLayerEntry(layerConfig: VectorTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
-    super.processOneLayerEntry(layerConfig);
+    await super.processOneLayerEntry(layerConfig);
     const sourceOptions: SourceOptions<Feature> = {
       url: getLocalizedValue(layerConfig.source.dataAccessPath as TypeLocalizedString, AppEventProcessor.getDisplayLanguage(this.mapId)),
     };
@@ -225,7 +233,10 @@ export class VectorTiles extends AbstractGeoViewRaster {
           this.metadata.defaultStyles
         }/root.json`,
         { resolutions: resolutions?.length ? resolutions : [] }
-      );
+      ).catch((error) => {
+        // Log
+        logger.logPromiseFailed('applyStyle in processOneLayerEntry in VectorTiles', error);
+      });
 
     return Promise.resolve(layerConfig.olLayer);
   }
@@ -297,22 +308,22 @@ export class VectorTiles extends AbstractGeoViewRaster {
   }
 
   // TODO: This section needs documentation (a header at least). Also, is it normal to have things hardcoded like that?
-  addVectorTileLayer(): void {
+  async addVectorTileLayer(): Promise<void> {
     // GV from code sandbox https://codesandbox.io/s/vector-tile-info-forked-g28jud?file=/main.js it works good
-    // GV from inside GEoView, even when not use, something is wrong.
-    olms(
+    // GV from inside GeoView, even when not use, something is wrong.
+    const map = await olms(
       'LYR3',
       'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/resources/styles/root.json?f=json'
-    ).then((map) => {
-      // Configure the map with a view with EPSG:3978 projection
-      (map as Map).setView(
-        new View({
-          projection: 'EPSG:3857',
-          center: [(-2750565.340500001 + -936703.1849000007) / 2, (3583872.5053000003 + 4659267.001500003) / 2],
-          zoom: 5,
-        })
-      );
-    });
+    );
+
+    // Configure the map with a view with EPSG:3978 projection
+    (map as Map).setView(
+      new View({
+        projection: 'EPSG:3857',
+        center: [(-2750565.340500001 + -936703.1849000007) / 2, (3583872.5053000003 + 4659267.001500003) / 2],
+        zoom: 5,
+      })
+    );
   }
 
   /**
@@ -320,8 +331,9 @@ export class VectorTiles extends AbstractGeoViewRaster {
    *
    * @param {string} layerPath Path of layer to style.
    * @param {string} styleUrl The url of the styles to apply.
+   * @returns {Promise<unknown>}
    */
-  setVectorTileStyle(layerPath: string, styleUrl: string): void {
-    applyStyle(api.maps[this.mapId].layer.registeredLayers[layerPath].olLayer as VectorTileLayer, styleUrl);
+  setVectorTileStyle(layerPath: string, styleUrl: string): Promise<unknown> {
+    return applyStyle(api.maps[this.mapId].layer.registeredLayers[layerPath].olLayer as VectorTileLayer, styleUrl);
   }
 }

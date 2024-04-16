@@ -8,6 +8,7 @@ import { TypeFeatureInfoResultSet } from '@/geo/utils/feature-info-layer-set';
 import { IDataTableState } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
 import { TypeLayerData } from '@/geo/utils/layer-set';
+import { TypeAllFeatureInfoResultSet } from '@/geo/utils/all-feature-info-layer-set';
 
 // GV The paradigm when working with DataTableEventProcessor vs DataTableState goes like this:
 // GV DataTableState provides: 'state values', 'actions' and 'setterActions'.
@@ -112,9 +113,10 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
    * Shortcut to get the DataTable state for a given map id
    * @param {string} mapId - Id of the map.
    * @param {string} layerPath - Layer path to apply filter.
+   * @returns {Promise<TypeAllFeatureInfoResultSet | void>}
    */
-  static triggerGetAllFeatureInfo(mapId: string, layerPath: string): void {
-    api.maps[mapId].layer.allFeatureInfoLayerSet.queryLayer(layerPath, 'all');
+  static triggerGetAllFeatureInfo(mapId: string, layerPath: string): Promise<TypeAllFeatureInfoResultSet | void> {
+    return api.maps[mapId].layer.allFeatureInfoLayerSet.queryLayer(layerPath, 'all');
   }
 
   /**

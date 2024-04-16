@@ -837,13 +837,18 @@ export abstract class AbstractGeoViewLayer {
     const promiseLegend = this.getLegend(layerPath);
 
     // Whenever the promise resolves
-    promiseLegend.then((legend) => {
-      // If legend was received
-      if (legend) {
-        // Emit legend information once retrieved
-        this.#emitLegendQueried({ layerPath, legend });
-      }
-    });
+    promiseLegend
+      .then((legend) => {
+        // If legend was received
+        if (legend) {
+          // Emit legend information once retrieved
+          this.#emitLegendQueried({ layerPath, legend });
+        }
+      })
+      .catch((error) => {
+        // Log
+        logger.logPromiseFailed('promiseLegend in queryLegend in AbstractGeoviewLayer', error);
+      });
 
     // Return the promise
     return promiseLegend;
@@ -1215,9 +1220,17 @@ export abstract class AbstractGeoViewLayer {
       features.forEach((featureNeedingItsCanvas) => {
         promisedAllCanvasFound.push(
           new Promise((resolveCanvas) => {
-            getFeatureCanvas(featureNeedingItsCanvas, layerConfig, callbackToFetchDataUrl).then((canvas) => {
-              resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
-            });
+            getFeatureCanvas(featureNeedingItsCanvas, layerConfig, callbackToFetchDataUrl)
+              .then((canvas) => {
+                resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
+              })
+              .catch((error) => {
+                // Log
+                logger.logPromiseFailed(
+                  'getFeatureCanvas in featureNeedingItsCanvas loop in formatFeatureInfoResult in AbstractGeoViewLayer',
+                  error
+                );
+              });
           })
         );
       });
@@ -1496,6 +1509,11 @@ export type TypeVectorLayerStyles = Partial<Record<TypeStyleGeometry, TypeStyleR
  * GeoViewAbstractLayers types
  */
 
+// GV: CONFIG EXTRACTION
+// GV: This section of code was extracted and copied to the geoview-config package
+// GV: |||||
+// GV: vvvvv
+
 // Definition of the keys used to create the constants of the GeoView layer
 // TODO: Refactor - Move this and related types/const below lower in the architecture? Say, to MapSchemaTypes? Otherwise, things circle..
 type LayerTypesKey =
@@ -1571,6 +1589,8 @@ export const CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<TypeGeoviewLayerType, string> 
   ogcWms: 'TypeOgcWmsLayerEntryConfig',
 };
 
+// GV: ^^^^^
+// GV: |||||
 const validVectorLayerLegendTypes: TypeGeoviewLayerType[] = [
   CONST_LAYER_TYPES.CSV,
   CONST_LAYER_TYPES.GEOJSON,

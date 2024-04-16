@@ -33,7 +33,10 @@ export class FeatureInfoLayerSet extends LayerSet {
     // Register a handler on the map click
     this.layerApi.mapViewer.onMapSingleClick((mapViewer, payload) => {
       // Query all layers which can be queried
-      this.queryLayers(payload.lnglat);
+      this.queryLayers(payload.lnglat).catch((error) => {
+        // Log
+        logger.logPromiseFailed('queryLayers in onMapSingleClick in FeatureInfoLayerSet', error);
+      });
     });
   }
 
@@ -74,7 +77,10 @@ export class FeatureInfoLayerSet extends LayerSet {
         layerPath,
       },
     };
-    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, 'click', this.resultSet);
+    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, 'click', this.resultSet).catch((error) => {
+      // Log
+      logger.logPromiseFailed('FeatureInfoEventProcessor.propagateFeatureInfoToStore in onRegisterLayer in FeatureInfoLayerSet', error);
+    });
   }
 
   /**
@@ -94,7 +100,15 @@ export class FeatureInfoLayerSet extends LayerSet {
         const layerConfig = this.layerApi.registeredLayers[layerPath];
         if (this?.resultSet?.[layerPath]?.data) {
           this.resultSet[layerPath].data.layerStatus = layerStatus;
-          FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerConfig.layerPath, 'click', this.resultSet);
+          FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerConfig.layerPath, 'click', this.resultSet).catch(
+            (error) => {
+              // Log
+              logger.logPromiseFailed(
+                'FeatureInfoEventProcessor.propagateFeatureInfoToStore in onProcessLayerStatusChanged in FeatureInfoLayerSet',
+                error
+              );
+            }
+          );
         }
       }
     }
@@ -163,19 +177,27 @@ export class FeatureInfoLayerSet extends LayerSet {
         allPromises.push(promiseResult);
 
         // When the promise is done, propagate to store
-        promiseResult.then((arrayOfRecords) => {
-          // Keep the features retrieved
-          data.features = arrayOfRecords;
-          data.layerStatus = layerConfig.layerStatus!;
+        promiseResult
+          .then((arrayOfRecords) => {
+            // Keep the features retrieved
+            data.features = arrayOfRecords;
+            data.layerStatus = layerConfig.layerStatus!;
 
-          // When property features is undefined, we are waiting for the query result.
-          // when Array.isArray(features) is true, the features property contains the query result.
-          // when property features is null, the query ended with an error.
-          data.queryStatus = arrayOfRecords ? 'processed' : 'error';
+            // When property features is undefined, we are waiting for the query result.
+            // when Array.isArray(features) is true, the features property contains the query result.
+            // when property features is null, the query ended with an error.
+            data.queryStatus = arrayOfRecords ? 'processed' : 'error';
 
-          // Propagate to store
-          FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, eventType, this.resultSet);
-        });
+            // Propagate to store
+            FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, eventType, this.resultSet).catch((error) => {
+              // Log
+              logger.logPromiseFailed('FeatureInfoEventProcessor.propagateFeatureInfoToStore in queryLayers in FeatureInfoLayerSet', error);
+            });
+          })
+          .catch((error) => {
+            // Log
+            logger.logPromiseFailed('queryLayerFeatures in queryLayers in FeatureInfoLayerSet', error);
+          });
       } else {
         data.features = null;
         data.queryStatus = 'error';

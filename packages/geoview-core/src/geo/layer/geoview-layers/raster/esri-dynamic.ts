@@ -46,13 +46,18 @@ import {
 } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
-export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
+type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
+type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
+
+// GV: CONFIG EXTRACTION
+// GV: This section of code was extracted and copied to the geoview-config package
+// GV: |||||
+// GV: vvvvv
+
+export interface TypeEsriDynamicLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_DYNAMIC;
   listOfLayerEntryConfig: EsriDynamicLayerEntryConfig[];
 }
-
-type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
-type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
 
 /** ******************************************************************************************************************************
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeEsriDynamicLayerConfig if the geoviewLayerType attribute of
@@ -67,6 +72,9 @@ export const layerConfigIsEsriDynamic = (verifyIfLayer: TypeGeoviewLayerConfig):
   return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 };
 
+// GV: ^^^^^
+// GV: |||||
+
 /** ******************************************************************************************************************************
  * type guard function that redefines an AbstractGeoViewLayer as an EsriDynamic if the type attribute of the verifyIfGeoViewLayer
  * parameter is ESRI_DYNAMIC. The type ascention applies only to the true block of the if clause that use this function.
@@ -79,6 +87,10 @@ export const layerConfigIsEsriDynamic = (verifyIfLayer: TypeGeoviewLayerConfig):
 export const geoviewLayerIsEsriDynamic = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is EsriDynamic => {
   return verifyIfGeoViewLayer?.type === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 };
+// GV: CONFIG EXTRACTION
+// GV: This section of code must be deleted because we already have another type guard that does the same thing
+// GV: |||||
+// GV: vvvvv
 
 /** ******************************************************************************************************************************
  * type guard function that redefines a TypeLayerEntryConfig as a EsriDynamicLayerEntryConfig if the geoviewLayerType attribute
@@ -95,6 +107,9 @@ export const geoviewEntryIsEsriDynamic = (
 ): verifyIfGeoViewEntry is EsriDynamicLayerEntryConfig => {
   return verifyIfGeoViewEntry?.geoviewLayerConfig?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 };
+
+// GV: ^^^^^
+// GV: |||||
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -224,10 +239,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  protected processOneLayerEntry(layerConfig: EsriDynamicLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected async processOneLayerEntry(layerConfig: EsriDynamicLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
-    super.processOneLayerEntry(layerConfig);
+    await super.processOneLayerEntry(layerConfig);
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
     sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));

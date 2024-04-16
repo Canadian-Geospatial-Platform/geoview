@@ -511,6 +511,11 @@ export type TypeLayerEntryConfig =
   | TileLayerEntryConfig
   | GroupLayerEntryConfig;
 
+// GV: CONFIG EXTRACTION
+// GV: This section of code is not used by the new config validation code
+// GV: |||||
+// GV: vvvvv
+
 /** ******************************************************************************************************************************
  * List of layers. Corresponds to the layerList defined in the schema.
  */
@@ -522,6 +527,13 @@ export type TypeListOfLayerEntryConfig = TypeLayerEntryConfig[];
  */
 // TODO: Suggestion - Get rid of this type. Simply use TypeGeoviewLayerConfig[]. It'd simplify types management accross the source code.
 export type TypeListOfGeoviewLayerConfig = TypeGeoviewLayerConfig[];
+// GV: ^^^^^
+// GV: |||||
+
+// GV: CONFIG EXTRACTION
+// GV: This section of code was extracted and copied to the geoview-config package
+// GV: |||||
+// GV: vvvvv
 
 /** ******************************************************************************************************************************
  *  Definition of a single Geoview layer configuration.
@@ -554,6 +566,8 @@ export type TypeGeoviewLayerConfig = {
   listOfLayerEntryConfig: TypeListOfLayerEntryConfig;
 };
 
+// GV: ^^^^^
+// GV: |||||
 /**
  * Definition of a GeoCore layer configuration
  */

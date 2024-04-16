@@ -1,6 +1,11 @@
 import { OSM, XYZ } from 'ol/source';
 import { Extent } from 'ol/extent';
 
+// GV: CONFIG EXTRACTION
+// GV: This section of code was extracted and copied to the geoview-config package
+// GV: |||||
+// GV: vvvvv
+
 /** ******************************************************************************************************************************
  *  Definition of the basemap options type.
  */
@@ -23,6 +28,8 @@ export type TypeBasemapOptions = {
   labeled: boolean;
 };
 
+// GV: ^^^^^
+// GV: |||||
 /** ******************************************************************************************************************************
  * interface used to define a new basemap.
  */

@@ -7,11 +7,17 @@ export const GEO_URL_TEXT = {
   text: 'Geo.ca',
 };
 
+// GV: CONFIG EXTRACTION
+// GV: This section of code was extracted and copied to the geoview-config package
+// GV: |||||
+// GV: vvvvv
 /** The default geocore url */
 export const CONFIG_GEOCORE_URL = 'https://geocore-stage.api.geo.ca';
 
 /** The default geolocator url */
 export const CONFIG_GEOLOCATOR_URL = 'https://geolocator.api.geo.ca?keys=geonames,nominatim,locate';
+// GV: ^^^^^
+// GV: |||||
 
 // OpenLayer constants
 export const OL_ZOOM_DURATION = 500;
