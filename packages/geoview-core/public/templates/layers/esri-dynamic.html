@@ -486,6 +486,8 @@
     <pre id="ResultSetId1-click" class="panel">Click on feature on the map</pre>
     <button type="button" class="collapsible" id="AllFeatureInfo1">Get All Feature Info (uniqueValueId/1)</button>
     <pre id="ResultSetId1-all-features" class="panel"></pre>
+    <button class="collapsible active">Map config</button>
+    <pre id="LYR1-config" class="panel map-title-holder"></pre>
     <hr />
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="LYR1CS" class="panel"></pre>
@@ -1190,6 +1192,46 @@
 
         else if (mapId === 'LYR4') {
 
+        // =======================================================================================================================
+          // GV: This is a temporary section for testing the API
+          var configOutput = document.getElementById('LYR1-config');
+          // Erase comments in the config file.
+          let newJsonStringMapConfig = document.getElementById('LYR1').getAttribute('data-config')
+             .split(/(?<!\\)'/gm)
+            .map((fragment, index) => {
+              if (index % 2) return fragment.replaceAll(/\/\*/gm, String.fromCharCode(1)).replaceAll(/\*\//gm, String.fromCharCode(2));
+              return fragment;
+            })
+            .join("'")
+            .replaceAll(/\/\*(?<=\/\*)((?:.|\n|\r)*?)(?=\*\/)\*\//gm, '')
+            .replaceAll(String.fromCharCode(1), '/*')
+            .replaceAll(String.fromCharCode(2), '*/');
+;
+
+          // If you want to use quotes in your JSON string, write \&quot or escape it using a backslash;
+          // First, replace apostrophes not preceded by a backslash with quotes
+          newJsonStringMapConfig = newJsonStringMapConfig.replace(/(?<!\\)'/gm, '"');
+          // Then, replace apostrophes preceded by a backslash with a single apostrophe
+          newJsonStringMapConfig = newJsonStringMapConfig.replace(/\\'/gm, "'");
+
+          cgpv.api.configApi.getMapConfig(JSON.parse(newJsonStringMapConfig)).then((mapConfig) => {
+            let jsonString;
+            const serialize = (objectToSerialize) => {
+              try {
+                const jsonString = JSON.stringify(objectToSerialize, (key, value) => {
+                  if (['geoviewLayerConfig', 'layerStatusWeight', '_olLayer', '_layerStatus', 'waitForProcessedBeforeSendingLoaded'].includes(key)) {
+                    return undefined;
+                  }
+                  return value;
+                }, 2);
+              configOutput.innerText = jsonString;
+              } catch (error) {
+                  console.error("Erreur lors de la sérialisation JSON :", error);
+              }
+            }
+            jsonString = serialize(mapConfig);
+          });
+          /**/
         }
       });
     </script>

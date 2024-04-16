@@ -1,3 +1,4 @@
+import { ConfigApi } from 'geoview-config/src/config/config-api';
 import { Event } from './events/event';
 
 import { Projection } from '@/geo/projection/projection';
@@ -20,6 +21,9 @@ import { initMapDivFromFunctionCall } from '@/app';
  * @class API
  */
 export class API {
+  // ConfigApi instance
+  configApi = ConfigApi;
+
   // event object used to handle triggering events, subscribing to an event etc...
   event: Event;
 

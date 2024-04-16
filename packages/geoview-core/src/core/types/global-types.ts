@@ -15,6 +15,11 @@ export { getGeoViewStore } from '@/core/stores/stores-managers';
 export type { SelectChangeEvent } from '@mui/material';
 export type { AnySchemaObject } from 'ajv';
 
+// GV: CONFIG EXTRACTION
+// GV: This section of code was extracted and copied to the geoview-config package
+// GV: |||||
+// GV: vvvvv
+
 /** ******************************************************************************************************************************
  * Definition of the map feature configuration according to what can be specified in the map div and in the schema for the
  * type extension TypeMapFeaturesInstance.
@@ -27,6 +32,9 @@ export interface TypeMapFeaturesConfig extends TypeMapFeaturesInstance {
   /** If true, the ready callback 'cgpv.init(mapId)' is called with the mapId as a parameter when the map is ready */
   triggerReadyCallback?: boolean;
 }
+
+// GV: ^^^^^
+// GV: |||||
 
 /** ******************************************************************************************************************************
  *  Definition of a global Window type.
@@ -78,6 +86,11 @@ export type TypeCGPVUI = {
   elements: typeof UI;
 };
 
+// GV: CONFIG EXTRACTION
+// GV: This section of code was extracted and copied to the geoview-config package
+// GV: |||||
+// GV: vvvvv
+
 /** ******************************************************************************************************************************
  * Cast a variable to a different type
  *
@@ -121,6 +134,9 @@ export function toJsonObject(p: unknown): TypeJsonObject {
 
   return p as TypeJsonObject;
 }
+
+// GV: ^^^^^
+// GV: |||||
 
 /** ******************************************************************************************************************************
  *  Definition of an extended HTML element type.

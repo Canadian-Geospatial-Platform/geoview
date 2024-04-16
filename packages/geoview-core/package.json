@@ -88,7 +88,8 @@
     "react-beautiful-dnd": "~13.1.1",
     "react-dropzone": "^14.2.3",
     "markdown-to-jsx": "~7.4.0",
-    "html-to-image": "^1.11.11"
+    "html-to-image": "^1.11.11",
+    "geoview-config": "workspace:~0.1.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.17.0",
