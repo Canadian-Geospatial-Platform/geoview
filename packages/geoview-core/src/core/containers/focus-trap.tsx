@@ -12,7 +12,6 @@ import { getFocusTrapSxClasses } from './containers-style';
 import { useAppGeoviewHTMLElement, useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
-import { ARROW_KEY_CODES } from '../utils/constant';
 
 /**
  * Interface for the focus trap properties

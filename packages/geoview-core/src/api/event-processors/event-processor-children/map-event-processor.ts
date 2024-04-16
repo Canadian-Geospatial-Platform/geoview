@@ -5,8 +5,6 @@ import { Extent } from 'ol/extent';
 import View, { FitOptions } from 'ol/View';
 import { KeyboardPan } from 'ol/interaction';
 import { Coordinate } from 'ol/coordinate';
-import TileLayer from 'ol/layer/Tile';
-import { XYZ } from 'ol/source';
 import { api } from '@/app';
 import {
   TypeGeoviewLayerConfig,
