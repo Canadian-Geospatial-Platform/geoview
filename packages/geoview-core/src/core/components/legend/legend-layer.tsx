@@ -37,7 +37,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
   const [isGroupOpen, setGroupOpen] = useState(true);
   const { getVisibilityFromOrderedLayerInfo } = useMapStoreActions();
 
-  const getLayerChildren = () => {
+  const getLayerChildren = (): TypeLegendLayer[] => {
     return layer.children?.filter(
       (c) => getVisibilityFromOrderedLayerInfo(c.layerPath) && ['processed', 'loaded'].includes(c.layerStatus ?? '')
     );
@@ -46,11 +46,11 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
   /**
    * Handle expand/shrink of layer groups.
    */
-  const handleExpandGroupClick = () => {
+  const handleExpandGroupClick = (): void => {
     setGroupOpen(!isGroupOpen);
   };
 
-  const getSecondaryText = () => {
+  const getSecondaryText = (): string => {
     if (getLayerChildren().length) {
       return t('legend.subLayersCount').replace('{count}', getLayerChildren().length.toString());
     }
@@ -64,7 +64,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
   };
 
   // renders the layers children, if any
-  function renderChildren() {
+  function renderChildren(): JSX.Element | null {
     if (!layer.children?.length) {
       return null;
     }
@@ -81,7 +81,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
   }
 
   // renders the layers items if any
-  function renderItems() {
+  function renderItems(): JSX.Element | null {
     if (!layer.items?.length) {
       return null;
     }
@@ -101,7 +101,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
     );
   }
 
-  function renderCollapsible() {
+  function renderCollapsible(): JSX.Element | null {
     if (!(layer.children?.length || layer.items?.length)) {
       return null;
     }

@@ -53,6 +53,7 @@ export class AsyncSemaphore {
   async withLockRunAndForget<A>(f: () => Promise<A>): Promise<void> {
     await this.#acquire();
     // Ignoring returned promise intentionally!
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.#execWithRelease(f);
   }
 

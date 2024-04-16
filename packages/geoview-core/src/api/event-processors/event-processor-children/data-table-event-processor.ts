@@ -88,7 +88,7 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
    * @param {string} filterStrings - Filters set on the data table
    * @param {boolean} isMapRecordExist - Filtered Map switch is on off.
    */
-  static applyFilters(mapId: string, layerPath: string, filterStrings: string, isMapRecordExist: boolean) {
+  static applyFilters(mapId: string, layerPath: string, filterStrings: string, isMapRecordExist: boolean): void {
     const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayer(layerPath);
     const filterLayerConfig = api.maps[mapId].layer.registeredLayers[layerPath] as TypeLayerEntryConfig;
 
@@ -124,7 +124,7 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath - The layer path that has changed.
    * @param {TypeFeatureInfoResultSet} resultSet - The result set associated to the map.
    */
-  static propagateFeatureInfoToStore(mapId: string, layerPath: string, resultSet: TypeFeatureInfoResultSet) {
+  static propagateFeatureInfoToStore(mapId: string, layerPath: string, resultSet: TypeFeatureInfoResultSet): void {
     /**
      * Create a get all features info object for each layer which is then used to render layers
      */
@@ -143,7 +143,7 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath - The layer path to delete
    * @private
    */
-  static #deleteFeatureAllInfo(mapId: string, layerPath: string) {
+  static #deleteFeatureAllInfo(mapId: string, layerPath: string): void {
     // Redirect to helper function
     this.#deleteFromArray(this.getDataTableState(mapId).allFeaturesDataArray, layerPath, (layerArrayResult) => {
       // Update the layer data array in the store
@@ -158,7 +158,7 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
    * @param {(layerArray: TypeLayerData[]) => void} onDeleteCallback - The callback executed when the array is updated
    * @private
    */
-  static #deleteFromArray<T extends TypeLayerData>(layerArray: T[], layerPath: string, onDeleteCallback: (layerArray: T[]) => void) {
+  static #deleteFromArray<T extends TypeLayerData>(layerArray: T[], layerPath: string, onDeleteCallback: (layerArray: T[]) => void): void {
     // Find the layer data info to delete from the array
     const layerDataInfoToDelIndex = layerArray.findIndex((layerInfo) => layerInfo.layerPath === layerPath);
 

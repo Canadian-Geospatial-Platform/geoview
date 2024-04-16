@@ -29,7 +29,7 @@ export class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Method to execute when the layer is loaded.
    */
-  loadedFunction() {
+  loadedFunction(): void {
     super.loadedFunction();
     if ('applyViewFilter' in this.geoviewLayerInstance!)
       (this.geoviewLayerInstance as GeoviewChild).applyViewFilter(this.layerPath, this.layerFilter || '');

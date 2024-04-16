@@ -120,7 +120,7 @@ export class Basemap {
   // #endregion
 
   // #region OVERVIEW MAP
-  async setOverviewMap() {
+  async setOverviewMap(): Promise<void> {
     const overviewMap = await this.createCoreBasemap({ basemapId: 'transport', shaded: false, labeled: false });
 
     if (overviewMap) this.overviewMap = overviewMap;
@@ -184,7 +184,9 @@ export class Basemap {
     let origin: number[] = [];
     let urlProj = 0;
 
-    function requestBasemap(url: string, timeout: number) {
+    // ? The actual response expected by AxiosResponse is `any`
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    function requestBasemap(url: string, timeout: number): Promise<AxiosResponse<any, any>> {
       return new Promise((resolve, reject) => {
         axios.get(url).then(resolve, reject);
         setTimeout(reject, timeout);
@@ -198,7 +200,7 @@ export class Basemap {
         const request = await requestBasemap(basemapLayer.jsonUrl as string, 3000);
 
         if (request) {
-          const result = toJsonObject((request as AxiosResponse).data);
+          const result = toJsonObject(request.data);
 
           // get minimum scale
           const minScale = result.minScale as number;

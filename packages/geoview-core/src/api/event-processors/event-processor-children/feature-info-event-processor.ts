@@ -78,7 +78,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath - The layer path to delete
    * @private
    */
-  static #deleteFeatureInfo(mapId: string, layerPath: string) {
+  static #deleteFeatureInfo(mapId: string, layerPath: string): void {
     // The feature info state
     const featureInfoState = this.getFeatureInfoState(mapId);
 
@@ -99,7 +99,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {(layerArray: TypeLayerData[]) => void} onDeleteCallback - The callback executed when the array is updated
    * @private
    */
-  static #deleteFromArray<T extends TypeLayerData>(layerArray: T[], layerPath: string, onDeleteCallback: (layerArray: T[]) => void) {
+  static #deleteFromArray<T extends TypeLayerData>(layerArray: T[], layerPath: string, onDeleteCallback: (layerArray: T[]) => void): void {
     // Find the layer data info to delete from the array
     const layerDataInfoToDelIndex = layerArray.findIndex((layerInfo) => layerInfo.layerPath === layerPath);
 
@@ -121,7 +121,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {EventType} eventType - The event type that triggered the layer set update.
    * @param {TypeFeatureInfoResultSet} resultSet - The result set associated to the map.
    */
-  static propagateFeatureInfoToStore(mapId: string, layerPath: string, eventType: EventType, resultSet: TypeFeatureInfoResultSet) {
+  static propagateFeatureInfoToStore(mapId: string, layerPath: string, eventType: EventType, resultSet: TypeFeatureInfoResultSet): void {
     // The feature info state
     const featureInfoState = this.getFeatureInfoState(mapId);
 

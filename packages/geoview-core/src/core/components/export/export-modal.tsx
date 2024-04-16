@@ -77,10 +77,10 @@ export default function ExportModal(): JSX.Element {
 
   /**
    * Calculate the width of the canvas based on dialog box container width.
-   * @param {HTMLDivElement} dialogBox container where canvas will be rendered.
-   * @returns number
+   * @param {HTMLDivElement} dialogBox - Container where canvas will be rendered.
+   * @returns {number} The canvas width
    */
-  const getCanvasWidth = (dialogBox: HTMLDivElement) => {
+  const getCanvasWidth = (dialogBox: HTMLDivElement): number => {
     const dialogBoxCompStyles = window.getComputedStyle(dialogBox);
 
     const paddingLeft = Number(dialogBoxCompStyles.getPropertyValue('padding-left').match(/\d+/)![0]);

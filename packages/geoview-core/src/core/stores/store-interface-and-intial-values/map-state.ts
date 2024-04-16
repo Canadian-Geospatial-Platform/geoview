@@ -753,29 +753,35 @@ export interface TypeOrderedLayerInfo {
 // **********************************************************
 // Map state selectors
 // **********************************************************
-export const useMapAttribution = () => useStore(useGeoViewStore(), (state) => state.mapState.attribution);
-export const useMapBasemapOptions = () => useStore(useGeoViewStore(), (state) => state.mapState.basemapOptions);
-export const useMapCenterCoordinates = () => useStore(useGeoViewStore(), (state) => state.mapState.centerCoordinates);
-export const useMapClickMarker = () => useStore(useGeoViewStore(), (state) => state.mapState.clickMarker);
-// TODO: Refactor - Get rid of the mapElement in the store and this 'useMapElement'
-export const useMapElement = () => useStore(useGeoViewStore(), (state) => state.mapState.mapElement);
-export const useMapExtent = () => useStore(useGeoViewStore(), (state) => state.mapState.mapExtent);
-export const useMapFixNorth = () => useStore(useGeoViewStore(), (state) => state.mapState.fixNorth);
-export const useMapInteraction = () => useStore(useGeoViewStore(), (state) => state.mapState.interaction);
-export const useMapHiglightColor = () => useStore(useGeoViewStore(), (state) => state.mapState.highlightColor);
-export const useMapHoverFeatureInfo = () => useStore(useGeoViewStore(), (state) => state.mapState.hoverFeatureInfo);
-export const useMapLoaded = () => useStore(useGeoViewStore(), (state) => state.mapState.mapLoaded);
-export const useMapNorthArrow = () => useStore(useGeoViewStore(), (state) => state.mapState.northArrow);
-export const useMapNorthArrowElement = () => useStore(useGeoViewStore(), (state) => state.mapState.northArrowElement);
-export const useMapOrderedLayerInfo = () => useStore(useGeoViewStore(), (state) => state.mapState.orderedLayerInfo);
-export const useMapOverviewMap = () => useStore(useGeoViewStore(), (state) => state.mapState.overviewMap);
-export const useMapOverviewMapHideZoom = () => useStore(useGeoViewStore(), (state) => state.mapState.overviewMapHideZoom);
-export const useMapPointerPosition = () => useStore(useGeoViewStore(), (state) => state.mapState.pointerPosition);
-export const useMapProjection = () => useStore(useGeoViewStore(), (state) => state.mapState.currentProjection);
-export const useMapRotation = () => useStore(useGeoViewStore(), (state) => state.mapState.rotation);
-export const useMapScale = () => useStore(useGeoViewStore(), (state) => state.mapState.scale);
-export const useMapSize = () => useStore(useGeoViewStore(), (state) => state.mapState.size);
-export const useMapVisibleLayers = () => useStore(useGeoViewStore(), (state) => state.mapState.visibleLayers);
-export const useMapZoom = () => useStore(useGeoViewStore(), (state) => state.mapState.zoom);
+export const useMapAttribution = (): string[] => useStore(useGeoViewStore(), (state) => state.mapState.attribution);
+export const useMapBasemapOptions = (): TypeBasemapOptions => useStore(useGeoViewStore(), (state) => state.mapState.basemapOptions);
+export const useMapCenterCoordinates = (): Coordinate => useStore(useGeoViewStore(), (state) => state.mapState.centerCoordinates);
+export const useMapClickMarker = (): TypeClickMarker | undefined => useStore(useGeoViewStore(), (state) => state.mapState.clickMarker);
 
-export const useMapStoreActions = () => useStore(useGeoViewStore(), (state) => state.mapState.actions);
+// TODO: Refactor - Get rid of the mapElement in the store and this 'useMapElement'
+export const useMapElement = (): OLMap | undefined => useStore(useGeoViewStore(), (state) => state.mapState.mapElement);
+
+export const useMapExtent = (): Extent | undefined => useStore(useGeoViewStore(), (state) => state.mapState.mapExtent);
+export const useMapFixNorth = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.fixNorth);
+export const useMapInteraction = (): TypeInteraction => useStore(useGeoViewStore(), (state) => state.mapState.interaction);
+export const useMapHiglightColor = (): TypeHighlightColors | undefined =>
+  useStore(useGeoViewStore(), (state) => state.mapState.highlightColor);
+export const useMapHoverFeatureInfo = (): TypeHoverFeatureInfo => useStore(useGeoViewStore(), (state) => state.mapState.hoverFeatureInfo);
+export const useMapLoaded = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.mapLoaded);
+export const useMapNorthArrow = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.northArrow);
+export const useMapNorthArrowElement = (): TypeNorthArrow => useStore(useGeoViewStore(), (state) => state.mapState.northArrowElement);
+export const useMapOrderedLayerInfo = (): TypeOrderedLayerInfo[] => useStore(useGeoViewStore(), (state) => state.mapState.orderedLayerInfo);
+export const useMapOverviewMap = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.overviewMap);
+export const useMapOverviewMapHideZoom = (): number => useStore(useGeoViewStore(), (state) => state.mapState.overviewMapHideZoom);
+export const useMapPointerPosition = (): TypeMapMouseInfo | undefined =>
+  useStore(useGeoViewStore(), (state) => state.mapState.pointerPosition);
+export const useMapProjection = (): TypeValidMapProjectionCodes => useStore(useGeoViewStore(), (state) => state.mapState.currentProjection);
+export const useMapRotation = (): number => useStore(useGeoViewStore(), (state) => state.mapState.rotation);
+export const useMapScale = (): TypeScaleInfo => useStore(useGeoViewStore(), (state) => state.mapState.scale);
+export const useMapSize = (): [number, number] => useStore(useGeoViewStore(), (state) => state.mapState.size);
+export const useMapVisibleLayers = (): string[] => useStore(useGeoViewStore(), (state) => state.mapState.visibleLayers);
+export const useMapZoom = (): number => useStore(useGeoViewStore(), (state) => state.mapState.zoom);
+
+// TODO: Refactor - We should explicit a type for the mapState.actions
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const useMapStoreActions = (): any => useStore(useGeoViewStore(), (state) => state.mapState.actions);

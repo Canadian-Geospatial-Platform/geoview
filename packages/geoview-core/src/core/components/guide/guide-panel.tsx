@@ -63,7 +63,7 @@ export function GuidePanel({ fullWidth }: GuidePanelType): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [guide]);
 
-  const handleGuideItemClick = (layer: LayerListEntry) => {
+  const handleGuideItemClick = (layer: LayerListEntry): void => {
     const index: number = layersList.findIndex((item) => item.layerName === layer.layerName);
     setGuideItemIndex(index);
     setSelectedLayerPath(layer.layerPath);

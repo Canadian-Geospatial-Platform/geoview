@@ -1,5 +1,8 @@
 /* @ts-expect-error there is no mui style in this package */
-export const getSxClasses = (theme) => ({
+
+// ? I doubt we want to define an explicit type for style properties?
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const getSxClasses = (theme): any => ({
   basemapCard: {
     '& .MuiCard-root': {
       backgroundColor: theme.palette.grey.A700,

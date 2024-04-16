@@ -115,7 +115,7 @@ export class CSV extends AbstractGeoViewVector {
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig) {
+  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
@@ -158,7 +158,7 @@ export class CSV extends AbstractGeoViewVector {
    *
    * @returns {string[][]} An array of the rows of the csv, split by separator.
    */
-  private csvStringToArray(csvData: string, separator: string) {
+  private csvStringToArray(csvData: string, separator: string): string[][] {
     const regex = new RegExp(`(\\${separator}|\\r?\\n|\\r|^)(?:"([^"]*(?:""[^"]*)*)"|([^\\${separator}\\r\\n]*))`, 'gi');
     let matches;
     const parsedData: string[][] = [[]];
@@ -178,7 +178,12 @@ export class CSV extends AbstractGeoViewVector {
    * @param {number[]} lonLatIndices The index of lon and lat in the array.
    * @param {VectorLayerEntryConfig} layerConfig The vector layer entry to configure.
    */
-  private processFeatureInfoConfig(headers: string[], firstRow: string[], lonLatIndices: number[], layerConfig: VectorLayerEntryConfig) {
+  private processFeatureInfoConfig(
+    headers: string[],
+    firstRow: string[],
+    lonLatIndices: number[],
+    layerConfig: VectorLayerEntryConfig
+  ): void {
     if (!layerConfig.source) layerConfig.source = {};
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
     // Process undefined outfields or aliasFields ('' = false and !'' = true). Also, if en is undefined, then fr is also undefined.

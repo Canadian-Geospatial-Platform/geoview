@@ -100,7 +100,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   const [isGroupOpen, setGroupOpen] = useState(layerIsSelected || layerChildIsSelected);
 
   // get layer description
-  const getLayerDescription = () => {
+  const getLayerDescription = (): JSX.Element | string | null => {
     if (layer.layerStatus === 'error') {
       return t('legend.layerError');
     }
@@ -135,11 +135,11 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   /**
    * Handle expand/shrink of layer groups.
    */
-  const handleExpandGroupClick = () => {
+  const handleExpandGroupClick = (): void => {
     setGroupOpen(!isGroupOpen);
   };
 
-  const handleLayerClick = () => {
+  const handleLayerClick = (): void => {
     if (!['processed', 'loaded'].includes(layer.layerStatus!)) {
       return;
     }
@@ -160,24 +160,24 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     }
   };
 
-  const handleLayerKeyDown = (e: React.KeyboardEvent) => {
+  const handleLayerKeyDown = (e: React.KeyboardEvent): void => {
     if (e.key === 'Enter') handleLayerClick();
   };
 
-  const handleToggleVisibility = () => {
+  const handleToggleVisibility = (): void => {
     setOrToggleLayerVisibility(layer.layerPath);
   };
 
-  const handleReloadLayer = () => {
+  const handleReloadLayer = (): void => {
     logger.logWarning('reloading layer not implemented...');
   };
 
   // TODO: refactor - this button function does nothing as it is the whole container that can be draggable
-  const handleReArrangeLayer = () => {
+  const handleReArrangeLayer = (): void => {
     logger.logWarning('re-arrange layer');
   };
 
-  function renderEditModeButtons() {
+  function renderEditModeButtons(): JSX.Element | null {
     if (displayState === 'remove' || layer.layerStatus === 'error') {
       return <DeleteUndoButton layer={layer} />;
     }
@@ -191,7 +191,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     return null;
   }
 
-  function renderMoreLayerButtons() {
+  function renderMoreLayerButtons(): JSX.Element | null {
     if (layer.layerStatus === 'processing' || layer.layerStatus === 'loading' || displayState !== 'view') {
       return null;
     }
@@ -221,7 +221,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     );
   }
 
-  function renderArrowButtons() {
+  function renderArrowButtons(): JSX.Element | null {
     if (!['processed', 'loaded'].includes(layer.layerStatus!)) {
       return null;
     }
@@ -243,7 +243,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     return null;
   }
 
-  function renderCollapsible() {
+  function renderCollapsible(): JSX.Element | null {
     if (!(layer.children && layer.children.length)) {
       return null;
     }
@@ -260,7 +260,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     );
   }
 
-  function getContainerClass() {
+  function getContainerClass(): string {
     const result: string[] = ['layer-panel ', layer.layerStatus ?? ''];
 
     if (depth === 0) {

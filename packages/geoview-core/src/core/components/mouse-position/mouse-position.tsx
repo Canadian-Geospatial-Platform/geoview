@@ -33,7 +33,7 @@ export function MousePosition(): JSX.Element {
   /**
    * Switch position mode
    */
-  const switchPositionMode = () => {
+  const switchPositionMode = (): void => {
     setPositionMode((positionMode + 1) % 3);
   };
 

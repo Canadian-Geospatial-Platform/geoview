@@ -348,7 +348,7 @@ function createStrokeOptions(settings: TypeSimpleSymbolVectorConfig | TypeLineSt
  * @param {FilterNodeType} operator - Operator to execute.
  * @param {FilterNodeArrayType} dataStack - Data stack to use for the operator execution.
  */
-function executeOperator(operator: FilterNodeType, dataStack: FilterNodeArrayType) {
+function executeOperator(operator: FilterNodeType, dataStack: FilterNodeArrayType): void {
   if (operator.nodeType === NodeType.binary) {
     if (dataStack.length < 2 || dataStack[dataStack.length - 2].nodeValue === '(')
       throw new Error(`binary operator error - operator = '${operator.nodeValue}'`);
@@ -1143,12 +1143,13 @@ export async function getLegendStyles(
     const styleConfig: TypeStyleConfig = layerConfig.style;
     if (!styleConfig) return {};
 
+    const legendStyles: TypeVectorLayerStyles = {};
     if (styleConfig.Point) {
       // ======================================================================================================================
       // Point style configuration ============================================================================================
       if (isSimpleStyleConfig(styleConfig.Point)) {
         const layerStyles = await getPointStyleSubRoutine(styleConfig.Point.settings);
-        return layerStyles;
+        legendStyles.Point = layerStyles.Point;
       }
 
       if (isUniqueValueStyleConfig(styleConfig.Point)) {
@@ -1156,7 +1157,7 @@ export async function getLegendStyles(
           styleConfig.Point.defaultSettings,
           (styleConfig.Point as TypeUniqueValueStyleConfig).uniqueValueStyleInfo
         );
-        return layerStyles;
+        legendStyles.Point = layerStyles.Point;
       }
 
       if (isClassBreakStyleConfig(styleConfig.Point)) {
@@ -1164,7 +1165,7 @@ export async function getLegendStyles(
           styleConfig.Point.defaultSettings,
           (styleConfig.Point as TypeClassBreakStyleConfig).classBreakStyleInfo
         );
-        return layerStyles;
+        legendStyles.Point = layerStyles.Point;
       }
     }
 
@@ -1191,7 +1192,7 @@ export async function getLegendStyles(
         });
         layerStyles.LineString!.arrayOfCanvas = styleArray;
       }
-      return layerStyles;
+      legendStyles.LineString = layerStyles.LineString;
     }
 
     if (styleConfig.Polygon) {
@@ -1217,12 +1218,12 @@ export async function getLegendStyles(
         });
         layerStyles.Polygon!.arrayOfCanvas = styleArray;
       }
-      return layerStyles;
+      legendStyles.Polygon = layerStyles.Polygon;
     }
+    return legendStyles;
   } catch (error) {
     return {};
   }
-  return {};
 }
 
 /** ***************************************************************************************************************************

@@ -91,7 +91,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    * Update Tab panel when value change from tabs and dropdown.
    * @param {number} tabValue index of the tab or dropdown.
    */
-  const updateTabPanel = (tabValue: number) => {
+  const updateTabPanel = (tabValue: number): void => {
     // Update panel refs when tab value is changed.
     // handle no tab when mobile dropdown is displayed.
     if (typeof tabValue === 'string') {
@@ -115,7 +115,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    * Handle a tab change
    * @param {number} newValue value of the new tab
    */
-  const handleChange = (event: SyntheticEvent<Element, Event>, newValue: number) => {
+  const handleChange = (event: SyntheticEvent<Element, Event>, newValue: number): void => {
     updateTabPanel(newValue);
   };
 
@@ -123,7 +123,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    * Handle a tab click
    * If the panel is collapsed when tab is clicked, expand the panel
    */
-  const handleClick = (index: number) => {
+  const handleClick = (index: number): void => {
     if (value === index) onToggleCollapse?.();
 
     // WCAG - if keyboard navigation is on and the tabs gets expanded, set the trap store info to open, close otherwise

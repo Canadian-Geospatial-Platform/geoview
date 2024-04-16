@@ -28,7 +28,7 @@ export default function Fullscreen(): JSX.Element {
   /**
    * Toggle between fullscreen and window mode
    */
-  function setFullscreen() {
+  function setFullscreen(): void {
     const element = document.getElementById(`shell-${mapId}`);
     if (element) {
       setFullScreenActive(!isFullScreen, element as TypeHTMLElement);
@@ -42,7 +42,7 @@ export default function Fullscreen(): JSX.Element {
     /**
      * Exit fullscreen with ESC key
      */
-    function handleExit() {
+    function handleExit(): void {
       if (!document.fullscreenElement) {
         setFullScreenActive(false);
       }

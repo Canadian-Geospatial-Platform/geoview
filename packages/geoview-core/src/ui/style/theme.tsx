@@ -1,4 +1,4 @@
-import { createTheme } from '@mui/material/styles';
+import { Theme, ThemeOptions, createTheme } from '@mui/material/styles';
 import { lightThemeColors } from './light-theme';
 import { darkThemeColors } from './dark-theme';
 import { geoCaThemeColors } from './geo-ca-theme';
@@ -13,7 +13,7 @@ declare module '@mui/material/styles/createPalette' {
   }
 }
 
-function getThemeOptions(mode: TypeDisplayTheme) {
+function getThemeOptions(mode: TypeDisplayTheme): ThemeOptions {
   switch (mode) {
     case 'dark':
       return generateThemeOptions(darkThemeColors);
@@ -24,7 +24,7 @@ function getThemeOptions(mode: TypeDisplayTheme) {
   }
 }
 
-export const getTheme = (mode: TypeDisplayTheme) => {
+export const getTheme = (mode: TypeDisplayTheme): Theme => {
   const optionClone = getThemeOptions(mode);
 
   return createTheme(optionClone);

@@ -20,7 +20,7 @@ const timeSliderEventProcessor = new TimeSliderEventProcessor();
 const geochartEventProcessor = new GeochartEventProcessor();
 const swiperEventProcessor = new SwiperEventProcessor();
 
-export function initializeEventProcessors(store: GeoviewStoreType) {
+export function initializeEventProcessors(store: GeoviewStoreType): void {
   // core stores
   appEventProcessor.initialize(store);
   featureInfoEventProcessor.initialize(store);
@@ -35,7 +35,7 @@ export function initializeEventProcessors(store: GeoviewStoreType) {
   if (store.getState().mapConfig!.corePackages?.includes('swiper')) swiperEventProcessor.initialize(store);
 }
 
-export function destroyEventProcessors(store: GeoviewStoreType) {
+export function destroyEventProcessors(store: GeoviewStoreType): void {
   // core stores
   appEventProcessor.destroy();
   featureInfoEventProcessor.destroy();
