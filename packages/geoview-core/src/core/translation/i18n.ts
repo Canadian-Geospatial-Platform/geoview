@@ -3,6 +3,7 @@ import { initReactI18next } from 'react-i18next';
 
 import translationEn from '@public/locales/en/translation.json';
 import translationFr from '@public/locales/fr/translation.json';
+import { logger } from '../utils/logger';
 
 i18n
   .use(initReactI18next)
@@ -29,6 +30,10 @@ i18n
     react: {
       useSuspense: true,
     },
+  })
+  .catch((error) => {
+    // Log
+    logger.logPromiseFailed('in init in translation/i18n', error);
   });
 
 export default i18n;

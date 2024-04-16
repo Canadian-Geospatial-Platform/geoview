@@ -95,10 +95,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
    */
-  protected processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | null> {
+  protected async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | null> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
-    super.processOneLayerEntry(layerConfig);
+    await super.processOneLayerEntry(layerConfig);
     const vectorSource = this.createVectorSource(layerConfig);
     const vectorLayer = this.createVectorLayer(layerConfig as VectorLayerEntryConfig, vectorSource);
     return Promise.resolve(vectorLayer);

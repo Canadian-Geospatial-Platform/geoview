@@ -81,7 +81,7 @@ export const findLayerDataAndConfigFromQueryResults = (
 ): [
   GeoViewGeoChartConfig<ChartType> | undefined,
   GeoViewGeoChartConfigLayer | undefined,
-  TypeLayerEntryConfig<ChartType> | undefined,
+  TypeLayerEntryConfig | undefined,
   TypeFeatureInfoEntry[] | undefined
 ] => {
   // Loop on the results set

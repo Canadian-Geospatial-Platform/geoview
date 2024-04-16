@@ -2,7 +2,7 @@ import { useTheme } from '@mui/material';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Paper, Typography } from '@/ui';
-import { useLayerLegendLayers, useMapVisibleLayers, useLayerStoreActions, useGeoViewMapId } from '@/core/stores/';
+import { useLayerLegendLayers, useMapVisibleLayers, useGeoViewMapId } from '@/core/stores/';
 import { logger } from '@/core/utils/logger';
 
 import { getSxClasses } from './legend-styles';
@@ -31,7 +31,6 @@ export function Legend({ fullWidth }: LegendType): JSX.Element {
   // store state
   const visibleLayers = useMapVisibleLayers();
   const layersList = useLayerLegendLayers();
-  const { getLayer } = useLayerStoreActions();
 
   // Custom hook for calculating the height of footer panel
   const { leftPanelRef } = useFooterPanelHeight({ footerPanelTab: 'legend' });
@@ -75,22 +74,9 @@ export function Legend({ fullWidth }: LegendType): JSX.Element {
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('LEGEND - visibleLayers', visibleLayers.length, visibleLayers);
-    // Loop on the visible layers to retrieve the valid TypeLegendLayer objects
-    const parentPaths: string[] = [];
 
-    const layers = visibleLayers
-      .map((layerPath) => {
-        const pathStart = layerPath!.split('/')[0];
-        if (!parentPaths.includes(pathStart)) {
-          parentPaths.push(pathStart);
-          return getLayer(layerPath!);
-        }
-        return undefined;
-      })
-      .filter((layer) => layer !== undefined) as TypeLegendLayer[];
-
-    setLegendLayers(layers);
-    updateLegendLayerListByWindowSize(layers);
+    setLegendLayers(layersList);
+    updateLegendLayerListByWindowSize(layersList);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visibleLayers, layersList]);
@@ -128,6 +114,8 @@ export function Legend({ fullWidth }: LegendType): JSX.Element {
               </Box>
             );
           })}
+
+        {/* Show legend Instructions when no layer found. */}
         {!legendLayers.length && (
           <Paper sx={{ padding: '2rem', width: '100%' }}>
             <Typography variant="h3" gutterBottom sx={sxClasses.legendInstructionsTitle}>
