@@ -24,8 +24,14 @@
       "projectFolder": "packages/geoview-basemap-panel"
     },
     {
+      "packageName": "geoview-config",
+      "projectFolder": "packages/geoview-config",
+      "cyclicDependencyProjects": ["geoview-config","geoview-core"]
+    },
+    {
       "packageName": "geoview-core",
-      "projectFolder": "packages/geoview-core"
+      "projectFolder": "packages/geoview-core",
+      "cyclicDependencyProjects": ["geoview-config","geoview-core"]
     },
     {
       "packageName": "geoview-geochart",

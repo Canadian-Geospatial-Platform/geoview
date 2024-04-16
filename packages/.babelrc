@@ -54,6 +54,12 @@
     "@babel/plugin-proposal-function-sent",
     "@babel/plugin-transform-logical-assignment-operators",
     [
+      "@babel/plugin-transform-typescript",
+      {
+        "allowDeclareFields": true
+      }
+    ],
+    [
       "@babel/plugin-transform-nullish-coalescing-operator",
       {
         "loose": false
@@ -82,7 +88,12 @@
     "@babel/plugin-syntax-dynamic-import",
     "@babel/plugin-syntax-import-meta",
     "@babel/plugin-transform-json-strings",
-    "@babel/plugin-transform-runtime",
+    [
+      "@babel/plugin-transform-runtime",
+      {
+        "regenerator": true
+      }
+    ],
     "lodash"
   ]
 }
