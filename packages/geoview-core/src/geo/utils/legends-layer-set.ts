@@ -55,19 +55,24 @@ export class LegendsLayerSet extends LayerSet {
         const legendPromise = this.layerApi.geoviewLayer(layerPath).queryLegend(layerPath);
 
         // Whenever the legend response comes in
-        legendPromise.then((legend: TypeLegend | null | undefined) => {
-          // If legend received
-          if (legend) {
-            // Query completed keep it
-            this.resultSet[layerPath].data = legend;
+        legendPromise
+          .then((legend: TypeLegend | null | undefined) => {
+            // If legend received
+            if (legend) {
+              // Query completed keep it
+              this.resultSet[layerPath].data = legend;
 
-            // Propagate to store
-            LegendEventProcessor.propagateLegendToStore(this.mapId, layerPath, this.resultSet[layerPath]);
+              // Propagate to store
+              LegendEventProcessor.propagateLegendToStore(this.mapId, layerPath, this.resultSet[layerPath]);
 
-            // Inform that the layer set has been updated by triggering an event down the road
-            this.onLayerSetUpdatedProcess(layerPath);
-          }
-        });
+              // Inform that the layer set has been updated by triggering an event down the road
+              this.onLayerSetUpdatedProcess(layerPath);
+            }
+          })
+          .catch((error) => {
+            // Log
+            logger.logPromiseFailed('legendPromise in onProcessLayerStatusChanged in legendsLayerSet', error);
+          });
 
         // config file could not determine if the layer is queryable, can it be done using the metadata? let's try
         // ? Trying to comment this line to see if it's good, don't understand the comment line just above this line

@@ -199,7 +199,10 @@ export function Swiper(props: SwiperProps): JSX.Element {
     // For each layer path
     layerPaths.forEach((layerPath: string) => {
       // Wire events on the layer path
-      attachLayerEventsOnPath(layerPath);
+      attachLayerEventsOnPath(layerPath).catch((error) => {
+        // Log
+        logger.logPromiseFailed('attachLayerEventsOnPath in useEffect in Swiper', error);
+      });
     });
 
     return () => {

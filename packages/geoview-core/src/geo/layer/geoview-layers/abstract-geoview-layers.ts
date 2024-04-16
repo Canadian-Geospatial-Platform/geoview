@@ -837,13 +837,18 @@ export abstract class AbstractGeoViewLayer {
     const promiseLegend = this.getLegend(layerPath);
 
     // Whenever the promise resolves
-    promiseLegend.then((legend) => {
-      // If legend was received
-      if (legend) {
-        // Emit legend information once retrieved
-        this.#emitLegendQueried({ layerPath, legend });
-      }
-    });
+    promiseLegend
+      .then((legend) => {
+        // If legend was received
+        if (legend) {
+          // Emit legend information once retrieved
+          this.#emitLegendQueried({ layerPath, legend });
+        }
+      })
+      .catch((error) => {
+        // Log
+        logger.logPromiseFailed('promiseLegend in queryLegend in AbstractGeoviewLayer', error);
+      });
 
     // Return the promise
     return promiseLegend;
@@ -1215,9 +1220,17 @@ export abstract class AbstractGeoViewLayer {
       features.forEach((featureNeedingItsCanvas) => {
         promisedAllCanvasFound.push(
           new Promise((resolveCanvas) => {
-            getFeatureCanvas(featureNeedingItsCanvas, layerConfig, callbackToFetchDataUrl).then((canvas) => {
-              resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
-            });
+            getFeatureCanvas(featureNeedingItsCanvas, layerConfig, callbackToFetchDataUrl)
+              .then((canvas) => {
+                resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
+              })
+              .catch((error) => {
+                // Log
+                logger.logPromiseFailed(
+                  'getFeatureCanvas in featureNeedingItsCanvas loop in formatFeatureInfoResult in AbstractGeoViewLayer',
+                  error
+                );
+              });
           })
         );
       });

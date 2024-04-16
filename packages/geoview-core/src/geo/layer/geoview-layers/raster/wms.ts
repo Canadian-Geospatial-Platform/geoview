@@ -489,10 +489,10 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer | null} The GeoView raster layer that has been created.
    */
-  protected processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
-    super.processOneLayerEntry(layerConfig);
+    await super.processOneLayerEntry(layerConfig);
     // Log
     logger.logTraceCore('WMS - processOneLayerEntry', layerConfig.layerPath);
 
