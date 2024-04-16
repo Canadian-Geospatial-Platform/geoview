@@ -1,4 +1,5 @@
 import { Theme } from '@mui/material/styles';
+import { border, borderBottom, display, width } from '@mui/system';
 
 // ? I doubt we want to define an explicit type for style properties?
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -9,6 +10,7 @@ export const getSxClasses = (theme: Theme): any => ({
   scaleContainer: {
     display: 'flex',
     backgroundColor: 'transparent',
+    cursor: 'pointer',
     border: 'none',
     height: '100%',
     ':hover': {
@@ -35,22 +37,35 @@ export const getSxClasses = (theme: Theme): any => ({
     height: '18px',
     maxHeight: '18px',
   },
-  scaleText: {
-    fontSize: theme.palette.geoViewFontSize.default,
-    color: theme.palette.geoViewColor.bgColor.light[800],
-    whiteSpace: 'nowrap',
-    border: '1px solid',
-    borderColor: theme.palette.geoViewColor.primary.light[300],
-    borderTop: 'none',
-    borderLeft: 'none',
-    borderRight: 'none',
-    textTransform: 'lowercase',
+  scaleTextContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 2,
 
     '&.interaction-static': {
       fontSize: theme.palette.geoViewFontSize.md,
       fontWeight: 'bold',
       borderBottom: '2px solid',
     },
+    '& span': {
+      fontSize: theme.palette.geoViewFontSize.default,
+      color: theme.palette.geoViewColor.bgColor.light[800],
+      textTransform: 'lowercase',
+      whiteSpace: 'nowrap',
+    },
+  },
+  scaleLine: {
+    width: '100%',
+    height: '3px',
+    borderColor: `${theme.palette.geoViewColor.primary.light[800]} !important`,
+    backgroundColor: 'transparent',
+    position: 'relative',
+    borderLeft: '1px solid',
+    borderRight: '1px solid',
+    borderBottom: '1px solid',
+    borderTop: 'none',
   },
   scaleCheckmark: {
     paddingRight: 5,

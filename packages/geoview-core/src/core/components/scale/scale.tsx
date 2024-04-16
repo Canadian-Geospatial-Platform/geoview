@@ -64,16 +64,10 @@ export function Scale(): JSX.Element {
 
   return (
     <Tooltip title={t('mapnav.scale')!} placement="top">
-      <Box sx={{ minWidth: 120 }}>
+      <Box sx={{ minWidth: 120, display: 'flex', flexDirection: 'row', gap: 1 }}>
         <Box id={`${mapId}-scaleControlBar`} sx={sxClasses.scaleControl} />
         <Box id={`${mapId}-scaleControlLine`} sx={sxClasses.scaleControl} />
-        <Button
-          onClick={() => switchScale()}
-          type="text"
-          sx={sxClasses.scaleContainer}
-          disableRipple
-          className={`interaction-${interaction}`}
-        >
+        <Box onClick={() => switchScale()} sx={sxClasses.scaleContainer} className={`interaction-${interaction}`}>
           {expanded ? (
             <Box sx={sxClasses.scaleExpandedContainer}>
               {scaleValues.map((value, index) => {
@@ -91,18 +85,17 @@ export function Scale(): JSX.Element {
             </Box>
           ) : (
             <Box
-              component="span"
               className={`interaction-${interaction}`}
               sx={{
-                ...sxClasses.scaleText,
-                borderBottom: !scaleValues[scaleMode].borderBottom ? 'none' : '1px solid',
+                ...sxClasses.scaleTextContainer,
                 width: scaleValues[scaleMode].borderBottom ? scale.lineWidth : 'none',
               }}
             >
-              {scaleValues[scaleMode].label}
+              <span>{scaleValues[scaleMode].label}</span>
+              <Box sx={sxClasses.scaleLine} />
             </Box>
           )}
-        </Button>
+        </Box>
       </Box>
     </Tooltip>
   );
