@@ -35,6 +35,7 @@ import {
   useDataTableAllFeaturesDataArray,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { LAYER_STATUS } from '@/core/utils/constant';
+import { TableViewIcon } from '@/ui/icons';
 
 interface SingleLayerProps {
   layer: TypeLegendLayer;
@@ -118,14 +119,11 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
 
     const itemsLengthDesc = t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
 
-    /* if (datatableSettings[layer.layerPath]) {
+    if (datatableSettings[layer.layerPath]) {
       return (
-        <Box style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'left', gap: 1 }}>
-          <span>{itemsLengthDesc} </span>
-          <TableViewIcon fontSize="small" />
-        </Box>
+        <span>{itemsLengthDesc} &nbsp;<TableViewIcon sx={{ marginBottom: '-5px' }} fontSize="small" /> </span>
       );
-    } */
+    }
     return itemsLengthDesc;
   };
 
