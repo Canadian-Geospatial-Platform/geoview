@@ -12,12 +12,7 @@ import { HoverTooltip } from '@/core/components/hover-tooltip/hover-tooltip';
 import { MapViewer } from '@/geo/map/map-viewer';
 
 import { sxClasses } from './map-style';
-import {
-  useMapLoaded,
-  useMapNorthArrow,
-  useMapOverviewMap,
-  useMapStoreActions,
-} from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapLoaded, useMapNorthArrow, useMapOverviewMap } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
@@ -51,7 +46,6 @@ export function Map(props: MapProps): JSX.Element {
   const northArrow = useMapNorthArrow();
   const mapLoaded = useMapLoaded();
   const mapStoreConfig = useGeoViewConfig();
-  const { createBaseMapFromOptions } = useMapStoreActions();
 
   const initCGPVMap = useCallback((): void => {
     // Log
@@ -90,12 +84,9 @@ export function Map(props: MapProps): JSX.Element {
 
     // Init the map on first render
     viewer.createMap(mapElement.current!);
-    createBaseMapFromOptions();
 
     initCGPVMap();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // We don't want to add a dependency here, because we only want this execution path to be executed on original mount of the map. Never again afterwards as it causes duplications of Views.
+  }, [initCGPVMap, viewer]);
 
   return (
     // ? the map is focusable and needs to be tabbable for keyboard navigation
@@ -105,10 +96,10 @@ export function Map(props: MapProps): JSX.Element {
         <>
           {northArrow && <NorthArrow />}
           <NorthPoleFlag />
-          <Crosshair mapTargetElement={viewer.map.getTargetElement()} />
+          <Crosshair mapTargetElement={mapElement.current!} />
           <ClickMarker />
           <HoverTooltip />
-          {deviceSizeMedUp && overviewMap && <OverviewMap olMap={viewer.map} />}
+          {deviceSizeMedUp && overviewMap && viewer.map && <OverviewMap olMap={viewer.map} />}
         </>
       )}
     </Box>

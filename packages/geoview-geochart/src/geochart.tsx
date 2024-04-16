@@ -1,5 +1,6 @@
 import { GeoChart as GeoChartComponent, GeoChartConfig, ChartType, GeoChartDefaultColors, SchemaValidator, GeoChartAction } from 'geochart';
 import { useAppDisplayLanguageById, useAppStoreActions } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
+import { MapEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/map-event-processor';
 import { TypeWindow } from 'geoview-core/src/core/types/global-types';
 import { TypeLayerEntryConfig } from 'geoview-core/src/geo/map/map-schema-types';
 import { logger } from 'geoview-core/src/core/utils/logger';
@@ -111,7 +112,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
       GeoViewGeoChartConfigLayer | undefined,
       TypeLayerEntryConfig | undefined,
       TypeFeatureInfoEntry[] | undefined
-    ] = findLayerDataAndConfigFromQueryResults(config, cgpv.api.maps[mapId].layer.registeredLayers, layers);
+    ] = findLayerDataAndConfigFromQueryResults(config, MapEventProcessor.getMapViewerLayerAPIInstance(mapId).registeredLayers, layers);
 
     // If found a chart for the layer
     let chartConfig;
@@ -125,7 +126,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
 
     // Return all info
     return { foundConfigChart, foundConfigChartLyr, foundLayerEntry, foundData, chartConfig };
-  }, [cgpv.api.maps, config, displayLanguage, mapId, layers]);
+  }, [config, displayLanguage, mapId, layers]);
 
   // #endregion
 

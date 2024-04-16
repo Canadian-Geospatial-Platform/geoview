@@ -11,6 +11,7 @@ import { api } from '@/app';
 import { TypeFeatureInfoLayerConfig } from '@/geo/map/map-schema-types';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { AppEventProcessor } from './app-event-processor';
+import { MapEventProcessor } from './map-event-processor';
 
 export class TimeSliderEventProcessor extends AbstractEventProcessor {
   /**
@@ -230,13 +231,17 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       if (values.length > 1) {
         filter += ` and ${field} <= date '${new Date(values[1]).toISOString()}'`;
       }
-      (api.maps[mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter(layerPath, filter);
+      (
+        MapEventProcessor.getMapViewerLayerAPIInstance(mapId).geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic
+      ).applyViewFilter(layerPath, filter);
     } else {
       let filter = `${field} >= date '${new Date(minAndMax[0]).toISOString()}'`;
       if (values.length > 1) {
         filter += `and ${field} <= date '${new Date(minAndMax[1]).toISOString()}'`;
       }
-      (api.maps[mapId].layer.geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter(layerPath, filter);
+      (
+        MapEventProcessor.getMapViewerLayerAPIInstance(mapId).geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic
+      ).applyViewFilter(layerPath, filter);
     }
   }
   // #endregion
