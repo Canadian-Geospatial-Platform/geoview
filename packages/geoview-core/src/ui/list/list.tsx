@@ -40,3 +40,5 @@ export const List = React.forwardRef<HTMLUListElement, TypeListProps>((props: Ty
     </MaterialList>
   );
 });
+
+List.displayName = 'List';

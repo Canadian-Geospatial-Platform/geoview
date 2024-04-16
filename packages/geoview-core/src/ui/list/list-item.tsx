@@ -14,12 +14,14 @@ const sxClasses = {
  * @param {TypeListItemProps} props the properties passed to the List Item element
  * @returns {JSX.Element} the created List Item element
  */
-export const ListItem  = React.forwardRef<HTMLLIElement, ListItemProps>((props, ref) =>  {
+export const ListItem = React.forwardRef<HTMLLIElement, ListItemProps>((props, ref) => {
   const { children } = props;
 
   return (
-    <MaterialListItem sx={sxClasses.listItem} {...props} ref={ref} >
+    <MaterialListItem sx={sxClasses.listItem} {...props} ref={ref}>
       {children !== undefined && children}
     </MaterialListItem>
   );
-})
+});
+
+ListItem.displayName = 'ListItem';

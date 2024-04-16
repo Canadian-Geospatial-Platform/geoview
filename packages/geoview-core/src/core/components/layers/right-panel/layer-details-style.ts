@@ -1,4 +1,5 @@
 import { Theme } from '@mui/material/styles';
+import { display } from '@mui/system';
 
 // ? I doubt we want to define an explicit type for style properties?
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -17,6 +18,15 @@ export const getSxClasses = (theme: Theme): any => ({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  layerOpacityControlContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'right',
+    justifyContent: 'right',
+    '& #layerOpacity': {
+      width: { xs: '100%', sm: '100%', md: '50%', lg: '40%', xl: '40%' },
+    },
   },
   itemsGrid: {
     width: '100%',

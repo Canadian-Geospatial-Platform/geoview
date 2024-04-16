@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
 import { animated, useSpring } from '@react-spring/web';
 import {
-  Box,
   Collapse,
   IconButton,
   KeyboardArrowDownIcon,
@@ -16,7 +15,6 @@ import {
   VisibilityOffOutlinedIcon,
   VisibilityOutlinedIcon,
   RestartAltIcon,
-  TableViewIcon,
   HandleIcon,
   Paper,
 } from '@/ui';
@@ -37,7 +35,6 @@ import {
   useDataTableAllFeaturesDataArray,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { LAYER_STATUS } from '@/core/utils/constant';
-import { Theme } from '@mui/material';
 
 interface SingleLayerProps {
   layer: TypeLegendLayer;
@@ -116,19 +113,19 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     const totalCount = layer.items.length;
 
     if (totalCount <= 1 && datatableSettings[layer.layerPath]) {
-      return (<span>&nbsp;</span>);
+      return <span>&nbsp;</span>;
     }
 
     const itemsLengthDesc = t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
 
-    /*if (datatableSettings[layer.layerPath]) {
+    /* if (datatableSettings[layer.layerPath]) {
       return (
         <Box style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'left', gap: 1 }}>
           <span>{itemsLengthDesc} </span>
           <TableViewIcon fontSize="small" />
         </Box>
       );
-    }*/
+    } */
     return itemsLengthDesc;
   };
 

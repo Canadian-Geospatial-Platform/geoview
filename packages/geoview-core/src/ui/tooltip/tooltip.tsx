@@ -9,4 +9,6 @@ import React from 'react';
  */
 export const Tooltip = React.forwardRef((props: TooltipProps, ref): JSX.Element => {
   return <MaterialTooltip enterDelay={1000} leaveDelay={200} {...props} ref={ref} />;
-})
+});
+
+Tooltip.displayName = 'Tooltip';
