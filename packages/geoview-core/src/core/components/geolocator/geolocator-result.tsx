@@ -31,9 +31,9 @@ interface GeolocatorFiltersType {
  * @param {GeoListItem[]} geoLocationData data to be displayed in result
  * @param {string} searchValue search value entered by the user.
  * @param {Error} error error thrown api call.
- * @returns JSX.Element
+ * @returns {JSX.Element}
  */
-export function GeolocatorResult({ geoLocationData, searchValue, error }: GeolocatorFiltersType) {
+export function GeolocatorResult({ geoLocationData, searchValue, error }: GeolocatorFiltersType): JSX.Element {
   const { t } = useTranslation();
   const [province, setProvince] = useState<string>('');
   const [category, setCategory] = useState<string>('');
@@ -47,7 +47,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
   /**
    * Clear all filters.
    */
-  const handleClearFilters = () => {
+  const handleClearFilters = (): void => {
     if (province || category) {
       setProvince('');
       setCategory('');

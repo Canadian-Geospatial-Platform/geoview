@@ -257,7 +257,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
 // private functions
 
-function setOpacityInLayerAndChildren(layer: TypeLegendLayer, opacity: number, mapId: string, isChild = false) {
+function setOpacityInLayerAndChildren(layer: TypeLegendLayer, opacity: number, mapId: string, isChild = false): void {
   _.set(layer, 'opacity', opacity);
   api.maps[mapId].layer.geoviewLayer(layer.layerPath).setOpacity(opacity, layer.layerPath);
   if (isChild) {
@@ -288,7 +288,7 @@ function findLayerByPath(layers: TypeLegendLayer[], layerPath: string): TypeLege
   return undefined;
 }
 
-function deleteSingleLayer(layers: TypeLegendLayer[], layerPath: string) {
+function deleteSingleLayer(layers: TypeLegendLayer[], layerPath: string): void {
   const indexToDelete = layers.findIndex((l) => l.layerPath === layerPath);
   if (indexToDelete >= 0) {
     layers.splice(indexToDelete, 1);
@@ -306,16 +306,19 @@ function deleteSingleLayer(layers: TypeLegendLayer[], layerPath: string) {
 // **********************************************************
 // Layer state selectors
 // **********************************************************
-export const useLayerHighlightedLayer = () => useStore(useGeoViewStore(), (state) => state.layerState.highlightedLayer);
-export const useLayerLegendLayers = () => useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
-export const useLayerSelectedLayer = () => useStore(useGeoViewStore(), (state) => state.layerState.selectedLayer);
-export const useLayerSelectedLayerPath = () => useStore(useGeoViewStore(), (state) => state.layerState.selectedLayerPath);
-export const useLayerDisplayState = () => useStore(useGeoViewStore(), (state) => state.layerState.displayState);
+export const useLayerHighlightedLayer = (): string => useStore(useGeoViewStore(), (state) => state.layerState.highlightedLayer);
+export const useLayerLegendLayers = (): TypeLegendLayer[] => useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
+export const useLayerSelectedLayer = (): TypeLegendLayer => useStore(useGeoViewStore(), (state) => state.layerState.selectedLayer);
+export const useLayerSelectedLayerPath = (): string | null | undefined =>
+  useStore(useGeoViewStore(), (state) => state.layerState.selectedLayerPath);
+export const useLayerDisplayState = (): TypeLayersViewDisplayState => useStore(useGeoViewStore(), (state) => state.layerState.displayState);
 
-export const useLayerStoreActions = () => useStore(useGeoViewStore(), (state) => state.layerState.actions);
+// TODO: Refactor - We should explicit a type for the layerState.actions
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const useLayerStoreActions = (): any => useStore(useGeoViewStore(), (state) => state.layerState.actions);
 
 // computed gets
-export const useSelectedLayer = () => {
+export const useSelectedLayer = (): TypeLegendLayer | undefined => {
   const layers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
   const selectedLayerPath = useStore(useGeoViewStore(), (state) => state.layerState.selectedLayerPath);
   if (selectedLayerPath) {

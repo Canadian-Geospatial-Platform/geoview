@@ -50,8 +50,9 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
   /**
    * The olLayer getter method for the ConfigBaseClass class and its descendant classes.
    * All layerConfig has an olLayer property, but the olLayer setter can only be use on group layers.
+   * @returns {BaseLayer | LayerGroup | null} The OL layer
    */
-  get olLayer() {
+  get olLayer(): BaseLayer | LayerGroup | null {
     // eslint-disable-next-line no-underscore-dangle
     return this._olLayer;
   }

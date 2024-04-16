@@ -1,4 +1,4 @@
-import { useState, useCallback, type ReactNode } from 'react';
+import { useState, useCallback, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Box, FullscreenIcon, IconButton } from '@/ui';
@@ -21,7 +21,14 @@ interface LayoutProps {
   fullWidth?: boolean;
 }
 
-export function Layout({ children, layerList, selectedLayerPath, onLayerListClicked, onIsEnlargeClicked, fullWidth }: LayoutProps) {
+export function Layout({
+  children,
+  layerList,
+  selectedLayerPath,
+  onLayerListClicked,
+  onIsEnlargeClicked,
+  fullWidth,
+}: LayoutProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
   const { t } = useTranslation<string>();

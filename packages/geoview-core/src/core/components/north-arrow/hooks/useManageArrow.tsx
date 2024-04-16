@@ -17,7 +17,9 @@ import { logger } from '@/core/utils/logger';
  * Custom hook to Manage North arrow.
  * @returns rotationAngle and northoffset
  */
-const useManageArrow = () => {
+// TODO: Refactor - Explicit this return as a type for rotationAngle and northoffset
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const useManageArrow = (): any => {
   const [rotationAngle, setRotationAngle] = useState({ angle: 0 });
   const [northOffset, setNorthOffset] = useState(0);
   const angle = useRef(0); // keep track of rotation angle for fix north

@@ -43,7 +43,7 @@ export interface IGeoviewState {
   swiperState: ISwiperState;
 }
 
-export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore) => {
+export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IGeoviewState => {
   // Log
   logger.logTraceCore('Initializing store core states...');
 
@@ -103,5 +103,5 @@ export type GeoviewStoreType = typeof fakeStore;
 // **********************************************************
 // GeoView state selectors
 // **********************************************************
-export const useGeoViewMapId = () => useStore(useGeoViewStore(), (state) => state.mapId);
-export const useGeoViewConfig = () => useStore(useGeoViewStore(), (state) => state.mapConfig);
+export const useGeoViewMapId = (): string => useStore(useGeoViewStore(), (state) => state.mapId);
+export const useGeoViewConfig = (): TypeMapFeaturesConfig | undefined => useStore(useGeoViewStore(), (state) => state.mapConfig);

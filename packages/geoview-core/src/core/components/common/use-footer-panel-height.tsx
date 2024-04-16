@@ -17,9 +17,11 @@ interface UseFooterPanelHeightType {
 /**
  * Custom Hook to calculate the height of footer panel content when we set the map in fullscreen mode.
  * @param {'layers' | 'details' | 'datatable' | 'legend'} footerPanelTab type of footer tab.
- * @returns list of ref objects that are attached to DOM.
+ * @returns {any} An object of ref objects that are attached to DOM.
  */
-export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightType) {
+// ? I doubt we want to define an explicit type for that utility hook?
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightType): any {
   const mapId = useGeoViewMapId();
   const leftPanelRef = useRef<HTMLDivElement>(null);
   const rightPanelRef = useRef<HTMLDivElement>(null);

@@ -258,15 +258,15 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   /**
    * Handle a collapse, expand event for the tabs component
    */
-  const handleToggleCollapse = () => {
+  const handleToggleCollapse = (): void => {
     setIsCollapsed(!isCollapsed);
   };
 
   /**
    * Handles when the selected tab changes
-   * @param tab The newly selected tab
+   * @param {TypeTabs} tab - The newly selected tab
    */
-  const handleSelectedTabChanged = (tab: TypeTabs) => {
+  const handleSelectedTabChanged = (tab: TypeTabs): void => {
     setActiveFooterBarTab(tab.id);
   };
 
@@ -274,14 +274,13 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // If clicked on a tab with a plugin
     if (api.maps[mapId].plugins[selectedTab]) {
       // Get the plugin
-      const theSelectedPlugin = api.maps[mapId].plugins[selectedTab];
-
-      // A bit hacky, but not much other choice for now...
       // ? unknown type cannot be use, need to escape
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (typeof (theSelectedPlugin as any).onSelected === 'function') {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (theSelectedPlugin as any).onSelected();
+      const theSelectedPlugin = api.maps[mapId].plugins[selectedTab] as any;
+
+      // A bit hacky, but not much other choice for now...
+      if (typeof theSelectedPlugin.onSelected === 'function') {
+        theSelectedPlugin.onSelected();
       }
     }
   }, [mapId, selectedTab]);
@@ -386,7 +385,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   }, [footerBarTabsConfig, mapId]);
 
   // Handle focus using dynamic focus button
-  const handleDynamicFocus = () => {
+  const handleDynamicFocus = (): void => {
     const shell = document.getElementById(`shell-${mapId}`);
     const block = isFocusToMap ? 'start' : 'end';
     shell?.scrollIntoView({ behavior: 'smooth', block });

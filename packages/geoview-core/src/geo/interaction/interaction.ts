@@ -34,7 +34,7 @@ export abstract class Interaction {
    * Starts the drawing interaction on the map
    * @param {OLInteraction} olInteraction - The OpenLayers Interaction object the map should start interacting on
    */
-  protected startInteraction(olInteraction: OLInteraction) {
+  protected startInteraction(olInteraction: OLInteraction): void {
     // Add modifier interaction on the map
     this.mapViewer.map.addInteraction(olInteraction);
   }
@@ -43,7 +43,7 @@ export abstract class Interaction {
    * Stops the drawing interaction on the map
    * @param {OLInteraction} olInteraction - The OpenLayers Interaction object the map should stop interacting on
    */
-  protected stopInteraction(olInteraction: OLInteraction) {
+  protected stopInteraction(olInteraction: OLInteraction): void {
     // Stop modifier interaction on the map
     this.mapViewer.map.removeInteraction(olInteraction);
   }

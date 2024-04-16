@@ -28,7 +28,7 @@ export function FocusTrapElement(props: FocusTrapElementProps): JSX.Element {
   const activeTrapGeoView = useUIActiveTrapGeoView();
   const focusItem = useUIActiveFocusItem();
 
-  const handleClose = () => {
+  const handleClose = (): void => {
     closeModal();
     document.getElementById(focusItem.callbackElementId as string)?.focus();
   };

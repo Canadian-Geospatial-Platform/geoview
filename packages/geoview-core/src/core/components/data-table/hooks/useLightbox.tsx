@@ -5,7 +5,9 @@ import { LightBoxSlides, LightboxImg } from '@/core/components/lightbox/lightbox
  * Custom Lightbox hook which handle rendering of the lightbox.
  * @returns {Object}
  */
-export function useLightBox() {
+// TODO: Refactor - Maybe worth creating an explicit type here instead of 'any'?
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useLightBox(): any {
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [slides, setSlides] = useState<LightBoxSlides[]>([]);
   const [slidesIndex, setSlidesIndex] = useState(0);
@@ -15,7 +17,7 @@ export function useLightBox() {
    * @param {string} images images url formatted as string and joined with ';' identifier.
    * @param {string} cellId id of the cell.
    */
-  const initLightBox = (images: string, cellId: string) => {
+  const initLightBox = (images: string, cellId: string): void => {
     setIsLightBoxOpen(true);
     const slidesList = images.split(';').map((item) => ({ src: item, alt: cellId, downloadUrl: item }));
     setSlides(slidesList);
@@ -23,9 +25,9 @@ export function useLightBox() {
 
   /**
    * Create LightBox Component based on lightbox is opened or not.
-   * @returns JSX.Element
+   * @returns {JSX.Element}
    */
-  function LightBoxComponent() {
+  function LightBoxComponent(): JSX.Element {
     return isLightBoxOpen ? (
       <LightboxImg
         open={isLightBoxOpen}

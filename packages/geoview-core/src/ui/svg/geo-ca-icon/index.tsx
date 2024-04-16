@@ -1,4 +1,6 @@
-export function GeoCaIcon() {
+// ? I doubt we want to define an explicit type for this?
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function GeoCaIcon(): any {
   return (
     <svg width="500" height="200" id="a" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="1100 0 1000 1010">
       <g>

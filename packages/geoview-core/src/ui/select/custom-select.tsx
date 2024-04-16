@@ -78,7 +78,7 @@ export function CustomSelect(props: TypeCustomSelectProps): JSX.Element {
    *
    * @param event the selection event
    */
-  const changeHandler = (event: SelectChangeEvent<string>) => {
+  const changeHandler = (event: SelectChangeEvent<string>): void => {
     if (!multiple) setValue(event.target.value);
     if (multiple) {
       const {

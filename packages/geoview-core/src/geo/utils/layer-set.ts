@@ -42,7 +42,7 @@ export class LayerSet {
   }
 
   // Shortcut to get the map id
-  protected get mapId() {
+  protected get mapId(): string {
     return this.layerApi.mapId;
   }
 
