@@ -58,18 +58,29 @@ export function Map(props: MapProps): JSX.Element {
     logger.logTraceUseCallback('map.initCGPVMap');
 
     // Load the core packages which are the ones who load on map (not footer plugin, not app-bar plugin)
-    mapStoreConfig?.corePackages?.forEach((corePackage: string) => {
-      api.plugin.loadScript(corePackage).then((constructor) => {
-        // add the plugin by passing in the loaded constructor from the script tag
-        api.plugin.addPlugin(
-          corePackage,
-          mapId,
-          constructor,
-          toJsonObject({
-            mapId,
-          })
-        );
-      });
+    mapStoreConfig?.corePackages?.forEach((corePackage: string): void => {
+      api.plugin
+        .loadScript(corePackage)
+        .then((constructor) => {
+          // add the plugin by passing in the loaded constructor from the script tag
+          api.plugin
+            .addPlugin(
+              corePackage,
+              mapId,
+              constructor,
+              toJsonObject({
+                mapId,
+              })
+            )
+            .catch((error) => {
+              // Log
+              logger.logPromiseFailed('api.plugin.addPlugin in useCallback in map', error);
+            });
+        })
+        .catch((error) => {
+          // Log
+          logger.logPromiseFailed('api.plugin.addPlugin in useCallback in map', error);
+        });
     });
   }, [mapId, mapStoreConfig?.corePackages]);
 

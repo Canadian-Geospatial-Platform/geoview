@@ -51,7 +51,6 @@ export interface IMapState {
 
   actions: {
     createBaseMapFromOptions: () => Promise<void>;
-    createEmptyBasemap: () => TileLayer<XYZ>;
     getPixelFromCoordinate: (coord: Coordinate) => [number, number];
     getIndexFromOrderedLayerInfo: (layerPath: string) => number;
     getVisibilityFromOrderedLayerInfo: (layerPath: string) => boolean;
