@@ -29,6 +29,7 @@ import { DetailsPanel } from '@/core/components/details/details-panel';
 import { Datapanel } from '@/core/components/data-table/data-panel';
 import { logger } from '@/core/utils/logger';
 import { GuidePanel } from '@/core/components/guide/guide-panel';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 interface ShellContainerCssProperties {
   mapVisibility: string;
@@ -272,11 +273,11 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
 
   useEffect(() => {
     // If clicked on a tab with a plugin
-    if (api.maps[mapId].plugins[selectedTab]) {
+    if (MapEventProcessor.getMapViewerPluginsInstance(mapId)[selectedTab]) {
       // Get the plugin
       // ? unknown type cannot be use, need to escape
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const theSelectedPlugin = api.maps[mapId].plugins[selectedTab] as any;
+      const theSelectedPlugin = MapEventProcessor.getMapViewerPluginsInstance(mapId)[selectedTab] as any;
 
       // A bit hacky, but not much other choice for now...
       if (typeof theSelectedPlugin.onSelected === 'function') {

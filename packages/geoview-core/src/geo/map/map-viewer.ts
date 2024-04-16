@@ -287,12 +287,19 @@ export class MapViewer {
       logger.logPromiseFailed('loadListOfGeoviewLayer in initMap in MapViewer', error);
     });
 
-    // // check if geometries are provided from url
-    // this.loadGeometries();
+    // check if geometries are provided from url
+    this.loadGeometries();
 
     // Emit map init
     this.#mapInit = true;
     this.#emitMapInit();
+
+    MapEventProcessor.resetBasemap(this.mapId)
+      .then()
+      .catch((error) => {
+        // Log
+        logger.logPromiseFailed(' MapEventProcessor.resetBasemap in map-viewer', error);
+      });
 
     // Start checking for when the map will be ready
     this.#checkMapReady();
@@ -625,7 +632,7 @@ export class MapViewer {
     return new Promise<void>((resolve) => {
       // TODO: Refactor minimal - Rewrite the code here to not have to rely on a setInterval anymore.
       const layersInterval = setInterval(() => {
-        if (api.maps[this.mapId].layer) {
+        if (this.layer) {
           // Check if all registered layers have their results set
           let allGood = true;
           Object.entries(this.layer.registeredLayers).forEach(([layerPath, registeredLayer]) => {

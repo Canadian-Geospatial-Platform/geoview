@@ -11,6 +11,7 @@ import { logger } from '@/core/utils/logger';
 
 import { AbstractPlugin } from './abstract-plugin';
 import { TypePluginStructure } from './plugin-types';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 /**
  * Class to manage plugins
@@ -100,7 +101,7 @@ export class Plugin {
     constructor?: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue),
     props?: TypeJsonObject
   ): Promise<void> => {
-    if (!api.maps?.[mapId]?.plugins?.[pluginId]) {
+    if (MapEventProcessor.getMapViewerPluginsInstance(mapId)[pluginId]) {
       let plugin: TypePluginStructure | null = null;
 
       if (constructor) {
@@ -191,7 +192,7 @@ export class Plugin {
         });
 
         // attach to the map plugins object
-        api.maps[mapId].plugins[pluginId] = plugin;
+        MapEventProcessor.getMapViewerPluginsInstance(mapId)[pluginId] = plugin;
 
         // call plugin added method if available
         if (typeof plugin.added === 'function') {
@@ -209,8 +210,8 @@ export class Plugin {
    */
   removePlugin = (pluginId: string, mapId: string): void => {
     // Get the plugin and remove it
-    api.maps[mapId]?.plugins[pluginId]?.removed?.();
-    delete api.maps[mapId].plugins[pluginId];
+    MapEventProcessor.getMapViewerPluginsInstance(mapId)[pluginId]?.removed?.();
+    delete MapEventProcessor.getMapViewerPluginsInstance(mapId)[pluginId];
   };
 
   /**
@@ -220,7 +221,7 @@ export class Plugin {
    */
   removePlugins = (mapId: string): void => {
     if (mapId) {
-      const recordOfPlugins = api.maps[mapId].plugins;
+      const recordOfPlugins = MapEventProcessor.getMapViewerPluginsInstance(mapId);
 
       if (recordOfPlugins) {
         // remove all plugins by map

@@ -629,7 +629,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
   protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const { map } = api.maps[this.mapId];
+    const { map } = MapEventProcessor.getMapViewerInstance(this.mapId);
     return this.getFeatureInfoAtCoordinate(map.getCoordinateFromPixel(location), layerPath);
   }
 
@@ -664,7 +664,7 @@ export class WMS extends AbstractGeoViewRaster {
       const layerConfig = this.getLayerConfig(layerPath) as OgcWmsLayerEntryConfig;
       if (!this.getVisible(layerPath)) return [];
 
-      const viewResolution = api.maps[this.mapId].getView().getResolution() as number;
+      const viewResolution = MapEventProcessor.getMapViewerInstance(this.mapId).getView().getResolution() as number;
       const crs = `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`;
       const clickCoordinate = api.utilities.projection.transform(lnglat, 'EPSG:4326', crs);
       if (

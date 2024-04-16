@@ -1,4 +1,3 @@
-import { api } from '@/app';
 import { GeoviewStoreType } from '@/core/stores';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
@@ -9,6 +8,7 @@ import { IDataTableState } from '@/core/stores/store-interface-and-intial-values
 import { logger } from '@/core/utils/logger';
 import { TypeLayerData } from '@/geo/utils/layer-set';
 import { TypeAllFeatureInfoResultSet } from '@/geo/utils/all-feature-info-layer-set';
+import { MapEventProcessor } from './map-event-processor';
 
 // GV The paradigm when working with DataTableEventProcessor vs DataTableState goes like this:
 // GV DataTableState provides: 'state values', 'actions' and 'setterActions'.
@@ -90,8 +90,8 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
    * @param {boolean} isMapRecordExist - Filtered Map switch is on off.
    */
   static applyFilters(mapId: string, layerPath: string, filterStrings: string, isMapRecordExist: boolean): void {
-    const geoviewLayerInstance = api.maps[mapId].layer.geoviewLayer(layerPath);
-    const filterLayerConfig = api.maps[mapId].layer.registeredLayers[layerPath] as TypeLayerEntryConfig;
+    const geoviewLayerInstance = MapEventProcessor.getMapViewerInstance(mapId).layer.geoviewLayer(layerPath);
+    const filterLayerConfig = MapEventProcessor.getMapViewerInstance(mapId).layer.registeredLayers[layerPath] as TypeLayerEntryConfig;
 
     if (isMapRecordExist && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined && filterStrings.length) {
       (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(layerPath, filterStrings);
@@ -116,7 +116,7 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
    * @returns {Promise<TypeAllFeatureInfoResultSet | void>}
    */
   static triggerGetAllFeatureInfo(mapId: string, layerPath: string): Promise<TypeAllFeatureInfoResultSet | void> {
-    return api.maps[mapId].layer.allFeatureInfoLayerSet.queryLayer(layerPath, 'all');
+    return MapEventProcessor.getMapViewerLayerAPIInstance(mapId).allFeatureInfoLayerSet.queryLayer(layerPath, 'all');
   }
 
   /**

@@ -1,7 +1,6 @@
 import Draggable from 'react-draggable';
 
 import { RefObject } from 'geoview-core';
-import { MapViewer } from 'geoview-core/src/geo/map/map-viewer';
 import { useSwiperLayerPaths } from 'geoview-core/src/core/stores/store-interface-and-intial-values/swiper-state';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
@@ -14,6 +13,7 @@ import BaseEvent from 'ol/events/Event';
 import debounce from 'lodash/debounce';
 
 import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
+import { MapEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/map-event-processor';
 import { sxClasses } from './swiper-style';
 
 type SwiperProps = {
@@ -34,7 +34,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const { useEffect, useState, useRef, useCallback } = react;
   const { Box, Tooltip, HandleIcon } = ui.elements;
   const { orientation } = config;
-  const mapViewer = api.maps[mapId] as MapViewer;
+  const mapViewer = MapEventProcessor.getMapViewerInstance(mapId);
 
   const mapSize = useRef<number[]>(mapViewer.map?.getSize() || [0, 0]);
   const swiperValue = useRef(50);
