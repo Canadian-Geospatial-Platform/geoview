@@ -19,8 +19,9 @@ import {
   ZoomInSearchIcon,
   Typography,
   VisibilityOffOutlinedIcon,
+  HighlightIcon,
 } from '@/ui';
-import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerHighlightedLayer, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { useMapStoreActions } from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
@@ -42,6 +43,9 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   const [isGroupOpen, setGroupOpen] = useState(true);
+
+  // get store actions
+  const highlightedLayer = useLayerHighlightedLayer();
   const { getVisibilityFromOrderedLayerInfo, setOrToggleLayerVisibility } = useMapStoreActions();
   const { setHighlightLayer, zoomToLayerExtent } = useLayerStoreActions();
 
@@ -107,7 +111,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
             className="style1"
             onClick={(e) => handleHighlightLayer(e)}
           >
-            <HighlightOutlinedIcon />
+            {highlightedLayer === layer.layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
           </IconButton>
           <IconButton tooltip="legend.zoomTo" className="style1" onClick={(e) => handleZoomTo(e)}>
             <ZoomInSearchIcon />
