@@ -43,6 +43,7 @@ export {
   GroupWorkOutlined as GroupWorkOutlinedIcon,
   Help as HelpIcon,
   HighlightOutlined as HighlightOutlinedIcon,
+  Highlight as HighlightIcon,
   Home as HomeIcon,
   HubOutlined as HubOutlinedIcon,
   Height as HeightIcon,

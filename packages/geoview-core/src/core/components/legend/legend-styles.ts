@@ -88,4 +88,22 @@ export const getSxClasses = (theme: Theme): any => ({
   legendInstructionsBody: {
     fontSize: theme.palette.geoViewFontSize.default,
   },
+  subList: {
+    width: '100%',
+    '& .MuiListItemIcon-root': {
+      minWidth: '1rem',
+    },
+    '& img': {
+      maxWidth: '1.5rem',
+    },
+  },
+  layerStackIcons: {
+    '& button': {
+      padding: '0.25rem',
+      '& svg': {
+        width: '1.25rem',
+        height: '1.25rem',
+      },
+    },
+  },
 });
