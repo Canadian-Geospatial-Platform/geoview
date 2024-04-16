@@ -114,7 +114,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     const totalCount = layer.items.length;
 
     if (totalCount <= 1 && datatableSettings[layer.layerPath]) {
-      return <span>&nbsp;</span>;
+      return null;
     }
 
     const itemsLengthDesc = t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
@@ -293,7 +293,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     <AnimatedPaper className={getContainerClass()} style={listItemSpring} data-layer-depth={depth}>
       <Tooltip title={layer.layerName} placement="top" enterDelay={1000} arrow>
         <ListItem key={layer.layerName} divider tabIndex={0} onKeyDown={(e) => handleLayerKeyDown(e)}>
-          <ListItemButton selected={layerIsSelected || (layerChildIsSelected && !isGroupOpen)} tabIndex={-1}>
+          <ListItemButton selected={layerIsSelected || (layerChildIsSelected && !isGroupOpen)} tabIndex={-1} sx={{minHeight: '4.51rem'}}>
             <LayerIcon layer={layer} />
             <ListItemText
               primary={layer.layerName !== undefined ? layer.layerName : layer.layerId}

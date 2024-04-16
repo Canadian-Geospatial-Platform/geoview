@@ -13,7 +13,7 @@ export const getSxClasses = (theme: Theme): any => ({
     '& .MuiListItemText-primary': {
       fontWeight: '600',
       padding: '5px 0px',
-      fontSize: `${theme.palette.geoViewFontSize.md} !important`,
+      fontSize: `${theme.palette.geoViewFontSize.default} !important`,
       lineHeight: 1.5,
       overflow: 'hidden',
       textOverflow: 'ellipsis',
