@@ -4,7 +4,7 @@
   "title": "GeoView Core Config Schema",
   "type": "object",
   "version": 1.0,
-  "comments": "// TODO: Reduce the schema to apply to user's config to its minimum size. The schema used for the config vakidation has more fields thatn the user's schema. Configuration for GeoView core packages, each packages manages it own schema. It correspond to the TypeMapFeaturesInstance type.",
+  "comments": "Configuration for GeoView core packages, each packages manages it own schema. It correspond to the TypeMapFeaturesInstance type.",
   "additionalProperties": false,
   "definitions": {
     "TypeLocalizedString": {
@@ -565,15 +565,7 @@
           "description": "The path (English/French) to reach the data to display. If not specified, metadataAccessPath will be assigned to it."
         },
         "postSettings": {
-          "type": "object",
-          "properties": {
-            "header": {
-              "type": "object"
-            },
-            "data": {
-              "type": "object"
-            }
-          }
+          "$ref": "#/definitions/TypePostSettings"
         },
         "format": {
           "$ref": "#/definitions/TypeVectorSourceFormats"
@@ -776,9 +768,6 @@
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "schemaTag": {
-          "enum": ["not used yet"]
-        },
         "entryType": {
           "enum": ["vector-heatmap"]
         },
@@ -830,15 +819,12 @@
           }
         }
       },
-      "required": ["schemaTag", "entryType", "layerId"]
+      "required": ["entryType", "layerId"]
     },
     "TypeVectorLayerEntryConfig": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "schemaTag": {
-          "enum": ["CSV", "GeoJSON", "esriFeature", "ogcWfs", "ogcFeature", "GeoPackage"]
-        },
         "entryType": {
           "enum": ["vector"]
         },
@@ -875,16 +861,13 @@
           }
         }
       },
-      "required": ["schemaTag", "entryType", "layerId"]
+      "required": ["entryType", "layerId"]
     },
     "TypeVectorTileLayerEntryConfig": {
       "additionalProperties": false,
       "type": "object",
       "description": "Layer sources providing vector data divided into a tile grid.",
       "properties": {
-        "schemaTag": {
-          "enum": ["not used yet"]
-        },
         "entryType": {
           "enum": ["vector-tile"]
         },
@@ -922,7 +905,7 @@
           }
         }
       },
-      "required": ["schemaTag", "entryType", "layerId"]
+      "required": ["entryType", "layerId"]
     },
     "TypeVectorTileSourceInitialConfig": {
       "additionalProperties": false,
@@ -953,9 +936,6 @@
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "schemaTag": {
-          "enum": ["ogcWms"]
-        },
         "entryType": {
           "enum": ["raster-image"]
         },
@@ -992,15 +972,12 @@
           }
         }
       },
-      "required": ["schemaTag", "entryType", "layerId"]
+      "required": ["entryType", "layerId"]
     },
     "TypeEsriDynamicLayerEntryConfig": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "schemaTag": {
-          "enum": ["esriDynamic"]
-        },
         "entryType": {
           "enum": ["raster-image"]
         },
@@ -1037,15 +1014,12 @@
           }
         }
       },
-      "required": ["schemaTag", "entryType", "layerId"]
+      "required": ["entryType", "layerId"]
     },
     "TypeEsriImageLayerEntryConfig": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "schemaTag": {
-          "enum": ["esriImage"]
-        },
         "entryType": {
           "enum": ["raster-image"]
         },
@@ -1082,15 +1056,12 @@
           }
         }
       },
-      "required": ["schemaTag", "entryType", "layerId"]
+      "required": ["entryType", "layerId"]
     },
     "TypeImageStaticLayerEntryConfig": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "schemaTag": {
-          "enum": ["imageStatic"]
-        },
         "entryType": {
           "enum": ["raster-image"]
         },
@@ -1120,15 +1091,12 @@
           }
         }
       },
-      "required": ["schemaTag", "entryType", "layerId"]
+      "required": ["entryType", "layerId"]
     },
     "TypeTileLayerEntryConfig": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "schemaTag": {
-          "enum": ["ogcWms", "xyzTiles", "vectorTiles"]
-        },
         "entryType": {
           "enum": ["raster-tile"]
         },
@@ -1158,7 +1126,7 @@
           }
         }
       },
-      "required": ["schemaTag", "entryType", "layerId"]
+      "required": ["entryType", "layerId"]
     },
     "TypeLayerEntryType": {
       "enum": ["vector", "vector-tile", "vector-heatmap", "raster-tile", "raster-image", "geoCore"],
@@ -1489,6 +1457,10 @@
           "type": "string",
           "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
         },
+        "isGeocoreLayer": {
+          "type": "boolean",
+          "description": "A flag used to indicate that the layer is a GeoCore layer."
+        },
         "geoviewLayerName": {
           "$ref": "#/definitions/TypeLocalizedString",
           "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
@@ -1503,11 +1475,11 @@
         },
         "serviceDateFormat": {
           "type": "string",
-          "description": "Date format used by the service endpoint."
+          "description": "Date format used by the service endpoint (default 'DD/MM/YYYY HH:MM:SSZ')."
         },
         "externalDateFormat": {
           "type": "string",
-          "description": "Date format used by the getFeatureInfo to output date variable."
+          "description": "Date format used by the getFeatureInfo to output date variable (default 'DD/MM/YYYY HH:MM:SSZ')."
         },
         "initialSettings": {
           "$ref": "#/definitions/TypeLayerInitialSettings",
@@ -1553,12 +1525,12 @@
           "esriImage",
           "GeoJSON",
           "GeoPackage",
-          "xyzTiles",
+          "imageStatic",
           "ogcFeature",
           "ogcWfs",
           "ogcWms",
-          "imageStatic",
-          "vectorTiles"
+          "vectorTiles",
+          "xyzTiles"
         ]
       },
       "description": "Type of GeoView layer."
@@ -1806,6 +1778,17 @@
       },
       "required": ["geocoreUrl"]
     },
+    "TypePostSettings": {
+      "type": "object",
+      "properties": {
+        "header": {
+          "type": "object"
+        },
+        "data": {
+          "type": "object"
+        }
+      }
+    },
     "TypeDisplayLanguage": {
       "enum": ["en", "fr"],
       "description": "Display languages supported."
@@ -1836,7 +1819,7 @@
         "mapId": {
           "type": "string"
         },
-        "map": {
+        "gvMap": {
           "$ref": "#/definitions/TypeMapConfig"
         },
         "theme": {
@@ -1875,7 +1858,7 @@
           "$ref": "#/definitions/TypeValidVersions"
         }
       },
-      "required": ["map", "suportedLanguages"]
+      "required": ["gvMap", "suportedLanguages"]
     }
   }
 }

@@ -62,6 +62,11 @@ const config = {
       dependOn: 'cgpv-main',
       filename: 'corePackages/[name].js',
     },
+    'geoview-config': {
+      import: '../geoview-config/src/index.tsx',
+      dependOn: 'cgpv-main',
+      filename: 'corePackages/[name].js',
+    },
     'geoview-geochart': {
       import: '../geoview-geochart/src/index.tsx',
       dependOn: 'cgpv-main',
@@ -119,8 +124,13 @@ const config = {
           {
             loader: 'babel-loader',
             options: {
-              plugins: ['lodash', '@babel/transform-runtime'],
-              presets: ['@babel/preset-env', ['@babel/preset-react', { runtime: 'automatic' }], '@babel/preset-typescript'],
+              plugins: ['lodash',
+                        '@babel/transform-runtime',
+                        ['@babel/plugin-transform-typescript', { allowDeclareFields: true }]
+              ],
+              presets: ['@babel/preset-env',
+                        ['@babel/preset-react', { runtime: 'automatic' }],
+                        '@babel/preset-typescript'],
             },
           },
         ],
