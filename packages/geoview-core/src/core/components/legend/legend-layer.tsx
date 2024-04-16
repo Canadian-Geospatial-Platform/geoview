@@ -86,7 +86,9 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
     e.stopPropagation();
     zoomToLayerExtent(layer.layerPath);
   };
+
   const visibility = !getVisibilityFromOrderedLayerInfo(layer.layerPath);
+  const isLayerVisible = layer.controls?.visibility ?? false;
 
   const getSecondaryText = (): JSX.Element => {
     if (getLayerChildren().length) {
@@ -102,7 +104,13 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
           <Typography component="span" fontSize={14}>
             {items}
           </Typography>
-          <IconButton edge="end" tooltip="layers.visibilityIsAlways" className="style1" onClick={(e) => handleToggleVisibility(e)}>
+          <IconButton
+            edge="end"
+            tooltip="layers.visibilityIsAlways"
+            className="style1"
+            onClick={(e) => handleToggleVisibility(e)}
+            disabled={!isLayerVisible}
+          >
             {visibility ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
           </IconButton>
           <IconButton
