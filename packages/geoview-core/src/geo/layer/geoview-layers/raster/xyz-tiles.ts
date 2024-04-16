@@ -177,10 +177,10 @@ export class XYZTiles extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  protected processOneLayerEntry(layerConfig: XYZTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected async processOneLayerEntry(layerConfig: XYZTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
-    super.processOneLayerEntry(layerConfig);
+    await super.processOneLayerEntry(layerConfig);
     const sourceOptions: SourceOptions = {
       url: getLocalizedValue(layerConfig.source.dataAccessPath as TypeLocalizedString, AppEventProcessor.getDisplayLanguage(this.mapId)),
     };

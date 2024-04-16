@@ -249,8 +249,8 @@ export class ImageStatic extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  processOneLayerEntry(layerConfig: ImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
-    super.processOneLayerEntry(layerConfig);
+  protected async processOneLayerEntry(layerConfig: ImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+    await super.processOneLayerEntry(layerConfig);
 
     if (!layerConfig?.source?.extent) throw new Error('Parameter extent is not defined in source element of layerConfig.');
     const sourceOptions: SourceOptions = {

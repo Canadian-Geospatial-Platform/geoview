@@ -66,17 +66,28 @@ export function Map(): JSX.Element {
 
       // Load the core packages which are the ones who load on map (not footer plugin, not app-bar plugin)
       mapStoreConfig?.corePackages?.forEach((corePackage: string) => {
-        api.plugin.loadScript(corePackage).then((constructor) => {
-          // add the plugin by passing in the loaded constructor from the script tag
-          api.plugin.addPlugin(
-            corePackage,
-            mapId,
-            constructor,
-            toJsonObject({
-              mapId,
-            })
-          );
-        });
+        api.plugin
+          .loadScript(corePackage)
+          .then((constructor) => {
+            // add the plugin by passing in the loaded constructor from the script tag
+            api.plugin
+              .addPlugin(
+                corePackage,
+                mapId,
+                constructor,
+                toJsonObject({
+                  mapId,
+                })
+              )
+              .catch((error) => {
+                // Log
+                logger.logPromiseFailed('api.plugin.addPlugin in corePackages loop in useCallback in Map', error);
+              });
+          })
+          .catch((error) => {
+            // Log
+            logger.logPromiseFailed('api.plugin.loadScript in corePackages loop in useCallback in Map', error);
+          });
       });
     },
     [createBaseMapFromOptions, mapId, mapStoreConfig?.corePackages, viewer]

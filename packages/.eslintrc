@@ -6,15 +6,16 @@
     "eslint:recommended",
     "plugin:react/recommended",
     "plugin:@typescript-eslint/recommended",
-    // "plugin:jsx-a11y/recommended",
     "plugin:prettier/recommended"
   ],
   "parser": "@typescript-eslint/parser",
-  // "parserOptions": { "project": "./tsconfig.eslint.json" },
+  "parserOptions": {
+    "project": true
+  },
   "env": {
     "browser": true
   },
-  "plugins": ["prettier", "@typescript-eslint", "react-hooks"], //, "jsx-a11y"],
+  "plugins": ["prettier", "@typescript-eslint", "react-hooks"],
   "root": true,
   "settings": {
     "import/resolver": {
@@ -77,15 +78,15 @@
         "endOfLine": "auto"
       }
     ],
-    "require-await": 1 // warning
+    "require-await": 1 // Warning
   },
   "overrides": [
     {
       // enable the rule specifically for TypeScript files
       "files": ["*.ts", "*.mts", "*.cts", "*.tsx"],
       "rules": {
-        // "@typescript-eslint/no-floating-promises": "error",
-        // "@typescript-eslint/no-misused-promises": "error",
+        "@typescript-eslint/no-floating-promises": 1, // Warning
+        "@typescript-eslint/no-misused-promises": 1, // Warning
         "@typescript-eslint/explicit-function-return-type": [
           1,
           {
