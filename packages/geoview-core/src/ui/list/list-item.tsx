@@ -1,12 +1,5 @@
 import { ListItem as MaterialListItem, ListItemProps } from '@mui/material';
-
-/**
- * Custom MUI ListItem Props
- */
-interface TypeListItemProps extends ListItemProps {
-  // eslint-disable-next-line react/require-default-props
-  innerref?: (element: HTMLElement | null) => void;
-}
+import React from 'react';
 
 const sxClasses = {
   listItem: {
@@ -21,13 +14,12 @@ const sxClasses = {
  * @param {TypeListItemProps} props the properties passed to the List Item element
  * @returns {JSX.Element} the created List Item element
  */
-export function ListItem(props: TypeListItemProps): JSX.Element {
+export const ListItem  = React.forwardRef<HTMLLIElement, ListItemProps>((props, ref) =>  {
   const { children } = props;
-  const { innerref, ...propsWithoutRefs } = props;
 
   return (
-    <MaterialListItem sx={sxClasses.listItem} ref={innerref} {...propsWithoutRefs}>
+    <MaterialListItem sx={sxClasses.listItem} {...props} ref={ref} >
       {children !== undefined && children}
     </MaterialListItem>
   );
-}
+})
