@@ -121,7 +121,10 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
 
     if (datatableSettings[layer.layerPath]) {
       return (
-        <span>{itemsLengthDesc} &nbsp;<TableViewIcon sx={{ marginBottom: '-5px' }} fontSize="small" /> </span>
+        <span>
+          {itemsLengthDesc} &nbsp;
+          <TableViewIcon sx={{ marginBottom: '-5px' }} fontSize="small" />{' '}
+        </span>
       );
     }
     return itemsLengthDesc;
