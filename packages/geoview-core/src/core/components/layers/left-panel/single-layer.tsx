@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
 import { animated, useSpring } from '@react-spring/web';
 import {
-  Box,
   Collapse,
   IconButton,
   KeyboardArrowDownIcon,
@@ -16,7 +15,6 @@ import {
   VisibilityOffOutlinedIcon,
   VisibilityOutlinedIcon,
   RestartAltIcon,
-  TableViewIcon,
   HandleIcon,
   Paper,
 } from '@/ui';
@@ -37,6 +35,7 @@ import {
   useDataTableAllFeaturesDataArray,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { LAYER_STATUS } from '@/core/utils/constant';
+import { TableViewIcon } from '@/ui/icons';
 
 interface SingleLayerProps {
   layer: TypeLegendLayer;
@@ -113,14 +112,19 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
 
     const count = layer.items.filter((d) => d.isVisible !== false).length;
     const totalCount = layer.items.length;
-    const itemsLengthDesc = t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
+
+    let itemsLengthDesc = t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
+
+    if (totalCount <= 1) {
+      itemsLengthDesc = '';
+    }
 
     if (datatableSettings[layer.layerPath]) {
       return (
-        <Box style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'left', gap: 1 }}>
-          <span>{itemsLengthDesc} </span>
-          <TableViewIcon />
-        </Box>
+        <span>
+          {itemsLengthDesc} &nbsp;
+          <TableViewIcon sx={{ marginBottom: '-5px' }} fontSize="small" />
+        </span>
       );
     }
     return itemsLengthDesc;
@@ -289,7 +293,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     <AnimatedPaper className={getContainerClass()} style={listItemSpring} data-layer-depth={depth}>
       <Tooltip title={layer.layerName} placement="top" enterDelay={1000} arrow>
         <ListItem key={layer.layerName} divider tabIndex={0} onKeyDown={(e) => handleLayerKeyDown(e)}>
-          <ListItemButton selected={layerIsSelected || (layerChildIsSelected && !isGroupOpen)} tabIndex={-1}>
+          <ListItemButton selected={layerIsSelected || (layerChildIsSelected && !isGroupOpen)} tabIndex={-1} sx={{ minHeight: '4.51rem' }}>
             <LayerIcon layer={layer} />
             <ListItemText
               primary={layer.layerName !== undefined ? layer.layerName : layer.layerId}
