@@ -98,7 +98,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   const [isGroupOpen, setGroupOpen] = useState(layerIsSelected || layerChildIsSelected);
 
   // get layer description
-  const getLayerDescription = (): JSX.Element | string => {
+  const getLayerDescription = (): JSX.Element | string | null => {
     if (layer.layerStatus === 'error') {
       return t('legend.layerError');
     }
