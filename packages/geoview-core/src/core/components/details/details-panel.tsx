@@ -396,7 +396,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
           onLayerListClicked={(layerEntry) => handleLayerChange(layerEntry)}
           fullWidth={fullWidth}
         >
-          {memoSelectedLayerDataFeatures && (
+          {memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length > 0 && (
             <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer }}>
               <Grid container sx={sxClasses.rightPanelBtnHolder}>
                 <Grid item xs={6}>
@@ -444,15 +444,16 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
               <FeatureInfo features={memoSelectedLayerData?.features} currentFeatureIndex={currentFeatureIndex} />
             </Box>
           )}
-          {!memoSelectedLayerDataFeatures && guide?.footerPanel && (
-            <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer, maxHeight: '600px' }}>
-              <Paper sx={{ padding: '20px' }}>
-                <Box className="guideBox">
-                  <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.details!.content}</Markdown>
-                </Box>
-              </Paper>
-            </Box>
-          )}
+          {!memoSelectedLayerDataFeatures ||
+            (memoSelectedLayerDataFeatures.length === 0 && guide?.footerPanel && (
+              <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer, maxHeight: '600px' }}>
+                <Paper sx={{ padding: '20px' }}>
+                  <Box className="guideBox">
+                    <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.details!.content}</Markdown>
+                  </Box>
+                </Paper>
+              </Box>
+            ))}
         </Layout>
       );
     }

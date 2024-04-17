@@ -8,7 +8,7 @@ import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { TypeInteraction, TypeHighlightColors, TypeValidMapProjectionCodes, TypeMapMouseInfo } from '@/geo/map/map-schema-types';
+import { TypeInteraction, TypeValidMapProjectionCodes, TypeMapMouseInfo } from '@/geo/map/map-schema-types';
 
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -27,7 +27,6 @@ export interface IMapState {
   clickMarker: TypeClickMarker | undefined;
   currentProjection: TypeValidMapProjectionCodes;
   fixNorth: boolean;
-  highlightColor?: TypeHighlightColors;
   highlightedFeatures: TypeFeatureInfoEntry[];
   hoverFeatureInfo: TypeHoverFeatureInfo | undefined | null;
   interaction: TypeInteraction;
@@ -97,7 +96,6 @@ export interface IMapState {
     setClickCoordinates: (clickCoordinates: TypeMapMouseInfo) => void;
     setFixNorth: (ifFix: boolean) => void;
     setHighlightedFeatures: (highlightedFeatures: TypeFeatureInfoEntry[]) => void;
-    setHighlightColor: (color: TypeHighlightColors) => void;
     setVisibleLayers: (newOrder: string[]) => void;
     setOrderedLayerInfo: (newOrderedLayerInfo: TypeOrderedLayerInfo[]) => void;
     setHoverable: (layerPath: string, hoverable: boolean) => void;
@@ -148,7 +146,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           basemapOptions: geoviewConfig.map.basemapOptions,
           centerCoordinates: geoviewConfig.map.viewSettings.center as Coordinate,
           currentProjection: geoviewConfig.map.viewSettings.projection,
-          highlightColor: geoviewConfig.map.highlightColor || 'black',
           interaction: geoviewConfig.map.interaction || 'dynamic',
           mapExtent: geoviewConfig.map.viewSettings.extent,
           northArrow: geoviewConfig.components!.indexOf('north-arrow') > -1 || false,
@@ -607,19 +604,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       },
 
       /**
-       * Sets the highlight color of the map.
-       * @param {TypeHighlightColors} highlightColor - The highlight color.
-       */
-      setHighlightColor: (highlightColor: TypeHighlightColors): void => {
-        set({
-          mapState: {
-            ...get().mapState,
-            highlightColor,
-          },
-        });
-      },
-
-      /**
        * Sets the visible layers of the map.
        * @param {string[]} visibleLayers - The visible layers.
        */
@@ -731,8 +715,6 @@ export const useMapClickMarker = (): TypeClickMarker | undefined => useStore(use
 export const useMapExtent = (): Extent | undefined => useStore(useGeoViewStore(), (state) => state.mapState.mapExtent);
 export const useMapFixNorth = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.fixNorth);
 export const useMapInteraction = (): TypeInteraction => useStore(useGeoViewStore(), (state) => state.mapState.interaction);
-export const useMapHiglightColor = (): TypeHighlightColors | undefined =>
-  useStore(useGeoViewStore(), (state) => state.mapState.highlightColor);
 export const useMapHoverFeatureInfo = (): TypeHoverFeatureInfo => useStore(useGeoViewStore(), (state) => state.mapState.hoverFeatureInfo);
 export const useMapLoaded = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.mapLoaded);
 export const useMapNorthArrow = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.northArrow);

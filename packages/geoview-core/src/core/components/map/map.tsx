@@ -64,6 +64,7 @@ export function Map(props: MapProps): JSX.Element {
               constructor,
               toJsonObject({
                 mapId,
+                viewer,
               })
             )
             .catch((error) => {
@@ -76,7 +77,7 @@ export function Map(props: MapProps): JSX.Element {
           logger.logPromiseFailed('api.plugin.addPlugin in useCallback in map', error);
         });
     });
-  }, [mapId, mapStoreConfig?.corePackages]);
+  }, [mapId, mapStoreConfig?.corePackages, viewer]);
 
   useEffect((): void => {
     // Log

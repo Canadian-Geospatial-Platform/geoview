@@ -42,9 +42,9 @@ export function unmountMap(mapId: string): void {
  *
  * @param {TypeMapFeaturesConfig} mapFeaturesConfig - The map features config to reload
  */
-const handleReconstruct = (mapFeaturesConfig: TypeMapFeaturesConfig): void => {
+const handleReconstruct = async (mapFeaturesConfig: TypeMapFeaturesConfig): Promise<void> => {
   if (mapFeaturesConfig) {
-    const map = api.maps[mapFeaturesConfig.mapId].remove(false);
+    const map = await api.maps[mapFeaturesConfig.mapId].remove(false);
 
     // recreate the map - create a new div and remove the active one
     const newRoot = document.createElement('div');

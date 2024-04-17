@@ -12,6 +12,7 @@ import { logger } from '@/core/utils/logger';
  */
 export type TypePluginOptions = {
   mapId: string;
+  viewer?: MapViewer;
 };
 
 /** ******************************************************************************************************************************

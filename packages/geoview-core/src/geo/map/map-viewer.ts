@@ -218,6 +218,11 @@ export class MapViewer {
     this.basemap = new Basemap(MapEventProcessor.getBasemapOptions(this.mapId), this.mapId);
   }
 
+  /**
+   * Create an Open Layer map from configuration attached to the class
+   * @param {HTMLElement} mapElement - HTML element to create the map within
+   * @returns {OLMap} The OpenLayer map
+   */
   createMap(mapElement: HTMLElement): OLMap {
     // config object
     const { mapFeaturesConfig } = this;
@@ -1327,7 +1332,7 @@ export class MapViewer {
    * @param {boolean} deleteContainer true if we want to delete div from the page
    * @returns {HTMLElement} return the HTML element
    */
-  remove(deleteContainer: boolean): HTMLElement {
+  async remove(deleteContainer: boolean): Promise<HTMLElement> {
     // Remove all layers
     this.layer.removeAllGeoviewLayers();
 
@@ -1335,7 +1340,7 @@ export class MapViewer {
     api.event.offAll(this.mapId);
 
     // unload all loaded plugins on the map
-    api.plugin.removePlugins(this.mapId);
+    await api.plugin.removePlugins(this.mapId);
 
     // get the map container to unmount
     const mapContainer = document.getElementById(this.mapId)!;
