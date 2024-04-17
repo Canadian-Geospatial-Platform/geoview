@@ -2,11 +2,8 @@ import React, { useEffect, useRef } from 'react';
 
 import { Coordinate } from 'ol/coordinate'; // For typing only
 
-import { getGeoViewStore } from '@/core/stores/stores-managers';
-
 import { Box, ClickMapMarker } from '@/ui';
-
-import { useMapClickMarker, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapClickMarker, useMapClickCoordinates, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
@@ -29,38 +26,23 @@ export function ClickMarker(): JSX.Element {
   const mapId = useGeoViewMapId();
 
   // internal state
-  const markerCoordinates = useRef<Coordinate>();
   const clickMarkerRef = useRef<HTMLDivElement>(null);
   const clickMarkerId = `${mapId}-clickmarker`;
 
   // get values from the store
   const clickMarker = useMapClickMarker();
+  const clickCoordinates = useMapClickCoordinates();
   const { setOverlayClickMarkerRef, showClickMarker } = useMapStoreActions();
   setTimeout(() => setOverlayClickMarkerRef(clickMarkerRef.current as HTMLElement), 0);
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('CLICK-MARKER - mount');
+    logger.logTraceUseEffect('CLICK-MARKER - clickCoordinates');
 
-    // if mapClickCoordinates changed, single click event has been triggered
-    const unsubMapSingleClick = getGeoViewStore(mapId).subscribe(
-      (state) => state.mapState.clickCoordinates,
-      (curClick, prevClick) => {
-        // Log
-        logger.logTraceCoreStoreSubscription('CLICK-MARKER - clickCoordinates', curClick);
-
-        if (curClick !== prevClick) {
-          markerCoordinates.current = curClick!.lnglat;
-          showClickMarker({ lnglat: curClick!.lnglat });
-        }
-      }
-    );
-
-    return () => {
-      unsubMapSingleClick();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (clickCoordinates) {
+      showClickMarker({ lnglat: clickCoordinates.lnglat });
+    }
+  }, [clickCoordinates, showClickMarker]);
 
   return (
     <Box

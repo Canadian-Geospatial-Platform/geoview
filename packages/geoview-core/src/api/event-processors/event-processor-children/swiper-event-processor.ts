@@ -1,4 +1,3 @@
-import { GeoviewStoreType } from '@/core/stores';
 import { ISwiperState } from '@/core/stores/store-interface-and-intial-values/swiper-state';
 import { logger } from '@/core/utils/logger';
 
@@ -8,40 +7,6 @@ import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-pr
  * Event processor focusing on interacting with the swiper state in the store.
  */
 export class SwiperEventProcessor extends AbstractEventProcessor {
-  /**
-   * Overrides initialization of the Swiper Event Processor
-   * @param {GeoviewStoreType} store The store associated with the Swiper Event Processor
-   * @returns An array of the subscriptions callbacks which were created
-   */
-  protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
-    // Checks for udpated layers in layer order
-    const unsubLayerRemoved = store.subscribe(
-      (state) => state.mapState.orderedLayerInfo,
-      (cur, prev) => {
-        // Log
-        logger.logTraceCoreStoreSubscription('SWIPER EVENT PROCESSOR - orderedLayerInfo', cur);
-
-        // Read the layer paths of each layer info
-        const curOrderedLayerPaths = cur.map((layerInfo) => layerInfo.layerPath);
-        const prevOrderedLayerPaths = prev.map((layerInfo) => layerInfo.layerPath);
-
-        // Get all the layer paths to check in a distinct array for looping purposes
-        const layerPathsToCheck = [...store.getState().swiperState.layerPaths];
-
-        // For each layer paths the swiper is using
-        layerPathsToCheck.forEach((layerPath) => {
-          // If it was in the layerdata array and is not anymore
-          if (prevOrderedLayerPaths.includes(layerPath) && !curOrderedLayerPaths.includes(layerPath)) {
-            // Remove it
-            SwiperEventProcessor.removeLayerPath(store.getState().mapId, layerPath);
-          }
-        });
-      }
-    );
-
-    return [unsubLayerRemoved];
-  }
-
   // **********************************************************
   // Static functions for Typescript files to access store actions
   // **********************************************************
