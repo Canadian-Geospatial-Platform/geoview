@@ -98,7 +98,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
   const [isGroupOpen, setGroupOpen] = useState(layerIsSelected || layerChildIsSelected);
 
   // get layer description
-  const getLayerDescription = (): JSX.Element | string | null => {
+  const getLayerDescription = (): JSX.Element | string => {
     if (layer.layerStatus === 'error') {
       return t('legend.layerError');
     }
@@ -114,7 +114,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     const totalCount = layer.items.length;
 
     if (totalCount <= 1 && datatableSettings[layer.layerPath]) {
-      return null;
+      return '';
     }
 
     const itemsLengthDesc = t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
@@ -123,7 +123,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
       return (
         <span>
           {itemsLengthDesc} &nbsp;
-          <TableViewIcon sx={{ marginBottom: '-5px' }} fontSize="small" />{' '}
+          <TableViewIcon sx={{ marginBottom: '-5px' }} fontSize="small" />
         </span>
       );
     }
