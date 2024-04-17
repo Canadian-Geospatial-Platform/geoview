@@ -4,7 +4,6 @@ import { Theme } from '@mui/material/styles';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getSxClasses = (theme: Theme): any => ({
   layersPanelContainer: {
-    background: theme.palette.geoViewColor.bgColor.main,
     paddingBottom: '1rem',
     '& .guideBox': {
       ml: '30px',

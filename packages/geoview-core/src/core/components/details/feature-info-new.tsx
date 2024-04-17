@@ -67,7 +67,7 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
     }
   };
 
-  const handleZoomIn = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>): Promise<void> => {
+  const handleZoomIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
     e.stopPropagation();
 
     // If the feature has an extent
@@ -77,14 +77,19 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
       const newCenter = transformPoints([center], 4326)[0];
 
       // Zoom to extent and wait for it to finish
-      await zoomToExtent(feature.extent);
+      zoomToExtent(feature.extent)
+        .then(async () => {
+          // Typically, the click marker is removed after a zoom, so wait a bit here and re-add it...
+          // TODO: Refactor - Zoom ClickMarker - Improve the logic in general of when/if a click marker should be removed after a zoom
+          await delay(150);
 
-      // Typically, the click marker is removed after a zoom, so wait a bit here and re-add it...
-      // TODO: Refactor - Zoom ClickMarker - Improve the logic in general of when/if a click marker should be removed after a zoom
-      await delay(150);
-
-      // Add (back?) a click marker
-      showClickMarker({ lnglat: newCenter });
+          // Add (back?) a click marker
+          showClickMarker({ lnglat: newCenter });
+        })
+        .catch((error: unknown) => {
+          // Log
+          logger.logPromiseFailed('zoomToExtent in handleZoomIn in FeatureInfoNew', error);
+        });
     }
   };
 

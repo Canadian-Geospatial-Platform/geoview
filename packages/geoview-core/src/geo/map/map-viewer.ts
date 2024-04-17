@@ -50,6 +50,7 @@ import {
   TypeValidMapProjectionCodes,
   TypeMapMouseInfo,
 } from '@/geo/map/map-schema-types';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 import { TypeMapFeaturesConfig, TypeHTMLElement, TypeJsonObject } from '@/core/types/global-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -72,6 +73,9 @@ interface TypeDocument extends Document {
 export class MapViewer {
   // Minimum delay (in milliseconds) for map to be in loading state
   static readonly #MIN_DELAY_LOADING = 2000;
+
+  // The starting time of the timer for the map ready
+  #checkMapReadyStartTime: number | undefined;
 
   // Function create-map-from-config has run
   createMapConfigHasRun = false;
@@ -236,9 +240,17 @@ export class MapViewer {
       this.map.on('singleclick', debounce(this.#handleMapSingleClick.bind(this), 1000, { leading: true }).bind(this));
     }
 
+    // Note the time
+    this.#checkMapReadyStartTime = Date.now();
+
     // initialize layers and load the layers passed in from map config if any
     this.layer = new LayerApi(this);
-    this.layer.loadListOfGeoviewLayer(this.mapFeaturesConfig.map.listOfGeoviewLayerConfig);
+
+    // TODO: Check - Maybe we want to await on this (for the Geocore layers that take longer to initialize) - to confirm
+    this.layer.loadListOfGeoviewLayer(this.mapFeaturesConfig.map.listOfGeoviewLayerConfig).catch((error) => {
+      // Log
+      logger.logPromiseFailed('loadListOfGeoviewLayer in initMap in MapViewer', error);
+    });
 
     // check if geometries are provided from url
     this.loadGeometries();
@@ -331,7 +343,10 @@ export class MapViewer {
     };
 
     // Save in the store
-    MapEventProcessor.setClickCoordinates(this.mapId, clickCoordinates);
+    MapEventProcessor.setClickCoordinates(this.mapId, clickCoordinates).catch((error) => {
+      // Log
+      logger.logPromiseFailed('setClickCoordinates in #handleMapSingleClick in MapViewer', error);
+    });
 
     // Emit to the outside
     this.#emitMapSingleClick(clickCoordinates);
@@ -397,15 +412,12 @@ export class MapViewer {
    * @private
    */
   #checkMapReady(): void {
-    // Note the time
-    const checkMapReadyStartTime = Date.now();
-
     // Log Marker Start
     logger.logMarkerStart(`mapReady-${this.mapId}`);
 
-    // TODO: Refactor - Rewrite the code here to not have to rely on a setInterval anymore.
+    // TODO: Refactor minimal - Rewrite the code here to not have to rely on a setInterval anymore.
     // Start an interval checker
-    const mapInterval = setInterval(async () => {
+    const mapInterval = setInterval(() => {
       if (this.layer.geoviewLayers) {
         const { geoviewLayers } = this.layer;
         let allGeoviewLayerRegistered =
@@ -420,56 +432,73 @@ export class MapViewer {
           // Clear interval
           clearInterval(mapInterval);
 
-          // How many layers?
-          const layersCount = Object.keys(geoviewLayers).length;
-
-          // Log
-          logger.logInfo(`Map is ready with ${layersCount} registered layers`, this.mapId);
-          logger.logMarkerCheck(`mapReady-${this.mapId}`, `for map to be ready. Layers are still being processed...`);
-
-          // Is ready
-          this.#mapReady = true;
-          this.#emitMapReady();
-
-          // Load the Map itself and the UI controls
-          await MapEventProcessor.initMapControls(this.mapId);
-          await AppEventProcessor.setGuide(this.mapId);
-
-          // Now that the map dom is loaded, register a handle when size is changing
-          this.map.on('change:size', this.#handleMapChangeSize.bind(this));
-          this.map.dispatchEvent('change:size'); // dispatch event to set initial value
-
-          // Register mouse interaction events
-          // set autofocus/blur on mouse enter/leave the map so user can scroll (zoom) without having to click the map
-          const mapHTMLElement = this.map.getTargetElement();
-          mapHTMLElement.addEventListener('wheel', (event: WheelEvent) => {
-            event.preventDefault(); // Abort event
-            mapHTMLElement.focus();
+          // Redirect
+          this.#checkMapReadyGo(geoviewLayers).catch((error) => {
+            // Log
+            logger.logPromiseFailed('checkMapReadyGo in checkMapReady in MapViewer', error);
           });
-
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          mapHTMLElement.addEventListener('mouseleave', (event: MouseEvent) => {
-            mapHTMLElement.blur();
-          });
-
-          // Start checking for layers result sets to be ready
-          this.#checkLayerResultSetReady();
-
-          // Start checking for map layers processed
-          this.#checkMapLayersProcessed();
-
-          // Check how load in milliseconds has it been processing thus far
-          const elapsedMilliseconds = Date.now() - checkMapReadyStartTime;
-
-          // Wait at least the minimum delay before officializing the map as loaded for the UI
-          await delay(MapViewer.#MIN_DELAY_LOADING - elapsedMilliseconds); // Negative value will simply resolve immediately
-
-          // Save in the store that the map is loaded
-          // GV This removes the spinning circle overlay
-          MapEventProcessor.setMapLoaded(this.mapId, true);
         }
       }
     }, 250);
+  }
+
+  /**
+   * Function called when the map is ready and additional processing can happen.
+   * @param {{ [geoviewLayerId: string]: AbstractGeoViewLayer }} geoviewLayers - The GeoView Layers
+   * @returns {Promise<void>}
+   * @private
+   */
+  async #checkMapReadyGo(geoviewLayers: { [geoviewLayerId: string]: AbstractGeoViewLayer }): Promise<void> {
+    // How many layers?
+    const layersCount = Object.keys(geoviewLayers).length;
+
+    // Log
+    logger.logInfo(`Map is ready with ${layersCount} registered layers`, this.mapId);
+    logger.logMarkerCheck(`mapReady-${this.mapId}`, `for map to be ready. Layers are still being processed...`);
+
+    // Is ready
+    this.#mapReady = true;
+    this.#emitMapReady();
+
+    // Load the Map itself and the UI controls
+    await MapEventProcessor.initMapControls(this.mapId);
+    await AppEventProcessor.setGuide(this.mapId);
+
+    // Now that the map dom is loaded, register a handle when size is changing
+    this.map.on('change:size', this.#handleMapChangeSize.bind(this));
+    this.map.dispatchEvent('change:size'); // dispatch event to set initial value
+
+    // Register mouse interaction events
+    // set autofocus/blur on mouse enter/leave the map so user can scroll (zoom) without having to click the map
+    const mapHTMLElement = this.map.getTargetElement();
+    mapHTMLElement.addEventListener('wheel', (event: WheelEvent) => {
+      event.preventDefault(); // Abort event
+      mapHTMLElement.focus();
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    mapHTMLElement.addEventListener('mouseleave', (event: MouseEvent) => {
+      mapHTMLElement.blur();
+    });
+
+    // Start checking for layers result sets to be ready
+    this.#checkLayerResultSetReady().catch((error) => {
+      // Log
+      logger.logError('Failed in #checkLayerResultSetReady', error);
+    });
+
+    // Start checking for map layers processed
+    this.#checkMapLayersProcessed();
+
+    // Check how load in milliseconds has it been processing thus far
+    const elapsedMilliseconds = Date.now() - this.#checkMapReadyStartTime!;
+
+    // Wait at least the minimum delay before officializing the map as loaded for the UI
+    await delay(MapViewer.#MIN_DELAY_LOADING - elapsedMilliseconds); // Negative value will simply resolve immediately
+
+    // Save in the store that the map is loaded
+    // GV This removes the spinning circle overlay
+    MapEventProcessor.setMapLoaded(this.mapId, true);
   }
 
   /**
@@ -478,7 +507,7 @@ export class MapViewer {
    */
   #checkMapLayersProcessed(): void {
     // Start an interval checker
-    // TODO: Refactor - Rewrite the code here to not have to rely on a setInterval anymore.
+    // TODO: Refactor minimal - Rewrite the code here to not have to rely on a setInterval anymore.
     const mapInterval = setInterval(() => {
       if (this.layer.geoviewLayers) {
         const { geoviewLayers } = this.layer;
@@ -519,7 +548,7 @@ export class MapViewer {
    */
   #checkMapLayersLoaded(): void {
     // Start an interval checker
-    // TODO: Refactor - Rewrite the code here to not have to rely on a setInterval anymore.
+    // TODO: Refactor minimal - Rewrite the code here to not have to rely on a setInterval anymore.
     const mapInterval = setInterval(() => {
       if (this.layer.geoviewLayers) {
         const { geoviewLayers } = this.layer;
@@ -559,7 +588,7 @@ export class MapViewer {
   #checkLayerResultSetReady(): Promise<void> {
     // Start another interval checker
     return new Promise<void>((resolve) => {
-      // TODO: Refactor - Rewrite the code here to not have to rely on a setInterval anymore.
+      // TODO: Refactor minimal - Rewrite the code here to not have to rely on a setInterval anymore.
       const layersInterval = setInterval(() => {
         if (api.maps[this.mapId].layer) {
           // Check if all registered layers have their results set
@@ -1008,7 +1037,10 @@ export class MapViewer {
     // enter fullscreen
     if (status) {
       if (element.requestFullscreen) {
-        element.requestFullscreen();
+        element.requestFullscreen().catch((error) => {
+          // Log
+          logger.logPromiseFailed('element.requestFullscreen', error);
+        });
       } else if (element.webkitRequestFullscreen) {
         /* Safari */
         element.webkitRequestFullscreen();
@@ -1024,7 +1056,10 @@ export class MapViewer {
     // exit fullscreen
     if (!status) {
       if (document.exitFullscreen) {
-        document.exitFullscreen();
+        document.exitFullscreen().catch((error) => {
+          // Log
+          logger.logPromiseFailed('document.exitFullscreen', error);
+        });
       } else if ((document as TypeDocument).webkitExitFullscreen) {
         /* Safari */
         (document as TypeDocument).webkitExitFullscreen();
@@ -1052,10 +1087,11 @@ export class MapViewer {
    *
    * @param {TypeDisplayLanguage} displayLanguage - The language to use (en, fr)
    * @param {boolean} resetLayer - Optional flag to ask viewer to reload layers with the new localize language
+   * @returns {Promise<[void, void]>}
    */
-  setLanguage(displayLanguage: TypeDisplayLanguage, resetLayer?: boolean | false): void {
+  setLanguage(displayLanguage: TypeDisplayLanguage, resetLayer?: boolean | false): Promise<[void, void]> {
     if (VALID_DISPLAY_LANGUAGE.includes(displayLanguage)) {
-      AppEventProcessor.setDisplayLanguage(this.mapId, displayLanguage);
+      const promise = AppEventProcessor.setDisplayLanguage(this.mapId, displayLanguage);
 
       // if flag is true, check if config support the layers change and apply
       if (resetLayer) {
@@ -1066,23 +1102,37 @@ export class MapViewer {
             api.utilities.core.getLocalizedMessage('validation.changeDisplayLanguageLayers', displayLanguage)
           );
       }
-    } else
-      this.notifications.addNotificationError(api.utilities.core.getLocalizedMessage('validation.changeDisplayLanguage', displayLanguage));
+
+      // Return the promise
+      return promise;
+    }
+
+    // Unsupported
+    this.notifications.addNotificationError(api.utilities.core.getLocalizedMessage('validation.changeDisplayLanguage', displayLanguage));
+    return Promise.resolve([undefined, undefined]);
   }
 
   /**
    * Set the display projection of the map
    *
    * @param {TypeValidMapProjectionCodes} projectionCode - The projection code (3978, 3857)
+   * @returns {Promise<void>}
    */
-  setProjection(projectionCode: TypeValidMapProjectionCodes): void {
+  setProjection(projectionCode: TypeValidMapProjectionCodes): Promise<void> {
     if (VALID_PROJECTION_CODES.includes(Number(projectionCode))) {
       // Propagate to the store
-      MapEventProcessor.setProjection(this.mapId, projectionCode);
+      const promise = MapEventProcessor.setProjection(this.mapId, projectionCode);
 
       // TODO: Emit to outside
       // this.#emitMapInit...
-    } else this.notifications.addNotificationError('validation.changeDisplayProjection');
+
+      // Return the promise
+      return promise;
+    }
+
+    // Unsupported
+    this.notifications.addNotificationError('validation.changeDisplayProjection');
+    return Promise.resolve();
   }
 
   /**
@@ -1202,18 +1252,29 @@ export class MapViewer {
 
       // for the moment, only polygon are supported but if need be, other geometries can easely be use as well
       geoms.forEach((key: string) => {
-        fetch(`${servEndpoint}${key}`).then((response) => {
-          // only process valid response
-          if (response.status === 200) {
-            response.json().then((data) => {
-              if (data.geometry !== undefined) {
-                // add the geometry
-                // TODO: use the geometry as GeoJSON and add properties to by queried by the details panel
-                this.layer.geometry.addPolygon(data.geometry.coordinates, undefined, generateId(null));
-              }
-            });
-          }
-        });
+        fetch(`${servEndpoint}${key}`)
+          .then((response) => {
+            // only process valid response
+            if (response.status === 200) {
+              response
+                .json()
+                .then((data) => {
+                  if (data.geometry !== undefined) {
+                    // add the geometry
+                    // TODO: use the geometry as GeoJSON and add properties to by queried by the details panel
+                    this.layer.geometry.addPolygon(data.geometry.coordinates, undefined, generateId(null));
+                  }
+                })
+                .catch((error) => {
+                  // Log
+                  logger.logPromiseFailed('response.json in loadGeometry in MapViewer', error);
+                });
+            }
+          })
+          .catch((error) => {
+            // Log
+            logger.logPromiseFailed('fetch in loadGeometries in MapViewer', error);
+          });
       });
     }
   }

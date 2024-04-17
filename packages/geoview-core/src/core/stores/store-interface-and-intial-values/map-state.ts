@@ -18,6 +18,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { TypeBasemapOptions } from '@/geo/layer/basemap/basemap-types';
 import { TypeHoverFeatureInfo } from '@/geo/utils/hover-feature-info-layer-set';
+import { TypeFeatureInfoResultSet } from '@/geo/utils/feature-info-layer-set';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with MapEventProcessor vs MapState
 
@@ -53,7 +54,7 @@ export interface IMapState {
   setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
 
   actions: {
-    createBaseMapFromOptions: () => void;
+    createBaseMapFromOptions: () => Promise<void>;
     createEmptyBasemap: () => TileLayer<XYZ>;
     getPixelFromCoordinate: (coord: Coordinate) => [number, number];
     getIndexFromOrderedLayerInfo: (layerPath: string) => number;
@@ -69,12 +70,12 @@ export interface IMapState {
     setZoom: (zoom: number, duration?: number) => void;
     setInteraction: (interaction: TypeInteraction) => void;
     setRotation: (rotation: number) => void;
-    zoomToExtent: (extent: Extent, options?: FitOptions) => void;
-    zoomToInitialExtent: () => void;
-    zoomToGeoLocatorLocation: (coords: [number, number], bbox?: [number, number, number, number]) => void;
-    zoomToMyLocation: (position: GeolocationPosition) => void;
+    zoomToExtent: (extent: Extent, options?: FitOptions) => Promise<void>;
+    zoomToInitialExtent: () => Promise<void>;
+    zoomToGeoLocatorLocation: (coords: [number, number], bbox?: [number, number, number, number]) => Promise<void>;
+    zoomToMyLocation: (position: GeolocationPosition) => Promise<void>;
     transformPoints: (coords: Coordinate[], outputProjection: number) => Coordinate[];
-    setClickCoordinates: (pointerPosition: TypeMapMouseInfo) => void;
+    setClickCoordinates: (pointerPosition: TypeMapMouseInfo) => Promise<TypeFeatureInfoResultSet>;
     setFixNorth: (ifFix: boolean) => void;
     setOverlayClickMarkerRef: (htmlRef: HTMLElement) => void;
     setOverlayNorthMarkerRef: (htmlRef: HTMLElement) => void;
@@ -169,10 +170,11 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     actions: {
       /**
        * Resets the base map.
+       * @returns {Promise<void>}
        */
-      createBaseMapFromOptions: (): void => {
+      createBaseMapFromOptions: (): Promise<void> => {
         // Redirect to processor
-        MapEventProcessor.resetBasemap(get().mapId);
+        return MapEventProcessor.resetBasemap(get().mapId);
       },
 
       /**
@@ -371,10 +373,11 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets the click coordinates.
        * @param {TypeMapMouseInfo} pointerPosition - The pointer position.
+       * @returns {Promise<TypeFeatureInfoResultSet>}
        */
-      setClickCoordinates: (pointerPosition: TypeMapMouseInfo): void => {
+      setClickCoordinates: (pointerPosition: TypeMapMouseInfo): Promise<TypeFeatureInfoResultSet> => {
         // Redirect to processor
-        MapEventProcessor.setClickCoordinates(get().mapId, pointerPosition);
+        return MapEventProcessor.setClickCoordinates(get().mapId, pointerPosition);
       },
 
       /**

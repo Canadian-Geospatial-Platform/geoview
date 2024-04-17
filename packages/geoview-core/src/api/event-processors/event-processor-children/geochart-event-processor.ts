@@ -44,7 +44,10 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
         logger.logTraceCoreStoreSubscription('GEOCHART EVENT PROCESSOR - layerDataArray', cur);
 
         // Also propagate in the geochart arrays
-        GeochartEventProcessor.propagateArrayDataToStore(store.getState().mapId, cur);
+        GeochartEventProcessor.propagateArrayDataToStore(store.getState().mapId, cur).catch((error) => {
+          // Log
+          logger.logPromiseFailed('propagateArrayDataToStore in layerDataArrayUpdate subscribe in geochart-event-processor', error);
+        });
       }
     );
 
@@ -169,17 +172,18 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * Propagates feature info layer sets to the store and the also in a batched manner.
    * @param {string} mapId The map id
    * @param {string} layerDataArray The layer data array to propagate in the store
+   * @returns {Promise<void>}
    */
-  static propagateArrayDataToStore(mapId: string, layerDataArray: TypeLayerData[]): void {
+  static propagateArrayDataToStore(mapId: string, layerDataArray: TypeLayerData[]): Promise<void> {
     // To propagate in the store, the processor needs an initialized chart store which is only initialized if the Geochart plugin exists.
     // Therefore, we validate its existence first.
-    if (!this.getGeochartState(mapId)) return;
+    if (!this.getGeochartState(mapId)) return Promise.resolve();
 
     // Update the layer data array in the store
     this.getGeochartState(mapId)!.actions.setLayerDataArray(layerDataArray);
 
     // Also propagate in the batched array
-    this.propagateFeatureInfoToStoreBatch(mapId, layerDataArray);
+    return this.propagateFeatureInfoToStoreBatch(mapId, layerDataArray);
   }
 
   /**

@@ -98,12 +98,16 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     setHighlightLayer(layerDetails.layerPath);
   };
 
-  const getSubTitle = (): string => {
+  const getSubTitle = (): string | null => {
     if (layerDetails.children.length > 0) {
       return t('legend.subLayersCount').replace('{count}', layerDetails.children.length.toString());
     }
     const count = layerDetails.items.filter((d) => d.isVisible !== false).length;
     const totalCount = layerDetails.items.length;
+
+    if (totalCount <= 1) {
+      return null;
+    }
     return t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
   };
 
@@ -270,7 +274,13 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             </Box>
             {renderLayerButtons()}
           </Box>
-          {layerDetails.controls?.opacity !== false && <LayerOpacityControl layerDetails={layerDetails} />}
+          {layerDetails.controls?.opacity !== false && (
+            <Box sx={sxClasses.layerOpacityControlContainer}>
+              <Box id="layerOpacity">
+                <LayerOpacityControl layerDetails={layerDetails} />
+              </Box>
+            </Box>
+          )}
           <Box sx={{ marginTop: '20px' }}>
             {layerDetails.items?.length > 0 && renderItems()}
             {layerDetails.children.length > 0 && (
