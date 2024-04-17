@@ -10,7 +10,6 @@ import { Coordinate } from 'ol/coordinate';
 import { Color } from 'ol/color';
 
 import { TypeHighlightColors } from '@/geo/map/map-schema-types';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { TypeFeatureInfoEntry } from './layer-set';
@@ -57,8 +56,8 @@ export class FeatureHighlight {
     this.#mapId = mapViewer.mapId;
 
     this.#overlayLayer = new VectorLayer({ source: this.#highlighSource, map: mapViewer.map });
-    if (MapEventProcessor.getMapHighlightColor(this.#mapId) !== undefined)
-      this.changeHighlightColor(MapEventProcessor.getMapHighlightColor(this.#mapId) as TypeHighlightColors);
+    // if (this.#highlightColor !== undefined)
+    //   this.changeHighlightColor(MapEventProcessor.getMapHighlightColor(this.#mapId) as TypeHighlightColors);
   }
 
   /**
@@ -75,23 +74,19 @@ export class FeatureHighlight {
       case 'white': {
         featureColor = [255, 255, 255, 0.3];
         stroke = new Stroke({ color: 'white', width: 1.25 });
-        MapEventProcessor.setMapHighlightColor(this.#mapId, 'white');
         break;
       }
       case 'red': {
         featureColor = [255, 0, 0, 0.3];
         stroke = new Stroke({ color: 'red', width: 1.25 });
-        MapEventProcessor.setMapHighlightColor(this.#mapId, 'red');
         break;
       }
       case 'green': {
         featureColor = [0, 255, 255, 0.3];
         stroke = new Stroke({ color: 'green', width: 1.25 });
-        MapEventProcessor.setMapHighlightColor(this.#mapId, 'green');
         break;
       }
       case 'black': {
-        MapEventProcessor.setMapHighlightColor(this.#mapId, 'black');
         break;
       }
       default: {

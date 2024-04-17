@@ -90,8 +90,8 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
    * @param {boolean} isMapRecordExist - Filtered Map switch is on off.
    */
   static applyFilters(mapId: string, layerPath: string, filterStrings: string, isMapRecordExist: boolean): void {
-    const geoviewLayerInstance = MapEventProcessor.getMapViewerInstance(mapId).layer.geoviewLayer(layerPath);
-    const filterLayerConfig = MapEventProcessor.getMapViewerInstance(mapId).layer.registeredLayers[layerPath] as TypeLayerEntryConfig;
+    const geoviewLayerInstance = MapEventProcessor.getMapViewerLayerAPIInstance(mapId).geoviewLayer(layerPath);
+    const filterLayerConfig = MapEventProcessor.getMapViewerLayerAPIInstance(mapId).registeredLayers[layerPath] as TypeLayerEntryConfig;
 
     if (isMapRecordExist && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined && filterStrings.length) {
       (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(layerPath, filterStrings);

@@ -8,7 +8,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { Modal, Button } from '@/ui';
 import { HtmlToReact } from './html-to-react';
 import { getFocusTrapSxClasses } from './containers-style';
-// import { ARROW_KEY_CODES } from '@/core/utils/constant';
+import { ARROW_KEY_CODES } from '@/core/utils/constant';
 import { useAppGeoviewHTMLElement, useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
@@ -88,7 +88,9 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     // the user escape the trap, remove it, put back skip link in focus cycle and zoom to top link
     setActiveTrapGeoView(false);
     geoviewElement.classList.remove('map-focus-trap');
-    // mapHTMLElement.removeEventListener('keydown',handleExit); // GV can't remove because of eslint @typescript-eslint/no-use-before-define
+    const mapHTMLElement = geoviewElement.querySelector('.geoview-shell')! as HTMLElement;
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    mapHTMLElement.removeEventListener('keydown', handleExit); // GV can't remove because of eslint @typescript-eslint/no-use-before-define
     document.removeEventListener('keydown', handleScrolling);
 
     // update store and focus to top link
@@ -97,27 +99,27 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   }
 
   // handle FocusTrap states (Exit)
-  // const handleExit = (evt: KeyboardEvent): void => {
-  //   if (!ARROW_KEY_CODES.includes(evt.code as string)) {
-  //     // remove the border from the map
-  //     mapElementStore!.style.border = sxClasses.exitFocus.border;
-  //   }
+  const handleExit = (evt: KeyboardEvent): void => {
+    if (!ARROW_KEY_CODES.includes(evt.code as string)) {
+      // remove the border from the map
+      mapElementStore!.style.border = sxClasses.exitFocus.border;
+    }
 
-  //   if (evt.code === 'KeyQ' && evt.ctrlKey) {
-  //     exitFocus();
-  //   }
-  // };
+    if (evt.code === 'KeyQ' && evt.ctrlKey) {
+      exitFocus();
+    }
+  };
 
   /**
    * Set the focus trap
    */
   function setFocusTrap(): void {
-    const mapHTMLElement = geoviewElement.querySelector('.geoview-shell')!; // mapHTMLElementRef.current!.closest('.geoview-shell') as HTMLElement;
+    const mapHTMLElement = geoviewElement.querySelector('.geoview-shell')! as HTMLElement;
 
     // add a class to specify the viewer is in focus trap mode
     setActiveTrapGeoView(true);
     mapHTMLElement.classList.add('map-focus-trap');
-    //  mapHTMLElement.addEventListener('keydown', handleExit); // TODO: this handle focus overload error
+    mapHTMLElement.addEventListener('keydown', handleExit); // TODO: this handle focus overload error
 
     // update the store and focus to map
     setTimeout(() => document.getElementById(`mapTargetElement-${mapId}`)?.focus(), 0);

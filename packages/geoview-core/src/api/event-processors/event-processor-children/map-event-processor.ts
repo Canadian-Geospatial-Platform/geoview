@@ -11,7 +11,6 @@ import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer } from '@/geo/map/map-viewer';
 import {
   TypeGeoviewLayerConfig,
-  TypeHighlightColors,
   TypeInteraction,
   TypeLayerEntryConfig,
   TypeMapMouseInfo,
@@ -77,7 +76,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
           for (let i = 0; i < newFeatures.length; i++)
             MapEventProcessor.getMapViewerLayerAPIInstance(mapId).featureHighlight.highlightFeature(newFeatures[i]);
           for (let i = 0; i < removedFeatures.length; i++)
-            MapEventProcessor.getMapViewerLayerAPIInstance(mapId).featureHighlight.removeHighlight((removedFeatures[i].geometry as TypeGeometry).ol_uid);
+            MapEventProcessor.getMapViewerLayerAPIInstance(mapId).featureHighlight.removeHighlight(
+              (removedFeatures[i].geometry as TypeGeometry).ol_uid
+            );
         }
       }
     );
@@ -198,21 +199,31 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   /**
    * Shortcut to get the Map Viewer layer api instance for a given map id
-   * This is use to reduce the use of api.maps[mapId] and be more explicit
+   * This is use to reduce the use of api.maps[mapId].layer and be more explicit
    * @param {string} mapId - map Id
    * @returns {LayerApi} The Map viewer layer API instance
    */
   static getMapViewerLayerAPIInstance(mapId: string): LayerApi {
+    // TODO: refactor layer - It seems sometimes we use getMapViewerLayerAPIInstance(mapId).geoviewLayer(layerPath)
+    // TD.CONT: and sometimes like the above. Should 'registeredLayers' be #private to have a single way of getting a layer using a layer path?
     return api.maps[mapId].layer;
   }
 
   /**
    * Shortcut to get the Map Viewer plugins instance for a given map id
-   * This is use to reduce the use of api.maps[mapId] and be more explicit
+   * This is use to reduce the use of api.maps[mapId].plugins and be more explicit
    * @param {string} mapId - map Id
    * @returns {TypeRecordOfPlugin} The map plugins record
    */
-  static getMapViewerPluginsInstance(mapId: string): TypeRecordOfPlugin {
+  static async getMapViewerPluginsInstance(mapId: string): Promise<TypeRecordOfPlugin> {
+    try {
+      // Check if the scaleControl exists and is showing information, wait for it
+      await whenThisThen(() => this.getMapViewerInstance(mapId) && this.getMapViewerInstance(mapId).plugins);
+    } catch (error) {
+      // Log
+      logger.logError("Couldn't retrieve the plugins instance on Map Viewer", error);
+    }
+
     return api.maps[mapId].plugins;
   }
 
@@ -260,10 +271,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static getBasemapOptions(mapId: string): TypeBasemapOptions {
     return this.getMapStateProtected(mapId).basemapOptions;
-  }
-
-  static getMapHighlightColor(mapId: string): string | undefined {
-    return this.getMapStateProtected(mapId).highlightColor;
   }
 
   static clickMarkerIconShow(mapId: string, marker: TypeClickMarker): void {
@@ -471,11 +478,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // Save in store
       this.getMapStateProtected(mapId).setterActions.setHighlightedFeatures(highlightedFeatures);
     }
-  }
-
-  static setMapHighlightColor(mapId: string, color: TypeHighlightColors): void {
-    // Save in store
-    this.getMapStateProtected(mapId).setterActions.setHighlightColor(color);
   }
 
   static setMapLayerHoverable(mapId: string, layerPath: string, hoverable: boolean): void {
