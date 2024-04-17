@@ -129,7 +129,6 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
         </IconButton>
       </Stack>
     );
-    
 
     return <Box />;
   };
