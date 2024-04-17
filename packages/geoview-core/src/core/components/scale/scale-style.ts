@@ -41,7 +41,6 @@ export const getSxClasses = (theme: Theme): any => ({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 2,
 
     '&.interaction-static': {
       fontSize: theme.palette.geoViewFontSize.md,

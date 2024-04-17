@@ -47,6 +47,7 @@ export const getSxClasses = (theme: Theme): any => ({
       margin: 'auto 0 auto auto',
     },
     justifyContent: 'end',
+    alignItems: 'start',
   },
   rotationControlsContainer: {
     display: 'flex',
