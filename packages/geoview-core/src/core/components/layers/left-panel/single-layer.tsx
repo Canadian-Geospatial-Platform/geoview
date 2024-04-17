@@ -113,17 +113,17 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     const count = layer.items.filter((d) => d.isVisible !== false).length;
     const totalCount = layer.items.length;
 
-    if (totalCount <= 1 && datatableSettings[layer.layerPath]) {
-      return null;
-    }
+    let itemsLengthDesc = t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
 
-    const itemsLengthDesc = t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
+    if (totalCount <= 1) {
+      itemsLengthDesc = '';
+    }
 
     if (datatableSettings[layer.layerPath]) {
       return (
         <span>
           {itemsLengthDesc} &nbsp;
-          <TableViewIcon sx={{ marginBottom: '-5px' }} fontSize="small" />{' '}
+          <TableViewIcon sx={{ marginBottom: '-5px' }} fontSize="small" />
         </span>
       );
     }
@@ -293,7 +293,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     <AnimatedPaper className={getContainerClass()} style={listItemSpring} data-layer-depth={depth}>
       <Tooltip title={layer.layerName} placement="top" enterDelay={1000} arrow>
         <ListItem key={layer.layerName} divider tabIndex={0} onKeyDown={(e) => handleLayerKeyDown(e)}>
-          <ListItemButton selected={layerIsSelected || (layerChildIsSelected && !isGroupOpen)} tabIndex={-1} sx={{minHeight: '4.51rem'}}>
+          <ListItemButton selected={layerIsSelected || (layerChildIsSelected && !isGroupOpen)} tabIndex={-1} sx={{ minHeight: '4.51rem' }}>
             <LayerIcon layer={layer} />
             <ListItemText
               primary={layer.layerName !== undefined ? layer.layerName : layer.layerId}
