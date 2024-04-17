@@ -7,12 +7,18 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeLayerStatus, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
+import { createLocalizedString, getLocalizedValue, whenThisThen } from '@/core/utils/utilities';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 import { TypeHoverLayerData } from './hover-feature-info-layer-set';
 import { LayerApi } from '@/geo/layer/layer';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
+import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
+import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
+import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
+import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
+import { logger } from '@/core/utils/logger';
 
 /**
  * A class to hold a set of layers associated with a value of any type.
@@ -100,9 +106,12 @@ export class LayerSet {
    * @param {'add' | 'remove'} action - The action to perform: 'add' to register or 'remove' to unregister
    */
   public registerOrUnregisterLayer(geoviewLayer: AbstractGeoViewLayer, layerPath: string, action: 'add' | 'remove'): void {
+    // Get the config
+    const layerConfig = this.layerApi.registeredLayers[layerPath];
+
     // Update the registration of all layer sets if !payload.layerSetId or update only the specified layer set
+    let workedOn = false;
     if (action === 'add' && this.onRegisterLayerCheck(geoviewLayer, layerPath) && !(layerPath in this.resultSet)) {
-      const layerConfig = this.layerApi.registeredLayers[layerPath];
       this.resultSet[layerPath] = {
         data: undefined,
         layerStatus: 'newInstance',
@@ -112,15 +121,136 @@ export class LayerSet {
       // Call the registration function for the layer-set. This method is different for each child.
       this.onRegisterLayer(geoviewLayer, layerPath);
 
-      // Inform that the layer set has been updated
-      this.onLayerSetUpdatedProcess(layerPath);
+      // Register for TimeSlider
+      this.#registerForTimeSlider(layerConfig);
+
+      // Inform that the layer set has been worked on
+      workedOn = true;
     } else if (action === 'remove' && layerPath in this.resultSet) {
       MapEventProcessor.removeOrderedLayerInfo(this.mapId, layerPath);
       delete this.resultSet[layerPath];
 
+      // Unregister from FeatureInfo
+      this.#unregisterFromFeatureInfo(layerConfig);
+
+      // Unregister from DataTableInfo
+      this.#unregisterFromDataTableInfo(layerConfig);
+
+      // Unregister from GeoChart
+      this.#unregisterFromGeoChart(layerConfig);
+
+      // Unregister from TimeSlider
+      this.#unregisterFromTimeSlider(layerConfig);
+
+      // Unregister from Swiper
+      this.#unregisterFromSwiper(layerConfig);
+
+      // Inform that the layer set has been worked on
+      workedOn = true;
+    }
+
+    // If worked on
+    if (workedOn) {
+      // Update ordering
+      this.#reorderLayerInfoStore(layerConfig);
+
       // Inform that the layer set has been updated
       this.onLayerSetUpdatedProcess(layerPath);
     }
+  }
+
+  /**
+   * Processes reordering of layer information in the store.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be reordered.
+   * @private
+   */
+  #reorderLayerInfoStore(layerConfig: TypeLayerEntryConfig): void {
+    // Update the ordered layer info
+    if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerConfig.layerPath) === -1) {
+      if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerConfig.layerPath.split('.')[1]) !== -1) {
+        MapEventProcessor.replaceOrderedLayerInfo(this.mapId, layerConfig, layerConfig.layerPath.split('.')[1]);
+      } else if (layerConfig.parentLayerConfig) {
+        const parentLayerPathArray = layerConfig.layerPath.split('/');
+        parentLayerPathArray.pop();
+        const parentLayerPath = parentLayerPathArray.join('/');
+        const parentLayerIndex = MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, parentLayerPath);
+        const numberOfLayers = MapEventProcessor.getMapOrderedLayerInfo(this.mapId).filter((layerInfo) =>
+          layerInfo.layerPath.startsWith(parentLayerPath)
+        ).length;
+        if (parentLayerIndex !== -1) MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig, parentLayerIndex + numberOfLayers);
+        else MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig.parentLayerConfig!);
+      } else MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig);
+    }
+  }
+
+  /**
+   * Unregisters layer information from feature info.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
+   * @private
+   */
+  #unregisterFromFeatureInfo(layerConfig: TypeLayerEntryConfig): void {
+    // Remove it from feature info array
+    FeatureInfoEventProcessor.deleteFeatureInfo(this.mapId, layerConfig.layerPath);
+  }
+
+  /**
+   * Unregisters layer information from data table info.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
+   * @private
+   */
+  #unregisterFromDataTableInfo(layerConfig: TypeLayerEntryConfig): void {
+    // Remove it from data table info array
+    DataTableEventProcessor.deleteFeatureAllInfo(this.mapId, layerConfig.layerPath);
+  }
+
+  /**
+   * Unregisters layer information from GeoChart.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
+   * @private
+   */
+  #unregisterFromGeoChart(layerConfig: TypeLayerEntryConfig): void {
+    // Remove from the GeoChart Charts
+    GeochartEventProcessor.removeGeochartChart(this.mapId, layerConfig.layerPath);
+  }
+
+  /**
+   * Registers layer information for TimeSlider.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
+   * @private
+   */
+  #registerForTimeSlider(layerConfig: TypeLayerEntryConfig): void {
+    // Wait until the layer is processed
+    // TODO: Check - Why is the 'applyFilters' function which is (sub)called below throwing a 'The source image cannot be decoded' error in the console
+    // TO.DOCONT: when removing and readding the layer a second time?
+    whenThisThen(() => layerConfig.IsGreaterThanOrEqualTo('processed'))
+      .then(() => {
+        // Add for the TimeSlider
+        TimeSliderEventProcessor.addTimeSliderLayerAndApplyFilters(this.mapId, layerConfig.layerPath);
+      })
+      .catch((error) => {
+        // Log
+        logger.logPromiseFailed('in waiting for layer status to be processed in registration of layer', error);
+      });
+  }
+
+  /**
+   * Unregisters layer information from TimeSlider.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
+   * @private
+   */
+  #unregisterFromTimeSlider(layerConfig: TypeLayerEntryConfig): void {
+    // Remove from the TimeSlider
+    TimeSliderEventProcessor.removeTimeSliderLayer(this.mapId, layerConfig.layerPath);
+  }
+
+  /**
+   * Unregisters layer information from Swiper.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
+   * @private
+   */
+  #unregisterFromSwiper(layerConfig: TypeLayerEntryConfig): void {
+    // Remove it from the Swiper
+    SwiperEventProcessor.removeLayerPath(this.mapId, layerConfig.layerPath);
   }
 
   /**

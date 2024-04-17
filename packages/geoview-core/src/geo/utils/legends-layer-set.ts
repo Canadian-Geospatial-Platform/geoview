@@ -1,6 +1,5 @@
 import { LayerSet } from '@/geo/utils/layer-set';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { logger } from '@/core/utils/logger';
@@ -116,32 +115,6 @@ export class LegendsLayerSet extends LayerSet {
         }
       }
     }
-  }
-
-  /**
-   * Overrides the behavior to apply when a layer set was updated for a legends-layer-set.
-   * @param {string} layerPath - The layer path which triggered the layer set update
-   */
-  protected onLayerSetUpdatedProcess(layerPath: string): void {
-    if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerPath) === -1) {
-      const layerConfig = this.layerApi.registeredLayers[layerPath];
-      if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerPath.split('.')[1]) !== -1) {
-        MapEventProcessor.replaceOrderedLayerInfo(this.mapId, layerConfig, layerPath.split('.')[1]);
-      } else if (layerConfig.parentLayerConfig) {
-        const parentLayerPathArray = layerPath.split('/');
-        parentLayerPathArray.pop();
-        const parentLayerPath = parentLayerPathArray.join('/');
-        const parentLayerIndex = MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, parentLayerPath);
-        const numberOfLayers = MapEventProcessor.getMapOrderedLayerInfo(this.mapId).filter((layerInfo) =>
-          layerInfo.layerPath.startsWith(parentLayerPath)
-        ).length;
-        if (parentLayerIndex !== -1) MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig, parentLayerIndex + numberOfLayers);
-        else MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig.parentLayerConfig!);
-      } else MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig);
-    }
-
-    // Call parent now
-    super.onLayerSetUpdatedProcess(layerPath);
   }
 }
 
