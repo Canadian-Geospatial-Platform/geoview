@@ -1,9 +1,7 @@
-import { GeoviewStoreType } from '@/core/stores/geoview-store';
-import { logger } from '@/core/utils/logger';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { ITimeSliderState, TimeSliderLayerSet } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import { getLocalizedValue, whenThisThenThat } from '@/core/utils/utilities';
+import { getLocalizedValue } from '@/core/utils/utilities';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
@@ -14,79 +12,6 @@ import { AppEventProcessor } from './app-event-processor';
 import { MapEventProcessor } from './map-event-processor';
 
 export class TimeSliderEventProcessor extends AbstractEventProcessor {
-  /**
-   * Override the initialization process to register store subscriptions handlers and return them so they can be destroyed later.
-   */
-  protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
-    const { mapId } = store.getState();
-
-    // TODO: Check - Do we want to switch the order of MapViewer instantiation vs store instantiation/initialization?
-    // At the time of writing, the MapViewer is actually created and added to the api.maps AFTER
-    // the store (and this current processor initialization) is called.
-
-    // TO.DOCONT: This is because the viewer is using the store config to start the init.
-    // Store creates a copy of it for reload and then viewer use the store init value to remove passing of object config.
-    // We should discuss the modification to do to switch creation later. If we move event to classes
-    // (map, layer) and these 2 classes (only) can call store function to set values, maybe doing this may be a good idea
-
-    // Wait for the map to 'appear' in the maps container
-    whenThisThenThat(
-      () => api.maps[mapId],
-      (mapViewer) => {
-        // Wait for the layers to be processed so that their 'layerTemporalDimension' information is set
-        mapViewer.onMapLayersProcessed(() => {
-          // Now the layerTemporalDimension should be good on the layers
-          const orderedLayers = store.getState().mapState.orderedLayerInfo.map((info) => info.layerPath);
-          const initialTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(mapId, orderedLayers);
-          if (initialTimeSliderLayerPaths) {
-            initialTimeSliderLayerPaths.forEach((layerPath) => {
-              const timeSliderLayer = TimeSliderEventProcessor.getInitialTimeSliderValues(mapId, layerPath);
-              store.getState().timeSliderState.actions.addTimeSliderLayer(timeSliderLayer);
-
-              const { defaultValue, field, filtering, minAndMax, values } = timeSliderLayer[layerPath];
-              TimeSliderEventProcessor.applyFilters(mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
-            });
-          }
-        });
-      },
-      (failedReason) => {
-        // Log
-        logger.logError('Failed to initialize the Time-Slider-Event-Processor', failedReason);
-      }
-    );
-
-    // Checks for added and removed layers with time dimension
-    const unsubOrderedLayerInfo = store.subscribe(
-      (state) => state.mapState.orderedLayerInfo,
-      (cur, prev) => {
-        // Log
-        logger.logTraceCoreStoreSubscription('TIME SLIDER EVENT PROCESSOR - orderedLayerInfo', cur);
-
-        const newTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(
-          mapId,
-          cur.map((info) => info.layerPath)
-        );
-        const oldTimeSliderLayerPaths = TimeSliderEventProcessor.filterTimeSliderLayers(
-          mapId,
-          prev.map((info) => info.layerPath)
-        );
-        const addedLayers = newTimeSliderLayerPaths.filter((layerPath) => !oldTimeSliderLayerPaths.includes(layerPath));
-        const removedLayers = oldTimeSliderLayerPaths.filter((layerPath) => !newTimeSliderLayerPaths.includes(layerPath));
-        if (addedLayers.length) {
-          addedLayers.forEach((layerPath) => {
-            const timeSliderLayer = TimeSliderEventProcessor.getInitialTimeSliderValues(mapId, layerPath);
-            store.getState().timeSliderState.actions.addTimeSliderLayer(timeSliderLayer);
-          });
-        }
-        if (removedLayers.length)
-          removedLayers.forEach((layerPath) => store.getState().timeSliderState.actions.removeTimeSliderLayer(layerPath));
-      }
-    );
-
-    // Return the array of subscriptions so they can be destroyed later
-    return [unsubOrderedLayerInfo];
-  }
-
   // **********************************************************
   // Static functions for Typescript files to access store actions
   // **********************************************************
@@ -108,17 +33,26 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Filter array of legend layers to get usable time slider layer paths
-   *
-   * @param {string} mapId The id of the map
-   * @param {TypeLegendLayer[]} legendLayers Array of legend layers to filter
-   * @returns {string[]} A list of usable layer paths
+   * Adds a time slider layer to the state
+   * @param mapId - The map id of the state to act on
+   * @param layerPath - The layer path of the layer to add to the state
    */
-  private static filterTimeSliderLayers(mapId: string, layerPaths: string[]): string[] {
-    const filteredLayerPaths = layerPaths.filter(
-      (layerPath) => api.maps[mapId].layer.geoviewLayers[layerPath.split('/')[0]].layerTemporalDimension[layerPath]
-    );
-    return filteredLayerPaths;
+  static addTimeSliderLayerAndApplyFilters(mapId: string, layerPath: string): void {
+    const timeSliderLayer = TimeSliderEventProcessor.getInitialTimeSliderValues(mapId, layerPath);
+    this.getTimesliderState(mapId)?.actions.addTimeSliderLayer(timeSliderLayer);
+
+    const { defaultValue, field, filtering, minAndMax, values } = timeSliderLayer[layerPath];
+    TimeSliderEventProcessor.applyFilters(mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
+  }
+
+  /**
+   * Removes a time slider layer from the state
+   * @param mapId - The map id of the state to act on
+   * @param layerPath - The layer path of the layer to remove from the state
+   */
+  static removeTimeSliderLayer(mapId: string, layerPath: string): void {
+    // Redirect
+    this.getTimesliderState(mapId)?.actions.removeTimeSliderLayer(layerPath);
   }
 
   /**

@@ -2,7 +2,7 @@ import { DataTableEventProcessor } from '@/api/event-processors/event-processor-
 import { logger } from '@/core/utils/logger';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { getLocalizedValue } from '@/core/utils/utilities';
-import { TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { TypeLayerEntryConfig, TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 import { LayerSet, QueryType, TypeLayerData } from './layer-set';
@@ -21,12 +21,12 @@ export class AllFeatureInfoLayerSet extends LayerSet {
   /**
    * Overrides the behavior to apply when an all-feature-info-layer-set wants to check for condition to register a layer in its set.
    * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
-   * @param {string} layerPath - The layer path
+   * @param {TypeLayerEntryConfig} layerConfig - The layer config
    * @returns {boolean} True when the layer should be registered to this all-feature-info-layer-set.
    */
-  protected onRegisterLayerCheck(geoviewLayer: AbstractGeoViewLayer, layerPath: string): boolean {
+  protected onRegisterLayerCheck(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): boolean {
     // Log
-    logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerPath, Object.keys(this.resultSet));
+    logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerConfig.layerPath, Object.keys(this.resultSet));
 
     // TODO: Make a util function for this check
     if (
@@ -40,7 +40,6 @@ export class AllFeatureInfoLayerSet extends LayerSet {
     )
       return false;
 
-    const layerConfig = this.layerApi.registeredLayers[layerPath];
     const queryable = layerConfig?.source?.featureInfo?.queryable;
     return !!queryable;
   }
@@ -48,14 +47,16 @@ export class AllFeatureInfoLayerSet extends LayerSet {
   /**
    * Overrides the behavior to apply when an all-feature-info-layer-set wants to register a layer in its set.
    * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
-   * @param {string} layerPath - The layer path
+   * @param {TypeLayerEntryConfig} layerConfig - The layer config
    */
-  protected onRegisterLayer(geoviewLayer: AbstractGeoViewLayer, layerPath: string): void {
+  protected onRegisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
     // Log
-    logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET - onRegisterLayer', layerPath, Object.keys(this.resultSet));
+    logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET - onRegisterLayer', layerConfig.layerPath, Object.keys(this.resultSet));
 
-    const layerConfig = this.layerApi.registeredLayers[layerPath];
-    this.resultSet[layerPath] = {
+    // Call parent
+    super.onRegisterLayer(geoviewLayer, layerConfig);
+
+    this.resultSet[layerConfig.layerPath] = {
       layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
       layerStatus: layerConfig.layerStatus!,
       data: {
@@ -64,12 +65,28 @@ export class AllFeatureInfoLayerSet extends LayerSet {
         eventListenerEnabled: true,
         queryStatus: 'processed',
         features: [],
-        layerPath,
+        layerPath: layerConfig.layerPath,
       },
     };
 
-    DataTableEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, this.resultSet);
-    DataTableEventProcessor.setInitialSettings(this.mapId, layerPath);
+    DataTableEventProcessor.propagateFeatureInfoToStore(this.mapId, layerConfig.layerPath, this.resultSet);
+    DataTableEventProcessor.setInitialSettings(this.mapId, layerConfig.layerPath);
+  }
+
+  /**
+   * Overrides the behavior to apply when unregistering a layer from the all-feature-info-layer-set.
+   * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being unregistered
+   * @param {TypeLayerEntryConfig} layerConfig - The layer config
+   */
+  protected onUnregisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
+    // Log
+    logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET - onUnregisterLayer', layerConfig.layerPath, Object.keys(this.resultSet));
+
+    // Call parent
+    super.onUnregisterLayer(geoviewLayer, layerConfig);
+
+    // Remove it from data table info array
+    DataTableEventProcessor.deleteFeatureAllInfo(this.mapId, layerConfig.layerPath);
   }
 
   /**

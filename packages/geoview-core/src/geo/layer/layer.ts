@@ -42,6 +42,9 @@ import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { api } from '@/app';
+import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
+import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
+import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
 
 export type TypeRegisteredLayers = { [layerPath: string]: TypeLayerEntryConfig };
 
@@ -466,6 +469,28 @@ export class LayerApi {
         this.#handleLayerStatusChanged(config, layerStatusEvent);
       });
 
+      // If registering
+      if (registrationEvent.action === 'add') {
+        // Update ordering
+        this.#reorderLayerInfoStore(registrationEvent.layerConfig);
+
+        // Register for TimeSlider
+        this.#registerForTimeSlider(registrationEvent.layerConfig);
+      } else {
+        // Remove from ordered layer info
+        // TODO: Have explicit function to do this, like reorderLayerInfoStore
+        MapEventProcessor.removeOrderedLayerInfo(this.mapId, registrationEvent.layerPath);
+
+        // Unregister from TimeSlider
+        this.#unregisterFromTimeSlider(registrationEvent.layerConfig);
+
+        // Unregister from GeoChart
+        this.#unregisterFromGeoChart(registrationEvent.layerConfig);
+
+        // Unregister from Swiper
+        this.#unregisterFromSwiper(registrationEvent.layerConfig);
+      }
+
       // Tell the layer sets about it
       [this.legendsLayerSet, this.hoverFeatureInfoLayerSet, this.allFeatureInfoLayerSet, this.featureInfoLayerSet].forEach(
         (layerSet: LayerSet) => {
@@ -477,6 +502,80 @@ export class LayerApi {
       // Log
       logger.logError(error);
     }
+  }
+
+  /**
+   * Processes reordering of layer information in the store.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be reordered.
+   * @private
+   */
+  #reorderLayerInfoStore(layerConfig: TypeLayerEntryConfig): void {
+    // Update the ordered layer info
+    if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerConfig.layerPath) === -1) {
+      if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerConfig.layerPath.split('.')[1]) !== -1) {
+        MapEventProcessor.replaceOrderedLayerInfo(this.mapId, layerConfig, layerConfig.layerPath.split('.')[1]);
+      } else if (layerConfig.parentLayerConfig) {
+        const parentLayerPathArray = layerConfig.layerPath.split('/');
+        parentLayerPathArray.pop();
+        const parentLayerPath = parentLayerPathArray.join('/');
+        const parentLayerIndex = MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, parentLayerPath);
+        const numberOfLayers = MapEventProcessor.getMapOrderedLayerInfo(this.mapId).filter((layerInfo) =>
+          layerInfo.layerPath.startsWith(parentLayerPath)
+        ).length;
+        if (parentLayerIndex !== -1) MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig, parentLayerIndex + numberOfLayers);
+        else MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig.parentLayerConfig!);
+      } else MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig);
+    }
+  }
+
+  /**
+   * Registers layer information for TimeSlider.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
+   * @private
+   */
+  #registerForTimeSlider(layerConfig: TypeLayerEntryConfig): void {
+    // Wait until the layer is processed
+    // TODO: Check - Why is the 'applyFilters' function which is (sub)called below throwing a 'The source image cannot be decoded' error in the console
+    // TO.DOCONT: when removing and readding the layer a second time?
+    whenThisThen(() => layerConfig.IsGreaterThanOrEqualTo('processed'))
+      .then(() => {
+        // Add for the TimeSlider
+        TimeSliderEventProcessor.addTimeSliderLayerAndApplyFilters(this.mapId, layerConfig.layerPath);
+      })
+      .catch((error) => {
+        // Log
+        logger.logPromiseFailed('in waiting for layer status to be processed in registration of layer', error);
+      });
+  }
+
+  /**
+   * Unregisters layer information from TimeSlider.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
+   * @private
+   */
+  #unregisterFromTimeSlider(layerConfig: TypeLayerEntryConfig): void {
+    // Remove from the TimeSlider
+    TimeSliderEventProcessor.removeTimeSliderLayer(this.mapId, layerConfig.layerPath);
+  }
+
+  /**
+   * Unregisters layer information from GeoChart.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
+   * @private
+   */
+  #unregisterFromGeoChart(layerConfig: TypeLayerEntryConfig): void {
+    // Remove from the GeoChart Charts
+    GeochartEventProcessor.removeGeochartChart(this.mapId, layerConfig.layerPath);
+  }
+
+  /**
+   * Unregisters layer information from Swiper.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
+   * @private
+   */
+  #unregisterFromSwiper(layerConfig: TypeLayerEntryConfig): void {
+    // Remove it from the Swiper
+    SwiperEventProcessor.removeLayerPath(this.mapId, layerConfig.layerPath);
   }
 
   /**

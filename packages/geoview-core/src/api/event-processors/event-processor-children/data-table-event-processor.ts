@@ -1,4 +1,3 @@
-import { GeoviewStoreType } from '@/core/stores';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
@@ -25,43 +24,6 @@ import { MapEventProcessor } from './map-event-processor';
 // GV both end up running code in DataTableEventProcessor (UI: via 'actions' and back-end code via 'DataTableEventProcessor')
 
 export class DataTableEventProcessor extends AbstractEventProcessor {
-  // TODO: refactor - we should centralize the propagation to store from where the remove layer happend... this code is repeated
-  // TD.CONT: qhen we do this, clean other obejct at the same time... each processor has a clean function called from where the remove
-  /**
-   * Overrides initialization of the Feature Info Event Processor
-   * @param {GeoviewStoreType} store - The store associated with the Feature Info Event Processor
-   * @returns An array of the subscriptions callbacks which were created
-   */
-  protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
-    // Checks for udpated layers in layer order
-    const unsubLayerRemoved = store.subscribe(
-      (state) => state.mapState.orderedLayerInfo,
-      (cur, prev) => {
-        // Log
-        logger.logTraceCoreStoreSubscription('DATATABLE EVENT PROCESSOR - orderedLayerInfo', cur);
-
-        // For each layer path in the layer data array
-        const curOrderedLayerPaths = cur.map((layerInfo) => layerInfo.layerPath);
-        const prevOrderedLayerPaths = prev.map((layerInfo) => layerInfo.layerPath);
-        store
-          .getState()
-          .dataTableState.allFeaturesDataArray.map((layerInfo) => layerInfo.layerPath)
-          .forEach((layerPath) => {
-            // If it was in the layer data array and is not anymore
-            if (prevOrderedLayerPaths.includes(layerPath) && !curOrderedLayerPaths.includes(layerPath)) {
-              // Remove it from all features array
-              DataTableEventProcessor.#deleteFeatureAllInfo(store.getState().mapId, layerPath);
-
-              // Log
-              logger.logInfo('Removed Feature Info in stores for layer path:', layerPath);
-            }
-          });
-      }
-    );
-
-    return [unsubLayerRemoved];
-  }
-
   // **********************************************************
   // Static functions for Typescript files to access store actions
   // **********************************************************
@@ -143,13 +105,15 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
    * Deletes the specified layer path from the all features layers sets in the store
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to delete
-   * @private
    */
-  static #deleteFeatureAllInfo(mapId: string, layerPath: string): void {
+  static deleteFeatureAllInfo(mapId: string, layerPath: string): void {
     // Redirect to helper function
     this.#deleteFromArray(this.getDataTableState(mapId).allFeaturesDataArray, layerPath, (layerArrayResult) => {
       // Update the layer data array in the store
       this.getDataTableState(mapId).setterActions.setAllFeaturesDataArray(layerArrayResult);
+
+      // Log
+      logger.logInfo('Removed Data Table Info in stores for layer path:', layerPath);
     });
   }
 
