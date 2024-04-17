@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 
-import { CheckIcon, Tooltip, Box, Button } from '@/ui';
+import { CheckIcon, Tooltip, Box } from '@/ui';
 import { getSxClasses } from './scale-style';
 import { useMapInteraction, useMapScale } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
