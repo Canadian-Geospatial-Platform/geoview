@@ -83,14 +83,17 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
       panelButtonId.current = 'detailsPanel';
       mapTargetElement.addEventListener('keydown', simulateClick);
       mapTargetElement.addEventListener('keydown', managePanDelta);
-    } else {
+    } else if (mapTargetElement) {
       mapTargetElement.removeEventListener('keydown', simulateClick);
       mapTargetElement.removeEventListener('keydown', managePanDelta);
     }
 
     return () => {
-      mapTargetElement.removeEventListener('keydown', simulateClick);
-      mapTargetElement.removeEventListener('keydown', managePanDelta);
+      // need to chack cause it may be undefined when we remove/delete the map
+      if (mapTargetElement) {
+        mapTargetElement.removeEventListener('keydown', simulateClick);
+        mapTargetElement.removeEventListener('keydown', managePanDelta);
+      }
     };
   }, [isCrosshairsActive, mapTargetElement, simulateClick, managePanDelta]);
 

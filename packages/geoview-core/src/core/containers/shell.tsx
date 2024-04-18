@@ -11,7 +11,6 @@ import { FooterBar } from '@/core/components/footer-bar/footer-bar';
 import { Geolocator } from '@/core/components/geolocator/geolocator';
 import { MapInfo } from '@/core/components/map-info/map-info';
 
-import { api } from '@/app';
 import { Box, CircularProgress, Link, Modal, Snackbar, Button, TypeModalProps, ModalApi, ModalEvent } from '@/ui';
 import { getShellSxClasses } from './containers-style';
 import { useMapInteraction, useMapLoaded } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -21,7 +20,6 @@ import {
   useUIActiveTrapGeoView,
   useUIAppbarComponents,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import ExportModal from '@/core/components/export/export-modal';
 import DataTableModal from '@/core/components/data-table/data-table-modal';
 import FeatureDetailModal from '@/core/components/details/feature-detail-modal';
@@ -54,7 +52,6 @@ export function Shell(props: ShellProps): JSX.Element {
 
   // render additional components if added by api
   const [components, setComponents] = useState<Record<string, JSX.Element>>({});
-  const [update, setUpdate] = useState<number>(0);
   const [modalProps, setModalProps] = useState<TypeModalProps>();
   const [modalOpen, setModalOpen] = useState<boolean>(false);
 
@@ -72,18 +69,6 @@ export function Shell(props: ShellProps): JSX.Element {
   const appBarComponents = useUIAppbarComponents();
   const geoviewConfig = useGeoViewConfig();
   const focusItem = useUIActiveFocusItem();
-
-  /**
-   * Causes the shell to re-render
-   */
-  const updateShell = useCallback(() => {
-    // Log
-    logger.logTraceUseCallback('SHELL - updateShell');
-
-    setUpdate((prevState) => {
-      return 1 + prevState;
-    });
-  }, []);
 
   /**
    * Handles when a component is being added to the map
@@ -166,20 +151,6 @@ export function Shell(props: ShellProps): JSX.Element {
     setSnackbarOpen(false);
   }, []);
 
-  /**
-   * Handles when the map needs to reload
-   */
-  const handleMapReload = useCallback(
-    (mapFeaturesPayload: TypeMapFeaturesConfig) => {
-      // Emit a map reconstruction
-      api.event.emitMapReconstruct(mapViewer.mapId, mapFeaturesPayload);
-
-      // Update the Shell
-      updateShell();
-    },
-    [mapViewer, updateShell]
-  );
-
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('SHELL - mount');
@@ -199,18 +170,14 @@ export function Shell(props: ShellProps): JSX.Element {
     // listen to removing a component event
     mapViewer.onMapComponentRemoved(handleMapRemoveComponent);
 
-    // listen to map reload
-    api.event.onMapReload(mapViewer.mapId, handleMapReload);
-
     return () => {
-      api.event.offMapReload(mapViewer.mapId, handleMapReload);
       mapViewer.offMapComponentRemoved(handleMapRemoveComponent);
       mapViewer.onMapComponentAdded(handleMapAddComponent);
       mapViewer.modal.offModalClosed(handleModalClose);
       mapViewer.modal.offModalOpened(handleModalOpen);
       mapViewer.notifications.offSnackbarOpen(handleSnackBarOpen);
     };
-  }, [mapViewer, handleMapRemoveComponent, handleModalOpen, handleMapReload]);
+  }, [mapViewer, handleMapRemoveComponent, handleModalOpen]);
 
   return (
     <Box sx={sxClasses.all}>
@@ -218,7 +185,7 @@ export function Shell(props: ShellProps): JSX.Element {
         {t('keyboardnav.start')}
       </Link>
       <FocusTrap open={activeTrapGeoView}>
-        <Box id={`shell-${mapViewer.mapId}`} sx={sxClasses.shell} className="geoview-shell" key={update} tabIndex={-1} aria-hidden="true">
+        <Box id={`shell-${mapViewer.mapId}`} sx={sxClasses.shell} className="geoview-shell" tabIndex={-1} aria-hidden="true">
           <CircularProgress isLoaded={mapLoaded} />
           <CircularProgress isLoaded={!circularProgressActive} />
           <Box id={`map-${mapViewer.mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer">

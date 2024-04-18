@@ -1332,31 +1332,40 @@ export class MapViewer {
    * @param {boolean} deleteContainer true if we want to delete div from the page
    * @returns {HTMLElement} return the HTML element
    */
-  async remove(deleteContainer: boolean): Promise<HTMLElement> {
-    // Remove all layers
-    this.layer.removeAllGeoviewLayers();
-
-    // unsubscribe from all remaining events registered on this map
-    api.event.offAll(this.mapId);
+  remove(deleteContainer: boolean): HTMLElement {
+    // get the map container to unmount
+    // remove geoview-class if we need to reuse the div
+    const mapContainer = document.getElementById(this.mapId)!;
+    mapContainer.classList.remove('geoview-map');
 
     // unload all loaded plugins on the map
-    await api.plugin.removePlugins(this.mapId);
+    api.plugin
+      .removePlugins(this.mapId)
+      .then(() => {
+        // Remove all layers
+        this.layer.removeAllGeoviewLayers();
 
-    // get the map container to unmount
-    const mapContainer = document.getElementById(this.mapId)!;
+        // unsubscribe from all remaining events registered on this map
+        api.event.offAll(this.mapId);
 
-    // remove the dom element (remove rendered map and overview map)
-    if (this.overviewRoot) this.overviewRoot?.unmount();
-    unmountMap(this.mapId);
+        // remove the dom element (remove rendered map and overview map)
+        if (this.overviewRoot) this.overviewRoot?.unmount();
+        unmountMap(this.mapId);
 
-    // delete the map instance from the maps array, will delete attached plugins
-    delete api.maps[this.mapId];
+        // delete store and event processor
+        removeGeoviewStore(this.mapId);
 
-    // delete store and event processor
-    removeGeoviewStore(this.mapId);
+        // if deleteContainer, delete the HTML div
+        if (deleteContainer) mapContainer.remove();
 
-    // if deleteContainer, delete the HTML div
-    if (deleteContainer) mapContainer.remove();
+        // delete the map instance from the maps array, will delete attached plugins
+        // TODO: need a time out here because if not, map is deleted before everything is done on the map
+        // TD.CONT: This whole sequence need to be async
+        setTimeout(() => delete api.maps[this.mapId], 1000);
+      })
+      .catch((error) => {
+        logger.logError(`Couldn't remove map in map-viewer`, error);
+      });
 
     // return the map container to be remove
     return mapContainer;
@@ -1366,8 +1375,21 @@ export class MapViewer {
    * Reload a map from a config object stored in store
    */
   reload(): void {
-    // emit an event to reload the map with the stored config
-    api.event.emitMapReload(this.mapId, MapEventProcessor.getGeoViewMapConfig(this.mapId)!);
+    // remove the map, then get config to use to recreate it
+    // TODO: need to use layers but because of circular dependencies we can't at the moment
+    // TD.CONT: We need to get ride of the time out as well.
+    const mapDiv = this.remove(false);
+    const config = this.mapFeaturesConfig;
+    config.map.listOfGeoviewLayerConfig = [];
+    setTimeout(
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      () =>
+        api.createMapFromConfig(mapDiv.id, JSON.stringify(config)).catch((error) => {
+          // Log
+          logger.logError(`Couldn't reload the map in map-viewer`, error);
+        }),
+      1500
+    );
   }
 
   /**

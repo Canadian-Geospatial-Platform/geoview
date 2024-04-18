@@ -1,7 +1,6 @@
 import EventEmitter from 'eventemitter3';
 
 import { logger } from '@/core/utils/logger';
-import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 
 export type TypeEventHandlerFunction<T> = (payload: T) => void;
 
@@ -16,8 +15,6 @@ interface IEventEmitter extends EventEmitter {
   _eventsCount: number;
 }
 
-const EVENT_MAP_RELOAD = 'map/reload';
-const EVENT_MAP_RECONSTRUCT = 'map/reconstruct';
 const SEPARATOR = '||';
 
 /**
@@ -114,69 +111,6 @@ export class Event {
 
   // #region SPECIALIZED EVENTS - IMPORTANT
   // GV These events exists to communicate between the Shell/App/MapViewer components.
-
-  /**
-   * Emits a map reload event to all handlers. The map reload is an event thrown by the MapViewer which tells the Shell that it wants to reload itself.
-   * @param {string} handlerName - The handler name for this map construct event
-   * @param {TypeMapFeaturesConfig} mapFeaturesConfig - The map features config to emit
-   * @private
-   */
-  emitMapReload(handlerName: string, mapFeaturesConfig: TypeMapFeaturesConfig): void {
-    // Emit the event
-    this.#emit(EVENT_MAP_RELOAD, handlerName, mapFeaturesConfig);
-  }
-
-  /**
-   * Registers a map reload event callback.
-   * @param {string} handlerName - The handler name for this map reload event
-   * @param {TypeEventHandlerFunction<TypeMapFeaturesConfig>} callback - The callback to be executed whenever the event is emitted
-   */
-  onMapReload(handlerName: string, callback: TypeEventHandlerFunction<TypeMapFeaturesConfig>): void {
-    // Register the event callback
-    this.#onMapHelperHandler(EVENT_MAP_RELOAD, handlerName, callback);
-  }
-
-  /**
-   * Unregisters a map reload event callback.
-   * @param {string} handlerName - The handler name for this map reload event
-   * @param {TypeEventHandlerFunction<TypeMapFeaturesConfig>} callback - The callback to be removed whenever the event is emitted
-   */
-  offMapReload(handlerName: string, callback: TypeEventHandlerFunction<TypeMapFeaturesConfig>): void {
-    // Unregister the event callback
-    this.#off(EVENT_MAP_RELOAD, handlerName, callback);
-  }
-
-  /**
-   * Emits a map reconstruct event to all handlers. The map reconstruct is an event thrown as part of a map reload process.
-   * It focuses on reconstructing a map: its store, its react root, its AppStart.
-   * @param {string} handlerName - The handler name for this map construct event
-   * @param {TypeMapFeaturesConfig} mapFeaturesConfig - The map features config to emit
-   * @private
-   */
-  emitMapReconstruct(handlerName: string, mapFeaturesConfig: TypeMapFeaturesConfig): void {
-    // Emit the event
-    this.#emit(EVENT_MAP_RECONSTRUCT, handlerName, mapFeaturesConfig);
-  }
-
-  /**
-   * Registers a map reconstruct event callback.
-   * @param {string} handlerName - The handler name for this map construct event
-   * @param {TypeEventHandlerFunction<TypeMapFeaturesConfig>} callback - The callback to be executed whenever the event is emitted
-   */
-  onMapReconstruct(handlerName: string, callback: TypeEventHandlerFunction<TypeMapFeaturesConfig>): void {
-    // Register the event callback
-    this.#onMapHelperHandler(EVENT_MAP_RECONSTRUCT, handlerName, callback);
-  }
-
-  /**
-   * Unregisters a map reconstruct event callback.
-   * @param {string} handlerName - The handler name for this map construct event
-   * @param {TypeEventHandlerFunction<TypeMapFeaturesConfig>} callback - The callback to be removed whenever the event is emitted
-   */
-  offMapReconstruct(handlerName: string, callback: TypeEventHandlerFunction<TypeMapFeaturesConfig>): void {
-    // Unregister the event callback
-    this.#off(EVENT_MAP_RECONSTRUCT, handlerName, callback);
-  }
 
   // #endregion
 }
