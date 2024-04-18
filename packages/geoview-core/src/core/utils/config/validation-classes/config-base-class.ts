@@ -215,7 +215,7 @@ export class ConfigBaseClass {
    * @returns {boolean} Returns false if the layer configuration can't be registered.
    */
   registerLayerConfig(): boolean {
-    const { registeredLayers } = MapEventProcessor.getMapViewerLayerAPIInstance(this.geoviewLayerInstance!.mapId);
+    const { registeredLayers } = MapEventProcessor.getMapViewerLayerAPI(this.geoviewLayerInstance!.mapId);
     if (registeredLayers[this.layerPath]) return false;
     (registeredLayers[this.layerPath] as ConfigBaseClass) = this;
 

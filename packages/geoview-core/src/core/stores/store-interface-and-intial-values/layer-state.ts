@@ -62,7 +62,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         return layer;
       },
       getLayerBounds: (layerPath: string) => {
-        const layer = MapEventProcessor.getMapViewerLayerAPIInstance(get().mapId).geoviewLayer(layerPath);
+        const layer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).geoviewLayer(layerPath);
         if (layer) {
           const bounds = layer.calculateBounds(layerPath);
           if (bounds) return bounds;
@@ -85,10 +85,10 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
         // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
         if (currentHighlight === tempLayerPath) {
-          MapEventProcessor.getMapViewerLayerAPIInstance(get().mapId).removeHighlightLayer();
+          MapEventProcessor.getMapViewerLayerAPI(get().mapId).removeHighlightLayer();
           tempLayerPath = '';
         } else {
-          MapEventProcessor.getMapViewerLayerAPIInstance(get().mapId).highlightLayer(tempLayerPath);
+          MapEventProcessor.getMapViewerLayerAPI(get().mapId).highlightLayer(tempLayerPath);
           const layer = findLayerByPath(get().layerState.legendLayers, layerPath);
           const { bounds } = layer as TypeLegendLayer;
           if (bounds && bounds[0] !== Infinity) get().mapState.actions.highlightBBox(bounds, true);
@@ -132,9 +132,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       toggleItemVisibility: (layerPath: string, geometryType: TypeStyleGeometry, itemName: string) => {
         const curLayers = get().layerState.legendLayers;
 
-        const registeredLayer = MapEventProcessor.getMapViewerLayerAPIInstance(get().mapId).registeredLayers[
-          layerPath
-        ] as VectorLayerEntryConfig;
+        const registeredLayer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).registeredLayers[layerPath] as VectorLayerEntryConfig;
         const layer = findLayerByPath(curLayers, layerPath);
         if (layer) {
           _.each(layer.items, (item) => {
@@ -163,7 +161,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           });
 
           // apply filter to layer
-          (MapEventProcessor.getMapViewerLayerAPIInstance(get().mapId).geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter(
+          (MapEventProcessor.getMapViewerLayerAPI(get().mapId).geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter(
             layerPath,
             ''
           );
@@ -179,9 +177,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         MapEventProcessor.setOrToggleMapLayerVisibility(get().mapId, layerPath, true);
         const curLayers = get().layerState.legendLayers;
 
-        const registeredLayer = MapEventProcessor.getMapViewerLayerAPIInstance(get().mapId).registeredLayers[
-          layerPath
-        ] as VectorLayerEntryConfig;
+        const registeredLayer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).registeredLayers[layerPath] as VectorLayerEntryConfig;
         const layer = findLayerByPath(curLayers, layerPath);
         if (layer) {
           _.each(layer.items, (item) => {
@@ -224,7 +220,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         // GV try to make reusable store actions....
         // GV we can have always item.... we cannot set visibility so if present we will need to trap. Need more use case
         // GV create a function setItemVisibility called with layer path and this function set the registered layer (from store values) then apply the filter.
-        (MapEventProcessor.getMapViewerLayerAPIInstance(get().mapId).geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter(
+        (MapEventProcessor.getMapViewerLayerAPI(get().mapId).geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter(
           layerPath,
           ''
         );
@@ -250,7 +246,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         });
 
         // TODO: keep reference to geoview map instance in the store or keep accessing with api - discussion
-        MapEventProcessor.getMapViewerLayerAPIInstance(get().mapId).removeLayersUsingPath(layerPath);
+        MapEventProcessor.getMapViewerLayerAPI(get().mapId).removeLayersUsingPath(layerPath);
       },
       zoomToLayerExtent: (layerPath: string): Promise<void> => {
         const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
@@ -269,7 +265,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
 function setOpacityInLayerAndChildren(layer: TypeLegendLayer, opacity: number, mapId: string, isChild = false): void {
   _.set(layer, 'opacity', opacity);
-  MapEventProcessor.getMapViewerLayerAPIInstance(mapId).geoviewLayer(layer.layerPath).setOpacity(opacity, layer.layerPath);
+  MapEventProcessor.getMapViewerLayerAPI(mapId).geoviewLayer(layer.layerPath).setOpacity(opacity, layer.layerPath);
   if (isChild) {
     _.set(layer, 'opacityFromParent', opacity);
   }

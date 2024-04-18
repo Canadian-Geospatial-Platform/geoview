@@ -106,7 +106,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
 
   static setFullscreen(mapId: string, active: boolean, element?: TypeHTMLElement): void {
     this.getAppState(mapId).setterActions.setFullScreenActive(active);
-    if (element !== undefined) MapEventProcessor.getMapViewerInstance(mapId).setFullscreen(active, element);
+    if (element !== undefined) MapEventProcessor.getMapViewer(mapId).setFullscreen(active, element);
   }
 
   static setCircularProgress(mapId: string, active: boolean): void {

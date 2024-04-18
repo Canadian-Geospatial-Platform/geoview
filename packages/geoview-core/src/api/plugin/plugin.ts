@@ -101,7 +101,7 @@ export class Plugin {
     constructor?: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue),
     props?: TypeJsonObject
   ): Promise<void> => {
-    const plugins = await MapEventProcessor.getMapViewerPluginsInstance(mapId);
+    const plugins = await MapEventProcessor.getMapViewerPlugins(mapId);
     if (!plugins[pluginId]) {
       let plugin: TypePluginStructure | null = null;
 
@@ -211,7 +211,7 @@ export class Plugin {
    */
   removePlugin = async (pluginId: string, mapId: string): Promise<void> => {
     // Get the plugin and remove it
-    const plugins = await MapEventProcessor.getMapViewerPluginsInstance(mapId);
+    const plugins = await MapEventProcessor.getMapViewerPlugins(mapId);
     plugins[pluginId]?.removed?.();
     delete plugins[pluginId];
   };
@@ -222,7 +222,7 @@ export class Plugin {
    * @param {string} mapId the map id to remove the plugin from (if not provided then plugin will be removed from all maps)
    */
   removePlugins = async (mapId: string): Promise<void> => {
-    const recordOfPlugins = await MapEventProcessor.getMapViewerPluginsInstance(mapId);
+    const recordOfPlugins = await MapEventProcessor.getMapViewerPlugins(mapId);
 
     if (recordOfPlugins) {
       // remove all plugins by map

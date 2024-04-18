@@ -124,7 +124,7 @@ export function commonValidateListOfLayerEntryConfig(
       // Replace the old version of the layer with the new layer group
       listOfLayerEntryConfig[i] = groupLayerConfig;
       // Don't forget to replace the old version in registeredLayers
-      MapEventProcessor.getMapViewerLayerAPIInstance(this.mapId).registeredLayers[groupLayerConfig.layerPath] = groupLayerConfig;
+      MapEventProcessor.getMapViewerLayerAPI(this.mapId).registeredLayers[groupLayerConfig.layerPath] = groupLayerConfig;
 
       (this.metadata!.layers[esriIndex].subLayerIds as TypeJsonArray).forEach((layerId) => {
         const subLayerEntryConfig: TypeLayerEntryConfig = geoviewEntryIsEsriDynamic(layerConfig)

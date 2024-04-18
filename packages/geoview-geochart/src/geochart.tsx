@@ -112,7 +112,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
       GeoViewGeoChartConfigLayer | undefined,
       TypeLayerEntryConfig | undefined,
       TypeFeatureInfoEntry[] | undefined
-    ] = findLayerDataAndConfigFromQueryResults(config, MapEventProcessor.getMapViewerLayerAPIInstance(mapId).registeredLayers, layers);
+    ] = findLayerDataAndConfigFromQueryResults(config, MapEventProcessor.getMapViewerLayerAPI(mapId).registeredLayers, layers);
 
     // If found a chart for the layer
     let chartConfig;

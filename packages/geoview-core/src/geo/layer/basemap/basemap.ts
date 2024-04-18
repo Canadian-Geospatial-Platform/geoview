@@ -525,7 +525,7 @@ export class Basemap {
     // update the basemap layers on the map
     if (basemap?.layers) {
       // remove previous basemaps
-      const layers = MapEventProcessor.getMapViewerInstance(this.mapId).map.getAllLayers();
+      const layers = MapEventProcessor.getMapViewer(this.mapId).map.getAllLayers();
 
       // loop through all layers on the map
       for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
@@ -537,7 +537,7 @@ export class Basemap {
         // check if the group id matches basemap
         if (layerId && layerId === 'basemap') {
           // remove the basemap layer
-          MapEventProcessor.getMapViewerInstance(this.mapId).map.removeLayer(layer);
+          MapEventProcessor.getMapViewer(this.mapId).map.removeLayer(layer);
         }
       }
 
@@ -552,7 +552,7 @@ export class Basemap {
         basemapLayer.set('mapId', 'basemap');
 
         // add the basemap layer
-        MapEventProcessor.getMapViewerInstance(this.mapId).map.getLayers().insertAt(index, basemapLayer);
+        MapEventProcessor.getMapViewer(this.mapId).map.getLayers().insertAt(index, basemapLayer);
 
         // render the layer
         basemapLayer.changed();

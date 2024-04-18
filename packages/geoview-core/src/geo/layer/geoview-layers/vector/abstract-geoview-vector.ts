@@ -148,7 +148,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         if (xhr.status === 200) {
           let features: Feature[] | null;
           if (layerConfig.schemaTag === CONST_LAYER_TYPES.CSV) {
-            features = (MapEventProcessor.getMapViewerLayerAPIInstance(this.mapId).geoviewLayer(layerPath) as CSV).convertCsv(
+            features = (MapEventProcessor.getMapViewerLayerAPI(this.mapId).geoviewLayer(layerPath) as CSV).convertCsv(
               xhr.responseText,
               layerConfig as VectorLayerEntryConfig
             );
@@ -290,7 +290,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         const configSource = layerConfig?.source;
         return layerSource !== undefined && configSource !== undefined && layerSource === configSource;
       };
-      const { map } = MapEventProcessor.getMapViewerInstance(this.mapId);
+      const { map } = MapEventProcessor.getMapViewer(this.mapId);
       const features = map.getFeaturesAtPixel(location, { hitTolerance: 4, layerFilter });
       return await this.formatFeatureInfoResult(features as Feature[], layerConfig as VectorLayerEntryConfig);
     } catch (error) {
@@ -309,7 +309,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
   protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const { map } = MapEventProcessor.getMapViewerInstance(this.mapId);
+    const { map } = MapEventProcessor.getMapViewer(this.mapId);
     return this.getFeatureInfoAtPixel(map.getPixelFromCoordinate(location as Coordinate), layerPath);
   }
 
@@ -322,7 +322,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
   protected getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const { map } = MapEventProcessor.getMapViewerInstance(this.mapId);
+    const { map } = MapEventProcessor.getMapViewer(this.mapId);
     const convertedLocation = api.utilities.projection.transform(
       location,
       'EPSG:4326',

@@ -231,17 +231,19 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       if (values.length > 1) {
         filter += ` and ${field} <= date '${new Date(values[1]).toISOString()}'`;
       }
-      (
-        MapEventProcessor.getMapViewerLayerAPIInstance(mapId).geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic
-      ).applyViewFilter(layerPath, filter);
+      (MapEventProcessor.getMapViewerLayerAPI(mapId).geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter(
+        layerPath,
+        filter
+      );
     } else {
       let filter = `${field} >= date '${new Date(minAndMax[0]).toISOString()}'`;
       if (values.length > 1) {
         filter += `and ${field} <= date '${new Date(minAndMax[1]).toISOString()}'`;
       }
-      (
-        MapEventProcessor.getMapViewerLayerAPIInstance(mapId).geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic
-      ).applyViewFilter(layerPath, filter);
+      (MapEventProcessor.getMapViewerLayerAPI(mapId).geoviewLayer(layerPath) as AbstractGeoViewVector | EsriDynamic).applyViewFilter(
+        layerPath,
+        filter
+      );
     }
   }
   // #endregion

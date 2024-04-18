@@ -276,7 +276,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     logger.logTraceUseEffect('FOOTER-BAR - selectedTab');
 
     // If clicked on a tab with a plugin
-    MapEventProcessor.getMapViewerPluginsInstance(mapId)
+    MapEventProcessor.getMapViewerPlugins(mapId)
       .then((plugins) => {
         if (plugins[selectedTab]) {
           // Get the plugin
