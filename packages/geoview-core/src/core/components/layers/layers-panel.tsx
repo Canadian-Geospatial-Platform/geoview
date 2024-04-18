@@ -41,11 +41,7 @@ export function LayersPanel(): JSX.Element {
   const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'layers' });
 
   const leftPanel = (): JSX.Element => {
-    return (
-      <Box>
-        <LeftPanel setIsLayersListPanelVisible={setIsLayersListPanelVisible} />
-      </Box>
-    );
+    return <LeftPanel setIsLayersListPanelVisible={setIsLayersListPanelVisible} />;
   };
 
   const rightPanel = (): JSX.Element | null => {
@@ -123,7 +119,7 @@ export function LayersPanel(): JSX.Element {
           isEnlarged={false}
           isLayersPanelVisible={isLayersListPanelVisible}
           ref={rightPanelRef}
-          sx={sxClasses.rightPanel}
+          sxProps={sxClasses.rightPanel}
         >
           {rightPanel()}
         </ResponsiveGrid.Right>

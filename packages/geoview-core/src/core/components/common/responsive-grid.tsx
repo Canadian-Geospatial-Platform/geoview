@@ -1,6 +1,7 @@
 import { ReactNode, forwardRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Grid, GridProps, SxProps } from '@/ui';
+import { Box } from '@/ui/layout';
 
 interface ResponsiveGridProps extends GridProps {
   children: ReactNode;
@@ -20,7 +21,7 @@ interface ResponsiveGridPanelProps extends GridProps {
  * @returns JSX.Element
  */
 const ResponsiveGridRoot = forwardRef(({ children, ...rest }: ResponsiveGridProps, ref) => (
-  <Grid component="div" container {...rest} paddingLeft={12} paddingRight={12} paddingBottom={12} ref={ref}>
+  <Grid component="div" container {...rest} paddingLeft={12} paddingRight={12} paddingBottom={12} spacing={8} ref={ref}>
     {children}
   </Grid>
 ));
@@ -63,13 +64,12 @@ const ResponsiveGridLeftPanel = forwardRef(
         sx={{
           ...(!fullWidth && { [theme.breakpoints.down('md')]: { display: isLayersPanelVisible ? 'none' : 'block' } }),
           ...(fullWidth && { display: isLayersPanelVisible ? 'none' : 'block' }),
-          ...sxProps,
         }}
         component="div"
         ref={ref}
         {...rest}
       >
-        {children}
+        <Box sx={{ ...sxProps }}>{children}</Box>
       </Grid>
     );
   }
@@ -116,13 +116,12 @@ const ResponsiveGridRightPanel = forwardRef(
           [theme.breakpoints.up('md')]: { paddingLeft: '1rem' },
           ...(!fullWidth && { [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'none' : 'block' } }),
           ...(fullWidth && { display: !isLayersPanelVisible ? 'none' : 'block' }),
-          ...sxProps,
         }}
         component="div"
         ref={ref}
         {...rest}
       >
-        {children}
+        <Box sx={{ ...sxProps }}>{children}</Box>
       </Grid>
     );
   }
