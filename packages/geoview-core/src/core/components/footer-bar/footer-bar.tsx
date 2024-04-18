@@ -274,25 +274,26 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('FOOTER-BAR - selectedTab');
-    async function selectTab(): Promise<void> {
-      // If clicked on a tab with a plugin
-      const plugins = await MapEventProcessor.getMapViewerPluginsInstance(mapId);
-      if (plugins[selectedTab]) {
-        // Get the plugin
-        // ? unknown type cannot be use, need to escape
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const theSelectedPlugin = plugins[selectedTab] as any;
 
-        // A bit hacky, but not much other choice for now...
-        if (typeof theSelectedPlugin.onSelected === 'function') {
-          theSelectedPlugin.onSelected();
+    // If clicked on a tab with a plugin
+    MapEventProcessor.getMapViewerPluginsInstance(mapId)
+      .then((plugins) => {
+        if (plugins[selectedTab]) {
+          // Get the plugin
+          // ? unknown type cannot be use, need to escape
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const theSelectedPlugin = plugins[selectedTab] as any;
+
+          // A bit hacky, but not much other choice for now...
+          if (typeof theSelectedPlugin.onSelected === 'function') {
+            theSelectedPlugin.onSelected();
+          }
         }
-      }
-    }
-    selectTab().catch((error) => {
-      // Log
-      logger.logPromiseFailed('selectTab in UseEffect in footer-bar', error);
-    });
+      })
+      .catch((error) => {
+        // Log
+        logger.logPromiseFailed('getMapViewerPluginsInstance in useEffect in footer-bar', error);
+      });
   }, [mapId, selectedTab]);
 
   /**

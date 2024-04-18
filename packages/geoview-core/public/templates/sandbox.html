@@ -205,7 +205,11 @@
         document.getElementById('mapSection').appendChild(newDiv);
 
         // create map
-        cgpv.api.createMapFromConfig('sandboxMap', document.getElementById('configGeoview').value);
+        // TODO: the delete has a timeout so we need to wait before trying to recreate the map...
+        // TD.CONT: this should be cleaner
+        setTimeout(() => {
+          cgpv.api.createMapFromConfig('sandboxMap', document.getElementById('configGeoview').value);
+        }, 1500);
       });
 
       const deleteMapButton = document.getElementById('deleteMap');

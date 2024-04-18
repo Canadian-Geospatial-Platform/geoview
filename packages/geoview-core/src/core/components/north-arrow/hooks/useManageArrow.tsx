@@ -44,7 +44,7 @@ const useManageArrow = (): any => {
     const arrowWidth = 24;
     const offsetX = mapWidth - arrowWidth / 2;
 
-    if (!fixNorth) {
+    if (!fixNorth && getPixelFromCoordinate(NORTH_POLE_POSITION) !== null) {
       // hard code north pole so that arrow does not continue pointing past it
       const screenNorthPoint = getPixelFromCoordinate(NORTH_POLE_POSITION);
       const screenY = screenNorthPoint[1];

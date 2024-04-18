@@ -222,19 +222,17 @@ export class Plugin {
    * @param {string} mapId the map id to remove the plugin from (if not provided then plugin will be removed from all maps)
    */
   removePlugins = async (mapId: string): Promise<void> => {
-    if (mapId) {
-      const recordOfPlugins = await MapEventProcessor.getMapViewerPluginsInstance(mapId);
+    const recordOfPlugins = await MapEventProcessor.getMapViewerPluginsInstance(mapId);
 
-      if (recordOfPlugins) {
-        // remove all plugins by map
-        for (let i = 0; i < Object.keys(recordOfPlugins).length; i += 1) {
-          const pluginId = Object.keys(recordOfPlugins)[i];
+    if (recordOfPlugins) {
+      // remove all plugins by map
+      for (let i = 0; i < Object.keys(recordOfPlugins).length; i += 1) {
+        const pluginId = Object.keys(recordOfPlugins)[i];
 
-          this.removePlugin(pluginId, mapId).catch((error) => {
-            // Log
-            logger.logPromiseFailed('removePlugins in plugins.ts', error);
-          });
-        }
+        this.removePlugin(pluginId, mapId).catch((error) => {
+          // Log
+          logger.logPromiseFailed('removePlugins in plugins.ts', error);
+        });
       }
     }
   };

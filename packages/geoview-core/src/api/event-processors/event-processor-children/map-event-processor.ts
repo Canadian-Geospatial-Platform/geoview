@@ -217,11 +217,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
    */
   static async getMapViewerPluginsInstance(mapId: string): Promise<TypeRecordOfPlugin> {
     try {
-      // Check if the scaleControl exists and is showing information, wait for it
-      await whenThisThen(() => this.getMapViewerInstance(mapId) && this.getMapViewerInstance(mapId).plugins);
+      // Check if the plugins exist
+      // TODO: if you run the code fast enough (only happened to me in the TimeSliderEventProcessor),
+      // TD.CONT: the getMapViewerInstance should be async, because it can be unset as well ( so not just getMapViewerPluginsInstance() ).
+      await whenThisThen(() => api && api.maps && api.maps[mapId] && api.maps[mapId].plugins);
     } catch (error) {
       // Log
-      logger.logError("Couldn't retrieve the plugins instance on Map Viewer", error);
+      logger.logError(`Couldn't retrieve the plugins instance on Map Viewer`, error);
     }
 
     return api.maps[mapId].plugins;
@@ -242,7 +244,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       );
     } catch (error) {
       // Log
-      logger.logError("Couldn't retrieve the scale information from the dom tree", error);
+      logger.logError(`Couldn't retrieve the scale information from the dom tree`, error);
       // TODO: Check - Maybe we want to actually throw the exception here? Logging only for now until couple maps get tested.
       // throw error;
     }
