@@ -62,7 +62,7 @@ export const getSxClasses = (theme: Theme): any => ({
 
   // map-info-expand-button.tsx
   expandButton: {
-    display: { xs: 'none', sm: 'none', md: 'flex', lg: 'flex', xl: 'flex' }, // 'flex',
+    display: { xs: 'none', sm: 'none', md: 'flex', lg: 'flex', xl: 'flex' },
     alignItems: 'center',
     justifyContent: 'center',
     color: theme.palette.geoViewColor.bgColor.light[800],
