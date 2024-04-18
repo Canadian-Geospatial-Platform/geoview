@@ -153,7 +153,6 @@ export function Layout({
           isEnlarged={isEnlarged}
           isLayersPanelVisible={isLayersPanelVisible}
           fullWidth={fullWidth}
-          className="right-panel-content"
         >
           <FullScreenDialog open={isFullScreen} onClose={() => setIsFullScreen(false)}>
             <Box sx={sxClasses.rightGridContent} className="fullscreen-mode">
