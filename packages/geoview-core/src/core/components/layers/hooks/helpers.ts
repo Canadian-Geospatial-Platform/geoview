@@ -1,10 +1,10 @@
 // TODO Remove when no longer needed
 import _ from 'lodash';
 import { CONST_LAYER_TYPES, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { api } from '@/app';
 import { TypeLegendLayer, TypeLegendItem } from '@/core/components/layers/types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { generateId } from '@/core/utils/utilities';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 // ? I doubt we want to define an explicit type for this helper?
 export function useLegendHelpers(): unknown {
@@ -155,7 +155,7 @@ export function useLegendHelpers(): unknown {
       },
     ];
 
-    const legendInfo = api.maps[mapId].layer.legendsLayerSet.resultSet;
+    const legendInfo = MapEventProcessor.getMapViewerLayerAPI(mapId).legendsLayerSet.resultSet;
     const keys = _.keys(legendInfo);
 
     keys.forEach((i) => {

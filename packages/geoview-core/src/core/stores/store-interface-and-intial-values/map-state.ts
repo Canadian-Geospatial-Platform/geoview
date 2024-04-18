@@ -1,17 +1,14 @@
-import { Map as OLMap } from 'ol';
 import { Coordinate } from 'ol/coordinate'; // only for typing
 import Overlay from 'ol/Overlay';
 import { Extent } from 'ol/extent'; // only for Typing
 import { FitOptions } from 'ol/View'; // only for typing
-import TileLayer from 'ol/layer/Tile'; // only for typing
-import { XYZ } from 'ol/source'; // only for typing
 
 import { useStore } from 'zustand';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { TypeInteraction, TypeHighlightColors, TypeValidMapProjectionCodes, TypeMapMouseInfo } from '@/geo/map/map-schema-types';
+import { TypeInteraction, TypeValidMapProjectionCodes, TypeMapMouseInfo } from '@/geo/map/map-schema-types';
 
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -30,11 +27,9 @@ export interface IMapState {
   clickMarker: TypeClickMarker | undefined;
   currentProjection: TypeValidMapProjectionCodes;
   fixNorth: boolean;
-  highlightColor?: TypeHighlightColors;
   highlightedFeatures: TypeFeatureInfoEntry[];
   hoverFeatureInfo: TypeHoverFeatureInfo | undefined | null;
   interaction: TypeInteraction;
-  mapElement?: OLMap;
   mapExtent: Extent | undefined;
   mapLoaded: boolean;
   northArrow: boolean;
@@ -55,7 +50,6 @@ export interface IMapState {
 
   actions: {
     createBaseMapFromOptions: () => Promise<void>;
-    createEmptyBasemap: () => TileLayer<XYZ>;
     getPixelFromCoordinate: (coord: Coordinate) => [number, number];
     getIndexFromOrderedLayerInfo: (layerPath: string) => number;
     getVisibilityFromOrderedLayerInfo: (layerPath: string) => boolean;
@@ -83,7 +77,6 @@ export interface IMapState {
 
   setterActions: {
     setMapChangeSize: (size: [number, number], scale: TypeScaleInfo) => void;
-    setMapElement: (mapElem: OLMap, zoom: number, scale: TypeScaleInfo) => void;
     setMapLoaded: (mapLoaded: boolean) => void;
     setAttribution: (attribution: string[]) => void;
     setInteraction: (interaction: TypeInteraction) => void;
@@ -103,7 +96,6 @@ export interface IMapState {
     setClickCoordinates: (clickCoordinates: TypeMapMouseInfo) => void;
     setFixNorth: (ifFix: boolean) => void;
     setHighlightedFeatures: (highlightedFeatures: TypeFeatureInfoEntry[]) => void;
-    setHighlightColor: (color: TypeHighlightColors) => void;
     setVisibleLayers: (newOrder: string[]) => void;
     setOrderedLayerInfo: (newOrderedLayerInfo: TypeOrderedLayerInfo[]) => void;
     setHoverable: (layerPath: string, hoverable: boolean) => void;
@@ -154,7 +146,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           basemapOptions: geoviewConfig.map.basemapOptions,
           centerCoordinates: geoviewConfig.map.viewSettings.center as Coordinate,
           currentProjection: geoviewConfig.map.viewSettings.projection,
-          highlightColor: geoviewConfig.map.highlightColor || 'black',
           interaction: geoviewConfig.map.interaction || 'dynamic',
           mapExtent: geoviewConfig.map.viewSettings.extent,
           northArrow: geoviewConfig.components!.indexOf('north-arrow') > -1 || false,
@@ -175,15 +166,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       createBaseMapFromOptions: (): Promise<void> => {
         // Redirect to processor
         return MapEventProcessor.resetBasemap(get().mapId);
-      },
-
-      /**
-       * Creates an empty base map.
-       * @returns {TileLayer<XYZ>} The empty base map layer.
-       */
-      createEmptyBasemap: (): TileLayer<XYZ> => {
-        // Redirect to processor and return the result
-        return MapEventProcessor.createEmptyBasemap(get().mapId);
       },
 
       /**
@@ -429,23 +411,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       },
 
       /**
-       * Sets the map element, zoom level, and scale.
-       * @param {OLMap} mapElement - The map element.
-       * @param {number} zoom - The zoom level.
-       * @param {TypeScaleInfo} scale - The scale information.
-       */
-      setMapElement: (mapElement: OLMap, zoom: number, scale: TypeScaleInfo): void => {
-        set({
-          mapState: {
-            ...get().mapState,
-            mapElement,
-            zoom,
-            scale,
-          },
-        });
-      },
-
-      /**
        * Sets whether the map is loaded.
        * @param {boolean} mapLoaded - Flag indicating if the map is loaded.
        */
@@ -639,19 +604,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       },
 
       /**
-       * Sets the highlight color of the map.
-       * @param {TypeHighlightColors} highlightColor - The highlight color.
-       */
-      setHighlightColor: (highlightColor: TypeHighlightColors): void => {
-        set({
-          mapState: {
-            ...get().mapState,
-            highlightColor,
-          },
-        });
-      },
-
-      /**
        * Sets the visible layers of the map.
        * @param {string[]} visibleLayers - The visible layers.
        */
@@ -760,15 +712,9 @@ export const useMapAttribution = (): string[] => useStore(useGeoViewStore(), (st
 export const useMapBasemapOptions = (): TypeBasemapOptions => useStore(useGeoViewStore(), (state) => state.mapState.basemapOptions);
 export const useMapCenterCoordinates = (): Coordinate => useStore(useGeoViewStore(), (state) => state.mapState.centerCoordinates);
 export const useMapClickMarker = (): TypeClickMarker | undefined => useStore(useGeoViewStore(), (state) => state.mapState.clickMarker);
-
-// TODO: Refactor - Get rid of the mapElement in the store and this 'useMapElement'
-export const useMapElement = (): OLMap | undefined => useStore(useGeoViewStore(), (state) => state.mapState.mapElement);
-
 export const useMapExtent = (): Extent | undefined => useStore(useGeoViewStore(), (state) => state.mapState.mapExtent);
 export const useMapFixNorth = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.fixNorth);
 export const useMapInteraction = (): TypeInteraction => useStore(useGeoViewStore(), (state) => state.mapState.interaction);
-export const useMapHiglightColor = (): TypeHighlightColors | undefined =>
-  useStore(useGeoViewStore(), (state) => state.mapState.highlightColor);
 export const useMapHoverFeatureInfo = (): TypeHoverFeatureInfo => useStore(useGeoViewStore(), (state) => state.mapState.hoverFeatureInfo);
 export const useMapLoaded = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.mapLoaded);
 export const useMapNorthArrow = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.northArrow);

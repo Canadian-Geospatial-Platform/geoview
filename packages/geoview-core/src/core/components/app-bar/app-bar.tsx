@@ -14,6 +14,7 @@ import {
   useUIAppbarComponents,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import { GuidePanel, Legend, DetailsPanel, AppBarApi, AppBarCreatedEvent, AppBarRemovedEvent } from '@/core/components';
@@ -61,6 +62,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const interaction = useMapInteraction();
   const appBarComponents = useUIAppbarComponents();
   const { hideClickMarker } = useMapStoreActions();
+  const geoviewElement = useAppGeoviewHTMLElement().querySelector('[id^="mapTargetElement-"]') as HTMLElement;
   // TODO: remove active footerTab Id and create new one for AppBar id.
   const activeFooterTabId = useUIActiveFooterBarTabId();
 
@@ -88,7 +90,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
       // Callback when removing and focus is lost
       const focusWhenNoElementCallback = (): void => {
-        const mapCont = api.maps[mapId].map.getTargetElement();
+        const mapCont = geoviewElement;
         mapCont.focus();
 
         // if in focus trap mode, trigger the event
@@ -101,7 +103,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
       helpClosePanelById(mapId, buttonPanelGroups, buttonId, groupName, setButtonPanelGroups, focusWhenNoElementCallback);
       setSelectedAppbarButtonId('');
     },
-    [buttonPanelGroups, mapId]
+    [buttonPanelGroups, geoviewElement, mapId]
   );
 
   const closeAll = useCallback(() => {

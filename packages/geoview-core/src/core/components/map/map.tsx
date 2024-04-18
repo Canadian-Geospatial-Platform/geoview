@@ -1,9 +1,5 @@
 import { useEffect, useRef, useCallback, MutableRefObject } from 'react';
 
-import OLMap from 'ol/Map';
-import View from 'ol/View';
-import { Extent } from 'ol/extent';
-
 import { Box, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
@@ -16,26 +12,32 @@ import { HoverTooltip } from '@/core/components/hover-tooltip/hover-tooltip';
 import { MapViewer } from '@/geo/map/map-viewer';
 
 import { sxClasses } from './map-style';
-import {
-  useMapLoaded,
-  useMapNorthArrow,
-  useMapOverviewMap,
-  useMapProjection,
-  useMapStoreActions,
-} from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapLoaded, useMapNorthArrow, useMapOverviewMap } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
 import { toJsonObject } from '@/core/types/global-types';
 
-export function Map(): JSX.Element {
+type MapProps = {
+  viewer: MapViewer;
+};
+
+/**
+ * Create a map component
+ * @param {MapProps} props - Map props containing the viewer
+ *
+ * @return {JSX.Element} The map component
+ */
+export function Map(props: MapProps): JSX.Element {
   // Log
   logger.logTraceRender('components/map/map');
+
+  const { viewer } = props;
 
   const defaultTheme = useTheme();
 
   // internal state - get ref to div element
-  const mapElement = useRef<HTMLDivElement | undefined>();
+  const mapElement = useRef<HTMLElement | undefined>();
   const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('md')); // if screen size is medium and up
 
   // get values from the store
@@ -44,122 +46,61 @@ export function Map(): JSX.Element {
   const northArrow = useMapNorthArrow();
   const mapLoaded = useMapLoaded();
   const mapStoreConfig = useGeoViewConfig();
-  const projectionCode = useMapProjection();
-  const { createEmptyBasemap, createBaseMapFromOptions } = useMapStoreActions();
 
-  // create a new map viewer instance
-  // TODO: use store
-  const viewer: MapViewer = api.maps[mapId];
-
-  const initCGPVMap = useCallback(
-    (cgpvMap: OLMap) => {
-      // Log
-      logger.logTraceUseCallback('map.initCGPVMap');
-
-      cgpvMap.set('mapId', mapId);
-
-      // initialize the map viewer and load plugins
-      viewer.initMap(cgpvMap);
-
-      // load basemap from selected options
-      createBaseMapFromOptions();
-
-      // Load the core packages which are the ones who load on map (not footer plugin, not app-bar plugin)
-      mapStoreConfig?.corePackages?.forEach((corePackage: string) => {
-        api.plugin
-          .loadScript(corePackage)
-          .then((constructor) => {
-            // add the plugin by passing in the loaded constructor from the script tag
-            api.plugin
-              .addPlugin(
-                corePackage,
-                mapId,
-                constructor,
-                toJsonObject({
-                  mapId,
-                })
-              )
-              .catch((error) => {
-                // Log
-                logger.logPromiseFailed('api.plugin.addPlugin in corePackages loop in useCallback in Map', error);
-              });
-          })
-          .catch((error) => {
-            // Log
-            logger.logPromiseFailed('api.plugin.loadScript in corePackages loop in useCallback in Map', error);
-          });
-      });
-    },
-    [createBaseMapFromOptions, mapId, mapStoreConfig?.corePackages, viewer]
-  );
-
-  const initMap = useCallback((): void => {
+  const initCGPVMap = useCallback((): void => {
     // Log
-    logger.logTraceUseCallback('map.initMap');
+    logger.logTraceUseCallback('map.initCGPVMap');
 
-    // create map projection object from code
-    const projection = api.utilities.projection.projections[projectionCode];
-
-    let extentProjected: Extent | undefined;
-    if (mapStoreConfig?.map.viewSettings.extent)
-      extentProjected = api.utilities.projection.transformExtent(
-        mapStoreConfig?.map.viewSettings.extent,
-        'EPSG:4326',
-        projection.getCode()
-      );
-
-    const initialMap = new OLMap({
-      target: mapElement.current as string | HTMLElement | undefined,
-      layers: [createEmptyBasemap()],
-      view: new View({
-        projection,
-        center: api.utilities.projection.transformFromLonLat(
-          [mapStoreConfig?.map.viewSettings.center[0] || -105, mapStoreConfig?.map.viewSettings.center[1] || 60],
-          projection
-        ),
-        zoom: mapStoreConfig?.map.viewSettings.zoom,
-        extent: extentProjected || undefined,
-        minZoom: mapStoreConfig?.map.viewSettings.minZoom || 0,
-        maxZoom: mapStoreConfig?.map.viewSettings.maxZoom || 17,
-      }),
-      controls: [],
-      keyboardEventTarget: document.getElementById(`map-${mapId}`) as HTMLElement,
+    // Load the core packages which are the ones who load on map (not footer plugin, not app-bar plugin)
+    mapStoreConfig?.corePackages?.forEach((corePackage: string): void => {
+      api.plugin
+        .loadScript(corePackage)
+        .then((constructor) => {
+          // add the plugin by passing in the loaded constructor from the script tag
+          api.plugin
+            .addPlugin(
+              corePackage,
+              mapId,
+              constructor,
+              toJsonObject({
+                mapId,
+                viewer,
+              })
+            )
+            .catch((error) => {
+              // Log
+              logger.logPromiseFailed('api.plugin.addPlugin in useCallback in map', error);
+            });
+        })
+        .catch((error) => {
+          // Log
+          logger.logPromiseFailed('api.plugin.addPlugin in useCallback in map', error);
+        });
     });
+  }, [mapId, mapStoreConfig?.corePackages, viewer]);
 
-    initCGPVMap(initialMap);
-  }, [
-    createEmptyBasemap,
-    initCGPVMap,
-    mapId,
-    mapStoreConfig?.map.viewSettings.center,
-    mapStoreConfig?.map.viewSettings.extent,
-    mapStoreConfig?.map.viewSettings.maxZoom,
-    mapStoreConfig?.map.viewSettings.minZoom,
-    mapStoreConfig?.map.viewSettings.zoom,
-    projectionCode,
-  ]);
-
-  useEffect(() => {
+  useEffect((): void => {
     // Log
     logger.logTraceUseEffect('map.initMap');
 
     // Init the map on first render
-    initMap();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // We don't want to add a dependency here, because we only want this execution path to be executed on original mount of the map. Never again afterwards as it causes duplications of Views.
+    viewer.createMap(mapElement.current!);
+
+    initCGPVMap();
+  }, [initCGPVMap, viewer]);
 
   return (
     // ? the map is focusable and needs to be tabbable for keyboard navigation
     /* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */
-    <Box id={`mapbox-${mapId}`} ref={mapElement as MutableRefObject<HTMLDivElement>} sx={sxClasses.mapContainer} tabIndex={0}>
+    <Box id={`mapTargetElement-${mapId}`} ref={mapElement as MutableRefObject<HTMLDivElement>} sx={sxClasses.mapContainer} tabIndex={0}>
       {mapLoaded && (
         <>
           {northArrow && <NorthArrow />}
           <NorthPoleFlag />
-          <Crosshair />
+          <Crosshair mapTargetElement={mapElement.current!} />
           <ClickMarker />
           <HoverTooltip />
-          {deviceSizeMedUp && overviewMap && <OverviewMap />}
+          {deviceSizeMedUp && overviewMap && viewer.map && <OverviewMap olMap={viewer.map} />}
         </>
       )}
     </Box>

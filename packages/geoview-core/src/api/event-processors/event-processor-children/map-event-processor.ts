@@ -5,18 +5,19 @@ import { Extent } from 'ol/extent';
 import View, { FitOptions } from 'ol/View';
 import { KeyboardPan } from 'ol/interaction';
 import { Coordinate } from 'ol/coordinate';
-import TileLayer from 'ol/layer/Tile';
-import { XYZ } from 'ol/source';
+
 import { api } from '@/app';
+import { LayerApi } from '@/geo/layer/layer';
+import { MapViewer } from '@/geo/map/map-viewer';
 import {
   TypeGeoviewLayerConfig,
-  TypeHighlightColors,
   TypeInteraction,
   TypeLayerEntryConfig,
   TypeMapMouseInfo,
   TypeMapState,
   TypeValidMapProjectionCodes,
 } from '@/geo/map/map-schema-types';
+import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
@@ -62,7 +63,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         // Log
         logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - highlightedFeatures', mapId, curFeatures);
 
-        if (curFeatures.length === 0) api.maps[mapId].layer.featureHighlight.removeHighlight('all');
+        if (curFeatures.length === 0) MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.removeHighlight('all');
         else {
           const curFeatureUids = curFeatures.map((feature) => (feature.geometry as TypeGeometry).ol_uid);
           const prevFeatureUids = prevFeatures.map((feature) => (feature.geometry as TypeGeometry).ol_uid);
@@ -72,9 +73,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
           const removedFeatures = prevFeatures.filter(
             (feature: TypeFeatureInfoEntry) => !curFeatureUids.includes((feature.geometry as TypeGeometry).ol_uid)
           );
-          for (let i = 0; i < newFeatures.length; i++) api.maps[mapId].layer.featureHighlight.highlightFeature(newFeatures[i]);
+          for (let i = 0; i < newFeatures.length; i++)
+            MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.highlightFeature(newFeatures[i]);
           for (let i = 0; i < removedFeatures.length; i++)
-            api.maps[mapId].layer.featureHighlight.removeHighlight((removedFeatures[i].geometry as TypeGeometry).ol_uid);
+            MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.removeHighlight(
+              (removedFeatures[i].geometry as TypeGeometry).ol_uid
+            );
         }
       }
     );
@@ -107,12 +111,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Initializes the map controls
    * @param {string} mapId - The map id being initialized
    */
-  static async initMapControls(mapId: string): Promise<void> {
+  static initMapControls(mapId: string): void {
     // Log
     logger.logTraceCore('MAP EVENT PROCESSOR - initMapControls', mapId);
 
     // use api to access map because this function will set map element in store
-    const { map } = api.maps[mapId];
+    const { map } = this.getMapViewer(mapId);
     const store = getGeoViewStore(mapId);
 
     // add map controls (scale)
@@ -159,16 +163,17 @@ export class MapEventProcessor extends AbstractEventProcessor {
     });
     map.addOverlay(clickMarkerOverlay);
 
-    // Wait for the OpenLayers map to kick-start the scale control before saving the scale information in the store
-    const scaleInfo = await this.getScaleInfoFromDomElement(mapId);
-
     // Save in the store
-    store.getState().mapState.setterActions.setMapElement(map, map.getView().getZoom()!, scaleInfo);
     store.getState().mapState.setterActions.setOverlayNorthMarker(northPoleMarker);
     store.getState().mapState.setterActions.setOverlayClickMarker(clickMarkerOverlay);
 
     // set map interaction
     this.setInteraction(mapId, store.getState().mapState.interaction);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  static getStoreConfig(mapId: string) {
+    return this.getState(mapId).mapConfig;
   }
 
   // **********************************************************
@@ -178,13 +183,55 @@ export class MapEventProcessor extends AbstractEventProcessor {
   // #region
   /**
    * Shortcut to get the Map state for a given map id
-   * @param {string} mapId The mapId
+   * @param {string} mapId - map Id
    * @returns {IMapState} The Map state
    */
   protected static getMapStateProtected(mapId: string): IMapState {
     // TODO: Refactor - Rename this function when we want to clarify the small confusion with getMapState function below
     // Return the map state
     return this.getState(mapId).mapState;
+  }
+
+  /**
+   * Shortcut to get the Map Viewer instance for a given map id
+   * This is use to reduce the use of api.maps[mapId] and be more explicit
+   * @param {string} mapId - map Id
+   * @returns {MapViewer} The Map viewer instance
+   */
+  static getMapViewer(mapId: string): MapViewer {
+    return api.maps[mapId];
+  }
+
+  /**
+   * Shortcut to get the Map Viewer layer api instance for a given map id
+   * This is use to reduce the use of api.maps[mapId].layer and be more explicit
+   * @param {string} mapId - map Id
+   * @returns {LayerApi} The Map viewer layer API instance
+   */
+  static getMapViewerLayerAPI(mapId: string): LayerApi {
+    // TODO: refactor layer - It seems sometimes we use getMapViewerLayerAPI(mapId).geoviewLayer(layerPath)
+    // TD.CONT: and sometimes like the above. Should 'registeredLayers' be #private to have a single way of getting a layer using a layer path?
+    return api.maps[mapId].layer;
+  }
+
+  /**
+   * Shortcut to get the Map Viewer plugins instance for a given map id
+   * This is use to reduce the use of api.maps[mapId].plugins and be more explicit
+   * @param {string} mapId - map Id
+   * @returns {TypeRecordOfPlugin} The map plugins record
+   */
+  static async getMapViewerPlugins(mapId: string): Promise<TypeRecordOfPlugin> {
+    try {
+      // Check if the plugins exist
+      // TODO: if you run the code fast enough (only happened to me in the TimeSliderEventProcessor),
+      // TD.CONT: the getMapViewer should be async, because it can be unset as well ( so not just getMapViewerPlugins() ).
+      await whenThisThen(() => api && api.maps && api.maps[mapId] && api.maps[mapId].plugins);
+    } catch (error) {
+      // Log
+      logger.logError(`Couldn't retrieve the plugins instance on Map Viewer`, error);
+    }
+
+    return api.maps[mapId].plugins;
   }
 
   /**
@@ -202,7 +249,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       );
     } catch (error) {
       // Log
-      logger.logError("Couldn't retrieve the scale information from the dom tree", error);
+      logger.logError(`Couldn't retrieve the scale information from the dom tree`, error);
       // TODO: Check - Maybe we want to actually throw the exception here? Logging only for now until couple maps get tested.
       // throw error;
     }
@@ -233,10 +280,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return this.getMapStateProtected(mapId).basemapOptions;
   }
 
-  static getMapHighlightColor(mapId: string): string | undefined {
-    return this.getMapStateProtected(mapId).highlightColor;
-  }
-
   static clickMarkerIconShow(mapId: string, marker: TypeClickMarker): void {
     // Project coords
     const projectedCoords = api.utilities.projection.transformPoints(
@@ -259,7 +302,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static highlightBBox(mapId: string, extent: Extent, isLayerHighlight?: boolean): void {
     // Perform a highlight
-    api.maps[mapId].layer.featureHighlight.highlightGeolocatorBBox(extent, isLayerHighlight);
+    this.getMapViewerLayerAPI(mapId).featureHighlight.highlightGeolocatorBBox(extent, isLayerHighlight);
   }
 
   static getMapInteraction(mapId: string): TypeInteraction {
@@ -304,7 +347,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static setClickCoordinates(mapId: string, clickCoordinates: TypeMapMouseInfo): Promise<TypeFeatureInfoResultSet> {
     // Perform query via the feature info layer set process
-    const promise = api.maps[mapId].layer.featureInfoLayerSet.queryLayers(clickCoordinates.lnglat);
+    const promise = this.getMapViewerLayerAPI(mapId).featureInfoLayerSet.queryLayers(clickCoordinates.lnglat);
 
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setClickCoordinates(clickCoordinates);
@@ -342,7 +385,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static setInteraction(mapId: string, interaction: TypeInteraction): void {
     // enable or disable map interaction when type of map interaction is set
-    api.maps[mapId].map.getInteractions().forEach((x) => x.setActive(interaction === 'dynamic'));
+    this.getMapViewer(mapId)
+      .map.getInteractions()
+      .forEach((x) => x.setActive(interaction === 'dynamic'));
 
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setInteraction(interaction);
@@ -354,7 +399,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       AppEventProcessor.setCircularProgress(mapId, true);
 
       // get view status (center and projection) to calculate new center
-      const currentView = api.maps[mapId].map.getView();
+      const currentView = this.getMapViewer(mapId).map.getView();
       const currentCenter = currentView.getCenter();
       const currentProjection = currentView.getProjection().getCode();
       const newCenter = api.utilities.projection.transformPoints([currentCenter!], currentProjection, 'EPSG:4326')[0];
@@ -370,7 +415,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       });
 
       // set new view
-      api.maps[mapId].map.setView(newView);
+      this.getMapViewer(mapId).map.setView(newView);
 
       // use store action to set projection value in store and apply new view to the map
       this.getMapStateProtected(mapId).setterActions.setProjection(projectionCode);
@@ -379,7 +424,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       await this.resetBasemap(mapId);
 
       // refresh layers so new projection is render properly and await on it
-      await api.maps[mapId].refreshLayers();
+      await this.getMapViewer(mapId).refreshLayers();
     } finally {
       // Remove circular progress as refresh is done
       AppEventProcessor.setCircularProgress(mapId, false);
@@ -388,13 +433,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static rotate(mapId: string, rotation: number): void {
     // Do the actual view map rotation
-    api.maps[mapId].map.getView().animate({ rotation });
+    this.getMapViewer(mapId).map.getView().animate({ rotation });
     // GV No need to save in the store, because this will trigger an event on MapViewer which will take care of updating the store
   }
 
   static zoom(mapId: string, zoom: number, duration: number = OL_ZOOM_DURATION): void {
     // Do the actual zoom
-    api.maps[mapId].map.getView().animate({ zoom, duration });
+    this.getMapViewer(mapId).map.getView().animate({ zoom, duration });
     // GV No need to save in the store, because this will trigger an event on MapViewer which will take care of updating the store
   }
 
@@ -442,11 +487,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
   }
 
-  static setMapHighlightColor(mapId: string, color: TypeHighlightColors): void {
-    // Save in store
-    this.getMapStateProtected(mapId).setterActions.setHighlightColor(color);
-  }
-
   static setMapLayerHoverable(mapId: string, layerPath: string, hoverable: boolean): void {
     this.getMapStateProtected(mapId).setterActions.setHoverable(layerPath, hoverable);
   }
@@ -478,7 +518,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       if (layerInfo) {
         // eslint-disable-next-line no-param-reassign
         layerInfo!.visible = newValue || !layerVisibility;
-        api.maps[mapId].layer.geoviewLayer(layerInfo.layerPath).setVisible(layerInfo.visible, layerInfo.layerPath);
+        this.getMapViewerLayerAPI(mapId).geoviewLayer(layerInfo.layerPath).setVisible(layerInfo.visible, layerInfo.layerPath);
       }
     });
 
@@ -487,7 +527,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       if ((!layerVisibility || newValue) && parentLayerVisibility === false) {
         if (parentLayerInfo) {
           parentLayerInfo.visible = true;
-          api.maps[mapId].layer.geoviewLayer(parentLayerPath).setVisible(true, parentLayerPath);
+          this.getMapViewerLayerAPI(mapId).geoviewLayer(parentLayerPath).setVisible(true, parentLayerPath);
         }
       }
       const children = curOrderedLayerInfo.filter(
@@ -543,7 +583,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       : (geoviewLayerConfig as TypeLayerEntryConfig).layerPath;
     const index = this.getMapIndexFromOrderedLayerInfo(mapId, layerPathToReplace || layerPath);
     const replacedLayers = orderedLayerInfo.filter((layerInfo) => layerInfo.layerPath.startsWith(layerPathToReplace || layerPath));
-    const newOrderedLayerInfo = api.maps[mapId].layer.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
+    const newOrderedLayerInfo = this.getMapViewerLayerAPI(mapId).generateArrayOfLayerOrderInfo(geoviewLayerConfig);
     orderedLayerInfo.splice(index, replacedLayers.length, ...newOrderedLayerInfo);
 
     // Redirect
@@ -559,7 +599,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    */
   static addOrderedLayerInfo(mapId: string, geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig, index?: number): void {
     const { orderedLayerInfo } = this.getMapStateProtected(mapId);
-    const newOrderedLayerInfo = api.maps[mapId].layer.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
+    const newOrderedLayerInfo = this.getMapViewerLayerAPI(mapId).generateArrayOfLayerOrderInfo(geoviewLayerConfig);
     if (!index) orderedLayerInfo.unshift(...newOrderedLayerInfo);
     else orderedLayerInfo.splice(index, 0, ...newOrderedLayerInfo);
 
@@ -589,24 +629,19 @@ export class MapEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // GV NEVER add a store action who does set state AND map action at a same time.
   // GV Review the action in store state to make sure
-  // #region
-  static createEmptyBasemap(mapId: string): TileLayer<XYZ> {
-    return api.maps[mapId].basemap.createEmptyBasemap();
-  }
-
   static createOverviewMapBasemap(mapId: string): TypeBasemapProps | undefined {
-    return api.maps[mapId].basemap.getOverviewMap();
+    return this.getMapViewer(mapId).basemap.getOverviewMap();
   }
 
   static resetBasemap(mapId: string): Promise<void> {
     // reset basemap will use the current display language and projection and recreate the basemap
     const language = AppEventProcessor.getDisplayLanguage(mapId);
     const projection = this.getMapState(mapId).currentProjection as TypeValidMapProjectionCodes;
-    return api.maps[mapId].basemap.loadDefaultBasemaps(projection, language);
+    return this.getMapViewer(mapId).basemap.loadDefaultBasemaps(projection, language);
   }
 
   static setMapKeyboardPanInteractions(mapId: string, panDelta: number): void {
-    const mapElement = api.maps[mapId].map;
+    const mapElement = this.getMapViewer(mapId).map;
 
     // replace the KeyboardPan interraction by a new one
     mapElement!.getInteractions().forEach((interactionItem) => {
@@ -624,7 +659,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param overviewRoot The React root element for the overview map
    */
   static setMapOverviewMapRoot(mapId: string, overviewRoot: Root): void {
-    api.maps[mapId].overviewRoot = overviewRoot;
+    this.getMapViewer(mapId).overviewRoot = overviewRoot;
   }
 
   /**
@@ -640,7 +675,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     options: FitOptions = { padding: [100, 100, 100, 100], maxZoom: 11, duration: 1000 }
   ): Promise<void> {
     // store state will be updated by map event
-    api.maps[mapId].getView().fit(extent, options);
+    this.getMapViewer(mapId).getView().fit(extent, options);
 
     // Use a Promise and resolve it when the duration expired
     return new Promise((resolve) => {
@@ -666,7 +701,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       const convertedExtent = api.utilities.projection.transformExtent(bbox, 'EPSG:4326', projectionConfig);
 
       // Highlight
-      api.maps[mapId].layer.featureHighlight.highlightGeolocatorBBox(convertedExtent);
+      this.getMapViewerLayerAPI(mapId).featureHighlight.highlightGeolocatorBBox(convertedExtent);
 
       // Zoom to extent and await
       await this.zoomToExtent(mapId, convertedExtent, {
@@ -736,17 +771,17 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static setLayerZIndices = (mapId: string): void => {
     const reversedLayers = [...this.getMapStateProtected(mapId).orderedLayerInfo].reverse();
     reversedLayers.forEach((orderedLayerInfo, index) => {
-      if (api.maps[mapId].layer.registeredLayers[orderedLayerInfo.layerPath]?.olLayer)
-        api.maps[mapId].layer.registeredLayers[orderedLayerInfo.layerPath].olLayer?.setZIndex(index + 10);
+      const olLayer = this.getMapViewerLayerAPI(mapId).registeredLayers[orderedLayerInfo.layerPath]?.olLayer;
+      if (olLayer) olLayer?.setZIndex(index + 10);
     });
   };
 
   static getPixelFromCoordinate = (mapId: string, coord: Coordinate): [number, number] => {
-    return api.maps[mapId].map.getPixelFromCoordinate(coord) as unknown as [number, number];
+    return this.getMapViewer(mapId).map.getPixelFromCoordinate(coord) as unknown as [number, number];
   };
 
   static setClickMarkerOnPosition = (mapId: string, position: number[]): void => {
-    api.maps[mapId].map.getOverlayById(`${mapId}-clickmarker`)!.setPosition(position);
+    this.getMapViewer(mapId).map.getOverlayById(`${mapId}-clickmarker`)!.setPosition(position);
   };
 
   // #endregion

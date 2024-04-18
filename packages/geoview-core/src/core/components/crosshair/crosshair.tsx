@@ -8,16 +8,24 @@ import { Box, Fade, Typography } from '@/ui';
 import { getSxClasses } from './crosshair-style';
 import { CrosshairIcon } from './crosshair-icon';
 import { useAppCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useMapElement, useMapPointerPosition, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapPointerPosition, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+
 import { logger } from '@/core/utils/logger';
+
+type CrosshairProps = {
+  mapTargetElement: HTMLElement;
+};
 
 /**
  * Create a Crosshair when map is focus with the keyboard so user can click on the map
+ * @param {CrosshairProps} - Crossahir props who caintain the mapTargetELement
  * @returns {JSX.Element} the crosshair component
  */
-export function Crosshair(): JSX.Element {
+export function Crosshair(props: CrosshairProps): JSX.Element {
   // Log
   logger.logTraceRender('components/crosshair/crosshair');
+
+  const { mapTargetElement } = props;
 
   const { t } = useTranslation<string>();
 
@@ -26,7 +34,6 @@ export function Crosshair(): JSX.Element {
 
   // get store values
   const isCrosshairsActive = useAppCrosshairsActive();
-  const mapElement = useMapElement();
   const pointerPosition = useMapPointerPosition();
   const { setClickCoordinates, setMapKeyboardPanInteractions } = useMapStoreActions();
 
@@ -41,6 +48,7 @@ export function Crosshair(): JSX.Element {
    */
   const simulateClick = useCallback(
     (event: KeyboardEvent) => {
+      logger.logTraceUseCallback('CROSSHAIR - simulateClick', pointerPosition);
       if (event.key === 'Enter' && pointerPosition) {
         // Update the store
         setClickCoordinates(pointerPosition);
@@ -56,6 +64,7 @@ export function Crosshair(): JSX.Element {
    */
   const managePanDelta = useCallback(
     (event: KeyboardEvent) => {
+      logger.logTraceUseCallback('CROSSHAIR - managePanDelta', event.key);
       if ((event.key === 'ArrowDown' && event.shiftKey) || (event.key === 'ArrowUp' && event.shiftKey)) {
         panDelta.current = event.key === 'ArrowDown' ? (panDelta.current -= 10) : (panDelta.current += 10);
         panDelta.current = panDelta.current < 10 ? 10 : panDelta.current; // minus panDelta reset the value so we need to trap
@@ -70,21 +79,23 @@ export function Crosshair(): JSX.Element {
     // Log
     logger.logTraceUseEffect('CROSSHAIR - isCrosshairsActive', isCrosshairsActive);
 
-    const mapHTMLElement = mapElement!.getTargetElement();
     if (isCrosshairsActive) {
       panelButtonId.current = 'detailsPanel';
-      mapHTMLElement.addEventListener('keydown', simulateClick);
-      mapHTMLElement.addEventListener('keydown', managePanDelta);
-    } else {
-      mapHTMLElement.removeEventListener('keydown', simulateClick);
-      mapHTMLElement.removeEventListener('keydown', managePanDelta);
+      mapTargetElement.addEventListener('keydown', simulateClick);
+      mapTargetElement.addEventListener('keydown', managePanDelta);
+    } else if (mapTargetElement) {
+      mapTargetElement.removeEventListener('keydown', simulateClick);
+      mapTargetElement.removeEventListener('keydown', managePanDelta);
     }
 
     return () => {
-      mapHTMLElement.removeEventListener('keydown', simulateClick);
-      mapHTMLElement.removeEventListener('keydown', managePanDelta);
+      // need to check cause it may be undefined when we remove/delete the map
+      if (mapTargetElement) {
+        mapTargetElement.removeEventListener('keydown', simulateClick);
+        mapTargetElement.removeEventListener('keydown', managePanDelta);
+      }
     };
-  }, [isCrosshairsActive, mapElement, simulateClick, managePanDelta]);
+  }, [isCrosshairsActive, mapTargetElement, simulateClick, managePanDelta]);
 
   return (
     <Box

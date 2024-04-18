@@ -5,7 +5,6 @@ import { TypeDisplayLanguage, TypeDisplayTheme } from '@/geo/map/map-schema-type
 import { TypeHTMLElement } from '@/core/types/global-types';
 import { MapEventProcessor } from './map-event-processor';
 import { createGuideObject } from '@/core/utils/utilities';
-import { api } from '@/app';
 
 export class AppEventProcessor extends AbstractEventProcessor {
   // Static functions for Typescript files to access store actions
@@ -107,7 +106,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
 
   static setFullscreen(mapId: string, active: boolean, element?: TypeHTMLElement): void {
     this.getAppState(mapId).setterActions.setFullScreenActive(active);
-    if (element !== undefined) api.maps[mapId].setFullscreen(active, element);
+    if (element !== undefined) MapEventProcessor.getMapViewer(mapId).setFullscreen(active, element);
   }
 
   static setCircularProgress(mapId: string, active: boolean): void {

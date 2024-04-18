@@ -13,7 +13,7 @@ import { logger } from '@/core/utils/logger';
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
 import { Cast, TypeJsonValue } from '@/core/types/global-types';
-import { api } from '@/app';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 /** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
@@ -215,7 +215,7 @@ export class ConfigBaseClass {
    * @returns {boolean} Returns false if the layer configuration can't be registered.
    */
   registerLayerConfig(): boolean {
-    const { registeredLayers } = api.maps[this.geoviewLayerInstance!.mapId].layer;
+    const { registeredLayers } = MapEventProcessor.getMapViewerLayerAPI(this.geoviewLayerInstance!.mapId);
     if (registeredLayers[this.layerPath]) return false;
     (registeredLayers[this.layerPath] as ConfigBaseClass) = this;
 

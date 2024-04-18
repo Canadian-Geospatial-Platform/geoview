@@ -7,6 +7,7 @@ import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Loading
 import { exportPNG } from '@/core/utils/utilities';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { NorthArrowIcon } from '@/core/components/north-arrow/north-arrow-icon';
 import { useMapAttribution, useMapNorthArrow, useMapScale } from '@/core/stores/store-interface-and-intial-values/map-state';
 import useManageArrow from '@/core/components/north-arrow/hooks/useManageArrow';
@@ -26,12 +27,11 @@ import { logger } from '@/core/utils/logger';
  */
 export default function ExportModal(): JSX.Element {
   const { t } = useTranslation();
+  const mapElement = useAppGeoviewHTMLElement();
+  const mapViewport = mapElement.getElementsByClassName('ol-viewport')[0];
   const mapId = useGeoViewMapId();
 
   const theme = useTheme();
-
-  // TODO: we should not access the api in component.
-  const { map } = api.maps[mapId];
 
   const [isMapLoading, setIsMapLoading] = useState(true);
   const [isLegendLoading, setIsLegendLoading] = useState(true);
@@ -103,7 +103,7 @@ export default function ExportModal(): JSX.Element {
       timer = setTimeout(() => {
         setIsMapLoading(true);
         htmlToImage
-          .toPng(map.getViewport())
+          .toPng(mapViewport as HTMLElement)
           .then((dataUrl) => {
             setIsMapLoading(false);
             const img = new Image();

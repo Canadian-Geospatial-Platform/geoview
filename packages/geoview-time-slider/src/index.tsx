@@ -4,6 +4,7 @@ import { TypeTabs } from 'geoview-core/src/ui/tabs/tabs';
 import { api } from 'geoview-core';
 import { TimeSliderIcon } from 'geoview-core/src/ui';
 import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
+import { MapEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/map-event-processor';
 
 import { TimeSliderPanel } from './time-slider-panel';
 import schema from '../schema.json';
@@ -120,17 +121,23 @@ class TimeSliderPlugin extends FooterPlugin {
         // TO.DOCONT: the later will override the plugin settings (can be tested by adding fake delays).
         // TO.DOCONT: If this Plugin has temporal dimension settings, for various layers, those should be set in synch with the layers
         // TO.DOCONT: using event listeners, not at Plugin creation.
-        api.maps[this.pluginProps.mapId].layer.geoviewLayer(obj.layerPaths[0]).setTemporalDimension(obj.layerPaths[0], timeDimension);
+        MapEventProcessor.getMapViewerLayerAPI(this.pluginProps.mapId)
+          .geoviewLayer(obj.layerPaths[0])
+          .setTemporalDimension(obj.layerPaths[0], timeDimension);
       }
 
       // Set override default value under time dimension if applicable
       if (obj.defaultValue) {
         const layerPath = obj.layerPaths[0];
-        const timeDimension = api.maps[this.pluginProps.mapId].layer.geoviewLayer(layerPath).layerTemporalDimension[layerPath];
-        api.maps[this.pluginProps.mapId].layer.geoviewLayer(layerPath).setTemporalDimension(layerPath, {
-          ...timeDimension,
-          default: obj.defaultValue,
-        });
+        const timeDimension = MapEventProcessor.getMapViewerLayerAPI(this.pluginProps.mapId).geoviewLayer(layerPath).layerTemporalDimension[
+          layerPath
+        ];
+        MapEventProcessor.getMapViewerLayerAPI(this.pluginProps.mapId)
+          .geoviewLayer(layerPath)
+          .setTemporalDimension(layerPath, {
+            ...timeDimension,
+            default: obj.defaultValue,
+          });
       }
     });
 
