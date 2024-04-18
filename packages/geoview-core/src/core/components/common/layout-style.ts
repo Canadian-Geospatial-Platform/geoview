@@ -8,12 +8,8 @@ export const getSxClasses = (theme: Theme): any => ({
     borderRadius: '5px',
     backgroundColor: theme.palette.geoViewColor.white,
     width: '100%',
-    overflow: 'auto',
-    maxHeight: '600px',
-
     '&.fullscreen-mode': {
       maxHeight: 'calc(100vh - 150px)',
-
       '& .MuiTableContainer-root': {
         maxHeight: 'calc(100vh - 260px)',
       },
@@ -32,6 +28,13 @@ export const getSxClasses = (theme: Theme): any => ({
       th: {
         textAlign: 'left',
         paddingLeft: '15px',
+      },
+      '& h3': {
+        '&:first-child': {
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.325rem',
+        },
       },
     },
   },

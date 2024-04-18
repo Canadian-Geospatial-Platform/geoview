@@ -64,6 +64,7 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
         if (rightPanel) {
           rightPanel.style.maxHeight = `${leftPanelHeight}px`;
           rightPanel.style.paddingBottom = `24px`;
+          rightPanel.style.overflowY = 'auto';
         }
       }
     }
@@ -73,6 +74,18 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
       leftPanelRef.current.style.overflow = 'auto';
       if (activeFooterBarTabId === TABS.DATA_TABLE) {
         setTableHeight(defaultHeight);
+
+        const rightPanelGuideContainer = (rightPanelRef.current?.querySelector('.guidebox-container') ?? null) as HTMLElement | null;
+        if (rightPanelGuideContainer) {
+          rightPanelGuideContainer.style.maxHeight = `${defaultHeight}px`;
+          rightPanelGuideContainer.style.paddingBottom = `24px`;
+          rightPanelGuideContainer.style.overflow = 'auto';
+        }
+        const rightPanel = (rightPanelRef.current?.firstElementChild ?? null) as HTMLElement | null;
+        if (rightPanel) {
+          rightPanel.removeAttribute('style');
+        }
+        // check if table exist as child in right panel.
       } else if (activeFooterBarTabId === TABS.GEO_CHART && rightPanelRef.current) {
         rightPanelRef.current.style.maxHeight = `${defaultHeight}px`;
         rightPanelRef.current.style.overflowY = 'auto';
@@ -80,6 +93,8 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
         const rightPanel = (rightPanelRef.current?.firstElementChild ?? null) as HTMLElement | null;
         if (rightPanel) {
           rightPanel.style.maxHeight = `${defaultHeight}px`;
+          rightPanel.style.paddingBottom = `24px`;
+          rightPanel.style.overflow = 'auto';
         }
       }
     }

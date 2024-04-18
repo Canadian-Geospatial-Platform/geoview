@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import Markdown from 'markdown-to-jsx';
-import { Box, FilterAltIcon, Paper, Skeleton } from '@/ui';
+import { Box, FilterAltIcon, Skeleton } from '@/ui';
 import DataTable from './data-table';
 import {
   useDataTableSelectedLayerPath,
@@ -211,21 +211,16 @@ export function Datapanel({ fullWidth }: DataPanelType): JSX.Element {
       {/* show data table instructions when all layers has no features */}
       {((!isLoading && isAllLayersNoFeatures()) || isLayerDisabled() || selectedLayerPath === '') && (
         <Box
-          sx={
-            fullWidth
-              ? { ...sxClasses.rightPanelContainer, overflowY: 'none' }
-              : { ...sxClasses.rightPanelContainer, maxHeight: '600px', overflowY: 'none' }
-          }
+          className="guidebox-container"
+          sx={fullWidth ? { ...sxClasses.rightPanelContainer, overflowY: 'hidden' } : { ...sxClasses.rightPanelContainer }}
         >
-          <Paper sx={{ padding: '2rem' }}>
-            <Box className="guideBox">
-              <Markdown options={{ wrapper: 'article' }}>{`${guide!.footerPanel!.children!.dataTable!.content}\n${
-                guide!.footerPanel!.children!.dataTable!.children!.filterData!.content
-              }\n${guide!.footerPanel!.children!.dataTable!.children!.sortingAndReordering!.content}\n\n${
-                guide!.footerPanel!.children!.dataTable!.children!.keyboardNavigation!.content
-              }`}</Markdown>
-            </Box>
-          </Paper>
+          <Box className="guideBox">
+            <Markdown options={{ wrapper: 'article' }}>{`${guide!.footerPanel!.children!.dataTable!.content}\n${
+              guide!.footerPanel!.children!.dataTable!.children!.filterData!.content
+            }\n${guide!.footerPanel!.children!.dataTable!.children!.sortingAndReordering!.content}\n\n${
+              guide!.footerPanel!.children!.dataTable!.children!.keyboardNavigation!.content
+            }`}</Markdown>
+          </Box>
         </Box>
       )}
     </Layout>

@@ -82,10 +82,8 @@ export function Layout({
     // Log
     logger.logTraceUseCallback('LAYOUT - renderLayerList');
 
-    return (
-      <LayerList isEnlarged={isEnlarged} selectedLayerPath={selectedLayerPath} onListItemClick={handleLayerChange} layerList={layerList} />
-    );
-  }, [isEnlarged, selectedLayerPath, layerList, handleLayerChange]);
+    return <LayerList selectedLayerPath={selectedLayerPath} onListItemClick={handleLayerChange} layerList={layerList} />;
+  }, [selectedLayerPath, layerList, handleLayerChange]);
 
   // // If we're on mobile
   if (theme.breakpoints.down('md')) {
@@ -96,7 +94,7 @@ export function Layout({
   }
 
   return (
-    <Box>
+    <Box sx={sxClasses.layoutContainer}>
       <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
         {!fullWidth && (
           <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlarged} aria-hidden={!isLayersPanelVisible}>
@@ -155,6 +153,7 @@ export function Layout({
           isEnlarged={isEnlarged}
           isLayersPanelVisible={isLayersPanelVisible}
           fullWidth={fullWidth}
+          className="right-panel-content"
         >
           <FullScreenDialog open={isFullScreen} onClose={() => setIsFullScreen(false)}>
             <Box sx={sxClasses.rightGridContent} className="fullscreen-mode">
