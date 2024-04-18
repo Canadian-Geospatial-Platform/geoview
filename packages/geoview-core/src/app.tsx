@@ -12,7 +12,7 @@ import * as UI from '@/ui';
 
 import AppStart from '@/core/app-start';
 import { API } from '@/api/api';
-import { Cast, TypeCGPV, TypeMapFeaturesConfig, TypeWindow } from '@/core/types/global-types';
+import { Cast, TypeCGPV, TypeWindow } from '@/core/types/global-types';
 import { Config } from '@/core/utils/config/config';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
@@ -36,37 +36,6 @@ export function unmountMap(mapId: string): void {
 }
 
 /**
- * Handles when the map reconstruction needs to happen. The map component is linked to a specific mapId. When we modify something on the map, the
- * changes spread throughout the data structure. We therefore need to reload the entire map configuration to ensure that
- * all changes made to the map are applied.
- *
- * @param {TypeMapFeaturesConfig} mapFeaturesConfig - The map features config to reload
- */
-const handleReconstruct = (mapFeaturesConfig: TypeMapFeaturesConfig): void => {
-  if (mapFeaturesConfig) {
-    const map = api.maps[mapFeaturesConfig.mapId].remove(false);
-
-    // recreate the map - create a new div and remove the active one
-    const newRoot = document.createElement('div');
-    newRoot.setAttribute('id', mapFeaturesConfig.mapId);
-    newRoot.setAttribute('class', 'geoview-map');
-    map!.parentNode!.insertBefore(newRoot, map);
-    map.remove();
-
-    // set plugin's loaded to false
-    // TODO: need to have this flag by map not for the api
-    api.plugin.pluginsLoaded = false;
-
-    addGeoViewStore(mapFeaturesConfig!);
-    // create the new root
-    reactRoot[mapFeaturesConfig.mapId] = createRoot(newRoot!);
-
-    // re-render map with original configuration
-    reactRoot[mapFeaturesConfig.mapId].render(<AppStart mapFeaturesConfig={mapFeaturesConfig} />);
-  }
-};
-
-/**
  * Function to render the map for inline map and map create from a function call
  *
  * @param {Element} mapElement - The html element div who will contain the map
@@ -87,9 +56,6 @@ async function renderMap(mapElement: Element): Promise<void> {
 
     // render the map with the config
     reactRoot[mapId] = createRoot(mapElement!);
-
-    // Register a handle when the api wants to reconstruct the map
-    api.event.onMapReconstruct(mapId, handleReconstruct);
 
     // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
     return new Promise<void>((resolve) => {

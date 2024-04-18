@@ -143,30 +143,6 @@ export class Basemap {
   // #endregion
 
   // #region CREATE BASEMAPS
-  /**
-   * Create empty basemap tilelayer to use as initial basemap while we load basemap
-   * so the viewer will not fails if basemap is not avialable
-   *
-   * @returns {TileLayer<XYZ>} return the created basemap
-   */
-  createEmptyBasemap(): TileLayer<XYZ> {
-    // create empty tilelayer to use as initial basemap while we load basemap
-    const emptyBasemap: TypeBasemapLayer = {
-      basemapId: 'empty',
-      source: new XYZ(),
-      type: 'empty',
-      opacity: 0,
-      resolutions: [],
-      origin: [],
-      minScale: 0,
-      maxScale: 17,
-      extent: [0, 0, 0, 0],
-    };
-    const emptyLayer = new TileLayer(emptyBasemap);
-    emptyLayer.set('mapId', 'basemap');
-
-    return emptyLayer;
-  }
 
   /**
    * Create a basemap layer
@@ -549,7 +525,7 @@ export class Basemap {
     // update the basemap layers on the map
     if (basemap?.layers) {
       // remove previous basemaps
-      const layers = api.maps[this.mapId].map.getAllLayers();
+      const layers = MapEventProcessor.getMapViewer(this.mapId).map.getAllLayers();
 
       // loop through all layers on the map
       for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
@@ -561,7 +537,7 @@ export class Basemap {
         // check if the group id matches basemap
         if (layerId && layerId === 'basemap') {
           // remove the basemap layer
-          api.maps[this.mapId].map.removeLayer(layer);
+          MapEventProcessor.getMapViewer(this.mapId).map.removeLayer(layer);
         }
       }
 
@@ -576,7 +552,7 @@ export class Basemap {
         basemapLayer.set('mapId', 'basemap');
 
         // add the basemap layer
-        api.maps[this.mapId].map.getLayers().insertAt(index, basemapLayer);
+        MapEventProcessor.getMapViewer(this.mapId).map.getLayers().insertAt(index, basemapLayer);
 
         // render the layer
         basemapLayer.changed();
