@@ -20,6 +20,11 @@ export const getSxClasses = (theme: Theme): any => ({
     pointerEvents: 'all',
     gap: 0.5,
     order: 3,
+    
+    fill: `${theme.palette.geoViewColor.grey.dark[900]} !important`,
+    position: 'absolute',
+    bottom: 0,
+    left: '0px',
 
     '&.interaction-static': {
       backdropFilter: 'unset',
