@@ -323,7 +323,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
   protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const { map } = MapEventProcessor.getMapViewerInstance(this.mapId);
+    const { map } = MapEventProcessor.getMapViewer(this.mapId);
     return this.getFeatureInfoAtCoordinate(map.getCoordinateFromPixel(location), layerPath);
   }
 
@@ -363,7 +363,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       if (!identifyUrl) return [];
 
       identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
-      const mapLayer = MapEventProcessor.getMapViewerInstance(this.mapId).map;
+      const mapLayer = MapEventProcessor.getMapViewer(this.mapId).map;
       const { currentProjection } = MapEventProcessor.getMapState(this.mapId);
       const size = mapLayer.getSize()!;
       let bounds = mapLayer.getView().calculateExtent();

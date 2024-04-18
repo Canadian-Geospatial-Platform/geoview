@@ -90,8 +90,8 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
    * @param {boolean} isMapRecordExist - Filtered Map switch is on off.
    */
   static applyFilters(mapId: string, layerPath: string, filterStrings: string, isMapRecordExist: boolean): void {
-    const geoviewLayerInstance = MapEventProcessor.getMapViewerLayerAPIInstance(mapId).geoviewLayer(layerPath);
-    const filterLayerConfig = MapEventProcessor.getMapViewerLayerAPIInstance(mapId).registeredLayers[layerPath] as TypeLayerEntryConfig;
+    const geoviewLayerInstance = MapEventProcessor.getMapViewerLayerAPI(mapId).geoviewLayer(layerPath);
+    const filterLayerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).registeredLayers[layerPath] as TypeLayerEntryConfig;
 
     if (isMapRecordExist && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined && filterStrings.length) {
       (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(layerPath, filterStrings);
@@ -116,7 +116,7 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
    * @returns {Promise<TypeAllFeatureInfoResultSet | void>}
    */
   static triggerGetAllFeatureInfo(mapId: string, layerPath: string): Promise<TypeAllFeatureInfoResultSet | void> {
-    return MapEventProcessor.getMapViewerLayerAPIInstance(mapId).allFeatureInfoLayerSet.queryLayer(layerPath, 'all');
+    return MapEventProcessor.getMapViewerLayerAPI(mapId).allFeatureInfoLayerSet.queryLayer(layerPath, 'all');
   }
 
   /**

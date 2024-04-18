@@ -1372,15 +1372,14 @@ export class MapViewer {
   }
 
   /**
-   * Reload a map from a config object stored in store
+   * Reload a map from a config object stored in store. It first remove then recreate the map.
    */
   reload(): void {
     // remove the map, then get config to use to recreate it
-    // TODO: need to use layers but because of circular dependencies we can't at the moment
-    // TD.CONT: We need to get ride of the time out as well.
     const mapDiv = this.remove(false);
-    const config = this.mapFeaturesConfig;
-    config.map.listOfGeoviewLayerConfig = [];
+    const config = MapEventProcessor.getStoreConfig(this.mapId);
+    // TODO: Remove time out and make this async so remove/recreate work one after the other
+    // TD.CONT: There is still as problem with bad config schema value and layers loading... should be refactor when config is done
     setTimeout(
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       () =>

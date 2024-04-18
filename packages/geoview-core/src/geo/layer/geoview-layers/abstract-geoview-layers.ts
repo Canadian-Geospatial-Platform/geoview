@@ -884,7 +884,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {TypeLayerEntryConfig | undefined} The layer configuration or undefined if not found.
    */
   getLayerConfig(layerPath: string): TypeLayerEntryConfig | undefined {
-    return MapEventProcessor.getMapViewerLayerAPIInstance(this.mapId).registeredLayers?.[layerPath] as TypeLayerEntryConfig;
+    return MapEventProcessor.getMapViewerLayerAPI(this.mapId).registeredLayers?.[layerPath] as TypeLayerEntryConfig;
   }
 
   /** ***************************************************************************************************************************
@@ -1426,7 +1426,7 @@ export abstract class AbstractGeoViewLayer {
   removeConfig(layerPath: string): void {
     const layerConfigToRemove = this.getLayerConfig(layerPath) as AbstractBaseLayerEntryConfig;
     if (layerConfigToRemove.entryType !== CONST_LAYER_ENTRY_TYPES.GROUP) this.unregisterFromLayerSets(layerConfigToRemove);
-    delete MapEventProcessor.getMapViewerLayerAPIInstance(this.mapId).registeredLayers[layerPath];
+    delete MapEventProcessor.getMapViewerLayerAPI(this.mapId).registeredLayers[layerPath];
   }
 }
 

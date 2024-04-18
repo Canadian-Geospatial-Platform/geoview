@@ -89,7 +89,7 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
     }
 
     return () => {
-      // need to chack cause it may be undefined when we remove/delete the map
+      // need to check cause it may be undefined when we remove/delete the map
       if (mapTargetElement) {
         mapTargetElement.removeEventListener('keydown', simulateClick);
         mapTargetElement.removeEventListener('keydown', managePanDelta);

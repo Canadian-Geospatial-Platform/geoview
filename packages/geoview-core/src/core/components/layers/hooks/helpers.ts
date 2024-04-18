@@ -155,7 +155,7 @@ export function useLegendHelpers(): unknown {
       },
     ];
 
-    const legendInfo = MapEventProcessor.getMapViewerLayerAPIInstance(mapId).legendsLayerSet.resultSet;
+    const legendInfo = MapEventProcessor.getMapViewerLayerAPI(mapId).legendsLayerSet.resultSet;
     const keys = _.keys(legendInfo);
 
     keys.forEach((i) => {
