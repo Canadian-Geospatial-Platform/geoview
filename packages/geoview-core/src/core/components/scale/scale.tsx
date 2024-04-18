@@ -82,7 +82,9 @@ export function Scale(): JSX.Element {
                     <CheckIcon
                       sx={{ ...sxClasses.scaleCheckmark, fontSize: theme.palette.geoViewFontSize.lg, opacity: scaleMode === index ? 1 : 0 }}
                     />
-                    <Box component="span" sx={{ ...sxClasses.scaleText, borderBottom: !value.borderBottom ? 'none' : '1px solid' }}>
+                    <Box component="span" 
+                    className={`${index === 0 ? 'hasScaleLine' : ''}`}
+                    sx={{ ...sxClasses.scaleText, borderBottom: !value.borderBottom ? 'none' : '1px solid' }}>
                       {value.label}
                     </Box>
                   </Box>
@@ -92,7 +94,7 @@ export function Scale(): JSX.Element {
           ) : (
             <Box
               component="span"
-              className={`interaction-${interaction}`}
+              className={`interaction-${interaction} hasScaleLine`}
               sx={{
                 ...sxClasses.scaleText,
                 borderBottom: !scaleValues[scaleMode].borderBottom ? 'none' : '1px solid',
