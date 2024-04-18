@@ -61,8 +61,7 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
     const rightPanel = (rightPanelRef.current?.firstElementChild ?? null) as HTMLElement | null;
 
     if (rightPanel) {
-      rightPanel.style.maxHeight = `${height}px`;
-      // rightPanel.style.paddingBottom = `24px`;
+      rightPanel.style.maxHeight = `${height ?? defaultHeight}px`;
       rightPanel.style.overflowY = 'auto';
     }
   };
