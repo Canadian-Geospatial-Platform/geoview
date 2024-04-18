@@ -65,7 +65,7 @@ export const getSxClasses = (theme: Theme): any => ({
 
     '&.hasScaleLine::after': {
       right: '-1px',
-    }
+    },
   },
   scaleCheckmark: {
     paddingRight: 5,
