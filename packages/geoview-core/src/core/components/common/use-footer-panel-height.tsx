@@ -54,6 +54,16 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
 
       if (activeFooterBarTabId === TABS.DATA_TABLE) {
         setTableHeight(leftPanelHeight - 10);
+        const rightPanelGuideContainer = (rightPanelRef.current?.querySelector('.guidebox-container') ?? null) as HTMLElement | null;
+        if (rightPanelGuideContainer) {
+          rightPanelGuideContainer.style.maxHeight = `${leftPanelHeight}px`;
+          rightPanelGuideContainer.style.paddingBottom = `24px`;
+          rightPanelGuideContainer.style.overflowY = 'auto';
+        }
+        const rightPanel = (rightPanelRef.current?.firstElementChild ?? null) as HTMLElement | null;
+        if (rightPanel) {
+          rightPanel.removeAttribute('style');
+        }
       } else if (activeFooterBarTabId === TABS.GEO_CHART && rightPanelRef.current) {
         rightPanelRef.current.style.maxHeight = `${leftPanelHeight}px`;
         rightPanelRef.current.style.overflowY = footerPanelResizeValue !== 100 ? 'auto' : 'visible';
