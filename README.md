@@ -179,8 +179,6 @@ Below is an example of a simple map, with an id **mapOne**. This map will be usi
       'map': {
         'interaction': 'dynamic',
         'viewSettings': {
-          'zoom': 4,
-          'center': [60, -100],
           'projection': 3978
         },
         'basemapOptions': {

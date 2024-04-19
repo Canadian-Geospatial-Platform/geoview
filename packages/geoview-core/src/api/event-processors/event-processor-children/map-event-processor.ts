@@ -737,7 +737,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   static zoomToInitialExtent(mapId: string): Promise<void> {
-    const { center, zoom } = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings;
+    const center = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter![1];
+    const zoom = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter![0];
     const projectedCoords = api.utilities.projection.transformPoints(
       [center],
       `EPSG:4326`,
