@@ -36,6 +36,7 @@ import {
   TypeListOfLocalizedLanguages,
   MapConfigLayerEntry,
   mapConfigLayerEntryIsGeoCore,
+  TypeInitialViewSettings,
 } from '@/geo/map/map-schema-types';
 import { Cast, toJsonObject, TypeJsonObject, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { CONST_GEOVIEW_SCHEMA_BY_TYPE, CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -79,14 +80,20 @@ export class ConfigValidation {
   /** The language that will be used to display the GeoView layer. */
   #displayLanguage: TypeDisplayLanguage;
 
+  // extents for each projection
+  #maxExtents: Record<TypeValidMapProjectionCodes, number[]> = {
+    3857: [-150, 38, -40, 84],
+    3978: [-125, 30, -60, 89],
+  };
+
   /** default configuration if provided configuration is missing or wrong */
   #defaultMapFeaturesConfig: TypeMapFeaturesConfig = {
     mapId: '',
     map: {
       interaction: 'dynamic',
       viewSettings: {
-        zoom: 4,
-        center: [-100, 60],
+        initialView: { zoomAndCenter: [3.5, [-90, 60]] },
+        maxExtent: this.#maxExtents[3978],
         projection: 3978,
         enableRotation: true,
         rotation: 0,
@@ -141,7 +148,8 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * The ConfigValidation class constructor used to instanciate an object of this type.
-   * @returns {ConfigValidation} An ConfigValidation instance.
+   *
+   * @returns {ConfigValidation} A ConfigValidation instance.
    */
   constructor() {
     this.#mapId = generateId();
@@ -170,7 +178,7 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Set mapId value.
-   * @param {string} mapId The ID of the Geoview map.
+   * @param {string} mapId - The ID of the Geoview map.
    */
   set mapId(mapId: string) {
     this.#mapId = mapId;
@@ -188,7 +196,7 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Set triggerReadyCallback value.
-   * @param {boolean} triggerReadyCallback The value to assign to the triggerReadyCallback flag for the Geoview map.
+   * @param {boolean} triggerReadyCallback - The value to assign to the triggerReadyCallback flag for the Geoview map.
    */
   set triggerReadyCallback(triggerReadyCallback: boolean) {
     this.#triggerReadyCallback = triggerReadyCallback;
@@ -204,7 +212,7 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Set displayLanguage value.
-   * @param {TypeDisplayLanguage} displayLanguage The display language of the Geoview map.
+   * @param {TypeDisplayLanguage} displayLanguage - The display language of the Geoview map.
    */
   set displayLanguage(displayLanguage: TypeDisplayLanguage) {
     this.#displayLanguage = this.validateDisplayLanguage(displayLanguage);
@@ -212,8 +220,9 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Validate basemap options.
-   * @param {TypeValidMapProjectionCodes} projection The projection code of the basemap.
-   * @param {TypeBasemapOptions} basemapOptions The basemap options to validate.
+   * @param {TypeValidMapProjectionCodes} projection - The projection code of the basemap.
+   * @param {TypeBasemapOptions} basemapOptions - The basemap options to validate.
+   *
    * @returns {TypeBasemapOptions} A valid basemap options.
    * @private
    */
@@ -236,7 +245,8 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Validate map version.
-   * @param {TypeValidVersions} version The version to validate.
+   * @param {TypeValidVersions} version - The version to validate.
+   *
    * @returns {TypeValidVersions} A valid version.
    */
   validateVersion(version?: TypeValidVersions): TypeValidVersions {
@@ -245,7 +255,8 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Validate map config language.
-   * @param {TypeDisplayLanguage} language The language to validate.
+   * @param {TypeDisplayLanguage} language - The language to validate.
+   *
    * @returns {TypeDisplayLanguage} A valid language.
    */
   validateDisplayLanguage(language?: TypeDisplayLanguage): TypeDisplayLanguage {
@@ -259,17 +270,21 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Validate zoom level.
-   * @param {number} zoom The zoom level to validate.
+   * @param {number} zoom - The zoom level to validate.
+   *
    * @returns {number} A valid zoom level.
    * @private
    */
   #validateZoom(zoom?: number): number {
-    return zoom && !Number.isNaN(zoom) && zoom >= 0 && zoom <= 18 ? zoom : this.#defaultMapFeaturesConfig.map.viewSettings.zoom;
+    return zoom && !Number.isNaN(zoom) && zoom >= 0 && zoom <= 18
+      ? zoom
+      : this.#defaultMapFeaturesConfig.map.viewSettings.initialView!.zoomAndCenter![0];
   }
 
   /** ***************************************************************************************************************************
    * Validate min zoom level.
-   * @param {number} zoom The zoom level to validate.
+   * @param {number} zoom - The zoom level to validate.
+   *
    * @returns {number} A valid zoom level.
    * @private
    */
@@ -279,7 +294,8 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Validate max zoom level.
-   * @param {number} zoom The zoom level to validate.
+   * @param {number} zoom - The zoom level to validate.
+   *
    * @returns {number} A valid zoom level.
    * @private
    */
@@ -289,7 +305,8 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Validate projection.
-   * @param {TypeValidMapProjectionCodes} projection The projection to validate.
+   * @param {TypeValidMapProjectionCodes} projection - The projection to validate.
+   *
    * @returns {TypeValidMapProjectionCodes} A valid projection.
    * @private
    */
@@ -301,8 +318,9 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Validate the center.
-   * @param {TypeValidMapProjectionCodes} projection The projection used by the map.
-   * @param {[number, number]} center The map center to validate.
+   * @param {TypeValidMapProjectionCodes} projection - The projection used by the map.
+   * @param {[number, number]} center - The map center to validate.
+   *
    * @returns {[number, number]} A valid map center.
    * @private
    */
@@ -314,22 +332,23 @@ export class ConfigValidation {
       const x =
         !Number.isNaN(xVal) && xVal > this.#center[projection].long[0] && xVal < this.#center[projection].long[1]
           ? xVal
-          : this.#defaultMapFeaturesConfig.map.viewSettings.center[0];
+          : this.#defaultMapFeaturesConfig.map.viewSettings.initialView!.zoomAndCenter![1][0];
       const y =
         !Number.isNaN(yVal) && yVal > this.#center[projection].lat[0] && yVal < this.#center[projection].lat[1]
           ? yVal
-          : this.#defaultMapFeaturesConfig.map.viewSettings.center[1];
+          : this.#defaultMapFeaturesConfig.map.viewSettings.initialView!.zoomAndCenter![1][1];
 
       return [x, y];
     }
-    return this.#defaultMapFeaturesConfig.map.viewSettings.center;
+    return this.#defaultMapFeaturesConfig.map.viewSettings.initialView!.zoomAndCenter![1];
   }
 
   /** ***************************************************************************************************************************
    * Validate the extent.
-   * @param {TypeValidMapProjectionCodes} projection The projection used by the map.
-   * @param {[number, number, number, number]} extent The map extent to valdate.
-   * @param {[number, number]} center The map extent to validate.
+   * @param {TypeValidMapProjectionCodes} projection - The projection used by the map.
+   * @param {[number, number, number, number]} extent - The map extent to valdate.
+   * @param {[number, number]} center - The map extent to validate.
+   *
    * @returns {[number, number, number, number]} A valid map extent.
    * @private
    */
@@ -352,8 +371,8 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Print a trace to help locate schema errors.
-   * @param {AnyValidateFunction<unknown>} validate The Ajv validator.
-   * @param {any} objectAffected Object that was validated.
+   * @param {AnyValidateFunction<unknown>} validate - The Ajv validator.
+   * @param {unknown} objectAffected - Object that was validated.
    * @private
    */
   #printSchemaError(validate: AnyValidateFunction<unknown>, objectAffected: unknown): void {
@@ -371,8 +390,9 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Validate the configuration of the map features against the TypeMapFeaturesInstance defined in the schema.
-   * @param {TypeMapFeaturesConfig} mapFeaturesConfigToValidate The map features configuration to validate.
-   * @param {Ajv} validator The schema validator to use.
+   * @param {TypeMapFeaturesConfig} mapFeaturesConfigToValidate - The map features configuration to validate.
+   * @param {Ajv} validator - The schema validator to use.
+   *
    * @returns {TypeMapFeaturesConfig} A valid map features configuration.
    * @private
    */
@@ -398,9 +418,10 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Validate the configuration of the map features against the TypeMapFeaturesInstance defined in the schema.
-   * @param {TypeGeoviewLayerType} geoviewLayerType The GeoView layer type to validate.
-   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entry configurations to validate.
-   * @param {Ajv} validator The schema validator to use.
+   * @param {TypeGeoviewLayerType} geoviewLayerType - The GeoView layer type to validate.
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig - The list of layer entry configurations to validate.
+   * @param {Ajv} validator - The schema validator to use.
+   *
    * @returns {TypeMapFeaturesConfig} A valid map features configuration.
    * @private
    */
@@ -447,7 +468,8 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Validate the map features configuration.
-   * @param {TypeMapFeaturesConfig} mapFeaturesConfigToValidate The map features configuration to validate.
+   * @param {TypeMapFeaturesConfig} mapFeaturesConfigToValidate - The map features configuration to validate.
+   *
    * @returns {TypeMapFeaturesConfig} A valid map features configuration.
    */
   validateMapConfigAgainstSchema(mapFeaturesConfigToValidate?: TypeMapFeaturesConfig): TypeMapFeaturesConfig {
@@ -510,8 +532,8 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Validate and adjust the list of GeoView layer configuration.
-   * @param {TypeListOfLocalizedLanguages} suportedLanguages The list of supported languages.
-   * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig The list of GeoView layer configuration to adjust and
+   * @param {TypeListOfLocalizedLanguages} suportedLanguages - The list of supported languages.
+   * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig - The list of GeoView layer configuration to adjust and
    * validate.
    */
   validateListOfGeoviewLayerConfig(
@@ -524,7 +546,7 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Do extra validation that schema can not do.
-   * @param {MapConfigLayerEntry[]} listOfMapConfigLayerEntry The list of Map Config Layer Entry configuration to adjust and
+   * @param {MapConfigLayerEntry[]} listOfMapConfigLayerEntry - The list of Map Config Layer Entry configuration to adjust and
    * validate.
    * @private
    */
@@ -565,7 +587,7 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Verify that the metadataAccessPath has a value.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to validate.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration to validate.
    * @private
    */
   #metadataAccessPathIsMandatory(geoviewLayerConfig: TypeGeoviewLayerConfig): void {
@@ -578,7 +600,7 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Verify that the geoviewLayerId has a value.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to validate.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration to validate.
    * @private
    */
   #geoviewLayerIdIsMandatory(geoviewLayerConfig: TypeGeoviewLayerConfig): void {
@@ -589,9 +611,9 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Process recursively the layer entries to create layers and layer groups.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to adjust and validate.
-   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entry configurations to process.
-   * @param {TypeGeoviewLayerConfig | GroupLayerEntryConfig} parentLayerConfig The parent layer configuration of all the
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration to adjust and validate.
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig - The list of layer entry configurations to process.
+   * @param {TypeGeoviewLayerConfig | GroupLayerEntryConfig} parentLayerConfig - The parent layer configuration of all the
    * layer entry configurations found in the list of layer entries.
    * @private
    */
@@ -650,9 +672,9 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Process recursively the layer entries to set the parents of each entries.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration.
-   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entry configurations to process.
-   * @param {GroupLayerEntryConfig} parentLayerConfig The parent layer configuration of all the
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration.
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig - The list of layer entry configurations to process.
+   * @param {GroupLayerEntryConfig} parentLayerConfig - The parent layer configuration of all the
    * layer configurations found in the list of layer entries.
    * @private
    */
@@ -671,10 +693,9 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Synchronize the English and French strings.
-   * @param {TypeLocalizedString} localizedString The localized string to synchronize the en and fr string.
-   * @param {TypeDisplayLanguage} sourceKey The source's key.
-   * @param {TypeDisplayLanguage} destinationKey The destination's key.
-   * @returns {TypeMapFeaturesConfig} A valid JSON configuration object.
+   * @param {TypeLocalizedString} localizedString - The localized string to synchronize the en and fr string.
+   * @param {TypeDisplayLanguage} sourceKey - The source's key.
+   * @param {TypeDisplayLanguage} destinationKey - The destination's key.
    * @private
    */
   #synchronizeLocalizedString(
@@ -687,8 +708,8 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Adjust the map features configuration localized strings according to the suported languages array content.
-   * @param {TypeListOfLocalizedLanguages} suportedLanguages The list of supported languages.
-   * @param {MapConfigLayerEntry[]} listOfMapConfigLayerEntry The list of Map Config Layer Entry configuration to adjust according
+   * @param {TypeListOfLocalizedLanguages} suportedLanguages - The list of supported languages.
+   * @param {MapConfigLayerEntry[]} listOfMapConfigLayerEntry - The list of Map Config Layer Entry configuration to adjust according
    * to the suported languages array content.
    * @private
    */
@@ -748,28 +769,45 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Adjust the map features configuration to make it valid.
-   * @param {TypeMapFeaturesConfig} config The map features configuration to adjust.
+   * @param {TypeMapFeaturesConfig} mapFeaturesConfigToAdjust - The map features configuration to adjust.
+   *
    * @returns {TypeMapFeaturesConfig} A valid JSON configuration object.
    * @private
    */
-  #adjustMapConfiguration(mapFeaturesConfigToAdjuste: TypeMapFeaturesConfig): TypeMapFeaturesConfig {
+  #adjustMapConfiguration(mapFeaturesConfigToAdjust: TypeMapFeaturesConfig): TypeMapFeaturesConfig {
     // merge default and provided configuration in a temporary object.
     const tempMapFeaturesConfig: TypeMapFeaturesConfig = {
       ...this.#defaultMapFeaturesConfig,
-      ...mapFeaturesConfigToAdjuste,
+      ...mapFeaturesConfigToAdjust,
     };
 
-    // do validation for every pieces
+    // Do validation for all pieces
     const projection = this.#validateProjection(tempMapFeaturesConfig?.map?.viewSettings?.projection);
-    const center = this.#validateCenter(projection, tempMapFeaturesConfig?.map?.viewSettings?.center);
-    const zoom = this.#validateZoom(tempMapFeaturesConfig?.map?.viewSettings?.zoom);
+    const center = this.#validateCenter(
+      projection,
+      tempMapFeaturesConfig?.map?.viewSettings?.initialView?.zoomAndCenter
+        ? tempMapFeaturesConfig?.map?.viewSettings?.initialView?.zoomAndCenter[1]
+        : undefined
+    );
+    const zoom = this.#validateZoom(
+      tempMapFeaturesConfig?.map?.viewSettings?.initialView?.zoomAndCenter
+        ? tempMapFeaturesConfig?.map?.viewSettings?.initialView?.zoomAndCenter[0]
+        : undefined
+    );
     const basemapOptions = this.#validateBasemap(projection, tempMapFeaturesConfig?.map?.basemapOptions);
     const schemaVersionUsed = this.validateVersion(tempMapFeaturesConfig.schemaVersionUsed);
     const minZoom = this.#validateMinZoom(tempMapFeaturesConfig?.map?.viewSettings?.minZoom);
     const maxZoom = this.#validateMaxZoom(tempMapFeaturesConfig?.map?.viewSettings?.maxZoom);
-    const extent = tempMapFeaturesConfig?.map?.viewSettings?.extent
-      ? this.#validateExtent(projection, tempMapFeaturesConfig?.map?.viewSettings?.extent as [number, number, number, number], center)
-      : undefined;
+    const maxExtent = tempMapFeaturesConfig?.map?.viewSettings?.maxExtent
+      ? this.#validateExtent(projection, tempMapFeaturesConfig?.map?.viewSettings?.maxExtent as [number, number, number, number], center)
+      : this.#maxExtents[projection];
+
+    // Set initial view, if no initial view, set zoomAndCenter to default.
+    let initialView: TypeInitialViewSettings = { zoomAndCenter: [zoom, center] };
+    if (tempMapFeaturesConfig.map.viewSettings.initialView?.extent)
+      initialView = { extent: tempMapFeaturesConfig.map.viewSettings.initialView?.extent };
+    else if (tempMapFeaturesConfig.map.viewSettings.initialView?.layerIds)
+      initialView = { layerIds: tempMapFeaturesConfig.map.viewSettings.initialView?.layerIds };
 
     // recreate the prop object to remove unwanted items and check if same as original. Log the modifications
     const validMapFeaturesConfig: TypeMapFeaturesConfig = {
@@ -777,12 +815,11 @@ export class ConfigValidation {
       map: {
         basemapOptions,
         viewSettings: {
-          zoom,
-          center,
           projection,
+          initialView,
           minZoom,
           maxZoom,
-          extent,
+          maxExtent,
         },
         highlightColor: tempMapFeaturesConfig.map.highlightColor,
         interaction: tempMapFeaturesConfig.map.interaction,
@@ -810,13 +847,12 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Log modifications made to configuration by the validator.
-   * @param {TypeMapFeaturesConfig} inputMapFeaturesConfig input config.
-   * @param {TypeMapFeaturesConfig} validMapFeaturesConfig valid config.
+   * @param {TypeMapFeaturesConfig} inputMapFeaturesConfig - The input config.
+   * @param {TypeMapFeaturesConfig} validMapFeaturesConfig - A valid config.
    * @private
    */
   #logModifs(inputMapFeaturesConfig: TypeMapFeaturesConfig, validMapFeaturesConfig: TypeMapFeaturesConfig): void {
-    // eslint-disable-next-line array-callback-return
-    Object.keys(inputMapFeaturesConfig).map((key) => {
+    Object.keys(inputMapFeaturesConfig).forEach((key) => {
       if (!(key in validMapFeaturesConfig)) {
         logger.logWarning(`- Map: ${this.mapId} - Key '${key}' is invalid -`);
       }
@@ -828,17 +864,27 @@ export class ConfigValidation {
       );
     }
 
-    if (inputMapFeaturesConfig?.map?.viewSettings?.zoom !== validMapFeaturesConfig.map.viewSettings.zoom) {
+    if (
+      inputMapFeaturesConfig?.map?.viewSettings?.initialView?.zoomAndCenter &&
+      validMapFeaturesConfig.map.viewSettings.initialView?.zoomAndCenter &&
+      inputMapFeaturesConfig?.map?.viewSettings?.initialView?.zoomAndCenter[0] !==
+        validMapFeaturesConfig.map.viewSettings.initialView?.zoomAndCenter[0]
+    ) {
       logger.logWarning(
-        `- Map: ${this.mapId} - Invalid zoom level ${inputMapFeaturesConfig?.map?.viewSettings?.zoom} replaced by ${validMapFeaturesConfig.map.viewSettings.zoom} -`
+        `- Map: ${this.mapId} - Invalid zoom level ${inputMapFeaturesConfig?.map?.viewSettings?.initialView?.zoomAndCenter[0]} 
+        replaced by ${validMapFeaturesConfig.map.viewSettings.initialView?.zoomAndCenter[0]} -`
       );
     }
 
     if (
-      JSON.stringify(inputMapFeaturesConfig?.map?.viewSettings?.center) !== JSON.stringify(validMapFeaturesConfig.map.viewSettings.center)
+      inputMapFeaturesConfig?.map?.viewSettings?.initialView?.zoomAndCenter &&
+      validMapFeaturesConfig.map.viewSettings.initialView?.zoomAndCenter &&
+      inputMapFeaturesConfig?.map?.viewSettings?.initialView?.zoomAndCenter[1] !==
+        validMapFeaturesConfig.map.viewSettings.initialView?.zoomAndCenter[1]
     ) {
       logger.logWarning(
-        `- Map: ${this.mapId} - Invalid center ${inputMapFeaturesConfig?.map?.viewSettings?.center} replaced by ${validMapFeaturesConfig.map.viewSettings.center}`
+        `- Map: ${this.mapId} - Invalid center ${inputMapFeaturesConfig?.map?.viewSettings?.initialView?.zoomAndCenter[1]} 
+        replaced by ${validMapFeaturesConfig.map.viewSettings.initialView?.zoomAndCenter[1]}`
       );
     }
 

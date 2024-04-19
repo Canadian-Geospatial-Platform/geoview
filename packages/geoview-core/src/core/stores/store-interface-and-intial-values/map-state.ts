@@ -144,15 +144,19 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         mapState: {
           ...get().mapState,
           basemapOptions: geoviewConfig.map.basemapOptions,
-          centerCoordinates: geoviewConfig.map.viewSettings.center as Coordinate,
+          centerCoordinates: geoviewConfig.map.viewSettings.initialView?.zoomAndCenter
+            ? (geoviewConfig.map.viewSettings.initialView.zoomAndCenter[1] as Coordinate)
+            : [-90, 67],
           currentProjection: geoviewConfig.map.viewSettings.projection,
           interaction: geoviewConfig.map.interaction || 'dynamic',
-          mapExtent: geoviewConfig.map.viewSettings.extent,
+          mapExtent: geoviewConfig.map.viewSettings.maxExtent,
           northArrow: geoviewConfig.components!.indexOf('north-arrow') > -1 || false,
           overviewMap: geoviewConfig.components!.indexOf('overview-map') > -1 || false,
           overviewMapHideZoom: geoviewConfig.overviewMap !== undefined ? geoviewConfig.overviewMap.hideOnZoom : 0,
           rotation: geoviewConfig.map.viewSettings.rotation || 0,
-          zoom: geoviewConfig.map.viewSettings.zoom,
+          zoom: geoviewConfig.map.viewSettings.initialView?.zoomAndCenter
+            ? geoviewConfig.map.viewSettings.initialView.zoomAndCenter[0]
+            : 4.5,
         },
       });
     },
