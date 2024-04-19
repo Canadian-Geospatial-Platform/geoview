@@ -5,19 +5,19 @@ import { Button } from '@/ui';
 import { getSxClasses } from './enlarge-button-style';
 
 interface CloseButtonProps {
-  isLayersPanelVisible: boolean;
-  onSetIsLayersPanelVisible: Dispatch<SetStateAction<boolean>>;
+  isRightPanelVisible: boolean;
+  onSetIsRightPanelVisible: Dispatch<SetStateAction<boolean>>;
   fullWidth?: boolean;
 }
 
 /**
  * Create close button
- * @param {boolean} isLayersPanelVisible show/hide the list in left panel
- * @param {function} setIsLayersPanelVisible dispatch function to update isLayersPanelVisible
+ * @param {boolean} isRightPanelVisible show/hide the list in left panel
+ * @param {function} setisRightPanelVisible dispatch function to update isRightPanelVisible
  * @param {boolean} fullWidth show close button when full width is true
  * @returns {JSX.Element}
  */
-export function CloseButton({ isLayersPanelVisible, onSetIsLayersPanelVisible, fullWidth }: CloseButtonProps): JSX.Element {
+export function CloseButton({ isRightPanelVisible, onSetIsRightPanelVisible, fullWidth }: CloseButtonProps): JSX.Element {
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
@@ -31,14 +31,14 @@ export function CloseButton({ isLayersPanelVisible, onSetIsLayersPanelVisible, f
         ...sxClasses.enlargeBtn,
         marginLeft: '1rem',
         ...(fullWidth ? sxClasses.appBarEnlargeButton : sxClasses.footerBarEnlargeButton),
-        ...(fullWidth && { display: !isLayersPanelVisible ? 'none' : 'block' }),
+        ...(fullWidth && { display: !isRightPanelVisible ? 'none' : 'block' }),
         ...(!fullWidth && {
           [theme.breakpoints.up('md')]: { display: 'none' },
-          [theme.breakpoints.between('sm', 'md')]: { display: !isLayersPanelVisible ? 'none' : 'block' },
-          [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'none' : 'block' },
+          [theme.breakpoints.between('sm', 'md')]: { display: !isRightPanelVisible ? 'none' : 'block' },
+          [theme.breakpoints.down('md')]: { display: !isRightPanelVisible ? 'none' : 'block' },
         }),
       }}
-      onClick={() => onSetIsLayersPanelVisible(false)}
+      onClick={() => onSetIsRightPanelVisible(false)}
       tooltip={t('dataTable.close') ?? ''}
       tooltipPlacement="top"
     >

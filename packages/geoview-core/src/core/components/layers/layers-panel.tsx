@@ -1,15 +1,13 @@
-import { useState } from 'react';
-import { useTheme } from '@mui/material/styles';
+import { useRef } from 'react';
 import Markdown from 'markdown-to-jsx';
-import { CloseButton, ResponsiveGrid, useFooterPanelHeight } from '@/core/components/common';
 import { Box, Paper } from '@/ui';
-import { getSxClasses } from './layers-style';
 import { useLayerDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayersToolbar } from './layers-toolbar';
 import { LayerDetails } from './right-panel/layer-details';
 import { LeftPanel } from './left-panel/left-panel';
 import { logger } from '@/core/utils/logger';
 import { useAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { ResponsiveGridLayout, ResponsiveGridLayoutExposedMethods } from '../common/responsive-grid-layout';
 
 export function LayersPanel(): JSX.Element {
   // Log
@@ -17,13 +15,10 @@ export function LayersPanel(): JSX.Element {
 
   const guide = useAppGuide();
 
-  const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
-
-  const [isLayersListPanelVisible, setIsLayersListPanelVisible] = useState(false);
-
   const selectedLayer = useSelectedLayer(); // get store value
   const displayState = useLayerDisplayState();
+
+  const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
 
   /*
   // Using helpers
@@ -37,13 +32,14 @@ export function LayersPanel(): JSX.Element {
   }, []);
   */
 
-  // Custom hook for calculating the height of footer panel
-  const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'layers' });
+  const showLayerDetailsPanel = (): void => {
+    responsiveLayoutRef.current?.setIsRightPanelVisible(true);
+  };
 
   const leftPanel = (): JSX.Element => {
     return (
       <Box>
-        <LeftPanel setIsLayersListPanelVisible={setIsLayersListPanelVisible} />
+        <LeftPanel setIsLayersListPanelVisible={showLayerDetailsPanel} />
       </Box>
     );
   };
@@ -99,35 +95,12 @@ export function LayersPanel(): JSX.Element {
   };
 
   return (
-    <Box sx={sxClasses.layersPanelContainer}>
-      <LayersToolbar />
-      <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
-        <ResponsiveGrid.Right isEnlarged={false} isLayersPanelVisible={isLayersListPanelVisible}>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'right',
-            }}
-          >
-            <CloseButton isLayersPanelVisible={isLayersListPanelVisible} onSetIsLayersPanelVisible={setIsLayersListPanelVisible} />
-          </Box>
-        </ResponsiveGrid.Right>
-      </ResponsiveGrid.Root>
-      <ResponsiveGrid.Root>
-        <ResponsiveGrid.Left isEnlarged={false} isLayersPanelVisible={isLayersListPanelVisible} ref={leftPanelRef}>
-          {leftPanel()}
-        </ResponsiveGrid.Left>
-
-        <ResponsiveGrid.Right
-          isEnlarged={false}
-          isLayersPanelVisible={isLayersListPanelVisible}
-          ref={rightPanelRef}
-          sx={sxClasses.rightPanel}
-        >
-          {rightPanel()}
-        </ResponsiveGrid.Right>
-      </ResponsiveGrid.Root>
-    </Box>
+    <ResponsiveGridLayout
+      ref={responsiveLayoutRef}
+      leftTop={<LayersToolbar />}
+      leftMain={leftPanel()}
+      rightMain={rightPanel()}
+      fullWidth={false}
+    />
   );
 }
