@@ -16,7 +16,7 @@ export const getSxClasses = (theme: Theme): any => ({
     justifyContent: 'center',
     backgroundColor: 'transparent',
     transition: 'bottom 300ms ease-in-out',
-    marginBottom: '5rem',
+    bottom: '6rem',
   },
   navBtnGroupContainer: {
     display: 'flex',

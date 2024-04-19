@@ -53,18 +53,18 @@ export const getSxClasses = (theme: Theme): any => ({
     '&.hasScaleLine::before, &.hasScaleLine::after': {
       content: '""',
       position: 'absolute',
-      bottom: '-2px',
+      bottom: '-1px',
       width: '1px',
       height: '8px',
       backgroundColor: theme.palette.geoViewColor.bgColor.light[800],
     },
 
     '&.hasScaleLine::before': {
-      left: '-1px',
+      left: '0px',
     },
 
     '&.hasScaleLine::after': {
-      right: '-1px',
+      right: '0px',
     },
   },
   scaleCheckmark: {
