@@ -33,8 +33,8 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
       throw new Error(`The layer entry with layerId equal to ${this.layerPath} must be an integer string`);
     }
     // if layerConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
-    this.source = {};
-    this.source.dataAccessPath = { ...layerConfig.geoviewLayerConfig.metadataAccessPath! };
+    if (!this.source) this.source = {};
+    if (!this.source.dataAccessPath) this.source.dataAccessPath = { ...this.geoviewLayerConfig.metadataAccessPath! };
   }
 
   /**

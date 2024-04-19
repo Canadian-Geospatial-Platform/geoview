@@ -13,12 +13,12 @@ export class WfsLayerEntryConfig extends VectorLayerEntryConfig {
     Object.assign(this, layerConfig);
 
     // Attribute 'style' must exist in layerConfig even if it is undefined
-    if (!('style' in layerConfig)) this.style = undefined;
-
+    if (!('style' in this)) this.style = undefined;
     // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
     // Value for this.source.format can only be WFS.
-    this.source = { format: 'WFS' };
-    this.source.dataAccessPath = { ...layerConfig.geoviewLayerConfig.metadataAccessPath! };
-    this.source.dataProjection = 'EPSG:4326';
+    if (!this.source) this.source = { format: 'WFS' };
+    if (!this.source.format) this.source.format = 'WFS';
+    if (!this.source.dataAccessPath) this.source.dataAccessPath = { ...this.geoviewLayerConfig.metadataAccessPath! };
+    if (!this.source.dataProjection) this.source.dataProjection = 'EPSG:4326';
   }
 }
