@@ -2,7 +2,6 @@ import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-l
 import {
   CONST_LAYER_ENTRY_TYPES,
   GeoviewChild,
-  TypeLocalizedString,
   TypeSourceImageEsriInitialConfig,
   TypeStyleConfig,
   TypeStyleGeometry,
@@ -38,7 +37,7 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     Object.assign(this, layerConfig);
     // if layerConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
     if (!this.source) this.source = {};
-    if (!this.source.dataAccessPath) this.source.dataAccessPath = { ...this.geoviewLayerConfig.metadataAccessPath } as TypeLocalizedString;
+    if (!this.source.dataAccessPath) this.source.dataAccessPath = { ...this.geoviewLayerConfig.metadataAccessPath! };
   }
 
   /**
