@@ -1,5 +1,6 @@
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
+import { Extent } from 'ol/extent';
 import { GeoCore } from '@/geo/layer/other/geocore';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { FeatureHighlight } from '@/geo/utils/feature-highlight';
@@ -37,6 +38,7 @@ import { HoverFeatureInfoLayerSet } from '@/geo/utils/hover-feature-info-layer-s
 import { AllFeatureInfoLayerSet } from '@/geo/utils/all-feature-info-layer-set';
 import { LegendsLayerSet } from '@/geo/utils/legends-layer-set';
 import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
+import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { LayerSet } from '@/geo/utils/layer-set';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -763,6 +765,25 @@ export class LayerApi {
       this.highlightedLayer.layerPath = undefined;
       this.highlightedLayer.originalOpacity = undefined;
     }
+  }
+
+  /**
+   * Gets the max extent of all layers on the map, or of a provided subset of layers.
+   *
+   * @param {string[]} layerIds - IDs of layer to get max extents from.
+   * @returns {Extent} The overall extent.
+   */
+  getExtentOfMultipleLayers(layerIds: string[] = Object.keys(this.registeredLayers)): Extent {
+    let bounds: Extent = [];
+    layerIds.forEach((layerId) => {
+      const subLayerPaths = Object.keys(this.registeredLayers).filter((layerPath) => layerPath.includes(layerId));
+      subLayerPaths.forEach((layerPath) => {
+        const layerBounds = this.geoviewLayer(layerPath).calculateBounds(layerPath);
+        if (!bounds.length && layerBounds) bounds = layerBounds;
+        else if (layerBounds) bounds = getMinOrMaxExtents(bounds, layerBounds);
+      });
+    });
+    return bounds;
   }
 }
 
