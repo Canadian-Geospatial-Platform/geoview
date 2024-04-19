@@ -1574,38 +1574,23 @@
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "center": {
-          "type": "array",
-          "prefixItems": [
-            {
-              "type": "number",
-              "minimum": -160,
-              "maximum": 160,
-              "default": -106,
-              "description": "Initial longitude value for map center."
-            },
-            {
-              "type": "number",
-              "minimum": -80,
-              "maximum": 80,
-              "default": 60,
-              "description": "Initial latitude value for map center."
-            }
-          ],
-          "default": [-106, 60]
+        "initialView": {
+          "$ref": "#/definitions/TypeInitialViewSettings",
+          "description": "Settings for the initial viewing area of the map."
         },
         "enableRotation": {
           "type": "boolean",
           "default": true,
           "description": "Enable rotation. If false, a rotation constraint that always sets the rotation to zero is used."
         },
-        "extent": {
+        "maxExtent": {
           "type": "array",
           "minItems": 4,
           "maxItems": 4,
           "items": {
             "type": "number"
           },
+          "default": [-125, 30, -60, 89],
           "description": "The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates."
         },
         "minZoom": {
@@ -1629,16 +1614,65 @@
           "maximum": 360,
           "default": 0,
           "description": "The initial rotation for the view in degree (positive rotation clockwise, 0 means North). Will be converted to radiant by the viewer."
+        }
+      }
+    },
+    "TypeInitialViewSettings": {
+      "additionalProperties": false,
+      "type": "object",
+      "maxItems": 1,
+      "properties": {
+        "zoomAndCenter": {
+          "$ref": "#/definitions/TypeZoomAndCenter"
         },
-        "zoom": {
+        "extent": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "number"
+          },
+          "description": "The extent for the initial view. Called with [minX, minY, maxX, maxY] extent coordinates."
+        },
+        "layerIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "description": "ID(s) of layer(s) to use as initial map focus."
+        }
+      }
+    },
+    "TypeZoomAndCenter": {
+      "type": "array",
+      "prefixItems": [
+        {
           "type": "number",
           "minimum": 0,
           "maximum": 28,
-          "default": 12,
+          "default": 3.5,
           "description": "Initial map zoom level. Zoom level are define by the basemap zoom levels. Levels between whole numbers are supported to fine tune initial view."
-        }
-      },
-      "required": ["zoom", "center"]
+        },
+        [
+          {
+            "type": "number",
+            "minimum": -160,
+            "maximum": 160,
+            "default": -90,
+            "description": "Initial longitude value for map center."
+          },
+          {
+            "type": "number",
+            "minimum": -80,
+            "maximum": 80,
+            "default": 65,
+            "description": "Initial latitude value for map center."
+          }
+        ]
+      ],
+      "default": [4.5, [-90, 67]],
+      "description": "Initial zoom and center coordinates to set map view."
     },
     "TypeValidMapProjectionCodes": {
       "enum": [3978, 3857],
@@ -1652,7 +1686,7 @@
         "enum": ["zoom", "fullscreen", "home", "location"]
       },
       "default": ["zoom", "fullscreen", "home"],
-      "description": "Controls availalbe on the navigation bar.",
+      "description": "Controls available on the navigation bar.",
       "minItems": 0
     },
     "TypeFooterBarProps": {
@@ -1772,7 +1806,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "External Package name. The name must be ideintical to the window external package object to load."
+            "description": "External Package name. The name must be identical to the window external package object to load."
           },
           "configUrl": {
             "type": "string",

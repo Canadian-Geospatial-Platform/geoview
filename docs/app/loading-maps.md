@@ -46,8 +46,9 @@ The content of the config must match the schema, an example of the object in the
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
-      "zoom": 12,
-      "center": [45, 75],
+      "initialView": {
+        "zoomAndCenter": [12, [45, 75]]
+      },
       "projection": 3978
     },
     "basemapOptions": {
@@ -59,9 +60,7 @@ The content of the config must match the schema, an example of the object in the
   },
   "theme": "dark",
   "components": ["north-arrow"],
-  "corePackages": [
-    "basemap-panel",
-  ],
+  "corePackages": ["basemap-panel"],
   "externalPackages": [],
   "suportedLanguages": ["en", "fr"]
 }
@@ -82,8 +81,9 @@ An example of this:
                     'map': {
                         'interaction': 'dynamic',
                         'viewSettings': {
-                            'zoom': 12,
-                            'center': [45,75],
+                            'initialView': {
+                              'zoomAndCenter': [12, [45,75]]
+                            },
                             'projection': 3978
                         },
                         'basemapOptions': {
@@ -138,8 +138,7 @@ cgpv.init(function() {
         map: {
             interaction: 'dynamic',
             viewSettings: {
-                zoom: 12,
-                center: [45, 75],
+                zoomAndCenter: [12, [45, 75]],
                 projection: 3978
             },
             basemapOptions: {
