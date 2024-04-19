@@ -231,9 +231,9 @@ export class MapViewer {
     const projection = api.utilities.projection.projections[mapFeaturesConfig.map.viewSettings.projection];
 
     let extentProjected: Extent | undefined;
-    if (mapFeaturesConfig?.map.viewSettings.extent)
+    if (mapFeaturesConfig?.map.viewSettings.maxExtent)
       extentProjected = api.utilities.projection.transformExtent(
-        mapFeaturesConfig?.map.viewSettings.extent,
+        mapFeaturesConfig?.map.viewSettings.maxExtent,
         'EPSG:4326',
         projection.getCode()
       );
@@ -244,10 +244,14 @@ export class MapViewer {
       view: new View({
         projection,
         center: api.utilities.projection.transformFromLonLat(
-          [mapFeaturesConfig?.map.viewSettings.center[0] || -105, mapFeaturesConfig?.map.viewSettings.center[1] || 60],
+          mapFeaturesConfig?.map.viewSettings.initialView?.zoomAndCenter
+            ? mapFeaturesConfig?.map.viewSettings.initialView?.zoomAndCenter[1]
+            : [-90, 60],
           projection
         ),
-        zoom: mapFeaturesConfig?.map.viewSettings.zoom,
+        zoom: mapFeaturesConfig?.map.viewSettings.initialView?.zoomAndCenter
+          ? mapFeaturesConfig?.map.viewSettings.initialView?.zoomAndCenter[0]
+          : 3.5,
         extent: extentProjected || undefined,
         minZoom: mapFeaturesConfig?.map.viewSettings.minZoom || 0,
         maxZoom: mapFeaturesConfig?.map.viewSettings.maxZoom || 17,
@@ -265,7 +269,6 @@ export class MapViewer {
 
   /**
    * Initializes map, layer class and geometries
-   * @param {OLMap} cgpMap - The OpenLayers map object
    */
   initMap(): void {
     // Register essential map handlers
@@ -534,6 +537,16 @@ export class MapViewer {
       logger.logError('Failed in #checkLayerResultSetReady', error);
     });
 
+    // Zoom to extent provided in config, it present
+    if (this.mapFeaturesConfig.map.viewSettings.initialView?.extent)
+      await this.zoomToExtent(
+        api.utilities.projection.transformExtent(
+          this.mapFeaturesConfig.map.viewSettings.initialView?.extent,
+          'EPSG:4326',
+          `EPSG:${this.mapFeaturesConfig.map.viewSettings.projection}`
+        )
+      );
+
     // Start checking for map layers processed
     this.#checkMapLayersProcessed();
 
@@ -570,6 +583,14 @@ export class MapViewer {
         if (allGeoviewLayerLoaded) {
           // Clear interval
           clearInterval(mapInterval);
+
+          // Zoom to extents of layers selected in config, if provided.
+          if (this.mapFeaturesConfig.map.viewSettings.initialView?.layerIds) {
+            const layerExtents = this.layer.getExtentOfMultipleLayers(this.mapFeaturesConfig.map.viewSettings.initialView.layerIds);
+            // Disabling to avoid unnecessary complication
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+            if (layerExtents.length) this.zoomToExtent(layerExtents);
+          }
 
           // How many layers?
           const layersCount = Object.keys(geoviewLayers).length;
@@ -1215,16 +1236,16 @@ export class MapViewer {
     const currentView = this.map.getView();
     const viewOptions: ViewOptions = {};
     viewOptions.projection = mapView.projection ? `EPSG:${mapView.projection}` : currentView.getProjection();
-    viewOptions.zoom = mapView.zoom ? mapView.zoom : currentView.getZoom();
-    viewOptions.center = mapView.center
-      ? api.utilities.projection.transformFromLonLat([mapView.center[0], mapView.center[1]], viewOptions.projection)
+    viewOptions.zoom = mapView.initialView?.zoomAndCenter ? mapView.initialView?.zoomAndCenter[0] : currentView.getZoom();
+    viewOptions.center = mapView.initialView?.zoomAndCenter
+      ? api.utilities.projection.transformFromLonLat(mapView.initialView?.zoomAndCenter[1], viewOptions.projection)
       : api.utilities.projection.transformFromLonLat(
           api.utilities.projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
           viewOptions.projection
         );
     viewOptions.minZoom = mapView.minZoom ? mapView.minZoom : currentView.getMinZoom();
     viewOptions.maxZoom = mapView.maxZoom ? mapView.maxZoom : currentView.getMaxZoom();
-    if (mapView.extent) viewOptions.extent = mapView.extent;
+    if (mapView.maxExtent) viewOptions.extent = mapView.maxExtent;
 
     this.map.setView(new View(viewOptions));
   }
