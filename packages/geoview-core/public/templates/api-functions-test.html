@@ -54,8 +54,6 @@
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
-              'zoom': 4,
-              'center': [-100, 60],
               'projection': 3857
             },
             'basemapOptions': {
@@ -146,10 +144,12 @@
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init((mapId) => {
         if (mapId === 'allMaps') {
-          cgpv.api.utilities.geo.getESRIServiceMetadata('https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/1').then((data) => {
-            console.log(data);
-            document.getElementById('esriMetadata').textContent = JSON.stringify(data, undefined, 2);
-          });
+          cgpv.api.utilities.geo
+            .getESRIServiceMetadata('https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/1')
+            .then((data) => {
+              console.log(data);
+              document.getElementById('esriMetadata').textContent = JSON.stringify(data, undefined, 2);
+            });
 
           cgpv.api.utilities.geo.getWMSServiceMetadata('https://geo.weather.gc.ca/geomet', 'RAQDPS-FW.CE_PM2.5-DIFF-YAvg').then((data) => {
             console.log(data);

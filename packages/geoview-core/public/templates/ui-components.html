@@ -58,8 +58,6 @@
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
-              'zoom': 4,
-              'center': [-100, 60],
               'projection': 3857
             },
             'basemapOptions': {
@@ -188,8 +186,10 @@
                 track: 'normal',
                 onChange: (dates) => {
                   const field = cgpv.api.maps.UI1.layer.geoviewLayer('historical-flood/0').getTemporalDimension('historical-flood/0').field;
-                  cgpv.api.maps.UI1.layer.geoviewLayer('historical-flood/0').applyViewFilter('historical-flood/0', `${field} >= date '${dates[0]}-01-01' and ${field} <= date '${dates[1]}-12-31'`);
-                }
+                  cgpv.api.maps.UI1.layer
+                    .geoviewLayer('historical-flood/0')
+                    .applyViewFilter('historical-flood/0', `${field} >= date '${dates[0]}-01-01' and ${field} <= date '${dates[1]}-12-31'`);
+                },
               })
             );
             /**
@@ -231,17 +231,16 @@
             // set min max
             function setSliderMinMax() {
               // Update the react component from external call
-              root1 = createAndUpdateSliderComponent('UI1-slider1', {...propsSlider1, min: 4, max: 12}, root1);
+              root1 = createAndUpdateSliderComponent('UI1-slider1', { ...propsSlider1, min: 4, max: 12 }, root1);
             }
             document.getElementById('sliderminmax').addEventListener('click', setSliderMinMax);
 
             // set values
             function setSliderValues() {
               // Update the react component from external call
-              root1 = createAndUpdateSliderComponent('UI1-slider1', {...propsSlider1, min: 0, max: 20, value: 12}, root1); // Math.floor(Math.random() * 2) + 4 <-- Helpful to test funky react stuff
+              root1 = createAndUpdateSliderComponent('UI1-slider1', { ...propsSlider1, min: 0, max: 20, value: 12 }, root1); // Math.floor(Math.random() * 2) + 4 <-- Helpful to test funky react stuff
             }
             document.getElementById('slidervalues').addEventListener('click', setSliderValues);
-
 
             // Props for slider 2
             const propsSlider2 = {
@@ -259,7 +258,9 @@
                 { value: 18, label: 'Max Level 18' },
               ],
               onChange: (sliderValues, activeThumb) => {
-                sliderPosition2[0].innerHTML = `<p>Slider values ${sliderValues} and active thumb ${activeThumb === 0 ? 'left' : 'right'}</p>`;
+                sliderPosition2[0].innerHTML = `<p>Slider values ${sliderValues} and active thumb ${
+                  activeThumb === 0 ? 'left' : 'right'
+                }</p>`;
               },
             };
 
