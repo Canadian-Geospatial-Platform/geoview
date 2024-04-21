@@ -1,5 +1,5 @@
 import { TypeSourceCSVInitialConfig } from '@/geo/layer/geoview-layers/vector/csv';
-import { CONST_LAYER_ENTRY_TYPES, TypeLocalizedString } from '@/geo/map/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES } from '@/geo/map/map-schema-types';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 
 export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
@@ -35,7 +35,7 @@ export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
       let { en, fr } = this.geoviewLayerConfig.metadataAccessPath!;
       en = en!.split('/').length > 1 ? en!.split('/').slice(0, -1).join('/') : './';
       fr = fr!.split('/').length > 1 ? fr!.split('/').slice(0, -1).join('/') : './';
-      this.source.dataAccessPath = { en, fr } as TypeLocalizedString;
+      this.source.dataAccessPath = { en, fr };
     }
     if (
       !(this.source.dataAccessPath!.en?.startsWith('blob') && !this.source.dataAccessPath!.en?.endsWith('/')) &&

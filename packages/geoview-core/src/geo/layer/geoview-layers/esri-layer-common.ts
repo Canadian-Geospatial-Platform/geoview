@@ -124,12 +124,21 @@ export function commonValidateListOfLayerEntryConfig(
       // Replace the old version of the layer with the new layer group
       listOfLayerEntryConfig[i] = groupLayerConfig;
       // Don't forget to replace the old version in registeredLayers
-      api.maps[this.mapId].layer.registeredLayers[groupLayerConfig.layerPath] = groupLayerConfig;
+      MapEventProcessor.getMapViewerLayerAPI(this.mapId).registeredLayers[groupLayerConfig.layerPath] = groupLayerConfig;
 
       (this.metadata!.layers[esriIndex].subLayerIds as TypeJsonArray).forEach((layerId) => {
-        const subLayerEntryConfig: TypeLayerEntryConfig = geoviewEntryIsEsriDynamic(layerConfig)
-          ? new EsriDynamicLayerEntryConfig(layerConfig as EsriDynamicLayerEntryConfig)
-          : new EsriFeatureLayerEntryConfig(layerConfig as EsriFeatureLayerEntryConfig);
+        // Make sure to copy the layerConfig source before recycling it in the constructors. This was causing the 'source' value to leak between layer entry configs
+        const layerConfigCopy = { ...layerConfig, source: { ...layerConfig.source } };
+
+        let subLayerEntryConfig;
+        if (geoviewEntryIsEsriDynamic(layerConfig)) {
+          subLayerEntryConfig = new EsriDynamicLayerEntryConfig(layerConfigCopy as EsriDynamicLayerEntryConfig);
+        } else {
+          subLayerEntryConfig = new EsriFeatureLayerEntryConfig(layerConfigCopy as EsriFeatureLayerEntryConfig);
+        }
+
+        // TODO: Check - Instead of rewriting the attributes right after creating the instance, maybe create the instance
+        // TO.DOCONT: with the correct values directly? Especially now that we copy the config to prevent leaking.
         subLayerEntryConfig.parentLayerConfig = groupLayerConfig;
         subLayerEntryConfig.layerId = `${layerId}`;
         subLayerEntryConfig.layerName = {

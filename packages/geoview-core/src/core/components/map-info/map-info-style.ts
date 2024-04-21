@@ -21,6 +21,11 @@ export const getSxClasses = (theme: Theme): any => ({
     gap: 0.5,
     order: 3,
 
+    fill: `${theme.palette.geoViewColor.grey.dark[900]} !important`,
+    position: 'absolute',
+    bottom: 0,
+    left: '0px',
+
     '&.interaction-static': {
       backdropFilter: 'unset',
       backgroundColor: 'unset',
@@ -57,7 +62,7 @@ export const getSxClasses = (theme: Theme): any => ({
 
   // map-info-expand-button.tsx
   expandButton: {
-    display: 'flex',
+    display: { xs: 'none', sm: 'none', md: 'flex', lg: 'flex', xl: 'flex' },
     alignItems: 'center',
     justifyContent: 'center',
     color: theme.palette.geoViewColor.bgColor.light[800],

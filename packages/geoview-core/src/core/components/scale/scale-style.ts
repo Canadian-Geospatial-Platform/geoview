@@ -39,17 +39,32 @@ export const getSxClasses = (theme: Theme): any => ({
     fontSize: theme.palette.geoViewFontSize.default,
     color: theme.palette.geoViewColor.bgColor.light[800],
     whiteSpace: 'nowrap',
-    border: '1px solid',
-    borderColor: theme.palette.geoViewColor.primary.light[300],
-    borderTop: 'none',
-    borderLeft: 'none',
-    borderRight: 'none',
+    borderBottom: `2px solid ${theme.palette.geoViewColor.primary.light[300]}`,
     textTransform: 'lowercase',
+    position: 'relative',
+    display: 'inline-block',
 
     '&.interaction-static': {
       fontSize: theme.palette.geoViewFontSize.md,
       fontWeight: 'bold',
       borderBottom: '2px solid',
+    },
+
+    '&.hasScaleLine::before, &.hasScaleLine::after': {
+      content: '""',
+      position: 'absolute',
+      bottom: '-1px',
+      width: '1px',
+      height: '8px',
+      backgroundColor: theme.palette.geoViewColor.bgColor.light[800],
+    },
+
+    '&.hasScaleLine::before': {
+      left: '0px',
+    },
+
+    '&.hasScaleLine::after': {
+      right: '0px',
     },
   },
   scaleCheckmark: {

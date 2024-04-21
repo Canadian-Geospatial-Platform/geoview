@@ -8,7 +8,6 @@ import {
   isWmsLegend,
 } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeLegendResultSetEntry } from '@/geo/utils/legends-layer-set';
-import { api } from '@/app';
 import { ILayerState } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
@@ -22,6 +21,7 @@ import {
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { AppEventProcessor } from './app-event-processor';
+import { MapEventProcessor } from './map-event-processor';
 
 export class LegendEventProcessor extends AbstractEventProcessor {
   // **********************************************************
@@ -152,7 +152,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     };
     const createNewLegendEntries = (layerPathBeginning: string, currentLevel: number, existingEntries: TypeLegendLayer[]): void => {
       const entryLayerPath = `${layerPathBeginning}/${layerPathNodes[currentLevel]}`;
-      const layerConfig = api.maps[mapId].layer.registeredLayers[entryLayerPath] as TypeLayerEntryConfig;
+      const layerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).registeredLayers[entryLayerPath] as TypeLayerEntryConfig;
       let entryIndex = existingEntries.findIndex((entry) => entry.layerPath === entryLayerPath);
       if (layerEntryIsGroupLayer(layerConfig)) {
         const controls: TypeLayerControls = setLayerControls(layerConfig);
@@ -187,7 +187,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           controls,
           layerId: layerPathNodes[currentLevel],
           layerPath: entryLayerPath,
-          layerAttribution: api.maps[mapId].layer.geoviewLayers[layerPathNodes[0]].attributions,
+          layerAttribution: MapEventProcessor.getMapViewerLayerAPI(mapId).geoviewLayers[layerPathNodes[0]].attributions,
           layerName:
             legendResultSetEntry.layerName ||
             getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(mapId)) ||
@@ -214,7 +214,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         // eslint-disable-next-line no-param-reassign
         else existingEntries[entryIndex] = newLegendLayer;
 
-        const myLayer = api.maps[mapId].layer.geoviewLayers[layerPathNodes[0]];
+        const myLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).geoviewLayers[layerPathNodes[0]];
         // TODO: calculateBounds issue will be tackle ASAP in a next PR
         newLegendLayer.bounds = myLayer.allLayerStatusAreGreaterThanOrEqualTo('loaded') ? myLayer.calculateBounds(layerPath) : undefined;
       }

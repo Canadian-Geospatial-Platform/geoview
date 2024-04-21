@@ -1,5 +1,4 @@
 import { TypeSourceEsriFeatureInitialConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
-import { TypeLocalizedString } from '@/geo/map/map-schema-types';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 
 export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
@@ -23,6 +22,6 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
     // Value for this.source.format can only be EsriJSON.
     if (!this.source) this.source = { format: 'EsriJSON' };
     if (!this.source.format) this.source.format = 'EsriJSON';
-    if (!this.source.dataAccessPath) this.source.dataAccessPath = { ...this.geoviewLayerConfig.metadataAccessPath } as TypeLocalizedString;
+    if (!this.source.dataAccessPath) this.source.dataAccessPath = { ...this.geoviewLayerConfig.metadataAccessPath! };
   }
 }

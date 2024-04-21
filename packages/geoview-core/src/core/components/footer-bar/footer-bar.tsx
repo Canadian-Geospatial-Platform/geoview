@@ -29,6 +29,7 @@ import { DetailsPanel } from '@/core/components/details/details-panel';
 import { Datapanel } from '@/core/components/data-table/data-panel';
 import { logger } from '@/core/utils/logger';
 import { GuidePanel } from '@/core/components/guide/guide-panel';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 interface ShellContainerCssProperties {
   mapVisibility: string;
@@ -271,18 +272,28 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   };
 
   useEffect(() => {
-    // If clicked on a tab with a plugin
-    if (api.maps[mapId].plugins[selectedTab]) {
-      // Get the plugin
-      // ? unknown type cannot be use, need to escape
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const theSelectedPlugin = api.maps[mapId].plugins[selectedTab] as any;
+    // Log
+    logger.logTraceUseEffect('FOOTER-BAR - selectedTab');
 
-      // A bit hacky, but not much other choice for now...
-      if (typeof theSelectedPlugin.onSelected === 'function') {
-        theSelectedPlugin.onSelected();
-      }
-    }
+    // If clicked on a tab with a plugin
+    MapEventProcessor.getMapViewerPlugins(mapId)
+      .then((plugins) => {
+        if (plugins[selectedTab]) {
+          // Get the plugin
+          // ? unknown type cannot be use, need to escape
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const theSelectedPlugin = plugins[selectedTab] as any;
+
+          // A bit hacky, but not much other choice for now...
+          if (typeof theSelectedPlugin.onSelected === 'function') {
+            theSelectedPlugin.onSelected();
+          }
+        }
+      })
+      .catch((error) => {
+        // Log
+        logger.logPromiseFailed('getMapViewerPluginsInstance in useEffect in footer-bar', error);
+      });
   }, [mapId, selectedTab]);
 
   /**

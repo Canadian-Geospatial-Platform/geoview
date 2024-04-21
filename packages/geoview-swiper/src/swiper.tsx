@@ -1,7 +1,6 @@
 import Draggable from 'react-draggable';
 
 import { RefObject } from 'geoview-core';
-import { MapViewer } from 'geoview-core/src/geo/map/map-viewer';
 import { useSwiperLayerPaths } from 'geoview-core/src/core/stores/store-interface-and-intial-values/swiper-state';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
@@ -14,10 +13,11 @@ import BaseEvent from 'ol/events/Event';
 import debounce from 'lodash/debounce';
 
 import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
+import { MapViewer } from 'geoview-core/src/geo/map/map-viewer';
 import { sxClasses } from './swiper-style';
 
 type SwiperProps = {
-  mapId: string;
+  viewer: MapViewer;
   config: ConfigProps;
 };
 
@@ -27,16 +27,15 @@ type ConfigProps = {
 };
 
 export function Swiper(props: SwiperProps): JSX.Element {
-  const { mapId, config } = props;
+  const { viewer, config } = props;
 
   const { cgpv } = window;
   const { api, ui, react } = cgpv;
   const { useEffect, useState, useRef, useCallback } = react;
   const { Box, Tooltip, HandleIcon } = ui.elements;
   const { orientation } = config;
-  const mapViewer = api.maps[mapId] as MapViewer;
 
-  const mapSize = useRef<number[]>(mapViewer.map?.getSize() || [0, 0]);
+  const mapSize = useRef<number[]>(viewer.map?.getSize() || [0, 0]);
   const swiperValue = useRef(50);
   const swiperRef = useRef<HTMLElement>();
 
@@ -119,7 +118,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
    */
   const onStop = debounce(() => {
     // get map size
-    mapSize.current = mapViewer.map.getSize() || [0, 0];
+    mapSize.current = viewer.map.getSize() || [0, 0];
     const size = orientation === 'vertical' ? mapSize.current[0] : mapSize.current[1];
     const position = orientation === 'vertical' ? getSwiperStyle()[0] : getSwiperStyle()[1];
     swiperValue.current = (position / size) * 100;
@@ -169,7 +168,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
     async (layerPath: string) => {
       try {
         // Get the layer at the layer path
-        const olLayer = await mapViewer.layer.getOLLayerByLayerPathAsync(layerPath);
+        const olLayer = await viewer.layer.getOLLayerByLayerPathAsync(layerPath);
         if (olLayer) {
           // Set the OL layers
           setOlLayers((prevArray: BaseLayer[]) => [...prevArray, olLayer]);
@@ -186,10 +185,10 @@ export function Swiper(props: SwiperProps): JSX.Element {
         }
       } catch (error) {
         // Log
-        logger.logError('SWIPER - Failed to attach layer events', mapViewer.layer?.geoviewLayers, layerPath, error);
+        logger.logError('SWIPER - Failed to attach layer events', viewer.layer?.geoviewLayers, layerPath, error);
       }
     },
-    [mapViewer, prerender]
+    [viewer, prerender]
   );
 
   useEffect(() => {
@@ -213,7 +212,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
       layerPaths.forEach((layerPath: string) => {
         try {
           // Get the layer at the layer path
-          const olLayer = mapViewer.layer.getOLLayerByLayerPath(layerPath);
+          const olLayer = viewer.layer.getOLLayerByLayerPath(layerPath);
           if (olLayer) {
             // Unwire the events on the layer
             olLayer.un(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
@@ -234,18 +233,18 @@ export function Swiper(props: SwiperProps): JSX.Element {
       // Empty layers array
       setOlLayers([]);
     };
-  }, [mapViewer, layerPaths, attachLayerEventsOnPath, prerender]);
+  }, [viewer, layerPaths, attachLayerEventsOnPath, prerender]);
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('GEOVIEW-SWIPER - mount', mapId);
+    logger.logTraceUseEffect('GEOVIEW-SWIPER - mount', viewer.mapId);
 
     // Grab reference
     const theSwiper = swiperRef?.current;
 
     const handleFocusIn = (): void => {
       // set listener for the focus in on swiper bar when on WCAG mode
-      if (document.getElementById(mapId)!.classList.contains('map-focus-trap')) {
+      if (document.getElementById(viewer.mapId)!.classList.contains('map-focus-trap')) {
         theSwiper?.addEventListener('keydown', updateSwiper);
       }
     };
@@ -261,13 +260,13 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
     return () => {
       // Log
-      logger.logTraceUseEffectUnmount('GEOVIEW-SWIPER - unmount', mapId);
+      logger.logTraceUseEffectUnmount('GEOVIEW-SWIPER - unmount', viewer.mapId);
 
       // Unwire events
       theSwiper?.removeEventListener('focusout', handleFocusOut);
       theSwiper?.removeEventListener('focusin', handleFocusIn);
     };
-  }, [mapId, updateSwiper]);
+  }, [viewer.mapId, updateSwiper]);
 
   // If any layer paths
   if (layerPaths.length > 0) {

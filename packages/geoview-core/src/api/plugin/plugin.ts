@@ -11,6 +11,7 @@ import { logger } from '@/core/utils/logger';
 
 import { AbstractPlugin } from './abstract-plugin';
 import { TypePluginStructure } from './plugin-types';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 /**
  * Class to manage plugins
@@ -100,7 +101,8 @@ export class Plugin {
     constructor?: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue),
     props?: TypeJsonObject
   ): Promise<void> => {
-    if (!api.maps?.[mapId]?.plugins?.[pluginId]) {
+    const plugins = await MapEventProcessor.getMapViewerPlugins(mapId);
+    if (!plugins[pluginId]) {
       let plugin: TypePluginStructure | null = null;
 
       if (constructor) {
@@ -191,7 +193,7 @@ export class Plugin {
         });
 
         // attach to the map plugins object
-        api.maps[mapId].plugins[pluginId] = plugin;
+        plugins[pluginId] = plugin;
 
         // call plugin added method if available
         if (typeof plugin.added === 'function') {
@@ -207,10 +209,11 @@ export class Plugin {
    * @param {string} pluginId the id of the plugin to delete
    * @param {string} mapId the map id to remove the plugin from
    */
-  removePlugin = (pluginId: string, mapId: string): void => {
+  removePlugin = async (pluginId: string, mapId: string): Promise<void> => {
     // Get the plugin and remove it
-    api.maps[mapId]?.plugins[pluginId]?.removed?.();
-    delete api.maps[mapId].plugins[pluginId];
+    const plugins = await MapEventProcessor.getMapViewerPlugins(mapId);
+    plugins[pluginId]?.removed?.();
+    delete plugins[pluginId];
   };
 
   /**
@@ -218,17 +221,18 @@ export class Plugin {
    *
    * @param {string} mapId the map id to remove the plugin from (if not provided then plugin will be removed from all maps)
    */
-  removePlugins = (mapId: string): void => {
-    if (mapId) {
-      const recordOfPlugins = api.maps[mapId].plugins;
+  removePlugins = async (mapId: string): Promise<void> => {
+    const recordOfPlugins = await MapEventProcessor.getMapViewerPlugins(mapId);
 
-      if (recordOfPlugins) {
-        // remove all plugins by map
-        for (let i = 0; i < Object.keys(recordOfPlugins).length; i += 1) {
-          const pluginId = Object.keys(recordOfPlugins)[i];
+    if (recordOfPlugins) {
+      // remove all plugins by map
+      for (let i = 0; i < Object.keys(recordOfPlugins).length; i += 1) {
+        const pluginId = Object.keys(recordOfPlugins)[i];
 
-          this.removePlugin(pluginId, mapId);
-        }
+        this.removePlugin(pluginId, mapId).catch((error) => {
+          // Log
+          logger.logPromiseFailed('removePlugins in plugins.ts', error);
+        });
       }
     }
   };

@@ -111,8 +111,8 @@ export class LayerApi {
     this.allFeatureInfoLayerSet = new AllFeatureInfoLayerSet(this);
     this.featureInfoLayerSet = new FeatureInfoLayerSet(this);
 
-    this.geometry = new GeometryApi(this.mapId);
-    this.featureHighlight = new FeatureHighlight(this.mapId);
+    this.geometry = new GeometryApi(this.mapViewer);
+    this.featureHighlight = new FeatureHighlight(this.mapViewer);
   }
 
   /**

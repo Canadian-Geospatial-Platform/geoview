@@ -37,6 +37,7 @@ import { Translate } from '@/geo/interaction/translate';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
 import { delay, generateId } from '@/core/utils/utilities';
+import { createEmptyBasemap } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import {
   TypeDisplayLanguage,
@@ -218,16 +219,55 @@ export class MapViewer {
   }
 
   /**
+   * Create an Open Layer map from configuration attached to the class
+   * @param {HTMLElement} mapElement - HTML element to create the map within
+   * @returns {OLMap} The OpenLayer map
+   */
+  createMap(mapElement: HTMLElement): OLMap {
+    // config object
+    const { mapFeaturesConfig } = this;
+
+    // create map projection object from code
+    const projection = api.utilities.projection.projections[mapFeaturesConfig.map.viewSettings.projection];
+
+    let extentProjected: Extent | undefined;
+    if (mapFeaturesConfig?.map.viewSettings.extent)
+      extentProjected = api.utilities.projection.transformExtent(
+        mapFeaturesConfig?.map.viewSettings.extent,
+        'EPSG:4326',
+        projection.getCode()
+      );
+
+    const initialMap = new OLMap({
+      target: mapElement,
+      layers: [createEmptyBasemap()],
+      view: new View({
+        projection,
+        center: api.utilities.projection.transformFromLonLat(
+          [mapFeaturesConfig?.map.viewSettings.center[0] || -105, mapFeaturesConfig?.map.viewSettings.center[1] || 60],
+          projection
+        ),
+        zoom: mapFeaturesConfig?.map.viewSettings.zoom,
+        extent: extentProjected || undefined,
+        minZoom: mapFeaturesConfig?.map.viewSettings.minZoom || 0,
+        maxZoom: mapFeaturesConfig?.map.viewSettings.maxZoom || 17,
+      }),
+      controls: [],
+      keyboardEventTarget: document.getElementById(`map-${this.mapId}`) as HTMLElement,
+    });
+
+    // Set the map
+    this.map = initialMap;
+    this.initMap();
+
+    return initialMap;
+  }
+
+  /**
    * Initializes map, layer class and geometries
    * @param {OLMap} cgpMap - The OpenLayers map object
    */
-  initMap(cgpMap: OLMap): void {
-    // Set the map
-    this.map = cgpMap;
-
-    // TODO: Refactor - Is it necessary to set the mapId again? It was set in constructor. Preferably set it at one or the other.
-    this.mapId = cgpMap.get('mapId');
-
+  initMap(): void {
     // Register essential map handlers
     this.map.on('moveend', this.#handleMapMoveEnd.bind(this));
     this.map.getView().on('change:resolution', debounce(this.#handleMapZoomEnd.bind(this), 100).bind(this));
@@ -258,6 +298,13 @@ export class MapViewer {
     // Emit map init
     this.#mapInit = true;
     this.#emitMapInit();
+
+    MapEventProcessor.resetBasemap(this.mapId)
+      .then()
+      .catch((error) => {
+        // Log
+        logger.logPromiseFailed(' MapEventProcessor.resetBasemap in map-viewer', error);
+      });
 
     // Start checking for when the map will be ready
     this.#checkMapReady();
@@ -590,7 +637,7 @@ export class MapViewer {
     return new Promise<void>((resolve) => {
       // TODO: Refactor minimal - Rewrite the code here to not have to rely on a setInterval anymore.
       const layersInterval = setInterval(() => {
-        if (api.maps[this.mapId].layer) {
+        if (this.layer) {
           // Check if all registered layers have their results set
           let allGood = true;
           Object.entries(this.layer.registeredLayers).forEach(([layerPath, registeredLayer]) => {
@@ -1286,41 +1333,62 @@ export class MapViewer {
    * @returns {HTMLElement} return the HTML element
    */
   remove(deleteContainer: boolean): HTMLElement {
-    // Remove all layers
-    this.layer.removeAllGeoviewLayers();
-
-    // unsubscribe from all remaining events registered on this map
-    api.event.offAll(this.mapId);
+    // get the map container to unmount
+    // remove geoview-class if we need to reuse the div
+    const mapContainer = document.getElementById(this.mapId)!;
+    mapContainer.classList.remove('geoview-map');
 
     // unload all loaded plugins on the map
-    api.plugin.removePlugins(this.mapId);
+    api.plugin
+      .removePlugins(this.mapId)
+      .then(() => {
+        // Remove all layers
+        this.layer.removeAllGeoviewLayers();
 
-    // get the map container to unmount
-    const mapContainer = document.getElementById(this.mapId)!;
+        // unsubscribe from all remaining events registered on this map
+        api.event.offAll(this.mapId);
 
-    // remove the dom element (remove rendered map and overview map)
-    if (this.overviewRoot) this.overviewRoot?.unmount();
-    unmountMap(this.mapId);
+        // remove the dom element (remove rendered map and overview map)
+        if (this.overviewRoot) this.overviewRoot?.unmount();
+        unmountMap(this.mapId);
 
-    // delete the map instance from the maps array, will delete attached plugins
-    delete api.maps[this.mapId];
+        // delete store and event processor
+        removeGeoviewStore(this.mapId);
 
-    // delete store and event processor
-    removeGeoviewStore(this.mapId);
+        // if deleteContainer, delete the HTML div
+        if (deleteContainer) mapContainer.remove();
 
-    // if deleteContainer, delete the HTML div
-    if (deleteContainer) mapContainer.remove();
+        // delete the map instance from the maps array, will delete attached plugins
+        // TODO: need a time out here because if not, map is deleted before everything is done on the map
+        // TD.CONT: This whole sequence need to be async
+        setTimeout(() => delete api.maps[this.mapId], 1000);
+      })
+      .catch((error) => {
+        logger.logError(`Couldn't remove map in map-viewer`, error);
+      });
 
     // return the map container to be remove
     return mapContainer;
   }
 
   /**
-   * Reload a map from a config object stored in store
+   * Reload a map from a config object stored in store. It first remove then recreate the map.
    */
   reload(): void {
-    // emit an event to reload the map with the stored config
-    api.event.emitMapReload(this.mapId, MapEventProcessor.getGeoViewMapConfig(this.mapId)!);
+    // remove the map, then get config to use to recreate it
+    const mapDiv = this.remove(false);
+    const config = MapEventProcessor.getStoreConfig(this.mapId);
+    // TODO: Remove time out and make this async so remove/recreate work one after the other
+    // TD.CONT: There is still as problem with bad config schema value and layers loading... should be refactor when config is done
+    setTimeout(
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      () =>
+        api.createMapFromConfig(mapDiv.id, JSON.stringify(config)).catch((error) => {
+          // Log
+          logger.logError(`Couldn't reload the map in map-viewer`, error);
+        }),
+      1500
+    );
   }
 
   /**
