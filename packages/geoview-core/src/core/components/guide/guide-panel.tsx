@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Box } from '@/ui';
 import { TypeGuideObject, useAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
-
+import { logger } from '@/core/utils/logger';
 import { getSxClasses } from './guide-style';
 import { LayerListEntry, Layout } from '@/core/components/common';
 
@@ -31,6 +31,9 @@ export function GuidePanel({ fullWidth }: GuidePanelType): JSX.Element {
    * Get Layer list with markdown content.
    */
   const getListOfGuides = useCallback((): GuideListItem[] => {
+    // Log
+    logger.logTraceUseCallback('GUIDE_PANEL - getListOfGuides');
+
     if (!guide) {
       return [];
     }
@@ -64,6 +67,9 @@ export function GuidePanel({ fullWidth }: GuidePanelType): JSX.Element {
    * Memo version of layer list with markdown content
    */
   const layersList = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('GUIDE_PANEL - layerlist');
+
     return getListOfGuides();
   }, [getListOfGuides]);
 
