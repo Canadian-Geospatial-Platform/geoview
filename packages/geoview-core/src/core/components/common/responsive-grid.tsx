@@ -8,7 +8,7 @@ interface ResponsiveGridProps extends GridProps {
 
 interface ResponsiveGridPanelProps extends GridProps {
   children: ReactNode;
-  isLayersPanelVisible: boolean;
+  isRightPanelVisible: boolean;
   sxProps?: SxProps | undefined;
   isEnlarged: boolean;
   fullWidth?: boolean;
@@ -29,18 +29,18 @@ ResponsiveGridRoot.displayName = 'ResponsiveGridRoot';
 /**
  * Get the left panel grid width size based on fullwidth flag.
  * @param {boolean} fullWidth panel with is maximum.
- * @param {boolean} isLayersPanelVisible layer panel is visibel
+ * @param {boolean} isRightPanelVisible right panel is visibel
  * @param {boolean} isEnlarged panel is enlarge
  * @returns {any}
  */
 // ? I doubt we want to define an explicit type for style properties?
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getLeftPanelSize = (fullWidth: boolean, isLayersPanelVisible: boolean, isEnlarged: boolean): any => {
+const getLeftPanelSize = (fullWidth: boolean, isRightPanelVisible: boolean, isEnlarged: boolean): any => {
   if (fullWidth) {
     return { xs: 12 };
   }
   return {
-    xs: isLayersPanelVisible ? 0 : 12,
+    xs: isRightPanelVisible ? 0 : 12,
     md: !isEnlarged ? 4 : 2,
     lg: !isEnlarged ? 4 : 1.25,
   };
@@ -49,20 +49,20 @@ const getLeftPanelSize = (fullWidth: boolean, isLayersPanelVisible: boolean, isE
 /**
  * Create Left Panel for responsive grid.
  * @param {ReactNode} children child elements to be rendered
- * @param {boolean} isLayersPanelVisible panel visibility
+ * @param {boolean} isRightPanelVisible panel visibility
  * @param {boolean} isEnlarged panel is enlarge
  * @returns JSX.Element
  */
 const ResponsiveGridLeftPanel = forwardRef(
-  ({ children, isLayersPanelVisible = false, sxProps = {}, isEnlarged, fullWidth = false, ...rest }: ResponsiveGridPanelProps, ref) => {
+  ({ children, isRightPanelVisible = false, sxProps = {}, isEnlarged, fullWidth = false, ...rest }: ResponsiveGridPanelProps, ref) => {
     const theme = useTheme();
     return (
       <Grid
         item
-        {...getLeftPanelSize(fullWidth, isLayersPanelVisible, isEnlarged)}
+        {...getLeftPanelSize(fullWidth, isRightPanelVisible, isEnlarged)}
         sx={{
-          ...(!fullWidth && { [theme.breakpoints.down('md')]: { display: isLayersPanelVisible ? 'none' : 'block' } }),
-          ...(fullWidth && { display: isLayersPanelVisible ? 'none' : 'block' }),
+          ...(!fullWidth && { [theme.breakpoints.down('md')]: { display: isRightPanelVisible ? 'none' : 'block' } }),
+          ...(fullWidth && { display: isRightPanelVisible ? 'none' : 'block' }),
           ...sxProps,
         }}
         component="div"
@@ -79,18 +79,18 @@ ResponsiveGridLeftPanel.displayName = 'ResponsiveGridLeftPanel';
 /**
  * Get the right panel grid width size based on fullwidth flag.
  * @param {boolean} fullWidth panel with is maximum.
- * @param {boolean} isLayersPanelVisible layer panel is visibel
+ * @param {boolean} isRightPanelVisible layer panel is visibel
  * @param {boolean} isEnlarged panel is enlarge
  * @returns {any}
  */
 // ? I doubt we want to define an explicit type for style properties?
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getRightPanelSize = (fullWidth: boolean, isLayersPanelVisible: boolean, isEnlarged: boolean): any => {
+const getRightPanelSize = (fullWidth: boolean, isRightPanelVisible: boolean, isEnlarged: boolean): any => {
   if (fullWidth) {
     return { xs: 12 };
   }
   return {
-    xs: !isLayersPanelVisible ? 0 : 12,
+    xs: !isRightPanelVisible ? 0 : 12,
     md: !isEnlarged ? 8 : 10,
     lg: !isEnlarged ? 8 : 10.75,
   };
@@ -99,23 +99,23 @@ const getRightPanelSize = (fullWidth: boolean, isLayersPanelVisible: boolean, is
 /**
  * Create Right Panel for responsive grid.
  * @param {ReactNode} children child elements to be rendered
- * @param {boolean} isLayersPanelVisible panel visibility
+ * @param {boolean} isRightPanelVisible panel visibility
  * @param {boolean} isEnlarged panel is enlarge
  * @param {object} sxProps Optional sx props
  * @returns JSX.Element
  */
 const ResponsiveGridRightPanel = forwardRef(
-  ({ children, isLayersPanelVisible = false, sxProps = {}, isEnlarged, fullWidth = false, ...rest }: ResponsiveGridPanelProps, ref) => {
+  ({ children, isRightPanelVisible = false, sxProps = {}, isEnlarged, fullWidth = false, ...rest }: ResponsiveGridPanelProps, ref) => {
     const theme = useTheme();
     return (
       <Grid
         item
-        {...getRightPanelSize(fullWidth, isLayersPanelVisible, isEnlarged)}
+        {...getRightPanelSize(fullWidth, isRightPanelVisible, isEnlarged)}
         sx={{
           position: 'relative',
           [theme.breakpoints.up('md')]: { paddingLeft: '1rem' },
-          ...(!fullWidth && { [theme.breakpoints.down('md')]: { display: !isLayersPanelVisible ? 'none' : 'block' } }),
-          ...(fullWidth && { display: !isLayersPanelVisible ? 'none' : 'block' }),
+          ...(!fullWidth && { [theme.breakpoints.down('md')]: { display: !isRightPanelVisible ? 'none' : 'block' } }),
+          ...(fullWidth && { display: !isRightPanelVisible ? 'none' : 'block' }),
           ...sxProps,
         }}
         component="div"
