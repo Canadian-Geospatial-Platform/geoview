@@ -3,12 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Box, FullscreenIcon, IconButton } from '@/ui';
 import { ResponsiveGrid } from './responsive-grid';
-import { EnlargeButton } from './enlarge-button';
-import { CloseButton } from './close-button';
 import { useFooterPanelHeight } from './use-footer-panel-height';
 import { getSxClasses } from './responsive-grid-layout-style';
 import FullScreenDialog from './full-screen-dialog';
 import { logger } from '@/core/utils/logger';
+import { ArrowBackIcon, ArrowForwardIcon } from '@/ui/icons';
+import { Button } from '@/ui/button/button';
 
 interface ResponsiveGridLayoutProps {
   leftTop?: ReactNode;
@@ -69,6 +69,54 @@ const ResponsiveGridLayout = forwardRef(
       }
     }
 
+    const renderEnlargeButton = function () {
+      return (
+        <Button
+          type="text"
+          size="small"
+          color="primary"
+          variant="contained"
+          className="style2"
+          startIcon={isEnlarged ? <ArrowForwardIcon /> : <ArrowBackIcon />}
+          sx={{ height: '40px', borderRadius: '1.5rem', [theme.breakpoints.down('md')]: { display: 'none' } }}
+          onClick={() => handleIsEnlarge(!isEnlarged)}
+          tooltip={isEnlarged ? t('dataTable.reduceBtn')! : t('dataTable.enlargeBtn')!}
+          tooltipPlacement="top"
+        >
+          {isEnlarged ? t('dataTable.reduceBtn') : t('dataTable.enlargeBtn')}
+        </Button>
+      );
+    };
+
+    const renderCloseButton = function () {
+      return (
+        <Button
+          type="text"
+          size="small"
+          color="primary"
+          variant="contained"
+          className="style2"
+          sx={{
+            height: '40px',
+            borderRadius: '1.5rem',
+            marginLeft: '1rem',
+            ...(fullWidth ? sxClasses.appBarEnlargeButton : sxClasses.footerBarEnlargeButton),
+            ...(fullWidth && { display: !isRightPanelVisible ? 'none' : 'block' }),
+            ...(!fullWidth && {
+              [theme.breakpoints.up('md')]: { display: 'none' },
+              [theme.breakpoints.between('sm', 'md')]: { display: !isRightPanelVisible ? 'none' : 'block' },
+              [theme.breakpoints.down('md')]: { display: !isRightPanelVisible ? 'none' : 'block' },
+            }),
+          }}
+          onClick={() => setIsRightPanelVisible(false)}
+          tooltip={t('dataTable.close') ?? ''}
+          tooltipPlacement="top"
+        >
+          {t('dataTable.close')}
+        </Button>
+      );
+    };
+
     return (
       <Box ref={ref}>
         <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
@@ -90,7 +138,7 @@ const ResponsiveGridLayout = forwardRef(
               {rightTop ?? <div />}
 
               <Box sx={{ display: 'flex', flexDirection: 'row', gap: '0.6rem' }}>
-                {!fullWidth && <EnlargeButton isEnlarged={isEnlarged} onSetIsEnlarged={handleIsEnlarge} />}
+                {!fullWidth && renderEnlargeButton()}
                 <IconButton
                   size="small"
                   onClick={() => setIsFullScreen(!isFullScreen)}
@@ -100,14 +148,7 @@ const ResponsiveGridLayout = forwardRef(
                 >
                   <FullscreenIcon />
                 </IconButton>
-                {!!(leftMain || leftTop) && (
-                  <CloseButton
-                    isRightPanelVisible={isRightPanelVisible}
-                    onSetIsRightPanelVisible={setIsRightPanelVisible}
-                    fullWidth={fullWidth}
-                    aria-label={t('general.close')}
-                  />
-                )}
+                {!!(leftMain || leftTop) && renderCloseButton()}
               </Box>
             </Box>
           </ResponsiveGrid.Right>
