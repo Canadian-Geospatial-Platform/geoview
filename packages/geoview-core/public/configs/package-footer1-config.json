@@ -122,7 +122,7 @@
     ]
   },
   "theme": "geo.ca",
-  "navBar": ["zoom", "fullscreen", "home", "location", "export"],
+  "navBar": ["zoom", "fullscreen", "home", "location"],
   "components": ["north-arrow", "overview-map"],
   "footerBar": {
     "tabs": {
