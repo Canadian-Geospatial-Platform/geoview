@@ -97,7 +97,7 @@ const ResponsiveGridLayout = forwardRef(
           variant="contained"
           className="style2"
           sx={{
-            height: '40px',
+            // height: '40px',
             borderRadius: '1.5rem',
             marginLeft: '1rem',
             ...(fullWidth ? sxClasses.appBarEnlargeButton : sxClasses.footerBarEnlargeButton),
@@ -137,7 +137,7 @@ const ResponsiveGridLayout = forwardRef(
             >
               {rightTop ?? <div />}
 
-              <Box sx={{ display: 'flex', flexDirection: 'row', gap: '0.6rem' }}>
+              <Box sx={{ display: 'flex', flexDirection: 'row', gap: '0.5rem' }}>
                 {!fullWidth && renderEnlargeButton()}
                 <IconButton
                   size="small"
