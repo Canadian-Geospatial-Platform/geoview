@@ -178,17 +178,25 @@ export function Datapanel({ fullWidth }: DataPanelType): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTab]);
 
+  const memoLayerList = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DATA-PANEL - memoLayersList', orderedLayerData);
+
+    return orderedLayerData.map((layer) => ({
+      ...layer,
+      layerFeatures: getFeaturesOfLayer(layer.layerPath),
+      tooltip: getLayerTooltip(layer.layerName ?? '', layer.layerPath),
+      mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerPath) && (
+        <FilterAltIcon sx={{ color: theme.palette.geoViewColor.grey.main }} />
+      ),
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMapFilteredSelectedForLayer, orderedLayerData]);
+
   return (
     <Layout
       selectedLayerPath={selectedLayerPath || ''}
-      layerList={orderedLayerData.map((layer) => ({
-        ...layer,
-        layerFeatures: getFeaturesOfLayer(layer.layerPath),
-        tooltip: getLayerTooltip(layer.layerName ?? '', layer.layerPath),
-        mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerPath) && (
-          <FilterAltIcon sx={{ color: theme.palette.geoViewColor.grey.main }} />
-        ),
-      }))}
+      layerList={memoLayerList}
       onLayerListClicked={handleLayerChange}
       fullWidth={fullWidth}
     >
