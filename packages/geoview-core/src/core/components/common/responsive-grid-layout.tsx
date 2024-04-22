@@ -97,15 +97,13 @@ const ResponsiveGridLayout = forwardRef(
           variant="contained"
           className="style2"
           sx={{
-            // height: '40px',
+            height: '40px',
             borderRadius: '1.5rem',
             marginLeft: '1rem',
             ...(fullWidth ? sxClasses.appBarEnlargeButton : sxClasses.footerBarEnlargeButton),
             ...(fullWidth && { display: !isRightPanelVisible ? 'none' : 'block' }),
             ...(!fullWidth && {
               [theme.breakpoints.up('md')]: { display: 'none' },
-              [theme.breakpoints.between('sm', 'md')]: { display: !isRightPanelVisible ? 'none' : 'block' },
-              [theme.breakpoints.down('md')]: { display: !isRightPanelVisible ? 'none' : 'block' },
             }),
           }}
           onClick={() => setIsRightPanelVisible(false)}
@@ -137,7 +135,7 @@ const ResponsiveGridLayout = forwardRef(
             >
               {rightTop ?? <div />}
 
-              <Box sx={{ display: 'flex', flexDirection: 'row', gap: '0.5rem' }}>
+              <Box sx={{ display: 'flex', flexDirection: 'row', gap: '0.6rem' }}>
                 {!fullWidth && renderEnlargeButton()}
                 <IconButton
                   size="small"
