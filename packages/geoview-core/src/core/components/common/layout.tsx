@@ -1,44 +1,19 @@
-import { useState, useCallback, ReactNode } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useTheme } from '@mui/material/styles';
-import { Box, FullscreenIcon, IconButton } from '@/ui';
+import { useCallback, ReactNode, useRef } from 'react';
 import { logger } from '@/core/utils/logger';
 import { LayerList, LayerListEntry } from './layer-list';
-import { ResponsiveGrid } from './responsive-grid';
+import { ResponsiveGridLayout, ResponsiveGridLayoutExposedMethods } from './responsive-grid-layout';
 import { LayerTitle } from './layer-title';
-import { EnlargeButton } from './enlarge-button';
-import { CloseButton } from './close-button';
-import { useFooterPanelHeight } from './use-footer-panel-height';
-import { getSxClasses } from './layout-style';
-import FullScreenDialog from './full-screen-dialog';
 
 interface LayoutProps {
   children?: ReactNode;
   layerList: LayerListEntry[];
   selectedLayerPath: string | undefined;
   onLayerListClicked: (layer: LayerListEntry) => void;
-  onIsEnlargeClicked?: (isEnlarge: boolean) => void;
   fullWidth?: boolean;
 }
 
-export function Layout({
-  children,
-  layerList,
-  selectedLayerPath,
-  onLayerListClicked,
-  onIsEnlargeClicked,
-  fullWidth,
-}: LayoutProps): JSX.Element {
-  const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
-  const { t } = useTranslation<string>();
-
-  const [isLayersPanelVisible, setIsLayersPanelVisible] = useState(false);
-  const [isEnlarged, setIsEnlarged] = useState(false);
-  const [isFullScreen, setIsFullScreen] = useState(false);
-
-  // Custom hook for calculating the height of footer panel
-  const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'default' });
+export function Layout({ children, layerList, selectedLayerPath, onLayerListClicked, fullWidth }: LayoutProps): JSX.Element {
+  const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
 
   /**
    * Handles clicks to layers in left panel. Sets selected layer.
@@ -49,28 +24,9 @@ export function Layout({
     (layer: LayerListEntry): void => {
       onLayerListClicked?.(layer);
       // Show the panel (hiding the layers list in the process if we're on mobile)
-      setIsLayersPanelVisible(true);
+      responsiveLayoutRef.current?.setIsRightPanelVisible(true);
     },
     [onLayerListClicked]
-  );
-
-  /**
-   * Handles click on the Enlarge button.
-   *
-   * @param {boolean} isEnlarge Indicate if enlarge
-   */
-  const handleIsEnlarge = useCallback(
-    (isEnlarge: boolean): void => {
-      // Log
-      logger.logTraceUseCallback('LAYOUT - handleIsEnlarge');
-
-      // Set the isEnlarge
-      setIsEnlarged(isEnlarge);
-
-      // Callback
-      onIsEnlargeClicked?.(isEnlarge);
-    },
-    [onIsEnlargeClicked]
   );
 
   /**
@@ -85,90 +41,27 @@ export function Layout({
     return <LayerList selectedLayerPath={selectedLayerPath} onListItemClick={handleLayerChange} layerList={layerList} />;
   }, [selectedLayerPath, layerList, handleLayerChange]);
 
-  // // If we're on mobile
-  if (theme.breakpoints.down('md')) {
-    // If there are no layers and not already showing the right-side panel
-    if (!layerList.length && !isLayersPanelVisible && !fullWidth) {
-      setIsLayersPanelVisible(true);
-    }
-  }
+  const renderLayerTitle = (): JSX.Element => {
+    return (
+      <LayerTitle hideTitle fullWidth={fullWidth}>
+        {layerList.find((layer) => layer.layerPath === selectedLayerPath)?.layerName ?? ''}
+      </LayerTitle>
+    );
+  };
 
   return (
-    <Box sx={sxClasses.layoutContainer}>
-      <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
-        {!fullWidth && (
-          <ResponsiveGrid.Left isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlarged} aria-hidden={!isLayersPanelVisible}>
-            {/* This panel is hidden from screen readers when not visible */}
-            {null}
-          </ResponsiveGrid.Left>
-        )}
-        <ResponsiveGrid.Right isLayersPanelVisible={isLayersPanelVisible} isEnlarged={isEnlarged} fullWidth={fullWidth}>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              [theme.breakpoints.up('md')]: { justifyContent: fullWidth ? 'space-between' : 'right' },
-              [theme.breakpoints.down('md')]: { justifyContent: 'space-between' },
-            }}
-          >
-            <LayerTitle hideTitle fullWidth={fullWidth}>
-              {layerList.find((layer) => layer.layerPath === selectedLayerPath)?.layerName ?? ''}
-            </LayerTitle>
-
-            <Box sx={{ display: 'flex', flexDirection: 'row', gap: '0.6rem' }}>
-              {!fullWidth && <EnlargeButton isEnlarged={isEnlarged} onSetIsEnlarged={handleIsEnlarge} />}
-              <IconButton
-                size="small"
-                onClick={() => setIsFullScreen(!isFullScreen)}
-                tooltip={isFullScreen ? t('general.closeFullscreen')! : t('general.openFullscreen')!}
-                className="style2"
-                color="primary"
-              >
-                <FullscreenIcon />
-              </IconButton>
-              {!!layerList.length && (
-                <CloseButton
-                  isLayersPanelVisible={isLayersPanelVisible}
-                  onSetIsLayersPanelVisible={setIsLayersPanelVisible}
-                  fullWidth={fullWidth}
-                  aria-label={t('general.close')}
-                />
-              )}
-            </Box>
-          </Box>
-        </ResponsiveGrid.Right>
-      </ResponsiveGrid.Root>
-      <ResponsiveGrid.Root>
-        <ResponsiveGrid.Left
-          {...(!fullWidth && { ref: leftPanelRef })}
-          isEnlarged={isEnlarged}
-          isLayersPanelVisible={isLayersPanelVisible}
-          fullWidth={fullWidth}
-          aria-hidden={!isLayersPanelVisible}
-        >
-          {renderLayerList()}
-        </ResponsiveGrid.Left>
-        <ResponsiveGrid.Right
-          {...(!fullWidth && { ref: rightPanelRef })}
-          isEnlarged={isEnlarged}
-          isLayersPanelVisible={isLayersPanelVisible}
-          fullWidth={fullWidth}
-        >
-          <FullScreenDialog open={isFullScreen} onClose={() => setIsFullScreen(false)}>
-            <Box sx={sxClasses.rightGridContent} className="fullscreen-mode">
-              {children}
-            </Box>
-          </FullScreenDialog>
-
-          <Box sx={sxClasses.rightGridContent}>{children}</Box>
-        </ResponsiveGrid.Right>
-      </ResponsiveGrid.Root>
-    </Box>
+    <ResponsiveGridLayout
+      ref={responsiveLayoutRef}
+      leftTop={null}
+      leftMain={renderLayerList()}
+      rightMain={children}
+      rightTop={renderLayerTitle()}
+      fullWidth={fullWidth}
+    />
   );
 }
 
 Layout.defaultProps = {
   children: null,
-  onIsEnlargeClicked: undefined,
   fullWidth: false,
 };
