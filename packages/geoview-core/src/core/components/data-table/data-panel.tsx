@@ -177,7 +177,7 @@ export function Datapanel({ fullWidth }: DataPanelType): JSX.Element {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTab]);
-
+  console.log('data panel - tableHeighttableHeight', tableHeight);
   return (
     <Layout
       selectedLayerPath={selectedLayerPath || ''}

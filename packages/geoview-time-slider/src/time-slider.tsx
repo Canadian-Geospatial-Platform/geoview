@@ -358,7 +358,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
   return (
     <Grid>
-      <div style={sxClasses.rightPanelContainer}>
+      <div>
         <Grid container sx={sxClasses.rightPanelBtnHolder}>
           <Grid item xs={9}>
             <Typography component="div" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px', paddingTop: '10px' }}>

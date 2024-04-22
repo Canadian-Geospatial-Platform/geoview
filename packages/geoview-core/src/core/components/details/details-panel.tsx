@@ -436,7 +436,10 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
             </Box>
           )}
           {(!memoSelectedLayerDataFeatures || memoSelectedLayerDataFeatures.length === 0) && guide?.footerPanel && (
-            <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer, maxHeight: '600px' }}>
+            <Box
+              sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer, maxHeight: '600px' }}
+              className="guidebox-container"
+            >
               <Box className="guideBox">
                 <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.details!.content}</Markdown>
               </Box>

@@ -9,9 +9,13 @@ export const getSxClasses = (theme: Theme): any => ({
     backgroundColor: theme.palette.geoViewColor.white,
     width: '100%',
     '&.fullscreen-mode': {
-      maxHeight: 'calc(100vh - 150px)',
+      maxHeight: 'calc(100vh - 90px)',
       '& .MuiTableContainer-root': {
         maxHeight: 'calc(100vh - 260px)',
+      },
+      '& .guidebox-container': {
+        maxHeight: 'calc(100vh - 120px)',
+        overflow: 'auto',
       },
     },
 

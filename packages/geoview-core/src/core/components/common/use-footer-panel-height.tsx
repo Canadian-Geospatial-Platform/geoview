@@ -43,8 +43,6 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
     const rightPanelGuideContainer = (rightPanelRef.current?.querySelector('.guidebox-container') ?? null) as HTMLElement | null;
     if (rightPanelGuideContainer) {
       rightPanelGuideContainer.style.maxHeight = `${height ?? defaultHeight}px`;
-      rightPanelGuideContainer.style.paddingBottom = `24px`;
-      rightPanelGuideContainer.style.overflowY = 'auto';
     }
     // remove style attribute when tab changes
     const rightPanel = (rightPanelRef.current?.firstElementChild ?? null) as HTMLElement | null;
@@ -71,19 +69,20 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
     logger.logTraceUseEffect('USE-FOOTER-PANEL-HEIGHT - footerPanelResizeValue', footerPanelResizeValue, isMapFullScreen);
 
     if (leftPanelRef.current && isMapFullScreen && (activeFooterBarTabId === footerPanelTab || footerPanelTab === 'default')) {
-      const panelTitleHeight = panelTitleRef.current?.clientHeight ?? 0;
+      const panelTitleHeight = panelTitleRef.current?.clientHeight || 0;
       const tabsContainer = document.getElementById(`${mapId}-tabsContainer`)!;
-      const firstChild = tabsContainer?.firstElementChild?.firstElementChild;
+      const footerBar = tabsContainer?.firstElementChild?.firstElementChild;
 
-      const firstChildHeight = firstChild?.clientHeight ?? 0;
-      const leftPanelHeight = (window.screen.height * footerPanelResizeValue) / 100 - panelTitleHeight - firstChildHeight;
+      const footerBarHeight = footerBar?.clientHeight ?? 0;
+
+      const leftPanelHeight = (window.screen.height * footerPanelResizeValue) / 100 - panelTitleHeight - footerBarHeight - 10;
 
       leftPanelRef.current.style.maxHeight = `${leftPanelHeight}px`;
       leftPanelRef.current.style.overflow = 'auto';
       leftPanelRef.current.style.paddingBottom = '24px';
 
       if (activeFooterBarTabId === TABS.DATA_TABLE) {
-        setTableHeight(leftPanelHeight - 10);
+        setTableHeight(leftPanelHeight);
         setGuideContainerHeight(leftPanelHeight);
       } else if (activeFooterBarTabId === TABS.GEO_CHART && rightPanelRef.current) {
         rightPanelRef.current.style.maxHeight = `${leftPanelHeight}px`;
@@ -113,11 +112,11 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
     isMapFullScreen,
     activeFooterBarTabId,
     footerPanelTab,
+    mapId,
+    setTableHeight,
     arrayOfLayerData,
     allFeaturesLayerData,
-    setTableHeight,
-    mapId,
   ]);
 
-  return { leftPanelRef, rightPanelRef, panelTitleRef };
+  return { leftPanelRef, rightPanelRef, panelTitleRef, activeFooterBarTabId };
 }
