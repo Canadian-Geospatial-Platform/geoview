@@ -17,6 +17,7 @@ interface ResponsiveGridLayoutProps {
   rightTop?: ReactNode;
   rightMain: ReactNode;
   fullWidth?: boolean;
+  onIsEnlargeClicked?: (isEnlarge: boolean) => void;
 }
 
 interface ResponsiveGridLayoutExposedMethods {
@@ -24,7 +25,10 @@ interface ResponsiveGridLayoutExposedMethods {
 }
 
 const ResponsiveGridLayout = forwardRef(
-  ({ leftTop, leftMain, rightTop, rightMain, fullWidth }: ResponsiveGridLayoutProps, ref: Ref<ResponsiveGridLayoutExposedMethods>) => {
+  (
+    { leftTop, leftMain, rightTop, rightMain, fullWidth, onIsEnlargeClicked }: ResponsiveGridLayoutProps,
+    ref: Ref<ResponsiveGridLayoutExposedMethods>
+  ) => {
     const theme = useTheme();
     const sxClasses = getSxClasses(theme);
     const { t } = useTranslation<string>();
@@ -49,14 +53,21 @@ const ResponsiveGridLayout = forwardRef(
      *
      * @param {boolean} isEnlarge Indicate if enlarge
      */
-    const handleIsEnlarge = useCallback((isEnlarge: boolean): void => {
-      // Log
-      logger.logTraceUseCallback('LAYOUT - handleIsEnlarge');
+    const handleIsEnlarge = useCallback(
+      (isEnlarge: boolean): void => {
+        // Log
+        logger.logTraceUseCallback('LAYOUT - handleIsEnlarge');
 
-      // Set the isEnlarge
-      setIsEnlarged(isEnlarge);
-    }, []);
-    // // If we're on mobile
+        // Set the isEnlarge
+        setIsEnlarged(isEnlarge);
+
+        // Callback
+        onIsEnlargeClicked?.(isEnlarge);
+      },
+      [onIsEnlargeClicked]
+    );
+
+    // If we're on mobile
     if (theme.breakpoints.down('md')) {
       if (!(leftMain || leftTop) && !isRightPanelVisible && !fullWidth) {
         setIsRightPanelVisible(true);
@@ -184,6 +195,7 @@ ResponsiveGridLayout.defaultProps = {
   leftMain: null,
   rightTop: null,
   fullWidth: false,
+  onIsEnlargeClicked: undefined,
 };
 
 export { ResponsiveGridLayout };
