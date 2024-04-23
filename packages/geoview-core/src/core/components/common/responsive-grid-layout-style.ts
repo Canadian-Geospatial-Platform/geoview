@@ -27,8 +27,7 @@ export const getSxClasses = (theme: Theme): any => ({
       border: 'none',
     },
     '& .guideBox': {
-      ml: '30px',
-      mb: '18px',
+      margin: '0 1.125rem 1.125rem',
       td: {
         width: 'auto',
         paddingLeft: '15px',
