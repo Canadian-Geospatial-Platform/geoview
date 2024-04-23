@@ -367,12 +367,6 @@ export class ConfigValidation {
       }
       logger.logWarning(this.mapId, '='.repeat(200), 'Schema error: ', this.mapId, error, 'Object affected: ', this.mapId, node);
     }
-
-    // TODO: refactor - remove setTimeout (dont know what it is used for)
-    setTimeout(() => {
-      // TODO: config should not push message to map... only to console and as return value.. map will be responsible to throw notification
-      api.maps[this.mapId].notifications.showError('validation.schema.notFound');
-    }, 2000);
   }
 
   /** ***************************************************************************************************************************
@@ -387,13 +381,8 @@ export class ConfigValidation {
     const validate = validator.getSchema(schemaPath);
 
     if (!validate) {
-      // TODO: refactor - remove setTimeout (dont know what it is used for)
-      setTimeout(() => {
-        const message = replaceParams([schemaPath], api.utilities.core.getLocalizedMessage('validation.schema.wrongPath', 'en'));
-        logger.logWarning(`- Map ${this.mapId}: ${message}`);
-        // TODO: config should not push message to map... only to console and as return value.. map will be responsible to throw notification
-        api.maps[this.mapId].notifications.showError('validation.schema.wrongPath', [schemaPath]);
-      }, 2000);
+      const message = replaceParams([schemaPath], api.utilities.core.getLocalizedMessage('validation.schema.wrongPath', 'en'));
+      logger.logWarning(`- Map ${this.mapId}: ${message}`);
       return false;
     }
 
