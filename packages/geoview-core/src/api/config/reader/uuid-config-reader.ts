@@ -4,7 +4,7 @@ import { CV_CONST_LAYER_TYPES, CV_CONST_SUB_LAYER_TYPES } from '@config/types/co
 import { TypeOfServer, TypeTileGrid } from '@config/types/map-schema-types';
 import { TypeJsonArray, TypeJsonObject, toJsonObject } from '@config/types/config-types';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { MapFeaturesConfig } from '../types/classes/map-features-config';
+import { MapFeaturesConfig } from '@config/types/classes/map-features-config';
 import { logger } from '@/core/utils/logger';
 import { createLocalizedString } from '@/core/utils/utilities';
 
@@ -356,6 +356,7 @@ export class UUIDmapConfigReader {
    * @private
    */
   static getGeoChartConfigFromResponse(result: AxiosResponse<GeoChartGeoCoreConfig>, lang: string): GeoChartConfig[] {
+    // TODO: We need a getTimeSliderFromResponse function to enable/disable timeslider from geocore
     // If no geochart information
     if (!result?.data || !result.data.reponse || !result.data.reponse.gcs || !Array.isArray(result.data.reponse.gcs)) return [];
 

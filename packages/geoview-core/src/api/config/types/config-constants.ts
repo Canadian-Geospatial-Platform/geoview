@@ -1,4 +1,5 @@
-// TODO: Consider creating an external package for utilities and constants to avoid code duplication.
+// TODO: When we are done with the config extraction, do a review of all the constants, types and utilities to
+// TODOCONT: remove code duplication.
 
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { LayerEntryTypesKey, LayerTypesKey, TypeGeoviewLayerType } from '@config/types/config-types';

@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle, no-param-reassign */
 import {
   CV_CONST_LAYER_TYPES,
   CV_DEFAULT_MAP_FEATURES_CONFIG,
@@ -201,6 +200,7 @@ export class ConfigApi {
         // .filter((geoviewLayerConfig) => !mapConfigLayerEntryIsGeoCore(geoviewLayerConfig))
         .forEach((geoviewLayerConfig) => {
           // The default value for geoviewLayerConfig.initialSettings.visible is true.
+          // eslint-disable-next-line no-param-reassign
           if (!geoviewLayerConfig.initialSettings) geoviewLayerConfig.initialSettings = { states: toJsonObject({ visible: true }) };
           switch (geoviewLayerConfig.geoviewLayerType) {
             case CV_CONST_LAYER_TYPES.CSV:
@@ -267,6 +267,7 @@ export class ConfigApi {
     sourceKey: TypeDisplayLanguage,
     destinationKey: TypeDisplayLanguage
   ): void {
+    // eslint-disable-next-line no-param-reassign
     localizedString[destinationKey] = localizedString[sourceKey];
   }
 
@@ -288,6 +289,7 @@ export class ConfigApi {
             if (!key.startsWith('_') && typeof config[key] === 'object') {
               if (config?.[key]?.en || config?.[key]?.fr) {
                 // delete empty localized strings
+                // eslint-disable-next-line no-param-reassign
                 if (!config[key].en && !config[key].fr) delete config[key];
                 else if (!config[key].en || !config[key].fr) {
                   throw new Error('When you support both languages, you must set all en and fr properties of localized strings.');
