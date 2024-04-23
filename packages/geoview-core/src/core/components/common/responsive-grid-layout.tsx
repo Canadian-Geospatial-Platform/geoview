@@ -38,9 +38,11 @@ const ResponsiveGridLayout = forwardRef(
     const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'default' });
 
     // Expose imperative methods to parent component
-    useImperativeHandle(ref, () => ({
-      setIsRightPanelVisible: (isVisible: boolean) => setIsRightPanelVisible(isVisible),
-    }));
+    useImperativeHandle(ref, function handleRef() {
+      return {
+        setIsRightPanelVisible: (isVisible: boolean) => setIsRightPanelVisible(isVisible),
+      };
+    });
 
     /**
      * Handles click on the Enlarge button.

@@ -147,7 +147,7 @@
       "core": ["geolocator", "export", "guide", "details", "legend"]
     }
   },
-  "navBar": ["zoom", "fullscreen", "home", "location", "export"],
+  "navBar": ["zoom", "fullscreen", "home", "location"],
   "components": ["north-arrow"],
   "corePackages": [],
   "externalPackages": [],
