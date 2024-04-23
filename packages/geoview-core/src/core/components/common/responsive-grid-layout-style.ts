@@ -27,7 +27,10 @@ export const getSxClasses = (theme: Theme): any => ({
       border: 'none',
     },
     '& .guideBox': {
-      margin: '0 1.125rem 1.125rem',
+      margin: '1rem',
+      img: {
+        maxWidth: '100%',
+      },
       td: {
         width: 'auto',
         paddingLeft: '15px',
