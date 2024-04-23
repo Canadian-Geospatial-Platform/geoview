@@ -1,17 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import Markdown from 'markdown-to-jsx';
-import {
-  IconButton,
-  Grid,
-  Typography,
-  ArrowForwardIosOutlinedIcon,
-  ArrowBackIosOutlinedIcon,
-  LayersClearOutlinedIcon,
-  Box,
-  Paper,
-} from '@/ui';
+import { IconButton, Grid, Typography, ArrowForwardIosOutlinedIcon, ArrowBackIosOutlinedIcon, LayersClearOutlinedIcon, Box } from '@/ui';
 import {
   useDetailsStoreActions,
   useDetailsCheckedFeatures,
@@ -19,7 +9,6 @@ import {
   useDetailsSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useMapStoreActions, useMapVisibleLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/utils/layer-set';
 
@@ -50,7 +39,6 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
   const arrayOfLayerDataBatch = useDetailsLayerDataArrayBatch();
   const checkedFeatures = useDetailsCheckedFeatures();
   const visibleLayers = useMapVisibleLayers();
-  const guide = useAppGuide();
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
   const { addHighlightedFeature, removeHighlightedFeature } = useMapStoreActions();
 
@@ -395,6 +383,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
           layerList={memoLayersList}
           onLayerListClicked={(layerEntry) => handleLayerChange(layerEntry)}
           fullWidth={fullWidth}
+          guideContentIds={['details']}
         >
           {memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length > 0 && (
             <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer }}>
@@ -442,15 +431,6 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
                 </Grid>
               </Grid>
               <FeatureInfo features={memoSelectedLayerData?.features} currentFeatureIndex={currentFeatureIndex} />
-            </Box>
-          )}
-          {(!memoSelectedLayerDataFeatures || memoSelectedLayerDataFeatures.length === 0) && guide?.footerPanel && (
-            <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer, maxHeight: '600px' }}>
-              <Paper sx={{ padding: '20px' }}>
-                <Box className="guideBox">
-                  <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.details!.content}</Markdown>
-                </Box>
-              </Paper>
             </Box>
           )}
         </Layout>

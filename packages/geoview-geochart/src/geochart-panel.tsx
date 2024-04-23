@@ -3,7 +3,7 @@ import { ChartType, SchemaValidator } from 'geochart';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
 import { TypeLayerData } from 'geoview-core/src/geo/utils/layer-set';
 import { Typography } from 'geoview-core/src/ui/typography/typography';
-import { Box, Paper } from 'geoview-core/src/ui';
+import { Box } from 'geoview-core/src/ui';
 import { useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
 import {
   useGeochartConfigs,
@@ -11,10 +11,9 @@ import {
   useGeochartLayerDataArrayBatch,
   useGeochartSelectedLayerPath,
 } from 'geoview-core/src/core/stores/store-interface-and-intial-values/geochart-state';
-import { useAppDisplayLanguage, useAppGuide } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
+import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
-import Markdown from 'markdown-to-jsx';
 import { GeoChart } from './geochart';
 import { GeoViewGeoChartConfig } from './geochart-types';
 
@@ -46,7 +45,6 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const selectedLayerPath = useGeochartSelectedLayerPath() as string;
   const { setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass } = useGeochartStoreActions();
   const displayLanguage = useAppDisplayLanguage();
-  const guide = useAppGuide();
 
   // Create the validator shared for all the charts in the footer
   const [schemaValidator] = useState<SchemaValidator>(new SchemaValidator());
@@ -249,6 +247,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
           layerList={memoLayersList}
           onLayerListClicked={handleLayerChange}
           onIsEnlargeClicked={handleIsEnlargeClicked}
+          guideContentIds={['chart', 'chartTypes']}
         >
           {selectedLayerPath && (
             <Box>
@@ -260,15 +259,6 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
                 return <></>;
               })}
             </Box>
-          )}
-          {!selectedLayerPath && guide?.footerPanel && (
-            <Paper sx={{ padding: '2rem' }}>
-              <Box className="guideBox">
-                <Markdown options={{ wrapper: 'article' }}>{`${guide!.footerPanel!.children!.chart!.content}\n${
-                  guide!.footerPanel!.children!.chart!.children!.chartTypes!.content
-                }`}</Markdown>
-              </Box>
-            </Paper>
           )}
         </Layout>
       );

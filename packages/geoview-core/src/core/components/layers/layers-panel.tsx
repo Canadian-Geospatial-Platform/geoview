@@ -1,13 +1,11 @@
 import { useRef } from 'react';
-import Markdown from 'markdown-to-jsx';
 import { useTheme } from '@mui/material';
-import { Box, Paper } from '@/ui';
+import { Box } from '@/ui';
 import { useLayerDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayersToolbar } from './layers-toolbar';
 import { LayerDetails } from './right-panel/layer-details';
 import { LeftPanel } from './left-panel/left-panel';
 import { logger } from '@/core/utils/logger';
-import { useAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { ResponsiveGridLayout, ResponsiveGridLayoutExposedMethods } from '../common/responsive-grid-layout';
 import { Typography } from '@/ui/typography/typography';
 
@@ -15,8 +13,6 @@ export function LayersPanel(): JSX.Element {
   const theme = useTheme();
   // Log
   logger.logTraceRender('components/layers/layers-panel');
-
-  const guide = useAppGuide();
 
   const selectedLayer = useSelectedLayer(); // get store value
   const displayState = useLayerDisplayState();
@@ -47,51 +43,26 @@ export function LayersPanel(): JSX.Element {
     );
   };
 
+  const guideContent = (): string[] => {
+    if (displayState === 'view') {
+      return ['layers.children.view', 'layers.children.layerSettings'];
+    }
+    if (displayState === 'remove') {
+      return ['layers.children.remove'];
+    }
+    if (displayState === 'order') {
+      return ['layers.children.sort'];
+    }
+    if (displayState === 'add') {
+      return ['layers.children.add'];
+    }
+
+    return [];
+  };
+
   const rightPanel = (): JSX.Element | null => {
     if (selectedLayer && displayState === 'view') {
       return <LayerDetails layerDetails={selectedLayer} />;
-    }
-    if (!selectedLayer && displayState === 'view') {
-      const markDown = (
-        <Markdown options={{ wrapper: 'article' }}>
-          {`${guide!.footerPanel!.children!.layers!.children!.view!.content}\n${
-            guide!.footerPanel!.children!.layers!.children!.layerSettings!.content
-          }`}
-        </Markdown>
-      );
-      return (
-        <Paper sx={{ padding: '20px', overflow: 'auto' }}>
-          <Box className="guideBox">{markDown}</Box>
-        </Paper>
-      );
-    }
-    if (displayState === 'remove') {
-      const markDown = (
-        <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.layers!.children!.remove!.content}</Markdown>
-      );
-      return (
-        <Paper sx={{ padding: '20px' }}>
-          <Box className="guideBox">{markDown}</Box>
-        </Paper>
-      );
-    }
-    if (displayState === 'order') {
-      const markDown = (
-        <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.layers!.children!.sort!.content}</Markdown>
-      );
-      return (
-        <Paper sx={{ padding: '20px' }}>
-          <Box className="guideBox">{markDown}</Box>
-        </Paper>
-      );
-    }
-    if (displayState === 'add') {
-      const markDown = <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.layers!.children!.add!.content}</Markdown>;
-      return (
-        <Paper sx={{ padding: '20px' }}>
-          <Box className="guideBox">{markDown}</Box>
-        </Paper>
-      );
     }
 
     return null;
@@ -120,6 +91,7 @@ export function LayersPanel(): JSX.Element {
       leftMain={leftPanel()}
       rightTop={layerTitle()}
       rightMain={rightPanel()}
+      guideContentIds={guideContent()}
       fullWidth={false}
     />
   );

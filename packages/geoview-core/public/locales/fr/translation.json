@@ -9,7 +9,8 @@
     "remove": "Retirer",
     "view": "Vue",
     "openFullscreen": "Ouvrir en plein écran",
-    "closeFullscreen": "Fermer le plein écran"
+    "closeFullscreen": "Fermer le plein écran",
+    "openGuide": "Ouvrir le guide"
   },
   "mapnav": {
     "arianavbar": "groupe de buttons vertical pour navigation sur la carte",

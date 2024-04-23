@@ -5,10 +5,8 @@ import {
   useTimeSliderLayers,
 } from 'geoview-core/src/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
-import { useAppGuide } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
-import { Box, Paper } from 'geoview-core/src/ui';
+import { Box } from 'geoview-core/src/ui';
 import { logger } from 'geoview-core/src/core/utils/logger';
-import Markdown from 'markdown-to-jsx';
 
 import { ReactNode } from 'react';
 import { TimeSlider } from './time-slider';
@@ -37,7 +35,6 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   // get values from store
   const visibleLayers = useMapVisibleLayers() as string[];
   const timeSliderLayers = useTimeSliderLayers();
-  const guide = useAppGuide();
 
   /**
    * handle Layer list when clicked on each layer.
@@ -114,15 +111,13 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   }, [memoLayersList, selectedLayerPath]);
 
   return (
-    <Layout selectedLayerPath={selectedLayerPath} onLayerListClicked={handleClickLayerList} layerList={memoLayersList}>
+    <Layout
+      selectedLayerPath={selectedLayerPath}
+      onLayerListClicked={handleClickLayerList}
+      layerList={memoLayersList}
+      guideContentIds={['timeSlider']}
+    >
       {selectedLayerPath && <TimeSlider mapId={mapId} config={configObj} layerPath={selectedLayerPath} key={selectedLayerPath} />}
-      {!selectedLayerPath && (
-        <Paper sx={{ padding: '2rem' }}>
-          <Box className="guideBox">
-            <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.timeSlider!.content}</Markdown>
-          </Box>
-        </Paper>
-      )}
     </Layout>
   );
 }

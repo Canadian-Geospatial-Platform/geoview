@@ -1,19 +1,23 @@
-import { useState, ReactNode, useCallback, forwardRef, useImperativeHandle, Ref } from 'react';
+import { useState, ReactNode, useCallback, forwardRef, useImperativeHandle, Ref, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
+import Markdown from 'markdown-to-jsx';
 import { Box, FullscreenIcon, IconButton } from '@/ui';
 import { ResponsiveGrid } from './responsive-grid';
 import { useFooterPanelHeight } from './use-footer-panel-height';
 import { getSxClasses } from './responsive-grid-layout-style';
 import FullScreenDialog from './full-screen-dialog';
 import { logger } from '@/core/utils/logger';
-import { ArrowBackIcon, ArrowForwardIcon } from '@/ui/icons';
+import { ArrowBackIcon, ArrowForwardIcon, QuestionMarkIcon } from '@/ui/icons';
 import { Button } from '@/ui/button/button';
+import { Paper } from '@/ui/paper/paper';
+import { useAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 interface ResponsiveGridLayoutProps {
   leftTop?: ReactNode;
   leftMain?: ReactNode;
   rightTop?: ReactNode;
+  guideContentIds?: string[];
   rightMain: ReactNode;
   fullWidth?: boolean;
   onIsEnlargeClicked?: (isEnlarge: boolean) => void;
@@ -25,14 +29,16 @@ interface ResponsiveGridLayoutExposedMethods {
 
 const ResponsiveGridLayout = forwardRef(
   (
-    { leftTop, leftMain, rightTop, rightMain, fullWidth, onIsEnlargeClicked }: ResponsiveGridLayoutProps,
+    { leftTop, leftMain, rightTop, rightMain, fullWidth, guideContentIds, onIsEnlargeClicked }: ResponsiveGridLayoutProps,
     ref: Ref<ResponsiveGridLayoutExposedMethods>
   ) => {
     const theme = useTheme();
     const sxClasses = getSxClasses(theme);
     const { t } = useTranslation<string>();
+    const guide = useAppGuide();
 
     const [isRightPanelVisible, setIsRightPanelVisible] = useState(false);
+    const [isGuideOpen, setIsGuideOpen] = useState(false);
     const [isEnlarged, setIsEnlarged] = useState(false);
     const [isFullScreen, setIsFullScreen] = useState(false);
 
@@ -43,6 +49,16 @@ const ResponsiveGridLayout = forwardRef(
     useImperativeHandle(ref, () => ({
       setIsRightPanelVisible: (isVisible: boolean) => setIsRightPanelVisible(isVisible),
     }));
+
+    useEffect(() => {
+      if (rightMain) {
+        setIsGuideOpen(false);
+      } else if (guideContentIds) {
+        setIsGuideOpen(true);
+      } else {
+        setIsGuideOpen(false);
+      }
+    }, [rightMain]);
 
     /**
      * Handles click on the Enlarge button.
@@ -62,6 +78,13 @@ const ResponsiveGridLayout = forwardRef(
       },
       [onIsEnlargeClicked]
     );
+
+    const handleOpenGuide = function () {
+      if (guideContentIds) {
+        setIsGuideOpen(true);
+      }
+    };
+
     // // If we're on mobile
     if (theme.breakpoints.down('md')) {
       if (!(leftMain || leftTop) && !isRightPanelVisible && !fullWidth) {
@@ -115,6 +138,80 @@ const ResponsiveGridLayout = forwardRef(
       );
     };
 
+    const renderGuideButton = function () {
+      return (
+        <IconButton size="small" onClick={() => handleOpenGuide()} tooltip={t('general.openGuide')!} className="style2" color="primary">
+          <QuestionMarkIcon />
+        </IconButton>
+      );
+    };
+
+    const renderFullScreenButton = function () {
+      return (
+        <IconButton
+          size="small"
+          onClick={() => setIsFullScreen(!isFullScreen)}
+          tooltip={isFullScreen ? t('general.closeFullscreen')! : t('general.openFullscreen')!}
+          className="style2"
+          color="primary"
+        >
+          <FullscreenIcon />
+        </IconButton>
+      );
+    };
+
+    // added a customGet function to get nested object properties. _.get was not working for this kind of object
+    function customGet<T>(obj: any, path: string): T | undefined {
+      if (obj === undefined || obj === null) {
+        return undefined;
+      }
+
+      const keys: string[] = path.split('.');
+      let result: any = obj;
+      for (const key of keys) {
+        if (result === undefined || result === null) {
+          return undefined;
+        }
+        result = result[key];
+      }
+      return result;
+    }
+
+    const renderGuide = function (): ReactNode {
+      const content = guideContentIds
+        ?.map((key) => {
+          return customGet(guide!.footerPanel!.children, `${key}.content`);
+        })
+        .filter((item) => item !== undefined)
+        .join('\n');
+
+      if (!content) return null;
+
+      return (
+        <Paper sx={{ padding: '20px', overflow: 'auto' }}>
+          <Box className="guideBox">
+            <Markdown options={{ wrapper: 'article' }}>{content}</Markdown>
+          </Box>
+        </Paper>
+      );
+    };
+
+    const renderRightContent = function () {
+      const content = !isGuideOpen ? rightMain : renderGuide();
+
+      return (
+        <>
+          <FullScreenDialog open={isFullScreen} onClose={() => setIsFullScreen(false)}>
+            <Box sx={sxClasses.rightGridContent} className="fullscreen-mode">
+              {content}
+            </Box>
+          </FullScreenDialog>
+
+          <Box sx={sxClasses.rightGridContent}>{content}</Box>
+        </>
+      );
+    };
+
     return (
       <Box ref={ref}>
         <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
@@ -137,15 +234,8 @@ const ResponsiveGridLayout = forwardRef(
 
               <Box sx={{ display: 'flex', flexDirection: 'row', gap: '0.6rem' }}>
                 {!fullWidth && renderEnlargeButton()}
-                <IconButton
-                  size="small"
-                  onClick={() => setIsFullScreen(!isFullScreen)}
-                  tooltip={isFullScreen ? t('general.closeFullscreen')! : t('general.openFullscreen')!}
-                  className="style2"
-                  color="primary"
-                >
-                  <FullscreenIcon />
-                </IconButton>
+                {guideContentIds?.length && !isGuideOpen && renderGuideButton()}
+                {renderFullScreenButton()}
                 {!!(leftMain || leftTop) && renderCloseButton()}
               </Box>
             </Box>
@@ -167,13 +257,7 @@ const ResponsiveGridLayout = forwardRef(
             isRightPanelVisible={isRightPanelVisible}
             fullWidth={fullWidth}
           >
-            <FullScreenDialog open={isFullScreen} onClose={() => setIsFullScreen(false)}>
-              <Box sx={sxClasses.rightGridContent} className="fullscreen-mode">
-                {rightMain}
-              </Box>
-            </FullScreenDialog>
-
-            <Box sx={sxClasses.rightGridContent}>{rightMain}</Box>
+            {renderRightContent()}
           </ResponsiveGrid.Right>
         </ResponsiveGrid.Root>
       </Box>
