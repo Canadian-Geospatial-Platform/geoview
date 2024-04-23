@@ -1,4 +1,4 @@
-import { useState, ReactNode, useCallback, forwardRef, useImperativeHandle, Ref, useEffect } from 'react';
+import React, { useState, ReactNode, useCallback, forwardRef, useImperativeHandle, Ref, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import Markdown from 'markdown-to-jsx';
@@ -58,7 +58,7 @@ const ResponsiveGridLayout = forwardRef(
       } else {
         setIsGuideOpen(false);
       }
-    }, [rightMain]);
+    }, [rightMain, guideContentIds]);
 
     /**
      * Handles click on the Enlarge button.
@@ -79,7 +79,7 @@ const ResponsiveGridLayout = forwardRef(
       [onIsEnlargeClicked]
     );
 
-    const handleOpenGuide = function () {
+    const handleOpenGuide = function (): void {
       if (guideContentIds) {
         setIsGuideOpen(true);
       }
@@ -92,7 +92,7 @@ const ResponsiveGridLayout = forwardRef(
       }
     }
 
-    const renderEnlargeButton = function () {
+    const renderEnlargeButton = function (): ReactNode {
       return (
         <Button
           type="text"
@@ -111,7 +111,7 @@ const ResponsiveGridLayout = forwardRef(
       );
     };
 
-    const renderCloseButton = function () {
+    const renderCloseButton = function (): ReactNode {
       return (
         <Button
           type="text"
@@ -138,7 +138,7 @@ const ResponsiveGridLayout = forwardRef(
       );
     };
 
-    const renderGuideButton = function () {
+    const renderGuideButton = function (): ReactNode {
       return (
         <IconButton size="small" onClick={() => handleOpenGuide()} tooltip={t('general.openGuide')!} className="style2" color="primary">
           <QuestionMarkIcon />
@@ -146,7 +146,7 @@ const ResponsiveGridLayout = forwardRef(
       );
     };
 
-    const renderFullScreenButton = function () {
+    const renderFullScreenButton = function (): ReactNode {
       return (
         <IconButton
           size="small"
@@ -161,12 +161,14 @@ const ResponsiveGridLayout = forwardRef(
     };
 
     // added a customGet function to get nested object properties. _.get was not working for this kind of object
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     function customGet<T>(obj: any, path: string): T | undefined {
       if (obj === undefined || obj === null) {
         return undefined;
       }
 
       const keys: string[] = path.split('.');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let result: any = obj;
       for (const key of keys) {
         if (result === undefined || result === null) {
@@ -196,7 +198,7 @@ const ResponsiveGridLayout = forwardRef(
       );
     };
 
-    const renderRightContent = function () {
+    const renderRightContent = function (): ReactNode {
       const content = !isGuideOpen ? rightMain : renderGuide();
 
       return (
@@ -272,6 +274,7 @@ ResponsiveGridLayout.defaultProps = {
   leftMain: null,
   rightTop: null,
   fullWidth: false,
+  guideContentIds: [],
   onIsEnlargeClicked: undefined,
 };
 

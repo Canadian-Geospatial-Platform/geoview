@@ -78,4 +78,5 @@ export function Layout({
 Layout.defaultProps = {
   children: null,
   fullWidth: false,
+  guideContentIds: null,
 };
