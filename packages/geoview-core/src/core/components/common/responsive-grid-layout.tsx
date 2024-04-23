@@ -92,7 +92,7 @@ const ResponsiveGridLayout = forwardRef(
       }
     }
 
-    const renderEnlargeButton = function (): ReactNode {
+    const renderEnlargeButton = (): JSX.Element => {
       return (
         <Button
           type="text"
@@ -111,7 +111,7 @@ const ResponsiveGridLayout = forwardRef(
       );
     };
 
-    const renderCloseButton = function (): ReactNode {
+    const renderCloseButton = (): JSX.Element => {
       return (
         <Button
           type="text"
@@ -138,7 +138,7 @@ const ResponsiveGridLayout = forwardRef(
       );
     };
 
-    const renderGuideButton = function (): ReactNode {
+    const renderGuideButton = (): JSX.Element => {
       return (
         <IconButton size="small" onClick={() => handleOpenGuide()} tooltip={t('general.openGuide')!} className="style2" color="primary">
           <QuestionMarkIcon />
@@ -146,7 +146,7 @@ const ResponsiveGridLayout = forwardRef(
       );
     };
 
-    const renderFullScreenButton = function (): ReactNode {
+    const renderFullScreenButton = (): JSX.Element => {
       return (
         <IconButton
           size="small"
@@ -170,16 +170,18 @@ const ResponsiveGridLayout = forwardRef(
       const keys: string[] = path.split('.');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let result: any = obj;
-      for (const key of keys) {
-        if (result === undefined || result === null) {
-          return undefined;
+      keys.forEach((key) => {
+        if (!(key in result)) {
+          result = undefined;
+          return;
         }
         result = result[key];
-      }
+      });
+
       return result;
     }
 
-    const renderGuide = function (): ReactNode {
+    const renderGuide = (): JSX.Element | null => {
       const content = guideContentIds
         ?.map((key) => {
           return customGet(guide!.footerPanel!.children, `${key}.content`);
@@ -198,7 +200,7 @@ const ResponsiveGridLayout = forwardRef(
       );
     };
 
-    const renderRightContent = function (): ReactNode {
+    const renderRightContent = (): JSX.Element => {
       const content = !isGuideOpen ? rightMain : renderGuide();
 
       return (

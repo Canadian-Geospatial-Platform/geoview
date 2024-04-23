@@ -162,7 +162,7 @@ export function Datapanel({ fullWidth }: DataPanelType): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTab]);
 
-  const renderContent = function (): JSX.Element | null {
+  const renderContent = (): JSX.Element | null => {
     if (isLoading) {
       return <Skeleton variant="rounded" width="100%" height={400} sx={{ bgcolor: theme.palette.grey[400] }} />;
     }
