@@ -350,6 +350,7 @@ export type TypeGeoviewLayerConfig = {
 /** ******************************************************************************************************************************
  * List of supported geoview theme.
  */
+// TODO: Move all the constants in the config-constants file.
 export type TypeDisplayTheme = 'dark' | 'light' | 'geo.ca';
 export const VALID_DISPLAY_THEME: TypeDisplayTheme[] = ['dark', 'light', 'geo.ca'];
 
@@ -470,7 +471,7 @@ export const VALID_PROJECTION_CODES = [3978, 3857];
 /** ******************************************************************************************************************************
  * Controls available on the navigation bar. Default = ['zoom', 'fullscreen', 'home'].
  */
-export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'home' | 'location' | 'export'>;
+export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'home' | 'location'>;
 
 /** ******************************************************************************************************************************
  * Configuration available on the application bar. Default = ['geolocator']. The about GeoView and notification are always there.
@@ -547,6 +548,7 @@ export type TypeServiceUrls = {
 // #endregion VIEWER CONFIG TYPES
 
 // #region STYLES TYPES
+// TODO: Move all the type guard functions in the typeGuards file.
 /** ******************************************************************************************************************************
  * type guard function that redefines a TypeBaseVectorConfig as a TypeLineStringVectorConfig if the type attribute of the
  * verifyIfConfig parameter is 'lineString'. The type ascention applies only to the true block of the if clause that use
