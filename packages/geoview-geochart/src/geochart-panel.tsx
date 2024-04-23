@@ -235,6 +235,13 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     );
   };
 
+
+  const onGuideIsOpen = (guideIsOpen: boolean): void => {
+    if(guideIsOpen) {
+      setSelectedLayerPath('');
+    }
+  };
+
   /**
    * Renders the complete GeoChart Panel component
    * @returns {JSX.Element}
@@ -247,6 +254,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
           layerList={memoLayersList}
           onLayerListClicked={handleLayerChange}
           onIsEnlargeClicked={handleIsEnlargeClicked}
+          onGuideIsOpen={onGuideIsOpen}
           guideContentIds={['chart', 'chartTypes']}
         >
           {selectedLayerPath && (

@@ -36,10 +36,10 @@ const getButtonStyleOverrides = (geoViewColors: IGeoViewColors): any => ({
       border: `3px solid ${geoViewColors.primary.light[500]}`,
       color: `${geoViewColors.primary.dark[100]}`,
       boxShadow: 1,
-    }
+    },
   },
-  '&.style2:disabled': { 
-    backgroundColor: `${geoViewColors.bgColor.dark[150]}`,
+  '&.style2:disabled': {
+    //backgroundColor: `${geoViewColors.bgColor.dark[150]}`,
   },
   '&.style3': {
     // used for app-bar buttons

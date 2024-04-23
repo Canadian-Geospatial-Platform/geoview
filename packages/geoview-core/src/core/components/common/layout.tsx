@@ -11,6 +11,7 @@ interface LayoutProps {
   selectedLayerPath: string | undefined;
   onLayerListClicked: (layer: LayerListEntry) => void;
   fullWidth?: boolean;
+  onGuideIsOpen?: (isGuideOpen: boolean) => void;
 }
 
 export function Layout({
@@ -20,6 +21,7 @@ export function Layout({
   selectedLayerPath,
   onLayerListClicked,
   fullWidth,
+  onGuideIsOpen
 }: LayoutProps): JSX.Element {
   const [isEnlarged, setIsEnlarged] = useState(false);
 
@@ -71,6 +73,7 @@ export function Layout({
       rightTop={renderLayerTitle()}
       fullWidth={fullWidth}
       onIsEnlargeClicked={setIsEnlarged}
+      onGuideIsOpen={onGuideIsOpen}
     />
   );
 }
@@ -79,4 +82,5 @@ Layout.defaultProps = {
   children: null,
   fullWidth: false,
   guideContentIds: null,
+  onGuideIsOpen: undefined
 };

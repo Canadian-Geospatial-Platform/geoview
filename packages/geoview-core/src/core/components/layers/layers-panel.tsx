@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { useTheme } from '@mui/material';
 import { Box } from '@/ui';
-import { useLayerDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerDisplayState, useLayerStoreActions, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayersToolbar } from './layers-toolbar';
 import { LayerDetails } from './right-panel/layer-details';
 import { LeftPanel } from './left-panel/left-panel';
@@ -16,6 +16,7 @@ export function LayersPanel(): JSX.Element {
 
   const selectedLayer = useSelectedLayer(); // get store value
   const displayState = useLayerDisplayState();
+  const { setSelectedLayerPath } = useLayerStoreActions();
 
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
 
@@ -84,6 +85,13 @@ export function LayersPanel(): JSX.Element {
     );
   };
 
+
+  const onGuideIsOpen = (guideIsOpen: boolean): void => {
+    if(guideIsOpen) {
+      setSelectedLayerPath('');
+    }
+  };
+
   return (
     <ResponsiveGridLayout
       ref={responsiveLayoutRef}
@@ -93,6 +101,7 @@ export function LayersPanel(): JSX.Element {
       rightMain={rightPanel()}
       guideContentIds={guideContent()}
       fullWidth={false}
+      onGuideIsOpen={onGuideIsOpen}
     />
   );
 }

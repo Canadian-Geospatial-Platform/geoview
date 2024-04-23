@@ -21,6 +21,7 @@ interface ResponsiveGridLayoutProps {
   rightMain: ReactNode;
   fullWidth?: boolean;
   onIsEnlargeClicked?: (isEnlarge: boolean) => void;
+  onGuideIsOpen?: (isGuideOpen: boolean) => void;
 }
 
 interface ResponsiveGridLayoutExposedMethods {
@@ -29,7 +30,7 @@ interface ResponsiveGridLayoutExposedMethods {
 
 const ResponsiveGridLayout = forwardRef(
   (
-    { leftTop, leftMain, rightTop, rightMain, fullWidth, guideContentIds, onIsEnlargeClicked }: ResponsiveGridLayoutProps,
+    { leftTop, leftMain, rightTop, rightMain, fullWidth, guideContentIds, onIsEnlargeClicked, onGuideIsOpen }: ResponsiveGridLayoutProps,
     ref: Ref<ResponsiveGridLayoutExposedMethods>
   ) => {
     const theme = useTheme();
@@ -61,6 +62,10 @@ const ResponsiveGridLayout = forwardRef(
         setIsGuideOpen(false);
       }
     }, [rightMain, guideContentIds]);
+
+    useEffect(() => {
+      onGuideIsOpen?.(isGuideOpen);
+    }, [isGuideOpen]);
 
     /**
      * Handles click on the Enlarge button.
@@ -142,7 +147,14 @@ const ResponsiveGridLayout = forwardRef(
 
     const renderGuideButton = (): JSX.Element => {
       return (
-        <IconButton disabled={isGuideOpen} size="small" onClick={() => handleOpenGuide()} tooltip={t('general.openGuide')!} className="style2" color="primary">
+        <IconButton
+          disabled={isGuideOpen}
+          size="small"
+          onClick={() => handleOpenGuide()}
+          tooltip={t('general.openGuide')!}
+          className="style2"
+          color="primary"
+        >
           <QuestionMarkIcon />
         </IconButton>
       );
@@ -280,6 +292,7 @@ ResponsiveGridLayout.defaultProps = {
   fullWidth: false,
   guideContentIds: [],
   onIsEnlargeClicked: undefined,
+  onGuideIsOpen: undefined,
 };
 
 export { ResponsiveGridLayout };
