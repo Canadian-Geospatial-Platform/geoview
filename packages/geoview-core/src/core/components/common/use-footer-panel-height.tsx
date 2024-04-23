@@ -57,7 +57,6 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
    */
   const rightPanelHeight = (height?: number): void => {
     const rightPanel = (rightPanelRef.current?.firstElementChild ?? null) as HTMLElement | null;
-
     if (rightPanel) {
       rightPanel.style.maxHeight = `${height ?? defaultHeight}px`;
       rightPanel.style.overflowY = 'auto';
@@ -85,9 +84,11 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
         setTableHeight(leftPanelHeight);
         setGuideContainerHeight(leftPanelHeight);
       } else if (activeFooterBarTabId === TABS.GEO_CHART && rightPanelRef.current) {
-        rightPanelRef.current.style.maxHeight = `${leftPanelHeight}px`;
-        rightPanelRef.current.style.overflowY = footerPanelResizeValue !== 100 ? 'auto' : 'visible';
-        rightPanelRef.current.style.paddingBottom = `24px`;
+        const childElem = rightPanelRef.current?.firstElementChild as HTMLElement | null;
+        if (childElem) {
+          childElem.style.maxHeight = `${leftPanelHeight}px`;
+          childElem.style.overflowY = footerPanelResizeValue !== 100 ? 'auto' : 'visible';
+        }
       } else {
         rightPanelHeight(leftPanelHeight);
       }
@@ -101,8 +102,11 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
         setGuideContainerHeight();
         // check if table exist as child in right panel.
       } else if (activeFooterBarTabId === TABS.GEO_CHART && rightPanelRef.current) {
-        rightPanelRef.current.style.maxHeight = `${defaultHeight}px`;
-        rightPanelRef.current.style.overflowY = 'auto';
+        const childElem = rightPanelRef.current?.firstElementChild as HTMLElement | null;
+        if (childElem) {
+          childElem.style.maxHeight = `${defaultHeight}px`;
+          childElem.style.overflowY = 'auto';
+        }
       } else {
         rightPanelHeight();
       }

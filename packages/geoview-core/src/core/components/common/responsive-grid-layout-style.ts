@@ -37,7 +37,7 @@ export const getSxClasses = (theme: Theme): any => ({
         paddingLeft: '15px',
       },
       '& h3': {
-        '&:first-child': {
+        '&:first-of-type': {
           display: 'flex',
           alignItems: 'center',
           gap: '0.325rem',

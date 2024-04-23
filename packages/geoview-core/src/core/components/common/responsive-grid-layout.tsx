@@ -9,6 +9,7 @@ import FullScreenDialog from './full-screen-dialog';
 import { logger } from '@/core/utils/logger';
 import { ArrowBackIcon, ArrowForwardIcon } from '@/ui/icons';
 import { Button } from '@/ui/button/button';
+import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 interface ResponsiveGridLayoutProps {
   leftTop?: ReactNode;
@@ -31,6 +32,7 @@ const ResponsiveGridLayout = forwardRef(
     const [isRightPanelVisible, setIsRightPanelVisible] = useState(false);
     const [isEnlarged, setIsEnlarged] = useState(false);
     const [isFullScreen, setIsFullScreen] = useState(false);
+    const isMapFullScreen = useAppFullscreenActive();
 
     // Custom hook for calculating the height of footer panel
     const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'default' });
@@ -127,15 +129,17 @@ const ResponsiveGridLayout = forwardRef(
 
               <Box sx={{ display: 'flex', flexDirection: 'row', gap: '0.6rem' }}>
                 {!fullWidth && renderEnlargeButton()}
-                <IconButton
-                  size="small"
-                  onClick={() => setIsFullScreen(!isFullScreen)}
-                  tooltip={isFullScreen ? t('general.closeFullscreen')! : t('general.openFullscreen')!}
-                  className="style2"
-                  color="primary"
-                >
-                  <FullscreenIcon />
-                </IconButton>
+                {!isMapFullScreen && (
+                  <IconButton
+                    size="small"
+                    onClick={() => setIsFullScreen(!isFullScreen)}
+                    tooltip={isFullScreen ? t('general.closeFullscreen')! : t('general.openFullscreen')!}
+                    className="style2"
+                    color="primary"
+                  >
+                    <FullscreenIcon />
+                  </IconButton>
+                )}
                 {!!(leftMain || leftTop) && renderCloseButton()}
               </Box>
             </Box>
