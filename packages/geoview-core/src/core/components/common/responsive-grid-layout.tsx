@@ -140,7 +140,7 @@ const ResponsiveGridLayout = forwardRef(
 
     const renderGuideButton = (): JSX.Element => {
       return (
-        <IconButton size="small" onClick={() => handleOpenGuide()} tooltip={t('general.openGuide')!} className="style2" color="primary">
+        <IconButton disabled={isGuideOpen} size="small" onClick={() => handleOpenGuide()} tooltip={t('general.openGuide')!} className="style2" color="primary">
           <QuestionMarkIcon />
         </IconButton>
       );
@@ -184,7 +184,7 @@ const ResponsiveGridLayout = forwardRef(
     const renderGuide = (): JSX.Element | null => {
       const content = guideContentIds
         ?.map((key) => {
-          return customGet(guide!.footerPanel!.children, `${key}.content`);
+          return customGet(guide?.footerPanel?.children, `${key}.content`);
         })
         .filter((item) => item !== undefined)
         .join('\n');
@@ -238,7 +238,7 @@ const ResponsiveGridLayout = forwardRef(
 
               <Box sx={{ display: 'flex', flexDirection: 'row', gap: '0.6rem' }}>
                 {!fullWidth && renderEnlargeButton()}
-                {guideContentIds?.length && !isGuideOpen && renderGuideButton()}
+                {guideContentIds?.length && renderGuideButton()}
                 {renderFullScreenButton()}
                 {!!(leftMain || leftTop) && renderCloseButton()}
               </Box>
