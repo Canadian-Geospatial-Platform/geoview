@@ -10,18 +10,6 @@ export const getSxClasses = (theme: Theme): any => ({
   rightPanelContainer: {
     color: theme.palette.geoViewColor.textColor.main,
   },
-  guideBox: {
-    ml: '30px',
-    mb: '18px',
-    td: {
-      width: 'auto',
-      paddingLeft: '15px',
-    },
-    th: {
-      textAlign: 'left',
-      paddingLeft: '15px',
-    },
-  },
   footerGuideListItemText: {
     '&:hover': {
       cursor: 'pointer',

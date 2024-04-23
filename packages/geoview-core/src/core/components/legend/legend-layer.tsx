@@ -94,41 +94,42 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
     if (getLayerChildren().length) {
       return <>{t('legend.subLayersCount').replace('{count}', getLayerChildren().length.toString())}</>;
     }
+    if (layer.items.length) {
+      let itemsCountStr = '';
+      if (layer.items.length > 1) {
+        itemsCountStr = t('legend.itemsCount')
+          .replace('{count}', layer.items.length.toString())
+          .replace('{totalCount}', layer.items.length.toString());
+      }
 
-    let itemsCountStr = '';
-    if (layer.items.length > 1) {
-      itemsCountStr = t('legend.itemsCount')
-        .replace('{count}', layer.items.length.toString())
-        .replace('{totalCount}', layer.items.length.toString());
+      return (
+        <Stack direction="row" alignItems="center" sx={sxClasses.layerStackIcons}>
+          <Typography component="span" fontSize={14}>
+            {itemsCountStr}
+          </Typography>
+          <IconButton
+            edge="end"
+            tooltip="layers.visibilityIsAlways"
+            className="style1"
+            onClick={(e) => handleToggleVisibility(e)}
+            disabled={!isLayerVisible}
+          >
+            {visibility ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
+          </IconButton>
+          <IconButton
+            tooltip="legend.highlightLayer"
+            sx={{ marginTop: '-0.3125rem' }}
+            className="style1"
+            onClick={(e) => handleHighlightLayer(e)}
+          >
+            {highlightedLayer === layer.layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
+          </IconButton>
+          <IconButton tooltip="legend.zoomTo" className="style1" onClick={(e) => handleZoomTo(e)}>
+            <ZoomInSearchIcon />
+          </IconButton>
+        </Stack>
+      );
     }
-
-    return (
-      <Stack direction="row" alignItems="center" sx={sxClasses.layerStackIcons}>
-        <Typography component="span" fontSize={14}>
-          {itemsCountStr}
-        </Typography>
-        <IconButton
-          edge="end"
-          tooltip="layers.visibilityIsAlways"
-          className="style1"
-          onClick={(e) => handleToggleVisibility(e)}
-          disabled={!isLayerVisible}
-        >
-          {visibility ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
-        </IconButton>
-        <IconButton
-          tooltip="legend.highlightLayer"
-          sx={{ marginTop: '-0.3125rem' }}
-          className="style1"
-          onClick={(e) => handleHighlightLayer(e)}
-        >
-          {highlightedLayer === layer.layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
-        </IconButton>
-        <IconButton tooltip="legend.zoomTo" className="style1" onClick={(e) => handleZoomTo(e)}>
-          <ZoomInSearchIcon />
-        </IconButton>
-      </Stack>
-    );
 
     return <Box />;
   };

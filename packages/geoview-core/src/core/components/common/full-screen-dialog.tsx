@@ -13,7 +13,7 @@ function FullScreenDialog(props: FullScreenDialogProps): JSX.Element {
 
   return (
     <Dialog fullScreen maxWidth="xl" open={open} onClose={onClose} disablePortal>
-      <DialogContent>
+      <DialogContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'end' }}>
         <IconButton onClick={onClose} color="primary" className="style2" sx={{ marginBottom: '1.5rem' }}>
           <CloseIcon />
         </IconButton>

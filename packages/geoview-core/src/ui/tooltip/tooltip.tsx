@@ -8,7 +8,7 @@ import React from 'react';
  * @returns {JSX.Element} the tooltip ui component
  */
 export const Tooltip = React.forwardRef((props: TooltipProps, ref): JSX.Element => {
-  return <MaterialTooltip enterDelay={1000} leaveDelay={200} {...props} ref={ref} />;
+  return <MaterialTooltip enterDelay={1000} enterNextDelay={200} {...props} ref={ref} />;
 });
 
 Tooltip.displayName = 'Tooltip';

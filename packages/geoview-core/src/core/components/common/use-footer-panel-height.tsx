@@ -22,6 +22,7 @@ interface UseFooterPanelHeightType {
 // ? I doubt we want to define an explicit type for that utility hook?
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightType): any {
+  const defaultHeight = 600;
   const mapId = useGeoViewMapId();
   const leftPanelRef = useRef<HTMLDivElement>(null);
   const rightPanelRef = useRef<HTMLDivElement>(null);
@@ -34,37 +35,62 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
   const allFeaturesLayerData = useDataTableAllFeaturesDataArray();
   const { setTableHeight } = useDataTableStoreActions();
 
+  /**
+   * Set the height of right panel guide container
+   * @param {number} height calculate height of the right panel based on footerPanelTab
+   */
+  const setGuideContainerHeight = (height?: number): void => {
+    const rightPanelGuideContainer = (rightPanelRef.current?.querySelector('.guidebox-container') ?? null) as HTMLElement | null;
+    if (rightPanelGuideContainer) {
+      rightPanelGuideContainer.style.maxHeight = `${height ?? defaultHeight}px`;
+    }
+    // remove style attribute when tab changes
+    const rightPanel = (rightPanelRef.current?.firstElementChild ?? null) as HTMLElement | null;
+    if (rightPanel) {
+      rightPanel.removeAttribute('style');
+    }
+  };
+
+  /**
+   * Set the height of right panel
+   * @param {number} height calculate height of the right panel based on footerPanelTab
+   */
+  const rightPanelHeight = (height?: number): void => {
+    const rightPanel = (rightPanelRef.current?.firstElementChild ?? null) as HTMLElement | null;
+    if (rightPanel) {
+      rightPanel.style.maxHeight = `${height ?? defaultHeight}px`;
+      rightPanel.style.overflowY = 'auto';
+    }
+  };
+
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('USE-FOOTER-PANEL-HEIGHT - footerPanelResizeValue', footerPanelResizeValue, isMapFullScreen);
 
-    const defaultHeight = 600;
-
     if (leftPanelRef.current && isMapFullScreen && (activeFooterBarTabId === footerPanelTab || footerPanelTab === 'default')) {
-      const panelTitleHeight = panelTitleRef.current?.clientHeight ?? 0;
+      const panelTitleHeight = panelTitleRef.current?.clientHeight || 0;
       const tabsContainer = document.getElementById(`${mapId}-tabsContainer`)!;
-      const firstChild = tabsContainer?.firstElementChild?.firstElementChild;
+      const footerBar = tabsContainer?.firstElementChild?.firstElementChild;
 
-      const firstChildHeight = firstChild?.clientHeight ?? 0;
-      const leftPanelHeight = (window.screen.height * footerPanelResizeValue) / 100 - panelTitleHeight - firstChildHeight;
+      const footerBarHeight = footerBar?.clientHeight ?? 0;
+
+      const leftPanelHeight = (window.screen.height * footerPanelResizeValue) / 100 - panelTitleHeight - footerBarHeight - 10;
 
       leftPanelRef.current.style.maxHeight = `${leftPanelHeight}px`;
       leftPanelRef.current.style.overflow = 'auto';
       leftPanelRef.current.style.paddingBottom = '24px';
 
       if (activeFooterBarTabId === TABS.DATA_TABLE) {
-        setTableHeight(leftPanelHeight - 10);
+        setTableHeight(leftPanelHeight);
+        setGuideContainerHeight(leftPanelHeight);
       } else if (activeFooterBarTabId === TABS.GEO_CHART && rightPanelRef.current) {
-        rightPanelRef.current.style.maxHeight = `${leftPanelHeight}px`;
-        rightPanelRef.current.style.overflowY = footerPanelResizeValue !== 100 ? 'auto' : 'visible';
-        rightPanelRef.current.style.paddingBottom = `24px`;
-      } else {
-        const rightPanel = (rightPanelRef.current?.firstElementChild ?? null) as HTMLElement | null;
-
-        if (rightPanel) {
-          rightPanel.style.maxHeight = `${leftPanelHeight}px`;
-          rightPanel.style.paddingBottom = `24px`;
+        const childElem = rightPanelRef.current?.firstElementChild as HTMLElement | null;
+        if (childElem) {
+          childElem.style.maxHeight = `${leftPanelHeight}px`;
+          childElem.style.overflowY = footerPanelResizeValue !== 100 ? 'auto' : 'visible';
         }
+      } else {
+        rightPanelHeight(leftPanelHeight);
       }
     }
     // reset the footer panel after map is not in fullscreen.
@@ -73,14 +99,16 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
       leftPanelRef.current.style.overflow = 'auto';
       if (activeFooterBarTabId === TABS.DATA_TABLE) {
         setTableHeight(defaultHeight);
+        setGuideContainerHeight();
+        // check if table exist as child in right panel.
       } else if (activeFooterBarTabId === TABS.GEO_CHART && rightPanelRef.current) {
-        rightPanelRef.current.style.maxHeight = `${defaultHeight}px`;
-        rightPanelRef.current.style.overflowY = 'auto';
-      } else {
-        const rightPanel = (rightPanelRef.current?.firstElementChild ?? null) as HTMLElement | null;
-        if (rightPanel) {
-          rightPanel.style.maxHeight = `${defaultHeight}px`;
+        const childElem = rightPanelRef.current?.firstElementChild as HTMLElement | null;
+        if (childElem) {
+          childElem.style.maxHeight = `${defaultHeight}px`;
+          childElem.style.overflowY = 'auto';
         }
+      } else {
+        rightPanelHeight();
       }
     }
   }, [
@@ -88,11 +116,11 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
     isMapFullScreen,
     activeFooterBarTabId,
     footerPanelTab,
+    mapId,
+    setTableHeight,
     arrayOfLayerData,
     allFeaturesLayerData,
-    setTableHeight,
-    mapId,
   ]);
 
-  return { leftPanelRef, rightPanelRef, panelTitleRef };
+  return { leftPanelRef, rightPanelRef, panelTitleRef, activeFooterBarTabId };
 }

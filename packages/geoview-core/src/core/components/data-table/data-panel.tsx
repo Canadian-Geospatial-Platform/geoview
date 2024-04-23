@@ -190,14 +190,7 @@ export function Datapanel({ fullWidth }: DataPanelType): JSX.Element {
   return (
     <Layout
       selectedLayerPath={selectedLayerPath || ''}
-      layerList={orderedLayerData.map((layer) => ({
-        ...layer,
-        layerFeatures: getFeaturesOfLayer(layer.layerPath),
-        tooltip: getLayerTooltip(layer.layerName ?? '', layer.layerPath),
-        mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerPath) && (
-          <FilterAltIcon sx={{ color: theme.palette.geoViewColor.grey.main }} />
-        ),
-      }))}
+      layerList={memoLayerList}
       onLayerListClicked={handleLayerChange}
       fullWidth={fullWidth}
       onGuideIsOpen={onGuideIsOpen}

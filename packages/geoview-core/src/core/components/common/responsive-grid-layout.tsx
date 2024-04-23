@@ -42,6 +42,7 @@ const ResponsiveGridLayout = forwardRef(
     const [isGuideOpen, setIsGuideOpen] = useState(false);
     const [isEnlarged, setIsEnlarged] = useState(false);
     const [isFullScreen, setIsFullScreen] = useState(false);
+    const isMapFullScreen = useAppFullscreenActive();
 
     // Custom hook for calculating the height of footer panel
     const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'default' });
@@ -293,7 +294,7 @@ ResponsiveGridLayout.defaultProps = {
   fullWidth: false,
   guideContentIds: [],
   onIsEnlargeClicked: undefined,
-  onGuideIsOpen: undefined,
+  onGuideIsOpen: undefined
 };
 
 export { ResponsiveGridLayout };

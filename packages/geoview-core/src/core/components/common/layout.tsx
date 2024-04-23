@@ -1,4 +1,4 @@
-import { useState, useCallback, ReactNode, useRef } from 'react';
+import { useCallback, ReactNode, useRef } from 'react';
 import { logger } from '@/core/utils/logger';
 import { LayerList, LayerListEntry } from './layer-list';
 import { ResponsiveGridLayout, ResponsiveGridLayoutExposedMethods } from './responsive-grid-layout';
@@ -50,12 +50,10 @@ export function Layout({
     // Log
     logger.logTraceUseCallback('LAYOUT - renderLayerList');
 
-    return (
-      <LayerList isEnlarged={isEnlarged} selectedLayerPath={selectedLayerPath} onListItemClick={handleLayerChange} layerList={layerList} />
-    );
-  }, [isEnlarged, selectedLayerPath, layerList, handleLayerChange]);
+    return <LayerList selectedLayerPath={selectedLayerPath} onListItemClick={handleLayerChange} layerList={layerList} />;
+  }, [selectedLayerPath, layerList, handleLayerChange]);
 
-  const renderLayerTitle = function (): JSX.Element {
+  const renderLayerTitle = (): JSX.Element => {
     return (
       <LayerTitle hideTitle fullWidth={fullWidth}>
         {layerList.find((layer) => layer.layerPath === selectedLayerPath)?.layerName ?? ''}

@@ -249,12 +249,37 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     );
   }
 
+  const getSubTitle = (): string | null => {
+    if (layerDetails.children.length > 0) {
+      return t('legend.subLayersCount').replace('{count}', layerDetails.children.length.toString());
+    }
+    const count = layerDetails.items.filter((d) => d.isVisible !== false).length;
+    const totalCount = layerDetails.items.length;
+
+    if (totalCount <= 1) {
+      return null;
+    }
+    return t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
+  };
+
   // Render
   return (
     <Paper sx={sxClasses.layerDetails}>
       {layerDetails !== undefined && (
         <>
-          <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'right' }}>{renderLayerButtons()}</Box>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Box sx={{ textAlign: 'left', [theme.breakpoints.down('md')]: { display: 'none' } }}>
+              <Typography sx={sxClasses.categoryTitle}> {layerDetails.layerName} </Typography>
+              <Typography sx={{ fontSize: theme.palette.geoViewFontSize.sm }}> {getSubTitle()} </Typography>
+            </Box>
+            {renderLayerButtons()}
+          </Box>
           {layerDetails.controls?.opacity !== false && (
             <Box sx={sxClasses.layerOpacityControlContainer}>
               <Box id="layerOpacity">

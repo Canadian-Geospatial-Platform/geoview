@@ -8,11 +8,6 @@ export const getSxClasses = (theme: Theme): any => ({
     fontWeight: '600',
     marginBottom: '20px',
   },
-  rightPanelContainer: {
-    border: `2px solid ${theme.palette.primary.main}`,
-    borderRadius: '5px',
-    backgroundColor: theme.palette.common.white,
-  },
   rightPanelBtnHolder: {
     marginTop: '20px',
     marginBottom: '9px',
