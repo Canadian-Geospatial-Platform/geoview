@@ -807,7 +807,7 @@ export const VALID_PROJECTION_CODES = [3978, 3857];
 /** ******************************************************************************************************************************
  * Controls available on the navigation bar. Default = ['zoom', 'fullscreen', 'home'].
  */
-export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'home' | 'location' | 'export'>;
+export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'home' | 'location'>;
 
 /** ******************************************************************************************************************************
  * Configuration available on the application bar. Default = ['geolocator']. The about GeoView and notification are always there.

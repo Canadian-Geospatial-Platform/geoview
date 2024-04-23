@@ -8,7 +8,6 @@ import ZoomIn from './buttons/zoom-in';
 import ZoomOut from './buttons/zoom-out';
 import Fullscreen from './buttons/fullscreen';
 import Home from './buttons/home';
-import ExportButton from '@/core/components/export/export-modal-button';
 import Location from './buttons/location';
 
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
@@ -222,7 +221,6 @@ export function NavBar(props: NavBarProps): JSX.Element {
           {navBarComponents.includes('fullscreen') && <Fullscreen />}
           {navBarComponents.includes('location') && <Location />}
           {navBarComponents.includes('home') && <Home />}
-          {navBarComponents.includes('export') && <ExportButton sxDetails={sxClasses.navButton} />}
         </ButtonGroup>
       </Box>
     </Box>
