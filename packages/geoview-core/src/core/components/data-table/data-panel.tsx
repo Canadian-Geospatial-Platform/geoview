@@ -182,7 +182,7 @@ export function Datapanel({ fullWidth }: DataPanelType): JSX.Element {
   };
 
   const onGuideIsOpen = (guideIsOpen: boolean): void => {
-    if(guideIsOpen) {
+    if (guideIsOpen) {
       setSelectedLayerPath('');
     }
   };

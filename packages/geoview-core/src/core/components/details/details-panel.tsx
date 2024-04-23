@@ -258,7 +258,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
     if (memoLayerSelectedItem && !(memoLayerSelectedItem.queryStatus === 'processed' || memoLayerSelectedItem.queryStatus === 'error'))
       return;
 
-    if(guideIsOpen) {
+    if (guideIsOpen) {
       setSelectedLayerPath('');
       return;
     }
@@ -371,12 +371,12 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
 
   const onGuideIsOpen = (guideIsOpenVal: boolean): void => {
     console.log('dfdfdf dsfdf', guideIsOpenVal);
-    if(guideIsOpen) {
+    if (guideIsOpen) {
       setGuideIsOpen(guideIsOpenVal);
       setSelectedLayerPath('');
-      //setselectedLayerPathLocal('');
-      //setSelectedLayerPath('');
-      //removeCheckedFeature('all');
+      // setselectedLayerPathLocal('');
+      // setSelectedLayerPath('');
+      // removeCheckedFeature('all');
     }
   };
 

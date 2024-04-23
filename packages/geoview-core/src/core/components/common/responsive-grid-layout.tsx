@@ -149,6 +149,7 @@ const ResponsiveGridLayout = forwardRef(
       return (
         <IconButton
           disabled={isGuideOpen}
+          sx={{width: '2.5rem', height: '2.5rem'}}
           size="small"
           onClick={() => handleOpenGuide()}
           tooltip={t('general.openGuide')!}

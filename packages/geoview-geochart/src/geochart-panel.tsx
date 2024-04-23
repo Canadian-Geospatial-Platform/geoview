@@ -235,9 +235,8 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     );
   };
 
-
   const onGuideIsOpen = (guideIsOpen: boolean): void => {
-    if(guideIsOpen) {
+    if (guideIsOpen) {
       setSelectedLayerPath('');
     }
   };

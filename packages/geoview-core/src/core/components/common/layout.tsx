@@ -21,7 +21,7 @@ export function Layout({
   selectedLayerPath,
   onLayerListClicked,
   fullWidth,
-  onGuideIsOpen
+  onGuideIsOpen,
 }: LayoutProps): JSX.Element {
   const [isEnlarged, setIsEnlarged] = useState(false);
 
@@ -82,5 +82,5 @@ Layout.defaultProps = {
   children: null,
   fullWidth: false,
   guideContentIds: null,
-  onGuideIsOpen: undefined
+  onGuideIsOpen: undefined,
 };
