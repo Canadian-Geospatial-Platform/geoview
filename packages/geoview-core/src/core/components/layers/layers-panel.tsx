@@ -60,7 +60,7 @@ export function LayersPanel(): JSX.Element {
         </Markdown>
       );
       return (
-        <Paper sx={{ padding: '20px', overflow: 'auto' }}>
+        <Paper sx={{ overflow: 'auto' }}>
           <Box className="guideBox">{markDown}</Box>
         </Paper>
       );
@@ -70,7 +70,7 @@ export function LayersPanel(): JSX.Element {
         <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.layers!.children!.remove!.content}</Markdown>
       );
       return (
-        <Paper sx={{ padding: '20px' }}>
+        <Paper>
           <Box className="guideBox">{markDown}</Box>
         </Paper>
       );
@@ -80,7 +80,7 @@ export function LayersPanel(): JSX.Element {
         <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.layers!.children!.sort!.content}</Markdown>
       );
       return (
-        <Paper sx={{ padding: '20px' }}>
+        <Paper>
           <Box className="guideBox">{markDown}</Box>
         </Paper>
       );
@@ -88,7 +88,7 @@ export function LayersPanel(): JSX.Element {
     if (displayState === 'add') {
       const markDown = <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.layers!.children!.add!.content}</Markdown>;
       return (
-        <Paper sx={{ padding: '20px' }}>
+        <Paper>
           <Box className="guideBox">{markDown}</Box>
         </Paper>
       );
