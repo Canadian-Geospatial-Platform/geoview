@@ -3,7 +3,7 @@ import { ChartType, SchemaValidator } from 'geochart';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
 import { TypeLayerData } from 'geoview-core/src/geo/utils/layer-set';
 import { Typography } from 'geoview-core/src/ui/typography/typography';
-import { Box, Paper } from 'geoview-core/src/ui';
+import { Box } from 'geoview-core/src/ui';
 import { useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
 import {
   useGeochartConfigs,
@@ -70,19 +70,6 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     // Redraw the GeoCharts
     redrawGeoCharts();
   });
-
-  /**
-   * Handles click on enlarge button in the layout component.
-   *
-   * @param {boolean} isEnlarge Indicates if is enlarged
-   */
-  const handleIsEnlargeClicked = useCallback((isEnlarge: boolean) => {
-    // Log
-    logger.logTraceUseCallback('GEOCHART-PANEL - handleIsEnlargeClicked', isEnlarge);
-
-    // Redraw the GeoCharts
-    redrawGeoCharts();
-  }, []);
 
   /**
    * Handles when the GeoChart child component is providing its callback to redraw itself
@@ -244,12 +231,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const renderComplete = (): JSX.Element => {
     if (memoLayersList) {
       return (
-        <Layout
-          selectedLayerPath={selectedLayerPath || ''}
-          layerList={memoLayersList}
-          onLayerListClicked={handleLayerChange}
-          onIsEnlargeClicked={handleIsEnlargeClicked}
-        >
+        <Layout selectedLayerPath={selectedLayerPath || ''} layerList={memoLayersList} onLayerListClicked={handleLayerChange}>
           {selectedLayerPath && (
             <Box>
               {Object.entries(configObj).map(([layerPath, layerChartConfig], index) => {
@@ -262,13 +244,11 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
             </Box>
           )}
           {!selectedLayerPath && guide?.footerPanel && (
-            <Paper sx={{ padding: '2rem' }}>
-              <Box className="guideBox">
-                <Markdown options={{ wrapper: 'article' }}>{`${guide!.footerPanel!.children!.chart!.content}\n${
-                  guide!.footerPanel!.children!.chart!.children!.chartTypes!.content
-                }`}</Markdown>
-              </Box>
-            </Paper>
+            <Box className="guideBox">
+              <Markdown options={{ wrapper: 'article' }}>{`${guide!.footerPanel!.children!.chart!.content}\n${
+                guide!.footerPanel!.children!.chart!.children!.chartTypes!.content
+              }`}</Markdown>
+            </Box>
           )}
         </Layout>
       );

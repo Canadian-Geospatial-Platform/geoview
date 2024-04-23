@@ -9,6 +9,7 @@ import FullScreenDialog from './full-screen-dialog';
 import { logger } from '@/core/utils/logger';
 import { ArrowBackIcon, ArrowForwardIcon } from '@/ui/icons';
 import { Button } from '@/ui/button/button';
+import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 interface ResponsiveGridLayoutProps {
   leftTop?: ReactNode;
@@ -16,7 +17,6 @@ interface ResponsiveGridLayoutProps {
   rightTop?: ReactNode;
   rightMain: ReactNode;
   fullWidth?: boolean;
-  onIsEnlargeClicked?: (isEnlarge: boolean) => void;
 }
 
 interface ResponsiveGridLayoutExposedMethods {
@@ -24,10 +24,7 @@ interface ResponsiveGridLayoutExposedMethods {
 }
 
 const ResponsiveGridLayout = forwardRef(
-  (
-    { leftTop, leftMain, rightTop, rightMain, fullWidth, onIsEnlargeClicked }: ResponsiveGridLayoutProps,
-    ref: Ref<ResponsiveGridLayoutExposedMethods>
-  ) => {
+  ({ leftTop, leftMain, rightTop, rightMain, fullWidth }: ResponsiveGridLayoutProps, ref: Ref<ResponsiveGridLayoutExposedMethods>) => {
     const theme = useTheme();
     const sxClasses = getSxClasses(theme);
     const { t } = useTranslation<string>();
@@ -35,6 +32,7 @@ const ResponsiveGridLayout = forwardRef(
     const [isRightPanelVisible, setIsRightPanelVisible] = useState(false);
     const [isEnlarged, setIsEnlarged] = useState(false);
     const [isFullScreen, setIsFullScreen] = useState(false);
+    const isMapFullScreen = useAppFullscreenActive();
 
     // Custom hook for calculating the height of footer panel
     const { leftPanelRef, rightPanelRef, panelTitleRef } = useFooterPanelHeight({ footerPanelTab: 'default' });
@@ -51,19 +49,13 @@ const ResponsiveGridLayout = forwardRef(
      *
      * @param {boolean} isEnlarge Indicate if enlarge
      */
-    const handleIsEnlarge = useCallback(
-      (isEnlarge: boolean): void => {
-        // Log
-        logger.logTraceUseCallback('LAYOUT - handleIsEnlarge');
+    const handleIsEnlarge = useCallback((isEnlarge: boolean): void => {
+      // Log
+      logger.logTraceUseCallback('LAYOUT - handleIsEnlarge');
 
-        // Set the isEnlarge
-        setIsEnlarged(isEnlarge);
-
-        // Callback
-        onIsEnlargeClicked?.(isEnlarge);
-      },
-      [onIsEnlargeClicked]
-    );
+      // Set the isEnlarge
+      setIsEnlarged(isEnlarge);
+    }, []);
     // // If we're on mobile
     if (theme.breakpoints.down('md')) {
       if (!(leftMain || leftTop) && !isRightPanelVisible && !fullWidth) {
@@ -71,7 +63,7 @@ const ResponsiveGridLayout = forwardRef(
       }
     }
 
-    const renderEnlargeButton = function () {
+    const renderEnlargeButton = (): JSX.Element => {
       return (
         <Button
           type="text"
@@ -90,7 +82,7 @@ const ResponsiveGridLayout = forwardRef(
       );
     };
 
-    const renderCloseButton = function () {
+    const renderCloseButton = (): JSX.Element => {
       return (
         <Button
           type="text"
@@ -139,15 +131,17 @@ const ResponsiveGridLayout = forwardRef(
 
               <Box sx={{ display: 'flex', flexDirection: 'row', gap: '0.6rem' }}>
                 {!fullWidth && renderEnlargeButton()}
-                <IconButton
-                  size="small"
-                  onClick={() => setIsFullScreen(!isFullScreen)}
-                  tooltip={isFullScreen ? t('general.closeFullscreen')! : t('general.openFullscreen')!}
-                  className="style2"
-                  color="primary"
-                >
-                  <FullscreenIcon />
-                </IconButton>
+                {!isMapFullScreen && (
+                  <IconButton
+                    size="small"
+                    onClick={() => setIsFullScreen(!isFullScreen)}
+                    tooltip={isFullScreen ? t('general.closeFullscreen')! : t('general.openFullscreen')!}
+                    className="style2"
+                    color="primary"
+                  >
+                    <FullscreenIcon />
+                  </IconButton>
+                )}
                 {!!(leftMain || leftTop) && renderCloseButton()}
               </Box>
             </Box>
@@ -190,7 +184,6 @@ ResponsiveGridLayout.defaultProps = {
   leftMain: null,
   rightTop: null,
   fullWidth: false,
-  onIsEnlargeClicked: undefined,
 };
 
 export { ResponsiveGridLayout };

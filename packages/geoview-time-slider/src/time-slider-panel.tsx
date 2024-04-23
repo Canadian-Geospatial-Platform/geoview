@@ -6,7 +6,7 @@ import {
 } from 'geoview-core/src/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
 import { useAppGuide } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
-import { Box, Paper } from 'geoview-core/src/ui';
+import { Box } from 'geoview-core/src/ui';
 import { logger } from 'geoview-core/src/core/utils/logger';
 import Markdown from 'markdown-to-jsx';
 
@@ -117,11 +117,9 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     <Layout selectedLayerPath={selectedLayerPath} onLayerListClicked={handleClickLayerList} layerList={memoLayersList}>
       {selectedLayerPath && <TimeSlider mapId={mapId} config={configObj} layerPath={selectedLayerPath} key={selectedLayerPath} />}
       {!selectedLayerPath && (
-        <Paper sx={{ padding: '2rem' }}>
-          <Box className="guideBox">
-            <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.timeSlider!.content}</Markdown>
-          </Box>
-        </Paper>
+        <Box className="guideBox">
+          <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.timeSlider!.content}</Markdown>
+        </Box>
       )}
     </Layout>
   );

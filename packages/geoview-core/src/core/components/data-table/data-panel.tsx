@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import Markdown from 'markdown-to-jsx';
-import { Box, FilterAltIcon, Paper, Skeleton } from '@/ui';
+import { Box, FilterAltIcon, Skeleton } from '@/ui';
 import DataTable from './data-table';
 import {
   useDataTableSelectedLayerPath,
@@ -178,17 +178,25 @@ export function Datapanel({ fullWidth }: DataPanelType): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTab]);
 
+  const memoLayerList = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DATA-PANEL - memoLayersList', orderedLayerData);
+
+    return orderedLayerData.map((layer) => ({
+      ...layer,
+      layerFeatures: getFeaturesOfLayer(layer.layerPath),
+      tooltip: getLayerTooltip(layer.layerName ?? '', layer.layerPath),
+      mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerPath) && (
+        <FilterAltIcon sx={{ color: theme.palette.geoViewColor.grey.main }} />
+      ),
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMapFilteredSelectedForLayer, orderedLayerData]);
+
   return (
     <Layout
       selectedLayerPath={selectedLayerPath || ''}
-      layerList={orderedLayerData.map((layer) => ({
-        ...layer,
-        layerFeatures: getFeaturesOfLayer(layer.layerPath),
-        tooltip: getLayerTooltip(layer.layerName ?? '', layer.layerPath),
-        mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerPath) && (
-          <FilterAltIcon sx={{ color: theme.palette.geoViewColor.grey.main }} />
-        ),
-      }))}
+      layerList={memoLayerList}
       onLayerListClicked={handleLayerChange}
       fullWidth={fullWidth}
     >
@@ -211,21 +219,16 @@ export function Datapanel({ fullWidth }: DataPanelType): JSX.Element {
       {/* show data table instructions when all layers has no features */}
       {((!isLoading && isAllLayersNoFeatures()) || isLayerDisabled() || selectedLayerPath === '') && (
         <Box
-          sx={
-            fullWidth
-              ? { ...sxClasses.rightPanelContainer, overflowY: 'none' }
-              : { ...sxClasses.rightPanelContainer, maxHeight: '600px', overflowY: 'none' }
-          }
+          className="guidebox-container"
+          sx={fullWidth ? { ...sxClasses.rightPanelContainer, overflowY: 'hidden' } : { ...sxClasses.rightPanelContainer }}
         >
-          <Paper sx={{ padding: '2rem' }}>
-            <Box className="guideBox">
-              <Markdown options={{ wrapper: 'article' }}>{`${guide!.footerPanel!.children!.dataTable!.content}\n${
-                guide!.footerPanel!.children!.dataTable!.children!.filterData!.content
-              }\n${guide!.footerPanel!.children!.dataTable!.children!.sortingAndReordering!.content}\n\n${
-                guide!.footerPanel!.children!.dataTable!.children!.keyboardNavigation!.content
-              }`}</Markdown>
-            </Box>
-          </Paper>
+          <Box className="guideBox">
+            <Markdown options={{ wrapper: 'article' }}>{`${guide!.footerPanel!.children!.dataTable!.content}\n${
+              guide!.footerPanel!.children!.dataTable!.children!.filterData!.content
+            }\n${guide!.footerPanel!.children!.dataTable!.children!.sortingAndReordering!.content}\n\n${
+              guide!.footerPanel!.children!.dataTable!.children!.keyboardNavigation!.content
+            }`}</Markdown>
+          </Box>
         </Box>
       )}
     </Layout>

@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import Markdown from 'markdown-to-jsx';
 import { useTheme } from '@mui/material';
-import { Box, Paper } from '@/ui';
+import { Box } from '@/ui';
 import { useLayerDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayersToolbar } from './layers-toolbar';
 import { LayerDetails } from './right-panel/layer-details';
@@ -60,38 +60,26 @@ export function LayersPanel(): JSX.Element {
         </Markdown>
       );
       return (
-        <Paper sx={{ padding: '20px', overflow: 'auto' }}>
+        <Box sx={{ overflow: 'auto' }}>
           <Box className="guideBox">{markDown}</Box>
-        </Paper>
+        </Box>
       );
     }
     if (displayState === 'remove') {
       const markDown = (
         <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.layers!.children!.remove!.content}</Markdown>
       );
-      return (
-        <Paper sx={{ padding: '20px' }}>
-          <Box className="guideBox">{markDown}</Box>
-        </Paper>
-      );
+      return <Box className="guideBox">{markDown}</Box>;
     }
     if (displayState === 'order') {
       const markDown = (
         <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.layers!.children!.sort!.content}</Markdown>
       );
-      return (
-        <Paper sx={{ padding: '20px' }}>
-          <Box className="guideBox">{markDown}</Box>
-        </Paper>
-      );
+      return <Box className="guideBox">{markDown}</Box>;
     }
     if (displayState === 'add') {
       const markDown = <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.layers!.children!.add!.content}</Markdown>;
-      return (
-        <Paper sx={{ padding: '20px' }}>
-          <Box className="guideBox">{markDown}</Box>
-        </Paper>
-      );
+      return <Box className="guideBox">{markDown}</Box>;
     }
 
     return null;

@@ -23,7 +23,6 @@ import {
   MRT_ToggleDensePaddingButton as MRTToggleDensePaddingButton,
   MRT_ShowHideColumnsButton as MRTShowHideColumnsButton,
   MRT_ToggleFiltersButton as MRTToggleFiltersButton,
-  MRT_ToggleFullScreenButton as MRTFullScreenToggleButton,
   MRT_GlobalFilterTextField as MRTGlobalFilterTextField,
   type MRT_SortingState as MRTSortingState,
   type MRT_RowVirtualizer as MRTRowVirtualizer,
@@ -429,7 +428,6 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps): JSX.
             <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} />
             <MRTShowHideColumnsButton className="style1" table={table} />
             <MRTToggleDensePaddingButton className="style1" table={table} />
-            <MRTFullScreenToggleButton className="style1" table={table} />
             <ExportButton rows={rows} columns={columns}>
               <JSONExportButton features={data.features as TypeFeatureInfoEntry[]} layerPath={layerPath} />
             </ExportButton>
@@ -445,7 +443,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps): JSX.
     enableColumnVirtualization: true,
     enablePagination: false,
     enableRowVirtualization: true,
-    muiTableContainerProps: { sx: { maxHeight: `${tableHeight - 75}px` } },
+    muiTableContainerProps: { sx: { maxHeight: `${tableHeight - 100}px` } },
     rowVirtualizerInstanceRef,
     rowVirtualizerOptions: { overscan: 5 },
     columnVirtualizerOptions: { overscan: 2 },

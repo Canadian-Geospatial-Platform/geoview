@@ -2,16 +2,7 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import Markdown from 'markdown-to-jsx';
-import {
-  IconButton,
-  Grid,
-  Typography,
-  ArrowForwardIosOutlinedIcon,
-  ArrowBackIosOutlinedIcon,
-  LayersClearOutlinedIcon,
-  Box,
-  Paper,
-} from '@/ui';
+import { IconButton, Grid, Typography, ArrowForwardIosOutlinedIcon, ArrowBackIosOutlinedIcon, LayersClearOutlinedIcon, Box } from '@/ui';
 import {
   useDetailsStoreActions,
   useDetailsCheckedFeatures,
@@ -445,12 +436,13 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
             </Box>
           )}
           {(!memoSelectedLayerDataFeatures || memoSelectedLayerDataFeatures.length === 0) && guide?.footerPanel && (
-            <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer, maxHeight: '600px' }}>
-              <Paper sx={{ padding: '20px' }}>
-                <Box className="guideBox">
-                  <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.details!.content}</Markdown>
-                </Box>
-              </Paper>
+            <Box
+              sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer, maxHeight: '600px' }}
+              className="guidebox-container"
+            >
+              <Box className="guideBox">
+                <Markdown options={{ wrapper: 'article' }}>{guide!.footerPanel!.children!.details!.content}</Markdown>
+              </Box>
             </Box>
           )}
         </Layout>

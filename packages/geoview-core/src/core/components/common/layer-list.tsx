@@ -2,7 +2,7 @@ import { ReactNode, memo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { animated, useSpring } from '@react-spring/web';
-import { Box, ChevronRightIcon, IconButton, List, ListItem, ListItemButton, ListItemIcon, Paper, Tooltip, Typography } from '@/ui';
+import { Box, List, ListItem, ListItemButton, ListItemIcon, Paper, Tooltip, Typography } from '@/ui';
 import { TypeFeatureInfoEntry, TypeQueryStatus } from '@/geo/utils/layer-set';
 import { getSxClasses } from './layer-list-style';
 import { LayerIcon } from './layer-icon';
@@ -22,7 +22,6 @@ export interface LayerListEntry {
 }
 
 interface LayerListProps {
-  isEnlarged: boolean;
   layerList: LayerListEntry[];
   selectedLayerPath: string | undefined;
   onListItemClick: (layer: LayerListEntry) => void;
@@ -31,12 +30,11 @@ interface LayerListProps {
 interface LayerListItemProps {
   isSelected: boolean;
   layer: LayerListEntry;
-  isEnlarged: boolean;
   onListItemClick: (layer: LayerListEntry) => void;
   layerIndex: number;
 }
 
-const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListItemClick, isEnlarged, layerIndex }: LayerListItemProps) {
+const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListItemClick, layerIndex }: LayerListItemProps) {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
   const { t } = useTranslation<string>();
@@ -105,20 +103,6 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
     );
   };
 
-  const renderLayerButton = (): JSX.Element | null => {
-    switch (layer.layerStatus) {
-      case 'error':
-        return null;
-
-      default:
-        return (
-          <IconButton edge="end" size="small" className="style1" disabled={isDisabled} tabIndex={-1} aria-hidden="true">
-            <ChevronRightIcon />
-          </IconButton>
-        );
-    }
-  };
-
   function getContainerClass(): string {
     const result: string[] = ['layer-panel', 'bordered', layer.layerStatus ?? '', `query-${layer.queryStatus}`];
 
@@ -156,20 +140,6 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
             >
               {renderLayerIcon()}
               {renderLayerBody()}
-              <Box
-                sx={{
-                  padding: isEnlarged ? '0.25rem' : '1rem',
-                  paddingRight: isEnlarged ? '0.25rem' : '1rem',
-                  [theme.breakpoints.down('xl')]: {
-                    display: isEnlarged ? 'none !important' : 'block',
-                  },
-                  [theme.breakpoints.down('sm')]: {
-                    display: 'none',
-                  },
-                }}
-              >
-                {renderLayerButton()}
-              </Box>
             </ListItemButton>
           </ListItem>
         </Box>
@@ -187,7 +157,7 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
  * @param {Function} onListItemClick  Callback function excecuted when list item is clicked.
  * @returns {JSX.Element}
  */
-export function LayerList({ layerList, isEnlarged, selectedLayerPath, onListItemClick }: LayerListProps): JSX.Element {
+export function LayerList({ layerList, selectedLayerPath, onListItemClick }: LayerListProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
   const { t } = useTranslation<string>();
@@ -202,7 +172,6 @@ export function LayerList({ layerList, isEnlarged, selectedLayerPath, onListItem
             // Some of layers will not have numOfFeatures, so to make layer look like selected, we need to set default value to 1.
             // Also we cant set numOfFeature initially, then it num of features will be display as sub title.
             isSelected={(layer?.numOffeatures ?? 1) > 0 && layer.layerPath === selectedLayerPath}
-            isEnlarged={isEnlarged}
             layer={layer}
             onListItemClick={onListItemClick}
             layerIndex={ind}
@@ -212,7 +181,6 @@ export function LayerList({ layerList, isEnlarged, selectedLayerPath, onListItem
         <LayerListItem
           key="dummyPath"
           isSelected={false}
-          isEnlarged
           layerIndex={0}
           layer={
             {
