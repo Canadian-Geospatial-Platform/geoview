@@ -46,7 +46,6 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
 
   // internal state
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
-  const [guideIsOpen, setGuideIsOpen] = useState<boolean>(false);
   const [selectedLayerPathLocal, setselectedLayerPathLocal] = useState<string>(selectedLayerPath);
   const [arrayOfLayerListLocal, setArrayOfLayerListLocal] = useState<LayerListEntry[]>([]);
 
@@ -258,8 +257,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
     if (memoLayerSelectedItem && !(memoLayerSelectedItem.queryStatus === 'processed' || memoLayerSelectedItem.queryStatus === 'error'))
       return;
 
-    if (guideIsOpen) {
-      setSelectedLayerPath('');
+    if (selectedLayerPath === '') {
       return;
     }
 
@@ -370,8 +368,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
   }
 
   const onGuideIsOpen = (guideIsOpenVal: boolean): void => {
-    if (guideIsOpen) {
-      setGuideIsOpen(guideIsOpenVal);
+    if (guideIsOpenVal) {
       setSelectedLayerPath('');
     }
   };
