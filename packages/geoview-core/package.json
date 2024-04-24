@@ -37,10 +37,10 @@
     "deploy": "gh-pages -d dist",
     "test": "jest",
     "update_test": "jest --updateSnapshot",
-    "format": "prettier --end-of-line crlf --write ../geoview-**/src/**/*.{ts,tsx,js}",
+    "format": "prettier --write ../geoview-**/src/**/*.{ts,tsx,js}",
     "lint": "eslint ../geoview-**/src/**/*.{ts,tsx,js}",
     "fix": "eslint ../geoview-**/src/**/*.{ts,tsx,js} --fix",
-    "formatMac": "prettier --end-of-line lf --write '../geoview-**/src/**/*.{ts,tsx,js}'",
+    "formatMac": "prettier --write '../geoview-**/src/**/*.{ts,tsx,js}'",
     "lintMac": "eslint '../geoview-**/src/**/*.{ts,tsx,js}'",
     "fixMac": "eslint '../geoview-**/src/**/*.{ts,tsx,js}' --fix",
     "generate.d.ts": "tsc --noEmit false --skipLibCheck true --declaration --allowJs --emitDeclarationOnly --outDir types"
