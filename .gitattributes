@@ -1,2 +1,2 @@
 # Set the default behavior, to ignore text end of line character - https://git-scm.com/docs/gitattributes
-* text=auto
+* -text
