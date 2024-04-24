@@ -9,10 +9,18 @@ interface LayoutProps {
   layerList: LayerListEntry[];
   selectedLayerPath: string | undefined;
   onLayerListClicked: (layer: LayerListEntry) => void;
+  onIsEnlargeClicked?: (isEnlarge: boolean) => void;
   fullWidth?: boolean;
 }
 
-export function Layout({ children, layerList, selectedLayerPath, onLayerListClicked, fullWidth }: LayoutProps): JSX.Element {
+export function Layout({
+  children,
+  layerList,
+  selectedLayerPath,
+  onLayerListClicked,
+  onIsEnlargeClicked,
+  fullWidth,
+}: LayoutProps): JSX.Element {
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
 
   /**
@@ -56,6 +64,7 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
       leftMain={renderLayerList()}
       rightMain={children}
       rightTop={renderLayerTitle()}
+      onIsEnlargeClicked={onIsEnlargeClicked}
       fullWidth={fullWidth}
     />
   );
@@ -63,5 +72,6 @@ export function Layout({ children, layerList, selectedLayerPath, onLayerListClic
 
 Layout.defaultProps = {
   children: null,
+  onIsEnlargeClicked: undefined,
   fullWidth: false,
 };

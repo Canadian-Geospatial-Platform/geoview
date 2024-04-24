@@ -25,7 +25,6 @@ interface IDataTableSettings {
 
 export interface IDataTableState {
   allFeaturesDataArray: TypeLayerData[];
-  isEnlargeDataTable: boolean;
   activeLayerData: TypeLayerData[];
   layersDataTableSetting: Record<string, IDataTableSettings>;
   selectedLayerPath: string;
@@ -36,7 +35,6 @@ export interface IDataTableState {
     applyMapFilters: (filterStrings: string) => void;
     setActiveLayersData: (layers: TypeLayerData[]) => void;
     setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
-    setIsEnlargeDataTable: (isEnlarge: boolean) => void;
     setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
     setRowsFilteredEntry: (rows: number, layerPath: string) => void;
     setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
@@ -52,7 +50,6 @@ export interface IDataTableState {
     setAllFeaturesDataArray: (allFeaturesDataArray: TypeLayerData[]) => void;
     setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
     setInitiallayerDataTableSetting: (layerPath: string) => void;
-    setIsEnlargeDataTable: (isEnlarge: boolean) => void;
     setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
     setRowsFilteredEntry: (rows: number, layerPath: string) => void;
     setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
@@ -67,7 +64,6 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
   return {
     activeLayerData: [],
     allFeaturesDataArray: [],
-    isEnlargeDataTable: false,
     layersDataTableSetting: {},
     selectedLayerPath: '',
     tableHeight: 600,
@@ -90,10 +86,6 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
       setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => {
         // Redirect to setter
         get().dataTableState.setterActions.setColumnFiltersEntry(filtered, layerPath);
-      },
-      setIsEnlargeDataTable: (isEnlarge: boolean) => {
-        // Redirect to setter
-        get().dataTableState.setterActions.setIsEnlargeDataTable(isEnlarge);
       },
       setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => {
         // Redirect to setter
@@ -170,14 +162,6 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
           dataTableState: {
             ...get().dataTableState,
             layersDataTableSetting: { ...get().dataTableState.layersDataTableSetting, [layerPath]: layerSettings },
-          },
-        });
-      },
-      setIsEnlargeDataTable: (isEnlarge: boolean) => {
-        set({
-          dataTableState: {
-            ...get().dataTableState,
-            isEnlargeDataTable: isEnlarge,
           },
         });
       },

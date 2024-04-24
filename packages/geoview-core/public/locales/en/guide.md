@@ -336,15 +336,12 @@ The Data Table controls are shown in the upper right section of the layer data p
 
 _Note: some options may not be available or are preselected depending on various factors._
 
-![](img/guide/datatable/settings.png)
-
 | Symbol                                                        | Name            | Description                                                                                                                               |
 | ------------------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | <img src="img/guide/datatable/filter_toggle.svg" width="30"/> | Display Filters | Toggle to show or hide filters                                                                                                            |
 | <img src="img/guide/datatable/filter.png" width="30"/>        | Filter switch   | Apply filters to the map                                                                                                                  |
 | <img src="img/guide/datatable/column_show.svg" width="30"/>   | Display Columns | Allows you to choose which columns you want visible and to pin columns to the left or right of the table                                  |
-| <img src="img/guide/datatable/density.svg" width="30"/>       | Density         | Toggle the height of the rows in the data table                                                                                           |
-| <img src="img/guide/datatable/fullscreen.svg" width="30"/>    | Full screen     | Full screen presents layer content using the entire page. Full screen option is only available when the map is embedded into another page |
+| <img src="img/guide/datatable/density.svg" width="30"/>       | Density         | Toggle the height of the rows in the data 
 | <img src="img/guide/datatable/export.svg" width="30"/>        | Export          | Export data table as CSV or GeoJSON. May not work as intended on mobile due to limitations with downloading files                         |
 
 The first two columns of the Data Table are Icon and Zoom. The remaining columns vary depending on the layer selected.
@@ -380,8 +377,6 @@ For each column in the data table, there may be a set of arrows associated with 
 ### Filter Data
 
 Data can be filtered by column. To show filters, click on the open filters icon ![](img/guide/datatable/filter_toggle_25.svg). A column is filterable if there is an input field under the title of the header:
-
-![](img/guide/datatable/filter_open.png)
 
 There are 3 types of filters:
 

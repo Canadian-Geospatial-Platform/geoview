@@ -6,7 +6,7 @@ import { getLocalizedValue } from '@/core/utils/utilities';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { EventType, LayerSet, TypeFeatureInfoEntry, TypeLayerData, TypeResultSet } from './layer-set';
+import { LayerSet, TypeFeatureInfoEntry, TypeLayerData, TypeResultSet } from './layer-set';
 import { LayerApi } from '@/geo/layer/layer';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
@@ -37,6 +37,18 @@ export class FeatureInfoLayerSet extends LayerSet {
         // Log
         logger.logPromiseFailed('queryLayers in onMapSingleClick in FeatureInfoLayerSet', error);
       });
+    });
+  }
+
+  /**
+   * Propagate to store
+   * @param {string} layerPath - Layer path to propagate
+   * @private
+   */
+  #propagateToStore(layerPath: string): void {
+    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, 'click', this.resultSet).catch((error) => {
+      // Log
+      logger.logPromiseFailed('FeatureInfoEventProcessor.propagateFeatureInfoToStore in onRegisterLayer in FeatureInfoLayerSet', error);
     });
   }
 
@@ -77,10 +89,9 @@ export class FeatureInfoLayerSet extends LayerSet {
         layerPath,
       },
     };
-    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, 'click', this.resultSet).catch((error) => {
-      // Log
-      logger.logPromiseFailed('FeatureInfoEventProcessor.propagateFeatureInfoToStore in onRegisterLayer in FeatureInfoLayerSet', error);
-    });
+
+    // Propagate to store
+    this.#propagateToStore(layerPath);
   }
 
   /**
@@ -100,15 +111,7 @@ export class FeatureInfoLayerSet extends LayerSet {
         const layerConfig = this.layerApi.registeredLayers[layerPath];
         if (this?.resultSet?.[layerPath]?.data) {
           this.resultSet[layerPath].data.layerStatus = layerStatus;
-          FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerConfig.layerPath, 'click', this.resultSet).catch(
-            (error) => {
-              // Log
-              logger.logPromiseFailed(
-                'FeatureInfoEventProcessor.propagateFeatureInfoToStore in onProcessLayerStatusChanged in FeatureInfoLayerSet',
-                error
-              );
-            }
-          );
+          this.#propagateToStore(layerConfig.layerPath);
         }
       }
     }
@@ -151,14 +154,13 @@ export class FeatureInfoLayerSet extends LayerSet {
     // TODO: REFACTOR - Watch out for code reentrancy between queries!
     // TO.DOCONT: Consider using a LIFO pattern, per layer path, as the race condition resolution
     // GV Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
-    // GV As it is (and was like this befor events refactor), the this.resultSet is mutating between async calls.
+    // GV As it is (and was like this before events refactor), the this.resultSet is mutating between async calls.
 
     // Prepare to hold all promises of features in the loop below
     const allPromises: Promise<TypeFeatureInfoEntry[] | undefined | null>[] = [];
 
     // Query and event types of what we're doing
     const queryType = 'at_long_lat';
-    const eventType = 'click';
 
     // Reinitialize the resultSet
     // Loop on each layer path in the resultSet
@@ -189,10 +191,7 @@ export class FeatureInfoLayerSet extends LayerSet {
             data.queryStatus = arrayOfRecords ? 'processed' : 'error';
 
             // Propagate to store
-            FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, eventType, this.resultSet).catch((error) => {
-              // Log
-              logger.logPromiseFailed('FeatureInfoEventProcessor.propagateFeatureInfoToStore in queryLayers in FeatureInfoLayerSet', error);
-            });
+            this.#propagateToStore(layerPath);
           })
           .catch((error) => {
             // Log
@@ -208,10 +207,22 @@ export class FeatureInfoLayerSet extends LayerSet {
     await Promise.allSettled(allPromises);
 
     // Emit the query layers has ended
-    this.#emitQueryEnded({ coordinate: longLatCoordinate, resultSet: this.resultSet, eventType });
+    this.#emitQueryEnded({ coordinate: longLatCoordinate, resultSet: this.resultSet });
 
     // Return the results
     return this.resultSet;
+  }
+
+  /**
+   * Apply status to item in results set reference by the layer path and propagate to store
+   * @param {string} layerPath - Layer path
+   * @param {boolean} isEnable - Status to apply
+   * @private
+   */
+  #processListenerStatusChanged(layerPath: string, isEnable: boolean): void {
+    this.resultSet[layerPath].data.eventListenerEnabled = isEnable;
+    this.resultSet[layerPath].data.features = [];
+    this.#propagateToStore(layerPath);
   }
 
   /**
@@ -220,10 +231,10 @@ export class FeatureInfoLayerSet extends LayerSet {
    * @param {string} layerPath - Optional parameter used to enable only one layer
    */
   enableClickListener(layerPath?: string): void {
-    if (layerPath) this.resultSet[layerPath].data.eventListenerEnabled = true;
+    if (layerPath) this.#processListenerStatusChanged(layerPath, true);
     else
       Object.keys(this.resultSet).forEach((key: string) => {
-        this.resultSet[key].data.eventListenerEnabled = true;
+        this.#processListenerStatusChanged(key, true);
       });
   }
 
@@ -233,10 +244,10 @@ export class FeatureInfoLayerSet extends LayerSet {
    * @param {string} layerPath - Optional parameter used to disable only one layer
    */
   disableClickListener(layerPath?: string): void {
-    if (layerPath) this.resultSet[layerPath].data.eventListenerEnabled = false;
+    if (layerPath) this.#processListenerStatusChanged(layerPath, false);
     else
       Object.keys(this.resultSet).forEach((key: string) => {
-        this.resultSet[key].data.eventListenerEnabled = false;
+        this.#processListenerStatusChanged(key, false);
       });
   }
 
@@ -279,5 +290,4 @@ type QueryEndedDelegate = EventDelegateBase<FeatureInfoLayerSet, QueryEndedEvent
 export type QueryEndedEvent = {
   coordinate: Coordinate;
   resultSet: TypeResultSet;
-  eventType: EventType;
 };
