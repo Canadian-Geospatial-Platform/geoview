@@ -9,6 +9,8 @@ export type GeoChartStoreByLayerPath = {
   [layerPath: string]: GeoChartConfig;
 };
 
+// GV Important: See notes in header of GeochartEventProcessor file for information on the paradigm to apply when working with GeochartEventProcessor vs GeochartState
+
 // #region INTERFACES
 
 export interface IGeochartState {
@@ -19,6 +21,14 @@ export interface IGeochartState {
   selectedLayerPath: string;
 
   actions: {
+    setGeochartCharts: (charts: GeoChartStoreByLayerPath) => void;
+    setLayerDataArray: (layerDataArray: TypeLayerData[]) => void;
+    setLayerDataArrayBatch: (layerDataArray: TypeLayerData[]) => void;
+    setLayerDataArrayBatchLayerPathBypass: (layerPath: string) => void;
+    setSelectedLayerPath: (selectedLayerPath: string) => void;
+  };
+
+  setterActions: {
     setGeochartCharts: (charts: GeoChartStoreByLayerPath) => void;
     setLayerDataArray: (layerDataArray: TypeLayerData[]) => void;
     setLayerDataArrayBatch: (layerDataArray: TypeLayerData[]) => void;
@@ -46,6 +56,29 @@ export function initializeGeochartState(set: TypeSetStore, get: TypeGetStore): I
     // #region ACTIONS
 
     actions: {
+      setGeochartCharts(charts: GeoChartStoreByLayerPath): void {
+        // Redirect to setter
+        get().geochartState.setterActions.setGeochartCharts(charts);
+      },
+      setLayerDataArray(layerDataArray: TypeLayerData[]) {
+        // Redirect to setter
+        get().geochartState.setterActions.setLayerDataArray(layerDataArray);
+      },
+      setLayerDataArrayBatch(layerDataArrayBatch: TypeLayerData[]) {
+        // Redirect to setter
+        get().geochartState.setterActions.setLayerDataArrayBatch(layerDataArrayBatch);
+      },
+      setLayerDataArrayBatchLayerPathBypass(layerDataArrayBatchLayerPathBypass: string): void {
+        // Redirect to setter
+        get().geochartState.setterActions.setLayerDataArrayBatchLayerPathBypass(layerDataArrayBatchLayerPathBypass);
+      },
+      setSelectedLayerPath(selectedLayerPath: string): void {
+        // Redirect to setter
+        get().geochartState.setterActions.setSelectedLayerPath(selectedLayerPath);
+      },
+    },
+
+    setterActions: {
       setGeochartCharts(charts: GeoChartStoreByLayerPath): void {
         set({
           geochartState: {

@@ -92,7 +92,7 @@ const ResponsiveGridLayout = forwardRef(
       }
     };
 
-    // // If we're on mobile
+    // If we're on mobile
     if (theme.breakpoints.down('md')) {
       if (!(leftMain || leftTop) && !isRightPanelVisible && !fullWidth) {
         setIsRightPanelVisible(true);

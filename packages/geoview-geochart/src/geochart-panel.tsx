@@ -70,6 +70,19 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   });
 
   /**
+   * Handles click on enlarge button in the layout component.
+   *
+   * @param {boolean} isEnlarge Indicates if is enlarged
+   */
+  const handleIsEnlargeClicked = useCallback((isEnlarge: boolean) => {
+    // Log
+    logger.logTraceUseCallback('GEOCHART-PANEL - handleIsEnlargeClicked', isEnlarge);
+
+    // Redraw the GeoCharts
+    redrawGeoCharts();
+  }, []);
+
+  /**
    * Handles when the GeoChart child component is providing its callback to redraw itself
    * @param {string} key - The GeoChart unique key of the child component
    * @param {Function} theCallbackRedraw - The callback to execute whenever we want to redraw the GeoChart
