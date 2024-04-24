@@ -85,7 +85,7 @@ export function LayersPanel(): JSX.Element {
     );
   };
 
-  const onGuideIsOpen = (guideIsOpen: boolean): void => {
+  const handleGuideIsOpen = (guideIsOpen: boolean): void => {
     if (guideIsOpen) {
       setSelectedLayerPath('');
     }
@@ -100,7 +100,7 @@ export function LayersPanel(): JSX.Element {
       rightMain={rightPanel()}
       guideContentIds={guideContent()}
       fullWidth={false}
-      onGuideIsOpen={onGuideIsOpen}
+      onGuideIsOpen={handleGuideIsOpen}
     />
   );
 }

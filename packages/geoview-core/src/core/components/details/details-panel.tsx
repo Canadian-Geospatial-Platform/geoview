@@ -367,7 +367,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
     resetCurrentIndex();
   }
 
-  const onGuideIsOpen = (guideIsOpenVal: boolean): void => {
+  const handleGuideIsOpen = (guideIsOpenVal: boolean): void => {
     if (guideIsOpenVal) {
       setSelectedLayerPath('');
     }
@@ -393,7 +393,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
           layerList={memoLayersList}
           onLayerListClicked={(layerEntry) => handleLayerChange(layerEntry)}
           fullWidth={fullWidth}
-          onGuideIsOpen={onGuideIsOpen}
+          onGuideIsOpen={handleGuideIsOpen}
           guideContentIds={['details']}
         >
           {memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length > 0 && (

@@ -181,7 +181,7 @@ export function Datapanel({ fullWidth }: DataPanelType): JSX.Element {
     return null;
   };
 
-  const onGuideIsOpen = (guideIsOpen: boolean): void => {
+  const handleGuideIsOpen = (guideIsOpen: boolean): void => {
     if (guideIsOpen) {
       setSelectedLayerPath('');
     }
@@ -208,7 +208,7 @@ export function Datapanel({ fullWidth }: DataPanelType): JSX.Element {
       layerList={memoLayerList}
       onLayerListClicked={handleLayerChange}
       fullWidth={fullWidth}
-      onGuideIsOpen={onGuideIsOpen}
+      onGuideIsOpen={handleGuideIsOpen}
       guideContentIds={[
         'dataTable',
         'dataTable.children.filterData',
