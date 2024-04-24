@@ -370,13 +370,9 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
   }
 
   const onGuideIsOpen = (guideIsOpenVal: boolean): void => {
-    console.log('dfdfdf dsfdf', guideIsOpenVal);
     if (guideIsOpen) {
       setGuideIsOpen(guideIsOpenVal);
       setSelectedLayerPath('');
-      // setselectedLayerPathLocal('');
-      // setSelectedLayerPath('');
-      // removeCheckedFeature('all');
     }
   };
 

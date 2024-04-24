@@ -23,8 +23,6 @@ export function Layout({
   fullWidth,
   onGuideIsOpen,
 }: LayoutProps): JSX.Element {
-  const [isEnlarged, setIsEnlarged] = useState(false);
-
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
 
   /**
@@ -70,7 +68,6 @@ export function Layout({
       guideContentIds={guideContentIds}
       rightTop={renderLayerTitle()}
       fullWidth={fullWidth}
-      onIsEnlargeClicked={setIsEnlarged}
       onGuideIsOpen={onGuideIsOpen}
     />
   );
