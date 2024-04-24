@@ -154,7 +154,7 @@ export class FeatureInfoLayerSet extends LayerSet {
     // TODO: REFACTOR - Watch out for code reentrancy between queries!
     // TO.DOCONT: Consider using a LIFO pattern, per layer path, as the race condition resolution
     // GV Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
-    // GV As it is (and was like this befor events refactor), the this.resultSet is mutating between async calls.
+    // GV As it is (and was like this before events refactor), the this.resultSet is mutating between async calls.
 
     // Prepare to hold all promises of features in the loop below
     const allPromises: Promise<TypeFeatureInfoEntry[] | undefined | null>[] = [];
@@ -214,15 +214,27 @@ export class FeatureInfoLayerSet extends LayerSet {
   }
 
   /**
+   * Apply status to item in results set reference by the layer path and propagate to store
+   * @param {string} layerPath - Layer path
+   * @param {boolean} isEnable - Status to apply
+   * @private
+   */
+  #processListenerStatusChanged(layerPath: string, isEnable: boolean): void {
+    this.resultSet[layerPath].data.eventListenerEnabled = isEnable;
+    this.resultSet[layerPath].data.features = [];
+    this.#propagateToStore(layerPath);
+  }
+
+  /**
    * Function used to enable listening of click events. When a layer path is not provided,
    * click events listening is enabled for all layers
    * @param {string} layerPath - Optional parameter used to enable only one layer
    */
   enableClickListener(layerPath?: string): void {
-    if (layerPath) this.resultSet[layerPath].data.eventListenerEnabled = true;
+    if (layerPath) this.#processListenerStatusChanged(layerPath, true);
     else
       Object.keys(this.resultSet).forEach((key: string) => {
-        this.resultSet[key].data.eventListenerEnabled = true;
+        this.#processListenerStatusChanged(key, true);
       });
   }
 
@@ -232,14 +244,10 @@ export class FeatureInfoLayerSet extends LayerSet {
    * @param {string} layerPath - Optional parameter used to disable only one layer
    */
   disableClickListener(layerPath?: string): void {
-    if (layerPath) {
-      // Set to false, remove current features and propagate to store
-      this.resultSet[layerPath].data.eventListenerEnabled = false;
-      this.resultSet[layerPath].data.features = [];
-      this.#propagateToStore(layerPath);
-    } else
+    if (layerPath) this.#processListenerStatusChanged(layerPath, false);
+    else
       Object.keys(this.resultSet).forEach((key: string) => {
-        this.resultSet[key].data.eventListenerEnabled = false;
+        this.#processListenerStatusChanged(key, false);
       });
   }
 
