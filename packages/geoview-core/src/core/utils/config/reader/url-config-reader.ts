@@ -163,8 +163,9 @@ export class URLmapConfigReader {
         map: {
           interaction: urlParams.i as TypeInteraction,
           viewSettings: {
-            zoom: parseInt(urlParams.z as TypeJsonValue as string, 10),
-            center: [parseInt(center[0], 10), parseInt(center[1], 10)],
+            initialView: {
+              zoomAndCenter: [parseInt(urlParams.z as TypeJsonValue as string, 10), [parseInt(center[0], 10), parseInt(center[1], 10)]],
+            },
             projection: parseInt(urlParams.p as string, 10) as TypeValidMapProjectionCodes,
           },
           basemapOptions,
