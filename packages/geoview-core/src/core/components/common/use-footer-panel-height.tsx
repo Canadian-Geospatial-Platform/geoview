@@ -65,7 +65,7 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
       leftPanelRef.current.style.paddingBottom = '24px';
 
       if (activeFooterBarTabId === TABS.DATA_TABLE) {
-        setTableHeight(leftPanelHeight * 0.9);
+        setTableHeight(leftPanelHeight * 0.97);
         rightPanelHeight(leftPanelHeight);
       } else if (activeFooterBarTabId === TABS.GEO_CHART && rightPanelRef.current) {
         const childElem = rightPanelRef.current?.firstElementChild as HTMLElement | null;
