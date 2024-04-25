@@ -60,7 +60,7 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    *
    * @returns {TypeLayerEntryType} The entryType associated to the sub layer.
    */
-  get entryType(): TypeLayerEntryType {
+  getEntryType(): TypeLayerEntryType {
     return CV_CONST_SUB_LAYER_TYPES.VECTOR;
   }
 }
