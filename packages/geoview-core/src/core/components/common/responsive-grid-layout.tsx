@@ -11,7 +11,7 @@ import { logger } from '@/core/utils/logger';
 import { ArrowBackIcon, ArrowForwardIcon, QuestionMarkIcon } from '@/ui/icons';
 import { Button } from '@/ui/button/button';
 import { Paper } from '@/ui/paper/paper';
-import { useAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppGuide, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 interface ResponsiveGridLayoutProps {
   leftTop?: ReactNode;
@@ -37,6 +37,7 @@ const ResponsiveGridLayout = forwardRef(
     const sxClasses = getSxClasses(theme);
     const { t } = useTranslation<string>();
     const guide = useAppGuide();
+    const isMapFullScreen = useAppFullscreenActive();
 
     const [isRightPanelVisible, setIsRightPanelVisible] = useState(false);
     const [isGuideOpen, setIsGuideOpen] = useState(false);
@@ -258,7 +259,7 @@ const ResponsiveGridLayout = forwardRef(
               <Box sx={{ display: 'flex', flexDirection: 'row', gap: '0.6rem' }}>
                 {!fullWidth && renderEnlargeButton()}
                 {guideContentIds?.length && renderGuideButton()}
-                {renderFullScreenButton()}
+                {!isMapFullScreen && renderFullScreenButton()}
                 {!!(leftMain || leftTop) && renderCloseButton()}
               </Box>
             </Box>
