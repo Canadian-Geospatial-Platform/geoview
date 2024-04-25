@@ -40,6 +40,27 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     this.source = { ...(layerConfig.source as TypeSourceImageEsriInitialConfig) };
   }
 
+  /** ***************************************************************************************************************************
+   * Method used to instanciate an AbstractBaseLayerEntryConfig object. The interaction with the instance will use the language
+   * stored in the #geoviewConfig object. The language associated to a configuration can be changed using the setConfigLanguage.
+   * @param {TypeJsonObject} jsonLeafConfig The leaf layer configuration.
+   * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited.
+   * @param {AbstractGeoviewLayerConfig | undefined} geoviewInstance The GeoView instance that owns the sub layer.
+   *
+   * @returns {AbstractBaseLayerEntryConfig} The leaf layer instance or undefined if there is an error.
+   */
+  static /* use async later */ getInstance(
+    jsonLeafConfig: TypeJsonObject,
+    initialSettings: TypeLayerInitialSettings,
+    geoviewInstance: AbstractGeoviewLayerConfig
+  ): Promise<AbstractBaseLayerEntryConfig | undefined> {
+    const leafLayerInstance = geoviewInstance.createLeafNode(jsonLeafConfig, initialSettings, geoviewInstance);
+    // process metadata here
+    // set default here
+    // validate here
+    return Promise.resolve(leafLayerInstance);
+  }
+
   /**
    * The getter method that returns the schemaPath property.
    *
@@ -52,5 +73,5 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    *
    * @returns {TypeLayerEntryType} The entryType associated to the sub layer.
    */
-  abstract get entryType(): TypeLayerEntryType;
+  abstract getEntryType(): TypeLayerEntryType;
 }

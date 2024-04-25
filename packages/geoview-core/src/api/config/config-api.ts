@@ -36,7 +36,7 @@ export class ConfigApi {
    * @returns {MapFeaturesConfig} The map features configuration.
    */
   static get defaultMapFeaturesConfig(): MapFeaturesConfig {
-    return new MapFeaturesConfig(JSON.stringify(CV_DEFAULT_MAP_FEATURES_CONFIG));
+    return Cast<MapFeaturesConfig>(JSON.stringify(CV_DEFAULT_MAP_FEATURES_CONFIG));
   }
 
   /** ***************************************************************************************************************************
@@ -439,8 +439,9 @@ export class ConfigApi {
     }
   }
 
-  static getMapConfig(jsonStringMapConfig: string): Promise<MapFeaturesConfig | undefined> {
+  static getMapConfig(jsonStringMapConfig: string, language: TypeDisplayLanguage): Promise<MapFeaturesConfig | undefined> {
     // Return the config
-    return Promise.resolve(new MapFeaturesConfig(jsonStringMapConfig));
+    const test = Promise.resolve(MapFeaturesConfig.getInstance(jsonStringMapConfig, language));
+    return test;
   }
 }

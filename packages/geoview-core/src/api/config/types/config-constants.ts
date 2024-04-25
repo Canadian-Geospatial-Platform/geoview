@@ -63,7 +63,7 @@ export const CV_CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> =
 /**
  * Definition of the sub schema to use for each type of Geoview layer
  */
-export const CV_CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<LayerTypesKey, string> = {
+export const CV_CONST_LEAF_LAYER_SCHEMA_PATH: Record<LayerTypesKey, string> = {
   CSV: 'TypeVectorLayerEntryConfig',
   ESRI_DYNAMIC: 'TypeEsriDynamicLayerEntryConfig',
   ESRI_FEATURE: 'TypeVectorLayerEntryConfig',
@@ -78,10 +78,10 @@ export const CV_CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<LayerTypesKey, string> = {
   WMS: 'TypeOgcWmsLayerEntryConfig',
 };
 
-export const CV_SCHEMA_PATH: Record<LayerTypesKey, string> = {
+export const CV_GEOVIEW_SCHEMA_PATH: Record<LayerTypesKey, string> = {
   CSV: '',
-  ESRI_DYNAMIC: 'https://cgpv/schema#/definitions/TypeEsriDynamicLayerEntryConfig',
-  ESRI_FEATURE: 'https://cgpv/schema#/definitions/TypeVectorLayerEntryConfig',
+  ESRI_DYNAMIC: 'https://cgpv/schema#/definitions/TypeGeoviewLayerConfig',
+  ESRI_FEATURE: 'https://cgpv/schema#/definitions/TypeGeoviewLayerConfig',
   ESRI_IMAGE: '',
   IMAGE_STATIC: '',
   GEOJSON: '',

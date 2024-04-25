@@ -1,4 +1,4 @@
-import { CV_CONST_SUB_LAYER_TYPES, CV_SCHEMA_PATH } from '@config/types/config-constants';
+import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@config/types/config-constants';
 import { TypeJsonObject } from '@config/types/config-types';
 import {
   TypeSourceImageEsriInitialConfig,
@@ -33,9 +33,6 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     super(layerConfig, initialSettings, geoviewLayerConfig);
     this.layerFilter = layerConfig.layerFilter as string;
     this.style = { ...(layerConfig.style as TypeStyleConfig) };
-    if (Number.isNaN(this.layerId)) {
-      throw new Error(`The layer entry with layerId equal to ${this.layerPath} must be an integer string`);
-    }
     // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
     if (!this.source.dataAccessPath) this.source.dataAccessPath = { ...geoviewLayerConfig.metadataAccessPath } as TypeLocalizedString;
   }
@@ -46,15 +43,15 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * @returns {string} The schemaPath associated to the sub layer.
    */
   get schemaPath(): string {
-    return CV_SCHEMA_PATH.ESRI_DYNAMIC;
+    return CV_CONST_LEAF_LAYER_SCHEMA_PATH.ESRI_DYNAMIC;
   }
 
   /**
-   * The getter method that returns the entryType property.
+   * A method that returns the entryType property.
    *
    * @returns {TypeLayerEntryType} The entryType associated to the sub layer.
    */
-  get entryType(): TypeLayerEntryType {
+  getEntryType(): TypeLayerEntryType {
     return CV_CONST_SUB_LAYER_TYPES.RASTER_IMAGE;
   }
 }
