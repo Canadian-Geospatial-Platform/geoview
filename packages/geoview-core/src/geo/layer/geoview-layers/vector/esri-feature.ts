@@ -16,7 +16,7 @@ import {
   TypeListOfLayerEntryConfig,
 } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { codedValueType, rangeDomainType } from '@/geo/utils/layer-set';
+import { codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/layer-set';
 
 import {
   commonGetFieldDomain,

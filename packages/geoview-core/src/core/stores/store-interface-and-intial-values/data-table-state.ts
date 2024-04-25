@@ -1,7 +1,7 @@
 import { useStore } from 'zustand';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
-import { TypeAllFeatureInfoResultSet } from '@/geo/utils/all-feature-info-layer-set';
-import { TypeFeatureInfoEntry, TypeLayerData } from '@/geo/utils/layer-set';
+import { TypeAllFeatureInfoResultSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
+import { TypeFeatureInfoEntry, TypeLayerData } from '@/geo/layer/layer-sets/layer-set';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 

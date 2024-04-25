@@ -1,6 +1,6 @@
 import { useStore } from 'zustand';
 import { GeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
-import { TypeLayerData } from '@/geo/utils/layer-set';
+import { TypeLayerData } from '@/geo/layer/layer-sets/layer-set';
 
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';

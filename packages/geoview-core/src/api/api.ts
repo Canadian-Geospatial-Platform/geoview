@@ -1,7 +1,7 @@
 import { ConfigApi } from '@config/config-api';
 import { Event } from './events/event';
 
-import { Projection } from '@/geo/projection/projection';
+import { Projection } from '@/geo/utils/projection';
 
 import { MapViewer } from '@/geo/map/map-viewer';
 

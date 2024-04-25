@@ -2,11 +2,11 @@ import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstrac
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import { TypeFeatureInfoResultSet } from '@/geo/utils/feature-info-layer-set';
+import { TypeFeatureInfoResultSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
 import { IDataTableState } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
-import { TypeLayerData } from '@/geo/utils/layer-set';
-import { TypeAllFeatureInfoResultSet } from '@/geo/utils/all-feature-info-layer-set';
+import { TypeLayerData } from '@/geo/layer/layer-sets/layer-set';
+import { TypeAllFeatureInfoResultSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
 import { MapEventProcessor } from './map-event-processor';
 
 // GV The paradigm when working with DataTableEventProcessor vs DataTableState goes like this:

@@ -32,7 +32,7 @@ import {
   TypeListOfLayerEntryConfig,
   TypeFeatureInfoLayerConfig,
 } from '@/geo/map/map-schema-types';
-import { TypeFeatureInfoEntry, codedValueType, rangeDomainType } from '@/geo/utils/layer-set';
+import { TypeFeatureInfoEntry, codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/layer-set';
 
 import {
   commonGetFieldDomain,

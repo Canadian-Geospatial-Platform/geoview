@@ -1,4 +1,4 @@
-import { LayerSet } from '@/geo/utils/layer-set';
+import { LayerSet } from '@/geo/layer/layer-sets/layer-set';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';

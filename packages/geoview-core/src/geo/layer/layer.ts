@@ -3,7 +3,7 @@ import LayerGroup from 'ol/layer/Group';
 import { Extent } from 'ol/extent';
 import { GeoCore } from '@/geo/layer/other/geocore';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
-import { FeatureHighlight } from '@/geo/utils/feature-highlight';
+import { FeatureHighlight } from '@/geo/map/feature-highlight';
 
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
@@ -34,12 +34,13 @@ import { layerConfigIsXYZTiles, XYZTiles } from '@/geo/layer/geoview-layers/rast
 import { layerConfigIsVectorTiles, VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { CSV, layerConfigIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
 
-import { HoverFeatureInfoLayerSet } from '@/geo/utils/hover-feature-info-layer-set';
-import { AllFeatureInfoLayerSet } from '@/geo/utils/all-feature-info-layer-set';
-import { LegendsLayerSet } from '@/geo/utils/legends-layer-set';
-import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
+import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
+import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
+import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
+import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
+import { LayerSet } from '@/geo/layer/layer-sets/layer-set';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
-import { LayerSet } from '@/geo/utils/layer-set';
+
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from '@/geo/map/map-viewer';

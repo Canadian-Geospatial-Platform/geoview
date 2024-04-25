@@ -1,7 +1,7 @@
 import { useStore } from 'zustand';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
-import { TypeLayerData, TypeFeatureInfoEntry, TypeGeometry } from '@/geo/utils/layer-set';
+import { TypeLayerData, TypeFeatureInfoEntry, TypeGeometry } from '@/geo/layer/layer-sets/layer-set';
 
 export interface IFeatureInfoState {
   checkedFeatures: Array<TypeFeatureInfoEntry>;
