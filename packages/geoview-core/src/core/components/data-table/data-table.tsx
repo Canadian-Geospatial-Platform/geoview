@@ -411,7 +411,6 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps): JSX.
       globalFilter,
     },
     enableColumnFilterModes: true,
-    enableColumnPinning: true,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
