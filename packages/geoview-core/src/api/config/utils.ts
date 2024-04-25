@@ -3,15 +3,14 @@ import Ajv from 'ajv';
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LAYER_TYPES } from '@config/types/config-constants';
 import { TypeGeoviewLayerType, TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
 import { TypeLayerEntryType, TypeLayerInitialSettings, TypeLocalizedString } from '@config/types/map-schema-types';
-
 import schema from '@config/types/config-validation-schema.json';
 import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
 import { MapFeaturesConfig } from '@config/types/classes/map-features-config';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { layerEntryIsGroupLayer } from '@config/types/type-guards';
+import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
 import { logger } from '@/core/utils/logger';
-import { GroupLayerEntryConfig } from './types/classes/sub-layer-config/group-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from './types/classes/sub-layer-config/abstract-base-layer-entry-config';
 
 type NewType = TypeGeoviewLayerType;
 
