@@ -66,6 +66,7 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
 
       if (activeFooterBarTabId === TABS.DATA_TABLE) {
         setTableHeight(leftPanelHeight);
+        rightPanelHeight(leftPanelHeight);
       } else if (activeFooterBarTabId === TABS.GEO_CHART && rightPanelRef.current) {
         const childElem = rightPanelRef.current?.firstElementChild as HTMLElement | null;
         if (childElem) {
