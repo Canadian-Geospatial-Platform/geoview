@@ -819,10 +819,9 @@ export abstract class AbstractGeoViewLayer {
   unregisterFromLayerSets(layerConfig: AbstractBaseLayerEntryConfig): void {
     // TODO: Refactor - This function should be deleted eventually. It's up to the layer orchestrator to manage the layers.
     // TO.DOCONT: The layer itself shouldn't know about it nor should have an explicit function mentioning the layer sets.
-    const { layerPath } = layerConfig;
 
     // Emit the layer unregistration
-    this.#emitGeoViewLayerRegistration({ layerPath, layerConfig, action: 'remove' });
+    this.#emitGeoViewLayerRegistration({ layerPath: layerConfig.layerPath, layerConfig, action: 'remove' });
   }
 
   /**

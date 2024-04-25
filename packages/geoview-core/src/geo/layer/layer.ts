@@ -103,6 +103,9 @@ export class LayerApi {
   // Keep all callback delegates references
   #onLayerAddedHandlers: LayerAddedDelegate[] = [];
 
+  // Maximum time duration to wait when registering a layer for the time slider
+  static #MAX_WAIT_TIME_SLIDER_REGISTRATION = 20000;
+
   /**
    * Initializes layer types and listen to add/remove layer events from outside
    * @param {MapViewer} mapViewer - A reference to the map viewer
@@ -475,7 +478,10 @@ export class LayerApi {
         this.#reorderLayerInfoStore(registrationEvent.layerConfig);
 
         // Register for TimeSlider
-        this.#registerForTimeSlider(registrationEvent.layerConfig);
+        this.#registerForTimeSlider(registrationEvent.layerConfig).catch((error) => {
+          // Log
+          logger.logPromiseFailed('in registration of layer for the time slider', error);
+        });
       } else {
         // Remove from ordered layer info
         // TODO: Have explicit function to do this, like reorderLayerInfoStore
@@ -533,19 +539,12 @@ export class LayerApi {
    * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
    * @private
    */
-  #registerForTimeSlider(layerConfig: TypeLayerEntryConfig): void {
+  async #registerForTimeSlider(layerConfig: TypeLayerEntryConfig): Promise<void> {
     // Wait until the layer is processed
-    // TODO: Check - Why is the 'applyFilters' function which is (sub)called below throwing a 'The source image cannot be decoded' error in the console
-    // TO.DOCONT: when removing and readding the layer a second time?
-    whenThisThen(() => layerConfig.IsGreaterThanOrEqualTo('processed'))
-      .then(() => {
-        // Add for the TimeSlider
-        TimeSliderEventProcessor.addTimeSliderLayerAndApplyFilters(this.mapId, layerConfig.layerPath);
-      })
-      .catch((error) => {
-        // Log
-        logger.logPromiseFailed('in waiting for layer status to be processed in registration of layer', error);
-      });
+    await whenThisThen(() => layerConfig.IsGreaterThanOrEqualTo('processed'), LayerApi.#MAX_WAIT_TIME_SLIDER_REGISTRATION);
+
+    // Check and add time slider layer when needed
+    TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.mapId, layerConfig);
   }
 
   /**
