@@ -52,7 +52,6 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
     logger.logTraceUseEffect('USE-FOOTER-PANEL-HEIGHT - footerPanelResizeValue', footerPanelResizeValue, isMapFullScreen);
 
     if (leftPanelRef.current && isMapFullScreen && (activeFooterBarTabId === footerPanelTab || footerPanelTab === 'default')) {
-      const rightPanel = (rightPanelRef.current?.firstElementChild ?? null) as HTMLElement | null;
       const panelTitleHeight = panelTitleRef.current?.clientHeight || 0;
       const tabsContainer = document.getElementById(`${mapId}-tabsContainer`)!;
       const footerBar = tabsContainer?.firstElementChild?.firstElementChild;
@@ -66,10 +65,8 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
       leftPanelRef.current.style.paddingBottom = '24px';
 
       if (activeFooterBarTabId === TABS.DATA_TABLE) {
-        if (rightPanel) {
-          rightPanel.removeAttribute('style');
-        }
-        setTableHeight(leftPanelHeight);
+        setTableHeight(leftPanelHeight * 0.9);
+        rightPanelHeight(leftPanelHeight);
       } else if (activeFooterBarTabId === TABS.GEO_CHART && rightPanelRef.current) {
         const childElem = rightPanelRef.current?.firstElementChild as HTMLElement | null;
         if (childElem) {

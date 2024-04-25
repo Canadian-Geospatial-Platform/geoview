@@ -86,7 +86,7 @@ const ResponsiveGridLayout = forwardRef(
       [onIsEnlargeClicked]
     );
 
-    const handleOpenGuide = function (): void {
+    const handleOpenGuide = (): void => {
       if (guideContentIds) {
         setIsGuideOpen(true);
       }
