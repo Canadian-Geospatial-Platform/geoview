@@ -93,6 +93,20 @@
           createCodeSnippet();
           createConfigSnippet();
         }
+      }, (mapId) => {
+        if (mapId === 'mapWM3') {
+          window.setInterval(() => {
+            const displayField1 = document.getElementById('HUC3-state');
+            const featureInfoLayerSet = cgpv.api.maps['mapWM3'].layer.featureInfoLayerSet.resultSet;
+            if (featureInfoLayerSet) {
+              const output = Object.keys(featureInfoLayerSet).reduce((outputValue, layerId) => {
+                const { layerStatus } = featureInfoLayerSet[layerId];
+                return `${outputValue}${layerId.split('/')[layerId.split('/').length - 1]} - status: ${layerStatus}, `;
+              }, '(');
+              displayField1.textContent = output && output !== '(' ? `${output.slice(0, -2)})` : '(undefined)';
+            } else displayField1.textContent = '(undefined)';
+          }, 250);
+        }
       });
 
       function addSwiper() {
@@ -106,18 +120,6 @@
       function removeSwiperAll() {
         cgpv.api.maps['mapWM3'].plugins['swiper'].deActivateAll();
       }
-
-      window.setInterval(() => {
-        const displayField1 = document.getElementById('HUC3-state');
-        const featureInfoLayerSet = (cgpv.api.maps && cgpv.api.maps['mapWM3']) ? cgpv.api.maps['mapWM3'].layer.featureInfoLayerSet.resultSet : undefined;
-        if (featureInfoLayerSet) {
-          const output = Object.keys(featureInfoLayerSet).reduce((outputValue, layerId) => {
-            const { layerStatus } = featureInfoLayerSet[layerId];
-            return `${outputValue}${layerId.split('/')[layerId.split('/').length - 1]} - status: ${layerStatus}, `;
-          }, '(');
-          displayField1.textContent = output && output !== '(' ? `${output.slice(0, -2)})` : '(undefined)';
-        } else displayField1.textContent = '(undefined)';
-      }, 250);
     </script>
   </body>
 </html>

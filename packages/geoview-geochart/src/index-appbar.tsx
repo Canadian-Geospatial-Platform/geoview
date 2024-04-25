@@ -71,10 +71,10 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
   /**
    * Callable plugin function to emit a Chart redraw event in order to update the Chart ui on demand.
    */
-  redrawChart = (): void => {
+  redrawChart(): void {
     // Emit a Chart Redraw event so the chart redraws
     // TODO: Implement the equivalent that's in the index.tsx file
-  };
+  }
 }
 
 // Exports the GeoChartAppBarPlugin

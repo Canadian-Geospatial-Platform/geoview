@@ -66,7 +66,7 @@ class SwiperPlugin extends MapPlugin {
    * Activates the swiper for the layer indicated by the given layer path.
    * @param {string} layerPath The layer path to activate swiper functionality
    */
-  activateForLayer = (layerPath: string): void => {
+  activateForLayer(layerPath: string): void {
     try {
       // Check if the layer exists on the map
       this.map().layer.getOLLayerByLayerPath(layerPath);
@@ -77,24 +77,24 @@ class SwiperPlugin extends MapPlugin {
       // Log
       logger.logError(error);
     }
-  };
+  }
 
   /**
    * Deactivates the swiper for the layer indicated by the given layer path.
    * @param {string} layerPath The layer path to deactivate swiper functionality
    */
-  deActivateForLayer = (layerPath: string): void => {
+  deActivateForLayer(layerPath: string): void {
     // Remove the layer
     SwiperEventProcessor.removeLayerPath(this.pluginProps.mapId, layerPath);
-  };
+  }
 
   /**
    * Deactivates the swiper for the layer indicated by the given layer path.
    */
-  deActivateAll = (): void => {
+  deActivateAll(): void {
     // Remove all layers
     SwiperEventProcessor.removeAll(this.pluginProps.mapId);
-  };
+  }
 }
 
 export default SwiperPlugin;
