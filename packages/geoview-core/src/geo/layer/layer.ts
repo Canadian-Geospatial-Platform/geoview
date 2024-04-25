@@ -105,6 +105,9 @@ export class LayerApi {
   // Keep all callback delegates references
   #onLayerAddedHandlers: LayerAddedDelegate[] = [];
 
+  // Maximum time duration to wait when registering a layer for the time slider
+  static #MAX_WAIT_TIME_SLIDER_REGISTRATION = 20000;
+
   /**
    * Initializes layer types and listen to add/remove layer events from outside
    * @param {MapViewer} mapViewer - A reference to the map viewer
@@ -473,15 +476,17 @@ export class LayerApi {
 
       // If registering
       if (registrationEvent.action === 'add') {
-        // Update ordering
-        this.#reorderLayerInfoStore(registrationEvent.layerConfig);
+        // Register for ordered layer information
+        this.#registerForOrderedLayerInfo(registrationEvent.layerConfig);
 
         // Register for TimeSlider
-        this.#registerForTimeSlider(registrationEvent.layerConfig);
+        this.#registerForTimeSlider(registrationEvent.layerConfig).catch((error) => {
+          // Log
+          logger.logPromiseFailed('in registration of layer for the time slider', error);
+        });
       } else {
-        // Remove from ordered layer info
-        // TODO: Have explicit function to do this, like reorderLayerInfoStore
-        MapEventProcessor.removeOrderedLayerInfo(this.mapId, registrationEvent.layerPath);
+        // Unregister from ordered layer info
+        this.#unregisterFromOrderedLayerInfo(registrationEvent.layerConfig);
 
         // Unregister from TimeSlider
         this.#unregisterFromTimeSlider(registrationEvent.layerConfig);
@@ -507,27 +512,64 @@ export class LayerApi {
   }
 
   /**
-   * Processes reordering of layer information in the store.
+   * Registers layer information for the ordered layer info in the store.
    * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be reordered.
    * @private
    */
-  #reorderLayerInfoStore(layerConfig: TypeLayerEntryConfig): void {
-    // Update the ordered layer info
+  #registerForOrderedLayerInfo(layerConfig: TypeLayerEntryConfig): void {
+    // If the map index for the given layer path hasn't been set yet
     if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerConfig.layerPath) === -1) {
-      if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerConfig.layerPath.split('.')[1]) !== -1) {
-        MapEventProcessor.replaceOrderedLayerInfo(this.mapId, layerConfig, layerConfig.layerPath.split('.')[1]);
+      // Get the sub-layer-path
+      const subLayerPath = layerConfig.layerPath.split('.')[1];
+
+      // If the map index of a sub-layer-path has been set
+      if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, subLayerPath) !== -1) {
+        // Replace the order layer info of the layer with the index of the sub-layer-path by calling replaceOrderedLayerInfo
+        MapEventProcessor.replaceOrderedLayerInfo(this.mapId, layerConfig, subLayerPath);
       } else if (layerConfig.parentLayerConfig) {
+        // Here the map index of a sub-layer-path hasn't been set and there's a parent layer config for the current layer config
+        // Get the sub-layer-path
+        // TODO: Refactor - Sometimes we are getting the sub-layer-path by splitting on the '.' and sometimes on the '/'.
+        // TO.DOCONT: This abstraction logic should be part of the ConfigBaseClass
         const parentLayerPathArray = layerConfig.layerPath.split('/');
         parentLayerPathArray.pop();
         const parentLayerPath = parentLayerPathArray.join('/');
+
+        // Get the map index of the parent layer path
         const parentLayerIndex = MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, parentLayerPath);
+
+        // Get the number of child layers
         const numberOfLayers = MapEventProcessor.getMapOrderedLayerInfo(this.mapId).filter((layerInfo) =>
           layerInfo.layerPath.startsWith(parentLayerPath)
         ).length;
-        if (parentLayerIndex !== -1) MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig, parentLayerIndex + numberOfLayers);
-        else MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig.parentLayerConfig!);
-      } else MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig);
+
+        // If the map index of the parent hasn't been set yet
+        if (parentLayerIndex !== -1) {
+          // Add the ordered layer information for the layer path based on the parent index + the number of child layers
+          // TODO: Check - This addition seems wrong? Seems like it's not going to scale well when multiple layers/groups and a single index order
+          MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig, parentLayerIndex + numberOfLayers);
+        } else {
+          // Add the ordered layer information for the layer path based unshifting the current array by calling addOrderedLayerInfo
+          // TODO: Check - Could use more comment here, not sure what it's meant for
+          MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig.parentLayerConfig!);
+        }
+      } else {
+        // Here the map index of a sub-layer-path hasn't been set and there's no parent layer config for the current layer config
+        // Add the ordered layer information for the layer path based unshifting the current array by calling addOrderedLayerInfo
+        // TODO: Check - Could use more comment here, not sure what it's meant for
+        MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig);
+      }
     }
+  }
+
+  /**
+   * Unregisters layer information from layer info store.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
+   * @private
+   */
+  #unregisterFromOrderedLayerInfo(layerConfig: TypeLayerEntryConfig): void {
+    // Remove from ordered layer info
+    MapEventProcessor.removeOrderedLayerInfo(this.mapId, layerConfig.layerPath);
   }
 
   /**
@@ -535,19 +577,12 @@ export class LayerApi {
    * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
    * @private
    */
-  #registerForTimeSlider(layerConfig: TypeLayerEntryConfig): void {
-    // Wait until the layer is processed
-    // TODO: Check - Why is the 'applyFilters' function which is (sub)called below throwing a 'The source image cannot be decoded' error in the console
-    // TO.DOCONT: when removing and readding the layer a second time?
-    whenThisThen(() => layerConfig.IsGreaterThanOrEqualTo('processed'))
-      .then(() => {
-        // Add for the TimeSlider
-        TimeSliderEventProcessor.addTimeSliderLayerAndApplyFilters(this.mapId, layerConfig.layerPath);
-      })
-      .catch((error) => {
-        // Log
-        logger.logPromiseFailed('in waiting for layer status to be processed in registration of layer', error);
-      });
+  async #registerForTimeSlider(layerConfig: TypeLayerEntryConfig): Promise<void> {
+    // Wait until the layer is loaded (or processed?)
+    await whenThisThen(() => layerConfig.IsGreaterThanOrEqualTo('loaded'), LayerApi.#MAX_WAIT_TIME_SLIDER_REGISTRATION);
+
+    // Check and add time slider layer when needed
+    TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.mapId, layerConfig);
   }
 
   /**
