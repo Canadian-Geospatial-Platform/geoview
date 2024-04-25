@@ -166,8 +166,11 @@ class TimeSliderPlugin extends FooterPlugin {
       const initialTimeSliderLayerPaths = TimeSliderPlugin.#filterTimeSliderLayers(this.pluginProps.mapId, orderedLayerPaths);
       if (initialTimeSliderLayerPaths) {
         initialTimeSliderLayerPaths.forEach((layerPath) => {
-          // Add the time slider in store
-          TimeSliderEventProcessor.addTimeSliderLayerAndApplyFilters(this.pluginProps.mapId, layerPath);
+          // Get the config
+          const layerConfig = api.maps[this.pluginProps.mapId].layer.registeredLayers[layerPath];
+
+          // Check and add time slider layer when needed
+          TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.pluginProps.mapId, layerConfig);
         });
       }
     });

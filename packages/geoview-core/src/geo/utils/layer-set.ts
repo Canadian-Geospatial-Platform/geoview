@@ -146,7 +146,7 @@ export class LayerSet {
    * @param {TypeLayerEntryConfig} layerConfig - The layer config
    */
   protected onRegisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
-    // Override this function to perform registration logic in the inherited classes
+    // Override this function to perform further registration logic in the inherited classes
     this.resultSet[layerConfig.layerPath] = {
       data: undefined,
       layerStatus: 'newInstance',
@@ -161,7 +161,7 @@ export class LayerSet {
    * @param {TypeLayerEntryConfig} layerConfig - The layer config
    */
   protected onUnregisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
-    // Override this function to perform registration logic in the inherited classes
+    // Override this function to perform further unregistration logic in the inherited classes
     delete this.resultSet[layerConfig.layerPath];
   }
 
