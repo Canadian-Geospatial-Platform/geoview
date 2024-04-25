@@ -1,13 +1,13 @@
-import { CV_CONST_LAYER_TYPES } from '@config/types/config-constants';
+import { CV_CONST_LAYER_TYPES, CV_GEOVIEW_SCHEMA_PATH } from '@config/types/config-constants';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { EsriFeatureLayerEntryConfig } from '@config/types/classes/sub-layer-config/vector-leaf/esri-feature-layer-entry-config';
 import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
 import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
-import { TypeJsonObject, toJsonObject } from '@config/types/config-types';
-import { TypeLayerInitialSettings } from '@config/types/map-schema-types';
+import { TypeGeoviewLayerType, TypeJsonObject } from '@config/types/config-types';
+import { TypeDisplayLanguage, TypeLayerInitialSettings } from '@config/types/map-schema-types';
 import { MapFeaturesConfig } from '@config/types/classes/map-features-config';
-import { logger } from '@/core/utils/logger';
+import { getListOfLayerEntryConfig, validateAgainstSchema } from '@config/utils';
 
 export type TypeEsriFeatureLayerNode =
   | (ConfigBaseClass & GroupLayerEntryConfig)
@@ -15,33 +15,77 @@ export type TypeEsriFeatureLayerNode =
 
 export class EsriFeatureLayerConfig extends AbstractGeoviewLayerConfig {
   /** Type of GeoView layer. */
-  geoviewLayerType = CV_CONST_LAYER_TYPES.ESRI_FEATURE;
+  geoviewLayerType: TypeGeoviewLayerType;
 
   /** The layer entries to use from the GeoView layer. */
   declare listOfLayerEntryConfig: TypeEsriFeatureLayerNode[];
 
-  /**
+  /** ***************************************************************************************************************************
    * The class constructor.
    * @param {TypeJsonObject} layerConfig The layer configuration we want to instanciate.
+   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map features configuration.
+   * @param {MapFeaturesConfig} mapFeaturesConfig An optional mapFeatureConfig instance if the layer is part of it.
    */
-  constructor(layerConfig: TypeJsonObject, mapFeaturesConfig?: MapFeaturesConfig) {
-    super(layerConfig, mapFeaturesConfig);
-    this.validate(toJsonObject(this));
+  // GV: This class cannot be instanciated using its constructor. The static method getInstance must be used.
+  // GV: # cannot be used to declare a private constructor. The 'private' keyword must be used. Also, a constructor cannot
+  // GV: return a promise. That's the reason why we need the getInstance which can do that.
+  private constructor(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, mapFeaturesConfig?: MapFeaturesConfig) {
+    super(layerConfig, language, mapFeaturesConfig);
+    this.geoviewLayerType = CV_CONST_LAYER_TYPES.ESRI_FEATURE;
+  }
+
+  /** ***************************************************************************************************************************
+   * Method used to instanciate an EsriFeatureLayerConfig object. The interaction with the instance will use the provided
+   * language. The language associated to the instance can be changed using the setConfigLanguage.
+   * @param {TypeJsonObject} layerConfig The layer configuration we want to instanciate.
+   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map features configuration.
+   * @param {MapFeaturesConfig} mapFeaturesConfig An optional mapFeatureConfig instance if the layer is part of it.
+   *
+   * @returns {Promise<EsriFeatureLayerConfig>} The ESRI feature configuration instance.
+   */
+  static async getInstance(
+    layerConfig: TypeJsonObject,
+    language: TypeDisplayLanguage,
+    mapFeaturesConfig?: MapFeaturesConfig
+  ): Promise<EsriFeatureLayerConfig> {
+    const esriFeatureLayerConfig = new EsriFeatureLayerConfig(layerConfig, language, mapFeaturesConfig);
+    (esriFeatureLayerConfig.listOfLayerEntryConfig as ConfigBaseClass[]) = await getListOfLayerEntryConfig(
+      layerConfig.listOfLayerEntryConfig,
+      esriFeatureLayerConfig.initialSettings,
+      esriFeatureLayerConfig
+    );
+    esriFeatureLayerConfig.processMetadata();
+    esriFeatureLayerConfig.setDefaultValues();
+    validateAgainstSchema(esriFeatureLayerConfig.getGeoviewLayerSchema(), esriFeatureLayerConfig);
+    return Promise.resolve(esriFeatureLayerConfig);
   }
 
   /**
-   * @protected validate
-   * Validate the object properties.
+   * A method that returns the geoview layer schema to use for the validation.
    *
-   * @param {TypeJsonObject} layerConfig The layer configuration to validate.
+   * @returns {string} The GeoView layer schema associated to the config.
+   * @abstract
    */
-  validate(layerConfig: TypeJsonObject): void {
-    super.validate(layerConfig);
-    if (!this.metadataAccessPath)
-      logger.logError(
-        `Property metadataAccessPath is mandatory for GeoView layer ${this.geoviewLayerId} of type ${this.geoviewLayerType}.`
-      );
+  getGeoviewLayerSchema(): string {
+    /** The GeoView layer schema associated to EsriFeatureLayerConfig */
+    return CV_GEOVIEW_SCHEMA_PATH.ESRI_FEATURE;
   }
+
+  /**
+   * @protected Process layer metadata.
+   */
+  // TODO: Implement this method
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  protected processMetadata(): void {}
+
+  /**
+   * @protected Set the default value when a class property that has a default value is left undefined.
+   *
+   * @param {TypeJsonObject} layerConfig The layer configuration affected.
+   */
+  // TODO: Implement this method
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  protected setDefaultValues(): void {}
 
   /**
    * The method used to implement the class factory model that returns the instance of the class

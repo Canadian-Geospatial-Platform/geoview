@@ -1,11 +1,11 @@
-import defaultsDeep from 'lodash/defaultsDeep';
-import cloneDeep from 'lodash/cloneDeep';
+// import defaultsDeep from 'lodash/defaultsDeep';
+// import cloneDeep from 'lodash/cloneDeep';
 
-import { Cast, TypeGeoviewLayerType, TypeJsonObject } from '@config/types/config-types';
+import { TypeGeoviewLayerType, TypeJsonObject } from '@config/types/config-types';
 import { TypeLocalizedString, TypeLayerEntryType, TypeLayerInitialSettings } from '@config/types/map-schema-types';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { validateAgainstSchema } from '@config/utils';
-import { CV_DEFAULT_INITIAL_SETTINGS } from '@config/types/config-constants';
+import { normalizeLocalizedString } from '@config/utils';
+// import { CV_DEFAULT_INITIAL_SETTINGS } from '@config/types/config-constants';
 
 /** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
@@ -25,7 +25,7 @@ export abstract class ConfigBaseClass {
   layerName?: TypeLocalizedString;
 
   /** Layer entry data type. This element is part of the schema. */
-  // entryType?: TypeLayerEntryType;
+  entryType: TypeLayerEntryType;
 
   /** Used internally too distinguish layers created from a GeoCore UUID. */
   geocoreId: string;
@@ -47,30 +47,17 @@ export abstract class ConfigBaseClass {
    */
   constructor(layerConfig: TypeJsonObject, initialSettings: TypeLayerInitialSettings, geoviewLayerConfig: AbstractGeoviewLayerConfig) {
     this.#geoviewConfig = geoviewLayerConfig;
-    const layerConfigWithDefault = this.#setDefaultValues(layerConfig, initialSettings);
-    this.#validate(layerConfigWithDefault);
 
-    this.layerId = layerConfigWithDefault.layerId as string;
-    this.layerName = { ...(Cast<TypeLocalizedString>(layerConfigWithDefault.layerName) || { en: 'Unknown', fr: 'inconnu' }) };
-    this.geocoreId = layerConfigWithDefault.geocoreId as string;
-    this.initialSettings = layerConfigWithDefault.initialSettings as TypeLayerInitialSettings;
-  }
-
-  #setDefaultValues(layerConfig: TypeJsonObject, initialSettings: TypeLayerInitialSettings): TypeJsonObject {
-    const layerConfigWithDefault = cloneDeep(layerConfig);
-    layerConfigWithDefault.entryType = this.entryType as TypeJsonObject;
-    layerConfigWithDefault.initialSettings = defaultsDeep(layerConfig.initialSettings, initialSettings);
-    layerConfigWithDefault.initialSettings = defaultsDeep(layerConfig.initialSettings, CV_DEFAULT_INITIAL_SETTINGS);
-    return layerConfigWithDefault;
-  }
-
-  #validate(layerConfig: TypeJsonObject): void {
-    validateAgainstSchema(layerConfig, this.schemaPath, this);
+    this.layerId = layerConfig.layerId as string;
+    this.layerName = normalizeLocalizedString(layerConfig.layerName);
+    this.entryType = this.getEntryType();
+    this.geocoreId = layerConfig.geocoreId as string;
+    this.initialSettings = layerConfig.initialSettings as TypeLayerInitialSettings;
   }
 
   abstract get schemaPath(): string;
 
-  abstract get entryType(): TypeLayerEntryType;
+  abstract getEntryType(): TypeLayerEntryType;
 
   /** The geoview layer type that owns this config entry. */
   get geoviewLayerType(): TypeGeoviewLayerType {

@@ -1,4 +1,4 @@
-import { CV_CONST_SUB_LAYER_TYPES, CV_SCHEMA_PATH } from '@config/types/config-constants';
+import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@config/types/config-constants';
 import { TypeJsonObject } from '@config/types/config-types';
 import {
   TypeSourceImageEsriInitialConfig,
@@ -52,7 +52,7 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * @returns {string} The schemaPath associated to the sub layer.
    */
   get schemaPath(): string {
-    return CV_SCHEMA_PATH.ESRI_FEATURE;
+    return CV_CONST_LEAF_LAYER_SCHEMA_PATH.ESRI_FEATURE;
   }
 
   /**

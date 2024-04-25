@@ -1,9 +1,9 @@
 import { CV_CONST_SUB_LAYER_TYPES, CV_LAYER_GROUP_SCHEMA_PATH } from '@config/types/config-constants';
-import { TypeJsonObject, TypeJsonArray } from '@config/types/config-types';
+import { TypeJsonObject } from '@config/types/config-types';
 import { TypeLayerInitialSettings } from '@config/types/map-schema-types';
-import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
+import { getListOfLayerEntryConfig } from '@/api/config/utils';
 
 /** ******************************************************************************************************************************
  * Type used to define a layer group.
@@ -21,12 +21,36 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
    * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited form the parent.
    * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The geoview layer configuration object that is creating this layer tree node.
    */
-  constructor(layerNode: TypeJsonObject, initialSettings: TypeLayerInitialSettings, geoviewLayerConfig: AbstractGeoviewLayerConfig) {
+  private constructor(
+    layerNode: TypeJsonObject,
+    initialSettings: TypeLayerInitialSettings,
+    geoviewLayerConfig: AbstractGeoviewLayerConfig
+  ) {
     super(layerNode, initialSettings, geoviewLayerConfig);
-    this.listOfLayerEntryConfig = (layerNode.listOfLayerEntryConfig as TypeJsonArray).map((subLayerNode: TypeJsonObject) => {
-      if (layerEntryIsGroupLayer(subLayerNode)) return new GroupLayerEntryConfig(subLayerNode, this.initialSettings, geoviewLayerConfig);
-      return geoviewLayerConfig.createLeafNode(layerNode, initialSettings, geoviewLayerConfig)!;
-    });
+    this.listOfLayerEntryConfig = [];
+  }
+
+  /** ***************************************************************************************************************************
+   * Method used to instanciate a GroupLayerEntryConfig object. The interaction with the instance will use the language stored
+   * in the #geoviewConfig object. The language associated to a configuration can be changed using the setConfigLanguage.
+   * @param {TypeJsonObject} jsonGroupConfig The group layer configuration.
+   * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited.
+   * @param {AbstractGeoviewLayerConfig | undefined} geoviewInstance The GeoView instance that owns the sub layer.
+   *
+   * @returns {GroupLayerEntryConfig} The group layer instance or undefined if there is an error.
+   */
+  static async getInstance(
+    jsonGroupConfig: TypeJsonObject,
+    initialSettings: TypeLayerInitialSettings,
+    geoviewInstance: AbstractGeoviewLayerConfig
+  ): Promise<GroupLayerEntryConfig | undefined> {
+    const groupLayerInstance = new GroupLayerEntryConfig(jsonGroupConfig, initialSettings, geoviewInstance);
+    groupLayerInstance.listOfLayerEntryConfig = await getListOfLayerEntryConfig(
+      jsonGroupConfig.listOfLayerEntryConfig,
+      initialSettings,
+      geoviewInstance
+    );
+    return groupLayerInstance;
   }
 
   get schemaPath(): string {
