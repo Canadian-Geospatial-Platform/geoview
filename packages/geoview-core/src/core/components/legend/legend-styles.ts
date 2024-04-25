@@ -38,15 +38,24 @@ export const getSxClasses = (theme: Theme): any => ({
   },
   legendLayerListItem: {
     padding: '6px 4px',
-    '& .layerTitle > .MuiListItemText-primary': {
+    '& .layerTitle': {
       fontSize: theme.palette.geoViewFontSize.md,
       fontWeight: '600',
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
       overflow: 'hidden',
+      '>p': {
+        margin: 0,
+        color: theme.palette.geoViewColor.textColor.light[400],
+        fontSize: theme.palette.geoViewFontSize.sm,
+        lineHeight: 1.43,
+      },
     },
 
     '& .layerTitle > .MuiListItemText-secondary': {
+      color: theme.palette.geoViewColor.textColor.light[400],
+    },
+    '& .layerTitle > div': {
       color: theme.palette.geoViewColor.textColor.light[400],
     },
 

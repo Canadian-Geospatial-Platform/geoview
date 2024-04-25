@@ -91,7 +91,7 @@ export const getShellSxClasses = (theme: Theme): any => ({
   mapShellContainer: {
     display: 'flex',
     flexDirection: 'row',
-    height: '100%',
+    height: '853px',
     width: '100%',
     position: 'relative',
     alignItems: 'stretch',
@@ -99,7 +99,7 @@ export const getShellSxClasses = (theme: Theme): any => ({
   mapContainer: {
     display: 'flex',
     flexDirection: 'column',
-    height: '100%',
+    height: '853px',
     width: '100%',
     position: 'relative',
     alignItems: 'stretch',

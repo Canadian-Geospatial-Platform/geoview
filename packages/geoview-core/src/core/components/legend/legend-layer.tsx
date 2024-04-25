@@ -92,7 +92,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
 
   const getSecondaryText = (): JSX.Element => {
     if (getLayerChildren().length) {
-      return <>{t('legend.subLayersCount').replace('{count}', getLayerChildren().length.toString())}</>;
+      return <Typography component="p">{t('legend.subLayersCount').replace('{count}', getLayerChildren().length.toString())}</Typography>;
     }
     if (layer.items.length) {
       let itemsCountStr = '';
@@ -198,6 +198,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
               }}
               primary={layer.layerName}
               className="layerTitle"
+              disableTypography
               secondary={getSecondaryText()}
             />
           </Tooltip>

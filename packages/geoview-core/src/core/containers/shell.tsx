@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, Fragment } from 'react';
+import { useEffect, useState, useCallback, Fragment, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
@@ -14,11 +14,14 @@ import { MapInfo } from '@/core/components/map-info/map-info';
 import { Box, CircularProgress, Link, Modal, Snackbar, Button, TypeModalProps, ModalApi, ModalEvent } from '@/ui';
 import { getShellSxClasses } from './containers-style';
 import { useMapInteraction, useMapLoaded } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useAppCircularProgressActive } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppCircularProgressActive, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
   useUIActiveFocusItem,
   useUIActiveTrapGeoView,
   useUIAppbarComponents,
+  useUIFooterPanelResizeValue,
+  useUIFooterPanelResizeValues,
+  useUIFooterBarIsCollapsed,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import ExportModal from '@/core/components/export/export-modal';
 import DataTableModal from '@/core/components/data-table/data-table-modal';
@@ -34,6 +37,11 @@ type ShellProps = {
   mapViewer: MapViewer;
 };
 
+interface ShellContainerCssProperties {
+  mapVisibility: string;
+  mapHeight: number;
+}
+
 /**
  * Create a shell component to wrap the map and other components not inside the map
  * @param {ShellProps} props the shell properties
@@ -44,7 +52,7 @@ export function Shell(props: ShellProps): JSX.Element {
   logger.logTraceRender('core/containers/shell');
 
   const { mapViewer } = props;
-
+  const defaultHeight = 853;
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
@@ -54,6 +62,9 @@ export function Shell(props: ShellProps): JSX.Element {
   const [components, setComponents] = useState<Record<string, JSX.Element>>({});
   const [modalProps, setModalProps] = useState<TypeModalProps>();
   const [modalOpen, setModalOpen] = useState<boolean>(false);
+
+  const mapShellContainerRef = useRef<HTMLElement | null>(null);
+  const mapContainerRef = useRef<HTMLElement | null>(null);
 
   // snackbar state
   const [snackbarMessage, setSnackbarMessage] = useState('');
@@ -69,6 +80,10 @@ export function Shell(props: ShellProps): JSX.Element {
   const appBarComponents = useUIAppbarComponents();
   const geoviewConfig = useGeoViewConfig();
   const focusItem = useUIActiveFocusItem();
+  const isMapFullScreen = useAppFullscreenActive();
+  const footerPanelResizeValue = useUIFooterPanelResizeValue();
+  const footerPanelResizeValues = useUIFooterPanelResizeValues();
+  const isFooterBarCollapsed = useUIFooterBarIsCollapsed();
 
   /**
    * Handles when a component is being added to the map
@@ -151,6 +166,89 @@ export function Shell(props: ShellProps): JSX.Element {
     setSnackbarOpen(false);
   }, []);
 
+  /**
+   * Calculate resize values for map based on popover values defined in store.
+   */
+  const memoMapResizeValues = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('SHELL - memoMapResizeValues', footerPanelResizeValue, footerPanelResizeValues);
+
+    return footerPanelResizeValues.reduce((acc, curr) => {
+      const windowHeight = window.screen.height;
+      let values: [string, number] = ['visible', windowHeight - (windowHeight * footerPanelResizeValue) / 100];
+      if (curr === footerPanelResizeValues[0]) {
+        values = ['visible', windowHeight - (windowHeight * footerPanelResizeValue) / 100];
+      }
+      if (curr === footerPanelResizeValues[footerPanelResizeValues.length - 1]) {
+        values = ['hidden', 0];
+      }
+
+      acc[curr] = {
+        mapVisibility: values[0],
+        mapHeight: values[1],
+      };
+      return acc;
+    }, {} as Record<number, ShellContainerCssProperties>);
+  }, [footerPanelResizeValue, footerPanelResizeValues]);
+
+  /**
+   * Effect to set the map div height
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('SHELL - mapViewer', mapViewer);
+
+    const { mapId } = mapViewer;
+    const mapDiv = document.getElementById(mapId)!;
+    mapDiv.style.height = 'fit-content';
+    mapDiv.style.transition = 'height 0.2s ease-out 0.2s';
+  }, [mapViewer]);
+
+  /**
+   * Update map height when switch on/off the fullscreen
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('SHELL - footerPanelResizeValue.isMapFullScreen.memoMapResizeValues', footerPanelResizeValue, isMapFullScreen);
+
+    if (isMapFullScreen && mapContainerRef.current && mapShellContainerRef.current) {
+      const { mapVisibility, mapHeight } = memoMapResizeValues[footerPanelResizeValue];
+      mapContainerRef.current.style.visibility = mapVisibility;
+      mapContainerRef.current.style.minHeight = `${mapHeight}px`;
+      mapShellContainerRef.current.style.visibility = mapVisibility;
+      mapShellContainerRef.current.style.minHeight = `${mapHeight}px`;
+
+      mapContainerRef.current.style.height = `${mapHeight}px`;
+      mapShellContainerRef.current.style.height = `${mapHeight}px`;
+    }
+
+    // Reset the map references with default heights.
+    if (!isMapFullScreen && mapContainerRef.current && mapShellContainerRef.current) {
+      mapContainerRef.current.style.visibility = 'visible';
+      mapContainerRef.current.style.minHeight = `${defaultHeight}px`;
+      mapContainerRef.current.style.height = `${defaultHeight}px`;
+
+      mapShellContainerRef.current.style.visibility = 'visible';
+      mapShellContainerRef.current.style.minHeight = `${defaultHeight}px`;
+      mapShellContainerRef.current.style.height = `${defaultHeight}px`;
+    }
+  }, [footerPanelResizeValue, isMapFullScreen, memoMapResizeValues]);
+
+  /**
+   * Update the map after footer panel is collapsed.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('SHELL - isFooterBarCollapsed.isMapFullScreen', isFooterBarCollapsed, isMapFullScreen);
+
+    if (isMapFullScreen && isFooterBarCollapsed && mapContainerRef.current && mapShellContainerRef.current) {
+      mapContainerRef.current.style.minHeight = `${window.screen.height - 72}px`;
+      mapContainerRef.current.style.height = `${window.screen.height - 72}px`;
+      mapShellContainerRef.current.style.minHeight = `${window.screen.height - 72}px`;
+      mapShellContainerRef.current.style.height = `${window.screen.height - 72}px`;
+    }
+  }, [isFooterBarCollapsed, isMapFullScreen]);
+
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('SHELL - mount');
@@ -179,6 +277,8 @@ export function Shell(props: ShellProps): JSX.Element {
     };
   }, [mapViewer, handleMapRemoveComponent, handleModalOpen]);
 
+  // console.log('mapViewer', mapViewer);
+
   return (
     <Box sx={sxClasses.all}>
       <Link id={`toplink-${mapViewer.mapId}`} href={`#bottomlink-${mapViewer.mapId}`} tabIndex={0} sx={[sxClasses.skip, { top: '0px' }]}>
@@ -188,11 +288,11 @@ export function Shell(props: ShellProps): JSX.Element {
         <Box id={`shell-${mapViewer.mapId}`} sx={sxClasses.shell} className="geoview-shell" tabIndex={-1} aria-hidden="true">
           <CircularProgress isLoaded={mapLoaded} />
           <CircularProgress isLoaded={!circularProgressActive} />
-          <Box id={`map-${mapViewer.mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer">
+          <Box id={`map-${mapViewer.mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
             <AppBar api={mapViewer.appBarApi} />
             {/* load geolocator component if config includes in list of components in appBar */}
             {appBarComponents.includes('geolocator') && interaction === 'dynamic' && <Geolocator />}
-            <Box sx={sxClasses.mapContainer}>
+            <Box sx={sxClasses.mapContainer} ref={mapContainerRef}>
               <Map viewer={mapViewer} />
               <MapInfo />
             </Box>
