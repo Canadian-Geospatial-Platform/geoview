@@ -209,7 +209,7 @@
             message.classList.remove('config-error');
             if (mapConfig.isValid) {
               message.innerHTML = 'File is valid, see console for details...';
-              document.getElementById('createMap').disabled = 0;
+              document.getElementById('createMap').disabled = true;
             } else {
               message.innerHTML = 'File is invalid, see console for details...';
             }

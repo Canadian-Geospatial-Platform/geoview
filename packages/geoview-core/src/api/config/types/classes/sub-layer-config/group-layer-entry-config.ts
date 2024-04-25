@@ -1,6 +1,6 @@
 import { CV_CONST_SUB_LAYER_TYPES, CV_LAYER_GROUP_SCHEMA_PATH } from '@config/types/config-constants';
 import { TypeJsonObject } from '@config/types/config-types';
-import { TypeLayerInitialSettings } from '@config/types/map-schema-types';
+import { TypeLayerEntryType, TypeLayerInitialSettings } from '@config/types/map-schema-types';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
 import { getListOfLayerEntryConfig } from '@/api/config/utils';
@@ -51,6 +51,15 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
       geoviewInstance
     );
     return groupLayerInstance;
+  }
+
+  /**
+   * The getter method that returns the entryType property.
+   *
+   * @returns {TypeLayerEntryType} The entryType associated to the sub layer.
+   */
+  getEntryType(): TypeLayerEntryType {
+    return CV_CONST_SUB_LAYER_TYPES.GROUP;
   }
 
   get schemaPath(): string {
