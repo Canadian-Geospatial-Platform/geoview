@@ -5,7 +5,7 @@ import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-int
 import { Dialog, DialogTitle, DialogContent, DialogActions, List, Button, Box, Typography } from '@/ui';
 import { getSxClasses } from './details-style';
 import { FeatureInfoTable } from './feature-info-table';
-import { TypeFieldEntry } from '@/geo/utils/layer-set';
+import { TypeFieldEntry } from '@/geo/layer/layer-sets/layer-set';
 import { logger } from '@/core/utils/logger';
 
 /**

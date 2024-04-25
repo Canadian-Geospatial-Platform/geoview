@@ -1,6 +1,6 @@
 import { GeoviewStoreType, IGeoviewState } from '@/core/stores/geoview-store';
 import { getGeoViewStore, getGeoViewStoreAsync } from '@/core/stores/stores-managers';
-import { TypeLayerData } from '@/geo/utils/layer-set';
+import { TypeLayerData } from '@/geo/layer/layer-sets/layer-set';
 import { logger } from '@/core/utils/logger';
 import { delay } from '@/core/utils/utilities';
 

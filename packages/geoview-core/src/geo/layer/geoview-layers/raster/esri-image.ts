@@ -12,7 +12,7 @@ import { TypeJsonObject } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { codedValueType, rangeDomainType } from '@/geo/utils/layer-set';
+import { codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/layer-set';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
@@ -34,7 +34,7 @@ import {
   commonProcessTemporalDimension,
 } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { getLegendStyles } from '@/geo/renderer/geoview-renderer';
+import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 
 export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;

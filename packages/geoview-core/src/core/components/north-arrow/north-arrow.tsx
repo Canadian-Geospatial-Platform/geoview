@@ -3,7 +3,7 @@ import { useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 
 import { Box } from '@/ui';
-import { PROJECTION_NAMES } from '@/geo/projection/projection';
+import { PROJECTION_NAMES } from '@/geo/utils/projection';
 import { NorthArrowIcon, NorthPoleIcon } from './north-arrow-icon';
 import { getSxClasses } from './north-arrow-style';
 import { useMapNorthArrowElement, useMapProjection, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';

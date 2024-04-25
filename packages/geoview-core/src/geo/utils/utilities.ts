@@ -16,7 +16,7 @@ import { xmlToJson } from '@/core/utils/utilities';
 
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { VECTOR_LAYER } from '@/core/utils/constant';
-import { getLegendStyles } from '@/geo/renderer/geoview-renderer';
+import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { TypeStyleConfig } from '@/geo/map/map-schema-types';
 

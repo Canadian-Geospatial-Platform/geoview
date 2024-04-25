@@ -34,9 +34,9 @@ import {
   TypeStyleGeometry,
   CONST_LAYER_ENTRY_TYPES,
 } from '@/geo/map/map-schema-types';
-import { QueryType, TypeFeatureInfoEntry, TypeLocation, codedValueType, rangeDomainType } from '@/geo/utils/layer-set';
+import { QueryType, TypeFeatureInfoEntry, TypeLocation, codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/layer-set';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { getLegendStyles, getFeatureCanvas } from '@/geo/renderer/geoview-renderer';
+import { getLegendStyles, getFeatureCanvas } from '@/geo/utils/renderer/geoview-renderer';
 
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';

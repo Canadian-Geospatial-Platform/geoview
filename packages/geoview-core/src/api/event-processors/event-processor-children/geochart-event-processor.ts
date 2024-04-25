@@ -2,7 +2,7 @@ import { GeoviewStoreType } from '@/core/stores';
 import { GeoChartStoreByLayerPath, IGeochartState } from '@/core/stores/store-interface-and-intial-values/geochart-state';
 import { GeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
 import { logger } from '@/core/utils/logger';
-import { TypeLayerData } from '@/geo/utils/layer-set';
+import { TypeLayerData } from '@/geo/layer/layer-sets/layer-set';
 
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
 
