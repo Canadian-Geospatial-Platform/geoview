@@ -441,7 +441,6 @@ export class ConfigApi {
 
   static getMapConfig(jsonStringMapConfig: string, language: TypeDisplayLanguage): Promise<MapFeaturesConfig | undefined> {
     // Return the config
-    const test = Promise.resolve(MapFeaturesConfig.getInstance(jsonStringMapConfig, language));
-    return test;
+    return MapFeaturesConfig.getInstance(jsonStringMapConfig, language);
   }
 }

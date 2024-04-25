@@ -200,7 +200,7 @@
               const textarea = document.getElementById('configOutput');
               const lineNumbersContainer = document.getElementById('outputLineNumbers');
               const lines = textarea.value.split('\n').length;
-              const lineNumbers = Array.from({ length: lines }, (_, index) => index + 1).join('<br>');
+              const lineNumbers = Array.from({ length: lines }, (_, index) => '').join('<span />');
               lineNumbersContainer.innerHTML = lineNumbers;
             })();
 
