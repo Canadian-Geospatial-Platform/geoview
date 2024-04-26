@@ -4,7 +4,7 @@ import { useTheme } from '@mui/material/styles';
 import { useMediaQuery } from '@mui/material';
 
 import { Switch, Box } from '@/ui';
-import { PROJECTION_NAMES } from '@/geo/projection/projection';
+import { PROJECTION_NAMES } from '@/geo/utils/projection';
 import { useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import {
   useMapFixNorth,

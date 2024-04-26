@@ -6,7 +6,7 @@ import { FitOptions } from 'ol/View'; // only for typing
 import { useStore } from 'zustand';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
+import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/layer-set';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeInteraction, TypeValidMapProjectionCodes, TypeMapMouseInfo } from '@/geo/map/map-schema-types';
 
@@ -14,8 +14,8 @@ import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { TypeBasemapOptions } from '@/geo/layer/basemap/basemap-types';
-import { TypeHoverFeatureInfo } from '@/geo/utils/hover-feature-info-layer-set';
-import { TypeFeatureInfoResultSet } from '@/geo/utils/feature-info-layer-set';
+import { TypeHoverFeatureInfo } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
+import { TypeFeatureInfoResultSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with MapEventProcessor vs MapState
 
@@ -144,15 +144,19 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         mapState: {
           ...get().mapState,
           basemapOptions: geoviewConfig.map.basemapOptions,
-          centerCoordinates: geoviewConfig.map.viewSettings.center as Coordinate,
+          centerCoordinates: geoviewConfig.map.viewSettings.initialView?.zoomAndCenter
+            ? (geoviewConfig.map.viewSettings.initialView.zoomAndCenter[1] as Coordinate)
+            : [-90, 67],
           currentProjection: geoviewConfig.map.viewSettings.projection,
           interaction: geoviewConfig.map.interaction || 'dynamic',
-          mapExtent: geoviewConfig.map.viewSettings.extent,
+          mapExtent: geoviewConfig.map.viewSettings.maxExtent,
           northArrow: geoviewConfig.components!.indexOf('north-arrow') > -1 || false,
           overviewMap: geoviewConfig.components!.indexOf('overview-map') > -1 || false,
           overviewMapHideZoom: geoviewConfig.overviewMap !== undefined ? geoviewConfig.overviewMap.hideOnZoom : 0,
           rotation: geoviewConfig.map.viewSettings.rotation || 0,
-          zoom: geoviewConfig.map.viewSettings.zoom,
+          zoom: geoviewConfig.map.viewSettings.initialView?.zoomAndCenter
+            ? geoviewConfig.map.viewSettings.initialView.zoomAndCenter[0]
+            : 4.5,
         },
       });
     },
@@ -712,6 +716,8 @@ export const useMapAttribution = (): string[] => useStore(useGeoViewStore(), (st
 export const useMapBasemapOptions = (): TypeBasemapOptions => useStore(useGeoViewStore(), (state) => state.mapState.basemapOptions);
 export const useMapCenterCoordinates = (): Coordinate => useStore(useGeoViewStore(), (state) => state.mapState.centerCoordinates);
 export const useMapClickMarker = (): TypeClickMarker | undefined => useStore(useGeoViewStore(), (state) => state.mapState.clickMarker);
+export const useMapClickCoordinates = (): TypeMapMouseInfo | undefined =>
+  useStore(useGeoViewStore(), (state) => state.mapState.clickCoordinates);
 export const useMapExtent = (): Extent | undefined => useStore(useGeoViewStore(), (state) => state.mapState.mapExtent);
 export const useMapFixNorth = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.fixNorth);
 export const useMapInteraction = (): TypeInteraction => useStore(useGeoViewStore(), (state) => state.mapState.interaction);

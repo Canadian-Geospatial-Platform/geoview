@@ -40,9 +40,9 @@ import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
-import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
+import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/layer-set';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { loadImage } from '@/geo/renderer/geoview-renderer';
+import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;

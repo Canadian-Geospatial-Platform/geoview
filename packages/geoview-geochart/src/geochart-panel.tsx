@@ -11,10 +11,9 @@ import {
   useGeochartLayerDataArrayBatch,
   useGeochartSelectedLayerPath,
 } from 'geoview-core/src/core/stores/store-interface-and-intial-values/geochart-state';
-import { useAppDisplayLanguage, useAppGuide } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
+import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
-import Markdown from 'markdown-to-jsx';
 import { GeoChart } from './geochart';
 import { GeoViewGeoChartConfig } from './geochart-types';
 
@@ -46,7 +45,6 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const selectedLayerPath = useGeochartSelectedLayerPath() as string;
   const { setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass } = useGeochartStoreActions();
   const displayLanguage = useAppDisplayLanguage();
-  const guide = useAppGuide();
 
   // Create the validator shared for all the charts in the footer
   const [schemaValidator] = useState<SchemaValidator>(new SchemaValidator());
@@ -237,6 +235,12 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     );
   };
 
+  const handleGuideIsOpen = (guideIsOpen: boolean): void => {
+    if (guideIsOpen) {
+      setSelectedLayerPath('');
+    }
+  };
+
   /**
    * Renders the complete GeoChart Panel component
    * @returns {JSX.Element}
@@ -249,6 +253,8 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
           layerList={memoLayersList}
           onLayerListClicked={handleLayerChange}
           onIsEnlargeClicked={handleIsEnlargeClicked}
+          onGuideIsOpen={handleGuideIsOpen}
+          guideContentIds={['chart', 'chartTypes']}
         >
           {selectedLayerPath && (
             <Box>
@@ -259,13 +265,6 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
                 // eslint-disable-next-line react/jsx-no-useless-fragment
                 return <></>;
               })}
-            </Box>
-          )}
-          {!selectedLayerPath && guide?.footerPanel && (
-            <Box className="guideBox">
-              <Markdown options={{ wrapper: 'article' }}>{`${guide!.footerPanel!.children!.chart!.content}\n${
-                guide!.footerPanel!.children!.chart!.children!.chartTypes!.content
-              }`}</Markdown>
             </Box>
           )}
         </Layout>

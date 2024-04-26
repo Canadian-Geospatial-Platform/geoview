@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { PROJECTION_NAMES } from '@/geo/projection/projection';
+import { PROJECTION_NAMES } from '@/geo/utils/projection';
 import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 import {
   useMapCenterCoordinates,

@@ -5,6 +5,7 @@ import { api } from 'geoview-core';
 import { TimeSliderIcon } from 'geoview-core/src/ui';
 import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
 import { MapEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/map-event-processor';
+import { TimeSliderEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/time-slider-event-processor';
 
 import { TimeSliderPanel } from './time-slider-panel';
 import schema from '../schema.json';
@@ -98,7 +99,11 @@ class TimeSliderPlugin extends FooterPlugin {
     },
   });
 
-  onCreateContentProps = (): TypeTabs => {
+  /**
+   * Overrides the creation of the content properties of this TimeSlider Footer Plugin.
+   * @returns {TypeTabs} The TypeTabs for the TimeSlider Footer Plugin
+   */
+  onCreateContentProps(): TypeTabs {
     // Set custom time dimension if applicable
     this.configObj.sliders.forEach((obj: SliderProps) => {
       if (obj.temporalDimension) {
@@ -148,7 +153,46 @@ class TimeSliderPlugin extends FooterPlugin {
       icon: <TimeSliderIcon />,
       content: <TimeSliderPanel mapId={this.pluginProps.mapId} configObj={this.configObj} />,
     };
-  };
+  }
+
+  /**
+   * Overrides the addition of the TimeSlider Footer Plugin to make sure to set the time slider configs in the store and apply filters.
+   */
+  onAdd(): void {
+    // Wait for the layers to be processed so that their 'layerTemporalDimension' information is set
+    api.maps[this.pluginProps.mapId].onMapLayersProcessed(() => {
+      // Now the layerTemporalDimension should be good on the layers
+      const orderedLayerPaths = Object.keys(api.maps[this.pluginProps.mapId].layer.registeredLayers);
+      const initialTimeSliderLayerPaths = TimeSliderPlugin.#filterTimeSliderLayers(this.pluginProps.mapId, orderedLayerPaths);
+      if (initialTimeSliderLayerPaths) {
+        initialTimeSliderLayerPaths.forEach((layerPath) => {
+          // Get the config
+          const layerConfig = api.maps[this.pluginProps.mapId].layer.registeredLayers[layerPath];
+
+          // Check and add time slider layer when needed
+          TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.pluginProps.mapId, layerConfig);
+        });
+      }
+    });
+
+    // Call parent
+    super.onAdd();
+  }
+
+  /**
+   * Filters an array of legend layers to get usable time slider layer paths
+   *
+   * @param {string} mapId The id of the map
+   * @param {TypeLegendLayer[]} legendLayers Array of legend layers to filter
+   * @returns {string[]} A list of usable layer paths
+   * @private
+   */
+  static #filterTimeSliderLayers(mapId: string, layerPaths: string[]): string[] {
+    const filteredLayerPaths = layerPaths.filter(
+      (layerPath) => api.maps[mapId].layer.geoviewLayers[layerPath.split('/')[0]].layerTemporalDimension[layerPath]
+    );
+    return filteredLayerPaths;
+  }
 }
 
 export default TimeSliderPlugin;

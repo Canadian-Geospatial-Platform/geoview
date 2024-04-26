@@ -1,8 +1,8 @@
 import { GeoviewStoreType } from '@/core/stores';
 import { IFeatureInfoState } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { logger } from '@/core/utils/logger';
-import { TypeFeatureInfoResultSet } from '@/geo/utils/feature-info-layer-set';
-import { EventType, TypeLayerData } from '@/geo/utils/layer-set';
+import { TypeFeatureInfoResultSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
+import { EventType, TypeLayerData } from '@/geo/layer/layer-sets/layer-set';
 
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
 import { UIEventProcessor } from './ui-event-processor';
@@ -11,6 +11,33 @@ import { UIEventProcessor } from './ui-event-processor';
  * Event processor focusing on interacting with the feature info state in the store (currently called detailsState).
  */
 export class FeatureInfoEventProcessor extends AbstractEventProcessor {
+  /**
+   * Overrides initialization of the GeoChart Event Processor
+   * @param {GeoviewStoreType} store The store associated with the GeoChart Event Processor
+   * @returns An array of the subscriptions callbacks which were created
+   */
+  protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
+    // Checks for updated layers in layer data array and update the batched array consequently
+    const layerDataArrayUpdateBatch = store.subscribe(
+      (state) => state.detailsState.layerDataArray,
+      (cur) => {
+        // Log
+        logger.logTraceCoreStoreSubscription('FEATURE-INFO EVENT PROCESSOR - layerDataArray', cur);
+
+        // Also propagate in the batched array
+        FeatureInfoEventProcessor.#propagateFeatureInfoToStoreBatch(store.getState().mapId, cur).catch((error) => {
+          // Log
+          logger.logPromiseFailed(
+            'propagateFeatureInfoToStoreBatch in layerDataArrayUpdateBatch subscribe in feature-info-event-processor',
+            error
+          );
+        });
+      }
+    );
+
+    return [layerDataArrayUpdateBatch];
+  }
+
   // **********************************************************
   // Static functions for Typescript files to access store actions
   // **********************************************************
@@ -28,47 +55,6 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   static #timeDelayBetweenPropagationsForBatch = 1000;
 
   /**
-   * Overrides initialization of the Feature Info Event Processor
-   * @param {GeoviewStoreType} store - The store associated with the Feature Info Event Processor
-   * @returns An array of the subscriptions callbacks which were created
-   */
-  protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
-    // Checks for udpated layers in layer order
-    const unsubLayerRemoved = store.subscribe(
-      (state) => state.mapState.orderedLayerInfo,
-      (cur, prev) => {
-        // Log
-        logger.logTraceCoreStoreSubscription('FEATUREINFO EVENT PROCESSOR - orderedLayerInfo', cur);
-
-        // For each layer path in the layer data array
-        const curOrderedLayerPaths = cur.map((layerInfo) => layerInfo.layerPath);
-        const prevOrderedLayerPaths = prev.map((layerInfo) => layerInfo.layerPath);
-        store
-          .getState()
-          .detailsState.layerDataArray.map((layerInfo) => layerInfo.layerPath)
-          .forEach((layerPath) => {
-            // If it was in the layer data array and is not anymore
-            if (prevOrderedLayerPaths.includes(layerPath) && !curOrderedLayerPaths.includes(layerPath)) {
-              // Remove it from feature info array
-              FeatureInfoEventProcessor.#deleteFeatureInfo(store.getState().mapId, layerPath).catch((error) => {
-                // Log
-                logger.logPromiseFailed(
-                  'FeatureInfoEventProcessor.#deleteFeatureInfo in unsubLayerRemoved subscription in featureInfoEventProcessor',
-                  error
-                );
-              });
-
-              // Log
-              logger.logInfo('Removed Feature Info in stores for layer path:', layerPath);
-            }
-          });
-      }
-    );
-
-    return [unsubLayerRemoved];
-  }
-
-  /**
    * Shortcut to get the Feature Info state for a given map id
    * @param {string} mapId - The mapId
    * @returns {IFeatureInfoState} The Feature Info state
@@ -79,23 +65,22 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Deletes the specified layer path from the layer sets in the store
+   * Deletes the specified layer path from the layer sets in the store.The update of the array will also trigger an update in a batched manner.
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to delete
    * @returns {Promise<void>}
-   * @private
    */
-  static #deleteFeatureInfo(mapId: string, layerPath: string): Promise<void> {
+  static deleteFeatureInfo(mapId: string, layerPath: string): void {
     // The feature info state
     const featureInfoState = this.getFeatureInfoState(mapId);
 
     // Redirect to helper function
-    return this.#deleteFromArray(featureInfoState.layerDataArray, layerPath, (layerArrayResult) => {
+    this.#deleteFromArray(featureInfoState.layerDataArray, layerPath, (layerArrayResult) => {
       // Update the layer data array in the store
       featureInfoState.actions.setLayerDataArray(layerArrayResult);
 
-      // Also propagate in the batched array
-      return FeatureInfoEventProcessor.#propagateFeatureInfoToStoreBatch(mapId, layerArrayResult);
+      // Log
+      logger.logInfo('Removed Feature Info in stores for layer path:', layerPath);
     });
   }
 
@@ -107,11 +92,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @returns {Promise<void>}
    * @private
    */
-  static #deleteFromArray<T extends TypeLayerData>(
-    layerArray: T[],
-    layerPath: string,
-    onDeleteCallback: (layerArray: T[]) => Promise<void>
-  ): Promise<void> {
+  static #deleteFromArray<T extends TypeLayerData>(layerArray: T[], layerPath: string, onDeleteCallback: (layerArray: T[]) => void): void {
     // Find the layer data info to delete from the array
     const layerDataInfoToDelIndex = layerArray.findIndex((layerInfo) => layerInfo.layerPath === layerPath);
 
@@ -121,15 +102,12 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       layerArray.splice(layerDataInfoToDelIndex, 1);
 
       // Callback with updated array
-      return onDeleteCallback(layerArray);
+      onDeleteCallback(layerArray);
     }
-
-    // Nothing to do
-    return Promise.resolve();
   }
 
   /**
-   * Propagates feature info layer sets to the store
+   * Propagates feature info layer sets to the store. The update of the array will also trigger an update in a batched manner.
    *
    * @param {string} mapId - The map identifier of the modified result set.
    * @param {string} layerPath - The layer path that has changed.
@@ -165,9 +143,6 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
         if (!['details', 'geochart'].includes(UIEventProcessor.getActiveFooterBarTab(mapId)))
           UIEventProcessor.setActiveFooterBarTab(mapId, 'details');
       }
-
-      // Also propagate in the batched array
-      return FeatureInfoEventProcessor.#propagateFeatureInfoToStoreBatch(mapId, layerDataArray);
     }
 
     // Nothing to do
@@ -181,7 +156,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * The propagation can be bypassed using the store 'layerDataArrayBatchLayerPathBypass' state which tells the process to
    * immediately batch out the array in the store for faster triggering of the state, for faster updating of the UI.
    * @param {string} mapId - The map id
-   * @param {string} layerDataArray - The layer data array to batch on
+   * @param {TypeLayerData[]} layerDataArray - The layer data array to batch on
    * @returns {Promise<void>} Promise upon completion
    * @private
    */

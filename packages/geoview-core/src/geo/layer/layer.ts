@@ -1,8 +1,9 @@
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
+import { Extent } from 'ol/extent';
 import { GeoCore } from '@/geo/layer/other/geocore';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
-import { FeatureHighlight } from '@/geo/utils/feature-highlight';
+import { FeatureHighlight } from '@/geo/map/feature-highlight';
 
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
@@ -33,15 +34,20 @@ import { layerConfigIsXYZTiles, XYZTiles } from '@/geo/layer/geoview-layers/rast
 import { layerConfigIsVectorTiles, VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { CSV, layerConfigIsCSV } from '@/geo/layer/geoview-layers/vector/csv';
 
-import { HoverFeatureInfoLayerSet } from '@/geo/utils/hover-feature-info-layer-set';
-import { AllFeatureInfoLayerSet } from '@/geo/utils/all-feature-info-layer-set';
-import { LegendsLayerSet } from '@/geo/utils/legends-layer-set';
-import { FeatureInfoLayerSet } from '@/geo/utils/feature-info-layer-set';
-import { LayerSet } from '@/geo/utils/layer-set';
+import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
+import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
+import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
+import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
+import { LayerSet } from '@/geo/layer/layer-sets/layer-set';
+import { getMinOrMaxExtents } from '@/geo/utils/utilities';
+
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { api } from '@/app';
+import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
+import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
+import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
 
 export type TypeRegisteredLayers = { [layerPath: string]: TypeLayerEntryConfig };
 
@@ -99,6 +105,9 @@ export class LayerApi {
 
   // Keep all callback delegates references
   #onLayerAddedHandlers: LayerAddedDelegate[] = [];
+
+  // Maximum time duration to wait when registering a layer for the time slider
+  static #MAX_WAIT_TIME_SLIDER_REGISTRATION = 20000;
 
   /**
    * Initializes layer types and listen to add/remove layer events from outside
@@ -466,6 +475,30 @@ export class LayerApi {
         this.#handleLayerStatusChanged(config, layerStatusEvent);
       });
 
+      // If registering
+      if (registrationEvent.action === 'add') {
+        // Register for ordered layer information
+        this.#registerForOrderedLayerInfo(registrationEvent.layerConfig);
+
+        // Register for TimeSlider
+        this.#registerForTimeSlider(registrationEvent.layerConfig).catch((error) => {
+          // Log
+          logger.logPromiseFailed('in registration of layer for the time slider', error);
+        });
+      } else {
+        // Unregister from ordered layer info
+        this.#unregisterFromOrderedLayerInfo(registrationEvent.layerConfig);
+
+        // Unregister from TimeSlider
+        this.#unregisterFromTimeSlider(registrationEvent.layerConfig);
+
+        // Unregister from GeoChart
+        this.#unregisterFromGeoChart(registrationEvent.layerConfig);
+
+        // Unregister from Swiper
+        this.#unregisterFromSwiper(registrationEvent.layerConfig);
+      }
+
       // Tell the layer sets about it
       [this.legendsLayerSet, this.hoverFeatureInfoLayerSet, this.allFeatureInfoLayerSet, this.featureInfoLayerSet].forEach(
         (layerSet: LayerSet) => {
@@ -477,6 +510,110 @@ export class LayerApi {
       // Log
       logger.logError(error);
     }
+  }
+
+  /**
+   * Registers layer information for the ordered layer info in the store.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be reordered.
+   * @private
+   */
+  #registerForOrderedLayerInfo(layerConfig: TypeLayerEntryConfig): void {
+    // If the map index for the given layer path hasn't been set yet
+    if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerConfig.layerPath) === -1) {
+      // Get the sub-layer-path
+      const subLayerPath = layerConfig.layerPath.split('.')[1];
+
+      // If the map index of a sub-layer-path has been set
+      if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, subLayerPath) !== -1) {
+        // Replace the order layer info of the layer with the index of the sub-layer-path by calling replaceOrderedLayerInfo
+        MapEventProcessor.replaceOrderedLayerInfo(this.mapId, layerConfig, subLayerPath);
+      } else if (layerConfig.parentLayerConfig) {
+        // Here the map index of a sub-layer-path hasn't been set and there's a parent layer config for the current layer config
+        // Get the sub-layer-path
+        // TODO: Refactor - Sometimes we are getting the sub-layer-path by splitting on the '.' and sometimes on the '/'.
+        // TO.DOCONT: This abstraction logic should be part of the ConfigBaseClass
+        const parentLayerPathArray = layerConfig.layerPath.split('/');
+        parentLayerPathArray.pop();
+        const parentLayerPath = parentLayerPathArray.join('/');
+
+        // Get the map index of the parent layer path
+        const parentLayerIndex = MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, parentLayerPath);
+
+        // Get the number of child layers
+        const numberOfLayers = MapEventProcessor.getMapOrderedLayerInfo(this.mapId).filter((layerInfo) =>
+          layerInfo.layerPath.startsWith(parentLayerPath)
+        ).length;
+
+        // If the map index of the parent hasn't been set yet
+        if (parentLayerIndex !== -1) {
+          // Add the ordered layer information for the layer path based on the parent index + the number of child layers
+          // TODO: Check - This addition seems wrong? Seems like it's not going to scale well when multiple layers/groups and a single index order
+          MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig, parentLayerIndex + numberOfLayers);
+        } else {
+          // Add the ordered layer information for the layer path based unshifting the current array by calling addOrderedLayerInfo
+          // TODO: Check - Could use more comment here, not sure what it's meant for
+          MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig.parentLayerConfig!);
+        }
+      } else {
+        // Here the map index of a sub-layer-path hasn't been set and there's no parent layer config for the current layer config
+        // Add the ordered layer information for the layer path based unshifting the current array by calling addOrderedLayerInfo
+        // TODO: Check - Could use more comment here, not sure what it's meant for
+        MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig);
+      }
+    }
+  }
+
+  /**
+   * Unregisters layer information from layer info store.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
+   * @private
+   */
+  #unregisterFromOrderedLayerInfo(layerConfig: TypeLayerEntryConfig): void {
+    // Remove from ordered layer info
+    MapEventProcessor.removeOrderedLayerInfo(this.mapId, layerConfig.layerPath);
+  }
+
+  /**
+   * Registers layer information for TimeSlider.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
+   * @private
+   */
+  async #registerForTimeSlider(layerConfig: TypeLayerEntryConfig): Promise<void> {
+    // Wait until the layer is loaded (or processed?)
+    await whenThisThen(() => layerConfig.IsGreaterThanOrEqualTo('loaded'), LayerApi.#MAX_WAIT_TIME_SLIDER_REGISTRATION);
+
+    // Check and add time slider layer when needed
+    TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.mapId, layerConfig);
+  }
+
+  /**
+   * Unregisters layer information from TimeSlider.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
+   * @private
+   */
+  #unregisterFromTimeSlider(layerConfig: TypeLayerEntryConfig): void {
+    // Remove from the TimeSlider
+    TimeSliderEventProcessor.removeTimeSliderLayer(this.mapId, layerConfig.layerPath);
+  }
+
+  /**
+   * Unregisters layer information from GeoChart.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
+   * @private
+   */
+  #unregisterFromGeoChart(layerConfig: TypeLayerEntryConfig): void {
+    // Remove from the GeoChart Charts
+    GeochartEventProcessor.removeGeochartChart(this.mapId, layerConfig.layerPath);
+  }
+
+  /**
+   * Unregisters layer information from Swiper.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
+   * @private
+   */
+  #unregisterFromSwiper(layerConfig: TypeLayerEntryConfig): void {
+    // Remove it from the Swiper
+    SwiperEventProcessor.removeLayerPath(this.mapId, layerConfig.layerPath);
   }
 
   /**
@@ -763,6 +900,31 @@ export class LayerApi {
       this.highlightedLayer.layerPath = undefined;
       this.highlightedLayer.originalOpacity = undefined;
     }
+  }
+
+  /**
+   * Gets the max extent of all layers on the map, or of a provided subset of layers.
+   *
+   * @param {string[]} layerIds - IDs of layer to get max extents from.
+   * @returns {Extent} The overall extent.
+   */
+  getExtentOfMultipleLayers(layerIds: string[] = Object.keys(this.registeredLayers)): Extent {
+    let bounds: Extent = [];
+
+    layerIds.forEach((layerId) => {
+      // Get sublayerpaths and layerpaths from layer IDs.
+      const subLayerPaths = Object.keys(this.registeredLayers).filter((layerPath) => layerPath.includes(layerId));
+
+      // Get max extents from all selected layers.
+      subLayerPaths.forEach((layerPath) => {
+        const layerBounds = this.geoviewLayer(layerPath).calculateBounds(layerPath);
+        // If bounds has not yet been defined, set to this layers bounds.
+        if (!bounds.length && layerBounds) bounds = layerBounds;
+        else if (layerBounds) bounds = getMinOrMaxExtents(bounds, layerBounds);
+      });
+    });
+
+    return bounds;
   }
 }
 

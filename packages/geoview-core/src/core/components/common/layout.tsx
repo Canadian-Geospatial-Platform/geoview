@@ -6,20 +6,24 @@ import { LayerTitle } from './layer-title';
 
 interface LayoutProps {
   children?: ReactNode;
+  guideContentIds?: string[];
   layerList: LayerListEntry[];
   selectedLayerPath: string | undefined;
   onLayerListClicked: (layer: LayerListEntry) => void;
   onIsEnlargeClicked?: (isEnlarge: boolean) => void;
   fullWidth?: boolean;
+  onGuideIsOpen?: (isGuideOpen: boolean) => void;
 }
 
 export function Layout({
   children,
+  guideContentIds,
   layerList,
   selectedLayerPath,
   onLayerListClicked,
   onIsEnlargeClicked,
   fullWidth,
+  onGuideIsOpen,
 }: LayoutProps): JSX.Element {
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
 
@@ -63,9 +67,11 @@ export function Layout({
       leftTop={null}
       leftMain={renderLayerList()}
       rightMain={children}
+      guideContentIds={guideContentIds}
       rightTop={renderLayerTitle()}
       onIsEnlargeClicked={onIsEnlargeClicked}
       fullWidth={fullWidth}
+      onGuideIsOpen={onGuideIsOpen}
     />
   );
 }
@@ -74,4 +80,6 @@ Layout.defaultProps = {
   children: null,
   onIsEnlargeClicked: undefined,
   fullWidth: false,
+  guideContentIds: null,
+  onGuideIsOpen: undefined,
 };

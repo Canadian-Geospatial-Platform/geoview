@@ -34,9 +34,9 @@ import {
   TypeStyleGeometry,
   CONST_LAYER_ENTRY_TYPES,
 } from '@/geo/map/map-schema-types';
-import { QueryType, TypeFeatureInfoEntry, TypeLocation, codedValueType, rangeDomainType } from '@/geo/utils/layer-set';
+import { QueryType, TypeFeatureInfoEntry, TypeLocation, codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/layer-set';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { getLegendStyles, getFeatureCanvas } from '@/geo/renderer/geoview-renderer';
+import { getLegendStyles, getFeatureCanvas } from '@/geo/utils/renderer/geoview-renderer';
 
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -819,10 +819,9 @@ export abstract class AbstractGeoViewLayer {
   unregisterFromLayerSets(layerConfig: AbstractBaseLayerEntryConfig): void {
     // TODO: Refactor - This function should be deleted eventually. It's up to the layer orchestrator to manage the layers.
     // TO.DOCONT: The layer itself shouldn't know about it nor should have an explicit function mentioning the layer sets.
-    const { layerPath } = layerConfig;
 
     // Emit the layer unregistration
-    this.#emitGeoViewLayerRegistration({ layerPath, layerConfig, action: 'remove' });
+    this.#emitGeoViewLayerRegistration({ layerPath: layerConfig.layerPath, layerConfig, action: 'remove' });
   }
 
   /**

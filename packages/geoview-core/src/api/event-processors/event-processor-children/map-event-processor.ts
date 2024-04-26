@@ -24,7 +24,7 @@ import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { whenThisThen } from '@/core/utils/utilities';
-import { TypeFeatureInfoEntry, TypeGeometry } from '@/geo/utils/layer-set';
+import { TypeFeatureInfoEntry, TypeGeometry } from '@/geo/layer/layer-sets/layer-set';
 
 import { AppEventProcessor } from './app-event-processor';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
@@ -32,8 +32,8 @@ import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeClickMarker } from '@/core/components';
 import { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { TypeBasemapOptions, TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
-import { TypeHoverFeatureInfo } from '@/geo/utils/hover-feature-info-layer-set';
-import { TypeFeatureInfoResultSet } from '@/geo/utils/feature-info-layer-set';
+import { TypeHoverFeatureInfo } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
+import { TypeFeatureInfoResultSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.
@@ -737,7 +737,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   static zoomToInitialExtent(mapId: string): Promise<void> {
-    const { center, zoom } = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings;
+    const center = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter![1];
+    const zoom = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter![0];
     const projectedCoords = api.utilities.projection.transformPoints(
       [center],
       `EPSG:4326`,

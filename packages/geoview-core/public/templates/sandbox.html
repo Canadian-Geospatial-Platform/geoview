@@ -94,8 +94,7 @@
   'map': {
     'interaction': 'dynamic',
     'viewSettings': {
-      'zoom': 5,
-      'center': [-110, 70],
+      'initialView': { 'zoomAndCenter': [2, [-110, 70]]},
       'projection': 3978
     },
     'basemapOptions': {
@@ -134,10 +133,10 @@
       </textarea>
     </div>
     <div>
-      <button id="validateConfig" style="margin:10px;">Validate</button>
-      <button id="createMap" style="margin:10px;">Create Map</button>
-      <button id="deleteMap" style="margin:10px;">Delete map</button>
-      <span id="validationMessage" style="margin:10px;">File not validate...</span>
+      <button id="validateConfig" style="margin: 10px">Validate</button>
+      <button id="createMap" style="margin: 10px">Create Map</button>
+      <button id="deleteMap" style="margin: 10px">Delete map</button>
+      <span id="validationMessage" style="margin: 10px">File not validate...</span>
     </div>
     <div class="map-title-holder">
       <h4 id="HLCONF1">Sanbox Map</h4>
@@ -199,8 +198,8 @@
 
         // create new map in a new dom node
         const newDiv = document.createElement('div');
-        const a = document.createAttribute("id");
-        a.value = "sandboxMap";
+        const a = document.createAttribute('id');
+        a.value = 'sandboxMap';
         newDiv.setAttributeNode(a);
         document.getElementById('mapSection').appendChild(newDiv);
 
@@ -244,8 +243,7 @@
               'map': {
                 'interaction': 'dynamic',
                 'viewSettings': {
-                  'zoom': 5,
-                  'center': [-110, 70],
+                  'initialView': {'zoomAndCenter': [5, [-110, 70]]},
                   'projection': 3978
                 },
                 'basemapOptions': {

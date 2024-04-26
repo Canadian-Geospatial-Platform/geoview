@@ -9,7 +9,8 @@
     "remove": "Remove",
     "view": "View",
     "openFullscreen": "Open in fullscreen",
-    "closeFullscreen": "Close fullscreen"
+    "closeFullscreen": "Close fullscreen",
+    "openGuide": "Open Guide"
   },
   "mapnav": {
     "arianavbar": "vertical button group for map navigation",

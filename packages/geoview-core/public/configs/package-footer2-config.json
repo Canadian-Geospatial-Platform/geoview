@@ -2,8 +2,6 @@
   "map": {
     "interaction": "static",
     "viewSettings": {
-      "zoom": 6,
-      "center": [-110, 50],
       "projection": 3978
     },
     "basemapOptions": {
