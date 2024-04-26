@@ -7,8 +7,10 @@ import TileLayer from 'ol/layer/Tile';
 
 import { api } from '@/app';
 import { TypeJsonObject, toJsonObject, TypeJsonArray } from '@/core/types/global-types';
+import { getLocalizedMessage } from '@/core/utils/utilities';
 import { TypeBasemapProps, TypeBasemapOptions, TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import { TypeDisplayLanguage, TypeValidMapProjectionCodes } from '@/geo/map/map-schema-types';
+import { Projection } from '@/geo/utils/projection';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
@@ -114,8 +116,9 @@ export class Basemap {
    *
    * @param {string} url basemap url
    * @returns {number} projection code
+   * @private
    */
-  private getProjectionFromUrl(url: string): number {
+  #getProjectionFromUrl(url: string): number {
     let code = 0;
     const index = url.indexOf('/MapServer');
 
@@ -153,8 +156,9 @@ export class Basemap {
    * @param {boolean} rest should we do a get request to get the info from the server
    *
    * @returns {TypeBasemapLayer} return the created basemap layer
+   * @private
    */
-  private async createBasemapLayer(
+  async #createBasemapLayer(
     basemapId: string,
     basemapLayer: TypeJsonObject,
     opacity: number,
@@ -226,7 +230,7 @@ export class Basemap {
 
           // Because OpenLayers can reproject on the fly raster, some like Shaded and Simple even if only available in 3978
           // can be use in 3857. For this we need to make a difference between map projection and url use for the basemap
-          urlProj = this.getProjectionFromUrl(basemapLayer.url as string);
+          urlProj = this.#getProjectionFromUrl(basemapLayer.url as string);
 
           // return a basemap layer
           return {
@@ -235,11 +239,8 @@ export class Basemap {
             url: basemapLayer.url as string,
             jsonUrl: basemapLayer.jsonUrl as string,
             source: new XYZ({
-              attributions: api.utilities.core.getLocalizedMessage(
-                'mapctrl.attribution.defaultnrcan',
-                AppEventProcessor.getDisplayLanguage(this.mapId)
-              ),
-              projection: api.utilities.projection.projections[urlProj],
+              attributions: getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapId)),
+              projection: Projection.PROJECTIONS[urlProj],
               url: basemapLayer.url as string,
               crossOrigin: 'Anonymous',
               tileGrid: new TileGrid({
@@ -299,7 +300,7 @@ export class Basemap {
     if (coreBasemapOptions) {
       // create shaded layer
       if (coreBasemapOptions.shaded && this.basemapsList[projectionCode].shaded) {
-        const shadedLayer = await this.createBasemapLayer('shaded', this.basemapsList[projectionCode].shaded, defaultOpacity, true);
+        const shadedLayer = await this.#createBasemapLayer('shaded', this.basemapsList[projectionCode].shaded, defaultOpacity, true);
         if (shadedLayer) {
           basemapLayers.push(shadedLayer);
           basemaplayerTypes.push('shaded');
@@ -308,7 +309,7 @@ export class Basemap {
 
       // create transport layer
       if (coreBasemapOptions.basemapId === 'transport' && this.basemapsList[projectionCode].transport) {
-        const transportLayer = await this.createBasemapLayer(
+        const transportLayer = await this.#createBasemapLayer(
           'transport',
           this.basemapsList[projectionCode].transport,
           coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
@@ -329,7 +330,7 @@ export class Basemap {
 
       // create simple layer
       if (coreBasemapOptions.basemapId === 'simple' && this.basemapsList[projectionCode].simple) {
-        const simpleLayer = await this.createBasemapLayer(
+        const simpleLayer = await this.#createBasemapLayer(
           'simple',
           this.basemapsList[projectionCode].simple,
           coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
@@ -371,7 +372,7 @@ export class Basemap {
       }
 
       if (basemapLayers.length && coreBasemapOptions.labeled) {
-        const labelLayer = await this.createBasemapLayer(
+        const labelLayer = await this.#createBasemapLayer(
           'label',
           toJsonObject({
             url: (this.basemapsList[projectionCode].label.url as string)?.replaceAll('xxxx', languageCode === 'en' ? 'CBMT' : 'CBCT'),
@@ -399,19 +400,8 @@ export class Basemap {
         basemapOptions: coreBasemapOptions,
         attribution:
           coreBasemapOptions.basemapId === 'osm'
-            ? [
-                '© OpenStreetMap',
-                api.utilities.core.getLocalizedMessage(
-                  'mapctrl.attribution.defaultnrcan',
-                  AppEventProcessor.getDisplayLanguage(this.mapId)
-                ),
-              ]
-            : [
-                api.utilities.core.getLocalizedMessage(
-                  'mapctrl.attribution.defaultnrcan',
-                  AppEventProcessor.getDisplayLanguage(this.mapId)
-                ),
-              ],
+            ? ['© OpenStreetMap', getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapId))]
+            : [getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapId))],
         zoomLevels: {
           min: minZoom,
           max: maxZoom,
@@ -470,7 +460,7 @@ export class Basemap {
         url: languageCode === 'en' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
         source: new XYZ({
           attributions: attribution[languageCode],
-          projection: api.utilities.projection.projections[projection],
+          projection: Projection.PROJECTIONS[projection],
           url: languageCode === 'en' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
           crossOrigin: 'Anonymous',
           tileGrid: new TileGrid({

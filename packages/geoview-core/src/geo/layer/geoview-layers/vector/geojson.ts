@@ -18,9 +18,9 @@ import {
   TypeBaseSourceVectorInitialConfig,
   TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
+import { Projection } from '@/geo/utils/projection';
 import { Cast, toJsonObject } from '@/core/types/global-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { api } from '@/app';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
@@ -196,9 +196,9 @@ export class GeoJSON extends AbstractGeoViewVector {
       }
 
       if (layerConfig.initialSettings?.extent)
-        layerConfig.initialSettings.extent = api.utilities.projection.transformExtent(
+        layerConfig.initialSettings.extent = Projection.transformExtent(
           layerConfig.initialSettings.extent,
-          'EPSG:4326',
+          Projection.PROJECTION_NAMES.LNGLAT,
           `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
         );
     }

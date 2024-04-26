@@ -3,7 +3,7 @@ import { useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 
 import { Box } from '@/ui';
-import { PROJECTION_NAMES } from '@/geo/utils/projection';
+import { Projection } from '@/geo/utils/projection';
 import { NorthArrowIcon, NorthPoleIcon } from './north-arrow-icon';
 import { getSxClasses } from './north-arrow-style';
 import { useMapNorthArrowElement, useMapProjection, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -33,7 +33,7 @@ export function NorthArrow(): JSX.Element {
 
   const { rotationAngle, northOffset } = useManageArrow();
 
-  return `EPSG:${mapProjection}` === PROJECTION_NAMES.LCC ? (
+  return `EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.LCC ? (
     <Box
       ref={northArrowRef}
       sx={sxClasses.northArrowContainer}
@@ -74,7 +74,7 @@ export function NorthPoleFlag(): JSX.Element {
     <Box
       ref={northPoleRef}
       id={northPoleId}
-      style={{ visibility: `EPSG:${mapProjection}` === PROJECTION_NAMES.LCC ? 'visible' : 'hidden' }}
+      style={{ visibility: `EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.LCC ? 'visible' : 'hidden' }}
     >
       <NorthPoleIcon />
     </Box>

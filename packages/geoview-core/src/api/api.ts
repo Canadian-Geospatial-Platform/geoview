@@ -1,17 +1,17 @@
 import { ConfigApi } from '@config/config-api';
-import { Event } from './events/event';
+
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { Plugin } from '@/api/plugin/plugin';
+import { Event } from '@/api/events/event';
+
+import { DateMgt } from '@/core/utils/date-mgt';
+import { logger } from '@/core/utils/logger';
+import * as Utilities from '@/core/utils/utilities';
 
 import { Projection } from '@/geo/utils/projection';
-
 import { MapViewer } from '@/geo/map/map-viewer';
-
-import { Plugin } from './plugin/plugin';
-import { DateMgt } from '@/core/utils/date-mgt';
-
-import * as Utilities from '@/core/utils/utilities';
 import * as GeoUtilities from '@/geo/utils/utilities';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { logger } from '@/core/utils/logger';
+
 import { initMapDivFromFunctionCall } from '@/app';
 
 /**
@@ -46,8 +46,8 @@ export class API {
     this.utilities = {
       core: Utilities,
       geo: GeoUtilities,
-      projection: new Projection(),
-      date: new DateMgt(),
+      projection: Projection,
+      date: DateMgt,
     };
 
     // apply focus to element when keyboard navigation is use

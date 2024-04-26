@@ -10,10 +10,8 @@ import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
 import Feature from 'ol/Feature';
 
 import { generateId, getXMLHttpRequest, createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
-import { api } from '@/app';
-import { LayerApi } from '@/geo/layer/layer';
 import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
-import { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
+import { TimeDimension, TypeDateFragments, DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { AsyncSemaphore } from '@/core/utils/async-semaphore';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
@@ -22,6 +20,9 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import {
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
@@ -34,12 +35,11 @@ import {
   TypeStyleGeometry,
   CONST_LAYER_ENTRY_TYPES,
 } from '@/geo/map/map-schema-types';
-import { QueryType, TypeFeatureInfoEntry, TypeLocation, codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/layer-set';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { LayerApi } from '@/geo/layer/layer';
+import { GeoViewLayerCreatedTwiceError } from '@/geo/layer/exceptions/layer-exceptions';
+import { QueryType, TypeFeatureInfoEntry, TypeLocation, codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { Projection } from '@/geo/utils/projection';
 import { getLegendStyles, getFeatureCanvas } from '@/geo/utils/renderer/geoview-renderer';
-
-import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 // Constant used to define the default layer names
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
@@ -124,13 +124,16 @@ export abstract class AbstractGeoViewLayer {
   externalFragmentsOrder: TypeDateFragments;
 
   // Keep all callback delegate references
-  #onGeoViewLayerRegistrationHandlers: GeoViewLayerRegistrationDelegate[] = [];
+  #onLayerRegistrationHandlers: LayerRegistrationDelegate[] = [];
 
   // Keep all callback delegate references
-  #onGeoViewLayerLegendQueryingHandlers: GeoViewLayerLegendQueryingDelegate[] = [];
+  #onLegendQueryingHandlers: LegendQueryingDelegate[] = [];
 
   // Keep all callback delegate references
-  #onGeoViewLayerLegendQueriedHandlers: GeoViewLayerLegendQueriedDelegate[] = [];
+  #onLegendQueriedHandlers: LegendQueriedDelegate[] = [];
+
+  // Keep all callback delegate references
+  #onVisibleChangedHandlers: VisibleChangedDelegate[] = [];
 
   /** ***************************************************************************************************************************
    * The class constructor saves parameters and common configuration parameters in attributes.
@@ -149,9 +152,9 @@ export abstract class AbstractGeoViewLayer {
     if (mapLayerConfig.metadataAccessPath?.fr) this.metadataAccessPath.fr = mapLayerConfig.metadataAccessPath.fr.trim();
     this.initialSettings = mapLayerConfig.initialSettings;
     this.serverDateFragmentsOrder = mapLayerConfig.serviceDateFormat
-      ? api.utilities.date.getDateFragmentsOrder(mapLayerConfig.serviceDateFormat)
+      ? DateMgt.getDateFragmentsOrder(mapLayerConfig.serviceDateFormat)
       : undefined;
-    this.externalFragmentsOrder = api.utilities.date.getDateFragmentsOrder(mapLayerConfig.externalDateFormat);
+    this.externalFragmentsOrder = DateMgt.getDateFragmentsOrder(mapLayerConfig.externalDateFormat);
     this.setListOfLayerEntryConfig(mapLayerConfig, mapLayerConfig.listOfLayerEntryConfig);
   }
 
@@ -183,86 +186,114 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {GeoViewLayerRegistrationEvent} event The event to emit
+   * @param {LayerRegistrationEvent} event The event to emit
    * @private
    */
-  #emitGeoViewLayerRegistration(event: GeoViewLayerRegistrationEvent): void {
+  #emitGeoViewLayerRegistration(event: LayerRegistrationEvent): void {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onGeoViewLayerRegistrationHandlers, event);
+    EventHelper.emitEvent(this, this.#onLayerRegistrationHandlers, event);
   }
 
   /**
    * Registers a geoview layer registration event handler.
-   * @param {GeoViewLayerRegistrationDelegate} callback The callback to be executed whenever the event is emitted
+   * @param {LayerRegistrationDelegate} callback The callback to be executed whenever the event is emitted
    */
-  onGeoViewLayerRegistration(callback: GeoViewLayerRegistrationDelegate): void {
+  onGeoViewLayerRegistration(callback: LayerRegistrationDelegate): void {
     // Register the event handler
-    EventHelper.onEvent(this.#onGeoViewLayerRegistrationHandlers, callback);
+    EventHelper.onEvent(this.#onLayerRegistrationHandlers, callback);
   }
 
   /**
    * Unregisters a geoview layer registration event handler.
-   * @param {GeoViewLayerRegistrationDelegate} callback The callback to stop being called whenever the event is emitted
+   * @param {LayerRegistrationDelegate} callback The callback to stop being called whenever the event is emitted
    */
-  offGeoViewLayerRegistration(callback: GeoViewLayerRegistrationDelegate): void {
+  offGeoViewLayerRegistration(callback: LayerRegistrationDelegate): void {
     // Unregister the event handler
-    EventHelper.offEvent(this.#onGeoViewLayerRegistrationHandlers, callback);
+    EventHelper.offEvent(this.#onLayerRegistrationHandlers, callback);
   }
 
   /**
    * Emits an event to all handlers.
-   * @param {GeoViewLayerLegendQueryingEvent} event The event to emit
+   * @param {LegendQueryingEvent} event The event to emit
    * @private
    */
-  #emitLegendQuerying(event: GeoViewLayerLegendQueryingEvent): void {
+  #emitLegendQuerying(event: LegendQueryingEvent): void {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onGeoViewLayerLegendQueryingHandlers, event);
+    EventHelper.emitEvent(this, this.#onLegendQueryingHandlers, event);
   }
 
   /**
    * Registers a legend querying event handler.
-   * @param {GeoViewLayerLegendQueryingDelegate} callback The callback to be executed whenever the event is emitted
+   * @param {LegendQueryingDelegate} callback The callback to be executed whenever the event is emitted
    */
-  onLegendQuerying(callback: GeoViewLayerLegendQueryingDelegate): void {
+  onLegendQuerying(callback: LegendQueryingDelegate): void {
     // Register the event handler
-    EventHelper.onEvent(this.#onGeoViewLayerLegendQueryingHandlers, callback);
+    EventHelper.onEvent(this.#onLegendQueryingHandlers, callback);
   }
 
   /**
    * Unregisters a legend querying event handler.
-   * @param {GeoViewLayerLegendQueryingDelegate} callback The callback to stop being called whenever the event is emitted
+   * @param {LegendQueryingDelegate} callback The callback to stop being called whenever the event is emitted
    */
-  offLegendQuerying(callback: GeoViewLayerLegendQueryingDelegate): void {
+  offLegendQuerying(callback: LegendQueryingDelegate): void {
     // Unregister the event handler
-    EventHelper.offEvent(this.#onGeoViewLayerLegendQueryingHandlers, callback);
+    EventHelper.offEvent(this.#onLegendQueryingHandlers, callback);
   }
 
   /**
    * Emits an event to all handlers.
-   * @param {GeoViewLayerLegendQueriedEvent} event The event to emit
+   * @param {LegendQueriedEvent} event The event to emit
    * @private
    */
-  #emitLegendQueried(event: GeoViewLayerLegendQueriedEvent): void {
+  #emitLegendQueried(event: LegendQueriedEvent): void {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onGeoViewLayerLegendQueriedHandlers, event);
+    EventHelper.emitEvent(this, this.#onLegendQueriedHandlers, event);
   }
 
   /**
    * Registers a legend queried event handler.
-   * @param {GeoViewLayerLegendQueriedDelegate} callback The callback to be executed whenever the event is emitted
+   * @param {LegendQueriedDelegate} callback The callback to be executed whenever the event is emitted
    */
-  onLegendQueried(callback: GeoViewLayerLegendQueriedDelegate): void {
+  onLegendQueried(callback: LegendQueriedDelegate): void {
     // Register the event handler
-    EventHelper.onEvent(this.#onGeoViewLayerLegendQueriedHandlers, callback);
+    EventHelper.onEvent(this.#onLegendQueriedHandlers, callback);
   }
 
   /**
    * Unregisters a legend queried event handler.
-   * @param {GeoViewLayerLegendQueriedDelegate} callback The callback to stop being called whenever the event is emitted
+   * @param {LegendQueriedDelegate} callback The callback to stop being called whenever the event is emitted
    */
-  offLegendQueried(callback: GeoViewLayerLegendQueriedDelegate): void {
+  offLegendQueried(callback: LegendQueriedDelegate): void {
     // Unregister the event handler
-    EventHelper.offEvent(this.#onGeoViewLayerLegendQueriedHandlers, callback);
+    EventHelper.offEvent(this.#onLegendQueriedHandlers, callback);
+  }
+
+  /**
+   * Emits an event to all handlers.
+   * @param {VisibleChangedEvent} event The event to emit
+   * @private
+   */
+  #emitVisibleChanged(event: VisibleChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onVisibleChangedHandlers, event);
+  }
+
+  /**
+   * Registers a legend queried event handler.
+   * @param {VisibleChangedDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onVisibleChanged(callback: VisibleChangedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onVisibleChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a legend queried event handler.
+   * @param {VisibleChangedDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offVisibleChanged(callback: VisibleChangedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onVisibleChangedHandlers, callback);
   }
 
   /** ***************************************************************************************************************************
@@ -344,37 +375,30 @@ export abstract class AbstractGeoViewLayer {
    */
   async createGeoViewLayers(): Promise<void> {
     if (this.olLayers === null) {
-      try {
-        // Log
-        logger.logTraceCore('ABSTRACT-GEOVIEW-LAYERS - createGeoViewLayers', this.listOfLayerEntryConfig);
-
-        // Try to get a key for logging timings
-        let logTimingsKey;
-        if (this.listOfLayerEntryConfig.length > 0) logTimingsKey = `${this.mapId} | ${this.listOfLayerEntryConfig[0].layerPath}`;
-
-        // Log
-        if (logTimingsKey) logger.logMarkerStart(logTimingsKey);
-
-        // Get additional service and await
-        await this.getAdditionalServiceDefinition();
-
-        // Log the time it took thus far
-        if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to get additional service definition');
-
-        // Process list of layers and await
-        this.olLayers = await this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
-
-        // Log the time it took thus far
-        if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to process list of layer entry config');
-      } catch (error) {
-        // Log error
-        logger.logError(error);
-      }
-    } else {
-      // TODO: find a more centralized way to trap error and display message
-      api.maps[this.mapId].notifications.showError('validation.layer.createtwice', [this.mapId]);
       // Log
-      logger.logError(`Can not execute twice the createGeoViewLayers method for the map ${this.mapId}`);
+      logger.logTraceCore('ABSTRACT-GEOVIEW-LAYERS - createGeoViewLayers', this.listOfLayerEntryConfig);
+
+      // Try to get a key for logging timings
+      let logTimingsKey;
+      if (this.listOfLayerEntryConfig.length > 0) logTimingsKey = `${this.mapId} | ${this.listOfLayerEntryConfig[0].layerPath}`;
+
+      // Log
+      if (logTimingsKey) logger.logMarkerStart(logTimingsKey);
+
+      // Get additional service and await
+      await this.getAdditionalServiceDefinition();
+
+      // Log the time it took thus far
+      if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to get additional service definition');
+
+      // Process list of layers and await
+      this.olLayers = await this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
+
+      // Log the time it took thus far
+      if (logTimingsKey) logger.logMarkerCheck(logTimingsKey, 'to process list of layer entry config');
+    } else {
+      // Raise error
+      throw new GeoViewLayerCreatedTwiceError(this, this.mapId);
     }
   }
 
@@ -928,7 +952,7 @@ export abstract class AbstractGeoViewLayer {
     if (layerConfig) {
       if (Array.isArray(layerConfig)) processGroupLayerBounds(layerConfig);
       else processGroupLayerBounds([layerConfig]);
-      if (projectionCode && bounds) return api.utilities.projection.transformExtent(bounds, `EPSG:4326`, `EPSG:${projectionCode}`);
+      if (projectionCode && bounds) return Projection.transformExtent(bounds, `EPSG:4326`, `EPSG:${projectionCode}`);
     }
     return bounds;
   }
@@ -1036,7 +1060,9 @@ export abstract class AbstractGeoViewLayer {
     const olLayer = this.getLayerConfig(layerPath)?.olLayer;
     if (olLayer) {
       olLayer.setVisible(layerVisibility);
-      olLayer.changed();
+      // olLayer.changed();
+      const curVisible = this.getVisible(layerPath);
+      if (layerVisibility !== curVisible) this.#emitVisibleChanged({ visible: layerVisibility });
     }
   }
 
@@ -1155,15 +1181,15 @@ export abstract class AbstractGeoViewLayer {
     if (fieldType === 'date') {
       if (typeof fieldValue === 'string') {
         if (!this.serverDateFragmentsOrder)
-          this.serverDateFragmentsOrder = api.utilities.date.getDateFragmentsOrder(api.utilities.date.deduceDateFormat(fieldValue));
-        returnValue = api.utilities.date.applyInputDateFormat(fieldValue, this.serverDateFragmentsOrder);
+          this.serverDateFragmentsOrder = DateMgt.getDateFragmentsOrder(DateMgt.deduceDateFormat(fieldValue));
+        returnValue = DateMgt.applyInputDateFormat(fieldValue, this.serverDateFragmentsOrder);
       } else {
         // All vector dates are kept internally in UTC.
-        returnValue = api.utilities.date.convertToUTC(`${api.utilities.date.convertMilisecondsToDate(fieldValue)}Z`);
+        returnValue = DateMgt.convertToUTC(`${DateMgt.convertMilisecondsToDate(fieldValue)}Z`);
       }
       const reverseTimeZone = true;
       if (this.externalFragmentsOrder)
-        returnValue = api.utilities.date.applyOutputDateFormat(returnValue, this.externalFragmentsOrder, reverseTimeZone);
+        returnValue = DateMgt.applyOutputDateFormat(returnValue, this.externalFragmentsOrder, reverseTimeZone);
       return returnValue;
     }
     return fieldValue;
@@ -1430,14 +1456,9 @@ export abstract class AbstractGeoViewLayer {
 }
 
 /**
- * Define a delegate for the event handler function signature
- */
-type GeoViewLayerRegistrationDelegate = EventDelegateBase<AbstractGeoViewLayer, GeoViewLayerRegistrationEvent>;
-
-/**
  * Define an event for the delegate
  */
-export type GeoViewLayerRegistrationEvent = {
+export type LayerRegistrationEvent = {
   layerPath: string;
   layerConfig: AbstractBaseLayerEntryConfig;
   action: 'add' | 'remove';
@@ -1446,27 +1467,44 @@ export type GeoViewLayerRegistrationEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type GeoViewLayerLegendQueryingDelegate = EventDelegateBase<AbstractGeoViewLayer, GeoViewLayerLegendQueryingEvent>;
+type LayerRegistrationDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerRegistrationEvent>;
 
 /**
  * Define an event for the delegate
  */
-export type GeoViewLayerLegendQueryingEvent = {
+export type LegendQueryingEvent = {
   layerPath: string;
 };
 
 /**
  * Define a delegate for the event handler function signature
  */
-type GeoViewLayerLegendQueriedDelegate = EventDelegateBase<AbstractGeoViewLayer, GeoViewLayerLegendQueriedEvent>;
+type LegendQueryingDelegate = EventDelegateBase<AbstractGeoViewLayer, LegendQueryingEvent>;
 
 /**
  * Define an event for the delegate
  */
-export type GeoViewLayerLegendQueriedEvent = {
+export type LegendQueriedEvent = {
   layerPath: string;
   legend: TypeLegend;
 };
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LegendQueriedDelegate = EventDelegateBase<AbstractGeoViewLayer, LegendQueriedEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type VisibleChangedEvent = {
+  visible: boolean;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type VisibleChangedDelegate = EventDelegateBase<AbstractGeoViewLayer, VisibleChangedEvent>;
 
 export type TypeLegend = {
   layerPath: string;

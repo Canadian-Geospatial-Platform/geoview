@@ -66,7 +66,8 @@ const ResponsiveGridLayout = forwardRef(
 
     useEffect(() => {
       onGuideIsOpen?.(isGuideOpen);
-    }, [isGuideOpen]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isGuideOpen]); // TODO: Check - Try to add the dependency on `onGuideIsOpen` here, making it a useCallback if necessary and test
 
     /**
      * Handles click on the Enlarge button.

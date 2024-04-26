@@ -33,14 +33,16 @@ import {
   TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
 import { xmlToJson, getLocalizedValue } from '@/core/utils/utilities';
+import { DateMgt } from '@/core/utils/date-mgt';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
+import { Projection } from '@/geo/utils/projection';
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
-import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/layer-set';
+import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 
@@ -588,9 +590,9 @@ export class WMS extends AbstractGeoViewRaster {
         // if (layerConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
         //   layerConfig.initialSettings.maxZoom = layerCapabilities.MaxScaleDenominator as number;
         if (layerConfig.initialSettings?.extent)
-          layerConfig.initialSettings.extent = api.utilities.projection.transformExtent(
+          layerConfig.initialSettings.extent = Projection.transformExtent(
             layerConfig.initialSettings.extent,
-            'EPSG:4326',
+            Projection.PROJECTION_NAMES.LNGLAT,
             `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
           );
 
@@ -616,7 +618,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected processTemporalDimension(wmsTimeDimension: TypeJsonObject, layerConfig: OgcWmsLayerEntryConfig): void {
     if (wmsTimeDimension !== undefined) {
-      this.layerTemporalDimension[layerConfig.layerPath] = api.utilities.date.createDimensionFromOGC(wmsTimeDimension);
+      this.layerTemporalDimension[layerConfig.layerPath] = DateMgt.createDimensionFromOGC(wmsTimeDimension);
     }
   }
 
@@ -642,10 +644,10 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The promised feature info table.
    */
   protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const convertedLocation = api.utilities.projection.transform(
+    const convertedLocation = Projection.transform(
       location,
       `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`,
-      'EPSG:4326'
+      Projection.PROJECTION_NAMES.LNGLAT
     );
     return this.getFeatureInfoAtLongLat(convertedLocation, layerPath);
   }
@@ -666,7 +668,7 @@ export class WMS extends AbstractGeoViewRaster {
 
       const viewResolution = MapEventProcessor.getMapViewer(this.mapId).getView().getResolution() as number;
       const crs = `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`;
-      const clickCoordinate = api.utilities.projection.transform(lnglat, 'EPSG:4326', crs);
+      const clickCoordinate = Projection.transform(lnglat, Projection.PROJECTION_NAMES.LNGLAT, crs);
       if (
         lnglat[0] < layerConfig.initialSettings!.bounds![0] ||
         layerConfig.initialSettings!.bounds![2] < lnglat[0] ||
@@ -1060,7 +1062,7 @@ export class WMS extends AbstractGeoViewRaster {
         searchDateEntry.forEach((dateFound) => {
           // If the date has a time zone, keep it as is, otherwise reverse its time zone by changing its sign
           const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
-          const reformattedDate = api.utilities.date.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
+          const reformattedDate = DateMgt.applyInputDateFormat(dateFound[0], this.externalFragmentsOrder, reverseTimeZone);
           filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index! - 6)}${reformattedDate}${filterValueToUse!.slice(
             dateFound.index! + dateFound[0].length + 2
           )}`;
@@ -1085,7 +1087,7 @@ export class WMS extends AbstractGeoViewRaster {
       (layerConfig?.olLayer as ImageLayer<Static>)?.getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
       MapEventProcessor.getMapState(this.mapId).currentProjection;
     let layerBounds = layerConfig?.initialSettings?.bounds || [];
-    layerBounds = api.utilities.projection.transformExtent(layerBounds, 'EPSG:4326', `EPSG:${projection}`);
+    layerBounds = Projection.transformExtent(layerBounds, 'EPSG:4326', `EPSG:${projection}`);
     const boundingBoxes = this.metadata?.Capability.Layer.BoundingBox;
     let bbExtent: Extent | undefined;
 

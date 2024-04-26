@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { PROJECTION_NAMES } from '@/geo/utils/projection';
+import { Projection } from '@/geo/utils/projection';
 import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 import {
   useMapCenterCoordinates,
@@ -85,7 +85,7 @@ const useManageArrow = (): any => {
     // Log
     logger.logTraceUseEffect('USEMANAGEARROW - northArrowElement', northArrowElement, fixNorth);
 
-    if (`EPSG:${mapProjection}` === PROJECTION_NAMES.LCC) {
+    if (`EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.LCC) {
       // Because of the projection, corners are wrapped and central value of the polygon may be higher then corners values.
       // There is no easy way to see if the user sees the north pole just by using bounding box. One of the solution may
       // be to use a debounce function to call on moveEnd where we

@@ -15,7 +15,7 @@ import { useUIActiveFooterBarTabId } from '@/core/stores/store-interface-and-int
 import { LayerListEntry, Layout } from '@/core/components/common';
 import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
-import { TypeFieldEntry, TypeLayerData } from '@/geo/layer/layer-sets/layer-set';
+import { TypeFieldEntry, TypeLayerData } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { LAYER_STATUS, TABS } from '@/core/utils/constant';
 
 export interface MappedLayerDataType extends TypeLayerData {

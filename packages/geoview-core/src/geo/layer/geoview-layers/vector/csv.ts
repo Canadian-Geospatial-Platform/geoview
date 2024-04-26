@@ -10,6 +10,7 @@ import { Point } from 'ol/geom';
 import { ProjectionLike } from 'ol/proj';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
+import { Projection } from '@/geo/utils/projection';
 import {
   TypeLayerEntryConfig,
   TypeVectorSourceInitialConfig,
@@ -232,7 +233,7 @@ export class CSV extends AbstractGeoViewVector {
    * @returns {Feature[]} The array of features.
    */
   convertCsv(csvData: string, layerConfig: VectorLayerEntryConfig): Feature[] | null {
-    const inProjection: ProjectionLike = layerConfig.source!.dataProjection || 'EPSG:4326';
+    const inProjection: ProjectionLike = layerConfig.source!.dataProjection || Projection.PROJECTION_NAMES.LNGLAT;
     const outProjection: ProjectionLike = `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`;
     const latList = ['latitude', 'lat', 'y', 'ycoord', 'latitude/latitude', 'latitude / latitude'];
     const lonList = ['longitude', 'lon', 'x', 'xcoord', 'longitude/longitude', 'longitude / longitude'];
@@ -269,8 +270,7 @@ export class CSV extends AbstractGeoViewVector {
       const lon = currentRow[lonIndex] ? Number(currentRow[lonIndex]) : Infinity;
       const lat = currentRow[latIndex] ? Number(currentRow[latIndex]) : Infinity;
       if (Number.isFinite(lon) && Number.isFinite(lat)) {
-        const coordinates =
-          inProjection !== outProjection ? api.utilities.projection.transform([lon, lat], inProjection, outProjection) : [lon, lat];
+        const coordinates = inProjection !== outProjection ? Projection.transform([lon, lat], inProjection, outProjection) : [lon, lat];
         const feature = new Feature({
           geometry: new Point(coordinates),
           ...properties,
