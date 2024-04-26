@@ -32,7 +32,7 @@ import {
   TypeListOfLayerEntryConfig,
   TypeFeatureInfoLayerConfig,
 } from '@/geo/map/map-schema-types';
-import { TypeFeatureInfoEntry, codedValueType, rangeDomainType } from '@/geo/utils/layer-set';
+import { TypeFeatureInfoEntry, codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/layer-set';
 
 import {
   commonGetFieldDomain,
@@ -781,6 +781,9 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         dateFound.index! + dateFound[0].length
       )}`;
     });
+
+    // TODO: Bug - The layerDefs filter being generated here fails when the filterValueToUse is for example for the historical_flood:
+    // TO.DOCONT: flood_cause in ('freshet', 'heavy rain', 'coastal storm', 'beaver dam failure', 'frazil', 'dam failure', 'municipal water main break', 'unknown') and (time_slider_date >= date '1696-01-01T05:00:00.000Z' and time_slider_date <= date '2023-01-01T05:00:00.000Z')
     (layerConfig.olLayer as ImageLayer<ImageArcGISRest>)
       .getSource()!
       .updateParams({ layerDefs: `{"${layerConfig.layerId}": "${filterValueToUse}"}` });

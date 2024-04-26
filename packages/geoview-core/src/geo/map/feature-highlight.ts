@@ -12,7 +12,7 @@ import { Color } from 'ol/color';
 import { TypeHighlightColors } from '@/geo/map/map-schema-types';
 import { logger } from '@/core/utils/logger';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { TypeFeatureInfoEntry } from './layer-set';
+import { TypeFeatureInfoEntry } from '../layer/layer-sets/layer-set';
 
 /** *****************************************************************************************************************************
  * A class to handle highlighting of features

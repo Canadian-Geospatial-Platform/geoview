@@ -2,7 +2,7 @@ import { GeoviewStoreType } from '@/core/stores';
 import { GeoChartStoreByLayerPath, IGeochartState } from '@/core/stores/store-interface-and-intial-values/geochart-state';
 import { GeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
 import { logger } from '@/core/utils/logger';
-import { TypeLayerData } from '@/geo/utils/layer-set';
+import { TypeLayerData } from '@/geo/layer/layer-sets/layer-set';
 
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
 
@@ -16,42 +16,37 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * @returns An array of the subscriptions callbacks which were created
    */
   protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
-    // Checks for udpated layers in layer order
-    const unsubLayerRemoved = store.subscribe(
-      (state) => state.mapState.orderedLayerInfo,
-      (cur, prev) => {
-        // Log
-        logger.logTraceCoreStoreSubscription('GEOCHART EVENT PROCESSOR - orderedLayerInfo', cur);
-
-        // For each chart config keys
-        const curOrderedLayerPaths = cur.map((layerInfo) => layerInfo.layerPath);
-        const prevOrderedLayerPaths = prev.map((layerInfo) => layerInfo.layerPath);
-        Object.keys(store.getState().geochartState.geochartChartsConfig).forEach((layerPath: string) => {
-          // If it was in the layerdata array and is not anymore
-          if (prevOrderedLayerPaths.includes(layerPath) && !curOrderedLayerPaths.includes(layerPath)) {
-            // Remove it
-            GeochartEventProcessor.removeGeochartChart(store.getState().mapId, layerPath);
-          }
-        });
-      }
-    );
-
-    // Checks for updated layers in layer data array
+    // Checks for updated layers in layer data array from the details state
     const layerDataArrayUpdate = store.subscribe(
       (state) => state.detailsState.layerDataArray,
       (cur) => {
         // Log
-        logger.logTraceCoreStoreSubscription('GEOCHART EVENT PROCESSOR - layerDataArray', cur);
+        logger.logTraceCoreStoreSubscription('GEOCHART EVENT PROCESSOR - detailsState.layerDataArray', cur);
 
         // Also propagate in the geochart arrays
-        GeochartEventProcessor.propagateArrayDataToStore(store.getState().mapId, cur).catch((error) => {
+        GeochartEventProcessor.#propagateArrayDataToStore(store.getState().mapId, cur);
+      }
+    );
+
+    // Checks for updated layers in geochart layer data array and update the batched array consequently
+    const layerDataArrayUpdateBatch = store.subscribe(
+      (state) => state.geochartState.layerDataArray,
+      (cur) => {
+        // Log
+        logger.logTraceCoreStoreSubscription('GEOCHART EVENT PROCESSOR - geochartState.layerDataArray', cur);
+
+        // Also propagate in the batched array
+        GeochartEventProcessor.#propagateFeatureInfoToStoreBatch(store.getState().mapId, cur).catch((error) => {
           // Log
-          logger.logPromiseFailed('propagateArrayDataToStore in layerDataArrayUpdate subscribe in geochart-event-processor', error);
+          logger.logPromiseFailed(
+            'propagateFeatureInfoToStoreBatch in layerDataArrayUpdateBatch subscribe in geochart-event-processor',
+            error
+          );
         });
       }
     );
 
-    return [unsubLayerRemoved, layerDataArrayUpdate];
+    return [layerDataArrayUpdate, layerDataArrayUpdateBatch];
   }
 
   // **********************************************************
@@ -111,8 +106,6 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
 
     // Log
     logger.logInfo('Added GeoChart configs for layer paths:', layerPaths);
-
-    // TODO: Also update the layer array in other store state to inform the later has a geochart attached to it (when code is done over there)?
   }
 
   /**
@@ -135,8 +128,6 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
 
     // Log
     logger.logInfo('Added GeoChart configs for layer path:', layerPath);
-
-    // TODO: Also update the layer array in other store state to inform the later has a geochart attached to it (when code is done over there)?
   }
 
   /**
@@ -163,27 +154,23 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
 
       // Log
       logger.logInfo('Removed GeoChart configs for layer path:', layerPath);
-
-      // TODO: Also update the layer array in other store state to inform the later has a geochart attached to it (when code is done over there)?
     }
   }
 
   /**
-   * Propagates feature info layer sets to the store and the also in a batched manner.
+   * Propagates feature info layer sets to the store. The update of the array will also trigger an update in a batched manner.
    * @param {string} mapId The map id
    * @param {string} layerDataArray The layer data array to propagate in the store
    * @returns {Promise<void>}
+   * @private
    */
-  static propagateArrayDataToStore(mapId: string, layerDataArray: TypeLayerData[]): Promise<void> {
+  static #propagateArrayDataToStore(mapId: string, layerDataArray: TypeLayerData[]): void {
     // To propagate in the store, the processor needs an initialized chart store which is only initialized if the Geochart plugin exists.
     // Therefore, we validate its existence first.
-    if (!this.getGeochartState(mapId)) return Promise.resolve();
+    if (!this.getGeochartState(mapId)) return;
 
     // Update the layer data array in the store
     this.getGeochartState(mapId)!.actions.setLayerDataArray(layerDataArray);
-
-    // Also propagate in the batched array
-    return this.propagateFeatureInfoToStoreBatch(mapId, layerDataArray);
   }
 
   /**
@@ -192,11 +179,12 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * update triggers in the components that are listening to the store array.
    * The propagation can be bypassed using the store 'layerDataArrayBatchLayerPathBypass' state which tells the process to
    * immediately batch out the array in the store for faster triggering of the state, for faster updating of the UI.
-   * @param {string} mapId The map id
-   * @param {string} layerDataArray The layer data array to batch on
+   * @param {string} mapId - The map id
+   * @param {TypeLayerData[]} layerDataArray - The layer data array to batch on
    * @returns {Promise<void>} Promise upon completion
+   * @private
    */
-  private static propagateFeatureInfoToStoreBatch(mapId: string, layerDataArray: TypeLayerData[]): Promise<void> {
+  static #propagateFeatureInfoToStoreBatch(mapId: string, layerDataArray: TypeLayerData[]): Promise<void> {
     // To propagate in the store, the processor needs an initialized chart store which is only initialized if the Geochart plugin exists.
     // Therefore, we validate its existence first.
     if (!this.getGeochartState(mapId)) return Promise.resolve();

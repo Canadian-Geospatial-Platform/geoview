@@ -1,4 +1,4 @@
-import { TypeLayerData, TypeFieldEntry } from '@/geo/utils/layer-set';
+import { TypeLayerData, TypeFieldEntry } from '@/geo/layer/layer-sets/layer-set';
 import { MappedLayerDataType } from '@/core/components/data-table/data-panel';
 
 /**

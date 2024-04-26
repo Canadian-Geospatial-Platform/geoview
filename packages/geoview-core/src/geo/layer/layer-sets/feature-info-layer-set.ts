@@ -4,9 +4,9 @@ import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { logger } from '@/core/utils/logger';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { TypeLayerEntryConfig, TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { LayerSet, TypeFeatureInfoEntry, TypeLayerData, TypeResultSet } from './layer-set';
+import { EventType, LayerSet, TypeFeatureInfoEntry, TypeLayerData, TypeResultSet } from './layer-set';
 import { LayerApi } from '@/geo/layer/layer';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
@@ -58,11 +58,10 @@ export class FeatureInfoLayerSet extends LayerSet {
    * @param {string} layerPath - The layer path
    * @returns {boolean} True when the layer should be registered to this feature-info-layer-set.
    */
-  protected onRegisterLayerCheck(geoviewLayer: AbstractGeoViewLayer, layerPath: string): boolean {
+  protected onRegisterLayerCheck(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): boolean {
     // Log
-    logger.logTraceCore('FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerPath, Object.keys(this.resultSet));
+    logger.logTraceCore('FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerConfig.layerPath, Object.keys(this.resultSet));
 
-    const layerConfig = this.layerApi.registeredLayers[layerPath];
     const queryable = layerConfig?.source?.featureInfo?.queryable;
     return !!queryable;
   }
@@ -72,12 +71,14 @@ export class FeatureInfoLayerSet extends LayerSet {
    * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
    * @param {string} layerPath - The layer path
    */
-  protected onRegisterLayer(geoviewLayer: AbstractGeoViewLayer, layerPath: string): void {
+  protected onRegisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
     // Log
-    logger.logTraceCore('FEATURE-INFO-LAYER-SET - onRegisterLayer', layerPath, Object.keys(this.resultSet));
+    logger.logTraceCore('FEATURE-INFO-LAYER-SET - onRegisterLayer', layerConfig.layerPath, Object.keys(this.resultSet));
 
-    const layerConfig = this.layerApi.registeredLayers[layerPath];
-    this.resultSet[layerPath] = {
+    // Call parent
+    super.onRegisterLayer(geoviewLayer, layerConfig);
+
+    this.resultSet[layerConfig.layerPath] = {
       layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
       layerStatus: layerConfig.layerStatus!,
       data: {
@@ -86,12 +87,28 @@ export class FeatureInfoLayerSet extends LayerSet {
         eventListenerEnabled: true,
         queryStatus: 'processed',
         features: [],
-        layerPath,
+        layerPath: layerConfig.layerPath,
       },
     };
 
     // Propagate to store
-    this.#propagateToStore(layerPath);
+    this.#propagateToStore(layerConfig.layerPath);
+  }
+
+  /**
+   * Overrides the behavior to apply when unregistering a layer from the feature-info-layer-set.
+   * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being unregistered
+   * @param {string} layerPath - The layer path
+   */
+  protected onUnregisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
+    // Log
+    logger.logTraceCore('FEATURE-INFO-LAYER-SET - onUnregisterLayer', layerConfig.layerPath, Object.keys(this.resultSet));
+
+    // Call parent
+    super.onUnregisterLayer(geoviewLayer, layerConfig);
+
+    // Remove it from feature info array
+    FeatureInfoEventProcessor.deleteFeatureInfo(this.mapId, layerConfig.layerPath);
   }
 
   /**
@@ -207,7 +224,7 @@ export class FeatureInfoLayerSet extends LayerSet {
     await Promise.allSettled(allPromises);
 
     // Emit the query layers has ended
-    this.#emitQueryEnded({ coordinate: longLatCoordinate, resultSet: this.resultSet });
+    this.#emitQueryEnded({ coordinate: longLatCoordinate, resultSet: this.resultSet, eventType: 'click' });
 
     // Return the results
     return this.resultSet;
@@ -290,4 +307,5 @@ type QueryEndedDelegate = EventDelegateBase<FeatureInfoLayerSet, QueryEndedEvent
 export type QueryEndedEvent = {
   coordinate: Coordinate;
   resultSet: TypeResultSet;
+  eventType: EventType;
 };

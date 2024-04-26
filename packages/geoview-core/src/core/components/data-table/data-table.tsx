@@ -45,7 +45,7 @@ import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 import { logger } from '@/core/utils/logger';
-import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
+import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/layer-set';
 import { MappedLayerDataType } from './data-panel';
 import { useLightBox, useFilterRows, useToolbarActionMessage, useGlobalFilter } from './hooks';
 import { getSxClasses } from './data-table-style';

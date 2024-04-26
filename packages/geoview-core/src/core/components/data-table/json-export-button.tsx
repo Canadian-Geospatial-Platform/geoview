@@ -4,7 +4,7 @@ import { Geometry, Point, Polygon, LineString, MultiPoint } from 'ol/geom';
 
 import { MenuItem } from '@/ui';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { TypeFeatureInfoEntry } from '@/geo/utils/layer-set';
+import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/layer-set';
 import { TypeJsonObject } from '@/core/types/global-types';
 
 interface JSONExportButtonProps {

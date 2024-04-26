@@ -21,7 +21,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { logger } from '@/core/utils/logger';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { loadImage } from '@/geo/renderer/geoview-renderer';
+import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.IMAGE_STATIC;
