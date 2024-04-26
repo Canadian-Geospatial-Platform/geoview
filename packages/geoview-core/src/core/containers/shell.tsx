@@ -52,11 +52,12 @@ export function Shell(props: ShellProps): JSX.Element {
   logger.logTraceRender('core/containers/shell');
 
   const { mapViewer } = props;
-  const defaultHeight = 853;
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
   const sxClasses = getShellSxClasses(theme);
+
+  const [origHeight, setOrigHeight] = useState<number>(0);
 
   // render additional components if added by api
   const [components, setComponents] = useState<Record<string, JSX.Element>>({});
@@ -176,9 +177,6 @@ export function Shell(props: ShellProps): JSX.Element {
     return footerPanelResizeValues.reduce((acc, curr) => {
       const windowHeight = window.screen.height;
       let values: [string, number] = ['visible', windowHeight - (windowHeight * footerPanelResizeValue) / 100];
-      if (curr === footerPanelResizeValues[0]) {
-        values = ['visible', windowHeight - (windowHeight * footerPanelResizeValue) / 100];
-      }
       if (curr === footerPanelResizeValues[footerPanelResizeValues.length - 1]) {
         values = ['hidden', 0];
       }
@@ -205,13 +203,24 @@ export function Shell(props: ShellProps): JSX.Element {
   }, [mapViewer]);
 
   /**
+   * Set the map height based on mapDiv
+   */
+  useEffect(() => {
+    if (mapContainerRef.current && mapShellContainerRef.current) {
+      const { mapId } = mapViewer;
+      const mapDiv = document.getElementById(mapId)!;
+      setOrigHeight(mapDiv!.clientHeight + 55);
+    }
+  }, [mapLoaded, mapViewer]);
+
+  /**
    * Update map height when switch on/off the fullscreen
    */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('SHELL - footerPanelResizeValue.isMapFullScreen.memoMapResizeValues', footerPanelResizeValue, isMapFullScreen);
 
-    if (isMapFullScreen && mapContainerRef.current && mapShellContainerRef.current) {
+    if (mapLoaded && isMapFullScreen && mapContainerRef.current && mapShellContainerRef.current) {
       const { mapVisibility, mapHeight } = memoMapResizeValues[footerPanelResizeValue];
       mapContainerRef.current.style.visibility = mapVisibility;
       mapContainerRef.current.style.minHeight = `${mapHeight}px`;
@@ -223,16 +232,16 @@ export function Shell(props: ShellProps): JSX.Element {
     }
 
     // Reset the map references with default heights.
-    if (!isMapFullScreen && mapContainerRef.current && mapShellContainerRef.current) {
+    if (mapLoaded && !isMapFullScreen && mapContainerRef.current && mapShellContainerRef.current) {
       mapContainerRef.current.style.visibility = 'visible';
-      mapContainerRef.current.style.minHeight = `${defaultHeight}px`;
-      mapContainerRef.current.style.height = `${defaultHeight}px`;
+      mapContainerRef.current.style.minHeight = `${origHeight}px`;
+      mapContainerRef.current.style.height = `${origHeight}px`;
 
       mapShellContainerRef.current.style.visibility = 'visible';
-      mapShellContainerRef.current.style.minHeight = `${defaultHeight}px`;
-      mapShellContainerRef.current.style.height = `${defaultHeight}px`;
+      mapShellContainerRef.current.style.minHeight = `${origHeight}px`;
+      mapShellContainerRef.current.style.height = `${origHeight}px`;
     }
-  }, [footerPanelResizeValue, isMapFullScreen, memoMapResizeValues]);
+  }, [footerPanelResizeValue, isMapFullScreen, memoMapResizeValues, origHeight, mapLoaded]);
 
   /**
    * Update the map after footer panel is collapsed.
@@ -276,8 +285,6 @@ export function Shell(props: ShellProps): JSX.Element {
       mapViewer.notifications.offSnackbarOpen(handleSnackBarOpen);
     };
   }, [mapViewer, handleMapRemoveComponent, handleModalOpen]);
-
-  // console.log('mapViewer', mapViewer);
 
   return (
     <Box sx={sxClasses.all}>
