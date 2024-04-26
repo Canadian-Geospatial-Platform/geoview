@@ -1,6 +1,7 @@
+import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { TypeSourceGeoPackageInitialConfig } from '@/geo/layer/geoview-layers/vector/geopackage';
 import { CONST_LAYER_ENTRY_TYPES } from '@/geo/map/map-schema-types';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { Projection } from '@/geo/utils/projection';
 
 export class GeoPackageLayerEntryConfig extends VectorLayerEntryConfig {
   declare source: TypeSourceGeoPackageInitialConfig;
@@ -38,6 +39,6 @@ export class GeoPackageLayerEntryConfig extends VectorLayerEntryConfig {
         ? `${this.source.dataAccessPath!.fr}${this.layerId}`
         : `${this.source.dataAccessPath!.fr}/${this.layerId}`;
     }
-    if (!this?.source?.dataProjection) this.source.dataProjection = 'EPSG:4326';
+    if (!this?.source?.dataProjection) this.source.dataProjection = Projection.PROJECTION_NAMES.LNGLAT;
   }
 }

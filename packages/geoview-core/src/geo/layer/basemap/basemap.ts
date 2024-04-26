@@ -240,7 +240,7 @@ export class Basemap {
             jsonUrl: basemapLayer.jsonUrl as string,
             source: new XYZ({
               attributions: getLocalizedMessage('mapctrl.attribution.defaultnrcan', AppEventProcessor.getDisplayLanguage(this.mapId)),
-              projection: Projection.projections[urlProj],
+              projection: Projection.PROJECTIONS[urlProj],
               url: basemapLayer.url as string,
               crossOrigin: 'Anonymous',
               tileGrid: new TileGrid({
@@ -460,7 +460,7 @@ export class Basemap {
         url: languageCode === 'en' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
         source: new XYZ({
           attributions: attribution[languageCode],
-          projection: Projection.projections[projection],
+          projection: Projection.PROJECTIONS[projection],
           url: languageCode === 'en' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
           crossOrigin: 'Anonymous',
           tileGrid: new TileGrid({

@@ -1,5 +1,5 @@
-import { TypeSourceWFSVectorInitialConfig } from '@/geo/layer/geoview-layers/vector/wfs';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { TypeSourceWFSVectorInitialConfig } from '@/geo/layer/geoview-layers/vector/wfs';
 
 export class WfsLayerEntryConfig extends VectorLayerEntryConfig {
   declare source: TypeSourceWFSVectorInitialConfig;

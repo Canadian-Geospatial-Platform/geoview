@@ -120,7 +120,7 @@ export class GeometryApi {
     const polyline = new Feature({
       geometry: new LineString(points, polylineOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        Projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
+        Projection.PROJECTIONS[MapEventProcessor.getMapState(this.#mapId).currentProjection]
       ),
     });
 
@@ -192,7 +192,7 @@ export class GeometryApi {
     const polygon = new Feature({
       geometry: new Polygon(points, polygonOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        Projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
+        Projection.PROJECTIONS[MapEventProcessor.getMapState(this.#mapId).currentProjection]
       ),
     });
 
@@ -263,7 +263,7 @@ export class GeometryApi {
     const projectedCoordinates = Projection.transform(
       coordinate,
       `EPSG:${options?.projection || 4326}`,
-      Projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
+      Projection.PROJECTIONS[MapEventProcessor.getMapState(this.#mapId).currentProjection]
     );
 
     // get radius, if not defined, set default
@@ -352,7 +352,7 @@ export class GeometryApi {
     const marker = new Feature({
       geometry: new Point(coordinate, markerOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        Projection.projections[MapEventProcessor.getMapState(this.#mapId).currentProjection]
+        Projection.PROJECTIONS[MapEventProcessor.getMapState(this.#mapId).currentProjection]
       ),
     });
 

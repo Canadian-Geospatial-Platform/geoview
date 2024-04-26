@@ -208,7 +208,7 @@ export class WFS extends AbstractGeoViewVector {
         if (layerConfig.initialSettings?.extent)
           layerConfig.initialSettings.extent = Projection.transformExtent(
             layerConfig.initialSettings.extent,
-            'EPSG:4326',
+            Projection.PROJECTION_NAMES.LNGLAT,
             `EPSG:${currentProjection}`
           );
 
@@ -217,7 +217,11 @@ export class WFS extends AbstractGeoViewVector {
           const upperCorner = (foundMetadata['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'] as string).split(' ');
           const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
           // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-          layerConfig.initialSettings!.bounds = Projection.transformExtent(bounds, 'EPSG:4326', `EPSG:${currentProjection}`);
+          layerConfig.initialSettings!.bounds = Projection.transformExtent(
+            bounds,
+            Projection.PROJECTION_NAMES.LNGLAT,
+            `EPSG:${currentProjection}`
+          );
         }
       }
     });
