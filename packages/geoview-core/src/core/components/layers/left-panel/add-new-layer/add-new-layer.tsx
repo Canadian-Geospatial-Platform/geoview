@@ -230,7 +230,7 @@ export function AddNewLayer(): JSX.Element {
   // TODO: Move all the validations in a utility add layer file inside geo. Also delete old utilities that were used
   // TODOCONT: in the previous version.
   const wmsValidation = async (): Promise<boolean> => {
-    const proj = Projection.projections[api.maps[mapId].getMapState().currentProjection].getCode();
+    const proj = Projection.PROJECTIONS[api.maps[mapId].getMapState().currentProjection].getCode();
     let supportedProj: string[] = [];
 
     try {

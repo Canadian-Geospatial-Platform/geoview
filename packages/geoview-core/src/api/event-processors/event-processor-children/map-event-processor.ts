@@ -285,7 +285,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Project coords
     const projectedCoords = Projection.transformPoints(
       [marker.lnglat],
-      `EPSG:4326`,
+      Projection.PROJECTION_NAMES.LNGLAT,
       `EPSG:${this.getMapStateProtected(mapId).currentProjection}`
     );
 
@@ -403,7 +403,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       const currentView = this.getMapViewer(mapId).map.getView();
       const currentCenter = currentView.getCenter();
       const currentProjection = currentView.getProjection().getCode();
-      const newCenter = Projection.transformPoints([currentCenter!], currentProjection, 'EPSG:4326')[0];
+      const newCenter = Projection.transformPoints([currentCenter!], currentProjection, Projection.PROJECTION_NAMES.LNGLAT)[0];
       const newProjection = projectionCode as TypeValidMapProjectionCodes;
 
       // create new view
@@ -411,7 +411,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         zoom: currentView.getZoom() as number,
         minZoom: currentView.getMinZoom(),
         maxZoom: currentView.getMaxZoom(),
-        center: Projection.transformPoints([newCenter], 'EPSG:4326', `EPSG:${newProjection}`)[0] as [number, number],
+        center: Projection.transformPoints([newCenter], Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${newProjection}`)[0] as [number, number],
         projection: `EPSG:${newProjection}`,
       });
 
@@ -525,7 +525,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
           // Go for it
           // eslint-disable-next-line no-param-reassign
           layerInfo.visible = newVisibility;
-          api.maps[mapId].layer.geoviewLayer(layerInfo.layerPath).setVisible(layerInfo.visible, layerInfo.layerPath);
+          this.getMapViewerLayerAPI(mapId).geoviewLayer(layerInfo.layerPath).setVisible(layerInfo.visible, layerInfo.layerPath);
         }
       }
     });
@@ -701,12 +701,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
       (indicatorBox[i] as HTMLElement).style.display = 'none';
     }
 
-    const projectionConfig = Projection.projections[this.getMapState(mapId).currentProjection];
+    const projectionConfig = Projection.PROJECTIONS[this.getMapState(mapId).currentProjection];
     if (bbox) {
       // GV There were issues with fromLonLat in rare cases in LCC projections, transformExtent seems to solve them.
       // GV fromLonLat and transformExtent give differing results in many cases, fromLonLat had issues with the first
       // GV three results from a geolocator search for "vancouver river"
-      const convertedExtent = Projection.transformExtent(bbox, 'EPSG:4326', projectionConfig);
+      const convertedExtent = Projection.transformExtent(bbox, Projection.PROJECTION_NAMES.LNGLAT, projectionConfig);
 
       // Highlight
       this.getMapViewerLayerAPI(mapId).featureHighlight.highlightGeolocatorBBox(convertedExtent);
@@ -726,7 +726,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     } else {
       const projectedCoords = Projection.transformPoints(
         [coords],
-        `EPSG:4326`,
+        Projection.PROJECTION_NAMES.LNGLAT,
         `EPSG:${this.getMapStateProtected(mapId).currentProjection}`
       );
 
@@ -747,7 +747,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static zoomToInitialExtent(mapId: string): Promise<void> {
     const center = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter![1];
     const zoom = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter![0];
-    const projectedCoords = Projection.transformPoints([center], `EPSG:4326`, `EPSG:${this.getMapStateProtected(mapId).currentProjection}`);
+    const projectedCoords = Projection.transformPoints(
+      [center],
+      Projection.PROJECTION_NAMES.LNGLAT,
+      `EPSG:${this.getMapStateProtected(mapId).currentProjection}`
+    );
     const extent: Extent = [...projectedCoords[0], ...projectedCoords[0]];
     const options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: zoom, duration: OL_ZOOM_DURATION };
 
@@ -756,7 +760,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static zoomToMyLocation(mapId: string, position: GeolocationPosition): Promise<void> {
     const coord: Coordinate = [position.coords.longitude, position.coords.latitude];
-    const projectedCoords = Projection.transformPoints([coord], `EPSG:4326`, `EPSG:${this.getMapStateProtected(mapId).currentProjection}`);
+    const projectedCoords = Projection.transformPoints(
+      [coord],
+      Projection.PROJECTION_NAMES.LNGLAT,
+      `EPSG:${this.getMapStateProtected(mapId).currentProjection}`
+    );
 
     const extent: Extent = [...projectedCoords[0], ...projectedCoords[0]];
     const options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: 13, duration: OL_ZOOM_DURATION };

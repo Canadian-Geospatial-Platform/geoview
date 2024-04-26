@@ -331,7 +331,7 @@ export function commonProcessInitialSettings(
   if (layerConfig.initialSettings?.extent)
     layerConfig.initialSettings.extent = Projection.transformExtent(
       layerConfig.initialSettings.extent,
-      'EPSG:4326',
+      Projection.PROJECTION_NAMES.LNGLAT,
       `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
     );
 

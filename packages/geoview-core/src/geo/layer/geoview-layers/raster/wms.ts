@@ -592,7 +592,7 @@ export class WMS extends AbstractGeoViewRaster {
         if (layerConfig.initialSettings?.extent)
           layerConfig.initialSettings.extent = Projection.transformExtent(
             layerConfig.initialSettings.extent,
-            'EPSG:4326',
+            Projection.PROJECTION_NAMES.LNGLAT,
             `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
           );
 
@@ -647,7 +647,7 @@ export class WMS extends AbstractGeoViewRaster {
     const convertedLocation = Projection.transform(
       location,
       `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`,
-      'EPSG:4326'
+      Projection.PROJECTION_NAMES.LNGLAT
     );
     return this.getFeatureInfoAtLongLat(convertedLocation, layerPath);
   }
@@ -668,7 +668,7 @@ export class WMS extends AbstractGeoViewRaster {
 
       const viewResolution = MapEventProcessor.getMapViewer(this.mapId).getView().getResolution() as number;
       const crs = `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`;
-      const clickCoordinate = Projection.transform(lnglat, 'EPSG:4326', crs);
+      const clickCoordinate = Projection.transform(lnglat, Projection.PROJECTION_NAMES.LNGLAT, crs);
       if (
         lnglat[0] < layerConfig.initialSettings!.bounds![0] ||
         layerConfig.initialSettings!.bounds![2] < lnglat[0] ||

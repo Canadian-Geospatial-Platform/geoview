@@ -4,7 +4,7 @@ import { useTheme } from '@mui/material/styles';
 import { useMediaQuery } from '@mui/material';
 
 import { Switch, Box } from '@/ui';
-import { PROJECTION_NAMES } from '@/geo/utils/projection';
+import { Projection } from '@/geo/utils/projection';
 import { useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import {
   useMapFixNorth,
@@ -62,7 +62,7 @@ export function MapInfoFixNorthSwitch(): JSX.Element {
         },
       }}
     >
-      {expanded && `EPSG:${mapProjection}` === PROJECTION_NAMES.LCC && isNorthEnable ? (
+      {expanded && `EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.LCC && isNorthEnable ? (
         <Switch size="small" onChange={fixNorth} title={t('mapctrl.rotation.fixedNorth')!} checked={isFixNorth} />
       ) : null}
     </Box>

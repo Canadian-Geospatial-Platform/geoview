@@ -233,7 +233,7 @@ export class CSV extends AbstractGeoViewVector {
    * @returns {Feature[]} The array of features.
    */
   convertCsv(csvData: string, layerConfig: VectorLayerEntryConfig): Feature[] | null {
-    const inProjection: ProjectionLike = layerConfig.source!.dataProjection || 'EPSG:4326';
+    const inProjection: ProjectionLike = layerConfig.source!.dataProjection || Projection.PROJECTION_NAMES.LNGLAT;
     const outProjection: ProjectionLike = `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`;
     const latList = ['latitude', 'lat', 'y', 'ycoord', 'latitude/latitude', 'latitude / latitude'];
     const lonList = ['longitude', 'lon', 'x', 'xcoord', 'longitude/longitude', 'longitude / longitude'];

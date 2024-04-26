@@ -1,5 +1,6 @@
-import { TypeSourceOgcFeatureInitialConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { TypeSourceOgcFeatureInitialConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
+import { Projection } from '@/geo/utils/projection';
 
 export class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
   declare source: TypeSourceOgcFeatureInitialConfig;
@@ -19,6 +20,6 @@ export class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
     if (!this.source) this.source = { format: 'featureAPI' };
     if (!this?.source?.format) this.source.format = 'featureAPI';
     if (!this.source.dataAccessPath) this.source.dataAccessPath = { ...this.geoviewLayerConfig.metadataAccessPath! };
-    if (!this.source.dataProjection) this.source.dataProjection = 'EPSG:4326';
+    if (!this.source.dataProjection) this.source.dataProjection = Projection.PROJECTION_NAMES.LNGLAT;
   }
 }
