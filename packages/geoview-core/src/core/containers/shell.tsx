@@ -92,6 +92,7 @@ export function Shell(props: ShellProps): JSX.Element {
   const footerPanelResizeValues = useUIFooterPanelResizeValues();
   const isFooterBarCollapsed = useUIFooterBarIsCollapsed();
   const geoviewElement = useAppGeoviewHTMLElement();
+  const footerTabContainer = geoviewElement.querySelector(`[id^="${mapId}-tabsContainer"]`);
   /**
    * Handles when a component is being added to the map
    * @param {MapComponentPayload} payload The map component being added
@@ -253,7 +254,6 @@ export function Shell(props: ShellProps): JSX.Element {
     logger.logTraceUseEffect('SHELL - isFooterBarCollapsed.isMapFullScreen', isFooterBarCollapsed, isMapFullScreen);
 
     if (isMapFullScreen && isFooterBarCollapsed && mapContainerRef.current && mapShellContainerRef.current) {
-      const footerTabContainer = document.getElementById(`${mapId}-tabsContainer`);
       const tabHeight = footerTabContainer?.clientHeight ?? 0;
 
       mapContainerRef.current.style.minHeight = `${window.screen.height - tabHeight}px`;
@@ -261,7 +261,7 @@ export function Shell(props: ShellProps): JSX.Element {
       mapShellContainerRef.current.style.minHeight = `${window.screen.height - tabHeight}px`;
       mapShellContainerRef.current.style.height = `${window.screen.height - tabHeight}px`;
     }
-  }, [isFooterBarCollapsed, isMapFullScreen, mapId]);
+  }, [isFooterBarCollapsed, isMapFullScreen, mapId, footerTabContainer]);
 
   useEffect(() => {
     // Log
