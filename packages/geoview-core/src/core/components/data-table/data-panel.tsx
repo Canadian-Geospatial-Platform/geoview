@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import Markdown from 'markdown-to-jsx';
 import { Box, FilterAltIcon, Skeleton } from '@/ui';
 import DataTable from './data-table';
 import {
@@ -13,12 +12,10 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useMapVisibleLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useUIActiveFooterBarTabId } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { LayerListEntry, Layout } from '@/core/components/common';
 import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
 import { TypeFieldEntry, TypeLayerData } from '@/geo/layer/layer-sets/layer-set';
-import { getSxClasses } from './data-table-style';
 import { LAYER_STATUS, TABS } from '@/core/utils/constant';
 
 export interface MappedLayerDataType extends TypeLayerData {
@@ -36,7 +33,6 @@ interface DataPanelType {
 export function Datapanel({ fullWidth }: DataPanelType): JSX.Element {
   const { t } = useTranslation();
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
 
   const layerData = useDataTableAllFeaturesDataArray();
 
@@ -48,7 +44,6 @@ export function Datapanel({ fullWidth }: DataPanelType): JSX.Element {
   const { setSelectedLayerPath } = useDataTableStoreActions();
   const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
   const selectedTab = useUIActiveFooterBarTabId();
-  const guide = useAppGuide();
   const visibleLayers = useMapVisibleLayers();
 
   // Create columns for data table.
@@ -144,17 +139,6 @@ export function Datapanel({ fullWidth }: DataPanelType): JSX.Element {
     return () => orderedLayerData.find((layer) => layer.layerPath === selectedLayerPath && layer?.features?.length);
   }, [selectedLayerPath, orderedLayerData]);
 
-  /**
-   * Checks if all layers have no features like features are empty array.
-   * @returns
-   */
-  const isAllLayersNoFeatures = useMemo(() => {
-    // Log
-    logger.logTraceUseMemo('DATA-PANEL - isAllLayersNoFeatures');
-
-    return () => orderedLayerData.every((layers) => !layers?.features?.length);
-  }, [orderedLayerData]);
-
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('DATA-PANEL - isLoading', isLoading, selectedLayerPath);
@@ -178,6 +162,31 @@ export function Datapanel({ fullWidth }: DataPanelType): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTab]);
 
+  const renderContent = (): JSX.Element | null => {
+    if (isLoading) {
+      return <Skeleton variant="rounded" width="100%" height={400} sx={{ bgcolor: theme.palette.grey[400] }} />;
+    }
+    if (selectedTab === TABS.DATA_TABLE && !isLayerDisabled() && isSelectedLayerHasFeatures()) {
+      return (
+        <>
+          {orderedLayerData.map((data: MappedLayerDataType) => (
+            <Box key={data.layerPath}>
+              {data.layerPath === selectedLayerPath ? <DataTable data={data} layerPath={data.layerPath} tableHeight={tableHeight} /> : null}
+            </Box>
+          ))}
+        </>
+      );
+    }
+
+    return null;
+  };
+
+  const handleGuideIsOpen = (guideIsOpen: boolean): void => {
+    if (guideIsOpen) {
+      setSelectedLayerPath('');
+    }
+  };
+
   const memoLayerList = useMemo(() => {
     // Log
     logger.logTraceUseMemo('DATA-PANEL - memoLayersList', orderedLayerData);
@@ -199,38 +208,15 @@ export function Datapanel({ fullWidth }: DataPanelType): JSX.Element {
       layerList={memoLayerList}
       onLayerListClicked={handleLayerChange}
       fullWidth={fullWidth}
+      onGuideIsOpen={handleGuideIsOpen}
+      guideContentIds={[
+        'dataTable',
+        'dataTable.children.filterData',
+        'dataTable.children.sortingAndReordering',
+        'dataTable.children.keyboardNavigation',
+      ]}
     >
-      {isLoading && <Skeleton variant="rounded" width="100%" height={400} sx={{ bgcolor: theme.palette.grey[400] }} />}
-
-      {!isLoading &&
-        selectedTab === TABS.DATA_TABLE &&
-        !isLayerDisabled() &&
-        isSelectedLayerHasFeatures() &&
-        orderedLayerData.map((data: MappedLayerDataType) => (
-          <Box key={data.layerPath}>
-            {data.layerPath === selectedLayerPath ? (
-              <DataTable data={data} layerPath={data.layerPath} tableHeight={tableHeight} />
-            ) : (
-              <Box />
-            )}
-          </Box>
-        ))}
-
-      {/* show data table instructions when all layers has no features */}
-      {((!isLoading && isAllLayersNoFeatures()) || isLayerDisabled() || selectedLayerPath === '') && (
-        <Box
-          className="guidebox-container"
-          sx={fullWidth ? { ...sxClasses.rightPanelContainer, overflowY: 'hidden' } : { ...sxClasses.rightPanelContainer }}
-        >
-          <Box className="guideBox">
-            <Markdown options={{ wrapper: 'article' }}>{`${guide!.footerPanel!.children!.dataTable!.content}\n${
-              guide!.footerPanel!.children!.dataTable!.children!.filterData!.content
-            }\n${guide!.footerPanel!.children!.dataTable!.children!.sortingAndReordering!.content}\n\n${
-              guide!.footerPanel!.children!.dataTable!.children!.keyboardNavigation!.content
-            }`}</Markdown>
-          </Box>
-        </Box>
-      )}
+      {renderContent()}
     </Layout>
   );
 }

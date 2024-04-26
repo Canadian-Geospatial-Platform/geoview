@@ -76,6 +76,7 @@ export {
   Pause as PauseIcon,
   PlayArrow as PlayArrowIcon,
   QueryStats as ChartIcon,
+  QuestionMark as QuestionMarkIcon,
   RadioButtonChecked as RadioButtonCheckedIcon,
   RadioButtonUnchecked as RadioButtonUncheckedIcon,
   Remove as ZoomOutIcon,
