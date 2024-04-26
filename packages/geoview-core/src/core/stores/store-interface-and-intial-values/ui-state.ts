@@ -22,6 +22,7 @@ export interface IUIState {
   navBarComponents: TypeNavBarProps;
   footerPanelResizeValue: number;
   footerPanelResizeValues: number[];
+  footerBarIsCollapsed: boolean;
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
@@ -32,6 +33,7 @@ export interface IUIState {
     setGeolocatorActive: (active: boolean) => void;
     setFooterPanelResizeValue: (value: number) => void;
     setMapInfoExpanded: (expanded: boolean) => void;
+    setFooterBarIsCollapsed: (collapsed: boolean) => void;
   };
 
   setterActions: {
@@ -42,6 +44,7 @@ export interface IUIState {
     setGeolocatorActive: (active: boolean) => void;
     setFooterPanelResizeValue: (value: number) => void;
     setMapInfoExpanded: (expanded: boolean) => void;
+    setFooterBarIsCollapsed: (collapsed: boolean) => void;
   };
 }
 
@@ -57,6 +60,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
     navBarComponents: [],
     footerPanelResizeValue: 35,
     footerPanelResizeValues: [35, 50, 100],
+    footerBarIsCollapsed: false,
 
     // initialize default stores section from config information when store receive configuration file
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
@@ -98,6 +102,10 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
       setMapInfoExpanded: (expanded: boolean) => {
         // Redirect to setter
         get().uiState.setterActions.setMapInfoExpanded(expanded);
+      },
+      setFooterBarIsCollapsed: (collapsed: boolean) => {
+        // Redirect to setter
+        get().uiState.setterActions.setFooterBarIsCollapsed(collapsed);
       },
     },
 
@@ -159,6 +167,15 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
         });
       },
+      setFooterBarIsCollapsed: (collapsed: boolean) => {
+        // Redirect to setter
+        set({
+          uiState: {
+            ...get().uiState,
+            footerBarIsCollapsed: collapsed,
+          },
+        });
+      },
     },
   } as IUIState;
 
@@ -179,6 +196,7 @@ export const useUIFooterPanelResizeValue = (): number => useStore(useGeoViewStor
 export const useUIFooterPanelResizeValues = (): number[] => useStore(useGeoViewStore(), (state) => state.uiState.footerPanelResizeValues);
 export const useUIMapInfoExpanded = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.mapInfoExpanded);
 export const useUINavbarComponents = (): TypeNavBarProps => useStore(useGeoViewStore(), (state) => state.uiState.navBarComponents);
+export const useUIFooterBarIsCollapsed = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.footerBarIsCollapsed);
 
 // TODO: Refactor - We should explicit a type for the uiState.actions
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
