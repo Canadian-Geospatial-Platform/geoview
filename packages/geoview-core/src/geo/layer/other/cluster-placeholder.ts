@@ -104,7 +104,7 @@
 //       }
 //     ]
 //   },
-//   "theme": "dark",
+//   "theme": "geo.ca",
 //   "components": [],
 //   "suportedLanguages": ["en"]
 // }
