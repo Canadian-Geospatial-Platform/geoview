@@ -53,7 +53,7 @@ import {
   TypeMapMouseInfo,
 } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { NORTH_POLE_POSITION } from '@/core/utils/constant';
+import { DEFAULT_MAP_EXTENT, NORTH_POLE_POSITION } from '@/core/utils/constant';
 import { TypeMapFeaturesConfig, TypeHTMLElement, TypeJsonObject } from '@/core/types/global-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
@@ -587,7 +587,13 @@ export class MapViewer {
 
           // Zoom to extents of layers selected in config, if provided.
           if (this.mapFeaturesConfig.map.viewSettings.initialView?.layerIds) {
-            const layerExtents = this.layer.getExtentOfMultipleLayers(this.mapFeaturesConfig.map.viewSettings.initialView.layerIds);
+            let layerExtents = this.layer.getExtentOfMultipleLayers(this.mapFeaturesConfig.map.viewSettings.initialView.layerIds);
+            if (layerExtents.includes(Infinity))
+              layerExtents = Projection.transformExtent(
+                DEFAULT_MAP_EXTENT,
+                Projection.PROJECTION_NAMES.LNGLAT,
+                `EPSG:${this.mapFeaturesConfig.map.viewSettings.projection}`
+              );
             if (layerExtents.length)
               this.zoomToExtent(layerExtents).catch((error) =>
                 logger.logPromiseFailed('promiseMapLayers in #checkMapLayersProcessed in map-viewer', error)

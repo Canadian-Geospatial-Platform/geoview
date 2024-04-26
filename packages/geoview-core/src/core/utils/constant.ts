@@ -13,6 +13,9 @@ export const CONFIG_GEOCORE_URL = 'https://geocore-stage.api.geo.ca';
 /** The default geolocator url */
 export const CONFIG_GEOLOCATOR_URL = 'https://geolocator.api.geo.ca?keys=geonames,nominatim,locate';
 
+/** The default map extent */
+export const DEFAULT_MAP_EXTENT = [-125, 30, -60, 89];
+
 // OpenLayer constants
 export const OL_ZOOM_DURATION = 500;
 

@@ -22,7 +22,7 @@ import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-l
 import { Projection } from '@/geo/utils/projection';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
-import { NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
+import { DEFAULT_MAP_EXTENT, NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { whenThisThen } from '@/core/utils/utilities';
 import { TypeFeatureInfoEntry, TypeGeometry } from '@/geo/layer/layer-sets/abstract-layer-set';
@@ -744,20 +744,53 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
   }
 
+  /**
+   * Return to initial view state of map using config.
+   *
+   * @param {string} mapId - ID of the map to return to original view
+   * @returns Promise<void>
+   */
   static zoomToInitialExtent(mapId: string): Promise<void> {
-    const center = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter![1];
-    const zoom = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter![0];
-    const projectedCoords = Projection.transformPoints(
-      [center],
-      Projection.PROJECTION_NAMES.LNGLAT,
-      `EPSG:${this.getMapStateProtected(mapId).currentProjection}`
-    );
-    const extent: Extent = [...projectedCoords[0], ...projectedCoords[0]];
-    const options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: zoom, duration: OL_ZOOM_DURATION };
+    let extent: Extent = DEFAULT_MAP_EXTENT;
+    const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
+
+    // Transform center coordinates and update options if zoomAndCenter are in config
+    if (getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter) {
+      [options.maxZoom] = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter!;
+
+      const center = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter![1];
+      const projectedCoords = Projection.transformPoints(
+        [center],
+        Projection.PROJECTION_NAMES.LNGLAT,
+        `EPSG:${this.getMapStateProtected(mapId).currentProjection}`
+      );
+
+      extent = [...projectedCoords[0], ...projectedCoords[0]];
+    }
+
+    // If extent is in config, use it
+    if (getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView?.extent)
+      extent = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.extent as Extent;
+
+    // Get extents of provided layer IDs if available
+    if (getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView?.layerIds) {
+      const layerExtents = api.maps[mapId].layer.getExtentOfMultipleLayers(
+        getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView?.layerIds
+      );
+
+      if (layerExtents) extent = layerExtents;
+    }
 
     return this.zoomToExtent(mapId, extent, options);
   }
 
+  /**
+   * Zoom to geolocation position provided.
+   *
+   * @param {string} mapId - ID of map to zoom on
+   * @param {GeolocationPosition} position - Info on position to zoom to.
+   * @returns Promise<void>
+   */
   static zoomToMyLocation(mapId: string, position: GeolocationPosition): Promise<void> {
     const coord: Coordinate = [position.coords.longitude, position.coords.latitude];
     const projectedCoords = Projection.transformPoints(
@@ -775,7 +808,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   /**
    * Set Z index for layers
    *
-   * @param {string} mapId Id of map to set layer Z indices
+   * @param {string} mapId - Id of map to set layer Z indices
    */
   static setLayerZIndices = (mapId: string): void => {
     const reversedLayers = [...this.getMapStateProtected(mapId).orderedLayerInfo].reverse();

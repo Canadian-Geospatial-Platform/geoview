@@ -42,7 +42,7 @@ import { Cast, toJsonObject, TypeJsonObject, TypeMapFeaturesConfig } from '@/cor
 import { CONST_GEOVIEW_SCHEMA_BY_TYPE, CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { geoviewEntryIsEsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { logger } from '@/core/utils/logger';
-import { CONFIG_GEOCORE_URL, CONFIG_GEOLOCATOR_URL } from '@/core/utils/constant';
+import { CONFIG_GEOCORE_URL, CONFIG_GEOLOCATOR_URL, DEFAULT_MAP_EXTENT } from '@/core/utils/constant';
 
 import { generateId, replaceParams, getLocalizedMessage } from '@/core/utils/utilities';
 import schema from '../../../../schema.json';
@@ -83,7 +83,7 @@ export class ConfigValidation {
   // extents for each projection
   #maxExtents: Record<TypeValidMapProjectionCodes, number[]> = {
     3857: [-150, 38, -40, 84],
-    3978: [-125, 30, -60, 89],
+    3978: DEFAULT_MAP_EXTENT,
   };
 
   /** default configuration if provided configuration is missing or wrong */
