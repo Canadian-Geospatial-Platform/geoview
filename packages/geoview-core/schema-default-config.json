@@ -20,9 +20,19 @@
     },
     "listOfGeoviewLayerConfig": []
   },
-  "theme": "dark",
-  "appBar": { "tabs": { "core": ["geolocator"] }},
-  "navBar": ["zoom", "fullscreen", "home"],
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator"
+      ]
+    }
+  },
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home"
+  ],
   "components": [],
   "corePackages": [],
   "externalPackages": [],

@@ -1,0 +1,134 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "initialView": {
+        "layerIds": [
+          "polygons.json",
+          "lines.json"
+        ]
+      },
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "osm",
+      "shaded": false,
+      "labeled": false
+    },
+    "highlightColor": "red",
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "geojsonLYR1",
+        "geoviewLayerName": {
+          "en": "GeoJSON Sample",
+          "fr": "GeoJSON Échantillon"
+        },
+        "metadataAccessPath": {
+          "en": "./datasets/geojson/metadata.json",
+          "fr": "./datasets/geojson/metadata.json"
+        },
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "polygons.json",
+            "layerName": {
+              "en": "Polygons",
+              "fr": "Polygones"
+            }
+          },
+          {
+            "layerId": "lines.json",
+            "layerName": {
+              "en": "Lines",
+              "fr": "Lignes"
+            }
+          },
+          {
+            "entryType": "group",
+            "layerId": "point-feature-group",
+            "layerName": {
+              "en": "point-feature-group",
+              "fr": "point-feature-group"
+            },
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "icon_points.json",
+                "layerName": {
+                  "en": "Icons",
+                  "fr": "Icones"
+                },
+                "initialSettings": {
+                  "controls": {
+                    "visibility": false
+                  }
+                }
+              },
+              {
+                "layerId": "points.json",
+                "layerName": {
+                  "en": "Points",
+                  "fr": "Points"
+                }
+              },
+              {
+                "layerId": "points_1.json",
+                "layerName": {
+                  "en": "Points 1",
+                  "fr": "Points 1"
+                }
+              },
+              {
+                "layerId": "points_2.json",
+                "layerName": {
+                  "en": "Points 2",
+                  "fr": "Points 2"
+                }
+              },
+              {
+                "layerId": "points_3.json",
+                "layerName": {
+                  "en": "Points 3",
+                  "fr": "Points 3"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "export"
+      ]
+    }
+  },
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home",
+    "location"
+  ],
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "legend",
+        "layers",
+        "details",
+        "data-table"
+      ]
+    }
+  },
+  "components": [
+    "north-arrow"
+  ],
+  "corePackages": [],
+  "externalPackages": [],
+  "suportedLanguages": [
+    "en",
+    "fr"
+  ]
+}

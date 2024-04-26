@@ -206,7 +206,7 @@ The viewer is bundled with core packages, you can load them by passing their id 
             'core': ['time-slider']
           }
         },
-        'theme': 'dark',
+        'theme': 'geo.ca',
         'suportedLanguages': ['en']
       }"
 ></div>

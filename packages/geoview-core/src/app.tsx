@@ -81,11 +81,11 @@ async function renderMap(mapElement: Element): Promise<void> {
  * @param {HTMLElement} mapDiv - The basic div to initialise
  * @param {string} mapConfig - The new config passed in from the function call
  */
-export async function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig: string): Promise<void> {
+export async function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig: string, url: boolean): Promise<void> {
   // If the div doesn't have a geoview-map class (therefore isn't supposed to be loaded via init())
   if (!mapDiv.classList.contains('geoview-map')) {
     // Create a data-config attribute and set config value on the div
-    const att = document.createAttribute('data-config');
+    const att = document.createAttribute(url ? 'data-config-url' : 'data-config');
     att.value = mapConfig;
     mapDiv.setAttributeNode(att);
 
