@@ -10,13 +10,20 @@
       "labeled": true
     }
   },
-  "theme": "dark",
-  "components": ["north-arrow", "overview-map"],
+  "theme": "geo.ca",
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
   "corePackages": [],
   "appBar": {
     "tabs": {
-      "core": ["basemap-panel"]
+      "core": [
+        "basemap-panel"
+      ]
     }
   },
-  "suportedLanguages": ["en"]
+  "suportedLanguages": [
+    "en"
+  ]
 }

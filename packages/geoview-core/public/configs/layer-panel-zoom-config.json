@@ -87,13 +87,19 @@
       }
     ]
   },
-  "theme": "dark",
+  "theme": "geo.ca",
   "components": [],
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details"]
+      "core": [
+        "legend",
+        "layers",
+        "details"
+      ]
     }
   },
   "corePackages": [],
-  "suportedLanguages": ["en"]
+  "suportedLanguages": [
+    "en"
+  ]
 }

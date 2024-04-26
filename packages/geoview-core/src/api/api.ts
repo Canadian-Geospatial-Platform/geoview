@@ -101,8 +101,8 @@ export class API {
    * GV The div MUST NOT have a geoview-map class or a warning will be shown when initMapDivFromFunctionCall is called.
    * If is present, the div will be created with a default config
    *
-   * @param {string} divId the id of the div to create map in
-   * @param {string} mapConfig the config passed in from the function call
+   * @param {string} divId - id of the div to create map in
+   * @param {string} mapConfig - config passed in from the function call
    */
   createMapFromConfig = (divId: string, mapConfig: string): Promise<void> => {
     // Get the map div
@@ -111,7 +111,30 @@ export class API {
     // If found the map div
     if (mapDiv) {
       // Init by function call
-      return initMapDivFromFunctionCall(mapDiv, mapConfig);
+      return initMapDivFromFunctionCall(mapDiv, mapConfig, false);
+    }
+
+    // Log error
+    logger.logError(`Div with id ${divId} does not exist`);
+    return Promise.reject(new Error(`Div with id ${divId} does not exist`));
+  };
+
+  /**
+   * Create a new map in a given div id.
+   * GV The div MUST NOT have a geoview-map class or a warning will be shown when initMapDivFromFunctionCall is called.
+   * If is present, the div will be created with a default config
+   *
+   * @param {string} divId - id of the div to create map in
+   * @param {string} mapConfigURL - url to access the config passed in from the function call
+   */
+  createMapFromConfigURL = (divId: string, mapConfig: string): Promise<void> => {
+    // Get the map div
+    const mapDiv = document.getElementById(divId);
+
+    // If found the map div
+    if (mapDiv) {
+      // Init by function call
+      return initMapDivFromFunctionCall(mapDiv, mapConfig, true);
     }
 
     // Log error
