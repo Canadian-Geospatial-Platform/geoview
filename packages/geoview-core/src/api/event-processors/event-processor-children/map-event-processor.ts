@@ -745,6 +745,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   static zoomToInitialExtent(mapId: string): Promise<void> {
+    if (getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView?.extent)
+      return this.zoomToExtent(mapId, getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView?.extent as Extent);
+    if (getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView?.layerIds) {
+      const extents = api.maps[mapId].layer.getExtentOfMultipleLayers(
+        getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView?.layerIds
+      );
+      if (extents) return this.zoomToExtent(mapId, extents);
+    }
     const center = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter![1];
     const zoom = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter![0];
     const projectedCoords = Projection.transformPoints(
@@ -754,7 +762,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
     );
     const extent: Extent = [...projectedCoords[0], ...projectedCoords[0]];
     const options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: zoom, duration: OL_ZOOM_DURATION };
-
     return this.zoomToExtent(mapId, extent, options);
   }
 
