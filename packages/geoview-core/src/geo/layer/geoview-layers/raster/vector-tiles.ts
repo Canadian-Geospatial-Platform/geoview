@@ -30,8 +30,9 @@ import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
-import { TileLayerEntryConfig } from '@/core/utils/config/validation-classes/tile-layer-entry-config';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 
 // TODO: Implement method to validate Vector Tiles service
 // TODO: Add more customization (minZoom, maxZoom, TMS)
@@ -139,11 +140,11 @@ export class VectorTiles extends AbstractGeoViewRaster {
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
+  protected obsoleteConfigValidateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
-        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
+        this.obsoleteConfigValidateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
         if (!layerConfig?.listOfLayerEntryConfig?.length) {
           this.layerLoadError.push({
             layer: layerPath,
@@ -167,10 +168,12 @@ export class VectorTiles extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  protected override async processOneLayerEntry(layerConfig: VectorTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected override async obsoleteConfigProcessOneLayerEntry(
+    layerConfig: VectorTilesLayerEntryConfig
+  ): Promise<TypeBaseRasterLayer | null> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
-    await super.processOneLayerEntry(layerConfig);
+    await super.obsoleteConfigProcessOneLayerEntry(layerConfig);
     const sourceOptions: SourceOptions<Feature> = {
       url: getLocalizedValue(layerConfig.source.dataAccessPath as TypeLocalizedString, AppEventProcessor.getDisplayLanguage(this.mapId)),
     };
@@ -250,8 +253,11 @@ export class VectorTiles extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected override processLayerMetadata(layerConfig: TileLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected override obsoleteConfigProcessLayerMetadata(
+    layerConfig: AbstractBaseLayerEntryConfig | GroupLayerEntryConfig
+  ): Promise<TypeLayerEntryConfig> {
     if (this.metadata) {
+      const vectorLayerConfig = layerConfig as VectorTilesLayerEntryConfig;
       const { tileInfo } = this.metadata;
       const extent = this.metadata.fullExtent;
       const newTileGrid: TypeTileGrid = {
@@ -261,7 +267,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
         tileSize: [tileInfo.rows as number, tileInfo.cols as number],
       };
       // eslint-disable-next-line no-param-reassign
-      layerConfig.source!.tileGrid = newTileGrid;
+      vectorLayerConfig.source!.tileGrid = newTileGrid;
 
       if (layerConfig.initialSettings?.extent)
         // eslint-disable-next-line no-param-reassign

@@ -117,7 +117,7 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected override async fetchServiceMetadata(): Promise<void> {
+  protected override async obsoleteConfigFetchServiceMetadata(): Promise<void> {
     const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
     if (metadataUrl) {
       const metadataAccessPathIsXmlFile = metadataUrl.slice(-4).toLowerCase() === '.xml';
@@ -177,12 +177,12 @@ export class WMS extends AbstractGeoViewRaster {
             }
             this.processMetadataInheritance();
           } catch (error) {
-            this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
+            this.obsoleteConfigSetAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
           }
         }
       }
     } else {
-      this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
+      this.obsoleteConfigSetAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
     }
   }
 
@@ -201,7 +201,7 @@ export class WMS extends AbstractGeoViewRaster {
       const metadata: TypeJsonObject = parser.read(capabilitiesString);
       return metadata;
     } catch (error) {
-      this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
+      this.obsoleteConfigSetAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
       return null;
     }
   }
@@ -236,10 +236,10 @@ export class WMS extends AbstractGeoViewRaster {
         };
         setDataAccessPath(this.listOfLayerEntryConfig);
       } else {
-        this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
+        this.obsoleteConfigSetAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
       }
     } catch (error) {
-      this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
+      this.obsoleteConfigSetAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
     }
   }
 
@@ -378,11 +378,11 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
+  protected obsoleteConfigValidateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
-        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
+        this.obsoleteConfigValidateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
         if (!layerConfig?.listOfLayerEntryConfig?.length) {
           this.layerLoadError.push({
             layer: layerPath,
@@ -407,7 +407,7 @@ export class WMS extends AbstractGeoViewRaster {
         }
 
         if ('Layer' in layerFound) {
-          this.createGroupLayer(layerFound, layerConfig as AbstractBaseLayerEntryConfig);
+          this.obsoleteConfigCreateGroupLayer(layerFound, layerConfig as AbstractBaseLayerEntryConfig);
           return;
         }
 
@@ -426,7 +426,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeJsonObject} layer The dynamic group layer metadata.
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer configurstion associated to the dynamic group.
    */
-  private createGroupLayer(layer: TypeJsonObject, layerConfig: AbstractBaseLayerEntryConfig): void {
+  private obsoleteConfigCreateGroupLayer(layer: TypeJsonObject, layerConfig: AbstractBaseLayerEntryConfig): void {
     // TODO: Refactor - createGroup is the same thing for all the layers type? group is a geoview structure.
     // TO.DOCONT: Should it be handle upper in abstract class to loop in structure and launch the creation of a leaf?
     const newListOfLayerEntryConfig: TypeListOfLayerEntryConfig = [];
@@ -454,7 +454,7 @@ export class WMS extends AbstractGeoViewRaster {
     };
     switchToGroupLayer.isMetadataLayerGroup = true;
     switchToGroupLayer.listOfLayerEntryConfig = newListOfLayerEntryConfig;
-    this.validateListOfLayerEntryConfig(newListOfLayerEntryConfig);
+    this.obsoleteConfigValidateListOfLayerEntryConfig(newListOfLayerEntryConfig);
   }
 
   /** ****************************************************************************************************************************
@@ -491,10 +491,12 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer | null} The GeoView raster layer that has been created.
    */
-  protected override async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected override async obsoleteConfigProcessOneLayerEntry(
+    layerConfig: AbstractBaseLayerEntryConfig
+  ): Promise<TypeBaseRasterLayer | null> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
-    await super.processOneLayerEntry(layerConfig);
+    await super.obsoleteConfigProcessOneLayerEntry(layerConfig);
     // Log
     logger.logTraceCore('WMS - processOneLayerEntry', layerConfig.layerPath);
 
@@ -576,7 +578,9 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
-  protected override processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected override obsoleteConfigProcessLayerMetadata(
+    layerConfig: AbstractBaseLayerEntryConfig | GroupLayerEntryConfig
+  ): Promise<TypeLayerEntryConfig> {
     if (geoviewEntryIsWMS(layerConfig)) {
       const layerCapabilities = this.getLayerMetadataEntry(layerConfig.layerId)!;
       this.layerMetadata[layerConfig.layerPath] = layerCapabilities;
@@ -618,7 +622,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected processTemporalDimension(wmsTimeDimension: TypeJsonObject, layerConfig: OgcWmsLayerEntryConfig): void {
     if (wmsTimeDimension !== undefined) {
-      this.layerTemporalDimension[layerConfig.layerPath] = DateMgt.createDimensionFromOGC(wmsTimeDimension);
+      this.obsoleteConfigSetTemporalDimension(layerConfig.layerPath, DateMgt.createDimensionFromOGC(wmsTimeDimension));
     }
   }
 

@@ -28,6 +28,7 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 
 export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'featureAPI';
@@ -126,7 +127,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected override fetchServiceMetadata(): Promise<void> {
+  protected override obsoleteConfigFetchServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
       if (metadataUrl) {
@@ -138,12 +139,12 @@ export class OgcFeature extends AbstractGeoViewVector {
             resolve();
           })
           .catch((reason) => {
-            this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
+            this.obsoleteConfigSetAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
             logger.logError('Unable to fetch metadata', this.metadataAccessPath, reason);
             resolve();
           });
       } else {
-        this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
+        this.obsoleteConfigSetAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
       }
     });
     return promisedExecution;
@@ -155,11 +156,11 @@ export class OgcFeature extends AbstractGeoViewVector {
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
+  protected obsoleteConfigValidateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
-        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
+        this.obsoleteConfigValidateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
         if (!layerConfig.listOfLayerEntryConfig.length) {
           this.layerLoadError.push({
             layer: layerPath,
@@ -222,7 +223,9 @@ export class OgcFeature extends AbstractGeoViewVector {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected override async processLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected override async obsoleteConfigProcessLayerMetadata(
+    layerConfig: AbstractBaseLayerEntryConfig | GroupLayerEntryConfig
+  ): Promise<TypeLayerEntryConfig> {
     try {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
       if (metadataUrl) {
@@ -231,8 +234,9 @@ export class OgcFeature extends AbstractGeoViewVector {
           : `${metadataUrl}/collections/${String(layerConfig.layerId)}/queryables?f=json`;
         const queryResult = await axios.get<TypeJsonObject>(queryUrl);
         if (queryResult.data.properties) {
+          const vectorLayerConfig = layerConfig as VectorLayerEntryConfig;
           this.layerMetadata[layerConfig.layerPath] = queryResult.data.properties;
-          OgcFeature.#processFeatureInfoConfig(queryResult.data.properties, layerConfig);
+          OgcFeature.#processFeatureInfoConfig(queryResult.data.properties, vectorLayerConfig);
         }
       }
     } catch (error) {

@@ -17,6 +17,7 @@ import { TileLayerEntryConfig } from '@/core/utils/config/validation-classes/til
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeJsonValue } from '@/core/types/global-types';
+import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 
 // #region UTILITIES TYPES
 
@@ -488,7 +489,7 @@ export interface TypeVectorTileSourceInitialConfig extends TypeBaseSourceVectorI
 export type TypeLayerEntryConfig =
   | AbstractBaseLayerEntryConfig
   | VectorLayerEntryConfig
-  | VectorLayerEntryConfig
+  | VectorTilesLayerEntryConfig
   | OgcWmsLayerEntryConfig
   | EsriDynamicLayerEntryConfig
   | EsriImageLayerEntryConfig

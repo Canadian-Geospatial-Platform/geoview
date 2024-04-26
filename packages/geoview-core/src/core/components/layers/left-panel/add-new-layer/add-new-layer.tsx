@@ -247,7 +247,7 @@ export function AddNewLayer(): JSX.Element {
       // Synchronize the geoviewLayerId.
       wmsGeoviewLayerConfig.geoviewLayerId = wmsGeoviewLayerInstance.geoviewLayerId;
       setGeoviewLayerInstance(wmsGeoviewLayerInstance);
-      await wmsGeoviewLayerInstance.createGeoViewLayers();
+      await wmsGeoviewLayerInstance.obsoleteConfigAndLayerCreateGeoViewLayers();
       if (!wmsGeoviewLayerInstance.metadata) throw new Error('Cannot get metadata');
       setHasMetadata(true);
       const wmsMetadata = wmsGeoviewLayerInstance.metadata;
@@ -320,7 +320,7 @@ export function AddNewLayer(): JSX.Element {
       // Synchronize the geoviewLayerId.
       wfsGeoviewLayerConfig.geoviewLayerId = wfsGeoviewLayerInstance.geoviewLayerId;
       setGeoviewLayerInstance(wfsGeoviewLayerInstance);
-      await wfsGeoviewLayerInstance.createGeoViewLayers();
+      await wfsGeoviewLayerInstance.obsoleteConfigAndLayerCreateGeoViewLayers();
       if (!wfsGeoviewLayerInstance.metadata) throw new Error('Cannot get metadata');
       setHasMetadata(true);
       const wfsMetadata = wfsGeoviewLayerInstance.metadata;
@@ -363,7 +363,7 @@ export function AddNewLayer(): JSX.Element {
       // Synchronize the geoviewLayerId.
       ogcFeatureGeoviewLayerConfig.geoviewLayerId = ogcFeatureInstance.geoviewLayerId;
       setGeoviewLayerInstance(ogcFeatureInstance);
-      await ogcFeatureInstance.createGeoViewLayers();
+      await ogcFeatureInstance.obsoleteConfigAndLayerCreateGeoViewLayers();
       const ogcFeatureMetadata = ogcFeatureInstance.metadata!;
       if (!ogcFeatureInstance.metadata) throw new Error('Cannot get metadata');
       setHasMetadata(true);
@@ -469,7 +469,7 @@ export function AddNewLayer(): JSX.Element {
       // Synchronize the geoviewLayerId.
       esriGeoviewLayerConfig.geoviewLayerId = esriGeoviewLayerInstance.geoviewLayerId;
       setGeoviewLayerInstance(esriGeoviewLayerInstance);
-      await esriGeoviewLayerInstance.createGeoViewLayers();
+      await esriGeoviewLayerInstance.obsoleteConfigAndLayerCreateGeoViewLayers();
       const esriMetadata = esriGeoviewLayerInstance.metadata!;
       if (!esriMetadata) throw new Error('Cannot get metadata');
       setHasMetadata(true);
@@ -539,7 +539,7 @@ export function AddNewLayer(): JSX.Element {
       // Synchronize the geoviewLayerId.
       esriImageGeoviewLayerConfig.geoviewLayerId = esriImageGeoviewLayerInstance.geoviewLayerId;
       setGeoviewLayerInstance(esriImageGeoviewLayerInstance);
-      await esriImageGeoviewLayerInstance.createGeoViewLayers();
+      await esriImageGeoviewLayerInstance.obsoleteConfigAndLayerCreateGeoViewLayers();
       const layers = [
         new EsriImageLayerEntryConfig({
           geoviewLayerConfig: esriImageGeoviewLayerConfig,
@@ -583,7 +583,7 @@ export function AddNewLayer(): JSX.Element {
       // Synchronize the geoviewLayerId.
       xyzGeoviewLayerConfig.geoviewLayerId = xyzGeoviewLayerInstance.geoviewLayerId;
       setGeoviewLayerInstance(xyzGeoviewLayerInstance);
-      await xyzGeoviewLayerInstance.createGeoViewLayers();
+      await xyzGeoviewLayerInstance.obsoleteConfigAndLayerCreateGeoViewLayers();
       setHasMetadata(false);
       const layers = [
         new XYZTilesLayerEntryConfig({
@@ -621,7 +621,7 @@ export function AddNewLayer(): JSX.Element {
       // Synchronize the geoviewLayerId.
       csvGeoviewLayerConfig.geoviewLayerId = csvGeoviewLayerInstance.geoviewLayerId;
       setGeoviewLayerInstance(csvGeoviewLayerInstance);
-      await csvGeoviewLayerInstance.createGeoViewLayers();
+      await csvGeoviewLayerInstance.obsoleteConfigAndLayerCreateGeoViewLayers();
       const layers = [
         new CsvLayerEntryConfig({
           geoviewLayerConfig: csvGeoviewLayerConfig,
@@ -662,7 +662,7 @@ export function AddNewLayer(): JSX.Element {
         // Synchronize the geoviewLayerId.
         geojsonGeoviewLayerConfig.geoviewLayerId = geojsonGeoviewLayerInstance.geoviewLayerId;
         setGeoviewLayerInstance(geojsonGeoviewLayerInstance);
-        await geojsonGeoviewLayerInstance.createGeoViewLayers();
+        await geojsonGeoviewLayerInstance.obsoleteConfigAndLayerCreateGeoViewLayers();
         setHasMetadata(true);
         if (!geojsonGeoviewLayerInstance.metadata) throw new Error('Cannot get metadata');
         const geojsonFeatureMetadata = geojsonGeoviewLayerInstance.metadata!;
@@ -687,7 +687,7 @@ export function AddNewLayer(): JSX.Element {
         // Synchronize the geoviewLayerId.
         geojsonGeoviewLayerConfig.geoviewLayerId = geojsonGeoviewLayerInstance.geoviewLayerId;
         setGeoviewLayerInstance(geojsonGeoviewLayerInstance);
-        await geojsonGeoviewLayerInstance.createGeoViewLayers();
+        await geojsonGeoviewLayerInstance.obsoleteConfigAndLayerCreateGeoViewLayers();
         const layers = [
           new GeoJSONLayerEntryConfig({
             geoviewLayerConfig: geojsonGeoviewLayerConfig,
@@ -849,9 +849,9 @@ export function AddNewLayer(): JSX.Element {
   };
 
   const doneAddedShowMessage = (layerBeingAdded: AbstractGeoViewLayer): void => {
-    if (layerBeingAdded.allLayerStatusAreGreaterThanOrEqualTo('error'))
+    if (layerBeingAdded.obsoleteConfigAllLayerStatusAreGreaterThanOrEqualTo('error'))
       api.maps[mapId].notifications.showMessage('layers.layerAddedWithError', [layerName]);
-    else if (layerBeingAdded?.allLayerStatusAreGreaterThanOrEqualTo('loaded'))
+    else if (layerBeingAdded?.obsoleteConfigAllLayerStatusAreGreaterThanOrEqualTo('loaded'))
       api.maps[mapId].notifications.showMessage('layers.layerAdded', [layerName]);
     else api.maps[mapId].notifications.showMessage('layers.layerAddedAndLoading', [layerName]);
   };

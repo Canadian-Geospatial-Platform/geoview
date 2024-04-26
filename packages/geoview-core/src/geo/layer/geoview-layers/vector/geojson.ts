@@ -26,6 +26,7 @@ import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'GeoJSON';
@@ -102,11 +103,11 @@ export class GeoJSON extends AbstractGeoViewVector {
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
+  protected obsoleteConfigValidateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
-        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
+        this.obsoleteConfigValidateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
         if (!layerConfig.listOfLayerEntryConfig.length) {
           this.layerLoadError.push({
             layer: layerPath,
@@ -155,18 +156,21 @@ export class GeoJSON extends AbstractGeoViewVector {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected override processLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected override obsoleteConfigProcessLayerMetadata(
+    layerConfig: AbstractBaseLayerEntryConfig | GroupLayerEntryConfig
+  ): Promise<TypeLayerEntryConfig> {
     if (this.metadata) {
       const metadataLayerList = Cast<VectorLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
       const layerMetadataFound = metadataLayerList.find(
         (layerMetadata) => layerMetadata.layerId === layerConfig.layerId && layerMetadata.layerIdExtension === layerConfig.layerIdExtension
       );
       if (layerMetadataFound) {
+        const vectorLayerConfig = layerConfig as VectorLayerEntryConfig;
         this.layerMetadata[layerConfig.layerPath] = toJsonObject(layerMetadataFound);
         layerConfig.layerName = layerConfig.layerName || layerMetadataFound.layerName;
         layerConfig.source = defaultsDeep(layerConfig.source, layerMetadataFound.source);
         layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, layerMetadataFound.initialSettings);
-        layerConfig.style = defaultsDeep(layerConfig.style, layerMetadataFound.style);
+        vectorLayerConfig.style = defaultsDeep(vectorLayerConfig.style, layerMetadataFound.style);
         // When the dataAccessPath stored in the layerConfig.source object is equal to the root of the metadataAccessPath with a
         // layerId ending, chances are that it was set by the config-validation because of an empty dataAcessPath value in the config.
         // This situation means that we want to use the dataAccessPath found in the metadata if it is set, otherwise we will keep the

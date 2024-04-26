@@ -27,6 +27,8 @@ import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vect
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
+import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'WFS';
@@ -121,7 +123,7 @@ export class WFS extends AbstractGeoViewVector {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected override fetchServiceMetadata(): Promise<void> {
+  protected override obsoleteConfigFetchServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
       let metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId)) as string;
 
@@ -134,7 +136,7 @@ export class WFS extends AbstractGeoViewVector {
         getXMLHttpRequest(`${metadataUrl}${getCapabilitiesUrl}`)
           .then((metadataString) => {
             if (metadataString === '{}') {
-              this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
+              this.obsoleteConfigSetAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
             } else {
               // need to pass a xmldom to xmlToJson
               const xmlDOMCapabilities = new DOMParser().parseFromString(metadataString, 'text/xml');
@@ -148,12 +150,12 @@ export class WFS extends AbstractGeoViewVector {
             }
           })
           .catch((reason) => {
-            this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
+            this.obsoleteConfigSetAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
             logger.logError('Unableto fetch metadata', this.metadataAccessPath, reason);
             resolve();
           });
       } else {
-        this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
+        this.obsoleteConfigSetAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
       }
     });
     return promisedExecution;
@@ -165,11 +167,11 @@ export class WFS extends AbstractGeoViewVector {
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
+  protected obsoleteConfigValidateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
-        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
+        this.obsoleteConfigValidateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
         if (!layerConfig.listOfLayerEntryConfig.length) {
           this.layerLoadError.push({
             layer: layerPath,
@@ -235,7 +237,9 @@ export class WFS extends AbstractGeoViewVector {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected override async processLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected override async obsoleteConfigProcessLayerMetadata(
+    layerConfig: AbstractBaseLayerEntryConfig | GroupLayerEntryConfig
+  ): Promise<TypeLayerEntryConfig> {
     try {
       let queryUrl = getLocalizedValue(layerConfig.source!.dataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
 
@@ -260,11 +264,12 @@ export class WFS extends AbstractGeoViewVector {
         this.version
       }&outputFormat=${encodeURIComponent(outputFormat as string)}&typeName=${layerConfig.layerId}`;
 
+      const esriFeatureLayerConfig = layerConfig as EsriFeatureLayerEntryConfig;
       if (describeFeatureUrl && outputFormat === 'application/json') {
         const layerMetadata = (await (await fetch(describeFeatureUrl)).json()) as TypeJsonObject;
         if (Array.isArray(layerMetadata.featureTypes) && Array.isArray(layerMetadata.featureTypes[0].properties)) {
           this.layerMetadata[layerConfig.layerPath] = layerMetadata.featureTypes[0].properties;
-          this.#processFeatureInfoConfig(layerMetadata.featureTypes[0].properties as TypeJsonArray, layerConfig);
+          this.#processFeatureInfoConfig(layerMetadata.featureTypes[0].properties as TypeJsonArray, esriFeatureLayerConfig);
         }
       } else if (describeFeatureUrl && outputFormat.toUpperCase().includes('XML')) {
         const layerMetadata = (await (await fetch(describeFeatureUrl)).text()) as string;
@@ -288,7 +293,7 @@ export class WFS extends AbstractGeoViewVector {
           });
 
           this.layerMetadata[layerConfig.layerPath] = featureTypeProperties as TypeJsonObject;
-          this.#processFeatureInfoConfig(featureTypeProperties as TypeJsonArray, layerConfig);
+          this.#processFeatureInfoConfig(featureTypeProperties as TypeJsonArray, esriFeatureLayerConfig);
         }
       }
     } catch (error) {

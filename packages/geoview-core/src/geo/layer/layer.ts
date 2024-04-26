@@ -212,14 +212,14 @@ export class LayerApi {
         .map((promise) => promise as PromiseFulfilledResult<TypeListOfGeoviewLayerConfig>)
         .forEach((promise) => {
           // For each layer
-          promise.value.forEach((geocoreGVLayer) => {
+          promise.value.forEach((geoviewLayerConfig) => {
             try {
               // Generate array of layer order information
-              const layerInfos = LayerApi.generateArrayOfLayerOrderInfo(geocoreGVLayer);
+              const layerInfos = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
               orderedLayerInfos.push(...layerInfos);
 
               // Add it
-              const addedResult = this.addGeoviewLayer(geocoreGVLayer);
+              const addedResult = this.addGeoviewLayer(geoviewLayerConfig);
 
               // If processed far enough to have a result with a promise
               if (addedResult) {
@@ -243,7 +243,7 @@ export class LayerApi {
                 });
               } else {
                 // Layer failed to get created
-                throw new GeoViewLayerNotCreatedError(geocoreGVLayer.geoviewLayerId, this.mapId);
+                throw new GeoViewLayerNotCreatedError(geoviewLayerConfig.geoviewLayerId, this.mapId);
               }
             } catch (error) {
               // Layer encountered a generic error when being created and added to the map
@@ -415,13 +415,13 @@ export class LayerApi {
 
       // Prepare mandatory registrations
       // TODO: Refactor - this shouldn't have to be mandatory! And not a function of the layer.
-      layerBeingAdded.initRegisteredLayers(this);
+      layerBeingAdded.obsoleteConfigInitRegisteredLayers(this);
 
       // Create a promise about the layer will be on the map
       const promiseLayer = new Promise<void>((resolve, reject) => {
         // Continue the addition process
         layerBeingAdded!
-          .createGeoViewLayers()
+          .obsoleteConfigAndLayerCreateGeoViewLayers()
           .then(() => {
             // Add the layer on the map
             this.#addToMap(layerBeingAdded!);
@@ -468,7 +468,7 @@ export class LayerApi {
     }
 
     // If all layer status are good
-    if (!geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('error')) {
+    if (!geoviewLayer.obsoleteConfigAllLayerStatusAreGreaterThanOrEqualTo('error')) {
       // Add the OpenLayers layer to the map officially
       this.mapViewer.map.addLayer(geoviewLayer.olLayers!);
     }
@@ -751,7 +751,7 @@ export class LayerApi {
       const pathBeginningAreEqual = partialLayerPathNodes.reduce<boolean>((areEqual, partialLayerPathNode, nodeIndex) => {
         return areEqual && partialLayerPathNode === completeLayerPathNodes[nodeIndex];
       }, true);
-      if (pathBeginningAreEqual) this.geoviewLayer(completeLayerPath).removeConfig(completeLayerPath);
+      if (pathBeginningAreEqual) this.geoviewLayer(completeLayerPath).obsoleteLayerAPIRemoveConfig(completeLayerPath);
     });
     if (listOfLayerEntryConfigAffected) listOfLayerEntryConfigAffected.splice(indexToDelete!, 1);
 
@@ -860,7 +860,7 @@ export class LayerApi {
     // Wait for the processed phase
     await whenThisThen(
       () => {
-        return geoviewLayerConfig.allLayerStatusAreGreaterThanOrEqualTo('processed');
+        return geoviewLayerConfig.obsoleteConfigAllLayerStatusAreGreaterThanOrEqualTo('processed');
       },
       timeout,
       checkFrequency

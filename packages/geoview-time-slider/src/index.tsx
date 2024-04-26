@@ -131,18 +131,18 @@ class TimeSliderPlugin extends FooterPlugin {
         // TO.DOCONT: using event listeners, not at Plugin creation.
         MapEventProcessor.getMapViewerLayerAPI(this.pluginProps.mapId)
           .geoviewLayer(obj.layerPaths[0])
-          .setTemporalDimension(obj.layerPaths[0], timeDimension);
+          .obsoleteConfigSetTemporalDimension(obj.layerPaths[0], timeDimension);
       }
 
       // Set override default value under time dimension if applicable
       if (obj.defaultValue) {
         const layerPath = obj.layerPaths[0];
-        const timeDimension = MapEventProcessor.getMapViewerLayerAPI(this.pluginProps.mapId).geoviewLayer(layerPath).layerTemporalDimension[
-          layerPath
-        ];
+        const timeDimension = MapEventProcessor.getMapViewerLayerAPI(this.pluginProps.mapId)
+          .geoviewLayer(layerPath)
+          .getTemporalDimension(layerPath);
         MapEventProcessor.getMapViewerLayerAPI(this.pluginProps.mapId)
           .geoviewLayer(layerPath)
-          .setTemporalDimension(layerPath, {
+          .obsoleteConfigSetTemporalDimension(layerPath, {
             ...timeDimension,
             default: obj.defaultValue,
           });
@@ -194,8 +194,8 @@ class TimeSliderPlugin extends FooterPlugin {
    * @private
    */
   #filterTimeSliderLayers(layerPaths: string[]): string[] {
-    const filteredLayerPaths = layerPaths.filter(
-      (layerPath) => this.mapViewer().layer.geoviewLayers[layerPath.split('/')[0]].layerTemporalDimension[layerPath]
+    const filteredLayerPaths = layerPaths.filter((layerPath) =>
+      this.mapViewer().layer.geoviewLayers[layerPath.split('/')[0]].getTemporalDimension(layerPath)
     );
     return filteredLayerPaths;
   }

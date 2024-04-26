@@ -75,10 +75,6 @@ export class LegendsLayerSet extends AbstractLayerSet {
             // Log
             logger.logPromiseFailed('legendPromise in onProcessLayerStatusChanged in legendsLayerSet', error);
           });
-
-        // config file could not determine if the layer is queryable, can it be done using the metadata? let's try
-        // ? Trying to comment this line to see if it's good, don't understand the comment line just above this line
-        // layerConfig.geoviewLayerInstance?.registerToLayerSets(layerConfig as AbstractBaseLayerEntryConfig);
       }
 
       if (layerExists || layerStatus === 'loaded') {

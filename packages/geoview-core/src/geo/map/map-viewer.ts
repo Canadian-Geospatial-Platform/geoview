@@ -475,7 +475,7 @@ export class MapViewer {
         let allGeoviewLayerRegistered =
           this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
         Object.values(geoviewLayers).forEach((geoviewLayer) => {
-          const layerIsRegistered = geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('registered');
+          const layerIsRegistered = geoviewLayer.obsoleteConfigAllLayerStatusAreGreaterThanOrEqualTo('registered');
           if (!layerIsRegistered) logger.logTraceDetailed('checkMapReady - wating on layer registration...', geoviewLayer.geoviewLayerId);
           allGeoviewLayerRegistered &&= layerIsRegistered;
         });
@@ -576,7 +576,7 @@ export class MapViewer {
         let allGeoviewLayerLoaded =
           this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
         Object.values(geoviewLayers).forEach((geoviewLayer) => {
-          const layerIsLoaded = geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('processed');
+          const layerIsLoaded = geoviewLayer.obsoleteConfigAllLayerStatusAreGreaterThanOrEqualTo('processed');
           if (!layerIsLoaded)
             logger.logTraceDetailed('checkMapLayersProcessed - waiting on layer processed...', geoviewLayer.geoviewLayerId);
           allGeoviewLayerLoaded &&= layerIsLoaded;
@@ -632,7 +632,7 @@ export class MapViewer {
         let allGeoviewLayerLoaded =
           this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
         Object.values(geoviewLayers).forEach((geoviewLayer) => {
-          const layerIsLoaded = geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('loaded');
+          const layerIsLoaded = geoviewLayer.obsoleteConfigAllLayerStatusAreGreaterThanOrEqualTo('loaded');
           if (!layerIsLoaded)
             logger.logTraceDetailed('checkMapLayersLoaded - waiting on layer loaded/error...', geoviewLayer.geoviewLayerId);
           allGeoviewLayerLoaded &&= layerIsLoaded;

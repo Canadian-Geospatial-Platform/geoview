@@ -173,7 +173,9 @@ export class ConfigBaseClass {
       // eslint-disable-next-line no-underscore-dangle
       this._layerStatus === 'loaded' &&
       this.parentLayerConfig &&
-      this.geoviewLayerInstance!.allLayerStatusAreGreaterThanOrEqualTo('loaded', [this.parentLayerConfig as GroupLayerEntryConfig])
+      this.geoviewLayerInstance!.obsoleteConfigAllLayerStatusAreGreaterThanOrEqualTo('loaded', [
+        this.parentLayerConfig as GroupLayerEntryConfig,
+      ])
     )
       (this.parentLayerConfig as GroupLayerEntryConfig).layerStatus = 'loaded';
   }
@@ -183,9 +185,6 @@ export class ConfigBaseClass {
    * @param {LayerStatusChangedEvent} event The event to emit
    * @private
    */
-  // TODO: refactor - if this emit is privare with #,  abstract-base-layer-entry-config.ts:28 Uncaught (in promise) TypeError: Private element is not present on this object
-  // TD.CONT: this by pass the error, I need to set this public. The problem come from the groupLayer object trying to emit this event but
-  // TD.CONT: the event is not define so this.onLayerStatus.... failed
   #emitLayerStatusChanged(event: LayerStatusChangedEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerStatusChangedHandlers, event);
@@ -222,7 +221,7 @@ export class ConfigBaseClass {
     // TODO: Check - Move this registerToLayerSets closer to the others, when I comment the line it seems good, except
     // TO.DOCONT: for an 'Anonymous' group layer that never got 'loaded'. See if we can fix this elsewhere and remove this.
     if (this.entryType !== CONST_LAYER_ENTRY_TYPES.GROUP)
-      (this.geoviewLayerInstance as AbstractGeoViewLayer).registerToLayerSets(Cast<AbstractBaseLayerEntryConfig>(this));
+      (this.geoviewLayerInstance as AbstractGeoViewLayer).obsoleteLayerAPIRegisterToLayerSets(Cast<AbstractBaseLayerEntryConfig>(this));
 
     this.layerStatus = 'registered';
     return true;

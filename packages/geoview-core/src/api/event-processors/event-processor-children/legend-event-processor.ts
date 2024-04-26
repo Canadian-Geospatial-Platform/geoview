@@ -216,7 +216,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
         const myLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).geoviewLayers[layerPathNodes[0]];
         // TODO: calculateBounds issue will be tackle ASAP in a next PR
-        newLegendLayer.bounds = myLayer.allLayerStatusAreGreaterThanOrEqualTo('loaded') ? myLayer.calculateBounds(layerPath) : undefined;
+        newLegendLayer.bounds = myLayer.obsoleteConfigAllLayerStatusAreGreaterThanOrEqualTo('loaded')
+          ? myLayer.calculateBounds(layerPath)
+          : undefined;
       }
     };
 

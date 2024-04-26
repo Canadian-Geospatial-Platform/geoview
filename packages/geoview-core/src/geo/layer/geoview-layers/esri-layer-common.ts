@@ -36,24 +36,26 @@ import { AppEventProcessor } from '@/api/event-processors/event-processor-childr
  *
  * @returns {Promise<void>} A promise that the execution is completed.
  */
-export async function commonfetchServiceMetadata(this: EsriDynamic | EsriFeature): Promise<void> {
-  const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
+export async function commonfetchServiceMetadata(geoviewLayer: EsriDynamic | EsriFeature): Promise<void> {
+  const metadataUrl = getLocalizedValue(geoviewLayer.metadataAccessPath, AppEventProcessor.getDisplayLanguage(geoviewLayer.mapId));
   if (metadataUrl) {
     try {
       const metadataString = await getXMLHttpRequest(`${metadataUrl}?f=json`);
-      if (metadataString === '{}') this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
+      if (metadataString === '{}')
+        geoviewLayer.obsoleteConfigSetAllLayerStatusTo('error', geoviewLayer.listOfLayerEntryConfig, 'Unable to read metadata');
       else {
-        this.metadata = JSON.parse(metadataString) as TypeJsonObject;
-        if ('error' in this.metadata) throw new Error(`Error code = ${this.metadata.error.code}, ${this.metadata.error.message}`);
-        const { copyrightText } = this.metadata;
-        if (copyrightText) this.attributions.push(copyrightText as string);
+        geoviewLayer.metadata = JSON.parse(metadataString) as TypeJsonObject;
+        if ('error' in geoviewLayer.metadata)
+          throw new Error(`Error code = ${geoviewLayer.metadata.error.code}, ${geoviewLayer.metadata.error.message}`);
+        const { copyrightText } = geoviewLayer.metadata;
+        if (copyrightText) geoviewLayer.attributions.push(copyrightText as string);
       }
     } catch (error) {
       logger.logInfo('Unable to read metadata', error);
-      this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
+      geoviewLayer.obsoleteConfigSetAllLayerStatusTo('error', geoviewLayer.listOfLayerEntryConfig, 'Unable to read metadata');
     }
   } else {
-    this.setAllLayerStatusTo('error', this.listOfLayerEntryConfig, 'Unable to read metadata');
+    geoviewLayer.obsoleteConfigSetAllLayerStatusTo('error', geoviewLayer.listOfLayerEntryConfig, 'Unable to read metadata');
   }
 }
 
@@ -73,7 +75,7 @@ export function commonValidateListOfLayerEntryConfig(
     const { layerPath } = layerConfig;
 
     if (layerEntryIsGroupLayer(layerConfig)) {
-      this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
+      this.obsoleteConfigValidateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
       if (!(layerConfig as GroupLayerEntryConfig).listOfLayerEntryConfig.length) {
         this.layerLoadError.push({
           layer: layerPath,
@@ -149,7 +151,7 @@ export function commonValidateListOfLayerEntryConfig(
         subLayerEntryConfig.registerLayerConfig();
       });
 
-      this.validateListOfLayerEntryConfig(newListOfLayerEntryConfig);
+      this.obsoleteConfigValidateListOfLayerEntryConfig(newListOfLayerEntryConfig);
       return;
     }
 
@@ -228,9 +230,9 @@ export function commonProcessTemporalDimension(
   singleHandle?: boolean
 ): void {
   if (esriTimeDimension !== undefined) {
-    layer.layerTemporalDimension[layerConfig.layerPath] = DateMgt.createDimensionFromESRI(
-      Cast<TimeDimensionESRI>(esriTimeDimension),
-      singleHandle
+    layer.obsoleteConfigSetTemporalDimension(
+      layerConfig.layerPath,
+      DateMgt.createDimensionFromESRI(Cast<TimeDimensionESRI>(esriTimeDimension), singleHandle)
     );
   }
 }

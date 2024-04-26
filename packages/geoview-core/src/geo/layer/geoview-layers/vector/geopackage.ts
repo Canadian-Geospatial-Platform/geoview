@@ -130,8 +130,8 @@ export class GeoPackage extends AbstractGeoViewVector {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected override fetchServiceMetadata(): Promise<void> {
-    // Return resolved promise
+  protected override obsoleteConfigFetchServiceMetadata(): Promise<void> {
+    // Return empty resolved promise
     return Promise.resolve();
   }
 
@@ -141,11 +141,11 @@ export class GeoPackage extends AbstractGeoViewVector {
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
+  protected obsoleteConfigValidateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
-        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
+        this.obsoleteConfigValidateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
         if (!layerConfig.listOfLayerEntryConfig.length) {
           this.layerLoadError.push({
             layer: layerPath,
@@ -170,16 +170,19 @@ export class GeoPackage extends AbstractGeoViewVector {
    * @returns {Promise<BaseLayer | null>} The promise that the layers were processed.
    */
   // TODO: Question - Is this function still used or should it be removed in favor of the mother class implementation?
-  override processListOfLayerEntryConfig(
+  override obsoleteConfigProcessListOfLayerEntryConfig(
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
     layerGroup?: LayerGroup
   ): Promise<BaseLayer | null> {
     const promisedListOfLayerEntryProcessed = new Promise<BaseLayer | null>((resolve) => {
       // Single group layer handled recursively
       if (listOfLayerEntryConfig.length === 1 && layerEntryIsGroupLayer(listOfLayerEntryConfig[0])) {
-        const newLayerGroup = GeoPackage.createLayerGroup(listOfLayerEntryConfig[0], listOfLayerEntryConfig[0].initialSettings!);
+        const newLayerGroup = GeoPackage.obsoleteConfigCreateLayerGroup(
+          listOfLayerEntryConfig[0],
+          listOfLayerEntryConfig[0].initialSettings!
+        );
 
-        this.processListOfLayerEntryConfig(listOfLayerEntryConfig[0].listOfLayerEntryConfig!, newLayerGroup)
+        this.obsoleteConfigProcessListOfLayerEntryConfig(listOfLayerEntryConfig[0].listOfLayerEntryConfig!, newLayerGroup)
           .then((groupReturned) => {
             if (groupReturned) {
               if (layerGroup) layerGroup.getLayers().push(groupReturned);
@@ -199,15 +202,15 @@ export class GeoPackage extends AbstractGeoViewVector {
         // Multiple layer configs are processed individually and added to layer group
       } else if (listOfLayerEntryConfig.length > 1) {
         if (!layerGroup)
-          layerGroup = GeoPackage.createLayerGroup(
+          layerGroup = GeoPackage.obsoleteConfigCreateLayerGroup(
             listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig,
             listOfLayerEntryConfig[0].initialSettings!
           );
 
         listOfLayerEntryConfig.forEach((layerConfig) => {
           if (layerEntryIsGroupLayer(layerConfig)) {
-            const newLayerGroup = GeoPackage.createLayerGroup(layerConfig, layerConfig.initialSettings!);
-            this.processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!, newLayerGroup)
+            const newLayerGroup = GeoPackage.obsoleteConfigCreateLayerGroup(layerConfig, layerConfig.initialSettings!);
+            this.obsoleteConfigProcessListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!, newLayerGroup)
               .then((groupReturned) => {
                 if (groupReturned) {
                   layerGroup!.getLayers().push(groupReturned);
@@ -224,7 +227,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                 logger.logPromiseFailed('processListOfLayerEntryConfig (2) in processListOfLayerEntryConfig in GeoPackage', error);
               });
           } else {
-            this.processOneLayerEntry(layerConfig as AbstractBaseLayerEntryConfig)
+            this.obsoleteConfigProcessOneLayerEntry(layerConfig as AbstractBaseLayerEntryConfig)
               .then((layers) => {
                 if (layers) {
                   layerGroup!.getLayers().push(layers);
@@ -246,7 +249,7 @@ export class GeoPackage extends AbstractGeoViewVector {
         if (layerGroup) resolve(layerGroup);
         // Single non-group config
       } else {
-        this.processOneLayerEntry(listOfLayerEntryConfig[0] as AbstractBaseLayerEntryConfig, layerGroup)
+        this.obsoleteConfigProcessOneLayerEntry(listOfLayerEntryConfig[0] as AbstractBaseLayerEntryConfig, layerGroup)
           .then((layer) => {
             if (layer) {
               listOfLayerEntryConfig[0].layerStatus = 'processed';
@@ -571,13 +574,13 @@ export class GeoPackage extends AbstractGeoViewVector {
    *
    * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
    */
-  protected override async processOneLayerEntry(
+  protected override async obsoleteConfigProcessOneLayerEntry(
     layerConfig: AbstractBaseLayerEntryConfig,
     layerGroup?: LayerGroup
   ): Promise<BaseLayer | null> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
-    await super.processOneLayerEntry(layerConfig);
+    await super.obsoleteConfigProcessOneLayerEntry(layerConfig);
     const promisedLayers = new Promise<BaseLayer | LayerGroup | null>((resolve) => {
       this.extractGeopackageData(layerConfig)
         .then(([layers, slds]) => {
@@ -604,7 +607,7 @@ export class GeoPackage extends AbstractGeoViewVector {
           } else {
             layerConfig.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
             (layerConfig as TypeLayerEntryConfig).listOfLayerEntryConfig = [];
-            const newLayerGroup = GeoPackage.createLayerGroup(layerConfig, layerConfig.initialSettings!);
+            const newLayerGroup = GeoPackage.obsoleteConfigCreateLayerGroup(layerConfig, layerConfig.initialSettings!);
             for (let i = 0; i < layers.length; i++) {
               const newLayerEntryConfig = cloneDeep(layerConfig) as AbstractBaseLayerEntryConfig;
               newLayerEntryConfig.layerId = layers[i].name;

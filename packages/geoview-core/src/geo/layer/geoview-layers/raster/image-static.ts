@@ -94,11 +94,9 @@ export class ImageStatic extends AbstractGeoViewRaster {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected override fetchServiceMetadata(): Promise<void> {
-    const promisedExecution = new Promise<void>((resolve) => {
-      resolve();
-    });
-    return promisedExecution;
+  protected override obsoleteConfigFetchServiceMetadata(): Promise<void> {
+    // Return empty resolved promise
+    return Promise.resolve();
   }
 
   /** ***************************************************************************************************************************
@@ -197,11 +195,11 @@ export class ImageStatic extends AbstractGeoViewRaster {
    *
    * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
    */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
+  protected obsoleteConfigValidateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
-        this.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
+        this.obsoleteConfigValidateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!);
         if (!layerConfig.listOfLayerEntryConfig.length) {
           this.layerLoadError.push({
             layer: layerPath,
@@ -249,8 +247,10 @@ export class ImageStatic extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  protected override async processOneLayerEntry(layerConfig: ImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
-    await super.processOneLayerEntry(layerConfig);
+  protected override async obsoleteConfigProcessOneLayerEntry(
+    layerConfig: ImageStaticLayerEntryConfig
+  ): Promise<TypeBaseRasterLayer | null> {
+    await super.obsoleteConfigProcessOneLayerEntry(layerConfig);
 
     if (!layerConfig?.source?.extent) throw new Error('Parameter extent is not defined in source element of layerConfig.');
     const sourceOptions: SourceOptions = {
