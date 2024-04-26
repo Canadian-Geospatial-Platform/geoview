@@ -324,7 +324,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     const { map } = MapEventProcessor.getMapViewer(this.mapId);
     const convertedLocation = Projection.transform(
       location,
-      'EPSG:4326',
+      Projection.PROJECTION_NAMES.LNGLAT,
       `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
     );
     return this.getFeatureInfoAtPixel(map.getPixelFromCoordinate(convertedLocation as Coordinate), layerPath);

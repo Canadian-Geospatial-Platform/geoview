@@ -340,7 +340,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     const convertedLocation = Projection.transform(
       location,
       `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`,
-      'EPSG:4326'
+      Projection.PROJECTION_NAMES.LNGLAT
     );
     return this.getFeatureInfoAtLongLat(convertedLocation, layerPath);
   }
@@ -368,7 +368,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       const { currentProjection } = MapEventProcessor.getMapState(this.mapId);
       const size = mapLayer.getSize()!;
       let bounds = mapLayer.getView().calculateExtent();
-      bounds = Projection.transformExtent(bounds, `EPSG:${currentProjection}`, 'EPSG:4326');
+      bounds = Projection.transformExtent(bounds, `EPSG:${currentProjection}`, Projection.PROJECTION_NAMES.LNGLAT);
 
       const extent = { xmin: bounds[0], ymin: bounds[1], xmax: bounds[2], ymax: bounds[3] };
 
@@ -392,7 +392,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       }
       const features = new EsriJSON().readFeatures(
         { features: jsonResponse.results },
-        { dataProjection: 'EPSG:4326', featureProjection: `EPSG:${currentProjection}` }
+        { dataProjection: Projection.PROJECTION_NAMES.LNGLAT, featureProjection: `EPSG:${currentProjection}` }
       ) as Feature<Geometry>[];
       const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig);
       return arrayOfFeatureInfoEntries;

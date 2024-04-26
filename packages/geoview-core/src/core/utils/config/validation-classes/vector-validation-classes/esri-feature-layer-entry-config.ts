@@ -1,5 +1,5 @@
-import { TypeSourceEsriFeatureInitialConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { TypeSourceEsriFeatureInitialConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
 
 export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
   declare source: TypeSourceEsriFeatureInitialConfig;

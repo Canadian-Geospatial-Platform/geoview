@@ -229,11 +229,15 @@ export class MapViewer {
     const { mapFeaturesConfig } = this;
 
     // create map projection object from code
-    const projection = Projection.projections[mapFeaturesConfig.map.viewSettings.projection];
+    const projection = Projection.PROJECTIONS[mapFeaturesConfig.map.viewSettings.projection];
 
     let extentProjected: Extent | undefined;
     if (mapFeaturesConfig?.map.viewSettings.maxExtent)
-      extentProjected = Projection.transformExtent(mapFeaturesConfig?.map.viewSettings.maxExtent, 'EPSG:4326', projection.getCode());
+      extentProjected = Projection.transformExtent(
+        mapFeaturesConfig?.map.viewSettings.maxExtent,
+        Projection.PROJECTION_NAMES.LNGLAT,
+        projection.getCode()
+      );
 
     const initialMap = new OLMap({
       target: mapElement,
@@ -328,7 +332,7 @@ export class MapViewer {
     const pointerPosition = {
       projected: centerCoordinates,
       pixel: this.map.getPixelFromCoordinate(centerCoordinates),
-      lnglat: Projection.transformPoints([centerCoordinates], projCode, `EPSG:4326`)[0],
+      lnglat: Projection.transformPoints([centerCoordinates], projCode, Projection.PROJECTION_NAMES.LNGLAT)[0],
       dragging: false,
     };
 
@@ -361,7 +365,7 @@ export class MapViewer {
     const pointerPosition = {
       projected: (event as MapBrowserEvent<UIEvent>).coordinate,
       pixel: (event as MapBrowserEvent<UIEvent>).pixel,
-      lnglat: Projection.transformPoints([(event as MapBrowserEvent<UIEvent>).coordinate], projCode, `EPSG:4326`)[0],
+      lnglat: Projection.transformPoints([(event as MapBrowserEvent<UIEvent>).coordinate], projCode, Projection.PROJECTION_NAMES.LNGLAT)[0],
       dragging: (event as MapBrowserEvent<UIEvent>).dragging,
     };
 
@@ -385,7 +389,7 @@ export class MapViewer {
     const clickCoordinates = {
       projected: (event as MapBrowserEvent<UIEvent>).coordinate,
       pixel: (event as MapBrowserEvent<UIEvent>).pixel,
-      lnglat: Projection.transformPoints([(event as MapBrowserEvent<UIEvent>).coordinate], projCode, `EPSG:4326`)[0],
+      lnglat: Projection.transformPoints([(event as MapBrowserEvent<UIEvent>).coordinate], projCode, Projection.PROJECTION_NAMES.LNGLAT)[0],
       dragging: (event as MapBrowserEvent<UIEvent>).dragging,
     };
 
@@ -539,7 +543,7 @@ export class MapViewer {
       await this.zoomToExtent(
         Projection.transformExtent(
           this.mapFeaturesConfig.map.viewSettings.initialView?.extent,
-          'EPSG:4326',
+          Projection.PROJECTION_NAMES.LNGLAT,
           `EPSG:${this.mapFeaturesConfig.map.viewSettings.projection}`
         )
       );
@@ -1433,8 +1437,8 @@ export class MapViewer {
     if (bounds) {
       const { currentProjection } = this.getMapState();
       mapBounds = projectionCode
-        ? Projection.transformExtent(bounds, `EPSG:${projectionCode}`, Projection.projections[currentProjection], 20)
-        : Projection.transformExtent(bounds, Projection.projections[currentProjection], Projection.projections[currentProjection], 25);
+        ? Projection.transformExtent(bounds, `EPSG:${projectionCode}`, Projection.PROJECTIONS[currentProjection], 20)
+        : Projection.transformExtent(bounds, Projection.PROJECTIONS[currentProjection], Projection.PROJECTIONS[currentProjection], 25);
     } else {
       Object.keys(this.layer.geoviewLayers).forEach((geoviewLayerId) => {
         if (!mapBounds) mapBounds = this.layer.geoviewLayers[geoviewLayerId].getMetadataBounds(geoviewLayerId);
