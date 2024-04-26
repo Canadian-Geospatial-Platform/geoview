@@ -614,14 +614,22 @@ export class LayerApi {
    * @private
    */
   async #registerForTimeSlider(layerConfig: TypeLayerEntryConfig): Promise<void> {
-    // Wait until the layer is loaded (or processed?)
-    await whenThisThen(() => layerConfig.IsGreaterThanOrEqualTo('loaded'), LayerApi.#MAX_WAIT_TIME_SLIDER_REGISTRATION);
+    let geoviewLayer;
+    try {
+      // Wait until the layer is loaded (or processed?)
+      await whenThisThen(() => layerConfig.IsGreaterThanOrEqualTo('loaded'), LayerApi.#MAX_WAIT_TIME_SLIDER_REGISTRATION);
+      geoviewLayer = this.geoviewLayer(layerConfig.layerPath);
+    } catch (error) {
+      // Layer failed to load, abandon it for the TimeSlider registration, too bad.
+      // The error itself, regarding the loaded failure, is already being taken care of elsewhere.
+      // Here, we haven't even made it to a possible layer registration for a possible Time Slider, because we couldn't even get the layer to load.
+    }
 
-    // Get the geoview layer
-    const geoviewLayer = this.geoviewLayer(layerConfig.layerPath);
-
-    // Check and add time slider layer when needed
-    TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.mapId, geoviewLayer, layerConfig);
+    // If the layer is loaded, continue
+    if (geoviewLayer) {
+      // Check and add time slider layer when needed
+      TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.mapId, geoviewLayer, layerConfig);
+    }
   }
 
   /**
