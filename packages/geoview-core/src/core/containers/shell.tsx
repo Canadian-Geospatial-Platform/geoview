@@ -14,7 +14,11 @@ import { MapInfo } from '@/core/components/map-info/map-info';
 import { Box, CircularProgress, Link, Modal, Snackbar, Button, TypeModalProps, ModalApi, ModalEvent } from '@/ui';
 import { getShellSxClasses } from './containers-style';
 import { useMapInteraction, useMapLoaded } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useAppCircularProgressActive, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
+import {
+  useAppCircularProgressActive,
+  useAppFullscreenActive,
+  useAppGeoviewHTMLElement,
+} from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
   useUIActiveFocusItem,
   useUIActiveTrapGeoView,
@@ -87,7 +91,7 @@ export function Shell(props: ShellProps): JSX.Element {
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
   const footerPanelResizeValues = useUIFooterPanelResizeValues();
   const isFooterBarCollapsed = useUIFooterBarIsCollapsed();
-
+  const geoviewElement = useAppGeoviewHTMLElement();
   /**
    * Handles when a component is being added to the map
    * @param {MapComponentPayload} payload The map component being added
@@ -196,22 +200,20 @@ export function Shell(props: ShellProps): JSX.Element {
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('SHELL - mapViewer', mapViewer);
+    logger.logTraceUseEffect('SHELL - mapViewer.mapId', mapViewer, mapId);
 
-    const mapDiv = document.getElementById(mapId)!;
-    mapDiv.style.height = 'fit-content';
-    mapDiv.style.transition = 'height 0.2s ease-out 0.2s';
-  }, [mapViewer, mapId]);
+    geoviewElement.style.height = 'fit-content';
+    geoviewElement.style.transition = 'height 0.2s ease-out 0.2s';
+  }, [mapViewer, mapId, geoviewElement]);
 
   /**
    * Set the map height based on mapDiv
    */
   useEffect(() => {
     if (mapContainerRef.current && mapShellContainerRef.current) {
-      const mapDiv = document.getElementById(mapId)!;
-      setOrigHeight(mapDiv!.clientHeight + 55);
+      setOrigHeight(geoviewElement!.clientHeight + 55);
     }
-  }, [mapLoaded, mapId]);
+  }, [mapLoaded, mapId, geoviewElement]);
 
   /**
    * Update map height when switch on/off the fullscreen
