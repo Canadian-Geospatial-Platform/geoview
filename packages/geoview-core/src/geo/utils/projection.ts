@@ -44,11 +44,10 @@ export class Projection {
     this.#initCRS84Projection();
     this.#initWMProjection();
     this.#initLCCProjection();
+    this.#initCSRSProjection();
+    this.#initCSRS98Projection();
 
     this.projectionNames = PROJECTION_NAMES;
-
-    proj4.defs('EPSG:4617', '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs');
-    register(proj4);
   }
 
   // #region INITIALIZE SUPPORTED PROJECTIONS
@@ -90,6 +89,34 @@ export class Projection {
     const projection = olGetProjection('EPSG:3978');
 
     if (projection) this.projections['3978'] = projection;
+  }
+
+  /**
+   * initialize CSRS projection
+   * @private
+   */
+  #initCSRSProjection(): void {
+    // define 4617 projection
+    proj4.defs('EPSG:4617', '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs');
+    register(proj4);
+
+    const projection = olGetProjection('EPSG:4617');
+
+    if (projection) this.projections['4617'] = projection;
+  }
+
+  /**
+   * initialize CSRS98 projection
+   * @private
+   */
+  #initCSRS98Projection(): void {
+    // define 4140 projection
+    proj4.defs('EPSG:4140', '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs');
+    register(proj4);
+
+    const projection = olGetProjection('EPSG:4140');
+
+    if (projection) this.projections['4140'] = projection;
   }
   // #endregion
 

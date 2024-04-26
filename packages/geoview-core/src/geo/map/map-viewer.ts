@@ -586,7 +586,13 @@ export class MapViewer {
 
           // Zoom to extents of layers selected in config, if provided.
           if (this.mapFeaturesConfig.map.viewSettings.initialView?.layerIds) {
-            const layerExtents = this.layer.getExtentOfMultipleLayers(this.mapFeaturesConfig.map.viewSettings.initialView.layerIds);
+            let layerExtents = this.layer.getExtentOfMultipleLayers(this.mapFeaturesConfig.map.viewSettings.initialView.layerIds);
+            if (layerExtents.includes(Infinity))
+              layerExtents = api.utilities.projection.transformExtent(
+                [-125, 30, -60, 89],
+                'EPSG:4326',
+                `EPSG:${this.mapFeaturesConfig.map.viewSettings.projection}`
+              );
             if (layerExtents.length)
               this.zoomToExtent(layerExtents).catch((error) =>
                 logger.logPromiseFailed('promiseMapLayers in #checkMapLayersProcessed in map-viewer', error)

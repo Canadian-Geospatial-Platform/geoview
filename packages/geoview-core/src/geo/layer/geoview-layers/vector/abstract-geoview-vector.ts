@@ -180,7 +180,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
                     dateString = api.utilities.date.applyInputDateFormat(dateString, this.serverDateFragmentsOrder);
                     (feature as Feature).set(fieldName, api.utilities.date.convertToMilliseconds(dateString), true);
                   } else {
-                    if (!this.serverDateFragmentsOrder)
+                    if (!this.serverDateFragmentsOrder && fieldValue)
                       this.serverDateFragmentsOrder = api.utilities.date.getDateFragmentsOrder(
                         api.utilities.date.deduceDateFormat(fieldValue)
                       );
