@@ -16,7 +16,6 @@ import { LayerListEntry, Layout } from '@/core/components/common';
 import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
 import { TypeFieldEntry, TypeLayerData } from '@/geo/layer/layer-sets/layer-set';
-import { getSxClasses } from './data-table-style';
 import { LAYER_STATUS, TABS } from '@/core/utils/constant';
 
 export interface MappedLayerDataType extends TypeLayerData {

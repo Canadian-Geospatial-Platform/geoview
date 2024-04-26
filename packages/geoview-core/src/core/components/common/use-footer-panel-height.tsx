@@ -101,7 +101,7 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
     mapId,
     setTableHeight,
     arrayOfLayerData,
-    allFeaturesLayerData
+    allFeaturesLayerData,
   ]);
 
   return { leftPanelRef, rightPanelRef, panelTitleRef, activeFooterBarTabId };
