@@ -4,7 +4,6 @@ import { useUIActiveFooterBarTabId, useUIFooterPanelResizeValue } from '@/core/s
 import { useDetailsLayerDataArray } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import {
   useDataTableAllFeaturesDataArray,
-  useDataTableSelectedLayerPath,
   useDataTableStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
@@ -35,7 +34,6 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
   const arrayOfLayerData = useDetailsLayerDataArray();
   const allFeaturesLayerData = useDataTableAllFeaturesDataArray();
   const { setTableHeight } = useDataTableStoreActions();
-  const dataTableSelectedLayerPath = useDataTableSelectedLayerPath();
 
   /**
    * Set the height of right panel
@@ -67,13 +65,8 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
       leftPanelRef.current.style.paddingBottom = '24px';
 
       if (activeFooterBarTabId === TABS.DATA_TABLE) {
-        const rightPanel = (rightPanelRef.current?.firstElementChild ?? null) as HTMLElement | null;
-       if (rightPanel && dataTableSelectedLayerPath) {
-        rightPanel.removeAttribute('style');
-        setTableHeight(leftPanelHeight);
-       } else {
         rightPanelHeight(leftPanelHeight);
-       }
+        setTableHeight(leftPanelHeight);
       } else if (activeFooterBarTabId === TABS.GEO_CHART && rightPanelRef.current) {
         const childElem = rightPanelRef.current?.firstElementChild as HTMLElement | null;
         if (childElem) {
@@ -108,8 +101,7 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
     mapId,
     setTableHeight,
     arrayOfLayerData,
-    allFeaturesLayerData,
-    dataTableSelectedLayerPath
+    allFeaturesLayerData
   ]);
 
   return { leftPanelRef, rightPanelRef, panelTitleRef, activeFooterBarTabId };
