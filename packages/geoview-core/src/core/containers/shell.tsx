@@ -237,7 +237,7 @@ export function Shell(props: ShellProps): JSX.Element {
       geoviewElement.style.height = 'fit-content';
       geoviewElement.style.transition = 'height 0.2s ease-out 0.2s';
     }
-  }, [footerPanelResizeValue, isMapFullScreen, memoMapResizeValues, origHeight, mapLoaded, isFooterBarCollapsed, geoviewElement.style]);
+  }, [footerPanelResizeValue, isMapFullScreen, memoMapResizeValues, origHeight, mapLoaded, isFooterBarCollapsed, geoviewElement]);
 
   /**
    * Update the map after footer panel is collapsed.
