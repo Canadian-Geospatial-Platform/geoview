@@ -19,6 +19,7 @@ import { removeGeoviewStore } from '@/core/stores/stores-managers';
 import { Basemap } from '@/geo/layer/basemap/basemap';
 import { LayerApi } from '@/geo/layer/layer';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
+import { Projection } from '@/geo/utils/projection';
 
 import { api, unmountMap } from '@/app';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
@@ -36,7 +37,7 @@ import { Translate } from '@/geo/interaction/translate';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
-import { delay, generateId } from '@/core/utils/utilities';
+import { delay, generateId, getLocalizedMessage } from '@/core/utils/utilities';
 import { createEmptyBasemap } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import {
@@ -228,13 +229,13 @@ export class MapViewer {
     const { mapFeaturesConfig } = this;
 
     // create map projection object from code
-    const projection = api.utilities.projection.projections[mapFeaturesConfig.map.viewSettings.projection];
+    const projection = Projection.PROJECTIONS[mapFeaturesConfig.map.viewSettings.projection];
 
     let extentProjected: Extent | undefined;
     if (mapFeaturesConfig?.map.viewSettings.maxExtent)
-      extentProjected = api.utilities.projection.transformExtent(
+      extentProjected = Projection.transformExtent(
         mapFeaturesConfig?.map.viewSettings.maxExtent,
-        'EPSG:4326',
+        Projection.PROJECTION_NAMES.LNGLAT,
         projection.getCode()
       );
 
@@ -243,7 +244,7 @@ export class MapViewer {
       layers: [createEmptyBasemap()],
       view: new View({
         projection,
-        center: api.utilities.projection.transformFromLonLat(
+        center: Projection.transformFromLonLat(
           mapFeaturesConfig?.map.viewSettings.initialView?.zoomAndCenter
             ? mapFeaturesConfig?.map.viewSettings.initialView?.zoomAndCenter[1]
             : [-90, 60],
@@ -331,7 +332,7 @@ export class MapViewer {
     const pointerPosition = {
       projected: centerCoordinates,
       pixel: this.map.getPixelFromCoordinate(centerCoordinates),
-      lnglat: api.utilities.projection.transformPoints([centerCoordinates], projCode, `EPSG:4326`)[0],
+      lnglat: Projection.transformPoints([centerCoordinates], projCode, Projection.PROJECTION_NAMES.LNGLAT)[0],
       dragging: false,
     };
 
@@ -364,7 +365,7 @@ export class MapViewer {
     const pointerPosition = {
       projected: (event as MapBrowserEvent<UIEvent>).coordinate,
       pixel: (event as MapBrowserEvent<UIEvent>).pixel,
-      lnglat: api.utilities.projection.transformPoints([(event as MapBrowserEvent<UIEvent>).coordinate], projCode, `EPSG:4326`)[0],
+      lnglat: Projection.transformPoints([(event as MapBrowserEvent<UIEvent>).coordinate], projCode, Projection.PROJECTION_NAMES.LNGLAT)[0],
       dragging: (event as MapBrowserEvent<UIEvent>).dragging,
     };
 
@@ -388,7 +389,7 @@ export class MapViewer {
     const clickCoordinates = {
       projected: (event as MapBrowserEvent<UIEvent>).coordinate,
       pixel: (event as MapBrowserEvent<UIEvent>).pixel,
-      lnglat: api.utilities.projection.transformPoints([(event as MapBrowserEvent<UIEvent>).coordinate], projCode, `EPSG:4326`)[0],
+      lnglat: Projection.transformPoints([(event as MapBrowserEvent<UIEvent>).coordinate], projCode, Projection.PROJECTION_NAMES.LNGLAT)[0],
       dragging: (event as MapBrowserEvent<UIEvent>).dragging,
     };
 
@@ -540,9 +541,9 @@ export class MapViewer {
     // Zoom to extent provided in config, it present
     if (this.mapFeaturesConfig.map.viewSettings.initialView?.extent)
       await this.zoomToExtent(
-        api.utilities.projection.transformExtent(
+        Projection.transformExtent(
           this.mapFeaturesConfig.map.viewSettings.initialView?.extent,
-          'EPSG:4326',
+          Projection.PROJECTION_NAMES.LNGLAT,
           `EPSG:${this.mapFeaturesConfig.map.viewSettings.projection}`
         )
       );
@@ -1166,10 +1167,7 @@ export class MapViewer {
       if (resetLayer) {
         if (AppEventProcessor.getSupportedLanguages(this.mapId).includes(displayLanguage)) {
           logger.logInfo('reset layers not implemented yet');
-        } else
-          this.notifications.addNotificationError(
-            api.utilities.core.getLocalizedMessage('validation.changeDisplayLanguageLayers', displayLanguage)
-          );
+        } else this.notifications.addNotificationError(getLocalizedMessage('validation.changeDisplayLanguageLayers', displayLanguage));
       }
 
       // Return the promise
@@ -1177,7 +1175,7 @@ export class MapViewer {
     }
 
     // Unsupported
-    this.notifications.addNotificationError(api.utilities.core.getLocalizedMessage('validation.changeDisplayLanguage', displayLanguage));
+    this.notifications.addNotificationError(getLocalizedMessage('validation.changeDisplayLanguage', displayLanguage));
     return Promise.resolve([undefined, undefined]);
   }
 
@@ -1222,10 +1220,7 @@ export class MapViewer {
   setTheme(displayTheme: TypeDisplayTheme): void {
     if (VALID_DISPLAY_THEME.includes(displayTheme)) {
       AppEventProcessor.setDisplayTheme(this.mapId, displayTheme);
-    } else
-      this.notifications.addNotificationError(
-        api.utilities.core.getLocalizedMessage('validation.changeDisplayTheme', this.getDisplayLanguage())
-      );
+    } else this.notifications.addNotificationError(getLocalizedMessage('validation.changeDisplayTheme', this.getDisplayLanguage()));
   }
 
   /**
@@ -1239,9 +1234,9 @@ export class MapViewer {
     viewOptions.projection = mapView.projection ? `EPSG:${mapView.projection}` : currentView.getProjection();
     viewOptions.zoom = mapView.initialView?.zoomAndCenter ? mapView.initialView?.zoomAndCenter[0] : currentView.getZoom();
     viewOptions.center = mapView.initialView?.zoomAndCenter
-      ? api.utilities.projection.transformFromLonLat(mapView.initialView?.zoomAndCenter[1], viewOptions.projection)
-      : api.utilities.projection.transformFromLonLat(
-          api.utilities.projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
+      ? Projection.transformFromLonLat(mapView.initialView?.zoomAndCenter[1], viewOptions.projection)
+      : Projection.transformFromLonLat(
+          Projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
           viewOptions.projection
         );
     viewOptions.minZoom = mapView.minZoom ? mapView.minZoom : currentView.getMinZoom();
@@ -1442,18 +1437,8 @@ export class MapViewer {
     if (bounds) {
       const { currentProjection } = this.getMapState();
       mapBounds = projectionCode
-        ? api.utilities.projection.transformExtent(
-            bounds,
-            `EPSG:${projectionCode}`,
-            api.utilities.projection.projections[currentProjection],
-            20
-          )
-        : api.utilities.projection.transformExtent(
-            bounds,
-            api.utilities.projection.projections[currentProjection],
-            api.utilities.projection.projections[currentProjection],
-            25
-          );
+        ? Projection.transformExtent(bounds, `EPSG:${projectionCode}`, Projection.PROJECTIONS[currentProjection], 20)
+        : Projection.transformExtent(bounds, Projection.PROJECTIONS[currentProjection], Projection.PROJECTIONS[currentProjection], 25);
     } else {
       Object.keys(this.layer.geoviewLayers).forEach((geoviewLayerId) => {
         if (!mapBounds) mapBounds = this.layer.geoviewLayers[geoviewLayerId].getMetadataBounds(geoviewLayerId);
@@ -1578,7 +1563,7 @@ export class MapViewer {
     // Check the container value for top middle of the screen
     // Convert this value to a lat long coordinate
     const pointXY = [this.map.getSize()![0] / 2, 1];
-    const pt = api.utilities.projection.transformToLonLat(this.map.getCoordinateFromPixel(pointXY), this.map.getView().getProjection());
+    const pt = Projection.transformToLonLat(this.map.getCoordinateFromPixel(pointXY), this.map.getView().getProjection());
 
     // If user is pass north, long value will start to be positive (other side of the earth).
     // This will work only for LCC Canada.
@@ -1598,10 +1583,7 @@ export class MapViewer {
 
       // map center (we use botton parallel to introduce less distortion)
       const extent = this.map.getView().calculateExtent();
-      const center: Coordinate = api.utilities.projection.transformToLonLat(
-        [(extent[0] + extent[2]) / 2, extent[1]],
-        this.map.getView().getProjection()
-      );
+      const center: Coordinate = Projection.transformToLonLat([(extent[0] + extent[2]) / 2, extent[1]], this.map.getView().getProjection());
       const pointB = { x: center[0], y: center[1] };
 
       // set info on longitude and latitude

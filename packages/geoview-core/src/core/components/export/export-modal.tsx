@@ -5,13 +5,13 @@ import { useTheme } from '@mui/material/styles';
 import * as htmlToImage from 'html-to-image';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, LoadingButton, Skeleton, TextField } from '@/ui';
 import { exportPNG } from '@/core/utils/utilities';
+import { DateMgt } from '@/core/utils/date-mgt';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { NorthArrowIcon } from '@/core/components/north-arrow/north-arrow-icon';
 import { useMapAttribution, useMapNorthArrow, useMapScale } from '@/core/stores/store-interface-and-intial-values/map-state';
 import useManageArrow from '@/core/components/north-arrow/hooks/useManageArrow';
-import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -198,7 +198,7 @@ export default function ExportModal(): JSX.Element {
             ))}
           </Box>
           <Box textAlign="center" sx={{ marginBottom: '1rem' }}>
-            {api.utilities.date.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A')}
+            {DateMgt.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A')}
           </Box>
         </Box>
       </DialogContent>

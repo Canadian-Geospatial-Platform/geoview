@@ -8,7 +8,7 @@ import { LightboxImg, LightBoxSlides } from '@/core/components/lightbox/lightbox
 import { isImage, stringify, generateId, sanitizeHtmlContent } from '@/core/utils/utilities';
 import { HtmlToReact } from '@/core/containers/html-to-react';
 import { logger } from '@/core/utils/logger';
-import { TypeFieldEntry } from '@/geo/layer/layer-sets/layer-set';
+import { TypeFieldEntry } from '@/geo/layer/layer-sets/abstract-layer-set';
 
 import { getSxClasses } from './details-style';
 

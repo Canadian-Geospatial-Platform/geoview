@@ -5,7 +5,7 @@ import { getLocalizedValue } from '@/core/utils/utilities';
 import { TypeLayerEntryConfig, TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
-import { LayerSet, QueryType, TypeLayerData } from './layer-set';
+import { AbstractLayerSet, QueryType, TypeLayerData } from './abstract-layer-set';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 
 /**
@@ -14,7 +14,7 @@ import { AppEventProcessor } from '@/api/event-processors/event-processor-childr
  *
  * @class AllFeatureInfoLayerSet
  */
-export class AllFeatureInfoLayerSet extends LayerSet {
+export class AllFeatureInfoLayerSet extends AbstractLayerSet {
   /** The resultSet object as existing in the base class, retyped here as a TypeAllFeatureInfoResultSet */
   declare resultSet: TypeAllFeatureInfoResultSet;
 

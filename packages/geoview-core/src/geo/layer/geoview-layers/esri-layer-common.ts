@@ -4,17 +4,17 @@ import axios from 'axios';
 import { Extent } from 'ol/extent';
 
 import cloneDeep from 'lodash/cloneDeep';
-import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { getLocalizedValue, getXMLHttpRequest } from '@/core/utils/utilities';
-import { TimeDimensionESRI } from '@/core/utils/date-mgt';
+import { Projection } from '@/geo/utils/projection';
+import { TimeDimensionESRI, DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
-import { TypeFeatureInfoEntryPartial, TypeFieldEntry, codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/layer-set';
+import { TypeFeatureInfoEntryPartial, TypeFieldEntry, codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import {
   CONST_LAYER_ENTRY_TYPES,
   layerEntryIsGroupLayer,
@@ -228,7 +228,7 @@ export function commonProcessTemporalDimension(
   singleHandle?: boolean
 ): void {
   if (esriTimeDimension !== undefined) {
-    layer.layerTemporalDimension[layerConfig.layerPath] = api.utilities.date.createDimensionFromESRI(
+    layer.layerTemporalDimension[layerConfig.layerPath] = DateMgt.createDimensionFromESRI(
       Cast<TimeDimensionESRI>(esriTimeDimension),
       singleHandle
     );
@@ -329,9 +329,9 @@ export function commonProcessInitialSettings(
   // GV if (layerConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerConfig.initialSettings.minZoom = minScale;
   // GV if (layerConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerConfig.initialSettings.maxZoom = maxScale;
   if (layerConfig.initialSettings?.extent)
-    layerConfig.initialSettings.extent = api.utilities.projection.transformExtent(
+    layerConfig.initialSettings.extent = Projection.transformExtent(
       layerConfig.initialSettings.extent,
-      'EPSG:4326',
+      Projection.PROJECTION_NAMES.LNGLAT,
       `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
     );
 

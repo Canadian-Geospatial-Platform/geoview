@@ -1,9 +1,5 @@
 import Draggable from 'react-draggable';
 
-import { RefObject } from 'geoview-core';
-import { useSwiperLayerPaths } from 'geoview-core/src/core/stores/store-interface-and-intial-values/swiper-state';
-import { logger } from 'geoview-core/src/core/utils/logger';
-
 import { getRenderPixel } from 'ol/render';
 import RenderEvent from 'ol/render/Event';
 import BaseLayer from 'ol/layer/Base';
@@ -12,6 +8,10 @@ import BaseEvent from 'ol/events/Event';
 
 import debounce from 'lodash/debounce';
 
+import { RefObject } from 'geoview-core';
+import { useSwiperLayerPaths } from 'geoview-core/src/core/stores/store-interface-and-intial-values/swiper-state';
+import { logger } from 'geoview-core/src/core/utils/logger';
+import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { MapViewer } from 'geoview-core/src/geo/map/map-viewer';
 import { sxClasses } from './swiper-style';
@@ -30,7 +30,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const { viewer, config } = props;
 
   const { cgpv } = window;
-  const { api, ui, react } = cgpv;
+  const { ui, react } = cgpv;
   const { useEffect, useState, useRef, useCallback } = react;
   const { Box, Tooltip, HandleIcon } = ui.elements;
   const { orientation } = config;
@@ -282,7 +282,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
           nodeRef={swiperRef as RefObject<HTMLElement>}
         >
           <Box sx={[orientation === 'vertical' ? sxClasses.vertical : sxClasses.horizontal, sxClasses.bar]} tabIndex={0} ref={swiperRef}>
-            <Tooltip title={api.utilities.core.getLocalizedMessage('swiper.tooltip', displayLanguage)}>
+            <Tooltip title={getLocalizedMessage('swiper.tooltip', displayLanguage)}>
               <Box className="handleContainer">
                 <HandleIcon sx={sxClasses.handle} className="handleL" />
                 <HandleIcon sx={sxClasses.handle} className="handleR" />

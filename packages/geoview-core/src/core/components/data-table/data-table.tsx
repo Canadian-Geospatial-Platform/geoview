@@ -37,22 +37,22 @@ import {
   ZoomInSearchIcon,
   InfoOutlinedIcon,
 } from '@/ui';
-import { api } from '@/app';
 
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useDataTableStoreActions, useDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
-
+import { DateMgt } from '@/core/utils/date-mgt';
+import { isImage } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/layer-set';
+import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/abstract-layer-set';
+
 import { MappedLayerDataType } from './data-panel';
 import { useLightBox, useFilterRows, useToolbarActionMessage, useGlobalFilter } from './hooks';
 import { getSxClasses } from './data-table-style';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
-import { isImage } from '@/core/utils/utilities';
 
 export interface FieldInfos {
   alias: string;
@@ -253,8 +253,8 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps): JSX.
    */
   const getDateColumnTooltip = (date: Date): JSX.Element => {
     return (
-      <Tooltip title={api.utilities.date.formatDate(date, 'YYYY-MM-DDThh:mm:ss')} arrow>
-        <Box>{api.utilities.date.formatDate(date, 'YYYY-MM-DDThh:mm:ss')}</Box>
+      <Tooltip title={DateMgt.formatDate(date, 'YYYY-MM-DDThh:mm:ss')} arrow>
+        <Box>{DateMgt.formatDate(date, 'YYYY-MM-DDThh:mm:ss')}</Box>
       </Tooltip>
     );
   };
@@ -534,7 +534,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps): JSX.
       if (typeof filterValue === 'object' && filterValue) {
         const dateOpr = tableState?.columnFilterFns[filterId] || 'equals';
         const dateFilter = DATE_FILTER[dateOpr] as string;
-        const date = api.utilities.date.applyInputDateFormat(`${(filterValue as Date).toISOString().slice(0, -5)}Z`);
+        const date = DateMgt.applyInputDateFormat(`${(filterValue as Date).toISOString().slice(0, -5)}Z`);
         const formattedDate = date.slice(0, -1);
         return `${filterId} ${dateFilter.replace('value', formattedDate)}`;
       }

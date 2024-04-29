@@ -1,6 +1,5 @@
 import proj4 from 'proj4';
 import { Coordinate } from 'ol/coordinate';
-
 import { register } from 'ol/proj/proj4';
 import {
   get as olGetProjection,
@@ -13,15 +12,7 @@ import {
   toLonLat,
 } from 'ol/proj';
 import { Extent } from 'ol/extent';
-
-/**
- * constant used for the available projection names
- */
-export const PROJECTION_NAMES = {
-  LCC: 'EPSG:3978',
-  WM: 'EPSG:3857',
-  LNGLAT: 'EPSG:4326',
-};
+import { logger } from '@/core/utils/logger';
 
 /**
  * Class used to handle functions for trasforming projections
@@ -29,69 +20,26 @@ export const PROJECTION_NAMES = {
  * @exports
  * @class Projection
  */
-export class Projection {
+export abstract class Projection {
   /**
-   * List of supported projections
+   * constant for the CRS84 URL
    */
-  projections: Record<string, olProjection> = {};
-
-  projectionNames;
+  static CRS_84_URL = 'http://www.opengis.net/def/crs/OGC/1.3/CRS84';
 
   /**
-   * initialize projections
+   * constant used for the available projection names
    */
-  constructor() {
-    this.#initCRS84Projection();
-    this.#initWMProjection();
-    this.#initLCCProjection();
-
-    this.projectionNames = PROJECTION_NAMES;
-
-    proj4.defs('EPSG:4617', '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs');
-    register(proj4);
-  }
-
-  // #region INITIALIZE SUPPORTED PROJECTIONS
-  /**
-   * Initialize WM Projection
-   * @private
-   */
-  #initCRS84Projection(): void {
-    const newDefinition = proj4.defs('EPSG:4326');
-    newDefinition.axis = 'neu';
-    proj4.defs('http://www.opengis.net/def/crs/OGC/1.3/CRS84', newDefinition);
-
-    const projection = olGetProjection('http://www.opengis.net/def/crs/OGC/1.3/CRS84');
-    if (projection) this.projections['http://www.opengis.net/def/crs/OGC/1.3/CRS84'] = projection;
-  }
+  static PROJECTION_NAMES = {
+    LCC: 'EPSG:3978',
+    WM: 'EPSG:3857',
+    LNGLAT: 'EPSG:4326',
+    EPSG4617: 'EPSG:4617',
+  };
 
   /**
-   * Initialize WM Projection
-   * @private
+   * List of supported projections and their OpenLayers projection
    */
-  #initWMProjection(): void {
-    const projection = olGetProjection('EPSG:3857');
-
-    if (projection) this.projections['3857'] = projection;
-  }
-
-  /**
-   * initialize LCC projection
-   * @private
-   */
-  #initLCCProjection(): void {
-    // define 3978 projection
-    proj4.defs(
-      'EPSG:3978',
-      '+proj=lcc +lat_1=49 +lat_2=77 +lat_0=49 +lon_0=-95 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs'
-    );
-    register(proj4);
-
-    const projection = olGetProjection('EPSG:3978');
-
-    if (projection) this.projections['3978'] = projection;
-  }
-  // #endregion
+  static PROJECTIONS: Record<string, olProjection> = {};
 
   /**
    * Transforms an extent from source projection to destination projection. This returns a new extent (and does not modify the
@@ -104,7 +52,7 @@ export class Projection {
    *
    * @returns The densified extent transformed in the destination projection.
    */
-  transformAndDensifyExtent(extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops = 25): Coordinate[] {
+  static transformAndDensifyExtent(extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops = 25): Coordinate[] {
     const coordinates: number[][] = [];
     const width: number = extent[2] - extent[0];
     const height: number = extent[3] - extent[1];
@@ -127,7 +75,7 @@ export class Projection {
    *
    * @returns The new extent transformed in the destination projection.
    */
-  transformExtent(extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops?: number | undefined): Extent {
+  static transformExtent(extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops?: number | undefined): Extent {
     return olTransformExtent(extent, source, destination, stops);
   }
 
@@ -138,7 +86,7 @@ export class Projection {
    * @param {string} fromProj projection to be converted from
    * @param {string} toProj projection to be converted to
    */
-  transformPoints = (points: Coordinate[], fromProj: string, toProj: string): Array<Array<number>> => {
+  static transformPoints(points: Coordinate[], fromProj: string, toProj: string): Array<Array<number>> {
     // initialize empty array for the converted points
     const converted: Array<Array<number>> = [];
 
@@ -158,7 +106,7 @@ export class Projection {
     }
 
     return converted;
-  };
+  }
 
   /**
    * Wrapper around OpenLayers function to transforms a coordinate from lone projection to another.
@@ -168,7 +116,7 @@ export class Projection {
    * @param {ProjectionLike} outProjection Desired projection of the coordinate
    * @return {Coordinate}  Coordinate as projected
    */
-  transform(coordinate: Coordinate, inProjection: ProjectionLike, outProjection: ProjectionLike): Coordinate {
+  static transform(coordinate: Coordinate, inProjection: ProjectionLike, outProjection: ProjectionLike): Coordinate {
     return olTransform(coordinate, inProjection, outProjection);
   }
 
@@ -179,7 +127,7 @@ export class Projection {
    * @param {ProjectionLike} projection Projection to project the coordinate
    * @return {Coordinate}  Coordinate as projected
    */
-  transformFromLonLat(coordinate: Coordinate, projection: ProjectionLike): Coordinate {
+  static transformFromLonLat(coordinate: Coordinate, projection: ProjectionLike): Coordinate {
     return fromLonLat(coordinate, projection);
   }
 
@@ -190,7 +138,7 @@ export class Projection {
    * @param {ProjectionLike} projection Projection of the coordinate
    * @return {Coordinate}  Coordinate as longitude and latitude, i.e. an array with longitude as 1st and latitude as 2nd element.
    */
-  transformToLonLat(coordinate: Coordinate, projection: ProjectionLike): Coordinate {
+  static transformToLonLat(coordinate: Coordinate, projection: ProjectionLike): Coordinate {
     return toLonLat(coordinate, projection);
   }
 
@@ -200,7 +148,7 @@ export class Projection {
    * @param {ProjectionLike} projectionLike Either a code string which is a combination of authority and identifier such as "EPSG:4326", or an existing projection object, or undefined.
    * @return {olProjection | null} — Projection object, or null if not in list.
    */
-  getProjection(projectionLike: ProjectionLike): olProjection | null {
+  static getProjection(projectionLike: ProjectionLike): olProjection | null {
     return olGetProjection(projectionLike);
   }
 
@@ -211,7 +159,61 @@ export class Projection {
    * @param {Coordinate} center map center
    * @returns the point resolution for map center
    */
-  getResolution = (projection: string, center: Coordinate): number => {
+  static getResolution(projection: string, center: Coordinate): number {
     return getPointResolution(projection, 1, center, 'm');
-  };
+  }
 }
+
+/**
+ * Initialize CRS84 Projection
+ * @private
+ */
+function initCRS84Projection(): void {
+  const newDefinition = proj4.defs(Projection.PROJECTION_NAMES.LNGLAT);
+  newDefinition.axis = 'neu';
+  proj4.defs(Projection.CRS_84_URL, newDefinition);
+
+  const projection = olGetProjection(Projection.CRS_84_URL);
+  if (projection) Projection.PROJECTIONS[Projection.CRS_84_URL] = projection;
+}
+
+/**
+ * Initialize WM Projection
+ * @private
+ */
+function initWMProjection(): void {
+  const projection = olGetProjection(Projection.PROJECTION_NAMES.WM);
+  if (projection) Projection.PROJECTIONS['3857'] = projection;
+}
+
+/**
+ * initialize LCC projection
+ * @private
+ */
+function initLCCProjection(): void {
+  // define 3978 projection
+  proj4.defs(
+    Projection.PROJECTION_NAMES.LCC,
+    '+proj=lcc +lat_1=49 +lat_2=77 +lat_0=49 +lon_0=-95 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs'
+  );
+  register(proj4);
+
+  const projection = olGetProjection(Projection.PROJECTION_NAMES.LCC);
+  if (projection) Projection.PROJECTIONS['3978'] = projection;
+}
+
+function initEPSG4617Projection(): void {
+  // define 4617 projection
+  proj4.defs(Projection.PROJECTION_NAMES.EPSG4617, '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs');
+  register(proj4);
+
+  const projection = olGetProjection(Projection.PROJECTION_NAMES.EPSG4617);
+  if (projection) Projection.PROJECTIONS['4617'] = projection;
+}
+
+// Initialize the supported projections
+initCRS84Projection();
+initWMProjection();
+initLCCProjection();
+initEPSG4617Projection();
+logger.logInfo('Projections initialized');

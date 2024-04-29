@@ -2,7 +2,7 @@ import { GeoviewStoreType } from '@/core/stores';
 import { IFeatureInfoState } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoResultSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
-import { EventType, TypeLayerData } from '@/geo/layer/layer-sets/layer-set';
+import { EventType, TypeLayerData } from '@/geo/layer/layer-sets/abstract-layer-set';
 
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
 import { UIEventProcessor } from './ui-event-processor';

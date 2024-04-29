@@ -19,7 +19,7 @@ import { AppEventProcessor } from '@/api/event-processors/event-processor-childr
  * @class LayerSet
  * @exports
  */
-export class LayerSet {
+export abstract class AbstractLayerSet {
   /** The LayerApi to work with */
   protected layerApi: LayerApi;
 
@@ -310,7 +310,7 @@ export type TypeFeatureInfoEntryPartial = Pick<TypeFeatureInfoEntry, 'fieldInfo'
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerSetUpdatedDelegate = EventDelegateBase<LayerSet, LayerSetUpdatedEvent>;
+type LayerSetUpdatedDelegate = EventDelegateBase<AbstractLayerSet, LayerSetUpdatedEvent>;
 
 /**
  * Define an event for the delegate

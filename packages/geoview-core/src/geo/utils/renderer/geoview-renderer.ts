@@ -13,6 +13,7 @@ import { toContext } from 'ol/render';
 import { Size } from 'ol/size';
 
 import { getLocalizedValue, setAlphaColor } from '@/core/utils/utilities';
+import { DateMgt } from '@/core/utils/date-mgt';
 import {
   isFilledPolygonVectorConfig,
   isIconSymbolVectorConfig,
@@ -53,7 +54,6 @@ import {
   unaryKeywords,
 } from './geoview-renderer-types';
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
@@ -506,10 +506,10 @@ function executeOperator(operator: FilterNodeType, dataStack: FilterNodeArrayTyp
           if (operand.nodeValue === null) dataStack.push(operand);
           else if (typeof operand.nodeValue !== 'string') throw new Error(`DATE operator error`);
           else {
-            operand.nodeValue = api.utilities.date.applyInputDateFormat(operand.nodeValue);
+            operand.nodeValue = DateMgt.applyInputDateFormat(operand.nodeValue);
             dataStack.push({
               nodeType: NodeType.variable,
-              nodeValue: api.utilities.date.convertToMilliseconds(api.utilities.date.convertToUTC(operand.nodeValue)),
+              nodeValue: DateMgt.convertToMilliseconds(DateMgt.convertToUTC(operand.nodeValue)),
             });
           }
           break;
