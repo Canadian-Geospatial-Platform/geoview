@@ -197,17 +197,6 @@ export function Shell(props: ShellProps): JSX.Element {
   }, [footerPanelResizeValue, footerPanelResizeValues]);
 
   /**
-   * Effect to set the map div height
-   */
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('SHELL - mapViewer.mapId', mapViewer, mapId);
-
-    geoviewElement.style.height = 'fit-content';
-    geoviewElement.style.transition = 'height 0.2s ease-out 0.2s';
-  }, [mapViewer, mapId, geoviewElement]);
-
-  /**
    * Set the map height based on mapDiv
    */
   useEffect(() => {
@@ -243,8 +232,12 @@ export function Shell(props: ShellProps): JSX.Element {
       mapShellContainerRef.current.style.visibility = 'visible';
       mapShellContainerRef.current.style.minHeight = `${origHeight}px`;
       mapShellContainerRef.current.style.height = `${origHeight}px`;
+
+      // Set the mapDiv height for height animation.
+      geoviewElement.style.height = 'fit-content';
+      geoviewElement.style.transition = 'height 0.2s ease-out 0.2s';
     }
-  }, [footerPanelResizeValue, isMapFullScreen, memoMapResizeValues, origHeight, mapLoaded, isFooterBarCollapsed]);
+  }, [footerPanelResizeValue, isMapFullScreen, memoMapResizeValues, origHeight, mapLoaded, isFooterBarCollapsed, geoviewElement.style]);
 
   /**
    * Update the map after footer panel is collapsed.
@@ -253,7 +246,7 @@ export function Shell(props: ShellProps): JSX.Element {
     // Log
     logger.logTraceUseEffect('SHELL - isFooterBarCollapsed.isMapFullScreen', isFooterBarCollapsed, isMapFullScreen);
 
-    if (isMapFullScreen && isFooterBarCollapsed && mapContainerRef.current && mapShellContainerRef.current) {
+    if (isMapFullScreen && mapContainerRef.current && mapShellContainerRef.current) {
       const tabHeight = footerTabContainer?.clientHeight ?? 0;
 
       mapContainerRef.current.style.minHeight = `${window.screen.height - tabHeight}px`;

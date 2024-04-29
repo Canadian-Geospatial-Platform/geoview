@@ -122,7 +122,7 @@ export default function ExportModal(): JSX.Element {
           setIsLegendLoading(true);
           // remove hidden attribute from document legend, so that html-to-image can copy the legend container.
           const legendTab = document.getElementById(`${mapId}-legend`) as HTMLElement;
-          const hasHiddenAttr = legendTab.hasAttribute('hidden');
+          const hasHiddenAttr = legendTab?.hasAttribute('hidden') ?? null;
           if (hasHiddenAttr) legendTab.removeAttribute('hidden');
           htmlToImage
             .toPng(legendContainer)

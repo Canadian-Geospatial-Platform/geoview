@@ -254,7 +254,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
           onLayerListClicked={handleLayerChange}
           onIsEnlargeClicked={handleIsEnlargeClicked}
           onGuideIsOpen={handleGuideIsOpen}
-          guideContentIds={['chart', 'chartTypes']}
+          guideContentIds={['chart', 'chart.children.chartTypes']}
         >
           {selectedLayerPath && (
             <Box>
