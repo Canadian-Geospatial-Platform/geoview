@@ -42,7 +42,6 @@
           <tr>
             <td>
               <a href="#HLYR1">1. Static Image Layers</a><br />
-              <a href="#HLYR2">2. Static Image Layers - with footer bar</a><br />
             </td>
           </tr>
         </tbody>
@@ -117,69 +116,6 @@
     <button type="button" class="collapsible">Code Snippet</button>
     <pre id="codeSnippet" class="panel"></pre>
 
-    <div class="map-title-holder">
-      <h4 id="HLYR2">2. Static Image Layers - with footer bar</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
-    <button class="collapsible active">Map Status Flags</button>
-    <pre id="HLYR2-state" class="panel map-title-holder"></pre>
-    <div
-      id="LYR2"
-      class="geoview-map"
-      triggerReadyCallback="true"
-      data-lang="en"
-      data-config="{
-        'map': {
-          'interaction': 'dynamic',
-          'viewSettings': {
-            'initialView': { 'zoomAndCenter': [6, [-90, 50]]},
-            'projection': 3857
-          },
-          'basemapOptions': {
-            'basemapId': 'transport',
-            'shaded': false,
-            'labeled': true
-          },
-          'listOfGeoviewLayerConfig': [
-            {
-              'geoviewLayerId': 'staticLYR10',
-              'geoviewLayerName': {
-                'en': 'Static Image'
-              },
-              'geoviewLayerType': 'imageStatic',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': 'thumbnail',
-                  'layerName': { 'en': 'Static Image' },
-                  'source': {
-                    'dataAccessPath': {
-                      'en': 'https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire/napl-ring-of-fire-1954-08-07-60k-thumbnail.png',
-                      'fr': 'https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire/napl-ring-of-fire-1954-08-07-60k-thumbnail.png'
-                    },
-                    'extent': [-87.77486341686723,
-                      51.62285357468582,
-                      -84.57727128084842,
-                      53.833354975551075
-                    ],
-                    'projection': 4326
-                  }
-                }
-              ]
-            }
-          ]
-        },
-        'components': ['overview-map'],
-        'footerBar': {
-          'tabs': {
-            'core': ['legend', 'layers', 'details', 'data-table']
-          }
-        },
-        'corePackages': [],
-        'theme': 'geo.ca',
-        'suportedLanguages': ['en']
-      }"
-    ></div>
-
     <script src="codedoc.js"></script>
     <script src="layerlib.js"></script>
     <script>
@@ -191,7 +127,6 @@
             displayLegend('LegendsId1', resultSet);
           });
           listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
-          listenToLegendLayerSetChanges('HLYR2-state', 'LYR2');
 
           // create snippets
           createCodeSnippet();

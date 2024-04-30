@@ -42,7 +42,6 @@
           <tr>
             <td>
               <a href="#HCSV1">1. CSV Layers</a><br />
-              <a href="#HCSV2">2. CSV Layers - with footer panel</a><br />
             </td>
           </tr>
         </tbody>
@@ -144,92 +143,6 @@
     <button type="button" class="collapsible">Code Snippet</button>
     <pre id="codeSnippet" class="panel"></pre>
 
-    <div class="map-title-holder">
-      <h4 id="HCSV2">2. CSV Layers - with footer panel</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
-    <button class="collapsible active">Map Status Flags</button>
-    <pre id="HCSV2-state" class="panel map-title-holder"></pre>
-    <div
-      id="CSV2"
-      class="geoview-map"
-      triggerReadyCallback="true"
-      data-lang="en"
-      data-config="{
-        'map': {
-          'interaction': 'dynamic',
-          'viewSettings': {
-            'projection': 3978
-          },
-          'basemapOptions': {
-            'basemapId': 'transport',
-            'shaded': true,
-            'labeled': false
-          },
-          'listOfGeoviewLayerConfig': [
-            {
-              'geoviewLayerId': 'csvLYR1',
-              'geoviewLayerName': { 'en': 'NPRI' },
-              'geoviewLayerType': 'CSV',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': 'NPRI-INRP_WaterEau_MediaGroupMilieu_2022',
-                  'layerName': { 'en': 'NPRI Water Media Group 2022' },
-                  'source': {
-                    'dataAccessPath': { 'en': './datasets/csv-files/NPRI-INRP_WaterEau_MediaGroupMilieu_2022.csv' },
-                    'separator': ','
-                  }
-                }
-              ]
-            },
-            {
-              'geoviewLayerId': 'csvLYR2',
-              'geoviewLayerName': { 'en': 'Station List MELCC' },
-              'geoviewLayerType': 'CSV',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': 'Station_List_Minus_HQ-MELCC',
-                  'layerName': { 'en': 'Station List' },
-                  'source': {
-                    'dataAccessPath': { 'en': './datasets/csv-files/Station_List_Minus_HQ-MELCC.csv'}
-                  }
-                }
-              ]
-            }
-            /*===========================================================================
-            Huge dataset, here as an example for using different separator and projection
-            {
-              'geoviewLayerId': 'csvLYR3',
-              'geoviewLayerName': { 'en': 'BC Shoreline Classification' },
-              'geoviewLayerType': 'CSV',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': 'ShorelineClassification_BC',
-                  'layerName': { 'en': 'BC Shoreline Classification' },
-                  'source': {
-                    'dataAccessPath': { 'en': './datasets/csv-files/ShorelineClassification_BC.csv'},
-                    'dataProjection': 'EPSG:3857',
-                    'separator': ';'
-                  }
-                }
-              ]
-            }
-            /*===========================================================================*/
-          ]
-        },
-        'components': ['overview-map'],
-        'overviewMap': {'hideOnZoom': 7},
-        'footerBar': {
-          'tabs': {
-            'core': ['legend', 'layers', 'details', 'data-table']
-          }
-        },
-        'corePackages': [],
-        'theme': 'geo.ca',
-        'suportedLanguages': ['en']
-        }"
-    ></div>
-
     <script src="codedoc.js"></script>
     <script src="layerlib.js"></script>
     <script>
@@ -247,7 +160,6 @@
           });
 
           listenToLegendLayerSetChanges('HCSV1-state', 'CSV1');
-          listenToLegendLayerSetChanges('HCSV2-state', 'CSV2');
 
           // CSV1 ===================================================================================================================
           const getAllFeatureInfo1 = document.getElementById('AllFeatureInfo1');
