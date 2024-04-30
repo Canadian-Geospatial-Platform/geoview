@@ -31,12 +31,5 @@ export function LeftPanel({ setIsLayersListPanelVisible }: LeftPanelProps): JSX.
   if (displayState === 'add') {
     return <AddNewLayer />;
   }
-  return (
-    <LayersList
-      parentLayerPath="none"
-      layersList={orderedLegendLayers}
-      depth={0}
-      setIsLayersListPanelVisible={setIsLayersListPanelVisible}
-    />
-  );
+  return <LayersList layersList={orderedLegendLayers} depth={0} setIsLayersListPanelVisible={setIsLayersListPanelVisible} />;
 }
