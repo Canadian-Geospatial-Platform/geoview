@@ -41,9 +41,11 @@ interface SingleLayerProps {
   depth: number;
   setIsLayersListPanelVisible: Dispatch<SetStateAction<boolean>>;
   index: number;
+  isFirst: boolean;
+  isLast: boolean;
 }
 
-export function SingleLayer({ depth, layer, setIsLayersListPanelVisible, index }: SingleLayerProps): JSX.Element {
+export function SingleLayer({ depth, layer, setIsLayersListPanelVisible, index, isFirst, isLast }: SingleLayerProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/left-panel/single-layer');
 
@@ -169,18 +171,23 @@ export function SingleLayer({ depth, layer, setIsLayersListPanelVisible, index }
   };
 
   function renderEditModeButtons(): JSX.Element | null {
-    if (displayState === 'remove' || layer.layerStatus === 'error') {
+    if (displayState === 'remove') {
       return <DeleteUndoButton layer={layer} />;
     }
     if (displayState === 'order') {
       return (
         <>
-          <IconButton edge="end" size="small" onClick={() => reorderLayer(layer.layerPath, -1)}>
-            <ArrowUpIcon />
-          </IconButton>
-          <IconButton edge="end" size="small" onClick={() => reorderLayer(layer.layerPath, 1)}>
-            <ArrowDownwardIcon />
-          </IconButton>
+          {!isFirst && (
+            <IconButton edge="end" size="small" onClick={() => reorderLayer(layer.layerPath, -1)}>
+              <ArrowUpIcon />
+            </IconButton>
+          )}
+          {!isLast && (
+            <IconButton edge="end" size="small" onClick={() => reorderLayer(layer.layerPath, 1)}>
+              <ArrowDownwardIcon />
+            </IconButton>
+          )}
+          {layer.layerStatus === 'error' && <DeleteUndoButton layer={layer} />}
         </>
       );
     }

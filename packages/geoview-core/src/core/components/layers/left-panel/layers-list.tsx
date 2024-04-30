@@ -46,6 +46,8 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, depth }: L
   };
 
   const legendItems = sortedLayers.map((details, index) => {
+    const isFirst = index === 0;
+    const isLast = index === sortedLayers.length - 1;
     return (
       <SingleLayer
         key={textToSlug(`layerKey-${index}-${details.layerPath}`)}
@@ -53,6 +55,8 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, depth }: L
         layer={details}
         setIsLayersListPanelVisible={setIsLayersListPanelVisible}
         index={index}
+        isFirst={isFirst}
+        isLast={isLast}
       />
     );
   });
