@@ -37,8 +37,9 @@ export class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
     }
     if (
       !(this.source.dataAccessPath!.en?.startsWith('blob') && !this.source.dataAccessPath!.en?.endsWith('/')) &&
-      !this.source.dataAccessPath!.en?.toUpperCase().endsWith('.JSON' || '.GEOJSON') &&
-      !this.source.dataAccessPath!.en?.toUpperCase().endsWith('=JSON') // Doesn't work if included in above line
+      !this.source.dataAccessPath!.en?.toUpperCase().endsWith('.JSON') &&
+      !this.source.dataAccessPath!.en?.toUpperCase().endsWith('.GEOJSON') &&
+      !this.source.dataAccessPath!.en?.toUpperCase().endsWith('=JSON')
     ) {
       this.source.dataAccessPath!.en = this.source.dataAccessPath!.en!.endsWith('/')
         ? `${this.source.dataAccessPath!.en}${this.layerId}`
