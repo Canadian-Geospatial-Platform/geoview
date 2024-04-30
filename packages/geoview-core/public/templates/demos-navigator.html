@@ -119,7 +119,7 @@
         <select name="Switch Language" id="switchLang">
           <option value="en">English</option>
           <option value="fr">French</option>
-          <option value="sp">Not Supported</option>
+          <option value="unsuported">Not Supported</option>
         </select>
       </div>
       <p>Display Theme:</p>
@@ -128,7 +128,7 @@
           <option value="geo.ca">Geo.ca</option>
           <option value="light">Light</option>
           <option value="dark">Dark</option>
-          <option value="none">What is this</option>
+          <option value="unsuported">Not Supported</option>
         </select>
       </div>
       <p>Display Projection:</p>
@@ -136,7 +136,7 @@
         <select name="Switch Projection" id="switchProjection">
           <option value="3978">LCC</option>
           <option value="3857">Web Mercator</option>
-          <option value="0000">Not Supported</option>
+          <option value="unsuported">Not Supported</option>
         </select>
       </div>
     </div>
@@ -166,6 +166,7 @@
 
     <script src="codedoc.js"></script>
     <script>
+      // ------------------ CONFIG SELECTOR SECTION START -----------------------------------------
       const configLoader = document.getElementById('configLoader');
       configLoader.addEventListener('change', (e) => {
         // delete old map
@@ -178,35 +179,54 @@
         newDiv.setAttributeNode(id);
         document.getElementById('mapSection').appendChild(newDiv);
 
+        // wait until map is removed before recreating it
         setTimeout(() => {
           // create map
           cgpv.api.createMapFromConfigURL('sandboxMap', e.target.value);
         }, 1500);
 
-       function fetchJSONData() {
-        fetch(e.target.value)
-          .then((res) => {
-            if (!res.ok) {
-              throw new Error
-                (`HTTP error! Status: ${res.status}`);
-            }
-            return res.json();
-          })
-          .then((data) => {
-            document.getElementById('configGeoview').textContent = JSON.stringify(data, null, 4);
-          
-            // set default number of lines
-            const textarea = document.querySelector('textarea');
-            const lineNumbers = document.querySelector('.line-numbers');
-            const numberOfLines = textarea.value.split('\n').length;
-            lineNumbers.innerHTML = Array(numberOfLines).fill('<span></span>').join('');
-          })
-          .catch((error) => 
-            console.error('Unable to fetch data:', error));
+        // fetch JSON config file to show in the text are section
+        function fetchJSONData() {
+          fetch(e.target.value)
+            .then((res) => {
+              if (!res.ok) {
+                throw new Error
+                  (`HTTP error! Status: ${res.status}`);
+              }
+              return res.json();
+            })
+            .then((data) => {
+              document.getElementById('configGeoview').textContent = JSON.stringify(data, null, 4);
+            
+              // set default number of lines
+              const textarea = document.querySelector('textarea');
+              const lineNumbers = document.querySelector('.line-numbers');
+              const numberOfLines = textarea.value.split('\n').length;
+              lineNumbers.innerHTML = Array(numberOfLines).fill('<span></span>').join('');
+
+              // pre-select theme and projection from config file
+              document.getElementById('switchTheme').value = data.theme;
+              document.getElementById('switchProjection').value = data.map.viewSettings.projection;
+
+              // update url to include selected file
+              const element = document.getElementById('configLoader');
+              window.history.replaceState(null, null, `?config=${element.value}`);
+            })
+            .catch((error) => 
+              console.error('Unable to fetch data:', error));
        }
        fetchJSONData();
       });
+      // ------------------ CONFIG SELECTOR SECTION END -----------------------------------------
 
+      const urlParams = new URLSearchParams(window.location.search);
+      const config = urlParams.get('config')
+      if (config) {
+        configLoader.value = config;
+        configLoader.dispatchEvent(new Event('change'));
+      }
+
+      // ------------------ SWITCHER SECTION START -----------------------------------------
       const switchLang = document.getElementById('switchLang');
       switchLang.addEventListener('change', (e) => {
         cgpv.api.maps['sandboxMap'].setLanguage(e.target.value);
@@ -221,6 +241,7 @@
       switchProjectioneElem.addEventListener('change', (e) => {
         cgpv.api.maps['sandboxMap'].setProjection(e.target.value);
       });
+      // ------------------ SWITCHER SECTION END -----------------------------------------
 
       const reload = document.getElementById('Reload-Button');
       reload.addEventListener('click', (e) => {
