@@ -249,6 +249,8 @@ export function Shell(props: ShellProps): JSX.Element {
     if (isMapFullScreen && mapContainerRef.current && mapShellContainerRef.current) {
       const tabHeight = footerTabContainer?.clientHeight ?? 0;
 
+      mapShellContainerRef.current.style.visibility = 'visible';
+      mapContainerRef.current.style.visibility = 'visible';
       mapContainerRef.current.style.minHeight = `${window.screen.height - tabHeight}px`;
       mapContainerRef.current.style.height = `${window.screen.height - tabHeight}px`;
       mapShellContainerRef.current.style.minHeight = `${window.screen.height - tabHeight}px`;
