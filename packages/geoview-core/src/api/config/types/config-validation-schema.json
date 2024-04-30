@@ -601,7 +601,7 @@
           "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer."
         },
         "projection": {
-          "type": "integer",
+          "$ref": "#/definitions/TypeValidMapProjectionCodes",
           "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
         },
         "featureInfo": {
@@ -645,7 +645,7 @@
           "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer."
         },
         "projection": {
-          "type": "integer",
+          "$ref": "#/definitions/TypeValidMapProjectionCodes",
           "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
         },
         "featureInfo": {
@@ -675,7 +675,7 @@
           "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer."
         },
         "projection": {
-          "type": "integer",
+          "$ref": "#/definitions/TypeValidMapProjectionCodes",
           "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
         },
         "featureInfo": {
@@ -708,7 +708,7 @@
           "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer."
         },
         "projection": {
-          "type": "integer",
+          "$ref": "#/definitions/TypeValidMapProjectionCodes",
           "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
         },
         "featureInfo": {
@@ -771,9 +771,9 @@
         "entryType": {
           "enum": ["vector-heatmap"]
         },
-        "layerPathEnding": {
+        "geocoreId": {
           "type": "string",
-          "description": "The ending element of the layer configuration path."
+          "description": "The identifier of the geocore layer entry if the geoview layer is derived from it."
         },
         "layerId": {
           "type": "string",
@@ -828,9 +828,9 @@
         "entryType": {
           "enum": ["vector"]
         },
-        "layerPathEnding": {
+        "geocoreId": {
           "type": "string",
-          "description": "The ending element of the layer configuration path."
+          "description": "The identifier of the geocore layer entry if the geoview layer is derived from it."
         },
         "layerId": {
           "type": "string",
@@ -870,10 +870,6 @@
       "properties": {
         "entryType": {
           "enum": ["vector-tile"]
-        },
-        "layerPathEnding": {
-          "type": "string",
-          "description": "The ending element of the layer configuration path."
         },
         "layerId": {
           "type": "string",
@@ -943,9 +939,9 @@
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
-        "layerPathEnding": {
+        "geocoreId": {
           "type": "string",
-          "description": "The ending element of the layer configuration path."
+          "description": "The identifier of the geocore layer entry if the geoview layer is derived from it."
         },
         "layerName": {
           "$ref": "#/definitions/TypeLocalizedString",
@@ -985,9 +981,9 @@
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
-        "layerPathEnding": {
+        "geocoreId": {
           "type": "string",
-          "description": "The ending element of the layer configuration path."
+          "description": "The identifier of the geocore layer entry if the geoview layer is derived from it."
         },
         "layerName": {
           "$ref": "#/definitions/TypeLocalizedString",
@@ -1027,9 +1023,9 @@
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
-        "layerPathEnding": {
+        "geocoreId": {
           "type": "string",
-          "description": "The ending element of the layer configuration path."
+          "description": "The identifier of the geocore layer entry if the geoview layer is derived from it."
         },
         "layerName": {
           "$ref": "#/definitions/TypeLocalizedString",
@@ -1069,9 +1065,9 @@
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
-        "layerPathEnding": {
+        "geocoreId": {
           "type": "string",
-          "description": "The ending element of the layer configuration path."
+          "description": "The identifier of the geocore layer entry if the geoview layer is derived from it."
         },
         "layerName": {
           "$ref": "#/definitions/TypeLocalizedString",
@@ -1100,9 +1096,9 @@
         "entryType": {
           "enum": ["raster-tile"]
         },
-        "layerPathEnding": {
+        "geocoreId": {
           "type": "string",
-          "description": "The ending element of the layer configuration path."
+          "description": "The identifier of the geocore layer entry if the geoview layer is derived from it."
         },
         "layerId": {
           "type": "string",
@@ -1144,11 +1140,9 @@
           "type": "string",
           "description": "The id of the layer group to display on the map."
         },
-        "not": {
-          "layerPathEnding": {
-            "type": "string",
-            "description": "The ending element of the layer configuration path."
-          }
+        "geocoreId": {
+          "type": "string",
+          "description": "The identifier of the geocore layer entry if the geoview layer is derived from it."
         },
         "layerName": {
           "$ref": "#/definitions/TypeLocalizedString",
@@ -1562,7 +1556,7 @@
           "items": {
             "type": "number"
           },
-          "default": [-145, 25, -53, 89],
+          "default": [-125, 30, -60, 89],
           "description": "The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates."
         },
         "minZoom": {

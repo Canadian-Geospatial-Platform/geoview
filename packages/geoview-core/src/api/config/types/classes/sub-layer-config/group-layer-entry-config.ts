@@ -1,9 +1,10 @@
 import { CV_CONST_SUB_LAYER_TYPES, CV_LAYER_GROUP_SCHEMA_PATH } from '@config/types/config-constants';
-import { TypeJsonObject } from '@config/types/config-types';
+import { TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
 import { TypeLayerEntryType, TypeLayerInitialSettings } from '@config/types/map-schema-types';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
-import { getListOfLayerEntryConfig } from '@/api/config/utils';
+import { getListOfLayerEntryConfig } from '@config/utils';
+import { layerEntryIsGroupLayer } from '../../type-guards';
 
 /** ******************************************************************************************************************************
  * Type used to define a layer group.
@@ -20,14 +21,24 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
    * @param {TypeJsonObject} layerConfig The layer node configuration we want to instanciate.
    * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited form the parent.
    * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The geoview layer configuration object that is creating this layer tree node.
+   * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
    */
-  private constructor(
+  constructor(
     layerNode: TypeJsonObject,
-    initialSettings: TypeLayerInitialSettings,
-    geoviewLayerConfig: AbstractGeoviewLayerConfig
+    initialSettings: TypeLayerInitialSettings | TypeJsonObject,
+    geoviewLayerConfig: AbstractGeoviewLayerConfig,
+    parentNode?: ConfigBaseClass
   ) {
-    super(layerNode, initialSettings, geoviewLayerConfig);
-    this.listOfLayerEntryConfig = [];
+    super(layerNode, initialSettings, geoviewLayerConfig, parentNode);
+    this.listOfLayerEntryConfig = (layerNode.listOfLayerEntryConfig as TypeJsonArray)
+      .map((subLayerConfig) => {
+        if (layerEntryIsGroupLayer(subLayerConfig))
+          return new GroupLayerEntryConfig(subLayerConfig, geoviewLayerConfig.initialSettings, geoviewLayerConfig, this);
+        return geoviewLayerConfig.createLeafNode(subLayerConfig, geoviewLayerConfig.initialSettings, geoviewLayerConfig, this);
+      })
+      .filter((subLayerConfig) => {
+        return subLayerConfig;
+      }) as ConfigBaseClass[];
   }
 
   /** ***************************************************************************************************************************

@@ -9,6 +9,8 @@ import {
 } from '@config/types/map-schema-types';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
+import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
+import { isvalidComparedToSchema } from '@config/utils';
 
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.
@@ -28,13 +30,20 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * @param {TypeJsonObject} layerConfig The sub layer configuration we want to instanciate.
    * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited.
    * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The GeoView instance that owns the sub layer.
+   * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
    */
-  constructor(layerConfig: TypeJsonObject, initialSettings: TypeLayerInitialSettings, geoviewLayerConfig: AbstractGeoviewLayerConfig) {
-    super(layerConfig, initialSettings, geoviewLayerConfig);
+  constructor(
+    layerConfig: TypeJsonObject,
+    initialSettings: TypeLayerInitialSettings,
+    geoviewLayerConfig: AbstractGeoviewLayerConfig,
+    parentNode: ConfigBaseClass
+  ) {
+    super(layerConfig, initialSettings, geoviewLayerConfig, parentNode);
     this.layerFilter = layerConfig.layerFilter as string;
-    this.style = { ...(layerConfig.style as TypeStyleConfig) };
+    this.style = layerConfig.style ? { ...(layerConfig.style as TypeStyleConfig) } : undefined;
     // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
     if (!this.source.dataAccessPath) this.source.dataAccessPath = { ...geoviewLayerConfig.metadataAccessPath } as TypeLocalizedString;
+    if (!isvalidComparedToSchema(this.schemaPath, this)) this.propagateError();
   }
 
   /**

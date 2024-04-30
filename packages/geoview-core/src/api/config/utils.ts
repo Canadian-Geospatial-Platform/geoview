@@ -47,10 +47,7 @@ export const convertLayerTypeToEntry = (layerType: NewType): TypeLayerEntryType 
  *
  * @returns {MapFeaturesConfig} A valid map features configuration.
  */
-export function validateAgainstSchema(
-  schemaPath: string,
-  targetObject: MapFeaturesConfig | AbstractGeoviewLayerConfig | TypeJsonObject
-): boolean {
+export function isvalidComparedToSchema(schemaPath: string, targetObject: object): boolean {
   // create a validator object
   const validator = new Ajv({
     strict: false,
@@ -76,7 +73,7 @@ export function validateAgainstSchema(
         for (let j = 1; j < path.length; j++) {
           node = node[path[j]] as Record<string, unknown>;
         }
-        logger.logWarning('='.repeat(200), 'Schema error: ', error, 'Object affected: ', node);
+        logger.logWarning('='.repeat(200), '\nSchema error: ', error, '\nObject affected: ', node);
       }
       (targetObject as MapFeaturesConfig | ConfigBaseClass)?.propagateError?.();
       return false;

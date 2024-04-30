@@ -7,7 +7,7 @@ import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-co
 import { TypeGeoviewLayerType, TypeJsonObject } from '@config/types/config-types';
 import { TypeDisplayLanguage, TypeLayerInitialSettings } from '@config/types/map-schema-types';
 import { MapFeaturesConfig } from '@config/types/classes/map-features-config';
-import { getListOfLayerEntryConfig, validateAgainstSchema } from '@config/utils';
+import { isvalidComparedToSchema } from '@config/utils';
 
 export type TypeEsriFeatureLayerNode =
   | (ConfigBaseClass & GroupLayerEntryConfig)
@@ -26,12 +26,16 @@ export class EsriFeatureLayerConfig extends AbstractGeoviewLayerConfig {
    * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map features configuration.
    * @param {MapFeaturesConfig} mapFeaturesConfig An optional mapFeatureConfig instance if the layer is part of it.
    */
-  // GV: This class cannot be instanciated using its constructor. The static method getInstance must be used.
-  // GV: # cannot be used to declare a private constructor. The 'private' keyword must be used. Also, a constructor cannot
-  // GV: return a promise. That's the reason why we need the getInstance which can do that.
-  private constructor(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, mapFeaturesConfig?: MapFeaturesConfig) {
+  constructor(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, mapFeaturesConfig?: MapFeaturesConfig) {
     super(layerConfig, language, mapFeaturesConfig);
     this.geoviewLayerType = CV_CONST_LAYER_TYPES.ESRI_FEATURE;
+    if (!isvalidComparedToSchema(this.geoviewLayerSchema, this)) this.propagateError();
+    if (!this.geoviewLayerId) {
+      throw new Error(`geoviewLayerId is mandatory for GeoView layer of type ${this.geoviewLayerType}.`);
+    }
+    if (!this.metadataAccessPath) {
+      throw new Error(`metadataAccessPath is mandatory for GeoView layer ${this.geoviewLayerId} of type ${this.geoviewLayerType}.`);
+    }
   }
 
   /** ***************************************************************************************************************************
@@ -42,7 +46,7 @@ export class EsriFeatureLayerConfig extends AbstractGeoviewLayerConfig {
    * @param {MapFeaturesConfig} mapFeaturesConfig An optional mapFeatureConfig instance if the layer is part of it.
    *
    * @returns {Promise<EsriFeatureLayerConfig>} The ESRI feature configuration instance.
-   */
+   * /
   static async getInstance(
     layerConfig: TypeJsonObject,
     language: TypeDisplayLanguage,
@@ -56,7 +60,7 @@ export class EsriFeatureLayerConfig extends AbstractGeoviewLayerConfig {
     );
     esriFeatureLayerConfig.processMetadata();
     esriFeatureLayerConfig.setDefaultValues();
-    validateAgainstSchema(esriFeatureLayerConfig.getGeoviewLayerSchema(), esriFeatureLayerConfig);
+    isvalidComparedToSchema(esriFeatureLayerConfig.getGeoviewLayerSchema(), esriFeatureLayerConfig);
     return Promise.resolve(esriFeatureLayerConfig);
   }
 
@@ -66,7 +70,7 @@ export class EsriFeatureLayerConfig extends AbstractGeoviewLayerConfig {
    * @returns {string} The GeoView layer schema associated to the config.
    * @abstract
    */
-  getGeoviewLayerSchema(): string {
+  get geoviewLayerSchema(): string {
     /** The GeoView layer schema associated to EsriFeatureLayerConfig */
     return CV_GEOVIEW_SCHEMA_PATH.ESRI_FEATURE;
   }
@@ -94,14 +98,16 @@ export class EsriFeatureLayerConfig extends AbstractGeoviewLayerConfig {
    * @param {TypeJsonObject} layerConfig The lsub ayer configuration.
    * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited.
    * @param {AbstractGeoviewLayerConfig} geoviewInstance The GeoView instance that owns the sub layer.
+   * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
    *
    * @returns {ConfigBaseClass | undefined} The sub layer instance or undefined if there is an error.
    */
   createLeafNode(
     layerConfig: TypeJsonObject,
     initialSettings: TypeLayerInitialSettings,
-    geoviewConfig: AbstractGeoviewLayerConfig
+    geoviewConfig: AbstractGeoviewLayerConfig,
+    parentNode: ConfigBaseClass
   ): ConfigBaseClass {
-    return new EsriFeatureLayerEntryConfig(layerConfig, initialSettings, geoviewConfig);
+    return new EsriFeatureLayerEntryConfig(layerConfig, initialSettings, geoviewConfig, parentNode);
   }
 }

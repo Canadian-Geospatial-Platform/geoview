@@ -34,10 +34,16 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * @param {TypeJsonObject} layerConfig The sub layer configuration we want to instanciate.
    * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited.
    * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The GeoView instance that owns the sub layer.
+   * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
    */
-  constructor(layerConfig: TypeJsonObject, initialSettings: TypeLayerInitialSettings, geoviewLayerConfig: AbstractGeoviewLayerConfig) {
-    super(layerConfig, initialSettings, geoviewLayerConfig);
-    this.source = { ...(layerConfig.source as TypeSourceImageEsriInitialConfig) };
+  // eslint-disable-next-line no-useless-constructor
+  constructor(
+    layerConfig: TypeJsonObject,
+    initialSettings: TypeLayerInitialSettings,
+    geoviewLayerConfig: AbstractGeoviewLayerConfig,
+    parentNode: ConfigBaseClass
+  ) {
+    super(layerConfig, initialSettings, geoviewLayerConfig, parentNode);
   }
 
   /** ***************************************************************************************************************************

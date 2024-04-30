@@ -8,8 +8,11 @@ import {
   TypeBasemapId,
   TypeBasemapOptions,
   TypeDisplayTheme,
+  TypeExternalPackages,
+  TypeFooterBarProps,
   TypeInteraction,
   TypeLayerEntryType,
+  TypeListOfLocalizedLanguages,
   TypeMapConfig,
   TypeNavBarProps,
   TypeOverviewMapProps,
@@ -64,18 +67,18 @@ export const CV_CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> =
  * Definition of the sub schema to use for each type of Geoview layer
  */
 export const CV_CONST_LEAF_LAYER_SCHEMA_PATH: Record<LayerTypesKey, string> = {
-  CSV: 'TypeVectorLayerEntryConfig',
-  ESRI_DYNAMIC: 'TypeEsriDynamicLayerEntryConfig',
-  ESRI_FEATURE: 'TypeVectorLayerEntryConfig',
-  ESRI_IMAGE: 'TypeEsriImageLayerEntryConfig',
-  IMAGE_STATIC: 'TypeImageStaticLayerEntryConfig',
-  GEOJSON: 'TypeVectorLayerEntryConfig',
-  GEOPACKAGE: 'TypeVectorLayerEntryConfig',
-  XYZ_TILES: 'TypeTileLayerEntryConfig',
-  VECTOR_TILES: 'TypeTileLayerEntryConfig',
-  OGC_FEATURE: 'TypeVectorLayerEntryConfig',
-  WFS: 'TypeVectorLayerEntryConfig',
-  WMS: 'TypeOgcWmsLayerEntryConfig',
+  CSV: 'https://cgpv/schema#/definitions/TypeVectorLayerEntryConfig',
+  ESRI_DYNAMIC: 'https://cgpv/schema#/definitions/TypeEsriDynamicLayerEntryConfig',
+  ESRI_FEATURE: 'https://cgpv/schema#/definitions/TypeVectorLayerEntryConfig',
+  ESRI_IMAGE: 'https://cgpv/schema#/definitions/TypeEsriImageLayerEntryConfig',
+  IMAGE_STATIC: 'https://cgpv/schema#/definitions/TypeImageStaticLayerEntryConfig',
+  GEOJSON: 'https://cgpv/schema#/definitions/TypeVectorLayerEntryConfig',
+  GEOPACKAGE: 'https://cgpv/schema#/definitions/TypeVectorLayerEntryConfig',
+  XYZ_TILES: 'https://cgpv/schema#/definitions/TypeTileLayerEntryConfig',
+  VECTOR_TILES: 'Thttps://cgpv/schema#/definitions/ypeTileLayerEntryConfig',
+  OGC_FEATURE: 'https://cgpv/schema#/definitions/TypeVectorLayerEntryConfig',
+  WFS: 'https://cgpv/schema#/definitions/TypeVectorLayerEntryConfig',
+  WMS: 'https://cgpv/schema#/definitions/TypeOgcWmsLayerEntryConfig',
 };
 
 export const CV_GEOVIEW_SCHEMA_PATH: Record<LayerTypesKey, string> = {
@@ -125,6 +128,12 @@ export const CV_MAP_CENTER: Record<TypeValidMapProjectionCodes, Record<string, n
   3978: { lat: [40, 90], long: [-140, 40] },
 };
 
+// extents for each projection
+export const CV_MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]> = {
+  3857: [-150, 38, -40, 84],
+  3978: [-125, 30, -60, 89],
+};
+
 /** ******************************************************************************************************************************
  *  Definition of the MapFeaturesConfig default values.
  */
@@ -132,11 +141,15 @@ export const CV_DEFAULT_MAP_FEATURES_CONFIG = {
   gvMap: {
     interaction: 'dynamic' as TypeInteraction,
     viewSettings: {
-      zoom: 4,
-      center: [-100, 60],
-      projection: 3978,
+      initialView: {
+        zoomAndCenter: [3.5, [-90, 60]],
+      },
       enableRotation: true,
       rotation: 0,
+      minZoom: 0,
+      maxZoom: 50,
+      maxExtent: [-125, 30, -60, 89],
+      projection: 3978,
     } as TypeViewSettings,
     basemapOptions: {
       basemapId: 'transport',
@@ -147,18 +160,21 @@ export const CV_DEFAULT_MAP_FEATURES_CONFIG = {
     extraOptions: {},
   } as TypeMapConfig,
   theme: 'dark' as TypeDisplayTheme,
-  components: [],
+  components: ['north-arrow', 'overview-map'],
   appBar: { tabs: { core: ['geolocator'] } } as TypeAppBarProps,
+  footerBar: {} as TypeFooterBarProps,
   navBar: ['zoom', 'fullscreen', 'home'] as TypeNavBarProps,
   corePackages: [],
   overviewMap: undefined as TypeOverviewMapProps | undefined,
+  externalPackages: [] as TypeExternalPackages,
   serviceUrls: {
     geocoreUrl: CV_CONFIG_GEOCORE_URL,
     geolocator: CV_CONFIG_GEOLOCATOR_URL,
   } as TypeServiceUrls,
+  supportedLanguages: ['en', 'fr'] as TypeListOfLocalizedLanguages,
   schemaVersionUsed: '1.0' as TypeValidVersions,
 };
-export const CV_DEFAULT_INITIAL_SETTINGS = {
+export const CV_DEFAULT_LAYER_INITIAL_SETTINGS = {
   controls: {
     highlight: true,
     hover: true,

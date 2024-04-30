@@ -421,10 +421,8 @@ export const VALID_INTERACTION: TypeInteraction[] = ['static', 'dynamic'];
  *  Definition of the view settings.
  */
 export type TypeViewSettings = {
-  /**
-   * Center of the map defined as [longitude, latitude]. Longitude domaine = [-160..160], default = -106.
-   * Latitude domaine = [-80..80], default = 60. */
-  center: [number, number];
+  /** Settings for the initial view for map, default is zoomAndCenter of [3.5, [-90, 65]] */
+  initialView?: TypeInitialViewSettings;
   /** Enable rotation. If false, a rotation constraint that always sets the rotation to zero is used. Default = true. */
   enableRotation?: boolean;
   /**
@@ -432,8 +430,10 @@ export type TypeViewSettings = {
    * the viewer. Domaine = [0..360], default = 0.
    */
   rotation?: number;
-  /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates. */
-  extent?: Extent;
+  /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates.
+   * Default [-125, 30, -60, 89].
+   */
+  maxExtent?: Extent;
   /**
    * The minimum zoom level used to determine the resolution constraint. If not set, will use default from basemap.
    * Domaine = [0..50].
@@ -449,8 +449,23 @@ export type TypeViewSettings = {
    * Default = 3978.
    */
   projection: TypeValidMapProjectionCodes;
-  /** Initial map zoom level. Zoom level are define by the basemap zoom levels. Domaine = [0..28], default = 12. */
-  zoom: number;
+};
+
+/** ******************************************************************************************************************************
+ *  Definition of the initial view settings.
+ */
+export type TypeInitialViewSettings = {
+  /**
+   * Option to set the zoom and center of initial view.
+   * Zoom and center of the map defined as [zoom, [longitude, latitude]]. Longitude domaine = [-160..160],
+   * Latitude domaine = [-80..80]. */
+  zoomAndCenter?: [number, [number, number]];
+  /**
+   * Option to set initial view by extent.
+   * Called with [minX, minY, maxX, maxY] extent coordinates. */
+  extent?: Extent;
+  /** IDs of layers to use for initial map extent. */
+  layerIds?: string[];
 };
 
 /** ******************************************************************************************************************************
