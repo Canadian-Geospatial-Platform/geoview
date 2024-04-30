@@ -12,17 +12,10 @@ importers:
     devDependencies:
       '@babel/core':
         specifier: ^7.17.0
-<<<<<<< HEAD
-        version: 7.24.4
-      '@babel/eslint-parser':
-        specifier: ^7.17.0
-        version: 7.24.1(@babel/core@7.24.4)(eslint@8.57.0)
-=======
         version: 7.24.5
       '@babel/eslint-parser':
         specifier: ^7.17.0
         version: 7.24.5(@babel/core@7.24.5)(eslint@8.57.0)
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@typescript-eslint/eslint-plugin':
         specifier: ^5.10.2
         version: 5.62.0(@typescript-eslint/parser@5.62.0)(eslint@8.57.0)(typescript@4.9.5)
@@ -71,21 +64,6 @@ importers:
     devDependencies:
       '@babel/core':
         specifier: ^7.17.0
-<<<<<<< HEAD
-        version: 7.24.4
-      '@babel/eslint-parser':
-        specifier: ^7.17.0
-        version: 7.24.1(@babel/core@7.24.4)(eslint@8.57.0)
-      '@babel/runtime':
-        specifier: ^7.17.0
-        version: 7.24.4
-      '@types/react':
-        specifier: ^18.2.0
-        version: 18.2.79
-      '@types/react-dom':
-        specifier: ^18.2.0
-        version: 18.2.25
-=======
         version: 7.24.5
       '@babel/eslint-parser':
         specifier: ^7.17.0
@@ -99,7 +77,6 @@ importers:
       '@types/react-dom':
         specifier: ^18.2.0
         version: 18.3.0
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@typescript-eslint/eslint-plugin':
         specifier: ^5.10.2
         version: 5.62.0(@typescript-eslint/parser@5.62.0)(eslint@8.57.0)(typescript@4.9.5)
@@ -150,33 +127,6 @@ importers:
     dependencies:
       '@emotion/react':
         specifier: ^11.11.0
-<<<<<<< HEAD
-        version: 11.11.4(@types/react@18.2.79)(react@18.2.0)
-      '@emotion/styled':
-        specifier: ^11.11.0
-        version: 11.11.5(@emotion/react@11.11.4)(@types/react@18.2.79)(react@18.2.0)
-      '@mui/base':
-        specifier: 5.0.0-beta.37
-        version: 5.0.0-beta.37(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0)
-      '@mui/icons-material':
-        specifier: ^5.15.11
-        version: 5.15.15(@mui/material@5.15.15)(@types/react@18.2.79)(react@18.2.0)
-      '@mui/lab':
-        specifier: 5.0.0-alpha.168
-        version: 5.0.0-alpha.168(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@mui/material@5.15.15)(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0)
-      '@mui/material':
-        specifier: ^5.15.11
-        version: 5.15.15(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0)
-      '@mui/styles':
-        specifier: ^5.15.11
-        version: 5.15.15(@types/react@18.2.79)(react@18.2.0)
-      '@mui/system':
-        specifier: ^5.15.11
-        version: 5.15.15(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@types/react@18.2.79)(react@18.2.0)
-      '@mui/x-date-pickers':
-        specifier: ^6.13.0
-        version: 6.19.9(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@mui/material@5.15.15)(@mui/system@5.15.15)(@types/react@18.2.79)(dayjs@1.11.10)(react-dom@18.2.0)(react@18.2.0)
-=======
         version: 11.11.4(@types/react@18.3.1)(react@18.3.1)
       '@emotion/styled':
         specifier: ^11.11.0
@@ -202,7 +152,6 @@ importers:
       '@mui/x-date-pickers':
         specifier: ^6.13.0
         version: 6.19.9(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@mui/material@5.15.15)(@mui/system@5.15.15)(@types/react@18.3.1)(dayjs@1.11.11)(react-dom@18.3.1)(react@18.3.1)
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@nieuwlandgeo/sldreader':
         specifier: ^0.3.1
         version: 0.3.1(ol@9.1.0)
@@ -277,14 +226,10 @@ importers:
         version: 7.1.3
       react:
         specifier: ^18.2.0
-<<<<<<< HEAD
-        version: 18.2.0
-=======
         version: 18.3.1
       react-beautiful-dnd:
         specifier: ~13.1.1
         version: 13.1.1(react-dom@18.3.1)(react@18.3.1)
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       react-dom:
         specifier: ^18.2.0
         version: 18.3.1(react@18.3.1)
@@ -312,84 +257,6 @@ importers:
     devDependencies:
       '@babel/cli':
         specifier: ^7.17.0
-<<<<<<< HEAD
-        version: 7.24.1(@babel/core@7.24.4)
-      '@babel/core':
-        specifier: ^7.17.0
-        version: 7.24.4
-      '@babel/eslint-parser':
-        specifier: ^7.17.0
-        version: 7.24.1(@babel/core@7.24.4)(eslint@8.57.0)
-      '@babel/plugin-proposal-decorators':
-        specifier: ^7.17.0
-        version: 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-proposal-do-expressions':
-        specifier: ^7.16.7
-        version: 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-proposal-export-default-from':
-        specifier: ^7.16.7
-        version: 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-proposal-function-bind':
-        specifier: ^7.16.7
-        version: 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-proposal-function-sent':
-        specifier: ^7.16.7
-        version: 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-proposal-pipeline-operator':
-        specifier: ^7.16.7
-        version: 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-proposal-throw-expressions':
-        specifier: ^7.16.7
-        version: 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-syntax-dynamic-import':
-        specifier: ^7.8.3
-        version: 7.8.3(@babel/core@7.24.4)
-      '@babel/plugin-syntax-import-meta':
-        specifier: ^7.10.4
-        version: 7.10.4(@babel/core@7.24.4)
-      '@babel/plugin-transform-class-properties':
-        specifier: ^7.22.0
-        version: 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-export-namespace-from':
-        specifier: ^7.22.0
-        version: 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-json-strings':
-        specifier: ^7.22.0
-        version: 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-logical-assignment-operators':
-        specifier: ^7.22.0
-        version: 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-nullish-coalescing-operator':
-        specifier: ^7.22.0
-        version: 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-numeric-separator':
-        specifier: ^7.22.0
-        version: 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-optional-chaining':
-        specifier: ^7.22.0
-        version: 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-private-methods':
-        specifier: ^7.22.0
-        version: 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-runtime':
-        specifier: ^7.17.0
-        version: 7.24.3(@babel/core@7.24.4)
-      '@babel/preset-env':
-        specifier: ^7.16.11
-        version: 7.24.4(@babel/core@7.24.4)
-      '@babel/preset-react':
-        specifier: ^7.16.7
-        version: 7.24.1(@babel/core@7.24.4)
-      '@babel/preset-typescript':
-        specifier: ^7.16.7
-        version: 7.24.1(@babel/core@7.24.4)
-      '@babel/runtime':
-        specifier: ^7.17.0
-        version: 7.24.4
-      '@babel/runtime-corejs3':
-        specifier: ^7.17.0
-        version: 7.24.4
-=======
         version: 7.24.5(@babel/core@7.24.5)
       '@babel/core':
         specifier: ^7.17.0
@@ -466,7 +333,6 @@ importers:
       '@babel/runtime-corejs3':
         specifier: ^7.17.0
         version: 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@types/create-react-class':
         specifier: ^15.6.3
         version: 15.6.8
@@ -490,12 +356,6 @@ importers:
         version: 2.5.5
       '@types/react':
         specifier: ^18.2.0
-<<<<<<< HEAD
-        version: 18.2.79
-      '@types/react-dom':
-        specifier: ^18.2.0
-        version: 18.2.25
-=======
         version: 18.3.1
       '@types/react-beautiful-dnd':
         specifier: ~13.1.3
@@ -503,7 +363,6 @@ importers:
       '@types/react-dom':
         specifier: ^18.2.0
         version: 18.3.0
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@types/react-router-dom':
         specifier: ^5.3.3
         version: 5.3.3
@@ -651,15 +510,6 @@ importers:
     devDependencies:
       '@babel/core':
         specifier: ^7.17.0
-<<<<<<< HEAD
-        version: 7.24.4
-      '@babel/eslint-parser':
-        specifier: ^7.17.0
-        version: 7.24.1(@babel/core@7.24.4)(eslint@8.57.0)
-      '@babel/runtime':
-        specifier: ^7.17.0
-        version: 7.24.4
-=======
         version: 7.24.5
       '@babel/eslint-parser':
         specifier: ^7.17.0
@@ -667,23 +517,15 @@ importers:
       '@babel/runtime':
         specifier: ^7.17.0
         version: 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@types/lodash':
         specifier: ^4.14.188
         version: 4.17.0
       '@types/react':
         specifier: ^18.2.0
-<<<<<<< HEAD
-        version: 18.2.79
-      '@types/react-dom':
-        specifier: ^18.2.0
-        version: 18.2.25
-=======
         version: 18.3.1
       '@types/react-dom':
         specifier: ^18.2.0
         version: 18.3.0
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@typescript-eslint/eslint-plugin':
         specifier: ^5.10.2
         version: 5.62.0(@typescript-eslint/parser@5.62.0)(eslint@8.57.0)(typescript@4.9.5)
@@ -750,15 +592,6 @@ importers:
     devDependencies:
       '@babel/core':
         specifier: ^7.17.0
-<<<<<<< HEAD
-        version: 7.24.4
-      '@babel/eslint-parser':
-        specifier: ^7.17.0
-        version: 7.24.1(@babel/core@7.24.4)(eslint@8.57.0)
-      '@babel/runtime':
-        specifier: ^7.17.0
-        version: 7.24.4
-=======
         version: 7.24.5
       '@babel/eslint-parser':
         specifier: ^7.17.0
@@ -766,7 +599,6 @@ importers:
       '@babel/runtime':
         specifier: ^7.17.0
         version: 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@types/lodash':
         specifier: ^4.14.188
         version: 4.17.0
@@ -827,21 +659,6 @@ importers:
     devDependencies:
       '@babel/core':
         specifier: ^7.17.0
-<<<<<<< HEAD
-        version: 7.24.4
-      '@babel/eslint-parser':
-        specifier: ^7.17.0
-        version: 7.24.1(@babel/core@7.24.4)(eslint@8.57.0)
-      '@babel/runtime':
-        specifier: ^7.17.0
-        version: 7.24.4
-      '@types/react':
-        specifier: ^18.2.0
-        version: 18.2.79
-      '@types/react-dom':
-        specifier: ^18.2.0
-        version: 18.2.25
-=======
         version: 7.24.5
       '@babel/eslint-parser':
         specifier: ^7.17.0
@@ -855,7 +672,6 @@ importers:
       '@types/react-dom':
         specifier: ^18.2.0
         version: 18.3.0
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@typescript-eslint/eslint-plugin':
         specifier: ^5.10.2
         version: 5.62.0(@typescript-eslint/parser@5.62.0)(eslint@8.57.0)(typescript@4.9.5)
@@ -906,14 +722,6 @@ importers:
         version: 4.9.5
 
 packages:
-<<<<<<< HEAD
-
-  /@aashutoshrathi/word-wrap@1.2.6:
-    resolution: {integrity: sha512-1Yjs2SvM8TflER/OD3cOjhWWOZb58A2t7wpE2S9XfBYTiIl+XFhQG2bjy4Pu1I+EAlCNUzRDYDdFwFYUKvXcIA==}
-    engines: {node: '>=0.10.0'}
-    dev: true
-=======
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
 
   /@ampproject/remapping@2.3.0:
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
@@ -923,23 +731,14 @@ packages:
       '@jridgewell/trace-mapping': 0.3.25
     dev: true
 
-<<<<<<< HEAD
-  /@babel/cli@7.24.1(@babel/core@7.24.4):
-    resolution: {integrity: sha512-HbmrtxyFUr34LwAlV9jS+sSIjUp4FpdtIMGwgufY3AsxrIfsh/HxlMTywsONAZsU0RMYbZtbZFpUCrSGs7o0EA==}
-=======
   /@babel/cli@7.24.5(@babel/core@7.24.5):
     resolution: {integrity: sha512-2qg1mYtJRsOOWF6IUwLP5jI42P8Cc0hQ5TmnjLrik/4DKouO8dFJN80HEz81VmVeUs97yuuf3vQ/9j7Elrcjlg==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=6.9.0'}
     hasBin: true
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-=======
       '@babel/core': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@jridgewell/trace-mapping': 0.3.25
       commander: 4.1.1
       convert-source-map: 2.0.0
@@ -956,11 +755,7 @@ packages:
     resolution: {integrity: sha512-y5+tLQyV8pg3fsiln67BVLD1P13Eg4lh5RW9mF0zUuvLrv9uIQ4MCL+CRT+FTsBlBjcIan6PGsLcBN0m3ClUyQ==}
     engines: {node: '>=6.9.0'}
     dependencies:
-<<<<<<< HEAD
-      '@babel/highlight': 7.24.2
-=======
       '@babel/highlight': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       picocolors: 1.0.0
 
   /@babel/compat-data@7.24.4:
@@ -968,27 +763,12 @@ packages:
     engines: {node: '>=6.9.0'}
     dev: true
 
-<<<<<<< HEAD
-  /@babel/core@7.24.4:
-    resolution: {integrity: sha512-MBVlMXP+kkl5394RBLSxxk/iLTeVGuXTV3cIDXavPpMMqnSnt6apKgan/U8O3USWZCWZT/TbgfEpKa4uMgN4Dg==}
-=======
   /@babel/core@7.24.5:
     resolution: {integrity: sha512-tVQRucExLQ02Boi4vdPp49svNGcfL2GhdTCT9aldhXgCJVAI21EtRfBettiuLUwce/7r6bFdgs6JFkcdTiFttA==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=6.9.0'}
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@babel/code-frame': 7.24.2
-<<<<<<< HEAD
-      '@babel/generator': 7.24.4
-      '@babel/helper-compilation-targets': 7.23.6
-      '@babel/helper-module-transforms': 7.23.3(@babel/core@7.24.4)
-      '@babel/helpers': 7.24.4
-      '@babel/parser': 7.24.4
-      '@babel/template': 7.24.0
-      '@babel/traverse': 7.24.1
-      '@babel/types': 7.24.0
-=======
       '@babel/generator': 7.24.5
       '@babel/helper-compilation-targets': 7.23.6
       '@babel/helper-module-transforms': 7.24.5(@babel/core@7.24.5)
@@ -997,7 +777,6 @@ packages:
       '@babel/template': 7.24.0
       '@babel/traverse': 7.24.5
       '@babel/types': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       convert-source-map: 2.0.0
       debug: 4.3.4
       gensync: 1.0.0-beta.2
@@ -1007,16 +786,6 @@ packages:
       - supports-color
     dev: true
 
-<<<<<<< HEAD
-  /@babel/eslint-parser@7.24.1(@babel/core@7.24.4)(eslint@8.57.0):
-    resolution: {integrity: sha512-d5guuzMlPeDfZIbpQ8+g1NaCNuAGBBGNECh0HVqz1sjOeVLh2CEaifuOysCH18URW6R7pqXINvf5PaR/dC6jLQ==}
-    engines: {node: ^10.13.0 || ^12.13.0 || >=14.0.0}
-    peerDependencies:
-      '@babel/core': ^7.11.0
-      eslint: ^7.5.0 || ^8.0.0
-    dependencies:
-      '@babel/core': 7.24.4
-=======
   /@babel/eslint-parser@7.24.5(@babel/core@7.24.5)(eslint@8.57.0):
     resolution: {integrity: sha512-gsUcqS/fPlgAw1kOtpss7uhY6E9SFFANQ6EFX5GTvzUwaV0+sGaZWk6xq22MOdeT9wfxyokW3ceCUvOiRtZciQ==}
     engines: {node: ^10.13.0 || ^12.13.0 || >=14.0.0}
@@ -1025,26 +794,17 @@ packages:
       eslint: ^7.5.0 || ^8.0.0 || ^9.0.0
     dependencies:
       '@babel/core': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@nicolo-ribaudo/eslint-scope-5-internals': 5.1.1-v1
       eslint: 8.57.0
       eslint-visitor-keys: 2.1.0
       semver: 6.3.1
     dev: true
 
-<<<<<<< HEAD
-  /@babel/generator@7.24.4:
-    resolution: {integrity: sha512-Xd6+v6SnjWVx/nus+y0l1sxMOTOMBkyL4+BIdbALyatQnAe/SRVjANeDPSCYaX+i1iJmuGSKf3Z+E+V/va1Hvw==}
-    engines: {node: '>=6.9.0'}
-    dependencies:
-      '@babel/types': 7.24.0
-=======
   /@babel/generator@7.24.5:
     resolution: {integrity: sha512-x32i4hEXvr+iI0NEoEfDKzlemF8AmtOP8CcrRaEcpzysWuoEb1KknpcvMsHKPONoKZiDuItklgWhB18xEhr9PA==}
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/types': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@jridgewell/gen-mapping': 0.3.5
       '@jridgewell/trace-mapping': 0.3.25
       jsesc: 2.5.2
@@ -1054,22 +814,14 @@ packages:
     resolution: {integrity: sha512-LvBTxu8bQSQkcyKOU+a1btnNFQ1dMAd0R6PyW3arXes06F6QLWLIrd681bxRPIXlrMGR3XYnW9JyML7dP3qgxg==}
     engines: {node: '>=6.9.0'}
     dependencies:
-<<<<<<< HEAD
-      '@babel/types': 7.24.0
-=======
       '@babel/types': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: true
 
   /@babel/helper-builder-binary-assignment-operator-visitor@7.22.15:
     resolution: {integrity: sha512-QkBXwGgaoC2GtGZRoma6kv7Szfv06khvhFav67ZExau2RaXzy8MpHSMO2PNoP2XtmQphJQRHFfg77Bq731Yizw==}
     engines: {node: '>=6.9.0'}
     dependencies:
-<<<<<<< HEAD
-      '@babel/types': 7.24.0
-=======
       '@babel/types': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: true
 
   /@babel/helper-compilation-targets@7.23.6:
@@ -1083,32 +835,12 @@ packages:
       semver: 6.3.1
     dev: true
 
-<<<<<<< HEAD
-  /@babel/helper-create-class-features-plugin@7.24.4(@babel/core@7.24.4):
-    resolution: {integrity: sha512-lG75yeuUSVu0pIcbhiYMXBXANHrpUPaOfu7ryAzskCgKUHuAxRQI5ssrtmF0X9UXldPlvT0XM/A4F44OXRt6iQ==}
-=======
   /@babel/helper-create-class-features-plugin@7.24.5(@babel/core@7.24.5):
     resolution: {integrity: sha512-uRc4Cv8UQWnE4NXlYTIIdM7wfFkOqlFztcC/gVXDKohKoVB3OyonfelUBaJzSwpBntZ2KYGF/9S7asCHsXwW6g==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-annotate-as-pure': 7.22.5
-      '@babel/helper-environment-visitor': 7.22.20
-      '@babel/helper-function-name': 7.23.0
-      '@babel/helper-member-expression-to-functions': 7.23.0
-      '@babel/helper-optimise-call-expression': 7.22.5
-      '@babel/helper-replace-supers': 7.24.1(@babel/core@7.24.4)
-      '@babel/helper-skip-transparent-expression-wrappers': 7.22.5
-      '@babel/helper-split-export-declaration': 7.22.6
-      semver: 6.3.1
-    dev: true
-
-  /@babel/helper-create-regexp-features-plugin@7.22.15(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-annotate-as-pure': 7.22.5
       '@babel/helper-environment-visitor': 7.22.20
@@ -1122,40 +854,25 @@ packages:
     dev: true
 
   /@babel/helper-create-regexp-features-plugin@7.22.15(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-29FkPLFjn4TPEa3RE7GpW+qbE8tlsu3jntNYNfcGsc49LphF1PQIiD+vMZ1z1xVOKt+93khA9tc2JBs3kBjA7w==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-=======
       '@babel/core': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@babel/helper-annotate-as-pure': 7.22.5
       regexpu-core: 5.3.2
       semver: 6.3.1
     dev: true
 
-<<<<<<< HEAD
-  /@babel/helper-define-polyfill-provider@0.6.2(@babel/core@7.24.4):
-=======
   /@babel/helper-define-polyfill-provider@0.6.2(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-LV76g+C502biUK6AyZ3LK10vDpDyCzZnhZFXkH1L75zHPj68+qc8Zfpx2th+gzwA2MzyK+1g/3EPl62yFnVttQ==}
     peerDependencies:
       '@babel/core': ^7.4.0 || ^8.0.0-0 <8.0.0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-compilation-targets': 7.23.6
-      '@babel/helper-plugin-utils': 7.24.0
-=======
       '@babel/core': 7.24.5
       '@babel/helper-compilation-targets': 7.23.6
       '@babel/helper-plugin-utils': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       debug: 4.3.4
       lodash.debounce: 4.0.8
       resolve: 1.22.8
@@ -1173,27 +890,13 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/template': 7.24.0
-<<<<<<< HEAD
-      '@babel/types': 7.24.0
-=======
       '@babel/types': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: true
 
   /@babel/helper-hoist-variables@7.22.5:
     resolution: {integrity: sha512-wGjk9QZVzvknA6yKIUURb8zY3grXCcOZt+/7Wcy8O2uctxhplmUPkOdlgoNhmdVee2c92JXbf1xpMtVNbfoxRw==}
     engines: {node: '>=6.9.0'}
     dependencies:
-<<<<<<< HEAD
-      '@babel/types': 7.24.0
-    dev: true
-
-  /@babel/helper-member-expression-to-functions@7.23.0:
-    resolution: {integrity: sha512-6gfrPwh7OuT6gZyJZvd6WbTfrqAo7vm4xCzAXOusKqq/vWdKXphTpj5klHKNmRUU6/QRGlBsyU9mAIPaWHlqJA==}
-    engines: {node: '>=6.9.0'}
-    dependencies:
-      '@babel/types': 7.24.0
-=======
       '@babel/types': 7.24.5
     dev: true
 
@@ -1202,60 +905,32 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/types': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: true
 
   /@babel/helper-module-imports@7.24.3:
     resolution: {integrity: sha512-viKb0F9f2s0BCS22QSF308z/+1YWKV/76mwt61NBzS5izMzDPwdq1pTrzf+Li3npBWX9KdQbkeCt1jSAM7lZqg==}
     engines: {node: '>=6.9.0'}
     dependencies:
-<<<<<<< HEAD
-      '@babel/types': 7.24.0
-
-  /@babel/helper-module-transforms@7.23.3(@babel/core@7.24.4):
-    resolution: {integrity: sha512-7bBs4ED9OmswdfDzpz4MpWgSrV7FXlc3zIagvLFjS5H+Mk7Snr21vQ6QwrsoCGMfNC4e4LQPdoULEt4ykz0SRQ==}
-=======
       '@babel/types': 7.24.5
 
   /@babel/helper-module-transforms@7.24.5(@babel/core@7.24.5):
     resolution: {integrity: sha512-9GxeY8c2d2mdQUP1Dye0ks3VDyIMS98kt/llQ2nUId8IsWqTF0l1LkSX0/uP7l7MCDrzXS009Hyhe2gzTiGW8A==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-environment-visitor': 7.22.20
-      '@babel/helper-module-imports': 7.24.3
-      '@babel/helper-simple-access': 7.22.5
-      '@babel/helper-split-export-declaration': 7.22.6
-      '@babel/helper-validator-identifier': 7.22.20
-=======
       '@babel/core': 7.24.5
       '@babel/helper-environment-visitor': 7.22.20
       '@babel/helper-module-imports': 7.24.3
       '@babel/helper-simple-access': 7.24.5
       '@babel/helper-split-export-declaration': 7.24.5
       '@babel/helper-validator-identifier': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: true
 
   /@babel/helper-optimise-call-expression@7.22.5:
     resolution: {integrity: sha512-HBwaojN0xFRx4yIvpwGqxiV2tUfl7401jlok564NgB9EHS1y6QT17FmKWm4ztqjeVdXLuC4fSvHc5ePpQjoTbw==}
     engines: {node: '>=6.9.0'}
     dependencies:
-<<<<<<< HEAD
-      '@babel/types': 7.24.0
-    dev: true
-
-  /@babel/helper-plugin-utils@7.24.0:
-    resolution: {integrity: sha512-9cUznXMG0+FxRuJfvL82QlTqIzhVW9sL0KjMPHhAOOvpQGL8QtdxnBKILjBqxlHyliz0yCa1G903ZXI/FuHy2w==}
-    engines: {node: '>=6.9.0'}
-    dev: true
-
-  /@babel/helper-remap-async-to-generator@7.22.20(@babel/core@7.24.4):
-=======
       '@babel/types': 7.24.5
     dev: true
 
@@ -1265,21 +940,11 @@ packages:
     dev: true
 
   /@babel/helper-remap-async-to-generator@7.22.20(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-pBGyV4uBqOns+0UvhsTO8qgl8hO89PmiDYv+/COyp1aeMcmfrfruz+/nCMFiYyFF/Knn0yfrC85ZzNFjembFTw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-annotate-as-pure': 7.22.5
-      '@babel/helper-environment-visitor': 7.22.20
-      '@babel/helper-wrap-function': 7.22.20
-    dev: true
-
-  /@babel/helper-replace-supers@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-annotate-as-pure': 7.22.5
       '@babel/helper-environment-visitor': 7.22.20
@@ -1287,25 +952,11 @@ packages:
     dev: true
 
   /@babel/helper-replace-supers@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-QCR1UqC9BzG5vZl8BMicmZ28RuUBnHhAMddD8yHFHDRH9lLTZ9uUPehX8ctVPT8l0TKblJidqcgUUKGVrePleQ==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-environment-visitor': 7.22.20
-      '@babel/helper-member-expression-to-functions': 7.23.0
-      '@babel/helper-optimise-call-expression': 7.22.5
-    dev: true
-
-  /@babel/helper-simple-access@7.22.5:
-    resolution: {integrity: sha512-n0H99E/K+Bika3++WNL17POvo4rKWZ7lZEp1Q+fStVbUi8nxPQEBOlTmCOxW/0JsS56SKKQ+ojAe2pHKJHN35w==}
-    engines: {node: '>=6.9.0'}
-    dependencies:
-      '@babel/types': 7.24.0
-=======
       '@babel/core': 7.24.5
       '@babel/helper-environment-visitor': 7.22.20
       '@babel/helper-member-expression-to-functions': 7.24.5
@@ -1317,23 +968,12 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/types': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: true
 
   /@babel/helper-skip-transparent-expression-wrappers@7.22.5:
     resolution: {integrity: sha512-tK14r66JZKiC43p8Ki33yLBVJKlQDFoA8GYN67lWCDCqoL6EMMSuM9b+Iff2jHaM/RRFYl7K+iiru7hbRqNx8Q==}
     engines: {node: '>=6.9.0'}
     dependencies:
-<<<<<<< HEAD
-      '@babel/types': 7.24.0
-    dev: true
-
-  /@babel/helper-split-export-declaration@7.22.6:
-    resolution: {integrity: sha512-AsUnxuLhRYsisFiaJwvp1QF+I3KjD5FOxut14q/GzovUe6orHLesW2C7d754kRm53h5gqrz6sFl6sxc4BVtE/g==}
-    engines: {node: '>=6.9.0'}
-    dependencies:
-      '@babel/types': 7.24.0
-=======
       '@babel/types': 7.24.5
     dev: true
 
@@ -1342,20 +982,14 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/types': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: true
 
   /@babel/helper-string-parser@7.24.1:
     resolution: {integrity: sha512-2ofRCjnnA9y+wk8b9IAREroeUP02KHp431N2mhKniy2yKIDKpbrHv9eXwm8cBeWQYcJmzv5qKCu65P47eCF7CQ==}
     engines: {node: '>=6.9.0'}
 
-<<<<<<< HEAD
-  /@babel/helper-validator-identifier@7.22.20:
-    resolution: {integrity: sha512-Y4OZ+ytlatR8AI+8KZfKuL5urKp7qey08ha31L8b3BwewJAoJamTzyvxPR/5D+KkdJCGPq/+8TukHBlY10FX9A==}
-=======
   /@babel/helper-validator-identifier@7.24.5:
     resolution: {integrity: sha512-3q93SSKX2TWCG30M2G2kwaKeTYgEUp5Snjuj8qm729SObL6nbtUldAi37qbxkD5gg3xnBio+f9nqpSepGZMvxA==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=6.9.0'}
 
   /@babel/helper-validator-option@7.23.5:
@@ -1363,29 +997,12 @@ packages:
     engines: {node: '>=6.9.0'}
     dev: true
 
-<<<<<<< HEAD
-  /@babel/helper-wrap-function@7.22.20:
-    resolution: {integrity: sha512-pms/UwkOpnQe/PDAEdV/d7dVCoBbB+R4FvYoHGZz+4VPcg7RtYy2KP7S2lbuWM6FCSgob5wshfGESbC/hzNXZw==}
-=======
   /@babel/helper-wrap-function@7.24.5:
     resolution: {integrity: sha512-/xxzuNvgRl4/HLNKvnFwdhdgN3cpLxgLROeLDl83Yx0AJ1SGvq1ak0OszTOjDfiB8Vx03eJbeDWh9r+jCCWttw==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/helper-function-name': 7.23.0
       '@babel/template': 7.24.0
-<<<<<<< HEAD
-      '@babel/types': 7.24.0
-    dev: true
-
-  /@babel/helpers@7.24.4:
-    resolution: {integrity: sha512-FewdlZbSiwaVGlgT1DPANDuCHaDMiOo+D/IDYRFYjHOuv66xMSJ7fQwwODwRNAPkADIO/z1EoF/l2BCWlWABDw==}
-    engines: {node: '>=6.9.0'}
-    dependencies:
-      '@babel/template': 7.24.0
-      '@babel/traverse': 7.24.1
-      '@babel/types': 7.24.0
-=======
       '@babel/types': 7.24.5
     dev: true
 
@@ -1396,97 +1013,52 @@ packages:
       '@babel/template': 7.24.0
       '@babel/traverse': 7.24.5
       '@babel/types': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     transitivePeerDependencies:
       - supports-color
     dev: true
 
-<<<<<<< HEAD
-  /@babel/highlight@7.24.2:
-    resolution: {integrity: sha512-Yac1ao4flkTxTteCDZLEvdxg2fZfz1v8M4QpaGypq/WPDqg3ijHYbDfs+LG5hvzSoqaSZ9/Z9lKSP3CjZjv+pA==}
-    engines: {node: '>=6.9.0'}
-    dependencies:
-      '@babel/helper-validator-identifier': 7.22.20
-=======
   /@babel/highlight@7.24.5:
     resolution: {integrity: sha512-8lLmua6AVh/8SLJRRVD6V8p73Hir9w5mJrhE+IPpILG31KKlI9iz5zmBYKcWPS59qSfgP9RaSBQSHHE81WKuEw==}
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/helper-validator-identifier': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       chalk: 2.4.2
       js-tokens: 4.0.0
       picocolors: 1.0.0
 
-<<<<<<< HEAD
-  /@babel/parser@7.24.4:
-    resolution: {integrity: sha512-zTvEBcghmeBma9QIGunWevvBAp4/Qu9Bdq+2k0Ot4fVMD6v3dsC9WOcRSKk7tRRyBM/53yKMJko9xOatGQAwSg==}
-=======
   /@babel/parser@7.24.5:
     resolution: {integrity: sha512-EOv5IK8arwh3LI47dz1b0tKUb/1uhHAnHJOrjgtQMIpu1uXd9mlFrJg9IUgGUgZ41Ch0K8REPTYpO7B76b4vJg==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=6.0.0'}
     hasBin: true
     dev: true
 
-<<<<<<< HEAD
-  /@babel/plugin-bugfix-firefox-class-in-computed-class-key@7.24.4(@babel/core@7.24.4):
-    resolution: {integrity: sha512-qpl6vOOEEzTLLcsuqYYo8yDtrTocmu2xkGvgNebvPjT9DTtfFYGmgDqY+rBYXNlqL4s9qLDn6xkrJv4RxAPiTA==}
-=======
   /@babel/plugin-bugfix-firefox-class-in-computed-class-key@7.24.5(@babel/core@7.24.5):
     resolution: {integrity: sha512-LdXRi1wEMTrHVR4Zc9F8OewC3vdm5h4QB6L71zy6StmYeqGi1b3ttIO8UC+BfZKcH9jdr4aI249rBkm+3+YvHw==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-environment-visitor': 7.22.20
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-environment-visitor': 7.22.20
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-y4HqEnkelJIOQGd+3g1bTeKsA5c6qM7eOn7VggGVbBc0y8MLSKHacwcIE2PplNlQSj0PqS9rrXL/nkPVK+kUNg==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-bugfix-v8-spread-parameters-in-optional-chaining@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-bugfix-v8-spread-parameters-in-optional-chaining@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-Hj791Ii4ci8HqnaKHAlLNs+zaLXb0EzSDhiAWp5VNlyvCNymYfacs64pxTxbH1znW/NcArSmwpmG9IKE/TUVVQ==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.13.0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/helper-skip-transparent-expression-wrappers': 7.22.5
-      '@babel/plugin-transform-optional-chaining': 7.24.1(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/plugin-bugfix-v8-static-class-fields-redefine-readonly@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
       '@babel/helper-skip-transparent-expression-wrappers': 7.22.5
@@ -1494,41 +1066,22 @@ packages:
     dev: true
 
   /@babel/plugin-bugfix-v8-static-class-fields-redefine-readonly@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-m9m/fXsXLiHfwdgydIFnpk+7jlVbnvlK5B2EKiPdLUb6WX654ZaaEWJUjk8TftRbZpK0XibovlLWX4KIZhV6jw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-environment-visitor': 7.22.20
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-proposal-decorators@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-environment-visitor': 7.22.20
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-proposal-decorators@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-zPEvzFijn+hRvJuX2Vu3KbEBN39LN3f7tW3MQO2LsIs57B26KU+kUc82BdAktS1VCM6libzh45eKGI65lg0cpA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-create-class-features-plugin': 7.24.4(@babel/core@7.24.4)
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/plugin-syntax-decorators': 7.24.1(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/plugin-proposal-do-expressions@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-create-class-features-plugin': 7.24.5(@babel/core@7.24.5)
       '@babel/helper-plugin-utils': 7.24.5
@@ -1536,81 +1089,44 @@ packages:
     dev: true
 
   /@babel/plugin-proposal-do-expressions@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-tVYbJAE3Duz/T0lV5P27aAgpg2vTfUuV0dXN4NNbnoRk7G989IcgjYIA+1pMHUMMLij7Gun42CC15UN5jWm4LA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/plugin-syntax-do-expressions': 7.24.1(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/plugin-proposal-export-default-from@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
       '@babel/plugin-syntax-do-expressions': 7.24.1(@babel/core@7.24.5)
     dev: true
 
   /@babel/plugin-proposal-export-default-from@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-+0hrgGGV3xyYIjOrD/bUZk/iUwOIGuoANfRfVg1cPhYBxF+TIXSEcc42DqzBICmWsnAQ+SfKedY0bj8QD+LuMg==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/plugin-syntax-export-default-from': 7.24.1(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/plugin-proposal-function-bind@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
       '@babel/plugin-syntax-export-default-from': 7.24.1(@babel/core@7.24.5)
     dev: true
 
   /@babel/plugin-proposal-function-bind@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-GDz3lXY623E+SMhloR0HDKYfFjLnqYEHjxIHo3SvpJTV3SV89974Y3mADXSYnO1N+UP7bioAFKqpOmsD9aOnuw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/plugin-syntax-function-bind': 7.24.1(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/plugin-proposal-function-sent@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
       '@babel/plugin-syntax-function-bind': 7.24.1(@babel/core@7.24.5)
     dev: true
 
   /@babel/plugin-proposal-function-sent@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-GxHpB7jATDZWYEuYkR5jv5aiHbwkmbvk3fJP5G2Dvl7va+kewfbYxpnU1BadIHd3kXlLPQj4CKbLKoWxX4nTtA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/helper-wrap-function': 7.22.20
-      '@babel/plugin-syntax-function-sent': 7.24.1(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/plugin-proposal-pipeline-operator@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
       '@babel/helper-wrap-function': 7.24.5
@@ -1618,589 +1134,320 @@ packages:
     dev: true
 
   /@babel/plugin-proposal-pipeline-operator@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-JFqo+VsSosYxzo1PPfrbeoIi0IcAJnjGpDXeVABNl5bH6/Zvn84Kd8utGEA1eT3gLsynyt1+TfQ/opGXtb0Y/A==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/plugin-syntax-pipeline-operator': 7.24.1(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/plugin-proposal-private-property-in-object@7.21.0-placeholder-for-preset-env.2(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
       '@babel/plugin-syntax-pipeline-operator': 7.24.1(@babel/core@7.24.5)
     dev: true
 
   /@babel/plugin-proposal-private-property-in-object@7.21.0-placeholder-for-preset-env.2(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-SOSkfJDddaM7mak6cPEpswyTRnuRltl429hMraQEglW+OkovnCzsiszTmsrlY//qLFjCpQDFRvjdm2wA5pPm9w==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-    dev: true
-
-  /@babel/plugin-proposal-throw-expressions@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
     dev: true
 
   /@babel/plugin-proposal-throw-expressions@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-wiae/VkKNX1WuM+wXIeAZY1cvbVKJJIf92eA23s2ufpp4w+vOlp+/4T3yfxN6nzN+hIwT15AsdwujAelIqNW+w==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/plugin-syntax-throw-expressions': 7.24.1(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/plugin-syntax-async-generators@7.8.4(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
       '@babel/plugin-syntax-throw-expressions': 7.24.1(@babel/core@7.24.5)
     dev: true
 
   /@babel/plugin-syntax-async-generators@7.8.4(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-tycmZxkGfZaxhMRbXlPXuVFpdWlXpir2W4AMhSJgRKzk/eDlIXOhb2LHWoLpDF7TEHylV5zNhykX6KAgHJmTNw==}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-bigint@7.8.3(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-bigint@7.8.3(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-wnTnFlG+YxQm3vDxpGE57Pj0srRU4sHE/mDkt1qv2YJJSeUAec2ma4WLUnUPeKjyrfntVwe/N6dCXpU+zL3Npg==}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-class-properties@7.12.13(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-class-properties@7.12.13(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-fm4idjKla0YahUNgFNLCB0qySdsoPiZP3iQE3rky0mBUtMZ23yDJ9SJdg6dXTSDnulOVqiF3Hgr9nbXvXTQZYA==}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-class-static-block@7.14.5(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-class-static-block@7.14.5(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-b+YyPmr6ldyNnM6sqYeMWE+bgJcJpO6yS4QD7ymxgH34GBPNDM/THBh8iunyvKIZztiwLH4CJZ0RxTk9emgpjw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-decorators@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-decorators@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-05RJdO/cCrtVWuAaSn1tS3bH8jbsJa/Y1uD186u6J4C/1mnHFxseeuWpsqr9anvo7TUulev7tm7GDwRV+VuhDw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-do-expressions@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-do-expressions@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-l5ZJA2DB2s/pM3SQzwf1ykWOiBaqN6Eb07EoZ/mH8dUR5RnaWlmPLoav6y4OT8A9Pkl615osBMZOedFbErdOOA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-dynamic-import@7.8.3(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-dynamic-import@7.8.3(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-5gdGbFon+PszYzqs83S3E5mpi7/y/8M9eC90MRTZfduQOYW76ig6SOSPNe41IG5LoP3FGBn2N0RjVDSQiS94kQ==}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-export-default-from@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-export-default-from@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-cNXSxv9eTkGUtd0PsNMK8Yx5xeScxfpWOUAxE+ZPAXXEcAMOC3fk7LRdXq5fvpra2pLx2p1YtkAhpUbB2SwaRA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-export-namespace-from@7.8.3(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-export-namespace-from@7.8.3(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-MXf5laXo6c1IbEbegDmzGPwGNTsHZmEy6QGznu5Sh2UCWvueywb2ee+CCE4zQiZstxU9BMoQO9i6zUFSY0Kj0Q==}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-function-bind@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-function-bind@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-7K+uzNJ5ZuL6g4Ud/UhbIxghwN2FAj8NBrzEO+eM0g9YddjOv+BD81ar/N7Es5sH+G8z9tnTYcfCu6EaPrkSDw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-function-sent@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-function-sent@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-aVwkxqagsGCI8vtuyMI+LnZ2SWtGP4+v9T/T88j2MwKRsGYzc9FAaEzsNMu1Htu6SsHPcfwQ7uZ7pYPGrVmG+g==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-import-assertions@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-import-assertions@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-IuwnI5XnuF189t91XbxmXeCDz3qs6iDRO7GJ++wcfgeXNs/8FmIlKcpDSXNVyuLQxlwvskmI3Ct73wUODkJBlQ==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-import-attributes@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-import-attributes@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-zhQTMH0X2nVLnb04tz+s7AMuasX8U0FnpE+nHTOhSOINjWMnopoZTxtIKsd45n4GQ/HIZLyfIpoul8e2m0DnRA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-import-meta@7.10.4(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-import-meta@7.10.4(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-Yqfm+XDx0+Prh3VSeEQCPU81yC+JWZ2pDPFSS4ZdpfZhp4MkFMaDC1UqseovEKwSUpnIL7+vK+Clp7bfh0iD7g==}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-json-strings@7.8.3(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-json-strings@7.8.3(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-lY6kdGpWHvjoe2vk4WrAapEuBR69EMxZl+RoGRhrFGNYVK8mOPAW8VfbT/ZgrFbXlDNiiaxQnAtgVCZ6jv30EA==}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-jsx@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-jsx@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-2eCtxZXf+kbkMIsXS4poTvT4Yu5rXiRa+9xGVT56raghjmBTKMpFNc9R4IDiB4emao9eO22Ox7CxuJG7BgExqA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-logical-assignment-operators@7.10.4(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-logical-assignment-operators@7.10.4(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-d8waShlpFDinQ5MtvGU9xDAOzKH47+FFoney2baFIoMr952hKOLp1HR7VszoZvOsV/4+RRszNY7D17ba0te0ig==}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-nullish-coalescing-operator@7.8.3(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-nullish-coalescing-operator@7.8.3(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-aSff4zPII1u2QD7y+F8oDsz19ew4IGEJg9SVW+bqwpwtfFleiQDMdzA/R+UlWDzfnHFCxxleFT0PMIrR36XLNQ==}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-numeric-separator@7.10.4(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-numeric-separator@7.10.4(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-9H6YdfkcK/uOnY/K7/aA2xpzaAgkQn37yzWUMRK7OaPOqOpGS1+n0H5hxT9AUw9EsSjPW8SVyMJwYRtWs3X3ug==}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-object-rest-spread@7.8.3(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-object-rest-spread@7.8.3(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-XoqMijGZb9y3y2XskN+P1wUGiVwWZ5JmoDRwx5+3GmEplNyVM2s2Dg8ILFQm8rWM48orGy5YpI5Bl8U1y7ydlA==}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-optional-catch-binding@7.8.3(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-optional-catch-binding@7.8.3(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-6VPD0Pc1lpTqw0aKoeRTMiB+kWhAoT24PA+ksWSBrFtl5SIRVpZlwN3NNPQjehA2E/91FV3RjLWoVTglWcSV3Q==}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-optional-chaining@7.8.3(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-optional-chaining@7.8.3(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-KoK9ErH1MBlCPxV0VANkXW2/dw4vlbGDrFgz8bmUsBGYkFRcbRwMh6cIJubdPrkxRwuGdtCk0v/wPTKbQgBjkg==}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-pipeline-operator@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-pipeline-operator@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-UU7uLj95zh6oMQiREvkTmXAvWy9pJI9p76SFkNsXTesDwQ67YM1UU1Bkx576djA6ZDcPSbzM/MqTJNcYeQ0G2g==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-private-property-in-object@7.14.5(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-private-property-in-object@7.14.5(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-0wVnp9dxJ72ZUJDV27ZfbSj6iHLoytYZmh3rFcxNnvsJF3ktkzLDZPy/mA17HGsaQT3/DQsWYX1f1QGWkCoVUg==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-throw-expressions@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-throw-expressions@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-o4dN/9/hUAC6RuX1QZDlauBG2nmSmUMk0K7/IOIFxjM8V16FS1JTHHiBWqGkkIjK4myeHucJbBHurqjtWFAdsw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-top-level-await@7.14.5(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-top-level-await@7.14.5(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-hx++upLv5U1rgYfwe1xBQUhRmU41NEvpUvrp8jkrSCdvGSnM5/qdRMtylJ6PG5OFkBaHkbTAKTnd3/YyESRHFw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-typescript@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-typescript@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-Yhnmvy5HZEnHUty6i++gcfH1/l68AHnItFHnaCv6hn9dNh0hQvvQJsxpi4BMBFN5DLeHBuucT/0DgzXif/OyRw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-syntax-unicode-sets-regex@7.18.6(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-syntax-unicode-sets-regex@7.18.6(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-727YkEAPwSIQTv5im8QHz3upqp92JTWhidIC81Tdx4VJYIte/VndKf1qKrfnnhPLiPghStWfvC/iFaMCQu7Nqg==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-create-regexp-features-plugin': 7.22.15(@babel/core@7.24.4)
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-arrow-functions@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-create-regexp-features-plugin': 7.22.15(@babel/core@7.24.5)
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-arrow-functions@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-ngT/3NkRhsaep9ck9uj2Xhv9+xB1zShY3tM3g6om4xxCELwCDN4g4Aq5dRn48+0hasAql7s2hdBOysCfNpr4fw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-async-generator-functions@7.24.3(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-async-generator-functions@7.24.3(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-Qe26CMYVjpQxJ8zxM1340JFNjZaF+ISWpr1Kt/jGo+ZTUzKkfw/pphEWbRCb+lmSM6k/TOgfYLvmbHkUQ0asIg==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-environment-visitor': 7.22.20
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/helper-remap-async-to-generator': 7.22.20(@babel/core@7.24.4)
-      '@babel/plugin-syntax-async-generators': 7.8.4(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/plugin-transform-async-to-generator@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-environment-visitor': 7.22.20
       '@babel/helper-plugin-utils': 7.24.5
@@ -2209,21 +1456,11 @@ packages:
     dev: true
 
   /@babel/plugin-transform-async-to-generator@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-AawPptitRXp1y0n4ilKcGbRYWfbbzFWz2NqNu7dacYDtFtz0CMjG64b3LQsb3KIgnf4/obcUL78hfaOS7iCUfw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-module-imports': 7.24.3
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/helper-remap-async-to-generator': 7.22.20(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/plugin-transform-block-scoped-functions@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-module-imports': 7.24.3
       '@babel/helper-plugin-utils': 7.24.5
@@ -2231,79 +1468,42 @@ packages:
     dev: true
 
   /@babel/plugin-transform-block-scoped-functions@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-TWWC18OShZutrv9C6mye1xwtam+uNi2bnTOCBUd5sZxyHOiWbU6ztSROofIMrK84uweEZC219POICK/sTYwfgg==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-block-scoping@7.24.4(@babel/core@7.24.4):
-    resolution: {integrity: sha512-nIFUZIpGKDf9O9ttyRXpHFpKC+X3Y5mtshZONuEUYBomAKoM4y029Jr+uB1bHGPhNmK8YXHevDtKDOLmtRrp6g==}
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-block-scoping@7.24.5(@babel/core@7.24.5):
     resolution: {integrity: sha512-sMfBc3OxghjC95BkYrYocHL3NaOplrcaunblzwXhGmlPwpmfsxr4vK+mBBt49r+S240vahmv+kUxkeKgs+haCw==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-class-properties@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-class-properties@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-OMLCXi0NqvJfORTaPQBwqLXHhb93wkBKZ4aNwMl6WtehO7ar+cmp+89iPEQPqxAnxsOKTaMcs3POz3rKayJ72g==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-create-class-features-plugin': 7.24.4(@babel/core@7.24.4)
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-class-static-block@7.24.4(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-create-class-features-plugin': 7.24.5(@babel/core@7.24.5)
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-class-static-block@7.24.4(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-B8q7Pz870Hz/q9UgP8InNpY01CSLDSCyqX7zcRuv3FcPl87A2G17lASroHWaCtbdIcbYzOZ7kWmXFKbijMSmFg==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.12.0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-create-class-features-plugin': 7.24.4(@babel/core@7.24.4)
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/plugin-syntax-class-static-block': 7.14.5(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/plugin-transform-classes@7.24.1(@babel/core@7.24.4):
-    resolution: {integrity: sha512-ZTIe3W7UejJd3/3R4p7ScyyOoafetUShSf4kCqV0O7F/RiHxVj/wRaRnQlrGwflvcehNA8M42HkAiEDYZu2F1Q==}
-=======
       '@babel/core': 7.24.5
       '@babel/helper-create-class-features-plugin': 7.24.5(@babel/core@7.24.5)
       '@babel/helper-plugin-utils': 7.24.5
@@ -2312,29 +1512,15 @@ packages:
 
   /@babel/plugin-transform-classes@7.24.5(@babel/core@7.24.5):
     resolution: {integrity: sha512-gWkLP25DFj2dwe9Ck8uwMOpko4YsqyfZJrOmqqcegeDYEbp7rmn4U6UQZNj08UF6MaX39XenSpKRCvpDRBtZ7Q==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-=======
       '@babel/core': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@babel/helper-annotate-as-pure': 7.22.5
       '@babel/helper-compilation-targets': 7.23.6
       '@babel/helper-environment-visitor': 7.22.20
       '@babel/helper-function-name': 7.23.0
-<<<<<<< HEAD
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/helper-replace-supers': 7.24.1(@babel/core@7.24.4)
-      '@babel/helper-split-export-declaration': 7.22.6
-      globals: 11.12.0
-    dev: true
-
-  /@babel/plugin-transform-computed-properties@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/helper-plugin-utils': 7.24.5
       '@babel/helper-replace-supers': 7.24.1(@babel/core@7.24.5)
       '@babel/helper-split-export-declaration': 7.24.5
@@ -2342,21 +1528,11 @@ packages:
     dev: true
 
   /@babel/plugin-transform-computed-properties@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-5pJGVIUfJpOS+pAqBQd+QMaTD2vCL/HcePooON6pDpHgRp4gNRmzyHTPIkXntwKsq3ayUFVfJaIKPw2pOkOcTw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/template': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-destructuring@7.24.1(@babel/core@7.24.4):
-    resolution: {integrity: sha512-ow8jciWqNxR3RYbSNVuF4U2Jx130nwnBnhRw6N6h1bOejNkABmcI5X5oz29K4alWX7vf1C+o6gtKXikzRKkVdw==}
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
       '@babel/template': 7.24.0
@@ -2364,156 +1540,85 @@ packages:
 
   /@babel/plugin-transform-destructuring@7.24.5(@babel/core@7.24.5):
     resolution: {integrity: sha512-SZuuLyfxvsm+Ah57I/i1HVjveBENYK9ue8MJ7qkc7ndoNjqquJiElzA7f5yaAXjyW2hKojosOTAQQRX50bPSVg==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-dotall-regex@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-dotall-regex@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-p7uUxgSoZwZ2lPNMzUkqCts3xlp8n+o05ikjy7gbtFJSt9gdU88jAmtfmOxHM14noQXBxfgzf2yRWECiNVhTCw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-create-regexp-features-plugin': 7.22.15(@babel/core@7.24.4)
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-duplicate-keys@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-create-regexp-features-plugin': 7.22.15(@babel/core@7.24.5)
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-duplicate-keys@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-msyzuUnvsjsaSaocV6L7ErfNsa5nDWL1XKNnDePLgmz+WdU4w/J8+AxBMrWfi9m4IxfL5sZQKUPQKDQeeAT6lA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-dynamic-import@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-dynamic-import@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-av2gdSTyXcJVdI+8aFZsCAtR29xJt0S5tas+Ef8NvBNmD1a+N/3ecMLeMBgfcK+xzsjdLDT6oHt+DFPyeqUbDA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/plugin-syntax-dynamic-import': 7.8.3(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/plugin-transform-exponentiation-operator@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
       '@babel/plugin-syntax-dynamic-import': 7.8.3(@babel/core@7.24.5)
     dev: true
 
   /@babel/plugin-transform-exponentiation-operator@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-U1yX13dVBSwS23DEAqU+Z/PkwE9/m7QQy8Y9/+Tdb8UWYaGNDYwTLi19wqIAiROr8sXVum9A/rtiH5H0boUcTw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-builder-binary-assignment-operator-visitor': 7.22.15
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-export-namespace-from@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-builder-binary-assignment-operator-visitor': 7.22.15
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-export-namespace-from@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-Ft38m/KFOyzKw2UaJFkWG9QnHPG/Q/2SkOrRk4pNBPg5IPZ+dOxcmkK5IyuBcxiNPyyYowPGUReyBvrvZs7IlQ==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/plugin-syntax-export-namespace-from': 7.8.3(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/plugin-transform-for-of@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
       '@babel/plugin-syntax-export-namespace-from': 7.8.3(@babel/core@7.24.5)
     dev: true
 
   /@babel/plugin-transform-for-of@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-OxBdcnF04bpdQdR3i4giHZNZQn7cm8RQKcSwA17wAAqEELo1ZOwp5FFgeptWUQXFyT9kwHo10aqqauYkRZPCAg==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/helper-skip-transparent-expression-wrappers': 7.22.5
-    dev: true
-
-  /@babel/plugin-transform-function-name@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
       '@babel/helper-skip-transparent-expression-wrappers': 7.22.5
     dev: true
 
   /@babel/plugin-transform-function-name@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-BXmDZpPlh7jwicKArQASrj8n22/w6iymRnvHYYd2zO30DbE277JO20/7yXJT3QxDPtiQiOxQBbZH4TpivNXIxA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-compilation-targets': 7.23.6
-      '@babel/helper-function-name': 7.23.0
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-json-strings@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-compilation-targets': 7.23.6
       '@babel/helper-function-name': 7.23.0
@@ -2521,117 +1626,64 @@ packages:
     dev: true
 
   /@babel/plugin-transform-json-strings@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-U7RMFmRvoasscrIFy5xA4gIp8iWnWubnKkKuUGJjsuOH7GfbMkB+XZzeslx2kLdEGdOJDamEmCqOks6e8nv8DQ==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/plugin-syntax-json-strings': 7.8.3(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/plugin-transform-literals@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
       '@babel/plugin-syntax-json-strings': 7.8.3(@babel/core@7.24.5)
     dev: true
 
   /@babel/plugin-transform-literals@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-zn9pwz8U7nCqOYIiBaOxoQOtYmMODXTJnkxG4AtX8fPmnCRYWBOHD0qcpwS9e2VDSp1zNJYpdnFMIKb8jmwu6g==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-logical-assignment-operators@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-logical-assignment-operators@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-OhN6J4Bpz+hIBqItTeWJujDOfNP+unqv/NJgyhlpSqgBTPm37KkMmZV6SYcOj+pnDbdcl1qRGV/ZiIjX9Iy34w==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/plugin-syntax-logical-assignment-operators': 7.10.4(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/plugin-transform-member-expression-literals@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
       '@babel/plugin-syntax-logical-assignment-operators': 7.10.4(@babel/core@7.24.5)
     dev: true
 
   /@babel/plugin-transform-member-expression-literals@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-4ojai0KysTWXzHseJKa1XPNXKRbuUrhkOPY4rEGeR+7ChlJVKxFa3H3Bz+7tWaGKgJAXUWKOGmltN+u9B3+CVg==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-modules-amd@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-modules-amd@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-lAxNHi4HVtjnHd5Rxg3D5t99Xm6H7b04hUS7EHIXcUl2EV4yl1gWdqZrNzXnSrHveL9qMdbODlLF55mvgjAfaQ==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-module-transforms': 7.23.3(@babel/core@7.24.4)
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-modules-commonjs@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-module-transforms': 7.24.5(@babel/core@7.24.5)
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-modules-commonjs@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-szog8fFTUxBfw0b98gEWPaEqF42ZUD/T3bkynW/wtgx2p/XCP55WEsb+VosKceRSd6njipdZvNogqdtI4Q0chw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-module-transforms': 7.23.3(@babel/core@7.24.4)
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/helper-simple-access': 7.22.5
-    dev: true
-
-  /@babel/plugin-transform-modules-systemjs@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-module-transforms': 7.24.5(@babel/core@7.24.5)
       '@babel/helper-plugin-utils': 7.24.5
@@ -2639,22 +1691,11 @@ packages:
     dev: true
 
   /@babel/plugin-transform-modules-systemjs@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-mqQ3Zh9vFO1Tpmlt8QPnbwGHzNz3lpNEMxQb1kAemn/erstyqw1r9KeOlOfo3y6xAnFEcOv2tSyrXfmMk+/YZA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-hoist-variables': 7.22.5
-      '@babel/helper-module-transforms': 7.23.3(@babel/core@7.24.4)
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/helper-validator-identifier': 7.22.20
-    dev: true
-
-  /@babel/plugin-transform-modules-umd@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-hoist-variables': 7.22.5
       '@babel/helper-module-transforms': 7.24.5(@babel/core@7.24.5)
@@ -2663,99 +1704,54 @@ packages:
     dev: true
 
   /@babel/plugin-transform-modules-umd@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-tuA3lpPj+5ITfcCluy6nWonSL7RvaG0AOTeAuvXqEKS34lnLzXpDb0dcP6K8jD0zWZFNDVly90AGFJPnm4fOYg==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-module-transforms': 7.23.3(@babel/core@7.24.4)
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-named-capturing-groups-regex@7.22.5(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-module-transforms': 7.24.5(@babel/core@7.24.5)
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-named-capturing-groups-regex@7.22.5(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-YgLLKmS3aUBhHaxp5hi1WJTgOUb/NCuDHzGT9z9WTt3YG+CPRhJs6nprbStx6DnWM4dh6gt7SU3sZodbZ08adQ==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-create-regexp-features-plugin': 7.22.15(@babel/core@7.24.4)
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-new-target@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-create-regexp-features-plugin': 7.22.15(@babel/core@7.24.5)
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-new-target@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-/rurytBM34hYy0HKZQyA0nHbQgQNFm4Q/BOc9Hflxi2X3twRof7NaE5W46j4kQitm7SvACVRXsa6N/tSZxvPug==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-nullish-coalescing-operator@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-nullish-coalescing-operator@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-iQ+caew8wRrhCikO5DrUYx0mrmdhkaELgFa+7baMcVuhxIkN7oxt06CZ51D65ugIb1UWRQ8oQe+HXAVM6qHFjw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/plugin-syntax-nullish-coalescing-operator': 7.8.3(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/plugin-transform-numeric-separator@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
       '@babel/plugin-syntax-nullish-coalescing-operator': 7.8.3(@babel/core@7.24.5)
     dev: true
 
   /@babel/plugin-transform-numeric-separator@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-7GAsGlK4cNL2OExJH1DzmDeKnRv/LXq0eLUSvudrehVA5Rgg4bIrqEUW29FbKMBRT0ztSqisv7kjP+XIC4ZMNw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/plugin-syntax-numeric-separator': 7.10.4(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/plugin-transform-object-rest-spread@7.24.1(@babel/core@7.24.4):
-    resolution: {integrity: sha512-XjD5f0YqOtebto4HGISLNfiNMTTs6tbkFf2TOqJlYKYmbo+mN9Dnpl4SRoofiziuOWMIyq3sZEUqLo3hLITFEA==}
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
       '@babel/plugin-syntax-numeric-separator': 7.10.4(@babel/core@7.24.5)
@@ -2763,21 +1759,10 @@ packages:
 
   /@babel/plugin-transform-object-rest-spread@7.24.5(@babel/core@7.24.5):
     resolution: {integrity: sha512-7EauQHszLGM3ay7a161tTQH7fj+3vVM/gThlz5HpFtnygTxjrlvoeq7MPVA1Vy9Q555OB8SnAOsMkLShNkkrHA==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-compilation-targets': 7.23.6
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/plugin-syntax-object-rest-spread': 7.8.3(@babel/core@7.24.4)
-      '@babel/plugin-transform-parameters': 7.24.1(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/plugin-transform-object-super@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-compilation-targets': 7.23.6
       '@babel/helper-plugin-utils': 7.24.5
@@ -2786,41 +1771,22 @@ packages:
     dev: true
 
   /@babel/plugin-transform-object-super@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-oKJqR3TeI5hSLRxudMjFQ9re9fBVUU0GICqM3J1mi8MqlhVr6hC/ZN4ttAyMuQR6EZZIY6h/exe5swqGNNIkWQ==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/helper-replace-supers': 7.24.1(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/plugin-transform-optional-catch-binding@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
       '@babel/helper-replace-supers': 7.24.1(@babel/core@7.24.5)
     dev: true
 
   /@babel/plugin-transform-optional-catch-binding@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-oBTH7oURV4Y+3EUrf6cWn1OHio3qG/PVwO5J03iSJmBg6m2EhKjkAu/xuaXaYwWW9miYtvbWv4LNf0AmR43LUA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/plugin-syntax-optional-catch-binding': 7.8.3(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/plugin-transform-optional-chaining@7.24.1(@babel/core@7.24.4):
-    resolution: {integrity: sha512-n03wmDt+987qXwAgcBlnUUivrZBPZ8z1plL0YvgQalLm+ZE5BMhGm94jhxXtA1wzv1Cu2aaOv1BM9vbVttrzSg==}
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
       '@babel/plugin-syntax-optional-catch-binding': 7.8.3(@babel/core@7.24.5)
@@ -2828,21 +1794,10 @@ packages:
 
   /@babel/plugin-transform-optional-chaining@7.24.5(@babel/core@7.24.5):
     resolution: {integrity: sha512-xWCkmwKT+ihmA6l7SSTpk8e4qQl/274iNbSKRRS8mpqFR32ksy36+a+LWY8OXCCEefF8WFlnOHVsaDI2231wBg==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/helper-skip-transparent-expression-wrappers': 7.22.5
-      '@babel/plugin-syntax-optional-chaining': 7.8.3(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/plugin-transform-parameters@7.24.1(@babel/core@7.24.4):
-    resolution: {integrity: sha512-8Jl6V24g+Uw5OGPeWNKrKqXPDw2YDjLc53ojwfMcKwlEoETKU9rU0mHUtcg9JntWI/QYzGAXNWEcVHZ+fR+XXg==}
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
       '@babel/helper-skip-transparent-expression-wrappers': 7.22.5
@@ -2851,38 +1806,20 @@ packages:
 
   /@babel/plugin-transform-parameters@7.24.5(@babel/core@7.24.5):
     resolution: {integrity: sha512-9Co00MqZ2aoky+4j2jhofErthm6QVLKbpQrvz20c3CH9KQCLHyNB+t2ya4/UrRpQGR+Wrwjg9foopoeSdnHOkA==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-private-methods@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-private-methods@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-tGvisebwBO5em4PaYNqt4fkw56K2VALsAbAakY0FjTYqJp7gfdrgr7YX76Or8/cpik0W6+tj3rZ0uHU9Oil4tw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-create-class-features-plugin': 7.24.4(@babel/core@7.24.4)
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-private-property-in-object@7.24.1(@babel/core@7.24.4):
-    resolution: {integrity: sha512-pTHxDVa0BpUbvAgX3Gat+7cSciXqUcY9j2VZKTbSB6+VQGpNgNO9ailxTGHSXlqOnX1Hcx1Enme2+yv7VqP9bg==}
-=======
       '@babel/core': 7.24.5
       '@babel/helper-create-class-features-plugin': 7.24.5(@babel/core@7.24.5)
       '@babel/helper-plugin-utils': 7.24.5
@@ -2890,21 +1827,10 @@ packages:
 
   /@babel/plugin-transform-private-property-in-object@7.24.5(@babel/core@7.24.5):
     resolution: {integrity: sha512-JM4MHZqnWR04jPMujQDTBVRnqxpLLpx2tkn7iPn+Hmsc0Gnb79yvRWOkvqFOx3Z7P7VxiRIR22c4eGSNj87OBQ==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-annotate-as-pure': 7.22.5
-      '@babel/helper-create-class-features-plugin': 7.24.4(@babel/core@7.24.4)
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/plugin-syntax-private-property-in-object': 7.14.5(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/plugin-transform-property-literals@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-annotate-as-pure': 7.22.5
       '@babel/helper-create-class-features-plugin': 7.24.5(@babel/core@7.24.5)
@@ -2913,77 +1839,41 @@ packages:
     dev: true
 
   /@babel/plugin-transform-property-literals@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-LetvD7CrHmEx0G442gOomRr66d7q8HzzGGr4PMHGr+5YIm6++Yke+jxj246rpvsbyhJwCLxcTn6zW1P1BSenqA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-react-display-name@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-react-display-name@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-mvoQg2f9p2qlpDQRBC7M3c3XTr0k7cp/0+kFKKO/7Gtu0LSw16eKB+Fabe2bDT/UpsyasTBBkAnbdsLrkD5XMw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-react-jsx-development@7.22.5(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-react-jsx-development@7.22.5(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-bDhuzwWMuInwCYeDeMzyi7TaBgRQei6DqxhbyniL7/VG4RSS7HtSL2QbY4eESy1KJqlWt8g3xeEBGPuo+XqC8A==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/plugin-transform-react-jsx': 7.23.4(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/plugin-transform-react-jsx@7.23.4(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/plugin-transform-react-jsx': 7.23.4(@babel/core@7.24.5)
     dev: true
 
   /@babel/plugin-transform-react-jsx@7.23.4(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-5xOpoPguCZCRbo/JeHlloSkTA8Bld1J/E1/kLfD1nsuiW1m8tduTA1ERCgIZokDflX/IBzKcqR3l7VlRgiIfHA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-annotate-as-pure': 7.22.5
-      '@babel/helper-module-imports': 7.24.3
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/plugin-syntax-jsx': 7.24.1(@babel/core@7.24.4)
-      '@babel/types': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-react-pure-annotations@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-annotate-as-pure': 7.22.5
       '@babel/helper-module-imports': 7.24.3
@@ -2993,204 +1883,111 @@ packages:
     dev: true
 
   /@babel/plugin-transform-react-pure-annotations@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-+pWEAaDJvSm9aFvJNpLiM2+ktl2Sn2U5DdyiWdZBxmLc6+xGt88dvFqsHiAiDS+8WqUwbDfkKz9jRxK3M0k+kA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-annotate-as-pure': 7.22.5
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-regenerator@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-annotate-as-pure': 7.22.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-regenerator@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-sJwZBCzIBE4t+5Q4IGLaaun5ExVMRY0lYwos/jNecjMrVCygCdph3IKv0tkP5Fc87e/1+bebAmEAGBfnRD+cnw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-      regenerator-transform: 0.15.2
-    dev: true
-
-  /@babel/plugin-transform-reserved-words@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
       regenerator-transform: 0.15.2
     dev: true
 
   /@babel/plugin-transform-reserved-words@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-JAclqStUfIwKN15HrsQADFgeZt+wexNQ0uLhuqvqAUFoqPMjEcFCYZBhq0LUdz6dZK/mD+rErhW71fbx8RYElg==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-runtime@7.24.3(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-runtime@7.24.3(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-J0BuRPNlNqlMTRJ72eVptpt9VcInbxO6iP3jaxr+1NPhC0UkKL+6oeX6VXMEYdADnuqmMmsBspt4d5w8Y/TCbQ==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-module-imports': 7.24.3
-      '@babel/helper-plugin-utils': 7.24.0
-      babel-plugin-polyfill-corejs2: 0.4.11(@babel/core@7.24.4)
-      babel-plugin-polyfill-corejs3: 0.10.4(@babel/core@7.24.4)
-      babel-plugin-polyfill-regenerator: 0.6.2(@babel/core@7.24.4)
-=======
       '@babel/core': 7.24.5
       '@babel/helper-module-imports': 7.24.3
       '@babel/helper-plugin-utils': 7.24.5
       babel-plugin-polyfill-corejs2: 0.4.11(@babel/core@7.24.5)
       babel-plugin-polyfill-corejs3: 0.10.4(@babel/core@7.24.5)
       babel-plugin-polyfill-regenerator: 0.6.2(@babel/core@7.24.5)
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       semver: 6.3.1
     transitivePeerDependencies:
       - supports-color
     dev: true
 
-<<<<<<< HEAD
-  /@babel/plugin-transform-shorthand-properties@7.24.1(@babel/core@7.24.4):
-=======
   /@babel/plugin-transform-shorthand-properties@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-LyjVB1nsJ6gTTUKRjRWx9C1s9hE7dLfP/knKdrfeH9UPtAGjYGgxIbFfx7xyLIEWs7Xe1Gnf8EWiUqfjLhInZA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-spread@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-spread@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-KjmcIM+fxgY+KxPVbjelJC6hrH1CgtPmTvdXAfn3/a9CnWGSTY7nH4zm5+cjmWJybdcPSsD0++QssDsjcpe47g==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/helper-skip-transparent-expression-wrappers': 7.22.5
-    dev: true
-
-  /@babel/plugin-transform-sticky-regex@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
       '@babel/helper-skip-transparent-expression-wrappers': 7.22.5
     dev: true
 
   /@babel/plugin-transform-sticky-regex@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-9v0f1bRXgPVcPrngOQvLXeGNNVLc8UjMVfebo9ka0WF3/7+aVUHmaJVT3sa0XCzEFioPfPHZiOcYG9qOsH63cw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-template-literals@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-template-literals@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-WRkhROsNzriarqECASCNu/nojeXCDTE/F2HmRgOzi7NGvyfYGq1NEjKBK3ckLfRgGc6/lPAqP0vDOSw3YtG34g==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-typeof-symbol@7.24.1(@babel/core@7.24.4):
-    resolution: {integrity: sha512-CBfU4l/A+KruSUoW+vTQthwcAdwuqbpRNB8HQKlZABwHRhsdHZ9fezp4Sn18PeAlYxTNiLMlx4xUBV3AWfg1BA==}
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-typeof-symbol@7.24.5(@babel/core@7.24.5):
     resolution: {integrity: sha512-UTGnhYVZtTAjdwOTzT+sCyXmTn8AhaxOS/MjG9REclZ6ULHWF9KoCZur0HSGU7hk8PdBFKKbYe6+gqdXWz84Jg==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-typescript@7.24.4(@babel/core@7.24.4):
-    resolution: {integrity: sha512-79t3CQ8+oBGk/80SQ8MN3Bs3obf83zJ0YZjDmDaEZN8MqhMI760apl5z6a20kFeMXBwJX99VpKT8CKxEBp5H1g==}
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-typescript@7.24.5(@babel/core@7.24.5):
     resolution: {integrity: sha512-E0VWu/hk83BIFUWnsKZ4D81KXjN5L3MobvevOHErASk9IPwKHOkTgvqzvNo1yP/ePJWqqK2SpUR5z+KQbl6NVw==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-annotate-as-pure': 7.22.5
-      '@babel/helper-create-class-features-plugin': 7.24.4(@babel/core@7.24.4)
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/plugin-syntax-typescript': 7.24.1(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/plugin-transform-unicode-escapes@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-annotate-as-pure': 7.22.5
       '@babel/helper-create-class-features-plugin': 7.24.5(@babel/core@7.24.5)
@@ -3199,79 +1996,43 @@ packages:
     dev: true
 
   /@babel/plugin-transform-unicode-escapes@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-RlkVIcWT4TLI96zM660S877E7beKlQw7Ig+wqkKBiWfj0zH5Q4h50q6er4wzZKRNSYpfo6ILJ+hrJAGSX2qcNw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-unicode-property-regex@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-unicode-property-regex@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-Ss4VvlfYV5huWApFsF8/Sq0oXnGO+jB+rijFEFugTd3cwSObUSnUi88djgR5528Csl0uKlrI331kRqe56Ov2Ng==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-create-regexp-features-plugin': 7.22.15(@babel/core@7.24.4)
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-unicode-regex@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-create-regexp-features-plugin': 7.22.15(@babel/core@7.24.5)
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-unicode-regex@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-2A/94wgZgxfTsiLaQ2E36XAOdcZmGAaEEgVmxQWwZXWkGhvoHbaqXcKnU8zny4ycpu3vNqg0L/PcCiYtHtA13g==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-create-regexp-features-plugin': 7.22.15(@babel/core@7.24.4)
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/plugin-transform-unicode-sets-regex@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-create-regexp-features-plugin': 7.22.15(@babel/core@7.24.5)
       '@babel/helper-plugin-utils': 7.24.5
     dev: true
 
   /@babel/plugin-transform-unicode-sets-regex@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-fqj4WuzzS+ukpgerpAoOnMfQXwUHFxXUZUE84oL2Kao2N8uSlvcpnAidKASgsNgzZHBsHWvcm8s9FPWUhAb8fA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-create-regexp-features-plugin': 7.22.15(@babel/core@7.24.4)
-      '@babel/helper-plugin-utils': 7.24.0
-    dev: true
-
-  /@babel/preset-env@7.24.4(@babel/core@7.24.4):
-    resolution: {integrity: sha512-7Kl6cSmYkak0FK/FXjSEnLJ1N9T/WA2RkMhu17gZ/dsxKJUuTYNIylahPTzqpLyJN4WhDif8X0XK1R8Wsguo/A==}
-=======
       '@babel/core': 7.24.5
       '@babel/helper-create-regexp-features-plugin': 7.22.15(@babel/core@7.24.5)
       '@babel/helper-plugin-utils': 7.24.5
@@ -3279,93 +2040,11 @@ packages:
 
   /@babel/preset-env@7.24.5(@babel/core@7.24.5):
     resolution: {integrity: sha512-UGK2ifKtcC8i5AI4cH+sbLLuLc2ktYSFJgBAXorKAsHUZmrQ1q6aQ6i3BvU24wWs2AAKqQB6kq3N9V9Gw1HiMQ==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/compat-data': 7.24.4
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-compilation-targets': 7.23.6
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/helper-validator-option': 7.23.5
-      '@babel/plugin-bugfix-firefox-class-in-computed-class-key': 7.24.4(@babel/core@7.24.4)
-      '@babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-bugfix-v8-spread-parameters-in-optional-chaining': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-bugfix-v8-static-class-fields-redefine-readonly': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-proposal-private-property-in-object': 7.21.0-placeholder-for-preset-env.2(@babel/core@7.24.4)
-      '@babel/plugin-syntax-async-generators': 7.8.4(@babel/core@7.24.4)
-      '@babel/plugin-syntax-class-properties': 7.12.13(@babel/core@7.24.4)
-      '@babel/plugin-syntax-class-static-block': 7.14.5(@babel/core@7.24.4)
-      '@babel/plugin-syntax-dynamic-import': 7.8.3(@babel/core@7.24.4)
-      '@babel/plugin-syntax-export-namespace-from': 7.8.3(@babel/core@7.24.4)
-      '@babel/plugin-syntax-import-assertions': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-syntax-import-attributes': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-syntax-import-meta': 7.10.4(@babel/core@7.24.4)
-      '@babel/plugin-syntax-json-strings': 7.8.3(@babel/core@7.24.4)
-      '@babel/plugin-syntax-logical-assignment-operators': 7.10.4(@babel/core@7.24.4)
-      '@babel/plugin-syntax-nullish-coalescing-operator': 7.8.3(@babel/core@7.24.4)
-      '@babel/plugin-syntax-numeric-separator': 7.10.4(@babel/core@7.24.4)
-      '@babel/plugin-syntax-object-rest-spread': 7.8.3(@babel/core@7.24.4)
-      '@babel/plugin-syntax-optional-catch-binding': 7.8.3(@babel/core@7.24.4)
-      '@babel/plugin-syntax-optional-chaining': 7.8.3(@babel/core@7.24.4)
-      '@babel/plugin-syntax-private-property-in-object': 7.14.5(@babel/core@7.24.4)
-      '@babel/plugin-syntax-top-level-await': 7.14.5(@babel/core@7.24.4)
-      '@babel/plugin-syntax-unicode-sets-regex': 7.18.6(@babel/core@7.24.4)
-      '@babel/plugin-transform-arrow-functions': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-async-generator-functions': 7.24.3(@babel/core@7.24.4)
-      '@babel/plugin-transform-async-to-generator': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-block-scoped-functions': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-block-scoping': 7.24.4(@babel/core@7.24.4)
-      '@babel/plugin-transform-class-properties': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-class-static-block': 7.24.4(@babel/core@7.24.4)
-      '@babel/plugin-transform-classes': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-computed-properties': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-destructuring': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-dotall-regex': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-duplicate-keys': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-dynamic-import': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-exponentiation-operator': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-export-namespace-from': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-for-of': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-function-name': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-json-strings': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-literals': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-logical-assignment-operators': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-member-expression-literals': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-modules-amd': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-modules-commonjs': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-modules-systemjs': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-modules-umd': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-named-capturing-groups-regex': 7.22.5(@babel/core@7.24.4)
-      '@babel/plugin-transform-new-target': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-nullish-coalescing-operator': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-numeric-separator': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-object-rest-spread': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-object-super': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-optional-catch-binding': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-optional-chaining': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-parameters': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-private-methods': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-private-property-in-object': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-property-literals': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-regenerator': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-reserved-words': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-shorthand-properties': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-spread': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-sticky-regex': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-template-literals': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-typeof-symbol': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-unicode-escapes': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-unicode-property-regex': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-unicode-regex': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-unicode-sets-regex': 7.24.1(@babel/core@7.24.4)
-      '@babel/preset-modules': 0.1.6-no-external-plugins(@babel/core@7.24.4)
-      babel-plugin-polyfill-corejs2: 0.4.11(@babel/core@7.24.4)
-      babel-plugin-polyfill-corejs3: 0.10.4(@babel/core@7.24.4)
-      babel-plugin-polyfill-regenerator: 0.6.2(@babel/core@7.24.4)
-=======
       '@babel/core': 7.24.5
       '@babel/helper-compilation-targets': 7.23.6
       '@babel/helper-plugin-utils': 7.24.5
@@ -3445,31 +2124,17 @@ packages:
       babel-plugin-polyfill-corejs2: 0.4.11(@babel/core@7.24.5)
       babel-plugin-polyfill-corejs3: 0.10.4(@babel/core@7.24.5)
       babel-plugin-polyfill-regenerator: 0.6.2(@babel/core@7.24.5)
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       core-js-compat: 3.37.0
       semver: 6.3.1
     transitivePeerDependencies:
       - supports-color
     dev: true
 
-<<<<<<< HEAD
-  /@babel/preset-modules@0.1.6-no-external-plugins(@babel/core@7.24.4):
-=======
   /@babel/preset-modules@0.1.6-no-external-plugins(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-HrcgcIESLm9aIR842yhJ5RWan/gebQUJ6E/E5+rf0y9o6oj7w0Br+sWuL6kEQ/o/AdfvR1Je9jG18/gnpwjEyA==}
     peerDependencies:
       '@babel/core': ^7.0.0-0 || ^8.0.0-0 <8.0.0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/types': 7.24.0
-      esutils: 2.0.3
-    dev: true
-
-  /@babel/preset-react@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
       '@babel/types': 7.24.5
@@ -3477,24 +2142,11 @@ packages:
     dev: true
 
   /@babel/preset-react@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-eFa8up2/8cZXLIpkafhaADTXSnl7IsUFCYenRWrARBz0/qZwcT0RBXpys0LJU4+WfPoF2ZG6ew6s2V6izMCwRA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/helper-validator-option': 7.23.5
-      '@babel/plugin-transform-react-display-name': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-react-jsx': 7.23.4(@babel/core@7.24.4)
-      '@babel/plugin-transform-react-jsx-development': 7.22.5(@babel/core@7.24.4)
-      '@babel/plugin-transform-react-pure-annotations': 7.24.1(@babel/core@7.24.4)
-    dev: true
-
-  /@babel/preset-typescript@7.24.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
       '@babel/helper-validator-option': 7.23.5
@@ -3505,53 +2157,33 @@ packages:
     dev: true
 
   /@babel/preset-typescript@7.24.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-1DBaMmRDpuYQBPWD8Pf/WEwCrtgRHxsZnP4mIy9G/X+hFfbI47Q2G4t1Paakld84+qsk2fSsUPMKg71jkoOOaQ==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-plugin-utils': 7.24.0
-      '@babel/helper-validator-option': 7.23.5
-      '@babel/plugin-syntax-jsx': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-modules-commonjs': 7.24.1(@babel/core@7.24.4)
-      '@babel/plugin-transform-typescript': 7.24.4(@babel/core@7.24.4)
-=======
       '@babel/core': 7.24.5
       '@babel/helper-plugin-utils': 7.24.5
       '@babel/helper-validator-option': 7.23.5
       '@babel/plugin-syntax-jsx': 7.24.1(@babel/core@7.24.5)
       '@babel/plugin-transform-modules-commonjs': 7.24.1(@babel/core@7.24.5)
       '@babel/plugin-transform-typescript': 7.24.5(@babel/core@7.24.5)
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: true
 
   /@babel/regjsgen@0.8.0:
     resolution: {integrity: sha512-x/rqGMdzj+fWZvCOYForTghzbtqPDZ5gPwaoNGHdgDfF2QA/XZbCBp4Moo5scrkAMPhB7z26XM/AaHuIJdgauA==}
     dev: true
 
-<<<<<<< HEAD
-  /@babel/runtime-corejs3@7.24.4:
-    resolution: {integrity: sha512-VOQOexSilscN24VEY810G/PqtpFvx/z6UqDIjIWbDe2368HhDLkYN5TYwaEz/+eRCUkhJ2WaNLLmQAlxzfWj4w==}
-=======
   /@babel/runtime-corejs3@7.24.5:
     resolution: {integrity: sha512-GWO0mgzNMLWaSYM4z4NVIuY0Cd1fl8cPnuetuddu5w/qGuvt5Y7oUi/kvvQGK9xgOkFJDQX2heIvTRn/OQ1XTg==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=6.9.0'}
     dependencies:
       core-js-pure: 3.37.0
       regenerator-runtime: 0.14.1
     dev: true
 
-<<<<<<< HEAD
-  /@babel/runtime@7.24.4:
-    resolution: {integrity: sha512-dkxf7+hn8mFBwKjs9bvBlArzLVxVbS8usaPUDd5p2a9JCL9tB8OaOVN1isD4+Xyk4ns89/xeOmbQvgdK7IIVdA==}
-=======
   /@babel/runtime@7.24.5:
     resolution: {integrity: sha512-Nms86NXrsaeU9vbBJKni6gXiEXZ4CVpYVzEjDH9Sb8vmZ3UljyA1GSOJl/6LGPO8EHLuSF9H+IxNXHPX8QHJ4g==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=6.9.0'}
     dependencies:
       regenerator-runtime: 0.14.1
@@ -3561,24 +2193,6 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/code-frame': 7.24.2
-<<<<<<< HEAD
-      '@babel/parser': 7.24.4
-      '@babel/types': 7.24.0
-    dev: true
-
-  /@babel/traverse@7.24.1:
-    resolution: {integrity: sha512-xuU6o9m68KeqZbQuDt2TcKSxUw/mrsvavlEqQ1leZ/B+C9tk6E4sRWy97WaXgvq5E+nU3cXMxv3WKOCanVMCmQ==}
-    engines: {node: '>=6.9.0'}
-    dependencies:
-      '@babel/code-frame': 7.24.2
-      '@babel/generator': 7.24.4
-      '@babel/helper-environment-visitor': 7.22.20
-      '@babel/helper-function-name': 7.23.0
-      '@babel/helper-hoist-variables': 7.22.5
-      '@babel/helper-split-export-declaration': 7.22.6
-      '@babel/parser': 7.24.4
-      '@babel/types': 7.24.0
-=======
       '@babel/parser': 7.24.5
       '@babel/types': 7.24.5
     dev: true
@@ -3595,28 +2209,18 @@ packages:
       '@babel/helper-split-export-declaration': 7.24.5
       '@babel/parser': 7.24.5
       '@babel/types': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       debug: 4.3.4
       globals: 11.12.0
     transitivePeerDependencies:
       - supports-color
     dev: true
 
-<<<<<<< HEAD
-  /@babel/types@7.24.0:
-    resolution: {integrity: sha512-+j7a5c253RfKh8iABBhywc8NSfP5LURe7Uh4qpsh6jc+aLJguvmIUBdjSdEMQv2bENrCR5MfRdjGo7vzS/ob7w==}
-    engines: {node: '>=6.9.0'}
-    dependencies:
-      '@babel/helper-string-parser': 7.24.1
-      '@babel/helper-validator-identifier': 7.22.20
-=======
   /@babel/types@7.24.5:
     resolution: {integrity: sha512-6mQNsaLeXTw0nxYUYu+NSa4Hx4BlF1x1x8/PMFbiR+GBSr+2DkECc69b8hgy2frEodNcvPffeH8YfWd3LI6jhQ==}
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/helper-string-parser': 7.24.1
       '@babel/helper-validator-identifier': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       to-fast-properties: 2.0.0
 
   /@bcoe/v8-coverage@0.2.3:
@@ -3632,11 +2236,7 @@ packages:
     resolution: {integrity: sha512-m4HEDZleaaCH+XgDDsPF15Ht6wTLsgDTeR3WYj9Q/k76JtWhrJjcP4+/XlG8LGT/Rol9qUfOIztXeA84ATpqPQ==}
     dependencies:
       '@babel/helper-module-imports': 7.24.3
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-=======
       '@babel/runtime': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@emotion/hash': 0.9.1
       '@emotion/memoize': 0.8.1
       '@emotion/serialize': 1.1.4
@@ -3672,11 +2272,7 @@ packages:
     resolution: {integrity: sha512-W2P2c/VRW1/1tLox0mVUalvnWXxavmv/Oum2aPsRcoDJuob75FC3Y8FbpfLwUegRcxINtGUMPq0tFCvYNTBXNA==}
     dev: false
 
-<<<<<<< HEAD
-  /@emotion/react@11.11.4(@types/react@18.2.79)(react@18.2.0):
-=======
   /@emotion/react@11.11.4(@types/react@18.3.1)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-t8AjMlF0gHpvvxk5mAtCqR4vmxiGHCeJBaQO6gncUSdklELOgtwjerNY2yuJNfwnc6vi16U/+uMF+afIawJ9iw==}
     peerDependencies:
       '@types/react': '*'
@@ -3685,16 +2281,6 @@ packages:
       '@types/react':
         optional: true
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-      '@emotion/babel-plugin': 11.11.0
-      '@emotion/cache': 11.11.0
-      '@emotion/serialize': 1.1.4
-      '@emotion/use-insertion-effect-with-fallbacks': 1.0.1(react@18.2.0)
-      '@emotion/utils': 1.2.1
-      '@emotion/weak-memoize': 0.3.1
-      '@types/react': 18.2.79
-=======
       '@babel/runtime': 7.24.5
       '@emotion/babel-plugin': 11.11.0
       '@emotion/cache': 11.11.0
@@ -3703,7 +2289,6 @@ packages:
       '@emotion/utils': 1.2.1
       '@emotion/weak-memoize': 0.3.1
       '@types/react': 18.3.1
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       hoist-non-react-statics: 3.3.2
       react: 18.3.1
     dev: false
@@ -3722,11 +2307,7 @@ packages:
     resolution: {integrity: sha512-0QBtGvaqtWi+nx6doRwDdBIzhNdZrXUppvTM4dtZZWEGTXL/XE/yJxLMGlDT1Gt+UHH5IX1n+jkXyytE/av7OA==}
     dev: false
 
-<<<<<<< HEAD
-  /@emotion/styled@11.11.5(@emotion/react@11.11.4)(@types/react@18.2.79)(react@18.2.0):
-=======
   /@emotion/styled@11.11.5(@emotion/react@11.11.4)(@types/react@18.3.1)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-/ZjjnaNKvuMPxcIiUkf/9SHoG4Q196DRl1w82hQ3WCsjo1IUR8uaGWrC6a87CrYAW0Kb/pK7hk8BnLgLRi9KoQ==}
     peerDependencies:
       '@emotion/react': ^11.0.0-rc.0
@@ -3736,17 +2317,6 @@ packages:
       '@types/react':
         optional: true
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-      '@emotion/babel-plugin': 11.11.0
-      '@emotion/is-prop-valid': 1.2.2
-      '@emotion/react': 11.11.4(@types/react@18.2.79)(react@18.2.0)
-      '@emotion/serialize': 1.1.4
-      '@emotion/use-insertion-effect-with-fallbacks': 1.0.1(react@18.2.0)
-      '@emotion/utils': 1.2.1
-      '@types/react': 18.2.79
-      react: 18.2.0
-=======
       '@babel/runtime': 7.24.5
       '@emotion/babel-plugin': 11.11.0
       '@emotion/is-prop-valid': 1.2.2
@@ -3756,18 +2326,13 @@ packages:
       '@emotion/utils': 1.2.1
       '@types/react': 18.3.1
       react: 18.3.1
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: false
 
   /@emotion/unitless@0.8.1:
     resolution: {integrity: sha512-KOEGMu6dmJZtpadb476IsZBclKvILjopjUii3V+7MnXIQCYh8W3NgNcgwo21n9LXZX6EDIKvqfjYxXebDwxKmQ==}
     dev: false
 
-<<<<<<< HEAD
-  /@emotion/use-insertion-effect-with-fallbacks@1.0.1(react@18.2.0):
-=======
   /@emotion/use-insertion-effect-with-fallbacks@1.0.1(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-jT/qyKZ9rzLErtrjGgdkMBn2OP8wl0G3sQlBb3YPryvKHsjvINUhVaPFfP+fpBcOkmrVOVEEHQFJ7nbj2TH2gw==}
     peerDependencies:
       react: '>=16.8.0'
@@ -3820,23 +2385,6 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: true
 
-<<<<<<< HEAD
-  /@floating-ui/core@1.6.0:
-    resolution: {integrity: sha512-PcF++MykgmTj3CIyOQbKA/hDzOAiqI3mhuoN44WRCopIs1sgoDoU4oty4Jtqaj/y3oDU6fnVSm4QG0a3t5i0+g==}
-    dependencies:
-      '@floating-ui/utils': 0.2.1
-    dev: false
-
-  /@floating-ui/dom@1.6.3:
-    resolution: {integrity: sha512-RnDthu3mzPlQ31Ss/BTwQ1zjzIhr3lk1gZB1OC56h/1vEtaXkESrOqL5fQVMfXpwGtRwX+YsZBdyHtJMQnkArw==}
-    dependencies:
-      '@floating-ui/core': 1.6.0
-      '@floating-ui/utils': 0.2.1
-    dev: false
-
-  /@floating-ui/react-dom@2.0.8(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-HOdqOt3R3OGeTKidaLvJKcgg75S6tibQ3Tif4eyd91QnIJWr0NLvoXFpJA/j8HqkFSL68GDca9AuyWEHlhyClw==}
-=======
   /@floating-ui/core@1.6.1:
     resolution: {integrity: sha512-42UH54oPZHPdRHdw6BgoBD6cg/eVTmVrFcgeRDM3jbO7uxSoipVcmcIGFcA5jmOHO5apcyvBhkSKES3fQJnu7A==}
     dependencies:
@@ -3852,20 +2400,10 @@ packages:
 
   /@floating-ui/react-dom@2.0.9(react-dom@18.3.1)(react@18.3.1):
     resolution: {integrity: sha512-q0umO0+LQK4+p6aGyvzASqKbKOJcAHJ7ycE9CuUvfx3s9zTHWmGJTPOIlM/hmSBfUfg/XfY5YhLBLR/LHwShQQ==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
     dependencies:
-<<<<<<< HEAD
-      '@floating-ui/dom': 1.6.3
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-    dev: false
-
-  /@floating-ui/utils@0.2.1:
-    resolution: {integrity: sha512-9TANp6GPoMtYzQdt54kfAyMmz1+osLlXdg2ENroU7zzrtflTLrrC/lgrIfaSe+Wu0b89GKccT7vxXA0MoAIO+Q==}
-=======
       '@floating-ui/dom': 1.6.4
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -3873,7 +2411,6 @@ packages:
 
   /@floating-ui/utils@0.2.2:
     resolution: {integrity: sha512-J4yDIIthosAsRZ5CPYP/jQvUAQtlZTTD/4suA08/FEnlxqW3sKS9iAhgsa9VYLZ6vDHn/ixJgIqRQPotoBjxIw==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: false
 
   /@humanwhocodes/config-array@0.11.14:
@@ -4073,11 +2610,7 @@ packages:
     resolution: {integrity: sha512-ipON6WtYgl/1329g5AIJVbUuEh0wZVbdpGwC99Jw4LwuoBNS95MVphU6zOeD9pDkon+LLbFL7lOQRapbB8SCHw==}
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-=======
       '@babel/core': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@jest/types': 27.5.1
       babel-plugin-istanbul: 6.1.1
       chalk: 4.1.2
@@ -4179,11 +2712,7 @@ packages:
     resolution: {integrity: sha512-HPnRdYO0WjFjRTSwO3frz1wKaU649OBFPX3Zo/2WZvuRi6zMiRGui8SnPQiQABgqCf8YikDe5t3HViTVw1WUzA==}
     dev: false
 
-<<<<<<< HEAD
-  /@mui/base@5.0.0-beta.37(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0):
-=======
   /@mui/base@5.0.0-beta.37(@types/react@18.3.1)(react-dom@18.3.1)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-/o3anbb+DeCng8jNsd3704XtmmLDZju1Fo8R2o7ugrVtPQ/QpcqddwKNzKPZwa0J5T8YNW3ZVuHyQgbTnQLisQ==}
     engines: {node: '>=12.0.0'}
     peerDependencies:
@@ -4194,32 +2723,19 @@ packages:
       '@types/react':
         optional: true
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-      '@floating-ui/react-dom': 2.0.8(react-dom@18.2.0)(react@18.2.0)
-      '@mui/types': 7.2.14(@types/react@18.2.79)
-      '@mui/utils': 5.15.14(@types/react@18.2.79)(react@18.2.0)
-      '@popperjs/core': 2.11.8
-      '@types/react': 18.2.79
-=======
       '@babel/runtime': 7.24.5
       '@floating-ui/react-dom': 2.0.9(react-dom@18.3.1)(react@18.3.1)
       '@mui/types': 7.2.14(@types/react@18.3.1)
       '@mui/utils': 5.15.14(@types/react@18.3.1)(react@18.3.1)
       '@popperjs/core': 2.11.8
       '@types/react': 18.3.1
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       clsx: 2.1.1
       prop-types: 15.8.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
     dev: false
 
-<<<<<<< HEAD
-  /@mui/base@5.0.0-beta.39(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0):
-=======
   /@mui/base@5.0.0-beta.39(@types/react@18.3.1)(react-dom@18.3.1)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-puyUptF7VJ+9/dMIRLF+DLR21cWfvejsA6OnatfJfqFp8aMhya7xQtvYLEfCch6ahvFZvNC9FFEGGR+qkgFjUg==}
     engines: {node: '>=12.0.0'}
     peerDependencies:
@@ -4230,32 +2746,19 @@ packages:
       '@types/react':
         optional: true
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-      '@floating-ui/react-dom': 2.0.8(react-dom@18.2.0)(react@18.2.0)
-      '@mui/types': 7.2.14(@types/react@18.2.79)
-      '@mui/utils': 5.15.14(@types/react@18.2.79)(react@18.2.0)
-      '@popperjs/core': 2.11.8
-      '@types/react': 18.2.79
-=======
       '@babel/runtime': 7.24.5
       '@floating-ui/react-dom': 2.0.9(react-dom@18.3.1)(react@18.3.1)
       '@mui/types': 7.2.14(@types/react@18.3.1)
       '@mui/utils': 5.15.14(@types/react@18.3.1)(react@18.3.1)
       '@popperjs/core': 2.11.8
       '@types/react': 18.3.1
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       clsx: 2.1.1
       prop-types: 15.8.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
     dev: false
 
-<<<<<<< HEAD
-  /@mui/base@5.0.0-beta.40(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0):
-=======
   /@mui/base@5.0.0-beta.40(@types/react@18.3.1)(react-dom@18.3.1)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-I/lGHztkCzvwlXpjD2+SNmvNQvB4227xBXhISPjEaJUXGImOQ9f3D2Yj/T3KasSI/h0MLWy74X0J6clhPmsRbQ==}
     engines: {node: '>=12.0.0'}
     peerDependencies:
@@ -4266,21 +2769,12 @@ packages:
       '@types/react':
         optional: true
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-      '@floating-ui/react-dom': 2.0.8(react-dom@18.2.0)(react@18.2.0)
-      '@mui/types': 7.2.14(@types/react@18.2.79)
-      '@mui/utils': 5.15.14(@types/react@18.2.79)(react@18.2.0)
-      '@popperjs/core': 2.11.8
-      '@types/react': 18.2.79
-=======
       '@babel/runtime': 7.24.5
       '@floating-ui/react-dom': 2.0.9(react-dom@18.3.1)(react@18.3.1)
       '@mui/types': 7.2.14(@types/react@18.3.1)
       '@mui/utils': 5.15.14(@types/react@18.3.1)(react@18.3.1)
       '@popperjs/core': 2.11.8
       '@types/react': 18.3.1
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       clsx: 2.1.1
       prop-types: 15.8.1
       react: 18.3.1
@@ -4291,11 +2785,7 @@ packages:
     resolution: {integrity: sha512-aXnw29OWQ6I5A47iuWEI6qSSUfH6G/aCsW9KmW3LiFqr7uXZBK4Ks+z8G+qeIub8k0T5CMqlT2q0L+ZJTMrqpg==}
     dev: false
 
-<<<<<<< HEAD
-  /@mui/icons-material@5.15.15(@mui/material@5.15.15)(@types/react@18.2.79)(react@18.2.0):
-=======
   /@mui/icons-material@5.15.15(@mui/material@5.15.15)(@types/react@18.3.1)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-kkeU/pe+hABcYDH6Uqy8RmIsr2S/y5bP2rp+Gat4CcRjCcVne6KudS1NrZQhUCRysrTDCAhcbcf9gt+/+pGO2g==}
     engines: {node: '>=12.0.0'}
     peerDependencies:
@@ -4306,15 +2796,6 @@ packages:
       '@types/react':
         optional: true
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-      '@mui/material': 5.15.15(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0)
-      '@types/react': 18.2.79
-      react: 18.2.0
-    dev: false
-
-  /@mui/lab@5.0.0-alpha.168(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@mui/material@5.15.15)(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0):
-=======
       '@babel/runtime': 7.24.5
       '@mui/material': 5.15.15(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@types/react@18.3.1)(react-dom@18.3.1)(react@18.3.1)
       '@types/react': 18.3.1
@@ -4322,7 +2803,6 @@ packages:
     dev: false
 
   /@mui/lab@5.0.0-alpha.168(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@mui/material@5.15.15)(@types/react@18.3.1)(react-dom@18.3.1)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-VKLQP5J/SujylvW3/riMtQYTspTluUkKLW/eu48RwuKby583cFCg8p4fWl4PpC3drwq6g9AeJ7DG4w0K+zFbdA==}
     engines: {node: '>=12.0.0'}
     peerDependencies:
@@ -4340,17 +2820,6 @@ packages:
       '@types/react':
         optional: true
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-      '@emotion/react': 11.11.4(@types/react@18.2.79)(react@18.2.0)
-      '@emotion/styled': 11.11.5(@emotion/react@11.11.4)(@types/react@18.2.79)(react@18.2.0)
-      '@mui/base': 5.0.0-beta.39(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0)
-      '@mui/material': 5.15.15(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0)
-      '@mui/system': 5.15.15(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@types/react@18.2.79)(react@18.2.0)
-      '@mui/types': 7.2.14(@types/react@18.2.79)
-      '@mui/utils': 5.15.14(@types/react@18.2.79)(react@18.2.0)
-      '@types/react': 18.2.79
-=======
       '@babel/runtime': 7.24.5
       '@emotion/react': 11.11.4(@types/react@18.3.1)(react@18.3.1)
       '@emotion/styled': 11.11.5(@emotion/react@11.11.4)(@types/react@18.3.1)(react@18.3.1)
@@ -4360,18 +2829,13 @@ packages:
       '@mui/types': 7.2.14(@types/react@18.3.1)
       '@mui/utils': 5.15.14(@types/react@18.3.1)(react@18.3.1)
       '@types/react': 18.3.1
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       clsx: 2.1.1
       prop-types: 15.8.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
     dev: false
 
-<<<<<<< HEAD
-  /@mui/material@5.15.15(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0):
-=======
   /@mui/material@5.15.15(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@types/react@18.3.1)(react-dom@18.3.1)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-3zvWayJ+E1kzoIsvwyEvkTUKVKt1AjchFFns+JtluHCuvxgKcLSRJTADw37k0doaRtVAsyh8bz9Afqzv+KYrIA==}
     engines: {node: '>=12.0.0'}
     peerDependencies:
@@ -4388,17 +2852,6 @@ packages:
       '@types/react':
         optional: true
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-      '@emotion/react': 11.11.4(@types/react@18.2.79)(react@18.2.0)
-      '@emotion/styled': 11.11.5(@emotion/react@11.11.4)(@types/react@18.2.79)(react@18.2.0)
-      '@mui/base': 5.0.0-beta.40(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0)
-      '@mui/core-downloads-tracker': 5.15.15
-      '@mui/system': 5.15.15(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@types/react@18.2.79)(react@18.2.0)
-      '@mui/types': 7.2.14(@types/react@18.2.79)
-      '@mui/utils': 5.15.14(@types/react@18.2.79)(react@18.2.0)
-      '@types/react': 18.2.79
-=======
       '@babel/runtime': 7.24.5
       '@emotion/react': 11.11.4(@types/react@18.3.1)(react@18.3.1)
       '@emotion/styled': 11.11.5(@emotion/react@11.11.4)(@types/react@18.3.1)(react@18.3.1)
@@ -4408,7 +2861,6 @@ packages:
       '@mui/types': 7.2.14(@types/react@18.3.1)
       '@mui/utils': 5.15.14(@types/react@18.3.1)(react@18.3.1)
       '@types/react': 18.3.1
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@types/react-transition-group': 4.4.10
       clsx: 2.1.1
       csstype: 3.1.3
@@ -4419,11 +2871,7 @@ packages:
       react-transition-group: 4.4.5(react-dom@18.3.1)(react@18.3.1)
     dev: false
 
-<<<<<<< HEAD
-  /@mui/private-theming@5.15.14(@types/react@18.2.79)(react@18.2.0):
-=======
   /@mui/private-theming@5.15.14(@types/react@18.3.1)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-UH0EiZckOWcxiXLX3Jbb0K7rC8mxTr9L9l6QhOZxYc4r8FHUkefltV9VDGLrzCaWh30SQiJvAEd7djX3XXY6Xw==}
     engines: {node: '>=12.0.0'}
     peerDependencies:
@@ -4433,24 +2881,14 @@ packages:
       '@types/react':
         optional: true
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-      '@mui/utils': 5.15.14(@types/react@18.2.79)(react@18.2.0)
-      '@types/react': 18.2.79
-=======
       '@babel/runtime': 7.24.5
       '@mui/utils': 5.15.14(@types/react@18.3.1)(react@18.3.1)
       '@types/react': 18.3.1
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       prop-types: 15.8.1
       react: 18.3.1
     dev: false
 
-<<<<<<< HEAD
-  /@mui/styled-engine@5.15.14(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(react@18.2.0):
-=======
   /@mui/styled-engine@5.15.14(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-RILkuVD8gY6PvjZjqnWhz8fu68dVkqhM5+jYWfB5yhlSQKg+2rHkmEwm75XIeAqI3qwOndK6zELK5H6Zxn4NHw==}
     engines: {node: '>=12.0.0'}
     peerDependencies:
@@ -4463,27 +2901,16 @@ packages:
       '@emotion/styled':
         optional: true
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-      '@emotion/cache': 11.11.0
-      '@emotion/react': 11.11.4(@types/react@18.2.79)(react@18.2.0)
-      '@emotion/styled': 11.11.5(@emotion/react@11.11.4)(@types/react@18.2.79)(react@18.2.0)
-=======
       '@babel/runtime': 7.24.5
       '@emotion/cache': 11.11.0
       '@emotion/react': 11.11.4(@types/react@18.3.1)(react@18.3.1)
       '@emotion/styled': 11.11.5(@emotion/react@11.11.4)(@types/react@18.3.1)(react@18.3.1)
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       csstype: 3.1.3
       prop-types: 15.8.1
       react: 18.3.1
     dev: false
 
-<<<<<<< HEAD
-  /@mui/styles@5.15.15(@types/react@18.2.79)(react@18.2.0):
-=======
   /@mui/styles@5.15.15(@types/react@18.3.1)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-KBklDHNEddodEjcnZ+/3ieVcp+Mb/pzdQzAagUpt4RDd9m/mn+2JkqJh2rnrWUwS//YLsbL3IbUrONYn5yPxfQ==}
     engines: {node: '>=12.0.0'}
     peerDependencies:
@@ -4493,21 +2920,12 @@ packages:
       '@types/react':
         optional: true
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-      '@emotion/hash': 0.9.1
-      '@mui/private-theming': 5.15.14(@types/react@18.2.79)(react@18.2.0)
-      '@mui/types': 7.2.14(@types/react@18.2.79)
-      '@mui/utils': 5.15.14(@types/react@18.2.79)(react@18.2.0)
-      '@types/react': 18.2.79
-=======
       '@babel/runtime': 7.24.5
       '@emotion/hash': 0.9.1
       '@mui/private-theming': 5.15.14(@types/react@18.3.1)(react@18.3.1)
       '@mui/types': 7.2.14(@types/react@18.3.1)
       '@mui/utils': 5.15.14(@types/react@18.3.1)(react@18.3.1)
       '@types/react': 18.3.1
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       clsx: 2.1.1
       csstype: 3.1.3
       hoist-non-react-statics: 3.3.2
@@ -4523,11 +2941,7 @@ packages:
       react: 18.3.1
     dev: false
 
-<<<<<<< HEAD
-  /@mui/system@5.15.15(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@types/react@18.2.79)(react@18.2.0):
-=======
   /@mui/system@5.15.15(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@types/react@18.3.1)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-aulox6N1dnu5PABsfxVGOZffDVmlxPOVgj56HrUnJE8MCSh8lOvvkd47cebIVQQYAjpwieXQXiDPj5pwM40jTQ==}
     engines: {node: '>=12.0.0'}
     peerDependencies:
@@ -4543,16 +2957,6 @@ packages:
       '@types/react':
         optional: true
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-      '@emotion/react': 11.11.4(@types/react@18.2.79)(react@18.2.0)
-      '@emotion/styled': 11.11.5(@emotion/react@11.11.4)(@types/react@18.2.79)(react@18.2.0)
-      '@mui/private-theming': 5.15.14(@types/react@18.2.79)(react@18.2.0)
-      '@mui/styled-engine': 5.15.14(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(react@18.2.0)
-      '@mui/types': 7.2.14(@types/react@18.2.79)
-      '@mui/utils': 5.15.14(@types/react@18.2.79)(react@18.2.0)
-      '@types/react': 18.2.79
-=======
       '@babel/runtime': 7.24.5
       '@emotion/react': 11.11.4(@types/react@18.3.1)(react@18.3.1)
       '@emotion/styled': 11.11.5(@emotion/react@11.11.4)(@types/react@18.3.1)(react@18.3.1)
@@ -4561,18 +2965,13 @@ packages:
       '@mui/types': 7.2.14(@types/react@18.3.1)
       '@mui/utils': 5.15.14(@types/react@18.3.1)(react@18.3.1)
       '@types/react': 18.3.1
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       clsx: 2.1.1
       csstype: 3.1.3
       prop-types: 15.8.1
       react: 18.3.1
     dev: false
 
-<<<<<<< HEAD
-  /@mui/types@7.2.14(@types/react@18.2.79):
-=======
   /@mui/types@7.2.14(@types/react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-MZsBZ4q4HfzBsywtXgM1Ksj6HDThtiwmOKUXH1pKYISI9gAVXCNHNpo7TlGoGrBaYWZTdNoirIN7JsQcQUjmQQ==}
     peerDependencies:
       '@types/react': ^17.0.0 || ^18.0.0
@@ -4580,17 +2979,10 @@ packages:
       '@types/react':
         optional: true
     dependencies:
-<<<<<<< HEAD
-      '@types/react': 18.2.79
-    dev: false
-
-  /@mui/utils@5.15.14(@types/react@18.2.79)(react@18.2.0):
-=======
       '@types/react': 18.3.1
     dev: false
 
   /@mui/utils@5.15.14(@types/react@18.3.1)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-0lF/7Hh/ezDv5X7Pry6enMsbYyGKjADzvHyo3Qrc/SSlTsQ1VkbDMbH0m2t3OR5iIVLwMoxwM7yGd+6FCMtTFA==}
     engines: {node: '>=12.0.0'}
     peerDependencies:
@@ -4600,25 +2992,15 @@ packages:
       '@types/react':
         optional: true
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-      '@types/prop-types': 15.7.12
-      '@types/react': 18.2.79
-=======
       '@babel/runtime': 7.24.5
       '@types/prop-types': 15.7.12
       '@types/react': 18.3.1
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       prop-types: 15.8.1
       react: 18.3.1
       react-is: 18.3.1
     dev: false
 
-<<<<<<< HEAD
-  /@mui/x-date-pickers@6.19.9(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@mui/material@5.15.15)(@mui/system@5.15.15)(@types/react@18.2.79)(dayjs@1.11.10)(react-dom@18.2.0)(react@18.2.0):
-=======
   /@mui/x-date-pickers@6.19.9(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@mui/material@5.15.15)(@mui/system@5.15.15)(@types/react@18.3.1)(dayjs@1.11.11)(react-dom@18.3.1)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-B2m4Fv/fOme5qmV6zuE3QnWQSvj3zKtI2OvikPz5prpiCcIxqpeytkQ7VfrWH3/Aqd5yhG1Yr4IgbqG0ymIXGg==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
@@ -4655,15 +3037,6 @@ packages:
       moment-jalaali:
         optional: true
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-      '@emotion/react': 11.11.4(@types/react@18.2.79)(react@18.2.0)
-      '@emotion/styled': 11.11.5(@emotion/react@11.11.4)(@types/react@18.2.79)(react@18.2.0)
-      '@mui/base': 5.0.0-beta.37(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0)
-      '@mui/material': 5.15.15(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0)
-      '@mui/system': 5.15.15(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@types/react@18.2.79)(react@18.2.0)
-      '@mui/utils': 5.15.14(@types/react@18.2.79)(react@18.2.0)
-=======
       '@babel/runtime': 7.24.5
       '@emotion/react': 11.11.4(@types/react@18.3.1)(react@18.3.1)
       '@emotion/styled': 11.11.5(@emotion/react@11.11.4)(@types/react@18.3.1)(react@18.3.1)
@@ -4671,7 +3044,6 @@ packages:
       '@mui/material': 5.15.15(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@types/react@18.3.1)(react-dom@18.3.1)(react@18.3.1)
       '@mui/system': 5.15.15(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@types/react@18.3.1)(react@18.3.1)
       '@mui/utils': 5.15.14(@types/react@18.3.1)(react@18.3.1)
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@types/react-transition-group': 4.4.10
       clsx: 2.1.1
       dayjs: 1.11.11
@@ -4736,43 +3108,21 @@ packages:
     resolution: {integrity: sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==}
     dev: false
 
-<<<<<<< HEAD
-  /@react-spring/animated@9.7.3(react@18.2.0):
-=======
   /@react-spring/animated@9.7.3(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-5CWeNJt9pNgyvuSzQH+uy2pvTg8Y4/OisoscZIR8/ZNLIOI+CatFBhGZpDGTF/OzdNFsAoGk3wiUYTwoJ0YIvw==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
-<<<<<<< HEAD
-      '@react-spring/shared': 9.7.3(react@18.2.0)
-      '@react-spring/types': 9.7.3
-      react: 18.2.0
-    dev: false
-
-  /@react-spring/core@9.7.3(react@18.2.0):
-=======
       '@react-spring/shared': 9.7.3(react@18.3.1)
       '@react-spring/types': 9.7.3
       react: 18.3.1
     dev: false
 
   /@react-spring/core@9.7.3(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-IqFdPVf3ZOC1Cx7+M0cXf4odNLxDC+n7IN3MDcVCTIOSBfqEcBebSv+vlY5AhM0zw05PDbjKrNmBpzv/AqpjnQ==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
-<<<<<<< HEAD
-      '@react-spring/animated': 9.7.3(react@18.2.0)
-      '@react-spring/shared': 9.7.3(react@18.2.0)
-      '@react-spring/types': 9.7.3
-      react: 18.2.0
-    dev: false
-
-  /@react-spring/shared@9.7.3(react@18.2.0):
-=======
       '@react-spring/animated': 9.7.3(react@18.3.1)
       '@react-spring/shared': 9.7.3(react@18.3.1)
       '@react-spring/types': 9.7.3
@@ -4780,48 +3130,30 @@ packages:
     dev: false
 
   /@react-spring/shared@9.7.3(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-NEopD+9S5xYyQ0pGtioacLhL2luflh6HACSSDUZOwLHoxA5eku1UPuqcJqjwSD6luKjjLfiLOspxo43FUHKKSA==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
       '@react-spring/types': 9.7.3
-<<<<<<< HEAD
-      react: 18.2.0
-=======
       react: 18.3.1
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: false
 
   /@react-spring/types@9.7.3:
     resolution: {integrity: sha512-Kpx/fQ/ZFX31OtlqVEFfgaD1ACzul4NksrvIgYfIFq9JpDHFwQkMVZ10tbo0FU/grje4rcL4EIrjekl3kYwgWw==}
     dev: false
 
-<<<<<<< HEAD
-  /@react-spring/web@9.7.3(react-dom@18.2.0)(react@18.2.0):
-=======
   /@react-spring/web@9.7.3(react-dom@18.3.1)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-BXt6BpS9aJL/QdVqEIX9YoUy8CE6TJrU0mNCqSoxdXlIeNcEBWOfIyE6B14ENNsyQKS3wOWkiJfco0tCr/9tUg==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
-<<<<<<< HEAD
-      '@react-spring/animated': 9.7.3(react@18.2.0)
-      '@react-spring/core': 9.7.3(react@18.2.0)
-      '@react-spring/shared': 9.7.3(react@18.2.0)
-      '@react-spring/types': 9.7.3
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-=======
       '@react-spring/animated': 9.7.3(react@18.3.1)
       '@react-spring/core': 9.7.3(react@18.3.1)
       '@react-spring/shared': 9.7.3(react@18.3.1)
       '@react-spring/types': 9.7.3
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: false
 
   /@sinonjs/commons@1.8.6:
@@ -4843,11 +3175,7 @@ packages:
       remove-accents: 0.4.2
     dev: false
 
-<<<<<<< HEAD
-  /@tanstack/react-table@8.13.2(react-dom@18.2.0)(react@18.2.0):
-=======
   /@tanstack/react-table@8.13.2(react-dom@18.3.1)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-b6mR3mYkjRtJ443QZh9sc7CvGTce81J35F/XMr0OoWbx0KIM7TTTdyNP2XKObvkLpYnLpCrYDwI3CZnLezWvpg==}
     engines: {node: '>=12'}
     peerDependencies:
@@ -4855,32 +3183,19 @@ packages:
       react-dom: '>=16'
     dependencies:
       '@tanstack/table-core': 8.13.2
-<<<<<<< HEAD
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-    dev: false
-
-  /@tanstack/react-virtual@3.1.3(react-dom@18.2.0)(react@18.2.0):
-=======
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
     dev: false
 
   /@tanstack/react-virtual@3.1.3(react-dom@18.3.1)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-YCzcbF/Ws/uZ0q3Z6fagH+JVhx4JLvbSflgldMgLsuvB8aXjZLLb3HvrEVxY480F9wFlBiXlvQxOyXb5ENPrNA==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
       '@tanstack/virtual-core': 3.1.3
-<<<<<<< HEAD
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-=======
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: false
 
   /@tanstack/table-core@8.13.2:
@@ -4900,13 +3215,8 @@ packages:
   /@types/babel__core@7.20.5:
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
     dependencies:
-<<<<<<< HEAD
-      '@babel/parser': 7.24.4
-      '@babel/types': 7.24.0
-=======
       '@babel/parser': 7.24.5
       '@babel/types': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@types/babel__generator': 7.6.8
       '@types/babel__template': 7.4.4
       '@types/babel__traverse': 7.20.5
@@ -4915,33 +3225,20 @@ packages:
   /@types/babel__generator@7.6.8:
     resolution: {integrity: sha512-ASsj+tpEDsEiFr1arWrlN6V3mdfjRMZt6LtK/Vp/kreFLnr5QH5+DhvD5nINYZXzwJvXeGq+05iUXcAzVrqWtw==}
     dependencies:
-<<<<<<< HEAD
-      '@babel/types': 7.24.0
-=======
       '@babel/types': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: true
 
   /@types/babel__template@7.4.4:
     resolution: {integrity: sha512-h/NUaSyG5EyxBIp8YRxo4RMe2/qQgvyowRwVMzhYhBCONbW8PUsg4lkFMrhgZhUe5z3L3MiLDuvyJ/CaPa2A8A==}
     dependencies:
-<<<<<<< HEAD
-      '@babel/parser': 7.24.4
-      '@babel/types': 7.24.0
-=======
       '@babel/parser': 7.24.5
       '@babel/types': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: true
 
   /@types/babel__traverse@7.20.5:
     resolution: {integrity: sha512-WXCyOcRtH37HAUkpXhUduaxdm82b4GSlyTqajXviN4EfiuPgNYR109xMCKvpl6zPIpua0DGlMEDCq+g8EdoheQ==}
     dependencies:
-<<<<<<< HEAD
-      '@babel/types': 7.24.0
-=======
       '@babel/types': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: true
 
   /@types/body-parser@1.19.5:
@@ -4974,11 +3271,7 @@ packages:
     resolution: {integrity: sha512-s5HocgHXvN4Phoypsz8+4TLFreWRUrMcq9MHgwVleqNNR5EipSrFN49LCU/N7j8nIiQoRExY9n79LBrTDdsE1Q==}
     dependencies:
       '@types/prop-types': 15.7.12
-<<<<<<< HEAD
-      '@types/react': 18.2.79
-=======
       '@types/react': 18.3.1
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: true
 
   /@types/emscripten@1.39.10:
@@ -5029,11 +3322,7 @@ packages:
     resolution: {integrity: sha512-WRXN0kQPCnqxN0/PgNgc7WBF6c8rbSHsEep3/qBLpsQ824RONdOmTs0TV7XhIW2GDNRAHO2CqCgAFLR5PChosw==}
     dependencies:
       '@types/fbemitter': 2.0.35
-<<<<<<< HEAD
-      '@types/react': 18.2.79
-=======
       '@types/react': 18.3.1
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: true
 
   /@types/glob@7.2.0:
@@ -5053,8 +3342,6 @@ packages:
     resolution: {integrity: sha512-qjDJRrmvBMiTx+jyLxvLfJU7UznFuokDv4f3WRuriHKERccVpFU+8XMQUAbDzoiJCsmexxRExQeMwwCdamSKDA==}
     dev: true
 
-<<<<<<< HEAD
-=======
   /@types/hoist-non-react-statics@3.3.5:
     resolution: {integrity: sha512-SbcrWzkKBw2cdwRTwQAswfpB9g9LJWfjtUeW/jvNwbhC8cpmmNYVePa+ncbUe0rGTQ7G3Ff6mYUN2VMfLVr+Sg==}
     dependencies:
@@ -5062,7 +3349,6 @@ packages:
       hoist-non-react-statics: 3.3.2
     dev: false
 
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
   /@types/html-minifier-terser@6.1.0:
     resolution: {integrity: sha512-oh/6byDPnL1zeNXFrDXFLyZjkr1MsBG667IM792caf1L2UPOOMf65NFzjUH/ltyfwjAGfs1rsX1eftK0jC/KIg==}
     dev: true
@@ -5159,16 +3445,6 @@ packages:
 
   /@types/range-parser@1.2.7:
     resolution: {integrity: sha512-hKormJbkJqzQGhziax5PItDUTMAM9uE2XXQmM37dyd4hVM+5aVl7oVxMVUiVQn2oCQFN/LKCZdvSM0pFRqbSmQ==}
-<<<<<<< HEAD
-    dev: true
-
-  /@types/react-dom@18.2.25:
-    resolution: {integrity: sha512-o/V48vf4MQh7juIKZU2QGDfli6p1+OOi5oXx36Hffpc9adsHeXjVp8rHuPkjd8VT8sOJ2Zp05HR7CdpGTIUFUA==}
-    dependencies:
-      '@types/react': 18.2.79
-    dev: true
-
-=======
     dev: true
 
   /@types/react-beautiful-dnd@13.1.8:
@@ -5192,16 +3468,11 @@ packages:
       redux: 4.2.1
     dev: false
 
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
   /@types/react-router-dom@5.3.3:
     resolution: {integrity: sha512-kpqnYK4wcdm5UaWI3fLcELopqLrHgLqNsdpHauzlQktfkHL3npOSwtj1Uz9oKBAzs7lFtVkV8j83voAz2D8fhw==}
     dependencies:
       '@types/history': 4.7.11
-<<<<<<< HEAD
-      '@types/react': 18.2.79
-=======
       '@types/react': 18.3.1
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@types/react-router': 5.1.20
     dev: true
 
@@ -5209,29 +3480,17 @@ packages:
     resolution: {integrity: sha512-jGjmu/ZqS7FjSH6owMcD5qpq19+1RS9DeVRqfl1FeBMxTDQAGwlMWOcs52NDoXaNKyG3d1cYQFMs9rCrb88o9Q==}
     dependencies:
       '@types/history': 4.7.11
-<<<<<<< HEAD
-      '@types/react': 18.2.79
-=======
       '@types/react': 18.3.1
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: true
 
   /@types/react-transition-group@4.4.10:
     resolution: {integrity: sha512-hT/+s0VQs2ojCX823m60m5f0sL5idt9SO6Tj6Dg+rdphGPIeJbJ6CxvBYkgkGKrYeDjvIpKTR38UzmtHJOGW3Q==}
     dependencies:
-<<<<<<< HEAD
-      '@types/react': 18.2.79
-    dev: false
-
-  /@types/react@18.2.79:
-    resolution: {integrity: sha512-RwGAGXPl9kSXwdNTafkOEuFrTBD5SA2B3iEB96xi8+xu5ddUa/cpvyVCSNn+asgLCTHkb5ZxN8gbuibYJi4s1w==}
-=======
       '@types/react': 18.3.1
     dev: false
 
   /@types/react@18.3.1:
     resolution: {integrity: sha512-V0kuGBX3+prX+DQ/7r2qsv1NsdfnCLnTgnRJ1pYnxykBhGMz+qj+box5lq7XsO5mtZsBqpjwwTu/7wszPfMBcw==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dependencies:
       '@types/prop-types': 15.7.12
       csstype: 3.1.3
@@ -5697,11 +3956,7 @@ packages:
       ajv: 6.12.6
     dev: true
 
-<<<<<<< HEAD
-  /ajv-keywords@5.1.0(ajv@8.12.0):
-=======
   /ajv-keywords@5.1.0(ajv@8.13.0):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-YCS/JNFAUyr5vAuhk1DWm1CBxRHW9LbJ2ozWeemrIqpbsqKjHVxYPyi5GC0rjZIT5JxJ3virVTS8wk4i/Z+krw==}
     peerDependencies:
       ajv: ^8.8.2
@@ -5719,13 +3974,8 @@ packages:
       uri-js: 4.4.1
     dev: true
 
-<<<<<<< HEAD
-  /ajv@8.12.0:
-    resolution: {integrity: sha512-sRu1kpcO9yLtYxBKvqfTeh9KzZEwO3STyX1HT+4CaDzC6HpTGYhIhPIzj9XuKU7KYDwnaeh5hcOwjy1QuJzBPA==}
-=======
   /ajv@8.13.0:
     resolution: {integrity: sha512-PRA911Blj99jR5RMeTunVbNXMF6Lp4vZXnk5GQjcnUWUTsrXtekg/pnmFFI2u/I36Y/2bITGS30GZCXei6uNkA==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dependencies:
       fast-deep-equal: 3.1.3
       json-schema-traverse: 1.0.0
@@ -5965,21 +4215,13 @@ packages:
       dequal: 2.0.3
     dev: true
 
-<<<<<<< HEAD
-  /babel-jest@27.5.1(@babel/core@7.24.4):
-=======
   /babel-jest@27.5.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-cdQ5dXjGRd0IBRATiQ4mZGlGlRE8kJpjPOixdNRdT+m3UcNqmYWN6rK6nvtXYfY3D76cb8s/O1Ss8ea24PIwcg==}
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
     peerDependencies:
       '@babel/core': ^7.8.0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-=======
       '@babel/core': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@jest/transform': 27.5.1
       '@jest/types': 27.5.1
       '@types/babel__core': 7.20.5
@@ -5992,22 +4234,14 @@ packages:
       - supports-color
     dev: true
 
-<<<<<<< HEAD
-  /babel-loader@8.3.0(@babel/core@7.24.4)(webpack@5.91.0):
-=======
   /babel-loader@8.3.0(@babel/core@7.24.5)(webpack@5.91.0):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-H8SvsMF+m9t15HNLMipppzkC+Y2Yq+v3SonZyU70RBL/h1gxPkH08Ot8pEE9Z4Kd+czyWJClmFS8qzIP9OZ04Q==}
     engines: {node: '>= 8.9'}
     peerDependencies:
       '@babel/core': ^7.0.0
       webpack: '>=2'
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-=======
       '@babel/core': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       find-cache-dir: 3.3.2
       loader-utils: 2.0.4
       make-dir: 3.1.0
@@ -6025,11 +4259,7 @@ packages:
     resolution: {integrity: sha512-Y1IQok9821cC9onCx5otgFfRm7Lm+I+wwxOx738M/WLPZ9Q42m4IG5W0FNX8WLL2gYMZo3JkuXIH2DOpWM+qwA==}
     engines: {node: '>=8'}
     dependencies:
-<<<<<<< HEAD
-      '@babel/helper-plugin-utils': 7.24.0
-=======
       '@babel/helper-plugin-utils': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@istanbuljs/load-nyc-config': 1.1.0
       '@istanbuljs/schema': 0.1.3
       istanbul-lib-instrument: 5.2.1
@@ -6043,11 +4273,7 @@ packages:
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
     dependencies:
       '@babel/template': 7.24.0
-<<<<<<< HEAD
-      '@babel/types': 7.24.0
-=======
       '@babel/types': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@types/babel__core': 7.20.5
       '@types/babel__traverse': 7.20.5
     dev: true
@@ -6056,11 +4282,7 @@ packages:
     resolution: {integrity: sha512-yDZLjK7TCkWl1gpBeBGmuaDIFhZKmkoL+Cu2MUUjv5VxUZx/z7tBGBCBcQs5RI1Bkz5LLmNdjx7paOyQtMovyg==}
     dependencies:
       '@babel/helper-module-imports': 7.24.3
-<<<<<<< HEAD
-      '@babel/types': 7.24.0
-=======
       '@babel/types': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       glob: 7.2.3
       lodash: 4.17.21
       require-package-name: 2.0.1
@@ -6070,105 +4292,52 @@ packages:
     resolution: {integrity: sha512-Cg7TFGpIr01vOQNODXOOaGz2NpCU5gl8x1qJFbb6hbZxR7XrcE2vtbAsTAbJ7/xwJtUuJEw8K8Zr/AE0LHlesg==}
     engines: {node: '>=10', npm: '>=6'}
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-=======
       '@babel/runtime': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       cosmiconfig: 7.1.0
       resolve: 1.22.8
     dev: false
 
-<<<<<<< HEAD
-  /babel-plugin-polyfill-corejs2@0.4.11(@babel/core@7.24.4):
-=======
   /babel-plugin-polyfill-corejs2@0.4.11(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-sMEJ27L0gRHShOh5G54uAAPaiCOygY/5ratXuiyb2G46FmlSpc9eFCzYVyDiPxfNbwzA7mYahmjQc5q+CZQ09Q==}
     peerDependencies:
       '@babel/core': ^7.4.0 || ^8.0.0-0 <8.0.0
     dependencies:
       '@babel/compat-data': 7.24.4
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-define-polyfill-provider': 0.6.2(@babel/core@7.24.4)
-=======
       '@babel/core': 7.24.5
       '@babel/helper-define-polyfill-provider': 0.6.2(@babel/core@7.24.5)
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       semver: 6.3.1
     transitivePeerDependencies:
       - supports-color
     dev: true
 
-<<<<<<< HEAD
-  /babel-plugin-polyfill-corejs3@0.10.4(@babel/core@7.24.4):
-=======
   /babel-plugin-polyfill-corejs3@0.10.4(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-25J6I8NGfa5YkCDogHRID3fVCadIR8/pGl1/spvCkzb6lVn6SR3ojpx9nOn9iEBcUsjY24AmdKm5khcfKdylcg==}
     peerDependencies:
       '@babel/core': ^7.4.0 || ^8.0.0-0 <8.0.0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-define-polyfill-provider': 0.6.2(@babel/core@7.24.4)
-=======
       '@babel/core': 7.24.5
       '@babel/helper-define-polyfill-provider': 0.6.2(@babel/core@7.24.5)
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       core-js-compat: 3.37.0
     transitivePeerDependencies:
       - supports-color
     dev: true
 
-<<<<<<< HEAD
-  /babel-plugin-polyfill-regenerator@0.6.2(@babel/core@7.24.4):
-=======
   /babel-plugin-polyfill-regenerator@0.6.2(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-2R25rQZWP63nGwaAswvDazbPXfrM3HwVoBXK6HcqeKrSrL/JqcC/rDcf95l4r7LXLyxDXc8uQDa064GubtCABg==}
     peerDependencies:
       '@babel/core': ^7.4.0 || ^8.0.0-0 <8.0.0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/helper-define-polyfill-provider': 0.6.2(@babel/core@7.24.4)
-=======
       '@babel/core': 7.24.5
       '@babel/helper-define-polyfill-provider': 0.6.2(@babel/core@7.24.5)
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     transitivePeerDependencies:
       - supports-color
     dev: true
 
-<<<<<<< HEAD
-  /babel-preset-current-node-syntax@1.0.1(@babel/core@7.24.4):
-=======
   /babel-preset-current-node-syntax@1.0.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-M7LQ0bxarkxQoN+vz5aJPsLBn77n8QgTFmo8WK0/44auK2xlCXrYcUxHFxgU7qW5Yzw/CjmLRK2uJzaCd7LvqQ==}
     peerDependencies:
       '@babel/core': ^7.0.0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/plugin-syntax-async-generators': 7.8.4(@babel/core@7.24.4)
-      '@babel/plugin-syntax-bigint': 7.8.3(@babel/core@7.24.4)
-      '@babel/plugin-syntax-class-properties': 7.12.13(@babel/core@7.24.4)
-      '@babel/plugin-syntax-import-meta': 7.10.4(@babel/core@7.24.4)
-      '@babel/plugin-syntax-json-strings': 7.8.3(@babel/core@7.24.4)
-      '@babel/plugin-syntax-logical-assignment-operators': 7.10.4(@babel/core@7.24.4)
-      '@babel/plugin-syntax-nullish-coalescing-operator': 7.8.3(@babel/core@7.24.4)
-      '@babel/plugin-syntax-numeric-separator': 7.10.4(@babel/core@7.24.4)
-      '@babel/plugin-syntax-object-rest-spread': 7.8.3(@babel/core@7.24.4)
-      '@babel/plugin-syntax-optional-catch-binding': 7.8.3(@babel/core@7.24.4)
-      '@babel/plugin-syntax-optional-chaining': 7.8.3(@babel/core@7.24.4)
-      '@babel/plugin-syntax-top-level-await': 7.14.5(@babel/core@7.24.4)
-    dev: true
-
-  /babel-preset-jest@27.5.1(@babel/core@7.24.4):
-=======
       '@babel/core': 7.24.5
       '@babel/plugin-syntax-async-generators': 7.8.4(@babel/core@7.24.5)
       '@babel/plugin-syntax-bigint': 7.8.3(@babel/core@7.24.5)
@@ -6185,17 +4354,12 @@ packages:
     dev: true
 
   /babel-preset-jest@27.5.1(@babel/core@7.24.5):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-Nptf2FzlPCWYuJg41HBqXVT8ym6bXOevuCTbhxlUpjwtysGaIWFvDEjp4y+G7fl13FgOdjs7P/DmErqH7da0Ag==}
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
     peerDependencies:
       '@babel/core': ^7.0.0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-=======
       '@babel/core': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       babel-plugin-jest-hoist: 27.5.1
       babel-preset-current-node-syntax: 1.0.1(@babel/core@7.24.5)
     dev: true
@@ -6334,13 +4498,8 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-<<<<<<< HEAD
-  /caniuse-lite@1.0.30001612:
-    resolution: {integrity: sha512-lFgnZ07UhaCcsSZgWW0K5j4e69dK1u/ltrL9lTUiFOwNHs12S3UMIEYgBV0Z6C6hRDev7iRnMzzYmKabYdXF9g==}
-=======
   /caniuse-lite@1.0.30001614:
     resolution: {integrity: sha512-jmZQ1VpmlRwHgdP1/uiKzgiAuGOfLEJsYFP4+GBou/QQ4U6IOJCB4NP1c+1p9RGLpwObcT94jA5/uO+F1vBbog==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: true
 
   /chalk@2.4.2:
@@ -6406,13 +4565,8 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-<<<<<<< HEAD
-  /cjs-module-lexer@1.2.3:
-    resolution: {integrity: sha512-0TNiGstbQmCFwt4akjjBg5pLRTSyj/PkWQ1ZoO2zntmg9yLqSRxwEa4iCfQLGjqhiqBfOJa7W/E8wfGrTDmlZQ==}
-=======
   /cjs-module-lexer@1.3.1:
     resolution: {integrity: sha512-a3KdPAANPbNE4ZUv9h6LckSl9zLsYOP4MBmhIPkRaeyybt+r4UghLvq+xw/YwUcC1gqylCkL4rdVs3Lwupjm4Q==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: true
 
   /clean-css@5.3.3:
@@ -6667,15 +4821,12 @@ packages:
       which: 2.0.2
     dev: true
 
-<<<<<<< HEAD
-=======
   /css-box-model@1.2.1:
     resolution: {integrity: sha512-a7Vr4Q/kd/aw96bnJG332W9V9LkJO69JRcaCYDUqjp6/z0w6VcZjgAcTbgFxEPfBgdnAwlh3iwu+hLopa+flJw==}
     dependencies:
       tiny-invariant: 1.3.3
     dev: false
 
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
   /css-loader@6.11.0(webpack@5.91.0):
     resolution: {integrity: sha512-CTJ+AEQJjq5NzLga5pE39qdiSV56F8ywCIsqNIRF0r7BDgWsN25aazToqAFg7ZrtA/U016xudB3ffgweORxX7g==}
     engines: {node: '>= 12.13.0'}
@@ -6712,11 +4863,7 @@ packages:
   /css-vendor@2.0.8:
     resolution: {integrity: sha512-x9Aq0XTInxrkuFeHKbYC7zWY8ai7qJ04Kxd9MnvbC1uO5DagxoHQjm4JvG+vCdXOoFtCjbL2XSZfxmoYa9uQVQ==}
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-=======
       '@babel/runtime': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       is-in-browser: 1.1.3
     dev: false
 
@@ -6793,13 +4940,8 @@ packages:
       is-data-view: 1.0.1
     dev: true
 
-<<<<<<< HEAD
-  /dayjs@1.11.10:
-    resolution: {integrity: sha512-vjAczensTgRcqDERK0SR2XMwsF/tSvnvlv6VcF2GIhg6Sx4yOIt/irsr1RDJsKiIyBzJDpCoXiWWq28MqH2cnQ==}
-=======
   /dayjs@1.11.11:
     resolution: {integrity: sha512-okzr3f11N6WuqYtZSvm+F776mB41wRZMhKP+hc34YdW+KmtYYK9iqvHSwo2k9FEH3fhGXvOPV6yz2IcSrfRUDg==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: false
 
   /debounce@1.2.1:
@@ -6956,11 +5098,7 @@ packages:
   /dom-helpers@5.2.1:
     resolution: {integrity: sha512-nRCa7CK3VTrM2NmGkIy4cbK7IZlgBE/PYMn55rrXefr5xXDP0LdtfPnblFDoVdcAfslJ7or6iqAUnx0CCGIWQA==}
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-=======
       '@babel/runtime': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       csstype: 3.1.3
     dev: false
 
@@ -7034,13 +5172,8 @@ packages:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
     dev: true
 
-<<<<<<< HEAD
-  /electron-to-chromium@1.4.748:
-    resolution: {integrity: sha512-VWqjOlPZn70UZ8FTKUOkUvBLeTQ0xpty66qV0yJcAGY2/CthI4xyW9aEozRVtuwv3Kpf5xTesmJUcPwuJmgP4A==}
-=======
   /electron-to-chromium@1.4.751:
     resolution: {integrity: sha512-2DEPi++qa89SMGRhufWTiLmzqyuGmNF3SK4+PQetW1JKiZdEpF4XQonJXJCzyuYSA6mauiMhbyVhqYAP45Hvfw==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: true
 
   /email-addresses@3.1.0:
@@ -7090,13 +5223,8 @@ packages:
     resolution: {integrity: sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==}
     engines: {node: '>=0.12'}
 
-<<<<<<< HEAD
-  /envinfo@7.12.0:
-    resolution: {integrity: sha512-Iw9rQJBGpJRd3rwXm9ft/JiGoAZmLxxJZELYDQoPRZ4USVhkKtIcNBPw6U+/K2mBpaqM25JSV6Yl4Az9vO2wJg==}
-=======
   /envinfo@7.13.0:
     resolution: {integrity: sha512-cvcaMr7KqXVh4nyzGTVqTum+gAiL265x5jUWQIDLq//zOGbW+gSW/C+OWLleY/rs9Qole6AZLMXPbtIFQbqu+Q==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=4'}
     hasBin: true
     dev: true
@@ -7170,13 +5298,8 @@ packages:
     engines: {node: '>= 0.4'}
     dev: true
 
-<<<<<<< HEAD
-  /es-iterator-helpers@1.0.18:
-    resolution: {integrity: sha512-scxAJaewsahbqTYrGKJihhViaM6DDZDDoucfvzNbK0pOren1g/daDQ3IAhzn+1G14rBG7w+i5N+qul60++zlKA==}
-=======
   /es-iterator-helpers@1.0.19:
     resolution: {integrity: sha512-zoMwbCcH5hwUkKJkT8kDIBZSz9I6mVG//+lDCinLCGov4+r7NIy0ld8o03M0cJxl2spVf6ESYVS6/gpIfq1FFw==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>= 0.4'}
     dependencies:
       call-bind: 1.0.7
@@ -7195,13 +5318,8 @@ packages:
       safe-array-concat: 1.1.2
     dev: true
 
-<<<<<<< HEAD
-  /es-module-lexer@1.5.0:
-    resolution: {integrity: sha512-pqrTKmwEIgafsYZAGw9kszYzmagcE/n4dbgwGWLEXg7J4QFJVQRBld8j3Q3GNez79jzxZshq0bcT962QHOghjw==}
-=======
   /es-module-lexer@1.5.2:
     resolution: {integrity: sha512-l60ETUTmLqbVbVHv1J4/qj+M8nq7AwMzEcg3kmJDt9dCNrTk+yHcYFf/Kw75pMDwd9mPcIGCG5LcS20SxYRzFA==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: true
 
   /es-object-atoms@1.0.0:
@@ -7284,11 +5402,7 @@ packages:
       semver: 6.3.1
     dev: true
 
-<<<<<<< HEAD
-  /eslint-config-airbnb@19.0.4(eslint-plugin-import@2.29.1)(eslint-plugin-jsx-a11y@6.8.0)(eslint-plugin-react-hooks@4.6.0)(eslint-plugin-react@7.34.1)(eslint@8.57.0):
-=======
   /eslint-config-airbnb@19.0.4(eslint-plugin-import@2.29.1)(eslint-plugin-jsx-a11y@6.8.0)(eslint-plugin-react-hooks@4.6.2)(eslint-plugin-react@7.34.1)(eslint@8.57.0):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-T75QYQVQX57jiNgpF9r1KegMICE94VYwoFQyMGhrvc+lB8YF2E/M/PYDaQe1AJcWaEgqLE+ErXV1Og/+6Vyzew==}
     engines: {node: ^10.12.0 || ^12.22.0 || ^14.17.0 || >=16.0.0}
     peerDependencies:
@@ -7392,11 +5506,7 @@ packages:
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-=======
       '@babel/runtime': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       aria-query: 5.3.0
       array-includes: 3.1.8
       array.prototype.flatmap: 1.3.2
@@ -7432,13 +5542,8 @@ packages:
       prettier-linter-helpers: 1.0.0
     dev: true
 
-<<<<<<< HEAD
-  /eslint-plugin-react-hooks@4.6.0(eslint@8.57.0):
-    resolution: {integrity: sha512-oFc7Itz9Qxh2x4gNHStv3BqJq54ExXmfC+a1NjAta66IAN87Wu0R/QArgIS9qKzX3dXKPI9H5crl9QchNMY9+g==}
-=======
   /eslint-plugin-react-hooks@4.6.2(eslint@8.57.0):
     resolution: {integrity: sha512-QzliNJq4GinDBcD8gPB5v0wh6g8q3SUi6EFF0x8N/BL9PoVs0atuGc47ozMRyOWAKdwaZ5OnbOEa3WR+dSGKuQ==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=10'}
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0
@@ -7841,11 +5946,7 @@ packages:
     resolution: {integrity: sha512-X8cqMLLie7KsNUDSdzeN8FYK9rEt4Dt67OsG/DNGnYTSDBG4uFAJFBnUeiV+zCVAvwFy56IjM9sH51jVaEhNxw==}
     dev: true
 
-<<<<<<< HEAD
-  /focus-trap-react@8.11.3(prop-types@15.8.1)(react-dom@18.2.0)(react@18.2.0):
-=======
   /focus-trap-react@8.11.3(prop-types@15.8.1)(react-dom@18.3.1)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-y126gMYuB1aVYiEZSP6/v9bAfVmAIUVixanhcoMelkz7bOh+l0c3h05CEHC8S63ztxdRI2AAPS9AsTat6jlDeQ==}
     peerDependencies:
       prop-types: ^15.8.1
@@ -8062,13 +6163,8 @@ packages:
       type-fest: 0.20.2
     dev: true
 
-<<<<<<< HEAD
-  /globalthis@1.0.3:
-    resolution: {integrity: sha512-sFdI5LyBiNTHjRd7cGPWapiHWMOXKyuBNX/cWJ3NfzrZQVa8GI/8cofCl74AOVqq9W5kNmguTIzJ/1s2gyI9wA==}
-=======
   /globalthis@1.0.4:
     resolution: {integrity: sha512-DpLKbNU4WylpxJykQujfCcwYWiV/Jhm50Goo0wrVILAv5jOr9d+H+UR3PhSCD2rCCEIg0uc+G+muBTwD54JhDQ==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>= 0.4'}
     dependencies:
       define-properties: 1.2.1
@@ -8269,11 +6365,7 @@ packages:
       void-elements: 3.1.0
     dev: false
 
-<<<<<<< HEAD
-  /html-react-parser@1.4.14(react@18.2.0):
-=======
   /html-react-parser@1.4.14(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-pxhNWGie8Y+DGDpSh8cTa0k3g8PsDcwlfolA+XxYo1AGDeB6e2rdlyv4ptU9bOTiZ2i3fID+6kyqs86MN0FYZQ==}
     peerDependencies:
       react: 0.14 || 15 || 16 || 17 || 18
@@ -8439,15 +6531,6 @@ packages:
   /i18next@22.5.1:
     resolution: {integrity: sha512-8TGPgM3pAD+VRsMtUMNknRz3kzqwp/gPALrWMsDnmC1mKqJwpWyooQRLMcbTwq8z8YwSmuj+ZYvc+xCuEpkssA==}
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-    dev: false
-
-  /i18next@23.11.2:
-    resolution: {integrity: sha512-qMBm7+qT8jdpmmDw/kQD16VpmkL9BdL+XNAK5MNbNFaf1iQQq35ZbPrSlqmnNPOSUY4m342+c0t0evinF5l7sA==}
-    dependencies:
-      '@babel/runtime': 7.24.4
-=======
       '@babel/runtime': 7.24.5
     dev: false
 
@@ -8455,7 +6538,6 @@ packages:
     resolution: {integrity: sha512-Pq/aSKowir7JM0rj+Wa23Kb6KKDUGno/HjG+wRQu0PxoTbpQ4N89MAT0rFGvXmLkRLNMb1BbBOKGozl01dabzg==}
     dependencies:
       '@babel/runtime': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: false
 
   /iconv-lite@0.4.24:
@@ -8810,13 +6892,8 @@ packages:
     resolution: {integrity: sha512-pzqtp31nLv/XFOzXGuvhCb8qhjmTVo5vjVk19XE4CRlSWz0KoeJ3bw9XsA7nOp9YBf4qHjwBxkDzKcME/J29Yg==}
     engines: {node: '>=8'}
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/parser': 7.24.4
-=======
       '@babel/core': 7.24.5
       '@babel/parser': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@istanbuljs/schema': 0.1.3
       istanbul-lib-coverage: 3.2.2
       semver: 6.3.1
@@ -8937,17 +7014,10 @@ packages:
       ts-node:
         optional: true
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@jest/test-sequencer': 27.5.1
-      '@jest/types': 27.5.1
-      babel-jest: 27.5.1(@babel/core@7.24.4)
-=======
       '@babel/core': 7.24.5
       '@jest/test-sequencer': 27.5.1
       '@jest/types': 27.5.1
       babel-jest: 27.5.1(@babel/core@7.24.5)
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       chalk: 4.1.2
       ci-info: 3.9.0
       deepmerge: 4.3.1
@@ -9242,28 +7312,16 @@ packages:
     resolution: {integrity: sha512-yYykXI5a0I31xX67mgeLw1DZ0bJB+gpq5IpSuCAoyDi0+BhgU/RIrL+RTzDmkNTchvDFWKP8lp+w/42Z3us5sA==}
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.24.4
-      '@babel/generator': 7.24.4
-      '@babel/plugin-syntax-typescript': 7.24.1(@babel/core@7.24.4)
-      '@babel/traverse': 7.24.1
-      '@babel/types': 7.24.0
-=======
       '@babel/core': 7.24.5
       '@babel/generator': 7.24.5
       '@babel/plugin-syntax-typescript': 7.24.1(@babel/core@7.24.5)
       '@babel/traverse': 7.24.5
       '@babel/types': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       '@jest/transform': 27.5.1
       '@jest/types': 27.5.1
       '@types/babel__traverse': 7.20.5
       '@types/prettier': 2.7.3
-<<<<<<< HEAD
-      babel-preset-current-node-syntax: 1.0.1(@babel/core@7.24.4)
-=======
       babel-preset-current-node-syntax: 1.0.1(@babel/core@7.24.5)
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       chalk: 4.1.2
       expect: 27.5.1
       graceful-fs: 4.2.11
@@ -9466,11 +7524,7 @@ packages:
   /jss-plugin-camel-case@10.10.0:
     resolution: {integrity: sha512-z+HETfj5IYgFxh1wJnUAU8jByI48ED+v0fuTuhKrPR+pRBYS2EDwbusU8aFOpCdYhtRc9zhN+PJ7iNE8pAWyPw==}
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-=======
       '@babel/runtime': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       hyphenate-style-name: 1.0.4
       jss: 10.10.0
     dev: false
@@ -9478,33 +7532,21 @@ packages:
   /jss-plugin-default-unit@10.10.0:
     resolution: {integrity: sha512-SvpajxIECi4JDUbGLefvNckmI+c2VWmP43qnEy/0eiwzRUsafg5DVSIWSzZe4d2vFX1u9nRDP46WCFV/PXVBGQ==}
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-=======
       '@babel/runtime': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       jss: 10.10.0
     dev: false
 
   /jss-plugin-global@10.10.0:
     resolution: {integrity: sha512-icXEYbMufiNuWfuazLeN+BNJO16Ge88OcXU5ZDC2vLqElmMybA31Wi7lZ3lf+vgufRocvPj8443irhYRgWxP+A==}
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-=======
       '@babel/runtime': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       jss: 10.10.0
     dev: false
 
   /jss-plugin-nested@10.10.0:
     resolution: {integrity: sha512-9R4JHxxGgiZhurDo3q7LdIiDEgtA1bTGzAbhSPyIOWb7ZubrjQe8acwhEQ6OEKydzpl8XHMtTnEwHXCARLYqYA==}
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-=======
       '@babel/runtime': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       jss: 10.10.0
       tiny-warning: 1.0.3
     dev: false
@@ -9512,22 +7554,14 @@ packages:
   /jss-plugin-props-sort@10.10.0:
     resolution: {integrity: sha512-5VNJvQJbnq/vRfje6uZLe/FyaOpzP/IH1LP+0fr88QamVrGJa0hpRRyAa0ea4U/3LcorJfBFVyC4yN2QC73lJg==}
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-=======
       '@babel/runtime': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       jss: 10.10.0
     dev: false
 
   /jss-plugin-rule-value-function@10.10.0:
     resolution: {integrity: sha512-uEFJFgaCtkXeIPgki8ICw3Y7VMkL9GEan6SqmT9tqpwM+/t+hxfMUdU4wQ0MtOiMNWhwnckBV0IebrKcZM9C0g==}
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-=======
       '@babel/runtime': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       jss: 10.10.0
       tiny-warning: 1.0.3
     dev: false
@@ -9535,11 +7569,7 @@ packages:
   /jss-plugin-vendor-prefixer@10.10.0:
     resolution: {integrity: sha512-UY/41WumgjW8r1qMCO8l1ARg7NHnfRVWRhZ2E2m0DMYsr2DD91qIXLyNhiX83hHswR7Wm4D+oDYNC1zWCJWtqg==}
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-=======
       '@babel/runtime': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       css-vendor: 2.0.8
       jss: 10.10.0
     dev: false
@@ -9547,11 +7577,7 @@ packages:
   /jss@10.10.0:
     resolution: {integrity: sha512-cqsOTS7jqPsPMjtKYDUpdFC0AbhYFLTcuGRqymgmdJIeQ8cH7+AgX7YSgQy79wXloZq2VvATYxUOUQEvS1V/Zw==}
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-=======
       '@babel/runtime': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       csstype: 3.1.3
       is-in-browser: 1.1.3
       tiny-warning: 1.0.3
@@ -9757,11 +7783,7 @@ packages:
       webpack: 5.91.0(webpack-cli@4.10.0)
     dev: true
 
-<<<<<<< HEAD
-  /markdown-to-jsx@7.4.7(react@18.2.0):
-=======
   /markdown-to-jsx@7.4.7(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-0+ls1IQZdU6cwM1yu0ZjjiVWYtkbExSyUIFU2ZeDIFuZM1W42Mh4OlJ4nb4apX4H8smxDHRdFaoIVJGwfv5hkg==}
     engines: {node: '>= 10'}
     peerDependencies:
@@ -9775,11 +7797,7 @@ packages:
     hasBin: true
     dev: true
 
-<<<<<<< HEAD
-  /material-react-table@2.12.1(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@mui/icons-material@5.15.15)(@mui/material@5.15.15)(@mui/x-date-pickers@6.19.9)(react-dom@18.2.0)(react@18.2.0):
-=======
   /material-react-table@2.12.1(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@mui/icons-material@5.15.15)(@mui/material@5.15.15)(@mui/x-date-pickers@6.19.9)(react-dom@18.3.1)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-nqILE26I/6/UfiILEc7mnVhIoVdG78qvkav85dcbn5BbNXkAJeA57Slut50eYytd7aQHCbaq9MoLvsVeO1yaIw==}
     engines: {node: '>=16'}
     peerDependencies:
@@ -9791,16 +7809,6 @@ packages:
       react: '>=17.0'
       react-dom: '>=17.0'
     dependencies:
-<<<<<<< HEAD
-      '@emotion/react': 11.11.4(@types/react@18.2.79)(react@18.2.0)
-      '@emotion/styled': 11.11.5(@emotion/react@11.11.4)(@types/react@18.2.79)(react@18.2.0)
-      '@mui/icons-material': 5.15.15(@mui/material@5.15.15)(@types/react@18.2.79)(react@18.2.0)
-      '@mui/material': 5.15.15(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0)
-      '@mui/x-date-pickers': 6.19.9(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@mui/material@5.15.15)(@mui/system@5.15.15)(@types/react@18.2.79)(dayjs@1.11.10)(react-dom@18.2.0)(react@18.2.0)
-      '@tanstack/match-sorter-utils': 8.11.8
-      '@tanstack/react-table': 8.13.2(react-dom@18.2.0)(react@18.2.0)
-      '@tanstack/react-virtual': 3.1.3(react-dom@18.2.0)(react@18.2.0)
-=======
       '@emotion/react': 11.11.4(@types/react@18.3.1)(react@18.3.1)
       '@emotion/styled': 11.11.5(@emotion/react@11.11.4)(@types/react@18.3.1)(react@18.3.1)
       '@mui/icons-material': 5.15.15(@mui/material@5.15.15)(@types/react@18.3.1)(react@18.3.1)
@@ -9809,7 +7817,6 @@ packages:
       '@tanstack/match-sorter-utils': 8.11.8
       '@tanstack/react-table': 8.13.2(react-dom@18.3.1)(react@18.3.1)
       '@tanstack/react-virtual': 3.1.3(react-dom@18.3.1)(react@18.3.1)
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       highlight-words: 1.2.2
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -9827,13 +7834,10 @@ packages:
       fs-monkey: 1.0.5
     dev: true
 
-<<<<<<< HEAD
-=======
   /memoize-one@5.2.1:
     resolution: {integrity: sha512-zYiwtZUcYyXKo/np96AGZAckk+FWWsUdJ3cHGGmld7+AhvcWmQyGCYUh1hc4Q/pkOhb65dQR/pqCyK0cOaHz4Q==}
     dev: false
 
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
   /merge-descriptors@1.0.1:
     resolution: {integrity: sha512-cCi6g3/Zr1iqQi6ySbseM1Xvooa98N0w31jzUYrXPX2xqObmFGHJ0tQ5u74H3mVh7wLouTseZyYIq39g8cNp1w==}
     dev: true
@@ -10083,13 +8087,8 @@ packages:
     resolution: {integrity: sha512-PX1wu0AmAdPqOL1mWhqmlOd8kOIZQwGZw6rh7uby9fTc5lhaOWFLX3I6R1hrF9k3zUY40e6igsLGkDXK92LJNg==}
     dev: true
 
-<<<<<<< HEAD
-  /ol-mapbox-style@12.3.1(ol@9.1.0):
-    resolution: {integrity: sha512-pKBpKBns4YUgeFCp+aeuJtM+D2BKLc1HJmk5tFL0Nv7u7nelZnInUs/+XnSlHOa1hPBSrOyL+7CvKtegEyuYlg==}
-=======
   /ol-mapbox-style@12.3.2(ol@9.1.0):
     resolution: {integrity: sha512-Qw9I6+WHz9zBsLNm8zWWb707Y/hXrQP1fcwK86pxcX/FklwyDxAhfJAdTkINHncZ331CBEWcqvi2tzoN23dgwg==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     peerDependencies:
       ol: '*'
     dependencies:
@@ -10148,18 +8147,10 @@ packages:
     hasBin: true
     dev: true
 
-<<<<<<< HEAD
-  /optionator@0.9.3:
-    resolution: {integrity: sha512-JjCoypp+jKn1ttEFExxhetCKeJt9zhAgAve5FXHixTvFDW/5aEktX9bufBKLRRMdU7bNtpLfcGu94B3cdEJgjg==}
-    engines: {node: '>= 0.8.0'}
-    dependencies:
-      '@aashutoshrathi/word-wrap': 1.2.6
-=======
   /optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
     engines: {node: '>= 0.8.0'}
     dependencies:
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       deep-is: 0.1.4
       fast-levenshtein: 2.0.6
       levn: 0.4.1
@@ -10523,13 +8514,10 @@ packages:
 
   /quickselect@2.0.0:
     resolution: {integrity: sha512-RKJ22hX8mHe3Y6wH/N3wCM6BWtjaxIyyUIkpHOvfFnxdI4yD4tBXEBKSbriGujF6jnSVkJrffuo6vxACiSSxIw==}
-<<<<<<< HEAD
-=======
     dev: false
 
   /raf-schd@4.0.3:
     resolution: {integrity: sha512-tQkJl2GRWh83ui2DiPTJz9wEiMN20syf+5oKfB03yYP7ioZcJwsIK8FjrtLwH1m7C7e+Tt2yYBlrOpdT+dyeIQ==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: false
 
   /randombytes@2.1.0:
@@ -10559,9 +8547,6 @@ packages:
       quickselect: 2.0.0
     dev: false
 
-<<<<<<< HEAD
-  /react-chartjs-2@5.2.0(chart.js@4.4.2)(react@18.2.0):
-=======
   /react-beautiful-dnd@13.1.1(react-dom@18.3.1)(react@18.3.1):
     resolution: {integrity: sha512-0Lvs4tq2VcrEjEgDXHjT98r+63drkKEgqyxdA7qD3mvKwga6a5SscbdLPO2IExotU1jW8L0Ksdl0Cj2AF67nPQ==}
     peerDependencies:
@@ -10582,7 +8567,6 @@ packages:
     dev: false
 
   /react-chartjs-2@5.2.0(chart.js@4.4.2)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-98iN5aguJyVSxp5U3CblRLH67J8gkfyGNbiK3c+l1QI/G4irHMPQw44aEPmjVag+YKTyQ260NcF82GTQ3bdscA==}
     peerDependencies:
       chart.js: ^4.1.1
@@ -10592,13 +8576,8 @@ packages:
       react: 18.3.1
     dev: false
 
-<<<<<<< HEAD
-  /react-dom@18.2.0(react@18.2.0):
-    resolution: {integrity: sha512-6IMTriUmvsjHUjNtEDudZfuDQUoWXVxKHhlEGSk81n4YFS+r/Kl99wXiwlVXtPBtJenozv2P+hxDsw9eA7Xo6g==}
-=======
   /react-dom@18.3.1(react@18.3.1):
     resolution: {integrity: sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     peerDependencies:
       react: ^18.3.1
     dependencies:
@@ -10606,11 +8585,7 @@ packages:
       react: 18.3.1
       scheduler: 0.23.2
 
-<<<<<<< HEAD
-  /react-draggable@4.4.6(react-dom@18.2.0)(react@18.2.0):
-=======
   /react-draggable@4.4.6(react-dom@18.3.1)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-LtY5Xw1zTPqHkVmtM3X8MUOxNDOUhv/khTgBgrUvwaS064bwVvxT+q5El0uUFNx5IEPKXuRejr7UqLwBIg5pdw==}
     peerDependencies:
       react: '>= 16.3.0'
@@ -10622,11 +8597,7 @@ packages:
       react-dom: 18.3.1(react@18.3.1)
     dev: false
 
-<<<<<<< HEAD
-  /react-dropzone@14.2.3(react@18.2.0):
-=======
   /react-dropzone@14.2.3(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-O3om8I+PkFKbxCukfIR3QAGftYXDZfOE2N1mr/7qebQJHs7U+/RSL/9xomJNpRg9kM5h9soQSdf0Gc7OHF5Fug==}
     engines: {node: '>= 10.13'}
     peerDependencies:
@@ -10638,11 +8609,7 @@ packages:
       react: 18.3.1
     dev: false
 
-<<<<<<< HEAD
-  /react-i18next@12.3.1(i18next@22.5.1)(react-dom@18.2.0)(react@18.2.0):
-=======
   /react-i18next@12.3.1(i18next@22.5.1)(react-dom@18.3.1)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-5v8E2XjZDFzK7K87eSwC7AJcAkcLt5xYZ4+yTPDAW1i7C93oOY1dnr4BaQM7un4Hm+GmghuiPvevWwlca5PwDA==}
     peerDependencies:
       i18next: '>= 19.0.0'
@@ -10655,22 +8622,14 @@ packages:
       react-native:
         optional: true
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-=======
       '@babel/runtime': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       html-parse-stringify: 3.0.1
       i18next: 22.5.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
     dev: false
 
-<<<<<<< HEAD
-  /react-i18next@13.5.0(i18next@23.11.2)(react-dom@18.2.0)(react@18.2.0):
-=======
   /react-i18next@13.5.0(i18next@23.11.3)(react-dom@18.3.1)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-CFJ5NDGJ2MUyBohEHxljOq/39NQ972rh1ajnadG9BjTk+UXbHLq4z5DKEbEQBDoIhUmmbuS/fIMJKo6VOax1HA==}
     peerDependencies:
       i18next: '>= 23.2.3'
@@ -10683,11 +8642,7 @@ packages:
       react-native:
         optional: true
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-=======
       '@babel/runtime': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       html-parse-stringify: 3.0.1
       i18next: 23.11.3
       react: 18.3.1
@@ -10699,25 +8654,13 @@ packages:
 
   /react-is@17.0.2:
     resolution: {integrity: sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==}
-<<<<<<< HEAD
-    dev: true
-
-  /react-is@18.2.0:
-    resolution: {integrity: sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==}
-=======
 
   /react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: false
 
   /react-property@2.0.0:
     resolution: {integrity: sha512-kzmNjIgU32mO4mmH5+iUyrqlpFQhF8K2k7eZ4fdLSOPFrD1XgEuSBv9LDEgxRXTMBqMd8ppT0x6TIzqE5pdGdw==}
-<<<<<<< HEAD
-    dev: false
-
-  /react-shallow-renderer@16.15.0(react@18.2.0):
-=======
     dev: false
 
   /react-redux@7.2.9(react-dom@18.3.1)(react@18.3.1):
@@ -10743,7 +8686,6 @@ packages:
     dev: false
 
   /react-shallow-renderer@16.15.0(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-oScf2FqQ9LFVQgA73vr86xl2NaOIX73rh+YFqcOp68CWj56tSfgtGKrEbyhCj0rSijyG9M1CYprTh39fBi5hzA==}
     peerDependencies:
       react: ^16.0.0 || ^17.0.0 || ^18.0.0
@@ -10753,13 +8695,8 @@ packages:
       react-is: 18.3.1
     dev: false
 
-<<<<<<< HEAD
-  /react-test-renderer@18.2.0(react@18.2.0):
-    resolution: {integrity: sha512-JWD+aQ0lh2gvh4NM3bBM42Kx+XybOxCpgYK7F8ugAlpaTSnWsX+39Z4XkOykGZAHrjwwTZT3x3KxswVWxHPUqA==}
-=======
   /react-test-renderer@18.3.1(react@18.3.1):
     resolution: {integrity: sha512-KkAgygexHUkQqtvvx/otwxtuFu5cVjfzTCtjXLH9boS19/Nbtg84zS7wIQn39G8IlrhThBpQsMKkq5ZHZIYFXA==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     peerDependencies:
       react: ^18.3.1
     dependencies:
@@ -10769,21 +8706,13 @@ packages:
       scheduler: 0.23.2
     dev: false
 
-<<<<<<< HEAD
-  /react-transition-group@4.4.5(react-dom@18.2.0)(react@18.2.0):
-=======
   /react-transition-group@4.4.5(react-dom@18.3.1)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-pZcd1MCJoiKiBR2NRxeCRg13uCXbydPnmB4EOeRrY7480qNWO8IIgQG6zlDkm6uRMsURXPuKq0GWtiM59a5Q6g==}
     peerDependencies:
       react: '>=16.6.0'
       react-dom: '>=16.6.0'
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-=======
       '@babel/runtime': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       dom-helpers: 5.2.1
       loose-envify: 1.4.0
       prop-types: 15.8.1
@@ -10791,13 +8720,8 @@ packages:
       react-dom: 18.3.1(react@18.3.1)
     dev: false
 
-<<<<<<< HEAD
-  /react@18.2.0:
-    resolution: {integrity: sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==}
-=======
   /react@18.3.1:
     resolution: {integrity: sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=0.10.0'}
     dependencies:
       loose-envify: 1.4.0
@@ -10838,15 +8762,12 @@ packages:
       resolve: 1.22.8
     dev: true
 
-<<<<<<< HEAD
-=======
   /redux@4.2.1:
     resolution: {integrity: sha512-LAUYz4lc+Do8/g7aeRa8JkyDErK6ekstQaqWQrNRW//MY1TvCEpMtpTWvlQ+FPbWCx+Xixu/6SHt5N0HR+SB4w==}
     dependencies:
       '@babel/runtime': 7.24.5
     dev: false
 
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
   /reflect.getprototypeof@1.0.6:
     resolution: {integrity: sha512-fmfw4XgoDke3kdI6h4xcUz1dG8uaiv5q9gcEwLS4Pnth2kxT+GZ7YehS1JTMGBQmtV7Y4GFGbs2re2NqhdozUg==}
     engines: {node: '>= 0.4'}
@@ -10877,11 +8798,7 @@ packages:
   /regenerator-transform@0.15.2:
     resolution: {integrity: sha512-hfMp2BoF0qOk3uc5V20ALGDS2ddjQaLrdl7xrGXvAIow7qeWRM2VA2HuCHkUKk9slq3VwEwLNK3DFBqDfPGYtg==}
     dependencies:
-<<<<<<< HEAD
-      '@babel/runtime': 7.24.4
-=======
       '@babel/runtime': 7.24.5
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: true
 
   /regexp.prototype.flags@1.5.2:
@@ -11104,13 +9021,8 @@ packages:
       xmlchars: 2.2.0
     dev: true
 
-<<<<<<< HEAD
-  /scheduler@0.23.0:
-    resolution: {integrity: sha512-CtuThmgHNg7zIZWAXi3AsyIzA3n4xx7aNyjwC2VJldO2LMVDhFK+63xGqq6CsJH4rTAt6/M+N4GhZiDYPx9eUw==}
-=======
   /scheduler@0.23.2:
     resolution: {integrity: sha512-UOShsPwz7NrMUqhR6t0hWjFduvOzbtv7toDH1/hIrfRNIDBnnBWd0CwJTGvTpngVlmwGCdP9/Zl/tVrDqcuYzQ==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dependencies:
       loose-envify: 1.4.0
 
@@ -11137,11 +9049,7 @@ packages:
     engines: {node: '>= 12.13.0'}
     dependencies:
       '@types/json-schema': 7.0.15
-<<<<<<< HEAD
-      ajv: 8.12.0
-=======
       ajv: 8.13.0
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       ajv-formats: 2.1.1
       ajv-keywords: 5.1.0(ajv@8.13.0)
     dev: true
@@ -11300,11 +9208,7 @@ packages:
     resolution: {integrity: sha512-wnD2ZE+l+SPC/uoS0vXeE9L1+0wuaMqKlfz9AMUo38JsyLSBWSFcHR1Rri62LZc12vLr1gb3jl7iwQhgwpAbGQ==}
     dev: true
 
-<<<<<<< HEAD
-  /simple-zustand-devtools@1.1.0(@types/react-dom@18.2.25)(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0)(zustand@4.4.7):
-=======
   /simple-zustand-devtools@1.1.0(@types/react-dom@18.3.0)(@types/react@18.3.1)(react-dom@18.3.1)(react@18.3.1)(zustand@4.4.7):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-Axfcfr9L3YL3kto7aschCQLY2VUlXXMnIVtaTe9Y0qWbNmPsX/y7KsNprmxBZoB0pww5ZGs1u/ohcrvQ3tE6jA==}
     peerDependencies:
       '@types/react': '>=18.0.0'
@@ -11313,19 +9217,11 @@ packages:
       react-dom: '>=18.0.0'
       zustand: '>=1.0.2'
     dependencies:
-<<<<<<< HEAD
-      '@types/react': 18.2.79
-      '@types/react-dom': 18.2.25
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      zustand: 4.4.7(@types/react@18.2.79)(react@18.2.0)
-=======
       '@types/react': 18.3.1
       '@types/react-dom': 18.3.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       zustand: 4.4.7(@types/react@18.3.1)(react@18.3.1)
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     dev: true
 
   /sirv@2.0.4:
@@ -11679,13 +9575,8 @@ packages:
       webpack: 5.91.0(webpack-cli@4.10.0)
     dev: true
 
-<<<<<<< HEAD
-  /terser@5.30.4:
-    resolution: {integrity: sha512-xRdd0v64a8mFK9bnsKVdoNP9GQIKUAaJPTaqEQDL4w/J8WaW4sWXXoMZ+6SimPkfT5bElreXf8m9HnmPc3E1BQ==}
-=======
   /terser@5.31.0:
     resolution: {integrity: sha512-Q1JFAoUKE5IMfI4Z/lkE/E6+SwgzO+x4tq4v1AyBLRj8VSYvRO6A/rQrPg1yud4g0En9EKI1TvFRF2tQFcoUkg==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=10'}
     hasBin: true
     dependencies:
@@ -11716,13 +9607,10 @@ packages:
     resolution: {integrity: sha512-eHY7nBftgThBqOyHGVN+l8gF0BucP09fMo0oO/Lb0w1OF80dJv+lDVpXG60WMQvkcxAkNybKsrEIE3ZtKGmPrA==}
     dev: true
 
-<<<<<<< HEAD
-=======
   /tiny-invariant@1.3.3:
     resolution: {integrity: sha512-+FbBPE1o9QAYvviau/qC5SE3caw21q3xkvWKBtja5vgqOWIHHJ3ioaq1VPfn/Szqctz2bU/oYeKd9/z5BL+PVg==}
     dev: false
 
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
   /tiny-warning@1.0.3:
     resolution: {integrity: sha512-lBN9zLN/oAf68o3zNXYrdCt1kP8WsiGW8Oo2ka41b2IM5JL/S1CTyX1rW0mb/zSuJun0ZUrDxx4sqvYS2FWzPA==}
     dev: false
@@ -11753,13 +9641,8 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
-<<<<<<< HEAD
-  /tough-cookie@4.1.3:
-    resolution: {integrity: sha512-aX/y5pVRkfRnfmuX+OdbSdXvPe6ieKX/G2s7e98f4poJHnqH3281gDPm/metm6E/WRamfx7WC4HUqkWHfQHprw==}
-=======
   /tough-cookie@4.1.4:
     resolution: {integrity: sha512-Loo5UUvLD9ScZ6jh8beX1T6sO1w2/MpCRpEP7V280GKMVUQ0Jzar2U3UJPsrdbziLEMMhu3Ujnq//rhiFuIeag==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=6'}
     dependencies:
       psl: 1.9.0
@@ -11986,9 +9869,6 @@ packages:
       requires-port: 1.0.0
     dev: true
 
-<<<<<<< HEAD
-  /use-sync-external-store@1.2.0(react@18.2.0):
-=======
   /use-memo-one@1.1.3(react@18.3.1):
     resolution: {integrity: sha512-g66/K7ZQGYrI6dy8GLpVcMsBp4s17xNkYJVSMvTEevGy3nDxHOfE6z8BVE22+5G5x7t3+bhzrlTDB7ObrEE0cQ==}
     peerDependencies:
@@ -11998,7 +9878,6 @@ packages:
     dev: false
 
   /use-sync-external-store@1.2.0(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -12436,13 +10315,8 @@ packages:
         optional: true
     dev: true
 
-<<<<<<< HEAD
-  /ws@8.16.0:
-    resolution: {integrity: sha512-HS0c//TP7Ina87TfiPUz1rQzMhHrl/SG2guqRcTOIUYD2q8uhUdNHZYJUaQ8aTGPzCh+c6oawMKW35nFl1dxyQ==}
-=======
   /ws@8.17.0:
     resolution: {integrity: sha512-uJq6108EgZMAl20KagGkzCKfMEjxmKvZHG7Tlq0Z6nOky7YF7aq4mOx6xK8TJ/i1LeK4Qus7INktacctDgY8Ow==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -12502,13 +10376,8 @@ packages:
       yargs-parser: 20.2.9
     dev: true
 
-<<<<<<< HEAD
-  /yet-another-react-lightbox@3.17.4(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-XDCZoEXsjkbRy7Pxk+nsQthbYqW7V2INHv9Qn9GmdILP4GH7wANsRF31TCXIKMU4etr3UHmPzClLXf7KpIwDYQ==}
-=======
   /yet-another-react-lightbox@3.17.5(react-dom@18.3.1)(react@18.3.1):
     resolution: {integrity: sha512-bfJe4PO6VgRCclyHYZr3XPXC8Ku44im5aQCI6SWUoCCO4ELo6kpAQxpb24VYz3RLtkMRVVCyXRVnkfPDXSfXhw==}
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     engines: {node: '>=14'}
     peerDependencies:
       react: '>=16.8.0'
@@ -12527,11 +10396,7 @@ packages:
     resolution: {integrity: sha512-w2NTI8+3l3eeltKAdK8QpiLo/flRAr2p8AGeakfMZOXBxOg9HIu4LVDxBi81sYgVhFhdJjv1OrB5ssI8uFPoLg==}
     dev: false
 
-<<<<<<< HEAD
-  /zustand@4.4.7(@types/react@18.2.79)(react@18.2.0):
-=======
   /zustand@4.4.7(@types/react@18.3.1)(react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {integrity: sha512-QFJWJMdlETcI69paJwhSMJz7PPWjVP8Sjhclxmxmxv/RYI7ZOvR5BHX+ktH0we9gTWQMxcne8q1OY8xxz604gw==}
     engines: {node: '>=12.7.0'}
     peerDependencies:
@@ -12546,37 +10411,21 @@ packages:
       react:
         optional: true
     dependencies:
-<<<<<<< HEAD
-      '@types/react': 18.2.79
-      react: 18.2.0
-      use-sync-external-store: 1.2.0(react@18.2.0)
-
-  github.com/Canadian-Geospatial-Platform/geochart/a3f626faf274e58b2683f6ac9bcbe7387c27d89a(@types/react@18.2.79):
-=======
       '@types/react': 18.3.1
       react: 18.3.1
       use-sync-external-store: 1.2.0(react@18.3.1)
 
   github.com/Canadian-Geospatial-Platform/geochart/a3f626faf274e58b2683f6ac9bcbe7387c27d89a(@types/react@18.3.1):
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
     resolution: {tarball: https://codeload.github.com/Canadian-Geospatial-Platform/geochart/tar.gz/a3f626faf274e58b2683f6ac9bcbe7387c27d89a}
     id: github.com/Canadian-Geospatial-Platform/geochart/a3f626faf274e58b2683f6ac9bcbe7387c27d89a
     name: geoview-geochart
     version: 0.1.0
     dependencies:
-<<<<<<< HEAD
-      '@emotion/react': 11.11.4(@types/react@18.2.79)(react@18.2.0)
-      '@emotion/styled': 11.11.5(@emotion/react@11.11.4)(@types/react@18.2.79)(react@18.2.0)
-      '@mui/icons-material': 5.15.15(@mui/material@5.15.15)(@types/react@18.2.79)(react@18.2.0)
-      '@mui/material': 5.15.15(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0)
-      ajv: 8.12.0
-=======
       '@emotion/react': 11.11.4(@types/react@18.3.1)(react@18.3.1)
       '@emotion/styled': 11.11.5(@emotion/react@11.11.4)(@types/react@18.3.1)(react@18.3.1)
       '@mui/icons-material': 5.15.15(@mui/material@5.15.15)(@types/react@18.3.1)(react@18.3.1)
       '@mui/material': 5.15.15(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@types/react@18.3.1)(react-dom@18.3.1)(react@18.3.1)
       ajv: 8.13.0
->>>>>>> e9239014f (Removal of async on config validation (constructor are now public))
       ajv-formats: 2.1.1
       chart.js: 4.4.2
       chartjs-adapter-moment: 1.0.1(chart.js@4.4.2)(moment@2.30.1)
