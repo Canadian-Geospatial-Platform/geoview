@@ -1,3 +1,7 @@
+// GV: CONFIG EXTRACTION
+// GV: This file was extracted and copied to the geoview-config package
+// GV: |||||
+// GV: vvvvv
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
 import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
@@ -418,6 +422,23 @@ export type TypeInteraction = 'static' | 'dynamic';
 export const VALID_INTERACTION: TypeInteraction[] = ['static', 'dynamic'];
 
 /** ******************************************************************************************************************************
+ *  Definition of the initial view settings.
+ */
+export type TypeInitialViewSettings = {
+  /**
+   * Option to set the zoom and center of initial view.
+   * Zoom and center of the map defined as [zoom, [longitude, latitude]]. Longitude domaine = [-160..160],
+   * Latitude domaine = [-80..80]. */
+  zoomAndCenter?: [number, [number, number]];
+  /**
+   * Option to set initial view by extent.
+   * Called with [minX, minY, maxX, maxY] extent coordinates. */
+  extent?: Extent;
+  /** IDs of layers to use for initial map extent. */
+  layerIds?: string[];
+};
+
+/** ******************************************************************************************************************************
  *  Definition of the view settings.
  */
 export type TypeViewSettings = {
@@ -449,23 +470,6 @@ export type TypeViewSettings = {
    * Default = 3978.
    */
   projection: TypeValidMapProjectionCodes;
-};
-
-/** ******************************************************************************************************************************
- *  Definition of the initial view settings.
- */
-export type TypeInitialViewSettings = {
-  /**
-   * Option to set the zoom and center of initial view.
-   * Zoom and center of the map defined as [zoom, [longitude, latitude]]. Longitude domaine = [-160..160],
-   * Latitude domaine = [-80..80]. */
-  zoomAndCenter?: [number, [number, number]];
-  /**
-   * Option to set initial view by extent.
-   * Called with [minX, minY, maxX, maxY] extent coordinates. */
-  extent?: Extent;
-  /** IDs of layers to use for initial map extent. */
-  layerIds?: string[];
 };
 
 /** ******************************************************************************************************************************
