@@ -1,0 +1,89 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "ESRIImageLYR1",
+        "geoviewLayerName": {
+          "en": "Max Temp"
+        },
+        "geoviewLayerType": "esriImage",
+        "metadataAccessPath": {
+            "en": "https://www5.agr.gc.ca/atlas/rest/services/app_agclimate_agclimat/agclimate_tx/ImageServer"
+        },
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "agclimate_tx",
+            "layerName": { "en": "Max Temperature" }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "ESRIImageLYR2",
+        "geoviewLayerName": {
+          "en": "Max Temp"
+        },
+        "geoviewLayerType": "esriImage",
+        "metadataAccessPath": {
+            "en": "https://www5.agr.gc.ca/atlas/rest/services/imageservices/annual_crop_inventory_2022/ImageServer"
+        },
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "annual_crop_inventory_2022",
+            "layerName": { "en": "Crop Inventory 2022" }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "ESRIImageLYR3",
+        "geoviewLayerName": {
+          "en": "USA"
+        },
+        "geoviewLayerType": "esriImage",
+        "metadataAccessPath": {
+            "en": "https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/USA/MapServer"
+        },
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": { "en": "Cities" },
+            "source": {
+              "dataAccessPath": {
+                "en": "https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/USA/MapServer"
+              }
+            }
+          },
+          {
+            "layerId": "1",
+            "layerName": { "en": "Roads" }
+          },
+          {
+            "layerId": "2",
+            "layerName": { "en": "States" }
+          },
+          {
+            "layerId": "3",
+            "layerName": { "en": "Counties" }
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map"],
+  "footerBar": {
+    "tabs": {
+      "core": ["legend", "layers", "details", "data-table"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "suportedLanguages": ["en"]
+}

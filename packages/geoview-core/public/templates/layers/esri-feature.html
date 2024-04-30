@@ -44,7 +44,6 @@
               <a href="#HLYR1">1. Many ESRI Feature Layers with legend settings from the metadata</a><br />
               <a href="#HLYR2">2. Date filtering using time zone change and non ISO date format</a><br />
               <a href="#HLYR3">3. Date filtering using ISO UTC dates</a><br />
-              <a href="#HLYR4">4. Many ESRI Feature Layers - with footer bar</a><br />
             </td>
           </tr>
         </tbody>
@@ -262,92 +261,6 @@
     <button type="button" class="collapsible">Code Snippet</button>
     <pre id="codeSnippet2" class="panel"></pre>
 
-    <div class="map-title-holder">
-      <h4 id="HLYR4">4. Many Esri Feature Layers - with footer bar</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
-    <button class="collapsible active">Map Status Flags</button>
-    <pre id="HLYR4-state" class="panel map-title-holder"></pre>
-    <div
-      id="LYR4"
-      class="geoview-map"
-      triggerReadyCallback="true"
-      data-lang="en"
-      data-config="{
-          'map': {
-            'interaction': 'dynamic',
-            'viewSettings': {
-              'projection': 3857
-            },
-            'basemapOptions': {
-              'basemapId': 'transport',
-              'shaded': false,
-              'labeled': true
-            },
-            'listOfGeoviewLayerConfig': [
-              {
-                'geoviewLayerId': 'uniqueValueId',
-                'geoviewLayerName': { 'en': 'uniqueValue' },
-                'metadataAccessPath': { 'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/' },
-                'geoviewLayerType': 'esriFeature',
-                'listOfLayerEntryConfig': [
-                  {
-                    'layerId': '1'
-                  }
-                ]
-              },
-              {
-                'geoviewLayerId': 'esriFeatureLYR1',
-                'geoviewLayerName': { 'en': 'Temporal_Test_Bed_en' },
-                'metadataAccessPath': {
-                  'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/'
-                },
-                'geoviewLayerType': 'esriFeature',
-                'listOfLayerEntryConfig': [
-                  {
-                    'layerId': '0'
-                  }
-                ]
-              },
-              {
-                'geoviewLayerId': 'classBreaksId',
-                'geoviewLayerName': { 'en': 'classBreaks' },
-                'metadataAccessPath': { 'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer/' },
-                'geoviewLayerType': 'esriFeature',
-                'listOfLayerEntryConfig': [
-                  {
-                    'layerId': '8'
-                  }
-                ]
-              },
-              {
-                'geoviewLayerId': 'historical-flood',
-                'geoviewLayerName': { 'en': 'Historical Flood Events (HFE)' },
-                'externalDateFormat': 'mm/dd/yyyy hh:mm:ss-05:00',
-                'metadataAccessPath': {
-                  'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer'
-                },
-                'geoviewLayerType': 'esriFeature',
-                'listOfLayerEntryConfig': [
-                  {
-                    'layerId': '0'
-                  }
-                ]
-              }
-            ]
-          },
-          'components': ['overview-map', 'north-arrow'],
-          'footerBar': {
-            'tabs': {
-              'core': ['legend', 'layers', 'details', 'data-table']
-            }
-          },
-          'corePackages': [],
-          'theme': 'geo.ca',
-          'suportedLanguages': ['en']
-        }"
-    ></div>
-
     <script src="codedoc.js"></script>
     <script src="layerlib.js"></script>
     <script>
@@ -385,7 +298,6 @@
           listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
           listenToLegendLayerSetChanges('HLYR2-state', 'LYR2');
           listenToLegendLayerSetChanges('HLYR3-state', 'LYR3');
-          listenToLegendLayerSetChanges('HLYR4-state', 'LYR4');
 
           // create snippets
           createCodeSnippet();

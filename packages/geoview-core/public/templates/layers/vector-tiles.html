@@ -49,7 +49,6 @@
           <td>
             <a href="#HLYR1">1. Vector Tiles Layers (declutter)</a><br />
             <a href="#HLYR2">2. Vector Tiles Layers (no declutter)</a><br />
-            <a href="#HLYR3">3. Vector Tiles Layers (declutter) - with footer bar</a><br />
           </td>
         </tr>
       </tbody>
@@ -155,56 +154,6 @@
   <pre id="LYR2CS" class="panel"></pre>
   <hr />
 
-  <div class="map-title-holder">
-    <h4 id="HLYR3">3. Vector Tiles Layers (declutter) - with footer bar</h4>
-    <a class="ref-link" href="#top">Top</a>
-  </div>
-  <button class="collapsible active">Map Status Flags</button>
-  <pre id="HLYR3-state" class="panel map-title-holder"></pre>
-  <div id="LYR3" class="geoview-map" data-lang="en" data-config="{
-          'map': {
-            'interaction': 'dynamic',
-            'viewSettings': {
-              'projection': 3978
-            },
-            'basemapOptions': {
-              'basemapId': 'nogeom',
-              'shaded': false,
-              'labeled': false
-            },
-            'listOfGeoviewLayerConfig': [
-              {
-                'geoviewLayerId': 'vectorTilesLYR1',
-                'geoviewLayerName': {
-                  'en': 'new basemap'
-                },
-                'geoviewLayerType': 'vectorTiles',
-                'metadataAccessPath': { 'en': 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/' },
-                'listOfLayerEntryConfig': [
-                  {
-                    'layerId': 'toner',
-                    'initialSettings': { 'minZoom': 3, 'maxZoom': 18 },
-                    'source': {
-                      'dataAccessPath': {
-                        'en': 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/tile/{z}/{y}/{x}.pbf'
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          'components': [],
-          'footerBar': {
-            'tabs': {
-              'core': ['legend', 'layers', 'details', 'data-table']
-            }
-          },
-          'corePackages': [],
-          'theme': 'geo.ca',
-          'suportedLanguages': ['en']
-        }"></div>
-
   <script src="codedoc.js"></script>
   <script src="layerlib.js"></script>
   <script>
@@ -213,7 +162,6 @@
       if (mapId === 'allMaps') {
         listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
         listenToLegendLayerSetChanges('HLYR2-state', 'LYR2');
-        listenToLegendLayerSetChanges('HLYR3-state', 'LYR3');
 
         // create snippets
         createCodeSnippet();

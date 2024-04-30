@@ -42,7 +42,6 @@
           <tr>
             <td>
               <a href="#HMap1">1. ESRI Image Layers</a><br />
-              <a href="#HMap2">2. ESRI Image Layers - with footer bar</a><br />
             </td>
           </tr>
         </tbody>
@@ -156,108 +155,6 @@
     <button type="button" class="collapsible">Code Snippet</button>
     <pre id="codeSnippet" class="panel"></pre>
 
-    <div class="map-title-holder">
-      <h4 id="HMap2">2. ESRI Image Layers - with footer bar</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
-    <button class="collapsible active">Map Status Flags</button>
-    <pre id="HMap2-state" class="panel map-title-holder"></pre>
-    <div
-      id="Map2"
-      class="geoview-map"
-      triggerReadyCallback="true"
-      data-lang="en"
-      data-config="{
-        'map': {
-          'interaction': 'dynamic',
-          'viewSettings': {
-            'projection': 3857
-          },
-          'basemapOptions': {
-            'basemapId': 'transport',
-            'shaded': false,
-            'labeled': true
-          },
-          'listOfGeoviewLayerConfig': [
-            {
-              'geoviewLayerId': 'ESRIImageLYR1',
-              'geoviewLayerName': {
-                'en': 'Max Temp'
-              },
-              'geoviewLayerType': 'esriImage',
-              'metadataAccessPath': {
-                  'en': 'https://www5.agr.gc.ca/atlas/rest/services/app_agclimate_agclimat/agclimate_tx/ImageServer'
-              },
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': 'agclimate_tx',
-                  'layerName': { 'en': 'Max Temperature' }
-                }
-              ]
-            },
-            {
-              'geoviewLayerId': 'ESRIImageLYR2',
-              'geoviewLayerName': {
-                'en': 'Max Temp'
-              },
-              'geoviewLayerType': 'esriImage',
-              'metadataAccessPath': {
-                  'en': 'https://www5.agr.gc.ca/atlas/rest/services/imageservices/annual_crop_inventory_2022/ImageServer'
-              },
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': 'annual_crop_inventory_2022',
-                  'layerName': { 'en': 'Crop Inventory 2022' }
-                }
-              ]
-            },
-            {
-              'geoviewLayerId': 'ESRIImageLYR3',
-              'geoviewLayerName': {
-                'en': 'USA'
-              },
-              'geoviewLayerType': 'esriImage',
-              'metadataAccessPath': {
-                  'en': 'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/USA/MapServer'
-              },
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': '0',
-                  'layerName': { 'en': 'Cities' },
-                  'source': {
-                    'dataAccessPath': {
-                      'en': 'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/USA/MapServer'
-                    }
-                  }
-                },
-                {
-                  'layerId': '1',
-                  'layerName': { 'en': 'Roads' }
-                },
-                {
-                  'layerId': '2',
-                  'layerName': { 'en': 'States' }
-                },
-                {
-                  'layerId': '3',
-                  'layerName': { 'en': 'Fill' }
-                }
-              ]
-            }
-          ]
-        },
-        'components': ['overview-map'],
-        'footerBar': {
-          'tabs': {
-            'core': ['legend', 'layers', 'details', 'data-table']
-          }
-        },
-        'corePackages': [],
-        'theme': 'geo.ca',
-        'suportedLanguages': ['en']
-      }"
-    ></div>
-
     <script src="codedoc.js"></script>
     <script src="layerlib.js"></script>
     <script>
@@ -269,7 +166,6 @@
             displayLegend('LegendsId1', resultSet);
           });
           listenToLegendLayerSetChanges('HMap1-state', 'Map1');
-          listenToLegendLayerSetChanges('HMap2-state', 'Map2');
 
           // create snippets
           createCodeSnippet();

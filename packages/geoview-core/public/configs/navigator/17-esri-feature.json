@@ -1,0 +1,73 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "uniqueValueId",
+        "geoviewLayerName": { "en": "uniqueValue" },
+        "metadataAccessPath": { "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/" },
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "esriFeatureLYR1",
+        "geoviewLayerName": { "en": "Temporal_Test_Bed_en" },
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/"
+        },
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "classBreaksId",
+        "geoviewLayerName": { "en": "classBreaks" },
+        "metadataAccessPath": { "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer/" },
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "8"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "historical-flood",
+        "geoviewLayerName": { "en": "Historical Flood Events (HFE)" },
+        "externalDateFormat": "mm/dd/yyyy hh:mm:ss-05:00",
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer"
+        },
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map", "north-arrow"],
+  "footerBar": {
+    "tabs": {
+      "core": ["legend", "layers", "details", "data-table"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "suportedLanguages": ["en"]
+}
