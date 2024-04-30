@@ -35,6 +35,8 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { LAYER_STATUS } from '@/core/utils/constant';
 import { ArrowDownwardIcon, ArrowUpIcon, TableViewIcon } from '@/ui/icons';
+import { Divider } from '@/ui/divider/divider';
+import { Theme } from '@mui/material/styles';
 
 interface SingleLayerProps {
   layer: TypeLegendLayer;
@@ -177,17 +179,14 @@ export function SingleLayer({ depth, layer, setIsLayersListPanelVisible, index, 
     if (displayState === 'order') {
       return (
         <>
-          {!isFirst && (
-            <IconButton edge="end" size="small" onClick={() => reorderLayer(layer.layerPath, -1)}>
-              <ArrowUpIcon />
-            </IconButton>
-          )}
-          {!isLast && (
-            <IconButton edge="end" size="small" onClick={() => reorderLayer(layer.layerPath, 1)}>
-              <ArrowDownwardIcon />
-            </IconButton>
-          )}
           {layer.layerStatus === 'error' && <DeleteUndoButton layer={layer} />}
+          <Divider orientation="vertical" sx={{marginLeft: '0.4rem', height: '1.8rem', backgroundColor: (theme: Theme) => theme.palette.geoViewColor.bgColor.dark[300] }} variant="middle" flexItem />
+          <IconButton disabled={isFirst} edge="end" size="small" onClick={() => reorderLayer(layer.layerPath, -1)}>
+            <ArrowUpIcon />
+          </IconButton>
+          <IconButton disabled={isLast} edge="end" size="small" onClick={() => reorderLayer(layer.layerPath, 1)}>
+            <ArrowDownwardIcon />
+          </IconButton>
         </>
       );
     }
