@@ -15,7 +15,6 @@ import {
   VisibilityOffOutlinedIcon,
   VisibilityOutlinedIcon,
   RestartAltIcon,
-  HandleIcon,
   Paper,
 } from '@/ui';
 import { TypeLegendLayer } from '@/core/components/layers/types';
@@ -35,17 +34,16 @@ import {
   useDataTableAllFeaturesDataArray,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { LAYER_STATUS } from '@/core/utils/constant';
-import { TableViewIcon } from '@/ui/icons';
+import { ArrowDownwardIcon, ArrowUpIcon, TableViewIcon } from '@/ui/icons';
 
 interface SingleLayerProps {
   layer: TypeLegendLayer;
   depth: number;
-  isDragging: boolean;
   setIsLayersListPanelVisible: Dispatch<SetStateAction<boolean>>;
   index: number;
 }
 
-export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisible, index }: SingleLayerProps): JSX.Element {
+export function SingleLayer({ depth, layer, setIsLayersListPanelVisible, index }: SingleLayerProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/left-panel/single-layer');
 
@@ -53,7 +51,7 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
 
   // Get store states
   const { setSelectedLayerPath } = useLayerStoreActions();
-  const { getVisibilityFromOrderedLayerInfo, setOrToggleLayerVisibility } = useMapStoreActions();
+  const { getVisibilityFromOrderedLayerInfo, setOrToggleLayerVisibility, reorderLayer } = useMapStoreActions();
   const selectedLayerPath = useLayerSelectedLayerPath();
   const displayState = useLayerDisplayState();
   const datatableSettings = useDataTableLayerSettings();
@@ -181,9 +179,14 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
     }
     if (displayState === 'order') {
       return (
-        <IconButton edge="end" size="small" onClick={handleReArrangeLayer}>
-          <HandleIcon color="error" />
-        </IconButton>
+        <>
+          <IconButton edge="end" size="small" onClick={() => reorderLayer( layer.layerPath, -1)}>
+            <ArrowUpIcon />
+          </IconButton>
+          <IconButton edge="end" size="small"  onClick={() => reorderLayer(layer.layerPath, 1)}>
+            <ArrowDownwardIcon />
+          </IconButton>
+        </>
       );
     }
     return null;
@@ -272,10 +275,6 @@ export function SingleLayer({ isDragging, depth, layer, setIsLayersListPanelVisi
 
     if (layerIsSelected) {
       result.push('selectedLayer bordered-primary');
-    }
-
-    if (isDragging) {
-      result.push('dragging');
     }
 
     return result.join(' ');
