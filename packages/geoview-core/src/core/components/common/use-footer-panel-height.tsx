@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIActiveFooterBarTabId, useUIFooterPanelResizeValue } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useDetailsLayerDataArray } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
@@ -23,10 +23,19 @@ interface UseFooterPanelHeightType {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightType): any {
   const defaultHeight = 600;
+
   const mapId = useGeoViewMapId();
   const leftPanelRef = useRef<HTMLDivElement>(null);
   const rightPanelRef = useRef<HTMLDivElement>(null);
-  const panelTitleRef = useRef<HTMLDivElement>(null);
+
+  const panelTitleRefHeight = useRef<number>(0);
+
+  // NOTE: this will keep the reference of panel title when tabs are changed.
+  const panelTitleRef = useCallback((node: HTMLDivElement) => {
+    if (node) {
+      panelTitleRefHeight.current = node.getBoundingClientRect()?.height ?? 0;
+    }
+  }, []);
 
   const isMapFullScreen = useAppFullscreenActive();
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
@@ -52,13 +61,12 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
     logger.logTraceUseEffect('USE-FOOTER-PANEL-HEIGHT - footerPanelResizeValue', footerPanelResizeValue, isMapFullScreen);
 
     if (leftPanelRef.current && isMapFullScreen && (activeFooterBarTabId === footerPanelTab || footerPanelTab === 'default')) {
-      const panelTitleHeight = panelTitleRef.current?.clientHeight || 0;
       const tabsContainer = document.getElementById(`${mapId}-tabsContainer`)!;
       const footerBar = tabsContainer?.firstElementChild?.firstElementChild;
 
       const footerBarHeight = footerBar?.clientHeight ?? 0;
 
-      const leftPanelHeight = (window.screen.height * footerPanelResizeValue) / 100 - panelTitleHeight - footerBarHeight - 10;
+      const leftPanelHeight = (window.screen.height * footerPanelResizeValue) / 100 - panelTitleRefHeight.current - footerBarHeight - 10;
 
       leftPanelRef.current.style.maxHeight = `${leftPanelHeight}px`;
       leftPanelRef.current.style.overflow = 'auto';
@@ -71,7 +79,7 @@ export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightTyp
         const childElem = rightPanelRef.current?.firstElementChild as HTMLElement | null;
         if (childElem) {
           childElem.style.maxHeight = `${leftPanelHeight}px`;
-          childElem.style.overflowY = footerPanelResizeValue !== 100 ? 'auto' : 'visible';
+          childElem.style.overflowY = 'auto';
         }
       } else {
         rightPanelHeight(leftPanelHeight);

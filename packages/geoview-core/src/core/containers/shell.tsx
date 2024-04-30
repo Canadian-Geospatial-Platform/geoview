@@ -232,6 +232,7 @@ export function Shell(props: ShellProps): JSX.Element {
       mapShellContainerRef.current.style.visibility = 'visible';
       mapShellContainerRef.current.style.minHeight = `${origHeight}px`;
       mapShellContainerRef.current.style.height = `${origHeight}px`;
+      mapShellContainerRef.current.style.zIndex = '0';
 
       // Set the mapDiv height for height animation.
       geoviewElement.style.height = 'fit-content';
@@ -250,6 +251,7 @@ export function Shell(props: ShellProps): JSX.Element {
       const tabHeight = footerTabContainer?.clientHeight ?? 0;
 
       mapShellContainerRef.current.style.visibility = 'visible';
+      mapShellContainerRef.current.style.zIndex = '-1';
       mapContainerRef.current.style.visibility = 'visible';
       mapContainerRef.current.style.minHeight = `${window.screen.height - tabHeight}px`;
       mapContainerRef.current.style.height = `${window.screen.height - tabHeight}px`;
