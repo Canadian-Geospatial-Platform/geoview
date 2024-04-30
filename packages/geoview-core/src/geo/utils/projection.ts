@@ -33,7 +33,8 @@ export abstract class Projection {
     LCC: 'EPSG:3978',
     WM: 'EPSG:3857',
     LNGLAT: 'EPSG:4326',
-    EPSG4617: 'EPSG:4617',
+    CSRS: 'EPSG:4617',
+    CSRS98: 'EPSG:4140',
   };
 
   /**
@@ -174,6 +175,7 @@ function initCRS84Projection(): void {
   proj4.defs(Projection.CRS_84_URL, newDefinition);
 
   const projection = olGetProjection(Projection.CRS_84_URL);
+
   if (projection) Projection.PROJECTIONS[Projection.CRS_84_URL] = projection;
 }
 
@@ -202,18 +204,37 @@ function initLCCProjection(): void {
   if (projection) Projection.PROJECTIONS['3978'] = projection;
 }
 
-function initEPSG4617Projection(): void {
+/**
+ * initialize CSRS projection
+ * @private
+ */
+function initCSRSProjection(): void {
   // define 4617 projection
-  proj4.defs(Projection.PROJECTION_NAMES.EPSG4617, '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs');
+  proj4.defs(Projection.PROJECTION_NAMES.CSRS, '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs');
   register(proj4);
 
-  const projection = olGetProjection(Projection.PROJECTION_NAMES.EPSG4617);
+  const projection = olGetProjection(Projection.PROJECTION_NAMES.CSRS);
   if (projection) Projection.PROJECTIONS['4617'] = projection;
+}
+
+/**
+ * initialize CSRS98 projection
+ * @private
+ */
+function initCSRS98Projection(): void {
+  // define 4140 projection
+  proj4.defs(Projection.PROJECTION_NAMES.CSRS98, '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs');
+  register(proj4);
+
+  const projection = olGetProjection(Projection.PROJECTION_NAMES.CSRS98);
+
+  if (projection) Projection.PROJECTIONS['4140'] = projection;
 }
 
 // Initialize the supported projections
 initCRS84Projection();
 initWMProjection();
 initLCCProjection();
-initEPSG4617Projection();
+initCSRSProjection();
+initCSRS98Projection();
 logger.logInfo('Projections initialized');
