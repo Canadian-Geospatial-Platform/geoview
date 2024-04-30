@@ -168,11 +168,6 @@ export function SingleLayer({ depth, layer, setIsLayersListPanelVisible, index }
     logger.logWarning('reloading layer not implemented...');
   };
 
-  // TODO: refactor - this button function does nothing as it is the whole container that can be draggable
-  const handleReArrangeLayer = (): void => {
-    logger.logWarning('re-arrange layer');
-  };
-
   function renderEditModeButtons(): JSX.Element | null {
     if (displayState === 'remove' || layer.layerStatus === 'error') {
       return <DeleteUndoButton layer={layer} />;
@@ -180,10 +175,10 @@ export function SingleLayer({ depth, layer, setIsLayersListPanelVisible, index }
     if (displayState === 'order') {
       return (
         <>
-          <IconButton edge="end" size="small" onClick={() => reorderLayer( layer.layerPath, -1)}>
+          <IconButton edge="end" size="small" onClick={() => reorderLayer(layer.layerPath, -1)}>
             <ArrowUpIcon />
           </IconButton>
-          <IconButton edge="end" size="small"  onClick={() => reorderLayer(layer.layerPath, 1)}>
+          <IconButton edge="end" size="small" onClick={() => reorderLayer(layer.layerPath, 1)}>
             <ArrowDownwardIcon />
           </IconButton>
         </>
@@ -251,12 +246,7 @@ export function SingleLayer({ depth, layer, setIsLayersListPanelVisible, index }
 
     return (
       <Collapse in={isGroupOpen} timeout="auto">
-        <LayersList
-          parentLayerPath={layer.layerPath}
-          depth={1 + depth}
-          layersList={layer.children}
-          setIsLayersListPanelVisible={setIsLayersListPanelVisible}
-        />
+        <LayersList depth={1 + depth} layersList={layer.children} setIsLayersListPanelVisible={setIsLayersListPanelVisible} />
       </Collapse>
     );
   }

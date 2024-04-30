@@ -9,12 +9,11 @@ import { TypeLegendLayer } from '@/core/components/layers/types';
 
 interface LayerListProps {
   depth: number;
-  parentLayerPath: string;
   layersList: TypeLegendLayer[];
   setIsLayersListPanelVisible: Dispatch<SetStateAction<boolean>>;
 }
 
-export function LayersList({ layersList, setIsLayersListPanelVisible, parentLayerPath, depth }: LayerListProps): JSX.Element {
+export function LayersList({ layersList, setIsLayersListPanelVisible, depth }: LayerListProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/left-panel/layers-list');
 
@@ -48,23 +47,15 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, parentLaye
 
   const legendItems = sortedLayers.map((details, index) => {
     return (
-
-      <div>
-        <SingleLayer
-          key={textToSlug(`layerKey-${index}-${details.layerPath}`)}
-          depth={depth}
-          layer={details}
-          setIsLayersListPanelVisible={setIsLayersListPanelVisible}
-          index={index}
-        />
-      </div>
-
+      <SingleLayer
+        key={textToSlug(`layerKey-${index}-${details.layerPath}`)}
+        depth={depth}
+        layer={details}
+        setIsLayersListPanelVisible={setIsLayersListPanelVisible}
+        index={index}
+      />
     );
   });
 
-  return (
-    <Box sx={getListClass()}>
-      {legendItems}
-    </Box>
-  );
+  return <Box sx={getListClass()}>{legendItems}</Box>;
 }
