@@ -1666,12 +1666,11 @@
             "type": "number",
             "minimum": -80,
             "maximum": 80,
-            "default": 65,
+            "default": 60,
             "description": "Initial latitude value for map center."
           }
         ]
       ],
-      "default": [4.5, [-90, 67]],
       "description": "Initial zoom and center coordinates to set map view."
     },
     "TypeValidMapProjectionCodes": {
