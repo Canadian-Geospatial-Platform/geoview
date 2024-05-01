@@ -1,8 +1,9 @@
+import cloneDeep from 'lodash/cloneDeep';
+
 import { TypeJsonObject } from '../../config-types';
 import {
   TypeBaseSourceVectorInitialConfig,
   TypeDisplayLanguage,
-  TypeLayerEntryType,
   TypeLayerInitialSettings,
   TypeSourceImageEsriInitialConfig,
   TypeSourceImageInitialConfig,
@@ -15,27 +16,31 @@ import {
 import { AbstractGeoviewLayerConfig } from '../geoview-config/abstract-geoview-layer-config';
 import { ConfigBaseClass } from './config-base-class';
 
+export type TypeSourceInitialConfig =
+  | TypeBaseSourceVectorInitialConfig
+  | TypeSourceTileInitialConfig
+  | TypeVectorSourceInitialConfig
+  | TypeVectorTileSourceInitialConfig
+  | TypeSourceImageInitialConfig
+  | TypeSourceImageWmsInitialConfig
+  | TypeSourceImageEsriInitialConfig
+  | TypeSourceImageStaticInitialConfig;
+
 /** ******************************************************************************************************************************
- * Base type used to define a GeoView layer to display on the map.
+ *  ******************************************************************************************************************************
+ *  ******************************************************************************************************************************
+ * Base type used to define a GeoView sublayer to display on the map.
  */
 export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /** Source settings to apply to the GeoView vector layer source at creation time. */
-  source:
-    | TypeBaseSourceVectorInitialConfig
-    | TypeSourceTileInitialConfig
-    | TypeVectorSourceInitialConfig
-    | TypeVectorTileSourceInitialConfig
-    | TypeSourceImageInitialConfig
-    | TypeSourceImageWmsInitialConfig
-    | TypeSourceImageEsriInitialConfig
-    | TypeSourceImageStaticInitialConfig;
+  source: TypeSourceInitialConfig;
 
-  /**
+  /** ***************************************************************************************************************************
    * The class constructor.
-   * @param {TypeJsonObject} layerConfig The sub layer configuration we want to instanciate.
+   * @param {TypeJsonObject} layerConfig The sublayer configuration we want to instanciate.
    * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited.
    * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map features configuration.
-   * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The GeoView instance that owns the sub layer.
+   * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The GeoView instance that owns the sublayer.
    * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
    */
   constructor(
@@ -46,21 +51,8 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     parentNode: ConfigBaseClass
   ) {
     super(layerConfig, initialSettings, language, geoviewLayerConfig, parentNode);
-    // If the user didn't provide a source then create an empty one else keep the user one.
-    this.source = layerConfig.source || {};
+    // If the user has provided a source then keep it, else create an empty one.
+    if (layerConfig.source) this.source = cloneDeep(layerConfig.source) as TypeSourceInitialConfig;
+    else this.source = {};
   }
-
-  /**
-   * The getter method that returns the schemaPath property.
-   *
-   * @returns {string} The schemaPath associated to the sub layer.
-   */
-  abstract get schemaPath(): string;
-
-  /**
-   * The getter method that returns the entryType property.
-   *
-   * @returns {TypeLayerEntryType} The entryType associated to the sub layer.
-   */
-  abstract getEntryType(): TypeLayerEntryType;
 }
