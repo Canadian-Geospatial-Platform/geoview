@@ -1369,7 +1369,7 @@ export class MapViewer {
         try {
           this.layer.removeAllGeoviewLayers();
         } catch (err) {
-          // Failed to remove layers, eat the exception and continue to remove th map
+          // Failed to remove layers, eat the exception and continue to remove the map
         }
 
         // unsubscribe from all remaining events registered on this map

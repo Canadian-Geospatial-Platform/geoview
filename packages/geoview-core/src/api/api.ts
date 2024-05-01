@@ -110,11 +110,8 @@ export class API {
 
     // If found the map div
     if (mapDiv) {
-      // check if it is a url for a config file or a config string
-      const url = mapConfig.match('.json$') !== null;
-
       // Init by function call
-      return initMapDivFromFunctionCall(mapDiv, mapConfig, url);
+      return initMapDivFromFunctionCall(mapDiv, mapConfig);
     }
 
     // Log error
