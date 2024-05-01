@@ -42,7 +42,7 @@
           <tr>
             <td>
               <a href="#HLYR1">1. Many GeoJSON Layers</a><br />
-              <a href="#HLYR3">2. One Layer, multiple geometry types and styles</a><br />
+              <a href="#HLYR2">2. One Layer with multiple geometry types and styles, and MultiPolygon Example</a><br />
             </td>
           </tr>
         </tbody>
@@ -137,13 +137,13 @@
     <pre id="codeSnippet" class="panel"></pre>
 
     <div class="map-title-holder">
-      <h4 id="HLYR3">2. One Layer, multiple geometry types and styles</h4>
+      <h4 id="HLYR2">2. One Layer with multiple geometry types and styles, and MultiPolygon Example</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <button class="collapsible active">Map Status Flags</button>
-    <pre id="HLYR3-state" class="panel map-title-holder"></pre>
+    <pre id="HLYR2-state" class="panel map-title-holder"></pre>
     <div
-      id="LYR3"
+      id="LYR2"
       class="geoview-map"
       triggerReadyCallback="true"
       data-lang="en"
@@ -151,8 +151,6 @@
         'map': {
           'interaction': 'dynamic',
           'viewSettings': {
-            'zoom': 4,
-            'center': [-100, 60],
             'projection': 3978
           },
           'basemapOptions': {
@@ -170,6 +168,18 @@
                 {
                   'layerId': 'projects.json',
                   'layerName': { 'en': 'Projects' }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'geojsonLYR2',
+              'geoviewLayerName': { 'en': 'MultiPolygon Sample' },
+              'metadataAccessPath': { 'en': './datasets/geojson/metadata.json' },
+              'geoviewLayerType': 'GeoJSON',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'multipolygons.geojson',
+                  'layerName': { 'en': 'MultiPolygon' }
                 }
               ]
             }
