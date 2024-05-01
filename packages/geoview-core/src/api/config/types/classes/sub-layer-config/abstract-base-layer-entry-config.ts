@@ -1,6 +1,7 @@
 import { TypeJsonObject } from '../../config-types';
 import {
   TypeBaseSourceVectorInitialConfig,
+  TypeDisplayLanguage,
   TypeLayerEntryType,
   TypeLayerInitialSettings,
   TypeSourceImageEsriInitialConfig,
@@ -19,7 +20,7 @@ import { ConfigBaseClass } from './config-base-class';
  */
 export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /** Source settings to apply to the GeoView vector layer source at creation time. */
-  source?:
+  source:
     | TypeBaseSourceVectorInitialConfig
     | TypeSourceTileInitialConfig
     | TypeVectorSourceInitialConfig
@@ -33,11 +34,20 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * The class constructor.
    * @param {TypeJsonObject} layerConfig The sub layer configuration we want to instanciate.
    * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited.
+   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map features configuration.
    * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The GeoView instance that owns the sub layer.
+   * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
    */
-  constructor(layerConfig: TypeJsonObject, initialSettings: TypeLayerInitialSettings, geoviewLayerConfig: AbstractGeoviewLayerConfig) {
-    super(layerConfig, initialSettings, geoviewLayerConfig);
-    this.source = { ...(layerConfig.source as TypeSourceImageEsriInitialConfig) };
+  constructor(
+    layerConfig: TypeJsonObject,
+    initialSettings: TypeLayerInitialSettings,
+    language: TypeDisplayLanguage,
+    geoviewLayerConfig: AbstractGeoviewLayerConfig,
+    parentNode: ConfigBaseClass
+  ) {
+    super(layerConfig, initialSettings, language, geoviewLayerConfig, parentNode);
+    // If the user didn't provide a source then create an empty one else keep the user one.
+    this.source = layerConfig.source || {};
   }
 
   /**
@@ -52,5 +62,5 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    *
    * @returns {TypeLayerEntryType} The entryType associated to the sub layer.
    */
-  abstract get entryType(): TypeLayerEntryType;
+  abstract getEntryType(): TypeLayerEntryType;
 }
