@@ -36,12 +36,20 @@ import { AppEventProcessor } from '@/api/event-processors/event-processor-childr
 // TODO: Implement method to validate Vector Tiles service
 // TODO: Add more customization (minZoom, maxZoom, TMS)
 
+// GV: CONFIG EXTRACTION
+// GV: This section of code must be deleted because we already have another type guard that does the same thing
+// GV: |||||
+// GV: vvvvv
+
 export type TypeSourceVectorTilesInitialConfig = TypeSourceTileInitialConfig;
 
 export interface TypeVectorTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.VECTOR_TILES;
   listOfLayerEntryConfig: VectorTilesLayerEntryConfig[];
 }
+
+// GV: ^^^^^
+// GV: |||||
 
 /** *****************************************************************************************************************************
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeVectorTilesConfig if the geoviewLayerType attribute of the

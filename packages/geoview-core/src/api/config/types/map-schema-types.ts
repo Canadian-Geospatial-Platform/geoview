@@ -1,3 +1,7 @@
+// GV: CONFIG EXTRACTION
+// GV: This file was extracted and copied to the geoview-config package
+// GV: |||||
+// GV: vvvvv
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
 import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
@@ -207,10 +211,9 @@ export type TypeSourceImageInitialConfig =
  */
 export type TypeBaseSourceImageInitialConfig = {
   /**
-   * The service endpoint of the layer (English/French). If not specified, the metadataAccessPath of the GeoView parent
-   * layer is used
+   * The service endpoint of the layer. If not specified, the metadataAccessPath of the GeoView layer is used
    */
-  dataAccessPath?: TypeLocalizedString;
+  dataAccessPath?: string;
   /**
    * The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
    * with the Canvas renderer.
@@ -283,7 +286,7 @@ export type TypeTileGrid = {
 /** ******************************************************************************************************************************
  * Initial settings for tile image sources.
  */
-export interface TypeSourceTileInitialConfig extends Omit<TypeBaseSourceImageInitialConfig, 'featureInfo'> {
+export interface TypeSourceTileInitialConfig extends TypeBaseSourceImageInitialConfig {
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. We only use queryable and
    * it must be set to false if specified.
    */
@@ -418,13 +421,28 @@ export type TypeInteraction = 'static' | 'dynamic';
 export const VALID_INTERACTION: TypeInteraction[] = ['static', 'dynamic'];
 
 /** ******************************************************************************************************************************
+ *  Definition of the initial view settings.
+ */
+export type TypeInitialViewSettings = {
+  /**
+   * Option to set the zoom and center of initial view.
+   * Zoom and center of the map defined as [zoom, [longitude, latitude]]. Longitude domaine = [-160..160],
+   * Latitude domaine = [-80..80]. */
+  zoomAndCenter?: [number, [number, number]];
+  /**
+   * Option to set initial view by extent.
+   * Called with [minX, minY, maxX, maxY] extent coordinates. */
+  extent?: Extent;
+  /** IDs of layers to use for initial map extent. */
+  layerIds?: string[];
+};
+
+/** ******************************************************************************************************************************
  *  Definition of the view settings.
  */
 export type TypeViewSettings = {
-  /**
-   * Center of the map defined as [longitude, latitude]. Longitude domaine = [-160..160], default = -106.
-   * Latitude domaine = [-80..80], default = 60. */
-  center: [number, number];
+  /** Settings for the initial view for map, default is zoomAndCenter of [3.5, [-90, 65]] */
+  initialView?: TypeInitialViewSettings;
   /** Enable rotation. If false, a rotation constraint that always sets the rotation to zero is used. Default = true. */
   enableRotation?: boolean;
   /**
@@ -432,8 +450,10 @@ export type TypeViewSettings = {
    * the viewer. Domaine = [0..360], default = 0.
    */
   rotation?: number;
-  /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates. */
-  extent?: Extent;
+  /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates.
+   * Default [-125, 30, -60, 89].
+   */
+  maxExtent?: Extent;
   /**
    * The minimum zoom level used to determine the resolution constraint. If not set, will use default from basemap.
    * Domaine = [0..50].
@@ -449,8 +469,6 @@ export type TypeViewSettings = {
    * Default = 3978.
    */
   projection: TypeValidMapProjectionCodes;
-  /** Initial map zoom level. Zoom level are define by the basemap zoom levels. Domaine = [0..28], default = 12. */
-  zoom: number;
 };
 
 /** ******************************************************************************************************************************

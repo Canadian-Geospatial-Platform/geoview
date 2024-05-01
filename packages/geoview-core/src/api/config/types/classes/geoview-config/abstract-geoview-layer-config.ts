@@ -1,13 +1,14 @@
 import defaultsDeep from 'lodash/defaultsDeep';
 import cloneDeep from 'lodash/cloneDeep';
 
-import { TypeGeoviewLayerType, TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
+import { Cast, TypeGeoviewLayerType, TypeJsonObject, TypeJsonArray } from '@config/types/config-types';
 import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
-import { TypeLayerInitialSettings, TypeLocalizedString } from '@config/types/map-schema-types';
-import { layerEntryIsGroupLayer } from '@config/types/type-guards';
-import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-layer-entry-config';
+import { TypeDisplayLanguage, TypeLayerInitialSettings } from '@config/types/map-schema-types';
 import { MapFeaturesConfig } from '@config/types/classes/map-features-config';
-import { CV_DEFAULT_INITIAL_SETTINGS } from '@config/types/config-constants';
+import { normalizeLocalizedString } from '@config/utils';
+import { CV_CONST_SUB_LAYER_TYPES, CV_DEFAULT_LAYER_INITIAL_SETTINGS } from '@config/types/config-constants';
+import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-layer-entry-config';
+import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 import { logger } from '@/core/utils/logger';
 import { generateId } from '@/core/utils/utilities';
 
@@ -15,6 +16,12 @@ import { generateId } from '@/core/utils/utilities';
  *  Definition of a single Geoview layer configuration.
  */
 export abstract class AbstractGeoviewLayerConfig {
+  /** The language used when interacting with this instance of MapFeaturesConfig. */
+  #language;
+
+  /** Original copy of the geoview layer configuration provided by the user. */
+  #originalgeoviewLayerConfig: TypeJsonObject;
+
   /** If the geoview layer is linked to a map config, we keep a reference to the map for message propagation */
   #mapFeaturesConfig?: MapFeaturesConfig;
 
@@ -28,10 +35,10 @@ export abstract class AbstractGeoviewLayerConfig {
    * The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this
    * information.
    */
-  geoviewLayerName: TypeLocalizedString;
+  geoviewLayerName: string;
 
   /** The GeoView layer access path (English/French). */
-  metadataAccessPath: TypeLocalizedString;
+  metadataAccessPath: string;
 
   /** Date format used by the service endpoint. */
   serviceDateFormat: string | undefined;
@@ -48,35 +55,58 @@ export abstract class AbstractGeoviewLayerConfig {
   /** The layer entries to use from the GeoView layer. */
   listOfLayerEntryConfig: ConfigBaseClass[] = [];
 
-  /**
+  /** ***************************************************************************************************************************
    * The class constructor.
-   * @param {TypeJsonObject} layerConfig The layer configuration we want to instanciate.
+   * @param {TypeJsonObject} geoviewLayerConfig The layer configuration we want to instanciate.
+   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map features configuration.
+   * @param {MapFeaturesConfig} mapFeaturesConfig An optional mapFeatureConfig instance if the layer is part of it.
    */
-  constructor(layerConfig: TypeJsonObject, mapFeaturesConfig?: MapFeaturesConfig) {
+  constructor(geoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage, mapFeaturesConfig?: MapFeaturesConfig) {
+    this.#originalgeoviewLayerConfig = cloneDeep(geoviewLayerConfig);
     this.#mapFeaturesConfig = mapFeaturesConfig;
-    const layerConfigWithDefault = this.#setDefaultValues(layerConfig);
+    this.#language = language;
 
-    this.geoviewLayerId = (layerConfigWithDefault.geoviewLayerId || generateId()) as string;
-    this.geoviewLayerName = { ...(layerConfigWithDefault.geoviewLayerName as object) } as TypeLocalizedString;
-    this.metadataAccessPath = { ...(layerConfigWithDefault.metadataAccessPath as object) } as TypeLocalizedString;
-    this.serviceDateFormat = (layerConfigWithDefault.serviceDateFormat || 'DD/MM/YYYY HH:MM:SSZ') as string;
-    this.externalDateFormat = (layerConfigWithDefault.externalDateFormat || 'DD/MM/YYYY HH:MM:SSZ') as string;
-    this.initialSettings = { ...(layerConfigWithDefault.initialSettings as object) } as TypeLayerInitialSettings;
-    this.createListOfLayerEntryConfig((layerConfigWithDefault.listOfLayerEntryConfig || []) as TypeJsonArray);
+    // Topmost layer must be a layer group or a leaf node.
+    if ((this.#originalgeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray).length > 1)
+      (this.#originalgeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray) = [
+        {
+          layerId: this.#originalgeoviewLayerConfig.geoviewLayerId,
+          initialSettings: defaultsDeep(geoviewLayerConfig.initialSettings, CV_DEFAULT_LAYER_INITIAL_SETTINGS),
+          layerName: { ...(this.#originalgeoviewLayerConfig.geoviewLayerName as object) },
+          entryType: CV_CONST_SUB_LAYER_TYPES.GROUP as TypeJsonObject,
+          listOfLayerEntryConfig: this.#originalgeoviewLayerConfig.listOfLayerEntryConfig,
+        },
+      ];
+
+    this.geoviewLayerId = (geoviewLayerConfig.geoviewLayerId || generateId()) as string;
+    this.geoviewLayerName = normalizeLocalizedString(geoviewLayerConfig.geoviewLayerName)![language]!;
+    this.metadataAccessPath = normalizeLocalizedString(geoviewLayerConfig.metadataAccessPath)![language]!;
+    this.serviceDateFormat = (geoviewLayerConfig.serviceDateFormat || 'DD/MM/YYYY HH:MM:SSZ') as string;
+    this.externalDateFormat = (geoviewLayerConfig.externalDateFormat || 'DD/MM/YYYY HH:MM:SSZ') as string;
+    this.initialSettings = Cast<TypeLayerInitialSettings>(
+      defaultsDeep(geoviewLayerConfig.initialSettings, CV_DEFAULT_LAYER_INITIAL_SETTINGS)
+    );
+    this.listOfLayerEntryConfig = (this.#originalgeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray)
+      .map((subLayerConfig) => {
+        if (layerEntryIsGroupLayer(subLayerConfig)) return new GroupLayerEntryConfig(subLayerConfig, this.initialSettings, language, this);
+        return this.createLeafNode(subLayerConfig, this.initialSettings, language, this);
+      })
+      .filter((subLayerConfig) => {
+        return subLayerConfig;
+      }) as ConfigBaseClass[];
   }
 
   /**
-   * Set the default value when a class property that has a default value is left undefined.
+   * @protected Process layer metadata.
+   */
+  protected abstract processMetadata(): void;
+
+  /**
+   * @protected Set the default value when a class property that has a default value is left undefined.
    *
    * @param {TypeJsonObject} layerConfig The layer configuration affected.
-   * @private
    */
-  #setDefaultValues(layerConfig: TypeJsonObject): TypeJsonObject {
-    const layerConfigWithDefault = cloneDeep(layerConfig);
-    layerConfigWithDefault.geoviewLayerType = this.geoviewLayerType as TypeJsonObject;
-    layerConfigWithDefault.initialSettings = defaultsDeep(layerConfig.initialSettings, CV_DEFAULT_INITIAL_SETTINGS);
-    return layerConfigWithDefault;
-  }
+  protected abstract setDefaultValues(): void;
 
   /**
    * @protected validate
@@ -92,25 +122,20 @@ export abstract class AbstractGeoviewLayerConfig {
   }
 
   /**
-   * Create the list of layer entries using the configuration provided.
-   *
-   * @param {TypeJsonObject} listOfJsonLayerConfig The list of layer entries to create.
-   */
-  createListOfLayerEntryConfig(listOfJsonLayerConfig: TypeJsonArray): void {
-    this.listOfLayerEntryConfig = listOfJsonLayerConfig.map((jsonLayerConfig) => {
-      if (layerEntryIsGroupLayer(jsonLayerConfig)) {
-        return new GroupLayerEntryConfig(jsonLayerConfig, this.initialSettings, this);
-      }
-      return this.createLeafNode(jsonLayerConfig, this.initialSettings, this)!;
-    });
-  }
-
-  /**
    * The getter method that returns the geoview layer type property.
    *
    * @returns {TypeGeoviewLayerType} The GeoView layer type.
+   * @abstract
    */
   abstract get geoviewLayerType(): TypeGeoviewLayerType;
+
+  /**
+   * The getter method that returns the geoview layer schema to use for the validation.
+   *
+   * @returns {string} The GeoView layer schema associated to the config.
+   * @abstract
+   */
+  abstract get geoviewLayerSchema(): string;
 
   /**
    * The method used to implement the class factory model that returns the instance of the class
@@ -118,14 +143,18 @@ export abstract class AbstractGeoviewLayerConfig {
    *
    * @param {TypeJsonObject} layerConfig The sub layer configuration.
    * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited.
+   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
    * @param {AbstractGeoviewLayerConfig} geoviewInstance The GeoView instance that owns the sub layer.
+   * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
    *
    * @returns {ConfigBaseClass | undefined} The sub layer instance or undefined if there is an error.
    */
   abstract createLeafNode(
     layerConfig: TypeJsonObject,
-    initialSettings: TypeLayerInitialSettings,
-    geoviewConfig: AbstractGeoviewLayerConfig
+    initialSettings: TypeLayerInitialSettings | TypeJsonObject,
+    language: TypeDisplayLanguage,
+    geoviewConfig: AbstractGeoviewLayerConfig,
+    parentNode?: ConfigBaseClass
   ): ConfigBaseClass | undefined;
 
   /**
