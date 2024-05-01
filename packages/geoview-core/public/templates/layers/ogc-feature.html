@@ -42,7 +42,6 @@
           <tr>
             <td>
               <a href="#HLYR1">1. OGC Feature Layers</a><br />
-              <a href="#HLYR2">2. OGC Feature Layers - with footer bar</a><br />
             </td>
           </tr>
         </tbody>
@@ -93,7 +92,7 @@
           },
           'components': ['overview-map'],
           'corePackages': [],
-          'theme': 'dark',
+          'theme': 'geo.ca',
           'suportedLanguages': ['en']
         }"
     ></div>
@@ -113,60 +112,6 @@
     <button type="button" class="collapsible">Code Snippet</button>
     <pre id="codeSnippet" class="panel"></pre>
 
-    <div class="map-title-holder">
-      <h4 id="HLYR2">2. OGC Feature API Layers - with footer bar</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
-    <button class="collapsible active">Map Status Flags</button>
-    <pre id="HLYR2-state" class="panel map-title-holder"></pre>
-    <div
-      id="LYR2"
-      class="geoview-map"
-      triggerReadyCallback="true"
-      data-lang="en"
-      data-config="{
-          'map': {
-            'interaction': 'dynamic',
-            'viewSettings': {
-              'initialView': { 'zoomAndCenter': [3, [0, 20]]},
-              'projection': 3857
-            },
-            'basemapOptions': {
-              'basemapId': 'transport',
-              'shaded': false,
-              'labeled': true
-            },
-            'listOfGeoviewLayerConfig': [
-              {
-                'geoviewLayerId': 'ogcFeatureLYR1',
-                'geoviewLayerName': {
-                  'en': 'Large Lakes'
-                },
-                'metadataAccessPath': {
-                  'en': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev'
-                },
-                'geoviewLayerType': 'ogcFeature',
-                'listOfLayerEntryConfig': [
-                  {
-                    'layerId': 'lakes',
-                    'layerFilter': 'name in (\'Lake Victoria\', \'Lake Superior\', \'L. Erie\', \'L. Ontario\')'
-                  }
-                ]
-              }
-            ]
-          },
-          'components': ['overview-map'],
-          'footerBar': {
-            'tabs': {
-              'core': ['legend', 'layers', 'details', 'data-table']
-            }
-          },
-          'corePackages': [],
-          'theme': 'geo.ca',
-          'suportedLanguages': ['en']
-        }"
-    ></div>
-
     <script src="codedoc.js"></script>
     <script src="layerlib.js"></script>
     <script>
@@ -184,7 +129,6 @@
           });
 
           listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
-          listenToLegendLayerSetChanges('HLYR2-state', 'LYR2');
 
           // create snippets
           createCodeSnippet();

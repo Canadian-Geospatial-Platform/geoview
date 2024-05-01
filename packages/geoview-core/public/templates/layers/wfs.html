@@ -43,7 +43,6 @@
             <td>
               <a href="#HLYR1">1. WFS Layers</a><br />
               <a href="#HLYR2">2. WFS Layers using bbox strategy</a><br />
-              <a href="#HLYR3">3. WFS Layers - with footer bar</a><br />
             </td>
           </tr>
         </tbody>
@@ -111,7 +110,7 @@
         },
         'components': ['overview-map'],
         'corePackages': [],
-        'theme': 'dark',
+        'theme': 'geo.ca',
         'suportedLanguages': ['en']
       }"
     ></div>
@@ -176,7 +175,7 @@
         },
         'components': ['overview-map'],
         'corePackages': [],
-        'theme': 'dark',
+        'theme': 'geo.ca',
         'suportedLanguages': ['en']
       }"
     ></div>
@@ -195,77 +194,6 @@
     <hr />
     <button type="button" class="collapsible">Code Snippet</button>
     <pre id="codeSnippet" class="panel"></pre>
-
-    <div class="map-title-holder">
-      <h4 id="HLYR3">3. WFS Layers - with footer bar</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
-    <button class="collapsible active">Map Status Flags</button>
-    <pre id="HLYR3-state" class="panel map-title-holder"></pre>
-    <div
-      id="LYR3"
-      class="geoview-map"
-      triggerReadyCallback="true"
-      data-lang="en"
-      data-config="{
-        'map': {
-          'interaction': 'dynamic',
-          'viewSettings': {
-            'initialView': { 'zoomAndCenter': [10, [-75.370748, 45.001058]]},
-            'projection': 3857
-          },
-          'basemapOptions': {
-            'basemapId': 'transport',
-            'shaded': false,
-            'labeled': true
-          },
-          'listOfGeoviewLayerConfig': [
-            {
-              'geoviewLayerId': 'wfsLYR1',
-              'geoviewLayerName': {
-                'en': 'US States'
-              },
-              'metadataAccessPath': {
-                'en': 'https://ahocevar.com/geoserver/wfs?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS'
-              },
-              'geoviewLayerType': 'ogcWfs',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': 'usa:states',
-                  'layerName': { 'en': 'US States' },
-                  'layerFilter': 'STATE_ABBR = \'NY\''
-                }
-              ]
-            },
-            {
-              'geoviewLayerId': 'wfsLYR2',
-              'geoviewLayerName': {
-                'en': 'Current Conditions'
-              },
-              'metadataAccessPath': {
-                'en': 'https://geo.weather.gc.ca/geomet?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS'
-              },
-              'geoviewLayerType': 'ogcWfs',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': 'ec-msc:CURRENT_CONDITIONS',
-                  'layerName': { 'en': 'Current Conditions' }
-                }
-              ]
-            }
-          ]
-        },
-        'components': ['overview-map'],
-        'footerBar': {
-          'tabs': {
-            'core': ['legend', 'layers', 'details']
-          }
-        },
-        'corePackages': [],
-        'theme': 'geo.ca',
-        'suportedLanguages': ['en']
-      }"
-    ></div>
 
     <script src="codedoc.js"></script>
     <script src="layerlib.js"></script>
@@ -296,10 +224,6 @@
             displayLegend('LegendsId2', resultSet);
           });
           listenToLegendLayerSetChanges('HLYR2-state', mapId);
-        }
-
-        if (mapId === 'LYR3') {
-          listenToLegendLayerSetChanges('HLYR3-state', mapId);
         }
 
         if (mapId === 'allMaps') {

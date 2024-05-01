@@ -21,7 +21,11 @@
           "fr": "https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer"
         },
         "geoviewLayerType": "ogcWms",
-        "listOfLayerEntryConfig": [{ "layerId": "0" }]
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
       },
       {
         "geoviewLayerId": "geojsonLYR4",
@@ -34,7 +38,17 @@
           "fr": "./datasets/geojson/metadata.json"
         },
         "geoviewLayerType": "GeoJSON",
-        "listOfLayerEntryConfig": [{ "layerId": "points.json" }, { "layerId": "lines.json" }, { "layerId": "polygons.json" }]
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "points.json"
+          },
+          {
+            "layerId": "lines.json"
+          },
+          {
+            "layerId": "polygons.json"
+          }
+        ]
       },
       {
         "geoviewLayerId": "wmsLYR7",
@@ -47,12 +61,18 @@
           "fr": "https://geo.weather.gc.ca/geomet"
         },
         "geoviewLayerType": "ogcWms",
-        "listOfLayerEntryConfig": [{ "layerId": "RAQDPS-FW.CE_PM2.5-DIFF-YAvg" }]
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "RAQDPS-FW.CE_PM2.5-DIFF-YAvg"
+          }
+        ]
       }
     ]
   },
-  "theme": "dark",
+  "theme": "geo.ca",
   "components": [],
   "corePackages": [],
-  "suportedLanguages": ["en"]
+  "suportedLanguages": [
+    "en"
+  ]
 }

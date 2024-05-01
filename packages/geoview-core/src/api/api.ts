@@ -101,8 +101,8 @@ export class API {
    * GV The div MUST NOT have a geoview-map class or a warning will be shown when initMapDivFromFunctionCall is called.
    * If is present, the div will be created with a default config
    *
-   * @param {string} divId the id of the div to create map in
-   * @param {string} mapConfig the config passed in from the function call
+   * @param {string} divId - id of the div to create map in
+   * @param {string} mapConfig - config passed in from the function call (string or url of a config path)
    */
   createMapFromConfig = (divId: string, mapConfig: string): Promise<void> => {
     // Get the map div
