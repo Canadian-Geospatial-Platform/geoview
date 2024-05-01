@@ -1366,7 +1366,11 @@ export class MapViewer {
       .removePlugins(this.mapId)
       .then(() => {
         // Remove all layers
-        this.layer.removeAllGeoviewLayers();
+        try {
+          this.layer.removeAllGeoviewLayers();
+        } catch (err) {
+          // Failed to remove layers, eat the exception and continue to remove th map
+        }
 
         // unsubscribe from all remaining events registered on this map
         api.event.offAll(this.mapId);

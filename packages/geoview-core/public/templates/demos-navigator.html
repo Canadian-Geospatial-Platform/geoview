@@ -109,6 +109,7 @@
             <option value="./configs/navigator/10-package-time-slider.json">Package time slider</option>
             <option value="./configs/navigator/11-package-time-slider-custom.json">Package custom time slider</option>
             <option value="./configs/navigator/12-package-geochart.json">Package geochart</option>
+            <option value="./configs/navigator/12-a-package-swiper.json">Package swiper</option>
             <option value="./configs/navigator/13-all-layers.json">All Layer Types</option>
             <option value="./configs/navigator/14-wms-layer.json">Layer - WMS -</option>
             <option value="./configs/navigator/15-xyz-tile.json">Layer - XYZ Tile -</option>
@@ -187,14 +188,16 @@
         // create new map in a new dom node
         const newDiv = document.createElement('div');
         const id = document.createAttribute('id');
+        const style = document.createAttribute('style');
         id.value = 'sandboxMap';
+        style.value = 'height: 150px !important; width: 100px;';
         newDiv.setAttributeNode(id);
         document.getElementById('mapSection').appendChild(newDiv);
 
         // wait until map is removed before recreating it
         setTimeout(() => {
           // create map
-          cgpv.api.createMapFromConfigURL('sandboxMap', e.target.value);
+          cgpv.api.createMapFromConfig('sandboxMap', e.target.value);
         }, 1500);
 
         // fetch JSON config file to show in the text are section
@@ -209,7 +212,7 @@
             })
             .then((data) => {
               document.getElementById('configGeoview').textContent = JSON.stringify(data, null, 4);
-            
+
               // set default number of lines
               const textarea = document.querySelector('textarea');
               const lineNumbers = document.querySelector('.line-numbers');
