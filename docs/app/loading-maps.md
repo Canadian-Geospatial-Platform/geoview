@@ -58,7 +58,7 @@ The content of the config must match the schema, an example of the object in the
     },
     "listOfGeoviewLayerConfig": []
   },
-  "theme": "dark",
+  "theme": "geo.ca",
   "components": ["north-arrow"],
   "corePackages": ["basemap-panel"],
   "externalPackages": [],
@@ -107,7 +107,7 @@ An example of this:
                         }
                       ],
                     },
-                    'theme': 'dark',
+                    'theme': 'geo.ca',
                     'components': ['north-arrow', 'overview-map'],
                     'corePackages': [],
                     'externalPackages': [],

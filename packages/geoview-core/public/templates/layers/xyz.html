@@ -42,7 +42,6 @@
           <tr>
             <td>
               <a href="#HLYR1">1. XYZ Layers</a><br />
-              <a href="#HLYR2">2. XYZ Layers - with footer bar</a><br />
             </td>
           </tr>
         </tbody>
@@ -93,7 +92,7 @@
           },
           'components': ['overview-map'],
           'corePackages': [],
-          'theme': 'dark',
+          'theme': 'geo.ca',
           'suportedLanguages': ['en']
         }"
     ></div>
@@ -104,61 +103,6 @@
     <button type="button" class="collapsible">Code Snippet</button>
     <pre id="codeSnippet" class="panel"></pre>
 
-    <div class="map-title-holder">
-      <h4 id="HLYR2">2. XYZ Tiles Layers - with footer bar</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
-    <button class="collapsible active">Map Status Flags</button>
-    <pre id="HLYR2-state" class="panel map-title-holder"></pre>
-    <div
-      id="LYR2"
-      class="geoview-map"
-      data-lang="en"
-      data-config="{
-          'map': {
-            'interaction': 'dynamic',
-            'viewSettings': {
-              'projection': 3857
-            },
-            'basemapOptions': {
-              'basemapId': 'transport',
-              'shaded': false,
-              'labeled': true
-            },
-            'listOfGeoviewLayerConfig': [
-              {
-                'geoviewLayerId': 'xyzTilesLYR1',
-                'geoviewLayerName': {
-                  'en': 'World_Topo_Map'
-                },
-                'geoviewLayerType': 'xyzTiles',
-                'listOfLayerEntryConfig': [
-                  {
-                    'layerId': 'topo',
-                    'layerName': {'en': 'World Topo Map'},
-                    'initialSettings': { 'minZoom': 3, 'maxZoom': 8 },
-                    'source': {
-                      'dataAccessPath': {
-                        'en': 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          'components': ['overview-map'],
-          'footerBar': {
-            'tabs': {
-              'core': ['legend', 'layers', 'details']
-            }
-          },
-          'corePackages': [],
-          'theme': 'geo.ca',
-          'suportedLanguages': ['en']
-        }"
-    ></div>
-
     <script src="codedoc.js"></script>
     <script src="layerlib.js"></script>
     <script>
@@ -166,7 +110,6 @@
       cgpv.init((mapId) => {
         if (mapId === 'allMaps') {
           listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
-          listenToLegendLayerSetChanges('HLYR2-state', 'LYR2');
 
           // create snippets
           createCodeSnippet();

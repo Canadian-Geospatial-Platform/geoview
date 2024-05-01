@@ -1,0 +1,34 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "esriFeatureLYR4",
+        "geoviewLayerName": { "en": "Water quality at monitoring sites" },
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer/"
+        },
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [{ "layerId": "0" }]
+      }
+    ]
+  },
+  "theme": "light",
+  "components": ["north-arrow", "overview-map"],
+  "appBar": {
+    "tabs": {
+      "core": ["basemap-panel"]
+    }
+  },
+  "corePackages": ["swiper"],
+  "externalPackages": [],
+  "suportedLanguages": ["en"]
+}

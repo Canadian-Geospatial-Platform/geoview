@@ -1,0 +1,54 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "csvLYR1",
+        "geoviewLayerName": { "en": "NPRI" },
+        "geoviewLayerType": "CSV",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "NPRI-INRP_WaterEau_MediaGroupMilieu_2022",
+            "layerName": { "en": "NPRI Water Media Group 2022" },
+            "source": {
+              "dataAccessPath": { "en": "./datasets/csv-files/NPRI-INRP_WaterEau_MediaGroupMilieu_2022.csv" },
+              "separator": ","
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "csvLYR2",
+        "geoviewLayerName": { "en": "Station List MELCC" },
+        "geoviewLayerType": "CSV",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "Station_List_Minus_HQ-MELCC",
+            "layerName": { "en": "Station List" },
+            "source": {
+              "dataAccessPath": { "en": "./datasets/csv-files/Station_List_Minus_HQ-MELCC.csv"}
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map"],
+  "overviewMap": {"hideOnZoom": 7},
+  "footerBar": {
+    "tabs": {
+      "core": ["legend", "layers", "details", "data-table"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "suportedLanguages": ["en"]
+  }

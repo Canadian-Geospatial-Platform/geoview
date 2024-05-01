@@ -1,0 +1,41 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "initialView": { "zoomAndCenter": [3, [0, 20]]},
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "ogcFeatureLYR1",
+        "geoviewLayerName": {
+          "en": "Large Lakes"
+        },
+        "metadataAccessPath": {
+          "en": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev"
+        },
+        "geoviewLayerType": "ogcFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "lakes",
+            "layerFilter": "name in (\"Lake Victoria\", \"Lake Superior\", \"L. Erie\", \"L. Ontario\")"
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map"],
+  "footerBar": {
+    "tabs": {
+      "core": ["legend", "layers", "details", "data-table"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "suportedLanguages": ["en"]
+}
