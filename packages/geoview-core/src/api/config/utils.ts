@@ -5,7 +5,7 @@ import { TypeGeoviewLayerType, TypeJsonObject } from '@config/types/config-types
 import { TypeLayerEntryType, TypeLocalizedString } from '@config/types/map-schema-types';
 import schema from '@config/types/config-validation-schema.json';
 import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
-import { MapFeaturesConfig } from '@config/types/classes/map-features-config';
+import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
 import { logger } from '@/core/utils/logger';
 
 type NewType = TypeGeoviewLayerType;
@@ -38,10 +38,10 @@ export const convertLayerTypeToEntry = (layerType: NewType): TypeLayerEntryType 
 };
 
 /** ***************************************************************************************************************************
- * Validate the map features configuration.
- * @param {MapFeaturesConfig} mapFeaturesConfigToValidate The map features configuration to validate.
+ * Validate the map feature configuration.
+ * @param {MapFeatureConfig} mapFeatureConfigToValidate The map feature configuration to validate.
  *
- * @returns {MapFeaturesConfig} A valid map features configuration.
+ * @returns {MapFeatureConfig} A valid map feature configuration.
  */
 export function isvalidComparedToSchema(schemaPath: string, targetObject: object): boolean {
   // create a validator object
@@ -71,13 +71,13 @@ export function isvalidComparedToSchema(schemaPath: string, targetObject: object
         }
         logger.logWarning('='.repeat(200), '\nSchema error: ', error, '\nObject affected: ', node);
       }
-      (targetObject as MapFeaturesConfig | ConfigBaseClass)?.propagateError?.();
+      (targetObject as MapFeatureConfig | ConfigBaseClass)?.propagateError?.();
       return false;
     }
     return true;
   }
   logger.logError(`Cannot find schema ${schemaPath}`);
-  (targetObject as MapFeaturesConfig | ConfigBaseClass)?.propagateError?.();
+  (targetObject as MapFeatureConfig | ConfigBaseClass)?.propagateError?.();
   return false;
 }
 

@@ -95,7 +95,7 @@ export const CV_GEOVIEW_SCHEMA_PATH: Record<LayerTypesKey, string> = {
   WFS: '',
   WMS: '',
 };
-export const CV_MAP_CONFIG_SCHEMA_PATH = 'https://cgpv/schema#/definitions/TypeMapFeaturesInstance';
+export const CV_MAP_CONFIG_SCHEMA_PATH = 'https://cgpv/schema#/definitions/TypeMapFeatureInstance';
 export const CV_LAYER_GROUP_SCHEMA_PATH = 'https://cgpv/schema#/definitions/TypeLayerGroupEntryConfig';
 
 /** ******************************************************************************************************************************
@@ -135,9 +135,10 @@ export const CV_MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]> = {
 };
 
 /** ******************************************************************************************************************************
- *  Definition of the MapFeaturesConfig default values.
+ *  Definition of the MapFeatureConfig default values. All the default values that applies to the map feature configuration are
+ * defined here.
  */
-export const CV_DEFAULT_MAP_FEATURES_CONFIG = {
+export const CV_DEFAULT_MAP_FEATURE_CONFIG = {
   gvMap: {
     interaction: 'dynamic' as TypeInteraction,
     viewSettings: {
@@ -174,6 +175,10 @@ export const CV_DEFAULT_MAP_FEATURES_CONFIG = {
   supportedLanguages: ['en', 'fr'] as TypeListOfLocalizedLanguages,
   schemaVersionUsed: '1.0' as TypeValidVersions,
 };
+
+/** ******************************************************************************************************************************
+ *  Definition of the initial settings default values.
+ */
 export const CV_DEFAULT_LAYER_INITIAL_SETTINGS = {
   controls: {
     highlight: true,

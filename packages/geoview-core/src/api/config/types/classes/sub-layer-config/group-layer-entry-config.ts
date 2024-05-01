@@ -6,7 +6,9 @@ import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-b
 import { layerEntryIsGroupLayer } from '../../type-guards';
 
 /** ******************************************************************************************************************************
- * Type used to define a layer group.
+ *  ******************************************************************************************************************************
+ *  ******************************************************************************************************************************
+ * Type used to define a group of layers. It can be either subgroups or sublayers.
  */
 export class GroupLayerEntryConfig extends ConfigBaseClass {
   /** Layer entry data type. */
@@ -15,23 +17,23 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
   /** The list of layer entry configurations to use from the GeoView layer group. */
   listOfLayerEntryConfig: ConfigBaseClass[] = [];
 
-  /**
+  /** ***************************************************************************************************************************
    * The class constructor.
-   * @param {TypeJsonObject} layerConfig The layer node configuration we want to instanciate.
-   * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited form the parent.
+   * @param {TypeJsonObject} layerConfig The sublayer configuration we want to instanciate.
+   * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited.
    * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
-   * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The geoview layer configuration object that is creating this layer tree node.
+   * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The GeoView instance that owns the sublayer.
    * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
    */
   constructor(
-    layerNode: TypeJsonObject,
+    layerConfig: TypeJsonObject,
     initialSettings: TypeLayerInitialSettings | TypeJsonObject,
     language: TypeDisplayLanguage,
     geoviewLayerConfig: AbstractGeoviewLayerConfig,
     parentNode?: ConfigBaseClass
   ) {
-    super(layerNode, initialSettings, language, geoviewLayerConfig, parentNode);
-    this.listOfLayerEntryConfig = (layerNode.listOfLayerEntryConfig as TypeJsonArray)
+    super(layerConfig, initialSettings, language, geoviewLayerConfig, parentNode);
+    this.listOfLayerEntryConfig = (layerConfig.listOfLayerEntryConfig as TypeJsonArray)
       .map((subLayerConfig) => {
         if (layerEntryIsGroupLayer(subLayerConfig))
           return new GroupLayerEntryConfig(subLayerConfig, geoviewLayerConfig.initialSettings, language, geoviewLayerConfig, this);
@@ -42,16 +44,24 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
       }) as ConfigBaseClass[];
   }
 
-  /**
-   * The getter method that returns the entryType property.
+  /** ***************************************************************************************************************************
+   * @protected
+   * The getter method that returns the schemaPath property. Each geoview sublayer type knows what section of the schema must be
+   * used to do its validation.
    *
-   * @returns {TypeLayerEntryType} The entryType associated to the sub layer.
+   * @returns {string} The schemaPath associated to the sublayer.
    */
-  getEntryType(): TypeLayerEntryType {
-    return CV_CONST_SUB_LAYER_TYPES.GROUP;
+  protected get schemaPath(): string {
+    return CV_LAYER_GROUP_SCHEMA_PATH;
   }
 
-  get schemaPath(): string {
-    return CV_LAYER_GROUP_SCHEMA_PATH;
+  /** ***************************************************************************************************************************
+   * @protected
+   * A method that returns the entryType property. Each sublayer knows what entry type is associated to it.
+   *
+   * @returns {TypeLayerEntryType} The entryType associated to the sublayer.
+   */
+  protected getEntryType(): TypeLayerEntryType {
+    return CV_CONST_SUB_LAYER_TYPES.GROUP;
   }
 }

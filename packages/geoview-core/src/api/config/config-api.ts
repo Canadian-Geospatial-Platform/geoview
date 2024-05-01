@@ -1,7 +1,7 @@
-import { CV_DEFAULT_MAP_FEATURES_CONFIG } from '@config/types/config-constants';
-import { Cast } from '@config/types/config-types';
+import { CV_DEFAULT_MAP_FEATURE_CONFIG } from '@config/types/config-constants';
+import { toJsonObject } from '@config/types/config-types';
 import { TypeDisplayLanguage } from '@config/types/map-schema-types';
-import { MapFeaturesConfig } from '@config/types/classes/map-features-config';
+import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -13,16 +13,16 @@ import { MapFeaturesConfig } from '@config/types/classes/map-features-config';
 // ******************************************************************************************************************************
 export class ConfigApi {
   /** ***************************************************************************************************************************
-   * Get map features configuration object.
+   * Get map feature configuration object.
    *
-   * @returns {MapFeaturesConfig} The map features configuration.
+   * @returns {MapFeatureConfig} The map feature configuration.
    */
-  static get defaultMapFeaturesConfig(): MapFeaturesConfig {
-    return Cast<MapFeaturesConfig>(JSON.stringify(CV_DEFAULT_MAP_FEATURES_CONFIG));
+  static getDefaultMapFeatureConfig(language: TypeDisplayLanguage): MapFeatureConfig {
+    return new MapFeatureConfig(toJsonObject(CV_DEFAULT_MAP_FEATURE_CONFIG), language);
   }
 
-  static getMapConfig(jsonStringMapConfig: string, language: TypeDisplayLanguage): MapFeaturesConfig {
+  static getMapConfig(jsonStringMapConfig: string, language: TypeDisplayLanguage): MapFeatureConfig {
     // Return the config
-    return new MapFeaturesConfig(jsonStringMapConfig, language);
+    return new MapFeatureConfig(jsonStringMapConfig, language);
   }
 }
