@@ -8,7 +8,7 @@ import {
   useDetailsLayerDataArrayBatch,
   useDetailsSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { useMapStoreActions, useMapVisibleLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapStoreActions, useMapVisibleLayers, useMapClickCoordinates } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/layer/layer-sets/abstract-layer-set';
 
@@ -39,6 +39,8 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
   const arrayOfLayerDataBatch = useDetailsLayerDataArrayBatch();
   const checkedFeatures = useDetailsCheckedFeatures();
   const visibleLayers = useMapVisibleLayers();
+  const mapClickCoordinates = useMapClickCoordinates();
+
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
   const { addHighlightedFeature, removeHighlightedFeature } = useMapStoreActions();
 
@@ -372,6 +374,16 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
       setSelectedLayerPath('');
     }
   };
+
+  /**
+   * Select the layer after layer is selected from map.
+   */
+  useEffect(() => {
+    if (mapClickCoordinates && memoLayersList?.length && !selectedLayerPath.length) {
+      const selectedLayer = memoLayersList.find((layer) => !!layer.numOffeatures);
+      setSelectedLayerPath(selectedLayer?.layerPath ?? '');
+    }
+  }, [mapClickCoordinates, memoLayersList, selectedLayerPath, setSelectedLayerPath]);
 
   // #endregion
 
