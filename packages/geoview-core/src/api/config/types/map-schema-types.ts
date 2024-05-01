@@ -211,10 +211,9 @@ export type TypeSourceImageInitialConfig =
  */
 export type TypeBaseSourceImageInitialConfig = {
   /**
-   * The service endpoint of the layer (English/French). If not specified, the metadataAccessPath of the GeoView parent
-   * layer is used
+   * The service endpoint of the layer. If not specified, the metadataAccessPath of the GeoView layer is used
    */
-  dataAccessPath?: TypeLocalizedString;
+  dataAccessPath?: string;
   /**
    * The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
    * with the Canvas renderer.
@@ -287,7 +286,7 @@ export type TypeTileGrid = {
 /** ******************************************************************************************************************************
  * Initial settings for tile image sources.
  */
-export interface TypeSourceTileInitialConfig extends Omit<TypeBaseSourceImageInitialConfig, 'featureInfo'> {
+export interface TypeSourceTileInitialConfig extends TypeBaseSourceImageInitialConfig {
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. We only use queryable and
    * it must be set to false if specified.
    */

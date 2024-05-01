@@ -1,18 +1,18 @@
 import defaultsDeep from 'lodash/defaultsDeep';
-// import cloneDeep from 'lodash/cloneDeep';
 
 import { TypeGeoviewLayerType, TypeJsonObject } from '@config/types/config-types';
-import { TypeLocalizedString, TypeLayerEntryType, TypeLayerInitialSettings } from '@config/types/map-schema-types';
+import { TypeLayerEntryType, TypeLayerInitialSettings, TypeDisplayLanguage } from '@config/types/map-schema-types';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { normalizeLocalizedString } from '@config/utils';
-import { CV_DEFAULT_LAYER_INITIAL_SETTINGS } from '../../config-constants';
-// import { CV_DEFAULT_LAYER_INITIAL_SETTINGS } from '@config/types/config-constants';
 
 /** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
  */
 export abstract class ConfigBaseClass {
   // GV: Only the public properties are serialized.
+  /** The language used when interacting with this instance of MapFeaturesConfig. */
+  #language;
+
   /** The GeoView configuration that owns the configuration tree that contains this node. */
   #geoviewConfig: AbstractGeoviewLayerConfig;
 
@@ -26,7 +26,7 @@ export abstract class ConfigBaseClass {
   layerId: string;
 
   /** The display name of the layer (English/French). */
-  layerName?: TypeLocalizedString;
+  layerName?: string;
 
   /** Layer entry data type. This element is part of the schema. */
   entryType: TypeLayerEntryType;
@@ -42,25 +42,28 @@ export abstract class ConfigBaseClass {
 
   /**
    * The class constructor.
-   * @param {TypeJsonObject} layerConfig The layer node configuration we want to instanciate.
-   * @param {TypeLayerInitialSettings | TypeJsonObject} initialSettings The initial settings inherited form the parent.
-   * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The geoview layer configuration object that is creating this layer tree node.
+   * @param {TypeJsonObject} layerConfig The sub layer configuration we want to instanciate.
+   * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited.
+   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map features configuration.
+   * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The GeoView instance that owns the sub layer.
    * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
    */
   constructor(
     layerConfig: TypeJsonObject,
     initialSettings: TypeLayerInitialSettings | TypeJsonObject,
+    language: TypeDisplayLanguage,
     geoviewLayerConfig: AbstractGeoviewLayerConfig,
     parentNode?: ConfigBaseClass
   ) {
+    this.#language = language;
     this.#geoviewConfig = geoviewLayerConfig;
     this.#parentNode = parentNode;
 
     this.layerId = layerConfig.layerId as string;
-    this.layerName = normalizeLocalizedString(layerConfig.layerName);
+    this.layerName = layerConfig.layerName ? normalizeLocalizedString(layerConfig.layerName)![this.#language]! : undefined;
     this.entryType = this.getEntryType();
     this.geocoreId = layerConfig.geocoreId as string;
-    this.initialSettings = defaultsDeep(layerConfig.initialSettings, CV_DEFAULT_LAYER_INITIAL_SETTINGS);
+    this.initialSettings = defaultsDeep(layerConfig.initialSettings, initialSettings);
   }
 
   abstract get schemaPath(): string;

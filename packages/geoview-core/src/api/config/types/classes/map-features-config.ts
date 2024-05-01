@@ -49,6 +49,9 @@ export class MapFeaturesConfig {
   /** Flag used to indicate that errors were detected in the config provided. */
   #errorDetected = false;
 
+  /** The service metadata. */
+  // #metadata: Promise<TypeJsonObject>;
+
   /** map configuration. */
   gvMap: TypeMapConfig;
 
@@ -134,35 +137,7 @@ export class MapFeaturesConfig {
     this.schemaVersionUsed = (jsonConfig.schemaVersionUsed as TypeValidVersions) || CV_DEFAULT_MAP_FEATURES_CONFIG.schemaVersionUsed;
     this.#errorDetected = this.#errorDetected || !isvalidComparedToSchema(CV_MAP_CONFIG_SCHEMA_PATH, this);
     if (this.#errorDetected) this.#makeMapConfigValid();
-  }
-
-  /** ***************************************************************************************************************************
-   * Method used to instanciate a MapFeaturesConfig object. The interaction with the instance will use the provided language.
-   * The language associated to a configuration can be changed using the setConfigLanguage.
-   * @param {string | TypeJsonObject} providedMapConfig The map features configuration to instantiate.
-   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map features configuration.
-   *
-   * @returns {MapFeaturesConfig} The map features configuration instance.
-   * /
-  static async getInstance(providedMapFeaturesConfig: string | TypeJsonObject, language: TypeDisplayLanguage): Promise<MapFeaturesConfig> {
-    const mapFeaturesConfig = new MapFeaturesConfig(providedMapFeaturesConfig, language);
-    const listOfGeoviewLayerConfig = Cast<TypeJsonArray>(mapFeaturesConfig.gvMap.listOfGeoviewLayerConfig || []);
-    /** List of GeoView Layers in the order which they should be added to the map. * /
-    const promisesOfGeoviewLayers: Promise<AbstractGeoviewLayerConfig | undefined>[] = [];
-    listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
-      promisesOfGeoviewLayers.push(MapFeaturesConfig.nodeFactory(geoviewLayerConfig, language, mapFeaturesConfig));
-    });
-    const promisedAllSettled = await Promise.allSettled(promisesOfGeoviewLayers);
-    mapFeaturesConfig.gvMap.listOfGeoviewLayerConfig = promisedAllSettled
-      .map((geoviewLayer) => {
-        return geoviewLayer.status === 'fulfilled' && geoviewLayer.value ? geoviewLayer.value : undefined;
-      })
-      .filter((geoviewLayer) => {
-        return geoviewLayer;
-      }) as AbstractGeoviewLayerConfig[];
-
-    validateAgainstSchema(CV_MAP_CONFIG_SCHEMA_PATH, mapFeaturesConfig);
-    return mapFeaturesConfig;
+    // this.#metadata = fetchServiceMetadata
   }
 
   /** ***************************************************************************************************************************
@@ -227,6 +202,10 @@ export class MapFeaturesConfig {
     return !this.#errorDetected;
   }
 
+  get test(): boolean {
+    return true;
+  }
+
   /**
    * The getter method that returns the jsonString property of the map features config.
    *
@@ -242,14 +221,7 @@ export class MapFeaturesConfig {
    * @returns {TypeLayerEntryType} The indentedJsonString property associated to map features config.
    */
   indentedJsonString(indent: number | undefined = 2): string {
-    return JSON.stringify(
-      this,
-      (key, value) => {
-        if (value?.en && value?.fr) return value[this.#language];
-        return value;
-      },
-      indent
-    );
+    return JSON.stringify(this, undefined, indent);
   }
 
   /**

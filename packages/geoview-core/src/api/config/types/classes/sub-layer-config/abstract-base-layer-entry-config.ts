@@ -1,6 +1,7 @@
 import { TypeJsonObject } from '../../config-types';
 import {
   TypeBaseSourceVectorInitialConfig,
+  TypeDisplayLanguage,
   TypeLayerEntryType,
   TypeLayerInitialSettings,
   TypeSourceImageEsriInitialConfig,
@@ -19,7 +20,7 @@ import { ConfigBaseClass } from './config-base-class';
  */
 export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /** Source settings to apply to the GeoView vector layer source at creation time. */
-  source?:
+  source:
     | TypeBaseSourceVectorInitialConfig
     | TypeSourceTileInitialConfig
     | TypeVectorSourceInitialConfig
@@ -33,38 +34,20 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * The class constructor.
    * @param {TypeJsonObject} layerConfig The sub layer configuration we want to instanciate.
    * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited.
+   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map features configuration.
    * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The GeoView instance that owns the sub layer.
    * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
    */
-  // eslint-disable-next-line no-useless-constructor
   constructor(
     layerConfig: TypeJsonObject,
     initialSettings: TypeLayerInitialSettings,
+    language: TypeDisplayLanguage,
     geoviewLayerConfig: AbstractGeoviewLayerConfig,
     parentNode: ConfigBaseClass
   ) {
-    super(layerConfig, initialSettings, geoviewLayerConfig, parentNode);
-  }
-
-  /** ***************************************************************************************************************************
-   * Method used to instanciate an AbstractBaseLayerEntryConfig object. The interaction with the instance will use the language
-   * stored in the #geoviewConfig object. The language associated to a configuration can be changed using the setConfigLanguage.
-   * @param {TypeJsonObject} jsonLeafConfig The leaf layer configuration.
-   * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited.
-   * @param {AbstractGeoviewLayerConfig | undefined} geoviewInstance The GeoView instance that owns the sub layer.
-   *
-   * @returns {AbstractBaseLayerEntryConfig} The leaf layer instance or undefined if there is an error.
-   */
-  static /* use async later */ getInstance(
-    jsonLeafConfig: TypeJsonObject,
-    initialSettings: TypeLayerInitialSettings,
-    geoviewInstance: AbstractGeoviewLayerConfig
-  ): Promise<AbstractBaseLayerEntryConfig | undefined> {
-    const leafLayerInstance = geoviewInstance.createLeafNode(jsonLeafConfig, initialSettings, geoviewInstance);
-    // process metadata here
-    // set default here
-    // validate here
-    return Promise.resolve(leafLayerInstance);
+    super(layerConfig, initialSettings, language, geoviewLayerConfig, parentNode);
+    // If the user didn't provide a source then create an empty one else keep the user one.
+    this.source = layerConfig.source || {};
   }
 
   /**

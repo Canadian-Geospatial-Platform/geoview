@@ -39,32 +39,6 @@ export class EsriDynamicLayerConfig extends AbstractGeoviewLayerConfig {
     }
   }
 
-  /** ***************************************************************************************************************************
-   * Method used to instanciate an EsriDynamicLayerConfig object. The interaction with the instance will use the provided
-   * language. The language associated to the instance can be changed using the setConfigLanguage.
-   * @param {TypeJsonObject} layerConfig The layer configuration we want to instanciate.
-   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map features configuration.
-   * @param {MapFeaturesConfig} mapFeaturesConfig An optional mapFeatureConfig instance if the layer is part of it.
-   *
-   * @returns {Promise<EsriDynamicLayerConfig>} The ESRI dynamic configuration instance.
-   * /
-  static async getInstance(
-    layerConfig: TypeJsonObject,
-    language: TypeDisplayLanguage,
-    mapFeaturesConfig?: MapFeaturesConfig
-  ): Promise<EsriDynamicLayerConfig> {
-    const esriDynamicLayerConfig = new EsriDynamicLayerConfig(layerConfig, language, mapFeaturesConfig);
-    (esriDynamicLayerConfig.listOfLayerEntryConfig as ConfigBaseClass[]) = await getListOfLayerEntryConfig(
-      layerConfig.listOfLayerEntryConfig,
-      esriDynamicLayerConfig.initialSettings,
-      esriDynamicLayerConfig
-    );
-    esriDynamicLayerConfig.processMetadata();
-    esriDynamicLayerConfig.setDefaultValues();
-    isvalidComparedToSchema(esriDynamicLayerConfig.getGeoviewLayerSchema(), esriDynamicLayerConfig);
-    return Promise.resolve(esriDynamicLayerConfig);
-  }
-
   /**
    * A method that returns the geoview layer schema to use for the validation.
    *
@@ -98,6 +72,7 @@ export class EsriDynamicLayerConfig extends AbstractGeoviewLayerConfig {
    *
    * @param {TypeJsonObject} layerConfig The sub layer configuration.
    * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited.
+   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
    * @param {AbstractGeoviewLayerConfig} geoviewInstance The GeoView instance that owns the sub layer.
    * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
    *
@@ -106,9 +81,10 @@ export class EsriDynamicLayerConfig extends AbstractGeoviewLayerConfig {
   createLeafNode(
     layerConfig: TypeJsonObject,
     initialSettings: TypeLayerInitialSettings,
+    language: TypeDisplayLanguage,
     geoviewConfig: AbstractGeoviewLayerConfig,
     parentNode: ConfigBaseClass
   ): ConfigBaseClass {
-    return new EsriDynamicLayerEntryConfig(layerConfig, initialSettings, geoviewConfig, parentNode);
+    return new EsriDynamicLayerEntryConfig(layerConfig, initialSettings, language, geoviewConfig, parentNode);
   }
 }

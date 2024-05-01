@@ -1,15 +1,11 @@
 import Ajv from 'ajv';
 
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LAYER_TYPES } from '@config/types/config-constants';
-import { TypeGeoviewLayerType, TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
-import { TypeLayerEntryType, TypeLayerInitialSettings, TypeLocalizedString } from '@config/types/map-schema-types';
+import { TypeGeoviewLayerType, TypeJsonObject } from '@config/types/config-types';
+import { TypeLayerEntryType, TypeLocalizedString } from '@config/types/map-schema-types';
 import schema from '@config/types/config-validation-schema.json';
 import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
 import { MapFeaturesConfig } from '@config/types/classes/map-features-config';
-import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { layerEntryIsGroupLayer } from '@config/types/type-guards';
-import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
 import { logger } from '@/core/utils/logger';
 
 type NewType = TypeGeoviewLayerType;
@@ -103,37 +99,4 @@ export function normalizeLocalizedString(localizedString: TypeLocalizedString | 
     return localizedString as TypeLocalizedString;
   }
   return undefined;
-}
-
-/**
- * Create the list of layer entries using the configuration provided.
- *
- * @param {TypeJsonObject} listOfJsonLayerConfig The list of layer entries to create.
- * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited.
- * @param {AbstractGeoviewLayerConfig | undefined} geoviewInstance The GeoView instance that owns the sub layer.
- *
- * @returns {ConfigBaseClass[]} The array of sub layer instances.
- */
-export async function getListOfLayerEntryConfig(
-  listOfJsonLayerConfig: TypeJsonObject,
-  initialSettings: TypeLayerInitialSettings,
-  geoviewInstance: AbstractGeoviewLayerConfig
-): Promise<ConfigBaseClass[]> {
-  const listOfLayerEntryConfig = (listOfJsonLayerConfig || []) as TypeJsonArray;
-  const promisesOfsubLayers: Promise<ConfigBaseClass | undefined>[] = [];
-  listOfLayerEntryConfig.forEach((subLayerConfig) => {
-    if (layerEntryIsGroupLayer(subLayerConfig)) {
-      promisesOfsubLayers.push(GroupLayerEntryConfig.getInstance(subLayerConfig, initialSettings, geoviewInstance));
-    } else {
-      promisesOfsubLayers.push(AbstractBaseLayerEntryConfig.getInstance(subLayerConfig, initialSettings, geoviewInstance));
-    }
-  });
-  const promisedAllSettled = await Promise.allSettled(promisesOfsubLayers);
-  return promisedAllSettled
-    .map((node) => {
-      return node.status === 'fulfilled' && node.value ? node.value : undefined;
-    })
-    .filter((node) => {
-      return node;
-    }) as ConfigBaseClass[];
 }
