@@ -318,6 +318,7 @@ ResponsiveGridLayout.defaultProps = {
   fullWidth: false,
   guideContentIds: [],
   onIsEnlargeClicked: undefined,
+  hideEnlargeBtn: false,
   onGuideIsOpen: undefined,
 };
 
