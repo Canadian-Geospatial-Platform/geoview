@@ -101,7 +101,7 @@ export default function Version(): JSX.Element {
                 </Link>
               </Box>
               <Box sx={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: '6px' }}>
-                <GitHubIcon fontSize="small" />
+                <GitHubIcon />
                 <Link rel="noopener" href={GITHUB_REPO} target="_black">
                   {t('appbar.repoLink')}
                 </Link>
