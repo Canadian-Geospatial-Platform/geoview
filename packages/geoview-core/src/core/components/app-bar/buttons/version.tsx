@@ -6,6 +6,7 @@ import { GITHUB_REPO, GEO_URL_TEXT } from '@/core/utils/constant';
 import { GeoCaIcon, IconButton, Popper } from '@/ui';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { GitHubIcon } from '@/ui/icons';
 
 // eslint-disable-next-line no-underscore-dangle
 declare const __VERSION__: TypeAppVersion;
@@ -90,17 +91,21 @@ export default function Version(): JSX.Element {
             <Typography sx={sxClasses.versionsInfoTitle} component="h3">
               {t('appbar.version')}
             </Typography>
-            <Box sx={{ padding: '10px' }}>
-              <Typography component="div">
+            <Box sx={{ padding: '10px', gap: "5px", display: "flex", flexDirection: "column" }}>
+              <Box sx={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: "6px" }}>
+                <SvgIcon viewBox="-4 -2 38 36">
+                  <GeoCaIcon />
+                </SvgIcon>
                 <Link rel="noopener" href={GEO_URL_TEXT.url} target="_black">
                   {GEO_URL_TEXT.text}
                 </Link>
-              </Typography>
-              <Typography component="div">
+              </Box>
+              <Box sx={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: "6px" }}>
+                <GitHubIcon  fontSize="small" />
                 <Link rel="noopener" href={GITHUB_REPO} target="_black">
                   {t('appbar.repoLink')}
                 </Link>
-              </Typography>
+              </Box>
               <Typography component="div">{`v.${__VERSION__.major}.${__VERSION__.minor}.${__VERSION__.patch}`}</Typography>
               <Typography component="div">{new Date(__VERSION__.timestamp).toLocaleDateString()}</Typography>
             </Box>
