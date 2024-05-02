@@ -70,6 +70,39 @@
       }
     },
     {
+      "layerId": "multipolygons.geojson",
+      "layerName": { "en": "MultiPolygons" },
+      "source": {
+        "featureInfo": {
+          "queryable": true,
+          "nameField": { "en": "Province", "fr": "Province" },
+          "outfields": { "en": "Province,creationDate", "fr": "Province,creationDate" },
+          "fieldTypes": "string,date",
+          "aliasFields": { "en": "Province,Creation Date", "fr": "Province,Date de création" }
+        }
+      },
+      "style": {
+        "MultiPolygon": {
+          "styleId": "uniqueValueId",
+          "defaultLabel": "Multiple provinces",
+          "styleType": "uniqueValue",
+          "defaultSettings": {
+            "type": "filledPolygon",
+            "color": "rgba(0,0,255,0.5)",
+            "paternSize": 10,
+            "paternWidth": 2,
+            "fillStyle": "diagonalCross",
+            "stroke": {
+              "color": "rgba(128,0,0,1)",
+              "lineStyle": "dot"
+            }
+          },
+          "defaultVisible": true,
+          "fields": ["Province"]
+        }
+      }
+    },
+    {
       "layerId": "lines.json",
       "layerName": { "en": "Lines" },
       "source": {

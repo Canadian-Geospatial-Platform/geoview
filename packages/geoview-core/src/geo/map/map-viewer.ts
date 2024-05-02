@@ -1253,6 +1253,75 @@ export class MapViewer {
   }
 
   /**
+   * Set the map center.
+   *
+   * @param {Coordinate} center - New center to use
+   */
+  setCenter(center: Coordinate): void {
+    const currentView = this.map.getView();
+    const transformedCenter = Projection.transformFromLonLat(center, currentView.getProjection());
+
+    currentView.setCenter(transformedCenter);
+  }
+
+  /**
+   * Set the map zoom level.
+   *
+   * @param {number} zoom - New zoom level
+   */
+  setZoomLevel(zoom: number): void {
+    this.map.getView().setZoom(zoom);
+  }
+
+  /**
+   * Set the minimum map zoom level.
+   *
+   * @param {number} zoom - New minimum zoom level
+   */
+  setMinZoomLevel(zoom: number): void {
+    this.map.getView().setMinZoom(zoom);
+  }
+
+  /**
+   * Set the maximum map zoom level.
+   *
+   * @param {number} zoom - New maximum zoom level
+   */
+  setMaxZoomLevel(zoom: number): void {
+    this.map.getView().setMaxZoom(zoom);
+  }
+
+  /**
+   * Set map extent.
+   *
+   * @param {Extent} extent - New extent to zoom to.
+   */
+  async setExtent(extent: Extent): Promise<void> {
+    await MapEventProcessor.zoomToExtent(this.mapId, extent);
+  }
+
+  /**
+   * Set the maximum extent of the map.
+   *
+   * @param {Extent} extent - New extent to use.
+   */
+  setMaxExtent(extent: Extent): void {
+    const currentView = this.map.getView();
+    const viewOptions: ViewOptions = {};
+    viewOptions.projection = currentView.getProjection();
+    viewOptions.zoom = currentView.getZoom();
+    viewOptions.center = Projection.transformFromLonLat(
+      Projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
+      viewOptions.projection
+    );
+    viewOptions.minZoom = currentView.getMinZoom();
+    viewOptions.maxZoom = currentView.getMaxZoom();
+    viewOptions.extent = Projection.transformExtent(extent, Projection.PROJECTION_NAMES.LNGLAT, currentView.getProjection());
+
+    this.map.setView(new View(viewOptions));
+  }
+
+  /**
    * Loop through all geoview layers and refresh their respective source.
    * Use this function on projection change or other viewer modification who may affect rendering.
    *
