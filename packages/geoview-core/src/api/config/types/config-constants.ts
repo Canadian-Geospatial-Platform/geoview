@@ -32,7 +32,6 @@ export const CV_CONFIG_GEOLOCATOR_URL = 'https://geolocator.api.geo.ca?keys=geon
 export const CV_CONST_SUB_LAYER_TYPES: Record<LayerEntryTypesKey, TypeLayerEntryType> = {
   VECTOR: 'vector',
   VECTOR_TILE: 'vector-tile',
-  VECTOR_HEATMAP: 'vector-heatmap',
   RASTER_TILE: 'raster-tile',
   RASTER_IMAGE: 'raster-image',
   GROUP: 'group',

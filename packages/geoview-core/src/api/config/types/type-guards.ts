@@ -35,19 +35,6 @@ export const layerEntryIsVector = (verifyIfLayer: ConfigBaseClass): verifyIfLaye
 };
 
 /** ******************************************************************************************************************************
- * Type guard function that redefines a ConfigBaseClass as a VectorHeatmapLayerEntryConfig if the entryType attribute of
- * the verifyIfLayer parameter is 'vectorHeatmap'. The type assertion applies only to the true block of the if clause that use
- * this function.
- *
- * @param {ConfigBaseClass} verifyIfLayer Polymorphic object to test in order to determine if the type assertion is valid.
- *
- * @returns {boolean} true if the type assertion is valid.
- * /
-export const layerEntryIsVectorHeatmap = (verifyIfLayer: ConfigBaseClass): verifyIfLayer is VectorHeatmapLayerEntryConfig => {
-  return verifyIfLayer?.entryType === CV_CONST_SUB_LAYER_TYPES.VECTOR_HEATMAP;
-};
-
-/** ******************************************************************************************************************************
  * Type guard function that redefines a ConfigBaseClass as a VectorTileEntryConfig if the entryType attribute of the
  * verifyIfLayer parameter is 'vector' and the object has a style attribute. The type assertion applies only to the true block
  * of the if clause that use this function.

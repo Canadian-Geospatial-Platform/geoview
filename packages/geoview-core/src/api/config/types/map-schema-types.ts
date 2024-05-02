@@ -186,7 +186,7 @@ export type TypeBaseVectorConfig = {
 /** ******************************************************************************************************************************
  * Type of Style to apply to the GeoView vector layer source at creation time.
  */
-export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'vector-heatmap' | 'raster-tile' | 'raster-image' | 'group' | 'geoCore';
+export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'raster-tile' | 'raster-image' | 'group' | 'geoCore';
 
 /** ******************************************************************************************************************************
  * Type that defines the domain of valid values for the ESRI format parameter.
@@ -309,7 +309,6 @@ export interface TypeVectorTileSourceInitialConfig extends TypeBaseSourceVectorI
 export type TypeLayerEntryConfig =
   | (ConfigBaseClass & GroupLayerEntryConfig)
   | (ConfigBaseClass & AbstractBaseLayerEntryConfig & (EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig));
-// | VectorHeatmapLayerEntryConfig
 // | VectorLayerEntryConfig
 // | OgcWmsLayerEntryConfig
 // | EsriImageLayerEntryConfig
