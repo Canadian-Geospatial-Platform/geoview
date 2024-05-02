@@ -34,7 +34,11 @@ export const layerEntryIsVector = (verifyIfLayer: ConfigBaseClass): verifyIfLaye
   return verifyIfLayer?.entryType === CV_CONST_SUB_LAYER_TYPES.VECTOR;
 };
 
+<<<<<<< HEAD
 /**
+=======
+/** ******************************************************************************************************************************
+>>>>>>> 15061c9970 (refactor(clean): Remove cluster and heatmap from codebase (#2076))
  * Type guard function that redefines a ConfigBaseClass as a VectorTileEntryConfig if the entryType attribute of the
  * verifyIfLayer parameter is 'vector' and the object has a style attribute. The type assertion applies only to the true block
  * of the if clause that use this function.
