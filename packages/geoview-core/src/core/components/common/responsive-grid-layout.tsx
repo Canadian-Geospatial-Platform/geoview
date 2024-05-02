@@ -22,6 +22,7 @@ interface ResponsiveGridLayoutProps {
   fullWidth?: boolean;
   onIsEnlargeClicked?: (isEnlarge: boolean) => void;
   onGuideIsOpen?: (isGuideOpen: boolean) => void;
+  hideEnlargeBtn?: boolean;
 }
 
 interface ResponsiveGridLayoutExposedMethods {
@@ -30,7 +31,17 @@ interface ResponsiveGridLayoutExposedMethods {
 
 const ResponsiveGridLayout = forwardRef(
   (
-    { leftTop, leftMain, rightTop, rightMain, fullWidth, guideContentIds, onIsEnlargeClicked, onGuideIsOpen }: ResponsiveGridLayoutProps,
+    {
+      leftTop,
+      leftMain,
+      rightTop,
+      rightMain,
+      fullWidth,
+      guideContentIds,
+      onIsEnlargeClicked,
+      onGuideIsOpen,
+      hideEnlargeBtn,
+    }: ResponsiveGridLayoutProps,
     ref: Ref<ResponsiveGridLayoutExposedMethods>
   ) => {
     const theme = useTheme();
@@ -68,6 +79,13 @@ const ResponsiveGridLayout = forwardRef(
       onGuideIsOpen?.(isGuideOpen);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isGuideOpen]); // TODO: Check - Try to add the dependency on `onGuideIsOpen` here, making it a useCallback if necessary and test
+
+    useEffect(() => {
+      // if hideEnlargeBtn changes to true and isEnlarged is true, set isEnlarged to false
+      if (hideEnlargeBtn && isEnlarged) {
+        setIsEnlarged(false);
+      }
+    }, [hideEnlargeBtn]);
 
     /**
      * Handles click on the Enlarge button.
@@ -258,7 +276,7 @@ const ResponsiveGridLayout = forwardRef(
               {rightTop ?? <div />}
 
               <Box sx={{ display: 'flex', flexDirection: 'row', gap: '0.6rem' }}>
-                {!fullWidth && renderEnlargeButton()}
+                {!fullWidth && !hideEnlargeBtn && renderEnlargeButton()}
                 {guideContentIds?.length && renderGuideButton()}
                 {!isMapFullScreen && renderFullScreenButton()}
                 {!!(leftMain || leftTop) && renderCloseButton()}
