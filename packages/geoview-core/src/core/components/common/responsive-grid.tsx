@@ -63,6 +63,7 @@ const ResponsiveGridLeftPanel = forwardRef(
         sx={{
           ...(!fullWidth && { [theme.breakpoints.down('md')]: { display: isRightPanelVisible ? 'none' : 'block' } }),
           ...(fullWidth && { display: isRightPanelVisible ? 'none' : 'block' }),
+          zIndex: 200,
           ...sxProps,
         }}
         component="div"
@@ -116,6 +117,7 @@ const ResponsiveGridRightPanel = forwardRef(
           [theme.breakpoints.up('md')]: { paddingLeft: '1rem' },
           ...(!fullWidth && { [theme.breakpoints.down('md')]: { display: !isRightPanelVisible ? 'none' : 'block' } }),
           ...(fullWidth && { display: !isRightPanelVisible ? 'none' : 'block' }),
+          zIndex: 100,
           ...sxProps,
         }}
         component="div"

@@ -101,6 +101,7 @@ export function LayersPanel(): JSX.Element {
       guideContentIds={guideContent()}
       fullWidth={false}
       onGuideIsOpen={handleGuideIsOpen}
+      hideEnlargeBtn={displayState !== 'view'}
     />
   );
 }
