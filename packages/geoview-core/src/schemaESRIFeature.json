@@ -1,0 +1,113 @@
+// Original
+{
+  "geoviewLayerId": "wmsLYR1",
+  "geoviewLayerType": "esrFeature",
+  "geoviewLayerName": { "en": "earthquakes", "fr": "tremblements de terre"},
+  "metadataAccessPath": {
+    "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/",
+    "fr": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/"
+  },
+  "listOfLayerEntryConfig": [
+    {
+      "layerId": "0"
+    }
+  ]
+}
+
+// ! remove TypeVectorHeatmapLayerEntryConfig reference and cluster from code base
+
+// Parsed
+{
+  "geoviewLayerId": "wmsLYR1",
+  "geoviewLayerType": "esrFeature",
+  "geoviewLayerName": "earthquakes", // name use for box creation instead of anonymous
+  "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/",
+  "metadata": {"currentVersion":10.81,"serviceDescription":"","mapName":"Historical Flood Events (HFE)","description":"","copyrightText":"","supportsDynamicLayers":true,"layers":[{"id":0,"name":"Historical Flood Events","parentLayerId":-1,"defaultVisibility":true,"subLayerIds":null,"minScale":0,"maxScale":0,"type":"Feature Layer","geometryType":"esriGeometryMultipoint"}],"tables":[],"spatialReference":{"wkid":3978,"latestWkid":3978},"singleFusedMapCache":false,"initialExtent":{"xmin":-209886.82935798308,"ymin":-3444772.2653888958,"xmax":5549110.218031175,"ymax":3439986.172912771,"spatialReference":{"wkid":3978,"latestWkid":3978}},"fullExtent":{"xmin":-2299396.777505842,"ymin":-693964.2490450842,"xmax":3010572.608746673,"ymax":2649921.147800939,"spatialReference":{"wkid":3978,"latestWkid":3978}},"timeInfo":{"timeExtent":[-8646566400000,1672531200000],"timeReference":null,"timeRelation":"esriTimeRelationOverlaps","defaultTimeInterval":1,"defaultTimeIntervalUnits":"esriTimeUnitsYears","defaultTimeWindow":0,"hasLiveData":false},"minScale":0,"maxScale":0,"units":"esriMeters","supportedImageFormatTypes":"PNG32,PNG24,PNG,JPG,DIB,TIFF,EMF,PS,PDF,GIF,SVG,SVGZ,BMP","documentInfo":{"Title":"Historical Flood Events (HFE)","Author":"Government of Canada; Natural Resources Canada; Strategic Policy and Results Sector","Comments":"Representation of the causes of flooding events as multiple points. The point groupings correspond to the set location that were affected by the same event. The inventory of past flooding has been compiled from various public sources and standardized into a common data model. A link to the source used is included for more information. \\n\\nThe event locations have been largely revised to have one location per place reported to have been affected by the flooding. Flooding events for which no location was included in the sources are positioned on the place name of the location affected by the flooding.  The event positions do not indicate where the flooding occurred. Flood events that affected more than one locality are represented by a multipoint.\\n\\nIt should be noted that no consultation was conducted with the various providers and stakeholders of historical flood data. Disparities in content between the various sources result in an inconsistent product. No warranty is given as to the accuracy or completeness of the information provided. The absence of information does not mean that no flooding has occurred.","Subject":"Representation of the causes of flooding events as multiple points. The point grouping correspond to the set location that were affected by the same event.","Category":"","AntialiasingMode":"None","TextAntialiasingMode":"Force","Keywords":"Historical, Flood, Event, Hydrographic Data, Canada, Inundation, HFE, EHI, Inland waters, Meteorology, Agriculture, Environment, Ocean, Transport, Communication, Climatology, Geoscience"},"capabilities":"Map,Data,Query","supportedQueryFormats":"JSON, geoJSON","exportTilesAllowed":false,"referenceScale":0,"supportsDatumTransformation":true,"maxRecordCount":50000,"maxImageHeight":4096,"maxImageWidth":4096,"supportedExtensions":"WMSServer","serviceItemId":"a9e476e73179438fb1bb78cd875a9ce2"},
+  "listOfLayerEntryConfig": [
+    {
+      "id": "0",
+      "name": "Historical Flood Events (HFE)", // name of actual layer instance box
+      "geometryType": "multipoint",
+      "attributions": [],
+      "bounds": [-110, 40, -70, 80 ], // if define in service or calculate after load for vector - in lat long
+      "minScale": 0, // default 0
+      "maxScale": 0, // default 0
+      "maxRecordCount": 0, // default 0 - if set it mean we may need a loop to load all features - FOR VECTOR -
+      "serviceDateFormat": "DD/MM/YYYY HH:MM:SSZ",
+      "externalDateFormat": "DD/MM/YYYY HH:MM:SSZ",
+      "initialSettings": {
+        "controls": {
+          "highlight": true,
+          "hover": true,
+          "opacity": true,
+          "query": true,
+          "remove": true,
+          "table": true,
+          "visibility": true,
+          "zoom": true
+        },
+        "states": {
+          "visible": true,
+          "opacity": 1,
+          "hoverable": true,
+          "queryable": true
+        }
+      },
+      "temporalDimension": {
+        "field":"time_slider_date",
+        "default":"2023-01-01T05:00:00Z",
+        "unitSymbol":"",
+        "range":{
+          "type":"discrete",
+          "range":["1696-01-01T05:00:00Z","1697-01-01T05:00:00Z","2023-01-01T04:42:28Z","2024-01-01T04:42:28Z","2023-01-01T05:00:00Z"]
+        },
+        "nearestValues":"discrete",
+        "singleHandle":false
+      },
+      "source": {
+        "featureInfo": { // restructure of TypeFeatureInfoLayerConfig
+          "nameField": "event_name",
+          "outfields": [
+            { "name": "event_name", "alias": "Event Name", "type": "string", "domain": [] },
+            { "name": "province_territory", "alias": "Province", "type": "string", "domain": [] },
+            { "name": "year", "alias": "Year", "type": "number", "domain": [] },
+            { "name": "start_date", "alias": "Start Date", "type": "date", "domain": [] }
+          ]
+        }
+      },
+      "style": {
+        "type": "uniqueValue", // uniqueValue, classBreak, simple ... they share the same structure.  No more style by geometry - one layer = one geometry
+        "fields": ["flood_cause"], // list of field to use to symbolize
+        "hasDefault": true, 
+        "info" [ // always an array and last item is always default if true (for simple one item is default???)
+          {
+            "label": "freshet",
+            "value": "freshet",
+            "visible": true,
+            "settings": {
+              "type": "image/png",
+              "offset": [0, 0], // x, y
+              "size": [9 , 15], // width height
+              "rotation": 0,
+              "opacity": 1,
+              "image": "KGgoAAAANSUhEUgAAAAwAAAAUC..."
+            }
+          } ...
+        ]
+      }
+    }
+  ]
+}
+
+// Geoview renderer sample
+"settings": {
+  "type": "filledPolygon",
+  "color": "rgba(0,128,128,0.5)",
+  "paternSize": 10,
+  "paternWidth": 2,
+  "fillStyle": "diagonalCross",
+  "stroke": {
+    "color": "rgba(128,128,0,1)",
+    "lineStyle": "dot"
+  }
+}
