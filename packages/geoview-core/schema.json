@@ -772,66 +772,6 @@
       },
       "required": ["origin", "resolutions"]
     },
-    "TypeVectorHeatmapLayerEntryConfig": {
-      "additionalProperties": false,
-      "type": "object",
-      "properties": {
-        "schemaTag": {
-          "enum": ["not used yet"]
-        },
-        "entryType": {
-          "enum": ["vector-heatmap"]
-        },
-        "layerPathEnding": {
-          "type": "string",
-          "description": "The ending element of the layer configuration path."
-        },
-        "layerId": {
-          "type": "string",
-          "description": "The id of the layer to display on the map."
-        },
-        "layerName": {
-          "$ref": "#/definitions/TypeLocalizedString",
-          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
-        },
-        "initialSettings": {
-          "$ref": "#/definitions/TypeLayerInitialSettings",
-          "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
-        },
-        "source": {
-          "$ref": "#/definitions/TypeVectorSourceInitialConfig"
-        },
-        "gradient": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "uniqueItems": true,
-          "minItems": 2,
-          "default": ["#00f", "#0ff", "#0f0", "#ff0", "#f00"],
-          "description": "Color gradient of the heatmap, specified as an array of CSS color strings."
-        },
-        "radius": {
-          "type": "number",
-          "description": "Radius size in pixels (default 8px)."
-        },
-        "blur": {
-          "type": "number",
-          "description": "Blur size in pixels (default 15px)."
-        },
-        "weight": {
-          "type": "string",
-          "description": "Feature attribute to use for the weight or a function (ADD FORMAT) that returns a weight from a feature."
-        },
-        "not": {
-          "listOfLayerEntryConfig": {
-            "$ref": "#/definitions/TypeListOfLayerEntryConfig",
-            "description": "The list of layer entry configurations to use from the GeoView layer group."
-          }
-        }
-      },
-      "required": ["schemaTag", "entryType", "layerId"]
-    },
     "TypeVectorLayerEntryConfig": {
       "additionalProperties": false,
       "type": "object",
@@ -1161,7 +1101,7 @@
       "required": ["schemaTag", "entryType", "layerId"]
     },
     "TypeLayerEntryType": {
-      "enum": ["vector", "vector-tile", "vector-heatmap", "raster-tile", "raster-image", "geoCore"],
+      "enum": ["vector", "vector-tile", "raster-tile", "raster-image", "geoCore"],
       "description": "Layer entry data type."
     },
     "TypeLayerGroupEntryConfig": {
@@ -1201,9 +1141,6 @@
       "oneOf": [
         {
           "$ref": "#/definitions/TypeLayerGroupEntryConfig"
-        },
-        {
-          "$ref": "#/definitions/TypeVectorHeatmapLayerEntryConfig"
         },
         {
           "$ref": "#/definitions/TypeVectorTileLayerEntryConfig"

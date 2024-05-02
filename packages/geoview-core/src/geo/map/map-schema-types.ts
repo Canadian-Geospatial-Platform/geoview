@@ -13,7 +13,6 @@ import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classe
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { TileLayerEntryConfig } from '@/core/utils/config/validation-classes/tile-layer-entry-config';
-import { VectorHeatmapLayerEntryConfig } from '@/core/utils/config/validation-classes/heatmap-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeJsonValue } from '@/core/types/global-types';
@@ -195,18 +194,17 @@ export type TypeBaseVectorConfig = {
 };
 
 // Definition of the keys used to create the constants of the GeoView layer
-export type LayerEntryTypesKey = 'VECTOR' | 'VECTOR_TILE' | 'VECTOR_HEATMAP' | 'RASTER_TILE' | 'RASTER_IMAGE' | 'GROUP' | 'GEOCORE';
+export type LayerEntryTypesKey = 'VECTOR' | 'VECTOR_TILE' | 'RASTER_TILE' | 'RASTER_IMAGE' | 'GROUP' | 'GEOCORE';
 
 /** ******************************************************************************************************************************
  * Type of Style to apply to the GeoView vector layer source at creation time.
  */
-export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'vector-heatmap' | 'raster-tile' | 'raster-image' | 'group' | 'geoCore';
+export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'raster-tile' | 'raster-image' | 'group' | 'geoCore';
 
 // Constants for the layer config types
 export const CONST_LAYER_ENTRY_TYPES: Record<LayerEntryTypesKey, TypeLayerEntryType> = {
   VECTOR: 'vector',
   VECTOR_TILE: 'vector-tile',
-  VECTOR_HEATMAP: 'vector-heatmap',
   RASTER_TILE: 'raster-tile',
   RASTER_IMAGE: 'raster-image',
   GROUP: 'group',
@@ -263,19 +261,6 @@ export const layerEntryIsGroupLayer = (verifyIfLayer: ConfigBaseClass): verifyIf
  */
 export const layerEntryIsVector = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is VectorLayerEntryConfig => {
   return verifyIfLayer?.entryType === CONST_LAYER_ENTRY_TYPES.VECTOR;
-};
-
-/** ******************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TypeVectorHeatmapLayerEntryConfig if the entryType attribute of
- * the verifyIfLayer parameter is 'vectorHeatmap'. The type ascention applies only to the true block of the if clause that use this
- * function.
- *
- * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @returns {boolean} true if the type ascention is valid.
- */
-export const layerEntryIsVectorHeatmap = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is VectorHeatmapLayerEntryConfig => {
-  return verifyIfLayer?.entryType === CONST_LAYER_ENTRY_TYPES.VECTOR_HEATMAP;
 };
 
 /** ******************************************************************************************************************************
@@ -501,7 +486,6 @@ export interface TypeVectorTileSourceInitialConfig extends TypeBaseSourceVectorI
  */
 export type TypeLayerEntryConfig =
   | AbstractBaseLayerEntryConfig
-  | VectorHeatmapLayerEntryConfig
   | VectorLayerEntryConfig
   | VectorLayerEntryConfig
   | OgcWmsLayerEntryConfig

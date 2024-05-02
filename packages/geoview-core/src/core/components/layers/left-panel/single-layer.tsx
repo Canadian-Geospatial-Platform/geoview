@@ -179,13 +179,18 @@ export function SingleLayer({ depth, layer, setIsLayersListPanelVisible, index, 
     if (displayState === 'order') {
       return (
         <>
-          {layer.layerStatus === 'error' && <DeleteUndoButton layer={layer} />}
-          <Divider
-            orientation="vertical"
-            sx={{ marginLeft: '0.4rem', height: '1.8rem', backgroundColor: (theme: Theme) => theme.palette.geoViewColor.bgColor.dark[300] }}
-            variant="middle"
-            flexItem
-          />
+          {layer.children?.length > 0 && (
+            <Divider
+              orientation="vertical"
+              sx={{
+                marginLeft: '0.4rem',
+                height: '1.5rem',
+                backgroundColor: (theme: Theme) => theme.palette.geoViewColor.bgColor.dark[300],
+              }}
+              variant="middle"
+              flexItem
+            />
+          )}
           <IconButton disabled={isFirst} edge="end" size="small" onClick={() => reorderLayer(layer.layerPath, -1)}>
             <ArrowUpIcon />
           </IconButton>
