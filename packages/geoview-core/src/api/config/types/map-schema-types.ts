@@ -12,38 +12,38 @@ import { TypeGeoviewLayerType } from '@config/types/config-types';
 
 // #region UTILITIES TYPES
 
-/** ******************************************************************************************************************************
+/**
  *  Definition of the post settings type needed when the GeoView GeoJSON layers need to use a POST instead of a GET.
  */
 export type TypePostSettings = { header?: Record<string, string>; data: unknown };
 
-/** ******************************************************************************************************************************
+/**
  *  Definition of a bilingual string.
  */
 export type TypeLocalizedString = TypeLocalizedStringEnAndFr | TypeLocalizedStringFr | TypeLocalizedStringEn;
 
-/** ******************************************************************************************************************************
+/**
  *  Definition of a bilingual string, only English provided.
  */
 export type TypeLocalizedStringEn = Pick<TypeLocalizedStringEnAndFr, 'en'> & Partial<Pick<TypeLocalizedStringEnAndFr, 'fr'>>;
 
-/** ******************************************************************************************************************************
+/**
  *  Definition of a bilingual string, only French provided.
  */
 export type TypeLocalizedStringFr = Pick<TypeLocalizedStringEnAndFr, 'fr'> & Partial<Pick<TypeLocalizedStringEnAndFr, 'en'>>;
 
-/** ******************************************************************************************************************************
+/**
  *  Definition of a bilingual string, both English and French provided.
  */
 export type TypeLocalizedStringEnAndFr = Required<Record<TypeDisplayLanguage, string>>;
 // #endregion UTILITIES TYPES
 
-/** ******************************************************************************************************************************
+/**
  * An array of numbers representing an extent: `[minx, miny, maxx, maxy]`.
  */
 export type Extent = Array<number>;
 
-/** ******************************************************************************************************************************
+/**
  * Initial settings to apply to the GeoView layer at creation time.
  */
 export type TypeLayerInitialSettings = {
@@ -63,7 +63,7 @@ export type TypeLayerInitialSettings = {
   states?: TypeLayerStates;
 };
 
-/** ******************************************************************************************************************************
+/**
  * Control settings to use in UI.
  */
 export type TypeLayerControls = {
@@ -85,7 +85,7 @@ export type TypeLayerControls = {
   zoom?: boolean;
 };
 
-/** ******************************************************************************************************************************
+/**
  * Initial settings to apply to the GeoView layer at creation time.
  */
 export type TypeLayerStates = {
@@ -99,12 +99,12 @@ export type TypeLayerStates = {
   queryable?: boolean;
 };
 
-/** ******************************************************************************************************************************
+/**
  * Type that defines the vector layer source formats.
  */
 export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI' | 'GeoPackage' | 'CSV';
 
-/** ******************************************************************************************************************************
+/**
  * Type used to configure a custom parser.
  */
 export type TypeDetailsLayerConfig = {
@@ -117,7 +117,7 @@ export type TypeDetailsLayerConfig = {
   template: TypeLocalizedString;
 };
 
-/** ******************************************************************************************************************************
+/**
  * Type used to configure the feature info for a layer.
  */
 export type TypeFeatureInfoLayerConfig = {
@@ -137,7 +137,7 @@ export type TypeFeatureInfoLayerConfig = {
   aliasFields?: TypeLocalizedString;
 };
 
-/** ******************************************************************************************************************************
+/**
  * Initial settings to apply to the GeoView vector layer source at creation time.
  */
 export type TypeBaseSourceVectorInitialConfig = {
@@ -155,7 +155,7 @@ export type TypeBaseSourceVectorInitialConfig = {
   strategy?: 'all' | 'bbox';
 };
 
-/** ******************************************************************************************************************************
+/**
  * Initial settings to apply to the GeoView vector layer source at creation time.
  */
 export interface TypeVectorSourceInitialConfig extends TypeBaseSourceVectorInitialConfig {
@@ -165,7 +165,7 @@ export interface TypeVectorSourceInitialConfig extends TypeBaseSourceVectorIniti
   separator?: string;
 }
 
-/** ******************************************************************************************************************************
+/**
  * Kind of symbol vector settings.
  */
 export type TypeKindOfVectorSettings =
@@ -175,7 +175,7 @@ export type TypeKindOfVectorSettings =
   | TypeSimpleSymbolVectorConfig
   | TypeIconSymbolVectorConfig;
 
-/** ******************************************************************************************************************************
+/**
  * Definition of the line symbol vector settings type.
  */
 export type TypeBaseVectorConfig = {
@@ -183,22 +183,22 @@ export type TypeBaseVectorConfig = {
   type: 'lineString' | 'filledPolygon' | 'simpleSymbol' | 'iconSymbol';
 };
 
-/** ******************************************************************************************************************************
+/**
  * Type of Style to apply to the GeoView vector layer source at creation time.
  */
 export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'raster-tile' | 'raster-image' | 'group' | 'geoCore';
 
-/** ******************************************************************************************************************************
+/**
  * Type that defines the domain of valid values for the ESRI format parameter.
  */
 export type TypeEsriFormatParameter = 'png' | 'jpg' | 'gif' | 'svg';
 
-/** ******************************************************************************************************************************
+/**
  * Type of server.
  */
 export type TypeOfServer = 'mapserver' | 'geoserver' | 'qgis';
 
-/** ******************************************************************************************************************************
+/**
  * Initial settings for image sources.
  */
 export type TypeSourceImageInitialConfig =
@@ -206,7 +206,7 @@ export type TypeSourceImageInitialConfig =
   | TypeSourceImageEsriInitialConfig
   | TypeSourceImageStaticInitialConfig;
 
-/** ******************************************************************************************************************************
+/**
  * Initial settings for image sources.
  */
 export type TypeBaseSourceImageInitialConfig = {
@@ -225,7 +225,7 @@ export type TypeBaseSourceImageInitialConfig = {
   featureInfo?: TypeFeatureInfoLayerConfig;
 };
 
-/** ******************************************************************************************************************************
+/**
  * Initial settings for WMS image sources.
  */
 export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceImageInitialConfig {
@@ -235,7 +235,7 @@ export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceImageInit
   style?: string | string[];
 }
 
-/** ******************************************************************************************************************************
+/**
  * Initial settings for static image sources.
  */
 export interface TypeSourceImageStaticInitialConfig extends Omit<TypeBaseSourceImageInitialConfig, 'featureInfo'> {
@@ -247,7 +247,7 @@ export interface TypeSourceImageStaticInitialConfig extends Omit<TypeBaseSourceI
   extent: Extent;
 }
 
-/** ******************************************************************************************************************************
+/**
  * Initial settings for WMS image sources.
  */
 export interface TypeSourceImageEsriInitialConfig extends TypeBaseSourceImageInitialConfig {
@@ -260,7 +260,7 @@ export interface TypeSourceImageEsriInitialConfig extends TypeBaseSourceImageIni
   transparent?: boolean;
 }
 
-/** ******************************************************************************************************************************
+/**
  * Definition of the tile grid structure.
  */
 export type TypeTileGrid = {
@@ -283,7 +283,7 @@ export type TypeTileGrid = {
   tileSize?: [number, number];
 };
 
-/** ******************************************************************************************************************************
+/**
  * Initial settings for tile image sources.
  */
 export interface TypeSourceTileInitialConfig extends TypeBaseSourceImageInitialConfig {
@@ -295,7 +295,7 @@ export interface TypeSourceTileInitialConfig extends TypeBaseSourceImageInitialC
   tileGrid?: TypeTileGrid;
 }
 
-/** ******************************************************************************************************************************
+/**
  * Initial settings to apply to the GeoView vector tile layer source at creation time.
  */
 export interface TypeVectorTileSourceInitialConfig extends TypeBaseSourceVectorInitialConfig {
@@ -303,7 +303,7 @@ export interface TypeVectorTileSourceInitialConfig extends TypeBaseSourceVectorI
   tileGrid?: TypeTileGrid;
 }
 
-/** ******************************************************************************************************************************
+/**
  * Layer config type.
  */
 export type TypeLayerEntryConfig =
@@ -315,7 +315,7 @@ export type TypeLayerEntryConfig =
 // | ImageStaticLayerEntryConfig
 // | TileLayerEntryConfig
 
-/** ******************************************************************************************************************************
+/**
  *  Definition of a single Geoview layer configuration.
  */
 export type TypeGeoviewLayerConfig = {
@@ -349,19 +349,19 @@ export type TypeGeoviewLayerConfig = {
 };
 
 // #region VIEWER CONFIG TYPES
-/** ******************************************************************************************************************************
+/**
  * List of supported geoview theme.
  */
 // TODO: Move all the constants in the config-constants file.
 export type TypeDisplayTheme = 'dark' | 'light' | 'geo.ca';
 export const VALID_DISPLAY_THEME: TypeDisplayTheme[] = ['dark', 'light', 'geo.ca'];
 
-/* *******************************************************************************************************************************
+/**
 /** ISO 639-1  language code prefix. */
 export type TypeDisplayLanguage = 'en' | 'fr';
 /** Constante mainly use for language prefix validation. */
 export const VALID_DISPLAY_LANGUAGE: TypeDisplayLanguage[] = ['en', 'fr'];
-/** ******************************************************************************************************************************
+/**
  * ISO 639-1 code indicating the languages supported by the configuration file. It will use value(s) provided here to access
  * bilangual nodes. For value(s) provided here, each bilingual node MUST provide a value.
  */
@@ -371,18 +371,18 @@ export type TypeListOfLocalizedLanguages = TypeLocalizedLanguages[];
 /** Constante mainly use for language code validation. */
 export const VALID_LOCALIZED_LANGUAGES: TypeListOfLocalizedLanguages = ['en', 'fr'];
 
-/* *******************************************************************************************************************************
+/**
 /** Valid version number. */
 export type TypeValidVersions = '1.0';
 /** Constante mainly use for version validation. */
 export const VALID_VERSIONS: TypeValidVersions[] = ['1.0'];
 
-/** ******************************************************************************************************************************
+/**
  *  Definition of the basemap options type.
  */
 export type TypeBasemapId = 'transport' | 'osm' | 'simple' | 'nogeom' | 'shaded';
 
-/** ******************************************************************************************************************************
+/**
  *  Definition of the basemap options type.
  */
 export type TypeBasemapOptions = {
@@ -394,7 +394,7 @@ export type TypeBasemapOptions = {
   labeled: boolean;
 };
 
-/** ******************************************************************************************************************************
+/**
  *  Definition of the map configuration settings.
  */
 export type TypeMapConfig = {
@@ -412,14 +412,14 @@ export type TypeMapConfig = {
   extraOptions?: Record<string, unknown>;
 };
 
-/** ******************************************************************************************************************************
+/**
  *  Definition of the valid map interactiom values. If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar).
  */
 export type TypeInteraction = 'static' | 'dynamic';
 /** Constante mainly use for interaction validation. */
 export const VALID_INTERACTION: TypeInteraction[] = ['static', 'dynamic'];
 
-/** ******************************************************************************************************************************
+/**
  *  Definition of the initial view settings.
  */
 export type TypeInitialViewSettings = {
@@ -436,7 +436,7 @@ export type TypeInitialViewSettings = {
   layerIds?: string[];
 };
 
-/** ******************************************************************************************************************************
+/**
  *  Definition of the view settings.
  */
 export type TypeViewSettings = {
@@ -470,27 +470,27 @@ export type TypeViewSettings = {
   projection: TypeValidMapProjectionCodes;
 };
 
-/** ******************************************************************************************************************************
+/**
  *  Type used to define valid highlight colors.
  */
 export type TypeHighlightColors = 'black' | 'white' | 'red' | 'green';
 
-/** ******************************************************************************************************************************
+/**
  *  Type used to define valid projection codes.
  */
 export type TypeValidMapProjectionCodes = 3978 | 3857;
 
-/** ******************************************************************************************************************************
+/**
  *  Constant mainly used to test if a TypeValidMapProjectionCodes variable is a valid projection codes.
  */
 export const VALID_PROJECTION_CODES = [3978, 3857];
 
-/** ******************************************************************************************************************************
+/**
  * Controls available on the navigation bar. Default = ['zoom', 'fullscreen', 'home'].
  */
 export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'home' | 'location'>;
 
-/** ******************************************************************************************************************************
+/**
  * Configuration available on the application bar. Default = ['geolocator']. The about GeoView and notification are always there.
  */
 export type TypeAppBarProps = {
@@ -500,7 +500,7 @@ export type TypeAppBarProps = {
 };
 export type TypeValidAppBarCoreProps = Array<'geolocator' | 'export' | 'basemap-panel' | 'geochart' | 'guide' | 'legend' | 'details'>;
 
-/** ******************************************************************************************************************************
+/**
  * Configuration available for the footer bar component.
  */
 export type TypeFooterBarProps = {
@@ -512,24 +512,24 @@ export type TypeFooterBarProps = {
 };
 export type TypeValidFooterBarTabsCoreProps = Array<'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart' | 'guide'>;
 
-/** ******************************************************************************************************************************
+/**
  *  Overview map options. Default none.
  */
 export type TypeOverviewMapProps = { hideOnZoom: number };
 
-/** ******************************************************************************************************************************
+/**
  * Core components to initialize on viewer load. Default = ['north-arrow', 'overview-map'].
  */
 export type TypeMapComponents = Array<'north-arrow' | 'overview-map'>;
 
-/** ******************************************************************************************************************************
+/**
  * Core packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in
  * the same loaction as core config (<<core config name>>-<<package name>>.json).
  * Default = [].
  */
 export type TypeMapCorePackages = Array<'swiper'>;
 
-/** ******************************************************************************************************************************
+/**
  * List of external packages to initialize on viewer load. Default = [].
  */
 export type TypeExternalPackages = {
@@ -543,7 +543,7 @@ export type TypeExternalPackages = {
 }[];
 
 // ?: Is this type realy needed, it is used nowhere in our code.
-/** ******************************************************************************************************************************
+/**
  * Service endpoint urls. Default = 'https://geocore.api.geo.ca'.
  */
 export type TypeServiceUrls = {
@@ -566,7 +566,7 @@ export type TypeServiceUrls = {
 
 // #region STYLES TYPES
 // TODO: Move all the type guard functions in the typeGuards file.
-/** ******************************************************************************************************************************
+/**
  * type guard function that redefines a TypeBaseVectorConfig as a TypeLineStringVectorConfig if the type attribute of the
  * verifyIfConfig parameter is 'lineString'. The type ascention applies only to the true block of the if clause that use
  * this function.
@@ -579,7 +579,7 @@ export const isLineStringVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): 
   return verifyIfConfig?.type === 'lineString';
 };
 
-/** ******************************************************************************************************************************
+/**
  * type guard function that redefines a TypeBaseVectorConfig as a TypePolygonVectorConfig if the type attribute of the
  * verifyIfConfig parameter is 'filledPolygon'. The type ascention applies only to the true block of the if clause that use
  * this function.
@@ -592,7 +592,7 @@ export const isFilledPolygonVectorConfig = (verifyIfConfig: TypeBaseVectorConfig
   return verifyIfConfig?.type === 'filledPolygon';
 };
 
-/** ******************************************************************************************************************************
+/**
  * type guard function that redefines a TypeBaseVectorConfig as a TypeSimpleSymbolVectorConfig if the type attribute of the
  * verifyIfConfig parameter is 'simpleSymbol'. The type ascention applies only to the true block of the if clause that use
  * this function.
@@ -605,7 +605,7 @@ export const isSimpleSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorConfig)
   return verifyIfConfig?.type === 'simpleSymbol';
 };
 
-/** ******************************************************************************************************************************
+/**
  * type guard function that redefines a TypeBaseVectorConfig as a TypeIconSymbolVectorConfig if the type attribute of the
  * verifyIfConfig parameter is 'iconSymbol'. The type ascention applies only to the true block of the if clause that use
  * this function.
@@ -618,7 +618,7 @@ export const isIconSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): 
   return verifyIfConfig?.type === 'iconSymbol';
 };
 
-/** ******************************************************************************************************************************
+/**
  * Valid values to specify line styles.
  */
 export type TypeLineStyle =
@@ -634,7 +634,7 @@ export type TypeLineStyle =
   | 'shortDash-dot-dot'
   | 'solid';
 
-/** ******************************************************************************************************************************
+/**
  * Stroke style for vector features.
  */
 export type TypeStrokeSymbolConfig = {
@@ -646,7 +646,7 @@ export type TypeStrokeSymbolConfig = {
   width?: number;
 };
 
-/** ******************************************************************************************************************************
+/**
  * Definition of the line symbol vector settings type.
  */
 export interface TypeLineStringVectorConfig extends TypeBaseVectorConfig {
@@ -656,7 +656,7 @@ export interface TypeLineStringVectorConfig extends TypeBaseVectorConfig {
   stroke: TypeStrokeSymbolConfig;
 }
 
-/** ******************************************************************************************************************************
+/**
  * Valid values to specify fill styles.
  */
 export type TypeFillStyle =
@@ -669,7 +669,7 @@ export type TypeFillStyle =
   | 'horizontal'
   | 'vertical';
 
-/** ******************************************************************************************************************************
+/**
  * Definition of the line symbol vector settings type.
  */
 export interface TypePolygonVectorConfig extends TypeBaseVectorConfig {
@@ -687,12 +687,12 @@ export interface TypePolygonVectorConfig extends TypeBaseVectorConfig {
   fillStyle: TypeFillStyle;
 }
 
-/** ******************************************************************************************************************************
+/**
  * Valid values to specify symbol shapes.
  */
 export type TypeSymbol = 'circle' | '+' | 'diamond' | 'square' | 'triangle' | 'X' | 'star';
 
-/** ******************************************************************************************************************************
+/**
  * Definition of the circle symbol vector settings type.
  */
 export interface TypeSimpleSymbolVectorConfig extends TypeBaseVectorConfig {
@@ -712,7 +712,7 @@ export interface TypeSimpleSymbolVectorConfig extends TypeBaseVectorConfig {
   symbol: TypeSymbol;
 }
 
-/** ******************************************************************************************************************************
+/**
  * Definition of the icon symbol vector settings type.
  */
 export interface TypeIconSymbolVectorConfig extends TypeBaseVectorConfig {
@@ -739,12 +739,12 @@ export interface TypeIconSymbolVectorConfig extends TypeBaseVectorConfig {
   crossOrigin?: string;
 }
 
-/** ******************************************************************************************************************************
+/**
  * Base style configuration.
  */
 export type TypeBaseStyleType = 'simple' | 'uniqueValue' | 'classBreaks';
 
-/** ******************************************************************************************************************************
+/**
  * Base style configuration.
  */
 export type TypeBaseStyleConfig = {
@@ -752,7 +752,7 @@ export type TypeBaseStyleConfig = {
   styleType: TypeBaseStyleType;
 };
 
-/** ******************************************************************************************************************************
+/**
  * type guard function that redefines a TypeBaseStyleConfig as a TypeSimpleStyleConfig if the type attribute of the
  * verifyIfConfig parameter is 'simple'. The type ascention applies only to the true block of the if clause that use
  * this function.
@@ -768,7 +768,7 @@ export const isSimpleStyleConfig = (
   return (verifyIfConfig as TypeStyleSettings)?.styleType === 'simple';
 };
 
-/** ******************************************************************************************************************************
+/**
  * Simple style configuration.
  */
 export interface TypeSimpleStyleConfig extends TypeBaseStyleConfig {
@@ -780,7 +780,7 @@ export interface TypeSimpleStyleConfig extends TypeBaseStyleConfig {
   settings: TypeKindOfVectorSettings;
 }
 
-/** ******************************************************************************************************************************
+/**
  * Unique value style information configuration.
  */
 export type TypeUniqueValueStyleInfo = {
@@ -794,7 +794,7 @@ export type TypeUniqueValueStyleInfo = {
   settings: TypeKindOfVectorSettings;
 };
 
-/** ******************************************************************************************************************************
+/**
  * type guard function that redefines a TypeStyleSettings | TypeKindOfVectorSettings as a TypeUniqueValueStyleConfig if the
  * styleType attribute of the verifyIfConfig parameter is 'uniqueValue'. The type ascention applies only to the true block of the
  * if clause that use this function.
@@ -810,7 +810,7 @@ export const isUniqueValueStyleConfig = (
   return (verifyIfConfig as TypeStyleSettings)?.styleType === 'uniqueValue';
 };
 
-/** ******************************************************************************************************************************
+/**
  * Unique value style configuration.
  */
 export interface TypeUniqueValueStyleConfig extends TypeBaseStyleConfig {
@@ -829,7 +829,7 @@ export interface TypeUniqueValueStyleConfig extends TypeBaseStyleConfig {
   uniqueValueStyleInfo: TypeUniqueValueStyleInfo[];
 }
 
-/** ******************************************************************************************************************************
+/**
  * Class break style information configuration.
  */
 export type TypeClassBreakStyleInfo = {
@@ -845,7 +845,7 @@ export type TypeClassBreakStyleInfo = {
   settings: TypeKindOfVectorSettings;
 };
 
-/** ******************************************************************************************************************************
+/**
  * type guard function that redefines a TypeStyleSettings | TypeKindOfVectorSettings as a TypeClassBreakStyleConfig if the
  * styleType attribute of the verifyIfConfig parameter is 'classBreaks'. The type ascention applies only to the true block of the
  * if clause that use this function.
@@ -861,7 +861,7 @@ export const isClassBreakStyleConfig = (
   return (verifyIfConfig as TypeStyleSettings)?.styleType === 'classBreaks';
 };
 
-/** ******************************************************************************************************************************
+/**
  * Class break style configuration.
  */
 export interface TypeClassBreakStyleConfig extends TypeBaseStyleConfig {
@@ -879,17 +879,17 @@ export interface TypeClassBreakStyleConfig extends TypeBaseStyleConfig {
   classBreakStyleInfo: TypeClassBreakStyleInfo[];
 }
 
-/** ******************************************************************************************************************************
+/**
  * Type of Style to apply to the GeoView vector layer source at creation time.
  */
 export type TypeStyleSettings = TypeBaseStyleConfig | TypeSimpleStyleConfig | TypeUniqueValueStyleConfig | TypeClassBreakStyleConfig;
 
-/** ******************************************************************************************************************************
+/**
  * Valid keys for the TypeStyleConfig object.
  */
 export type TypeStyleGeometry = 'Point' | 'LineString' | 'Polygon';
 
-/** ******************************************************************************************************************************
+/**
  * Type of Style to apply to the GeoView vector layer based on geometry types.
  */
 export type TypeStyleConfig = Partial<Record<TypeStyleGeometry, TypeStyleSettings>>;

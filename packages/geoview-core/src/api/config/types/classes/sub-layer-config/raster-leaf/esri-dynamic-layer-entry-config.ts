@@ -13,9 +13,7 @@ import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-co
 import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
 import { isvalidComparedToSchema } from '@config/utils';
 
-/** ******************************************************************************************************************************
- *  ******************************************************************************************************************************
- *  ******************************************************************************************************************************
+/**
  * The ESRI dynamic geoview sublayer class.
  */
 export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
@@ -28,13 +26,14 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** Style to apply to the raster layer. */
   style?: TypeStyleConfig;
 
-  /** ***************************************************************************************************************************
+  /**
    * The class constructor.
    * @param {TypeJsonObject} layerConfig The sublayer configuration we want to instanciate.
    * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited.
    * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
    * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The GeoView instance that owns the sublayer.
-   * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
+   * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
+   * @constructor
    */
   constructor(
     layerConfig: TypeJsonObject,
@@ -55,22 +54,22 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     if (!isvalidComparedToSchema(this.schemaPath, this)) this.propagateError();
   }
 
-  /** ***************************************************************************************************************************
-   * @protected
+  /**
    * The getter method that returns the schemaPath property. Each geoview sublayer type knows what section of the schema must be
    * used to do its validation.
    *
    * @returns {string} The schemaPath associated to the sublayer.
+   * @protected
    */
   protected get schemaPath(): string {
     return CV_CONST_LEAF_LAYER_SCHEMA_PATH.ESRI_DYNAMIC;
   }
 
-  /** ***************************************************************************************************************************
-   * @protected
+  /**
    * A method that returns the entryType property. Each sublayer knows what entry type is associated to it.
    *
    * @returns {TypeLayerEntryType} The entryType associated to the sublayer.
+   * @protected
    */
   protected getEntryType(): TypeLayerEntryType {
     return CV_CONST_SUB_LAYER_TYPES.RASTER_IMAGE;

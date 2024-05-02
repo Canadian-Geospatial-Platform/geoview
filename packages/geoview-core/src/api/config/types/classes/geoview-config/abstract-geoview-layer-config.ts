@@ -12,9 +12,7 @@ import { logger } from '@/core/utils/logger';
 import { generateId } from '@/core/utils/utilities';
 import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
 
-/** ******************************************************************************************************************************
- *  ******************************************************************************************************************************
- *  ******************************************************************************************************************************
+/**
  *  Base class for the definition of a Geoview layer configuration.
  */
 export abstract class AbstractGeoviewLayerConfig {
@@ -60,7 +58,7 @@ export abstract class AbstractGeoviewLayerConfig {
   /** The layer entries to use from the GeoView layer. */
   listOfLayerEntryConfig: ConfigBaseClass[] = [];
 
-  /** ***************************************************************************************************************************
+  /**
    * The class constructor.
    * @param {TypeJsonObject} geoviewLayerConfig The layer configuration we want to instanciate.
    * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
@@ -102,8 +100,9 @@ export abstract class AbstractGeoviewLayerConfig {
     this.#validate();
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Validate the object properties. Layer name and type must be set.
+   * @private
    */
   #validate(): void {
     if (!this.geoviewLayerName)
@@ -112,23 +111,22 @@ export abstract class AbstractGeoviewLayerConfig {
       logger.logError(`Property geoviewLayerType is mandatory for GeoView layer ${this.geoviewLayerId} of type ${this.geoviewLayerType}.`);
   }
 
-  /** ***************************************************************************************************************************
-   * @protected
+  /**
    * The getter method that returns the geoview layer schema to use for the validation. Each geoview layer type knows what
    * section of the schema must be used to do its validation.
+   * @protected @abstract
    */
   protected abstract getServiceMetadata(): void;
 
-  /** ***************************************************************************************************************************
-   * @abstract
+  /**
    * The getter method that returns the geoview layer schema to use for the validation.
    *
    * @returns {string} The GeoView layer schema associated to the config.
+   * @protected @abstract
    */
-  abstract get geoviewLayerSchema(): string;
+  protected abstract get geoviewLayerSchema(): string;
 
-  /** ***************************************************************************************************************************
-   * @abstract
+  /**
    * The method used to implement the class factory model that returns the instance of the class based on the sublayer
    * type needed.
    *
@@ -139,6 +137,7 @@ export abstract class AbstractGeoviewLayerConfig {
    * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
    *
    * @returns {ConfigBaseClass | undefined} The sublayer instance or undefined if there is an error.
+   * @abstract
    */
   abstract createLeafNode(
     layerConfig: TypeJsonObject,
@@ -148,7 +147,7 @@ export abstract class AbstractGeoviewLayerConfig {
     parentNode?: ConfigBaseClass
   ): ConfigBaseClass | undefined;
 
-  /** ***************************************************************************************************************************
+  /**
    * Methode used to propagate the error flag to the AbstractGeoviewLayerConfig instance and the
    * MapFeatureConfig instance if it exists.
    */

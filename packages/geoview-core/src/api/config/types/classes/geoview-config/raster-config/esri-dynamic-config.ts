@@ -9,15 +9,11 @@ import { TypeDisplayLanguage, TypeLayerInitialSettings } from '@config/types/map
 import { isvalidComparedToSchema } from '@config/utils';
 import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
 
-/* *************************************************************************************************************************** */
+/* */
 
-export type TypeEsriDynamicLayerNode =
-  | (ConfigBaseClass & GroupLayerEntryConfig)
-  | (ConfigBaseClass & AbstractBaseLayerEntryConfig & EsriDynamicLayerEntryConfig);
+export type TypeEsriDynamicLayerNode = GroupLayerEntryConfig | (AbstractBaseLayerEntryConfig & EsriDynamicLayerEntryConfig);
 
-/** ******************************************************************************************************************************
- *  ******************************************************************************************************************************
- *  ******************************************************************************************************************************
+/**
  * The ESRI dynamic geoview layer class.
  */
 export class EsriDynamicLayerConfig extends AbstractGeoviewLayerConfig {
@@ -27,11 +23,12 @@ export class EsriDynamicLayerConfig extends AbstractGeoviewLayerConfig {
   /** The layer entries to use from the GeoView layer. */
   declare listOfLayerEntryConfig: TypeEsriDynamicLayerNode[];
 
-  /** ***************************************************************************************************************************
+  /**
    * The class constructor.
    * @param {TypeJsonObject} layerConfig The layer configuration we want to instanciate.
    * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
    * @param {MapFeatureConfig} mapFeatureConfig An optional mapFeatureConfig instance if the layer is part of it.
+   * @constructor
    */
   constructor(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, mapFeatureConfig?: MapFeatureConfig) {
     super(layerConfig, language, mapFeatureConfig);
@@ -45,27 +42,27 @@ export class EsriDynamicLayerConfig extends AbstractGeoviewLayerConfig {
     }
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * The getter method that returns the geoview layer schema to use for the validation. Each geoview layer type knows what
    * section of the schema must be used to do its validation.
    *
    * @returns {string} The GeoView layer schema associated to the config.
+   * @protected
    */
-  get geoviewLayerSchema(): string {
+  protected get geoviewLayerSchema(): string {
     /** The GeoView layer schema associated to EsriDynamicLayerConfig */
     return CV_GEOVIEW_SCHEMA_PATH.ESRI_DYNAMIC;
   }
 
-  /** ***************************************************************************************************************************
-   * @protected
+  /**
    * Get the service metadata from the metadataAccessPath and store it in a private variable of the geoview layer.
+   * @protected
    */
   // TODO: Implement this method
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   protected getServiceMetadata(): void {}
 
-  /** ***************************************************************************************************************************
-   * @abstract
+  /**
    * The method used to implement the class factory model that returns the instance of the class based on the sublayer
    * type needed.
    *
@@ -75,7 +72,7 @@ export class EsriDynamicLayerConfig extends AbstractGeoviewLayerConfig {
    * @param {AbstractGeoviewLayerConfig} geoviewConfig The GeoView instance that owns the sublayer.
    * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
    *
-   * @returns {ConfigBaseClass | undefined} The sublayer instance or undefined if there is an error.
+   * @returns {ConfigBaseClass} The sublayer instance or undefined if there is an error.
    */
   createLeafNode(
     layerConfig: TypeJsonObject,

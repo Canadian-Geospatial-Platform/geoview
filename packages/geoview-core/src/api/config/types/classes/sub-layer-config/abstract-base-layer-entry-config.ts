@@ -26,22 +26,21 @@ export type TypeSourceInitialConfig =
   | TypeSourceImageEsriInitialConfig
   | TypeSourceImageStaticInitialConfig;
 
-/** ******************************************************************************************************************************
- *  ******************************************************************************************************************************
- *  ******************************************************************************************************************************
+/**
  * Base type used to define a GeoView sublayer to display on the map.
  */
 export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /** Source settings to apply to the GeoView vector layer source at creation time. */
   source: TypeSourceInitialConfig;
 
-  /** ***************************************************************************************************************************
+  /**
    * The class constructor.
    * @param {TypeJsonObject} layerConfig The sublayer configuration we want to instanciate.
    * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited.
    * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map features configuration.
    * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The GeoView instance that owns the sublayer.
-   * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
+   * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
+   * @constructor
    */
   constructor(
     layerConfig: TypeJsonObject,

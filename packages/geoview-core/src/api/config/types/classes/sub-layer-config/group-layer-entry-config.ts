@@ -5,9 +5,7 @@ import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config
 import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
 import { layerEntryIsGroupLayer } from '../../type-guards';
 
-/** ******************************************************************************************************************************
- *  ******************************************************************************************************************************
- *  ******************************************************************************************************************************
+/**
  * Type used to define a group of layers. It can be either subgroups or sublayers.
  */
 export class GroupLayerEntryConfig extends ConfigBaseClass {
@@ -17,13 +15,14 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
   /** The list of layer entry configurations to use from the GeoView layer group. */
   listOfLayerEntryConfig: ConfigBaseClass[] = [];
 
-  /** ***************************************************************************************************************************
+  /**
    * The class constructor.
    * @param {TypeJsonObject} layerConfig The sublayer configuration we want to instanciate.
    * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited.
    * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
    * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The GeoView instance that owns the sublayer.
-   * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
+   * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
+   * @constructor
    */
   constructor(
     layerConfig: TypeJsonObject,
@@ -44,7 +43,7 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
       }) as ConfigBaseClass[];
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * @protected
    * The getter method that returns the schemaPath property. Each geoview sublayer type knows what section of the schema must be
    * used to do its validation.
@@ -55,7 +54,7 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
     return CV_LAYER_GROUP_SCHEMA_PATH;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * @protected
    * A method that returns the entryType property. Each sublayer knows what entry type is associated to it.
    *

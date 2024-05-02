@@ -36,10 +36,8 @@ import { isvalidComparedToSchema } from '@config/utils';
 import { isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { logger } from '@/core//utils/logger';
 
-/** ******************************************************************************************************************************
- *  ******************************************************************************************************************************
- *  ******************************************************************************************************************************
- * The map feature confiiguration class.
+/**
+ * The map feature configuration class.
  */
 export class MapFeatureConfig {
   /** The language used when interacting with this instance of MapFeatureConfig. */
@@ -96,7 +94,7 @@ export class MapFeatureConfig {
    */
   schemaVersionUsed?: '1.0';
 
-  /** ***************************************************************************************************************************
+  /**
    * The class constructor
    *
    * A copy of the original configuration is kept to identify which fields were left empty by the user. This information will be
@@ -104,8 +102,7 @@ export class MapFeatureConfig {
    *
    * @param {string | TypeJsonObject} providedMapConfig The map feature configuration to instantiate.
    * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
-   *
-   * @returns {MapFeatureConfig} The map feature configuration instance.
+   * @constructor
    */
   constructor(providedMapFeatureConfig: string | TypeJsonObject, language: TypeDisplayLanguage) {
     // Convert string to JSON object. Also transfer map property to gvMap and clone the config.
@@ -144,8 +141,7 @@ export class MapFeatureConfig {
     // this.#metadata = fetchServiceMetadata
   }
 
-  /** ***************************************************************************************************************************
-   * @private
+  /**
    * Get the JSON representation of the map feature configuration and convert "map" property to "gvMap" to avoid conflict with
    * the Array's map function. A cloned copy of the configuration is kept in the private variable #originalgeoviewLayerConfig.
    * The cloned object is return to the caller.
@@ -153,6 +149,7 @@ export class MapFeatureConfig {
    * @param {string | TypeJsonObject} providedMapFeatureConfig The map feature configuration to initialize.
    *
    * @returns {TypeJsonObject} The cloned map feature configuration.
+   * @private
    */
   #getJsonMapFeatureConfig(providedMapFeatureConfig: string | TypeJsonObject): TypeJsonObject {
     if (providedMapFeatureConfig) {
@@ -172,15 +169,16 @@ export class MapFeatureConfig {
       return this.#originalgeoviewLayerConfig as TypeJsonObject;
     }
     this.#errorDetected = true;
+    // TODO: Create a special exception for the config.
     throw new Error(`We cannot create a map feature object without providing a configuration,`);
   }
 
-  /** ***************************************************************************************************************************
-   * @private
+  /**
    * Convert the stringMapFeatureConfig to a json object. Comments will be removed from the string.
    * @param {TypeJsonObject} stringMapFeatureConfig The map configuration string to convert to JSON format.
    *
    * @returns {TypeJsonObject} A JSON map feature configuration object.
+   * @private
    */
   #getJsonRepresentation(stringMapFeatureConfig: TypeJsonObject): TypeJsonObject {
     // Erase comments in the config file.
@@ -200,7 +198,7 @@ export class MapFeatureConfig {
     return toJsonObject(CV_DEFAULT_MAP_FEATURE_CONFIG);
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * The getter method that returns the isValid flag (true when the map feature config is valid).
    *
    * @returns {boolean} The isValid property associated to map feature config.
@@ -209,37 +207,37 @@ export class MapFeatureConfig {
     return !this.#errorDetected;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * The getter method, which returns the json string of the map feature's configuration as if it were a property. However, this
    * pseudo-property is not part of the serialized output. What's more, the output representation is not a multi-line indented
    * string. Private variables and pseudo-properties are not serialized.
    *
-   * @returns {TypeLayerEntryType} The json string corresponding to the map feature configuration.
+   * @returns {string} The json string corresponding to the map feature configuration.
    */
-  get jsonString(): string {
-    return this.indentedJsonString(undefined);
+  getJsonString(): string {
+    return this.getIndentedJsonString(null);
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * The getter method, which returns the json string of the map feature's configuration as if it were a property. However, this
    * pseudo-property is not part of the serialized output. What's more, the output representation is a multi-line indented
    * string. Indentation can be controled using the ident parameter. Private variables and pseudo-properties are not serialized.
+   * @param {number | null} indent The number of space to indent the output string.
    *
-   * @returns {TypeLayerEntryType} The json string corresponding to the map feature configuration.
+   * @returns {string} The json string corresponding to the map feature configuration.
    */
-  indentedJsonString(indent: number | undefined = 2): string {
-    return JSON.stringify(this, undefined, indent);
+  getIndentedJsonString(indent: number | null = 2): string {
+    return JSON.stringify(this, undefined, indent || undefined);
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Methode used to propagate the error flag to the MapFeatureConfig instance.
    */
   propagateError(): void {
     this.#errorDetected = true;
   }
 
-  /** ***************************************************************************************************************************
-   * @static
+  /**
    * The method used to implement the class factory model that returns the instance of the class based on the GeoView layer type
    * needed.
    *
@@ -248,6 +246,7 @@ export class MapFeatureConfig {
    * @param {MapFeatureConfig} mapFeatureConfig An optional mapFeatureConfig instance if the layer is part of it.
    *
    * @returns {AbstractGeoviewLayerConfig | undefined} The GeoView layer instance or undefined if there is an error.
+   * @static
    */
   static nodeFactory(
     layerConfig: TypeJsonObject,
@@ -283,11 +282,11 @@ export class MapFeatureConfig {
     return undefined;
   }
 
-  /** ***************************************************************************************************************************
-   * @private
+  /**
    * This method attempts to recover a valid configuration following the detection of an error. It will attempt to replace the
    * erroneous values with the default values associated with the properties in error. There is a limit to this recovery
    * capability, however, and the resulting configuration may not be viable despite this attempt.
+   * @private
    */
   #makeMapConfigValid(): void {
     // Do validation for all pieces
@@ -324,11 +323,12 @@ export class MapFeatureConfig {
     this.#logModifs();
   }
 
-  /** ***************************************************************************************************************************
-   * @private
+  /**
    * Validate the center property.
+   * @private
    */
   #validateCenter(): void {
+    // TODO: This is not true anymore. Center and projection can be null if layersId is set. Apply correction accordingly.
     // center and projection cannot be undefined because udefined values were set with default values.
     const xVal = this.gvMap.viewSettings.initialView!.zoomAndCenter![1][0];
     const yVal = this.gvMap.viewSettings.initialView!.zoomAndCenter![1][1];
@@ -344,9 +344,9 @@ export class MapFeatureConfig {
         : CV_DEFAULT_MAP_FEATURE_CONFIG.gvMap.viewSettings.initialView!.zoomAndCenter![1][1];
   }
 
-  /** ***************************************************************************************************************************
-   * @private
+  /**
    * Validate basemap options properties.
+   * @private
    */
   #validateBasemap(): void {
     // basemapOptions and projection cannot be undefined because udefined values were set with default values.
@@ -364,9 +364,9 @@ export class MapFeatureConfig {
       : CV_DEFAULT_MAP_FEATURE_CONFIG.gvMap.basemapOptions.labeled;
   }
 
-  /** ***************************************************************************************************************************
-   * @private
+  /**
    * Validate the maxExtent property.
+   * @private
    */
   #validateMaxExtent(): void {
     const { projection } = this.gvMap.viewSettings;
@@ -384,10 +384,10 @@ export class MapFeatureConfig {
     this.gvMap.viewSettings.maxExtent! = [minX, minY, maxX, maxY] as Extent;
   }
 
-  /** ***************************************************************************************************************************
-   * @private
+  /**
    * Log modifications made to configuration by the validator. This method compares the values provided by the user to the
    * final values of the configuration and log all modifications made to the config.
+   * @private
    */
   #logModifs(): void {
     Object.keys(this.#originalgeoviewLayerConfig).forEach((key) => {

@@ -97,7 +97,7 @@ export const CV_GEOVIEW_SCHEMA_PATH: Record<LayerTypesKey, string> = {
 export const CV_MAP_CONFIG_SCHEMA_PATH = 'https://cgpv/schema#/definitions/TypeMapFeatureInstance';
 export const CV_LAYER_GROUP_SCHEMA_PATH = 'https://cgpv/schema#/definitions/TypeLayerGroupEntryConfig';
 
-/** ******************************************************************************************************************************
+/**
  *  Definition of the basemap options type.
  */
 export const CV_VALID_BASEMAP_ID: TypeBasemapId[] = ['transport', 'osm', 'simple', 'nogeom', 'shaded'];
@@ -133,7 +133,7 @@ export const CV_MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]> = {
   3978: [-125, 30, -60, 89],
 };
 
-/** ******************************************************************************************************************************
+/**
  *  Definition of the MapFeatureConfig default values. All the default values that applies to the map feature configuration are
  * defined here.
  */
@@ -175,7 +175,7 @@ export const CV_DEFAULT_MAP_FEATURE_CONFIG = {
   schemaVersionUsed: '1.0' as TypeValidVersions,
 };
 
-/** ******************************************************************************************************************************
+/**
  *  Definition of the initial settings default values.
  */
 export const CV_DEFAULT_LAYER_INITIAL_SETTINGS = {
