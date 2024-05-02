@@ -13,26 +13,27 @@ import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-co
 import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
 import { isvalidComparedToSchema } from '@config/utils';
 
+/**
+ * The ESRI feature geoview sublayer class.
+ */
 export class EsriFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-  /** Layer entry data type. */
-  // entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
-
   /** Filter to apply on feature of this layer. */
   layerFilter?: string;
 
   /** Source settings to apply to the GeoView image layer source at creation time. */
-  source: TypeSourceImageEsriInitialConfig;
+  declare source: TypeSourceImageEsriInitialConfig;
 
   /** Style to apply to the raster layer. */
   style?: TypeStyleConfig;
 
   /**
    * The class constructor.
-   * @param {TypeJsonObject} layerConfig The sub layer configuration we want to instanciate.
+   * @param {TypeJsonObject} layerConfig The sublayer configuration we want to instanciate.
    * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited.
-   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map features configuration.
-   * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The GeoView instance that owns the sub layer.
-   * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
+   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
+   * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The GeoView instance that owns the sublayer.
+   * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
+   * @constructor
    */
   constructor(
     layerConfig: TypeJsonObject,
@@ -43,32 +44,34 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   ) {
     super(layerConfig, initialSettings, language, geoviewLayerConfig, parentNode);
     this.layerFilter = layerConfig.layerFilter as string;
-    this.source = { ...(layerConfig.source as TypeSourceImageEsriInitialConfig) };
     this.style = layerConfig.style ? { ...(layerConfig.style as TypeStyleConfig) } : undefined;
     if (Number.isNaN(this.layerId)) {
       throw new Error(`The layer entry with layerId equal to ${this.layerPath} must be an integer string`);
     }
-    this.source.format = 'EsriJSON' as TypeEsriFormatParameter; // Set the source.format property (the user cannot provide this field)
+    this.source.format = 'EsriJSON' as TypeEsriFormatParameter; // Set the source.format property
     // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
     if (!this.source.dataAccessPath) this.source.dataAccessPath = geoviewLayerConfig.metadataAccessPath;
     if (!isvalidComparedToSchema(this.schemaPath, this)) this.propagateError();
   }
 
   /**
-   * The getter method that returns the schemaPath property.
+   * The getter method that returns the schemaPath property. Each geoview sublayer type knows what section of the schema must be
+   * used to do its validation.
    *
-   * @returns {string} The schemaPath associated to the sub layer.
+   * @returns {string} The schemaPath associated to the sublayer.
+   * @protected
    */
-  get schemaPath(): string {
+  protected get schemaPath(): string {
     return CV_CONST_LEAF_LAYER_SCHEMA_PATH.ESRI_FEATURE;
   }
 
   /**
-   * The getter method that returns the entryType property.
+   * A method that returns the entryType property. Each sublayer knows what entry type is associated to it.
    *
-   * @returns {TypeLayerEntryType} The entryType associated to the sub layer.
+   * @returns {TypeLayerEntryType} The entryType associated to the sublayer.
+   * @protected
    */
-  getEntryType(): TypeLayerEntryType {
+  protected getEntryType(): TypeLayerEntryType {
     return CV_CONST_SUB_LAYER_TYPES.VECTOR;
   }
 }

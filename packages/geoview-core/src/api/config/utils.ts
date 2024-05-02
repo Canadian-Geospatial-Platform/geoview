@@ -5,7 +5,7 @@ import { TypeGeoviewLayerType, TypeJsonObject } from '@config/types/config-types
 import { TypeLayerEntryType, TypeLocalizedString } from '@config/types/map-schema-types';
 import schema from '@config/types/config-validation-schema.json';
 import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
-import { MapFeaturesConfig } from '@config/types/classes/map-features-config';
+import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
 import { logger } from '@/core/utils/logger';
 
 type NewType = TypeGeoviewLayerType;
@@ -37,11 +37,12 @@ export const convertLayerTypeToEntry = (layerType: NewType): TypeLayerEntryType 
   }
 };
 
-/** ***************************************************************************************************************************
- * Validate the map features configuration.
- * @param {MapFeaturesConfig} mapFeaturesConfigToValidate The map features configuration to validate.
+/**
+ * Validate a section of the configuration against the schema identified by the schema path.
+ * @param {string} schemaPath The path to the schema section to use for the validation.
+ * @param {object} targetObject The map feature configuration to validate.
  *
- * @returns {MapFeaturesConfig} A valid map features configuration.
+ * @returns {boolean} A boolean indicating that the schema section is valid (true) or invalide (false).
  */
 export function isvalidComparedToSchema(schemaPath: string, targetObject: object): boolean {
   // create a validator object
@@ -71,32 +72,29 @@ export function isvalidComparedToSchema(schemaPath: string, targetObject: object
         }
         logger.logWarning('='.repeat(200), '\nSchema error: ', error, '\nObject affected: ', node);
       }
-      (targetObject as MapFeaturesConfig | ConfigBaseClass)?.propagateError?.();
+      (targetObject as MapFeatureConfig | ConfigBaseClass)?.propagateError?.();
       return false;
     }
     return true;
   }
   logger.logError(`Cannot find schema ${schemaPath}`);
-  (targetObject as MapFeaturesConfig | ConfigBaseClass)?.propagateError?.();
+  (targetObject as MapFeatureConfig | ConfigBaseClass)?.propagateError?.();
   return false;
 }
 
-/** ***************************************************************************************************************************
+/**
  * Normalize the localized string parameter. If a language is set and the other is not, the undefined language is set to
  * the value of the other.
  * @param {TypeLocalizedString | TypeJsonObject} localizedString The localized string to normalize.
  *
- * @returns {TypeLocalizedString} A normalized localized string.
+ * @returns {TypeLocalizedString | undefined} A normalized localized string.
  */
 export function normalizeLocalizedString(localizedString: TypeLocalizedString | TypeJsonObject): TypeLocalizedString | undefined {
-  if (localizedString) {
-    // GV: param reassign is needed since we want both properties 'en' and 'fr' to be set.
-    // GV: If only one is set, we use the value of the other one
-    // eslint-disable-next-line no-param-reassign
-    if ('en' in localizedString && !('fr' in localizedString)) localizedString.fr = localizedString.en;
-    // eslint-disable-next-line no-param-reassign
-    if ('fr' in localizedString && !('en' in localizedString)) localizedString.en = localizedString.fr;
-    return localizedString as TypeLocalizedString;
+  const returnValue = { en: localizedString?.en as string, fr: localizedString?.fr as string } as TypeLocalizedString;
+  if (localizedString && (returnValue.en || returnValue.fr)) {
+    if (!returnValue.fr) returnValue.fr = returnValue.en;
+    if (!returnValue.en) returnValue.en = returnValue.fr;
+    return returnValue;
   }
   return undefined;
 }

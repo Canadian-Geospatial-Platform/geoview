@@ -193,37 +193,28 @@
         const configArea = document.getElementById('configGeoview');
         const configOutput = document.getElementById('configOutput');
 
-        try {
-          // get config and test if JSON is valid
-          const mapConfig = cgpv.api.configApi.getMapConfig(configArea.value, langue);
-          mapConfig.mapId = 'sandboxMap';
-          configOutput.value = mapConfig.indentedJsonString().replaceAll('gvMap', 'map');
+        // get config and test if JSON is valid
+        const mapConfig = cgpv.api.configApi.getMapConfig(configArea.value, langue);
+        mapConfig.mapId = 'sandboxMap';
+        configOutput.value = mapConfig.getIndentedJsonString().replaceAll('gvMap', 'map');
 
-          // Generate line numbers
-          (() => {
-            const textarea = document.getElementById('configOutput');
-            const lineNumbersContainer = document.getElementById('outputLineNumbers');
-            const lines = textarea.value.split('\n').length;
-            const lineNumbers = Array.from({ length: lines }, (_, index) => '').join('<span />');
-            lineNumbersContainer.innerHTML = lineNumbers;
-          })();
+        // Generate line numbers
+        (() => {
+          const textarea = document.getElementById('configOutput');
+          const lineNumbersContainer = document.getElementById('outputLineNumbers');
+          const lines = textarea.value.split('\n').length;
+          const lineNumbers = Array.from({ length: lines }, (_, index) => '').join('<span />');
+          lineNumbersContainer.innerHTML = lineNumbers;
+        })();
 
-          // set class and message
-          message.classList.add('config-json-valid');
-          message.classList.remove('config-error');
-          if (mapConfig.isValid) {
-            message.innerHTML = 'File is valid, see console for details...';
-            document.getElementById('createMap').disabled = true;
-          } else {
-            message.innerHTML = 'File is invalid, see console for details...';
-          }
-
-        } catch (e) {
-          // set class and message
-          message.classList.add('config-error');
-          message.classList.remove('config-json-valid');
-          message.innerHTML = cgpv.api.utilities.core.escapeRegExp(e.message);
+        // set class and message
+        message.classList.add('config-json-valid');
+        message.classList.remove('config-error');
+        if (mapConfig.isValid) {
+          message.innerHTML = 'File is valid, see console for details...';
           document.getElementById('createMap').disabled = true;
+        } else {
+          message.innerHTML = 'File is invalid, see console for details...';
         }
       });
 

@@ -6,14 +6,16 @@ import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/gr
 import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
 import { TypeGeoviewLayerType, TypeJsonObject } from '@config/types/config-types';
 import { TypeDisplayLanguage, TypeLayerInitialSettings } from '@config/types/map-schema-types';
-import { MapFeaturesConfig } from '@config/types/classes/map-features-config';
 import { isvalidComparedToSchema } from '@config/utils';
+import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
 
-export type TypeEsriDynamicLayerNode =
-  | (ConfigBaseClass & GroupLayerEntryConfig)
-  | (ConfigBaseClass & AbstractBaseLayerEntryConfig & EsriDynamicLayerEntryConfig);
+/* */
 
-/* *************************************************************************************************************************** */
+export type TypeEsriDynamicLayerNode = GroupLayerEntryConfig | (AbstractBaseLayerEntryConfig & EsriDynamicLayerEntryConfig);
+
+/**
+ * The ESRI dynamic geoview layer class.
+ */
 export class EsriDynamicLayerConfig extends AbstractGeoviewLayerConfig {
   /** Type of GeoView layer. */
   geoviewLayerType: TypeGeoviewLayerType;
@@ -21,14 +23,15 @@ export class EsriDynamicLayerConfig extends AbstractGeoviewLayerConfig {
   /** The layer entries to use from the GeoView layer. */
   declare listOfLayerEntryConfig: TypeEsriDynamicLayerNode[];
 
-  /** ***************************************************************************************************************************
+  /**
    * The class constructor.
    * @param {TypeJsonObject} layerConfig The layer configuration we want to instanciate.
-   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map features configuration.
-   * @param {MapFeaturesConfig} mapFeaturesConfig An optional mapFeatureConfig instance if the layer is part of it.
+   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
+   * @param {MapFeatureConfig} mapFeatureConfig An optional mapFeatureConfig instance if the layer is part of it.
+   * @constructor
    */
-  constructor(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, mapFeaturesConfig?: MapFeaturesConfig) {
-    super(layerConfig, language, mapFeaturesConfig);
+  constructor(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, mapFeatureConfig?: MapFeatureConfig) {
+    super(layerConfig, language, mapFeatureConfig);
     this.geoviewLayerType = CV_CONST_LAYER_TYPES.ESRI_DYNAMIC;
     if (!isvalidComparedToSchema(this.geoviewLayerSchema, this)) this.propagateError();
     if (!this.geoviewLayerId) {
@@ -40,43 +43,36 @@ export class EsriDynamicLayerConfig extends AbstractGeoviewLayerConfig {
   }
 
   /**
-   * A method that returns the geoview layer schema to use for the validation.
+   * The getter method that returns the geoview layer schema to use for the validation. Each geoview layer type knows what
+   * section of the schema must be used to do its validation.
    *
    * @returns {string} The GeoView layer schema associated to the config.
-   * @abstract
+   * @protected
    */
-  get geoviewLayerSchema(): string {
+  protected get geoviewLayerSchema(): string {
     /** The GeoView layer schema associated to EsriDynamicLayerConfig */
     return CV_GEOVIEW_SCHEMA_PATH.ESRI_DYNAMIC;
   }
 
   /**
-   * @protected Process layer metadata.
+   * Get the service metadata from the metadataAccessPath and store it in a private variable of the geoview layer.
+   * @protected
    */
   // TODO: Implement this method
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  protected processMetadata(): void {}
+  protected getServiceMetadata(): void {}
 
   /**
-   * @protected Set the default value when a class property that has a default value is left undefined.
+   * The method used to implement the class factory model that returns the instance of the class based on the sublayer
+   * type needed.
    *
-   * @param {TypeJsonObject} layerConfig The layer configuration affected.
-   */
-  // TODO: Implement this method
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  protected setDefaultValues(): void {}
-
-  /**
-   * The method used to implement the class factory model that returns the instance of the class
-   * based on the sub layer type needed.
-   *
-   * @param {TypeJsonObject} layerConfig The sub layer configuration.
+   * @param {TypeJsonObject} layerConfig The sublayer configuration.
    * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited.
    * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
-   * @param {AbstractGeoviewLayerConfig} geoviewInstance The GeoView instance that owns the sub layer.
+   * @param {AbstractGeoviewLayerConfig} geoviewConfig The GeoView instance that owns the sublayer.
    * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
    *
-   * @returns {ConfigBaseClass | undefined} The sub layer instance or undefined if there is an error.
+   * @returns {ConfigBaseClass} The sublayer instance or undefined if there is an error.
    */
   createLeafNode(
     layerConfig: TypeJsonObject,
