@@ -1,4 +1,4 @@
-/** ******************************************************************************************************************************
+/**
  * Cast a variable to a different type
  *
  * @param {unkown} p a variable to cast to
@@ -9,7 +9,7 @@ export function Cast<TargetType = never>(p: unknown): TargetType {
   return p as TargetType;
 }
 
-/* *******************************************************************************************************************************
+/**
  * General Json type
  */
 /**
@@ -17,17 +17,17 @@ export function Cast<TargetType = never>(p: unknown): TargetType {
  */
 export type TypeJsonValue = null | string | number | boolean | TypeJsonObject[] | { [key: string]: TypeJsonObject };
 
-/** ------------------------------------------------------------------------------------------------------------------------------
+/**
  * Type used for an array of objects
  */
 export type TypeJsonArray = TypeJsonValue & TypeJsonObject[];
 
-/** ------------------------------------------------------------------------------------------------------------------------------
+/**
  * Type used for a json object
  */
 export type TypeJsonObject = TypeJsonValue & { [key: string]: TypeJsonObject };
 
-/** ------------------------------------------------------------------------------------------------------------------------------
+/**
  * Convert a type of a variable to json object
  *
  * @param {unkown} p an object to convert its type to a json object

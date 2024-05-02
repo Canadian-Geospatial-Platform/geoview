@@ -8,7 +8,7 @@ import { EsriDynamicLayerEntryConfig } from '@config/types/classes/sub-layer-con
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LAYER_TYPES } from '@config/types/config-constants';
 import { TypeJsonObject } from '@config/types/config-types';
 
-/** ******************************************************************************************************************************
+/**
  * Type guard function that redefines a ConfigBaseClass as a GroupLayerEntryConfig if the entryType attribute of the verifyIfLayer
  * parameter is CV_CONST_SUB_LAYER_TYPES.GROUP. The type assertion applies only to the true block of the if clause that use this
  * function.
@@ -21,7 +21,7 @@ export const layerEntryIsGroupLayer = (verifyIfLayer: ConfigBaseClass | TypeJson
   return verifyIfLayer?.entryType === CV_CONST_SUB_LAYER_TYPES.GROUP;
 };
 
-/** ******************************************************************************************************************************
+/**
  * Type guard function that redefines a ConfigBaseClass as a VectorLayerEntryConfig if the entryType attribute of
  * the verifyIfLayer parameter is 'vector'. The type assertion applies only to the true block of the if clause that use this
  * function.
@@ -34,7 +34,7 @@ export const layerEntryIsVector = (verifyIfLayer: ConfigBaseClass): verifyIfLaye
   return verifyIfLayer?.entryType === CV_CONST_SUB_LAYER_TYPES.VECTOR;
 };
 
-/** ******************************************************************************************************************************
+/**
  * Type guard function that redefines a ConfigBaseClass as a VectorTileEntryConfig if the entryType attribute of the
  * verifyIfLayer parameter is 'vector' and the object has a style attribute. The type assertion applies only to the true block
  * of the if clause that use this function.
@@ -47,7 +47,7 @@ export const layerEntryIsVectorTile = (verifyIfLayer: ConfigBaseClass): verifyIf
   return verifyIfLayer?.entryType === CV_CONST_SUB_LAYER_TYPES.VECTOR_TILE;
 };
 
-/** ******************************************************************************************************************************
+/**
  * Type guard function that redefines a ConfigBaseClass as a TileLayerEntryConfig if the entryType attribute of the verifyIfLayer
  * parameter is 'raster-tile'. The type assertion applies only to the true block of the if clause that use this function.
  *
@@ -59,7 +59,7 @@ export const layerEntryIsRasterTile = (verifyIfLayer: ConfigBaseClass): verifyIf
   return verifyIfLayer?.entryType === CV_CONST_SUB_LAYER_TYPES.RASTER_TILE;
 };
 
-/** ******************************************************************************************************************************
+/**
  * Type guard function that redefines a ConfigBaseClass as a OgcWmsLayerEntryConfig if the entryType attribute of the
  * verifyIfLayer parameter is CV_CONST_LAYER_TYPES.WMS. The type assertion applies only to the true block of the if clause that use
  * this function.
@@ -72,7 +72,7 @@ export const layerEntryIsOgcWms = (verifyIfLayer: ConfigBaseClass): verifyIfLaye
   return verifyIfLayer?.entryType === CV_CONST_LAYER_TYPES.WMS;
 };
 
-/** ******************************************************************************************************************************
+/**
  * Type guard function that redefines a ConfigBaseClass as a EsriDynamicLayerEntryConfig if the entryType attribute of
  * the verifyIfLayer parameter is CV_CONST_LAYER_TYPES.WMS. The type assertion applies only to the true block of the if clause that
  * use this function.
@@ -85,7 +85,7 @@ export const layerEntryIsEsriDynamic = (verifyIfLayer: ConfigBaseClass): verifyI
   return verifyIfLayer?.geoviewLayerType === CV_CONST_LAYER_TYPES.ESRI_DYNAMIC;
 };
 
-/** ******************************************************************************************************************************
+/**
  * type guard function that redefines a ConfigBaseClass as a EsriImageLayerEntryConfig if the entryType attribute of the
  * verifyIfLayer parameter is CV_CONST_LAYER_TYPES.WMS. The type assertion applies only to the true block of the if clause that use
  * this function.
@@ -98,7 +98,7 @@ export const layerEntryIsEsriImage = (verifyIfLayer: ConfigBaseClass): verifyIfL
   return verifyIfLayer?.entryType === CV_CONST_LAYER_TYPES.ESRI_IMAGE;
 };
 
-/** ******************************************************************************************************************************
+/**
  * Type guard function that redefines a ConfigBaseClass as a ImageStaticLayerEntryConfig if the entryType attribute of
  * the verifyIfLayer parameter is CV_CONST_LAYER_TYPES.WMS. The type assertion applies only to the true block of the if clause that
  * use this function.
@@ -112,7 +112,7 @@ export const layerEntryIsImageStatic = (verifyIfLayer: ConfigBaseClass): verifyI
 };
 
 // #region GEOVIEW CONFIG TYPE GUARDS
-/** ******************************************************************************************************************************
+/**
  * Type guard function that redefines an AbstractGeoviewLayerConfig as a GeocoreConfig if the entryType attribute of the
  * verifyIfLay parameter is CV_CONST_LAYER_TYPES.GEOCORE. The type assertion applies only to the true block of the if clause that use this
  * function.
@@ -134,7 +134,7 @@ export const mapConfigLayerEntryIsGeoCore = (verifyIfLayer: AbstractGeoviewLayer
   return verifyIfLayer.geoviewLayerType === CV_CONST_LAYER_TYPES.GEOCORE;
 };
 
-/** ******************************************************************************************************************************
+/**
  * Type guard function that redefines a TypeGeoviewLayerConfig as a TypeEsriDynamicLayerConfig if the geoviewLayerType attribute
  * of the verifyIfLayer parameter is ESRI_DYNAMIC. The type assertion applies only to the true block of the if clause that use
  * this function.
@@ -147,7 +147,7 @@ export const geoviewConfigIsEsriDynamic = (verifyIfLayer: AbstractGeoviewLayerCo
   return verifyIfLayer?.geoviewLayerType === CV_CONST_LAYER_TYPES.ESRI_DYNAMIC;
 };
 
-/** *****************************************************************************************************************************
+/**
  * type guard function that redefines a CsvLayerEntryConfig as a TypeCSVLayerConfig if the geoviewLayerType attribute of the
  * verifyIfLayer parameter is CSV. The type assertion applies only to the true block of the if clause that use this
  * function.
@@ -158,5 +158,4 @@ export const geoviewConfigIsEsriDynamic = (verifyIfLayer: AbstractGeoviewLayerCo
  * /
 export const layerConfigIsCSV = (verifyIfLayer: AbstractGeoviewLayerConfig): verifyIfLayer is CsvLayerConfig => {
   return verifyIfLayer?.geoviewLayerType === CV_CONST_LAYER_TYPES.CSV;
-};
-/** ************************************************************************************************************************** */
+}; */
