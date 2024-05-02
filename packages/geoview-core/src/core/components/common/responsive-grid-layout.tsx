@@ -85,7 +85,7 @@ const ResponsiveGridLayout = forwardRef(
       if (hideEnlargeBtn && isEnlarged) {
         setIsEnlarged(false);
       }
-    }, [hideEnlargeBtn]);
+    }, [hideEnlargeBtn, isEnlarged]);
 
     /**
      * Handles click on the Enlarge button.
@@ -318,6 +318,7 @@ ResponsiveGridLayout.defaultProps = {
   fullWidth: false,
   guideContentIds: [],
   onIsEnlargeClicked: undefined,
+  hideEnlargeBtn: false,
   onGuideIsOpen: undefined,
 };
 
