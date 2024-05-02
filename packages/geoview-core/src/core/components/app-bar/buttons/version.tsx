@@ -91,8 +91,8 @@ export default function Version(): JSX.Element {
             <Typography sx={sxClasses.versionsInfoTitle} component="h3">
               {t('appbar.version')}
             </Typography>
-            <Box sx={{ padding: '10px', gap: "5px", display: "flex", flexDirection: "column" }}>
-              <Box sx={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: "6px" }}>
+            <Box sx={{ padding: '10px', gap: '5px', display: 'flex', flexDirection: 'column' }}>
+              <Box sx={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: '6px' }}>
                 <SvgIcon viewBox="-4 -2 38 36">
                   <GeoCaIcon />
                 </SvgIcon>
@@ -100,8 +100,8 @@ export default function Version(): JSX.Element {
                   {GEO_URL_TEXT.text}
                 </Link>
               </Box>
-              <Box sx={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: "6px" }}>
-                <GitHubIcon  fontSize="small" />
+              <Box sx={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: '6px' }}>
+                <GitHubIcon fontSize="small" />
                 <Link rel="noopener" href={GITHUB_REPO} target="_black">
                   {t('appbar.repoLink')}
                 </Link>
