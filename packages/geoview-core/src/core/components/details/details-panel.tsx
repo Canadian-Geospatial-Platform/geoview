@@ -33,6 +33,9 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+  // NOTE: This internal state is created, so that we can handle edge case
+  // where user clicks on map and details tab with selected layer and right panel.
+  const [isGuideOpen, setIsGuideOpen] = useState(true);
 
   // Get states and actions from store
   const selectedLayerPath = useDetailsSelectedLayerPath();
@@ -370,6 +373,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
   }
 
   const handleGuideIsOpen = (guideIsOpenVal: boolean): void => {
+    setIsGuideOpen(guideIsOpenVal);
     if (guideIsOpenVal) {
       setSelectedLayerPath('');
     }
@@ -379,11 +383,12 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
    * Select the layer after layer is selected from map.
    */
   useEffect(() => {
-    if (mapClickCoordinates && memoLayersList?.length && !selectedLayerPath.length) {
+    if (mapClickCoordinates && memoLayersList?.length && !selectedLayerPath.length && isGuideOpen) {
       const selectedLayer = memoLayersList.find((layer) => !!layer.numOffeatures);
       setSelectedLayerPath(selectedLayer?.layerPath ?? '');
     }
-  }, [mapClickCoordinates, memoLayersList, selectedLayerPath, setSelectedLayerPath]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapClickCoordinates, memoLayersList]);
 
   // #endregion
 
