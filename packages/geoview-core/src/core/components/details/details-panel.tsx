@@ -8,7 +8,7 @@ import {
   useDetailsLayerDataArrayBatch,
   useDetailsSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { useMapStoreActions, useMapVisibleLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapStoreActions, useMapVisibleLayers, useMapClickCoordinates } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/layer/layer-sets/abstract-layer-set';
 
@@ -33,12 +33,17 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+  // NOTE: This internal state is created, so that we can handle edge case
+  // where user clicks on map and details tab with selected layer and right panel.
+  const [isGuideOpen, setIsGuideOpen] = useState(true);
 
   // Get states and actions from store
   const selectedLayerPath = useDetailsSelectedLayerPath();
   const arrayOfLayerDataBatch = useDetailsLayerDataArrayBatch();
   const checkedFeatures = useDetailsCheckedFeatures();
   const visibleLayers = useMapVisibleLayers();
+  const mapClickCoordinates = useMapClickCoordinates();
+
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
   const { addHighlightedFeature, removeHighlightedFeature } = useMapStoreActions();
 
@@ -368,10 +373,22 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
   }
 
   const handleGuideIsOpen = (guideIsOpenVal: boolean): void => {
+    setIsGuideOpen(guideIsOpenVal);
     if (guideIsOpenVal) {
       setSelectedLayerPath('');
     }
   };
+
+  /**
+   * Select the layer after layer is selected from map.
+   */
+  useEffect(() => {
+    if (mapClickCoordinates && memoLayersList?.length && !selectedLayerPath.length && isGuideOpen) {
+      const selectedLayer = memoLayersList.find((layer) => !!layer.numOffeatures);
+      setSelectedLayerPath(selectedLayer?.layerPath ?? '');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapClickCoordinates, memoLayersList]);
 
   // #endregion
 

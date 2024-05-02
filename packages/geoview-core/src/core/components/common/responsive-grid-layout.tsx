@@ -132,6 +132,7 @@ const ResponsiveGridLayout = forwardRef(
             height: '40px',
             borderRadius: '1.5rem',
             marginLeft: '1rem',
+            padding: '0 0.75rem',
             ...(fullWidth ? sxClasses.appBarEnlargeButton : sxClasses.footerBarEnlargeButton),
             ...(fullWidth && { display: !isRightPanelVisible ? 'none' : 'block' }),
             ...(!fullWidth && {
