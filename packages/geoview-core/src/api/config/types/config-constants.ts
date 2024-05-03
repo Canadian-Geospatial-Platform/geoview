@@ -138,7 +138,7 @@ export const CV_MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]> = {
  * defined here.
  */
 export const CV_DEFAULT_MAP_FEATURE_CONFIG = {
-  gvMap: {
+  map: {
     interaction: 'dynamic' as TypeInteraction,
     viewSettings: {
       initialView: {
