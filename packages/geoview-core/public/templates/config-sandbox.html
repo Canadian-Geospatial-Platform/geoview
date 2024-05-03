@@ -195,8 +195,7 @@
 
         // get config and test if JSON is valid
         const mapConfig = cgpv.api.configApi.getMapConfig(configArea.value, langue);
-        mapConfig.mapId = 'sandboxMap';
-        configOutput.value = mapConfig.getIndentedJsonString().replaceAll('gvMap', 'map');
+        configOutput.value = mapConfig.getIndentedJsonString();
 
         // Generate line numbers
         (() => {

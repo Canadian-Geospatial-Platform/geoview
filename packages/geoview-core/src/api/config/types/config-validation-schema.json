@@ -1772,7 +1772,7 @@
         "mapId": {
           "type": "string"
         },
-        "gvMap": {
+        "map": {
           "$ref": "#/definitions/TypeMapConfig"
         },
         "theme": {
@@ -1811,7 +1811,7 @@
           "$ref": "#/definitions/TypeValidVersions"
         }
       },
-      "required": ["gvMap", "suportedLanguages"]
+      "required": ["map", "suportedLanguages"]
     }
   }
 }

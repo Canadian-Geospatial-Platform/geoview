@@ -53,7 +53,7 @@ export class MapFeatureConfig {
   // #metadata: Promise<TypeJsonObject>;
 
   /** map configuration. */
-  gvMap: TypeMapConfig;
+  map: TypeMapConfig;
 
   /** Service URLs. */
   serviceUrls: TypeServiceUrls;
@@ -105,16 +105,16 @@ export class MapFeatureConfig {
    * @constructor
    */
   constructor(providedMapFeatureConfig: string | TypeJsonObject, language: TypeDisplayLanguage) {
-    // Convert string to JSON object. Also transfer map property to gvMap and clone the config.
-    const clonedJsonConfig = this.#getJsonMapFeatureConfig(providedMapFeatureConfig);
+    // Convert string to JSON object and clone the config.
+    this.#originalgeoviewLayerConfig = cloneDeep(this.#getJsonMapFeatureConfig(providedMapFeatureConfig));
+    const clonedJsonConfig = this.#originalgeoviewLayerConfig;
     this.#language = language;
 
     // set map configuration
-    if (clonedJsonConfig.gvMap)
-      (clonedJsonConfig.gvMap.listOfGeoviewLayerConfig as TypeJsonArray) = (clonedJsonConfig.gvMap.listOfGeoviewLayerConfig ||
-        []) as TypeJsonArray;
-    this.gvMap = Cast<TypeMapConfig>(defaultsDeep(clonedJsonConfig.gvMap, CV_DEFAULT_MAP_FEATURE_CONFIG.gvMap));
-    this.gvMap.listOfGeoviewLayerConfig = (clonedJsonConfig.gvMap.listOfGeoviewLayerConfig as TypeJsonArray)
+    const gvMap = clonedJsonConfig.map as TypeJsonObject;
+    if (gvMap) (gvMap.listOfGeoviewLayerConfig as TypeJsonArray) = (gvMap.listOfGeoviewLayerConfig || []) as TypeJsonArray;
+    this.map = Cast<TypeMapConfig>(defaultsDeep(gvMap, CV_DEFAULT_MAP_FEATURE_CONFIG.map));
+    this.map.listOfGeoviewLayerConfig = (gvMap.listOfGeoviewLayerConfig as TypeJsonArray)
       .map((geoviewLayerConfig) => {
         return MapFeatureConfig.nodeFactory(geoviewLayerConfig, this.#language, this);
       })
@@ -142,9 +142,7 @@ export class MapFeatureConfig {
   }
 
   /**
-   * Get the JSON representation of the map feature configuration and convert "map" property to "gvMap" to avoid conflict with
-   * the Array's map function. A cloned copy of the configuration is kept in the private variable #originalgeoviewLayerConfig.
-   * The cloned object is return to the caller.
+   * Get the JSON representation of the map feature configuration.
    *
    * @param {string | TypeJsonObject} providedMapFeatureConfig The map feature configuration to initialize.
    *
@@ -153,20 +151,9 @@ export class MapFeatureConfig {
    */
   #getJsonMapFeatureConfig(providedMapFeatureConfig: string | TypeJsonObject): TypeJsonObject {
     if (providedMapFeatureConfig) {
-      const jsonMapFeatureConfig =
-        typeof providedMapFeatureConfig === 'string'
-          ? this.#getJsonRepresentation(providedMapFeatureConfig as TypeJsonObject)
-          : (providedMapFeatureConfig as TypeJsonObject);
-      // GV: User's schema has a property named "map" which conflicts with the map function of the "Array" type. We need to rename it.
-      // GV: To be able to delete the map property after having transfered it in gvMap, we must set jsonMapConfig's properties
-      // GV: as optional otherwise we have an typescript error saying we cannot delete jsonMapConfig.map because it is not optional
-      this.#originalgeoviewLayerConfig = cloneDeep(jsonMapFeatureConfig);
-      if (!('gvMap' in this.#originalgeoviewLayerConfig)) {
-        // We rename the map property to avoid conflict with the map function associated to Arrays
-        this.#originalgeoviewLayerConfig.gvMap = { ...(this.#originalgeoviewLayerConfig.map as object) };
-        delete (this.#originalgeoviewLayerConfig as Partial<TypeJsonObject>).map;
-      }
-      return this.#originalgeoviewLayerConfig as TypeJsonObject;
+      return typeof providedMapFeatureConfig === 'string'
+        ? this.#getJsonRepresentation(providedMapFeatureConfig as TypeJsonObject)
+        : (providedMapFeatureConfig as TypeJsonObject);
     }
     this.#errorDetected = true;
     // TODO: Create a special exception for the config.
@@ -290,19 +277,17 @@ export class MapFeatureConfig {
    */
   #makeMapConfigValid(): void {
     // Do validation for all pieces
-    this.gvMap.viewSettings.projection =
-      this.gvMap.viewSettings.projection && VALID_PROJECTION_CODES.includes(this.gvMap.viewSettings.projection)
-        ? this.gvMap.viewSettings.projection
-        : CV_DEFAULT_MAP_FEATURE_CONFIG.gvMap.viewSettings.projection;
+    this.map.viewSettings.projection =
+      this.map.viewSettings.projection && VALID_PROJECTION_CODES.includes(this.map.viewSettings.projection)
+        ? this.map.viewSettings.projection
+        : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.projection;
 
     this.#validateCenter();
 
     // zoom cannot be undefined because udefined values were set with default values.
-    const zoom = this.gvMap.viewSettings.initialView!.zoomAndCenter![0];
-    this.gvMap.viewSettings.initialView!.zoomAndCenter![0] =
-      !Number.isNaN(zoom) && zoom >= 0 && zoom <= 28
-        ? zoom
-        : CV_DEFAULT_MAP_FEATURE_CONFIG.gvMap.viewSettings.initialView!.zoomAndCenter![0];
+    const zoom = this.map.viewSettings.initialView!.zoomAndCenter![0];
+    this.map.viewSettings.initialView!.zoomAndCenter![0] =
+      !Number.isNaN(zoom) && zoom >= 0 && zoom <= 28 ? zoom : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![0];
 
     this.#validateBasemap();
 
@@ -310,13 +295,13 @@ export class MapFeatureConfig {
       ? this.schemaVersionUsed
       : CV_DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed!;
 
-    const minZoom = this.gvMap.viewSettings.minZoom!;
-    this.gvMap.viewSettings.minZoom =
-      !Number.isNaN(minZoom) && minZoom >= 0 && minZoom <= 50 ? minZoom : CV_DEFAULT_MAP_FEATURE_CONFIG.gvMap.viewSettings.minZoom;
+    const minZoom = this.map.viewSettings.minZoom!;
+    this.map.viewSettings.minZoom =
+      !Number.isNaN(minZoom) && minZoom >= 0 && minZoom <= 50 ? minZoom : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.minZoom;
 
-    const maxZoom = this.gvMap.viewSettings.maxZoom!;
-    this.gvMap.viewSettings.maxZoom =
-      !Number.isNaN(maxZoom) && maxZoom >= 0 && maxZoom <= 50 ? maxZoom : CV_DEFAULT_MAP_FEATURE_CONFIG.gvMap.viewSettings.maxZoom;
+    const maxZoom = this.map.viewSettings.maxZoom!;
+    this.map.viewSettings.maxZoom =
+      !Number.isNaN(maxZoom) && maxZoom >= 0 && maxZoom <= 50 ? maxZoom : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.maxZoom;
 
     this.#validateMaxExtent();
 
@@ -330,18 +315,18 @@ export class MapFeatureConfig {
   #validateCenter(): void {
     // TODO: This is not true anymore. Center and projection can be null if layersId is set. Apply correction accordingly.
     // center and projection cannot be undefined because udefined values were set with default values.
-    const xVal = this.gvMap.viewSettings.initialView!.zoomAndCenter![1][0];
-    const yVal = this.gvMap.viewSettings.initialView!.zoomAndCenter![1][1];
-    const { projection } = this.gvMap.viewSettings;
+    const xVal = this.map.viewSettings.initialView!.zoomAndCenter![1][0];
+    const yVal = this.map.viewSettings.initialView!.zoomAndCenter![1][1];
+    const { projection } = this.map.viewSettings;
 
-    this.gvMap.viewSettings.initialView!.zoomAndCenter![1][0] =
+    this.map.viewSettings.initialView!.zoomAndCenter![1][0] =
       !Number.isNaN(xVal) && xVal > CV_MAP_CENTER[projection].long[0] && xVal < CV_MAP_CENTER[projection].long[1]
         ? xVal
-        : CV_DEFAULT_MAP_FEATURE_CONFIG.gvMap.viewSettings.initialView!.zoomAndCenter![1][0];
-    this.gvMap.viewSettings.initialView!.zoomAndCenter![1][1] =
+        : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![1][0];
+    this.map.viewSettings.initialView!.zoomAndCenter![1][1] =
       !Number.isNaN(yVal) && yVal > CV_MAP_CENTER[projection].lat[0] && yVal < CV_MAP_CENTER[projection].lat[1]
         ? yVal
-        : CV_DEFAULT_MAP_FEATURE_CONFIG.gvMap.viewSettings.initialView!.zoomAndCenter![1][1];
+        : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![1][1];
   }
 
   /**
@@ -350,18 +335,18 @@ export class MapFeatureConfig {
    */
   #validateBasemap(): void {
     // basemapOptions and projection cannot be undefined because udefined values were set with default values.
-    const { projection } = this.gvMap.viewSettings;
-    const { basemapOptions } = this.gvMap;
+    const { projection } = this.map.viewSettings;
+    const { basemapOptions } = this.map;
 
-    this.gvMap.basemapOptions.basemapId = CV_BASEMAP_ID[projection].includes(basemapOptions.basemapId)
+    this.map.basemapOptions.basemapId = CV_BASEMAP_ID[projection].includes(basemapOptions.basemapId)
       ? basemapOptions.basemapId
-      : CV_DEFAULT_MAP_FEATURE_CONFIG.gvMap.basemapOptions.basemapId;
-    this.gvMap.basemapOptions.shaded = CV_BASEMAP_SHADED[projection].includes(basemapOptions.shaded)
+      : CV_DEFAULT_MAP_FEATURE_CONFIG.map.basemapOptions.basemapId;
+    this.map.basemapOptions.shaded = CV_BASEMAP_SHADED[projection].includes(basemapOptions.shaded)
       ? basemapOptions.shaded
-      : CV_DEFAULT_MAP_FEATURE_CONFIG.gvMap.basemapOptions.shaded;
-    this.gvMap.basemapOptions.labeled = CV_BASEMAP_LABEL[projection].includes(basemapOptions.labeled)
+      : CV_DEFAULT_MAP_FEATURE_CONFIG.map.basemapOptions.shaded;
+    this.map.basemapOptions.labeled = CV_BASEMAP_LABEL[projection].includes(basemapOptions.labeled)
       ? basemapOptions.labeled
-      : CV_DEFAULT_MAP_FEATURE_CONFIG.gvMap.basemapOptions.labeled;
+      : CV_DEFAULT_MAP_FEATURE_CONFIG.map.basemapOptions.labeled;
   }
 
   /**
@@ -369,9 +354,9 @@ export class MapFeatureConfig {
    * @private
    */
   #validateMaxExtent(): void {
-    const { projection } = this.gvMap.viewSettings;
-    const center = this.gvMap.viewSettings.initialView!.zoomAndCenter![1];
-    const maxExtent = this.gvMap.viewSettings.maxExtent!;
+    const { projection } = this.map.viewSettings;
+    const center = this.map.viewSettings.initialView!.zoomAndCenter![1];
+    const maxExtent = this.map.viewSettings.maxExtent!;
     // TODO: Which one do we want, the commented one or the next one?
     // const [extentMinX, extentMinY, extentMaxX, extentMaxY] = getMinOrMaxExtents(maxExtent, CV_MAP_EXTENTS[projection], 'min');
     const [extentMinX, extentMinY, extentMaxX, extentMaxY] = maxExtent;
@@ -381,7 +366,7 @@ export class MapFeatureConfig {
     const maxX = !Number.isNaN(extentMaxX) && extentMaxX > center[0] ? extentMaxX : CV_MAP_CENTER[projection].long[1];
     const maxY = !Number.isNaN(extentMaxY) && extentMaxY > center[1] ? extentMaxY : CV_MAP_CENTER[projection].lat[1];
 
-    this.gvMap.viewSettings.maxExtent! = [minX, minY, maxX, maxY] as Extent;
+    this.map.viewSettings.maxExtent! = [minX, minY, maxX, maxY] as Extent;
   }
 
   /**
@@ -396,46 +381,48 @@ export class MapFeatureConfig {
       }
     });
 
-    if (this.#originalgeoviewLayerConfig?.gvMap?.viewSettings?.projection !== this.gvMap.viewSettings.projection) {
+    if ((this.#originalgeoviewLayerConfig?.map as TypeJsonObject)?.viewSettings?.projection !== this.map.viewSettings.projection) {
       logger.logWarning(
-        `- Invalid projection code ${this.#originalgeoviewLayerConfig?.gvMap?.viewSettings?.projection} replaced by ${
-          this.gvMap.viewSettings.projection
+        `- Invalid projection code ${(this.#originalgeoviewLayerConfig?.map as TypeJsonObject)?.viewSettings?.projection} replaced by ${
+          this.map.viewSettings.projection
         } -`
       );
     }
 
     if (
-      this.#originalgeoviewLayerConfig?.gvMap?.viewSettings?.initialView?.zoomAndCenter &&
-      this.gvMap.viewSettings.initialView?.zoomAndCenter &&
-      this.#originalgeoviewLayerConfig?.gvMap?.viewSettings?.initialView?.zoomAndCenter[0] !==
-        this.gvMap.viewSettings.initialView?.zoomAndCenter[0]
+      (this.#originalgeoviewLayerConfig?.map as TypeJsonObject)?.viewSettings?.initialView?.zoomAndCenter &&
+      this.map.viewSettings.initialView?.zoomAndCenter &&
+      (this.#originalgeoviewLayerConfig?.map as TypeJsonObject)?.viewSettings?.initialView?.zoomAndCenter[0] !==
+        this.map.viewSettings.initialView?.zoomAndCenter[0]
     ) {
       logger.logWarning(
-        `- Invalid zoom level ${this.#originalgeoviewLayerConfig?.gvMap?.viewSettings?.initialView?.zoomAndCenter[0]} 
-        replaced by ${this.gvMap.viewSettings.initialView?.zoomAndCenter[0]} -`
+        `- Invalid zoom level ${(this.#originalgeoviewLayerConfig?.map as TypeJsonObject)?.viewSettings?.initialView?.zoomAndCenter[0]} 
+        replaced by ${this.map.viewSettings.initialView?.zoomAndCenter[0]} -`
       );
     }
 
-    const originalZoomAndCenter = this.#originalgeoviewLayerConfig?.gvMap?.viewSettings?.initialView?.zoomAndCenter;
+    const originalZoomAndCenter = (this.#originalgeoviewLayerConfig?.map as TypeJsonObject)?.viewSettings?.initialView?.zoomAndCenter;
     if (
       originalZoomAndCenter &&
       Array.isArray(originalZoomAndCenter) &&
       (originalZoomAndCenter as TypeJsonArray).length === 2 &&
       Array.isArray(originalZoomAndCenter[1]) &&
       (originalZoomAndCenter[1] as TypeJsonArray).length === 2 &&
-      Cast<[number, number]>(originalZoomAndCenter[1]) !== this.gvMap.viewSettings.initialView!.zoomAndCenter![1]
+      Cast<[number, number]>(originalZoomAndCenter[1]) !== this.map.viewSettings.initialView!.zoomAndCenter![1]
     ) {
       logger.logWarning(
         `- Invalid center ${originalZoomAndCenter[1]} 
-        replaced by ${this.gvMap.viewSettings.initialView!.zoomAndCenter![1]}`
+        replaced by ${this.map.viewSettings.initialView!.zoomAndCenter![1]}`
       );
     }
 
-    if (JSON.stringify(this.#originalgeoviewLayerConfig?.gvMap?.basemapOptions) !== JSON.stringify(this.gvMap.basemapOptions)) {
+    if (
+      JSON.stringify((this.#originalgeoviewLayerConfig?.map as TypeJsonObject)?.basemapOptions) !== JSON.stringify(this.map.basemapOptions)
+    ) {
       logger.logWarning(
-        `- Invalid basemap options ${JSON.stringify(this.#originalgeoviewLayerConfig?.gvMap?.basemapOptions)} replaced by ${JSON.stringify(
-          this.gvMap.basemapOptions
-        )} -`
+        `- Invalid basemap options ${JSON.stringify(
+          (this.#originalgeoviewLayerConfig?.map as TypeJsonObject)?.basemapOptions
+        )} replaced by ${JSON.stringify(this.map.basemapOptions)} -`
       );
     }
   }
