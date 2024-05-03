@@ -166,7 +166,7 @@
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init((mapId) => {
-        if (mapId === 'allMaps') {
+        if (mapId === 'mapWM') {
           setTimeout(() => cgpv.api.maps.mapWM.map.on('movestart', () => (tzoom0 = performance.now())), 1000);
           setTimeout(
             () =>

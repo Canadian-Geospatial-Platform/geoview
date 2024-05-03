@@ -140,7 +140,7 @@
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init((mapId) => {
-        if (mapId === 'allMaps') {
+        if (mapId === 'LYR5') {
           // Wire a handle when all queries done after a map click
           cgpv.api.maps['LYR5'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
             const { coordinate, resultSet, eventType } = payload;
@@ -156,7 +156,7 @@
           createConfigSnippet();
         }
       }, (mapId) => {
-        if (mapId === 'allMaps') {
+        if (mapId === 'LYR5') {
           // Layers are loaded
           createTableOfFilter('LYR5');
         }

@@ -324,11 +324,9 @@
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init((mapId) => {
-        if (mapId === 'allMaps') {
-          // create snippets
-          createCodeSnippet();
-          createConfigSnippet();
-        }
+        // create snippets
+        createCodeSnippet();
+        createConfigSnippet();
       });
     </script>
   </body>

@@ -266,7 +266,7 @@
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init((mapId) => {
-        if (mapId === 'allMaps') {
+        if (mapId === 'LYR1') {
           // Wire a handle when all queries done after a map click
           cgpv.api.maps['LYR1'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
             const { coordinate, resultSet, eventType } = payload;
@@ -276,6 +276,8 @@
             const { resultSet } = payload;
             displayLegend('LegendsId1', resultSet);
           });
+          listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
+        } else if (mapId === 'LYR2') {
           // Wire a handle when all queries done after a map click
           cgpv.api.maps['LYR2'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
             const { coordinate, resultSet, eventType } = payload;
@@ -285,6 +287,8 @@
             const { resultSet } = payload;
             displayLegend('LegendsId2', resultSet);
           });
+          listenToLegendLayerSetChanges('HLYR2-state', 'LYR2');
+        } else if (mapId === 'LYR3') {
           // Wire a handle when all queries done after a map click
           cgpv.api.maps['LYR3'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
             const { coordinate, resultSet, eventType } = payload;
@@ -294,63 +298,15 @@
             const { resultSet } = payload;
             displayLegend('LegendsId3', resultSet);
           });
-
-          listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
-          listenToLegendLayerSetChanges('HLYR2-state', 'LYR2');
           listenToLegendLayerSetChanges('HLYR3-state', 'LYR3');
-
-          // create snippets
-          createCodeSnippet();
-          createConfigSnippet();
         }
+
+        // create snippets
+        createCodeSnippet();
+        createConfigSnippet();
       }, (mapId) => {
-        if (mapId === 'allMaps') {
-          // Layers are loaded
-          createTableOfFilter('LYR2');
-          createTableOfFilter('LYR3');
-
-          if (cgpv.api.maps?.LYR2?.layer?.registeredLayers?.['historical-flood/0']?.layerStatus === 'loaded') {
-            const field2 = cgpv.api.maps.LYR2.layer.geoviewLayer('historical-flood/0').getTemporalDimension('historical-flood/0').field;
-            const LYR2_FILTERS = [`${field2} >= date '01/01/2018 05:00:00' and ${field2} <= date '12/31/2019 19:00:00-05:00'`,
-                                  `${field2} > date '01/01/2018 05:00:00' and ${field2} <= date '01/01/2020 05:00:00Z'`,
-                                  `${field2} >= date '01/01/2018 05:00:00' and ${field2} < date '01/01/2020 00:00:00+05:00'`];
-            let i = 0;
-            window.setInterval(() => {
-              const input = document.getElementById('filter-input-LYR2-historical-flood');
-              if (input) {
-                input.value = LYR2_FILTERS[i];
-                const layerConfig = cgpv.api.maps.LYR2.layer.registeredLayers['historical-flood/0'];
-                const checkbox = document.getElementById('checkbox-LYR2-historical-flood');
-                cgpv.api.maps.LYR2.layer.geoviewLayer('historical-flood/0').applyViewFilter('historical-flood/0',
-                  LYR2_FILTERS[i],
-                  checkbox.value !== 'true'
-                );
-                if (++i === LYR2_FILTERS.length) i = 0;
-              }
-            }, 3000)
-          }
-
-          if (cgpv.api.maps?.LYR3?.layer?.registeredLayers?.['historical-flood/0']?.layerStatus === 'loaded') {
-            const field3 = cgpv.api.maps.LYR3.layer.geoviewLayer('historical-flood/0').getTemporalDimension('historical-flood/0').field;
-            const LYR3_FILTERS = [`${field3} >= date '2018-01-01T00:00:00' and ${field3} <= date '2020-01-01T00:00:00'`,
-                                  `${field3} > date '2018-01-01T00:00:00' and ${field3} <= date '2020-01-01T00:00:00'`,
-                                  `${field3} >= date '2018-01-01T00:00:00' and ${field3} < date '2020-01-01T00:00:00'`];
-            let j = 0;
-            window.setInterval(() => {
-              const input = document.getElementById('filter-input-LYR3-historical-flood');
-              if (input) {
-                input.value = LYR3_FILTERS[j];
-                const layerConfig = cgpv.api.maps.LYR3.layer.registeredLayers['historical-flood/0'];
-                const checkbox = document.getElementById('checkbox-LYR3-historical-flood');
-                cgpv.api.maps.LYR3.layer.geoviewLayer('historical-flood/0').applyViewFilter('historical-flood/0',
-                  LYR3_FILTERS[j],
-                  checkbox.value !== 'true'
-                );
-                if (++j === LYR3_FILTERS.length) j = 0;
-              }
-            }, 3000)
-          }
-
+        if (mapId === 'LYR1') {
+          createTableOfFilter('LYR1');
           if (cgpv.api.maps.LYR1.layer.registeredLayers['esriFeatureLYR1/0'].layerStatus === 'loaded') {
             let k = 0;
             window.setInterval(() => {
@@ -368,10 +324,6 @@
               }
             }, 1000)
           }
-        }
-
-        if (mapId === 'LYR1') {
-          createTableOfFilter('LYR1');
 
           const dropDownContent = document.getElementById('dropdown1');
           var element = document.createElement('option');
@@ -395,6 +347,52 @@
               createInfoTable('LYR1', 'ResultSetId1', resultSet, 'all-features');
             }
           });
+        } else if (mapId === 'LYR2') {
+          createTableOfFilter('LYR2');
+          if (cgpv.api.maps?.LYR2?.layer?.registeredLayers?.['historical-flood/0']?.layerStatus === 'loaded') {
+            const field2 = cgpv.api.maps.LYR2.layer.geoviewLayer('historical-flood/0').getTemporalDimension('historical-flood/0').field;
+            const LYR2_FILTERS = [`${field2} >= date '01/01/2018 05:00:00' and ${field2} <= date '12/31/2019 19:00:00-05:00'`,
+                                  `${field2} > date '01/01/2018 05:00:00' and ${field2} <= date '01/01/2020 05:00:00Z'`,
+                                  `${field2} >= date '01/01/2018 05:00:00' and ${field2} < date '01/01/2020 00:00:00+05:00'`];
+            let i = 0;
+            window.setInterval(() => {
+              const input = document.getElementById('filter-input-LYR2-historical-flood');
+              if (input) {
+                input.value = LYR2_FILTERS[i];
+                const layerConfig = cgpv.api.maps.LYR2.layer.registeredLayers['historical-flood/0'];
+                const checkbox = document.getElementById('checkbox-LYR2-historical-flood');
+                cgpv.api.maps.LYR2.layer.geoviewLayer('historical-flood/0').applyViewFilter('historical-flood/0',
+                  LYR2_FILTERS[i],
+                  checkbox.value !== 'true'
+                );
+                if (++i === LYR2_FILTERS.length) i = 0;
+              }
+            }, 3000)
+          }
+        
+        } else if (mapId === 'LYR3') {
+          createTableOfFilter('LYR3');
+          if (cgpv.api.maps?.LYR3?.layer?.registeredLayers?.['historical-flood/0']?.layerStatus === 'loaded') {
+            const field3 = cgpv.api.maps.LYR3.layer.geoviewLayer('historical-flood/0').getTemporalDimension('historical-flood/0').field;
+            const LYR3_FILTERS = [`${field3} >= date '2018-01-01T00:00:00' and ${field3} <= date '2020-01-01T00:00:00'`,
+                                  `${field3} > date '2018-01-01T00:00:00' and ${field3} <= date '2020-01-01T00:00:00'`,
+                                  `${field3} >= date '2018-01-01T00:00:00' and ${field3} < date '2020-01-01T00:00:00'`];
+            let j = 0;
+            window.setInterval(() => {
+              const input = document.getElementById('filter-input-LYR3-historical-flood');
+              if (input) {
+                input.value = LYR3_FILTERS[j];
+                const layerConfig = cgpv.api.maps.LYR3.layer.registeredLayers['historical-flood/0'];
+                const checkbox = document.getElementById('checkbox-LYR3-historical-flood');
+                cgpv.api.maps.LYR3.layer.geoviewLayer('historical-flood/0').applyViewFilter('historical-flood/0',
+                  LYR3_FILTERS[j],
+                  checkbox.value !== 'true'
+                );
+                if (++j === LYR3_FILTERS.length) j = 0;
+              }
+            }, 3000)
+          }
+
         }
       });
 

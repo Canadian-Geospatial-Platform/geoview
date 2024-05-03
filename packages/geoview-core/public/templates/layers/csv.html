@@ -148,7 +148,7 @@
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init((mapId) => {
-        if (mapId === 'allMaps') {
+        if (mapId === 'CSV1') {
           // Wire a handle when all queries done after a map click
           cgpv.api.maps['CSV1'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
             const { coordinate, resultSet, eventType } = payload;
@@ -168,14 +168,12 @@
             createInfoTable('CSV1', 'ResultSetId1', resultSet, 'all-features');
           });
 
+          // Layers are loaded
+          createTableOfFilter('CSV1');
+
           // create snippets
           createCodeSnippet();
           createConfigSnippet();
-        }
-      }, (mapId) => {
-        if (mapId === 'allMaps') {
-          // Layers are loaded
-          createTableOfFilter('CSV1');
         }
       });
     </script>
