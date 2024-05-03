@@ -260,12 +260,22 @@ const ResponsiveGridLayout = forwardRef(
       <Box ref={ref}>
         <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
           {!fullWidth && (
-            <ResponsiveGrid.Left isRightPanelVisible={isRightPanelVisible} isEnlarged={isEnlarged} aria-hidden={!isRightPanelVisible} sxProps={{zIndex: isFullScreen ? 'unset' : 200 }}>
+            <ResponsiveGrid.Left
+              isRightPanelVisible={isRightPanelVisible}
+              isEnlarged={isEnlarged}
+              aria-hidden={!isRightPanelVisible}
+              sxProps={{ zIndex: isFullScreen ? 'unset' : 200 }}
+            >
               {/* This panel is hidden from screen readers when not visible */}
               {leftTop}
             </ResponsiveGrid.Left>
           )}
-          <ResponsiveGrid.Right isRightPanelVisible={isRightPanelVisible} isEnlarged={isEnlarged} fullWidth={fullWidth} sxProps={{zIndex: isFullScreen ? 'unset' : 100 }}>
+          <ResponsiveGrid.Right
+            isRightPanelVisible={isRightPanelVisible}
+            isEnlarged={isEnlarged}
+            fullWidth={fullWidth}
+            sxProps={{ zIndex: isFullScreen ? 'unset' : 100 }}
+          >
             <Box
               sx={{
                 display: 'flex',
@@ -292,7 +302,7 @@ const ResponsiveGridLayout = forwardRef(
             isRightPanelVisible={isRightPanelVisible}
             fullWidth={fullWidth}
             aria-hidden={!isRightPanelVisible}
-            sxProps={{zIndex: isFullScreen ? 'unset' : 200 }}
+            sxProps={{ zIndex: isFullScreen ? 'unset' : 200 }}
           >
             {leftMain}
           </ResponsiveGrid.Left>
@@ -301,7 +311,7 @@ const ResponsiveGridLayout = forwardRef(
             isEnlarged={isEnlarged}
             isRightPanelVisible={isRightPanelVisible}
             fullWidth={fullWidth}
-            sxProps={{zIndex: isFullScreen ? 'unset' : 100 }}
+            sxProps={{ zIndex: isFullScreen ? 'unset' : 100 }}
           >
             {renderRightContent()}
           </ResponsiveGrid.Right>
