@@ -1,4 +1,4 @@
-{
+const layer = {
   "geoviewLayerId": "wmsLYR1",
   "geoviewLayerName": "earthquakes",
   "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/",

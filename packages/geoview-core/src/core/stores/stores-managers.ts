@@ -3,12 +3,12 @@ import { useContext } from 'react';
 import { create, createStore } from 'zustand';
 import { mountStoreDevtool } from 'simple-zustand-devtools';
 
+import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
 import { destroyEventProcessors, initializeEventProcessors } from '@/api/event-processors';
 import { IGeoviewState, GeoviewStoreType, geoviewStoreDefinitionWithSubscribeSelector } from './geoview-store';
 import { MapContext } from '@/core/app-start';
 import { logger } from '@/core/utils/logger';
 import { whenThisThen } from '@/core/utils/utilities';
-import { MapFeaturesConfig } from '@/api/config/types/classes/map-features-config';
 
 export interface StoresManagerState {
   stores: Record<string, GeoviewStoreType>;
@@ -18,7 +18,7 @@ export const useStoresManager = createStore<StoresManagerState>(() => ({
   stores: {},
 }));
 
-export const addGeoViewStore = (config: MapFeaturesConfig): void => {
+export const addGeoViewStore = (config: MapFeatureConfig): void => {
   if (!config.mapId) {
     return;
   }

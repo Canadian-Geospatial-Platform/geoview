@@ -8,7 +8,7 @@ import 'ol/ol.css';
 import '@/ui/style/style.css';
 import '@/ui/style/vendor.css';
 
-import { MapFeaturesConfig } from '@config/types/classes/map-features-config';
+import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
 import * as UI from '@/ui';
 
 import AppStart from '@/core/app-start';
@@ -59,15 +59,16 @@ async function fetchConfigFile(configUrl: string): Promise<string> {
  * consifuration automatically
  *
  * @param {Element} mapElement - Div map element with attributes
- * @returns {Promise<MapFeaturesConfig>} A promise who contains the caonfiguration to use
+ * @returns {Promise<MapFeatureConfig>} A promise who contains the caonfiguration to use
  */
-async function getMapConfig(mapElement: Element): Promise<MapFeaturesConfig> {
-  // create a new config object and apply default
-  let mapConfig: MapFeaturesConfig = api.configApi.defaultMapFeaturesConfig;
-
+async function getMapConfig(mapElement: Element): Promise<MapFeatureConfig> {
   // get language in wich we need to have the config file (if not provided, default to English)
-  // check what type of config is provided (data-config, data-config-url or data-shared)
+
+  // create a new config object and apply default
   const lang = mapElement.hasAttribute('data-lang') ? (mapElement.getAttribute('data-lang')! as TypeDisplayLanguage) : 'en';
+  let mapConfig: MapFeatureConfig = api.configApi.getDefaultMapFeatureConfig(lang);
+
+  // check what type of config is provided (data-config, data-config-url or data-shared)
   if (mapElement.hasAttribute('data-config')) {
     // configurations from inline div is provided
     const configData = mapElement.getAttribute('data-config');
