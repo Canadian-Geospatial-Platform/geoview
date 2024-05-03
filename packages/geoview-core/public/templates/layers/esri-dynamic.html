@@ -654,11 +654,9 @@
           listenToLegendLayerSetChanges('HLYR3-state', 'LYR3');
         }
 
-        else if (mapId === 'allMaps') {
-          // create snippets
-          createCodeSnippet();
-          createConfigSnippet();
-        }
+        // create snippets
+        createCodeSnippet();
+        createConfigSnippet();
       }, (mapId) => {
         if (mapId === 'LYR1') {
           createTableOfFilter('LYR1');

@@ -226,13 +226,11 @@
           listenToLegendLayerSetChanges('HLYR2-state', mapId);
         }
 
-        if (mapId === 'allMaps') {
-          // create snippets
-          createCodeSnippet();
-          createConfigSnippet();
-        }
+        // create snippets
+        createCodeSnippet();
+        createConfigSnippet();
       }, (mapId) => {
-        if (mapId === 'allMaps') {
+        if (mapId === 'LYR1') {
           // Layers are loaded
           createTableOfFilter('LYR1');
           createTableOfFilter('LYR2');

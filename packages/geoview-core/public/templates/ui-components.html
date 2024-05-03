@@ -153,125 +153,120 @@
       }
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init(
-        (mapId) => {
-          if (mapId === 'allMaps') {
-            // create snippets
-            createCodeSnippet();
-            createConfigSnippet();
-          }
-        },
-        (mapId) => {
-          if (mapId === 'allMaps') {
-            /**
-             * RANGE SLIDER UI SECTION START
-             */
-            // add a slider component and link it to a map with mapId props
-            cgpv.api.utilities.core.addUiComponent(
-              'UI1-rangeslider1',
-              cgpv.react.createElement(cgpv.ui.elements.Slider, {
-                mapId: 'UI1',
-                id: 'UI1-slider-flood',
-                min: 1696,
-                max: 2023,
-                value: [1696, 2023],
-                marks: [
-                  { value: 1696, label: '1696' },
-                  { value: 1700, label: '1700' },
-                  { value: 1800, label: '1800' },
-                  { value: 1900, label: '1900' },
-                  { value: 2000, label: '2000' },
-                  { value: 2023, label: '2023' },
-                ],
-                track: 'normal',
-                onChange: (dates) => {
-                  const field = cgpv.api.maps.UI1.layer.geoviewLayer('historical-flood/0').getTemporalDimension('historical-flood/0').field;
-                  cgpv.api.maps.UI1.layer
-                    .geoviewLayer('historical-flood/0')
-                    .applyViewFilter('historical-flood/0', `${field} >= date '${dates[0]}-01-01' and ${field} <= date '${dates[1]}-12-31'`);
-                },
-              })
-            );
-            /**
-             * RANGE SLIDER UI SECTION END
-             */
-
-            /**
-             * SLIDER UI SECTION START
-             */
-
-            // get the slider position 2 dom element
-            const sliderPosition2 = document.getElementsByClassName('slider-position2');
-
-            // Props for slider 1
-            const propsSlider1 = {
+      cgpv.init((mapId) => {
+        // create snippets
+        createCodeSnippet();
+        createConfigSnippet();
+        if (mapId === 'UI1') {
+          /**
+           * RANGE SLIDER UI SECTION START
+           */
+          // add a slider component and link it to a map with mapId props
+          cgpv.api.utilities.core.addUiComponent(
+            'UI1-rangeslider1',
+            cgpv.react.createElement(cgpv.ui.elements.Slider, {
               mapId: 'UI1',
-              id: 'UI1-slider1',
-              min: 0,
-              max: 18,
-              value: 8,
+              id: 'UI1-slider-flood',
+              min: 1696,
+              max: 2023,
+              value: [1696, 2023],
               marks: [
-                { value: 0, label: 'Min Level 0' },
-                { value: 4, label: 'Level 4' },
-                { value: 8, label: 'Level 8' },
-                { value: 18, label: 'Max Level 18' },
+                { value: 1696, label: '1696' },
+                { value: 1700, label: '1700' },
+                { value: 1800, label: '1800' },
+                { value: 1900, label: '1900' },
+                { value: 2000, label: '2000' },
+                { value: 2023, label: '2023' },
               ],
-              track: false,
-              // TODO: setting the view zoom level create bugs with the overview map
-              onChange: (zoomLevel) => {
-                const lat = 50;
-                const lng = -95;
-                cgpv.api.maps['UI1'].getView().animate({ zoom: zoomLevel });
+              track: 'normal',
+              onChange: (dates) => {
+                const field = cgpv.api.maps.UI1.layer.geoviewLayer('historical-flood/0').getTemporalDimension('historical-flood/0').field;
+                cgpv.api.maps.UI1.layer
+                  .geoviewLayer('historical-flood/0')
+                  .applyViewFilter('historical-flood/0', `${field} >= date '${dates[0]}-01-01' and ${field} <= date '${dates[1]}-12-31'`);
               },
-            };
+            })
+          );
+          /**
+           * RANGE SLIDER UI SECTION END
+           */
 
-            // Create and add the react element
-            let root1 = createAndAddSliderComponent('UI1-slider1', propsSlider1);
+          /**
+           * SLIDER UI SECTION START
+           */
 
-            // set min max
-            function setSliderMinMax() {
-              // Update the react component from external call
-              root1 = createAndUpdateSliderComponent('UI1-slider1', { ...propsSlider1, min: 4, max: 12 }, root1);
-            }
-            document.getElementById('sliderminmax').addEventListener('click', setSliderMinMax);
+          // get the slider position 2 dom element
+          const sliderPosition2 = document.getElementsByClassName('slider-position2');
 
-            // set values
-            function setSliderValues() {
-              // Update the react component from external call
-              root1 = createAndUpdateSliderComponent('UI1-slider1', { ...propsSlider1, min: 0, max: 20, value: 12 }, root1); // Math.floor(Math.random() * 2) + 4 <-- Helpful to test funky react stuff
-            }
-            document.getElementById('slidervalues').addEventListener('click', setSliderValues);
+          // Props for slider 1
+          const propsSlider1 = {
+            mapId: 'UI1',
+            id: 'UI1-slider1',
+            min: 0,
+            max: 18,
+            value: 8,
+            marks: [
+              { value: 0, label: 'Min Level 0' },
+              { value: 4, label: 'Level 4' },
+              { value: 8, label: 'Level 8' },
+              { value: 18, label: 'Max Level 18' },
+            ],
+            track: false,
+            // TODO: setting the view zoom level create bugs with the overview map
+            onChange: (zoomLevel) => {
+              const lat = 50;
+              const lng = -95;
+              cgpv.api.maps['UI1'].getView().animate({ zoom: zoomLevel });
+            },
+          };
 
-            // Props for slider 2
-            const propsSlider2 = {
-              id: 'UI1-slider2',
-              min: 0,
-              max: 18,
-              value: [5, 10],
-              marks: [
-                { value: 0, label: 'Min Level 0' },
-                { value: 2 },
-                { value: 4, label: 'Level 4' },
-                { value: 5, label: 'Level 5' },
-                { value: 6, label: 'Level 6' },
-                { value: 8, label: 'Level 8' },
-                { value: 18, label: 'Max Level 18' },
-              ],
-              onChange: (sliderValues, activeThumb) => {
-                sliderPosition2[0].innerHTML = `<p>Slider values ${sliderValues} and active thumb ${
-                  activeThumb === 0 ? 'left' : 'right'
-                }</p>`;
-              },
-            };
+          // Create and add the react element
+          let root1 = createAndAddSliderComponent('UI1-slider1', propsSlider1);
 
-            // Create and add the react element
-            const root2 = createAndAddSliderComponent('UI1-slider2', propsSlider2);
-
-            /**
-             * SLIDER UI SECTION END
-             */
+          // set min max
+          function setSliderMinMax() {
+            // Update the react component from external call
+            root1 = createAndUpdateSliderComponent('UI1-slider1', { ...propsSlider1, min: 4, max: 12 }, root1);
           }
+          document.getElementById('sliderminmax').addEventListener('click', setSliderMinMax);
+
+          // set values
+          function setSliderValues() {
+            // Update the react component from external call
+            root1 = createAndUpdateSliderComponent('UI1-slider1', { ...propsSlider1, min: 0, max: 20, value: 12 }, root1); // Math.floor(Math.random() * 2) + 4 <-- Helpful to test funky react stuff
+          }
+          document.getElementById('slidervalues').addEventListener('click', setSliderValues);
+
+          // Props for slider 2
+          const propsSlider2 = {
+            id: 'UI1-slider2',
+            min: 0,
+            max: 18,
+            value: [5, 10],
+            marks: [
+              { value: 0, label: 'Min Level 0' },
+              { value: 2 },
+              { value: 4, label: 'Level 4' },
+              { value: 5, label: 'Level 5' },
+              { value: 6, label: 'Level 6' },
+              { value: 8, label: 'Level 8' },
+              { value: 18, label: 'Max Level 18' },
+            ],
+            onChange: (sliderValues, activeThumb) => {
+              sliderPosition2[0].innerHTML = `<p>Slider values ${sliderValues} and active thumb ${
+                activeThumb === 0 ? 'left' : 'right'
+              }</p>`;
+            },
+          };
+
+          // Create and add the react element
+          const root2 = createAndAddSliderComponent('UI1-slider2', propsSlider2);
+
+          /**
+           * SLIDER UI SECTION END
+           */
         }
+      }
       );
     </script>
   </body>
