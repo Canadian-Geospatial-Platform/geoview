@@ -8,6 +8,7 @@ import 'ol/ol.css';
 import '@/ui/style/style.css';
 import '@/ui/style/vendor.css';
 
+import { MapFeaturesConfig } from '@config/types/classes/map-features-config';
 import * as UI from '@/ui';
 
 import AppStart from '@/core/app-start';
@@ -17,6 +18,8 @@ import { Config } from '@/core/utils/config/config';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
 import { logger } from '@/core/utils/logger';
+import { isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
+import { TypeDisplayLanguage } from './api/config/types/map-schema-types';
 
 // The next export allow to import the exernal-types from 'geoview-core' from outside of the geoview-core package.
 export * from './core/types/external-types';
@@ -36,6 +39,69 @@ export function unmountMap(mapId: string): void {
 }
 
 /**
+ * Function to read the configuration specified
+ *
+ * @param {string} configUrl - url to fetch the config from
+ * @returns configuration string
+ */
+async function fetchConfigFile(configUrl: string): Promise<string> {
+  const response = await fetch(configUrl);
+  const result = await response.json();
+
+  return result;
+}
+
+/**
+ * Function to get a configuration from a div element who contains attributes to read from.
+ * If the div has one of the folllowing atttributes data-config, data-config-url or data-shared,
+ * it will try to get a valide configuration from the attribute content. If there is no such attributes,
+ * it will return a default config. If the data-geocore is present, it will inject the layer in the
+ * consifuration automatically
+ *
+ * @param {Element} mapElement - Div map element with attributes
+ * @returns {Promise<MapFeaturesConfig>} A promise who contains the caonfiguration to use
+ */
+async function getMapConfig(mapElement: Element): Promise<MapFeaturesConfig> {
+  // create a new config object and apply default
+  let mapConfig: MapFeaturesConfig = api.configApi.defaultMapFeaturesConfig;
+
+  // get language in wich we need to have the config file (if not provided, default to English)
+  // check what type of config is provided (data-config, data-config-url or data-shared)
+  const lang = mapElement.hasAttribute('data-lang') ? (mapElement.getAttribute('data-lang')! as TypeDisplayLanguage) : 'en';
+  if (mapElement.hasAttribute('data-config')) {
+    // configurations from inline div is provided
+    const configData = mapElement.getAttribute('data-config');
+
+    // Erase comments in the config file.
+    let configObjStr = removeCommentsFromJSON(configData!);
+
+    // remove CR and LF from the map config
+    configObjStr = configObjStr.replace(/(\r\n|\n|\r)/gm, '');
+    // replace apostrophes not preceded by a backslash with quotes
+    configObjStr = configObjStr.replace(/(?<!\\)'/gm, '"');
+    // replace apostrophes preceded by a backslash with a single apostrophe
+    configObjStr = configObjStr.replace(/\\'/gm, "'");
+
+    if (isJsonString(configObjStr)) mapConfig = api.configApi.getMapConfig(configObjStr, lang);
+  } else if (mapElement.hasAttribute('data-config-url')) {
+    // configurations file url is provided
+    const configUrl = mapElement.getAttribute('data-config-url');
+    const configObject = await fetchConfigFile(configUrl!);
+    mapConfig = api.configApi.getMapConfig(configObject, lang);
+  } else if (mapElement.getAttribute('data-shared')) {
+    // configurations from the URL parameters is provided
+    // TODO: create a function to return a valid config from the url param string
+    // TD.CONT: this function should be in config api, we pass param and received back the config
+  }
+
+  // TODO: inject 'data-geocore-keys' inside the config for later processing by the configAPI
+  // TD.CONT: This injectioon can be done in api.configApi.getMapConfig with optional parameter keys
+  // TD.CONT: This will return the listOfGeoviewLAyer with a new entry: {'geoviewLayerType': 'geoCore','geoviewLayerId': '21b821cf-0f1c-40ee-8925-eab12d357668'},
+
+  return mapConfig;
+}
+
+/**
  * Function to render the map for inline map and map create from a function call
  *
  * @param {Element} mapElement - The html element div who will contain the map
@@ -49,10 +115,16 @@ async function renderMap(mapElement: Element): Promise<void> {
   // otherwise return the default config
   const configObj = await config.initializeMapConfig();
 
+  const conf = await getMapConfig(mapElement);
+
   // if valid config was provided - mapId is now part of config
   if (configObj) {
     const { mapId } = configObj;
-    addGeoViewStore(configObj);
+    // addGeoViewStore(configObj);
+    const id = mapElement.getAttribute('id')!;
+    conf.mapId = id;
+    // conf.map = conf.gvMap;
+    addGeoViewStore(conf);
 
     // render the map with the config
     reactRoot[mapId] = createRoot(mapElement!);

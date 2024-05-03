@@ -293,7 +293,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // Log
     logger.logTraceUseEffect('FOOTER-BAR - footerBarTabsConfig');
     // Packages tab
-    if (footerBarTabsConfig && footerBarTabsConfig.tabs.core.includes('time-slider')) {
+    if (footerBarTabsConfig?.tabs && footerBarTabsConfig.tabs.core.includes('time-slider')) {
       // create a new tab by loading the time-slider plugin
       api.plugin
         .loadScript('time-slider')
@@ -318,7 +318,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         });
     }
 
-    if (footerBarTabsConfig && footerBarTabsConfig.tabs.core.includes('geochart')) {
+    if (footerBarTabsConfig?.tabs && footerBarTabsConfig.tabs.core.includes('geochart')) {
       // create a new tab by loading the geo chart plugin
       api.plugin
         .loadScript('geochart')
