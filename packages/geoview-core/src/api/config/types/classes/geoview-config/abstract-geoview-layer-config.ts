@@ -31,9 +31,6 @@ export abstract class AbstractGeoviewLayerConfig {
   /** The GeoView layer identifier. */
   geoviewLayerId: string;
 
-  /** Type of GeoView layer. */
-  abstract geoviewLayerType: TypeGeoviewLayerType;
-
   /**
    * The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this
    * information.
@@ -97,18 +94,21 @@ export abstract class AbstractGeoviewLayerConfig {
       .filter((subLayerConfig) => {
         return subLayerConfig;
       }) as ConfigBaseClass[];
-    this.#validate();
   }
 
   /**
    * Validate the object properties. Layer name and type must be set.
    * @private
    */
-  #validate(): void {
-    if (!this.geoviewLayerName)
+  protected validate(): void {
+    if (!this.geoviewLayerName) {
       logger.logError(`Property geoviewLayerName is mandatory for GeoView layer ${this.geoviewLayerId} of type ${this.geoviewLayerType}.`);
-    if (!this.geoviewLayerType)
+      this.propagateError();
+    }
+    if (!this.geoviewLayerType) {
       logger.logError(`Property geoviewLayerType is mandatory for GeoView layer ${this.geoviewLayerId} of type ${this.geoviewLayerType}.`);
+      this.propagateError();
+    }
   }
 
   /**
@@ -125,6 +125,14 @@ export abstract class AbstractGeoviewLayerConfig {
    * @protected @abstract
    */
   protected abstract get geoviewLayerSchema(): string;
+
+  /**
+   * The getter method that returns the geoview layer type to use for the validation.
+   *
+   * @returns {string} The GeoView layer schema associated to the config.
+   * @protected @abstract
+   */
+  abstract get geoviewLayerType(): TypeGeoviewLayerType;
 
   /**
    * The method used to implement the class factory model that returns the instance of the class based on the sublayer
@@ -154,5 +162,14 @@ export abstract class AbstractGeoviewLayerConfig {
   propagateError(): void {
     this.#errorDetected = true;
     this.#mapFeatureConfig?.propagateError();
+  }
+
+  /**
+   * The getter method that returns the isValid flag (true when the map feature config is valid).
+   *
+   * @returns {boolean} The isValid property associated to map feature config.
+   */
+  get isValid(): boolean {
+    return !this.#errorDetected;
   }
 }

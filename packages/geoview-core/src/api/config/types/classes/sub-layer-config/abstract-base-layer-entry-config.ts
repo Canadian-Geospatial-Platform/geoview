@@ -47,7 +47,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     initialSettings: TypeLayerInitialSettings,
     language: TypeDisplayLanguage,
     geoviewLayerConfig: AbstractGeoviewLayerConfig,
-    parentNode: ConfigBaseClass
+    parentNode?: ConfigBaseClass
   ) {
     super(layerConfig, initialSettings, language, geoviewLayerConfig, parentNode);
     // If the user has provided a source then keep it, else create an empty one.
