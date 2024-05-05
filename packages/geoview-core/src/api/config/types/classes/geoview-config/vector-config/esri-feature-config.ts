@@ -42,6 +42,7 @@ export class EsriFeatureLayerConfig extends AbstractGeoviewLayerConfig {
     if (!this.metadataAccessPath) {
       throw new Error(`metadataAccessPath is mandatory for GeoView layer ${this.geoviewLayerId} of type ${this.geoviewLayerType}.`);
     }
+    this.validate();
   }
 
   /**

@@ -125,7 +125,7 @@ export class MapFeatureConfig {
     this.theme = (clonedJsonConfig.theme || CV_DEFAULT_MAP_FEATURE_CONFIG.theme) as TypeDisplayTheme;
     this.navBar = [...((clonedJsonConfig.navBar || CV_DEFAULT_MAP_FEATURE_CONFIG.navBar) as TypeNavBarProps)];
     this.appBar = Cast<TypeAppBarProps>(defaultsDeep(clonedJsonConfig.appBar, CV_DEFAULT_MAP_FEATURE_CONFIG.appBar));
-    this.footerBar = Cast<TypeFooterBarProps>(defaultsDeep(clonedJsonConfig.footerBar, CV_DEFAULT_MAP_FEATURE_CONFIG.footerBar));
+    this.footerBar = Cast<TypeFooterBarProps>(clonedJsonConfig.footerBar);
     this.overviewMap = Cast<TypeOverviewMapProps>(defaultsDeep(clonedJsonConfig.overviewMap, CV_DEFAULT_MAP_FEATURE_CONFIG.overviewMap));
     this.components = [...((clonedJsonConfig.components || CV_DEFAULT_MAP_FEATURE_CONFIG.components) as TypeMapComponents)];
     this.corePackages = [...((clonedJsonConfig.corePackages || CV_DEFAULT_MAP_FEATURE_CONFIG.corePackages) as TypeMapCorePackages)];
