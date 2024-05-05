@@ -162,8 +162,18 @@ export function Datapanel({ fullWidth }: DataPanelType): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTab]);
 
+  /**
+   * Check if layer sttaus is processing while querying
+   */
+  const memoIsLayerQueryStatusProcessing = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DATA-PANEL - order layer status processing.');
+
+    return () => !!orderedLayerData.find((layer) => layer.queryStatus === LAYER_STATUS.PROCESSING);
+  }, [orderedLayerData]);
+
   const renderContent = (): JSX.Element | null => {
-    if (isLoading) {
+    if (isLoading || memoIsLayerQueryStatusProcessing()) {
       return <Skeleton variant="rounded" width="100%" height={400} sx={{ bgcolor: theme.palette.grey[400] }} />;
     }
     if (selectedTab === TABS.DATA_TABLE && !isLayerDisabled() && isSelectedLayerHasFeatures()) {
