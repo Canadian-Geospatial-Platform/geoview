@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { IconButton, Grid, Typography, ArrowForwardIosOutlinedIcon, ArrowBackIosOutlinedIcon, LayersClearOutlinedIcon, Box } from '@/ui';
+import { IconButton, Grid, ArrowForwardIosOutlinedIcon, ArrowBackIosOutlinedIcon, LayersClearOutlinedIcon, Box, Skeleton } from '@/ui';
 import {
   useDetailsStoreActions,
   useDetailsCheckedFeatures,
@@ -15,6 +15,7 @@ import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/layer/l
 import { LayerListEntry, Layout } from '@/core/components/common';
 import { getSxClasses } from './details-style';
 import { FeatureInfo } from './feature-info-new';
+import { LAYER_STATUS } from '@/core/utils/constant';
 
 interface DetailsPanelType {
   fullWidth?: boolean;
@@ -33,9 +34,6 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
-  // NOTE: This internal state is created, so that we can handle edge case
-  // where user clicks on map and details tab with selected layer and right panel.
-  const [isGuideOpen, setIsGuideOpen] = useState(true);
 
   // Get states and actions from store
   const selectedLayerPath = useDetailsSelectedLayerPath();
@@ -373,7 +371,6 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
   }
 
   const handleGuideIsOpen = (guideIsOpenVal: boolean): void => {
-    setIsGuideOpen(guideIsOpenVal);
     if (guideIsOpenVal) {
       setSelectedLayerPath('');
     }
@@ -383,12 +380,22 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
    * Select the layer after layer is selected from map.
    */
   useEffect(() => {
-    if (mapClickCoordinates && memoLayersList?.length && !selectedLayerPath.length && isGuideOpen) {
+    if (mapClickCoordinates && memoLayersList?.length && !selectedLayerPath.length) {
       const selectedLayer = memoLayersList.find((layer) => !!layer.numOffeatures);
       setSelectedLayerPath(selectedLayer?.layerPath ?? '');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapClickCoordinates, memoLayersList]);
+
+  /**
+   * Check if layer sttaus is processing while querying
+   */
+  const memoIsLayerQueryStatusProcessing = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DATA-PANEL - order layer status processing.');
+
+    return () => !!arrayOfLayerDataBatch?.find((layer) => layer.queryStatus === LAYER_STATUS.PROCESSING);
+  }, [arrayOfLayerDataBatch]);
 
   // #endregion
 
@@ -398,79 +405,83 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
    * Renders the complete Details Panel component
    * @returns {JSX.Element}
    */
-  const renderComplete = (): JSX.Element => {
-    if (memoLayersList) {
-      const featureTitleDetails = t('details.featureDetailsTitle')
-        .replace('{count}', `${currentFeatureIndex + 1}`)
-        .replace('{total}', `${memoSelectedLayerDataFeatures?.length}`);
-
+  const renderContent = (): JSX.Element | null => {
+    // render skeleton when layer is fetching data.
+    if (memoIsLayerQueryStatusProcessing()) {
+      return <Skeleton variant="rounded" width="100%" height={500} sx={{ bgcolor: theme.palette.grey[400] }} />;
+    }
+    if (memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length > 0) {
       return (
-        <Layout
-          selectedLayerPath={selectedLayerPath || ''}
-          layerList={memoLayersList}
-          onLayerListClicked={(layerEntry) => handleLayerChange(layerEntry)}
-          fullWidth={fullWidth}
-          onGuideIsOpen={handleGuideIsOpen}
-          guideContentIds={['details']}
-        >
-          {memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length > 0 && (
-            <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer }}>
-              <Grid container sx={sxClasses.rightPanelBtnHolder}>
-                <Grid item xs={6}>
-                  <Box style={{ marginLeft: '22px' }}>
-                    {featureTitleDetails}
-                    <IconButton
-                      sx={{ marginLeft: '20px', [theme.breakpoints.down('sm')]: { display: 'none' } }}
-                      aria-label="clear-all-features"
-                      tooltip="details.clearAllfeatures"
-                      tooltipPlacement="top"
-                      onClick={() => handleClearAllHighlights()}
-                      className="style1"
-                      disabled={checkedFeatures.length === 0}
-                    >
-                      <LayersClearOutlinedIcon />
-                    </IconButton>
-                  </Box>
-                </Grid>
-                <Grid item xs={6}>
-                  <Box sx={{ textAlign: 'right', marginRight: '26px' }}>
-                    <IconButton
-                      aria-label="backward"
-                      tooltip="details.previousFeatureBtn"
-                      tooltipPlacement="top"
-                      onClick={() => handleFeatureNavigateChange(-1)}
-                      disabled={currentFeatureIndex <= 0}
-                      className="style1"
-                    >
-                      <ArrowBackIosOutlinedIcon />
-                    </IconButton>
-                    <IconButton
-                      sx={{ marginLeft: '20px' }}
-                      aria-label="forward"
-                      tooltip="details.nextFeatureBtn"
-                      tooltipPlacement="top"
-                      onClick={() => handleFeatureNavigateChange(1)}
-                      disabled={!memoSelectedLayerData?.features || currentFeatureIndex + 1 >= memoSelectedLayerData!.features!.length}
-                      className="style1"
-                    >
-                      <ArrowForwardIosOutlinedIcon />
-                    </IconButton>
-                  </Box>
-                </Grid>
-              </Grid>
-              <FeatureInfo features={memoSelectedLayerData?.features} currentFeatureIndex={currentFeatureIndex} />
-            </Box>
-          )}
-        </Layout>
+        <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer }}>
+          <Grid container sx={sxClasses.rightPanelBtnHolder}>
+            <Grid item xs={6}>
+              <Box style={{ marginLeft: '22px' }}>
+                {t('details.featureDetailsTitle')
+                  .replace('{count}', `${currentFeatureIndex + 1}`)
+                  .replace('{total}', `${memoSelectedLayerDataFeatures?.length}`)}
+                <IconButton
+                  sx={{ marginLeft: '20px', [theme.breakpoints.down('sm')]: { display: 'none' } }}
+                  aria-label="clear-all-features"
+                  tooltip="details.clearAllfeatures"
+                  tooltipPlacement="top"
+                  onClick={() => handleClearAllHighlights()}
+                  className="style1"
+                  disabled={checkedFeatures.length === 0}
+                >
+                  <LayersClearOutlinedIcon />
+                </IconButton>
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box sx={{ textAlign: 'right', marginRight: '26px' }}>
+                <IconButton
+                  aria-label="backward"
+                  tooltip="details.previousFeatureBtn"
+                  tooltipPlacement="top"
+                  onClick={() => handleFeatureNavigateChange(-1)}
+                  disabled={currentFeatureIndex <= 0}
+                  className="style1"
+                >
+                  <ArrowBackIosOutlinedIcon />
+                </IconButton>
+                <IconButton
+                  sx={{ marginLeft: '20px' }}
+                  aria-label="forward"
+                  tooltip="details.nextFeatureBtn"
+                  tooltipPlacement="top"
+                  onClick={() => handleFeatureNavigateChange(1)}
+                  disabled={!memoSelectedLayerData?.features || currentFeatureIndex + 1 >= memoSelectedLayerData!.features!.length}
+                  className="style1"
+                >
+                  <ArrowForwardIosOutlinedIcon />
+                </IconButton>
+              </Box>
+            </Grid>
+          </Grid>
+          <FeatureInfo features={memoSelectedLayerData?.features} currentFeatureIndex={currentFeatureIndex} />
+        </Box>
       );
     }
-
-    // Loading UI
-    return <Typography>{t('details.loadingUI')}</Typography>;
+    // return null to render the guide when detail tab is opened.
+    return null;
   };
 
-  // Render
-  return renderComplete();
+  return (
+    <Layout
+      selectedLayerPath={selectedLayerPath || ''}
+      layerList={memoLayersList}
+      onLayerListClicked={(layerEntry) => handleLayerChange(layerEntry)}
+      fullWidth={fullWidth}
+      onGuideIsOpen={handleGuideIsOpen}
+      guideContentIds={['details']}
+    >
+      {renderContent()}
+    </Layout>
+  );
 
   // # endregion
 }
+
+DetailsPanel.defaultProps = {
+  fullWidth: false,
+};
