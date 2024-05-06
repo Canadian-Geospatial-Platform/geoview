@@ -25,9 +25,6 @@ export interface TypeMapFeaturesConfig extends TypeMapFeaturesInstance {
   mapId: string;
   /** This attribute is not part of the schema. It is placed here to keep the 'data-lang' attribute of the HTML div of the map. */
   displayLanguage?: TypeDisplayLanguage;
-  // TODO: refactor - Do we really need to keep this info in the config? Can it be autoamtic....
-  /** If true, the ready callback 'cgpv.init(mapId)' is called with the mapId as a parameter when the map is ready */
-  triggerReadyCallback?: boolean;
 }
 
 /** ******************************************************************************************************************************

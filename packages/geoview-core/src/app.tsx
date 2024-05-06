@@ -226,14 +226,10 @@ function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded
 
             // Register when the map viewer will have loaded layers
             mapViewer.onMapLayersLoaded((mapViewerLoaded) => {
-              // Run the callback for maps that have the triggerReadyCallback set using the mapId for the parameter value
-              if (mapViewerLoaded.mapFeaturesConfig.triggerReadyCallback) {
-                // Log
-                logger.logInfo('Map layers loaded', mapViewerLoaded.mapId);
+              logger.logInfo('Map layers loaded', mapViewerLoaded.mapId);
 
-                // Callback for that particular map
-                callbackMapLayersLoaded?.(mapViewerLoaded.mapId);
-              }
+              // Callback for that particular map
+              callbackMapLayersLoaded?.(mapViewerLoaded.mapId);
 
               // Resolve
               resolve(mapViewerLoaded);
