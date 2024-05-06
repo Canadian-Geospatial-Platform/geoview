@@ -166,7 +166,7 @@ export default function DataTableModal(): JSX.Element {
             enableColumnActions={false}
             enablePagination={(layer?.features?.length ?? 0) > 50}
             enableBottomToolbar={(layer?.features?.length ?? 0) > 50}
-            initialState={{ density: 'compact', pagination: { pageSize: 50, pageIndex: 1 } }}
+            initialState={{ density: 'compact', pagination: { pageSize: 50, pageIndex: 0 } }}
             muiPaginationProps={{
               rowsPerPageOptions: [50, 100],
             }}
