@@ -13,7 +13,7 @@ import * as UI from '@/ui';
 
 import AppStart from '@/core/app-start';
 import { API } from '@/api/api';
-import { Cast, TypeCGPV, TypeWindow } from '@/core/types/global-types';
+import { Cast, TypeCGPV, TypeMapFeaturesConfig, TypeWindow } from '@/core/types/global-types';
 import { Config } from '@/core/utils/config/config';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
@@ -59,9 +59,9 @@ async function fetchConfigFile(configUrl: string): Promise<string> {
  * consifuration automatically
  *
  * @param {Element} mapElement - Div map element with attributes
- * @returns {Promise<MapFeatureConfig>} A promise who contains the caonfiguration to use
+ * @returns {Promise<TypeMapFeaturesConfig>} A promise who contains the caonfiguration to use
  */
-async function getMapConfig(mapElement: Element): Promise<MapFeatureConfig> {
+async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig> {
   // get language in wich we need to have the config file (if not provided, default to English)
 
   // create a new config object and apply default
@@ -99,7 +99,14 @@ async function getMapConfig(mapElement: Element): Promise<MapFeatureConfig> {
   // TD.CONT: This injectioon can be done in api.configApi.getMapConfig with optional parameter keys
   // TD.CONT: This will return the listOfGeoviewLAyer with a new entry: {'geoviewLayerType': 'geoCore','geoviewLayerId': '21b821cf-0f1c-40ee-8925-eab12d357668'},
 
-  return mapConfig;
+  // add the map display language and the map id to config (extend the MapFeatureConfig)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mapConfigExtend: any = mapConfig;
+  const id = mapElement.getAttribute('id')!;
+  mapConfigExtend.mapId = id;
+  mapConfigExtend.displayLanguage = lang;
+
+  return mapConfigExtend as unknown as TypeMapFeaturesConfig;
 }
 
 /**
@@ -122,9 +129,6 @@ async function renderMap(mapElement: Element): Promise<void> {
   if (configObj) {
     const { mapId } = configObj;
     // addGeoViewStore(configObj);
-    const id = mapElement.getAttribute('id')!;
-    conf.mapId = id;
-    // conf.map = conf.gvMap;
     addGeoViewStore(conf);
 
     // render the map with the config

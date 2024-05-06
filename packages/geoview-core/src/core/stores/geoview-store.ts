@@ -17,7 +17,6 @@ import { IUIState, initializeUIState } from './store-interface-and-intial-values
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { serializeTypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
-import { MapFeaturesConfig } from '@/api/config/types/classes/map-features-config';
 
 export type TypeSetStore = (
   partial: IGeoviewState | Partial<IGeoviewState> | ((state: IGeoviewState) => IGeoviewState | Partial<IGeoviewState>),
@@ -28,7 +27,7 @@ export type TypeGetStore = () => IGeoviewState;
 export interface IGeoviewState {
   mapConfig: TypeMapFeaturesConfig | undefined;
   mapId: string;
-  setMapConfig: (config: MapFeaturesConfig) => void;
+  setMapConfig: (config: TypeMapFeaturesConfig) => void;
 
   // core state interfaces
   appState: IAppState;
@@ -51,7 +50,7 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IG
   // Return the initialized store definition
   return {
     mapConfig: undefined,
-    setMapConfig: (config: MapFeaturesConfig) => {
+    setMapConfig: (config: TypeMapFeaturesConfig) => {
       // Log (leaving the logDebug for now until more tests are done with the config 2024-02-28)
       logger.logDebug('Sending the map config to the store...', config.mapId);
 
