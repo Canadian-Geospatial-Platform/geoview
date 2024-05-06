@@ -86,10 +86,10 @@ export class ConfigApi {
    * Get a map feature config from url parameters.
    * @param {string} urlStringParams The url parameters.
    *
-   * @returns {Promise<MapFeatureConfig | undefined>} A map feature configuration object generated from url parameters.
+   * @returns {Promise<MapFeatureConfig>} A map feature configuration object generated from url parameters.
    * @static @async
    */
-  static async getConfigFromUrl(urlStringParams: string): Promise<MapFeatureConfig | undefined> {
+  static async getConfigFromUrl(urlStringParams: string): Promise<MapFeatureConfig> {
     // return the parameters as an object if url contains any params
     const urlParams = ConfigApi.#getMapPropsFromUrlParams(urlStringParams);
 

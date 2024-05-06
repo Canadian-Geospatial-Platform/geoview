@@ -79,8 +79,8 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IG
 
       // packages states, only create if needed
       // TODO: Change this check for something more generic that checks in appBar too
-      if (config.footerBar?.tabs?.core.includes('time-slider')) set({ timeSliderState: initializeTimeSliderState(set, get) });
-      if (config.footerBar?.tabs?.core.includes('geochart')) set({ geochartState: initializeGeochartState(set, get) });
+      if (config.footerBar?.tabs.core.includes('time-slider')) set({ timeSliderState: initializeTimeSliderState(set, get) });
+      if (config.footerBar?.tabs.core.includes('geochart')) set({ geochartState: initializeGeochartState(set, get) });
       if (config.corePackages?.includes('swiper')) set({ swiperState: initializeSwiperState(set, get) });
     },
 

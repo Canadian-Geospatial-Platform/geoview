@@ -91,8 +91,8 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
     mapConfig = api.configApi.getMapConfig(configObject, lang);
   } else if (mapElement.getAttribute('data-shared')) {
     // configurations from the URL parameters is provided
-    // TODO: create a function to return a valid config from the url param string
-    // TD.CONT: this function should be in config api, we pass param and received back the config
+    const urlParam = new URLSearchParams(window.location.search).toString() || '';
+    mapConfig = await api.configApi.getConfigFromUrl(urlParam);
   }
 
   // TODO: inject 'data-geocore-keys' inside the config for later processing by the configAPI
@@ -122,16 +122,16 @@ async function renderMap(mapElement: Element): Promise<void> {
 
   // if a config is provided from either inline div, url params or json file, validate it with against the schema
   // otherwise return the default config
-  const conf = await getMapConfig(mapElement);
+  const configuration = await getMapConfig(mapElement);
 
   // if valid config was provided - mapId is now part of config
-  if (configObj) {
-    const { mapId } = configObj;
+  if (configuration) {
+    const { mapId } = configuration;
 
     // add config to store
     // TODO: refactor - revome the assignement once new config contain layers
-    addGeoViewStore(conf);
-    conf.map.listOfGeoviewLayerConfig = configObj.map.listOfGeoviewLayerConfig;
+    addGeoViewStore(configuration);
+    configuration.map.listOfGeoviewLayerConfig = configObj!.map.listOfGeoviewLayerConfig;
 
     // render the map with the config
     reactRoot[mapId] = createRoot(mapElement!);
@@ -139,7 +139,7 @@ async function renderMap(mapElement: Element): Promise<void> {
     // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
     return new Promise<void>((resolve) => {
       // TODO: Refactor #1810 - Activate <React.StrictMode> here or in app-start.tsx?
-      reactRoot[mapId].render(<AppStart mapFeaturesConfig={conf} onMapViewerInit={(): void => resolve()} />);
+      reactRoot[mapId].render(<AppStart mapFeaturesConfig={configuration} onMapViewerInit={(): void => resolve()} />);
       // reactRoot[mapId].render(
       //   <React.StrictMode>
       //     <AppStart mapFeaturesConfig={configObj} />

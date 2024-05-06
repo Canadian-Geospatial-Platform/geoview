@@ -30,8 +30,8 @@ export function initializeEventProcessors(store: GeoviewStoreType): void {
 
   // package stores, only create if needed
   // TODO: Change this check for something more generic that checks in appBar too
-  if (store.getState().mapConfig!.footerBar?.tabs?.core.includes('time-slider')) timeSliderEventProcessor.initialize(store);
-  if (store.getState().mapConfig!.footerBar?.tabs?.core.includes('geochart')) geochartEventProcessor.initialize(store);
+  if (store.getState().mapConfig!.footerBar?.tabs.core.includes('time-slider')) timeSliderEventProcessor.initialize(store);
+  if (store.getState().mapConfig!.footerBar?.tabs.core.includes('geochart')) geochartEventProcessor.initialize(store);
   if (store.getState().mapConfig!.corePackages?.includes('swiper')) swiperEventProcessor.initialize(store);
 }
 
@@ -45,7 +45,7 @@ export function destroyEventProcessors(store: GeoviewStoreType): void {
 
   // package stores, only destroy if created
   // TODO: Change this check for something more generic that checks in appBar too
-  if (store.getState().mapConfig!.footerBar?.tabs?.core.includes('time-slider')) timeSliderEventProcessor.destroy();
-  if (store.getState().mapConfig!.footerBar?.tabs?.core.includes('geochart')) geochartEventProcessor.destroy();
+  if (store.getState().mapConfig!.footerBar?.tabs.core.includes('time-slider')) timeSliderEventProcessor.destroy();
+  if (store.getState().mapConfig!.footerBar?.tabs.core.includes('geochart')) geochartEventProcessor.destroy();
   if (store.getState().mapConfig!.corePackages?.includes('swiper')) swiperEventProcessor.destroy();
 }

@@ -103,7 +103,7 @@ export class ConfigValidation {
       listOfGeoviewLayerConfig: [],
       extraOptions: {},
     },
-    theme: 'dark',
+    theme: 'geo.ca',
     components: [],
     appBar: { tabs: { core: ['geolocator'] } },
     navBar: ['zoom', 'fullscreen', 'home'],
