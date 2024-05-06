@@ -40,7 +40,7 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     initialSettings: TypeLayerInitialSettings,
     language: TypeDisplayLanguage,
     geoviewLayerConfig: AbstractGeoviewLayerConfig,
-    parentNode: ConfigBaseClass
+    parentNode?: ConfigBaseClass
   ) {
     super(layerConfig, initialSettings, language, geoviewLayerConfig, parentNode);
     this.layerFilter = layerConfig.layerFilter as string;
