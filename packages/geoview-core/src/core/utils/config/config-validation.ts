@@ -74,9 +74,6 @@ export class ConfigValidation {
   /** The map ID associated to the configuration. If it is undefined, a unique value will be generated and assign to it. */
   #mapId: string;
 
-  /** The triggerReadyCallback flag associated to the configuration. Default value is false. */
-  #triggerReadyCallback: boolean;
-
   /** The language that will be used to display the GeoView layer. */
   #displayLanguage: TypeDisplayLanguage;
 
@@ -117,7 +114,6 @@ export class ConfigValidation {
       geolocator: CONFIG_GEOLOCATOR_URL,
     },
     displayLanguage: 'en',
-    triggerReadyCallback: false,
     suportedLanguages: ['en', 'fr'],
     schemaVersionUsed: '1.0',
   };
@@ -155,7 +151,6 @@ export class ConfigValidation {
     this.#mapId = generateId();
     this.#defaultMapFeaturesConfig.mapId = this.mapId;
     this.#displayLanguage = this.#defaultMapFeaturesConfig.displayLanguage!;
-    this.#triggerReadyCallback = this.#defaultMapFeaturesConfig.triggerReadyCallback!;
   }
 
   /** ***************************************************************************************************************************
@@ -183,23 +178,6 @@ export class ConfigValidation {
   set mapId(mapId: string) {
     this.#mapId = mapId;
     this.#defaultMapFeaturesConfig.mapId = this.mapId;
-  }
-
-  /** ***************************************************************************************************************************
-   * Get triggerReadyCallback value.
-   *
-   * @returns {boolean} The triggerReadyCallback flag of the Geoview map.
-   */
-  get triggerReadyCallback(): boolean {
-    return this.#triggerReadyCallback;
-  }
-
-  /** ***************************************************************************************************************************
-   * Set triggerReadyCallback value.
-   * @param {boolean} triggerReadyCallback - The value to assign to the triggerReadyCallback flag for the Geoview map.
-   */
-  set triggerReadyCallback(triggerReadyCallback: boolean) {
-    this.#triggerReadyCallback = triggerReadyCallback;
   }
 
   /** ***************************************************************************************************************************
@@ -830,7 +808,6 @@ export class ConfigValidation {
       components: tempMapFeaturesConfig.components,
       corePackages: tempMapFeaturesConfig.corePackages,
       suportedLanguages: tempMapFeaturesConfig.suportedLanguages,
-      triggerReadyCallback: this.#triggerReadyCallback,
       displayLanguage: this.#displayLanguage,
       navBar: tempMapFeaturesConfig.navBar,
       appBar: tempMapFeaturesConfig.appBar,
