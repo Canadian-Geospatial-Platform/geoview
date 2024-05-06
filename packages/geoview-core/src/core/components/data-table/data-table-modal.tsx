@@ -10,7 +10,6 @@ import {
   Table,
   type MRT_ColumnDef as MRTColumnDef,
   Box,
-  Typography,
   CircularProgress,
 } from '@/ui';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
@@ -126,7 +125,7 @@ export default function DataTableModal(): JSX.Element {
     // Log
     logger.logTraceUseMemo('DATA-TABLE-MODAL - rows', layer?.fieldInfos);
 
-    return (layer?.features?.slice(0, 99).map((feature) => {
+    return (layer?.features?.map((feature) => {
       return feature.fieldInfo;
     }) ?? []) as unknown as ColumnsType[];
   }, [layer?.features, layer?.fieldInfos]);
@@ -165,10 +164,13 @@ export default function DataTableModal(): JSX.Element {
             columns={columns}
             data={rows}
             enableColumnActions={false}
-            enableBottomToolbar={false}
-            initialState={{ density: 'compact' }}
-            muiTableContainerProps={{ sx: { maxHeight: '70vh' } }}
-            enablePagination={false}
+            enablePagination={(layer?.features?.length ?? 0) > 50}
+            enableBottomToolbar={(layer?.features?.length ?? 0) > 50}
+            initialState={{ density: 'compact', pagination: { pageSize: 50, pageIndex: 0 } }}
+            muiPaginationProps={{
+              rowsPerPageOptions: [50, 100],
+            }}
+            muiTableContainerProps={{ sx: { maxHeight: '60vh' } }}
             enableStickyHeader
             enableSorting
             positionToolbarAlertBanner="none" // hide existing row count
@@ -178,22 +180,7 @@ export default function DataTableModal(): JSX.Element {
             enableFilters={false}
             enableFullScreenToggle={false}
             enableHiding={false}
-            enableTopToolbar={(layer?.features?.length ?? 0) > 0}
-            renderTopToolbarCustomActions={() => {
-              return (
-                <Box sx={{ ...sxClasses.selectedRows, ...sxClasses.selectedRowsDirection }}>
-                  <Typography component="p">
-                    {t('layers.dataModalFeaturesDisplayed')
-                      .replace('{totalNumberOfFeatures}', (layer?.features?.length ?? 0).toString())
-                      .replace(
-                        '{numberOfFeatures}',
-                        ((layer?.features?.length ?? 0) > 100 ? 100 : layer?.features?.length ?? 0).toString()
-                      )}
-                  </Typography>
-                  <Typography component="p">{t('layers.completeTable')}</Typography>
-                </Box>
-              );
-            }}
+            enableTopToolbar={false}
           />
         )}
       </DialogContent>
