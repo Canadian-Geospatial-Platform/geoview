@@ -15,27 +15,20 @@ export { getGeoViewStore } from '@/core/stores/stores-managers';
 export type { SelectChangeEvent } from '@mui/material';
 export type { AnySchemaObject } from 'ajv';
 
-// GV: CONFIG EXTRACTION
-// GV: This section of code was extracted and copied to the geoview-config package
-// GV: |||||
-// GV: vvvvv
-
 /** ******************************************************************************************************************************
  * Definition of the map feature configuration according to what can be specified in the map div and in the schema for the
  * type extension TypeMapFeaturesInstance.
  */
 export interface TypeMapFeaturesConfig extends TypeMapFeaturesInstance {
-  // TODO: cahange MapFeatureConfig de yves
+  // TODO: refactor - once new config is finished, change to extend MapFeatureConfig from @config
   /** This attribute is not part of the schema. It is placed here to keep the 'id' attribute of the HTML div of the map. */
   mapId: string;
   /** This attribute is not part of the schema. It is placed here to keep the 'data-lang' attribute of the HTML div of the map. */
   displayLanguage?: TypeDisplayLanguage;
+  // TODO: refactor - Do we really need to keep this info in the config? Can it be autoamtic....
   /** If true, the ready callback 'cgpv.init(mapId)' is called with the mapId as a parameter when the map is ready */
   triggerReadyCallback?: boolean;
 }
-
-// GV: ^^^^^
-// GV: |||||
 
 /** ******************************************************************************************************************************
  *  Definition of a global Window type.
