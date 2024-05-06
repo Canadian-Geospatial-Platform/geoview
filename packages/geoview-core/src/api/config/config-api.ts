@@ -164,7 +164,6 @@ export class ConfigApi {
   }
 
   /**
-   * @static
    * Get the default values that are applied to the map feature configuration when the user doesn't provide a value for a field
    * that is covered by a default value.
    * @param {TypeDisplayLanguage} language The language of the map feature config we want to produce.
