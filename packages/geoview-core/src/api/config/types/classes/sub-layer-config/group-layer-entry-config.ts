@@ -3,7 +3,7 @@ import { TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
 import { TypeDisplayLanguage, TypeLayerEntryType, TypeLayerInitialSettings } from '@config/types/map-schema-types';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
-import { layerEntryIsGroupLayer } from '../../type-guards';
+import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 
 /**
  * Type used to define a group of layers. It can be either subgroups or sublayers.
