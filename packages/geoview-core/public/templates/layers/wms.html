@@ -157,9 +157,6 @@
     <p>This map has a wms layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="LYR1CS" class="panel"></pre>
-    <hr />
-    <button type="button" class="collapsible">Code Snippet</button>
-    <pre id="codeSnippet" class="panel"></pre>
 
     <div class="map-title-holder">
       <h4 id="HLYR2">2. All Styles of a WMS Layer</h4>
@@ -508,11 +505,6 @@
             });
             listenToLegendLayerSetChanges('HLYR1-state', 'LYR4');
           }
-
-          // create snippets
-          createCodeSnippet();
-          createConfigSnippet();
-        
         },
         (mapId) => {
           if (mapId === 'LYR1') {
@@ -579,6 +571,12 @@
       var testRefreshBtn = document.getElementsByClassName('test-refresh-WMS-btn')[0];
       testRefreshBtn.addEventListener('click', function (e) {
         cgpv.api.maps['LYR1'].setProjection(3978);
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
       });
     </script>
   </body>

@@ -137,9 +137,6 @@
   <p>This map has a wms layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="LYR1CS" class="panel"></pre>
-    <hr />
-    <button type="button" class="collapsible">Code Snippet</button>
-    <pre id="codeSnippet" class="panel"></pre>
 
     <div class="map-title-holder">
       <h4 id="HLYR2">2. Date filtering using time zone changed and non ISO date format</h4>
@@ -196,9 +193,6 @@
     <hr />
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="LYR2CS" class="panel"></pre>
-    <hr />
-    <button type="button" class="collapsible">Code Snippet</button>
-    <pre id="codeSnippet1" class="panel"></pre>
 
     <div class="map-title-holder">
       <h4 id="HLYR3">3. Date filtering using ISO UTC dates</h4>
@@ -256,7 +250,7 @@
     <pre id="LYR3CS" class="panel"></pre>
     <hr />
     <button type="button" class="collapsible">Code Snippet</button>
-    <pre id="codeSnippet2" class="panel"></pre>
+    <pre id="codeSnippet" class="panel"></pre>
 
     <script src="codedoc.js"></script>
     <script src="layerlib.js"></script>
@@ -274,6 +268,7 @@
             displayLegend('LegendsId1', resultSet);
           });
           listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
+
         } else if (mapId === 'LYR2') {
           // Wire a handle when all queries done after a map click
           cgpv.api.maps['LYR2'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
@@ -285,6 +280,7 @@
             displayLegend('LegendsId2', resultSet);
           });
           listenToLegendLayerSetChanges('HLYR2-state', 'LYR2');
+
         } else if (mapId === 'LYR3') {
           // Wire a handle when all queries done after a map click
           cgpv.api.maps['LYR3'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
@@ -297,10 +293,6 @@
           });
           listenToLegendLayerSetChanges('HLYR3-state', 'LYR3');
         }
-
-        // create snippets
-        createCodeSnippet();
-        createConfigSnippet();
       }, (mapId) => {
         if (mapId === 'LYR1') {
           createTableOfFilter('LYR1');
@@ -327,6 +319,12 @@
           element.value = '';
           element.innerText = 'Select a layer';
           dropDownContent.appendChild(element);
+
+          const getAllFeatureInfo2 = document.getElementById('AllFeatureInfo2');
+          getAllFeatureInfo2.addEventListener('click', async () => {
+            const resultSet = await cgpv.api.maps['LYR2'].layer.allFeatureInfoLayerSet.queryLayer('historical-flood/0');
+            createInfoTable('LYR2', 'ResultSetId2', resultSet, 'all-features');
+          });
 
           const lyr1RegisteredLayers = cgpv.api.maps.LYR1.layer.registeredLayers;
           Object.keys(lyr1RegisteredLayers).forEach((layerPath) => {
@@ -390,21 +388,18 @@
             }, 3000)
           }
 
+          const getAllFeatureInfo3 = document.getElementById('AllFeatureInfo3');
+          getAllFeatureInfo3.addEventListener('click', async () => {
+            const resultSet = await cgpv.api.maps['LYR3'].layer.allFeatureInfoLayerSet.queryLayer('historical-flood/0');
+            createInfoTable('LYR3', 'ResultSetId3', resultSet, 'all-features');
+          });
         }
       });
 
-      // LYR1 ===================================================================================================================
-      const getAllFeatureInfo2 = document.getElementById('AllFeatureInfo2');
-      getAllFeatureInfo2.addEventListener('click', async () => {
-        const resultSet = await cgpv.api.maps['LYR2'].layer.allFeatureInfoLayerSet.queryLayer('historical-flood/0');
-        createInfoTable('LYR2', 'ResultSetId2', resultSet, 'all-features');
-      });
-
-      // LYR3 ===================================================================================================================
-      const getAllFeatureInfo3 = document.getElementById('AllFeatureInfo3');
-      getAllFeatureInfo3.addEventListener('click', async () => {
-        const resultSet = await cgpv.api.maps['LYR3'].layer.allFeatureInfoLayerSet.queryLayer('historical-flood/0');
-        createInfoTable('LYR3', 'ResultSetId3', resultSet, 'all-features');
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
       });
     </script>
   </body>

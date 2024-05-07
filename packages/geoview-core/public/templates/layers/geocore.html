@@ -185,15 +185,17 @@
         } else if (mapId === 'LYR2') {
           listenToLegendLayerSetChanges('HLYR2-state', 'LYR2');
         }
-  
-        // create snippets
-        createCodeSnippet();
-        createConfigSnippet();
       }, (mapId) => {
         if (mapId === 'LYR1') {
           // Layers are loaded
           createTableOfFilter('LYR1');
         }
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
       });
     </script>
   </body>

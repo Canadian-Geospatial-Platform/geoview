@@ -486,9 +486,6 @@
     <hr />
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="LYR1CS" class="panel"></pre>
-    <hr />
-    <button type="button" class="collapsible">Code Snippet</button>
-    <pre id="codeSnippet" class="panel"></pre>
 
     <div class="map-title-holder">
       <h4 id="HLYR2">2. Date filtering using time zone changed and non ISO date format</h4>
@@ -545,9 +542,6 @@
     <hr />
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="LYR2CS" class="panel"></pre>
-    <hr />
-    <button type="button" class="collapsible">Code Snippet</button>
-    <pre id="codeSnippet1" class="panel"></pre>
 
     <div class="map-title-holder">
       <h4 id="HLYR3">3. Date filtering using ISO UTC dates</h4>
@@ -605,7 +599,7 @@
     <pre id="LYR3CS" class="panel"></pre>
     <hr />
     <button type="button" class="collapsible">Code Snippet</button>
-    <pre id="codeSnippet2" class="panel"></pre>
+    <pre id="codeSnippet" class="panel"></pre>
 
     <script src="codedoc.js"></script>
     <script src="layerlib.js"></script>
@@ -651,9 +645,6 @@
           listenToLegendLayerSetChanges('HLYR3-state', 'LYR3');
         }
 
-        // create snippets
-        createCodeSnippet();
-        createConfigSnippet();
       }, (mapId) => {
         if (mapId === 'LYR1') {
           createTableOfFilter('LYR1');
@@ -735,6 +726,12 @@
             }
           }, 3000);
         }
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
       });
     </script>
   </body>

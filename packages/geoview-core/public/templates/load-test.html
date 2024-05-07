@@ -176,10 +176,6 @@
               }),
             1000
           );
-
-          // create snippets
-          createCodeSnippet();
-          createConfigSnippet();
         }
       });
 
@@ -366,6 +362,12 @@
 
         return [-long, lat];
       }
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });
     </script>
   </body>
 </html>

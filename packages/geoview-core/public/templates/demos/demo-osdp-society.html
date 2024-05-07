@@ -126,11 +126,13 @@
       cgpv.init((mapId) => {
         if (mapId === 'Map1') {
           listenToLegendLayerSetChanges('HMap1-state', 'Map1');
-
-          // create snippets
-          createCodeSnippet();
-          createConfigSnippet();
         }
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
       });
     </script>
   </body>

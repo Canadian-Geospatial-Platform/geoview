@@ -84,11 +84,13 @@
         if (mapId === 'LNG1') {
           // Write code here...
           // ...
-
-          // create snippets
-          createCodeSnippet();
-          createConfigSnippet();
         }
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
       });
     </script>
   </body>

@@ -299,11 +299,13 @@
           cgpv.api.maps['mapWM'].layer.geometry.onGeometryAdded((sender, payload) => {
             console.log(`geometry added ${payload.getGeometry().getType()}`);
           });
-
-          // create snippets
-          createCodeSnippet();
-          createConfigSnippet();
         }
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
       });
     </script>
   </body>

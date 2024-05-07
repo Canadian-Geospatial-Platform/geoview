@@ -128,23 +128,24 @@
           });
 
           listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
-
-          // create snippets
-          createCodeSnippet();
-          createConfigSnippet();
         }
       }, (mapId) => {
         if (mapId === 'LYR1') {
           // Layers are loaded
+          const getAllFeatureInfo1 = document.getElementById('AllFeatureInfo1');
+          getAllFeatureInfo1.addEventListener('click', async () => {
+            const resultSet = await cgpv.api.maps['LYR1'].layer.allFeatureInfoLayerSet.queryLayer('ogcFeatureLYR1/lakes');
+            createInfoTable('LYR1', 'ResultSetId1', resultSet, 'all-features');
+          });
+
           createTableOfFilter('LYR1');
         }
       });
 
-      // LYR1 ===================================================================================================================
-      const getAllFeatureInfo1 = document.getElementById('AllFeatureInfo1');
-      getAllFeatureInfo1.addEventListener('click', async () => {
-        const resultSet = await cgpv.api.maps['LYR1'].layer.allFeatureInfoLayerSet.queryLayer('ogcFeatureLYR1/lakes');
-        createInfoTable('LYR1', 'ResultSetId1', resultSet, 'all-features');
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
       });
     </script>
   </body>

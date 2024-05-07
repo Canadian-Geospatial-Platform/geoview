@@ -138,11 +138,13 @@
 
             cgpv.api.maps['EVNT1'].notifications.addNotificationSuccess('this is a success notification title');
           }, 10000);
-
-          // create snippets
-          createCodeSnippet();
-          createConfigSnippet();
         }
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
       });
     </script>
   </body>

@@ -506,16 +506,18 @@
             displayLegend('LegendsId1', resultSet);
           });
           listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
-
-          // create snippets
-          createCodeSnippet();
-          createConfigSnippet();
         }
       }, (mapId) => {
         if (mapId === 'LYR1') {
           // Layers are loaded
           createTableOfFilter('LYR1');
         }
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
       });
     </script>
   </body>

@@ -18,7 +18,7 @@ import { Config } from '@/core/utils/config/config';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
 import { logger } from '@/core/utils/logger';
-import { isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
+import { removeCommentsFromJSON } from '@/core/utils/utilities';
 import { TypeDisplayLanguage } from './api/config/types/map-schema-types';
 
 // The next export allow to import the exernal-types from 'geoview-core' from outside of the geoview-core package.
@@ -73,24 +73,16 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
     // configurations from inline div is provided
     const configData = mapElement.getAttribute('data-config');
 
-    // Erase comments in the config file.
-    let configObjStr = removeCommentsFromJSON(configData!);
-
-    // remove CR and LF from the map config
-    configObjStr = configObjStr.replace(/(\r\n|\n|\r)/gm, '');
-    // replace apostrophes not preceded by a backslash with quotes
-    configObjStr = configObjStr.replace(/(?<!\\)'/gm, '"');
-    // replace apostrophes preceded by a backslash with a single apostrophe
-    configObjStr = configObjStr.replace(/\\'/gm, "'");
-
-    if (isJsonString(configObjStr)) mapConfig = api.configApi.getMapConfig(configObjStr, lang);
+    // Erase comments in the config file then process
+    const configObjStr = removeCommentsFromJSON(configData!);
+    mapConfig = api.configApi.getMapConfig(configObjStr, lang);
   } else if (mapElement.hasAttribute('data-config-url')) {
-    // configurations file url is provided
+    // configurations file url is provided, fetch then process
     const configUrl = mapElement.getAttribute('data-config-url');
     const configObject = await fetchConfigFile(configUrl!);
     mapConfig = api.configApi.getMapConfig(configObject, lang);
   } else if (mapElement.getAttribute('data-shared')) {
-    // configurations from the URL parameters is provided
+    // configurations from the URL parameters is provided, extract then process
     const urlParam = new URLSearchParams(window.location.search).toString() || '';
     mapConfig = await api.configApi.getConfigFromUrl(urlParam);
   }
@@ -215,25 +207,12 @@ function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded
           const mapId = mapElement.getAttribute('id')!;
           callbackMapInit?.(mapId);
 
-          // Create promise for when all the layers will be loaded
-          return new Promise((resolve) => {
-            const mapViewer = api.maps[mapId];
-            // If the mapviewer is already ready, resolve right away
-            if (mapViewer.mapLayersLoaded) {
-              resolve(mapViewer);
-              return;
-            }
+          // Register when the map viewer will have loaded layers
+          api.maps[mapId].onMapLayersLoaded((mapViewerLoaded) => {
+            logger.logInfo('Map layers loaded', mapViewerLoaded.mapId);
 
-            // Register when the map viewer will have loaded layers
-            mapViewer.onMapLayersLoaded((mapViewerLoaded) => {
-              logger.logInfo('Map layers loaded', mapViewerLoaded.mapId);
-
-              // Callback for that particular map
-              callbackMapLayersLoaded?.(mapViewerLoaded.mapId);
-
-              // Resolve
-              resolve(mapViewerLoaded);
-            });
+            // Callback for that particular map
+            callbackMapLayersLoaded?.(mapViewerLoaded.mapId);
           });
         })
         .catch((error) => {

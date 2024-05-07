@@ -165,11 +165,13 @@
             displayLegend('LegendsId1', resultSet);
           });
           listenToLegendLayerSetChanges('HMap1-state', 'Map1');
-
-          // create snippets
-          createCodeSnippet();
-          createConfigSnippet();
         }
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
       });
     </script>
   </body>

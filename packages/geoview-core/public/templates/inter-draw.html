@@ -179,11 +179,13 @@
         if (mapId === 'MAP1') {
           // Init map
           initMap1(cgpv.api.maps['MAP1']);
-
-          // create snippets
-          createCodeSnippet();
-          createConfigSnippet();
         }
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
       });
     </script>
   </body>
