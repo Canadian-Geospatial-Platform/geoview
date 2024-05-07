@@ -82,8 +82,8 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
     const configObject = await fetchConfigFile(configUrl!);
     mapConfig = api.configApi.getMapConfig(configObject, lang);
   } else if (mapElement.getAttribute('data-shared')) {
-    // configurations from the URL parameters is provided, extract then process
-    const urlParam = new URLSearchParams(window.location.search).toString() || '';
+    // configurations from the URL parameters is provided, extract then process (replace HTLM characters , && :)
+    const urlParam = new URLSearchParams(window.location.search).toString().replace(/%2C/g, ',').replace(/%3A/g, ':') || '';
     mapConfig = await api.configApi.getConfigFromUrl(urlParam);
   }
 
