@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%= htmlWebpackPlugin.options.title %></title>
-    <link rel="stylesheet" href="css/style.css" />
     <link rel="shortcut icon" href="./favicon.ico" />
     <meta name="msapplication-TileColor" content="#da532c" />
     <meta name="msapplication-config" content="./img/browserconfig.xml" />
@@ -21,7 +20,7 @@
       <table>
         <tbody>
           <tr>
-            <td><img class="logo" alt="logo" src="./img/Logo.png" /></td>
+            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
             <td class="header-title">
               <h1><strong>Footer tabs - Vanilla JavaScript</strong></h1>
             </td>
@@ -34,7 +33,7 @@
       <table>
         <tbody>
           <tr>
-            <td>This page is used to showcase using the footer tabsuse in plain vanilla JavaScript.</td>
+            <td>This page is used to showcase using the footer tabs use in plain vanilla JavaScript.</td>
           </tr>
         </tbody>
       </table>
@@ -55,10 +54,7 @@
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init((mapIdTemp) => {
-        if (mapIdTemp === 'allMaps') {
-          // define the map id
-          const mapId = 'mapWM';
-
+        if (mapIdTemp === 'mapWM') {
           // import react and api from the core
           const { react, api, ui } = cgpv;
 
@@ -274,11 +270,13 @@
             label: 'Custom',
             content: 'This is a table to develop', // TableComponent,
           });
-
-          // create snippets
-          createCodeSnippet();
-          createConfigSnippet();
         }
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
       });
     </script>
   </body>

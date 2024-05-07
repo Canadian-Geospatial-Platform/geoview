@@ -143,7 +143,7 @@
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init((mapId) => {
-        if (mapId === 'allMaps') {
+        if (mapId === 'LNG1') {
           cgpv.api.utilities.geo
             .getESRIServiceMetadata('https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/1')
             .then((data) => {
@@ -223,11 +223,13 @@
             var timeConsole = document.getElementById('time-console');
             timeConsole.textContent = '';
           });
-
-          // create snippets
-          createCodeSnippet();
-          createConfigSnippet();
         }
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
       });
     </script>
   </body>

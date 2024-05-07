@@ -50,29 +50,22 @@ export class ConfigApi {
     const obj: TypeJsonObject = {};
 
     if (objStr && objStr.length) {
-      // get the text in between { }
-      const objStrPropRegex = /(?:[{_.])(.*?)(?=[}_.])/g;
+      // first { is kept with regex, remove
+      const objProps = objStr.split(',');
 
-      const objStrProps = objStr.match(objStrPropRegex);
+      if (objProps) {
+        for (let i = 0; i < objProps.length; i += 1) {
+          const prop = objProps[i].split(':');
+          if (prop && prop.length) {
+            const key: string = prop[0];
+            const value: string = prop[1];
 
-      if (objStrProps && objStrProps.length) {
-        // first { is kept with regex, remove
-        const objProps = objStrProps[0].replace(/{/g, '').split(',');
-
-        if (objProps) {
-          for (let i = 0; i < objProps.length; i += 1) {
-            const prop = objProps[i].split(':');
-            if (prop && prop.length) {
-              const key: string = prop[0];
-              const value: string = prop[1];
-
-              if (prop[1] === 'true') {
-                obj[key] = Cast<TypeJsonObject>(true);
-              } else if (prop[1] === 'false') {
-                obj[key] = Cast<TypeJsonObject>(false);
-              } else {
-                obj[key] = Cast<TypeJsonObject>(value);
-              }
+            if (prop[1] === 'true') {
+              obj[key] = Cast<TypeJsonObject>(true);
+            } else if (prop[1] === 'false') {
+              obj[key] = Cast<TypeJsonObject>(false);
+            } else {
+              obj[key] = Cast<TypeJsonObject>(value);
             }
           }
         }
@@ -86,10 +79,10 @@ export class ConfigApi {
    * Get a map feature config from url parameters.
    * @param {string} urlStringParams The url parameters.
    *
-   * @returns {Promise<MapFeatureConfig | undefined>} A map feature configuration object generated from url parameters.
+   * @returns {Promise<MapFeatureConfig>} A map feature configuration object generated from url parameters.
    * @static @async
    */
-  static async getConfigFromUrl(urlStringParams: string): Promise<MapFeatureConfig | undefined> {
+  static async getConfigFromUrl(urlStringParams: string): Promise<MapFeatureConfig> {
     // return the parameters as an object if url contains any params
     const urlParams = ConfigApi.#getMapPropsFromUrlParams(urlStringParams);
 
@@ -100,7 +93,7 @@ export class ConfigApi {
     const displayLanguage = (urlParams.l as TypeDisplayLanguage) || 'en';
 
     if (Object.keys(urlParams).length && !urlParams.geoms) {
-      // Ex: p=3857&z=4&c=40,-100&l=en&t=dark&b={basemapId:transport,shaded:false,labeled:true}&i=dynamic&cp=details-panel,layers-panel&cc=overview-map&keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9
+      // Ex: p=3857&z=4&c=40,-100&l=en&t=dark&b=basemapId:transport,shaded:false,labeled:true&i=dynamic&cp=details-panel,layers-panel&cc=overview-map&keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9
 
       // get center
       let center: string[] = [];
