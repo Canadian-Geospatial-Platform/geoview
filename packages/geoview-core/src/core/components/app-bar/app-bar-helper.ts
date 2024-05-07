@@ -114,3 +114,28 @@ export const helpCloseAll = (
     });
   });
 };
+
+export const enforceArrayOrder = (sourceArray: string[], enforce: string[]): string[] => {
+  const filteredEnforce = enforce.filter((item) => sourceArray.includes(item)); // Filter out items not present in sourceArray
+  const sortedArray = [...sourceArray].sort((a, b) => {
+    const indexA = filteredEnforce.indexOf(a);
+    const indexB = filteredEnforce.indexOf(b);
+
+    // If both items are enforced, sort based on their positions in enforce
+    if (indexA !== -1 && indexB !== -1) {
+      return indexA - indexB;
+    }
+    // If only one of the items is enforced, prioritize it
+    if (indexA !== -1) {
+      return -1;
+    }
+    if (indexB !== -1) {
+      return 1;
+    }
+    // If neither item is enforced, maintain the original order
+
+    return 0;
+  });
+
+  return sortedArray;
+};

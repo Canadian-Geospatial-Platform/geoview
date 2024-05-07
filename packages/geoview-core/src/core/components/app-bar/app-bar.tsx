@@ -23,7 +23,7 @@ import Notifications from '@/core/components/notifications/notifications';
 import Geolocator from './buttons/geolocator';
 import Version from './buttons/version';
 import { getSxClasses } from './app-bar-style';
-import { helpCloseAll, helpClosePanelById, helpOpenPanelById } from './app-bar-helper';
+import { enforceArrayOrder, helpCloseAll, helpClosePanelById, helpOpenPanelById } from './app-bar-helper';
 import { TypeJsonObject, TypeJsonValue, toJsonObject } from '@/core/types/global-types';
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 
@@ -284,20 +284,15 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   // #endregion
 
-  return (
-    <Box sx={sxClasses.appBar} className={`interaction-${interaction}`} ref={appBar}>
-      <Box sx={sxClasses.appBarButtons}>
-        {appBarComponents.includes('geolocator') && interaction === 'dynamic' && (
-          <Box>
-            <List sx={sxClasses.appBarList}>
-              <ListItem>
-                <Geolocator />
-              </ListItem>
-            </List>
-          </Box>
-        )}
+  let buttonPanelGroupNames = Object.keys(buttonPanelGroups);
+  buttonPanelGroupNames = enforceArrayOrder(buttonPanelGroupNames, ['legend', 'details', 'guide']);
+  const topGroupNames = buttonPanelGroupNames.filter((groupName) => groupName !== 'guide');
+  const bottomGroupNames = buttonPanelGroupNames.filter((groupName) => groupName === 'guide');
 
-        {Object.keys(buttonPanelGroups).map((groupName: string) => {
+  const renderButtonGroup = (groupNames: string[]): ReactNode => {
+    return (
+      <>
+        {groupNames.map((groupName: string) => {
           // get button panels from group
           const buttonPanels = buttonPanelGroups[groupName];
 
@@ -327,16 +322,34 @@ export function AppBar(props: AppBarProps): JSX.Element {
             </List>
           );
         })}
-        {appBarComponents.includes('export') && interaction === 'dynamic' && (
+      </>
+    );
+  };
+
+  return (
+    <Box sx={sxClasses.appBar} className={`interaction-${interaction}`} ref={appBar}>
+      <Box sx={sxClasses.appBarButtons}>
+        {appBarComponents.includes('geolocator') && interaction === 'dynamic' && (
           <Box>
+            <List sx={sxClasses.appBarList}>
+              <ListItem>
+                <Geolocator />
+              </ListItem>
+            </List>
+          </Box>
+        )}
+
+        {renderButtonGroup(topGroupNames)}
+
+        <Box sx={sxClasses.versionButtonDiv}>
+          {renderButtonGroup(bottomGroupNames)}
+          {appBarComponents.includes('export') && interaction === 'dynamic' && (
             <List sx={sxClasses.appBarList}>
               <ListItem>
                 <ExportButton className={` style3 ${activeModalId ? 'active' : ''}`} />
               </ListItem>
             </List>
-          </Box>
-        )}
-        <Box sx={sxClasses.versionButtonDiv}>
+          )}
           <List sx={sxClasses.appBarList}>
             {interaction === 'dynamic' && <hr />}
             <ListItem>
