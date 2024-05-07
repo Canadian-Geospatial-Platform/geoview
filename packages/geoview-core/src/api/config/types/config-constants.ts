@@ -158,7 +158,7 @@ export const CV_DEFAULT_MAP_FEATURE_CONFIG = {
     listOfGeoviewLayerConfig: [] as AbstractGeoviewLayerConfig[],
     extraOptions: {},
   } as TypeMapConfig,
-  theme: 'dark' as TypeDisplayTheme,
+  theme: 'geo.ca' as TypeDisplayTheme,
   components: ['north-arrow', 'overview-map'],
   appBar: { tabs: { core: ['geolocator'] } } as TypeAppBarProps,
   navBar: ['zoom', 'fullscreen', 'home'] as TypeNavBarProps,

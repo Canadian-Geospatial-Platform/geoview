@@ -58,7 +58,6 @@
     <div
       id="LYR1"
       class="geoview-map"
-      triggerReadyCallback="true"
       data-lang="en"
       data-config="{
         'map': {
@@ -126,9 +125,6 @@
     <p>This map has a wfs layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="LYR1CS" class="panel"></pre>
-    <hr />
-    <button type="button" class="collapsible">Code Snippet</button>
-    <pre id="codeSnippet" class="panel"></pre>
 
     <div class="map-title-holder">
       <h4 id="HLYR2">2. WFS Layers using bbox strategy</h4>
@@ -139,7 +135,6 @@
     <div
       id="LYR2"
       class="geoview-map"
-      triggerReadyCallback="true"
       data-lang="en"
       data-config="{
         'map': {
@@ -190,7 +185,7 @@
     <hr />
     <p>This map has a wfs layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
-    <pre id="LYR1CS" class="panel"></pre>
+    <pre id="LYR2CS" class="panel"></pre>
     <hr />
     <button type="button" class="collapsible">Code Snippet</button>
     <pre id="codeSnippet" class="panel"></pre>
@@ -211,9 +206,7 @@
             displayLegend('LegendsId1', resultSet);
           });
           listenToLegendLayerSetChanges('HLYR1-state', mapId);
-        }
-
-        if (mapId === 'LYR2') {
+        } else if (mapId === 'LYR2') {
           // Wire a handle when all queries done after a map click
           cgpv.api.maps[mapId].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
             const { coordinate, resultSet, eventType } = payload;
@@ -226,31 +219,31 @@
           listenToLegendLayerSetChanges('HLYR2-state', mapId);
         }
 
-        if (mapId === 'allMaps') {
-          // create snippets
-          createCodeSnippet();
-          createConfigSnippet();
-        }
       }, (mapId) => {
-        if (mapId === 'allMaps') {
+        if (mapId === 'LYR1') {
           // Layers are loaded
+          const getAllFeatureInfo1 = document.getElementById('AllFeatureInfo1');
+          getAllFeatureInfo1.addEventListener('click', async () => {
+            const resultSet = await cgpv.api.maps['LYR1'].layer.allFeatureInfoLayerSet.queryLayer('wfsLYR1/usa:states');
+            createInfoTable('LYR1', 'ResultSetId1', resultSet, 'all-features');
+          });
+
           createTableOfFilter('LYR1');
+        } else if (mapId === 'LYR2') {
+          const getAllFeatureInfo2 = document.getElementById('AllFeatureInfo2');
+          getAllFeatureInfo2.addEventListener('click', async () => {
+            const resultSet = await cgpv.api.maps['LYR2'].layer.allFeatureInfoLayerSet.queryLayer('wfsLYR4/mrds');
+            createInfoTable('LYR2', 'ResultSetId2', resultSet, 'all-features');
+          });
+
           createTableOfFilter('LYR2');
         }
       });
 
-      // LYR1 ===================================================================================================================
-      const getAllFeatureInfo1 = document.getElementById('AllFeatureInfo1');
-      getAllFeatureInfo1.addEventListener('click', async () => {
-        const resultSet = await cgpv.api.maps['LYR1'].layer.allFeatureInfoLayerSet.queryLayer('wfsLYR1/usa:states');
-        createInfoTable('LYR1', 'ResultSetId1', resultSet, 'all-features');
-      });
-
-      // LYR2 ===================================================================================================================
-      const getAllFeatureInfo2 = document.getElementById('AllFeatureInfo2');
-      getAllFeatureInfo2.addEventListener('click', async () => {
-        const resultSet = await cgpv.api.maps['LYR2'].layer.allFeatureInfoLayerSet.queryLayer('wfsLYR4/mrds');
-        createInfoTable('LYR2', 'ResultSetId2', resultSet, 'all-features');
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
       });
     </script>
   </body>

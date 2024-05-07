@@ -235,7 +235,7 @@
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init((mapId) => {
-        if (mapId === 'allMaps') {
+        if (mapId === 'mapWM') {
           // get addPolyline button element and add event handler
           var addPolylineBtn = document.getElementsByClassName('add-polyline-btn')[0];
           addPolylineBtn.addEventListener('click', function (e) {
@@ -299,11 +299,13 @@
           cgpv.api.maps['mapWM'].layer.geometry.onGeometryAdded((sender, payload) => {
             console.log(`geometry added ${payload.getGeometry().getType()}`);
           });
-
-          // create snippets
-          createCodeSnippet();
-          createConfigSnippet();
         }
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
       });
     </script>
   </body>

@@ -81,7 +81,7 @@
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init((mapId) => {
-        if (mapId === 'allMaps') {
+        if (mapId === 'mapWM') {
           // get add panel button element for WM map
           var addAppbarPanelBtn = document.getElementsByClassName('add-appbar-panel-btn')[0];
 
@@ -108,7 +108,6 @@
 
           // get add nav-bar panel button element for WM map
           var addNavbarPanelBtn = document.getElementsByClassName('add-navbar-panel-btn')[0];
-
           // add nav-bar panel btn click event handler
           // button will open a panel on the nav-bar
           addNavbarPanelBtn.addEventListener('click', function (e) {
@@ -170,11 +169,13 @@
             // call an api function to add a new button panel in the nav-bar in a new group
             cgpv.api.maps['mapWM'].navBarApi.createNavbarButtonPanel(button, panel, 'newGroup');
           });
-
-          // create snippets
-          createCodeSnippet();
-          createConfigSnippet();
         }
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
       });
     </script>
   </body>

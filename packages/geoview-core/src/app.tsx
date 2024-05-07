@@ -8,15 +8,18 @@ import 'ol/ol.css';
 import '@/ui/style/style.css';
 import '@/ui/style/vendor.css';
 
+import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
 import * as UI from '@/ui';
 
 import AppStart from '@/core/app-start';
 import { API } from '@/api/api';
-import { Cast, TypeCGPV, TypeWindow } from '@/core/types/global-types';
+import { Cast, TypeCGPV, TypeMapFeaturesConfig, TypeWindow } from '@/core/types/global-types';
 import { Config } from '@/core/utils/config/config';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
 import { logger } from '@/core/utils/logger';
+import { removeCommentsFromJSON } from '@/core/utils/utilities';
+import { TypeDisplayLanguage } from './api/config/types/map-schema-types';
 
 // The next export allow to import the exernal-types from 'geoview-core' from outside of the geoview-core package.
 export * from './core/types/external-types';
@@ -36,23 +39,91 @@ export function unmountMap(mapId: string): void {
 }
 
 /**
+ * Function to read the configuration specified
+ *
+ * @param {string} configUrl - url to fetch the config from
+ * @returns configuration string
+ */
+async function fetchConfigFile(configUrl: string): Promise<string> {
+  const response = await fetch(configUrl);
+  const result = await response.json();
+
+  return result;
+}
+
+/**
+ * Function to get a configuration from a div element who contains attributes to read from.
+ * If the div has one of the folllowing atttributes data-config, data-config-url or data-shared,
+ * it will try to get a valide configuration from the attribute content. If there is no such attributes,
+ * it will return a default config. If the data-geocore is present, it will inject the layer in the
+ * consifuration automatically
+ *
+ * @param {Element} mapElement - Div map element with attributes
+ * @returns {Promise<TypeMapFeaturesConfig>} A promise who contains the caonfiguration to use
+ */
+async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig> {
+  // get language in wich we need to have the config file (if not provided, default to English)
+
+  // create a new config object and apply default
+  const lang = mapElement.hasAttribute('data-lang') ? (mapElement.getAttribute('data-lang')! as TypeDisplayLanguage) : 'en';
+  let mapConfig: MapFeatureConfig = api.configApi.getDefaultMapFeatureConfig(lang);
+
+  // check what type of config is provided (data-config, data-config-url or data-shared)
+  if (mapElement.hasAttribute('data-config')) {
+    // configurations from inline div is provided
+    const configData = mapElement.getAttribute('data-config');
+
+    // Erase comments in the config file then process
+    const configObjStr = removeCommentsFromJSON(configData!);
+    mapConfig = api.configApi.getMapConfig(configObjStr, lang);
+  } else if (mapElement.hasAttribute('data-config-url')) {
+    // configurations file url is provided, fetch then process
+    const configUrl = mapElement.getAttribute('data-config-url');
+    const configObject = await fetchConfigFile(configUrl!);
+    mapConfig = api.configApi.getMapConfig(configObject, lang);
+  } else if (mapElement.getAttribute('data-shared')) {
+    // configurations from the URL parameters is provided, extract then process (replace HTLM characters , && :)
+    const urlParam = new URLSearchParams(window.location.search).toString().replace(/%2C/g, ',').replace(/%3A/g, ':') || '';
+    mapConfig = await api.configApi.getConfigFromUrl(urlParam);
+  }
+
+  // TODO: inject 'data-geocore-keys' inside the config for later processing by the configAPI
+  // TD.CONT: This injectioon can be done in api.configApi.getMapConfig with optional parameter keys
+  // TD.CONT: This will return the listOfGeoviewLAyer with a new entry: {'geoviewLayerType': 'geoCore','geoviewLayerId': '21b821cf-0f1c-40ee-8925-eab12d357668'},
+
+  // add the map display language and the map id to config (extend the MapFeatureConfig)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mapConfigExtend: any = mapConfig;
+  const id = mapElement.getAttribute('id')!;
+  mapConfigExtend.mapId = id;
+  mapConfigExtend.displayLanguage = lang;
+
+  return mapConfigExtend as unknown as TypeMapFeaturesConfig;
+}
+
+/**
  * Function to render the map for inline map and map create from a function call
  *
  * @param {Element} mapElement - The html element div who will contain the map
  */
 async function renderMap(mapElement: Element): Promise<void> {
+  // TODO: refactor - remove this config once we get layers from the new one
   // create a new config for this map element
   const config = new Config(mapElement);
-
-  // initialize config
-  // if a config is provided from either inline div, url params or json file, validate it with against the schema
-  // otherwise return the default config
   const configObj = await config.initializeMapConfig();
 
+  // if a config is provided from either inline div, url params or json file, validate it with against the schema
+  // otherwise return the default config
+  const configuration = await getMapConfig(mapElement);
+
   // if valid config was provided - mapId is now part of config
-  if (configObj) {
-    const { mapId } = configObj;
-    addGeoViewStore(configObj);
+  if (configuration) {
+    const { mapId } = configuration;
+
+    // add config to store
+    // TODO: refactor - revome the assignement once new config contain layers
+    addGeoViewStore(configuration);
+    configuration.map.listOfGeoviewLayerConfig = configObj!.map.listOfGeoviewLayerConfig;
 
     // render the map with the config
     reactRoot[mapId] = createRoot(mapElement!);
@@ -60,7 +131,7 @@ async function renderMap(mapElement: Element): Promise<void> {
     // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
     return new Promise<void>((resolve) => {
       // TODO: Refactor #1810 - Activate <React.StrictMode> here or in app-start.tsx?
-      reactRoot[mapId].render(<AppStart mapFeaturesConfig={configObj} onMapViewerInit={(): void => resolve()} />);
+      reactRoot[mapId].render(<AppStart mapFeaturesConfig={configuration} onMapViewerInit={(): void => resolve()} />);
       // reactRoot[mapId].render(
       //   <React.StrictMode>
       //     <AppStart mapFeaturesConfig={configObj} />
@@ -116,11 +187,10 @@ export async function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig:
  * @param {(mapId: string) => void} callbackMapLayersLoaded optional callback function to run once layers are loaded on the map
  * @returns {Promise<void>}
  */
-async function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded?: (mapId: string) => void): Promise<void> {
+function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded?: (mapId: string) => void): void {
   const mapElements = document.getElementsByClassName('geoview-map');
 
   // loop through map elements on the page
-  const promises = [];
   for (let i = 0; i < mapElements.length; i += 1) {
     const mapElement = mapElements[i] as Element;
     if (!mapElement.classList.contains('geoview-map-func-call')) {
@@ -134,70 +204,23 @@ async function init(callbackMapInit?: (mapId: string) => void, callbackMapLayers
           logger.logInfo('Map initialized', mapElement.getAttribute('id')!);
 
           // Callback about it
-          callbackMapInit?.(mapElement.getAttribute('id')!);
+          const mapId = mapElement.getAttribute('id')!;
+          callbackMapInit?.(mapId);
+
+          // Register when the map viewer will have loaded layers
+          api.maps[mapId].onMapLayersLoaded((mapViewerLoaded) => {
+            logger.logInfo('Map layers loaded', mapViewerLoaded.mapId);
+
+            // Callback for that particular map
+            callbackMapLayersLoaded?.(mapViewerLoaded.mapId);
+          });
         })
         .catch((error) => {
           // Log
           logger.logPromiseFailed('promiseMapInit in init in App', error);
         });
-
-      // Push the promise in the list of all maps being rendered
-      promises.push(promiseMapInit);
     }
   }
-
-  // Wait for map renders to end and MapViewers to be initialized
-  await Promise.allSettled(promises);
-
-  // TODO: REFACTOR - Petition to never callback with 'allMaps' and rethink this.
-  // TO.DOCONT: It's very dangerous for the listeners and imposes that they always be careful what the callback is about.
-  // TO.DOCONT: I've even found examples of us not using it correctly in the template pages...
-
-  // Log
-  logger.logInfo('Map initialized', 'allMaps');
-
-  // Callback all maps have been initialized
-  callbackMapInit?.('allMaps');
-
-  //
-  // At this point, all api.maps[] MapViewers that needed to be instantiated were done so.
-  //
-
-  // Loop on each map viewer to register more handlers
-  const mapViewersPromises = Object.values(api.maps).map((mapViewer) => {
-    // Create promise for when all the layers will be loaded
-    return new Promise((resolve) => {
-      // If the mapviewer is already ready, resolve right away
-      if (mapViewer.mapLayersLoaded) {
-        resolve(mapViewer);
-        return;
-      }
-
-      // Register when the map viewer will have loaded layers
-      mapViewer.onMapLayersLoaded((mapViewerLoaded) => {
-        // Run the callback for maps that have the triggerReadyCallback set using the mapId for the parameter value
-        if (mapViewerLoaded.mapFeaturesConfig.triggerReadyCallback) {
-          // Log
-          logger.logInfo('Map layers loaded', mapViewerLoaded.mapId);
-
-          // Callback for that particular map
-          callbackMapLayersLoaded?.(mapViewerLoaded.mapId);
-        }
-
-        // Resolve
-        resolve(mapViewerLoaded);
-      });
-    });
-  });
-
-  // Wait for all maps to have their layers loaded
-  await Promise.allSettled(mapViewersPromises);
-
-  // Log
-  logger.logInfo('Map layers loaded', 'allMaps');
-
-  // Callback all maps and layers have been loaded
-  callbackMapLayersLoaded?.('allMaps');
 }
 
 // cgpv object to be exported with the api for outside use
