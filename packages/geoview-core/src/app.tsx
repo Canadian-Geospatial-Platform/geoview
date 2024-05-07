@@ -107,14 +107,14 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
  * @param {Element} mapElement - The html element div who will contain the map
  */
 async function renderMap(mapElement: Element): Promise<void> {
-  // TODO: refactor - remove this config once we get layers from the new one
-  // create a new config for this map element
-  const config = new Config(mapElement);
-  const configObj = await config.initializeMapConfig();
-
   // if a config is provided from either inline div, url params or json file, validate it with against the schema
   // otherwise return the default config
   const configuration = await getMapConfig(mapElement);
+
+  // TODO: refactor - remove this config once we get layers from the new one
+  // create a new config for this map element
+  const config = new Config();
+  const configObj = await config.initializeMapConfig(configuration.mapId, configuration!.map!.listOfGeoviewLayerConfig!);
 
   // if valid config was provided - mapId is now part of config
   if (configuration) {
@@ -123,7 +123,7 @@ async function renderMap(mapElement: Element): Promise<void> {
     // add config to store
     // TODO: refactor - revome the assignement once new config contain layers
     addGeoViewStore(configuration);
-    configuration.map.listOfGeoviewLayerConfig = configObj!.map.listOfGeoviewLayerConfig;
+    configuration.map.listOfGeoviewLayerConfig = configObj!;
 
     // render the map with the config
     reactRoot[mapId] = createRoot(mapElement!);

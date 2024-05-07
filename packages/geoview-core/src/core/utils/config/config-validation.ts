@@ -450,14 +450,15 @@ export class ConfigValidation {
    *
    * @returns {TypeMapFeaturesConfig} A valid map features configuration.
    */
-  validateMapConfigAgainstSchema(mapFeaturesConfigToValidate?: TypeMapFeaturesConfig): TypeMapFeaturesConfig {
-    let validMapFeaturesConfig: TypeMapFeaturesConfig;
+  validateMapConfigAgainstSchema(listOfGeoviewLayerConfig: MapConfigLayerEntry[]): MapConfigLayerEntry[] {
+    // let validMapFeaturesConfig: TypeMapFeaturesConfig;
 
     // if config has been provided by user then validate it
-    if (mapFeaturesConfigToValidate) {
-      // if the list of layer doesn't exist, add the key with empty array for the map to trigger
-      if (mapFeaturesConfigToValidate.map.listOfGeoviewLayerConfig === undefined)
-        mapFeaturesConfigToValidate.map.listOfGeoviewLayerConfig = [];
+    // eslint-disable-next-line no-constant-condition
+    if (1 === 1) {
+      // // if the list of layer doesn't exist, add the key with empty array for the map to trigger
+      // if (mapFeaturesConfigToValidate.map.listOfGeoviewLayerConfig === undefined)
+      //   mapFeaturesConfigToValidate.map.listOfGeoviewLayerConfig = [];
 
       // create a validator object
       const validator = new Ajv({
@@ -468,12 +469,12 @@ export class ConfigValidation {
       // initialize validator with schema file
       validator.compile(schema);
 
-      let isValid = this.#isValidTypeMapFeaturesInstance(mapFeaturesConfigToValidate, validator);
-      for (let i = 0; i < mapFeaturesConfigToValidate.map.listOfGeoviewLayerConfig.length && isValid; i++) {
+      let isValid = true; //  this.#isValidTypeMapFeaturesInstance(mapFeaturesConfigToValidate, validator);
+      for (let i = 0; i < listOfGeoviewLayerConfig.length && isValid; i++) {
         // If not GeoCore, validate the geoview configuration with the schema.
         // GeoCore doesn't have schema validation as part of the routine below, because they're not a TypeGeoviewLayerType anymore
-        if (!mapConfigLayerEntryIsGeoCore(mapFeaturesConfigToValidate.map.listOfGeoviewLayerConfig[i])) {
-          const gvLayerConfigCasted = mapFeaturesConfigToValidate.map.listOfGeoviewLayerConfig[i] as TypeGeoviewLayerConfig;
+        if (!mapConfigLayerEntryIsGeoCore(listOfGeoviewLayerConfig[i])) {
+          const gvLayerConfigCasted = listOfGeoviewLayerConfig[i] as TypeGeoviewLayerConfig;
           isValid = this.#isValidTypeListOfLayerEntryConfig(
             gvLayerConfigCasted.geoviewLayerType,
             gvLayerConfigCasted.listOfLayerEntryConfig,
@@ -482,30 +483,31 @@ export class ConfigValidation {
         }
       }
 
-      if (!isValid) {
-        validMapFeaturesConfig = {
-          ...this.#adjustMapConfiguration(mapFeaturesConfigToValidate),
-          mapId: this.mapId,
-          displayLanguage: this.#displayLanguage as TypeDisplayLanguage,
-        };
-      } else {
-        validMapFeaturesConfig = {
-          ...this.#adjustMapConfiguration(mapFeaturesConfigToValidate),
-          mapId: this.mapId,
-          displayLanguage: this.#displayLanguage as TypeDisplayLanguage,
-        };
-      }
-    } else {
-      validMapFeaturesConfig = {
-        ...this.#defaultMapFeaturesConfig,
-        mapId: this.mapId,
-        displayLanguage: this.#displayLanguage as TypeDisplayLanguage,
-      };
+      // if (!isValid) {
+      //   validMapFeaturesConfig = {
+      //     ...this.#adjustMapConfiguration(mapFeaturesConfigToValidate),
+      //     mapId: this.mapId,
+      //     displayLanguage: this.#displayLanguage as TypeDisplayLanguage,
+      //   };
+      // } else {
+      //   validMapFeaturesConfig = {
+      //     ...this.#adjustMapConfiguration(mapFeaturesConfigToValidate),
+      //     mapId: this.mapId,
+      //     displayLanguage: this.#displayLanguage as TypeDisplayLanguage,
+      //   };
+      // }
+      // } else {
+      //   validMapFeaturesConfig = {
+      //     ...this.#defaultMapFeaturesConfig,
+      //     mapId: this.mapId,
+      //     displayLanguage: this.#displayLanguage as TypeDisplayLanguage,
+      //   };
     }
-    this.#processLocalizedString(validMapFeaturesConfig.suportedLanguages, validMapFeaturesConfig.map.listOfGeoviewLayerConfig);
-    this.#doExtraValidation(validMapFeaturesConfig.map.listOfGeoviewLayerConfig);
 
-    return validMapFeaturesConfig;
+    this.#processLocalizedString(['en'], listOfGeoviewLayerConfig);
+    this.#doExtraValidation(listOfGeoviewLayerConfig);
+
+    return listOfGeoviewLayerConfig;
   }
 
   /** ***************************************************************************************************************************
