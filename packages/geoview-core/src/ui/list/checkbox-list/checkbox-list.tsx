@@ -115,6 +115,7 @@ export function CheckboxList(props: CheckboxListProps): JSX.Element {
 /**
  * React's default properties for the CheckboxList
  */
+// TODO: Refactor - Remove defaltProps as it's no longer a good practice
 CheckboxList.defaultProps = {
   onChecked: null,
 };
