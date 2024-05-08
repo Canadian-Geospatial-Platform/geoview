@@ -231,6 +231,7 @@ export function Datapanel({ fullWidth }: DataPanelType): JSX.Element {
   );
 }
 
+// TODO: Refactor - Remove defaltProps as it's no longer a good practice
 Datapanel.defaultProps = {
   fullWidth: false,
 };

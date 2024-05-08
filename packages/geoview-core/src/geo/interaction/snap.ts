@@ -50,7 +50,7 @@ export class Snap extends Interaction {
   /**
    * Starts the interaction on the map.
    */
-  public override startInteraction(): void {
+  override startInteraction(): void {
     // Redirect to super method to start interaction
     super.startInteraction(this.#ol_snap);
   }
@@ -58,7 +58,7 @@ export class Snap extends Interaction {
   /**
    * Stops the interaction on the map.
    */
-  public override stopInteraction(): void {
+  override stopInteraction(): void {
     // Redirect to super method to stop interaction
     super.stopInteraction(this.#ol_snap);
   }

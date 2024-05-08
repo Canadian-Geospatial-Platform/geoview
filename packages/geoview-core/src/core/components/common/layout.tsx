@@ -76,6 +76,7 @@ export function Layout({
   );
 }
 
+// TODO: Refactor - Remove defaltProps as it's no longer a good practice
 Layout.defaultProps = {
   children: null,
   onIsEnlargeClicked: undefined,

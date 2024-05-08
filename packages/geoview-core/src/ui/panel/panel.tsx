@@ -151,6 +151,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
 /**
  * React's default properties for the Panel
  */
+// TODO: Refactor - Remove defaltProps as it's no longer a good practice
 Panel.defaultProps = {
   onPanelOpened: null,
   onPanelClosed: null,
