@@ -1,11 +1,11 @@
-import { ChangeEvent, useCallback, useRef, useState } from 'react';
+import { ChangeEvent, useCallback, useRef, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import debounce from 'lodash/debounce';
 import { useTheme } from '@mui/material';
 import { CloseIcon, SearchIcon, AppBarUI, Box, Divider, IconButton, ProgressBar, Toolbar } from '@/ui';
 import { StyledInputField, sxClasses } from './geolocator-style';
 import { OL_ZOOM_DURATION } from '@/core/utils/constant';
-import { useUIAppbarGeolocatorActive } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIAppbarGeolocatorActive, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useAppGeolocatorServiceURL, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { GeolocatorResult } from './geolocator-result';
 import { logger } from '@/core/utils/logger';
@@ -33,17 +33,18 @@ export function Geolocator(): JSX.Element {
   const [error, setError] = useState<Error>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>('');
-  const [isSearchInputVisible, setIsSearchInputVisible] = useState<boolean>(false);
 
   // get store values
   const displayLanguage = useAppDisplayLanguage();
   const geolocatorServiceURL = useAppGeolocatorServiceURL();
+  const { setGeolocatorActive } = useUIStoreActions();
 
   // set the active (visible) or not active (hidden) from geolocator button click
   const active = useUIAppbarGeolocatorActive();
 
   const urlRef = useRef<string>(`${geolocatorServiceURL}&lang=${displayLanguage}`);
-
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const MIN_SEARCH_LENGTH = 3;
   /**
    * Checks if search term is decimal degree coordinate and return geo list item.
    * @param {string} searchTerm search term user searched.
@@ -83,10 +84,21 @@ export function Geolocator(): JSX.Element {
    * @param {string} searchTerm the search term entered by the user
    * @returns {Promise<void>}
    */
-  const getGeolocations = async (searchTerm: string): Promise<void> => {
+  const getGeolocations = useCallback(async (searchTerm: string): Promise<void> => {
     try {
       setIsLoading(true);
-      const response = await fetch(`${urlRef.current}&q=${encodeURIComponent(`${searchTerm}*`)}`);
+      // Abort any pending requests
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      // Create new abort controller
+      const newAbortController = new AbortController();
+      abortControllerRef.current = newAbortController;
+
+      const response = await fetch(`${urlRef.current}&q=${encodeURIComponent(`${searchTerm}*`)}`, {
+        signal: abortControllerRef.current.signal,
+      });
       if (!response.ok) {
         throw new Error('Error');
       }
@@ -102,17 +114,17 @@ export function Geolocator(): JSX.Element {
       setIsLoading(false);
       setError(err as Error);
     }
-  };
+  }, []);
 
   /**
    * Reset search component values when close icon is clicked.
    * @returns void
    */
   const resetSearch = useCallback(() => {
-    setIsSearchInputVisible(false);
     setSearchValue('');
     setData(undefined);
-  }, []);
+    setGeolocatorActive(false);
+  }, [setGeolocatorActive]);
 
   /**
    * Do service request after debouncing.
@@ -135,6 +147,8 @@ export function Geolocator(): JSX.Element {
 
   /**
    * onChange handler for search input field
+   * NOTE: search will fire only when user enter atleast 3 characters.
+   * when less 3 characters while doing search, list will be cleared out.
    * @param {ChangeEvent<HTMLInputElement>} e HTML Change event handler
    * @returns void
    */
@@ -142,70 +156,71 @@ export function Geolocator(): JSX.Element {
     const { value } = e.target;
     setSearchValue(value);
     // do fetch request when user enter at least 3 characters.
-    if (value.length >= 3) {
+    if (value.length >= MIN_SEARCH_LENGTH) {
       debouncedRequest(value);
     }
     // clear geo list when search term cleared from input field.
-    if (!value.length && data?.length) {
+    if (!value.length || value.length < MIN_SEARCH_LENGTH) {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      doRequest.cancel();
       setData(undefined);
     }
   };
 
-  // TODO: Check - The 2 'getGeolocations' function call below, in the rendering code, execute promises. This is as intended!? Not sure react likes it?
+  /**
+   * Geo location handler.
+   * @returns void
+   */
+  const handleGetGeolocations = useCallback(() => {
+    if (searchValue.length >= MIN_SEARCH_LENGTH) {
+      // cancel previous in queue request and fetch geo locations with new search value.
+      doRequest.cancel();
+      getGeolocations(searchValue).catch((errorInside) => {
+        // Log
+        logger.logPromiseFailed('getGeolocations in Geolocator', errorInside);
+      });
+    }
+  }, [doRequest, getGeolocations, searchValue]);
+
+  useEffect(() => {
+    return () => {
+      // Cleanup function to abort any pending requests
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
   return (
     <Box sx={sxClasses.root} visibility={active ? 'visible' : 'hidden'} id="geolocator-search">
       <Box sx={sxClasses.geolocator}>
         <AppBarUI position="static">
-          <Toolbar
-            variant="dense"
-            // attach event handler to toolbar when search input is hidden.
-            {...(!isSearchInputVisible && { onClick: () => setIsSearchInputVisible(true) })}
-            sx={{ cursor: !isSearchInputVisible ? 'pointer' : 'default' }}
-          >
+          <Toolbar variant="dense">
             <form
               onSubmit={(e) => {
+                // NOTE: so that when enter is pressed, page is not reloaded.
                 e.preventDefault();
-                // cancel the debounce fn, when enter key clicked before wait time.
-                doRequest.cancel();
-                getGeolocations(searchValue).catch((errorInside) => {
-                  // Log
-                  logger.logPromiseFailed('getGeolocations in rendering (1) in Geolocator', errorInside);
-                });
+                handleGetGeolocations();
               }}
             >
-              {isSearchInputVisible && (
-                <StyledInputField placeholder={t('geolocator.search')!} autoFocus onChange={onChange} value={searchValue} />
-              )}
-
+              <StyledInputField placeholder={t('geolocator.search')!} autoFocus onChange={onChange} value={searchValue} />
               <Box sx={{ display: 'flex', marginLeft: 'auto', alignItems: 'center' }}>
                 <IconButton
                   size="small"
                   edge="end"
                   color="inherit"
                   sx={{ mr: 4 }}
-                  disabled={isSearchInputVisible && !searchValue.length}
-                  onClick={() => {
-                    if (!isSearchInputVisible) {
-                      setIsSearchInputVisible(true);
-                    } else if (searchValue.length) {
-                      doRequest.cancel();
-                      getGeolocations(searchValue).catch((errorInside) => {
-                        // Log
-                        logger.logPromiseFailed('getGeolocations in rendering (2) in Geolocator', errorInside);
-                      });
-                    }
-                  }}
+                  disabled={!searchValue.length}
+                  onClick={handleGetGeolocations}
                 >
                   <SearchIcon fontSize={theme.palette.geoViewFontSize.sm} />
                 </IconButton>
-                {isSearchInputVisible && (
-                  <>
-                    <Divider orientation="vertical" variant="middle" flexItem />
-                    <IconButton size="small" edge="end" color="inherit" sx={{ mr: 2, ml: 4 }} onClick={resetSearch}>
-                      <CloseIcon fontSize={theme.palette.geoViewFontSize.sm} />
-                    </IconButton>
-                  </>
-                )}
+                <Divider orientation="vertical" variant="middle" flexItem />
+                <IconButton size="small" edge="end" color="inherit" sx={{ mr: 2, ml: 4 }} onClick={resetSearch}>
+                  <CloseIcon fontSize={theme.palette.geoViewFontSize.sm} />
+                </IconButton>
               </Box>
             </form>
           </Toolbar>
@@ -216,7 +231,7 @@ export function Geolocator(): JSX.Element {
           <ProgressBar />
         </Box>
       )}
-      {!!data && (
+      {!!data && searchValue?.length >= MIN_SEARCH_LENGTH && (
         <Box sx={sxClasses.searchResult}>
           <GeolocatorResult geoLocationData={data} searchValue={searchValue} error={error} />
         </Box>

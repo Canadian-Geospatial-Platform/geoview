@@ -12,6 +12,8 @@ import {
   useUIActiveFocusItem,
   useUIActiveFooterBarTabId,
   useUIAppbarComponents,
+  useUIAppbarGeolocatorActive,
+  useUIStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -65,6 +67,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const geoviewElement = useAppGeoviewHTMLElement().querySelector('[id^="mapTargetElement-"]') as HTMLElement;
   // TODO: remove active footerTab Id and create new one for AppBar id.
   const activeFooterTabId = useUIActiveFooterBarTabId();
+
+  const { setGeolocatorActive } = useUIStoreActions();
+  const isGeolocatorActive = useUIAppbarGeolocatorActive();
 
   // get store config for app bar to add (similar logic as in footer-bar)
   const appBarConfig = useGeoViewConfig()?.appBar;
@@ -131,6 +136,11 @@ export function AppBar(props: AppBarProps): JSX.Element {
       // Log
       logger.logTraceUseCallback('APP-BAR - handleButtonClicked', buttonId);
 
+      // close geolocator if opened when panel is open.
+      if (isGeolocatorActive) {
+        setGeolocatorActive(false);
+      }
+
       // Get the button panel
       const buttonPanel = buttonPanelGroups[groupName][buttonId];
 
@@ -142,7 +152,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
         closePanelById(buttonId, groupName);
       }
     },
-    [buttonPanelGroups, closePanelById, openPanelById]
+    [buttonPanelGroups, closePanelById, isGeolocatorActive, openPanelById, setGeolocatorActive]
   );
 
   const handleGeneralCloseClicked = useCallback(() => {
@@ -211,6 +221,10 @@ export function AppBar(props: AppBarProps): JSX.Element {
     // TODO: remove active footerTab Id and create new one for AppBar id.
     // open AppBar detail drawer when click on map.
     if (activeFooterTabId === 'details' && buttonPanelGroups?.details?.AppbarPanelButtonDetails?.panel) {
+      // close geolocator when user click on map layer.
+      if (isGeolocatorActive) {
+        setGeolocatorActive(false);
+      }
       // Open it
       openPanelById(buttonPanelGroups?.details?.AppbarPanelButtonDetails?.button?.id || '', undefined);
     }
@@ -333,7 +347,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
           <Box>
             <List sx={sxClasses.appBarList}>
               <ListItem>
-                <Geolocator />
+                <Geolocator closeAllPanels={closeAll} />
               </ListItem>
             </List>
           </Box>
