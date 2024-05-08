@@ -40,7 +40,7 @@ export default function ExportButton(props: ExportProps): JSX.Element {
 /**
  * default properties values
  */
-// TODO: Refactor - Remove defaltProps as it's no longer a good practice
+// TODO: Refactor - Remove defaultProps as it's no longer a good practice
 ExportButton.defaultProps = {
   className: '',
   sxDetails: undefined,

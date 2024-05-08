@@ -211,7 +211,7 @@ export function Slider(props: SliderProps): JSX.Element {
 /**
  * The default props
  */
-// TODO: Refactor - Remove defaltProps as it's no longer a good practice
+// TODO: Refactor - Remove defaultProps as it's no longer a good practice
 Slider.defaultProps = {
   sliderId: generateId(),
   className: undefined,

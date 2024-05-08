@@ -32,7 +32,7 @@ export function LayerTitle({ children, hideTitle, fullWidth }: LayerTitleProp): 
   );
 }
 
-// TODO: Refactor - Remove defaltProps as it's no longer a good practice
+// TODO: Refactor - Remove defaultProps as it's no longer a good practice
 LayerTitle.defaultProps = {
   hideTitle: false,
   fullWidth: false,

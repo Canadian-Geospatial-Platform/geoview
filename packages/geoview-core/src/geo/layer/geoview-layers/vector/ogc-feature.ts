@@ -91,6 +91,7 @@ export const geoviewEntryIsOgcFeature = (
  */
 // ******************************************************************************************************************************
 export class OgcFeature extends AbstractGeoViewVector {
+  // TODO: Check - If this still used?
   // private variable holding wfs version
   // private version = '2.0.0';
 
