@@ -181,10 +181,16 @@ export const CV_DEFAULT_LAYER_INITIAL_SETTINGS = {
     highlight: true,
     hover: true,
     opacity: true,
-    query: true,
+    query: false,
     remove: true,
     table: true,
     visibility: true,
     zoom: true,
+  },
+  states: {
+    visible: true,
+    opacity: 1,
+    hoverable: true,
+    queryable: false,
   },
 };

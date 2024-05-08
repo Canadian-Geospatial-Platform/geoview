@@ -8,7 +8,6 @@ import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-b
 import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@config/types/classes/sub-layer-config/raster-leaf/esri-dynamic-layer-entry-config';
 import { EsriFeatureLayerEntryConfig } from '@config/types/classes/sub-layer-config/vector-leaf/esri-feature-layer-entry-config';
-import { TypeGeoviewLayerType } from '@config/types/config-types';
 
 // #region UTILITIES TYPES
 
@@ -105,50 +104,45 @@ export type TypeLayerStates = {
 export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI' | 'GeoPackage' | 'CSV';
 
 /**
- * Type used to configure a custom parser.
- */
-export type TypeDetailsLayerConfig = {
-  /**
-   * A path to a javascript file with a function for parsing the layers identify output. Only needed if a custom template is
-   * being used.
-   */
-  parser?: string;
-  /** A path to an html template (English/French) that will override default identify output. */
-  template: TypeLocalizedString;
-};
-
-/**
  * Type used to configure the feature info for a layer.
  */
 export type TypeFeatureInfoLayerConfig = {
-  /** Allow querying. Default = false. */
-  queryable: boolean;
-  customParser?: TypeDetailsLayerConfig;
   /**
-   * The display field (English/French) of the layer. If it is not present the viewer will make an attempt to find the first valid
+   * The display field of the layer. If it is not present the viewer will make an attempt to find the first valid
    * field.
    */
-  nameField?: TypeLocalizedString;
-  /** A comma separated list of attribute names (English/French) that should be requested on query (all by default). */
-  outfields?: TypeLocalizedString;
-  /** A comma separated list of types. Type at index i is associated to the variable at index i. */
-  fieldTypes?: string;
-  /** A comma separated list of attribute names (English/French) that should be use for alias. If empty, no alias will be set */
-  aliasFields?: TypeLocalizedString;
+  nameField: string;
+  /** The list of fields to be displayed by the UI. */
+  outfields: TypeOutfields;
 };
+
+/**
+ * The definition of the fields to be displayed by the UI.
+ */
+export type TypeOutfields = {
+  name: string;
+  alias: string;
+  type: TypeOutfieldsType;
+  domain: unknown[];
+};
+
+/** The types supported by the outfields object. */
+export type TypeOutfieldsType = 'string' | 'date' | 'number' | 'url';
 
 /**
  * Initial settings to apply to the GeoView vector layer source at creation time.
  */
 export type TypeBaseSourceVectorInitialConfig = {
-  /** Path used to access the data. */
-  dataAccessPath?: TypeLocalizedString;
+  /** Maximum number of records to fetch (default: 0). */
+  maxRecordCount: number;
+  /** Filter to apply on features of this layer. */
+  layerFilter: string;
   /** Settings to use when loading a GeoJSON layer using a POST instead of a GET */
   postSettings?: TypePostSettings;
   /** The feature format used by the XHR feature loader when url is set. */
   format?: TypeVectorSourceFormats | 'MVT';
   /** The projection code of the source. Default value is EPSG:4326. */
-  dataProjection?: string;
+  dataProjection?: TypeValidMapProjectionCodes;
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
   featureInfo?: TypeFeatureInfoLayerConfig;
   /** Loading strategy to use (all or bbox). */
@@ -211,10 +205,6 @@ export type TypeSourceImageInitialConfig =
  */
 export type TypeBaseSourceImageInitialConfig = {
   /**
-   * The service endpoint of the layer. If not specified, the metadataAccessPath of the GeoView layer is used
-   */
-  dataAccessPath?: string;
-  /**
    * The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
    * with the Canvas renderer.
    * */
@@ -238,11 +228,7 @@ export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceImageInit
 /**
  * Initial settings for static image sources.
  */
-export interface TypeSourceImageStaticInitialConfig extends Omit<TypeBaseSourceImageInitialConfig, 'featureInfo'> {
-  /** Definition of the feature information structure that will be used by the getFeatureInfo method. We only use queryable and
-   * it must be set to false if specified.
-   */
-  featureInfo?: { queryable: false };
+export interface TypeSourceImageStaticInitialConfig extends TypeBaseSourceImageInitialConfig {
   /** Image extent */
   extent: Extent;
 }
@@ -251,6 +237,10 @@ export interface TypeSourceImageStaticInitialConfig extends Omit<TypeBaseSourceI
  * Initial settings for WMS image sources.
  */
 export interface TypeSourceImageEsriInitialConfig extends TypeBaseSourceImageInitialConfig {
+  /** Maximum number of records to fetch (default: 0). */
+  maxRecordCount: number;
+  /** Filter to apply on features of this layer. */
+  layerFilter: string;
   /** The format used by the image layer. */
   format?: TypeEsriFormatParameter;
   /**
@@ -287,10 +277,6 @@ export type TypeTileGrid = {
  * Initial settings for tile image sources.
  */
 export interface TypeSourceTileInitialConfig extends TypeBaseSourceImageInitialConfig {
-  /** Definition of the feature information structure that will be used by the getFeatureInfo method. We only use queryable and
-   * it must be set to false if specified.
-   */
-  featureInfo?: { queryable: false };
   /** Tile grid parameters to use. */
   tileGrid?: TypeTileGrid;
 }
@@ -318,35 +304,7 @@ export type TypeLayerEntryConfig =
 /**
  *  Definition of a single Geoview layer configuration.
  */
-export type TypeGeoviewLayerConfig = {
-  /** The GeoView layer identifier. */
-  geoviewLayerId: string;
-
-  /** Flag used to indicate that the layer is a GeoCore layer. */
-  isGeocoreLayer: false;
-
-  geoviewLayerName?: TypeLocalizedString;
-
-  /** The GeoView layer access path (English/French). */
-  metadataAccessPath?: TypeLocalizedString;
-
-  /** Type of GeoView layer. */
-  geoviewLayerType: TypeGeoviewLayerType;
-
-  /** Date format used by the service endpoint. */
-  serviceDateFormat?: string;
-
-  /** Date format used by the getFeatureInfo to output date variable. */
-  externalDateFormat?: string;
-
-  /**
-   * Initial settings to apply to the GeoView layer at creation time.
-   */
-  initialSettings?: TypeLayerInitialSettings;
-
-  /** An Array of sub layers to add to the GeoView layer. */
-  listOfLayerEntryConfig: ConfigBaseClass[];
-};
+export type TypeGeoviewLayerConfig = AbstractGeoviewLayerConfig;
 
 // #region VIEWER CONFIG TYPES
 /**
@@ -422,11 +380,11 @@ export const VALID_INTERACTION: TypeInteraction[] = ['static', 'dynamic'];
 /**
  *  Definition of the initial view settings.
  */
-export type TypeInitialViewSettings = {
+export type TypeMapViewSettings = {
   /**
    * Option to set the zoom and center of initial view.
-   * Zoom and center of the map defined as [zoom, [longitude, latitude]]. Longitude domaine = [-160..160],
-   * Latitude domaine = [-80..80]. */
+   * Zoom and center of the map defined as [zoom, [longitude, latitude]]. Longitude domain = [-160..160],
+   * Latitude domain = [-80..80]. */
   zoomAndCenter?: [number, [number, number]];
   /**
    * Option to set initial view by extent.
@@ -436,12 +394,12 @@ export type TypeInitialViewSettings = {
   layerIds?: string[];
 };
 
-/**
+/** ******************************************************************************************************************************
  *  Definition of the view settings.
  */
 export type TypeViewSettings = {
   /** Settings for the initial view for map, default is zoomAndCenter of [3.5, [-90, 65]] */
-  initialView?: TypeInitialViewSettings;
+  initialView?: TypeMapViewSettings;
   /** Enable rotation. If false, a rotation constraint that always sets the rotation to zero is used. Default = true. */
   enableRotation?: boolean;
   /**

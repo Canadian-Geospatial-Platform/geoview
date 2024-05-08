@@ -17,9 +17,6 @@ import { isvalidComparedToSchema } from '@config/utils';
  * The ESRI feature geoview sublayer class.
  */
 export class EsriFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-  /** Filter to apply on feature of this layer. */
-  layerFilter?: string;
-
   /** Source settings to apply to the GeoView image layer source at creation time. */
   declare source: TypeSourceImageEsriInitialConfig;
 
@@ -43,14 +40,11 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     parentNode?: ConfigBaseClass
   ) {
     super(layerConfig, initialSettings, language, geoviewLayerConfig, parentNode);
-    this.layerFilter = layerConfig.layerFilter as string;
     this.style = layerConfig.style ? { ...(layerConfig.style as TypeStyleConfig) } : undefined;
-    if (Number.isNaN(this.layerId)) {
+    if (Number.isNaN(this.id)) {
       throw new Error(`The layer entry with layerId equal to ${this.layerPath} must be an integer string`);
     }
     this.source.format = 'EsriJSON' as TypeEsriFormatParameter; // Set the source.format property
-    // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
-    if (!this.source.dataAccessPath) this.source.dataAccessPath = geoviewLayerConfig.metadataAccessPath;
     if (!isvalidComparedToSchema(this.schemaPath, this)) this.propagateError();
   }
 

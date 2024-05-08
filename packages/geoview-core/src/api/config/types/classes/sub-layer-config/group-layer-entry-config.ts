@@ -35,8 +35,8 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
     this.listOfLayerEntryConfig = (layerConfig.listOfLayerEntryConfig as TypeJsonArray)
       .map((subLayerConfig) => {
         if (layerEntryIsGroupLayer(subLayerConfig))
-          return new GroupLayerEntryConfig(subLayerConfig, geoviewLayerConfig.initialSettings, language, geoviewLayerConfig, this);
-        return geoviewLayerConfig.createLeafNode(subLayerConfig, geoviewLayerConfig.initialSettings, language, geoviewLayerConfig, this);
+          return new GroupLayerEntryConfig(subLayerConfig, initialSettings, language, geoviewLayerConfig, this);
+        return geoviewLayerConfig.createLeafNode(subLayerConfig, initialSettings, language, geoviewLayerConfig, this);
       })
       .filter((subLayerConfig) => {
         return subLayerConfig;

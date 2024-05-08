@@ -294,7 +294,6 @@ export class MapFeatureConfig {
     this.schemaVersionUsed = VALID_VERSIONS.includes(this.schemaVersionUsed!)
       ? this.schemaVersionUsed
       : CV_DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed!;
-
     const minZoom = this.map.viewSettings.minZoom!;
     this.map.viewSettings.minZoom =
       !Number.isNaN(minZoom) && minZoom >= 0 && minZoom <= 50 ? minZoom : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.minZoom;
@@ -304,7 +303,6 @@ export class MapFeatureConfig {
       !Number.isNaN(maxZoom) && maxZoom >= 0 && maxZoom <= 50 ? maxZoom : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.maxZoom;
 
     this.#validateMaxExtent();
-
     this.#logModifs();
   }
 
