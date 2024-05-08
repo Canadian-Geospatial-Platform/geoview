@@ -16,7 +16,7 @@ export class GeoViewColorClass {
   light: ColorRecord = {};
 
   constructor(mainColor: string, isInverse = false) {
-    if (!this.isValidColor(mainColor)) {
+    if (!GeoViewColorClass.#isValidColor(mainColor)) {
       throw new Error('Invalid color format');
     }
     this.main = mainColor;
@@ -28,7 +28,7 @@ export class GeoViewColorClass {
     });
   }
 
-  private isValidColor(color: string): boolean {
+  static #isValidColor(color: string): boolean {
     // Implement a color validation logic, or use a library like chroma.js
     // For simplicity, you can check if it's a valid hex, rgb, or rgba color string
     const colorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$|^rgba?\(\d+,\s*\d+,\s*\d+(,\s*(0(\.\d+)?|1(\.0)?))?\)$/;

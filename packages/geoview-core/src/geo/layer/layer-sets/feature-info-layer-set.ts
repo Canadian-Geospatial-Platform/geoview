@@ -58,7 +58,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * @param {string} layerPath - The layer path
    * @returns {boolean} True when the layer should be registered to this feature-info-layer-set.
    */
-  protected onRegisterLayerCheck(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): boolean {
+  protected override onRegisterLayerCheck(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): boolean {
     // Log
     logger.logTraceCore('FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerConfig.layerPath, Object.keys(this.resultSet));
 
@@ -71,7 +71,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
    * @param {string} layerPath - The layer path
    */
-  protected onRegisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
+  protected override onRegisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
     // Log
     logger.logTraceCore('FEATURE-INFO-LAYER-SET - onRegisterLayer', layerConfig.layerPath, Object.keys(this.resultSet));
 
@@ -100,7 +100,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being unregistered
    * @param {string} layerPath - The layer path
    */
-  protected onUnregisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
+  protected override onUnregisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
     // Log
     logger.logTraceCore('FEATURE-INFO-LAYER-SET - onUnregisterLayer', layerConfig.layerPath, Object.keys(this.resultSet));
 
@@ -117,7 +117,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * @param {string} layerPath - The layer path being affected
    * @param {string} layerStatus - The new layer status
    */
-  protected onProcessLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
+  protected override onProcessLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
     // if layer's status flag exists and is different than the new one
     if (this.resultSet?.[layerPath]?.layerStatus && this.resultSet?.[layerPath]?.layerStatus !== layerStatus) {
       if (layerStatus === 'error') delete this.resultSet[layerPath];
@@ -190,7 +190,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         data.queryStatus = 'processing';
 
         // Process query on results data
-        const promiseResult = this.queryLayerFeatures(data, layerConfig, layerPath, queryType, longLatCoordinate);
+        const promiseResult = FeatureInfoLayerSet.queryLayerFeatures(data, layerConfig, layerPath, queryType, longLatCoordinate);
 
         // Add the promise
         allPromises.push(promiseResult);

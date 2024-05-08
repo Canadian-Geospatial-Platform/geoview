@@ -355,7 +355,7 @@ export class ConsoleLogger {
   #logLevel(level: number, header: string, color: keyof ColorCode, ...messages: unknown[]): void {
     // If the configured logging level accepts to log the given level
     // eslint-disable-next-line no-console
-    if (this.#checkLevel(level)) console.log(`%c${this.#formatTime(new Date())} ${header}`, `color: ${color}`, ...messages);
+    if (this.#checkLevel(level)) console.log(`%c${ConsoleLogger.#formatTime(new Date())} ${header}`, `color: ${color}`, ...messages);
   }
 
   /**
@@ -368,7 +368,7 @@ export class ConsoleLogger {
   #warnLevel(level: number, ...messages: unknown[]): void {
     // If the configured logging level accepts to log the given level
     // eslint-disable-next-line no-console
-    if (this.#checkLevel(level)) console.warn(`${this.#formatTime(new Date())}`, ...messages);
+    if (this.#checkLevel(level)) console.warn(`${ConsoleLogger.#formatTime(new Date())}`, ...messages);
   }
 
   /**
@@ -381,7 +381,7 @@ export class ConsoleLogger {
   #errorLevel(level: number, ...messages: unknown[]): void {
     // If the configured logging level accepts to log the given level
     // eslint-disable-next-line no-console
-    if (this.#checkLevel(level)) console.error(`${this.#formatTime(new Date())}`, ...messages);
+    if (this.#checkLevel(level)) console.error(`${ConsoleLogger.#formatTime(new Date())}`, ...messages);
   }
 
   /**
@@ -390,7 +390,7 @@ export class ConsoleLogger {
    * @returns {string} The formatted date
    * @private
    */
-  #formatTime(date: Date): string {
+  static #formatTime(date: Date): string {
     const options: Intl.DateTimeFormatOptions = {
       hour: '2-digit',
       minute: '2-digit',

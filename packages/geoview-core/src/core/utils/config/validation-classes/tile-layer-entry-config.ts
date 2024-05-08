@@ -6,7 +6,7 @@ import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config
  */
 export class TileLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** Layer entry data type. */
-  entryType = CONST_LAYER_ENTRY_TYPES.RASTER_TILE;
+  override entryType = CONST_LAYER_ENTRY_TYPES.RASTER_TILE;
 
   /** Initial settings to apply to the GeoView image layer source at creation time. */
   declare source?: TypeSourceTileInitialConfig;

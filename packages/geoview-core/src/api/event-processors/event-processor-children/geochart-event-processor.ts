@@ -15,7 +15,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * @param {GeoviewStoreType} store The store associated with the GeoChart Event Processor
    * @returns An array of the subscriptions callbacks which were created
    */
-  protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
+  protected override onInitialize(store: GeoviewStoreType): Array<() => void> | void {
     // Checks for updated layers in layer data array from the details state
     const layerDataArrayUpdate = store.subscribe(
       (state) => state.detailsState.layerDataArray,

@@ -4,7 +4,7 @@ import { capitalize } from 'lodash';
 import { useTheme } from '@mui/material/styles';
 import { Box, List, ListItem, Panel, IconButton, TypeIconButtonProps, SchoolIcon, InfoOutlinedIcon, HubOutlinedIcon } from '@/ui';
 
-import { api } from '@/app';
+import { Plugin } from '@/api/plugin/plugin';
 
 import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import ExportButton from '@/core/components/export/export-modal-button';
@@ -241,22 +241,19 @@ export function AppBar(props: AppBarProps): JSX.Element {
     // Packages tab
     if (appBarConfig && appBarConfig.tabs.core.includes('basemap-panel')) {
       // create a new tab by loading the plugin
-      api.plugin
-        .loadScript('basemap-panel')
+      Plugin.loadScript('basemap-panel')
         .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
-          api.plugin
-            .addPlugin(
-              'basemap-panel',
+          Plugin.addPlugin(
+            'basemap-panel',
+            mapId,
+            constructor,
+            toJsonObject({
               mapId,
-              constructor,
-              toJsonObject({
-                mapId,
-              })
-            )
-            .catch((error) => {
-              // Log
-              logger.logPromiseFailed('api.plugin.addPlugin in useEffect in app-bar', error);
-            });
+            })
+          ).catch((error) => {
+            // Log
+            logger.logPromiseFailed('api.plugin.addPlugin in useEffect in app-bar', error);
+          });
         })
         .catch((error) => {
           // Log

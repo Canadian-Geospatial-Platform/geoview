@@ -10,7 +10,7 @@ import { layerEntryIsGroupLayer } from '@config/types/type-guards';
  */
 export class GroupLayerEntryConfig extends ConfigBaseClass {
   /** Layer entry data type. */
-  entryType = CV_CONST_SUB_LAYER_TYPES.GROUP;
+  override entryType = CV_CONST_SUB_LAYER_TYPES.GROUP;
 
   /** The list of layer entry configurations to use from the GeoView layer group. */
   listOfLayerEntryConfig: ConfigBaseClass[] = [];
@@ -50,7 +50,7 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
    *
    * @returns {string} The schemaPath associated to the sublayer.
    */
-  protected get schemaPath(): string {
+  protected override get schemaPath(): string {
     return CV_LAYER_GROUP_SCHEMA_PATH;
   }
 
@@ -60,7 +60,7 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
    *
    * @returns {TypeLayerEntryType} The entryType associated to the sublayer.
    */
-  protected getEntryType(): TypeLayerEntryType {
+  protected override getEntryType(): TypeLayerEntryType {
     return CV_CONST_SUB_LAYER_TYPES.GROUP;
   }
 }

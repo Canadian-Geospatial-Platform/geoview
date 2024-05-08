@@ -46,7 +46,7 @@ export class EsriFeatureLayerConfig extends AbstractGeoviewLayerConfig {
    * @returns {string} The GeoView layer schema associated to the config.
    * @protected
    */
-  protected get geoviewLayerSchema(): string {
+  protected override get geoviewLayerSchema(): string {
     /** The GeoView layer schema associated to EsriFeatureLayerConfig */
     return CV_GEOVIEW_SCHEMA_PATH.ESRI_FEATURE;
   }
@@ -57,7 +57,7 @@ export class EsriFeatureLayerConfig extends AbstractGeoviewLayerConfig {
    */
   // TODO: Implement this method
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  protected getServiceMetadata(): void {}
+  protected override getServiceMetadata(): void {}
 
   /**
    * The method used to implement the class factory model that returns the instance of the class based on the sublayer
@@ -71,7 +71,7 @@ export class EsriFeatureLayerConfig extends AbstractGeoviewLayerConfig {
    *
    * @returns {ConfigBaseClass} The sublayer instance or undefined if there is an error.
    */
-  createLeafNode(
+  override createLeafNode(
     layerConfig: TypeJsonObject,
     initialSettings: TypeLayerInitialSettings,
     language: TypeDisplayLanguage,

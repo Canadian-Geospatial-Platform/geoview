@@ -21,14 +21,12 @@ import { TypeFeatureInfoEntry } from '../layer/layer-sets/abstract-layer-set';
  * @class FeatureHighlight
  */
 export class FeatureHighlight {
-  /** The map id */
-  #mapId: string;
-
   /** The vector source to use for the animation features */
   #highlighSource: VectorSource = new VectorSource();
 
-  /** The hidden layer to display animations */
-  #overlayLayer: VectorLayer<VectorSource>;
+  /** The hidden layer to display animations. */
+  // GV It's public, because even if it's not read in this class, it's actually important to instanciate per OpenLayer design.
+  overlayLayer: VectorLayer<VectorSource>;
 
   /** The fill for the highlight */
   #highlightColor = 'black';
@@ -53,9 +51,7 @@ export class FeatureHighlight {
    * @param {MapViewer} mapViewer a reference to the map viewer
    */
   constructor(mapViewer: MapViewer) {
-    this.#mapId = mapViewer.mapId;
-
-    this.#overlayLayer = new VectorLayer({ source: this.#highlighSource, map: mapViewer.map });
+    this.overlayLayer = new VectorLayer({ source: this.#highlighSource, map: mapViewer.map });
     // if (this.#highlightColor !== undefined)
     //   this.changeHighlightColor(MapEventProcessor.getMapHighlightColor(this.#mapId) as TypeHighlightColors);
   }

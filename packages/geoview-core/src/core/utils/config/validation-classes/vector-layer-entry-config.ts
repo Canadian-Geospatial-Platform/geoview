@@ -6,7 +6,7 @@ import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config
  */
 export class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** Layer entry data type. */
-  entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
+  override entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
 
   /** Filter to apply on feature of this layer. */
   layerFilter?: string;
@@ -29,7 +29,7 @@ export class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Method to execute when the layer is loaded.
    */
-  loadedFunction(): void {
+  override loadedFunction(): void {
     super.loadedFunction();
     if ('applyViewFilter' in this.geoviewLayerInstance!)
       (this.geoviewLayerInstance as GeoviewChild).applyViewFilter(this.layerPath, this.layerFilter || '');

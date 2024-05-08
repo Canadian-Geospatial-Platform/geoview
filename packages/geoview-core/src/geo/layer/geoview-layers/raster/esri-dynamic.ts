@@ -137,7 +137,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected fetchServiceMetadata(): Promise<void> {
+  protected override fetchServiceMetadata(): Promise<void> {
     return commonfetchServiceMetadata.call(this);
   }
 
@@ -177,7 +177,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
-  protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
+  protected override getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
     return commonGetFieldType.call(this, fieldName, layerConfig);
   }
 
@@ -189,7 +189,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
-  protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
+  protected override getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
     return commonGetFieldDomain.call(this, fieldName, layerConfig);
   }
 
@@ -229,7 +229,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected override processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     return commonProcessLayerMetadata.call(this, layerConfig);
   }
 
@@ -240,7 +240,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  protected async processOneLayerEntry(layerConfig: EsriDynamicLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected override async processOneLayerEntry(layerConfig: EsriDynamicLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
     await super.processOneLayerEntry(layerConfig);
@@ -285,7 +285,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {string} layerPath - The layer path to the layer's configuration.
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-  protected async getAllFeatureInfo(layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected override async getAllFeatureInfo(layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig(layerPath)! as EsriDynamicLayerEntryConfig;
@@ -338,7 +338,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-  protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected override getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     const { map } = MapEventProcessor.getMapViewer(this.mapId);
     return this.getFeatureInfoAtCoordinate(map.getCoordinateFromPixel(location), layerPath);
   }
@@ -351,7 +351,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The promised feature info table.
    */
-  protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected override getFeatureInfoAtCoordinate(
+    location: Coordinate,
+    layerPath: string
+  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     const convertedLocation = Projection.transform(
       location,
       `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`,
@@ -368,7 +371,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The promised feature info table.
    */
-  protected async getFeatureInfoAtLongLat(lnglat: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected override async getFeatureInfoAtLongLat(
+    lnglat: Coordinate,
+    layerPath: string
+  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       // Get the layer config in a loaded phase
       const layerConfig = (await this.getLayerConfig(layerPath)) as EsriDynamicLayerEntryConfig;
@@ -428,7 +434,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * index in the style settings and the second one to the number of different values the field may have based on visibility of
    * the feature.
    */
-  private countFieldOfTheSameValue(styleSettings: TypeUniqueValueStyleConfig): TypeFieldOfTheSameValue[][] {
+  private static countFieldOfTheSameValue(styleSettings: TypeUniqueValueStyleConfig): TypeFieldOfTheSameValue[][] {
     return styleSettings.uniqueValueStyleInfo.reduce<TypeFieldOfTheSameValue[][]>(
       (counter, styleEntry): TypeFieldOfTheSameValue[][] => {
         if (
@@ -458,7 +464,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {number[]} An array that gives the field order to use to build the query tree.
    */
-  private sortFieldOfTheSameValue(styleSettings: TypeUniqueValueStyleConfig, fieldOfTheSameValue: TypeFieldOfTheSameValue[][]): number[] {
+  private static sortFieldOfTheSameValue(
+    styleSettings: TypeUniqueValueStyleConfig,
+    fieldOfTheSameValue: TypeFieldOfTheSameValue[][]
+  ): number[] {
     const fieldNotUsed = styleSettings.fields.map(() => true);
     const fieldOrder: number[] = [];
     for (let entrySelected = 0; entrySelected !== -1; entrySelected = fieldNotUsed.findIndex((flag) => flag)) {
@@ -504,7 +513,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {TypeQueryTree} The query tree to use when building the final query string.
    */
-  private getQueryTree(
+  private static getQueryTree(
     styleSettings: TypeUniqueValueStyleConfig,
     fieldOfTheSameValue: TypeFieldOfTheSameValue[][],
     fieldOrder: number[]
@@ -636,9 +645,9 @@ export class EsriDynamic extends AbstractGeoViewRaster {
           return `(1=1)${layerFilter ? ` and (${layerFilter})` : ''}`;
 
         // This section of code optimize the query to reduce it at it shortest expression.
-        const fieldOfTheSameValue = this.countFieldOfTheSameValue(styleSettings);
-        const fieldOrder = this.sortFieldOfTheSameValue(styleSettings, fieldOfTheSameValue);
-        const queryTree = this.getQueryTree(styleSettings, fieldOfTheSameValue, fieldOrder);
+        const fieldOfTheSameValue = EsriDynamic.countFieldOfTheSameValue(styleSettings);
+        const fieldOrder = EsriDynamic.sortFieldOfTheSameValue(styleSettings, fieldOfTheSameValue);
+        const queryTree = EsriDynamic.getQueryTree(styleSettings, fieldOfTheSameValue, fieldOrder);
         const query = this.buildQuery(queryTree, 0, fieldOrder, styleSettings, layerConfig.source.featureInfo!);
         return `${query}${layerFilter ? ` and (${layerFilter})` : ''}`;
       }

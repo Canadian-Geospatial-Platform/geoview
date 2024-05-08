@@ -94,7 +94,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected fetchServiceMetadata(): Promise<void> {
+  protected override fetchServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
       resolve();
     });
@@ -146,7 +146,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeLegend | null>} The legend of the layer.
    */
-  async getLegend(layerPath: string): Promise<TypeLegend | null> {
+  override async getLegend(layerPath: string): Promise<TypeLegend | null> {
     try {
       const layerConfig = this.getLayerConfig(layerPath) as ImageStaticLayerEntryConfig | undefined | null;
       if (!layerConfig) return null;
@@ -249,7 +249,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  protected async processOneLayerEntry(layerConfig: ImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected override async processOneLayerEntry(layerConfig: ImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     await super.processOneLayerEntry(layerConfig);
 
     if (!layerConfig?.source?.extent) throw new Error('Parameter extent is not defined in source element of layerConfig.');

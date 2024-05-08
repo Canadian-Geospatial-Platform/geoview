@@ -130,12 +130,9 @@ export class GeoPackage extends AbstractGeoViewVector {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected fetchServiceMetadata(): Promise<void> {
-    // TODO: Check - That doesn't seem to be doing anything, suggest changing to Promise.resolve() or throw a not implemented exception depending on the intent
-    const promisedExecution = new Promise<void>((resolve) => {
-      resolve();
-    });
-    return promisedExecution;
+  protected override fetchServiceMetadata(): Promise<void> {
+    // Return resolved promise
+    return Promise.resolve();
   }
 
   /** ***************************************************************************************************************************
@@ -173,11 +170,14 @@ export class GeoPackage extends AbstractGeoViewVector {
    * @returns {Promise<BaseLayer | null>} The promise that the layers were processed.
    */
   // TODO: Question - Is this function still used or should it be removed in favor of the mother class implementation?
-  processListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer | null> {
+  override processListOfLayerEntryConfig(
+    listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
+    layerGroup?: LayerGroup
+  ): Promise<BaseLayer | null> {
     const promisedListOfLayerEntryProcessed = new Promise<BaseLayer | null>((resolve) => {
       // Single group layer handled recursively
       if (listOfLayerEntryConfig.length === 1 && layerEntryIsGroupLayer(listOfLayerEntryConfig[0])) {
-        const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[0], listOfLayerEntryConfig[0].initialSettings!);
+        const newLayerGroup = GeoPackage.createLayerGroup(listOfLayerEntryConfig[0], listOfLayerEntryConfig[0].initialSettings!);
 
         this.processListOfLayerEntryConfig(listOfLayerEntryConfig[0].listOfLayerEntryConfig!, newLayerGroup)
           .then((groupReturned) => {
@@ -199,14 +199,14 @@ export class GeoPackage extends AbstractGeoViewVector {
         // Multiple layer configs are processed individually and added to layer group
       } else if (listOfLayerEntryConfig.length > 1) {
         if (!layerGroup)
-          layerGroup = this.createLayerGroup(
+          layerGroup = GeoPackage.createLayerGroup(
             listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig,
             listOfLayerEntryConfig[0].initialSettings!
           );
 
         listOfLayerEntryConfig.forEach((layerConfig) => {
           if (layerEntryIsGroupLayer(layerConfig)) {
-            const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings!);
+            const newLayerGroup = GeoPackage.createLayerGroup(layerConfig, layerConfig.initialSettings!);
             this.processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!, newLayerGroup)
               .then((groupReturned) => {
                 if (groupReturned) {
@@ -348,7 +348,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                   properties = stmt.getAsObject();
                   const geomProp = properties[columnName] as Uint8Array;
                   delete properties[columnName];
-                  const feature = this.parseGpkgGeom(geomProp);
+                  const feature = GeoPackage.parseGpkgGeom(geomProp);
                   const formattedFeature = format.readFeatures(feature, {
                     ...readOptions,
                     dataProjection: tableDataProjection,
@@ -398,7 +398,7 @@ export class GeoPackage extends AbstractGeoViewVector {
    *
    * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
    */
-  protected processGeopackageStyle(layerConfig: AbstractBaseLayerEntryConfig, sld: string | number | Uint8Array): void {
+  protected static processGeopackageStyle(layerConfig: AbstractBaseLayerEntryConfig, sld: string | number | Uint8Array): void {
     // Extract layer styles if they exist
     const { rules } = SLDReader.Reader(sld).layers[0].styles[0].featuretypestyles[0];
     if ((layerConfig as VectorLayerEntryConfig).style === undefined) (layerConfig as VectorLayerEntryConfig).style = {};
@@ -549,12 +549,12 @@ export class GeoPackage extends AbstractGeoViewVector {
 
     // Extract layer styles if they exist
     if (sld && sld[name]) {
-      this.processGeopackageStyle(layerConfig, sld[name]);
+      GeoPackage.processGeopackageStyle(layerConfig, sld[name]);
     }
 
     if (layerInfo.properties) {
       const { properties } = layerInfo;
-      this.processFeatureInfoConfig(properties as TypeJsonObject, layerConfig as VectorLayerEntryConfig);
+      GeoPackage.#processFeatureInfoConfig(properties as TypeJsonObject, layerConfig as VectorLayerEntryConfig);
     }
 
     const vectorLayer = this.createVectorLayer(layerConfig as VectorLayerEntryConfig, source);
@@ -571,7 +571,10 @@ export class GeoPackage extends AbstractGeoViewVector {
    *
    * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
    */
-  protected async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer | null> {
+  protected override async processOneLayerEntry(
+    layerConfig: AbstractBaseLayerEntryConfig,
+    layerGroup?: LayerGroup
+  ): Promise<BaseLayer | null> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
     await super.processOneLayerEntry(layerConfig);
@@ -601,7 +604,7 @@ export class GeoPackage extends AbstractGeoViewVector {
           } else {
             layerConfig.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
             (layerConfig as TypeLayerEntryConfig).listOfLayerEntryConfig = [];
-            const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings!);
+            const newLayerGroup = GeoPackage.createLayerGroup(layerConfig, layerConfig.initialSettings!);
             for (let i = 0; i < layers.length; i++) {
               const newLayerEntryConfig = cloneDeep(layerConfig) as AbstractBaseLayerEntryConfig;
               newLayerEntryConfig.layerId = layers[i].name;
@@ -646,8 +649,9 @@ export class GeoPackage extends AbstractGeoViewVector {
    *
    * @param {TypeJsonArray} fields An array of field names and its aliases.
    * @param {VectorLayerEntryConfig} layerConfig The vector layer entry to configure.
+   * @private
    */
-  private processFeatureInfoConfig(fields: TypeJsonObject, layerConfig: VectorLayerEntryConfig): void {
+  static #processFeatureInfoConfig(fields: TypeJsonObject, layerConfig: VectorLayerEntryConfig): void {
     if (!layerConfig.source) layerConfig.source = {};
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
     // Process undefined outfields or aliasFields ('' = false and !'' = true). Also, if en is undefined, then fr is also undefined.
@@ -694,7 +698,7 @@ export class GeoPackage extends AbstractGeoViewVector {
    *
    * @returns {Uint8Array} Uint8Array Subarray of inputted binary geoametry array.
    */
-  protected parseGpkgGeom(gpkgBinGeom: Uint8Array): Uint8Array {
+  protected static parseGpkgGeom(gpkgBinGeom: Uint8Array): Uint8Array {
     const flags = gpkgBinGeom[3];
     // eslint-disable-next-line no-bitwise
     const eFlags: number = (flags >> 1) & 7;

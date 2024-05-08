@@ -14,7 +14,7 @@ import { MapViewer } from '@/geo/map/map-viewer';
 import { sxClasses } from './map-style';
 import { useMapLoaded, useMapNorthArrow, useMapOverviewMap } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
-import { api } from '@/app';
+import { Plugin } from '@/api/plugin/plugin';
 import { logger } from '@/core/utils/logger';
 import { toJsonObject } from '@/core/types/global-types';
 
@@ -53,24 +53,21 @@ export function Map(props: MapProps): JSX.Element {
 
     // Load the core packages which are the ones who load on map (not footer plugin, not app-bar plugin)
     mapStoreConfig?.corePackages?.forEach((corePackage: string): void => {
-      api.plugin
-        .loadScript(corePackage)
+      Plugin.loadScript(corePackage)
         .then((constructor) => {
           // add the plugin by passing in the loaded constructor from the script tag
-          api.plugin
-            .addPlugin(
-              corePackage,
+          Plugin.addPlugin(
+            corePackage,
+            mapId,
+            constructor,
+            toJsonObject({
               mapId,
-              constructor,
-              toJsonObject({
-                mapId,
-                viewer,
-              })
-            )
-            .catch((error) => {
-              // Log
-              logger.logPromiseFailed('api.plugin.addPlugin in useCallback in map', error);
-            });
+              viewer,
+            })
+          ).catch((error) => {
+            // Log
+            logger.logPromiseFailed('api.plugin.addPlugin in useCallback in map', error);
+          });
         })
         .catch((error) => {
           // Log

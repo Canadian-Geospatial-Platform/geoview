@@ -16,6 +16,7 @@ import {
 import { AbstractGeoviewLayerConfig } from '../geoview-config/abstract-geoview-layer-config';
 import { ConfigBaseClass } from './config-base-class';
 
+// TODO: Refactor - Instead of listing all the possible types, for the `source` attribute, use a parent type
 export type TypeSourceInitialConfig =
   | TypeBaseSourceVectorInitialConfig
   | TypeSourceTileInitialConfig
