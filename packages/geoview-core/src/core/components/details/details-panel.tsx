@@ -482,7 +482,7 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
   // # endregion
 }
 
-// TODO: Refactor - Remove defaltProps as it's no longer a good practice
+// TODO: Refactor - Remove defaultProps as it's no longer a good practice
 DetailsPanel.defaultProps = {
   fullWidth: false,
 };
