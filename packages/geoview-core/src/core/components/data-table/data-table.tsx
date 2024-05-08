@@ -4,14 +4,14 @@ import { useTranslation } from 'react-i18next';
 import debounce from 'lodash/debounce';
 import startCase from 'lodash/startCase';
 
+import { getCenter, Extent } from 'ol/extent'; // only for typing
+
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import { MRT_Localization_FR as MRTLocalizationFR } from 'material-react-table/locales/fr';
 import { MRT_Localization_EN as MRTLocalizationEN } from 'material-react-table/locales/en';
-
-import { Extent } from 'ol/extent'; // only for typing
 
 import { useTheme } from '@mui/material/styles';
 import { HtmlToReact } from '@/core/containers/html-to-react';
@@ -43,7 +43,7 @@ import { useDataTableStoreActions, useDataTableLayerSettings } from '@/core/stor
 import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { isImage } from '@/core/utils/utilities';
+import { isImage, delay } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/abstract-layer-set';
 
@@ -131,7 +131,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps): JSX.
   const [sorting, setSorting] = useState<MRTSortingState>([]);
 
   // get store actions and values
-  const { zoomToExtent } = useMapStoreActions();
+  const { zoomToExtent, transformPoints, showClickMarker } = useMapStoreActions();
   const { applyMapFilters, setSelectedFeature } = useDataTableStoreActions();
   const language = useAppDisplayLanguage();
   const datatableSettings = useDataTableLayerSettings();
@@ -348,9 +348,28 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps): JSX.
    */
   const handleZoomIn = useCallback(
     (extent: Extent | undefined) => {
-      if (extent) zoomToExtent(extent);
+      if (extent) {
+        // Project
+        const center = getCenter(extent);
+        const newCenter = transformPoints([center], 4326)[0];
+
+        // Zoom to extent and wait for it to finish
+        zoomToExtent(extent)
+          .then(async () => {
+            // Typically, the click marker is removed after a zoom, so wait a bit here and re-add it...
+            // TODO: Refactor - Zoom ClickMarker - Improve the logic in general of when/if a click marker should be removed after a zoom
+            await delay(150);
+
+            // Add (back?) a click marker
+            showClickMarker({ lnglat: newCenter });
+          })
+          .catch((error: unknown) => {
+            // Log
+            logger.logPromiseFailed('zoomToExtent in handleZoomIn in FeatureInfoNew', error);
+          });
+      }
     },
-    [zoomToExtent]
+    [zoomToExtent, transformPoints, showClickMarker]
   );
 
   /**
