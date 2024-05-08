@@ -37,9 +37,6 @@ export class EsriDynamicLayerConfig extends AbstractGeoviewLayerConfig {
     if (!this.geoviewLayerId) {
       throw new Error(`geoviewLayerId is mandatory for GeoView layer of type ${this.geoviewLayerType}.`);
     }
-    if (!this.metadataAccessPath) {
-      throw new Error(`metadataAccessPath is mandatory for GeoView layer ${this.geoviewLayerId} of type ${this.geoviewLayerType}.`);
-    }
     this.validate();
   }
 

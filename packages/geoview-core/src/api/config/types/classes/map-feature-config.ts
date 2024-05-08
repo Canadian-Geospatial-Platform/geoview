@@ -2,7 +2,6 @@ import cloneDeep from 'lodash/cloneDeep';
 import defaultsDeep from 'lodash/defaultsDeep';
 
 import {
-  Extent,
   TypeAppBarProps,
   TypeDisplayLanguage,
   TypeDisplayTheme,
@@ -294,17 +293,6 @@ export class MapFeatureConfig {
     this.schemaVersionUsed = VALID_VERSIONS.includes(this.schemaVersionUsed!)
       ? this.schemaVersionUsed
       : CV_DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed!;
-
-    const minZoom = this.map.viewSettings.minZoom!;
-    this.map.viewSettings.minZoom =
-      !Number.isNaN(minZoom) && minZoom >= 0 && minZoom <= 50 ? minZoom : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.minZoom;
-
-    const maxZoom = this.map.viewSettings.maxZoom!;
-    this.map.viewSettings.maxZoom =
-      !Number.isNaN(maxZoom) && maxZoom >= 0 && maxZoom <= 50 ? maxZoom : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.maxZoom;
-
-    this.#validateMaxExtent();
-
     this.#logModifs();
   }
 
@@ -347,26 +335,6 @@ export class MapFeatureConfig {
     this.map.basemapOptions.labeled = CV_BASEMAP_LABEL[projection].includes(basemapOptions.labeled)
       ? basemapOptions.labeled
       : CV_DEFAULT_MAP_FEATURE_CONFIG.map.basemapOptions.labeled;
-  }
-
-  /**
-   * Validate the maxExtent property.
-   * @private
-   */
-  #validateMaxExtent(): void {
-    const { projection } = this.map.viewSettings;
-    const center = this.map.viewSettings.initialView!.zoomAndCenter![1];
-    const maxExtent = this.map.viewSettings.maxExtent!;
-    // TODO: Which one do we want, the commented one or the next one?
-    // const [extentMinX, extentMinY, extentMaxX, extentMaxY] = getMinOrMaxExtents(maxExtent, CV_MAP_EXTENTS[projection], 'min');
-    const [extentMinX, extentMinY, extentMaxX, extentMaxY] = maxExtent;
-
-    const minX = !Number.isNaN(extentMinX) && extentMinX < center[0] ? extentMinX : CV_MAP_CENTER[projection].long[0];
-    const minY = !Number.isNaN(extentMinY) && extentMinY < center[1] ? extentMinY : CV_MAP_CENTER[projection].lat[0];
-    const maxX = !Number.isNaN(extentMaxX) && extentMaxX > center[0] ? extentMaxX : CV_MAP_CENTER[projection].long[1];
-    const maxY = !Number.isNaN(extentMaxY) && extentMaxY > center[1] ? extentMaxY : CV_MAP_CENTER[projection].lat[1];
-
-    this.map.viewSettings.maxExtent! = [minX, minY, maxX, maxY] as Extent;
   }
 
   /**
