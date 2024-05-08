@@ -4,7 +4,8 @@ import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import { Coordinate } from 'ol/coordinate';
 
-import { TypeBasemapOptions } from '@/geo/layer/basemap/basemap-types';
+import { TypeBasemapOptions, TypeInteraction, TypeViewSettings } from '@config/types/map-schema-types';
+
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
@@ -716,7 +717,7 @@ export type TypeMapState = {
  *  Definition of the map configuration settings.
  */
 export type TypeMapConfig = {
-  /** Basemap options settings for this map configuration. */
+  // /** Basemap options settings for this map configuration. */
   basemapOptions: TypeBasemapOptions;
   /** Type of interaction. */
   interaction: TypeInteraction;
@@ -724,18 +725,11 @@ export type TypeMapConfig = {
   listOfGeoviewLayerConfig?: MapConfigLayerEntry[];
   /** View settings. */
   viewSettings: TypeViewSettings;
-  /** Highlight color. */
-  highlightColor?: TypeHighlightColors;
-  /** Additional options used for OpenLayers map options. */
-  extraOptions?: Record<string, unknown>;
+  // /** Highlight color. */
+  // highlightColor?: TypeHighlightColors;
+  // /** Additional options used for OpenLayers map options. */
+  // extraOptions?: Record<string, unknown>;
 };
-
-/** ******************************************************************************************************************************
- *  Definition of the valid map interactiom values. If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar).
- */
-export type TypeInteraction = 'static' | 'dynamic';
-/** Constante mainly use for interaction validation. */
-export const VALID_INTERACTION: TypeInteraction[] = ['static', 'dynamic'];
 
 /** ******************************************************************************************************************************
  *  Definition of the initial view settings.
@@ -752,40 +746,6 @@ export type TypeInitialViewSettings = {
   extent?: Extent;
   /** IDs of layers to use for initial map extent. */
   layerIds?: string[];
-};
-
-/** ******************************************************************************************************************************
- *  Definition of the view settings.
- */
-export type TypeViewSettings = {
-  /** Settings for the initial view for map, default is zoomAndCenter of [3.5, [-90, 65]] */
-  initialView?: TypeInitialViewSettings;
-  /** Enable rotation. If false, a rotation constraint that always sets the rotation to zero is used. Default = true. */
-  enableRotation?: boolean;
-  /**
-   * The initial rotation for the view in degree (positive rotation clockwise, 0 means North). Will be converted to radiant by
-   * the viewer. Domaine = [0..360], default = 0.
-   */
-  rotation?: number;
-  /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates.
-   * Default [-125, 30, -60, 89].
-   */
-  maxExtent?: Extent;
-  /**
-   * The minimum zoom level used to determine the resolution constraint. If not set, will use default from basemap.
-   * Domaine = [0..50].
-   */
-  minZoom?: number;
-  /**
-   * The maximum zoom level used to determine the resolution constraint. If not set, will use default from basemap.
-   * Domaine = [0..50].
-   */
-  maxZoom?: number;
-  /**
-   * Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada.
-   * Default = 3978.
-   */
-  projection: TypeValidMapProjectionCodes;
 };
 
 /** ******************************************************************************************************************************

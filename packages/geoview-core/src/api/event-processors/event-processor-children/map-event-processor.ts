@@ -6,12 +6,12 @@ import View, { FitOptions } from 'ol/View';
 import { KeyboardPan } from 'ol/interaction';
 import { Coordinate } from 'ol/coordinate';
 
+import { TypeBasemapOptions, TypeInteraction } from '@config/types/map-schema-types';
 import { api } from '@/app';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer } from '@/geo/map/map-viewer';
 import {
   TypeGeoviewLayerConfig,
-  TypeInteraction,
   TypeLayerEntryConfig,
   TypeMapMouseInfo,
   TypeMapState,
@@ -32,7 +32,7 @@ import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-pr
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeClickMarker } from '@/core/components';
 import { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { TypeBasemapOptions, TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
+import { TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
 import { TypeHoverFeatureInfo } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
 import { TypeFeatureInfoResultSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
 

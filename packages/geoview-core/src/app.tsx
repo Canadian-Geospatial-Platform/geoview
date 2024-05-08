@@ -76,11 +76,20 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
     // Erase comments in the config file then process
     const configObjStr = removeCommentsFromJSON(configData!);
     mapConfig = api.configApi.getMapConfig(configObjStr, lang);
+
+    // TODO: refactor - remove this injection once config is done
+    let tempStr = removeCommentsFromJSON(configData!);
+    tempStr = tempStr.replace(/(?<!\\)'/gm, '"');
+    tempStr = tempStr.replace(/\\'/gm, "'");
+    mapConfig.map.listOfGeoviewLayerConfig = (JSON.parse(tempStr) as unknown as MapFeatureConfig).map.listOfGeoviewLayerConfig;
   } else if (mapElement.hasAttribute('data-config-url')) {
     // configurations file url is provided, fetch then process
     const configUrl = mapElement.getAttribute('data-config-url');
     const configObject = await fetchConfigFile(configUrl!);
     mapConfig = api.configApi.getMapConfig(configObject, lang);
+
+    // TODO: refactor - remove this injection once config is done
+    mapConfig.map.listOfGeoviewLayerConfig = (configObject as unknown as MapFeatureConfig).map.listOfGeoviewLayerConfig;
   } else if (mapElement.getAttribute('data-shared')) {
     // configurations from the URL parameters is provided, extract then process (replace HTLM characters , && :)
     const urlParam = new URLSearchParams(window.location.search).toString().replace(/%2C/g, ',').replace(/%3A/g, ':') || '';
@@ -115,15 +124,14 @@ async function renderMap(mapElement: Element): Promise<void> {
   // create a new config for this map element
   const config = new Config();
   const configObj = await config.initializeMapConfig(configuration.mapId, configuration!.map!.listOfGeoviewLayerConfig!);
+  configuration.map.listOfGeoviewLayerConfig = configObj!;
 
   // if valid config was provided - mapId is now part of config
   if (configuration) {
     const { mapId } = configuration;
 
     // add config to store
-    // TODO: refactor - revome the assignement once new config contain layers
     addGeoViewStore(configuration);
-    configuration.map.listOfGeoviewLayerConfig = configObj!;
 
     // render the map with the config
     reactRoot[mapId] = createRoot(mapElement!);

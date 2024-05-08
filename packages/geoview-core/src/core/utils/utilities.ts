@@ -249,6 +249,7 @@ export function parseJSONConfig(configObjStr: string): unknown {
 }
 
 /**
+/**
  * Export the image data url as a PNG
  * @param {string} datUrl the dataurl to be downloaded as png.
  * @param {string} name name of exported file

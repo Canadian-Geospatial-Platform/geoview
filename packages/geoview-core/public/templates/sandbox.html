@@ -169,9 +169,9 @@
           const configArea = document.getElementById('configGeoview');
           const configJSON = JSON.parse(configArea.value.replaceAll(`'`, `"`));
 
-          const validConfig = cgpv.api.utilities.core.getValidConfigFromString(
+          const validConfig = cgpv.api.configApi.getMapConfig(
             document.getElementById('configGeoview').value.replaceAll("'", '"'),
-            document.getElementById('sandboxMap')
+            'en'
           );
 
           // set class and message

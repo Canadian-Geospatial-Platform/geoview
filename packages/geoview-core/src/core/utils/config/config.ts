@@ -36,57 +36,9 @@ export class Config {
    * @returns {Config} An instance of the Config class.
    */
   constructor() {
-    // this.#mapElement = mapElement;
-
     // Instanciate the configuration validator.
     this.configValidation = new ConfigValidation();
-
-    // get the id from the map element
-    // const mapId = id; // this.#mapElement.getAttribute('id');
-
-    // update map id if provided in map element
-    // if (mapId) this.mapId = mapId;
-
-    // get the display language from the map element
-    // const displayLanguage = lang; // this.#mapElement.getAttribute('data-lang');
-
-    // update display language if provided in map element
-    // this.displayLanguage = (displayLanguage && displayLanguage.toLowerCase() === 'fr' ? 'fr' : 'en') as TypeDisplayLanguage;
   }
-
-  /** ***************************************************************************************************************************
-   * Get mapId value.
-   *
-   * @returns {string} The ID of the Geoview map.
-   */
-  // get mapId(): string {
-  //   return this.configValidation.mapId;
-  // }
-
-  /** ***************************************************************************************************************************
-   * Set mapId value.
-   * @param {string} mapId The ID of the Geoview map.
-   */
-  // set mapId(mapId: string) {
-  //   this.configValidation.mapId = mapId;
-  // }
-
-  /** ***************************************************************************************************************************
-   * Get displayLanguage value.
-   *
-   * @returns {TypeDisplayLanguage} The display language of the Geoview map.
-   */
-  // get displayLanguage(): TypeDisplayLanguage {
-  //   return this.configValidation.displayLanguage;
-  // }
-
-  /** ***************************************************************************************************************************
-   * Set displayLanguage value.
-   * @param {TypeDisplayLanguage} displayLanguage The display language of the Geoview map.
-   */
-  // set displayLanguage(displayLanguage: TypeDisplayLanguage) {
-  //   this.configValidation.displayLanguage = displayLanguage;
-  // }
 
   /** ***************************************************************************************************************************
    * Get a valid map configuration.
@@ -107,7 +59,7 @@ export class Config {
       });
     }
 
-    // TEST
+    // TODO: refactor - return only the layers
     const validLayers = this.configValidation.validateMapConfigAgainstSchema(listOfGeoviewLayerConfig);
     logger.logDebug('Config', validLayers);
 
@@ -138,30 +90,6 @@ export class Config {
    * @returns {Promise<TypeMapFeaturesConfig | undefined>} The initialized valid map config.
    */
   initializeMapConfig(mapId: string, listOfGeoviewLayerConfig: MapConfigLayerEntry[]): MapConfigLayerEntry[] | undefined {
-    // // create a new config object to store provided config by user
-    // let mapFeaturesConfig: TypeMapFeaturesConfig | undefined;
-
-    // // check if inline div config has been passed
-    // const inlineDivConfig = await InlineDivConfigReader.getMapFeaturesConfig(this.mapId, this.#mapElement);
-
-    // // use inline config if provided
-    // if (inlineDivConfig) mapFeaturesConfig = { ...inlineDivConfig };
-
-    // // check if a config file url is provided.
-    // const jsonFileConfig = await JsonConfigReader.getMapFeaturesConfig(this.mapId, this.#mapElement);
-
-    // if (jsonFileConfig) mapFeaturesConfig = { ...jsonFileConfig };
-
-    // // get the value that will check if any url params passed will override existing map
-    // const shared = this.#mapElement.getAttribute('data-shared');
-    // if (shared === 'true') {
-    //   // check if config params have been passed
-    //   const urlParamsConfig = await URLmapConfigReader.getMapFeaturesConfig(this.mapId);
-
-    //   // use the url params config if provided
-    //   if (urlParamsConfig) mapFeaturesConfig = { ...urlParamsConfig };
-    // }
-
     // NOTE: URL config has precedence on JSON file config that has precedence on inline config
     if (!listOfGeoviewLayerConfig) {
       logger.logInfo(`- Map: ${mapId} - Empty JSON configuration object, using default -`);

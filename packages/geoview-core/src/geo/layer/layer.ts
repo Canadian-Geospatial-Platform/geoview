@@ -354,9 +354,10 @@ export class LayerApi {
     // TO.DOCONT: Here the function sends the config to this class to get the structure to use to generate layers.
     // TO.DOCONT: We should not have link to config anymore...
     // create a new config object for this map element
-    const config = new Config(this.mapViewer.map.getTargetElement());
+    const config = new Config();
 
-    const suportedLanguages = optionalSuportedLanguages || config.configValidation.defaultMapFeaturesConfig.suportedLanguages;
+    // TODO: refactor - hard coded the supported language to clean the old config
+    const suportedLanguages = optionalSuportedLanguages || ['en', 'fr'];
 
     // TODO: Refactor - This should be deal with the config classes and this class pushes the structure ready for consumption by layer orchestrator
     config.configValidation.validateListOfGeoviewLayerConfig(suportedLanguages, [geoviewLayerConfig]);
