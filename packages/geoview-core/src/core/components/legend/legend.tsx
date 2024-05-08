@@ -130,7 +130,3 @@ export function Legend({ fullWidth }: LegendType): JSX.Element {
     </Box>
   );
 }
-
-Legend.defaultProps = {
-  fullWidth: false,
-};

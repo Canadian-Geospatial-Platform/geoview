@@ -160,7 +160,7 @@ export abstract class AbstractGeoviewLayerConfig {
    * MapFeatureConfig instance if it exists.
    */
   propagateError(): void {
-    // this.#errorDetected = true;
+    this.#errorDetected = true;
     this.#mapFeatureConfig?.propagateError();
   }
 
