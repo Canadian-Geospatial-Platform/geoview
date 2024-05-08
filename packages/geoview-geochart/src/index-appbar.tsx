@@ -16,14 +16,18 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
    *
    * @returns {AnySchemaObject} the package schema
    */
-  schema = (): AnySchemaObject => schema;
+  static schema(): AnySchemaObject {
+    return schema;
+  }
 
   /**
    * Return the default config for this package
    *
    * @returns {TypeJsonObject} the default config
    */
-  defaultConfig = (): TypeJsonObject => toJsonObject(defaultConfig);
+  static defaultConfig(): TypeJsonObject {
+    return toJsonObject(defaultConfig);
+  }
 
   /**
    * Translations object to inject to the viewer translations
@@ -41,7 +45,7 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
     },
   });
 
-  onCreateButtonProps(): TypeIconButtonProps {
+  override onCreateButtonProps(): TypeIconButtonProps {
     // Button props
     return {
       id: 'geoChartPanelButton',
@@ -52,7 +56,7 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
     };
   }
 
-  onCreateContentProps(): TypePanelProps {
+  override onCreateContentProps(): TypePanelProps {
     // Panel props
     return {
       title: 'chartPanel.title',
@@ -61,7 +65,7 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
     };
   }
 
-  onCreateContent(): JSX.Element {
+  override onCreateContent(): JSX.Element {
     // Fetch cgpv
     // TODO: Create a geochart-appbar-panel equivalent to geochart-panel to hold the GeoChart itself and hook on the useGeochartConfigs store the same way geochart-panel does it
     // return <GeoChartAppBarPanel mapId={this.pluginProps.mapId} schemaValidator={new SchemaValidator()} />;
@@ -71,6 +75,7 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
   /**
    * Callable plugin function to emit a Chart redraw event in order to update the Chart ui on demand.
    */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   redrawChart(): void {
     // Emit a Chart Redraw event so the chart redraws
     // TODO: Implement the equivalent that's in the index.tsx file

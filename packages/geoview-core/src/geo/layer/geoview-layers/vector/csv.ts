@@ -111,11 +111,9 @@ export class CSV extends AbstractGeoViewVector {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected fetchServiceMetadata(): Promise<void> {
-    const promisedExecution = new Promise<void>((resolve) => {
-      resolve();
-    });
-    return promisedExecution;
+  protected override fetchServiceMetadata(): Promise<void> {
+    // Return resolved promise
+    return Promise.resolve();
   }
 
   /** ***************************************************************************************************************************
@@ -155,7 +153,7 @@ export class CSV extends AbstractGeoViewVector {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected override processLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     return Promise.resolve(layerConfig);
   }
 
@@ -166,8 +164,9 @@ export class CSV extends AbstractGeoViewVector {
    * @param {string} separator The character used to separate the values.
    *
    * @returns {string[][]} An array of the rows of the csv, split by separator.
+   * @private
    */
-  private csvStringToArray(csvData: string, separator: string): string[][] {
+  static #csvStringToArray(csvData: string, separator: string): string[][] {
     const regex = new RegExp(`(\\${separator}|\\r?\\n|\\r|^)(?:"([^"]*(?:""[^"]*)*)"|([^\\${separator}\\r\\n]*))`, 'gi');
     let matches;
     const parsedData: string[][] = [[]];
@@ -186,8 +185,9 @@ export class CSV extends AbstractGeoViewVector {
    * @param {string[]} firstRow The first row of data.
    * @param {number[]} lonLatIndices The index of lon and lat in the array.
    * @param {VectorLayerEntryConfig} layerConfig The vector layer entry to configure.
+   * @private
    */
-  private processFeatureInfoConfig(
+  static #processFeatureInfoConfig(
     headers: string[],
     firstRow: string[],
     lonLatIndices: number[],
@@ -249,7 +249,7 @@ export class CSV extends AbstractGeoViewVector {
     const features: Feature[] = [];
     let latIndex: number | undefined;
     let lonIndex: number | undefined;
-    const csvRows = this.csvStringToArray(csvData, layerConfig.source!.separator || ',');
+    const csvRows = CSV.#csvStringToArray(csvData, layerConfig.source!.separator || ',');
     const headers: string[] = csvRows[0];
     for (let i = 0; i < headers.length; i++) {
       if (latList.includes(headers[i].toLowerCase())) latIndex = i;
@@ -266,7 +266,7 @@ export class CSV extends AbstractGeoViewVector {
       layerConfig.layerStatus = 'error';
       return null;
     }
-    this.processFeatureInfoConfig(headers, csvRows[1], [latIndex, lonIndex], layerConfig);
+    CSV.#processFeatureInfoConfig(headers, csvRows[1], [latIndex, lonIndex], layerConfig);
     for (let i = 1; i < csvRows.length; i++) {
       const currentRow = csvRows[i];
       const properties: { [key: string]: string | number } = {};
@@ -298,7 +298,7 @@ export class CSV extends AbstractGeoViewVector {
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
-  protected createVectorSource(
+  protected override createVectorSource(
     layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}

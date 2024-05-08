@@ -117,7 +117,7 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected async fetchServiceMetadata(): Promise<void> {
+  protected override async fetchServiceMetadata(): Promise<void> {
     const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
     if (metadataUrl) {
       const metadataAccessPathIsXmlFile = metadataUrl.slice(-4).toLowerCase() === '.xml';
@@ -491,7 +491,7 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer | null} The GeoView raster layer that has been created.
    */
-  protected async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected override async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
     await super.processOneLayerEntry(layerConfig);
@@ -576,7 +576,7 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected override processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     if (geoviewEntryIsWMS(layerConfig)) {
       const layerCapabilities = this.getLayerMetadataEntry(layerConfig.layerId)!;
       this.layerMetadata[layerConfig.layerPath] = layerCapabilities;
@@ -630,7 +630,7 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
-  protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected override getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     const { map } = MapEventProcessor.getMapViewer(this.mapId);
     return this.getFeatureInfoAtCoordinate(map.getCoordinateFromPixel(location), layerPath);
   }
@@ -643,7 +643,10 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The promised feature info table.
    */
-  protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected override getFeatureInfoAtCoordinate(
+    location: Coordinate,
+    layerPath: string
+  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     const convertedLocation = Projection.transform(
       location,
       `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`,
@@ -660,7 +663,10 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The promised feature info table.
    */
-  protected async getFeatureInfoAtLongLat(lnglat: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected override async getFeatureInfoAtLongLat(
+    lnglat: Coordinate,
+    layerPath: string
+  ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig(layerPath) as OgcWmsLayerEntryConfig;
@@ -696,10 +702,10 @@ export class WMS extends AbstractGeoViewRaster {
           const jsonResponse = xmlToJson(xmlDomResponse);
           // GV TODO: We should use a WMS format setting in the schema to decide what feature info response interpreter to use
           // GV For the moment, we try to guess the response format based on properties returned from the query
-          const featureCollection = this.getAttribute(jsonResponse, 'FeatureCollection');
-          if (featureCollection) featureMember = this.getAttribute(featureCollection, 'featureMember');
+          const featureCollection = WMS.#getAttribute(jsonResponse, 'FeatureCollection');
+          if (featureCollection) featureMember = WMS.#getAttribute(featureCollection, 'featureMember');
           else {
-            const featureInfoResponse = this.getAttribute(jsonResponse, 'GetFeatureInfoResponse');
+            const featureInfoResponse = WMS.#getAttribute(jsonResponse, 'GetFeatureInfoResponse');
             if (featureInfoResponse?.Layer) {
               featureMember = {};
               const layerName =
@@ -864,7 +870,7 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
    */
-  async getLegend(layerPath: string): Promise<TypeLegend | null> {
+  override async getLegend(layerPath: string): Promise<TypeLegend | null> {
     try {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig(layerPath) as OgcWmsLayerEntryConfig;
@@ -1007,8 +1013,9 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {string} attribute The attribute searched.
    *
    * @returns {TypeJsonObject | undefined} The promised feature info table.
+   * @private
    */
-  private getAttribute(jsonObject: TypeJsonObject, attributeEnding: string): TypeJsonObject | undefined {
+  static #getAttribute(jsonObject: TypeJsonObject, attributeEnding: string): TypeJsonObject | undefined {
     const keyFound = Object.keys(jsonObject).find((key) => key.endsWith(attributeEnding));
     return keyFound ? jsonObject[keyFound] : undefined;
   }

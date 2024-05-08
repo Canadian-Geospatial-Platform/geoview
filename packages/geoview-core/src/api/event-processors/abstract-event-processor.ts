@@ -46,7 +46,8 @@ export abstract class AbstractEventProcessor {
     if (subs) this.subscriptionArr.push(...subs);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/class-methods-use-this
   protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
     // ? Here, `store` is unused, but used in inherited classes, so the eslint-disable should be kept
     // This method should be overriden to initialize and return a list of subscribtions so that they can be destroyed later

@@ -14,10 +14,10 @@ import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-cla
  */
 export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** Tag used to link the entry to a specific schema. */
-  schemaTag = CONST_LAYER_TYPES.ESRI_DYNAMIC;
+  override schemaTag = CONST_LAYER_TYPES.ESRI_DYNAMIC;
 
   /** Layer entry data type. */
-  entryType = CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE;
+  override entryType = CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE;
 
   /** Filter to apply on feature of this layer. */
   layerFilter?: string;
@@ -59,7 +59,7 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Method to execute when the layer is loaded.
    */
-  loadedFunction(): void {
+  override loadedFunction(): void {
     super.loadedFunction();
     if ('applyViewFilter' in this.geoviewLayerInstance!)
       (this.geoviewLayerInstance as GeoviewChild).applyViewFilter(this.layerPath, this.layerFilter || '');

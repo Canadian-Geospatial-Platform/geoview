@@ -16,14 +16,18 @@ class SwiperPlugin extends MapPlugin {
    *
    * @returns {AnySchemaObject} the package schema
    */
-  schema = (): AnySchemaObject => schema;
+  static schema(): AnySchemaObject {
+    return schema;
+  }
 
   /**
    * Returns the default config for this package
    *
    * @returns {TypeJsonObject} the default config
    */
-  defaultConfig = (): TypeJsonObject => toJsonObject(defaultConfig);
+  static defaultConfig(): TypeJsonObject {
+    return toJsonObject(defaultConfig);
+  }
 
   /**
    * Translations object to inject to the viewer translations

@@ -20,9 +20,6 @@ export class GeoCore {
 
   private displayLanguage: TypeDisplayLanguage;
 
-  /** Config validation object used to validate the configuration and define default values */
-  private configValidation = new ConfigValidation();
-
   /**
    * Constructor
    * @param {string} mapId the id of the map
@@ -50,7 +47,7 @@ export class GeoCore {
       const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(url, this.displayLanguage, [uuid]);
 
       // Validate the generated Geoview Layer Config
-      this.configValidation.validateListOfGeoviewLayerConfig(AppEventProcessor.getSupportedLanguages(this.mapId), response.layers);
+      ConfigValidation.validateListOfGeoviewLayerConfig(AppEventProcessor.getSupportedLanguages(this.mapId), response.layers);
 
       // For each found geochart associated with the Geocore UUIDs
       response.geocharts?.forEach((geochartConfig) => {

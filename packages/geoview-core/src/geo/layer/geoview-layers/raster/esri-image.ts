@@ -131,7 +131,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeLegend | null>} The legend of the layer.
    */
-  async getLegend(layerPath: string): Promise<TypeLegend | null> {
+  override async getLegend(layerPath: string): Promise<TypeLegend | null> {
     try {
       const layerConfig = this.getLayerConfig(layerPath) as EsriImageLayerEntryConfig | undefined | null;
       if (!layerConfig) return null;
@@ -233,7 +233,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
-  protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
+  protected override getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
     return commonGetFieldType.call(this, fieldName, layerConfig);
   }
 
@@ -245,7 +245,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
-  protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
+  protected override getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
     return commonGetFieldDomain.call(this, fieldName, layerConfig);
   }
 
@@ -263,9 +263,9 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @param {EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
    */
-  processFeatureInfoConfig = (layerConfig: EsriImageLayerEntryConfig): void => {
+  processFeatureInfoConfig(layerConfig: EsriImageLayerEntryConfig): void {
     commonProcessFeatureInfoConfig.call(this, layerConfig);
-  };
+  }
 
   /** ***************************************************************************************************************************
    * This method set the initial settings based on the service metadata. Priority is given to the layer configuration.
@@ -285,7 +285,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected override processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     return commonProcessLayerMetadata.call(this, layerConfig);
   }
 
@@ -296,7 +296,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  protected async processOneLayerEntry(layerConfig: EsriImageLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected override async processOneLayerEntry(layerConfig: EsriImageLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
     await super.processOneLayerEntry(layerConfig);

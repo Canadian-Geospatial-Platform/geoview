@@ -39,14 +39,18 @@ class TimeSliderPlugin extends FooterPlugin {
    *
    * @returns {AnySchemaObject} returns the schema for this package
    */
-  schema = (): AnySchemaObject => schema;
+  static schema(): AnySchemaObject {
+    return schema;
+  }
 
   /**
    * Return the default config for this package
    *
    * @returns {TypeJsonObject} the default config
    */
-  defaultConfig = (): TypeJsonObject => toJsonObject(defaultConfig);
+  static defaultConfig(): TypeJsonObject {
+    return toJsonObject(defaultConfig);
+  }
 
   /**
    * Translations object to inject to the viewer translations
@@ -102,7 +106,7 @@ class TimeSliderPlugin extends FooterPlugin {
    * Overrides the creation of the content properties of this TimeSlider Footer Plugin.
    * @returns {TypeTabs} The TypeTabs for the TimeSlider Footer Plugin
    */
-  onCreateContentProps(): TypeTabs {
+  override onCreateContentProps(): TypeTabs {
     // Set custom time dimension if applicable
     this.configObj.sliders.forEach((obj: SliderProps) => {
       if (obj.temporalDimension) {
@@ -157,7 +161,7 @@ class TimeSliderPlugin extends FooterPlugin {
   /**
    * Overrides the addition of the TimeSlider Footer Plugin to make sure to set the time slider configs in the store and apply filters.
    */
-  onAdd(): void {
+  override onAdd(): void {
     // Wait for the layers to be processed so that their 'layerTemporalDimension' information is set
     this.mapViewer().onMapLayersProcessed(() => {
       // Now the layerTemporalDimension should be good on the layers

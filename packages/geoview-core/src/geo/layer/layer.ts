@@ -7,7 +7,7 @@ import { FeatureHighlight } from '@/geo/map/feature-highlight';
 
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
-import { Config } from '@/core/utils/config/config';
+import { ConfigValidation } from '@/core/utils/config/config-validation';
 import { generateId, whenThisThen } from '@/core/utils/utilities';
 import { ConfigBaseClass, LayerStatusChangedEvent } from '@/core/utils/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
@@ -129,7 +129,7 @@ export class LayerApi {
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The config to get the info from.
    * @returns {TypeOrderedLayerInfo[]} The array of ordered layer info.
    */
-  generateArrayOfLayerOrderInfo(geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig): TypeOrderedLayerInfo[] {
+  static generateArrayOfLayerOrderInfo(geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig): TypeOrderedLayerInfo[] {
     const newOrderedLayerInfos: TypeOrderedLayerInfo[] = [];
 
     const addSubLayerPathToLayerOrder = (layerEntryConfig: TypeLayerEntryConfig, layerPath: string): void => {
@@ -215,7 +215,7 @@ export class LayerApi {
           promise.value.forEach((geocoreGVLayer) => {
             try {
               // Generate array of layer order information
-              const layerInfos = this.generateArrayOfLayerOrderInfo(geocoreGVLayer);
+              const layerInfos = LayerApi.generateArrayOfLayerOrderInfo(geocoreGVLayer);
               orderedLayerInfos.push(...layerInfos);
 
               // Add it
@@ -349,18 +349,11 @@ export class LayerApi {
     // eslint-disable-next-line no-param-reassign
     geoviewLayerConfig.geoviewLayerId = generateId(geoviewLayerConfig.geoviewLayerId);
 
-    // TODO: Refactor - We should not create a new config here.
-    // TO.DOCONT: The layer class should receive an instance of configuration in is constructor.
-    // TO.DOCONT: Here the function sends the config to this class to get the structure to use to generate layers.
-    // TO.DOCONT: We should not have link to config anymore...
-    // create a new config object for this map element
-    const config = new Config();
-
     // TODO: refactor - hard coded the supported language to clean the old config
     const suportedLanguages = optionalSuportedLanguages || ['en', 'fr'];
 
     // TODO: Refactor - This should be deal with the config classes and this class pushes the structure ready for consumption by layer orchestrator
-    config.configValidation.validateListOfGeoviewLayerConfig(suportedLanguages, [geoviewLayerConfig]);
+    ConfigValidation.validateListOfGeoviewLayerConfig(suportedLanguages, [geoviewLayerConfig]);
 
     if (geoviewLayerConfig.geoviewLayerId in this.geoviewLayers) this.#printDuplicateGeoviewLayerConfigError(geoviewLayerConfig);
     else {
@@ -804,7 +797,7 @@ export class LayerApi {
 
       try {
         // Waiting for the processed phase, possibly throwing exception if that's not happening
-        await this.waitForAllLayerStatusAreGreaterThanOrEqualTo(layer, timeout, checkFrequency);
+        await LayerApi.waitForAllLayerStatusAreGreaterThanOrEqualTo(layer, timeout, checkFrequency);
         return layer;
       } catch (error) {
         // Throw
@@ -859,7 +852,7 @@ export class LayerApi {
    * @returns {Promise<void>} A promise when done waiting
    * @throws An exception when the layer failed to become in processed phase before the timeout expired
    */
-  async waitForAllLayerStatusAreGreaterThanOrEqualTo(
+  static async waitForAllLayerStatusAreGreaterThanOrEqualTo(
     geoviewLayerConfig: AbstractGeoViewLayer,
     timeout?: number,
     checkFrequency?: number

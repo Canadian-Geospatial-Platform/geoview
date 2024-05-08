@@ -29,6 +29,9 @@ export abstract class AbstractLayerSet {
   /** Sequence number to append to the layer name when we declare a layer as anonymous. */
   protected anonymousSequenceNumber = 1;
 
+  /** Indicates the default when registering layer */
+  #defaultRegisterLayerCheck = true;
+
   // Keep all callback delegates references
   #onLayerSetUpdatedHandlers: LayerSetUpdatedDelegate[] = [];
 
@@ -136,7 +139,7 @@ export abstract class AbstractLayerSet {
   protected onRegisterLayerCheck(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): boolean {
     // Override this function to perform registration condition logic in the inherited classes
     // By default, a layer-set always registers layers
-    return true;
+    return this.#defaultRegisterLayerCheck;
   }
 
   /**
@@ -183,7 +186,7 @@ export abstract class AbstractLayerSet {
    * @param {TypeLocation} location - The location for the query
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise resolving to the query results
    */
-  protected queryLayerFeatures(
+  protected static queryLayerFeatures(
     data: TypeLayerData | TypeHoverLayerData,
     layerConfig: TypeLayerEntryConfig,
     layerPath: string,

@@ -16,14 +16,18 @@ class BasemapPanelPlugin extends AppBarPlugin {
    *
    * @returns {AnySchemaObject} the package schema
    */
-  schema = (): AnySchemaObject => schema;
+  static schema(): AnySchemaObject {
+    return schema;
+  }
 
   /**
    * Return the default config for this package
    *
    * @returns {TypeJsonObject} the default config
    */
-  defaultConfig = (): TypeJsonObject => toJsonObject(defaultConfig);
+  static defaultConfig(): TypeJsonObject {
+    return toJsonObject(defaultConfig);
+  }
 
   /**
    * translations object to inject to the viewer translations
@@ -89,7 +93,7 @@ class BasemapPanelPlugin extends AppBarPlugin {
     },
   });
 
-  onCreateButtonProps(): TypeIconButtonProps {
+  override onCreateButtonProps(): TypeIconButtonProps {
     // Button props
     return {
       id: `${this.pluginProps.mapId}-basemapPanelButton`,
@@ -100,7 +104,7 @@ class BasemapPanelPlugin extends AppBarPlugin {
     };
   }
 
-  onCreateContentProps(): TypePanelProps {
+  override onCreateContentProps(): TypePanelProps {
     // Panel props
     return {
       title: 'basemapPanel.title',
@@ -110,14 +114,14 @@ class BasemapPanelPlugin extends AppBarPlugin {
     };
   }
 
-  onCreateContent = (): JSX.Element => {
+  override onCreateContent = (): JSX.Element => {
     return <BasemapPanel mapId={this.pluginProps.mapId} config={this.configObj || {}} />;
   };
 
   /**
    * Function called when the plugin is removed, used for clean up
    */
-  onRemoved(): void {
+  override onRemoved(): void {
     // reset basemaps array
     this.mapViewer().basemap.basemaps = [];
   }

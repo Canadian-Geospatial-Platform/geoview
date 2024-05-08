@@ -3,7 +3,7 @@ import { camelCase } from 'lodash';
 import { useTheme } from '@mui/material/styles';
 
 import { Box, IconButton, Tabs, TypeTabs, MoveDownRoundedIcon, MoveUpRoundedIcon } from '@/ui';
-import { api } from '@/app';
+import { Plugin } from '@/api/plugin/plugin';
 import { getSxClasses } from './footer-bar-style';
 import { ResizeFooterPanel } from '@/core/components/resize-footer-panel/resize-footer-panel';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -295,22 +295,19 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // Packages tab
     if (footerBarTabsConfig && footerBarTabsConfig.tabs.core.includes('time-slider')) {
       // create a new tab by loading the time-slider plugin
-      api.plugin
-        .loadScript('time-slider')
+      Plugin.loadScript('time-slider')
         .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
-          api.plugin
-            .addPlugin(
-              'time-slider',
+          Plugin.addPlugin(
+            'time-slider',
+            mapId,
+            constructor,
+            toJsonObject({
               mapId,
-              constructor,
-              toJsonObject({
-                mapId,
-              })
-            )
-            .catch((error) => {
-              // Log
-              logger.logPromiseFailed('api.plugin.addPlugin(time-slider) in useEffect in FooterBar', error);
-            });
+            })
+          ).catch((error) => {
+            // Log
+            logger.logPromiseFailed('api.plugin.addPlugin(time-slider) in useEffect in FooterBar', error);
+          });
         })
         .catch((error) => {
           // Log
@@ -320,22 +317,19 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
 
     if (footerBarTabsConfig && footerBarTabsConfig.tabs.core.includes('geochart')) {
       // create a new tab by loading the geo chart plugin
-      api.plugin
-        .loadScript('geochart')
+      Plugin.loadScript('geochart')
         .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
-          api.plugin
-            .addPlugin(
-              'geochart',
+          Plugin.addPlugin(
+            'geochart',
+            mapId,
+            constructor,
+            toJsonObject({
               mapId,
-              constructor,
-              toJsonObject({
-                mapId,
-              })
-            )
-            .catch((error) => {
-              // Log
-              logger.logPromiseFailed('api.plugin.addPlugin(geochart) in useEffect in FooterBar', error);
-            });
+            })
+          ).catch((error) => {
+            // Log
+            logger.logPromiseFailed('api.plugin.addPlugin(geochart) in useEffect in FooterBar', error);
+          });
         })
         .catch((error) => {
           // Log

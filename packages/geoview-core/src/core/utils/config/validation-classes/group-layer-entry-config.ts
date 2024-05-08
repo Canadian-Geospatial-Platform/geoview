@@ -18,7 +18,7 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
   declare schemaTag: never;
 
   /** Layer entry data type. */
-  entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
+  override entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
 
   /** The ending element of the layer configuration path is not used on groups. */
   declare layerIdExtension: never;

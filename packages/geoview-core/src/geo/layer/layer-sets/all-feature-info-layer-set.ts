@@ -24,7 +24,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    * @param {TypeLayerEntryConfig} layerConfig - The layer config
    * @returns {boolean} True when the layer should be registered to this all-feature-info-layer-set.
    */
-  protected onRegisterLayerCheck(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): boolean {
+  protected override onRegisterLayerCheck(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): boolean {
     // Log
     logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerConfig.layerPath, Object.keys(this.resultSet));
 
@@ -49,7 +49,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
    * @param {TypeLayerEntryConfig} layerConfig - The layer config
    */
-  protected onRegisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
+  protected override onRegisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
     // Log
     logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET - onRegisterLayer', layerConfig.layerPath, Object.keys(this.resultSet));
 
@@ -78,7 +78,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being unregistered
    * @param {TypeLayerEntryConfig} layerConfig - The layer config
    */
-  protected onUnregisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
+  protected override onUnregisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
     // Log
     logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET - onUnregisterLayer', layerConfig.layerPath, Object.keys(this.resultSet));
 
@@ -95,7 +95,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    * @param {string} layerPath - The layer path being affected
    * @param {string} layerStatus - The new layer status
    */
-  protected onProcessLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
+  protected override onProcessLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
     // TODO: Refactor - This function (and the same function in feature-info-layer-set and hover-feature-info-layer-set) are all very similar if not identical
     // TO.DOCONT: Move the code to the mother class. Be mindful of legends-layer-set that also has a onProcessLayerStatusChanged which is different though.
     // TO.DOCONT: The status of layers should not matters to child layer set (all feature, feature, hover).
@@ -146,7 +146,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
         data.queryStatus = 'processing';
 
         // Process query on results data
-        const promiseResult = this.queryLayerFeatures(data, layerConfig, layerPath, queryType, layerPath);
+        const promiseResult = AllFeatureInfoLayerSet.queryLayerFeatures(data, layerConfig, layerPath, queryType, layerPath);
 
         // Wait for promise to resolve
         const arrayOfRecords = await promiseResult;

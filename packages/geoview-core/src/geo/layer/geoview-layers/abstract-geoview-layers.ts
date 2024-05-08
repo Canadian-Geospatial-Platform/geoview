@@ -529,6 +529,8 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
+  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     if (!layerConfig.source) layerConfig.source = {};
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: false };
@@ -556,7 +558,10 @@ export abstract class AbstractGeoViewLayer {
       if (listOfLayerEntryConfig.length === 0) return null;
       if (listOfLayerEntryConfig.length === 1) {
         if (layerEntryIsGroupLayer(listOfLayerEntryConfig[0])) {
-          const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[0], listOfLayerEntryConfig[0].initialSettings!);
+          const newLayerGroup = AbstractGeoViewLayer.createLayerGroup(
+            listOfLayerEntryConfig[0],
+            listOfLayerEntryConfig[0].initialSettings!
+          );
           const groupReturned = await this.processListOfLayerEntryConfig(listOfLayerEntryConfig[0].listOfLayerEntryConfig!, newLayerGroup);
           if (groupReturned) {
             if (layerGroup) layerGroup.getLayers().push(groupReturned);
@@ -587,7 +592,7 @@ export abstract class AbstractGeoViewLayer {
 
       if (!layerGroup) {
         // All children of this level in the tree have the same parent, so we use the first element of the array to retrieve the parent node.
-        layerGroup = this.createLayerGroup(
+        layerGroup = AbstractGeoViewLayer.createLayerGroup(
           (listOfLayerEntryConfig[0] as AbstractBaseLayerEntryConfig).parentLayerConfig as TypeLayerEntryConfig,
           listOfLayerEntryConfig[0].initialSettings!
         );
@@ -595,7 +600,10 @@ export abstract class AbstractGeoViewLayer {
       const promiseOfLayerCreated: Promise<BaseLayer | LayerGroup | null>[] = [];
       listOfLayerEntryConfig.forEach((layerConfig, i) => {
         if (layerEntryIsGroupLayer(layerConfig)) {
-          const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[i], listOfLayerEntryConfig[i].initialSettings!);
+          const newLayerGroup = AbstractGeoViewLayer.createLayerGroup(
+            listOfLayerEntryConfig[i],
+            listOfLayerEntryConfig[i].initialSettings!
+          );
           promiseOfLayerCreated.push(this.processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!, newLayerGroup));
         } else if ((listOfLayerEntryConfig[i] as AbstractBaseLayerEntryConfig).layerStatus === 'error')
           promiseOfLayerCreated.push(Promise.resolve(null));
@@ -640,6 +648,8 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<BaseLayer | null>} The GeoView layer that has been created.
    */
+  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | null> {
     // GV IMPORTANT: The processOneLayerEntry method of all the children must call this method to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
@@ -740,6 +750,8 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
+  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected getAllFeatureInfo(layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getAllFeatureInfo is not implemented! for ${layerPath}`);
@@ -755,6 +767,8 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
+  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoAtPixel is not implemented! for ${layerPath} - ${location}`);
@@ -770,6 +784,8 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
+  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoAtCoordinate is not implemented! for ${layerPath} - ${location}`);
@@ -785,6 +801,8 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
+  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoAtLongLat is not implemented for ${layerPath} - ${location}!`);
@@ -800,6 +818,8 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
+  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected getFeatureInfoUsingBBox(location: Coordinate[], layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoUsingBBox is not implemented! for ${layerPath} - ${location}`);
@@ -815,6 +835,8 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
+  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected getFeatureInfoUsingPolygon(location: Coordinate[], layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // Log
     logger.logError(`getFeatureInfoUsingPolygon is not implemented! for ${layerPath} - ${location}`);
@@ -884,7 +906,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {TypeLayerInitialSettings } initialSettings Initial settings to apply to the layer.
    * @returns {LayerGroup} A new layer group.
    */
-  protected createLayerGroup(layerConfig: TypeLayerEntryConfig, initialSettings: TypeLayerInitialSettings): LayerGroup {
+  protected static createLayerGroup(layerConfig: TypeLayerEntryConfig, initialSettings: TypeLayerInitialSettings): LayerGroup {
     const layerGroupOptions: LayerGroupOptions = {
       layers: new Collection(),
       properties: { layerConfig },
@@ -965,7 +987,8 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
-
+  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
     // Log
     logger.logWarning(`getFieldDomain is not implemented for ${fieldName} - ${layerConfig}`);
@@ -980,7 +1003,8 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
-
+  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
     // Log
     logger.logWarning(`getFieldType is not implemented for ${fieldName} - ${layerConfig}`);
