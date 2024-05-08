@@ -433,8 +433,9 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns {TypeFieldOfTheSameValue[][]} The result of the evaluation. The first index of the array correspond to the field's
    * index in the style settings and the second one to the number of different values the field may have based on visibility of
    * the feature.
+   * @private
    */
-  private static countFieldOfTheSameValue(styleSettings: TypeUniqueValueStyleConfig): TypeFieldOfTheSameValue[][] {
+  static #countFieldOfTheSameValue(styleSettings: TypeUniqueValueStyleConfig): TypeFieldOfTheSameValue[][] {
     return styleSettings.uniqueValueStyleInfo.reduce<TypeFieldOfTheSameValue[][]>(
       (counter, styleEntry): TypeFieldOfTheSameValue[][] => {
         if (
@@ -645,7 +646,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
           return `(1=1)${layerFilter ? ` and (${layerFilter})` : ''}`;
 
         // This section of code optimize the query to reduce it at it shortest expression.
-        const fieldOfTheSameValue = EsriDynamic.countFieldOfTheSameValue(styleSettings);
+        const fieldOfTheSameValue = EsriDynamic.#countFieldOfTheSameValue(styleSettings);
         const fieldOrder = EsriDynamic.sortFieldOfTheSameValue(styleSettings, fieldOfTheSameValue);
         const queryTree = EsriDynamic.getQueryTree(styleSettings, fieldOfTheSameValue, fieldOrder);
         const query = this.buildQuery(queryTree, 0, fieldOrder, styleSettings, layerConfig.source.featureInfo!);

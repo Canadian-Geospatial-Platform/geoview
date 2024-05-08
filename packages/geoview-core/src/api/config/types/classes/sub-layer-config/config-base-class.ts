@@ -20,6 +20,7 @@ export abstract class ConfigBaseClass {
   #parentNode: ConfigBaseClass | undefined = undefined;
 
   /** Used internally to distinguish layer groups derived from the metadata. */
+  // TODO: Refactor - Add this back?
   // #isMetadataLayerGroup?: false;
 
   /** The identifier of the layer to display on the map. This element is part of the schema. */

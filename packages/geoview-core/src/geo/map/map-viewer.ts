@@ -21,7 +21,7 @@ import { LayerApi } from '@/geo/layer/layer';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { Projection } from '@/geo/utils/projection';
 
-import { API, api, unmountMap } from '@/app';
+import { api, unmountMap } from '@/app';
 import { Plugin } from '@/api/plugin/plugin';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 
@@ -1476,7 +1476,7 @@ export class MapViewer {
     setTimeout(
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       () =>
-        API.createMapFromConfig(mapDiv.id, JSON.stringify(config)).catch((error) => {
+        api.createMapFromConfig(mapDiv.id, JSON.stringify(config)).catch((error) => {
           // Log
           logger.logError(`Couldn't reload the map in map-viewer`, error);
         }),
