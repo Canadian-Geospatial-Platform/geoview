@@ -58,14 +58,15 @@ export class UUIDmapConfigReader {
             const geoviewLayerConfig: TypeJsonObject = {
               geoviewLayerId: `${id}` as TypeJsonObject,
               geoviewLayerName: Cast<TypeJsonObject>(createLocalizedString(name as string)),
-              metadataAccessPath: Cast<TypeJsonObject>(createLocalizedString(url as string)),
+              isGeocore: true as TypeJsonObject,
+              accessPath: Cast<TypeJsonObject>(createLocalizedString(url as string)),
               geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_DYNAMIC as TypeJsonObject,
             };
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
                 return {
-                  entryType: CV_CONST_SUB_LAYER_TYPES.RASTER_IMAGE as TypeJsonObject,
-                  layerId: `${item.index}` as TypeJsonObject,
+                  type: CV_CONST_SUB_LAYER_TYPES.RASTER_IMAGE as TypeJsonObject,
+                  id: `${item.index}` as TypeJsonObject,
                 } as TypeJsonObject;
               }
             );
@@ -75,14 +76,15 @@ export class UUIDmapConfigReader {
               const geoviewLayerConfig: TypeJsonObject = {
                 geoviewLayerId: `${id}` as TypeJsonObject,
                 geoviewLayerName: Cast<TypeJsonObject>(createLocalizedString(name as string)),
-                metadataAccessPath: Cast<TypeJsonObject>(createLocalizedString(url as string)),
+                isGeocore: true as TypeJsonObject,
+                accessPath: Cast<TypeJsonObject>(createLocalizedString(url as string)),
                 geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_FEATURE as TypeJsonObject,
               };
               (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
                 (item): TypeJsonObject => {
                   return {
-                    entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR as TypeJsonObject,
-                    layerId: `${item.index}` as TypeJsonObject,
+                    type: CV_CONST_SUB_LAYER_TYPES.VECTOR as TypeJsonObject,
+                    id: `${item.index}` as TypeJsonObject,
                   } as TypeJsonObject;
                 }
               );
@@ -92,14 +94,15 @@ export class UUIDmapConfigReader {
             const geoviewLayerConfig: TypeJsonObject = {
               geoviewLayerId: `${id}` as TypeJsonObject,
               geoviewLayerName: Cast<TypeJsonObject>(createLocalizedString(name as string)),
-              metadataAccessPath: Cast<TypeJsonObject>(createLocalizedString(url as string)),
+              isGeocore: true as TypeJsonObject,
+              accessPath: Cast<TypeJsonObject>(createLocalizedString(url as string)),
               geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_FEATURE as TypeJsonObject,
             };
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
                 return {
-                  entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR as TypeJsonObject,
-                  layerId: `${item.index}` as TypeJsonObject,
+                  type: CV_CONST_SUB_LAYER_TYPES.VECTOR as TypeJsonObject,
+                  id: `${item.index}` as TypeJsonObject,
                 } as TypeJsonObject;
               }
             );

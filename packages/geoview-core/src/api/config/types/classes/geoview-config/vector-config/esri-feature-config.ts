@@ -39,9 +39,6 @@ export class EsriFeatureLayerConfig extends AbstractGeoviewLayerConfig {
     if (!this.geoviewLayerId) {
       throw new Error(`geoviewLayerId is mandatory for GeoView layer of type ${this.geoviewLayerType}.`);
     }
-    if (!this.metadataAccessPath) {
-      throw new Error(`metadataAccessPath is mandatory for GeoView layer ${this.geoviewLayerId} of type ${this.geoviewLayerType}.`);
-    }
     this.validate();
   }
 
@@ -58,7 +55,7 @@ export class EsriFeatureLayerConfig extends AbstractGeoviewLayerConfig {
   }
 
   /**
-   * Get the service metadata from the metadataAccessPath and store it in a private variable of the geoview layer.
+   * Get the service metadata from the accessPath and store it in a private variable of the geoview layer.
    * @protected
    */
   // TODO: Implement this method

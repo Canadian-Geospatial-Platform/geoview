@@ -145,9 +145,6 @@ export const CV_DEFAULT_MAP_FEATURE_CONFIG = {
       },
       enableRotation: true,
       rotation: 0,
-      minZoom: 0,
-      maxZoom: 50,
-      maxExtent: [-125, 30, -60, 89],
       projection: 3978,
     } as TypeViewSettings,
     basemapOptions: {
@@ -181,10 +178,16 @@ export const CV_DEFAULT_LAYER_INITIAL_SETTINGS = {
     highlight: true,
     hover: true,
     opacity: true,
-    query: true,
+    query: false,
     remove: true,
     table: true,
     visibility: true,
     zoom: true,
+  },
+  states: {
+    visible: true,
+    opacity: 1,
+    hoverable: true,
+    queryable: false,
   },
 };
