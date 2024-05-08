@@ -22,7 +22,7 @@
           },
           {
             "layerId": "1",
-            "layerFilter": "E_Province = \"Alberta\" or E_Province = \"Manitoba\"",
+            "layerFilter": "E_Province = 'Alberta' or E_Province = 'Manitoba'",
             "style": {
               "Point": {
                 "styleId": "uniqueValueId",

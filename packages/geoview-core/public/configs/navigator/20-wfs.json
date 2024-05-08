@@ -24,7 +24,7 @@
           {
             "layerId": "usa:states",
             "layerName": { "en": "US States" },
-            "layerFilter": "STATE_ABBR = \"NY\""
+            "layerFilter": "STATE_ABBR = 'NY'"
           }
         ]
       },
