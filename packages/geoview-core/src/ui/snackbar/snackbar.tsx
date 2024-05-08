@@ -10,14 +10,14 @@ import { logger } from '@/core/utils/logger';
 /**
  * Snackbar properties interface
  */
-interface SnackBarProps {
+type SnackBarProps = {
   snackBarId: string;
   message: string;
   open: boolean;
   type: SnackbarType;
   button?: JSX.Element;
   onClose?: (event?: React.SyntheticEvent | Event, reason?: string) => void;
-}
+};
 
 const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
   return <MaterialAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -58,8 +58,3 @@ export function Snackbar(props: SnackBarProps): JSX.Element {
     </AnimatedSnackbar>
   );
 }
-
-Snackbar.defaultProps = {
-  button: undefined,
-  onClose: undefined,
-};

@@ -25,7 +25,7 @@ export class FeatureHighlight {
   #highlighSource: VectorSource = new VectorSource();
 
   /** The hidden layer to display animations. */
-  // GV It's public, because even if it's not read in this class, it's actually important to instanciate per OpenLayer design.
+  // GV It's public, to save an eslint warning, because even if it's not read in this class, it's actually important to instanciate per OpenLayer design.
   overlayLayer: VectorLayer<VectorSource>;
 
   /** The fill for the highlight */
