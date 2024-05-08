@@ -10,7 +10,7 @@ import { LegendLayer } from './legend-layer';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { useFooterPanelHeight } from '@/core/components/common';
 
-interface LegendType {
+type LegendType = {
   fullWidth?: boolean;
 }
 
@@ -130,7 +130,3 @@ export function Legend({ fullWidth }: LegendType): JSX.Element {
     </Box>
   );
 }
-
-Legend.defaultProps = {
-  fullWidth: false,
-};
