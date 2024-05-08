@@ -6,8 +6,7 @@ import sanitizeHtml from 'sanitize-html';
 
 import { TypeDisplayLanguage, TypeLocalizedString } from '@/geo/map/map-schema-types';
 
-import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { Config } from '@/core/utils/config/config';
+import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { TypeGuideObject } from '../stores/store-interface-and-intial-values/app-state';
 
@@ -250,20 +249,6 @@ export function parseJSONConfig(configObjStr: string): unknown {
 }
 
 /**
- * Get a valid configuration from a string configuration
- *
- * @param {string} configString String configuration
- * @returns {TypeMapFeaturesConfig} A valid configuration object
- */
-// TODO: refactor - yves, move this function to config class
-export function getValidConfigFromString(configString: string, mapDiv: HTMLElement): TypeMapFeaturesConfig {
-  const configObjString = removeCommentsFromJSON(configString);
-  const parsedMapConfig = parseJSONConfig(configObjString);
-  // create a new config for this map element
-  const config = new Config(mapDiv!);
-  return config.getValidMapConfig(parsedMapConfig as TypeMapFeaturesConfig);
-}
-
 /**
  * Export the image data url as a PNG
  * @param {string} datUrl the dataurl to be downloaded as png.

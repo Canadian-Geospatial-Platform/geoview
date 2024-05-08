@@ -4,7 +4,8 @@ import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import { Coordinate } from 'ol/coordinate';
 
-import { TypeBasemapOptions } from '@/geo/layer/basemap/basemap-types';
+import { TypeBasemapOptions } from '@config/types/map-schema-types';
+
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
@@ -716,7 +717,7 @@ export type TypeMapState = {
  *  Definition of the map configuration settings.
  */
 export type TypeMapConfig = {
-  /** Basemap options settings for this map configuration. */
+  // /** Basemap options settings for this map configuration. */
   basemapOptions: TypeBasemapOptions;
   /** Type of interaction. */
   interaction: TypeInteraction;
@@ -724,10 +725,10 @@ export type TypeMapConfig = {
   listOfGeoviewLayerConfig?: MapConfigLayerEntry[];
   /** View settings. */
   viewSettings: TypeViewSettings;
-  /** Highlight color. */
-  highlightColor?: TypeHighlightColors;
-  /** Additional options used for OpenLayers map options. */
-  extraOptions?: Record<string, unknown>;
+  // /** Highlight color. */
+  // highlightColor?: TypeHighlightColors;
+  // /** Additional options used for OpenLayers map options. */
+  // extraOptions?: Record<string, unknown>;
 };
 
 /** ******************************************************************************************************************************

@@ -4,16 +4,16 @@ import { Extent } from 'ol/extent'; // only for Typing
 import { FitOptions } from 'ol/View'; // only for typing
 
 import { useStore } from 'zustand';
+import { TypeBasemapOptions, TypeInteraction } from '@config/types/map-schema-types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { Projection } from '@/geo/utils/projection';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { TypeInteraction, TypeValidMapProjectionCodes, TypeMapMouseInfo } from '@/geo/map/map-schema-types';
+import { TypeValidMapProjectionCodes, TypeMapMouseInfo } from '@/geo/map/map-schema-types';
 
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
-import { TypeBasemapOptions } from '@/geo/layer/basemap/basemap-types';
 import { TypeHoverFeatureInfo } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
 import { TypeFeatureInfoResultSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
 

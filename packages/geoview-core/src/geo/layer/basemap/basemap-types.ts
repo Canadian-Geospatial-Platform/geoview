@@ -1,35 +1,6 @@
 import { OSM, XYZ } from 'ol/source';
 import { Extent } from 'ol/extent';
 
-// GV: CONFIG EXTRACTION
-// GV: This section of code was extracted and copied to the geoview-config package
-// GV: |||||
-// GV: vvvvv
-
-/** ******************************************************************************************************************************
- *  Definition of the basemap options type.
- */
-export type TypeBasemapId = 'transport' | 'osm' | 'simple' | 'nogeom' | 'shaded';
-
-/** ******************************************************************************************************************************
- *  Definition of the basemap options type.
- */
-export const VALID_BASEMAP_ID: TypeBasemapId[] = ['transport', 'osm', 'simple', 'nogeom', 'shaded'];
-
-/** ******************************************************************************************************************************
- *  Definition of the basemap options type.
- */
-export type TypeBasemapOptions = {
-  /** Id of the basemap to use. */
-  basemapId: TypeBasemapId;
-  /** Enable or disable shaded basemap (if basemap id is set to shaded then this should be false). */
-  shaded: boolean;
-  /** Enable or disable basemap labels. */
-  labeled: boolean;
-};
-
-// GV: ^^^^^
-// GV: |||||
 /** ******************************************************************************************************************************
  * interface used to define a new basemap.
  */

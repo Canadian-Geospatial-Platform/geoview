@@ -1,14 +1,12 @@
 /* eslint-disable no-underscore-dangle, no-param-reassign */
 // We have a lot of private function with functions with dangle and many reassigns. We keep it global...
 // TODO: refactor - clean the code to minimize esLint warning
-import { Extent } from 'ol/extent';
 
 import Ajv from 'ajv';
 import { AnyValidateFunction } from 'ajv/dist/types';
 
 import defaultsDeep from 'lodash/defaultsDeep';
 
-import { TypeBasemapId, TypeBasemapOptions, VALID_BASEMAP_ID } from '@/geo/layer/basemap/basemap-types';
 import { geoviewEntryIsWMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { geoviewEntryIsImageStatic } from '@/geo/layer/geoview-layers/raster/image-static';
 import { geoviewEntryIsXYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
@@ -26,23 +24,16 @@ import {
   TypeDisplayLanguage,
   TypeLayerEntryConfig,
   TypeLocalizedString,
-  TypeValidMapProjectionCodes,
-  TypeValidVersions,
   TypeListOfLayerEntryConfig,
-  VALID_DISPLAY_LANGUAGE,
-  VALID_PROJECTION_CODES,
-  VALID_VERSIONS,
   TypeListOfGeoviewLayerConfig,
   TypeListOfLocalizedLanguages,
   MapConfigLayerEntry,
   mapConfigLayerEntryIsGeoCore,
-  TypeInitialViewSettings,
 } from '@/geo/map/map-schema-types';
-import { Cast, toJsonObject, TypeJsonObject, TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { Cast, toJsonObject, TypeJsonObject } from '@/core/types/global-types';
 import { CONST_GEOVIEW_SCHEMA_BY_TYPE, CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { geoviewEntryIsEsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { logger } from '@/core/utils/logger';
-import { CONFIG_GEOCORE_URL, CONFIG_GEOLOCATOR_URL, DEFAULT_MAP_EXTENT } from '@/core/utils/constant';
 
 import { generateId, replaceParams, getLocalizedMessage } from '@/core/utils/utilities';
 import schema from '../../../../schema.json';
@@ -74,74 +65,6 @@ export class ConfigValidation {
   /** The map ID associated to the configuration. If it is undefined, a unique value will be generated and assign to it. */
   #mapId: string;
 
-  /** The language that will be used to display the GeoView layer. */
-  #displayLanguage: TypeDisplayLanguage;
-
-  // extents for each projection
-  #maxExtents: Record<TypeValidMapProjectionCodes, number[]> = {
-    3857: [-150, 38, -40, 84],
-    3978: DEFAULT_MAP_EXTENT,
-  };
-
-  /** default configuration if provided configuration is missing or wrong */
-  #defaultMapFeaturesConfig: TypeMapFeaturesConfig = {
-    mapId: '',
-    map: {
-      interaction: 'dynamic',
-      viewSettings: {
-        initialView: { zoomAndCenter: [3.5, [-90, 60]] },
-        maxExtent: this.#maxExtents[3978],
-        projection: 3978,
-        enableRotation: true,
-        rotation: 0,
-      },
-      basemapOptions: {
-        basemapId: 'transport',
-        shaded: true,
-        labeled: true,
-      },
-      listOfGeoviewLayerConfig: [],
-      extraOptions: {},
-    },
-    theme: 'geo.ca',
-    components: [],
-    appBar: { tabs: { core: ['geolocator'] } },
-    navBar: ['zoom', 'fullscreen', 'home'],
-    corePackages: [],
-    overviewMap: undefined,
-    serviceUrls: {
-      geocoreUrl: CONFIG_GEOCORE_URL,
-      geolocator: CONFIG_GEOLOCATOR_URL,
-    },
-    displayLanguage: 'en',
-    suportedLanguages: ['en', 'fr'],
-    schemaVersionUsed: '1.0',
-  };
-
-  // valid basemap ids
-  #basemapId: Record<TypeValidMapProjectionCodes, TypeBasemapId[]> = {
-    3857: VALID_BASEMAP_ID,
-    3978: VALID_BASEMAP_ID,
-  };
-
-  // valid shaded basemap values for each projection
-  #basemapShaded: Record<TypeValidMapProjectionCodes, boolean[]> = {
-    3857: [true, false],
-    3978: [true, false],
-  };
-
-  // valid labeled basemap values for each projection
-  #basemaplabeled: Record<TypeValidMapProjectionCodes, boolean[]> = {
-    3857: [true, false],
-    3978: [true, false],
-  };
-
-  // valid center levels from each projection
-  #center: Record<TypeValidMapProjectionCodes, Record<string, number[]>> = {
-    3857: { lat: [-90, 90], long: [-180, 180] },
-    3978: { lat: [40, 90], long: [-140, 40] },
-  };
-
   /** ***************************************************************************************************************************
    * The ConfigValidation class constructor used to instanciate an object of this type.
    *
@@ -149,17 +72,6 @@ export class ConfigValidation {
    */
   constructor() {
     this.#mapId = generateId();
-    this.#defaultMapFeaturesConfig.mapId = this.mapId;
-    this.#displayLanguage = this.#defaultMapFeaturesConfig.displayLanguage!;
-  }
-
-  /** ***************************************************************************************************************************
-   * Get map features configuration object.
-   *
-   * @returns {TypeMapFeaturesConfig} The map features configuration.
-   */
-  get defaultMapFeaturesConfig(): TypeMapFeaturesConfig {
-    return this.#defaultMapFeaturesConfig;
   }
 
   /** ***************************************************************************************************************************
@@ -177,174 +89,6 @@ export class ConfigValidation {
    */
   set mapId(mapId: string) {
     this.#mapId = mapId;
-    this.#defaultMapFeaturesConfig.mapId = this.mapId;
-  }
-
-  /** ***************************************************************************************************************************
-   * Get displayLanguage value.
-   * @returns {TypeDisplayLanguage} The display language of the Geoview map.
-   */
-  get displayLanguage(): TypeDisplayLanguage {
-    return this.#displayLanguage;
-  }
-
-  /** ***************************************************************************************************************************
-   * Set displayLanguage value.
-   * @param {TypeDisplayLanguage} displayLanguage - The display language of the Geoview map.
-   */
-  set displayLanguage(displayLanguage: TypeDisplayLanguage) {
-    this.#displayLanguage = this.validateDisplayLanguage(displayLanguage);
-  }
-
-  /** ***************************************************************************************************************************
-   * Validate basemap options.
-   * @param {TypeValidMapProjectionCodes} projection - The projection code of the basemap.
-   * @param {TypeBasemapOptions} basemapOptions - The basemap options to validate.
-   *
-   * @returns {TypeBasemapOptions} A valid basemap options.
-   * @private
-   */
-  #validateBasemap(projection?: TypeValidMapProjectionCodes, basemapOptions?: TypeBasemapOptions): TypeBasemapOptions {
-    if (projection && basemapOptions) {
-      const basemapId = this.#basemapId[projection].includes(basemapOptions.basemapId)
-        ? basemapOptions.basemapId
-        : this.#defaultMapFeaturesConfig.map.basemapOptions.basemapId;
-      const shaded = this.#basemapShaded[projection].includes(basemapOptions.shaded)
-        ? basemapOptions.shaded
-        : this.#defaultMapFeaturesConfig.map.basemapOptions.shaded;
-      const labeled = this.#basemaplabeled[projection].includes(basemapOptions.labeled)
-        ? basemapOptions.labeled
-        : this.#defaultMapFeaturesConfig.map.basemapOptions.labeled;
-
-      return { basemapId, shaded, labeled };
-    }
-    return this.#defaultMapFeaturesConfig.map.basemapOptions;
-  }
-
-  /** ***************************************************************************************************************************
-   * Validate map version.
-   * @param {TypeValidVersions} version - The version to validate.
-   *
-   * @returns {TypeValidVersions} A valid version.
-   */
-  validateVersion(version?: TypeValidVersions): TypeValidVersions {
-    return version && VALID_VERSIONS.includes(version) ? version : this.#defaultMapFeaturesConfig.schemaVersionUsed!;
-  }
-
-  /** ***************************************************************************************************************************
-   * Validate map config language.
-   * @param {TypeDisplayLanguage} language - The language to validate.
-   *
-   * @returns {TypeDisplayLanguage} A valid language.
-   */
-  validateDisplayLanguage(language?: TypeDisplayLanguage): TypeDisplayLanguage {
-    if (language && VALID_DISPLAY_LANGUAGE.includes(language)) return language;
-
-    logger.logWarning(
-      `- Map: ${this.mapId} - Invalid display language code ${language} replaced by ${this.#defaultMapFeaturesConfig.displayLanguage} -`
-    );
-    return this.#defaultMapFeaturesConfig.displayLanguage!;
-  }
-
-  /** ***************************************************************************************************************************
-   * Validate zoom level.
-   * @param {number} zoom - The zoom level to validate.
-   *
-   * @returns {number} A valid zoom level.
-   * @private
-   */
-  #validateZoom(zoom?: number): number {
-    return zoom && !Number.isNaN(zoom) && zoom >= 0 && zoom <= 18
-      ? zoom
-      : this.#defaultMapFeaturesConfig.map.viewSettings.initialView!.zoomAndCenter![0];
-  }
-
-  /** ***************************************************************************************************************************
-   * Validate min zoom level.
-   * @param {number} zoom - The zoom level to validate.
-   *
-   * @returns {number} A valid zoom level.
-   * @private
-   */
-  #validateMinZoom(zoom?: number): number | undefined {
-    return zoom && !Number.isNaN(zoom) && zoom >= 0 && zoom <= 18 ? zoom : undefined;
-  }
-
-  /** ***************************************************************************************************************************
-   * Validate max zoom level.
-   * @param {number} zoom - The zoom level to validate.
-   *
-   * @returns {number} A valid zoom level.
-   * @private
-   */
-  #validateMaxZoom(zoom?: number): number | undefined {
-    return zoom && !Number.isNaN(zoom) && zoom >= 0 && zoom <= 18 ? zoom : undefined;
-  }
-
-  /** ***************************************************************************************************************************
-   * Validate projection.
-   * @param {TypeValidMapProjectionCodes} projection - The projection to validate.
-   *
-   * @returns {TypeValidMapProjectionCodes} A valid projection.
-   * @private
-   */
-  #validateProjection(projection?: TypeValidMapProjectionCodes): TypeValidMapProjectionCodes {
-    return projection && VALID_PROJECTION_CODES.includes(projection)
-      ? projection
-      : this.#defaultMapFeaturesConfig.map.viewSettings.projection;
-  }
-
-  /** ***************************************************************************************************************************
-   * Validate the center.
-   * @param {TypeValidMapProjectionCodes} projection - The projection used by the map.
-   * @param {[number, number]} center - The map center to validate.
-   *
-   * @returns {[number, number]} A valid map center.
-   * @private
-   */
-  #validateCenter(projection?: TypeValidMapProjectionCodes, center?: [number, number]): [number, number] {
-    if (projection && center) {
-      const xVal = Number(center[0]);
-      const yVal = Number(center[1]);
-
-      const x =
-        !Number.isNaN(xVal) && xVal > this.#center[projection].long[0] && xVal < this.#center[projection].long[1]
-          ? xVal
-          : this.#defaultMapFeaturesConfig.map.viewSettings.initialView!.zoomAndCenter![1][0];
-      const y =
-        !Number.isNaN(yVal) && yVal > this.#center[projection].lat[0] && yVal < this.#center[projection].lat[1]
-          ? yVal
-          : this.#defaultMapFeaturesConfig.map.viewSettings.initialView!.zoomAndCenter![1][1];
-
-      return [x, y];
-    }
-    return this.#defaultMapFeaturesConfig.map.viewSettings.initialView!.zoomAndCenter![1];
-  }
-
-  /** ***************************************************************************************************************************
-   * Validate the extent.
-   * @param {TypeValidMapProjectionCodes} projection - The projection used by the map.
-   * @param {[number, number, number, number]} extent - The map extent to valdate.
-   * @param {[number, number]} center - The map extent to validate.
-   *
-   * @returns {[number, number, number, number]} A valid map extent.
-   * @private
-   */
-  #validateExtent(
-    projection: TypeValidMapProjectionCodes,
-    extent: [number, number, number, number],
-    center: [number, number]
-  ): Extent | undefined {
-    if (projection && extent) {
-      const [extentMinX, extentMinY, extentMaxX, extentMaxY] = extent;
-      const minX = !Number.isNaN(extentMinX) && extentMinX < center[0] ? extentMinX : this.#center[projection].long[0];
-      const minY = !Number.isNaN(extentMinY) && extentMinY < center[1] ? extentMinY : this.#center[projection].lat[0];
-      const maxX = !Number.isNaN(extentMaxX) && extentMaxX > center[0] ? extentMaxX : this.#center[projection].long[1];
-      const maxY = !Number.isNaN(extentMaxY) && extentMaxY > center[1] ? extentMaxY : this.#center[projection].lat[1];
-
-      return [minX, minY, maxX, maxY] as Extent;
-    }
-    return undefined;
   }
 
   /** ***************************************************************************************************************************
@@ -364,34 +108,6 @@ export class ConfigValidation {
       }
       logger.logWarning(this.mapId, '='.repeat(200), 'Schema error: ', this.mapId, error, 'Object affected: ', this.mapId, node);
     }
-  }
-
-  /** ***************************************************************************************************************************
-   * Validate the configuration of the map features against the TypeMapFeaturesInstance defined in the schema.
-   * @param {TypeMapFeaturesConfig} mapFeaturesConfigToValidate - The map features configuration to validate.
-   * @param {Ajv} validator - The schema validator to use.
-   *
-   * @returns {TypeMapFeaturesConfig} A valid map features configuration.
-   * @private
-   */
-  #isValidTypeMapFeaturesInstance(mapFeaturesConfigToValidate: TypeMapFeaturesConfig, validator: Ajv): boolean {
-    const schemaPath = 'https://cgpv/schema#/definitions/TypeMapFeaturesInstance';
-    const validate = validator.getSchema(schemaPath);
-
-    if (!validate) {
-      const message = replaceParams([schemaPath], getLocalizedMessage('validation.schema.wrongPath', 'en'));
-      logger.logWarning(`- Map ${this.mapId}: ${message}`);
-      return false;
-    }
-
-    // validate configuration
-    const valid = validate({ ...mapFeaturesConfigToValidate });
-
-    if (!valid) {
-      this.#printSchemaError(validate, mapFeaturesConfigToValidate);
-      return false;
-    }
-    return true;
   }
 
   /** ***************************************************************************************************************************
@@ -450,62 +166,34 @@ export class ConfigValidation {
    *
    * @returns {TypeMapFeaturesConfig} A valid map features configuration.
    */
-  validateMapConfigAgainstSchema(mapFeaturesConfigToValidate?: TypeMapFeaturesConfig): TypeMapFeaturesConfig {
-    let validMapFeaturesConfig: TypeMapFeaturesConfig;
+  validateMapConfigAgainstSchema(listOfGeoviewLayerConfig: MapConfigLayerEntry[]): MapConfigLayerEntry[] {
+    // create a validator object
+    const validator = new Ajv({
+      strict: false,
+      allErrors: false,
+    });
 
-    // if config has been provided by user then validate it
-    if (mapFeaturesConfigToValidate) {
-      // if the list of layer doesn't exist, add the key with empty array for the map to trigger
-      if (mapFeaturesConfigToValidate.map.listOfGeoviewLayerConfig === undefined)
-        mapFeaturesConfigToValidate.map.listOfGeoviewLayerConfig = [];
+    // initialize validator with schema file
+    validator.compile(schema);
 
-      // create a validator object
-      const validator = new Ajv({
-        strict: false,
-        allErrors: false,
-      });
-
-      // initialize validator with schema file
-      validator.compile(schema);
-
-      let isValid = this.#isValidTypeMapFeaturesInstance(mapFeaturesConfigToValidate, validator);
-      for (let i = 0; i < mapFeaturesConfigToValidate.map.listOfGeoviewLayerConfig.length && isValid; i++) {
-        // If not GeoCore, validate the geoview configuration with the schema.
-        // GeoCore doesn't have schema validation as part of the routine below, because they're not a TypeGeoviewLayerType anymore
-        if (!mapConfigLayerEntryIsGeoCore(mapFeaturesConfigToValidate.map.listOfGeoviewLayerConfig[i])) {
-          const gvLayerConfigCasted = mapFeaturesConfigToValidate.map.listOfGeoviewLayerConfig[i] as TypeGeoviewLayerConfig;
-          isValid = this.#isValidTypeListOfLayerEntryConfig(
-            gvLayerConfigCasted.geoviewLayerType,
-            gvLayerConfigCasted.listOfLayerEntryConfig,
-            validator
-          );
-        }
+    let isValid = true; //  this.#isValidTypeMapFeaturesInstance(mapFeaturesConfigToValidate, validator);
+    for (let i = 0; i < listOfGeoviewLayerConfig.length && isValid; i++) {
+      // If not GeoCore, validate the geoview configuration with the schema.
+      // GeoCore doesn't have schema validation as part of the routine below, because they're not a TypeGeoviewLayerType anymore
+      if (!mapConfigLayerEntryIsGeoCore(listOfGeoviewLayerConfig[i])) {
+        const gvLayerConfigCasted = listOfGeoviewLayerConfig[i] as TypeGeoviewLayerConfig;
+        isValid = this.#isValidTypeListOfLayerEntryConfig(
+          gvLayerConfigCasted.geoviewLayerType,
+          gvLayerConfigCasted.listOfLayerEntryConfig,
+          validator
+        );
       }
-
-      if (!isValid) {
-        validMapFeaturesConfig = {
-          ...this.#adjustMapConfiguration(mapFeaturesConfigToValidate),
-          mapId: this.mapId,
-          displayLanguage: this.#displayLanguage as TypeDisplayLanguage,
-        };
-      } else {
-        validMapFeaturesConfig = {
-          ...this.#adjustMapConfiguration(mapFeaturesConfigToValidate),
-          mapId: this.mapId,
-          displayLanguage: this.#displayLanguage as TypeDisplayLanguage,
-        };
-      }
-    } else {
-      validMapFeaturesConfig = {
-        ...this.#defaultMapFeaturesConfig,
-        mapId: this.mapId,
-        displayLanguage: this.#displayLanguage as TypeDisplayLanguage,
-      };
     }
-    this.#processLocalizedString(validMapFeaturesConfig.suportedLanguages, validMapFeaturesConfig.map.listOfGeoviewLayerConfig);
-    this.#doExtraValidation(validMapFeaturesConfig.map.listOfGeoviewLayerConfig);
 
-    return validMapFeaturesConfig;
+    this.#processLocalizedString(['en'], listOfGeoviewLayerConfig);
+    this.#doExtraValidation(listOfGeoviewLayerConfig);
+
+    return listOfGeoviewLayerConfig;
   }
 
   /** ***************************************************************************************************************************
@@ -742,135 +430,6 @@ export class ConfigValidation {
         }
       };
       listOfMapConfigLayerEntry.forEach((geoviewLayerConfig) => propagateLocalizedString(toJsonObject(geoviewLayerConfig)));
-    }
-  }
-
-  /** ***************************************************************************************************************************
-   * Adjust the map features configuration to make it valid.
-   * @param {TypeMapFeaturesConfig} mapFeaturesConfigToAdjust - The map features configuration to adjust.
-   *
-   * @returns {TypeMapFeaturesConfig} A valid JSON configuration object.
-   * @private
-   */
-  #adjustMapConfiguration(mapFeaturesConfigToAdjust: TypeMapFeaturesConfig): TypeMapFeaturesConfig {
-    // merge default and provided configuration in a temporary object.
-    const tempMapFeaturesConfig: TypeMapFeaturesConfig = {
-      ...this.#defaultMapFeaturesConfig,
-      ...mapFeaturesConfigToAdjust,
-    };
-
-    // Do validation for all pieces
-    const projection = this.#validateProjection(tempMapFeaturesConfig?.map?.viewSettings?.projection);
-    const center = this.#validateCenter(
-      projection,
-      tempMapFeaturesConfig?.map?.viewSettings?.initialView?.zoomAndCenter
-        ? tempMapFeaturesConfig?.map?.viewSettings?.initialView?.zoomAndCenter[1]
-        : undefined
-    );
-    const zoom = this.#validateZoom(
-      tempMapFeaturesConfig?.map?.viewSettings?.initialView?.zoomAndCenter
-        ? tempMapFeaturesConfig?.map?.viewSettings?.initialView?.zoomAndCenter[0]
-        : undefined
-    );
-    const basemapOptions = this.#validateBasemap(projection, tempMapFeaturesConfig?.map?.basemapOptions);
-    const schemaVersionUsed = this.validateVersion(tempMapFeaturesConfig.schemaVersionUsed);
-    const minZoom = this.#validateMinZoom(tempMapFeaturesConfig?.map?.viewSettings?.minZoom);
-    const maxZoom = this.#validateMaxZoom(tempMapFeaturesConfig?.map?.viewSettings?.maxZoom);
-    const maxExtent = tempMapFeaturesConfig?.map?.viewSettings?.maxExtent
-      ? this.#validateExtent(projection, tempMapFeaturesConfig?.map?.viewSettings?.maxExtent as [number, number, number, number], center)
-      : this.#maxExtents[projection];
-
-    // Set initial view, if no initial view, set zoomAndCenter to default.
-    let initialView: TypeInitialViewSettings = { zoomAndCenter: [zoom, center] };
-    if (tempMapFeaturesConfig.map.viewSettings.initialView?.extent)
-      initialView = { extent: tempMapFeaturesConfig.map.viewSettings.initialView?.extent };
-    else if (tempMapFeaturesConfig.map.viewSettings.initialView?.layerIds)
-      initialView = { layerIds: tempMapFeaturesConfig.map.viewSettings.initialView?.layerIds };
-
-    // recreate the prop object to remove unwanted items and check if same as original. Log the modifications
-    const validMapFeaturesConfig: TypeMapFeaturesConfig = {
-      mapId: this.mapId,
-      map: {
-        basemapOptions,
-        viewSettings: {
-          projection,
-          initialView,
-          minZoom,
-          maxZoom,
-          maxExtent,
-        },
-        highlightColor: tempMapFeaturesConfig.map.highlightColor,
-        interaction: tempMapFeaturesConfig.map.interaction,
-        listOfGeoviewLayerConfig: tempMapFeaturesConfig.map.listOfGeoviewLayerConfig,
-        extraOptions: tempMapFeaturesConfig.map.extraOptions,
-      },
-      theme: tempMapFeaturesConfig.theme,
-      components: tempMapFeaturesConfig.components,
-      corePackages: tempMapFeaturesConfig.corePackages,
-      suportedLanguages: tempMapFeaturesConfig.suportedLanguages,
-      displayLanguage: this.#displayLanguage,
-      navBar: tempMapFeaturesConfig.navBar,
-      appBar: tempMapFeaturesConfig.appBar,
-      footerBar: tempMapFeaturesConfig.footerBar,
-      overviewMap: tempMapFeaturesConfig.overviewMap,
-      externalPackages: tempMapFeaturesConfig.externalPackages,
-      schemaVersionUsed,
-      serviceUrls: tempMapFeaturesConfig.serviceUrls,
-    };
-    this.#logModifs(tempMapFeaturesConfig, validMapFeaturesConfig);
-
-    return validMapFeaturesConfig;
-  }
-
-  /** ***************************************************************************************************************************
-   * Log modifications made to configuration by the validator.
-   * @param {TypeMapFeaturesConfig} inputMapFeaturesConfig - The input config.
-   * @param {TypeMapFeaturesConfig} validMapFeaturesConfig - A valid config.
-   * @private
-   */
-  #logModifs(inputMapFeaturesConfig: TypeMapFeaturesConfig, validMapFeaturesConfig: TypeMapFeaturesConfig): void {
-    Object.keys(inputMapFeaturesConfig).forEach((key) => {
-      if (!(key in validMapFeaturesConfig)) {
-        logger.logWarning(`- Map: ${this.mapId} - Key '${key}' is invalid -`);
-      }
-    });
-
-    if (inputMapFeaturesConfig?.map?.viewSettings?.projection !== validMapFeaturesConfig.map.viewSettings.projection) {
-      logger.logWarning(
-        `- Map: ${this.mapId} - Invalid projection code ${inputMapFeaturesConfig?.map?.viewSettings?.projection} replaced by ${validMapFeaturesConfig.map.viewSettings.projection} -`
-      );
-    }
-
-    if (
-      inputMapFeaturesConfig?.map?.viewSettings?.initialView?.zoomAndCenter &&
-      validMapFeaturesConfig.map.viewSettings.initialView?.zoomAndCenter &&
-      inputMapFeaturesConfig?.map?.viewSettings?.initialView?.zoomAndCenter[0] !==
-        validMapFeaturesConfig.map.viewSettings.initialView?.zoomAndCenter[0]
-    ) {
-      logger.logWarning(
-        `- Map: ${this.mapId} - Invalid zoom level ${inputMapFeaturesConfig?.map?.viewSettings?.initialView?.zoomAndCenter[0]} 
-        replaced by ${validMapFeaturesConfig.map.viewSettings.initialView?.zoomAndCenter[0]} -`
-      );
-    }
-
-    if (
-      inputMapFeaturesConfig?.map?.viewSettings?.initialView?.zoomAndCenter &&
-      validMapFeaturesConfig.map.viewSettings.initialView?.zoomAndCenter &&
-      inputMapFeaturesConfig?.map?.viewSettings?.initialView?.zoomAndCenter[1] !==
-        validMapFeaturesConfig.map.viewSettings.initialView?.zoomAndCenter[1]
-    ) {
-      logger.logWarning(
-        `- Map: ${this.mapId} - Invalid center ${inputMapFeaturesConfig?.map?.viewSettings?.initialView?.zoomAndCenter[1]} 
-        replaced by ${validMapFeaturesConfig.map.viewSettings.initialView?.zoomAndCenter[1]}`
-      );
-    }
-
-    if (JSON.stringify(inputMapFeaturesConfig?.map?.basemapOptions) !== JSON.stringify(validMapFeaturesConfig.map.basemapOptions)) {
-      logger.logWarning(
-        `- Map: ${this.mapId} - Invalid basemap options ${JSON.stringify(
-          inputMapFeaturesConfig?.map?.basemapOptions
-        )} replaced by ${JSON.stringify(validMapFeaturesConfig.map.basemapOptions)} -`
-      );
     }
   }
 }

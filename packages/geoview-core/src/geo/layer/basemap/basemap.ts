@@ -5,10 +5,11 @@ import { XYZ, OSM } from 'ol/source';
 import TileGrid from 'ol/tilegrid/TileGrid';
 import TileLayer from 'ol/layer/Tile';
 
+import { TypeBasemapOptions } from '@config/types/map-schema-types';
 import { api } from '@/app';
 import { TypeJsonObject, toJsonObject, TypeJsonArray } from '@/core/types/global-types';
 import { getLocalizedMessage } from '@/core/utils/utilities';
-import { TypeBasemapProps, TypeBasemapOptions, TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
+import { TypeBasemapProps, TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import { TypeDisplayLanguage, TypeValidMapProjectionCodes } from '@/geo/map/map-schema-types';
 import { Projection } from '@/geo/utils/projection';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
