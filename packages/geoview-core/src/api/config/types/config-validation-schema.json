@@ -804,7 +804,7 @@
           }
         }
       },
-      "required": ["entryType", "layerId"]
+      "required": ["entryType", "id"]
     },
     "TypeVectorTileLayerEntryConfig": {
       "additionalProperties": false,
@@ -814,7 +814,7 @@
         "entryType": {
           "enum": ["vector-tile"]
         },
-        "layerId": {
+        "id": {
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
@@ -877,7 +877,7 @@
           }
         }
       },
-      "required": ["entryType", "layerId"]
+      "required": ["entryType", "id"]
     },
     "TypeVectorTileSourceInitialConfig": {
       "additionalProperties": false,
@@ -907,7 +907,7 @@
         "entryType": {
           "enum": ["raster-image"]
         },
-        "layerId": {
+        "id": {
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
@@ -965,7 +965,7 @@
           }
         }
       },
-      "required": ["entryType", "layerId"]
+      "required": ["entryType", "id"]
     },
     "TypeEsriDynamicLayerEntryConfig": {
       "additionalProperties": false,
@@ -974,11 +974,11 @@
         "entryType": {
           "enum": ["raster-image"]
         },
-        "layerId": {
+        "LayerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
-        "TypeLayerInitialSettings": {
+        "layerName": {
           "oneOf": [
             {
               "$ref": "#/definitions/TypeLocalizedString",
@@ -1036,7 +1036,7 @@
           }
         }
       },
-      "required": ["entryType", "layerId"]
+      "required": ["entryType", "id"]
     },
     "TypeEsriImageLayerEntryConfig": {
       "additionalProperties": false,
@@ -1045,7 +1045,7 @@
         "entryType": {
           "enum": ["raster-image"]
         },
-        "layerId": {
+        "id": {
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
@@ -1103,7 +1103,7 @@
           }
         }
       },
-      "required": ["entryType", "layerId"]
+      "required": ["entryType", "id"]
     },
     "TypeImageStaticLayerEntryConfig": {
       "additionalProperties": false,
@@ -1112,7 +1112,7 @@
         "entryType": {
           "enum": ["raster-image"]
         },
-        "layerId": {
+        "id": {
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
@@ -1167,7 +1167,7 @@
           }
         }
       },
-      "required": ["entryType", "layerId"]
+      "required": ["entryType", "id"]
     },
     "TypeTileLayerEntryConfig": {
       "additionalProperties": false,
@@ -1231,7 +1231,7 @@
           }
         }
       },
-      "required": ["entryType", "layerId"]
+      "required": ["entryType", "id"]
     },
     "TypeLayerEntryType": {
       "enum": ["vector", "vector-tile", "raster-tile", "raster-image", "geoCore"],
@@ -1245,7 +1245,7 @@
         "entryType": {
           "enum": ["group"]
         },
-        "layerId": {
+        "id": {
           "type": "string",
           "description": "The id of the layer group to display on the map."
         },
@@ -1279,7 +1279,7 @@
           "description": "The list of layer entry configurations to use from the GeoView layer group."
         }
       },
-      "required": ["entryType", "layerId", "listOfLayerEntryConfig"]
+      "required": ["entryType", "id", "listOfLayerEntryConfig"]
     },
     "TypeLayerEntryConfig": {
       "oneOf": [
