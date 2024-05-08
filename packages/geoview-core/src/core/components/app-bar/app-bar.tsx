@@ -221,6 +221,10 @@ export function AppBar(props: AppBarProps): JSX.Element {
     // TODO: remove active footerTab Id and create new one for AppBar id.
     // open AppBar detail drawer when click on map.
     if (activeFooterTabId === 'details' && buttonPanelGroups?.details?.AppbarPanelButtonDetails?.panel) {
+      // close geolocator when user click on map layer.
+      if (isGeolocatorActive) {
+        setGeolocatorActive(false);
+      }
       // Open it
       openPanelById(buttonPanelGroups?.details?.AppbarPanelButtonDetails?.button?.id || '', undefined);
     }
