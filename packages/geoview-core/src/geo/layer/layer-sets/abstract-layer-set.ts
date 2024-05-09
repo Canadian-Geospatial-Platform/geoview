@@ -260,6 +260,8 @@ export type TypeFeatureInfoByEventTypes = {
   [eventName in EventType]?: TypeLayerData;
 };
 
+// TODO: Move the definition of the domain in the new schema
+// TODO.CONT: Starting here vvvv
 export type codeValueEntryType = {
   name: string;
   code: unknown;

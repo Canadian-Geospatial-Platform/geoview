@@ -34,12 +34,6 @@ export class EsriDynamicLayerConfig extends AbstractGeoviewLayerConfig {
     super(layerConfig, language, mapFeatureConfig);
     this.geoviewLayerType = CV_CONST_LAYER_TYPES.ESRI_DYNAMIC;
     if (!isvalidComparedToSchema(this.geoviewLayerSchema, this)) this.propagateError();
-    if (!this.geoviewLayerId) {
-      throw new Error(`geoviewLayerId is mandatory for GeoView layer of type ${this.geoviewLayerType}.`);
-    }
-    if (!this.metadataAccessPath) {
-      throw new Error(`metadataAccessPath is mandatory for GeoView layer ${this.geoviewLayerId} of type ${this.geoviewLayerType}.`);
-    }
     this.validate();
   }
 

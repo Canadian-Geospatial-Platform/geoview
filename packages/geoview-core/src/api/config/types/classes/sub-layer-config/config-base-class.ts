@@ -1,7 +1,7 @@
 import defaultsDeep from 'lodash/defaultsDeep';
 
 import { TypeGeoviewLayerType, TypeJsonObject } from '@config/types/config-types';
-import { TypeLayerEntryType, TypeLayerInitialSettings, TypeDisplayLanguage } from '@config/types/map-schema-types';
+import { TypeLayerEntryType, TypeLayerInitialSettings, TypeDisplayLanguage, Extent } from '@config/types/map-schema-types';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { normalizeLocalizedString } from '@config/utils';
 
@@ -28,11 +28,20 @@ export abstract class ConfigBaseClass {
   /** The display name of the layer (English/French). */
   layerName?: string;
 
-  /** Layer entry data type. This element is part of the schema. */
-  entryType: TypeLayerEntryType;
+  /** Attributions obtained from the configuration or the metadata. */
+  attributions: string[];
 
-  /** Used internally too distinguish layers created from a GeoCore UUID. */
-  geocoreId: string;
+  /** Bounds (in lat long) obtained from the metadata or calculated from the layers */
+  bounds: Extent;
+
+  /** The min scale that can be reach by the layer. */
+  minScale: number;
+
+  /** The max scale that can be reach by the layer. */
+  maxScale: number;
+
+  /** Layer entry data type. */
+  entryType: TypeLayerEntryType;
 
   /**
    * Initial settings to apply to the GeoView layer entry at creation time. Initial settings are inherited from the parent in the
@@ -60,10 +69,13 @@ export abstract class ConfigBaseClass {
     this.#geoviewConfig = geoviewLayerConfig;
     this.#parentNode = parentNode;
 
-    this.layerId = layerConfig.layerId as string;
-    this.layerName = layerConfig.layerName ? normalizeLocalizedString(layerConfig.layerName)![this.#language]! : undefined;
+    this.layerId = layerConfig.id as string;
+    this.layerName = layerConfig.name ? normalizeLocalizedString(layerConfig.name)![this.#language]! : undefined;
+    this.attributions = (layerConfig.attributions as string[]) || [];
+    this.bounds = layerConfig.bounds as Extent;
+    this.minScale = (layerConfig.minScale as number) || 0;
+    this.maxScale = (layerConfig.minScale as number) || 0;
     this.entryType = this.getEntryType();
-    this.geocoreId = layerConfig.geocoreId as string;
     this.initialSettings = defaultsDeep(layerConfig.initialSettings, initialSettings);
   }
 

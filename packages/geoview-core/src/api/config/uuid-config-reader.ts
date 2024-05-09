@@ -55,52 +55,55 @@ export class UUIDmapConfigReader {
           const isFeature = (url as string).indexOf('FeatureServer') > -1;
 
           if (layerType === CV_CONST_LAYER_TYPES.ESRI_DYNAMIC && !isFeature) {
-            const geoviewLayerConfig: TypeJsonObject = {
-              geoviewLayerId: `${id}` as TypeJsonObject,
-              geoviewLayerName: Cast<TypeJsonObject>(createLocalizedString(name as string)),
-              metadataAccessPath: Cast<TypeJsonObject>(createLocalizedString(url as string)),
-              geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_DYNAMIC as TypeJsonObject,
-            };
+            const geoviewLayerConfig = Cast<TypeJsonObject>({
+              geoviewLayerId: `${id}`,
+              geoviewLayerName: createLocalizedString(name as string),
+              isGeocore: true,
+              metadataAccessPath: createLocalizedString(url as string),
+              geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_DYNAMIC,
+            });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
-                return {
-                  entryType: CV_CONST_SUB_LAYER_TYPES.RASTER_IMAGE as TypeJsonObject,
-                  layerId: `${item.index}` as TypeJsonObject,
-                } as TypeJsonObject;
+                return Cast<TypeJsonObject>({
+                  entryType: CV_CONST_SUB_LAYER_TYPES.RASTER_IMAGE,
+                  layerId: `${item.index}`,
+                });
               }
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (isFeature) {
             for (let j = 0; j < (layerEntries as TypeJsonArray).length; j++) {
-              const geoviewLayerConfig: TypeJsonObject = {
-                geoviewLayerId: `${id}` as TypeJsonObject,
-                geoviewLayerName: Cast<TypeJsonObject>(createLocalizedString(name as string)),
-                metadataAccessPath: Cast<TypeJsonObject>(createLocalizedString(url as string)),
-                geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_FEATURE as TypeJsonObject,
-              };
+              const geoviewLayerConfig = Cast<TypeJsonObject>({
+                geoviewLayerId: `${id}`,
+                geoviewLayerName: createLocalizedString(name as string),
+                isGeocore: true,
+                metadataAccessPath: createLocalizedString(url as string),
+                geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_FEATURE,
+              });
               (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
                 (item): TypeJsonObject => {
-                  return {
-                    entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR as TypeJsonObject,
-                    layerId: `${item.index}` as TypeJsonObject,
-                  } as TypeJsonObject;
+                  return Cast<TypeJsonObject>({
+                    entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR,
+                    layerId: `${item.index}`,
+                  });
                 }
               );
               listOfGeoviewLayerConfig.push(geoviewLayerConfig);
             }
           } else if (layerType === CV_CONST_LAYER_TYPES.ESRI_FEATURE) {
-            const geoviewLayerConfig: TypeJsonObject = {
-              geoviewLayerId: `${id}` as TypeJsonObject,
-              geoviewLayerName: Cast<TypeJsonObject>(createLocalizedString(name as string)),
-              metadataAccessPath: Cast<TypeJsonObject>(createLocalizedString(url as string)),
-              geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_FEATURE as TypeJsonObject,
-            };
+            const geoviewLayerConfig = Cast<TypeJsonObject>({
+              geoviewLayerId: `${id}`,
+              geoviewLayerName: createLocalizedString(name as string),
+              isGeocore: true,
+              metadataAccessPath: createLocalizedString(url as string),
+              geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_FEATURE,
+            });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
-                return {
-                  entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR as TypeJsonObject,
-                  layerId: `${item.index}` as TypeJsonObject,
-                } as TypeJsonObject;
+                return Cast<TypeJsonObject>({
+                  entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR,
+                  layerId: `${item.index}`,
+                });
               }
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);

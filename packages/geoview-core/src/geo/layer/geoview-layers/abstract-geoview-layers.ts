@@ -958,9 +958,9 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Returns the domaine of the specified field or null if the field has no domain.
+   * Returns the domain of the specified field or null if the field has no domain.
    *
-   * @param {string} fieldName field name for which we want to get the domaine.
+   * @param {string} fieldName field name for which we want to get the domain.
    * @param {TypeLayerEntryConfig} layerConfig layer configuration.
    *
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
