@@ -1,3 +1,5 @@
+// Needs to disable class-methods-use-this because we need to pass the instance reference 'this' to the validator.
+// eslint-disable-next-line @typescript-eslint/class-methods-use-this
 import cloneDeep from 'lodash/cloneDeep';
 import defaultsDeep from 'lodash/defaultsDeep';
 
