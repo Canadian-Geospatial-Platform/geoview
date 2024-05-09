@@ -88,7 +88,7 @@ export abstract class AbstractGeoviewLayerConfig {
 
     this.geoviewLayerId = (this.#originalgeoviewLayerConfig.geoviewLayerId || generateId()) as string;
     this.geoviewLayerName = normalizeLocalizedString(this.#originalgeoviewLayerConfig.geoviewLayerName)![this.#language]!;
-    this.metadataAccessPath = normalizeLocalizedString(this.#originalgeoviewLayerConfig.accessPath)![this.#language]!;
+    this.metadataAccessPath = normalizeLocalizedString(this.#originalgeoviewLayerConfig.metadataAccessPath)![this.#language]!;
     this.serviceDateFormat = (this.#originalgeoviewLayerConfig.serviceDateFormat || 'DD/MM/YYYY HH:MM:SSZ') as string;
     this.externalDateFormat = (this.#originalgeoviewLayerConfig.externalDateFormat || 'DD/MM/YYYY HH:MM:SSZ') as string;
     this.listOfLayerEntryConfig = (this.#originalgeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray)

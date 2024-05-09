@@ -52,7 +52,7 @@ export class EsriFeatureLayerConfig extends AbstractGeoviewLayerConfig {
   }
 
   /**
-   * Get the service metadata from the accessPath and store it in a private variable of the geoview layer.
+   * Get the service metadata from the metadataAccessPath and store it in a private variable of the geoview layer.
    * @protected
    */
   // TODO: Implement this method
