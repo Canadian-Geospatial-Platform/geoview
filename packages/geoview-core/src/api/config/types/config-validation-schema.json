@@ -742,11 +742,11 @@
         "entryType": {
           "enum": ["vector"]
         },
-        "id": {
+        "layerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
-        "name": {
+        "layerName": {
           "oneOf": [
             {
               "$ref": "#/definitions/TypeLocalizedString",
@@ -804,7 +804,7 @@
           }
         }
       },
-      "required": ["entryType", "id"]
+      "required": ["entryType", "layerId"]
     },
     "TypeVectorTileLayerEntryConfig": {
       "additionalProperties": false,
@@ -814,11 +814,11 @@
         "entryType": {
           "enum": ["vector-tile"]
         },
-        "id": {
+        "layerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
-        "name": {
+        "layerName": {
           "oneOf": [
             {
               "$ref": "#/definitions/TypeLocalizedString",
@@ -877,7 +877,7 @@
           }
         }
       },
-      "required": ["entryType", "id"]
+      "required": ["entryType", "layerId"]
     },
     "TypeVectorTileSourceInitialConfig": {
       "additionalProperties": false,
@@ -907,11 +907,11 @@
         "entryType": {
           "enum": ["raster-image"]
         },
-        "id": {
+        "layerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
-        "name": {
+        "layerName": {
           "oneOf": [
             {
               "$ref": "#/definitions/TypeLocalizedString",
@@ -965,7 +965,7 @@
           }
         }
       },
-      "required": ["entryType", "id"]
+      "required": ["entryType", "layerId"]
     },
     "TypeEsriDynamicLayerEntryConfig": {
       "additionalProperties": false,
@@ -974,11 +974,11 @@
         "entryType": {
           "enum": ["raster-image"]
         },
-        "id": {
+        "layerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
-        "name": {
+        "TypeLayerInitialSettings": {
           "oneOf": [
             {
               "$ref": "#/definitions/TypeLocalizedString",
@@ -1036,7 +1036,7 @@
           }
         }
       },
-      "required": ["entryType", "id"]
+      "required": ["entryType", "layerId"]
     },
     "TypeEsriImageLayerEntryConfig": {
       "additionalProperties": false,
@@ -1045,11 +1045,11 @@
         "entryType": {
           "enum": ["raster-image"]
         },
-        "id": {
+        "layerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
-        "name": {
+        "layerName": {
           "oneOf": [
             {
               "$ref": "#/definitions/TypeLocalizedString",
@@ -1103,7 +1103,7 @@
           }
         }
       },
-      "required": ["entryType", "id"]
+      "required": ["entryType", "layerId"]
     },
     "TypeImageStaticLayerEntryConfig": {
       "additionalProperties": false,
@@ -1112,11 +1112,11 @@
         "entryType": {
           "enum": ["raster-image"]
         },
-        "id": {
+        "layerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
-        "name": {
+        "layerName": {
           "oneOf": [
             {
               "$ref": "#/definitions/TypeLocalizedString",
@@ -1167,7 +1167,7 @@
           }
         }
       },
-      "required": ["entryType", "id"]
+      "required": ["entryType", "layerId"]
     },
     "TypeTileLayerEntryConfig": {
       "additionalProperties": false,
@@ -1176,11 +1176,11 @@
         "entryType": {
           "enum": ["raster-tile"]
         },
-        "id": {
+        "layerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
-        "name": {
+        "layerName": {
           "oneOf": [
             {
               "$ref": "#/definitions/TypeLocalizedString",
@@ -1231,7 +1231,7 @@
           }
         }
       },
-      "required": ["entryType", "id"]
+      "required": ["entryType", "layerId"]
     },
     "TypeLayerEntryType": {
       "enum": ["vector", "vector-tile", "raster-tile", "raster-image", "geoCore"],
@@ -1245,11 +1245,11 @@
         "entryType": {
           "enum": ["group"]
         },
-        "id": {
+        "layerId": {
           "type": "string",
           "description": "The id of the layer group to display on the map."
         },
-        "name": {
+        "layerName": {
           "oneOf": [
             {
               "$ref": "#/definitions/TypeLocalizedString",
@@ -1279,7 +1279,7 @@
           "description": "The list of layer entry configurations to use from the GeoView layer group."
         }
       },
-      "required": ["entryType", "id", "listOfLayerEntryConfig"]
+      "required": ["entryType", "layerId", "listOfLayerEntryConfig"]
     },
     "TypeLayerEntryConfig": {
       "oneOf": [
@@ -1376,14 +1376,7 @@
       "type": "array",
       "additionalProperties": false,
       "items": {
-        "anyOf": [
-          {
-            "$ref": "#/definitions/TypeGeoviewLayerConfig"
-          },
-          {
-            "$ref": "#/definitions/TypeGeoCoreLayerConfig"
-          }
-        ]
+        "$ref": "#/definitions/TypeGeoviewLayerConfig"
       }
     },
     "TypeGeoviewLayerConfig": {
@@ -1411,7 +1404,7 @@
           ],
           "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
         },
-        "accessPath": {
+        "metadataAccessPath": {
           "oneOf": [
             {
               "$ref": "#/definitions/TypeLocalizedString",
@@ -1446,29 +1439,6 @@
         }
       },
       "required": ["geoviewLayerId", "geoviewLayerName", "geoviewLayerType", "listOfLayerEntryConfig"]
-    },
-    "TypeGeoCoreLayerConfig": {
-      "additionalProperties": false,
-      "type": "object",
-      "properties": {
-        "geoviewLayerId": {
-          "type": "string",
-          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
-        },
-        "geoviewLayerType": {
-          "$ref": "#/definitions/TypeGeoCoreLayerType",
-          "description": "Type of GeoCore layer."
-        },
-        "geoviewLayerName": {
-          "$ref": "#/definitions/TypeLocalizedString",
-          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
-        },
-        "initialSettings": {
-          "$ref": "#/definitions/TypeLayerInitialSettings",
-          "description": "Initial settings to apply to the GeoView layer at creation time."
-        }
-      },
-      "required": ["geoviewLayerId", "geoviewLayerType"]
     },
     "TypeGeoviewLayerType": {
       "type": "string",

@@ -41,8 +41,8 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   ) {
     super(layerConfig, initialSettings, language, geoviewLayerConfig, parentNode);
     this.style = layerConfig.style ? { ...(layerConfig.style as TypeStyleConfig) } : undefined;
-    if (Number.isNaN(this.id)) {
-      throw new Error(`The layer entry with layerId equal to ${this.layerPath} must be an integer string`);
+    if (Number.isNaN(this.layerId)) {
+      throw new Error(`The layer entry with layer path equal to ${this.layerPath} must be an integer string`);
     }
     this.source.format = (layerConfig?.source?.format || 'png') as TypeEsriFormatParameter; // Set the source.format property
     if (!isvalidComparedToSchema(this.schemaPath, this)) this.propagateError();

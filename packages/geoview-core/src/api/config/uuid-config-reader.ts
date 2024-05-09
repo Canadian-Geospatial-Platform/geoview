@@ -59,15 +59,15 @@ export class UUIDmapConfigReader {
               geoviewLayerId: `${id}`,
               geoviewLayerName: createLocalizedString(name as string),
               isGeocore: true,
-              accessPath: createLocalizedString(url as string),
+              metadataAccessPath: createLocalizedString(url as string),
               geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_DYNAMIC,
             });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
-                return {
-                  type: CV_CONST_SUB_LAYER_TYPES.RASTER_IMAGE as TypeJsonObject,
-                  id: `${item.index}` as TypeJsonObject,
-                } as TypeJsonObject;
+                return Cast<TypeJsonObject>({
+                  entryType: CV_CONST_SUB_LAYER_TYPES.RASTER_IMAGE,
+                  layerId: `${item.index}`,
+                });
               }
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
@@ -77,15 +77,15 @@ export class UUIDmapConfigReader {
                 geoviewLayerId: `${id}`,
                 geoviewLayerName: createLocalizedString(name as string),
                 isGeocore: true,
-                accessPath: createLocalizedString(url as string),
+                metadataAccessPath: createLocalizedString(url as string),
                 geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_FEATURE,
               });
               (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
                 (item): TypeJsonObject => {
-                  return {
-                    type: CV_CONST_SUB_LAYER_TYPES.VECTOR as TypeJsonObject,
-                    id: `${item.index}` as TypeJsonObject,
-                  } as TypeJsonObject;
+                  return Cast<TypeJsonObject>({
+                    entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR,
+                    layerId: `${item.index}`,
+                  });
                 }
               );
               listOfGeoviewLayerConfig.push(geoviewLayerConfig);
@@ -95,14 +95,14 @@ export class UUIDmapConfigReader {
               geoviewLayerId: `${id}`,
               geoviewLayerName: createLocalizedString(name as string),
               isGeocore: true,
-              accessPath: createLocalizedString(url as string),
+              metadataAccessPath: createLocalizedString(url as string),
               geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_FEATURE,
             });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
                 return Cast<TypeJsonObject>({
-                  type: CV_CONST_SUB_LAYER_TYPES.VECTOR,
-                  id: `${item.index}`,
+                  entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR,
+                  layerId: `${item.index}`,
                 });
               }
             );

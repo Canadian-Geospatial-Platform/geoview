@@ -41,7 +41,7 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   ) {
     super(layerConfig, initialSettings, language, geoviewLayerConfig, parentNode);
     this.style = layerConfig.style ? { ...(layerConfig.style as TypeStyleConfig) } : undefined;
-    if (Number.isNaN(this.id)) {
+    if (Number.isNaN(this.layerId)) {
       throw new Error(`The layer entry with layerId equal to ${this.layerPath} must be an integer string`);
     }
     this.source.format = 'EsriJSON' as TypeEsriFormatParameter; // Set the source.format property

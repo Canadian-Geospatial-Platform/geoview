@@ -41,7 +41,7 @@ export abstract class AbstractGeoviewLayerConfig {
   isGeocore: boolean;
 
   /** The GeoView layer access path (English/French). */
-  accessPath: string;
+  metadataAccessPath: string;
 
   /** Date format used by the service endpoint. */
   serviceDateFormat: string | undefined;
@@ -88,7 +88,7 @@ export abstract class AbstractGeoviewLayerConfig {
 
     this.geoviewLayerId = (this.#originalgeoviewLayerConfig.geoviewLayerId || generateId()) as string;
     this.geoviewLayerName = normalizeLocalizedString(this.#originalgeoviewLayerConfig.geoviewLayerName)![this.#language]!;
-    this.accessPath = normalizeLocalizedString(this.#originalgeoviewLayerConfig.accessPath)![this.#language]!;
+    this.metadataAccessPath = normalizeLocalizedString(this.#originalgeoviewLayerConfig.metadataAccessPath)![this.#language]!;
     this.serviceDateFormat = (this.#originalgeoviewLayerConfig.serviceDateFormat || 'DD/MM/YYYY HH:MM:SSZ') as string;
     this.externalDateFormat = (this.#originalgeoviewLayerConfig.externalDateFormat || 'DD/MM/YYYY HH:MM:SSZ') as string;
     this.listOfLayerEntryConfig = (this.#originalgeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray)
@@ -106,12 +106,20 @@ export abstract class AbstractGeoviewLayerConfig {
    * @private
    */
   protected validate(): void {
+    if (!this.geoviewLayerType) {
+      logger.logError(`Property geoviewLayerType is mandatory for GeoView layer ${this.geoviewLayerId} of type ${this.geoviewLayerType}.`);
+      this.propagateError();
+    }
+    if (!this.geoviewLayerId) {
+      throw new Error(`geoviewLayerId is mandatory for GeoView layer of type ${this.geoviewLayerType}.`);
+      this.propagateError();
+    }
     if (!this.geoviewLayerName) {
       logger.logError(`Property geoviewLayerName is mandatory for GeoView layer ${this.geoviewLayerId} of type ${this.geoviewLayerType}.`);
       this.propagateError();
     }
-    if (!this.geoviewLayerType) {
-      logger.logError(`Property geoviewLayerType is mandatory for GeoView layer ${this.geoviewLayerId} of type ${this.geoviewLayerType}.`);
+    if (!this.metadataAccessPath) {
+      throw new Error(`metadataAccessPath is mandatory for GeoView layer ${this.geoviewLayerId} of type ${this.geoviewLayerType}.`);
       this.propagateError();
     }
   }

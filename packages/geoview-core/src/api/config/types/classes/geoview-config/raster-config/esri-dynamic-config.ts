@@ -34,9 +34,6 @@ export class EsriDynamicLayerConfig extends AbstractGeoviewLayerConfig {
     super(layerConfig, language, mapFeatureConfig);
     this.geoviewLayerType = CV_CONST_LAYER_TYPES.ESRI_DYNAMIC;
     if (!isvalidComparedToSchema(this.geoviewLayerSchema, this)) this.propagateError();
-    if (!this.geoviewLayerId) {
-      throw new Error(`geoviewLayerId is mandatory for GeoView layer of type ${this.geoviewLayerType}.`);
-    }
     this.validate();
   }
 
@@ -53,7 +50,7 @@ export class EsriDynamicLayerConfig extends AbstractGeoviewLayerConfig {
   }
 
   /**
-   * Get the service metadata from the accessPath and store it in a private variable of the geoview layer.
+   * Get the service metadata from the metadataAccessPath and store it in a private variable of the geoview layer.
    * @protected
    */
   // TODO: Implement this method

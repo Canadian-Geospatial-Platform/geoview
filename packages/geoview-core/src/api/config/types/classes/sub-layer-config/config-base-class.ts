@@ -22,11 +22,11 @@ export abstract class ConfigBaseClass {
   /** Used internally to distinguish layer groups derived from the metadata. */
   #isMetadataLayerGroup?: false;
 
-  /** The identifier of the layer to display on the map. */
-  id: string;
+  /** The identifier of the layer to display on the map. This element is part of the schema. */
+  layerId: string;
 
   /** The display name of the layer (English/French). */
-  name?: string;
+  layerName?: string;
 
   /** Attributions obtained from the configuration or the metadata. */
   attributions: string[];
@@ -69,8 +69,8 @@ export abstract class ConfigBaseClass {
     this.#geoviewConfig = geoviewLayerConfig;
     this.#parentNode = parentNode;
 
-    this.id = layerConfig.id as string;
-    this.name = layerConfig.name ? normalizeLocalizedString(layerConfig.name)![this.#language]! : undefined;
+    this.layerId = layerConfig.id as string;
+    this.layerName = layerConfig.name ? normalizeLocalizedString(layerConfig.name)![this.#language]! : undefined;
     this.attributions = (layerConfig.attributions as string[]) || [];
     this.bounds = layerConfig.bounds as Extent;
     this.minScale = (layerConfig.minScale as number) || 0;
@@ -110,7 +110,7 @@ export abstract class ConfigBaseClass {
    */
   get layerPath(): string {
     const getLayerPath = (aNode: ConfigBaseClass): string => {
-      return aNode.#parentNode ? `${getLayerPath(aNode.#parentNode)}/${aNode.id}` : aNode.id;
+      return aNode.#parentNode ? `${getLayerPath(aNode.#parentNode)}/${aNode.layerId}` : aNode.layerId;
     };
     return `${this.#geoviewConfig.geoviewLayerId}/${getLayerPath(this)}`;
   }
