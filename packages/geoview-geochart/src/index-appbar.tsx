@@ -16,7 +16,7 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
    *
    * @returns {AnySchemaObject} the package schema
    */
-  static schema(): AnySchemaObject {
+  override schema(): AnySchemaObject {
     return schema;
   }
 
@@ -25,7 +25,7 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
    *
    * @returns {TypeJsonObject} the default config
    */
-  static defaultConfig(): TypeJsonObject {
+  override defaultConfig(): TypeJsonObject {
     return toJsonObject(defaultConfig);
   }
 

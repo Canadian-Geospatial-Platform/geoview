@@ -31,9 +31,3 @@ export function LayerTitle({ children, hideTitle, fullWidth }: LayerTitleProp): 
     </Typography>
   );
 }
-
-// TODO: Refactor - Remove defaultProps as it's no longer a good practice
-LayerTitle.defaultProps = {
-  hideTitle: false,
-  fullWidth: false,
-};
