@@ -35,17 +35,6 @@
         ]
       },
       {
-        "geoviewLayerId": "classBreaksId",
-        "geoviewLayerName": { "en": "classBreaks" },
-        "metadataAccessPath": { "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer/" },
-        "geoviewLayerType": "esriFeature",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "8"
-          }
-        ]
-      },
-      {
         "geoviewLayerId": "historical-flood",
         "geoviewLayerName": { "en": "Historical Flood Events (HFE)" },
         "externalDateFormat": "mm/dd/yyyy hh:mm:ss-05:00",
