@@ -77,6 +77,7 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
       const newCenter = transformPoints([center], 4326)[0];
 
       // Zoom to extent and wait for it to finish
+      // TODO: We have the same patch in data-table, see if we should create a reusable custom patch / or cahnge desing
       zoomToExtent(feature.extent)
         .then(async () => {
           // Typically, the click marker is removed after a zoom, so wait a bit here and re-add it...

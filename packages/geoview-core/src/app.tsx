@@ -77,7 +77,7 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
     const configObjStr = removeCommentsFromJSON(configData!);
     mapConfig = api.configApi.getMapConfig(configObjStr, lang);
 
-    // TODO: refactor - remove this injection once config is done
+    // TODO: refactor - remove this injection once config is done, remove the casting to unknown
     let tempStr = removeCommentsFromJSON(configData!);
     tempStr = tempStr.replace(/(?<!\\)'/gm, '"');
     tempStr = tempStr.replace(/\\'/gm, "'");
@@ -90,7 +90,7 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
     const configObject = await fetchConfigFile(configUrl!);
     mapConfig = api.configApi.getMapConfig(configObject, lang);
 
-    // TODO: refactor - remove this injection once config is done
+    // TODO: refactor - remove this injection once config is done, remove the casting to unknown
     mapConfig.map.listOfGeoviewLayerConfig = (configObject as unknown as MapFeatureConfig).map.listOfGeoviewLayerConfig
       ? (configObject as unknown as MapFeatureConfig).map.listOfGeoviewLayerConfig
       : [];
