@@ -59,6 +59,8 @@ export abstract class FooterPlugin extends AbstractPlugin {
   /**
    * Called when a footer plugin has been selected in the tabs
    */
+  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   onSelected(): void {
     // Log
     logger.logTraceCore('FOOTER-PLUGIN - onSelected');

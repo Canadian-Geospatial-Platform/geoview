@@ -135,11 +135,13 @@ export const ResponsiveGrid = {
   Right: ResponsiveGridRightPanel,
 };
 
+// TODO: Refactor - Remove defaultProps as it's no longer a good practice
 ResponsiveGridLeftPanel.defaultProps = {
   sxProps: undefined,
   fullWidth: false,
 };
 
+// TODO: Refactor - Remove defaultProps as it's no longer a good practice
 ResponsiveGridRightPanel.defaultProps = {
   sxProps: undefined,
   fullWidth: false,

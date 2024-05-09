@@ -31,6 +31,7 @@ export function ProgressBar(props: ProgressbarProps): JSX.Element {
 /**
  * Default property values
  */
+// TODO: Refactor - Remove defaultProps as it's no longer a good practice
 ProgressBar.defaultProps = {
   className: '',
   variant: 'indeterminate',

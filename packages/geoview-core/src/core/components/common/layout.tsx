@@ -75,11 +75,3 @@ export function Layout({
     />
   );
 }
-
-Layout.defaultProps = {
-  children: null,
-  onIsEnlargeClicked: undefined,
-  fullWidth: false,
-  guideContentIds: null,
-  onGuideIsOpen: undefined,
-};

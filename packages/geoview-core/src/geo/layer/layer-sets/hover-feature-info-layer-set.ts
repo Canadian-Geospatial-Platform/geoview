@@ -41,7 +41,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    * @param {TypeLayerEntryConfig} layerConfig - The layer config
    * @returns {boolean} True when the layer should be registered to this hover-feature-info-layer-set.
    */
-  protected onRegisterLayerCheck(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): boolean {
+  protected override onRegisterLayerCheck(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): boolean {
     // Log
     logger.logTraceCore('HOVER-FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerConfig.layerPath, Object.keys(this.resultSet));
 
@@ -56,7 +56,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
    * @param {TypeLayerEntryConfig} layerConfig - The layer config
    */
-  protected onRegisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
+  protected override onRegisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
     // Log
     logger.logTraceCore('HOVER-FEATURE-INFO-LAYER-SET - onRegisterLayer', layerConfig.layerPath, Object.keys(this.resultSet));
 
@@ -81,7 +81,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    * @param {string} layerPath - The layer path being affected
    * @param {string} layerStatus - The new layer status
    */
-  protected onProcessLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
+  protected override onProcessLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
     // TODO: layer api should manage the add and remove from layer related to the layer status
     // if layer's status flag exists and is different than the new one
     if (this.resultSet?.[layerPath]?.layerStatus && this.resultSet?.[layerPath]?.layerStatus !== layerStatus) {
@@ -116,7 +116,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
         data.queryStatus = 'init';
 
         // Process query on results data
-        this.queryLayerFeatures(data, layerConfig, layerPath, queryType, pixelCoordinate)
+        HoverFeatureInfoLayerSet.queryLayerFeatures(data, layerConfig, layerPath, queryType, pixelCoordinate)
           .then((arrayOfRecords) => {
             if (arrayOfRecords === null) {
               this.resultSet[layerPath].data.queryStatus = 'error';

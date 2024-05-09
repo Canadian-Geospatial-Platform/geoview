@@ -53,7 +53,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   /**
    * Override the initialization process to register store subscriptions handlers and return them so they can be destroyed later.
    */
-  protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
+  protected override onInitialize(store: GeoviewStoreType): Array<() => void> | void {
     const { mapId } = store.getState();
 
     // #region FEATURE SELECTION
@@ -591,7 +591,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       : (geoviewLayerConfig as TypeLayerEntryConfig).layerPath;
     const index = this.getMapIndexFromOrderedLayerInfo(mapId, layerPathToReplace || layerPath);
     const replacedLayers = orderedLayerInfo.filter((layerInfo) => layerInfo.layerPath.startsWith(layerPathToReplace || layerPath));
-    const newOrderedLayerInfo = this.getMapViewerLayerAPI(mapId).generateArrayOfLayerOrderInfo(geoviewLayerConfig);
+    const newOrderedLayerInfo = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
     orderedLayerInfo.splice(index, replacedLayers.length, ...newOrderedLayerInfo);
 
     // Redirect
@@ -607,7 +607,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    */
   static addOrderedLayerInfo(mapId: string, geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig, index?: number): void {
     const { orderedLayerInfo } = this.getMapStateProtected(mapId);
-    const newOrderedLayerInfo = this.getMapViewerLayerAPI(mapId).generateArrayOfLayerOrderInfo(geoviewLayerConfig);
+    const newOrderedLayerInfo = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
     if (!index) orderedLayerInfo.unshift(...newOrderedLayerInfo);
     else orderedLayerInfo.splice(index, 0, ...newOrderedLayerInfo);
 

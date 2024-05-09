@@ -58,8 +58,3 @@ export function Snackbar(props: SnackBarProps): JSX.Element {
     </AnimatedSnackbar>
   );
 }
-
-Snackbar.defaultProps = {
-  button: undefined,
-  onClose: undefined,
-};

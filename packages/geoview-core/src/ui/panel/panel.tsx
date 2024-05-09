@@ -147,12 +147,3 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     </Box>
   );
 }
-
-/**
- * React's default properties for the Panel
- */
-Panel.defaultProps = {
-  onPanelOpened: null,
-  onPanelClosed: null,
-  onGeneralCloseClicked: null,
-};

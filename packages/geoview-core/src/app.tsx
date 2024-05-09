@@ -13,7 +13,7 @@ import * as UI from '@/ui';
 
 import AppStart from '@/core/app-start';
 import { API } from '@/api/api';
-import { Cast, TypeCGPV, TypeMapFeaturesConfig, TypeWindow } from '@/core/types/global-types';
+import { TypeCGPV, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { Config } from '@/core/utils/config/config';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
@@ -238,7 +238,7 @@ function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded
 // cgpv object to be exported with the api for outside use
 export const cgpv: TypeCGPV = {
   init,
-  api: Cast<API>(api),
+  api,
   react: React,
   createRoot,
   ui: {
@@ -254,4 +254,4 @@ export const cgpv: TypeCGPV = {
 Object.freeze(cgpv);
 
 // export the cgpv globally
-Cast<TypeWindow>(window).cgpv = cgpv;
+window.cgpv = cgpv;

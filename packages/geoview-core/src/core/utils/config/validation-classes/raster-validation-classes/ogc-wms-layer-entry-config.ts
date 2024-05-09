@@ -8,10 +8,10 @@ import { createLocalizedString } from '@/core/utils/utilities';
  */
 export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** Tag used to link the entry to a specific schema. */
-  schemaTag = CONST_LAYER_TYPES.WMS;
+  override schemaTag = CONST_LAYER_TYPES.WMS;
 
   /** Layer entry data type. */
-  entryType = CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE;
+  override entryType = CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE;
 
   /** Filter to apply on feature of this layer. */
   layerFilter?: string;
@@ -52,7 +52,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Method to execute when the layer is loaded.
    */
-  loadedFunction(): void {
+  override loadedFunction(): void {
     super.loadedFunction();
     if ('applyViewFilter' in this.geoviewLayerInstance!)
       (this.geoviewLayerInstance as GeoviewChild).applyViewFilter(this.layerPath, this.layerFilter || '');

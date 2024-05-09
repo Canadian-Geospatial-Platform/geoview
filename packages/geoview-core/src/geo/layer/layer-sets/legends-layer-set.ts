@@ -22,7 +22,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
    * @param {TypeLayerEntryConfig} layerConfig - The layer config
    */
-  protected onRegisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
+  protected override onRegisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
     // Log
     logger.logTraceCore('LEGENDS-LAYER-SET - onRegisterLayer', layerConfig.layerPath, Object.keys(this.resultSet));
 
@@ -39,7 +39,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * @param {string} layerPath - The layer path being affected
    * @param {string} layerStatus - The new layer status
    */
-  protected onProcessLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
+  protected override onProcessLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
     // Check some variables as received
     const layerExists = !!this.resultSet?.[layerPath];
     const statusHasChanged = this.resultSet?.[layerPath]?.layerStatus !== layerStatus;

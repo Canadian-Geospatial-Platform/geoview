@@ -31,8 +31,3 @@ export function LayerTitle({ children, hideTitle, fullWidth }: LayerTitleProp): 
     </Typography>
   );
 }
-
-LayerTitle.defaultProps = {
-  hideTitle: false,
-  fullWidth: false,
-};

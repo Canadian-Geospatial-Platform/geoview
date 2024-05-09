@@ -323,6 +323,7 @@ const ResponsiveGridLayout = forwardRef(
 
 ResponsiveGridLayout.displayName = 'ResponsiveGridLayout';
 
+// TODO: Refactor - Remove defaultProps as it's no longer a good practice
 ResponsiveGridLayout.defaultProps = {
   leftTop: null,
   leftMain: null,

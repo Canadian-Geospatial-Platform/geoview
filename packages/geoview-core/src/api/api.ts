@@ -2,7 +2,6 @@ import { ConfigApi } from '@config/config-api';
 
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { Plugin } from '@/api/plugin/plugin';
-import { Event } from '@/api/events/event';
 
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
@@ -24,14 +23,11 @@ export class API {
   // ConfigApi static class
   configApi = ConfigApi;
 
-  // event object used to handle triggering events, subscribing to an event etc...
-  event: Event;
-
   // list of available maps
   maps: Record<string, MapViewer> = {};
 
   // load plugins API
-  plugin: Plugin;
+  plugin: typeof Plugin;
 
   // utilities object
   utilities;
@@ -40,8 +36,8 @@ export class API {
    * Initiate the event and projection objects
    */
   constructor() {
-    this.event = new Event();
-    this.plugin = new Plugin();
+    // TODO: Check - Maybe move plugin inside utilities?
+    this.plugin = Plugin;
 
     this.utilities = {
       core: Utilities,
@@ -51,7 +47,7 @@ export class API {
     };
 
     // apply focus to element when keyboard navigation is use
-    this.#manageKeyboardFocus();
+    API.#manageKeyboardFocus();
   }
 
   /**
@@ -59,7 +55,7 @@ export class API {
    * Code from: https://github.com/MaxMaeder/keyboardFocus.js
    * @private
    */
-  #manageKeyboardFocus = (): void => {
+  static #manageKeyboardFocus(): void {
     // Remove the 'keyboard-focused' class from any elements that have it
     function removeFocusedClass(): void {
       const previouslyFocusedElement = document.getElementsByClassName('keyboard-focused')[0];
@@ -94,7 +90,7 @@ export class API {
     // Remove the class when the user interacts with the page with their mouse, or when the page looses focus
     document.addEventListener('click', removeFocusedClass);
     document.addEventListener('focusout', removeFocusedClass);
-  };
+  }
 
   /**
    * Create a new map in a given div id.
@@ -104,7 +100,9 @@ export class API {
    * @param {string} divId - id of the div to create map in
    * @param {string} mapConfig - config passed in from the function call (string or url of a config path)
    */
-  createMapFromConfig = (divId: string, mapConfig: string): Promise<void> => {
+  // This function is called by the template, and since the template use the instance of the object from cgpv.api, this function has to be on the instance, not static. Refactor this?
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  createMapFromConfig(divId: string, mapConfig: string): Promise<void> {
     // Get the map div
     const mapDiv = document.getElementById(divId);
 
@@ -117,5 +115,5 @@ export class API {
     // Log error
     logger.logError(`Div with id ${divId} does not exist`);
     return Promise.reject(new Error(`Div with id ${divId} does not exist`));
-  };
+  }
 }

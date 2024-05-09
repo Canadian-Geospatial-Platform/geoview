@@ -91,8 +91,9 @@ export const geoviewEntryIsOgcFeature = (
  */
 // ******************************************************************************************************************************
 export class OgcFeature extends AbstractGeoViewVector {
-  // private varibale holding wfs version
-  private version = '2.0.0';
+  // TODO: Check - If this still used?
+  // private variable holding wfs version
+  // private version = '2.0.0';
 
   /** ***************************************************************************************************************************
    * Initialize layer
@@ -112,7 +113,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
-  protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
+  protected override getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
     const fieldDefinitions = this.layerMetadata[layerConfig.layerPath];
     const fieldEntryType = (fieldDefinitions[fieldName].type as string).split(':').slice(-1)[0] as string;
     if (fieldEntryType === 'date') return 'date';
@@ -125,7 +126,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected fetchServiceMetadata(): Promise<void> {
+  protected override fetchServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
       if (metadataUrl) {
@@ -221,7 +222,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected async processLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected override async processLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     try {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
       if (metadataUrl) {
@@ -231,7 +232,7 @@ export class OgcFeature extends AbstractGeoViewVector {
         const queryResult = await axios.get<TypeJsonObject>(queryUrl);
         if (queryResult.data.properties) {
           this.layerMetadata[layerConfig.layerPath] = queryResult.data.properties;
-          this.processFeatureInfoConfig(queryResult.data.properties, layerConfig);
+          OgcFeature.#processFeatureInfoConfig(queryResult.data.properties, layerConfig);
         }
       }
     } catch (error) {
@@ -246,8 +247,9 @@ export class OgcFeature extends AbstractGeoViewVector {
    *
    * @param {TypeJsonArray} fields An array of field names and its aliases.
    * @param {VectorLayerEntryConfig} layerConfig The vector layer entry to configure.
+   * @private
    */
-  private processFeatureInfoConfig(fields: TypeJsonObject, layerConfig: VectorLayerEntryConfig): void {
+  static #processFeatureInfoConfig(fields: TypeJsonObject, layerConfig: VectorLayerEntryConfig): void {
     if (!layerConfig.source) layerConfig.source = {};
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
     // Process undefined outfields or aliasFields ('' = false and !'' = true). Also, if en is undefined, then fr is also undefined.
@@ -297,7 +299,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
-  protected createVectorSource(
+  protected override createVectorSource(
     layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}

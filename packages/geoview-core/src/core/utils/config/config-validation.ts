@@ -190,8 +190,8 @@ export class ConfigValidation {
       }
     }
 
-    this.#processLocalizedString(['en'], listOfGeoviewLayerConfig);
-    this.#doExtraValidation(listOfGeoviewLayerConfig);
+    ConfigValidation.#processLocalizedString(['en'], listOfGeoviewLayerConfig);
+    ConfigValidation.#doExtraValidation(listOfGeoviewLayerConfig);
 
     return listOfGeoviewLayerConfig;
   }
@@ -202,12 +202,12 @@ export class ConfigValidation {
    * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig - The list of GeoView layer configuration to adjust and
    * validate.
    */
-  validateListOfGeoviewLayerConfig(
+  static validateListOfGeoviewLayerConfig(
     suportedLanguages: TypeListOfLocalizedLanguages,
     listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig
   ): void {
-    this.#processLocalizedString(suportedLanguages, listOfGeoviewLayerConfig);
-    this.#doExtraValidation(listOfGeoviewLayerConfig);
+    ConfigValidation.#processLocalizedString(suportedLanguages, listOfGeoviewLayerConfig);
+    ConfigValidation.#doExtraValidation(listOfGeoviewLayerConfig);
   }
 
   /** ***************************************************************************************************************************
@@ -216,7 +216,7 @@ export class ConfigValidation {
    * validate.
    * @private
    */
-  #doExtraValidation(listOfMapConfigLayerEntry?: MapConfigLayerEntry[]): void {
+  static #doExtraValidation(listOfMapConfigLayerEntry?: MapConfigLayerEntry[]): void {
     if (listOfMapConfigLayerEntry) {
       listOfMapConfigLayerEntry
         .filter((geoviewLayerConfig) => !mapConfigLayerEntryIsGeoCore(geoviewLayerConfig))
@@ -231,8 +231,8 @@ export class ConfigValidation {
             case CONST_LAYER_TYPES.VECTOR_TILES:
             case CONST_LAYER_TYPES.GEOPACKAGE:
             case CONST_LAYER_TYPES.IMAGE_STATIC:
-              this.#geoviewLayerIdIsMandatory(geoviewLayerConfigCasted);
-              this.#processLayerEntryConfig(geoviewLayerConfigCasted, geoviewLayerConfigCasted.listOfLayerEntryConfig);
+              ConfigValidation.#geoviewLayerIdIsMandatory(geoviewLayerConfigCasted);
+              ConfigValidation.#processLayerEntryConfig(geoviewLayerConfigCasted, geoviewLayerConfigCasted.listOfLayerEntryConfig);
               break;
             case CONST_LAYER_TYPES.ESRI_DYNAMIC:
             case CONST_LAYER_TYPES.ESRI_FEATURE:
@@ -240,9 +240,9 @@ export class ConfigValidation {
             case CONST_LAYER_TYPES.OGC_FEATURE:
             case CONST_LAYER_TYPES.WFS:
             case CONST_LAYER_TYPES.WMS:
-              this.#geoviewLayerIdIsMandatory(geoviewLayerConfigCasted);
-              this.#metadataAccessPathIsMandatory(geoviewLayerConfigCasted);
-              this.#processLayerEntryConfig(geoviewLayerConfigCasted, geoviewLayerConfigCasted.listOfLayerEntryConfig);
+              ConfigValidation.#geoviewLayerIdIsMandatory(geoviewLayerConfigCasted);
+              ConfigValidation.#metadataAccessPathIsMandatory(geoviewLayerConfigCasted);
+              ConfigValidation.#processLayerEntryConfig(geoviewLayerConfigCasted, geoviewLayerConfigCasted.listOfLayerEntryConfig);
               break;
             default:
               throw new Error('Your not supposed to end here. There is a problem with the schema validator.');
@@ -256,7 +256,7 @@ export class ConfigValidation {
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration to validate.
    * @private
    */
-  #metadataAccessPathIsMandatory(geoviewLayerConfig: TypeGeoviewLayerConfig): void {
+  static #metadataAccessPathIsMandatory(geoviewLayerConfig: TypeGeoviewLayerConfig): void {
     if (!geoviewLayerConfig.metadataAccessPath) {
       throw new Error(
         `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.geoviewLayerId} of type ${geoviewLayerConfig.geoviewLayerType}.`
@@ -269,7 +269,7 @@ export class ConfigValidation {
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration to validate.
    * @private
    */
-  #geoviewLayerIdIsMandatory(geoviewLayerConfig: TypeGeoviewLayerConfig): void {
+  static #geoviewLayerIdIsMandatory(geoviewLayerConfig: TypeGeoviewLayerConfig): void {
     if (!geoviewLayerConfig.geoviewLayerId) {
       throw new Error(`geoviewLayerId is mandatory for GeoView layer of type ${geoviewLayerConfig.geoviewLayerType}.`);
     }
@@ -283,7 +283,7 @@ export class ConfigValidation {
    * layer entry configurations found in the list of layer entries.
    * @private
    */
-  #processLayerEntryConfig(
+  static #processLayerEntryConfig(
     geoviewLayerConfig: TypeGeoviewLayerConfig,
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
     parentLayerConfig?: GroupLayerEntryConfig
@@ -301,10 +301,10 @@ export class ConfigValidation {
 
       if (layerEntryIsGroupLayer(layerConfig as ConfigBaseClass)) {
         // We must set the parents of all elements in the group.
-        this.#recursivelySetChildParent(geoviewLayerConfig, [layerConfig], parentLayerConfig);
+        ConfigValidation.#recursivelySetChildParent(geoviewLayerConfig, [layerConfig], parentLayerConfig);
         const parent = new GroupLayerEntryConfig(layerConfig as GroupLayerEntryConfig);
         listOfLayerEntryConfig[i] = parent;
-        this.#processLayerEntryConfig(geoviewLayerConfig, parent.listOfLayerEntryConfig, parent);
+        ConfigValidation.#processLayerEntryConfig(geoviewLayerConfig, parent.listOfLayerEntryConfig, parent);
       } else if (geoviewEntryIsWMS(layerConfig)) {
         listOfLayerEntryConfig[i] = new OgcWmsLayerEntryConfig(layerConfig);
       } else if (geoviewEntryIsImageStatic(layerConfig)) {
@@ -344,7 +344,7 @@ export class ConfigValidation {
    * layer configurations found in the list of layer entries.
    * @private
    */
-  #recursivelySetChildParent(
+  static #recursivelySetChildParent(
     geoviewLayerConfig: TypeGeoviewLayerConfig,
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
     parentLayerConfig?: GroupLayerEntryConfig
@@ -353,7 +353,11 @@ export class ConfigValidation {
       layerConfig.parentLayerConfig = parentLayerConfig;
       layerConfig.geoviewLayerConfig = geoviewLayerConfig;
       if (layerEntryIsGroupLayer(layerConfig))
-        this.#recursivelySetChildParent(geoviewLayerConfig, layerConfig.listOfLayerEntryConfig!, layerConfig as GroupLayerEntryConfig);
+        ConfigValidation.#recursivelySetChildParent(
+          geoviewLayerConfig,
+          layerConfig.listOfLayerEntryConfig!,
+          layerConfig as GroupLayerEntryConfig
+        );
     });
   }
 
@@ -364,7 +368,7 @@ export class ConfigValidation {
    * @param {TypeDisplayLanguage} destinationKey - The destination's key.
    * @private
    */
-  #synchronizeLocalizedString(
+  static #synchronizeLocalizedString(
     localizedString: TypeLocalizedString,
     sourceKey: TypeDisplayLanguage,
     destinationKey: TypeDisplayLanguage
@@ -379,7 +383,7 @@ export class ConfigValidation {
    * to the suported languages array content.
    * @private
    */
-  #processLocalizedString(suportedLanguages: TypeListOfLocalizedLanguages, listOfMapConfigLayerEntry?: MapConfigLayerEntry[]): void {
+  static #processLocalizedString(suportedLanguages: TypeListOfLocalizedLanguages, listOfMapConfigLayerEntry?: MapConfigLayerEntry[]): void {
     if (suportedLanguages.includes('en') && suportedLanguages.includes('fr') && listOfMapConfigLayerEntry) {
       const validateLocalizedString = (config: TypeJsonObject): void => {
         if (typeof config === 'object') {
@@ -421,7 +425,7 @@ export class ConfigValidation {
               // Leaving the commented line here in case a developer needs to quickly uncomment it again to troubleshoot
               // logger.logDebug(`Key=${key}`, config[key]);
               if (config?.[key]?.en || config?.[key]?.fr)
-                this.#synchronizeLocalizedString(Cast<TypeLocalizedString>(config[key]), sourceKey, destinationKey);
+                ConfigValidation.#synchronizeLocalizedString(Cast<TypeLocalizedString>(config[key]), sourceKey, destinationKey);
               // Avoid the 'geoviewLayerConfig' and 'parentLayerConfig' properties because they loop on themself and cause a
               // stack overflow error.
               else if (!['geoviewLayerConfig', 'parentLayerConfig'].includes(key)) propagateLocalizedString(config[key]);

@@ -55,7 +55,7 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * @returns {string} The schemaPath associated to the sublayer.
    * @protected
    */
-  protected get schemaPath(): string {
+  protected override get schemaPath(): string {
     return CV_CONST_LEAF_LAYER_SCHEMA_PATH.ESRI_DYNAMIC;
   }
 
@@ -65,7 +65,7 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * @returns {TypeLayerEntryType} The entryType associated to the sublayer.
    * @protected
    */
-  protected getEntryType(): TypeLayerEntryType {
+  protected override getEntryType(): TypeLayerEntryType {
     return CV_CONST_SUB_LAYER_TYPES.RASTER_IMAGE;
   }
 }

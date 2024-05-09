@@ -59,7 +59,7 @@ import { EsriDynamic, TypeEsriDynamicLayerConfig } from '@/geo/layer/geoview-lay
 import { TypeXYZTilesConfig, XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 import { EsriFeature, TypeEsriFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { GeoJSON, TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
-import { Config } from '@/core/utils/config/config';
+import { ConfigValidation } from '@/core/utils/config/config-validation';
 
 type EsriOptions = {
   err: string;
@@ -668,8 +668,7 @@ export function AddNewLayer(): JSX.Element {
         const geojsonFeatureMetadata = geojsonGeoviewLayerInstance.metadata!;
         geojsonGeoviewLayerConfig.listOfLayerEntryConfig = Cast<GeoJSONLayerEntryConfig[]>(geojsonFeatureMetadata.listOfLayerEntryConfig);
         // validate and instanciate layer configs
-        const config = new Config();
-        config.configValidation.validateListOfGeoviewLayerConfig(['en'], [geojsonGeoviewLayerConfig]);
+        ConfigValidation.validateListOfGeoviewLayerConfig(['en'], [geojsonGeoviewLayerConfig]);
         const layers = geojsonGeoviewLayerConfig.listOfLayerEntryConfig;
         if (layers.length === 1) {
           setLayerName(layers[0].layerName!.en! as string);

@@ -22,6 +22,7 @@ import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { Projection } from '@/geo/utils/projection';
 
 import { api, unmountMap } from '@/app';
+import { Plugin } from '@/api/plugin/plugin';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 
 import { AppBarApi } from '@/core/components/app-bar/app-bar-api';
@@ -1107,7 +1108,7 @@ export class MapViewer {
    * @param status - Toggle fullscreen or exit fullscreen status
    * @param {HTMLElement} element - The element to toggle fullscreen on
    */
-  setFullscreen(status: boolean, element: TypeHTMLElement): void {
+  static setFullscreen(status: boolean, element: TypeHTMLElement): void {
     // TODO: Refactor - For reusability, this function should be static and moved to a browser-utilities class
     // TO.DOCONT: If we want to keep a function here, in MapViewer, it should just be a redirect to the browser-utilities'
     // enter fullscreen
@@ -1431,8 +1432,7 @@ export class MapViewer {
     mapContainer.classList.remove('geoview-map');
 
     // unload all loaded plugins on the map
-    api.plugin
-      .removePlugins(this.mapId)
+    Plugin.removePlugins(this.mapId)
       .then(() => {
         // Remove all layers
         try {
@@ -1440,9 +1440,6 @@ export class MapViewer {
         } catch (err) {
           // Failed to remove layers, eat the exception and continue to remove the map
         }
-
-        // unsubscribe from all remaining events registered on this map
-        api.event.offAll(this.mapId);
 
         // remove the dom element (remove rendered map and overview map)
         if (this.overviewRoot) this.overviewRoot?.unmount();

@@ -121,7 +121,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
-  protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
+  protected override getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
     const fieldDefinitions = this.layerMetadata[layerConfig.layerPath].source.featureInfo;
     const fieldIndex = getLocalizedValue(
       Cast<TypeLocalizedString>(fieldDefinitions.outfields),
@@ -167,7 +167,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  protected async processOneLayerEntry(layerConfig: VectorTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected override async processOneLayerEntry(layerConfig: VectorTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
     await super.processOneLayerEntry(layerConfig);
@@ -250,7 +250,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerConfig: TileLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected override processLayerMetadata(layerConfig: TileLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     if (this.metadata) {
       const { tileInfo } = this.metadata;
       const extent = this.metadata.fullExtent;
@@ -309,7 +309,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
   }
 
   // TODO: This section needs documentation (a header at least). Also, is it normal to have things hardcoded like that?
-  async addVectorTileLayer(): Promise<void> {
+  static async addVectorTileLayer(): Promise<void> {
     // GV from code sandbox https://codesandbox.io/s/vector-tile-info-forked-g28jud?file=/main.js it works good
     // GV from inside GeoView, even when not use, something is wrong.
     const map = await olms(

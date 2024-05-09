@@ -119,7 +119,7 @@ export class Basemap {
    * @returns {number} projection code
    * @private
    */
-  #getProjectionFromUrl(url: string): number {
+  static #getProjectionFromUrl(url: string): number {
     let code = 0;
     const index = url.indexOf('/MapServer');
 
@@ -231,7 +231,7 @@ export class Basemap {
 
           // Because OpenLayers can reproject on the fly raster, some like Shaded and Simple even if only available in 3978
           // can be use in 3857. For this we need to make a difference between map projection and url use for the basemap
-          urlProj = this.#getProjectionFromUrl(basemapLayer.url as string);
+          urlProj = Basemap.#getProjectionFromUrl(basemapLayer.url as string);
 
           // return a basemap layer
           return {

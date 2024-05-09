@@ -94,6 +94,7 @@ function ExportButton({ rows, columns, children }: ExportButtonProps): JSX.Eleme
   );
 }
 
+// TODO: Refactor - Remove defaultProps as it's no longer a good practice
 ExportButton.defaultProps = { children: '' };
 
 export default ExportButton;

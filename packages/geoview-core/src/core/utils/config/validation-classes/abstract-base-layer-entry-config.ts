@@ -27,7 +27,7 @@ import { TypeJsonValue } from '@/core/types/global-types';
  */
 export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /** The ending element of the layer configuration path. */
-  layerIdExtension?: string | undefined = undefined;
+  override layerIdExtension?: string | undefined = undefined;
 
   /** The display name of the layer (English/French). */
   layerName?: TypeLocalizedString;
@@ -131,19 +131,10 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
-   * Serializes the TypeBaseLayerEntryConfig class
-   * @returns {TypeJsonValue} The serialized TypeBaseLayerEntryConfig
-   */
-  serialize(): TypeJsonValue {
-    // Redirect
-    return this.onSerialize();
-  }
-
-  /**
    * Overrides the serialization of the mother class
    * @returns {TypeJsonValue} The serialized TypeBaseLayerEntryConfig
    */
-  onSerialize(): TypeJsonValue {
+  override onSerialize(): TypeJsonValue {
     // Call parent
     const serialized = super.onSerialize() as unknown as AbstractBaseLayerEntryConfig;
 

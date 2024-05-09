@@ -19,10 +19,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
  * @exports
  * @class
  */
-export class Plugin {
-  // used for a timer to check if all plugins are loaded then execute a timer
-  #pluginsReady = 0;
-
+export abstract class Plugin {
   // used to indicate that all initial plugins finished loading
   pluginsLoaded = false;
 
@@ -33,7 +30,7 @@ export class Plugin {
    */
   // ? unknown type cannot be use, need to escape. Creates problems in footer-bar.tsx
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  loadScript = (pluginId: string): Promise<any> => {
+  static loadScript(pluginId: string): Promise<any> {
     return new Promise((resolve, reject) => {
       const existingScript = document.getElementById(pluginId);
 
@@ -85,7 +82,7 @@ export class Plugin {
           });
       }
     });
-  };
+  }
 
   /**
    * Add new plugin
@@ -95,14 +92,15 @@ export class Plugin {
    * @param {Class} constructor the plugin class (React Component)
    * @param {Object} props the plugin properties
    */
-  addPlugin = async (
+  static async addPlugin(
     pluginId: string,
     mapId: string,
     constructor?: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue),
     props?: TypeJsonObject
-  ): Promise<void> => {
+  ): Promise<void> {
     const plugins = await MapEventProcessor.getMapViewerPlugins(mapId);
     if (!plugins[pluginId]) {
+      // TODO: Refactor - Get rid of the TypePluginStructure and use AbstractPlugin directly, taking advantage of the the mother class abstract methods.
       let plugin: TypePluginStructure | null = null;
 
       if (constructor) {
@@ -201,7 +199,7 @@ export class Plugin {
         }
       }
     }
-  };
+  }
 
   /**
    * Delete a specific plugin loaded in a map
@@ -209,19 +207,19 @@ export class Plugin {
    * @param {string} pluginId the id of the plugin to delete
    * @param {string} mapId the map id to remove the plugin from
    */
-  removePlugin = async (pluginId: string, mapId: string): Promise<void> => {
+  static async removePlugin(pluginId: string, mapId: string): Promise<void> {
     // Get the plugin and remove it
     const plugins = await MapEventProcessor.getMapViewerPlugins(mapId);
     plugins[pluginId]?.removed?.();
     delete plugins[pluginId];
-  };
+  }
 
   /**
    * Delete all plugins loaded in a map
    *
    * @param {string} mapId the map id to remove the plugin from (if not provided then plugin will be removed from all maps)
    */
-  removePlugins = async (mapId: string): Promise<void> => {
+  static async removePlugins(mapId: string): Promise<void> {
     const recordOfPlugins = await MapEventProcessor.getMapViewerPlugins(mapId);
 
     if (recordOfPlugins) {
@@ -229,11 +227,11 @@ export class Plugin {
       for (let i = 0; i < Object.keys(recordOfPlugins).length; i += 1) {
         const pluginId = Object.keys(recordOfPlugins)[i];
 
-        this.removePlugin(pluginId, mapId).catch((error) => {
+        Plugin.removePlugin(pluginId, mapId).catch((error) => {
           // Log
           logger.logPromiseFailed('removePlugins in plugins.ts', error);
         });
       }
     }
-  };
+  }
 }

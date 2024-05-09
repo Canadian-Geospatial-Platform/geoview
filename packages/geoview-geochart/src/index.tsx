@@ -17,14 +17,18 @@ class GeoChartFooterPlugin extends FooterPlugin {
    *
    * @returns {AnySchemaObject} the package schema
    */
-  schema = (): AnySchemaObject => schema;
+  override schema(): AnySchemaObject {
+    return schema;
+  }
 
   /**
    * Return the default config for this package
    *
    * @returns {TypeJsonObject} the default config
    */
-  defaultConfig = (): TypeJsonObject => toJsonObject(defaultConfig);
+  override defaultConfig(): TypeJsonObject {
+    return toJsonObject(defaultConfig);
+  }
 
   // The callback used to redraw the GeoCharts in the GeoChartPanel
   callbackRedraw?: () => void;
@@ -56,7 +60,7 @@ class GeoChartFooterPlugin extends FooterPlugin {
   /**
    * Overrides the addition of the GeoChart Footer Plugin to make sure to set the chart configs into the store.
    */
-  onAdd(): void {
+  override onAdd(): void {
     // Initialize the store with geochart provided configuration
     GeochartEventProcessor.setGeochartCharts(this.pluginProps.mapId, this.configObj.charts);
 
@@ -68,7 +72,7 @@ class GeoChartFooterPlugin extends FooterPlugin {
    * Overrides the creation of the content properties of this GeoChart Footer Plugin.
    * @returns {TypeTabs} The TypeTabs for the GeoChart Footer Plugin
    */
-  onCreateContentProps(): TypeTabs {
+  override onCreateContentProps(): TypeTabs {
     // Create element
     const content = (
       <GeoChartPanel
@@ -98,7 +102,7 @@ class GeoChartFooterPlugin extends FooterPlugin {
    * Overrides when the plugin is selected in the Footer Bar.
    * @returns {TypeTabs} The TypeTabs for the GeoChart Footer Plugin
    */
-  onSelected(): void {
+  override onSelected(): void {
     // Call parent
     super.onSelected();
 

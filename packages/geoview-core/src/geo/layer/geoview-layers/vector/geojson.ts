@@ -155,7 +155,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected override processLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     if (this.metadata) {
       const metadataLayerList = Cast<VectorLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
       const layerMetadataFound = metadataLayerList.find(
@@ -214,7 +214,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
-  protected createVectorSource(
+  protected override createVectorSource(
     layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}

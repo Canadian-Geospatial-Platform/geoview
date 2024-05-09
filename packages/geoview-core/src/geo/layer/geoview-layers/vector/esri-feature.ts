@@ -106,7 +106,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected fetchServiceMetadata(): Promise<void> {
+  protected override fetchServiceMetadata(): Promise<void> {
     return commonfetchServiceMetadata.call(this);
   }
 
@@ -146,7 +146,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
-  protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
+  protected override getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
     return commonGetFieldType.call(this, fieldName, layerConfig);
   }
 
@@ -158,7 +158,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
-  protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
+  protected override getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
     return commonGetFieldDomain.call(this, fieldName, layerConfig);
   }
 
@@ -176,9 +176,9 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @param {EsriFeatureLayerEntryConfig} layerConfig The layer entry to configure.
    */
-  processFeatureInfoConfig = (layerConfig: EsriFeatureLayerEntryConfig): void => {
+  processFeatureInfoConfig(layerConfig: EsriFeatureLayerEntryConfig): void {
     commonProcessFeatureInfoConfig.call(this, layerConfig);
-  };
+  }
 
   /** ***************************************************************************************************************************
    * This method set the initial settings based on the service metadata. Priority is given to the layer configuration.
@@ -198,7 +198,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected override processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     return commonProcessLayerMetadata.call(this, layerConfig);
   }
 
@@ -211,7 +211,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
-  protected createVectorSource(
+  protected override createVectorSource(
     layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}

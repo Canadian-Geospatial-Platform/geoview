@@ -117,31 +117,33 @@ export class UUIDmapConfigReader {
     return listOfGeoviewLayerConfig;
   }
 
-  /**
-   * Reads and parses GeoChart configs from uuid request result
-   * @param {AxiosResponse<GeoChartGeoCoreConfig>} result the uuid request result
-   * @param {string} lang the language to use to read results
-   * @returns {GeoChartConfig[]} the list of GeoChart configs
-   */
-  private static getGeoChartConfigFromResponse(result: AxiosResponse<GeoChartGeoCoreConfig>, lang: string): GeoChartConfig[] {
-    // If no geochart information
-    if (!result?.data || !result.data.reponse || !result.data.reponse.gcs || !Array.isArray(result.data.reponse.gcs)) return [];
+  // TODO: Check - Commented out as not called anymore by method `getGVConfigFromUUIDs`, but maybe it should still?
+  // /**
+  //  * Reads and parses GeoChart configs from uuid request result
+  //  * @param {AxiosResponse<GeoChartGeoCoreConfig>} result the uuid request result
+  //  * @param {string} lang the language to use to read results
+  //  * @returns {GeoChartConfig[]} the list of GeoChart configs
+  //  * @private
+  //  */
+  // static #getGeoChartConfigFromResponse(result: AxiosResponse<GeoChartGeoCoreConfig>, lang: string): GeoChartConfig[] {
+  //   // If no geochart information
+  //   if (!result?.data || !result.data.reponse || !result.data.reponse.gcs || !Array.isArray(result.data.reponse.gcs)) return [];
 
-    // Find all Geochart configs
-    const foundConfigs = result.data.reponse.gcs
-      .map((gcs) => gcs?.[lang]?.packages?.geochart as GeoChartGeoCoreConfig)
-      .filter((geochartValue) => !!geochartValue);
+  //   // Find all Geochart configs
+  //   const foundConfigs = result.data.reponse.gcs
+  //     .map((gcs) => gcs?.[lang]?.packages?.geochart as GeoChartGeoCoreConfig)
+  //     .filter((geochartValue) => !!geochartValue);
 
-    // For each found config, parse
-    const parsedConfigs: GeoChartConfig[] = [];
-    foundConfigs.forEach((foundConfig) => {
-      // Transform GeoChartGeoCoreConfig to GeoChartConfig
-      parsedConfigs.push({ ...(foundConfig as object), layers: [foundConfig.layers] } as GeoChartConfig);
-    });
+  //   // For each found config, parse
+  //   const parsedConfigs: GeoChartConfig[] = [];
+  //   foundConfigs.forEach((foundConfig) => {
+  //     // Transform GeoChartGeoCoreConfig to GeoChartConfig
+  //     parsedConfigs.push({ ...(foundConfig as object), layers: [foundConfig.layers] } as GeoChartConfig);
+  //   });
 
-    // Return all configs
-    return parsedConfigs;
-  }
+  //   // Return all configs
+  //   return parsedConfigs;
+  // }
 
   /**
    * Generates GeoView layers and package configurations (i.e. geochart), from GeoCore API, using a list of UUIDs.

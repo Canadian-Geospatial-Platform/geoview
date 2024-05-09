@@ -45,6 +45,12 @@
     "import/prefer-default-export": "off",
     "react/no-find-dom-node": 0,
     "class-methods-use-this": "off",
+    "@typescript-eslint/class-methods-use-this": [
+      1, // Warning
+      {
+        "ignoreOverrideMethods": true
+      }
+    ],
     "jsx-a11y/anchor-is-valid": [
       "error",
       {
@@ -66,7 +72,7 @@
     "react/jsx-props-no-spreading": "off",
     "import/no-extraneous-dependencies": "off",
     "import/no-unresolved": "off",
-    "react/require-default-props": "warn",
+    "react/require-default-props": "off",
     "no-restricted-imports": [
       "error",
       {
