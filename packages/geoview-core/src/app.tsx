@@ -77,19 +77,23 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
     const configObjStr = removeCommentsFromJSON(configData!);
     mapConfig = api.configApi.getMapConfig(configObjStr, lang);
 
-    // TODO: refactor - remove this injection once config is done
+    // TODO: refactor - remove this injection once config is done, remove the casting to unknown
     let tempStr = removeCommentsFromJSON(configData!);
     tempStr = tempStr.replace(/(?<!\\)'/gm, '"');
     tempStr = tempStr.replace(/\\'/gm, "'");
-    mapConfig.map.listOfGeoviewLayerConfig = (JSON.parse(tempStr) as unknown as MapFeatureConfig).map.listOfGeoviewLayerConfig;
+    mapConfig.map.listOfGeoviewLayerConfig = (JSON.parse(tempStr) as unknown as MapFeatureConfig).map.listOfGeoviewLayerConfig
+      ? (JSON.parse(tempStr) as unknown as MapFeatureConfig).map.listOfGeoviewLayerConfig
+      : [];
   } else if (mapElement.hasAttribute('data-config-url')) {
     // configurations file url is provided, fetch then process
     const configUrl = mapElement.getAttribute('data-config-url');
     const configObject = await fetchConfigFile(configUrl!);
     mapConfig = api.configApi.getMapConfig(configObject, lang);
 
-    // TODO: refactor - remove this injection once config is done
-    mapConfig.map.listOfGeoviewLayerConfig = (configObject as unknown as MapFeatureConfig).map.listOfGeoviewLayerConfig;
+    // TODO: refactor - remove this injection once config is done, remove the casting to unknown
+    mapConfig.map.listOfGeoviewLayerConfig = (configObject as unknown as MapFeatureConfig).map.listOfGeoviewLayerConfig
+      ? (configObject as unknown as MapFeatureConfig).map.listOfGeoviewLayerConfig
+      : [];
   } else if (mapElement.getAttribute('data-shared')) {
     // configurations from the URL parameters is provided, extract then process (replace HTLM characters , && :)
     const urlParam = new URLSearchParams(window.location.search).toString().replace(/%2C/g, ',').replace(/%3A/g, ':') || '';

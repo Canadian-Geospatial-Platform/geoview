@@ -11,26 +11,6 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId": "esriFeatureLYR4",
-        "geoviewLayerName": {
-          "en": "Water quality at monitoring sites",
-          "fr": "Qualité eau"
-        },
-        "metadataAccessPath": {
-          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer",
-          "fr": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer"
-        },
-        "geoviewLayerType": "esriFeature",
-        "initialSettings": {
-          "controls": { "visibility": false }
-        },
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "8"
-          }
-        ]
-      },
-      {
         "geoviewLayerId": "uniqueValueId",
         "geoviewLayerName": {
           "en": "uniqueValue",

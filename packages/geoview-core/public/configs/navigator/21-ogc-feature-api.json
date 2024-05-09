@@ -23,7 +23,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "lakes",
-            "layerFilter": "name in (\"Lake Victoria\", \"Lake Superior\", \"L. Erie\", \"L. Ontario\")"
+            "layerFilter": "name in ('Lake Victoria', 'Lake Superior', 'L. Erie', 'L. Ontario')"
           }
         ]
       }
