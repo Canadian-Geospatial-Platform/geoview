@@ -978,7 +978,7 @@
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
-        "TypeLayerInitialSettings": {
+        "layerName": {
           "oneOf": [
             {
               "$ref": "#/definitions/TypeLocalizedString",

@@ -33,6 +33,7 @@ export class EsriDynamicLayerConfig extends AbstractGeoviewLayerConfig {
   constructor(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, mapFeatureConfig?: MapFeatureConfig) {
     super(layerConfig, language, mapFeatureConfig);
     this.geoviewLayerType = CV_CONST_LAYER_TYPES.ESRI_DYNAMIC;
+    if (!isvalidComparedToSchema(this.geoviewLayerSchema, layerConfig)) this.propagateError();
     if (!isvalidComparedToSchema(this.geoviewLayerSchema, this)) this.propagateError();
     this.validate();
   }

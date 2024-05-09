@@ -1,3 +1,5 @@
+// Needs to disable class-methods-use-this because we need to pass the instance reference 'this' to the validator.
+// eslint-disable-next-line @typescript-eslint/class-methods-use-this
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@config/types/config-constants';
 import { TypeJsonObject } from '@config/types/config-types';
 import {
@@ -45,6 +47,7 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
       throw new Error(`The layer entry with layer path equal to ${this.layerPath} must be an integer string`);
     }
     this.source.format = (layerConfig?.source?.format || 'png') as TypeEsriFormatParameter; // Set the source.format property
+    if (!isvalidComparedToSchema(this.schemaPath, layerConfig)) this.propagateError();
     if (!isvalidComparedToSchema(this.schemaPath, this)) this.propagateError();
   }
 
