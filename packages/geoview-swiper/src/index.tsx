@@ -16,7 +16,7 @@ class SwiperPlugin extends MapPlugin {
    *
    * @returns {AnySchemaObject} the package schema
    */
-  static schema(): AnySchemaObject {
+  override schema(): AnySchemaObject {
     return schema;
   }
 
@@ -25,7 +25,7 @@ class SwiperPlugin extends MapPlugin {
    *
    * @returns {TypeJsonObject} the default config
    */
-  static defaultConfig(): TypeJsonObject {
+  override defaultConfig(): TypeJsonObject {
     return toJsonObject(defaultConfig);
   }
 
@@ -50,7 +50,7 @@ class SwiperPlugin extends MapPlugin {
   /**
    * Overrides the addition of the Swiper Map Plugin to make sure to set the layer paths from the config into the store.
    */
-  onAdd(): void {
+  override onAdd(): void {
     // Initialize the store with swiper provided configuration
     SwiperEventProcessor.setLayerPaths(this.pluginProps.mapId, this.configObj.layers);
 
@@ -62,7 +62,7 @@ class SwiperPlugin extends MapPlugin {
    * Overrides the creation of the content of this Swiper Map Plugin.
    * @returns {JSX.Element} The JSX.Element representing the Swiper Plugin
    */
-  onCreateContent(): JSX.Element {
+  override onCreateContent(): JSX.Element {
     return <Swiper viewer={this.pluginProps.viewer} config={this.configObj} />;
   }
 

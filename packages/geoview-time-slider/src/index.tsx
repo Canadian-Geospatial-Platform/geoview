@@ -39,7 +39,7 @@ class TimeSliderPlugin extends FooterPlugin {
    *
    * @returns {AnySchemaObject} returns the schema for this package
    */
-  static schema(): AnySchemaObject {
+  override schema(): AnySchemaObject {
     return schema;
   }
 
@@ -48,7 +48,7 @@ class TimeSliderPlugin extends FooterPlugin {
    *
    * @returns {TypeJsonObject} the default config
    */
-  static defaultConfig(): TypeJsonObject {
+  override defaultConfig(): TypeJsonObject {
     return toJsonObject(defaultConfig);
   }
 

@@ -4,7 +4,7 @@ import i18next from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { API } from '@/api/api';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { TypeWindow, TypeJsonObject } from '@/core/types/global-types';
+import { TypeWindow, TypeJsonObject, AnySchemaObject } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 
 /** ******************************************************************************************************************************
@@ -74,6 +74,16 @@ export abstract class AbstractPlugin {
   displayLanguage(): string {
     return this.translate?.getI18n().language || 'en';
   }
+
+  /**
+   * Must override function to get the schema validator
+   */
+  abstract schema(): AnySchemaObject;
+
+  /**
+   * Must override function to get the default config
+   */
+  abstract defaultConfig(): TypeJsonObject;
 
   /**
    * Override this to do the actual adding

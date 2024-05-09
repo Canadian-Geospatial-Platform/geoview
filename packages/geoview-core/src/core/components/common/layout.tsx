@@ -75,12 +75,3 @@ export function Layout({
     />
   );
 }
-
-// TODO: Refactor - Remove defaultProps as it's no longer a good practice
-Layout.defaultProps = {
-  children: null,
-  onIsEnlargeClicked: undefined,
-  fullWidth: false,
-  guideContentIds: null,
-  onGuideIsOpen: undefined,
-};

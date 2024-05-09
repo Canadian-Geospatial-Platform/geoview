@@ -100,6 +100,7 @@ export abstract class Plugin {
   ): Promise<void> {
     const plugins = await MapEventProcessor.getMapViewerPlugins(mapId);
     if (!plugins[pluginId]) {
+      // TODO: Refactor - Get rid of the TypePluginStructure and use AbstractPlugin directly, taking advantage of the the mother class abstract methods.
       let plugin: TypePluginStructure | null = null;
 
       if (constructor) {
