@@ -517,7 +517,7 @@ export class WMS extends AbstractGeoViewRaster {
 
         if (Array.isArray(layerConfig.source?.style)) {
           this.WMSStyles = layerConfig.source.style;
-        } else if ((layerCapabilities.Style.length as number) > 1) {
+        } else if (layerCapabilities.Style && (layerCapabilities.Style.length as number) > 1) {
           this.WMSStyles = [];
           for (let i = 0; i < (layerCapabilities.Style.length as number); i++) {
             this.WMSStyles.push(layerCapabilities.Style[i].Name as string);
