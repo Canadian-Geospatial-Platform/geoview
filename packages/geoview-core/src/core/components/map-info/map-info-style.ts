@@ -6,7 +6,7 @@ import { Theme } from '@mui/material/styles';
 export const getSxClasses = (theme: Theme): any => ({
   mapInfoContainer: {
     flexGrow: 1,
-    zIndex: 50,
+    zIndex: 200,
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
