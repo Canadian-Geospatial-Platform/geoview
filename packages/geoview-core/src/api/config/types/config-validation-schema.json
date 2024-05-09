@@ -974,7 +974,7 @@
         "entryType": {
           "enum": ["raster-image"]
         },
-        "LayerId": {
+        "layerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
