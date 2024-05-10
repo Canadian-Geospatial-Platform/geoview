@@ -63,7 +63,7 @@ export function Shell(props: ShellProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getShellSxClasses(theme);
 
-  const [origHeight, setOrigHeight] = useState<number>(0);
+  const [origHeight, setOrigHeight] = useState<string>('0');
 
   // render additional components if added by api
   const [components, setComponents] = useState<Record<string, JSX.Element>>({});
@@ -93,6 +93,7 @@ export function Shell(props: ShellProps): JSX.Element {
   const isFooterBarCollapsed = useUIFooterBarIsCollapsed();
   const geoviewElement = useAppGeoviewHTMLElement();
   const footerTabContainer = geoviewElement.querySelector(`[id^="${mapId}-tabsContainer"]`);
+
   /**
    * Handles when a component is being added to the map
    * @param {MapComponentPayload} payload The map component being added
@@ -201,7 +202,9 @@ export function Shell(props: ShellProps): JSX.Element {
    */
   useEffect(() => {
     if (mapContainerRef.current && mapShellContainerRef.current) {
-      setOrigHeight(geoviewElement!.clientHeight + 55);
+      // NOTE: grab height from data attribute of parent div, if not present then grab client height
+      const height = geoviewElement!.dataset?.height ?? `${geoviewElement!.clientHeight}px`;
+      setOrigHeight(height);
     }
   }, [mapLoaded, mapId, geoviewElement]);
 
@@ -226,17 +229,13 @@ export function Shell(props: ShellProps): JSX.Element {
     // Reset the map references with default heights.
     if (mapLoaded && !isMapFullScreen && mapContainerRef.current && mapShellContainerRef.current) {
       mapContainerRef.current.style.visibility = 'visible';
-      mapContainerRef.current.style.minHeight = `${origHeight}px`;
-      mapContainerRef.current.style.height = `${origHeight}px`;
+      mapContainerRef.current.style.minHeight = origHeight;
+      mapContainerRef.current.style.height = origHeight;
 
       mapShellContainerRef.current.style.visibility = 'visible';
-      mapShellContainerRef.current.style.minHeight = `${origHeight}px`;
-      mapShellContainerRef.current.style.height = `${origHeight}px`;
+      mapShellContainerRef.current.style.minHeight = origHeight;
+      mapShellContainerRef.current.style.height = origHeight;
       mapShellContainerRef.current.style.zIndex = '0';
-
-      // Set the mapDiv height for height animation.
-      geoviewElement.style.height = 'fit-content';
-      geoviewElement.style.transition = 'height 0.2s ease-out 0.2s';
     }
   }, [footerPanelResizeValue, isMapFullScreen, memoMapResizeValues, origHeight, mapLoaded, isFooterBarCollapsed, geoviewElement]);
 
