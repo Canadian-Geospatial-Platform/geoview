@@ -431,6 +431,8 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps): JSX.
       globalFilter,
     },
     enableColumnFilterModes: true,
+    // NOTE: enable column pinning so that icon, zoom, details can be pinned to left
+    enableColumnPinning: true,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
@@ -445,7 +447,8 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps): JSX.
           <Box>
             <MRTToggleFiltersButton className="style1" table={table} />
             <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} />
-            <MRTShowHideColumnsButton className="style1" table={table} />
+            {/* enable column pinning options is override, so that pinning option in menu can be hide. */}
+            <MRTShowHideColumnsButton className="style1" table={{ ...table, options: { ...table.options, enableColumnPinning: false } }} />
             <MRTToggleDensePaddingButton className="style1" table={table} />
             <ExportButton rows={rows} columns={columns}>
               <JSONExportButton features={data.features as TypeFeatureInfoEntry[]} layerPath={layerPath} />
