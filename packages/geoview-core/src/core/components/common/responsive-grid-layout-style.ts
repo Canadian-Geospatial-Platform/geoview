@@ -6,7 +6,11 @@ export const getSxClasses = (theme: Theme): any => ({
   rightGridContent: {
     border: `2px solid ${theme.palette.geoViewColor.primary.main}`,
     borderRadius: '5px',
-    backgroundColor: theme.palette.geoViewColor.white,
+    backgroundColor: theme.palette.geoViewColor.bgColor.light[300],
+
+    '&.guide-container': {
+      backgroundColor: theme.palette.geoViewColor.white
+    },
     width: '100%',
     '&.fullscreen-mode': {
       maxHeight: 'calc(100vh - 90px)',
@@ -27,6 +31,7 @@ export const getSxClasses = (theme: Theme): any => ({
       border: 'none',
     },
     '& .guideBox': {
+      color: `${theme.palette.geoViewColor.grey.dark[800]}  !important`,
       margin: '1rem',
       img: {
         maxWidth: '100%',

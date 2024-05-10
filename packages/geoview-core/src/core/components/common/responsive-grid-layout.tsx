@@ -10,7 +10,6 @@ import FullScreenDialog from './full-screen-dialog';
 import { logger } from '@/core/utils/logger';
 import { ArrowBackIcon, ArrowForwardIcon, QuestionMarkIcon } from '@/ui/icons';
 import { Button } from '@/ui/button/button';
-import { Paper } from '@/ui/paper/paper';
 import { useAppGuide, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 interface ResponsiveGridLayoutProps {
@@ -232,11 +231,11 @@ const ResponsiveGridLayout = forwardRef(
       if (!content) return null;
 
       return (
-        <Paper sx={{ padding: '20px', overflow: 'auto' }}>
+        <Box sx={{ padding: '20px', overflow: 'auto' }}>
           <Box className="guideBox">
             <Markdown options={{ wrapper: 'article' }}>{content}</Markdown>
           </Box>
-        </Paper>
+        </Box>
       );
     };
 
@@ -251,7 +250,7 @@ const ResponsiveGridLayout = forwardRef(
             </Box>
           </FullScreenDialog>
 
-          <Box sx={sxClasses.rightGridContent}>{content}</Box>
+          <Box sx={sxClasses.rightGridContent} className={isGuideOpen ? 'guide-container' : ''}>{content}</Box>
         </>
       );
     };
