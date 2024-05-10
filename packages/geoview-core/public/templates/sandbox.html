@@ -156,11 +156,11 @@
   <div class="selector-container">
     <p>Map Width:</p>
     <div class="selector">
-      <input type="text" placeholder="Width of the map" id="mapWidth" value="100%" />
+      <input type="text" placeholder="Width of the map" id="mapWidth" />
     </div>
     <p>Map height:</p>
     <div class="selector">
-      <input type="text" placeholder="Height of the map" id="mapHeight" value="900" />
+      <input type="text" placeholder="Height of the map" id="mapHeight" />
     </div>
 
     <div class="selector">
@@ -231,13 +231,15 @@
       a.value = 'sandboxMap';
       newDiv.setAttributeNode(a);
 
-      let mapWidth = document.getElementById("mapWidth")?.value;
-      let mapHeight = document.getElementById("mapHeight")?.value;
+      const mapWidth = document.getElementById('mapWidth')?.value + "px";
+      const mapHeight = document.getElementById('mapHeight')?.value + "px";
 
-      if (mapWidth !== "100%" && mapWidth.length) {
-        mapWidth += "px";
-      }
-      mapHeight = mapHeight.length ? mapHeight + "px" : "900px";
+      // if (mapWidth !== "100%" && mapWidth.length) {
+      //   mapWidth += "px";
+      // }
+
+      // mapWidth = mapWidth.length ? mapWidth + "px" : "900px";
+      // mapHeight = mapHeight.length ? mapHeight + "px" : "900px";
 
       newDiv.style.width = mapWidth;
       newDiv.style.minHeight = mapHeight;
@@ -261,7 +263,17 @@
     const mapHeightInput = document.getElementById("mapHeight");
 
     applyMapSizeBtn.addEventListener("click", () => {
-      createMapButton.dispatchEvent(new Event('click'));
+      const mapWidth = document.getElementById('mapWidth')?.value;
+      const mapHeight = document.getElementById('mapHeight')?.value;
+
+      /**
+       * ===========================================================================
+       *  MIN WIDTH and MIN HEIGHT should be greater than 0
+       * ===========================================================================
+      */
+      if (parseInt(mapWidth) > 0 && parseInt(mapHeight) > 0) {
+        createMapButton.dispatchEvent(new Event('click'));
+      }
     });
 
     mapWidthInput.addEventListener("input", () => {
@@ -271,6 +283,17 @@
     mapHeightInput.addEventListener("input", () => {
       applyMapSizeBtn.removeAttribute("disabled");
     })
+
+    const widthInput = document.getElementById('mapWidth');
+    const heightInput = document.getElementById('mapHeight');
+
+    // Set the map width input value based on map section width.
+    if (widthInput) {
+      const mapSection = document.getElementById("mapSection");
+      widthInput.value = mapSection.clientWidth;
+    }
+
+    document.getElementById('mapHeight').value = "900";
 
     const sandboxMap = document.getElementById("sandboxMap");
     if (sandboxMap) {
