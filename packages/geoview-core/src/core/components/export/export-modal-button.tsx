@@ -7,7 +7,6 @@ import { useGeoViewMapId } from '@/core/stores/geoview-store';
  */
 interface ExportProps {
   className?: string;
-  // eslint-disable-next-line react/require-default-props
   sxDetails?: object;
 }
 
@@ -16,9 +15,7 @@ interface ExportProps {
  *
  * @returns {JSX.Element} the export button
  */
-export default function ExportButton(props: ExportProps): JSX.Element {
-  const { className, sxDetails } = props;
-
+export default function ExportButton({ className = '', sxDetails }: ExportProps): JSX.Element {
   // get store function
   const mapId = useGeoViewMapId();
   const { openModal } = useUIStoreActions();
@@ -36,12 +33,3 @@ export default function ExportButton(props: ExportProps): JSX.Element {
     </IconButton>
   );
 }
-
-/**
- * default properties values
- */
-// TODO: Refactor - Remove defaultProps as it's no longer a good practice
-ExportButton.defaultProps = {
-  className: '',
-  sxDetails: undefined,
-};
