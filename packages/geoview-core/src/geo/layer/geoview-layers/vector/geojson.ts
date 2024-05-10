@@ -7,6 +7,9 @@ import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
 
 import defaultsDeep from 'lodash/defaultsDeep';
+
+import { TypeLocalizedString } from '@config/types/map-schema-types';
+
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
@@ -16,7 +19,6 @@ import {
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
   TypeBaseSourceVectorInitialConfig,
-  TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
 import { Projection } from '@/geo/utils/projection';
 import { Cast, toJsonObject } from '@/core/types/global-types';

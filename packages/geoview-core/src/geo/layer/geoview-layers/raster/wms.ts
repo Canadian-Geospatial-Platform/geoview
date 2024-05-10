@@ -15,6 +15,10 @@ import { Extent } from 'ol/extent';
 import cloneDeep from 'lodash/cloneDeep';
 
 import Static from 'ol/source/ImageStatic';
+
+import { TypeLocalizedString } from '@config/types/map-schema-types';
+// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
+
 import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import {
   AbstractGeoViewLayer,
@@ -28,9 +32,8 @@ import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
-  layerEntryIsGroupLayer,
   CONST_LAYER_ENTRY_TYPES,
-  TypeLocalizedString,
+  layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { xmlToJson, getLocalizedValue } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';

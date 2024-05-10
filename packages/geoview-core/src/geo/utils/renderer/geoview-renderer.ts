@@ -12,6 +12,8 @@ import Feature from 'ol/Feature';
 import { toContext } from 'ol/render';
 import { Size } from 'ol/size';
 
+import { TypeDisplayLanguage } from '@config/types/map-schema-types';
+
 import { getLocalizedValue, setAlphaColor } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import {
@@ -39,7 +41,6 @@ import {
   isClassBreakStyleConfig,
   TypeUniqueValueStyleConfig,
   TypeClassBreakStyleConfig,
-  TypeDisplayLanguage,
 } from '@/geo/map/map-schema-types';
 import {
   binaryKeywors,

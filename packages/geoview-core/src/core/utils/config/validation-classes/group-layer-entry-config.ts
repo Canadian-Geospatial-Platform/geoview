@@ -1,10 +1,12 @@
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
+
+import { TypeLocalizedString } from '@config/types/map-schema-types';
+
 import {
   CONST_LAYER_ENTRY_TYPES,
   TypeLayerInitialSettings,
   TypeListOfLayerEntryConfig,
-  TypeLocalizedString,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { logger } from '@/core/utils/logger';

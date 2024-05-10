@@ -5,6 +5,10 @@ import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
 import { Extent } from 'ol/extent';
 
 import defaultsDeep from 'lodash/defaultsDeep';
+
+import { TypeLocalizedString } from '@config/types/map-schema-types';
+// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
+
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
@@ -13,7 +17,6 @@ import {
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
-  TypeLocalizedString,
 } from '@/geo/map/map-schema-types';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { getLocalizedValue } from '@/core/utils/utilities';
