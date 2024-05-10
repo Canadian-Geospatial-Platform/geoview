@@ -7,6 +7,7 @@ import { KeyboardPan } from 'ol/interaction';
 import { Coordinate } from 'ol/coordinate';
 
 import { TypeBasemapOptions, TypeInteraction } from '@config/types/map-schema-types';
+import { CV_MAP_EXTENTS } from '@config/types/config-constants';
 import { api } from '@/app';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer } from '@/geo/map/map-viewer';
@@ -22,7 +23,7 @@ import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-l
 import { Projection } from '@/geo/utils/projection';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
-import { DEFAULT_MAP_EXTENT, NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
+import { NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { whenThisThen } from '@/core/utils/utilities';
 import { TypeFeatureInfoEntry, TypeGeometry } from '@/geo/layer/layer-sets/abstract-layer-set';
@@ -751,7 +752,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @returns Promise<void>
    */
   static zoomToInitialExtent(mapId: string): Promise<void> {
-    let extent: Extent = DEFAULT_MAP_EXTENT;
+    const currProjection = this.getMapStateProtected(mapId).currentProjection;
+    let extent: Extent = CV_MAP_EXTENTS[currProjection];
     const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
 
     // Transform center coordinates and update options if zoomAndCenter are in config
@@ -759,11 +761,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       [options.maxZoom] = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter!;
 
       const center = getGeoViewStore(mapId).getState().mapConfig!.map.viewSettings.initialView!.zoomAndCenter![1];
-      const projectedCoords = Projection.transformPoints(
-        [center],
-        Projection.PROJECTION_NAMES.LNGLAT,
-        `EPSG:${this.getMapStateProtected(mapId).currentProjection}`
-      );
+      const projectedCoords = Projection.transformPoints([center], Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${currProjection}`);
 
       extent = [...projectedCoords[0], ...projectedCoords[0]];
     }

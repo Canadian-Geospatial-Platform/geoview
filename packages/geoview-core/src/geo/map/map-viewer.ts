@@ -14,6 +14,7 @@ import Collection from 'ol/Collection';
 import { Source } from 'ol/source';
 
 import queryString from 'query-string';
+import { CV_MAP_EXTENTS } from '@config/types/config-constants';
 import { removeGeoviewStore } from '@/core/stores/stores-managers';
 
 import { Basemap } from '@/geo/layer/basemap/basemap';
@@ -54,7 +55,7 @@ import {
   TypeMapMouseInfo,
 } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { DEFAULT_MAP_EXTENT, NORTH_POLE_POSITION } from '@/core/utils/constant';
+import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 import { TypeMapFeaturesConfig, TypeHTMLElement, TypeJsonObject } from '@/core/types/global-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
@@ -591,7 +592,7 @@ export class MapViewer {
             let layerExtents = this.layer.getExtentOfMultipleLayers(this.mapFeaturesConfig.map.viewSettings.initialView.layerIds);
             if (layerExtents.includes(Infinity))
               layerExtents = Projection.transformExtent(
-                DEFAULT_MAP_EXTENT,
+                CV_MAP_EXTENTS[this.mapFeaturesConfig.map.viewSettings.projection],
                 Projection.PROJECTION_NAMES.LNGLAT,
                 `EPSG:${this.mapFeaturesConfig.map.viewSettings.projection}`
               );
