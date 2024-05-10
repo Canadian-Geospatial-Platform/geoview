@@ -12,6 +12,9 @@ import initSqlJs, { SqlValue } from 'sql.js';
 import * as SLDReader from '@nieuwlandgeo/sldreader';
 
 import { cloneDeep } from 'lodash';
+
+// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
+
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
@@ -20,13 +23,13 @@ import {
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
-  layerEntryIsGroupLayer,
   TypeSimpleSymbolVectorConfig,
   TypeStrokeSymbolConfig,
   TypeLineStringVectorConfig,
   TypePolygonVectorConfig,
   TypeFillStyle,
   CONST_LAYER_ENTRY_TYPES,
+  layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';

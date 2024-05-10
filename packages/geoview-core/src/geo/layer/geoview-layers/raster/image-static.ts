@@ -5,6 +5,8 @@ import Static, { Options as SourceOptions } from 'ol/source/ImageStatic';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Extent } from 'ol/extent';
 
+// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
+
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';

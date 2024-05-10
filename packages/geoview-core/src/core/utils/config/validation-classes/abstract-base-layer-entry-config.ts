@@ -2,13 +2,14 @@
 // ? we escape all private attribute in this file
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
+import { TypeLocalizedString } from '@config/types/map-schema-types';
+// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 
 import {
   CONST_LAYER_ENTRY_TYPES,
   TypeBaseSourceVectorInitialConfig,
   TypeLayerAndListenerType,
   TypeLayerInitialSettings,
-  TypeLocalizedString,
   TypeSourceImageEsriInitialConfig,
   TypeSourceImageInitialConfig,
   TypeSourceImageStaticInitialConfig,

@@ -1,10 +1,12 @@
+// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
+
 import {
   convertLayerTypeToEntry,
   TypeListOfLayerEntryConfig,
-  layerEntryIsGroupLayer,
   mapConfigLayerEntryIsGeoCore,
   TypeGeoviewLayerConfig,
   MapConfigLayerEntry,
+  layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { logger } from '@/core/utils/logger';

@@ -6,18 +6,12 @@ import View, { FitOptions } from 'ol/View';
 import { KeyboardPan } from 'ol/interaction';
 import { Coordinate } from 'ol/coordinate';
 
-import { TypeBasemapOptions, TypeInteraction } from '@config/types/map-schema-types';
+import { TypeBasemapOptions, TypeInteraction, TypeValidMapProjectionCodes } from '@config/types/map-schema-types';
 import { CV_MAP_EXTENTS } from '@config/types/config-constants';
 import { api } from '@/app';
 import { LayerApi } from '@/geo/layer/layer';
-import { MapViewer } from '@/geo/map/map-viewer';
-import {
-  TypeGeoviewLayerConfig,
-  TypeLayerEntryConfig,
-  TypeMapMouseInfo,
-  TypeMapState,
-  TypeValidMapProjectionCodes,
-} from '@/geo/map/map-schema-types';
+import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
+import { TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { Projection } from '@/geo/utils/projection';

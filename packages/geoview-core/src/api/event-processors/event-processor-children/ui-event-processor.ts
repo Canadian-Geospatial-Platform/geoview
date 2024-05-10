@@ -1,4 +1,4 @@
-import { TypeMapCorePackages, TypeValidAppBarCoreProps } from '@/geo/map/map-schema-types';
+import { TypeMapCorePackages, TypeValidAppBarCoreProps } from '@config/types/map-schema-types';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { IUIState } from '@/core/stores/store-interface-and-intial-values/ui-state';
 

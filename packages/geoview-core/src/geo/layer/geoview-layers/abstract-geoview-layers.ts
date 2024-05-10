@@ -9,6 +9,8 @@ import { Extent } from 'ol/extent';
 import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
 import Feature from 'ol/Feature';
 
+import { TypeLocalizedString } from '@config/types/map-schema-types';
+
 import { generateId, getXMLHttpRequest, createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
 import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
 import { TimeDimension, TypeDateFragments, DateMgt } from '@/core/utils/date-mgt';
@@ -26,7 +28,6 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import {
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
-  TypeLocalizedString,
   TypeLayerEntryConfig,
   layerEntryIsGroupLayer,
   TypeStyleConfig,

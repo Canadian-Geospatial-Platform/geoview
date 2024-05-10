@@ -4,6 +4,9 @@ import axios from 'axios';
 import { Extent } from 'ol/extent';
 
 import cloneDeep from 'lodash/cloneDeep';
+
+// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
+
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { getLocalizedValue, getXMLHttpRequest } from '@/core/utils/utilities';
@@ -17,10 +20,10 @@ import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/gr
 import { TypeFeatureInfoEntryPartial, TypeFieldEntry, codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import {
   CONST_LAYER_ENTRY_TYPES,
-  layerEntryIsGroupLayer,
   TypeLayerEntryConfig,
   TypeListOfLayerEntryConfig,
   TypeStyleGeometry,
+  layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';

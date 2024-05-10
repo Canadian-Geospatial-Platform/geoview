@@ -22,22 +22,6 @@
         }
       }
     },
-    "TypeDetailsLayerConfig": {
-      "additionalProperties": false,
-      "type": "object",
-      "properties": {
-        "additionalProperties": false,
-        "parser": {
-          "type": "string",
-          "description": "A path to a javascript file with a function for parsing the layers identify output. Only needed if a custom template is being used."
-        },
-        "template": {
-          "$ref": "#/definitions/TypeLocalizedString",
-          "description": "A path to an html template (English/French) that will override default identify output."
-        }
-      },
-      "required": ["template"]
-    },
     "TypeFeatureInfoLayerConfig": {
       "additionalProperties": false,
       "type": "object",
@@ -46,9 +30,6 @@
           "type": "boolean",
           "default": true,
           "description": "Allow querying. Default = false."
-        },
-        "customParser": {
-          "$ref": "#/definitions/TypeDetailsLayerConfig"
         },
         "nameField": {
           "$ref": "#/definitions/TypeLocalizedString",

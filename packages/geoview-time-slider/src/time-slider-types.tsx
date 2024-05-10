@@ -1,5 +1,5 @@
 import { TimeDimension } from 'geoview-core/src/core/utils/date-mgt';
-import { TypeLocalizedString } from 'geoview-core/src/geo/map/map-schema-types';
+import { TypeLocalizedString } from 'geoview-core/src/api/config/types/map-schema-types';
 
 export type SliderProps = {
   layerPaths: string[];

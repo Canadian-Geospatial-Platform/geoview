@@ -1,7 +1,7 @@
+import { TypeDisplayLanguage, TypeDisplayTheme } from '@config/types/map-schema-types';
 import { IAppState } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { NotificationDetailsType } from '@/core/components';
-import { TypeDisplayLanguage, TypeDisplayTheme } from '@/geo/map/map-schema-types';
 import { TypeHTMLElement } from '@/core/types/global-types';
 import { createGuideObject } from '@/core/utils/utilities';
 import { MapViewer } from '@/geo/map/map-viewer';

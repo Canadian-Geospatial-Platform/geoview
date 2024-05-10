@@ -9,6 +9,9 @@ import { Extent } from 'ol/extent';
 
 import olms, { applyStyle } from 'ol-mapbox-style';
 
+import { TypeLocalizedString } from '@config/types/map-schema-types';
+// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
+
 import Feature from 'ol/Feature';
 import { MVT } from 'ol/format';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -18,9 +21,8 @@ import {
   TypeSourceTileInitialConfig,
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
-  layerEntryIsGroupLayer,
-  TypeLocalizedString,
   TypeTileGrid,
+  layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';

@@ -8,6 +8,9 @@ import Feature from 'ol/Feature';
 
 import { Point } from 'ol/geom';
 import { ProjectionLike } from 'ol/proj';
+
+// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
+
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { Projection } from '@/geo/utils/projection';
@@ -16,8 +19,8 @@ import {
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
-  layerEntryIsGroupLayer,
   TypeBaseSourceVectorInitialConfig,
+  layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { api } from '@/app';
