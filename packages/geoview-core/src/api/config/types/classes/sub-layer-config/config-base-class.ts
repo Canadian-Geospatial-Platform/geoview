@@ -23,7 +23,7 @@ export abstract class ConfigBaseClass {
   // TODO: Refactor - Add this back?
   // #isMetadataLayerGroup?: false;
 
-  /** The identifier of the layer to display on the map. This element is part of the schema. */
+  /** The identifier of the layer to display on the map. */
   layerId: string;
 
   /** The display name of the layer (English/French). */
@@ -70,8 +70,8 @@ export abstract class ConfigBaseClass {
     this.#geoviewConfig = geoviewLayerConfig;
     this.#parentNode = parentNode;
 
-    this.layerId = layerConfig.id as string;
-    this.layerName = layerConfig.name ? normalizeLocalizedString(layerConfig.name)![this.#language]! : undefined;
+    this.layerId = layerConfig.layerId as string;
+    this.layerName = layerConfig.layerName ? normalizeLocalizedString(layerConfig.layerName)![this.#language]! : undefined;
     this.attributions = (layerConfig.attributions as string[]) || [];
     this.bounds = layerConfig.bounds as Extent;
     this.minScale = (layerConfig.minScale as number) || 0;

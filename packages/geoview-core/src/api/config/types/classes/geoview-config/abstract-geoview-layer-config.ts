@@ -1,3 +1,5 @@
+// Needs to disable class-methods-use-this because we need to pass the instance reference 'this' to the agregated sublayers.
+// eslint-disable-next-line @typescript-eslint/class-methods-use-this
 import defaultsDeep from 'lodash/defaultsDeep';
 import cloneDeep from 'lodash/cloneDeep';
 
