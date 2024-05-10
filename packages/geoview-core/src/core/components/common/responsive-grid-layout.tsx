@@ -288,7 +288,7 @@ const ResponsiveGridLayout = forwardRef(
 
               <Box sx={{ display: 'flex', flexDirection: 'row', gap: '0.6rem' }}>
                 {!fullWidth && !hideEnlargeBtn && renderEnlargeButton()}
-                {guideContentIds?.length && renderGuideButton()}
+                {!!guideContentIds?.length && renderGuideButton()}
                 {!isMapFullScreen && renderFullScreenButton()}
                 {!!(leftMain || leftTop) && renderCloseButton()}
               </Box>

@@ -236,8 +236,23 @@ export function Shell(props: ShellProps): JSX.Element {
       mapShellContainerRef.current.style.minHeight = origHeight;
       mapShellContainerRef.current.style.height = origHeight;
       mapShellContainerRef.current.style.zIndex = '0';
+
+      // Update mapDiv height to accomodate the footbar
+      if (geoviewConfig!.footerBar) {
+        geoviewElement.style.height = 'fit-content';
+        geoviewElement.style.transition = 'height 0.2s ease-out 0.2s';
+      }
     }
-  }, [footerPanelResizeValue, isMapFullScreen, memoMapResizeValues, origHeight, mapLoaded, isFooterBarCollapsed, geoviewElement]);
+  }, [
+    footerPanelResizeValue,
+    isMapFullScreen,
+    memoMapResizeValues,
+    origHeight,
+    mapLoaded,
+    isFooterBarCollapsed,
+    geoviewElement,
+    geoviewConfig,
+  ]);
 
   /**
    * Update the map after footer panel is collapsed.

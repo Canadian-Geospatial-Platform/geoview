@@ -26,7 +26,7 @@ interface DetailsPanelType {
  * @param {DetailsPanelProps} props The properties passed to LayersListFooter
  * @returns {JSX.Element} the layers list
  */
-export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
+export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Element {
   // Log
   logger.logTraceRender('components/details/details-panel');
 
@@ -481,8 +481,3 @@ export function DetailsPanel({ fullWidth }: DetailsPanelType): JSX.Element {
 
   // # endregion
 }
-
-// TODO: Refactor - Remove defaultProps as it's no longer a good practice
-DetailsPanel.defaultProps = {
-  fullWidth: false,
-};
