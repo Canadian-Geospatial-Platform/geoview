@@ -7,7 +7,7 @@ import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Loading
 import { exportPNG } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { NorthArrowIcon } from '@/core/components/north-arrow/north-arrow-icon';
 import { useMapAttribution, useMapNorthArrow, useMapScale } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -46,6 +46,7 @@ export default function ExportModal(): JSX.Element {
   const textFieldRef = useRef(null) as RefObject<HTMLInputElement>;
   const exportTitleRef = useRef(null) as RefObject<HTMLDivElement>;
 
+  const geoviewConfig = useGeoViewConfig();
   const northArrow = useMapNorthArrow();
   const scale = useMapScale();
   const mapAttributions = useMapAttribution();
@@ -117,9 +118,8 @@ export default function ExportModal(): JSX.Element {
 
         // add legend
         const legendContainer = document.getElementById(`${mapId}-legendContainer`);
-        if (legendContainer && legendContainerRef.current) {
+        if (legendContainer && legendContainerRef.current && Object.keys(geoviewConfig?.footerBar?.tabs ?? {}).length) {
           legendContainer.removeAttribute('style');
-          setIsLegendLoading(true);
           // remove hidden attribute from document legend, so that html-to-image can copy the legend container.
           const legendTab = document.getElementById(`${mapId}-legend`) as HTMLElement;
           const hasHiddenAttr = legendTab?.hasAttribute('hidden') ?? null;
@@ -137,6 +137,8 @@ export default function ExportModal(): JSX.Element {
             .catch((error: Error) => {
               logger.logError('Error occured while converting legend to image', error);
             });
+        } else {
+          setIsLegendLoading(false);
         }
       }, 10);
     }
