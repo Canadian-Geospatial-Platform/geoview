@@ -746,19 +746,6 @@
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
-        "layerName": {
-          "oneOf": [
-            {
-              "$ref": "#/definitions/TypeLocalizedString",
-              "description": "Used by the input schema."
-            },
-            {
-              "type": "string",
-              "description": "Used by the internal schema."
-            }
-          ],
-          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
-        },
         "geometryType": {
           "$ref": "#/definitions/TypeGeometryType",
           "description": "The type of geometry used by the layer."
@@ -796,15 +783,34 @@
         },
         "style": {
           "$ref": "#/definitions/TypeStyleConfig"
+        }
+      },
+      "if": {
+        "properties": {
+          "entryType": {
+            "enum": ["vector"],
+            "description": "The entryType property is not defined by the user but by the viewer according to the geoview layer type. It is used as a flag indicating the type of schema used (input/internal)."
+          }
         },
-        "not": {
-          "listOfLayerEntryConfig": {
-            "$ref": "#/definitions/TypeListOfLayerEntryConfig",
-            "description": "The list of layer entry configurations to use from the GeoView layer group."
+        "required": ["entryType"]
+      },
+      "then": {
+        "properties": {
+          "layerName": {
+            "type": "string",
+            "description": "Used by the internal schema."
           }
         }
       },
-      "required": ["entryType", "layerId"]
+      "else": {
+        "properties": {
+          "layerName": {
+              "$ref": "#/definitions/TypeLocalizedString",
+              "description": "Used by the input schema. The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+          }
+        }
+      },
+    "required": ["layerId"]
     },
     "TypeVectorTileLayerEntryConfig": {
       "additionalProperties": false,
@@ -817,19 +823,6 @@
         "layerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."
-        },
-        "layerName": {
-          "oneOf": [
-            {
-              "$ref": "#/definitions/TypeLocalizedString",
-              "description": "Used by the input schema."
-            },
-            {
-              "type": "string",
-              "description": "Used by the internal schema."
-            }
-          ],
-          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
         },
         "geometryType": {
           "$ref": "#/definitions/TypeGeometryType",
@@ -869,15 +862,34 @@
         },
         "style": {
           "$ref": "#/definitions/TypeStyleConfig"
+        }
+      },
+      "if": {
+        "properties": {
+          "entryType": {
+            "enum": ["vector-tile"],
+            "description": "The entryType property is not defined by the user but by the viewer according to the geoview layer type. It is used as a flag indicating the type of schema used (input/internal)."
+          }
         },
-        "not": {
-          "listOfLayerEntryConfig": {
-            "$ref": "#/definitions/TypeListOfLayerEntryConfig",
-            "description": "The list of layer entry configurations to use from the GeoView layer group."
+        "required": ["entryType"]
+      },
+      "then": {
+        "properties": {
+          "layerName": {
+            "type": "string",
+            "description": "Used by the internal schema."
           }
         }
       },
-      "required": ["entryType", "layerId"]
+      "else": {
+        "properties": {
+          "layerName": {
+              "$ref": "#/definitions/TypeLocalizedString",
+              "description": "Used by the input schema. The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+          }
+        }
+      },
+    "required": ["layerId"]
     },
     "TypeVectorTileSourceInitialConfig": {
       "additionalProperties": false,
@@ -910,19 +922,6 @@
         "layerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."
-        },
-        "layerName": {
-          "oneOf": [
-            {
-              "$ref": "#/definitions/TypeLocalizedString",
-              "description": "Used by the input schema."
-            },
-            {
-              "type": "string",
-              "description": "Used by the internal schema."
-            }
-          ],
-          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
         },
         "attributions": {
           "type": "array",
@@ -957,15 +956,34 @@
         },
         "style": {
           "$ref": "#/definitions/TypeStyleConfig"
+        }
+      },
+      "if": {
+        "properties": {
+          "entryType": {
+            "enum": ["raster-image"],
+            "description": "The entryType property is not defined by the user but by the viewer according to the geoview layer type. It is used as a flag indicating the type of schema used (input/internal)."
+          }
         },
-        "not": {
-          "listOfLayerEntryConfig": {
-            "$ref": "#/definitions/TypeListOfLayerEntryConfig",
-            "description": "The list of layer entry configurations to use from the GeoView layer group."
+        "required": ["entryType"]
+      },
+      "then": {
+        "properties": {
+          "layerName": {
+            "type": "string",
+            "description": "Used by the internal schema."
           }
         }
       },
-      "required": ["entryType", "layerId"]
+      "else": {
+        "properties": {
+          "layerName": {
+              "$ref": "#/definitions/TypeLocalizedString",
+              "description": "Used by the input schema. The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+          }
+        }
+      },
+    "required": ["layerId"]
     },
     "TypeEsriDynamicLayerEntryConfig": {
       "additionalProperties": false,
@@ -1028,15 +1046,34 @@
         },
         "style": {
           "$ref": "#/definitions/TypeStyleConfig"
+        }
+      },
+      "if": {
+        "properties": {
+          "entryType": {
+            "enum": ["raster-image"],
+            "description": "The entryType property is not defined by the user but by the viewer according to the geoview layer type. It is used as a flag indicating the type of schema used (input/internal)."
+          }
         },
-        "not": {
-          "listOfLayerEntryConfig": {
-            "$ref": "#/definitions/TypeListOfLayerEntryConfig",
-            "description": "The list of layer entry configurations to use from the GeoView layer group."
+        "required": ["entryType"]
+      },
+      "then": {
+        "properties": {
+          "layerName": {
+            "type": "string",
+            "description": "Used by the internal schema."
           }
         }
       },
-      "required": ["entryType", "layerId"]
+      "else": {
+        "properties": {
+          "layerName": {
+            "$ref": "#/definitions/TypeLocalizedString",
+            "description": "Used by the input schema. The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+          }
+        }
+      },
+    "required": ["layerId"]
     },
     "TypeEsriImageLayerEntryConfig": {
       "additionalProperties": false,
@@ -1048,19 +1085,6 @@
         "layerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."
-        },
-        "layerName": {
-          "oneOf": [
-            {
-              "$ref": "#/definitions/TypeLocalizedString",
-              "description": "Used by the input schema."
-            },
-            {
-              "type": "string",
-              "description": "Used by the internal schema."
-            }
-          ],
-          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
         },
         "attributions": {
           "type": "array",
@@ -1095,15 +1119,34 @@
         },
         "style": {
           "$ref": "#/definitions/TypeStyleConfig"
+        }
+      },
+      "if": {
+        "properties": {
+          "entryType": {
+            "enum": ["raster-image"],
+            "description": "The entryType property is not defined by the user but by the viewer according to the geoview layer type. It is used as a flag indicating the type of schema used (input/internal)."
+          }
         },
-        "not": {
-          "listOfLayerEntryConfig": {
-            "$ref": "#/definitions/TypeListOfLayerEntryConfig",
-            "description": "The list of layer entry configurations to use from the GeoView layer group."
+        "required": ["entryType"]
+      },
+      "then": {
+        "properties": {
+          "layerName": {
+            "type": "string",
+            "description": "Used by the internal schema."
           }
         }
       },
-      "required": ["entryType", "layerId"]
+      "else": {
+        "properties": {
+          "layerName": {
+              "$ref": "#/definitions/TypeLocalizedString",
+              "description": "Used by the input schema. The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+          }
+        }
+      },
+    "required": ["layerId"]
     },
     "TypeImageStaticLayerEntryConfig": {
       "additionalProperties": false,
@@ -1115,19 +1158,6 @@
         "layerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."
-        },
-        "layerName": {
-          "oneOf": [
-            {
-              "$ref": "#/definitions/TypeLocalizedString",
-              "description": "Used by the input schema."
-            },
-            {
-              "type": "string",
-              "description": "Used by the internal schema."
-            }
-          ],
-          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
         },
         "attributions": {
           "type": "array",
@@ -1159,15 +1189,34 @@
         },
         "source": {
           "$ref": "#/definitions/TypeSourceImageStaticInitialConfig"
+        }
+      },
+      "if": {
+        "properties": {
+          "entryType": {
+            "enum": ["raster-image"],
+            "description": "The entryType property is not defined by the user but by the viewer according to the geoview layer type. It is used as a flag indicating the type of schema used (input/internal)."
+          }
         },
-        "not": {
-          "listOfLayerEntryConfig": {
-            "$ref": "#/definitions/TypeListOfLayerEntryConfig",
-            "description": "The list of layer entry configurations to use from the GeoView layer group."
+        "required": ["entryType"]
+      },
+      "then": {
+        "properties": {
+          "layerName": {
+            "type": "string",
+            "description": "Used by the internal schema."
           }
         }
       },
-      "required": ["entryType", "layerId"]
+      "else": {
+        "properties": {
+          "layerName": {
+              "$ref": "#/definitions/TypeLocalizedString",
+              "description": "Used by the input schema. The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+          }
+        }
+      },
+    "required": ["layerId"]
     },
     "TypeTileLayerEntryConfig": {
       "additionalProperties": false,
@@ -1179,19 +1228,6 @@
         "layerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."
-        },
-        "layerName": {
-          "oneOf": [
-            {
-              "$ref": "#/definitions/TypeLocalizedString",
-              "description": "Used by the input schema."
-            },
-            {
-              "type": "string",
-              "description": "Used by the internal schema."
-            }
-          ],
-          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
         },
         "attributions": {
           "type": "array",
@@ -1223,15 +1259,34 @@
         },
         "source": {
           "$ref": "#/definitions/TypeSourceTileInitialConfig"
+        }
+      },
+      "if": {
+        "properties": {
+          "entryType": {
+            "enum": ["raster-tile"],
+            "description": "The entryType property is not defined by the user but by the viewer according to the geoview layer type. It is used as a flag indicating the type of schema used (input/internal)."
+          }
         },
-        "not": {
-          "listOfLayerEntryConfig": {
-            "$ref": "#/definitions/TypeListOfLayerEntryConfig",
-            "description": "The list of layer entry configurations to use from the GeoView layer group."
+        "required": ["entryType"]
+      },
+      "then": {
+        "properties": {
+          "layerName": {
+            "type": "string",
+            "description": "Used by the internal schema."
           }
         }
       },
-      "required": ["entryType", "layerId"]
+      "else": {
+        "properties": {
+          "layerName": {
+              "$ref": "#/definitions/TypeLocalizedString",
+              "description": "Used by the input schema. The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+          }
+        }
+      },
+    "required": ["layerId"]
     },
     "TypeLayerEntryType": {
       "enum": ["vector", "vector-tile", "raster-tile", "raster-image", "geoCore"],
@@ -1248,19 +1303,6 @@
         "layerId": {
           "type": "string",
           "description": "The id of the layer group to display on the map."
-        },
-        "layerName": {
-          "oneOf": [
-            {
-              "$ref": "#/definitions/TypeLocalizedString",
-              "description": "Used by the input schema."
-            },
-            {
-              "type": "string",
-              "description": "Used by the internal schema."
-            }
-          ],
-          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
         },
         "bounds": {
           "type": "array",
@@ -1279,32 +1321,32 @@
           "description": "The list of layer entry configurations to use from the GeoView layer group."
         }
       },
-      "required": ["entryType", "layerId", "listOfLayerEntryConfig"]
-    },
-    "TypeLayerEntryConfig": {
-      "oneOf": [
-        {
-          "$ref": "#/definitions/TypeLayerGroupEntryConfig"
+      "if": {
+        "properties": {
+          "entryType": {
+            "enum": ["group"],
+            "description": "The entryType property is not defined by the user but by the viewer according to the geoview layer type. It is used as a flag indicating the type of schema used (input/internal)."
+          }
         },
-        {
-          "$ref": "#/definitions/TypeVectorTileLayerEntryConfig"
-        },
-        {
-          "$ref": "#/definitions/TypeVectorLayerEntryConfig"
-        },
-        {
-          "$ref": "#/definitions/TypeOgcWmsLayerEntryConfig"
-        },
-        {
-          "$ref": "#/definitions/TypeEsriDynamicLayerEntryConfig"
-        },
-        {
-          "$ref": "#/definitions/TypeEsriImageLayerEntryConfig"
-        },
-        {
-          "$ref": "#/definitions/TypeTileLayerEntryConfig"
+        "required": ["entryType"]
+      },
+      "then": {
+        "properties": {
+          "layerName": {
+            "type": "string",
+            "description": "Used by the internal schema."
+          }
         }
-      ]
+      },
+      "else": {
+        "properties": {
+          "layerName": {
+              "$ref": "#/definitions/TypeLocalizedString",
+              "description": "Used by the input schema. The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+          }
+        }
+      },
+      "required": ["layerId", "listOfLayerEntryConfig"]
     },
     "TypeListOfLayerEntryConfig": {
       "type": "array",

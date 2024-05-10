@@ -1,25 +1,13 @@
 // TODO: When we are done with the config extraction, do a review of all the constants, types and utilities to
 // TODOCONT: remove code duplication.
 
-import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { LayerEntryTypesKey, LayerTypesKey, TypeGeoviewLayerType } from '@config/types/config-types';
+import { Cast, LayerEntryTypesKey, LayerTypesKey, TypeGeoviewLayerType } from '@config/types/config-types';
 import {
-  TypeAppBarProps,
   TypeBasemapId,
-  TypeBasemapOptions,
-  TypeDisplayTheme,
-  TypeExternalPackages,
-  TypeInteraction,
   TypeLayerEntryType,
-  TypeListOfLocalizedLanguages,
-  TypeMapConfig,
-  TypeNavBarProps,
-  TypeOverviewMapProps,
-  TypeServiceUrls,
   TypeValidMapProjectionCodes,
-  TypeValidVersions,
-  TypeViewSettings,
 } from '@config/types/map-schema-types';
+import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
 
 /** The default geocore url */
 export const CV_CONFIG_GEOCORE_URL = 'https://geocore-stage.api.geo.ca';
@@ -136,9 +124,9 @@ export const CV_MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]> = {
  *  Definition of the MapFeatureConfig default values. All the default values that applies to the map feature configuration are
  * defined here.
  */
-export const CV_DEFAULT_MAP_FEATURE_CONFIG = {
+export const CV_DEFAULT_MAP_FEATURE_CONFIG = Cast<MapFeatureConfig>({
   map: {
-    interaction: 'dynamic' as TypeInteraction,
+    interaction: 'dynamic',
     viewSettings: {
       initialView: {
         zoomAndCenter: [3.5, [-90, 60]],
@@ -149,29 +137,29 @@ export const CV_DEFAULT_MAP_FEATURE_CONFIG = {
       maxZoom: 50,
       maxExtent: [-125, 30, -60, 89],
       projection: 3978,
-    } as TypeViewSettings,
+    },
     basemapOptions: {
       basemapId: 'transport',
       shaded: true,
       labeled: true,
-    } as TypeBasemapOptions,
-    listOfGeoviewLayerConfig: [] as AbstractGeoviewLayerConfig[],
+    },
+    listOfGeoviewLayerConfig: [],
     extraOptions: {},
-  } as TypeMapConfig,
-  theme: 'geo.ca' as TypeDisplayTheme,
+  },
+  theme: 'geo.ca',
   components: ['north-arrow', 'overview-map'],
-  appBar: { tabs: { core: ['geolocator'] } } as TypeAppBarProps,
-  navBar: ['zoom', 'fullscreen', 'home'] as TypeNavBarProps,
+  appBar: { tabs: { core: ['geolocator'] } },
+  navBar: ['zoom', 'fullscreen', 'home'],
   corePackages: [],
-  overviewMap: undefined as TypeOverviewMapProps | undefined,
-  externalPackages: [] as TypeExternalPackages,
+  overviewMap: undefined,
+  externalPackages: [],
   serviceUrls: {
     geocoreUrl: CV_CONFIG_GEOCORE_URL,
     geolocator: CV_CONFIG_GEOLOCATOR_URL,
-  } as TypeServiceUrls,
-  supportedLanguages: ['en', 'fr'] as TypeListOfLocalizedLanguages,
-  schemaVersionUsed: '1.0' as TypeValidVersions,
-};
+  },
+  suportedLanguages: ['en', 'fr'],
+  schemaVersionUsed: '1.0',
+});
 
 /**
  *  Definition of the initial settings default values.
