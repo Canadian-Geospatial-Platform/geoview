@@ -4,6 +4,8 @@ import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Image as ImageLayer } from 'ol/layer';
 import { Extent } from 'ol/extent';
 
+// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
+
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -21,9 +23,9 @@ import {
   TypeGeoviewLayerConfig,
   TypeUniqueValueStyleConfig,
   TypeListOfLayerEntryConfig,
-  layerEntryIsGroupLayer,
   TypeUniqueValueStyleInfo,
   TypeStyleConfig,
+  layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 
 import {

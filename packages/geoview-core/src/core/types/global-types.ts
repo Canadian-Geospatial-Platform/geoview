@@ -3,12 +3,13 @@ import { createRoot } from 'react-dom/client';
 
 import { useTheme } from '@mui/material/styles';
 import { useMediaQuery } from '@mui/material';
+import { TypeDisplayLanguage } from '@config/types/map-schema-types';
 import { API } from '@/api/api';
 import { logger } from '@/core/utils/logger';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import * as UI from '@/ui';
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
-import { TypeDisplayLanguage, TypeMapFeaturesInstance } from '@/geo/map/map-schema-types';
+import { TypeMapFeaturesInstance } from '@/geo/map/map-schema-types';
 
 export { getGeoViewStore } from '@/core/stores/stores-managers';
 

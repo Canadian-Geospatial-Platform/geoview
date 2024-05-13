@@ -13,13 +13,10 @@ import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
 
+import { TypeLocalizedString } from '@config/types/map-schema-types';
+
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import {
-  TypeBaseSourceVectorInitialConfig,
-  TypeLayerEntryConfig,
-  TypeListOfLayerEntryConfig,
-  TypeLocalizedString,
-} from '@/geo/map/map-schema-types';
+import { TypeBaseSourceVectorInitialConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';

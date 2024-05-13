@@ -7,6 +7,8 @@ import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
 import { bbox } from 'ol/loadingstrategy';
 
+// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
+
 import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
@@ -15,8 +17,8 @@ import {
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
-  layerEntryIsGroupLayer,
   TypeBaseSourceVectorInitialConfig,
+  layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 
 import { getLocalizedValue, getXMLHttpRequest, xmlToJson, findPropertyNameByRegex } from '@/core/utils/utilities';

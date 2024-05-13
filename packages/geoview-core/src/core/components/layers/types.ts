@@ -1,5 +1,6 @@
 import { Extent } from 'ol/extent';
-import { TypeLayerControls, TypeLayerStatus, TypeStyleConfig, TypeStyleGeometry } from '@/geo/map/map-schema-types';
+import { TypeLayerControls } from '@config/types/map-schema-types';
+import { TypeLayerStatus, TypeStyleConfig, TypeStyleGeometry } from '@/geo/map/map-schema-types';
 import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 export type TypeLayersViewDisplayState = 'remove' | 'add' | 'order' | 'view';

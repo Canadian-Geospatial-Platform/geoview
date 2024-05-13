@@ -1,3 +1,5 @@
+import { TypeLayerControls } from '@config/types/map-schema-types';
+// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import {
   CONST_LAYER_TYPES,
@@ -11,8 +13,8 @@ import { TypeLegendResultSetEntry } from '@/geo/layer/layer-sets/legends-layer-s
 import { ILayerState } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
+
 import {
-  TypeLayerControls,
   TypeLayerEntryConfig,
   TypeStyleGeometry,
   isClassBreakStyleConfig,

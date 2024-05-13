@@ -14,6 +14,17 @@ import Collection from 'ol/Collection';
 import { Source } from 'ol/source';
 
 import queryString from 'query-string';
+import { CV_MAP_EXTENTS } from '@config/types/config-constants';
+import {
+  TypeViewSettings,
+  TypeInteraction,
+  TypeValidMapProjectionCodes,
+  TypeDisplayLanguage,
+  VALID_DISPLAY_LANGUAGE,
+  TypeDisplayTheme,
+  VALID_DISPLAY_THEME,
+  VALID_PROJECTION_CODES,
+} from '@config/types/map-schema-types';
 import { removeGeoviewStore } from '@/core/stores/stores-managers';
 
 import { Basemap } from '@/geo/layer/basemap/basemap';
@@ -35,26 +46,13 @@ import { Extent as ExtentInteraction } from '@/geo/interaction/extent';
 import { Modify } from '@/geo/interaction/modify';
 import { Snap } from '@/geo/interaction/snap';
 import { Translate } from '@/geo/interaction/translate';
-
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
 import { delay, generateId, getLocalizedMessage } from '@/core/utils/utilities';
 import { createEmptyBasemap } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import {
-  TypeDisplayLanguage,
-  TypeViewSettings,
-  TypeMapState,
-  TypeDisplayTheme,
-  VALID_DISPLAY_LANGUAGE,
-  VALID_DISPLAY_THEME,
-  VALID_PROJECTION_CODES,
-  TypeInteraction,
-  TypeValidMapProjectionCodes,
-  TypeMapMouseInfo,
-} from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { DEFAULT_MAP_EXTENT, NORTH_POLE_POSITION } from '@/core/utils/constant';
+import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 import { TypeMapFeaturesConfig, TypeHTMLElement, TypeJsonObject } from '@/core/types/global-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
@@ -591,7 +589,7 @@ export class MapViewer {
             let layerExtents = this.layer.getExtentOfMultipleLayers(this.mapFeaturesConfig.map.viewSettings.initialView.layerIds);
             if (layerExtents.includes(Infinity))
               layerExtents = Projection.transformExtent(
-                DEFAULT_MAP_EXTENT,
+                CV_MAP_EXTENTS[this.mapFeaturesConfig.map.viewSettings.projection],
                 Projection.PROJECTION_NAMES.LNGLAT,
                 `EPSG:${this.mapFeaturesConfig.map.viewSettings.projection}`
               );
@@ -1679,6 +1677,27 @@ export class MapViewer {
     }
   }
 }
+
+/**
+ *  Definition of map state to attach to the map object for reference.
+ */
+export type TypeMapState = {
+  currentProjection: number;
+  currentZoom: number;
+  mapCenterCoordinates: Coordinate;
+  singleClickedPosition: TypeMapMouseInfo;
+  pointerPosition: TypeMapMouseInfo;
+};
+
+/**
+ * Type used to define the map mouse information
+ * */
+export type TypeMapMouseInfo = {
+  lnglat: Coordinate;
+  pixel: Coordinate;
+  projected: Coordinate;
+  dragging: boolean;
+};
 
 /**
  * Define a delegate for the event handler function signature

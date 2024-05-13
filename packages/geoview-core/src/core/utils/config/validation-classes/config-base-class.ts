@@ -1,5 +1,8 @@
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
+
+// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
+
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {

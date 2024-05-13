@@ -500,9 +500,8 @@ export type TypeExternalPackages = {
   configUrl?: string;
 }[];
 
-// ?: Is this type realy needed, it is used nowhere in our code.
 /**
- * Service endpoint urls. Default = 'https://geocore.api.geo.ca'.
+ * Service endpoint urls. Default = 'https://geocore.api.geo.ca'. Used in config-constant
  */
 export type TypeServiceUrls = {
   /**
