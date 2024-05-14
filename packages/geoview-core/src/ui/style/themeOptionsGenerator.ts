@@ -292,9 +292,9 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
 
               // for selected layer
               '&.selectedLayer, &.selected': {
-                borderColor: geoViewColors.primary.main,
-                borderWidth: '2px',
-                borderStyle: 'solid',
+                borderColor: `${geoViewColors.primary.main} !important`,
+                borderWidth: '2px !important',
+                borderStyle: 'solid !important',
               },
               // when layer is dragging
               '&.dragging': {
