@@ -1170,7 +1170,7 @@ export class MapViewer {
 
       // if flag is true, check if config support the layers change and apply
       if (resetLayer) {
-        if (AppEventProcessor.getSupportedLanguages(this.mapId).includes(displayLanguage)) {
+        if (AppEventProcessor.getsuportedLanguages(this.mapId).includes(displayLanguage)) {
           logger.logInfo('reset layers not implemented yet');
         } else this.notifications.addNotificationError(getLocalizedMessage('validation.changeDisplayLanguageLayers', displayLanguage));
       }

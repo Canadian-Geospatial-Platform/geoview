@@ -10,15 +10,11 @@
       "labeled": true
     }
   },
-  "components": [
-    "overview-map"
-  ],
+  "components": ["overview-map"],
   "overviewMap": {
     "hideOnZoom": 7
   },
   "corePackages": [],
   "theme": "geo.ca",
-  "suportedLanguages": [
-    "en"
-  ]
+  "suportedLanguages": ["en"]
 }

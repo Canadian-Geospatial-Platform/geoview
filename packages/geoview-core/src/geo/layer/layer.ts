@@ -341,19 +341,19 @@ export class LayerApi {
    * Adds a layer to the map. This is the main method to add a GeoView Layer on the map.
    * It handles all the processing, including the validations, and makes sure to inform the layer sets about the layer.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The geoview layer configuration to add
-   * @param {TypeListOfLocalizedLanguages} optionalSuportedLanguages - An optional list of supported language
+   * @param {TypeListOfLocalizedLanguages} optionalsuportedLanguages - An optional list of supported language
    * @returns {GeoViewLayerAddedResult | undefined} The result of the addition of the geoview layer.
    * The result contains the instanciated GeoViewLayer along with a promise that will resolve when the layer will be officially on the map.
    */
   addGeoviewLayer(
     geoviewLayerConfig: TypeGeoviewLayerConfig,
-    optionalSuportedLanguages?: TypeListOfLocalizedLanguages
+    optionalsuportedLanguages?: TypeListOfLocalizedLanguages
   ): GeoViewLayerAddedResult | undefined {
     // eslint-disable-next-line no-param-reassign
     geoviewLayerConfig.geoviewLayerId = generateId(geoviewLayerConfig.geoviewLayerId);
 
     // TODO: refactor - hard coded the supported language to clean the old config
-    const suportedLanguages = optionalSuportedLanguages || ['en', 'fr'];
+    const suportedLanguages = optionalsuportedLanguages || ['en', 'fr'];
 
     // TODO: Refactor - This should be deal with the config classes and this class pushes the structure ready for consumption by layer orchestrator
     ConfigValidation.validateListOfGeoviewLayerConfig(suportedLanguages, [geoviewLayerConfig]);

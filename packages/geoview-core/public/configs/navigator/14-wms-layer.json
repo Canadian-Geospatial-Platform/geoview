@@ -29,7 +29,7 @@
                     "nameField": { "en": "plain_text", "fr": "plain_texte" },
                     "fieldTypes": "string",
                     "outfields": { "en": "plain_text", "fr": "plain_texte" },
-                    "aliasFields":  { "en": "Forcast", "fr": "Prévision" }
+                    "aliasFields": { "en": "Forcast", "fr": "Prévision" }
                   }
                 }
               },
@@ -58,7 +58,7 @@
                 "nameField": { "en": "band-0-pixel-value", "fr": "band-0-pixel-value" },
                 "fieldTypes": "number",
                 "outfields": { "en": "band-0-pixel-value", "fr": "band-0-pixel-value" },
-                "aliasFields":  { "en": "Pixel value", "fr": "Valeur du pixel" }
+                "aliasFields": { "en": "Pixel value", "fr": "Valeur du pixel" }
               }
             }
           }

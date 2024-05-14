@@ -32,7 +32,7 @@
               {
                 "layerId": "icon_points.json",
                 "layerName": { "en": "Icons" },
-                "initialSettings": { "states": {"visible" : false} }
+                "initialSettings": { "states": { "visible": false } }
               },
               {
                 "layerId": "points.json",
@@ -45,7 +45,7 @@
     ]
   },
   "components": ["overview-map"],
-  "overviewMap": {"hideOnZoom": 7},
+  "overviewMap": { "hideOnZoom": 7 },
   "footerBar": {
     "tabs": {
       "core": ["legend", "layers", "details", "data-table"]
@@ -54,4 +54,4 @@
   "corePackages": [],
   "theme": "geo.ca",
   "suportedLanguages": ["en"]
-  }
+}

@@ -37,7 +37,7 @@
     ]
   },
   "components": ["overview-map"],
-  "overviewMap": {"hideOnZoom": 7},
+  "overviewMap": { "hideOnZoom": 7 },
   "footerBar": {
     "tabs": {
       "core": ["legend", "layers", "details", "data-table"]
@@ -46,4 +46,4 @@
   "corePackages": [],
   "theme": "geo.ca",
   "suportedLanguages": ["en"]
-  }
+}

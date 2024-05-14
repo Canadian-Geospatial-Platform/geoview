@@ -34,7 +34,7 @@
             "layerId": "Station_List_Minus_HQ-MELCC",
             "layerName": { "en": "Station List" },
             "source": {
-              "dataAccessPath": { "en": "./datasets/csv-files/Station_List_Minus_HQ-MELCC.csv"}
+              "dataAccessPath": { "en": "./datasets/csv-files/Station_List_Minus_HQ-MELCC.csv" }
             }
           }
         ]
@@ -42,7 +42,7 @@
     ]
   },
   "components": ["overview-map"],
-  "overviewMap": {"hideOnZoom": 7},
+  "overviewMap": { "hideOnZoom": 7 },
   "footerBar": {
     "tabs": {
       "core": ["legend", "layers", "details", "data-table"]
@@ -51,4 +51,4 @@
   "corePackages": [],
   "theme": "geo.ca",
   "suportedLanguages": ["en"]
-  }
+}

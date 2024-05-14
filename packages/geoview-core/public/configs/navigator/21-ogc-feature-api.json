@@ -2,7 +2,7 @@
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
-      "initialView": { "zoomAndCenter": [3, [0, 20]]},
+      "initialView": { "zoomAndCenter": [3, [0, 20]] },
       "projection": 3857
     },
     "basemapOptions": {

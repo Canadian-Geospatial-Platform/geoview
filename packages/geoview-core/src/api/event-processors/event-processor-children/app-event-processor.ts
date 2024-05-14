@@ -58,7 +58,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The mapId
    * @returns {TypeDisplayLanguage[]} The supported languages.
    */
-  static getSupportedLanguages(mapId: string): TypeDisplayLanguage[] {
+  static getsuportedLanguages(mapId: string): TypeDisplayLanguage[] {
     return this.getAppState(mapId).suportedLanguages;
   }
 

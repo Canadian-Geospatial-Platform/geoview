@@ -17,7 +17,7 @@
         },
         "geoviewLayerType": "esriImage",
         "metadataAccessPath": {
-            "en": "https://www5.agr.gc.ca/atlas/rest/services/app_agclimate_agclimat/agclimate_tx/ImageServer"
+          "en": "https://www5.agr.gc.ca/atlas/rest/services/app_agclimate_agclimat/agclimate_tx/ImageServer"
         },
         "listOfLayerEntryConfig": [
           {
@@ -33,7 +33,7 @@
         },
         "geoviewLayerType": "esriImage",
         "metadataAccessPath": {
-            "en": "https://www5.agr.gc.ca/atlas/rest/services/imageservices/annual_crop_inventory_2022/ImageServer"
+          "en": "https://www5.agr.gc.ca/atlas/rest/services/imageservices/annual_crop_inventory_2022/ImageServer"
         },
         "listOfLayerEntryConfig": [
           {
@@ -49,7 +49,7 @@
         },
         "geoviewLayerType": "esriImage",
         "metadataAccessPath": {
-            "en": "https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/USA/MapServer"
+          "en": "https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/USA/MapServer"
         },
         "listOfLayerEntryConfig": [
           {

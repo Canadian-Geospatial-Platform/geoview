@@ -32,7 +32,7 @@
               {
                 "layerId": "icon_points.json",
                 "layerName": { "en": "Icons" },
-                "initialSettings": { "states": {"visible": false} }
+                "initialSettings": { "states": { "visible": false } }
               },
               {
                 "layerId": "points.json",
@@ -91,7 +91,7 @@
         },
         "geoviewLayerType": "esriImage",
         "metadataAccessPath": {
-            "en": "https://www5.agr.gc.ca/atlas/rest/services/imageservices/annual_crop_inventory_2022/ImageServer"
+          "en": "https://www5.agr.gc.ca/atlas/rest/services/imageservices/annual_crop_inventory_2022/ImageServer"
         },
         "listOfLayerEntryConfig": [
           {
@@ -135,11 +135,7 @@
                 "en": "https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire/napl-ring-of-fire-1954-08-07-60k-thumbnail.png",
                 "fr": "https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire/napl-ring-of-fire-1954-08-07-60k-thumbnail.png"
               },
-              "extent": [-87.77486341686723,
-                51.62285357468582,
-                -84.57727128084842,
-                53.833354975551075
-              ],
+              "extent": [-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075],
               "projection": 4326
             }
           }
@@ -176,7 +172,7 @@
                 "nameField": { "en": "band-0-pixel-value", "fr": "band-0-pixel-value" },
                 "fieldTypes": "number",
                 "outfields": { "en": "band-0-pixel-value", "fr": "band-0-pixel-value" },
-                "aliasFields":  { "en": "Pixel value", "fr": "Valeur du pixel" }
+                "aliasFields": { "en": "Pixel value", "fr": "Valeur du pixel" }
               }
             }
           }
@@ -209,7 +205,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "topo",
-            "layerName": {"en": "World Topo Map"},
+            "layerName": { "en": "World Topo Map" },
             "initialSettings": { "minZoom": 3, "maxZoom": 8 },
             "source": {
               "dataAccessPath": {
@@ -225,7 +221,9 @@
           "en": "new basemap"
         },
         "geoviewLayerType": "vectorTiles",
-        "metadataAccessPath": { "en": "https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/" },
+        "metadataAccessPath": {
+          "en": "https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/"
+        },
         "listOfLayerEntryConfig": [
           {
             "layerId": "toner",
@@ -242,7 +240,7 @@
     ]
   },
   "components": ["overview-map"],
-  "overviewMap": {"hideOnZoom": 7},
+  "overviewMap": { "hideOnZoom": 7 },
   "footerBar": {
     "tabs": {
       "core": ["legend", "layers", "details", "data-table"]
@@ -251,4 +249,4 @@
   "corePackages": [],
   "theme": "geo.ca",
   "suportedLanguages": ["en"]
-  }
+}

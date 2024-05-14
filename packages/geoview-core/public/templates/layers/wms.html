@@ -1,66 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>
-    <%= htmlWebpackPlugin.options.title %>
-  </title>
-  <link rel="shortcut icon" href="./favicon.ico" />
-  <meta name="msapplication-TileColor" content="#da532c" />
-  <meta name="msapplication-config" content="./img/browserconfig.xml" />
-  <meta name="theme-color" content="#ffffff" />
-  <meta name="msapplication-TileColor" content="#da532c" />
-  <meta name="theme-color" content="#ffffff" />
-  <link rel="stylesheet" href="css/style.css" />
-</head>
+  <body>
+    <div class="header-table">
+      <table>
+        <tbody>
+          <tr>
+            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
+            <td class="header-title">
+              <h1><strong>WMS Layers</strong></h1>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <a href="./index.html">Main</a><br />
+              &nbsp;&nbsp;&nbsp;&nbsp;<a href="./type-of-layers.html">Type Of Layers</a><br />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p>This page is used to showcase how the viewer may show WMS layer types</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <a href="#HLYR1">1. Many WMS Layers</a><br />
+              <a href="#HLYR2">2. All Styles of a WMS Layer</a><br />
+              <a href="#HLYR3">3. Choose from a list of styles</a><br />
+              <a href="#HLYR4">4. Automatic group creation from metadata information</a><br />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-<body>
-  <div class="header-table">
-    <table>
-      <tbody>
-        <tr>
-          <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-          <td class="header-title">
-            <h1><strong>WMS Layers</strong></h1>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <table>
-      <tbody>
-        <tr>
-          <td>
-            <a href="./index.html">Main</a><br />
-            &nbsp;&nbsp;&nbsp;&nbsp;<a href="./type-of-layers.html">Type Of Layers</a><br />
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <p>This page is used to showcase how the viewer may show WMS layer types</p>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <a href="#HLYR1">1. Many WMS Layers</a><br />
-            <a href="#HLYR2">2. All Styles of a WMS Layer</a><br />
-            <a href="#HLYR3">3. Choose from a list of styles</a><br />
-            <a href="#HLYR4">4. Automatic group creation from metadata information</a><br />
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="map-title-holder">
-    <h4 id="HLYR1">1. Many WMS Layers (the map displays the different phases of the temporal dimension)</h4>
-    <a class="ref-link" href="#top">Top</a>
-  </div>
-  <button class="collapsible active">Map Status Flags</button>
-  <pre id="HLYR1-state" class="panel map-title-holder"></pre>
-  <button class="test-refresh-WMS-btn">Test Refresh WMS</button>
-  <div id="LYR1" class="geoview-map" data-lang="en" data-config="{
+    <div class="map-title-holder">
+      <h4 id="HLYR1">1. Many WMS Layers (the map displays the different phases of the temporal dimension)</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <button class="collapsible active">Map Status Flags</button>
+    <pre id="HLYR1-state" class="panel map-title-holder"></pre>
+    <button class="test-refresh-WMS-btn">Test Refresh WMS</button>
+    <div
+      id="LYR1"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
             'map': {
               'interaction': 'dynamic',
               'viewSettings': {
@@ -137,18 +138,6 @@
                       'layerName': { 'en': 'Test Spatiotemporel' }
                     }
                   ]
-                },
-                {
-                  'geoviewLayerId': 'HRDEM-dsm-hillshade',
-                  'geoviewLayerName': { 'en': 'DSM Hillshade' },
-                  'metadataAccessPath': { 'en': 'https://datacube.services.geo.ca/ows/elevation' },
-                  'geoviewLayerType': 'ogcWms',
-                  'listOfLayerEntryConfig': [
-                    {
-                      'layerId': 'dsm-hillshade',
-                      'layerName': { 'en': 'DSM-Hillshade' }
-                    }
-                  ]
                 }
               ]
             },
@@ -156,25 +145,30 @@
             'corePackages': [],
             'theme': 'geo.ca',
             'suportedLanguages': ['en']
-          }"></div>
-  <button type="button" class="collapsible">Visibility and filters</button>
-  <pre id="layer1-buttons-pre" class="panel"></pre>
-  <button class="collapsible">Get Legend</button>
-  <pre id="LegendsId1-table-pre" class="panel"></pre>
-  <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="ResultSetId1-click" class="panel">Click on feature on the map</pre>
-  <hr />
-  <p>This map has a wms layer added from configuration.</p>
-  <button type="button" class="collapsible">Configuration Snippet</button>
-  <pre id="LYR1CS" class="panel"></pre>
+          }"
+    ></div>
+    <button type="button" class="collapsible">Visibility and filters</button>
+    <pre id="layer1-buttons-pre" class="panel"></pre>
+    <button class="collapsible">Get Legend</button>
+    <pre id="LegendsId1-table-pre" class="panel"></pre>
+    <button type="button" class="collapsible">Get Feature Info</button>
+    <pre id="ResultSetId1-click" class="panel">Click on feature on the map</pre>
+    <hr />
+    <p>This map has a wms layer added from configuration.</p>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="LYR1CS" class="panel"></pre>
 
-  <div class="map-title-holder">
-    <h4 id="HLYR2">2. All Styles of a WMS Layer</h4>
-    <a class="ref-link" href="#top">Top</a>
-  </div>
-  <button class="collapsible active">Map Status Flags</button>
-  <pre id="HLYR2-state" class="panel map-title-holder"></pre>
-  <div id="LYR2" class="geoview-map" data-lang="en" data-config="{
+    <div class="map-title-holder">
+      <h4 id="HLYR2">2. All Styles of a WMS Layer</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <button class="collapsible active">Map Status Flags</button>
+    <pre id="HLYR2-state" class="panel map-title-holder"></pre>
+    <div
+      id="LYR2"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
       'map': {
         'interaction': 'dynamic',
         'viewSettings': {
@@ -334,26 +328,31 @@
       'corePackages': [],
       'theme': 'geo.ca',
       'suportedLanguages': ['en']
-    }"></div>
-  <button type="button" class="collapsible">Visibility and filters</button>
-  <pre id="layer2-buttons-pre" class="panel"></pre>
-  <button class="collapsible">Get Legend</button>
-  <pre id="LegendsId2-table-pre" class="panel"></pre>
-  <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="ResultSetId2-click" class="panel">Click on feature on the map</pre>
-  <hr />
-  <p>This map has a wms layer added from configuration.</p>
-  <button type="button" class="collapsible">Configuration Snippet</button>
-  <pre id="LYR2CS" class="panel"></pre>
-  <hr />
+    }"
+    ></div>
+    <button type="button" class="collapsible">Visibility and filters</button>
+    <pre id="layer2-buttons-pre" class="panel"></pre>
+    <button class="collapsible">Get Legend</button>
+    <pre id="LegendsId2-table-pre" class="panel"></pre>
+    <button type="button" class="collapsible">Get Feature Info</button>
+    <pre id="ResultSetId2-click" class="panel">Click on feature on the map</pre>
+    <hr />
+    <p>This map has a wms layer added from configuration.</p>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="LYR2CS" class="panel"></pre>
+    <hr />
 
-  <div class="map-title-holder">
-    <h4 id="HLYR3">3. All Styles of a WMS Layer</h4>
-    <a class="ref-link" href="#top">Top</a>
-  </div>
-  <button class="collapsible active">Map Status Flags</button>
-  <pre id="HLYR3-state" class="panel map-title-holder"></pre>
-  <div id="LYR3" class="geoview-map" data-lang="en" data-config="{
+    <div class="map-title-holder">
+      <h4 id="HLYR3">3. All Styles of a WMS Layer</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <button class="collapsible active">Map Status Flags</button>
+    <pre id="HLYR3-state" class="panel map-title-holder"></pre>
+    <div
+      id="LYR3"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
       'map': {
         'interaction': 'dynamic',
         'viewSettings': {
@@ -391,26 +390,31 @@
       'corePackages': [],
       'theme': 'geo.ca',
       'suportedLanguages': ['en']
-    }"></div>
-  <label for="language">Select a layer style:</label>
-  <select name="style" id="style"></select>
-  <button class="collapsible">Get Legend</button>
-  <pre id="LegendsId3-table-pre" class="panel"></pre>
-  <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="ResultSetId3-click" class="panel">Click on feature on the map</pre>
-  <hr />
-  <p>This map has a wms layer added from configuration.</p>
-  <button type="button" class="collapsible">Configuration Snippet</button>
-  <pre id="LYR3CS" class="panel"></pre>
-  <hr />
+    }"
+    ></div>
+    <label for="language">Select a layer style:</label>
+    <select name="style" id="style"></select>
+    <button class="collapsible">Get Legend</button>
+    <pre id="LegendsId3-table-pre" class="panel"></pre>
+    <button type="button" class="collapsible">Get Feature Info</button>
+    <pre id="ResultSetId3-click" class="panel">Click on feature on the map</pre>
+    <hr />
+    <p>This map has a wms layer added from configuration.</p>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="LYR3CS" class="panel"></pre>
+    <hr />
 
-  <div class="map-title-holder">
-    <h4 id="HLYR4">4. Automatic group creation from metadata information</h4>
-    <a class="ref-link" href="#top">Top</a>
-  </div>
-  <button class="collapsible active">Map Status Flags</button>
-  <pre id="HLYR4-state" class="panel map-title-holder"></pre>
-  <div id="LYR4" class="geoview-map" data-lang="en" data-config="{
+    <div class="map-title-holder">
+      <h4 id="HLYR4">4. Automatic group creation from metadata information</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <button class="collapsible active">Map Status Flags</button>
+    <pre id="HLYR4-state" class="panel map-title-holder"></pre>
+    <div
+      id="LYR4"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
         'map': {
           'interaction': 'dynamic',
           'viewSettings': {
@@ -441,139 +445,139 @@
         'corePackages': [],
         'theme': 'geo.ca',
         'suportedLanguages': ['en']
-      }"></div>
-  <button type="button" class="collapsible">Visibility and filters</button>
-  <pre id="layer4-buttons-pre" class="panel"></pre>
-  <button class="collapsible">Get Legend</button>
-  <pre id="LegendsId4-table-pre" class="panel"></pre>
-  <hr />
-  <p>This map has a wms layer added from configuration.</p>
-  <button type="button" class="collapsible">Configuration Snippet</button>
-  <pre id="LYR4CS" class="panel"></pre>
-  <hr />
-  <button type="button" class="collapsible">Code Snippet</button>
-  <pre id="codeSnippet" class="panel"></pre>
+      }"
+    ></div>
+    <button type="button" class="collapsible">Visibility and filters</button>
+    <pre id="layer4-buttons-pre" class="panel"></pre>
+    <button class="collapsible">Get Legend</button>
+    <pre id="LegendsId4-table-pre" class="panel"></pre>
+    <hr />
+    <p>This map has a wms layer added from configuration.</p>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="LYR4CS" class="panel"></pre>
+    <hr />
+    <button type="button" class="collapsible">Code Snippet</button>
+    <pre id="codeSnippet" class="panel"></pre>
 
-  <script src="codedoc.js"></script>
-  <script src="layerlib.js"></script>
-  <script>
-    // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-    cgpv.init(
-      (mapId) => {
-        if (mapId === 'LYR1') {
-          // Wire a handle when all queries done after a map click
-          cgpv.api.maps['LYR1'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
-            const { coordinate, resultSet, eventType } = payload;
-            createInfoTable('LYR1', 'ResultSetId1', resultSet, eventType);
-          });
-          cgpv.api.maps['LYR1'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
-            const { resultSet } = payload;
-            displayLegend('LegendsId1', resultSet);
-          });
-          listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
-        } else if (mapId === 'LYR2') {
-          // Wire a handle when all queries done after a map click
-          cgpv.api.maps['LYR2'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
-            const { coordinate, resultSet, eventType } = payload;
-            createInfoTable('LYR2', 'ResultSetId2', resultSet, eventType);
-          });
-          cgpv.api.maps['LYR2'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
-            const { resultSet } = payload;
-            displayLegend('LegendsId2', resultSet);
-          });
-          listenToLegendLayerSetChanges('HLYR1-state', 'LYR2');
-        } else if (mapId === 'LYR3') {
-          // Wire a handle when all queries done after a map click
-          cgpv.api.maps['LYR3'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
-            const { coordinate, resultSet, eventType } = payload;
-            createInfoTable('LYR3', 'ResultSetId3', resultSet, eventType);
-          });
-          cgpv.api.maps['LYR3'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
-            const { resultSet } = payload;
-            displayLegend('LegendsId3', resultSet);
-          });
-          listenToLegendLayerSetChanges('HLYR1-state', 'LYR3');
-        } else if (mapId === 'LYR4') {
-          cgpv.api.maps['LYR4'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
-            const { resultSet } = payload;
-            displayLegend('LegendsId4', resultSet);
-          });
-          listenToLegendLayerSetChanges('HLYR1-state', 'LYR4');
-        }
-      },
-      (mapId) => {
-        if (mapId === 'LYR1') {
-          createTableOfFilter('LYR1');
-          // ========================================================================================================================
-          // Cycle through the temporal data
-          let i = 0;
-          window.setInterval(() => {
-            const layerConfig = cgpv.api.maps.LYR1.layer.registeredLayers['wmsLYR1-spatiotemporel/RADAR_1KM_RSNO'];
-            const temporalData = cgpv.api.maps.LYR1.layer
-              .geoviewLayer('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO')
-              .getTemporalDimension('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO');
-            if (temporalData) {
-              cgpv.api.maps.LYR1.layer
+    <script src="codedoc.js"></script>
+    <script src="layerlib.js"></script>
+    <script>
+      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(
+        (mapId) => {
+          if (mapId === 'LYR1') {
+            // Wire a handle when all queries done after a map click
+            cgpv.api.maps['LYR1'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
+              const { coordinate, resultSet, eventType } = payload;
+              createInfoTable('LYR1', 'ResultSetId1', resultSet, eventType);
+            });
+            cgpv.api.maps['LYR1'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+              const { resultSet } = payload;
+              displayLegend('LegendsId1', resultSet);
+            });
+            listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
+          } else if (mapId === 'LYR2') {
+            // Wire a handle when all queries done after a map click
+            cgpv.api.maps['LYR2'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
+              const { coordinate, resultSet, eventType } = payload;
+              createInfoTable('LYR2', 'ResultSetId2', resultSet, eventType);
+            });
+            cgpv.api.maps['LYR2'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+              const { resultSet } = payload;
+              displayLegend('LegendsId2', resultSet);
+            });
+            listenToLegendLayerSetChanges('HLYR1-state', 'LYR2');
+          } else if (mapId === 'LYR3') {
+            // Wire a handle when all queries done after a map click
+            cgpv.api.maps['LYR3'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
+              const { coordinate, resultSet, eventType } = payload;
+              createInfoTable('LYR3', 'ResultSetId3', resultSet, eventType);
+            });
+            cgpv.api.maps['LYR3'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+              const { resultSet } = payload;
+              displayLegend('LegendsId3', resultSet);
+            });
+            listenToLegendLayerSetChanges('HLYR1-state', 'LYR3');
+          } else if (mapId === 'LYR4') {
+            cgpv.api.maps['LYR4'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+              const { resultSet } = payload;
+              displayLegend('LegendsId4', resultSet);
+            });
+            listenToLegendLayerSetChanges('HLYR1-state', 'LYR4');
+          }
+        },
+        (mapId) => {
+          if (mapId === 'LYR1') {
+            createTableOfFilter('LYR1');
+            // ========================================================================================================================
+            // Cycle through the temporal data
+            let i = 0;
+            window.setInterval(() => {
+              const layerConfig = cgpv.api.maps.LYR1.layer.registeredLayers['wmsLYR1-spatiotemporel/RADAR_1KM_RSNO'];
+              const temporalData = cgpv.api.maps.LYR1.layer
                 .geoviewLayer('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO')
-                .applyViewFilter('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO', `time=date '${temporalData.range.range[i]}'`);
-              if (++i === temporalData.range.range.length) i = 0;
-            }
-          }, 2500);
+                .getTemporalDimension('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO');
+              if (temporalData) {
+                cgpv.api.maps.LYR1.layer
+                  .geoviewLayer('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO')
+                  .applyViewFilter('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO', `time=date '${temporalData.range.range[i]}'`);
+                if (++i === temporalData.range.range.length) i = 0;
+              }
+            }, 2500);
 
-          let j = 0;
-          window.setInterval(() => {
-            const layerConfig = cgpv.api.maps.LYR1.layer.registeredLayers['wmsLYR1-msi/msi-94-or-more'];
-            const temporalData = cgpv.api.maps.LYR1.layer
-              .geoviewLayer('wmsLYR1-msi/msi-94-or-more')
-              .getTemporalDimension('wmsLYR1-msi/msi-94-or-more');
-            if (temporalData) {
-              cgpv.api.maps.LYR1.layer
+            let j = 0;
+            window.setInterval(() => {
+              const layerConfig = cgpv.api.maps.LYR1.layer.registeredLayers['wmsLYR1-msi/msi-94-or-more'];
+              const temporalData = cgpv.api.maps.LYR1.layer
                 .geoviewLayer('wmsLYR1-msi/msi-94-or-more')
-                .applyViewFilter('wmsLYR1-msi/msi-94-or-more', `time=date '${temporalData.range.range[j]}'`);
-              if (++j === temporalData.range.range.length) j = 0;
-            }
-          }, 2500);
-        } else if (mapId === 'LYR2') {
-          createTableOfFilter('LYR2');
-        } else if (mapId === 'LYR33') {
-          const intervalId = window.setInterval(() => {
-            const lyr3LayerConfig = cgpv.api.maps.LYR3.layer.registeredLayers['wmsLYR3-Root/landcover_2015_19classes'];
-            if (Array.isArray(lyr3LayerConfig?.source?.style)) {
-              const dropDownContent = document.getElementById('style');
-              lyr3LayerConfig.source.style.forEach((style) => {
-                element = document.createElement('option');
-                element.value = style;
-                element.innerText = style;
-                dropDownContent.appendChild(element);
-              });
-              dropDownContent.addEventListener('click', (e) => {
-                cgpv.api.maps.LYR3.layer.geoviewLayers['wmsLYR3-Root'].setStyle(
-                  dropDownContent.value,
-                  'wmsLYR3-Root/landcover_2015_19classes'
-                );
-              });
-            }
-            clearInterval(intervalId);
-          }, 1000);
-        } else if (mapId === 'LYR4') {
-          createTableOfFilter('LYR4');
+                .getTemporalDimension('wmsLYR1-msi/msi-94-or-more');
+              if (temporalData) {
+                cgpv.api.maps.LYR1.layer
+                  .geoviewLayer('wmsLYR1-msi/msi-94-or-more')
+                  .applyViewFilter('wmsLYR1-msi/msi-94-or-more', `time=date '${temporalData.range.range[j]}'`);
+                if (++j === temporalData.range.range.length) j = 0;
+              }
+            }, 2500);
+          } else if (mapId === 'LYR2') {
+            createTableOfFilter('LYR2');
+          } else if (mapId === 'LYR33') {
+            const intervalId = window.setInterval(() => {
+              const lyr3LayerConfig = cgpv.api.maps.LYR3.layer.registeredLayers['wmsLYR3-Root/landcover_2015_19classes'];
+              if (Array.isArray(lyr3LayerConfig?.source?.style)) {
+                const dropDownContent = document.getElementById('style');
+                lyr3LayerConfig.source.style.forEach((style) => {
+                  element = document.createElement('option');
+                  element.value = style;
+                  element.innerText = style;
+                  dropDownContent.appendChild(element);
+                });
+                dropDownContent.addEventListener('click', (e) => {
+                  cgpv.api.maps.LYR3.layer.geoviewLayers['wmsLYR3-Root'].setStyle(
+                    dropDownContent.value,
+                    'wmsLYR3-Root/landcover_2015_19classes'
+                  );
+                });
+              }
+              clearInterval(intervalId);
+            }, 1000);
+          } else if (mapId === 'LYR4') {
+            createTableOfFilter('LYR4');
+          }
         }
-      }
-    );
+      );
 
-    // ========================================================================================================================
-    // Test a refresh WMS from projection change
-    var testRefreshBtn = document.getElementsByClassName('test-refresh-WMS-btn')[0];
-    testRefreshBtn.addEventListener('click', function (e) {
-      cgpv.api.maps['LYR1'].setProjection(3978);
-    });
+      // ========================================================================================================================
+      // Test a refresh WMS from projection change
+      var testRefreshBtn = document.getElementsByClassName('test-refresh-WMS-btn')[0];
+      testRefreshBtn.addEventListener('click', function (e) {
+        cgpv.api.maps['LYR1'].setProjection(3978);
+      });
 
-    // create snippets
-    window.addEventListener('load', () => {
-      createCodeSnippet();
-      createConfigSnippet();
-    });
-  </script>
-</body>
-
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });
+    </script>
+  </body>
 </html>
