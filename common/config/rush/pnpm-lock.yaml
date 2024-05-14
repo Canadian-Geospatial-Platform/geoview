@@ -131,6 +131,9 @@ importers:
       '@emotion/styled':
         specifier: ^11.11.0
         version: 11.11.5(@emotion/react@11.11.4)(@types/react@18.3.1)(react@18.3.1)
+      '@fontsource/roboto':
+        specifier: ^5.0.13
+        version: 5.0.13
       '@mui/base':
         specifier: 5.0.0-beta.37
         version: 5.0.0-beta.37(@types/react@18.3.1)(react-dom@18.3.1)(react@18.3.1)
@@ -2402,6 +2405,10 @@ packages:
 
   /@floating-ui/utils@0.2.2:
     resolution: {integrity: sha512-J4yDIIthosAsRZ5CPYP/jQvUAQtlZTTD/4suA08/FEnlxqW3sKS9iAhgsa9VYLZ6vDHn/ixJgIqRQPotoBjxIw==}
+    dev: false
+
+  /@fontsource/roboto@5.0.13:
+    resolution: {integrity: sha512-j61DHjsdUCKMXSdNLTOxcG701FWnF0jcqNNQi2iPCDxU8seN/sMxeh62dC++UiagCWq9ghTypX+Pcy7kX+QOeQ==}
     dev: false
 
   /@humanwhocodes/config-array@0.11.14:
