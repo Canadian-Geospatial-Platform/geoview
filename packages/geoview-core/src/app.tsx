@@ -7,6 +7,7 @@ import { useTheme } from '@mui/material/styles';
 import 'ol/ol.css';
 import '@/ui/style/style.css';
 import '@/ui/style/vendor.css';
+import '@fontsource/roboto/400.css';
 
 import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
 import * as UI from '@/ui';
