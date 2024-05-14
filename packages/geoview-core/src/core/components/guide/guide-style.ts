@@ -4,8 +4,9 @@ import { Theme } from '@mui/material/styles';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getSxClasses = (theme: Theme): any => ({
   guideContainer: {
-    background: theme.palette.geoViewColor.bgColor.main,
-    paddingBottom: '1rem',
+    '& .responsive-layout-right-main-content': {
+      backgroundColor: theme.palette.geoViewColor.white,
+    },
   },
   rightPanelContainer: {
     color: theme.palette.geoViewColor.textColor.main,

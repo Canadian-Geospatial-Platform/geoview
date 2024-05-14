@@ -382,6 +382,13 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
           },
         },
       },
+      MuiTypography: {
+        styleOverrides: {
+          root: {
+            color: geoViewColors.textColor.main,
+          },
+        },
+      },
     },
     overrides: {
       button: {
