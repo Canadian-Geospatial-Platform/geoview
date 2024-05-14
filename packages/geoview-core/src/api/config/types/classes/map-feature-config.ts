@@ -17,6 +17,7 @@ import {
   TypeNavBarProps,
   TypeOverviewMapProps,
   TypeServiceUrls,
+  TypeValidMapProjectionCodes,
   TypeValidVersions,
   VALID_PROJECTION_CODES,
   VALID_VERSIONS,
@@ -33,6 +34,7 @@ import {
   CV_DEFAULT_MAP_FEATURE_CONFIG,
   CV_MAP_CENTER,
   CV_MAP_CONFIG_SCHEMA_PATH,
+  CV_MAP_EXTENTS,
 } from '@config/types/config-constants';
 import { isvalidComparedToSchema } from '@config/utils';
 import { isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
@@ -87,7 +89,8 @@ export class MapFeatureConfig {
   /**
    * ISO 639-1 code indicating the languages supported by the configuration file. It will use value(s) provided here to
    * access bilangual configuration nodes. For value(s) provided here, each bilingual configuration node MUST provide a value.
-   * */
+   */
+  // TODO: Delete the suportedLanguages property from the viewer.
   suportedLanguages: TypeListOfLocalizedLanguages;
 
   /**
@@ -116,7 +119,9 @@ export class MapFeatureConfig {
     // set map configuration
     const gvMap = clonedJsonConfig.map as TypeJsonObject;
     if (gvMap) (gvMap.listOfGeoviewLayerConfig as TypeJsonArray) = (gvMap.listOfGeoviewLayerConfig || []) as TypeJsonArray;
-    this.map = Cast<TypeMapConfig>(defaultsDeep(gvMap, CV_DEFAULT_MAP_FEATURE_CONFIG.map));
+    this.map = Cast<TypeMapConfig>(
+      defaultsDeep(gvMap, this.#getDefaultMapConfig(gvMap?.viewSettings?.projection as TypeValidMapProjectionCodes))
+    );
     this.map.listOfGeoviewLayerConfig = (gvMap.listOfGeoviewLayerConfig as TypeJsonArray)
       .map((geoviewLayerConfig) => {
         return MapFeatureConfig.nodeFactory(geoviewLayerConfig, this.#language, this);
@@ -136,7 +141,7 @@ export class MapFeatureConfig {
       ...((clonedJsonConfig.externalPackages || CV_DEFAULT_MAP_FEATURE_CONFIG.externalPackages) as TypeExternalPackages),
     ];
     this.suportedLanguages = [
-      ...((clonedJsonConfig.suportedLanguages || CV_DEFAULT_MAP_FEATURE_CONFIG.supportedLanguages) as TypeListOfLocalizedLanguages),
+      ...((clonedJsonConfig.suportedLanguages || CV_DEFAULT_MAP_FEATURE_CONFIG.suportedLanguages) as TypeListOfLocalizedLanguages),
     ];
     this.schemaVersionUsed = (clonedJsonConfig.schemaVersionUsed as TypeValidVersions) || CV_DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed;
     this.#errorDetected = this.#errorDetected || !isvalidComparedToSchema(CV_MAP_CONFIG_SCHEMA_PATH, this);
@@ -270,6 +275,21 @@ export class MapFeatureConfig {
         logger.logError(`Invalid GeoView layerType (${layerConfig.geoviewLayerType}).`);
     }
     return undefined;
+  }
+
+  /**
+   * Get the default values for the mapFeatureConfig.map using the projection code.
+   * @param {TypeValidMapProjectionCodes} projection The projection code.
+   *
+   * @returns {TypeMapConfig} The default map configuration associated to the projection.
+   */
+  #getDefaultMapConfig(projection?: TypeValidMapProjectionCodes): TypeMapConfig {
+    const proj =
+      projection && VALID_PROJECTION_CODES.includes(projection) ? projection : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.projection;
+    const mapConfig = cloneDeep(CV_DEFAULT_MAP_FEATURE_CONFIG.map);
+    mapConfig.viewSettings.maxExtent = [...CV_MAP_EXTENTS[proj]];
+
+    return mapConfig;
   }
 
   /**
