@@ -250,7 +250,12 @@ const ResponsiveGridLayout = forwardRef(
             </Box>
           </FullScreenDialog>
 
-          <Box sx={sxClasses.rightGridContent} className={isGuideOpen ? 'responsive-layout-right-main-content guide-container' : 'responsive-layout-right-main-content'}>{content}</Box>
+          <Box
+            sx={sxClasses.rightGridContent}
+            className={isGuideOpen ? 'responsive-layout-right-main-content guide-container' : 'responsive-layout-right-main-content'}
+          >
+            {content}
+          </Box>
         </>
       );
     };

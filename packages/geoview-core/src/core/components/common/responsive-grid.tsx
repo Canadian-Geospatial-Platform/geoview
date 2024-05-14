@@ -55,7 +55,10 @@ const getLeftPanelSize = (fullWidth: boolean, isRightPanelVisible: boolean, isEn
  * @returns JSX.Element
  */
 const ResponsiveGridLeftPanel = forwardRef(
-  ({ children, className, isRightPanelVisible = false, sxProps = {}, isEnlarged, fullWidth = false, ...rest }: ResponsiveGridPanelProps, ref) => {
+  (
+    { children, className, isRightPanelVisible = false, sxProps = {}, isEnlarged, fullWidth = false, ...rest }: ResponsiveGridPanelProps,
+    ref
+  ) => {
     const theme = useTheme();
     return (
       <Grid
@@ -107,7 +110,10 @@ const getRightPanelSize = (fullWidth: boolean, isRightPanelVisible: boolean, isE
  * @returns JSX.Element
  */
 const ResponsiveGridRightPanel = forwardRef(
-  ({ children, className, isRightPanelVisible = false, sxProps = {}, isEnlarged, fullWidth = false, ...rest }: ResponsiveGridPanelProps, ref) => {
+  (
+    { children, className, isRightPanelVisible = false, sxProps = {}, isEnlarged, fullWidth = false, ...rest }: ResponsiveGridPanelProps,
+    ref
+  ) => {
     const theme = useTheme();
     return (
       <Grid

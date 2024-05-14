@@ -9,7 +9,7 @@ export const getSxClasses = (theme: Theme): any => ({
     backgroundColor: theme.palette.geoViewColor.bgColor.light[300],
 
     '&.guide-container': {
-      backgroundColor: theme.palette.geoViewColor.white
+      backgroundColor: theme.palette.geoViewColor.white,
     },
     width: '100%',
     '&.fullscreen-mode': {
