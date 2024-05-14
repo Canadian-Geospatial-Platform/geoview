@@ -13,6 +13,7 @@ import { useSwiperLayerPaths } from 'geoview-core/src/core/stores/store-interfac
 import { logger } from 'geoview-core/src/core/utils/logger';
 import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
+import { useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from 'geoview-core/src/geo/map/map-viewer';
 import { sxClasses } from './swiper-style';
 
@@ -46,6 +47,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   // Get store values
   const layerPaths = useSwiperLayerPaths();
   const displayLanguage = useAppDisplayLanguage();
+  const visibleLayers = useMapVisibleLayers();
 
   /**
    * Pre compose, Pre render event callback
@@ -195,8 +197,13 @@ export function Swiper(props: SwiperProps): JSX.Element {
     // Log
     logger.logTraceUseEffect('GEOVIEW-SWIPER - layerPaths', layerPaths);
 
+    // Get all associated layerPaths in case provided path is a layer ID or group layer path
+    const associatedLayerPaths = layerPaths
+      .map((layerPath) => visibleLayers.filter((visibleLayerPath) => visibleLayerPath.includes(layerPath)))
+      .flat();
+
     // For each layer path
-    layerPaths.forEach((layerPath: string) => {
+    associatedLayerPaths.forEach((layerPath: string) => {
       // Wire events on the layer path
       attachLayerEventsOnPath(layerPath).catch((error) => {
         // Log
@@ -209,7 +216,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
       logger.logTraceUseEffectUnmount('GEOVIEW-SWIPER - layerPaths', layerPaths);
 
       // set listener for layers in config array
-      layerPaths.forEach((layerPath: string) => {
+      associatedLayerPaths.forEach((layerPath: string) => {
         try {
           // Get the layer at the layer path
           const olLayer = viewer.layer.getOLLayerByLayerPath(layerPath);
@@ -233,7 +240,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
       // Empty layers array
       setOlLayers([]);
     };
-  }, [viewer, layerPaths, attachLayerEventsOnPath, prerender]);
+  }, [viewer, layerPaths, attachLayerEventsOnPath, prerender, visibleLayers]);
 
   useEffect(() => {
     // Log
