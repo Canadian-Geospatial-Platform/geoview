@@ -148,10 +148,12 @@ export const ResponsiveGrid = {
 ResponsiveGridLeftPanel.defaultProps = {
   sxProps: undefined,
   fullWidth: false,
+  className: '',
 };
 
 // TODO: Refactor - Remove defaultProps as it's no longer a good practice
 ResponsiveGridRightPanel.defaultProps = {
   sxProps: undefined,
   fullWidth: false,
+  className: '',
 };
