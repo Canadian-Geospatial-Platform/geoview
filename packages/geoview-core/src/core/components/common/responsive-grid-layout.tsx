@@ -245,12 +245,12 @@ const ResponsiveGridLayout = forwardRef(
       return (
         <>
           <FullScreenDialog open={isFullScreen} onClose={() => setIsFullScreen(false)}>
-            <Box sx={sxClasses.rightGridContent} className="fullscreen-mode">
+            <Box sx={sxClasses.rightGridContent} className="responsive-layout-right-main-content fullscreen-mode">
               {content}
             </Box>
           </FullScreenDialog>
 
-          <Box sx={sxClasses.rightGridContent} className={isGuideOpen ? 'guide-container' : ''}>{content}</Box>
+          <Box sx={sxClasses.rightGridContent} className={isGuideOpen ? 'responsive-layout-right-main-content guide-container' : 'responsive-layout-right-main-content'}>{content}</Box>
         </>
       );
     };
@@ -264,6 +264,7 @@ const ResponsiveGridLayout = forwardRef(
               isEnlarged={isEnlarged}
               aria-hidden={!isRightPanelVisible}
               sxProps={{ zIndex: isFullScreen ? 'unset' : 200 }}
+              className="responsive-layout-left-top"
             >
               {/* This panel is hidden from screen readers when not visible */}
               {leftTop}
@@ -274,6 +275,7 @@ const ResponsiveGridLayout = forwardRef(
             isEnlarged={isEnlarged}
             fullWidth={fullWidth}
             sxProps={{ zIndex: isFullScreen ? 'unset' : 100 }}
+            className="responsive-layout-right-top"
           >
             <Box
               sx={{
@@ -302,6 +304,7 @@ const ResponsiveGridLayout = forwardRef(
             fullWidth={fullWidth}
             aria-hidden={!isRightPanelVisible}
             sxProps={{ zIndex: isFullScreen ? 'unset' : 200 }}
+            className="responsive-layout-left-main"
           >
             {leftMain}
           </ResponsiveGrid.Left>
@@ -311,6 +314,7 @@ const ResponsiveGridLayout = forwardRef(
             isRightPanelVisible={isRightPanelVisible}
             fullWidth={fullWidth}
             sxProps={{ zIndex: isFullScreen ? 'unset' : 100 }}
+            className="responsive-layout-right-main"
           >
             {renderRightContent()}
           </ResponsiveGrid.Right>
