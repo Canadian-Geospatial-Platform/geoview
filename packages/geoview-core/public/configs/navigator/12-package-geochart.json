@@ -140,6 +140,5 @@
       "core": ["legend", "layers", "details", "geochart"]
     }
   },
-  "corePackages": [],
-  "suportedLanguages": ["en", "fr"]
+  "corePackages": []
 }

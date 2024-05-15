@@ -17,7 +17,6 @@ export interface IAppState {
   isCrosshairsActive: boolean;
   isFullscreenActive: boolean;
   notifications: Array<NotificationDetailsType>;
-  suportedLanguages: TypeDisplayLanguage[];
 
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
@@ -58,7 +57,6 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     isCrosshairsActive: false,
     isFullscreenActive: false,
     notifications: [],
-    suportedLanguages: [],
 
     // initialize default stores section from config information when store receive configuration file
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
@@ -69,7 +67,6 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
           displayTheme: geoviewConfig.theme || 'geo.ca',
           geolocatorServiceURL: geoviewConfig.serviceUrls?.geolocator,
           geoviewHTMLElement: document.getElementById(get().mapId)!,
-          suportedLanguages: geoviewConfig.suportedLanguages,
         },
       });
     },
@@ -260,8 +257,6 @@ export const useAppGeolocatorServiceURL = (): string | undefined =>
 export const useAppGeoviewHTMLElement = (): HTMLElement => useStore(useGeoViewStore(), (state) => state.appState.geoviewHTMLElement);
 export const useAppGuide = (): TypeGuideObject | undefined => useStore(useGeoViewStore(), (state) => state.appState.guide);
 export const useAppNotifications = (): NotificationDetailsType[] => useStore(useGeoViewStore(), (state) => state.appState.notifications);
-export const useAppsuportedLanguages = (): TypeDisplayLanguage[] =>
-  useStore(useGeoViewStore(), (state) => state.appState.suportedLanguages);
 
 // GV these 2 selector are use in app-start.tsx before context is assigned to the map
 // GV DO NOT USE this technique elsewhere, it is only to reload language and theme

@@ -63,6 +63,5 @@
     }
   },
   "corePackages": [],
-  "externalPackages": [],
-  "suportedLanguages": ["en"]
+  "externalPackages": []
 }

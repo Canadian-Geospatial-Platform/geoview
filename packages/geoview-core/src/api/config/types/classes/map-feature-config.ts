@@ -10,7 +10,6 @@ import {
   TypeDisplayTheme,
   TypeExternalPackages,
   TypeFooterBarProps,
-  TypeListOfLocalizedLanguages,
   TypeMapComponents,
   TypeMapConfig,
   TypeMapCorePackages,
@@ -87,13 +86,6 @@ export class MapFeatureConfig {
   externalPackages?: TypeExternalPackages;
 
   /**
-   * ISO 639-1 code indicating the languages supported by the configuration file. It will use value(s) provided here to
-   * access bilangual configuration nodes. For value(s) provided here, each bilingual configuration node MUST provide a value.
-   */
-  // TODO: Delete the suportedLanguages property from the viewer.
-  suportedLanguages: TypeListOfLocalizedLanguages;
-
-  /**
    * The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by
    * this version of the viewer.
    */
@@ -139,9 +131,6 @@ export class MapFeatureConfig {
     this.corePackages = [...((clonedJsonConfig.corePackages || CV_DEFAULT_MAP_FEATURE_CONFIG.corePackages) as TypeMapCorePackages)];
     this.externalPackages = [
       ...((clonedJsonConfig.externalPackages || CV_DEFAULT_MAP_FEATURE_CONFIG.externalPackages) as TypeExternalPackages),
-    ];
-    this.suportedLanguages = [
-      ...((clonedJsonConfig.suportedLanguages || CV_DEFAULT_MAP_FEATURE_CONFIG.suportedLanguages) as TypeListOfLocalizedLanguages),
     ];
     this.schemaVersionUsed = (clonedJsonConfig.schemaVersionUsed as TypeValidVersions) || CV_DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed;
     this.#errorDetected = this.#errorDetected || !isvalidComparedToSchema(CV_MAP_CONFIG_SCHEMA_PATH, this);
@@ -283,6 +272,7 @@ export class MapFeatureConfig {
    *
    * @returns {TypeMapConfig} The default map configuration associated to the projection.
    */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   #getDefaultMapConfig(projection?: TypeValidMapProjectionCodes): TypeMapConfig {
     const proj =
       projection && VALID_PROJECTION_CODES.includes(projection) ? projection : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.projection;

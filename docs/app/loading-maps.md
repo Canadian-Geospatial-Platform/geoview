@@ -61,8 +61,7 @@ The content of the config must match the schema, an example of the object in the
   "theme": "geo.ca",
   "components": ["north-arrow"],
   "corePackages": ["basemap-panel"],
-  "externalPackages": [],
-  "suportedLanguages": ["en", "fr"]
+  "externalPackages": []
 }
 ```
 
@@ -110,8 +109,7 @@ An example of this:
                     'theme': 'geo.ca',
                     'components': ['north-arrow', 'overview-map'],
                     'corePackages': [],
-                    'externalPackages': [],
-                    'suportedLanguages': ['en', 'fr']
+                    'externalPackages': []
                 }'
 ></div>
 ```
@@ -151,8 +149,7 @@ cgpv.init(function() {
         theme: 'dark',
         components: ['north-arrow', 'overview-map'],
         corePackages: ['basemap-panel'],
-        externalPackages: [],
-        suportedLanguages: ['en', 'fr'],
+        externalPackages: []
     });
 });
 </script>

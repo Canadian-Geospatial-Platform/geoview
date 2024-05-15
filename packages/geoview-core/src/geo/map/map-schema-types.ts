@@ -10,7 +10,6 @@ import {
   TypeHighlightColors,
   TypeValidMapProjectionCodes,
   TypeDisplayTheme,
-  TypeListOfLocalizedLanguages,
   TypeLocalizedString,
   TypeLayerStates,
   TypeLayerControls,
@@ -456,11 +455,6 @@ export type TypeMapFeaturesInstance = {
   corePackages?: TypeMapCorePackages; //! config
   /** List of external packages. */
   externalPackages?: TypeExternalPackages; //! config
-  /**
-   * ISO 639-1 code indicating the languages supported by the configuration file. It will use value(s) provided here to
-   * access bilangual configuration nodes. For value(s) provided here, each bilingual configuration node MUST provide a value.
-   * */
-  suportedLanguages: TypeListOfLocalizedLanguages; //! config
   /**
    * The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by
    * this version of the viewer.

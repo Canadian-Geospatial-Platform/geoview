@@ -56,10 +56,6 @@ The `externalPackages` property is optional and its type is `TypeExternalPackage
 NOTE: This property is not used in the current implementation. It is documented here as a wish.
 The `serviceUrls` property is optional and its type is `TypeExternalPackages` which is a records having as properties `keys` and `proxyUrl`. `keys` refer to the service end point to access API for layers specification (loading and plugins parameters). By default it is GeoCore but can be another endpoint with similar output.
 
-## suportedLanguages
-
-The `suportedLanguages` property is mandatory and its type is `TypeListOfLocalizedLanguages` which is an array of 0..2 elements whose value can be `'en'` or `'fr'`. When a language is selected here, all `TypeLocalizedString` properties of the configuration must initialize the corresponding property. When `suportedLanguages` specify only one language, the validation process will copy the property of the supported language in the property of the other language for all the `TypeLocalizedString` properties of the configuration. This allow to reduce the size of the configuration.
-
 # The Map Configuration
 
 The map configuration section is used to define the elements we want to appear on the map. Here, we define the base map to use and its options, the kind of interaction, the list of GeoView layer configurations, the view settings and extraOptions. The following figure shows a deeper but not complete representation of the configuration.

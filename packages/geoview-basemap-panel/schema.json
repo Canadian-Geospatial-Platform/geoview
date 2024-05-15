@@ -205,22 +205,11 @@
       "minItems": 1,
       "required": ["coreBasemaps", "customBasemaps"]
     },
-    "suportedLanguages": {
-      "type": "array",
-      "uniqueItems": true,
-      "items": {
-        "type": "string",
-        "enum": ["en", "fr"]
-      },
-      "default": ["en", "fr"],
-      "description": "ISO 639-1 code indicating the languages supported by the configuration file.",
-      "minItems": 1
-    },
     "version": {
       "type": "string",
       "enum": ["1.0"],
       "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
     }
   },
-  "required": ["canSwichProjection", "supportedProjections", "suportedLanguages"]
+  "required": ["canSwichProjection", "supportedProjections"]
 }

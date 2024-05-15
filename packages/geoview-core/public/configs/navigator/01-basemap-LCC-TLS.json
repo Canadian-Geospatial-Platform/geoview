@@ -16,6 +16,5 @@
     "hideOnZoom": 6
   },
   "corePackages": [],
-  "theme": "geo.ca",
-  "suportedLanguages": ["en"]
+  "theme": "geo.ca"
 }

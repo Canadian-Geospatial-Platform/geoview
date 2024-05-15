@@ -204,8 +204,7 @@ Below is an example of a simple map, with an id **mapOne**. This map will be usi
       },
       'theme': 'geo.ca',
       'components': ['north-arrow', 'overview-map'],
-      'corePackages': [],
-      'suportedLanguages': ['en']
+      'corePackages': []
     }"
 ></div>
 ```
