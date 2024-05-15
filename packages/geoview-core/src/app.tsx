@@ -128,7 +128,7 @@ async function renderMap(mapElement: Element): Promise<void> {
   // TODO: refactor - remove this config once we get layers from the new one
   // create a new config for this map element
   const config = new Config();
-  const configObj = await config.initializeMapConfig(configuration.mapId, configuration!.map!.listOfGeoviewLayerConfig!);
+  const configObj = config.initializeMapConfig(configuration.mapId, configuration!.map!.listOfGeoviewLayerConfig!);
   configuration.map.listOfGeoviewLayerConfig = configObj!;
 
   // if valid config was provided - mapId is now part of config

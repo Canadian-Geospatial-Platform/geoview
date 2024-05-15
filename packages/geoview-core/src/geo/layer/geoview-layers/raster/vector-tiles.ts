@@ -20,7 +20,6 @@ import {
   TypeLayerEntryConfig,
   TypeSourceTileInitialConfig,
   TypeGeoviewLayerConfig,
-  TypeListOfLayerEntryConfig,
   TypeTileGrid,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
@@ -34,6 +33,7 @@ import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-clas
 import { logger } from '@/core/utils/logger';
 import { TileLayerEntryConfig } from '@/core/utils/config/validation-classes/tile-layer-entry-config';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 // TODO: Implement method to validate Vector Tiles service
 // TODO: Add more customization (minZoom, maxZoom, TMS)
@@ -123,7 +123,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
-  protected override getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
+  protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number' {
     const fieldDefinitions = this.layerMetadata[layerConfig.layerPath].source.featureInfo;
     const fieldIndex = getLocalizedValue(
       Cast<TypeLocalizedString>(fieldDefinitions.outfields),
@@ -139,9 +139,9 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
    * extra configuration may be done here.
    *
-   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
+  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
@@ -169,7 +169,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  protected override async processOneLayerEntry(layerConfig: VectorTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected override async processOneLayerEntry(layerConfig: VectorTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | undefined> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
     await super.processOneLayerEntry(layerConfig);
@@ -188,7 +188,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
       logger.logError(`Error: vector tile layer (${layerConfig.layerId}) projection does not match map projection`);
       // eslint-disable-next-line no-param-reassign
       layerConfig.layerStatus = 'error';
-      return Promise.resolve(null);
+      return Promise.resolve(undefined);
     }
 
     if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
@@ -285,7 +285,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @returns {Extent | undefined} The new layer bounding box.
    */
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
-    const layerConfig = this.getLayerConfig(layerPath);
+    const layerConfig = this.getLayerEntryConfig(layerPath);
     const layerBounds = (layerConfig?.olLayer as TileLayer<VectorTileSource>).getSource()?.getTileGrid()?.getExtent();
     const projection =
       (layerConfig?.olLayer as TileLayer<VectorTileSource>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||

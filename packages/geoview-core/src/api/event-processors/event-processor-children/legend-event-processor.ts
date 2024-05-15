@@ -154,7 +154,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     };
     const createNewLegendEntries = (layerPathBeginning: string, currentLevel: number, existingEntries: TypeLegendLayer[]): void => {
       const entryLayerPath = `${layerPathBeginning}/${layerPathNodes[currentLevel]}`;
-      const layerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).registeredLayers[entryLayerPath] as TypeLayerEntryConfig;
+      const layerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(entryLayerPath)!;
       let entryIndex = existingEntries.findIndex((entry) => entry.layerPath === entryLayerPath);
       if (layerEntryIsGroupLayer(layerConfig)) {
         const controls: TypeLayerControls = setLayerControls(layerConfig);
@@ -189,7 +189,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           controls,
           layerId: layerPathNodes[currentLevel],
           layerPath: entryLayerPath,
-          layerAttribution: MapEventProcessor.getMapViewerLayerAPI(mapId).geoviewLayers[layerPathNodes[0]].attributions,
+          layerAttribution: MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPathNodes[0])!.attributions,
           layerName:
             legendResultSetEntry.layerName ||
             getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(mapId)) ||
@@ -216,7 +216,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         // eslint-disable-next-line no-param-reassign
         else existingEntries[entryIndex] = newLegendLayer;
 
-        const myLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).geoviewLayers[layerPathNodes[0]];
+        const myLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPathNodes[0])!;
         // TODO: calculateBounds issue will be tackle ASAP in a next PR
         newLegendLayer.bounds = myLayer.allLayerStatusAreGreaterThanOrEqualTo('loaded') ? myLayer.calculateBounds(layerPath) : undefined;
       }

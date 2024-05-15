@@ -13,7 +13,7 @@ export type BatchedPropagationLayerDataArrayByMap = {
 
 export abstract class AbstractEventProcessor {
   // The subscription array used to destroy the subscriptions
-  private subscriptionArr: Array<() => void> = [];
+  #subscriptionArr: Array<() => void> = [];
 
   /**
    * Shortcut to get the store state for a given map id
@@ -43,7 +43,7 @@ export abstract class AbstractEventProcessor {
   public initialize(store: GeoviewStoreType): void {
     // Call on initialize for the inherited classes to initialize and return their subscribtions
     const subs = this.onInitialize(store);
-    if (subs) this.subscriptionArr.push(...subs);
+    if (subs) this.#subscriptionArr.push(...subs);
   }
 
   // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
@@ -65,7 +65,7 @@ export abstract class AbstractEventProcessor {
 
   protected onDestroy(): void {
     // destroying all subscriptions
-    this.subscriptionArr.forEach((unsub) => unsub());
+    this.#subscriptionArr.forEach((unsub) => unsub());
   }
 
   /**

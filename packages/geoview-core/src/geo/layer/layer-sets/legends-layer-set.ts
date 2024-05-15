@@ -1,10 +1,9 @@
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 import { logger } from '@/core/utils/logger';
 import { TypeLayerEntryConfig, TypeLayerStatus } from '@/geo/map/map-schema-types';
-import { AbstractGeoViewLayer, TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 /**
  * A class to hold a set of layers associated with an array of TypeLegend. When this class is instantiated, all layers already
@@ -19,15 +18,14 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a legends-layer-set wants to register a layer in its set.
-   * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
    * @param {TypeLayerEntryConfig} layerConfig - The layer config
    */
-  protected override onRegisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
+  protected override onRegisterLayer(layerConfig: TypeLayerEntryConfig): void {
     // Log
     logger.logTraceCore('LEGENDS-LAYER-SET - onRegisterLayer', layerConfig.layerPath, Object.keys(this.resultSet));
 
     // Call parent
-    super.onRegisterLayer(geoviewLayer, layerConfig);
+    super.onRegisterLayer(layerConfig);
 
     // Leaving this here for now, likely can be refactored later
     this.resultSet[layerConfig.layerPath].data = undefined;
@@ -48,13 +46,10 @@ export class LegendsLayerSet extends AbstractLayerSet {
     super.onProcessLayerStatusChanged(config, layerPath, layerStatus);
 
     if (statusHasChanged) {
-      // Get the config from the registered layers
-      const layerConfig = this.layerApi.registeredLayers[layerPath];
-
       // If the layer has been at least processed, we know its metadata has been processed and legend is ready to be queried (logic to move?)
       if (layerExists && ['processed', 'loaded'].includes(layerStatus)) {
         // Query for the legend
-        const legendPromise = this.layerApi.geoviewLayer(layerPath).queryLegend(layerPath);
+        const legendPromise = this.layerApi.getGeoviewLayer(layerPath)!.queryLegend(layerPath);
 
         // Whenever the legend response comes in
         legendPromise
@@ -75,13 +70,12 @@ export class LegendsLayerSet extends AbstractLayerSet {
             // Log
             logger.logPromiseFailed('legendPromise in onProcessLayerStatusChanged in legendsLayerSet', error);
           });
-
-        // config file could not determine if the layer is queryable, can it be done using the metadata? let's try
-        // ? Trying to comment this line to see if it's good, don't understand the comment line just above this line
-        // layerConfig.geoviewLayerInstance?.registerToLayerSets(layerConfig as AbstractBaseLayerEntryConfig);
       }
 
       if (layerExists || layerStatus === 'loaded') {
+        // Get the config from the registered layers
+        const layerConfig = this.layerApi.getLayerEntryConfig(layerPath)!;
+
         // TODO: Check - I'm not sure where the logic to set layer status for the parent to loaded when a child is loaded/error is, but
         // TO.DOCONT: I had to add this as part of the refactor to make it work
         // Possibly update the layer status(es) of the parent(s)
@@ -106,7 +100,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
       // If the current status to set is at least loaded (or error), make the parent loaded
       if (['loaded', 'error'].includes(currentLayerStatus)) {
         // Get the parent config
-        const parentGroupLayer = currentLayerConfig.parentLayerConfig as GroupLayerEntryConfig;
+        const parentGroupLayer = currentLayerConfig.parentLayerConfig;
 
         // Update the status on the parent
         parentGroupLayer.layerStatus = 'loaded';

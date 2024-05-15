@@ -3,7 +3,7 @@ import { logger } from '@/core/utils/logger';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { TypeLayerEntryConfig, TypeLayerStatus } from '@/geo/map/map-schema-types';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 import { AbstractLayerSet, QueryType, TypeLayerData } from './abstract-layer-set';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
@@ -20,24 +20,24 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when an all-feature-info-layer-set wants to check for condition to register a layer in its set.
-   * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
    * @param {TypeLayerEntryConfig} layerConfig - The layer config
    * @returns {boolean} True when the layer should be registered to this all-feature-info-layer-set.
    */
-  protected override onRegisterLayerCheck(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): boolean {
+  protected override onRegisterLayerCheck(layerConfig: TypeLayerEntryConfig): boolean {
     // Log
     logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerConfig.layerPath, Object.keys(this.resultSet));
 
     // TODO: Make a util function for this check - this can be done prior to layer creation in config section
     // for some layer type, we know there is no data-table
     if (
+      layerConfig.geoviewLayerInstance &&
       [
         CONST_LAYER_TYPES.ESRI_IMAGE,
         CONST_LAYER_TYPES.IMAGE_STATIC,
         CONST_LAYER_TYPES.XYZ_TILES,
         CONST_LAYER_TYPES.VECTOR_TILES,
         CONST_LAYER_TYPES.WMS,
-      ].includes(geoviewLayer.type)
+      ].includes(layerConfig.geoviewLayerInstance.type)
     )
       return false;
 
@@ -49,15 +49,14 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when an all-feature-info-layer-set wants to register a layer in its set.
-   * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
    * @param {TypeLayerEntryConfig} layerConfig - The layer config
    */
-  protected override onRegisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
+  protected override onRegisterLayer(layerConfig: TypeLayerEntryConfig): void {
     // Log
     logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET - onRegisterLayer', layerConfig.layerPath, Object.keys(this.resultSet));
 
     // Call parent
-    super.onRegisterLayer(geoviewLayer, layerConfig);
+    super.onRegisterLayer(layerConfig);
 
     this.resultSet[layerConfig.layerPath] = {
       layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
@@ -78,15 +77,14 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when unregistering a layer from the all-feature-info-layer-set.
-   * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being unregistered
    * @param {TypeLayerEntryConfig} layerConfig - The layer config
    */
-  protected override onUnregisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
+  protected override onUnregisterLayer(layerConfig: TypeLayerEntryConfig): void {
     // Log
     logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET - onUnregisterLayer', layerConfig.layerPath, Object.keys(this.resultSet));
 
     // Call parent
-    super.onUnregisterLayer(geoviewLayer, layerConfig);
+    super.onUnregisterLayer(layerConfig);
 
     // Remove it from data table info array
     DataTableEventProcessor.deleteFeatureAllInfo(this.mapId, layerConfig.layerPath);
@@ -113,7 +111,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
         // Call parent. After this call, this.resultSet?.[layerPath]?.layerStatus may have changed!
         super.onProcessLayerStatusChanged(config, layerPath, layerStatus);
 
-        const layerConfig = this.layerApi.registeredLayers[layerPath];
+        const layerConfig = this.layerApi.getLayerEntryConfig(layerPath)!;
         if (this?.resultSet?.[layerPath]?.data) {
           this.resultSet[layerPath].data.layerStatus = layerStatus;
           DataTableEventProcessor.propagateFeatureInfoToStore(this.mapId, layerConfig.layerPath, this.resultSet);
@@ -138,9 +136,9 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     // TODO: Refactor - Make this function throw an error instead of returning void as option of the promise (to have same behavior as feature-info-layer-set)
 
     // If valid layer path
-    if (this.layerApi.registeredLayers[layerPath] && this.resultSet[layerPath]) {
+    if (this.layerApi.isLayerEntryConfigRegistered(layerPath) && this.resultSet[layerPath]) {
       const { data } = this.resultSet[layerPath];
-      const layerConfig = this.layerApi.registeredLayers[layerPath];
+      const layerConfig = this.layerApi.getLayerEntryConfig(layerPath)!;
 
       if (!this.resultSet[layerPath].data.eventListenerEnabled) return Promise.resolve();
 

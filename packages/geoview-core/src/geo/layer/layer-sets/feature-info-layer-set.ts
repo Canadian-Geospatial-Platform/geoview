@@ -54,11 +54,10 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
-   * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
    * @param {string} layerPath - The layer path
    * @returns {boolean} True when the layer should be registered to this feature-info-layer-set.
    */
-  protected override onRegisterLayerCheck(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): boolean {
+  protected override onRegisterLayerCheck(layerConfig: TypeLayerEntryConfig): boolean {
     // Log
     logger.logTraceCore('FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerConfig.layerPath, Object.keys(this.resultSet));
 
@@ -79,15 +78,14 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to register a layer in its set.
-   * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
-   * @param {string} layerPath - The layer path
+   * @param {TypeLayerEntryConfig} layerConfig - The layer config
    */
-  protected override onRegisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
+  protected override onRegisterLayer(layerConfig: TypeLayerEntryConfig): void {
     // Log
     logger.logTraceCore('FEATURE-INFO-LAYER-SET - onRegisterLayer', layerConfig.layerPath, Object.keys(this.resultSet));
 
     // Call parent
-    super.onRegisterLayer(geoviewLayer, layerConfig);
+    super.onRegisterLayer(layerConfig);
 
     this.resultSet[layerConfig.layerPath] = {
       layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
@@ -108,15 +106,14 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when unregistering a layer from the feature-info-layer-set.
-   * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being unregistered
-   * @param {string} layerPath - The layer path
+   * @param {TypeLayerEntryConfig} layerConfig - The layer config
    */
-  protected override onUnregisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
+  protected override onUnregisterLayer(layerConfig: TypeLayerEntryConfig): void {
     // Log
     logger.logTraceCore('FEATURE-INFO-LAYER-SET - onUnregisterLayer', layerConfig.layerPath, Object.keys(this.resultSet));
 
     // Call parent
-    super.onUnregisterLayer(geoviewLayer, layerConfig);
+    super.onUnregisterLayer(layerConfig);
 
     // Remove it from feature info array
     FeatureInfoEventProcessor.deleteFeatureInfo(this.mapId, layerConfig.layerPath);
@@ -136,7 +133,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         // Call parent. After this call, this.resultSet?.[layerPath]?.layerStatus may have changed!
         super.onProcessLayerStatusChanged(config, layerPath, layerStatus);
 
-        const layerConfig = this.layerApi.registeredLayers[layerPath];
+        const layerConfig = this.layerApi.getLayerEntryConfig(layerPath)!;
         if (this?.resultSet?.[layerPath]?.data) {
           this.resultSet[layerPath].data.layerStatus = layerStatus;
           this.#propagateToStore(layerConfig.layerPath);
@@ -193,7 +190,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // Reinitialize the resultSet
     // Loop on each layer path in the resultSet
     Object.keys(this.resultSet).forEach((layerPath) => {
-      const layerConfig = this.layerApi.registeredLayers[layerPath];
+      const layerConfig = this.layerApi.getLayerEntryConfig(layerPath)!;
       const { data } = this.resultSet[layerPath];
       if (!data.eventListenerEnabled) return;
       if (layerConfig.layerStatus === 'loaded') {

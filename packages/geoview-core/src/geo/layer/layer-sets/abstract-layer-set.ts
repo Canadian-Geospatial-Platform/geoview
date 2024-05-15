@@ -5,7 +5,7 @@ import Feature from 'ol/Feature';
 import RenderFeature from 'ol/render/Feature';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeLayerStatus, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
-import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
@@ -26,9 +26,6 @@ export abstract class AbstractLayerSet {
 
   /** An object containing the result sets indexed using the layer path */
   resultSet: TypeResultSet = {};
-
-  /** Sequence number to append to the layer name when we declare a layer as anonymous. */
-  protected anonymousSequenceNumber = 1;
 
   /** Indicates the default when registering layer */
   #defaultRegisterLayerCheck = true;
@@ -73,18 +70,17 @@ export abstract class AbstractLayerSet {
       this.resultSet[layerPath].layerStatus = layerStatus;
 
       if (['processed', 'error'].includes(layerStatus) && !this.resultSet[layerPath].layerName) {
-        const layerConfig = this.layerApi.registeredLayers[layerPath];
+        const layerConfig = this.layerApi.getLayerEntryConfig(layerPath)!;
         const layerName = getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId));
         if (layerName) this.resultSet[layerPath].layerName = layerName;
         else {
           this.resultSet[layerPath].layerName = getLocalizedValue(
             {
-              en: `Anonymous Layer ${this.anonymousSequenceNumber}`,
-              fr: `Couche Anonyme ${this.anonymousSequenceNumber}`,
+              en: `Anonymous Layer`,
+              fr: `Couche Anonyme`,
             },
             AppEventProcessor.getDisplayLanguage(this.mapId)
           );
-          this.anonymousSequenceNumber++;
         }
 
         // Synchronize the layer name property in the config and the layer set object when the geoview instance is ready.
@@ -102,25 +98,21 @@ export abstract class AbstractLayerSet {
 
   /**
    * Registers or Unregisters the layer in the layer-set, making sure the layer-set is aware of the layer.
-   * @param {AbstractGeoViewLayer} geoviewLayer - The layer to register/unregister
-   * @param {string} layerPath - The path of the layer
+   * @param {TypeLayerEntryConfig} layerConfig - The layer config
    * @param {'add' | 'remove'} action - The action to perform: 'add' to register or 'remove' to unregister
    */
-  public registerOrUnregisterLayer(geoviewLayer: AbstractGeoViewLayer, layerPath: string, action: 'add' | 'remove'): void {
-    // Get the layer config
-    const layerConfig = this.layerApi.registeredLayers[layerPath];
-
+  public registerOrUnregisterLayer(layerConfig: TypeLayerEntryConfig, action: 'add' | 'remove'): void {
     // Update the registration of all layer sets if !payload.layerSetId or update only the specified layer set
     let workedOn = false;
-    if (action === 'add' && this.onRegisterLayerCheck(geoviewLayer, layerConfig) && !(layerPath in this.resultSet)) {
+    if (action === 'add' && this.onRegisterLayerCheck(layerConfig) && !(layerConfig.layerPath in this.resultSet)) {
       // Call the registration function for the layer-set. This method is different for each child.
-      this.onRegisterLayer(geoviewLayer, layerConfig);
+      this.onRegisterLayer(layerConfig);
 
       // Inform that the layer set has been worked on
       workedOn = true;
-    } else if (action === 'remove' && layerPath in this.resultSet) {
+    } else if (action === 'remove' && layerConfig.layerPath in this.resultSet) {
       // Call the unregistration function for the layer-set. This method is different for each child.
-      this.onUnregisterLayer(geoviewLayer, layerConfig);
+      this.onUnregisterLayer(layerConfig);
 
       // Inform that the layer set has been worked on
       workedOn = true;
@@ -129,19 +121,18 @@ export abstract class AbstractLayerSet {
     // If worked on
     if (workedOn) {
       // Inform that the layer set has been updated
-      this.onLayerSetUpdatedProcess(layerPath);
+      this.onLayerSetUpdatedProcess(layerConfig.layerPath);
     }
   }
 
   /**
    * An overridable registration condition function for a layer-set to check if the registration
    * should happen for a specific geoview layer and layer path.
-   * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
    * @param {TypeLayerEntryConfig} layerConfig - The layer config
    * @returns {boolean} True if the layer should be registered, false otherwise
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected onRegisterLayerCheck(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): boolean {
+  protected onRegisterLayerCheck(layerConfig: TypeLayerEntryConfig): boolean {
     // Override this function to perform registration condition logic in the inherited classes
     // By default, a layer-set always registers layers
     return this.#defaultRegisterLayerCheck;
@@ -150,10 +141,9 @@ export abstract class AbstractLayerSet {
   /**
    * An overridable registration function for a layer-set that the registration process will use to
    * create a new entry in the layer set for a specific geoview layer and layer path.
-   * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
    * @param {TypeLayerEntryConfig} layerConfig - The layer config
    */
-  protected onRegisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
+  protected onRegisterLayer(layerConfig: TypeLayerEntryConfig): void {
     // Override this function to perform further registration logic in the inherited classes
     this.resultSet[layerConfig.layerPath] = {
       data: undefined,
@@ -165,10 +155,9 @@ export abstract class AbstractLayerSet {
   /**
    * An overridable unregistration function for a layer-set that the registration process will use to
    * unregister a specific geoview layer and layer path.
-   * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being unregistered
    * @param {TypeLayerEntryConfig} layerConfig - The layer config
    */
-  protected onUnregisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
+  protected onUnregisterLayer(layerConfig: TypeLayerEntryConfig): void {
     // Override this function to perform further unregistration logic in the inherited classes
     delete this.resultSet[layerConfig.layerPath];
   }

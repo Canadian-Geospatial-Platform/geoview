@@ -24,8 +24,6 @@ import { geoviewEntryIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geop
 import {
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
-  TypeListOfLayerEntryConfig,
-  TypeListOfGeoviewLayerConfig,
   MapConfigLayerEntry,
   mapConfigLayerEntryIsGeoCore,
   layerEntryIsGroupLayer,
@@ -113,7 +111,7 @@ export class ConfigValidation {
   /** ***************************************************************************************************************************
    * Validate the configuration of the map features against the TypeMapFeaturesInstance defined in the schema.
    * @param {TypeGeoviewLayerType} geoviewLayerType - The GeoView layer type to validate.
-   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig - The list of layer entry configurations to validate.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entry configurations to validate.
    * @param {Ajv} validator - The schema validator to use.
    *
    * @returns {TypeMapFeaturesConfig} A valid map features configuration.
@@ -121,7 +119,7 @@ export class ConfigValidation {
    */
   #isValidTypeListOfLayerEntryConfig(
     geoviewLayerType: TypeGeoviewLayerType,
-    listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
+    listOfLayerEntryConfig: TypeLayerEntryConfig[],
     validator: Ajv
   ): boolean {
     const layerSchemaPath = `https://cgpv/schema#/definitions/${CONST_GEOVIEW_SCHEMA_BY_TYPE[geoviewLayerType]}`;
@@ -198,10 +196,10 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Validate and adjust the list of GeoView layer configuration.
-   * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig - The list of GeoView layer configuration to adjust and
+   * @param {TypeGeoviewLayerConfig[]} listOfGeoviewLayerConfig - The list of GeoView layer configuration to adjust and
    * validate.
    */
-  static validateListOfGeoviewLayerConfig(listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig): void {
+  static validateListOfGeoviewLayerConfig(listOfGeoviewLayerConfig?: TypeGeoviewLayerConfig[]): void {
     // TODO: we support only unilingual fields for now. When refactor to new config bilinagual will be supported for geoviewLayerName, metadataAccessPath and layerName
     ConfigValidation.#processLocalizedString(['en'], listOfGeoviewLayerConfig);
     ConfigValidation.#doExtraValidation(listOfGeoviewLayerConfig);
@@ -275,14 +273,13 @@ export class ConfigValidation {
   /** ***************************************************************************************************************************
    * Process recursively the layer entries to create layers and layer groups.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration to adjust and validate.
-   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig - The list of layer entry configurations to process.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entry configurations to process.
    * @param {TypeGeoviewLayerConfig | GroupLayerEntryConfig} parentLayerConfig - The parent layer configuration of all the
    * layer entry configurations found in the list of layer entries.
-   * @private
    */
   static #processLayerEntryConfig(
     geoviewLayerConfig: TypeGeoviewLayerConfig,
-    listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
+    listOfLayerEntryConfig: TypeLayerEntryConfig[],
     parentLayerConfig?: GroupLayerEntryConfig
   ): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig, i: number) => {
@@ -336,14 +333,14 @@ export class ConfigValidation {
   /** ***************************************************************************************************************************
    * Process recursively the layer entries to set the parents of each entries.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration.
-   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig - The list of layer entry configurations to process.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entry configurations to process.
    * @param {GroupLayerEntryConfig} parentLayerConfig - The parent layer configuration of all the
    * layer configurations found in the list of layer entries.
    * @private
    */
   static #recursivelySetChildParent(
     geoviewLayerConfig: TypeGeoviewLayerConfig,
-    listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
+    listOfLayerEntryConfig: TypeLayerEntryConfig[],
     parentLayerConfig?: GroupLayerEntryConfig
   ): void {
     listOfLayerEntryConfig.forEach((layerConfig) => {

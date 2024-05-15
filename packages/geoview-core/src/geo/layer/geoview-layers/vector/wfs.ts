@@ -16,7 +16,6 @@ import {
   TypeLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
-  TypeListOfLayerEntryConfig,
   TypeBaseSourceVectorInitialConfig,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
@@ -88,8 +87,8 @@ export const geoviewEntryIsWFS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): v
  */
 // ******************************************************************************************************************************
 export class WFS extends AbstractGeoViewVector {
-  /** private varibale holding wfs version. */
-  private version = '2.0.0';
+  /** private variable holding wfs version. */
+  #version = '2.0.0';
 
   /** ***************************************************************************************************************************
    * Initialize layer
@@ -104,11 +103,11 @@ export class WFS extends AbstractGeoViewVector {
    * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
    *
    * @param {string} fieldName field name for which we want to get the type.
-   * @param {TypeLayerEntryConfig} layerConfig layer configuration.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig layer configuration.
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
-  protected override getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
+  protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number' {
     const fieldDefinitions = this.layerMetadata[layerConfig.layerPath] as TypeJsonArray;
     const fieldDefinition = fieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
     if (!fieldDefinition) return 'string';
@@ -145,7 +144,7 @@ export class WFS extends AbstractGeoViewVector {
               const capabilitiesObject = findPropertyNameByRegex(xmlJsonCapabilities, /(?:WFS_Capabilities)/);
 
               this.metadata = capabilitiesObject as TypeJsonObject;
-              this.version = (capabilitiesObject as TypeJsonObject)['@attributes'].version as string;
+              this.#version = (capabilitiesObject as TypeJsonObject)['@attributes'].version as string;
               resolve();
             }
           })
@@ -165,9 +164,9 @@ export class WFS extends AbstractGeoViewVector {
    * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined. If
    * necessary, additional code can be executed in the child method to complete the layer configuration.
    *
-   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
+  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
@@ -259,7 +258,7 @@ export class WFS extends AbstractGeoViewVector {
       }
 
       const describeFeatureUrl = `${queryUrl}?service=WFS&request=DescribeFeatureType&version=${
-        this.version
+        this.#version
       }&outputFormat=${encodeURIComponent(outputFormat as string)}&typeName=${layerConfig.layerId}`;
 
       if (describeFeatureUrl && outputFormat === 'application/json') {
@@ -367,7 +366,7 @@ export class WFS extends AbstractGeoViewVector {
       // check if url contains metadata parameters for the getCapabilities request and reformat the urls
       let sourceUrl = getLocalizedValue(layerConfig.source!.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
       sourceUrl = sourceUrl!.indexOf('?') > -1 ? sourceUrl!.substring(0, sourceUrl!.indexOf('?')) : sourceUrl;
-      sourceUrl = `${sourceUrl}?service=WFS&request=getFeature&version=${this.version}`;
+      sourceUrl = `${sourceUrl}?service=WFS&request=getFeature&version=${this.#version}`;
       sourceUrl = `${sourceUrl}&typeName=${layerConfig.layerId}`;
       // if an extent is provided, use it in the url
       if (sourceOptions.strategy === bbox && Number.isFinite(extent[0])) {
@@ -377,7 +376,7 @@ export class WFS extends AbstractGeoViewVector {
     };
 
     sourceOptions.format = new FormatWFS({
-      version: this.version,
+      version: this.#version,
     });
 
     const vectorSource = super.createVectorSource(layerConfig, sourceOptions, readOptions);

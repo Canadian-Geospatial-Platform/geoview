@@ -10,6 +10,7 @@ import View, { FitOptions, ViewOptions } from 'ol/View';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import BaseLayer from 'ol/layer/Base';
+import LayerGroup from 'ol/layer/Group';
 import Collection from 'ol/Collection';
 import { Source } from 'ol/source';
 
@@ -511,7 +512,7 @@ export class MapViewer {
     this.#emitMapReady();
 
     // Load the Map itself and the UI controls
-    await MapEventProcessor.initMapControls(this.mapId);
+    MapEventProcessor.initMapControls(this.mapId);
     await AppEventProcessor.setGuide(this.mapId);
 
     // Now that the map dom is loaded, register a handle when size is changing
@@ -667,17 +668,8 @@ export class MapViewer {
       const layersInterval = setInterval(() => {
         if (this.layer) {
           // Check if all registered layers have their results set
-          let allGood = true;
-          Object.entries(this.layer.registeredLayers).forEach(([layerPath, registeredLayer]) => {
-            // If not queryable, don't expect a result set
-            if (!registeredLayer.source?.featureInfo?.queryable) return;
-
-            const { resultSet } = this.layer.featureInfoLayerSet;
-            const layerResultSetReady = Object.keys(resultSet).includes(layerPath);
-            if (!layerResultSetReady) {
-              logger.logTraceDetailed('checkLayerResultSetReady - waiting on layer resultSet...', layerPath);
-              allGood = false;
-            }
+          const allGood = this.layer.checkLayerResultSetsReady((layerEntryConfig) => {
+            logger.logTraceDetailed('checkLayerResultSetReady - waiting on layer resultSet...', layerEntryConfig.layerPath);
           });
 
           // If all good
@@ -1327,7 +1319,7 @@ export class MapViewer {
   refreshLayers(): Promise<void> {
     const mapLayers = this.layer.geoviewLayers;
     Object.entries(mapLayers).forEach((mapLayerEntry) => {
-      const refreshBaseLayer = (baseLayer: BaseLayer | null): void => {
+      const refreshBaseLayer = (baseLayer: BaseLayer | LayerGroup | undefined): void => {
         if (baseLayer) {
           const layerGroup: Array<BaseLayer> | Collection<BaseLayer> | undefined = baseLayer.get('layers');
           if (layerGroup) {
@@ -1340,7 +1332,8 @@ export class MapViewer {
           }
         }
       };
-      refreshBaseLayer(mapLayerEntry[1].olLayers);
+      // TODO: Check - The index [1] seems wrong here. Should probably have a refresh function in AbstractGeoViewLayer being called here in this loop.
+      refreshBaseLayer(mapLayerEntry[1].olRootLayer);
     });
 
     // Return a promise for when rendering will complete
