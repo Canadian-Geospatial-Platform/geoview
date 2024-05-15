@@ -272,6 +272,7 @@ export class MapFeatureConfig {
    *
    * @returns {TypeMapConfig} The default map configuration associated to the projection.
    */
+  // Cannot be static function because it is use in: Cast<TypeMapConfig> for map default
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   #getDefaultMapConfig(projection?: TypeValidMapProjectionCodes): TypeMapConfig {
     const proj =
