@@ -224,6 +224,8 @@ export function commonGetFieldDomain(
  * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig The layer entry to configure
  * @param {boolean} singleHandle True for ESRI Image
  */
+// TODO: There is a bug with the temporal dimension returned by service URL:
+// TODO.CONT:  https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_fr/MapServer/0
 export function commonProcessTemporalDimension(
   layer: EsriDynamic | EsriFeature | EsriImage,
   esriTimeDimension: TypeJsonObject,

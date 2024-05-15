@@ -51,7 +51,7 @@ type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: num
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
 
 // GV: CONFIG EXTRACTION
-// GV: This section of code was extracted and copied to the geoview-config package
+// GV: This section of code was extracted and copied to the geoview config section
 // GV: |||||
 // GV: vvvvv
 
