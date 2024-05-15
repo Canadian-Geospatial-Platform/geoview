@@ -112,7 +112,7 @@ export class MapFeatureConfig {
     const gvMap = clonedJsonConfig.map as TypeJsonObject;
     if (gvMap) (gvMap.listOfGeoviewLayerConfig as TypeJsonArray) = (gvMap.listOfGeoviewLayerConfig || []) as TypeJsonArray;
     this.map = Cast<TypeMapConfig>(
-      defaultsDeep(gvMap, this.#getDefaultMapConfig(gvMap?.viewSettings?.projection as TypeValidMapProjectionCodes))
+      defaultsDeep(gvMap, MapFeatureConfig.#getDefaultMapConfig(gvMap?.viewSettings?.projection as TypeValidMapProjectionCodes))
     );
     this.map.listOfGeoviewLayerConfig = (gvMap.listOfGeoviewLayerConfig as TypeJsonArray)
       .map((geoviewLayerConfig) => {
@@ -272,9 +272,7 @@ export class MapFeatureConfig {
    *
    * @returns {TypeMapConfig} The default map configuration associated to the projection.
    */
-  // Cannot be static function because it is use in: Cast<TypeMapConfig> for map default
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  #getDefaultMapConfig(projection?: TypeValidMapProjectionCodes): TypeMapConfig {
+  static #getDefaultMapConfig(projection?: TypeValidMapProjectionCodes): TypeMapConfig {
     const proj =
       projection && VALID_PROJECTION_CODES.includes(projection) ? projection : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.projection;
     const mapConfig = cloneDeep(CV_DEFAULT_MAP_FEATURE_CONFIG.map);
