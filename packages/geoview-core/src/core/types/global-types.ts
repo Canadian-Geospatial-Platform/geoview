@@ -76,7 +76,7 @@ export type TypeCGPVUI = {
 };
 
 // GV: CONFIG EXTRACTION
-// GV: This section of code was extracted and copied to the geoview-config package
+// GV: This section of code was extracted and copied to the geoview config section
 // GV: |||||
 // GV: vvvvv
 

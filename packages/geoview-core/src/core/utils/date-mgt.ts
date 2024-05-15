@@ -69,6 +69,10 @@ const timeUnitsESRI = {
  */
 type TimePrecision = 'hour' | 'minute' | 'second';
 
+// GV: CONFIG EXTRACTION
+// GV: This file was extracted and copied to the geoview config section
+// GV: |||||
+// GV: vvvvv
 /** ******************************************************************************************************************************
  * Type used to define the range values for an OGC time dimension.
  */
@@ -88,6 +92,9 @@ export type TimeDimension = {
   nearestValues: 'discrete' | 'absolute';
   singleHandle: boolean;
 };
+
+// GV: ^^^^^
+// GV: |||||
 
 /** ******************************************************************************************************************************
  * Type used to validate the ESRI time dimension.

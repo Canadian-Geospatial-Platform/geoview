@@ -85,7 +85,7 @@ export abstract class ConfigBaseClass {
    * used to do its validation.
    *
    * @returns {string} The schemaPath associated to the sublayer.
-   * @protected @abstrsact
+   * @protected @abstract
    */
   protected abstract get schemaPath(): string;
 

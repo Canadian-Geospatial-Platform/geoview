@@ -55,7 +55,7 @@ export abstract class AbstractGeoviewLayerConfig {
    * Initial settings to apply to the GeoView layer at creation time.
    * This attribute is allowed only if listOfLayerEntryConfig.length > 1.
    */
-  #initialSettings: TypeLayerInitialSettings;
+  initialSettings: TypeLayerInitialSettings;
 
   /** The layer entries to use from the GeoView layer. */
   listOfLayerEntryConfig: ConfigBaseClass[] = [];
@@ -73,7 +73,7 @@ export abstract class AbstractGeoviewLayerConfig {
 
     this.isGeocore = (this.#originalgeoviewLayerConfig.isGeocore as boolean) || false;
 
-    this.#initialSettings = Cast<TypeLayerInitialSettings>(
+    this.initialSettings = Cast<TypeLayerInitialSettings>(
       defaultsDeep(this.#originalgeoviewLayerConfig.initialSettings, CV_DEFAULT_LAYER_INITIAL_SETTINGS)
     );
     // Topmost layer must be a layer group or a leaf node.
@@ -81,7 +81,7 @@ export abstract class AbstractGeoviewLayerConfig {
       (this.#originalgeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray) = [
         {
           layerId: this.#originalgeoviewLayerConfig.geoviewLayerId,
-          initialSettings: this.#initialSettings as TypeJsonObject,
+          initialSettings: this.initialSettings as TypeJsonObject,
           layerName: { ...(this.#originalgeoviewLayerConfig.geoviewLayerName as object) },
           entryType: CV_CONST_SUB_LAYER_TYPES.GROUP as TypeJsonObject,
           listOfLayerEntryConfig: this.#originalgeoviewLayerConfig.listOfLayerEntryConfig,
@@ -95,8 +95,8 @@ export abstract class AbstractGeoviewLayerConfig {
     this.externalDateFormat = (this.#originalgeoviewLayerConfig.externalDateFormat || 'DD/MM/YYYY HH:MM:SSZ') as string;
     this.listOfLayerEntryConfig = (this.#originalgeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray)
       .map((subLayerConfig) => {
-        if (layerEntryIsGroupLayer(subLayerConfig)) return new GroupLayerEntryConfig(subLayerConfig, this.#initialSettings, language, this);
-        return this.createLeafNode(subLayerConfig, this.#initialSettings, language, this);
+        if (layerEntryIsGroupLayer(subLayerConfig)) return new GroupLayerEntryConfig(subLayerConfig, this.initialSettings, language, this);
+        return this.createLeafNode(subLayerConfig, this.initialSettings, language, this);
       })
       .filter((subLayerConfig) => {
         return subLayerConfig;
