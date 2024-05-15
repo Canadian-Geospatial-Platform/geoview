@@ -16,7 +16,9 @@
       "core": ["basemap-panel"]
     }
   },
-  "components": ["north-arrow", "overview-map"],
-  "theme": "geo.ca",
-  "suportedLanguages": ["en", "fr"]
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "theme": "geo.ca"
 }

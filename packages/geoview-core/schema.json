@@ -1819,14 +1819,11 @@
         "serviceUrls": {
           "$ref": "#/definitions/TypeServiceUrls"
         },
-        "suportedLanguages": {
-          "$ref": "#/definitions/TypeListOfLocalizedLanguages"
-        },
         "schemaVersionUsed": {
           "$ref": "#/definitions/TypeValidVersions"
         }
       },
-      "required": ["map", "suportedLanguages"]
+      "required": ["map"]
     }
   }
 }

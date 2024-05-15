@@ -53,15 +53,6 @@ export class AppEventProcessor extends AbstractEventProcessor {
     return this.getAppState(mapId).displayTheme;
   }
 
-  /**
-   * Shortcut to get the supported languages for a given map id
-   * @param {string} mapId - The mapId
-   * @returns {TypeDisplayLanguage[]} The supported languages.
-   */
-  static getsuportedLanguages(mapId: string): TypeDisplayLanguage[] {
-    return this.getAppState(mapId).suportedLanguages;
-  }
-
   static async addNotification(mapId: string, notif: NotificationDetailsType): Promise<void> {
     // because notification is called before map is created, we use the async
     // version of getAppStateAsync

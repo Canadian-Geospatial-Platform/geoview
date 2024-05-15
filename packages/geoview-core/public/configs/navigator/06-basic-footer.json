@@ -94,6 +94,5 @@
     "tabs": {
       "core": ["geolocator", "export"]
     }
-  },
-  "suportedLanguages": ["en"]
+  }
 }

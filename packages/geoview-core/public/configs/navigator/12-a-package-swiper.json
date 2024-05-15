@@ -29,6 +29,5 @@
     }
   },
   "corePackages": ["swiper"],
-  "externalPackages": [],
-  "suportedLanguages": ["en"]
+  "externalPackages": []
 }

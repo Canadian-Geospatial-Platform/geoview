@@ -123,6 +123,5 @@
   "theme": "light",
   "components": ["north-arrow", "overview-map"],
   "corePackages": ["swiper"],
-  "externalPackages": [],
-  "suportedLanguages": ["en"]
+  "externalPackages": []
 }

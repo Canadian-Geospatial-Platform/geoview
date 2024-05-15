@@ -1,6 +1,5 @@
 {
   "orientation": "vertical",
   "keyboardOffset": 10,
-  "layers": ["LYR1"],
-  "suportedLanguages": ["en"]
+  "layers": ["LYR1"]
 }

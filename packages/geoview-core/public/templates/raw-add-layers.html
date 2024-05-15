@@ -102,97 +102,99 @@
           'tabs': {
             'core': ['geolocator', 'export']
           }
-        },
-        'suportedLanguages': ['en']
-      }"
-    ></div>
-    <h4>Add Layer Examples</h4>
-    <div style="font-size: smaller">
-      <div>
-        ESRI Feature Service Layer
-        <ul>
-          <li class="source-link">https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer/8</li>
-        </ul>
-      </div>
-      <div>
-        ESRI Dynamic Service Layer
-        <ul>
-          <li class="source-link">
-            https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer
-          </li>
-          <li class="source-link">
-            https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/forest_industry_hotspots_en/MapServer
-          </li>
-        </ul>
-      </div>
-      <div>
-        ESRI Image Layer
-        <ul>
-          <li class="source-link">https://www5.agr.gc.ca/atlas/rest/services/app_agclimate_agclimat/agclimate_tx/ImageServer/</li>
-        </ul>
-      </div>
-      <div>
-        WMS Layer
-        <ul>
-          <li class="source-link">https://ows.mundialis.de/services/service</li>
-        </ul>
-      </div>
-      <div>
-        WFS Layer
-        <ul>
-          <li class="source-link">https://giswebservices.massgis.state.ma.us/geoserver/wfs</li>
-          <li>Select 'Aiports' layer</li>
-        </ul>
-      </div>
-      <div>
-        XYZ Layer
-        <ul>
-          <li class="source-link">https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}</li>
-        </ul>
-      </div>
-      <div>
-        GeoJson Layer
-        <ul>
-          <li class="source-link">https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/polygons.json</li>
-          <li class="source-link">https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/lines.json</li>
-          <li class="source-link">https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/points.json</li>
-        </ul>
-      </div>
-      <div>
-        OGC API Feature Layer
-        <ul>
-          <li class="source-link">https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev</li>
-          <li class="source-link">https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev/collections/lakes</li>
-        </ul>
-      </div>
-      <div style="margin-bottom: 20px">
-        <div>GeoCore UUID Layer</div>
-        <div style="margin-top: 10px; margin-left: 20px">
-          <input id="selectGeoCore" list="geocoreids" style="width: 300px" />
-          <datalist id="geocoreids">
-            <option value="21b821cf-0f1c-40ee-8925-eab12d357668"></option>
-            <option value="ccc75c12-5acc-4a6a-959f-ef6f621147b9"></option>
-            <option value="0fca08b5-e9d0-414b-a3c4-092ff9c5e326"></option>
-            <option value="03ccfb5c-a06e-43e3-80fd-09d4f8f69703"></option>
-            <option value="ea4c0bdb-a63f-49a4-b14a-09c1560aad0b"></option>
-            <option value="0fe65119-e96e-4a57-8bfe-9d9245fba06b"></option>
-          </datalist>
-          <button type="button" onclick="addGeocore()">Add layer</button>
-        </div>
-      </div>
-      <div>
-        GeoPackage Layer
-        <ul>
-          <li class="source-link">https://canadian-geospatial-platform.github.io/geoview/public/datasets/geopackages/rivers.gpkg</li>
-        </ul>
-      </div>
-      <div>
-        CSV Layer
-        <ul>
-          <li class="source-link">
-            https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files/Station_List_Minus_HQ-MELCC.csv
-          </li>
-        </ul>
+        }
+      }"></div>
+  <h4>Add Layer Examples</h4>
+  <div style="font-size: smaller">
+    <div>
+      ESRI Feature Service Layer
+      <ul>
+        <li class="source-link">https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer/8</li>
+      </ul>
+    </div>
+    <div>
+      ESRI Dynamic Service Layer
+      <ul>
+        <li class="source-link">
+          https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer
+        </li>
+        <li class="source-link">
+          https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/forest_industry_hotspots_en/MapServer
+        </li>
+      </ul>
+    </div>
+    <div>
+      ESRI Image Layer
+      <ul>
+        <li class="source-link">
+          https://www5.agr.gc.ca/atlas/rest/services/app_agclimate_agclimat/agclimate_tx/ImageServer/</li>
+      </ul>
+    </div>
+    <div>
+      WMS Layer
+      <ul>
+        <li class="source-link">https://ows.mundialis.de/services/service</li>
+      </ul>
+    </div>
+    <div>
+      WFS Layer
+      <ul>
+        <li class="source-link">https://giswebservices.massgis.state.ma.us/geoserver/wfs</li>
+        <li>Select 'Aiports' layer</li>
+      </ul>
+    </div>
+    <div>
+      XYZ Layer
+      <ul>
+        <li class="source-link">
+          https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}</li>
+      </ul>
+    </div>
+    <div>
+      GeoJson Layer
+      <ul>
+        <li class="source-link">
+          https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/polygons.json</li>
+        <li class="source-link">
+          https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/lines.json</li>
+        <li class="source-link">
+          https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/points.json</li>
+      </ul>
+    </div>
+    <div>
+      OGC API Feature Layer
+      <ul>
+        <li class="source-link">https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev</li>
+        <li class="source-link">https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev/collections/lakes</li>
+      </ul>
+    </div>
+    <div>
+      GeoPackage Layer
+      <ul>
+        <li class="source-link">https://canadian-geospatial-platform.github.io/geoview/public/datasets/geopackages/rivers.gpkg</li>
+      </ul>
+    </div>
+    <div>
+      CSV Layer
+      <ul>
+        <li class="source-link">
+          https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files/Station_List_Minus_HQ-MELCC.csv
+        </li>
+      </ul>
+    </div>
+    <div style="margin-bottom: 20px">
+      <div>GeoCore UUID Layer</div>
+      <div style="margin-top: 10px; margin-left: 20px">
+        <input id="selectGeoCore" list="geocoreids" style="width: 300px" />
+        <datalist id="geocoreids">
+          <option value="21b821cf-0f1c-40ee-8925-eab12d357668"></option>
+          <option value="ccc75c12-5acc-4a6a-959f-ef6f621147b9"></option>
+          <option value="0fca08b5-e9d0-414b-a3c4-092ff9c5e326"></option>
+          <option value="03ccfb5c-a06e-43e3-80fd-09d4f8f69703"></option>
+          <option value="ea4c0bdb-a63f-49a4-b14a-09c1560aad0b"></option>
+          <option value="0fe65119-e96e-4a57-8bfe-9d9245fba06b"></option>
+        </datalist>
+        <button type="button" onclick="addGeocore()">Add layer</button>
       </div>
     </div>
     <hr />

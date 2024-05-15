@@ -153,7 +153,6 @@ export const CV_DEFAULT_MAP_FEATURE_CONFIG = Cast<MapFeatureConfig>({
     geocoreUrl: CV_CONFIG_GEOCORE_URL,
     geolocator: CV_CONFIG_GEOLOCATOR_URL,
   },
-  suportedLanguages: ['en', 'fr'],
   schemaVersionUsed: '1.0',
 });
 

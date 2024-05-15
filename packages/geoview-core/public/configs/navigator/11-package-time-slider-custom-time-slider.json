@@ -39,6 +39,5 @@
       "layerPaths": ["MSI/msi-94-or-more"],
       "defaultValue": "2011-08-15T00:00:00Z"
     }
-  ],
-  "suportedLanguages": ["en", "fr"]
+  ]
 }

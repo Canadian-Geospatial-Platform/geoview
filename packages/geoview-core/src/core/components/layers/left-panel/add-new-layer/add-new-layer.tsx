@@ -668,7 +668,7 @@ export function AddNewLayer(): JSX.Element {
         const geojsonFeatureMetadata = geojsonGeoviewLayerInstance.metadata!;
         geojsonGeoviewLayerConfig.listOfLayerEntryConfig = Cast<GeoJSONLayerEntryConfig[]>(geojsonFeatureMetadata.listOfLayerEntryConfig);
         // validate and instanciate layer configs
-        ConfigValidation.validateListOfGeoviewLayerConfig(['en'], [geojsonGeoviewLayerConfig]);
+        ConfigValidation.validateListOfGeoviewLayerConfig([geojsonGeoviewLayerConfig]);
         const layers = geojsonGeoviewLayerConfig.listOfLayerEntryConfig;
         if (layers.length === 1) {
           setLayerName(layers[0].layerName!.en! as string);

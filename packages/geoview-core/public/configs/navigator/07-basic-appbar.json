@@ -128,6 +128,5 @@
   "navBar": ["zoom", "fullscreen", "home", "location"],
   "components": ["north-arrow"],
   "corePackages": [],
-  "externalPackages": [],
-  "suportedLanguages": ["en", "fr"]
+  "externalPackages": []
 }

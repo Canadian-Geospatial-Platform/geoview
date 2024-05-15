@@ -65,9 +65,6 @@
   ],
   "corePackages": [],
   "externalPackages": [],
-  "suportedLanguages": [
-    "en"
-  ],
   "assetsUrl": "",
   "schemaVersionUsed": "1.0"
 }

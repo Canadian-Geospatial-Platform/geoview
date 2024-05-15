@@ -198,15 +198,12 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Validate and adjust the list of GeoView layer configuration.
-   * @param {TypeListOfLocalizedLanguages} suportedLanguages - The list of supported languages.
    * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig - The list of GeoView layer configuration to adjust and
    * validate.
    */
-  static validateListOfGeoviewLayerConfig(
-    suportedLanguages: TypeListOfLocalizedLanguages,
-    listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig
-  ): void {
-    ConfigValidation.#processLocalizedString(suportedLanguages, listOfGeoviewLayerConfig);
+  static validateListOfGeoviewLayerConfig(listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig): void {
+    // TODO: we support only unilingual fields for now. When refactor to new config bilinagual will be supported for geoviewLayerName, metadataAccessPath and layerName
+    ConfigValidation.#processLocalizedString(['en'], listOfGeoviewLayerConfig);
     ConfigValidation.#doExtraValidation(listOfGeoviewLayerConfig);
   }
 

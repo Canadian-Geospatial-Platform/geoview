@@ -17,6 +17,5 @@
     "tabs": {
       "core": ["basemap-panel"]
     }
-  },
-  "suportedLanguages": ["en"]
+  }
 }
