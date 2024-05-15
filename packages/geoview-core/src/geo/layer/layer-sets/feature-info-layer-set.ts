@@ -62,7 +62,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // Log
     logger.logTraceCore('FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerConfig.layerPath, Object.keys(this.resultSet));
 
-    const queryable = layerConfig?.source?.featureInfo?.queryable;
+    const queryable = true; // layerConfig?.source?.featureInfo?.queryable;
     return !!queryable;
   }
 

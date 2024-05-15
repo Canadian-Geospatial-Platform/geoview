@@ -631,6 +631,18 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
             orderedLayerInfo,
           },
         });
+
+        // GV subscrite from map-eent-processor is unstable for layer coming from PyGeoProcess, event if layer is added
+        // GV to the orderedLayerInfo array, the subscribe does not fired the callback. By copying here, we enfore it...
+        const curVisibleLayers = orderedLayerInfo
+          .map((layerInfo) => {
+            if (layerInfo.visible) return layerInfo.layerPath;
+            return undefined;
+          })
+          .filter((layerPath) => layerPath);
+        const prevVisibleLayers = [get().mapState.visibleLayers];
+        if (JSON.stringify(prevVisibleLayers) !== JSON.stringify(curVisibleLayers))
+          get().mapState.setterActions.setVisibleLayers(curVisibleLayers as string[]);
       },
 
       /**
