@@ -65,8 +65,8 @@ export const CV_CONST_LEAF_LAYER_SCHEMA_PATH: Record<LayerTypesKey, string> = {
 
 export const CV_GEOVIEW_SCHEMA_PATH: Record<LayerTypesKey, string> = {
   CSV: '',
-  ESRI_DYNAMIC: 'https://cgpv/schema#/definitions/TypeGeoviewLayerConfig',
-  ESRI_FEATURE: 'https://cgpv/schema#/definitions/TypeGeoviewLayerConfig',
+  ESRI_DYNAMIC: 'https://cgpv/schema#/definitions/AbstractGeoviewLayerConfig',
+  ESRI_FEATURE: 'https://cgpv/schema#/definitions/AbstractGeoviewLayerConfig',
   ESRI_IMAGE: '',
   IMAGE_STATIC: '',
   GEOJSON: '',
@@ -77,7 +77,7 @@ export const CV_GEOVIEW_SCHEMA_PATH: Record<LayerTypesKey, string> = {
   WFS: '',
   WMS: '',
 };
-export const CV_MAP_CONFIG_SCHEMA_PATH = 'https://cgpv/schema#/definitions/TypeMapFeatureInstance';
+export const CV_MAP_CONFIG_SCHEMA_PATH = 'https://cgpv/schema#/definitions/MapFeatureConfig';
 export const CV_LAYER_GROUP_SCHEMA_PATH = 'https://cgpv/schema#/definitions/TypeLayerGroupEntryConfig';
 
 /**
@@ -123,6 +123,7 @@ export const CV_MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]> = {
 export const CV_DEFAULT_MAP_FEATURE_CONFIG = Cast<MapFeatureConfig>({
   map: {
     interaction: 'dynamic',
+    highlightColor: 'black',
     viewSettings: {
       initialView: {
         zoomAndCenter: [3.5, [-90, 60]],
