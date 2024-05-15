@@ -3,12 +3,7 @@
     "interaction": "dynamic",
     "viewSettings": {
       "projection": 3978,
-      "maxExtent": [
-        -125,
-        30,
-        -60,
-        89
-      ]
+      "maxExtent": [-125, 30, -60, 89]
     },
     "basemapOptions": {
       "basemapId": "transport",
@@ -16,15 +11,11 @@
       "labeled": true
     }
   },
-  "components": [
-    "overview-map"
-  ],
+  "components": ["overview-map"],
   "overviewMap": {
     "hideOnZoom": 6
   },
   "corePackages": [],
   "theme": "geo.ca",
-  "suportedLanguages": [
-    "en"
-  ]
+  "suportedLanguages": ["en"]
 }

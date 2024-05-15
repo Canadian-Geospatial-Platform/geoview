@@ -72,7 +72,5 @@
   "theme": "geo.ca",
   "components": [],
   "corePackages": [],
-  "suportedLanguages": [
-    "en"
-  ]
+  "suportedLanguages": ["en"]
 }

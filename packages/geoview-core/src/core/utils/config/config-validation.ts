@@ -377,10 +377,10 @@ export class ConfigValidation {
   }
 
   /** ***************************************************************************************************************************
-   * Adjust the map features configuration localized strings according to the suported languages array content.
+   * Adjust the map features configuration localized strings according to the supported languages array content.
    * @param {TypeListOfLocalizedLanguages} suportedLanguages - The list of supported languages.
    * @param {MapConfigLayerEntry[]} listOfMapConfigLayerEntry - The list of Map Config Layer Entry configuration to adjust according
-   * to the suported languages array content.
+   * to the supported languages array content.
    * @private
    */
   static #processLocalizedString(suportedLanguages: TypeListOfLocalizedLanguages, listOfMapConfigLayerEntry?: MapConfigLayerEntry[]): void {

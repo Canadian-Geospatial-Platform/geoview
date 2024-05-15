@@ -3,12 +3,7 @@
     "interaction": "dynamic",
     "viewSettings": {
       "initialView": {
-        "extent": [
-          -90,
-          45,
-          -65,
-          70
-        ]
+        "extent": [-90, 45, -65, 70]
       },
       "projection": 3857
     },
@@ -18,13 +13,8 @@
       "labeled": true
     }
   },
-  "components": [
-    "overview-map",
-    "north-arrow"
-  ],
+  "components": ["overview-map", "north-arrow"],
   "corePackages": [],
   "theme": "geo.ca",
-  "suportedLanguages": [
-    "en"
-  ]
+  "suportedLanguages": ["en"]
 }

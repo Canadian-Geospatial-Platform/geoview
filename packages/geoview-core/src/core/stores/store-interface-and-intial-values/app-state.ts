@@ -260,7 +260,7 @@ export const useAppGeolocatorServiceURL = (): string | undefined =>
 export const useAppGeoviewHTMLElement = (): HTMLElement => useStore(useGeoViewStore(), (state) => state.appState.geoviewHTMLElement);
 export const useAppGuide = (): TypeGuideObject | undefined => useStore(useGeoViewStore(), (state) => state.appState.guide);
 export const useAppNotifications = (): NotificationDetailsType[] => useStore(useGeoViewStore(), (state) => state.appState.notifications);
-export const useAppSuportedLanguages = (): TypeDisplayLanguage[] =>
+export const useAppsuportedLanguages = (): TypeDisplayLanguage[] =>
   useStore(useGeoViewStore(), (state) => state.appState.suportedLanguages);
 
 // GV these 2 selector are use in app-start.tsx before context is assigned to the map

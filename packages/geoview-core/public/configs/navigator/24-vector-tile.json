@@ -16,7 +16,9 @@
           "en": "new basemap"
         },
         "geoviewLayerType": "vectorTiles",
-        "metadataAccessPath": { "en": "https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/" },
+        "metadataAccessPath": {
+          "en": "https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/"
+        },
         "listOfLayerEntryConfig": [
           {
             "layerId": "toner",

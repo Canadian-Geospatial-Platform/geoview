@@ -805,12 +805,12 @@
       "else": {
         "properties": {
           "layerName": {
-              "$ref": "#/definitions/TypeLocalizedString",
-              "description": "Used by the input schema. The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+            "$ref": "#/definitions/TypeLocalizedString",
+            "description": "Used by the input schema. The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
           }
         }
       },
-    "required": ["layerId"]
+      "required": ["layerId"]
     },
     "TypeVectorTileLayerEntryConfig": {
       "additionalProperties": false,
@@ -884,12 +884,12 @@
       "else": {
         "properties": {
           "layerName": {
-              "$ref": "#/definitions/TypeLocalizedString",
-              "description": "Used by the input schema. The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+            "$ref": "#/definitions/TypeLocalizedString",
+            "description": "Used by the input schema. The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
           }
         }
       },
-    "required": ["layerId"]
+      "required": ["layerId"]
     },
     "TypeVectorTileSourceInitialConfig": {
       "additionalProperties": false,
@@ -978,12 +978,12 @@
       "else": {
         "properties": {
           "layerName": {
-              "$ref": "#/definitions/TypeLocalizedString",
-              "description": "Used by the input schema. The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+            "$ref": "#/definitions/TypeLocalizedString",
+            "description": "Used by the input schema. The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
           }
         }
       },
-    "required": ["layerId"]
+      "required": ["layerId"]
     },
     "TypeEsriDynamicLayerEntryConfig": {
       "additionalProperties": false,
@@ -1073,7 +1073,7 @@
           }
         }
       },
-    "required": ["layerId"]
+      "required": ["layerId"]
     },
     "TypeEsriImageLayerEntryConfig": {
       "additionalProperties": false,
@@ -1141,12 +1141,12 @@
       "else": {
         "properties": {
           "layerName": {
-              "$ref": "#/definitions/TypeLocalizedString",
-              "description": "Used by the input schema. The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+            "$ref": "#/definitions/TypeLocalizedString",
+            "description": "Used by the input schema. The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
           }
         }
       },
-    "required": ["layerId"]
+      "required": ["layerId"]
     },
     "TypeImageStaticLayerEntryConfig": {
       "additionalProperties": false,
@@ -1211,12 +1211,12 @@
       "else": {
         "properties": {
           "layerName": {
-              "$ref": "#/definitions/TypeLocalizedString",
-              "description": "Used by the input schema. The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+            "$ref": "#/definitions/TypeLocalizedString",
+            "description": "Used by the input schema. The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
           }
         }
       },
-    "required": ["layerId"]
+      "required": ["layerId"]
     },
     "TypeTileLayerEntryConfig": {
       "additionalProperties": false,
@@ -1281,12 +1281,12 @@
       "else": {
         "properties": {
           "layerName": {
-              "$ref": "#/definitions/TypeLocalizedString",
-              "description": "Used by the input schema. The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+            "$ref": "#/definitions/TypeLocalizedString",
+            "description": "Used by the input schema. The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
           }
         }
       },
-    "required": ["layerId"]
+      "required": ["layerId"]
     },
     "TypeLayerEntryType": {
       "enum": ["vector", "vector-tile", "raster-tile", "raster-image", "geoCore"],
@@ -1341,8 +1341,8 @@
       "else": {
         "properties": {
           "layerName": {
-              "$ref": "#/definitions/TypeLocalizedString",
-              "description": "Used by the input schema. The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+            "$ref": "#/definitions/TypeLocalizedString",
+            "description": "Used by the input schema. The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
           }
         }
       },

@@ -13,18 +13,10 @@
   "corePackages": [],
   "appBar": {
     "tabs": {
-      "core": [
-        "basemap-panel"
-      ]
+      "core": ["basemap-panel"]
     }
   },
-  "components": [
-    "overview-map",
-    "north-arrow"
-  ],
+  "components": ["overview-map", "north-arrow"],
   "theme": "geo.ca",
-  "suportedLanguages": [
-    "en",
-    "fr"
-  ]
+  "suportedLanguages": ["en", "fr"]
 }

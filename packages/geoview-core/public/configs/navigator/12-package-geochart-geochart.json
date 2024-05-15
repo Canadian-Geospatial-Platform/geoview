@@ -1,8 +1,5 @@
 {
-  "suportedLanguages": [
-    "en",
-    "fr"
-  ],
+  "suportedLanguages": ["en", "fr"],
   "charts": [
     {
       "layers": [

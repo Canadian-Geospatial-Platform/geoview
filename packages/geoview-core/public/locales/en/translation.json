@@ -168,8 +168,8 @@
     },
     "changeDisplayLanguageLayers": "Layers can not be relaoded because the configuration does not support this language",
     "changeDisplayLanguage": "Only 'en' and 'fr' are supported",
-    "changeDisplayTheme": "Theme unsuported",
-    "changeDisplayProjection": "Projection unsuported",
+    "changeDisplayTheme": "Theme unsupported",
+    "changeDisplayProjection": "Projection unsupported",
     "invalidConfig": "Invalid JSON config, default configuration applied"
   },
   "exportModal": {
