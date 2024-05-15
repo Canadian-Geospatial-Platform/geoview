@@ -2,7 +2,6 @@ import { TypeDisplayLanguage } from '@config/types/map-schema-types';
 
 import { UUIDmapConfigReader } from '@/core/utils/config/reader/uuid-config-reader';
 import { ConfigValidation } from '@/core/utils/config/config-validation';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
 import { logger } from '@/core/utils/logger';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -49,7 +48,7 @@ export class GeoCore {
       const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(url, this.displayLanguage, [uuid]);
 
       // Validate the generated Geoview Layer Config
-      ConfigValidation.validateListOfGeoviewLayerConfig(AppEventProcessor.getsuportedLanguages(this.mapId), response.layers);
+      ConfigValidation.validateListOfGeoviewLayerConfig(response.layers);
 
       // For each found geochart associated with the Geocore UUIDs
       response.geocharts?.forEach((geochartConfig) => {
