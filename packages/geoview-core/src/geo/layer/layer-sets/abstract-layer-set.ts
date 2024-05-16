@@ -12,6 +12,7 @@ import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-b
 import { TypeHoverLayerData } from './hover-feature-info-layer-set';
 import { LayerApi } from '@/geo/layer/layer';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { Cast, TypeJsonObject } from '@/core/types/global-types';
 
 /**
  * A class to hold a set of layers associated with a value of any type.
@@ -88,6 +89,10 @@ export abstract class AbstractLayerSet {
 
         // Synchronize the layer name property in the config and the layer set object when the geoview instance is ready.
         if (!layerConfig.layerName) layerConfig.layerName = createLocalizedString(this.resultSet[layerPath].layerName!);
+
+        // There is a synch issue when layerName is not set on the layerConfig when layer is registered, it wil not appear in UI
+        if (this.resultSet[layerPath].data)
+          (Cast<TypeJsonObject>(this.resultSet[layerPath].data).layerName as string) = this.resultSet[layerPath].layerName!;
       }
 
       // Inform that the layer set has been updated

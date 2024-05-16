@@ -625,10 +625,13 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
        * @param {TypeOrderedLayerInfo[]} orderedLayerInfo - The ordered layer information.
        */
       setOrderedLayerInfo: (orderedLayerInfo: TypeOrderedLayerInfo[]): void => {
+        // We need to explicitly define ... for the array. If not subscribe does not fired
+        // TODO: refactor - setterActions in setState will recreate array if needed. We need to implement the pattern in all setterActions
+        // TD.CONT: We should have a deep equality function to compare previous / current
         set({
           mapState: {
             ...get().mapState,
-            orderedLayerInfo,
+            orderedLayerInfo: [...orderedLayerInfo],
           },
         });
       },
@@ -645,7 +648,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           layerInfo.hoverable = hoverable;
 
           // Redirect
-          get().mapState.setterActions.setOrderedLayerInfo([...curLayerInfo]);
+          get().mapState.setterActions.setOrderedLayerInfo(curLayerInfo);
         }
       },
 
@@ -662,7 +665,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           if (queryable) layerInfo.hoverable = queryable;
 
           // Redirect
-          get().mapState.setterActions.setOrderedLayerInfo([...curLayerInfo]);
+          get().mapState.setterActions.setOrderedLayerInfo(curLayerInfo);
         }
       },
 
