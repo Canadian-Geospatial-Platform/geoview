@@ -30,7 +30,7 @@ import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vect
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { TypeJsonObject } from '@/api/config/types/config-types';
+import { Cast, TypeJsonObject } from '@/api/config/types/config-types';
 
 // GV: CONFIG EXTRACTION
 // GV: This section of code was extracted and copied to the geoview config section
@@ -158,6 +158,8 @@ export class CSV extends AbstractGeoViewVector {
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
   protected override processLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+    // process the feature info configuration and attach the config to the instance for access by parent class
+    this.layerMetadata[layerConfig.layerPath] = Cast<TypeJsonObject>(layerConfig);
     return Promise.resolve(layerConfig);
   }
 
@@ -272,9 +274,7 @@ export class CSV extends AbstractGeoViewVector {
       return null;
     }
 
-    // process the feature info configuration and attach the config to the instance for access by parent class
     CSV.#processFeatureInfoConfig(headers, csvRows[1], [latIndex, lonIndex], layerConfig);
-    this.layerMetadata[layerConfig.layerPath] = layerConfig as unknown as TypeJsonObject;
 
     for (let i = 1; i < csvRows.length; i++) {
       const currentRow = csvRows[i];
