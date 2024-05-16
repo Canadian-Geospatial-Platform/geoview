@@ -293,6 +293,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   // #endregion
 
+  /**
+   * Re-order the footer tab buttons.
+   */
   const { topGroupNames, bottomGroupNames } = useMemo(() => {
     // Log
     logger.logTraceUseMemo('APP-BAR - panels');
@@ -304,6 +307,11 @@ export function AppBar(props: AppBarProps): JSX.Element {
     return { topGroupNames: topGroup, bottomGroupNames: bottomGroup };
   }, [buttonPanelGroups]);
 
+  /**
+   * Render Tab groups in appbar.
+   * @param {string[]} groupNames group that will be rendered in appbar.
+   * @returns JSX.Element
+   */
   const renderButtonGroup = (groupNames: string[]): ReactNode => {
     return (
       <>
@@ -326,7 +334,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                         tooltipPlacement="right"
                         className={`style3 ${activeAppBarPanelId === buttonPanel.button.id ? 'active' : ''}`}
                         size="small"
-                        onClick={(): void => handleButtonClicked(buttonPanel.button.id!, groupName)}
+                        onClick={() => handleButtonClicked(buttonPanel.button.id!, groupName)}
                       >
                         {buttonPanel.button.children}
                       </IconButton>
