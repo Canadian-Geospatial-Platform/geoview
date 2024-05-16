@@ -64,12 +64,12 @@ export type GeoViewLayerAddedResult = {
  */
 export class LayerApi {
   /** Layers with valid configuration for this map. */
-  // TODO: Refactor - Turn this #private if we don't want developers to be able to push to this in an
+  // TODO: Refactor - Turn this #private if we don't want developers to be able to push (or delete) in this array in an
   // TO.DOCONT: attempt to register layers without going through the proper process. Any other modifiers aren't enough, due to calls from pure JS.
   registeredLayers: TypeRegisteredLayers = {};
 
   // variable used to store all added geoview layers
-  // TODO: Refactor - Turn this #private if we don't want developers to be able to push to this in an
+  // TODO: Refactor - Turn this #private if we don't want developers to be able to push (or delete) in this array in an
   // TO.DOCONT: attempt to register layers without going through the proper process. Any other modifiers aren't enough, due to calls from pure JS.
   geoviewLayers: { [geoviewLayerId: string]: AbstractGeoViewLayer } = {};
 
@@ -78,10 +78,6 @@ export class LayerApi {
 
   // order to load layers
   initialLayerOrder: Array<TypeOrderedLayerInfo> = [];
-
-  // TODO: Uncomment this and implement in order to replace the layerLoadError on the AbstractGeoViewLayer class
-  /** layers of listOfLayerEntryConfig that did not load. */
-  // layerLoadError: { layer: string; loggerMessage: string }[] = [];
 
   /** used to reference the map viewer */
   mapViewer: MapViewer;
@@ -394,8 +390,8 @@ export class LayerApi {
       });
 
       // Prepare mandatory registrations
-      // TODO: Refactor - this shouldn't have to be mandatory! And not a function of the layer.
-      layerBeingAdded.initRegisteredLayers(this);
+      // TODO: Refactor - Review this function call in the refactoring rethinking
+      this.initRegisteredLayers(layerBeingAdded, layerBeingAdded.listOfLayerEntryConfig);
 
       // Create a promise about the layer will be on the map
       const promiseLayer = new Promise<void>((resolve, reject) => {
@@ -424,6 +420,31 @@ export class LayerApi {
 
     // Not added
     return undefined;
+  }
+
+  /** ***************************************************************************************************************************
+   * Process recursively the list of layer entries to initialize the registeredLayers object.
+   *
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries to process.
+   */
+  initRegisteredLayers(geoviewLayer: AbstractGeoViewLayer, listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
+    listOfLayerEntryConfig.forEach((layerConfig, i) => {
+      if (this.isLayerEntryConfigRegistered(layerConfig.layerPath)) {
+        geoviewLayer.layerLoadError.push({
+          layer: layerConfig.layerPath,
+          loggerMessage: `Duplicate layerPath (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`,
+        });
+        // Duplicate layer can't be kept because it has the same layer path than the first encontered layer.
+        // eslint-disable-next-line no-param-reassign
+        delete listOfLayerEntryConfig[i];
+      } else {
+        // TODO: Check - If we're doing the assignation here, is it still necessary to do it in setLayerAndLoadEndListeners!?
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.geoviewLayerInstance = geoviewLayer;
+        layerConfig.registerLayerConfig();
+      }
+      if (layerEntryIsGroupLayer(layerConfig)) this.initRegisteredLayers(geoviewLayer, layerConfig.listOfLayerEntryConfig);
+    });
   }
 
   /**
@@ -847,6 +868,26 @@ export class LayerApi {
   }
 
   /**
+   * Asynchronously returns the OpenLayer layer associated to a specific layer path.
+   * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
+   * Note this function uses the 'Async' suffix to differentiate it from 'getOLLayer'.
+   * @param {string} layerPath - The layer path to the layer's configuration.
+   * @param {number} timeout - Optionally indicate the timeout after which time to abandon the promise
+   * @param {number} checkFrequency - Optionally indicate the frequency at which to check for the condition on the layerabstract
+   * @returns {Promise<BaseLayer | LayerGroup>} Returns the OpenLayer layer associated to the layer path.
+   */
+  getOLLayerAsync(layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer | LayerGroup> {
+    // Make sure the open layer has been created, sometimes it can still be in the process of being created
+    return whenThisThen(
+      () => {
+        return this.getOLLayer(layerPath)!;
+      },
+      timeout,
+      checkFrequency
+    );
+  }
+
+  /**
    * Asynchronously gets a layer using its id and return the layer data.
    * If the layer we're searching for has to be processed, set mustBeProcessed to true when awaiting on this method.
    * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
@@ -884,40 +925,6 @@ export class LayerApi {
 
     // Throw
     throw new Error(`Layer ${geoviewLayerId} not found.`);
-  }
-
-  /**
-   * Returns the OpenLayer layer associated to a specific layer path.
-   * @param {string} layerPath - The layer path to the layer's configuration.
-   * @returns {BaseLayer | LayerGroup} Returns the OpenLayer layer associated to the layer path.
-   */
-  getOLLayerByLayerPath(layerPath: string): BaseLayer | LayerGroup {
-    // Return the olLayer object from the registered layers
-    const olLayer = this.getOLLayer(layerPath);
-    if (olLayer) return olLayer;
-    throw new Error(`Layer at path ${layerPath} not found.`);
-  }
-
-  /**
-   * Asynchronously returns the OpenLayer layer associated to a specific layer path.
-   * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
-   * Note this function uses the 'Async' suffix to differentiate it from 'getOLLayerByLayerPath'.
-   * @param {string} layerPath - The layer path to the layer's configuration.
-   * @param {number} timeout - Optionally indicate the timeout after which time to abandon the promise
-   * @param {number} checkFrequency - Optionally indicate the frequency at which to check for the condition on the layerabstract
-   * @returns {Promise<BaseLayer | LayerGroup>} Returns the OpenLayer layer associated to the layer path.
-   */
-  async getOLLayerByLayerPathAsync(layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer | LayerGroup> {
-    // Make sure the open layer has been created, sometimes it can still be in the process of being created
-    const promisedLayer = await whenThisThen(
-      () => {
-        return this.getOLLayer(layerPath);
-      },
-      timeout,
-      checkFrequency
-    );
-    // Here, the layer resolved
-    return promisedLayer!;
   }
 
   /**

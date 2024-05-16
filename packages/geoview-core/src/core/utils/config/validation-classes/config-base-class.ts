@@ -93,7 +93,7 @@ export class ConfigBaseClass {
     // TODO: Refactor - Get rid of this Object.assign pattern here and elsewhere unless explicitely commented why.
     Object.assign(this, layerConfig);
     // eslint-disable-next-line no-underscore-dangle
-    if (this.geoviewLayerConfig) this._layerPath = ConfigBaseClass.evaluateLayerPath(layerConfig);
+    if (this.geoviewLayerConfig) this._layerPath = ConfigBaseClass.#evaluateLayerPath(layerConfig);
     else logger.logError("Couldn't calculate layerPath because geoviewLayerConfig has an invalid value");
   }
 
@@ -114,7 +114,7 @@ export class ConfigBaseClass {
     // eslint-disable-next-line no-underscore-dangle
     this._layerId = newLayerId;
     // eslint-disable-next-line no-underscore-dangle
-    this._layerPath = ConfigBaseClass.evaluateLayerPath(this);
+    this._layerPath = ConfigBaseClass.#evaluateLayerPath(this);
   }
 
   /**
@@ -123,10 +123,10 @@ export class ConfigBaseClass {
    */
   get layerPath(): string {
     // TODO: Refactor - It would be better to not have a 'getter' that 'sets' a value at the same time.
-    // TO.DOCONT: Unfortunately, when commenting this out (to rely on the one in layerId) the Groups inside Groups aren't working anymore.
+    // TO.DOCONT: Unfortunately, when commenting this out (to rely on the one in layerId) things almost work, except for the Groups inside Groups which don't.
     // TO.DOCONT: The fix for this should be elsewhere and the line below commented out asap to prevent other issues like that.
     // eslint-disable-next-line no-underscore-dangle
-    this._layerPath = ConfigBaseClass.evaluateLayerPath(this);
+    this._layerPath = ConfigBaseClass.#evaluateLayerPath(this);
     // eslint-disable-next-line no-underscore-dangle
     return this._layerPath;
   }
@@ -167,6 +167,7 @@ export class ConfigBaseClass {
    * The layerStatus setter method for the ConfigBaseClass class and its descendant classes.
    * @param {string} newLayerStatus The new layerId value.
    */
+  // TODO: Refactor - Change this from a 'setter' to an actual set function, arguably too complex for just a 'setter'
   set layerStatus(newLayerStatus: TypeLayerStatus) {
     if (
       newLayerStatus === 'loaded' &&
@@ -202,13 +203,13 @@ export class ConfigBaseClass {
    *
    * @returns {string} Returns the layer path.
    */
-  static evaluateLayerPath(layerConfig: ConfigBaseClass, layerPath?: string): string {
+  static #evaluateLayerPath(layerConfig: ConfigBaseClass, layerPath?: string): string {
     let pathEnding = layerPath;
     if (pathEnding === undefined)
       pathEnding =
         layerConfig.layerIdExtension === undefined ? layerConfig.layerId : `${layerConfig.layerId}.${layerConfig.layerIdExtension}`;
     if (!layerConfig.parentLayerConfig) return `${layerConfig.geoviewLayerConfig!.geoviewLayerId!}/${pathEnding}`;
-    return this.evaluateLayerPath(
+    return this.#evaluateLayerPath(
       layerConfig.parentLayerConfig as GroupLayerEntryConfig,
       `${(layerConfig.parentLayerConfig as GroupLayerEntryConfig).layerId}/${pathEnding}`
     );
@@ -258,8 +259,8 @@ export class ConfigBaseClass {
     // TODO: REFACTOR - Do NOT do this! Bad design.
     (layerApi.registeredLayers[this.layerPath] as ConfigBaseClass) = this;
 
-    // TODO: Check - Move this registerToLayerSets closer to the others, when I comment the line it seems good, except
-    // TO.DOCONT: for an 'Anonymous' group layer that never got 'loaded'. See if we can fix this elsewhere and remove this.
+    // TODO: Check - Move this registerToLayerSets closer to the others, when I comment the line the Groups start breaking
+    // TO.DOCONT: See if we can fix this elsewhere and remove this.
     if (this.entryType !== CONST_LAYER_ENTRY_TYPES.GROUP)
       (this.geoviewLayerInstance as AbstractGeoViewLayer).registerToLayerSets(Cast<AbstractBaseLayerEntryConfig>(this));
 

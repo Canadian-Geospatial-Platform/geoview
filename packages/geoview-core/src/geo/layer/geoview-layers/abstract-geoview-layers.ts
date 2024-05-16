@@ -36,7 +36,6 @@ import {
   CONST_LAYER_ENTRY_TYPES,
   TypeLayerAndListenerType,
 } from '@/geo/map/map-schema-types';
-import { LayerApi } from '@/geo/layer/layer';
 import { GeoViewLayerCreatedTwiceError } from '@/geo/layer/exceptions/layer-exceptions';
 import { QueryType, TypeFeatureInfoEntry, TypeLocation, codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { Projection } from '@/geo/utils/projection';
@@ -363,29 +362,6 @@ export abstract class AbstractGeoViewLayer {
       if ((layerConfig as AbstractBaseLayerEntryConfig).layerStatus === 'error') return counter + 1;
       return counter;
     }, 0);
-  }
-
-  /** ***************************************************************************************************************************
-   * Process recursively the list of layer entries to initialize the registeredLayers object.
-   *
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries to process.
-   */
-  initRegisteredLayers(layerApi: LayerApi, listOfLayerEntryConfig: TypeLayerEntryConfig[] = this.listOfLayerEntryConfig): void {
-    listOfLayerEntryConfig.forEach((layerConfig, i) => {
-      if (layerApi.isLayerEntryConfigRegistered(layerConfig.layerPath)) {
-        this.layerLoadError.push({
-          layer: layerConfig.layerPath,
-          loggerMessage: `Duplicate layerPath (mapId:  ${this.mapId}, layerPath: ${layerConfig.layerPath})`,
-        });
-        // Duplicate layer can't be kept because it has the same layer path than the first encontered layer.
-        delete listOfLayerEntryConfig[i];
-      } else {
-        // TODO: Check - If we're doing this here, is it still necessary to do it in setLayerAndLoadEndListeners!?
-        layerConfig.geoviewLayerInstance = this;
-        layerConfig.registerLayerConfig();
-      }
-      if (layerEntryIsGroupLayer(layerConfig)) this.initRegisteredLayers(layerApi, layerConfig.listOfLayerEntryConfig);
-    });
   }
 
   /** ***************************************************************************************************************************
@@ -1534,7 +1510,7 @@ export abstract class AbstractGeoViewLayer {
       } else logger.logError(`Provision of a load end listener type is mandatory for layer path "${layerConfig.layerPath}".`);
     }
 
-    // Emit about it
+    // Emit about the layer creation so we can do something about it (part of the major layer refactor)
     this.#emitLayerCreation({ layer: olLayer! });
   }
 }
