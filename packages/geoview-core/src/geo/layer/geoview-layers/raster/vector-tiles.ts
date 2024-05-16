@@ -220,15 +220,13 @@ export class VectorTiles extends AbstractGeoViewRaster {
     const declutter = this.mapId !== 'LYR2';
 
     // eslint-disable-next-line no-param-reassign
-    layerConfig.olLayerAndLoadEndListeners = {
+    this.setLayerAndLoadEndListeners(layerConfig, {
       olLayer: new VectorTileLayer({ ...tileLayerOptions, declutter }),
       loadEndListenerType: 'tile',
-    };
+    });
 
     const resolutions = (layerConfig.olLayer as VectorTileLayer).getSource()?.getTileGrid()?.getResolutions();
 
-    // eslint-disable-next-line no-param-reassign
-    layerConfig.geoviewLayerInstance = this;
     if (this.metadata?.defaultStyles)
       applyStyle(
         layerConfig.olLayer as VectorTileLayer,

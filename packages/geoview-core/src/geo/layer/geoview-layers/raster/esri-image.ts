@@ -329,12 +329,10 @@ export class EsriImage extends AbstractGeoViewRaster {
     // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
 
     // eslint-disable-next-line no-param-reassign
-    layerConfig.olLayerAndLoadEndListeners = {
+    this.setLayerAndLoadEndListeners(layerConfig, {
       olLayer: new ImageLayer(imageLayerOptions),
       loadEndListenerType: 'image',
-    };
-    // eslint-disable-next-line no-param-reassign
-    layerConfig.geoviewLayerInstance = this;
+    });
 
     return Promise.resolve(layerConfig.olLayer);
   }

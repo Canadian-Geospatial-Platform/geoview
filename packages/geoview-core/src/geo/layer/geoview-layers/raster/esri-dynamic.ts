@@ -275,10 +275,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     const olLayer = new ImageLayer(imageLayerOptions);
 
     // TODO: Refactor - Wire it up
-    layerConfig.olLayerAndLoadEndListeners = {
+    this.setLayerAndLoadEndListeners(layerConfig, {
       olLayer,
       loadEndListenerType: 'image',
-    };
+    });
 
     return Promise.resolve(olLayer);
   }

@@ -242,10 +242,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     const olLayer = new VectorLayer(layerOptions);
 
     // TODO: Refactor - Wire it up
-    layerConfig.olLayerAndLoadEndListeners = {
+    this.setLayerAndLoadEndListeners(layerConfig, {
       olLayer,
       loadEndListenerType: 'features',
-    };
+    });
 
     return olLayer;
   }

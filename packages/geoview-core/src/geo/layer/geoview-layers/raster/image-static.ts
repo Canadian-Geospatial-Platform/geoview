@@ -276,12 +276,10 @@ export class ImageStatic extends AbstractGeoViewRaster {
     // GV            in the 'loading' state if the flag value is false.
 
     // eslint-disable-next-line no-param-reassign
-    layerConfig.olLayerAndLoadEndListeners = {
+    this.setLayerAndLoadEndListeners(layerConfig, {
       olLayer: new ImageLayer(staticImageOptions),
       loadEndListenerType: 'image',
-    };
-    // eslint-disable-next-line no-param-reassign
-    layerConfig.geoviewLayerInstance = this;
+    });
 
     return Promise.resolve(layerConfig.olLayer);
   }

@@ -34,6 +34,7 @@ import {
   TypeLayerStatus,
   TypeStyleGeometry,
   CONST_LAYER_ENTRY_TYPES,
+  TypeLayerAndListenerType,
 } from '@/geo/map/map-schema-types';
 import { LayerApi } from '@/geo/layer/layer';
 import { GeoViewLayerCreatedTwiceError } from '@/geo/layer/exceptions/layer-exceptions';
@@ -379,6 +380,7 @@ export abstract class AbstractGeoViewLayer {
         // Duplicate layer can't be kept because it has the same layer path than the first encontered layer.
         delete listOfLayerEntryConfig[i];
       } else {
+        // TODO: Check - If we're doing this here, is it still necessary to do it in setLayerAndLoadEndListeners!?
         layerConfig.geoviewLayerInstance = this;
         layerConfig.registerLayerConfig();
       }
@@ -1488,6 +1490,53 @@ export abstract class AbstractGeoViewLayer {
       }
     });
   }
+
+  /**
+   * The olLayerAndLoadEndListeners setter method for the ConfigBaseClass class and its descendant classes.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer configuration we are creating a layer for.
+   * @param {TypeLayerAndListenerType} layerAndListenerType The layer configuration we want to instanciate
+   *                                                        and its listener type.
+   */
+  setLayerAndLoadEndListeners(layerConfig: AbstractBaseLayerEntryConfig, layerAndListenerType: TypeLayerAndListenerType): void {
+    const { olLayer, loadEndListenerType } = layerAndListenerType;
+    // eslint-disable-next-line no-param-reassign, no-underscore-dangle
+    layerConfig._olLayer = olLayer;
+
+    // Keep reference
+    layerConfig.geoviewLayerInstance = this;
+
+    // Group layers have no listener
+    if (olLayer && layerConfig.entryType !== CONST_LAYER_ENTRY_TYPES.GROUP) {
+      if (loadEndListenerType) {
+        let loadErrorListener: () => void;
+
+        // Definition of the load end listener functions
+        const loadEndListener = (): void => {
+          layerConfig.loadedFunction();
+          // eslint-disable-next-line no-param-reassign
+          layerConfig.layerStatus = 'loaded';
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (olLayer! as any).get('source').un(`${loadEndListenerType}loaderror`, loadErrorListener);
+        };
+
+        loadErrorListener = (): void => {
+          // eslint-disable-next-line no-param-reassign
+          layerConfig.layerStatus = 'error';
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (olLayer! as any).get('source').un(`${loadEndListenerType}loadend`, loadEndListener);
+        };
+
+        // Activation of the load end listeners
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (olLayer! as any).get('source').once(`${loadEndListenerType}loaderror`, loadErrorListener);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (olLayer! as any).get('source').once(`${loadEndListenerType}loadend`, loadEndListener);
+      } else logger.logError(`Provision of a load end listener type is mandatory for layer path "${layerConfig.layerPath}".`);
+    }
+
+    // Emit about it
+    this.#emitLayerCreation({ layer: olLayer! });
+  }
 }
 
 /**
@@ -1554,7 +1603,7 @@ export type TypeLegend = {
  * Define an event for the delegate
  */
 export type LayerCreationEvent = {
-  layer: unknown;
+  layer: BaseLayer | LayerGroup;
 };
 
 /**

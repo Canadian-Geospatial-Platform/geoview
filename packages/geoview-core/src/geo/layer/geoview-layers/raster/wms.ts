@@ -551,11 +551,10 @@ export class WMS extends AbstractGeoViewRaster {
         // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
         // GV            in the 'loading' state if the flag value is false.
 
-        layerConfig.olLayerAndLoadEndListeners = {
+        this.setLayerAndLoadEndListeners(layerConfig, {
           olLayer: new ImageLayer(imageLayerOptions),
           loadEndListenerType: 'image',
-        };
-        layerConfig.geoviewLayerInstance = this;
+        });
 
         return Promise.resolve(layerConfig.olLayer);
       }

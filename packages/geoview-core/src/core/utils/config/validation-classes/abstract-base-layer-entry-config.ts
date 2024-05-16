@@ -4,9 +4,7 @@ import { TypeLocalizedString } from '@config/types/map-schema-types';
 // import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 
 import {
-  CONST_LAYER_ENTRY_TYPES,
   TypeBaseSourceVectorInitialConfig,
-  TypeLayerAndListenerType,
   TypeLayerInitialSettings,
   TypeSourceImageEsriInitialConfig,
   TypeSourceImageInitialConfig,
@@ -16,7 +14,6 @@ import {
   TypeVectorSourceInitialConfig,
   TypeVectorTileSourceInitialConfig,
 } from '@/geo/map/map-schema-types';
-import { logger } from '@/core/utils/logger';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeJsonValue } from '@/core/types/global-types';
 import { FilterNodeArrayType } from '@/geo/utils/renderer/geoview-renderer-types';
@@ -31,8 +28,10 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /** The display name of the layer (English/French). */
   layerName?: TypeLocalizedString;
 
+  /** The calculated filter equation */
   filterEquation?: FilterNodeArrayType;
 
+  /** Indicates if filter is on/off */
   legendFilterIsOff: boolean = false;
 
   /**
@@ -62,43 +61,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   constructor(layerConfig: AbstractBaseLayerEntryConfig) {
     super(layerConfig);
     Object.assign(this, layerConfig);
-  }
-
-  /**
-   * The olLayerAndLoadEndListeners setter method for the ConfigBaseClass class and its descendant classes.
-   * @param {TypeLayerAndListenerType} layerAndListenerType The layer configuration we want to instanciate
-   *                                                        and its listener type.
-   */
-  // TODO: Replace the setter/getter functions with methods acting on private properties.
-  set olLayerAndLoadEndListeners(layerAndListenerType: TypeLayerAndListenerType) {
-    const { olLayer, loadEndListenerType } = layerAndListenerType;
-    this._olLayer = olLayer;
-    // Group layers have no listener
-    if (olLayer && this.entryType !== CONST_LAYER_ENTRY_TYPES.GROUP) {
-      if (loadEndListenerType) {
-        let loadErrorListener: () => void;
-
-        // Definition of the load end listener functions
-        const loadEndListener = (): void => {
-          this.loadedFunction();
-          this.layerStatus = 'loaded';
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (this._olLayer! as any).get('source').un(`${loadEndListenerType}loaderror`, loadErrorListener);
-        };
-
-        loadErrorListener = (): void => {
-          this.layerStatus = 'error';
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (this._olLayer! as any).get('source').un(`${loadEndListenerType}loadend`, loadEndListener);
-        };
-
-        // Activation of the load end listeners
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (this._olLayer! as any).get('source').once(`${loadEndListenerType}loaderror`, loadErrorListener);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (this._olLayer! as any).get('source').once(`${loadEndListenerType}loadend`, loadEndListener);
-      } else logger.logError(`Provision of a load end listener type is mandatory for layer path "${this.layerPath}".`);
-    }
   }
 
   /**

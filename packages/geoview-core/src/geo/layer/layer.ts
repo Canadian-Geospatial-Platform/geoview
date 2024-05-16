@@ -850,7 +850,7 @@ export class LayerApi {
    * Asynchronously gets a layer using its id and return the layer data.
    * If the layer we're searching for has to be processed, set mustBeProcessed to true when awaiting on this method.
    * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
-   * Note this function uses the 'Async' suffix to differentiate it from 'geoviewLayer()'.
+   * Note this function uses the 'Async' suffix to differentiate it from 'getGeoviewLayer()'.
    * @param {string} geoviewLayerId - The geoview layer id to look for
    * @param {boolean} mustBeProcessed - Indicate if the layer we're searching for must be found only once processed
    * @param {number} timeout - Optionally indicate the timeout after which time to abandon the promise

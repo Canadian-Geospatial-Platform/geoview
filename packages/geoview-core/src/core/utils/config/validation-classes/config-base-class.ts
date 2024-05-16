@@ -64,7 +64,7 @@ export class ConfigBaseClass {
   // TODO: Refactor - There shouldn't be a coupling to an OpenLayers `BaseLayer` inside a Configuration class.
   // TO.DOCONT: That logic should be elsewhere so that the Configuration class remains portable and immutable.
   /** This property is used to link the displayed layer to its layer entry config. it is not part of the schema. */
-  protected _olLayer?: BaseLayer | LayerGroup;
+  _olLayer?: BaseLayer | LayerGroup;
 
   /** Flag indicating that the loaded signal arrived before the processed one */
   #waitForProcessedBeforeSendingLoaded = false;
@@ -122,10 +122,11 @@ export class ConfigBaseClass {
    * @returns {string} The layer path
    */
   get layerPath(): string {
-    // TODO: Check - It would be better to not have a 'getter' that 'sets' a value at the same time. Was it not sufficient to set
-    // TO.DOCONT: the layer path in the layerId setter as it's doing now? Let's comment it out for now
+    // TODO: Refactor - It would be better to not have a 'getter' that 'sets' a value at the same time.
+    // TO.DOCONT: Unfortunately, when commenting this out (to rely on the one in layerId) the Groups inside Groups aren't working anymore.
+    // TO.DOCONT: The fix for this should be elsewhere and the line below commented out asap to prevent other issues like that.
     // eslint-disable-next-line no-underscore-dangle
-    // this._layerPath = ConfigBaseClass.evaluateLayerPath(this);
+    this._layerPath = ConfigBaseClass.evaluateLayerPath(this);
     // eslint-disable-next-line no-underscore-dangle
     return this._layerPath;
   }
