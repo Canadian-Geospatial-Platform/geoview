@@ -30,6 +30,7 @@ import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vect
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { TypeJsonObject } from '@/api/config/types/config-types';
 
 // GV: CONFIG EXTRACTION
 // GV: This section of code was extracted and copied to the geoview-config package
@@ -258,6 +259,7 @@ export class CSV extends AbstractGeoViewVector {
       if (latList.includes(headers[i].toLowerCase())) latIndex = i;
       if (lonList.includes(headers[i].toLowerCase())) lonIndex = i;
     }
+
     if (latIndex === undefined || lonIndex === undefined) {
       logger.logError(
         `Could not find geographic data for ${getLocalizedValue(this.geoviewLayerName, AppEventProcessor.getDisplayLanguage(this.mapId))}`
@@ -269,7 +271,11 @@ export class CSV extends AbstractGeoViewVector {
       layerConfig.layerStatus = 'error';
       return null;
     }
+
+    // process the feature info configuration and attach the config to the instance for access by parent class
     CSV.#processFeatureInfoConfig(headers, csvRows[1], [latIndex, lonIndex], layerConfig);
+    this.layerMetadata[layerConfig.layerPath] = layerConfig as unknown as TypeJsonObject;
+
     for (let i = 1; i < csvRows.length; i++) {
       const currentRow = csvRows[i];
       const properties: { [key: string]: string | number } = {};
@@ -278,6 +284,7 @@ export class CSV extends AbstractGeoViewVector {
           properties[headers[j]] = currentRow[j] !== '' && Number(currentRow[j]) ? Number(currentRow[j]) : currentRow[j];
         }
       }
+
       const lon = currentRow[lonIndex] ? Number(currentRow[lonIndex]) : Infinity;
       const lat = currentRow[latIndex] ? Number(currentRow[latIndex]) : Infinity;
       if (Number.isFinite(lon) && Number.isFinite(lat)) {
@@ -289,6 +296,7 @@ export class CSV extends AbstractGeoViewVector {
         features.push(feature);
       }
     }
+
     return features;
   }
 

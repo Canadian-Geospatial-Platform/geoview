@@ -2,10 +2,10 @@ import { Coordinate } from 'ol/coordinate';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { logger } from '@/core/utils/logger';
-import { getLocalizedValue } from '@/core/utils/utilities';
+import { getLocalizedValue, whenThisThen } from '@/core/utils/utilities';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLayerEntryConfig, TypeLayerStatus } from '@/geo/map/map-schema-types';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { EventType, AbstractLayerSet, TypeFeatureInfoEntry, TypeLayerData, TypeResultSet } from './abstract-layer-set';
 import { LayerApi } from '@/geo/layer/layer';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
@@ -62,8 +62,19 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // Log
     logger.logTraceCore('FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerConfig.layerPath, Object.keys(this.resultSet));
 
-    const queryable = true; // layerConfig?.source?.featureInfo?.queryable;
-    return !!queryable;
+    // TODO: Make a util function for this check - this can be done prior to layer creation in config section
+    // for some layer type, we know there is no details
+    if (
+      [CONST_LAYER_TYPES.ESRI_IMAGE, CONST_LAYER_TYPES.IMAGE_STATIC, CONST_LAYER_TYPES.XYZ_TILES, CONST_LAYER_TYPES.VECTOR_TILES].includes(
+        geoviewLayer.type
+      )
+    )
+      return false;
+
+    // TODO: there is a synching issue with CSV were source is undefined when layer is registered. To overcome this,
+    // TD.CONT: if not specified to false by default, we will set it to true
+    const queryable = layerConfig?.source?.featureInfo?.queryable;
+    return !!(queryable || queryable === undefined);
   }
 
   /**
@@ -71,12 +82,28 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
    * @param {string} layerPath - The layer path
    */
-  protected override onRegisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
+  protected override async onRegisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): Promise<void> {
     // Log
     logger.logTraceCore('FEATURE-INFO-LAYER-SET - onRegisterLayer', layerConfig.layerPath, Object.keys(this.resultSet));
 
     // Call parent
     super.onRegisterLayer(geoviewLayer, layerConfig);
+
+    // TODO: there is bug when layerName is not set on the layerConfig when layer is registered, it wil not appear in UI
+    // TD.CONT: The layerName on resultSet gets updated later but not the one in data.
+    // TD.CONT: With this await, we wait until name is define
+    // TODO: refactor - when we use new config, layerName will be set by default - no more await
+    try {
+      // Check if the layer name is define in configuration, wait for it
+      await whenThisThen(
+        () =>
+          getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) !== undefined &&
+          getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) !== ''
+      );
+    } catch (error) {
+      // Log
+      logger.logError(`Couldn't retrieve the layer name`, error);
+    }
 
     this.resultSet[layerConfig.layerPath] = {
       layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) ?? '',

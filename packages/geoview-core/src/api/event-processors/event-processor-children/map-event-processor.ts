@@ -81,26 +81,26 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // #endregion FEATURE SELECTION
 
-    const unsubOrderedLayerInfo = store.subscribe(
-      (state) => state.mapState.orderedLayerInfo,
-      (cur) => {
-        // Log
-        logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - orderedLaterInfo', mapId, cur);
+    // const unsubOrderedLayerInfo = store.subscribe(
+    //   (state) => state.mapState.orderedLayerInfo,
+    //   (cur) => {
+    //     // Log
+    //     logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - orderedLaterInfo', mapId, cur);
 
-        const curVisibleLayers = cur
-          .map((layerInfo) => {
-            if (layerInfo.visible) return layerInfo.layerPath;
-            return undefined;
-          })
-          .filter((layerPath) => layerPath);
-        const prevVisibleLayers = [...store.getState().mapState.visibleLayers];
-        if (JSON.stringify(prevVisibleLayers) !== JSON.stringify(curVisibleLayers))
-          store.getState().mapState.setterActions.setVisibleLayers(curVisibleLayers as string[]);
-      }
-    );
+    //     const curVisibleLayers = cur
+    //       .map((layerInfo) => {
+    //         if (layerInfo.visible) return layerInfo.layerPath;
+    //         return undefined;
+    //       })
+    //       .filter((layerPath) => layerPath);
+    //     const prevVisibleLayers = [...store.getState().mapState.visibleLayers];
+    //     if (JSON.stringify(prevVisibleLayers) !== JSON.stringify(curVisibleLayers))
+    //       store.getState().mapState.setterActions.setVisibleLayers(curVisibleLayers as string[]);
+    //   }
+    // );
 
     // Return the array of subscriptions so they can be destroyed later
-    return [unsubMapHighlightedFeatures, unsubOrderedLayerInfo];
+    return [unsubMapHighlightedFeatures]; // , unsubOrderedLayerInfo];
   }
 
   /**
