@@ -3,6 +3,8 @@ import { logger } from '@/core/utils/logger';
 
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 
+// GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
+
 /**
  * Event processor focusing on interacting with the swiper state in the store.
  */
@@ -34,7 +36,7 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
    */
   static setLayerPaths(mapId: string, layerPaths: string[]): void {
     // set store layer paths
-    this.getSwiperState(mapId)?.actions.setLayerPaths(layerPaths);
+    this.getSwiperState(mapId)?.setterActions.setLayerPaths(layerPaths);
 
     // Log
     logger.logInfo('Added Swiper functionality for layer paths:', layerPaths);
@@ -60,7 +62,7 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
       updatedArray.push(layerPath);
 
       // Update the layer data array in the store
-      this.getSwiperState(mapId)!.actions.setLayerPaths(updatedArray);
+      this.getSwiperState(mapId)!.setterActions.setLayerPaths(updatedArray);
 
       // Log
       logger.logInfo('Added Swiper functionality for layer path:', layerPath);
@@ -93,7 +95,7 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
       updatedArray.splice(layerIndex, 1);
 
       // Update the layer data array in the store
-      this.getSwiperState(mapId)!.actions.setLayerPaths(updatedArray);
+      this.getSwiperState(mapId)!.setterActions.setLayerPaths(updatedArray);
 
       // Log
       logger.logInfo('Removed Swiper functionality for layer path:', layerPath);
@@ -119,7 +121,7 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
     const { layerPaths } = this.getSwiperState(mapId)!;
 
     // Update the layer data array in the store
-    this.getSwiperState(mapId)!.actions.setLayerPaths([]);
+    this.getSwiperState(mapId)!.setterActions.setLayerPaths([]);
 
     // Log
     logger.logInfo('Removed Swiper functionality for all layer paths', layerPaths);

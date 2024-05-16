@@ -9,6 +9,8 @@ import { TypeFeatureInfoLayerConfig, TypeLayerEntryConfig } from '@/geo/map/map-
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { AppEventProcessor } from './app-event-processor';
 
+// GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
+
 export class TimeSliderEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // Static functions for Typescript files to access store actions
@@ -74,7 +76,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     const timeSliderLayer = { [layerPath]: timeSliderValues };
 
     // Add it
-    this.getTimesliderState(mapId)?.actions.addTimeSliderLayer(timeSliderLayer);
+    this.getTimesliderState(mapId)?.setterActions.addTimeSliderLayer(timeSliderLayer);
 
     const { defaultValue, field, filtering, minAndMax, values } = timeSliderLayer[layerPath];
     this.applyFilters(geoviewLayer, layerPath, defaultValue, field, filtering, minAndMax, values);
@@ -87,7 +89,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    */
   static removeTimeSliderLayer(mapId: string, layerPath: string): void {
     // Redirect
-    this.getTimesliderState(mapId)?.actions.removeTimeSliderLayer(layerPath);
+    this.getTimesliderState(mapId)?.setterActions.removeTimeSliderLayer(layerPath);
   }
 
   /**

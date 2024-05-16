@@ -14,6 +14,8 @@ import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 
+// #region INTERFACES & TYPES
+
 export interface ILayerState {
   highlightedLayer: string;
   selectedLayer: TypeLegendLayer;
@@ -38,6 +40,8 @@ export interface ILayerState {
     zoomToLayerExtent: (layerPath: string) => Promise<void>;
   };
 }
+
+// #endregion INTERFACES & TYPES
 
 export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILayerState {
   const init = {
