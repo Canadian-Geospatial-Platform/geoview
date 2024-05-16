@@ -64,9 +64,10 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
-   * Method to execute when the layer is loaded.
+   * Overridable method being executed when the layer is loaded.
    */
   loadedFunction(): void {
+    // TODO: Refactor - Review design surrounding that function. Shouldn't be here.
     // Set visibility
     this.geoviewLayerInstance?.setVisible(this.initialSettings?.states?.visible !== false, this.layerPath);
   }

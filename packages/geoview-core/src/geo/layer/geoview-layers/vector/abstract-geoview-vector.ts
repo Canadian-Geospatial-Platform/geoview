@@ -353,23 +353,23 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter parameter is used alone to display
+   * Apply a view filter to the layer. When the combineLegendFilter flag is false, the filter parameter is used alone to display
    * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
    * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
    * is done.
    *
    * @param {string} layerPath The layer path to the layer's configuration.
    * @param {string} filter A filter to be used in place of the getViewFilter value.
-   * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
+   * @param {boolean} combineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath: string, filter: string, CombineLegendFilter = true): void {
+  applyViewFilter(layerPath: string, filter: string, combineLegendFilter = true): void {
     const layerConfig = this.getLayerEntryConfig(layerPath) as VectorLayerEntryConfig;
     // Log
     logger.logTraceCore('ABSTRACT-GEOVIEW-VECTOR - applyViewFilter', layerPath);
 
     let filterValueToUse = filter.replaceAll(/\s{2,}/g, ' ').trim();
-    layerConfig.legendFilterIsOff = !CombineLegendFilter;
-    if (CombineLegendFilter) layerConfig.layerFilter = filter;
+    layerConfig.legendFilterIsOff = !combineLegendFilter;
+    if (combineLegendFilter) layerConfig.layerFilter = filter;
 
     // Convert date constants using the externalFragmentsOrder derived from the externalDateFormat
     const searchDateEntry = [

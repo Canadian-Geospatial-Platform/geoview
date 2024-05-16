@@ -551,6 +551,7 @@ export class WMS extends AbstractGeoViewRaster {
         // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
         // GV            in the 'loading' state if the flag value is false.
 
+        // TODO: Refactor - Wire it up
         this.setLayerAndLoadEndListeners(layerConfig, {
           olLayer: new ImageLayer(imageLayerOptions),
           loadEndListenerType: 'image',
@@ -1035,7 +1036,7 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
+   * Apply a view filter to the layer. When the combineLegendFilter flag is false, the filter paramater is used alone to display
    * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
    * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
    * is done.
@@ -1043,9 +1044,9 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @param {string} layerPath The layer path to the layer's configuration.
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
-   * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
+   * @param {boolean} combineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath: string, filter: string, CombineLegendFilter = true): void {
+  applyViewFilter(layerPath: string, filter: string, combineLegendFilter = true): void {
     const layerConfig = this.getLayerEntryConfig(layerPath) as OgcWmsLayerEntryConfig;
     // Log
     logger.logTraceCore('WMS - applyViewFilter', layerPath);
@@ -1054,8 +1055,8 @@ export class WMS extends AbstractGeoViewRaster {
     const source = (layerConfig.olLayer as ImageLayer<ImageWMS>).getSource();
     if (source) {
       let filterValueToUse = filter;
-      layerConfig.legendFilterIsOff = !CombineLegendFilter;
-      if (CombineLegendFilter) layerConfig.layerFilter = filter;
+      layerConfig.legendFilterIsOff = !combineLegendFilter;
+      if (combineLegendFilter) layerConfig.layerFilter = filter;
 
       if (filterValueToUse) {
         filterValueToUse = filterValueToUse.replaceAll(/\s{2,}/g, ' ').trim();

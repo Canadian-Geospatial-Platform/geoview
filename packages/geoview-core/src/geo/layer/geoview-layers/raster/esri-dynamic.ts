@@ -775,7 +775,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
+   * Apply a view filter to the layer. When the combineLegendFilter flag is false, the filter paramater is used alone to display
    * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
    * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
    * is done.

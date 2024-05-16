@@ -30,14 +30,14 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     // TODO: Make a util function for this check - this can be done prior to layer creation in config section
     // for some layer type, we know there is no data-table
     if (
-      layerConfig.geoviewLayerInstance &&
+      layerConfig.schemaTag &&
       [
         CONST_LAYER_TYPES.ESRI_IMAGE,
         CONST_LAYER_TYPES.IMAGE_STATIC,
         CONST_LAYER_TYPES.XYZ_TILES,
         CONST_LAYER_TYPES.VECTOR_TILES,
         CONST_LAYER_TYPES.WMS,
-      ].includes(layerConfig.geoviewLayerInstance.type)
+      ].includes(layerConfig.schemaTag)
     )
       return false;
 

@@ -11,7 +11,7 @@ import Feature from 'ol/Feature';
 
 import { TypeLocalizedString } from '@config/types/map-schema-types';
 
-import { generateId, getXMLHttpRequest, createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
+import { generateId, getXMLHttpRequest, createLocalizedString, getLocalizedValue, whenThisThen } from '@/core/utils/utilities';
 import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';
 import { TimeDimension, TypeDateFragments, DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
@@ -1512,6 +1512,29 @@ export abstract class AbstractGeoViewLayer {
 
     // Emit about the layer creation so we can do something about it (part of the major layer refactor)
     this.#emitLayerCreation({ layer: olLayer! });
+  }
+
+  /**
+   * Returns a Promise that will be resolved once the given layer is in a processed phase.
+   * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
+   * @param {AbstractGeoViewLayer} geoviewLayerConfig - The layer object
+   * @param {number} timeout - Optionally indicate the timeout after which time to abandon the promise
+   * @param {number} checkFrequency - Optionally indicate the frequency at which to check for the condition on the layerabstract
+   * @returns {Promise<void>} A promise when done waiting
+   * @throws An exception when the layer failed to become in processed phase before the timeout expired
+   */
+  async waitForAllLayerStatusAreGreaterThanOrEqualTo(timeout?: number, checkFrequency?: number): Promise<void> {
+    // Wait for the processed phase
+    await whenThisThen(
+      () => {
+        return this.allLayerStatusAreGreaterThanOrEqualTo('processed');
+      },
+      timeout,
+      checkFrequency
+    );
+
+    // Resolve successfully, otherwise an exception has been thrown already
+    return Promise.resolve();
   }
 }
 

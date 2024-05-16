@@ -275,7 +275,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
     // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
     // GV            in the 'loading' state if the flag value is false.
 
-    // eslint-disable-next-line no-param-reassign
+    // TODO: Refactor - Wire it up
     this.setLayerAndLoadEndListeners(layerConfig, {
       olLayer: new ImageLayer(staticImageOptions),
       loadEndListenerType: 'image',

@@ -219,7 +219,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     // TODO remove after demoing again
     const declutter = this.mapId !== 'LYR2';
 
-    // eslint-disable-next-line no-param-reassign
+    // TODO: Refactor - Wire it up
     this.setLayerAndLoadEndListeners(layerConfig, {
       olLayer: new VectorTileLayer({ ...tileLayerOptions, declutter }),
       loadEndListenerType: 'tile',

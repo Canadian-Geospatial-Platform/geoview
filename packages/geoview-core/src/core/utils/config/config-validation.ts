@@ -276,6 +276,7 @@ export class ConfigValidation {
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entry configurations to process.
    * @param {TypeGeoviewLayerConfig | GroupLayerEntryConfig} parentLayerConfig - The parent layer configuration of all the
    * layer entry configurations found in the list of layer entries.
+   * @private
    */
   static #processLayerEntryConfig(
     geoviewLayerConfig: TypeGeoviewLayerConfig,

@@ -828,26 +828,6 @@ export class LayerApi {
   }
 
   /**
-   * Verifies if a layer is registered. Returns true if registered.
-   * @param {string} layerPath - The layer path to check.
-   * @returns {boolean} Returns true if the layer configuration is registered.
-   */
-  isLayerEntryConfigRegistered(layerPath: string): boolean {
-    return !!this.registeredLayers[layerPath];
-  }
-
-  /** ***************************************************************************************************************************
-   * Get the layer configuration of the specified layer path.
-   *
-   * @param {string} layerPath The layer path.
-   *
-   * @returns {TypeLayerEntryConfig | undefined} The layer configuration or undefined if not found.
-   */
-  getLayerEntryConfig(layerPath: string): TypeLayerEntryConfig | undefined {
-    return this.registeredLayers?.[layerPath];
-  }
-
-  /**
    * Returns the GeoView instance associated to the layer path. The first element of the layerPath
    * is the geoviewLayerId.
    * @param {string} layerPath - The layer path to the layer's configuration.
@@ -856,35 +836,6 @@ export class LayerApi {
   getGeoviewLayer(layerPath: string): AbstractGeoViewLayer | undefined {
     // The first element of the layerPath is the geoviewLayerId
     return this.geoviewLayers[layerPath.split('/')[0]];
-  }
-
-  /**
-   * Returns the OpenLayer instance associated with the layer path.
-   * @param {string} layerPath - The layer path to the layer's configuration.
-   * @returns {AbstractGeoViewLayer} Returns the geoview instance associated to the layer path.
-   */
-  getOLLayer(layerPath: string): BaseLayer | LayerGroup | undefined {
-    return this.getLayerEntryConfig(layerPath)?.olLayer;
-  }
-
-  /**
-   * Asynchronously returns the OpenLayer layer associated to a specific layer path.
-   * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
-   * Note this function uses the 'Async' suffix to differentiate it from 'getOLLayer'.
-   * @param {string} layerPath - The layer path to the layer's configuration.
-   * @param {number} timeout - Optionally indicate the timeout after which time to abandon the promise
-   * @param {number} checkFrequency - Optionally indicate the frequency at which to check for the condition on the layerabstract
-   * @returns {Promise<BaseLayer | LayerGroup>} Returns the OpenLayer layer associated to the layer path.
-   */
-  getOLLayerAsync(layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer | LayerGroup> {
-    // Make sure the open layer has been created, sometimes it can still be in the process of being created
-    return whenThisThen(
-      () => {
-        return this.getOLLayer(layerPath)!;
-      },
-      timeout,
-      checkFrequency
-    );
   }
 
   /**
@@ -915,7 +866,7 @@ export class LayerApi {
 
       try {
         // Waiting for the processed phase, possibly throwing exception if that's not happening
-        await LayerApi.waitForAllLayerStatusAreGreaterThanOrEqualTo(layer, timeout, checkFrequency);
+        await layer.waitForAllLayerStatusAreGreaterThanOrEqualTo(timeout, checkFrequency);
         return layer;
       } catch (error) {
         // Throw
@@ -928,30 +879,52 @@ export class LayerApi {
   }
 
   /**
-   * Returns a Promise that will be resolved once the given layer is in a processed phase.
+   * Verifies if a layer is registered. Returns true if registered.
+   * @param {string} layerPath - The layer path to check.
+   * @returns {boolean} Returns true if the layer configuration is registered.
+   */
+  isLayerEntryConfigRegistered(layerPath: string): boolean {
+    return !!this.registeredLayers[layerPath];
+  }
+
+  /** ***************************************************************************************************************************
+   * Get the layer configuration of the specified layer path.
+   *
+   * @param {string} layerPath The layer path.
+   *
+   * @returns {TypeLayerEntryConfig | undefined} The layer configuration or undefined if not found.
+   */
+  getLayerEntryConfig(layerPath: string): TypeLayerEntryConfig | undefined {
+    return this.registeredLayers?.[layerPath];
+  }
+
+  /**
+   * Returns the OpenLayer instance associated with the layer path.
+   * @param {string} layerPath - The layer path to the layer's configuration.
+   * @returns {AbstractGeoViewLayer} Returns the geoview instance associated to the layer path.
+   */
+  getOLLayer(layerPath: string): BaseLayer | LayerGroup | undefined {
+    return this.getLayerEntryConfig(layerPath)?.olLayer;
+  }
+
+  /**
+   * Asynchronously returns the OpenLayer layer associated to a specific layer path.
    * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
-   * @param {AbstractGeoViewLayer} geoviewLayerConfig - The layer object
+   * Note this function uses the 'Async' suffix to differentiate it from 'getOLLayer'.
+   * @param {string} layerPath - The layer path to the layer's configuration.
    * @param {number} timeout - Optionally indicate the timeout after which time to abandon the promise
    * @param {number} checkFrequency - Optionally indicate the frequency at which to check for the condition on the layerabstract
-   * @returns {Promise<void>} A promise when done waiting
-   * @throws An exception when the layer failed to become in processed phase before the timeout expired
+   * @returns {Promise<BaseLayer | LayerGroup>} Returns the OpenLayer layer associated to the layer path.
    */
-  static async waitForAllLayerStatusAreGreaterThanOrEqualTo(
-    geoviewLayerConfig: AbstractGeoViewLayer,
-    timeout?: number,
-    checkFrequency?: number
-  ): Promise<void> {
-    // Wait for the processed phase
-    await whenThisThen(
+  getOLLayerAsync(layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer | LayerGroup> {
+    // Make sure the open layer has been created, sometimes it can still be in the process of being created
+    return whenThisThen(
       () => {
-        return geoviewLayerConfig.allLayerStatusAreGreaterThanOrEqualTo('processed');
+        return this.getOLLayer(layerPath)!;
       },
       timeout,
       checkFrequency
     );
-
-    // Resolve successfully, otherwise an exception has been thrown already
-    return Promise.resolve();
   }
 
   /**
