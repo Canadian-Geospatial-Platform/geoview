@@ -30,7 +30,7 @@ interface DataPanelType {
  * @returns {JSX.Element} Data table as react element.
  */
 
-export function Datapanel({ fullWidth }: DataPanelType): JSX.Element {
+export function Datapanel({ fullWidth = false }: DataPanelType): JSX.Element {
   const { t } = useTranslation();
   const theme = useTheme();
 
@@ -191,11 +191,14 @@ export function Datapanel({ fullWidth }: DataPanelType): JSX.Element {
     return null;
   };
 
-  const handleGuideIsOpen = (guideIsOpen: boolean): void => {
-    if (guideIsOpen) {
-      setSelectedLayerPath('');
-    }
-  };
+  const handleGuideIsOpen = useCallback(
+    (guideIsOpen: boolean): void => {
+      if (guideIsOpen) {
+        setSelectedLayerPath('');
+      }
+    },
+    [setSelectedLayerPath]
+  );
 
   const memoLayerList = useMemo(() => {
     // Log
@@ -230,8 +233,3 @@ export function Datapanel({ fullWidth }: DataPanelType): JSX.Element {
     </Layout>
   );
 }
-
-// TODO: Refactor - Remove defaultProps as it's no longer a good practice
-Datapanel.defaultProps = {
-  fullWidth: false,
-};

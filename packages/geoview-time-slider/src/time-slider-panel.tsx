@@ -110,11 +110,14 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     }
   }, [memoLayersList, selectedLayerPath]);
 
-  const handleGuideIsOpen = (guideIsOpen: boolean): void => {
-    if (guideIsOpen) {
-      setSelectedLayerPath('');
-    }
-  };
+  const handleGuideIsOpen = useCallback(
+    (guideIsOpen: boolean): void => {
+      if (guideIsOpen) {
+        setSelectedLayerPath('');
+      }
+    },
+    [setSelectedLayerPath]
+  );
 
   return (
     <Layout

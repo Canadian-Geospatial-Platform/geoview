@@ -31,15 +31,15 @@ interface ResponsiveGridLayoutExposedMethods {
 const ResponsiveGridLayout = forwardRef(
   (
     {
-      leftTop,
-      leftMain,
-      rightTop,
-      rightMain,
-      fullWidth,
-      guideContentIds,
+      leftTop = null,
+      leftMain = null,
+      rightTop = null,
+      rightMain = null,
+      fullWidth = false,
+      guideContentIds = [],
       onIsEnlargeClicked,
       onGuideIsOpen,
-      hideEnlargeBtn,
+      hideEnlargeBtn = false,
     }: ResponsiveGridLayoutProps,
     ref: Ref<ResponsiveGridLayoutExposedMethods>
   ) => {
@@ -76,8 +76,7 @@ const ResponsiveGridLayout = forwardRef(
 
     useEffect(() => {
       onGuideIsOpen?.(isGuideOpen);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isGuideOpen]); // TODO: Check - Try to add the dependency on `onGuideIsOpen` here, making it a useCallback if necessary and test
+    }, [isGuideOpen, onGuideIsOpen]);
 
     useEffect(() => {
       // if hideEnlargeBtn changes to true and isEnlarged is true, set isEnlarged to false
@@ -105,11 +104,11 @@ const ResponsiveGridLayout = forwardRef(
       [onIsEnlargeClicked]
     );
 
-    const handleOpenGuide = (): void => {
+    const handleOpenGuide = useCallback((): void => {
       if (guideContentIds) {
         setIsGuideOpen(true);
       }
-    };
+    }, [setIsGuideOpen, guideContentIds]);
 
     // If we're on mobile
     if (theme.breakpoints.down('md')) {
@@ -330,18 +329,6 @@ const ResponsiveGridLayout = forwardRef(
 );
 
 ResponsiveGridLayout.displayName = 'ResponsiveGridLayout';
-
-// TODO: Refactor - Remove defaultProps as it's no longer a good practice
-ResponsiveGridLayout.defaultProps = {
-  leftTop: null,
-  leftMain: null,
-  rightTop: null,
-  fullWidth: false,
-  guideContentIds: [],
-  onIsEnlargeClicked: undefined,
-  hideEnlargeBtn: false,
-  onGuideIsOpen: undefined,
-};
 
 export { ResponsiveGridLayout };
 export type { ResponsiveGridLayoutExposedMethods };
