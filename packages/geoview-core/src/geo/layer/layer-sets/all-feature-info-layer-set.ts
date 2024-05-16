@@ -28,7 +28,8 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     // Log
     logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerConfig.layerPath, Object.keys(this.resultSet));
 
-    // TODO: Make a util function for this check
+    // TODO: Make a util function for this check - this can be done prior to layer creation in config section
+    // for some layer type, we know there is no data-table
     if (
       [
         CONST_LAYER_TYPES.ESRI_IMAGE,
@@ -40,8 +41,10 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     )
       return false;
 
+    // TODO: there is a synching issue, sometimes source is undefined when layer is registered. To overcome this,
+    // TD.CONT: if not specified to false by default, we will set it to true
     const queryable = layerConfig?.source?.featureInfo?.queryable;
-    return !!queryable;
+    return !!(queryable || queryable === undefined);
   }
 
   /**

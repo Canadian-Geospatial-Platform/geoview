@@ -5,7 +5,7 @@ import { logger } from '@/core/utils/logger';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLayerEntryConfig, TypeLayerStatus } from '@/geo/map/map-schema-types';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { EventType, AbstractLayerSet, TypeFeatureInfoEntry, TypeLayerData, TypeResultSet } from './abstract-layer-set';
 import { LayerApi } from '@/geo/layer/layer';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
@@ -62,8 +62,19 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // Log
     logger.logTraceCore('FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerConfig.layerPath, Object.keys(this.resultSet));
 
+    // TODO: Make a util function for this check - this can be done prior to layer creation in config section
+    // for some layer type, we know there is no details
+    if (
+      [CONST_LAYER_TYPES.ESRI_IMAGE, CONST_LAYER_TYPES.IMAGE_STATIC, CONST_LAYER_TYPES.XYZ_TILES, CONST_LAYER_TYPES.VECTOR_TILES].includes(
+        geoviewLayer.type
+      )
+    )
+      return false;
+
+    // TODO: there is a synching issue, sometimes source is undefined when layer is registered. To overcome this,
+    // TD.CONT: if not specified to false by default, we will set it to true
     const queryable = layerConfig?.source?.featureInfo?.queryable;
-    return !!queryable;
+    return !!(queryable || queryable === undefined);
   }
 
   /**
