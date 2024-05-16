@@ -632,8 +632,9 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           },
         });
 
-        // GV subscrite from map-eent-processor is unstable for layer coming from PyGeoProcess, event if layer is added
-        // GV to the orderedLayerInfo array, the subscribe does not fired the callback. By copying here, we enfore it...
+        // GV subscrite from map-eent-processor is unstable for layer coming from PyGeoApiProcess, even if layer is added
+        // GV to the orderedLayerInfo array, the subscribe does not fired the callback. By copying here, we enforce it...
+        // update array of visible layer from modification to the orderedLayerInfo who holds layers states and order
         const curVisibleLayers = orderedLayerInfo
           .map((layerInfo) => {
             if (layerInfo.visible) return layerInfo.layerPath;
