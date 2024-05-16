@@ -5,13 +5,15 @@ import { TypeLayerData } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 
+// GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with GeochartEventProcessor vs GeochartState
+
+// #region INTERFACES & TYPES
+
+type GeochartActions = IGeochartState['actions'];
+
 export type GeoChartStoreByLayerPath = {
   [layerPath: string]: GeoChartConfig;
 };
-
-// GV Important: See notes in header of GeochartEventProcessor file for information on the paradigm to apply when working with GeochartEventProcessor vs GeochartState
-
-// #region INTERFACES
 
 export interface IGeochartState {
   geochartChartsConfig: GeoChartStoreByLayerPath;
@@ -37,13 +39,13 @@ export interface IGeochartState {
   };
 }
 
-// #endregion INTERFACES
+// #endregion INTERFACES & TYPES
 
 /**
  * Initializes a Geochart state object.
- * @param {TypeSetStore} set The store set callback function
- * @param {TypeSetStore} get The store get callback function
- * @returns {IGeochartState} The Geochart state object
+ * @param {TypeSetStore} set - The store set callback function
+ * @param {TypeSetStore} get - The store get callback function
+ * @returns {IGeochartState} - The Geochart state object
  */
 export function initializeGeochartState(set: TypeSetStore, get: TypeGetStore): IGeochartState {
   const init = {
@@ -137,6 +139,4 @@ export const useGeochartLayerDataArrayBatch = (): TypeLayerData[] =>
   useStore(useGeoViewStore(), (state) => state.geochartState.layerDataArrayBatch);
 export const useGeochartSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.geochartState.selectedLayerPath);
 
-// TODO: Refactor - We should explicit a type for the geochartState.actions
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const useGeochartStoreActions = (): any => useStore(useGeoViewStore(), (state) => state.geochartState.actions);
+export const useGeochartStoreActions = (): GeochartActions => useStore(useGeoViewStore(), (state) => state.geochartState.actions);

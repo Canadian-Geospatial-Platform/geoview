@@ -6,6 +6,8 @@ import { TypeLayerData } from '@/geo/layer/layer-sets/abstract-layer-set';
 
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
 
+// GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
+
 /**
  * Event processor focusing on interacting with the geochart state in the store.
  */

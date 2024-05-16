@@ -7,6 +7,8 @@ import { EventType, TypeLayerData } from '@/geo/layer/layer-sets/abstract-layer-
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
 import { UIEventProcessor } from './ui-event-processor';
 
+// GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
+
 /**
  * Event processor focusing on interacting with the feature info state in the store (currently called detailsState).
  */

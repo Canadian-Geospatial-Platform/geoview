@@ -7,6 +7,8 @@ import { createGuideObject } from '@/core/utils/utilities';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { MapEventProcessor } from './map-event-processor';
 
+// GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
+
 export class AppEventProcessor extends AbstractEventProcessor {
   // Static functions for Typescript files to access store actions
   // **********************************************************
