@@ -140,8 +140,13 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       // If there was some features on this propagation
       if (atLeastOneFeature) {
         // If the current tab is not 'details' nor 'geochart', switch to details
-        if (!['details', 'geochart'].includes(UIEventProcessor.getActiveFooterBarTab(mapId)))
+        if (!['details', 'geochart'].includes(UIEventProcessor.getActiveFooterBarTab(mapId))) {
           UIEventProcessor.setActiveFooterBarTab(mapId, 'details');
+        }
+
+        if (UIEventProcessor.getActiveAppBarPanelId(mapId) !== 'AppbarPanelButtonDetails') {
+          UIEventProcessor.setActiveAppBarPanelId(mapId, 'AppbarPanelButtonDetails');
+        }
       }
     }
 
