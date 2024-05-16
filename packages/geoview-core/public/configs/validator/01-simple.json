@@ -1,0 +1,163 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "minZoom": 5,
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "LYR1",
+        "geoviewLayerName": {
+          "en": "Temporal Test Bed",
+          "fr": "Banc d\\'essai temporel"
+        },
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/",
+          "fr": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_fr/MapServer/"
+        },
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "geometryType": "point",
+            "layerName": {
+              "en": "stations-Temporal",
+              "fr": "stations-Temporal"
+            },
+            "initialSettings": {
+              "controls": {
+                "query": true
+              },
+              "states": {
+                "queryable": true
+              }
+            },
+            "attributions": [],
+            "temporalDimension": {
+              "field": "Date",
+              "default": "2021-09-01T00:00:00Z",
+              "unitSymbol": "",
+              "range": {
+                "range": [
+                  "2020-01-01T00:00:00Z",
+                  "2020-03-01T00:00:00Z",
+                  "2020-05-01T00:00:00Z",
+                  "2020-07-01T00:00:00Z",
+                  "2020-09-01T00:00:00Z",
+                  "2020-11-01T00:00:00Z",
+                  "2021-01-01T00:00:00Z",
+                  "2021-03-01T00:00:00Z",
+                  "2021-05-01T00:00:00Z",
+                  "2021-07-01T00:00:00Z",
+                  "2021-09-01T00:00:00Z"
+                ],
+                "type": "discrete"
+              },
+              "singleHandle": false
+            },
+            "source": {
+              "layerFilter": "",
+              "maxRecordCount": 0,
+              "featureInfo": {
+                "nameField": "Location_Emplacement",
+                "outfields": [
+                  {
+                    "name": "Location_Emplacement",
+                    "alias": "Location_Emplacement",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "Province",
+                    "alias": "Province",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "Station",
+                    "alias": "Station",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "OBJECTID",
+                    "alias": "OBJECTID",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "X",
+                    "alias": "X",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "Y",
+                    "alias": "Y",
+                    "type": "number",
+                    "domain": []
+                  },
+                  {
+                    "name": "Status_EN",
+                    "alias": "Status_EN",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "Status_FR",
+                    "alias": "Status_FR",
+                    "type": "string",
+                    "domain": []
+                  },
+                  {
+                    "name": "Date",
+                    "alias": "Date",
+                    "type": "date",
+                    "domain": []
+                  }
+                ]
+              }
+            },
+            "style": {
+              "type": "simple",
+              "hasDefault": false,
+              "info": [
+                {
+                  "label": "",
+                  "visible": true,
+                  "settings": {
+                    "type": "simpleSymbol",
+                    "symbol": "circle",
+                    "stroke": {
+                      "color": "rgba(0,0,0,1)",
+                      "lineStyle": "solid",
+                      "width": 1
+                    },
+                    "size": 2.668,
+                    "rotation": 0,
+                    "offset": [0,0],
+                    "color": "rgba(0,156,130,1)"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map"],
+  "footerBar": {
+    "tabs": {
+      "core": ["legend", "layers", "details", "data-table"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

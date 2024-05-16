@@ -1,5 +1,5 @@
 // GV: CONFIG EXTRACTION
-// GV: This file was extracted and copied to the geoview-config package
+// GV: This file was extracted and copied to the geoview config section
 // GV: |||||
 // GV: vvvvv
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
@@ -136,7 +136,7 @@ export type TypeBaseSourceVectorInitialConfig = {
   /** Maximum number of records to fetch (default: 0). */
   maxRecordCount: number;
   /** Filter to apply on features of this layer. */
-  layerFilter: string;
+  layerFilter?: string;
   /** Settings to use when loading a GeoJSON layer using a POST instead of a GET */
   postSettings?: TypePostSettings;
   /** The feature format used by the XHR feature loader when url is set. */
@@ -525,12 +525,12 @@ export type TypeServiceUrls = {
 // TODO: Move all the type guard functions in the typeGuards file.
 /**
  * type guard function that redefines a TypeBaseVectorConfig as a TypeLineStringVectorConfig if the type attribute of the
- * verifyIfConfig parameter is 'lineString'. The type ascention applies only to the true block of the if clause that use
+ * verifyIfConfig parameter is 'lineString'. The type assertion applies only to the true block of the if clause that use
  * this function.
  *
- * @param {TypeBaseVectorConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
+ * @param {TypeBaseVectorConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
  *
- * @returns {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type assertion is valid.
  */
 export const isLineStringVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): verifyIfConfig is TypeLineStringVectorConfig => {
   return verifyIfConfig?.type === 'lineString';
@@ -538,12 +538,12 @@ export const isLineStringVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): 
 
 /**
  * type guard function that redefines a TypeBaseVectorConfig as a TypePolygonVectorConfig if the type attribute of the
- * verifyIfConfig parameter is 'filledPolygon'. The type ascention applies only to the true block of the if clause that use
+ * verifyIfConfig parameter is 'filledPolygon'. The type assertion applies only to the true block of the if clause that use
  * this function.
  *
- * @param {TypeBaseVectorConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
+ * @param {TypeBaseVectorConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
  *
- * @returns {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type assertion is valid.
  */
 export const isFilledPolygonVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): verifyIfConfig is TypePolygonVectorConfig => {
   return verifyIfConfig?.type === 'filledPolygon';
@@ -551,12 +551,12 @@ export const isFilledPolygonVectorConfig = (verifyIfConfig: TypeBaseVectorConfig
 
 /**
  * type guard function that redefines a TypeBaseVectorConfig as a TypeSimpleSymbolVectorConfig if the type attribute of the
- * verifyIfConfig parameter is 'simpleSymbol'. The type ascention applies only to the true block of the if clause that use
+ * verifyIfConfig parameter is 'simpleSymbol'. The type assertion applies only to the true block of the if clause that use
  * this function.
  *
- * @param {TypeBaseVectorConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
+ * @param {TypeBaseVectorConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
  *
- * @returns {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type assertion is valid.
  */
 export const isSimpleSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): verifyIfConfig is TypeSimpleSymbolVectorConfig => {
   return verifyIfConfig?.type === 'simpleSymbol';
@@ -564,12 +564,12 @@ export const isSimpleSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorConfig)
 
 /**
  * type guard function that redefines a TypeBaseVectorConfig as a TypeIconSymbolVectorConfig if the type attribute of the
- * verifyIfConfig parameter is 'iconSymbol'. The type ascention applies only to the true block of the if clause that use
+ * verifyIfConfig parameter is 'iconSymbol'. The type assertion applies only to the true block of the if clause that use
  * this function.
  *
- * @param {TypeBaseVectorConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
+ * @param {TypeBaseVectorConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
  *
- * @returns {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type assertion is valid.
  */
 export const isIconSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): verifyIfConfig is TypeIconSymbolVectorConfig => {
   return verifyIfConfig?.type === 'iconSymbol';
@@ -711,13 +711,13 @@ export type TypeBaseStyleConfig = {
 
 /**
  * type guard function that redefines a TypeBaseStyleConfig as a TypeSimpleStyleConfig if the type attribute of the
- * verifyIfConfig parameter is 'simple'. The type ascention applies only to the true block of the if clause that use
+ * verifyIfConfig parameter is 'simple'. The type assertion applies only to the true block of the if clause that use
  * this function.
  *
  * @param {TypeStyleSettings | TypeKindOfVectorSettings} verifyIfConfig Polymorphic object to test in order to determine if
- * the type ascention is valid.
+ * the type assertion is valid.
  *
- * @returns {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type assertion is valid.
  */
 export const isSimpleStyleConfig = (
   verifyIfConfig: TypeStyleSettings | TypeKindOfVectorSettings
@@ -753,13 +753,13 @@ export type TypeUniqueValueStyleInfo = {
 
 /**
  * type guard function that redefines a TypeStyleSettings | TypeKindOfVectorSettings as a TypeUniqueValueStyleConfig if the
- * styleType attribute of the verifyIfConfig parameter is 'uniqueValue'. The type ascention applies only to the true block of the
+ * styleType attribute of the verifyIfConfig parameter is 'uniqueValue'. The type assertion applies only to the true block of the
  * if clause that use this function.
  *
  * @param {TypeStyleSettings | TypeKindOfVectorSettings} verifyIfConfig Polymorphic object to test in order to determine if the
- * type ascention is valid.
+ * type assertion is valid.
  *
- * @returns {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type assertion is valid.
  */
 export const isUniqueValueStyleConfig = (
   verifyIfConfig: TypeStyleSettings | TypeKindOfVectorSettings
@@ -804,13 +804,13 @@ export type TypeClassBreakStyleInfo = {
 
 /**
  * type guard function that redefines a TypeStyleSettings | TypeKindOfVectorSettings as a TypeClassBreakStyleConfig if the
- * styleType attribute of the verifyIfConfig parameter is 'classBreaks'. The type ascention applies only to the true block of the
+ * styleType attribute of the verifyIfConfig parameter is 'classBreaks'. The type assertion applies only to the true block of the
  * if clause that use this function.
  *
  * @param {TypeStyleSettings | TypeKindOfVectorSettings} verifyIfConfig Polymorphic object to test in order to determine if the
- * type ascention is valid.
+ * type assertion is valid.
  *
- * @returns {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type assertion is valid.
  */
 export const isClassBreakStyleConfig = (
   verifyIfConfig: TypeStyleSettings | TypeKindOfVectorSettings
@@ -836,6 +836,22 @@ export interface TypeClassBreakStyleConfig extends TypeBaseStyleConfig {
   classBreakStyleInfo: TypeClassBreakStyleInfo[];
 }
 
+export type TypeTemporalDimension = {
+  field: string;
+  default: string;
+  unitSymbol: string;
+  range: TypeRangeItems;
+  nearestValues: TypeNearestValues;
+  singleHandle: boolean;
+};
+
+export type TypeRangeItems = {
+  type: string;
+  range: string[];
+};
+
+export type TypeNearestValues = 'discrete' | 'absolute';
+
 /**
  * Type of Style to apply to the GeoView vector layer source at creation time.
  */
@@ -844,10 +860,25 @@ export type TypeStyleSettings = TypeBaseStyleConfig | TypeSimpleStyleConfig | Ty
 /**
  * Valid keys for the TypeStyleConfig object.
  */
-export type TypeStyleGeometry = 'Point' | 'LineString' | 'Polygon';
+export type TypeGeometryType = 'Point' | 'LineString' | 'Polygon';
 
 /**
  * Type of Style to apply to the GeoView vector layer based on geometry types.
  */
-export type TypeStyleConfig = Partial<Record<TypeStyleGeometry, TypeStyleSettings>>;
+export type TypeStyleConfig = {
+  type: TypeGeometryType;
+  fields: string[];
+  hasDefault: boolean;
+  info: TypeStyleConfigInfo;
+};
+
+/**
+ * Information needed to render the feature.
+ */
+export type TypeStyleConfigInfo = {
+  visible: boolean;
+  label: string;
+  values: (string | number)[];
+  settings: TypeKindOfVectorSettings;
+};
 // #endregion STYLES TYPES

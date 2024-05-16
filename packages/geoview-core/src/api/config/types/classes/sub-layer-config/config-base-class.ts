@@ -85,7 +85,7 @@ export abstract class ConfigBaseClass {
    * used to do its validation.
    *
    * @returns {string} The schemaPath associated to the sublayer.
-   * @protected @abstrsact
+   * @protected @abstract
    */
   protected abstract get schemaPath(): string;
 
@@ -122,5 +122,26 @@ export abstract class ConfigBaseClass {
    */
   propagateError(): void {
     this.#geoviewConfig.propagateError();
+  }
+
+  /**
+   * This method returns the json string of the layer entry configuration. The output representation is not a multi-line indented
+   * string. Private variables and pseudo-properties are not serialized.
+   *
+   * @returns {string} The json string corresponding to the map feature configuration.
+   */
+  getJsonString(): string {
+    return this.getIndentedJsonString(null);
+  }
+
+  /**
+   * This method returns the json string of the entry configuration.The output representation is a multi-line indented
+   * string. Indentation can be controled using the ident parameter. Private variables and pseudo-properties are not serialized.
+   * @param {number | null} indent The number of space to indent the output string.
+   *
+   * @returns {string} The json string corresponding to the entry configuration.
+   */
+  getIndentedJsonString(indent: number | null = 2): string {
+    return JSON.stringify(this, undefined, indent || undefined);
   }
 }

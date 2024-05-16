@@ -212,9 +212,6 @@
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "styleId": {
-          "type": "string"
-        },
         "styleType": {
           "enum": ["simple"]
         },
@@ -231,9 +228,6 @@
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "styleId": {
-          "type": "string"
-        },
         "styleType": {
           "enum": ["uniqueValue"]
         },
@@ -301,9 +295,6 @@
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "styleId": {
-          "type": "string"
-        },
         "styleType": {
           "enum": ["classBreaks"]
         },
@@ -401,17 +392,60 @@
     },
     "TypeStyleConfig": {
       "additionalProperties": false,
-      "minProperties": 1,
       "type": "object",
       "properties": {
-        "Point": {
-          "$ref": "#/definitions/TypeStyleSettings"
+        "type": {
+          "enum": ["simple", "uniqueValue", "classBreaks"],
+          "description": "The type of style used by the layer."
         },
-        "LineString": {
-          "$ref": "#/definitions/TypeStyleSettings"
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
         },
-        "Polygon": {
-          "$ref": "#/definitions/TypeStyleSettings"
+        "hasDefault": {
+          "type": "boolean",
+          "description": "Flag used to indicate that the symbology has a default value."
+        },
+        "info": {
+          "type": "array",
+          "description": "Array of style information.",
+          "items": {
+              "$ref": "#/definitions/TypeStyleConfigInfo"
+          }
+        }
+      }
+    },
+    "TypeStyleConfigInfo": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "visible": {
+          "type": "boolean",
+          "description": "Flag used to show/hide features associated to the label (default: true)."
+        },
+        "label": {
+          "type": "string"
+        },
+        "values": {
+          "description": "Simple type has a single value at index 0; uniqueValue type has many entries (up to 3 for ESRI) and classBreaks type has two entries (index 0 for min and index 1 for max).",
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ]
+          },
+          "minItems": 1
+        },
+        "settings": {
+          "$ref": "#/definitions/TypeKindOfVectorSettings"
         }
       }
     },
@@ -746,6 +780,19 @@
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
+        "layerName": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/TypeLocalizedString",
+              "description": "Used by the input schema."
+            },
+            {
+              "type": "string",
+              "description": "Used by the internal schema."
+            }
+          ],
+          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+        },
         "geometryType": {
           "$ref": "#/definitions/TypeGeometryType",
           "description": "The type of geometry used by the layer."
@@ -777,6 +824,10 @@
         "initialSettings": {
           "$ref": "#/definitions/TypeLayerInitialSettings",
           "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
+        },
+        "temporalDimension": {
+          "$ref": "#/definitions/TypeTemporalDimension",
+          "description": "The temporal dimension settings."
         },
         "source": {
           "$ref": "#/definitions/TypeVectorSourceInitialConfig"
@@ -811,6 +862,47 @@
         }
       },
       "required": ["layerId"]
+    },
+    "TypeTemporalDimension": {
+      "additionalProperties": false,
+      "type": "object",
+      "description": "OGC time dimension definition.",
+      "properties": {
+        "field": {
+          "type": "string"
+        },
+        "default": {
+          "type": "string"
+        },
+        "unitSymbol": {
+          "type": "string"
+        },
+        "range": {
+          "$ref": "#/definitions/TypeRangeItems"
+        },
+        "nearestValues": {
+          "enum": ["discrete", "absolute"]
+        },
+        "singleHandle": {
+          "type": "boolean"
+        }
+      }
+    },
+    "TypeRangeItems": {
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Definition of the range object in the OGC time dimension.",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "range": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
     },
     "TypeVectorTileLayerEntryConfig": {
       "additionalProperties": false,
@@ -1040,6 +1132,10 @@
         "initialSettings": {
           "$ref": "#/definitions/TypeLayerInitialSettings",
           "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
+        },
+        "temporalDimension": {
+          "$ref": "#/definitions/TypeTemporalDimension",
+          "description": "The temporal dimension settings."
         },
         "source": {
           "$ref": "#/definitions/TypeSourceImageEsriInitialConfig"
@@ -1418,10 +1514,10 @@
       "type": "array",
       "additionalProperties": false,
       "items": {
-        "$ref": "#/definitions/TypeGeoviewLayerConfig"
+        "$ref": "#/definitions/AbstractGeoviewLayerConfig"
       }
     },
-    "TypeGeoviewLayerConfig": {
+    "AbstractGeoviewLayerConfig": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
@@ -1812,14 +1908,11 @@
       "enum": ["1.0"],
       "description": "The schema version that can be used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
     },
-    "TypeMapFeatureInstance": {
+    "MapFeatureConfig": {
       "description": "The map feature configuration.",
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "mapId": {
-          "type": "string"
-        },
         "map": {
           "$ref": "#/definitions/TypeMapConfig"
         },

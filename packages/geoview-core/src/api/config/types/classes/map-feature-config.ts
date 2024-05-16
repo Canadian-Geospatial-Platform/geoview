@@ -1,5 +1,3 @@
-// Needs to disable class-methods-use-this because we need to pass the instance reference 'this' to the validator.
-// eslint-disable-next-line @typescript-eslint/class-methods-use-this
 import cloneDeep from 'lodash/cloneDeep';
 import defaultsDeep from 'lodash/defaultsDeep';
 
@@ -58,20 +56,17 @@ export class MapFeatureConfig {
   /** map configuration. */
   map: TypeMapConfig;
 
-  /** Service URLs. */
-  serviceUrls: TypeServiceUrls;
-
   /** Display theme, default = geo.ca. */
   theme?: TypeDisplayTheme;
 
   /** Nav bar properies. */
   navBar?: TypeNavBarProps;
 
-  /** App bar properies. */
-  appBar?: TypeAppBarProps;
-
   /** Footer bar properies. */
   footerBar?: TypeFooterBarProps;
+
+  /** App bar properies. */
+  appBar?: TypeAppBarProps;
 
   /** Overview map properies. */
   overviewMap?: TypeOverviewMapProps;
@@ -84,6 +79,9 @@ export class MapFeatureConfig {
 
   /** List of external packages. */
   externalPackages?: TypeExternalPackages;
+
+  /** Service URLs. */
+  serviceUrls: TypeServiceUrls;
 
   /**
    * The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by
@@ -192,8 +190,7 @@ export class MapFeatureConfig {
   }
 
   /**
-   * The getter method, which returns the json string of the map feature's configuration as if it were a property. However, this
-   * pseudo-property is not part of the serialized output. What's more, the output representation is not a multi-line indented
+   * This method returns the json string of the map feature's configuration. The output representation is not a multi-line indented
    * string. Private variables and pseudo-properties are not serialized.
    *
    * @returns {string} The json string corresponding to the map feature configuration.
@@ -203,8 +200,7 @@ export class MapFeatureConfig {
   }
 
   /**
-   * The getter method, which returns the json string of the map feature's configuration as if it were a property. However, this
-   * pseudo-property is not part of the serialized output. What's more, the output representation is a multi-line indented
+   * This method returns the json string of the map feature's configuration. The output representation is a multi-line indented
    * string. Indentation can be controled using the ident parameter. Private variables and pseudo-properties are not serialized.
    * @param {number | null} indent The number of space to indent the output string.
    *

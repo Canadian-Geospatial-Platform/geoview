@@ -41,307 +41,168 @@
         color: #506882;
       }
 
-      textarea {
-        height: 9999px;
-        line-height: 21px;
-        overflow-y: hidden;
-        padding: 0;
-        border: 0;
-        background: #282a3a;
-        color: #fff;
-        min-width: 500px;
-        outline: none;
-        resize: none;
-      }
-    </style>
-  </head>
-
-  <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>Sandbox Configuration</strong></h1>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td><a href="./index.html">Main</a><br /></td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>This page is used to test map configuration.</td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>
-              <div class="editor">
-                <div class="line-numbers" id="inputLineNumbers">
-                  <span></span>
-                </div>
-                <textarea id="configGeoview" name="configuration" cols="110">
-{
-  'map': {
-    'interaction': 'dynamic',
-    'viewSettings': {
-      'minZoom': 5,
-      'projection': 3978
-    },
-    'basemapOptions': {
-      'basemapId': 'transport',
-      'shaded': false,
-      'labeled': true
-    },
-    'listOfGeoviewLayerConfig': [
-      {
-      'geoviewLayerId': 'wmsLYR1',
-      'geoviewLayerName': {
-        'en': 'Earthquakes',
-        'fr': 'Tremblements de terre'
-      },
-      'metadataAccessPath': {
-        'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/',
-        'fr': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_fr/MapServer/'
-      },
-      'geoviewLayerType': 'esriDynamic',
-      'listOfLayerEntryConfig': [
-        {
-          'layerId': '0',
-          'geometryType': 'point',
-          'layerName': {
-            'en': 'Earthquakes 1980-1990',
-            'fr': 'Tremblements de terre 1980-1990'
-          },
-          'initialSettings': {
-            'controls': {
-              'query': true
-            },
-            'states': {
-              'queryable': true
-            }
-          },
-          'attributions': ['Ressources naturelles Canada, Secteur des terres et des minéraux, Commission Géologique du Canada, Service canadien d\'information sur les risques'],
-          'source': {
-            'layerFilter': '',
-            'maxRecordCount': 0,
-            'featureInfo': {
-              'nameField': 'date',
-              'outfields': [
-                {
-                  'name': 'magnitude_codelist',
-                  'alias': 'magnitude_codelist',
-                  'type': 'date',
-                  'domain': []
-                },
-                {
-                  'name': 'magnitude',
-                  'alias': 'Magnitude',
-                  'type': 'number',
-                  'domain': []
-                },
-                {
-                  'name': 'magnitude_type',
-                  'alias': 'Magnitude Type',
-                  'type': 'string',
-                  'domain': []
-                },
-                {
-                  'name': 'date',
-                  'alias': 'Date',
-                  'type': 'string',
-                  'domain': []
-                },
-                {
-                  'name': 'place',
-                  'alias': 'Place',
-                  'type': 'string',
-                  'domain': []
-                },
-                {
-                  'name': 'depth',
-                  'alias': 'Depth',
-                  'type': 'number',
-                  'domain': []
-                },
-                {
-                  'name': 'latitude',
-                  'alias': 'Latitude',
-                  'type': 'number',
-                  'domain': []
-                },
-                {
-                  'name': 'longitude',
-                  'alias': 'Longitude',
-                  'type': 'number',
-                  'domain': []
-                },
-                {
-                  'name': 'OBJECTID',
-                  'alias': 'OBJECTID',
-                  'type': 'number',
-                  'domain': []
-                }
-              ]
-            }
-          }
-        },
-        {
-          'layerId': '1',
-          'geometryType': 'point',
-          'layerName': {
-            'en': 'Earthquakes 1990-2000',
-            'fr': ' Tremblements de terre 1990-2000'
-          },
-          'attributions': ['Ressources naturelles Canada, Secteur des terres et des minéraux, Commission Géologique du Canada, Service canadien d\'information sur les risques'],
-          'source': {
-            'layerFilter': '',
-            'maxRecordCount': 0,
-            'featureInfo': {
-              'nameField': 'date',
-              'outfields': [
-                {
-                  'name': 'magnitude_codelist',
-                  'alias': 'magnitude_codelist',
-                  'type': 'date',
-                  'domain': []
-                },
-                {
-                  'name': 'magnitude',
-                  'alias': 'Magnitude',
-                  'type': 'number',
-                  'domain': []
-                },
-                {
-                  'name': 'magnitude_type',
-                  'alias': 'Magnitude Type',
-                  'type': 'string',
-                  'domain': []
-                },
-                {
-                  'name': 'date',
-                  'alias': 'Date',
-                  'type': 'string',
-                  'domain': []
-                },
-                {
-                  'name': 'place',
-                  'alias': 'Place',
-                  'type': 'string',
-                  'domain': []
-                },
-                {
-                  'name': 'depth',
-                  'alias': 'Depth',
-                  'type': 'number',
-                  'domain': []
-                },
-                {
-                  'name': 'latitude',
-                  'alias': 'Latitude',
-                  'type': 'number',
-                  'domain': []
-                },
-                {
-                  'name': 'longitude',
-                  'alias': 'Longitude',
-                  'type': 'number',
-                  'domain': []
-                },
-                {
-                  'name': 'OBJECTID',
-                  'alias': 'OBJECTID',
-                  'type': 'number',
-                  'domain': []
-                }
-              ]
-            }
-          }
-        }
-      ]
-    }]
-  },
-  'components': ['overview-map'],
-  'footerBar': {
-    'tabs': {
-      'core': ['legend', 'layers', 'details', 'data-table']
+    textarea {
+      height: 99999px;
+      line-height: 21px;
+      overflow-y: hidden;
+      padding: 0;
+      border: 0;
+      background: #282a3a;
+      color: #fff;
+      min-width: 500px;
+      outline: none;
+      resize: none;
+      overflow-x: auto;
+      white-space: nowrap;
     }
-  },
-  'corePackages': [],
-  'theme': 'geo.ca'
-}
-                </textarea>
+  </style>
+</head>
+
+<body>
+  <div class="header-table">
+    <table>
+      <tbody>
+        <tr>
+          <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
+          <td class="header-title">
+            <h1><strong>Sandbox Configuration</strong></h1>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <tbody>
+        <tr>
+          <td><a href="./index.html">Main</a><br /></td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <tbody>
+        <tr>
+          <td>This page is used to test map configuration.</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="selector-container">
+              <p>Configuration to load:</p>
+              <div class="selector">
+                <select name="Config Loader" id="configLoader">
+                  <option value="">--select--</option>
+                  <option value="./configs/validator/01-simple.json">Simple</option>
+                  <option value="./configs/validator/02-unique-value.json">Unique Value</option>
+                  <option value="./configs/validator/03-class-breaks.json">Class Breaks</option>
+                </select>
               </div>
-            </td>
-            <td>
-              <span id="validationMessage" style="margin: 10px">File not validated...</span>
-              <div class="editor">
-                <div class="line-numbers" id="outputLineNumbers">
-                  <span></span>
-                </div>
-                <textarea id="configOutput" name="configuration" cols="110"> </textarea>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <tbody>
+        <tr>
+          <td>
+            <div class="editor">
+              <div class="line-numbers" id="inputLineNumbers">
+                <span></span>
               </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              <textarea id="configGeoview" name="configuration" cols="110">
+              </textarea>
+            </div>
+          </td>
+          <td>
+            <span id="validationMessage" style="margin:10px;">File not validated...</span>
+            <div class="editor">
+              <div class="line-numbers" id="outputLineNumbers">
+                <span></span>
+              </div>
+              <textarea id="configOutput" name="configuration" cols="110">
+              </textarea>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div>
+    <button id="validateConfig" style="margin:10px;">Validate</button>
+    <select id="language">
+      <option value="en">English</option>
+      <option value="fr">Français</option>
+    </select>
+    <button id="createMap" style="margin:10px;">Create Map</button>
+    <button id="deleteMap" style="margin:10px;">Delete map</button>
+    <br />
+  </div>
+  <div class="editor" style="height:60px">
+    <div class="line-numbers" id="inputLineNumbers">
+      <span></span>
     </div>
     <div>
-      <button id="validateConfig" style="margin: 10px">Validate</button>
-      <select id="language">
-        <option value="en">English</option>
-        <option value="fr">Français</option>
-      </select>
-      <button id="createMap" style="margin: 10px">Create Map</button>
-      <button id="deleteMap" style="margin: 10px">Delete map</button>
-      <br />
-    </div>
-    <div class="editor" style="height: 60px">
-      <div class="line-numbers" id="inputLineNumbers">
-        <span></span>
-      </div>
-      <div>
-        <textarea id="configUrlGeoview" name="Urlconfiguration" cols="210">
+      <textarea id="configUrlGeoview" name="Urlconfiguration" cols="210">
 p=3857&z=4&c=-100,40&l=en&t=dark&b=basemapId:transport,shaded:false,labeled:true&i=dynamic&cc=overview-map&keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9
-        </textarea>
-      </div>
+      </textarea>
     </div>
-    <div>
-      <button id="validateUrlConfig" style="margin: 10px">Validate</button>
-      <select id="urlLanguage">
-        <option value="en">English</option>
-        <option value="fr">Français</option>
-      </select>
-      <br />
-    </div>
-    <div class="map-title-holder">
-      <h4 id="HLCONF1">Sanbox Map</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
-    <div id="mapSection">
-      <div id="sandboxMap"></div>
-    </div>
-    <p>This map loads it's configurations from the text area.</p>
-    <hr />
+  </div>
+  <div>
+    <button id="validateUrlConfig" style="margin:10px;">Validate</button>
+    <select id="urlLanguage">
+      <option value="en">English</option>
+      <option value="fr">Français</option>
+    </select>
+    <br />
+  </div>
+  <div class="map-title-holder">
+    <h4 id="HLCONF1">Sanbox Map</h4>
+    <a class="ref-link" href="#top">Top</a>
+  </div>
+  <div id="mapSection">
+    <div id="sandboxMap"></div>
+  </div>
+  <p>This map loads it's configurations from the text area.</p>
+  <hr />
 
-    <button type="button" class="collapsible">Code Snippet</button>
-    <pre id="codeSnippet" class="panel"></pre>
+  <button type="button" class="collapsible">Code Snippet</button>
+  <pre id="codeSnippet" class="panel"></pre>
 
-    <script src="codedoc.js"></script>
+  <script src="codedoc.js"></script>
 
-    <script>
-      // Config Validate Button============================================================================================================
-      const validateJSONButton = document.getElementById('validateConfig');
+  <script>
+    // Config Snippet Selection Button ==================================================================================================
+
+    const configLoader = document.getElementById('configLoader');
+    configLoader.addEventListener('change', (e) => {
+      // fetch JSON config file to show in the text are section
+      function fetchJSONData() {
+        fetch(e.target.value)
+          .then((res) => {
+            if (!res.ok) {
+              throw new Error
+                (`HTTP error! Status: ${res.status}`);
+            }
+            return res.text();
+          })
+          .then((data) => {
+            document.getElementById('configGeoview').textContent = data;
+
+            // set default number of lines
+            const textarea = document.querySelector('textarea');
+            const lineNumbers = document.querySelector('.line-numbers');
+            const numberOfLines = textarea.value.split('\n').length;
+            lineNumbers.innerHTML = Array(numberOfLines).fill('<span></span>').join('');
+
+          })
+          .catch((error) =>
+            console.error('Unable to fetch data:', error));
+      }
+      fetchJSONData();
+    });
+    configLoader.value = './configs/validator/01-simple.json';
+    configLoader.dispatchEvent(new Event('change'));
+    
+    // Config Validate Button ===========================================================================================================
+    const validateJSONButton = document.getElementById('validateConfig');
 
       // add an event listener when a button is clicked
       validateJSONButton.addEventListener('click', function (e) {
@@ -351,18 +212,18 @@ p=3857&z=4&c=-100,40&l=en&t=dark&b=basemapId:transport,shaded:false,labeled:true
         const configArea = document.getElementById('configGeoview');
         const configOutput = document.getElementById('configOutput');
 
-        // get config and test if JSON is valid
-        const mapConfig = cgpv.api.configApi.getMapConfig(configArea.value, langue);
-        configOutput.value = mapConfig.getIndentedJsonString();
+      // get config and test if JSON is valid
+      const mapConfig = cgpv.api.configApi.getMapConfig(configArea.value.replaceAll('"', "'").replaceAll("\\'", "\'"), langue);
+      configOutput.textContent = mapConfig.getIndentedJsonString();
 
-        // Generate line numbers
-        (() => {
-          const textarea = document.getElementById('configOutput');
-          const lineNumbersContainer = document.getElementById('outputLineNumbers');
-          const lines = textarea.value.split('\n').length;
-          const lineNumbers = Array.from({ length: lines }, (_, index) => '').join('<span />');
-          lineNumbersContainer.innerHTML = lineNumbers;
-        })();
+      // Generate line numbers
+      (() => {
+        const textarea = document.getElementById('configOutput');
+        const lineNumbersContainer = document.getElementById('outputLineNumbers');
+        const lines = textarea.value.split('\n').length+1;
+        const lineNumbers = Array.from({ length: lines }, (_, index) => '').join('<span />');
+        lineNumbersContainer.innerHTML = lineNumbers;
+      })();
 
         // set class and message
         message.classList.add('config-json-valid');
@@ -375,8 +236,8 @@ p=3857&z=4&c=-100,40&l=en&t=dark&b=basemapId:transport,shaded:false,labeled:true
         }
       });
 
-      // Config Url Validate Button========================================================================================================
-      const validateURLButton = document.getElementById('validateUrlConfig');
+    // Config Url Validate Button =======================================================================================================
+    const validateURLButton = document.getElementById('validateUrlConfig');
 
       // add an event listener when the button is clicked
       validateURLButton.addEventListener('click', function (e) {
@@ -393,14 +254,14 @@ p=3857&z=4&c=-100,40&l=en&t=dark&b=basemapId:transport,shaded:false,labeled:true
         returnedValue.then((mapConfig) => {
           configOutput.value = mapConfig.getIndentedJsonString();
 
-          // Generate line numbers
-          (() => {
-            const textarea = document.getElementById('configOutput');
-            const lineNumbersContainer = document.getElementById('outputLineNumbers');
-            const lines = textarea.value.split('\n').length;
-            const lineNumbers = Array.from({ length: lines }, (_, index) => '').join('<span />');
-            lineNumbersContainer.innerHTML = lineNumbers;
-          })();
+        // Generate line numbers
+        (() => {
+          const textarea = document.getElementById('configOutput');
+          const lineNumbersContainer = document.getElementById('outputLineNumbers');
+          const lines = textarea.value.split('\n').length+1;
+          const lineNumbers = Array.from({ length: lines }, (_, index) => '').join('<span />');
+          lineNumbersContainer.innerHTML = lineNumbers;
+        })();
 
           // set class and message
           message.classList.add('config-json-valid');
@@ -414,9 +275,9 @@ p=3857&z=4&c=-100,40&l=en&t=dark&b=basemapId:transport,shaded:false,labeled:true
         });
       });
 
-      // Create Button============================================================================================================
-      const createMapButton = document.getElementById('createMap');
-      createMapButton.disabled = true;
+    // Create Button ====================================================================================================================
+    const createMapButton = document.getElementById('createMap');
+    createMapButton.disabled = true;
 
       // add an event listener when a button is clicked
       createMapButton.addEventListener('click', function (e) {
@@ -443,9 +304,9 @@ p=3857&z=4&c=-100,40&l=en&t=dark&b=basemapId:transport,shaded:false,labeled:true
         cgpv.api.maps['sandboxMap'].remove(true);
       });
 
-      // Editor script section===================================================================================================
-      const textarea = document.querySelector('textarea');
-      const lineNumbers = document.querySelector('.line-numbers');
+    // Editor script section ============================================================================================================
+    const textarea = document.querySelector('textarea');
+    const lineNumbers = document.querySelector('.line-numbers');
 
       // set default number of lines
       const numberOfLines = textarea.value.split('\n').length;
