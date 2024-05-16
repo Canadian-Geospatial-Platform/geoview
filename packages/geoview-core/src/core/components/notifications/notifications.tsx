@@ -113,7 +113,7 @@ export default function Notifications(): JSX.Element {
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
       <div>
-        <Badge badgeContent={notificationsCount} color="error">
+        <Badge badgeContent={notificationsCount > 99 ? '99+' : notificationsCount} color="error">
           <IconButton
             id="notification"
             tooltip="appbar.notifications"
