@@ -293,7 +293,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   // #endregion
 
   /**
-   * Re-order the footer tab buttons.
+   * Re-order the appbar buttons.
    */
   const { topGroupNames, bottomGroupNames } = useMemo(() => {
     // Log
