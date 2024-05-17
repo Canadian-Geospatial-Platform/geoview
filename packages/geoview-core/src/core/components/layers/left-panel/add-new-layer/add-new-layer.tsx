@@ -1099,7 +1099,6 @@ export function AddNewLayer(): JSX.Element {
             stepContent: {
               children: (
                 <Box
-                  component="div"
                   className="dropzone"
                   style={{ position: 'relative' }}
                   onDrop={(e) => handleDrop(e)}
@@ -1109,7 +1108,6 @@ export function AddNewLayer(): JSX.Element {
                 >
                   {drag && (
                     <Box
-                      component="div"
                       ref={dragPopover}
                       style={{
                         backgroundColor: 'rgba(128,128,128,.95)',

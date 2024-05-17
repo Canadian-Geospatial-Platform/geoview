@@ -24,7 +24,7 @@ function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIconStackPr
   const iconData = useIconLayerSet(layerPath);
 
   const iconImage: string = iconData?.length > 0 ? iconData[0] : '';
-  const iconImageStacked: string = iconData && iconData.length > 1 ? iconData[1] : '';
+  const iconImageStacked: string = iconData?.length > 1 ? iconData[1] : '';
   const numOfIcons: number | undefined = iconData?.length;
 
   const iconStackContent = (): JSX.Element | null => {
