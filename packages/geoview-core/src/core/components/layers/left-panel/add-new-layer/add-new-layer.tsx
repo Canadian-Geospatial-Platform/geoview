@@ -1098,7 +1098,8 @@ export function AddNewLayer(): JSX.Element {
             },
             stepContent: {
               children: (
-                <Box component='div'
+                <Box
+                  component="div"
                   className="dropzone"
                   style={{ position: 'relative' }}
                   onDrop={(e) => handleDrop(e)}
@@ -1107,7 +1108,8 @@ export function AddNewLayer(): JSX.Element {
                   onDragLeave={(e) => handleDragLeave(e)}
                 >
                   {drag && (
-                    <Box component='div'
+                    <Box
+                      component="div"
                       ref={dragPopover}
                       style={{
                         backgroundColor: 'rgba(128,128,128,.95)',
@@ -1129,7 +1131,7 @@ export function AddNewLayer(): JSX.Element {
                       </h3>
                     </Box>
                   )}
-                  <Box component='div'>
+                  <Box>
                     <input
                       type="file"
                       id="fileUpload"
@@ -1142,7 +1144,7 @@ export function AddNewLayer(): JSX.Element {
                   </Box>
                   <Button type="text" onClick={() => document.getElementById('fileUpload')?.click()} className="">
                     <FileUploadIcon />
-                    <Box component='span'>{t('layers.upload')}</Box>
+                    <Box component="span">{t('layers.upload')}</Box>
                   </Button>
                   <p style={{ textAlign: 'center' }}>
                     <small>{t('layers.drop')}</small>

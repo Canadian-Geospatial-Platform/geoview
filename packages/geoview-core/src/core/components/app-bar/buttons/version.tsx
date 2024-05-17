@@ -73,7 +73,7 @@ export default function Version(): JSX.Element {
 
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
-      <Box component='div'>
+      <Box>
         <IconButton
           id="version-button"
           tooltip="appbar.version"

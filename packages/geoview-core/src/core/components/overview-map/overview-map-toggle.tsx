@@ -99,8 +99,9 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element {
 
   return (
     <Tooltip title={tooltipAndAria}>
-      <Box component='div' ref={divRef} className={classes.toggleBtnContainer}>
-        <Box component='div'
+      <Box ref={divRef} className={classes.toggleBtnContainer}>
+        <Box
+          component="div"
           className={`${classes.toggleBtn} ${!status ? classes.minimapOpen : classes.minimapClosed}`}
           style={{
             margin: 0,

@@ -88,7 +88,7 @@ export function MousePosition(): JSX.Element {
                     ...sxClasses.mousePositionCheckmark,
                   }}
                 />
-                <Box component='span'>{position}</Box>
+                <Box component="span">{position}</Box>
               </Box>
             );
           })}

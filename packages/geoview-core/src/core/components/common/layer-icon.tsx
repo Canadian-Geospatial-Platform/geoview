@@ -1,9 +1,9 @@
+import { useTheme } from '@mui/material/styles';
 import { Box, CircularProgressBase, ErrorIcon, GroupWorkOutlinedIcon, IconButton, BrowserNotSupportedIcon } from '@/ui';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { getSxClasses } from './layer-icon-style';
 import { useIconLayerSet } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayerListEntry } from '.';
-import { useTheme } from '@mui/material/styles';
 
 export interface TypeIconStackProps {
   layerPath: string;
@@ -23,7 +23,7 @@ function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIconStackPr
 
   const iconData = useIconLayerSet(layerPath);
 
-  const iconImage: string = iconData && iconData.length > 0 ? iconData[0] : '';
+  const iconImage: string = iconData?.length > 0 ? iconData[0] : '';
   const iconImageStacked: string = iconData && iconData.length > 1 ? iconData[1] : '';
   const numOfIcons: number | undefined = iconData?.length;
 

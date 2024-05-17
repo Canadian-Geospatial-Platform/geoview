@@ -161,7 +161,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
         });
 
         if (panels.length > 0) {
-          return <Box component='div' key={groupName}>{panels}</Box>;
+          return <Box key={groupName}>{panels}</Box>;
         }
         return null;
       })}

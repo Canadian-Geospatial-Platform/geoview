@@ -1,5 +1,6 @@
 import { CSSProperties, ReactNode } from 'react';
 import parse from 'html-react-parser';
+import { Box } from '@/ui/layout';
 
 /**
  * Interface used for custom html elements
@@ -37,11 +38,11 @@ export function HtmlToReact(props: HtmlToReactProps): JSX.Element {
 
   // eslint-disable-next-line react/jsx-props-no-spreading
   return (
-    <div {...extraOptions} className={className} style={style}>
+    <Box {...extraOptions} className={className} style={style}>
       {reactItems.map((item: TrustedHTML, index) => (
         // eslint-disable-next-line react/no-array-index-key
-        <div key={index}>{item as ReactNode}</div>
+        <Box key={index}>{item as ReactNode}</Box>
       ))}
-    </div>
+    </Box>
   );
 }

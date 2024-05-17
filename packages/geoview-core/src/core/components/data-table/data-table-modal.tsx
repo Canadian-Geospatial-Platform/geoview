@@ -64,11 +64,7 @@ export default function DataTableModal(): JSX.Element {
    * @returns {JSX.Element}
    */
   const getCellValue = (cellValue: string): JSX.Element => {
-    return (
-      <Box component="div" sx={sxClasses.tableCell}>
-        {cellValue}
-      </Box>
-    );
+    return <Box sx={sxClasses.tableCell}>{cellValue}</Box>;
   };
 
   /**

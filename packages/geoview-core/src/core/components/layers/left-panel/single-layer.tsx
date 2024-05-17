@@ -124,7 +124,7 @@ export function SingleLayer({ depth, layer, setIsLayersListPanelVisible, index, 
 
     if (datatableSettings[layer.layerPath]) {
       return (
-        <Box component='span'>
+        <Box component="span">
           {itemsLengthDesc} &nbsp;
           <TableViewIcon sx={{ marginBottom: '-5px' }} fontSize="small" />
         </Box>

@@ -25,5 +25,5 @@ export const getSxClasses = (theme: Theme): any => ({
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     padding: '5px',
-  }
+  },
 });
