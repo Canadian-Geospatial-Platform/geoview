@@ -144,8 +144,8 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
           UIEventProcessor.setActiveFooterBarTab(mapId, 'details');
         }
 
-        if (UIEventProcessor.getActiveAppBarPanelId(mapId) !== 'AppbarPanelButtonDetails') {
-          UIEventProcessor.setActiveAppBarPanelId(mapId, 'AppbarPanelButtonDetails');
+        if (UIEventProcessor.getActiveAppBarTabId(mapId) !== 'AppbarPanelButtonDetails') {
+          UIEventProcessor.setActiveAppBarTabId(mapId, 'AppbarPanelButtonDetails');
         }
       }
     }

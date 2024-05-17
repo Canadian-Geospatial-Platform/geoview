@@ -178,3 +178,8 @@ export const CV_DEFAULT_LAYER_INITIAL_SETTINGS = {
     queryable: false,
   },
 };
+
+/**
+ * Definition of the default order of the tabs inside appbar
+ */
+export const CV_DEFAULT_APPBAR_TABS_ORDER = ['legend', 'details', 'guide'];
