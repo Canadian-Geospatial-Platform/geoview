@@ -20,6 +20,7 @@ export function useLightBox(): UseLightBoxReturnType {
    * Initialize lightbox with state.
    * @param {string} images images url formatted as string and joined with ';' identifier.
    * @param {string} alias alt tag for the image.
+   * @param {number | undefined} index index of the image which is displayed.
    */
   const initLightBox = (images: string, alias: string, index: number | undefined): void => {
     setIsLightBoxOpen(true);
