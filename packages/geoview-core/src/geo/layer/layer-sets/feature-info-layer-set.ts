@@ -54,7 +54,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
-   * @param {string} layerPath - The layer path
+   * @param {TypeLayerEntryConfig} layerConfig - The layer path
    * @returns {boolean} True when the layer should be registered to this feature-info-layer-set.
    */
   protected override onRegisterLayerCheck(layerConfig: TypeLayerEntryConfig): boolean {
@@ -192,14 +192,17 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // Loop on each layer path in the resultSet
     Object.keys(this.resultSet).forEach((layerPath) => {
       const layerConfig = this.layerApi.getLayerEntryConfig(layerPath)!;
+      const layer = this.layerApi.getGeoviewLayerHybrid(layerPath);
+
       const { data } = this.resultSet[layerPath];
       if (!data.eventListenerEnabled) return;
-      if (layerConfig.layerStatus === 'loaded') {
+
+      if (layerConfig.layerStatus === 'loaded' && layer) {
         data.features = undefined;
         data.queryStatus = 'processing';
 
         // Process query on results data
-        const promiseResult = FeatureInfoLayerSet.queryLayerFeatures(data, layerConfig, layerPath, queryType, longLatCoordinate);
+        const promiseResult = AbstractLayerSet.queryLayerFeatures(data, layerConfig, layer, queryType, longLatCoordinate);
 
         // Add the promise
         allPromises.push(promiseResult);

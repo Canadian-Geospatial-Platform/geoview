@@ -48,6 +48,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   static getLayerIconImage(layerLegend: TypeLegend | null): TypeLegendLayerIcons | undefined {
+    // TODO: Refactor - Move this function to a utility class instead of at the 'processor' level so it's safer to call from a layer framework level class
     const iconDetails: TypeLegendLayerIcons = [];
     if (layerLegend) {
       if (layerLegend.legend === null) {
@@ -154,9 +155,15 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       };
       return controls;
     };
-    const createNewLegendEntries = (layerPathBeginning: string, currentLevel: number, existingEntries: TypeLegendLayer[]): void => {
-      const entryLayerPath = `${layerPathBeginning}/${layerPathNodes[currentLevel]}`;
-      const layerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(entryLayerPath)!;
+    const createNewLegendEntries = (currentLevel: number, existingEntries: TypeLegendLayer[]): void => {
+      const suffix = layerPathNodes.slice(0, currentLevel);
+      const entryLayerPath = suffix.join('/');
+      const layerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(entryLayerPath);
+
+      // If not found, skip
+      if (!layerConfig) return;
+
+      const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layerConfig.layerPath);
       let entryIndex = existingEntries.findIndex((entry) => entry.layerPath === entryLayerPath);
       if (layerEntryIsGroupLayer(layerConfig)) {
         const controls: TypeLayerControls = setLayerControls(layerConfig);
@@ -168,9 +175,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             layerPath: entryLayerPath,
             layerStatus: legendResultSetEntry.layerStatus,
             layerName:
-              legendResultSetEntry.layerName ||
+              // ! legendResultSetEntry.layerName || This overwrites all group names all the way down to the leaf with the name of the first loaded leaf.. wrong, commenting line..
               getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(mapId)) ||
-              getLocalizedValue(layerConfig.geoviewLayerInstance?.geoviewLayerName, AppEventProcessor.getDisplayLanguage(mapId)) ||
+              getLocalizedValue(layer?.getGeoviewLayerName(), AppEventProcessor.getDisplayLanguage(mapId)) ||
               layerConfig.layerPath,
             type: layerConfig.entryType as TypeGeoviewLayerType,
             canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
@@ -183,8 +190,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         }
         // eslint-disable-next-line no-param-reassign
         else existingEntries[entryIndex].layerStatus = layerConfig.layerStatus;
-        createNewLegendEntries(entryLayerPath, currentLevel + 1, existingEntries[entryIndex].children);
-      } else if (layerConfig) {
+        createNewLegendEntries(currentLevel + 1, existingEntries[entryIndex].children);
+      } else {
         const controls: TypeLayerControls = setLayerControls(layerConfig);
         const newLegendLayer: TypeLegendLayer = {
           bounds: undefined,
@@ -195,7 +202,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           layerName:
             legendResultSetEntry.layerName ||
             getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(mapId)) ||
-            getLocalizedValue(layerConfig.geoviewLayerInstance?.geoviewLayerName, AppEventProcessor.getDisplayLanguage(mapId)) ||
+            getLocalizedValue(layer?.getGeoviewLayerName(), AppEventProcessor.getDisplayLanguage(mapId)) ||
             layerConfig.layerPath,
           layerStatus: legendResultSetEntry.layerStatus,
           styleConfig: legendResultSetEntry.data?.styleConfig,
@@ -228,7 +235,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const layers = this.getLayerState(mapId).legendLayers;
 
     // Process creation of legend entries
-    createNewLegendEntries(layerPathNodes[0], 1, layers);
+    createNewLegendEntries(2, layers);
 
     // Update the legend layers with the updated array, triggering the subscribe
     this.getLayerState(mapId).actions.setLegendLayers(layers);

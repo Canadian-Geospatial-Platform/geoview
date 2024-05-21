@@ -131,7 +131,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     // TODO: REFACTOR - Watch out for code reentrancy between queries!
     // TO.DOCONT: Consider using a LIFO pattern, per layer path, as the race condition resolution
     // GV Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
-    // GV As it is (and was like this befor events refactor), the this.resultSet is mutating between async calls.
+    // GV As it is (and was like this before events refactor), the this.resultSet is mutating between async calls.
 
     // TODO: Refactor - Make this function throw an error instead of returning void as option of the promise (to have same behavior as feature-info-layer-set)
 
@@ -139,15 +139,16 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     if (this.layerApi.isLayerEntryConfigRegistered(layerPath) && this.resultSet[layerPath]) {
       const { data } = this.resultSet[layerPath];
       const layerConfig = this.layerApi.getLayerEntryConfig(layerPath)!;
+      const layer = this.layerApi.getGeoviewLayerHybrid(layerPath);
 
       if (!this.resultSet[layerPath].data.eventListenerEnabled) return Promise.resolve();
 
-      if (layerConfig.layerStatus === 'loaded') {
+      if (layerConfig.layerStatus === 'loaded' && layer) {
         data.features = undefined;
         data.queryStatus = 'processing';
 
         // Process query on results data
-        const promiseResult = AllFeatureInfoLayerSet.queryLayerFeatures(data, layerConfig, layerPath, queryType, layerPath);
+        const promiseResult = AbstractLayerSet.queryLayerFeatures(data, layerConfig, layer, queryType, layerPath);
 
         // Wait for promise to resolve
         const arrayOfRecords = await promiseResult;

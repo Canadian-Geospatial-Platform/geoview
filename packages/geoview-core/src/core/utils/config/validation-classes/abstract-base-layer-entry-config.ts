@@ -15,7 +15,7 @@ import {
   TypeVectorTileSourceInitialConfig,
 } from '@/geo/map/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { TypeJsonValue } from '@/core/types/global-types';
+import { TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
 import { FilterNodeArrayType } from '@/geo/utils/renderer/geoview-renderer-types';
 
 /** ******************************************************************************************************************************
@@ -27,6 +27,9 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /** The display name of the layer (English/French). */
   layerName?: TypeLocalizedString;
+
+  /** The metadata associated witht he layer */
+  #metadata?: TypeJsonObject;
 
   /** The calculated filter equation */
   filterEquation?: FilterNodeArrayType;
@@ -64,12 +67,20 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
-   * Overridable method being executed when the layer is loaded.
+   * Gets the metadata that is associated to the layer.
+   * @param {string} layerPath The layer path to the layer's configuration.
+   *
+   * @returns {TypeJsonObject} The layer metadata.
    */
-  loadedFunction(): void {
-    // TODO: Refactor - Review design surrounding that function. Shouldn't be here.
-    // Set visibility
-    this.geoviewLayerInstance?.setVisible(this.initialSettings?.states?.visible !== false, this.layerPath);
+  getMetadata(): TypeJsonObject | undefined {
+    return this.#metadata;
+  }
+
+  /**
+   * Sets the layer metadata for the layer.
+   */
+  setMetadata(layerMetadata: TypeJsonObject): void {
+    this.#metadata = layerMetadata;
   }
 
   /**

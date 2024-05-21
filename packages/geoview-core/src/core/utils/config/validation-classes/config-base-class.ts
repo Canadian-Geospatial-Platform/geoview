@@ -1,22 +1,15 @@
-import BaseLayer from 'ol/layer/Base';
-import LayerGroup from 'ol/layer/Group';
-
-// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
-
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
-  CONST_LAYER_ENTRY_TYPES,
   TypeGeoviewLayerConfig,
+  TypeLayerEntryConfig,
   TypeLayerEntryType,
   TypeLayerStatus,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { logger } from '@/core/utils/logger';
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
-import { Cast, TypeJsonValue } from '@/core/types/global-types';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { TypeJsonValue } from '@/core/types/global-types';
 
 /** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
@@ -46,11 +39,6 @@ export class ConfigBaseClass {
   /** Layer entry data type. This element is part of the schema. */
   entryType?: TypeLayerEntryType;
 
-  // TODO: Refactor - There shouldn't be a coupling to a `AbstractGeoViewLayer` inside a Configuration class.
-  // TO.DOCONT: That logic should be elsewhere so that the Configuration class remains portable and immutable.
-  /** The geoview layer instance that contains this layer configuration. */
-  geoviewLayerInstance?: AbstractGeoViewLayer;
-
   /** It is used to link the layer entry config to the GeoView layer config. */
   geoviewLayerConfig = {} as TypeGeoviewLayerConfig;
 
@@ -60,11 +48,6 @@ export class ConfigBaseClass {
 
   /** It is used to link the layer entry config to the parent's layer config. */
   parentLayerConfig?: GroupLayerEntryConfig;
-
-  // TODO: Refactor - There shouldn't be a coupling to an OpenLayers `BaseLayer` inside a Configuration class.
-  // TO.DOCONT: That logic should be elsewhere so that the Configuration class remains portable and immutable.
-  /** This property is used to link the displayed layer to its layer entry config. it is not part of the schema. */
-  _olLayer?: BaseLayer | LayerGroup;
 
   /** Flag indicating that the loaded signal arrived before the processed one */
   #waitForProcessedBeforeSendingLoaded = false;
@@ -133,29 +116,6 @@ export class ConfigBaseClass {
   }
 
   /**
-   * The olLayer getter method for the ConfigBaseClass class and its descendant classes.
-   * All layerConfig has an olLayer property, but the olLayer setter can only be use on group layers.
-   * @returns {BaseLayer | LayerGroup | undefined} The OL layer
-   */
-  get olLayer(): BaseLayer | LayerGroup | undefined {
-    // eslint-disable-next-line no-underscore-dangle
-    return this._olLayer;
-  }
-
-  /**
-   * The olLayer setter method for the ConfigBaseClass class and its descendant classes.
-   * All layerConfig has an olLayer property, but the olLayer setter can only be use on group layers.
-   * If you want to set the olLayer property for a descendant of AbstractBaseLayerEntryConfig, you must
-   * use its olLayerAndLoadEndListeners because it enforce the creation of the load end listeners.
-   * @param {LayerGroup} olLayerValue The new olLayerd value.
-   */
-  set olLayer(olLayerValue: BaseLayer | LayerGroup | undefined) {
-    // eslint-disable-next-line no-underscore-dangle
-    if (layerEntryIsGroupLayer(this)) this._olLayer = olLayerValue;
-    else throw new Error(`The olLayer setter can only be used on layer group and layerPath refers to a layer of type "${this.entryType}".`);
-  }
-
-  /**
    * The layerId getter method for the ConfigBaseClass class and its descendant classes.
    * @retuns {TypeLayerStatus} The layer status
    */
@@ -192,7 +152,7 @@ export class ConfigBaseClass {
       // eslint-disable-next-line no-underscore-dangle
       this._layerStatus === 'loaded' &&
       this.parentLayerConfig &&
-      this.geoviewLayerInstance!.allLayerStatusAreGreaterThanOrEqualTo('loaded', [this.parentLayerConfig as GroupLayerEntryConfig])
+      ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('loaded', [this.parentLayerConfig as GroupLayerEntryConfig])
     )
       this.parentLayerConfig.layerStatus = 'loaded';
   }
@@ -248,29 +208,6 @@ export class ConfigBaseClass {
   }
 
   /**
-   * Register the layer identifier. Duplicate identifier are not allowed.
-   *
-   * @returns {boolean} Returns false if the layer configuration can't be registered.
-   */
-  registerLayerConfig(): boolean {
-    // TODO: Refactor - Move this function elsewhere. Shouldn't be here.
-    const layerApi = MapEventProcessor.getMapViewerLayerAPI(this.geoviewLayerInstance!.mapId);
-    const isRegistered = layerApi.isLayerEntryConfigRegistered(this.layerPath);
-    if (isRegistered) return false;
-
-    // TODO: REFACTOR - Do NOT do this! Bad design.
-    (layerApi.registeredLayers[this.layerPath] as ConfigBaseClass) = this;
-
-    // TODO: Check - Move this registerToLayerSets closer to the others, when I comment the line the Groups start breaking
-    // TO.DOCONT: See if we can fix this elsewhere and remove this.
-    if (this.entryType !== CONST_LAYER_ENTRY_TYPES.GROUP)
-      (this.geoviewLayerInstance as AbstractGeoViewLayer).registerToLayerSets(Cast<AbstractBaseLayerEntryConfig>(this));
-
-    this.layerStatus = 'registered';
-    return true;
-  }
-
-  /**
    * This method compares the internal layer status of the config with the layer status passed as a parameter and it
    * returns true if the internal value is greater or equal to the value of the parameter.
    *
@@ -303,6 +240,24 @@ export class ConfigBaseClass {
       layerStatus: this.layerStatus,
       isMetadataLayerGroup: this.isMetadataLayerGroup,
     } as unknown as TypeJsonValue;
+  }
+
+  /**
+   * Recursively checks the list of layer entries to see if all of them are greater than or equal to the provided layer status.
+   *
+   * @param {TypeLayerStatus} layerStatus The layer status to compare with the internal value of the config.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer's configuration
+   *                                                            (default: this.listOfLayerEntryConfig).
+   *
+   * @returns {boolean} true when all layers are greater than or equal to the layerStatus parameter.
+   */
+  static allLayerStatusAreGreaterThanOrEqualTo(layerStatus: TypeLayerStatus, listOfLayerEntryConfig: TypeLayerEntryConfig[]): boolean {
+    // Try to find a layer that is not greater than or equal to the layerStatus parameter. If you can, return false
+    return !listOfLayerEntryConfig.find((layerConfig: TypeLayerEntryConfig) => {
+      if (layerEntryIsGroupLayer(layerConfig))
+        return !this.allLayerStatusAreGreaterThanOrEqualTo(layerStatus, layerConfig.listOfLayerEntryConfig);
+      return !layerConfig.isGreaterThanOrEqualTo(layerStatus || 'newInstance');
+    });
   }
 }
 

@@ -153,7 +153,6 @@ export class ImageStatic extends AbstractGeoViewRaster {
       if (!legendImage) {
         const legend: TypeLegend = {
           type: this.type,
-          layerPath: layerConfig.layerPath,
           layerName: layerConfig!.layerName,
           legend: null,
         };
@@ -168,7 +167,6 @@ export class ImageStatic extends AbstractGeoViewRaster {
         drawingContext.drawImage(image, 0, 0);
         const legend: TypeLegend = {
           type: this.type,
-          layerPath: layerConfig.layerPath,
           layerName: layerConfig!.layerName,
           legend: drawingCanvas,
         };
@@ -176,7 +174,6 @@ export class ImageStatic extends AbstractGeoViewRaster {
       }
       const legend: TypeLegend = {
         type: this.type,
-        layerPath: layerConfig.layerPath,
         layerName: layerConfig!.layerName,
         legend: null,
       };
@@ -245,7 +242,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    *
    * @param {ImageStaticLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
+   * @returns {Promise<TypeBaseRasterLayer | undefined>} The GeoView raster layer that has been created.
    */
   protected override async processOneLayerEntry(layerConfig: ImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | undefined> {
     await super.processOneLayerEntry(layerConfig);
@@ -275,13 +272,16 @@ export class ImageStatic extends AbstractGeoViewRaster {
     // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
     // GV            in the 'loading' state if the flag value is false.
 
+    // Create the OpenLayer layer
+    const olLayer = new ImageLayer(staticImageOptions);
+
     // TODO: Refactor - Wire it up
     this.setLayerAndLoadEndListeners(layerConfig, {
-      olLayer: new ImageLayer(staticImageOptions),
+      olLayer,
       loadEndListenerType: 'image',
     });
 
-    return Promise.resolve(layerConfig.olLayer);
+    return Promise.resolve(olLayer);
   }
 
   /** ***************************************************************************************************************************
@@ -293,11 +293,11 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @returns {Extent} The new layer bounding box.
    */
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
-    const layerConfig = this.getLayerEntryConfig(layerPath);
-    const layerBounds = (layerConfig?.olLayer as ImageLayer<Static>).getSource()?.getImageExtent();
+    const layer = this.getOLLayer(layerPath) as ImageLayer<Static> | undefined;
+
+    const layerBounds = layer?.getSource()?.getImageExtent();
     const projection =
-      (layerConfig?.olLayer as ImageLayer<Static>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
-      MapEventProcessor.getMapState(this.mapId).currentProjection;
+      layer?.getSource()?.getProjection()?.getCode().replace('EPSG:', '') || MapEventProcessor.getMapState(this.mapId).currentProjection;
 
     if (layerBounds) {
       let transformedBounds = layerBounds;

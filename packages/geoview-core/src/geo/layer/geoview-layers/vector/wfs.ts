@@ -108,7 +108,7 @@ export class WFS extends AbstractGeoViewVector {
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
   protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number' {
-    const fieldDefinitions = this.layerMetadata[layerConfig.layerPath] as TypeJsonArray;
+    const fieldDefinitions = this.getLayerMetadata(layerConfig.layerPath) as TypeJsonArray;
     const fieldDefinition = fieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
     if (!fieldDefinition) return 'string';
     const fieldEntryType = (fieldDefinition.type as string).split(':').slice(-1)[0] as string;
@@ -264,7 +264,7 @@ export class WFS extends AbstractGeoViewVector {
       if (describeFeatureUrl && outputFormat === 'application/json') {
         const layerMetadata = (await (await fetch(describeFeatureUrl)).json()) as TypeJsonObject;
         if (Array.isArray(layerMetadata.featureTypes) && Array.isArray(layerMetadata.featureTypes[0].properties)) {
-          this.layerMetadata[layerConfig.layerPath] = layerMetadata.featureTypes[0].properties;
+          this.setLayerMetadata(layerConfig.layerPath, layerMetadata.featureTypes[0].properties);
           this.#processFeatureInfoConfig(layerMetadata.featureTypes[0].properties as TypeJsonArray, layerConfig);
         }
       } else if (describeFeatureUrl && outputFormat.toUpperCase().includes('XML')) {
@@ -288,7 +288,7 @@ export class WFS extends AbstractGeoViewVector {
             featureTypeProperties.push(element['@attributes']);
           });
 
-          this.layerMetadata[layerConfig.layerPath] = featureTypeProperties as TypeJsonObject;
+          this.setLayerMetadata(layerConfig.layerPath, featureTypeProperties as TypeJsonObject);
           this.#processFeatureInfoConfig(featureTypeProperties as TypeJsonArray, layerConfig);
         }
       }

@@ -169,7 +169,7 @@ export class GeoPackage extends AbstractGeoViewVector {
    * @param {LayerGroup} layerGroup Optional layer group to use when we have many layers. The very first call to
    *  processListOfLayerEntryConfig must not provide a value for this parameter. It is defined for internal use.
    *
-   * @returns {Promise<BaseLayer | null>} The promise that the layers were processed.
+   * @returns {Promise<BaseLayer | undefined>} The promise that the layers were processed.
    */
   // TODO: Question - Is this function still used or should it be removed in favor of the mother class implementation?
   override processListOfLayerEntryConfig(
@@ -179,7 +179,7 @@ export class GeoPackage extends AbstractGeoViewVector {
     const promisedListOfLayerEntryProcessed = new Promise<BaseLayer | undefined>((resolve) => {
       // Single group layer handled recursively
       if (listOfLayerEntryConfig.length === 1 && layerEntryIsGroupLayer(listOfLayerEntryConfig[0])) {
-        const newLayerGroup = GeoPackage.createLayerGroup(listOfLayerEntryConfig[0], listOfLayerEntryConfig[0].initialSettings!);
+        const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[0], listOfLayerEntryConfig[0].initialSettings!);
 
         this.processListOfLayerEntryConfig(listOfLayerEntryConfig[0].listOfLayerEntryConfig!, newLayerGroup)
           .then((groupReturned) => {
@@ -201,14 +201,14 @@ export class GeoPackage extends AbstractGeoViewVector {
         // Multiple layer configs are processed individually and added to layer group
       } else if (listOfLayerEntryConfig.length > 1) {
         if (!layerGroup)
-          layerGroup = GeoPackage.createLayerGroup(
+          layerGroup = this.createLayerGroup(
             listOfLayerEntryConfig[0].parentLayerConfig as TypeLayerEntryConfig,
             listOfLayerEntryConfig[0].initialSettings!
           );
 
         listOfLayerEntryConfig.forEach((layerConfig) => {
           if (layerEntryIsGroupLayer(layerConfig)) {
-            const newLayerGroup = GeoPackage.createLayerGroup(layerConfig, layerConfig.initialSettings!);
+            const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings!);
             this.processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!, newLayerGroup)
               .then((groupReturned) => {
                 if (groupReturned) {
@@ -397,8 +397,6 @@ export class GeoPackage extends AbstractGeoViewVector {
    *
    * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    * @param {string | number | Uint8Array} sld The SLD style associated with the layer
-   *
-   * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
    */
   protected static processGeopackageStyle(layerConfig: AbstractBaseLayerEntryConfig, sld: string | number | Uint8Array): void {
     // Extract layer styles if they exist
@@ -538,14 +536,15 @@ export class GeoPackage extends AbstractGeoViewVector {
    * @param {AbstractLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    * @param {sldsInterface} sld The SLD style associated with the layers geopackage, if any
    *
-   * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
+   * @returns {Promise<BaseLayer | undefined>} The GeoView base layer that has been created.
    */
   protected processOneGeopackageLayer(
     layerConfig: AbstractBaseLayerEntryConfig,
     layerInfo: layerData,
     sld?: sldsInterface
-  ): Promise<BaseLayer | null> {
-    layerConfig.registerLayerConfig();
+  ): Promise<BaseLayer | undefined> {
+    // FIXME: Temporary patch to keep the behavior until those layer classes don't exist
+    MapEventProcessor.getMapViewerLayerAPI(this.mapId).registerLayerConfigInit(layerConfig);
 
     const { name, source } = layerInfo;
 
@@ -571,7 +570,7 @@ export class GeoPackage extends AbstractGeoViewVector {
    * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    * @param {LayerGroup} layerGroup Optional layer group for multiple layers.
    *
-   * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
+   * @returns {Promise<BaseLayer | undefined>} The GeoView base layer that has been created.
    */
   protected override async processOneLayerEntry(
     layerConfig: AbstractBaseLayerEntryConfig,
@@ -606,7 +605,7 @@ export class GeoPackage extends AbstractGeoViewVector {
           } else {
             layerConfig.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
             (layerConfig as TypeLayerEntryConfig).listOfLayerEntryConfig = [];
-            const newLayerGroup = GeoPackage.createLayerGroup(layerConfig, layerConfig.initialSettings!);
+            const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings!);
             for (let i = 0; i < layers.length; i++) {
               const newLayerEntryConfig = cloneDeep(layerConfig) as AbstractBaseLayerEntryConfig;
               newLayerEntryConfig.layerId = layers[i].name;

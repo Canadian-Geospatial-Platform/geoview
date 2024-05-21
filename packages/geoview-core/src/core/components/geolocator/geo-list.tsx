@@ -71,6 +71,14 @@ export default function GeoList({ geoListItems, searchValue }: GeoListProps): JS
     );
   }, []);
 
+  const handleZoomToGeoLocator = (latLng: [number, number], bbox: [number, number, number, number]): void => {
+    // Zoom to location
+    zoomToGeoLocatorLocation(latLng, bbox).catch((error) => {
+      // Log
+      logger.logPromiseFailed('Failed to triggerGetAllFeatureInfo in data-panel.GeoList.handleZoomToGeoLocator', error);
+    });
+  };
+
   return (
     <Box>
       {geoListItems.map((geoListItem, index) => (
@@ -81,7 +89,7 @@ export default function GeoList({ geoListItems, searchValue }: GeoListProps): JS
           key={`${geoListItem.name}-${geoListItem.lat}-${index.toString()}`}
         >
           <ListItem component="div" disablePadding>
-            <ListItemButton onClick={() => zoomToGeoLocatorLocation([geoListItem.lng, geoListItem.lat], geoListItem.bbox)}>
+            <ListItemButton onClick={() => handleZoomToGeoLocator([geoListItem.lng, geoListItem.lat], geoListItem.bbox)}>
               <Grid container>
                 <Grid item xs={12} sm={8}>
                   <Typography sx={sxClassesList.listStyle}>

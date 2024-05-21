@@ -48,18 +48,18 @@ export class LegendsLayerSet extends AbstractLayerSet {
     if (statusHasChanged) {
       // If the layer has been at least processed, we know its metadata has been processed and legend is ready to be queried (logic to move?)
       if (layerExists && ['processed', 'loaded'].includes(layerStatus)) {
-        // Query for the legend
-        const legendPromise = this.layerApi.getGeoviewLayer(layerPath)!.queryLegend(layerPath);
+        // Query the legend
+        const legendPromise = this.layerApi.getGeoviewLayerHybrid(layerPath)?.queryLegend(layerPath);
 
         // Whenever the legend response comes in
         legendPromise
-          .then((legend: TypeLegend | null | undefined) => {
+          ?.then((legend: TypeLegend | null | undefined) => {
             // If legend received
             if (legend) {
               // Query completed keep it
               this.resultSet[layerPath].data = legend;
 
-              // Propagate to store
+              // Propagate to store once the legend is received
               LegendEventProcessor.propagateLegendToStore(this.mapId, layerPath, this.resultSet[layerPath]);
 
               // Inform that the layer set has been updated by triggering an event down the road
@@ -72,45 +72,8 @@ export class LegendsLayerSet extends AbstractLayerSet {
           });
       }
 
-      if (layerExists || layerStatus === 'loaded') {
-        // Get the config from the registered layers
-        const layerConfig = this.layerApi.getLayerEntryConfig(layerPath)!;
-
-        // TODO: Check - I'm not sure where the logic to set layer status for the parent to loaded when a child is loaded/error is, but
-        // TO.DOCONT: I had to add this as part of the refactor to make it work
-        // Possibly update the layer status(es) of the parent(s)
-        this.#changeLayerStatusOfParentsRecursive(layerConfig, layerStatus);
-
-        // Propagate to store
-        LegendEventProcessor.propagateLegendToStore(this.mapId, layerPath, this.resultSet[layerPath]);
-      }
-    }
-  }
-
-  /**
-   * Recursively tries to set the layer status on the parent group layer(s), depending if the layer entry has a parent and
-   * if the current layer status is loaded or error.
-   * @param {TypeLayerEntryConfig} currentLayerConfig - The current layer config being checked
-   * @param {TypeLayerStatus} currentLayerStatus - The layer status that triggered the check on the parent(s)
-   * @private
-   */
-  #changeLayerStatusOfParentsRecursive(currentLayerConfig: TypeLayerEntryConfig, currentLayerStatus: TypeLayerStatus): void {
-    // If layer has a parent
-    if (currentLayerConfig.parentLayerConfig) {
-      // If the current status to set is at least loaded (or error), make the parent loaded
-      if (['loaded', 'error'].includes(currentLayerStatus)) {
-        // Get the parent config
-        const parentGroupLayer = currentLayerConfig.parentLayerConfig;
-
-        // Update the status on the parent
-        parentGroupLayer.layerStatus = 'loaded';
-
-        // If has another parent, go recursive
-        if (parentGroupLayer.parentLayerConfig) {
-          // Going recursive
-          this.#changeLayerStatusOfParentsRecursive(parentGroupLayer, currentLayerStatus);
-        }
-      }
+      // Propagate to store
+      LegendEventProcessor.propagateLegendToStore(this.mapId, layerPath, this.resultSet[layerPath]);
     }
   }
 }

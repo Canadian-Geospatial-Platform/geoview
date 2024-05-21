@@ -152,7 +152,6 @@ export class EsriImage extends AbstractGeoViewRaster {
       if (!legendInfo) {
         const legend: TypeLegend = {
           type: this.type,
-          layerPath,
           layerName: layerConfig.layerName!,
           styleConfig: layerConfig.style,
           legend: null,
@@ -185,7 +184,6 @@ export class EsriImage extends AbstractGeoViewRaster {
       layerConfig.style = styleConfig;
       const legend: TypeLegend = {
         type: this.type,
-        layerPath,
         layerName: layerConfig?.layerName,
         styleConfig,
         legend: await getLegendStyles(
@@ -295,7 +293,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @param {EsriImageLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
+   * @returns { Promise<TypeBaseRasterLayer | undefined>} The GeoView raster layer that has been created.
    */
   protected override async processOneLayerEntry(layerConfig: EsriImageLayerEntryConfig): Promise<TypeBaseRasterLayer | undefined> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
@@ -328,17 +326,31 @@ export class EsriImage extends AbstractGeoViewRaster {
     // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
     // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
 
+    // Create the OpenLayer layer
+    const olLayer = new ImageLayer(imageLayerOptions);
+
     // TODO: Refactor - Wire it up
     this.setLayerAndLoadEndListeners(layerConfig, {
-      olLayer: new ImageLayer(imageLayerOptions),
+      olLayer,
       loadEndListenerType: 'image',
     });
 
-    return Promise.resolve(layerConfig.olLayer);
+    return Promise.resolve(olLayer);
+  }
+
+  /**
+   * Overrides when the layer gets in loaded status.
+   */
+  override onLoaded(layerConfig: AbstractBaseLayerEntryConfig): void {
+    // Call parent
+    super.onLoaded(layerConfig);
+
+    // Apply view filter immediately
+    this.applyViewFilter(layerConfig.layerPath, (layerConfig as EsriImageLayerEntryConfig).layerFilter || '');
   }
 
   /** ***************************************************************************************************************************
-   * Apply a view filter to the layer. When the combineLegendFilter flag is false, the filter paramater is used alone to display
+   * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter paramater is used alone to display
    * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
    * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
    * is done.
@@ -352,9 +364,10 @@ export class EsriImage extends AbstractGeoViewRaster {
     logger.logTraceCore('ESRIImage - applyViewFilter', layerPath);
 
     const layerConfig = this.getLayerEntryConfig(layerPath) as EsriImageLayerEntryConfig;
+    const olLayer = this.getOLLayer(layerPath) as ImageLayer<ImageArcGISRest>;
 
     // Get source
-    const source = (layerConfig.olLayer as ImageLayer<ImageArcGISRest>).getSource();
+    const source = olLayer.getSource();
     if (source) {
       let filterValueToUse = filter;
       layerConfig.legendFilterIsOff = !combineLegendFilter;
@@ -380,7 +393,7 @@ export class EsriImage extends AbstractGeoViewRaster {
           )}`;
         });
         source.updateParams({ [dimension]: filterValueToUse.replace(/\s*/g, '') });
-        layerConfig.olLayer!.changed();
+        olLayer.changed();
       }
     }
   }

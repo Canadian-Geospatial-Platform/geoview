@@ -37,7 +37,6 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a hover-feature-info-layer-set wants to check for condition to register a layer in its set.
-   * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
    * @param {TypeLayerEntryConfig} layerConfig - The layer config
    * @returns {boolean} True when the layer should be registered to this hover-feature-info-layer-set.
    */
@@ -108,14 +107,17 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     // Loop on each layer path in the resultSet
     Object.keys(this.resultSet).forEach((layerPath) => {
       const layerConfig = this.layerApi.getLayerEntryConfig(layerPath)!;
+      const layer = this.layerApi.getGeoviewLayerHybrid(layerPath);
+
       const { data } = this.resultSet[layerPath];
       if (!data.eventListenerEnabled) return;
-      if (layerConfig.layerStatus === 'loaded') {
+
+      if (layerConfig.layerStatus === 'loaded' && layer) {
         data.feature = undefined;
         data.queryStatus = 'init';
 
         // Process query on results data
-        HoverFeatureInfoLayerSet.queryLayerFeatures(data, layerConfig, layerPath, queryType, pixelCoordinate)
+        AbstractLayerSet.queryLayerFeatures(data, layerConfig, layer, queryType, pixelCoordinate)
           .then((arrayOfRecords) => {
             if (arrayOfRecords === null) {
               this.resultSet[layerPath].data.queryStatus = 'error';

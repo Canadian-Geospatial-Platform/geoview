@@ -5,14 +5,14 @@ import Feature from 'ol/Feature';
 import RenderFeature from 'ol/render/Feature';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeLayerStatus, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
-import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { createLocalizedString, getLocalizedValue } from '@/core/utils/utilities';
+import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { getLocalizedValue } from '@/core/utils/utilities';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
 import { TypeHoverLayerData } from './hover-feature-info-layer-set';
 import { LayerApi } from '@/geo/layer/layer';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { Cast, TypeJsonObject } from '@/core/types/global-types';
+import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
 
 /**
  * A class to hold a set of layers associated with a value of any type.
@@ -44,56 +44,6 @@ export abstract class AbstractLayerSet {
   // Shortcut to get the map id
   protected get mapId(): string {
     return this.layerApi.mapId;
-  }
-
-  /**
-   * Processes the layer status change in the layer-set.
-   * @param {ConfigBaseClass} config - The layer config class
-   * @param {string} layerPath - The layer path being affected
-   * @param {TypeLayerStatus} layerStatus - The new layer status
-   */
-  public processLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
-    // Call the overridable function to process a layer status changed
-    this.onProcessLayerStatusChanged(config, layerPath, layerStatus);
-  }
-
-  /**
-   * An overridable function for a layer-set to process a layer status changed event.
-   * @param {ConfigBaseClass} config - The layer config class
-   * @param {string} layerPath - The layer path being affected
-   * @param {TypeLayerStatus} layerStatus - The new layer status
-   */
-  protected onProcessLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
-    // if layer's status flag exists and is different than the new one
-    if (this.resultSet?.[layerPath]?.layerStatus && this.resultSet?.[layerPath]?.layerStatus !== layerStatus) {
-      // Change the layer status!
-      this.resultSet[layerPath].layerStatus = layerStatus;
-
-      if (['processed', 'error'].includes(layerStatus) && !this.resultSet[layerPath].layerName) {
-        const layerConfig = this.layerApi.getLayerEntryConfig(layerPath)!;
-        const layerName = getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId));
-        if (layerName) this.resultSet[layerPath].layerName = layerName;
-        else {
-          this.resultSet[layerPath].layerName = getLocalizedValue(
-            {
-              en: `Anonymous Layer`,
-              fr: `Couche Anonyme`,
-            },
-            AppEventProcessor.getDisplayLanguage(this.mapId)
-          );
-        }
-
-        // Synchronize the layer name property in the config and the layer set object when the geoview instance is ready.
-        if (!layerConfig.layerName) layerConfig.layerName = createLocalizedString(this.resultSet[layerPath].layerName!);
-
-        // There is a synch issue when layerName is not set on the layerConfig when layer is registered, it wil not appear in UI
-        if (this.resultSet[layerPath].data)
-          (Cast<TypeJsonObject>(this.resultSet[layerPath].data).layerName as string) = this.resultSet[layerPath].layerName!;
-      }
-
-      // Inform that the layer set has been updated
-      this.onLayerSetUpdatedProcess(layerPath);
-    }
   }
 
   /**
@@ -163,6 +113,57 @@ export abstract class AbstractLayerSet {
   }
 
   /**
+   * Processes the layer status change in the layer-set.
+   * @param {ConfigBaseClass} config - The layer config class
+   * @param {string} layerPath - The layer path being affected
+   * @param {TypeLayerStatus} layerStatus - The new layer status
+   */
+  public processLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
+    // Call the overridable function to process a layer status changed
+    this.onProcessLayerStatusChanged(config, layerPath, layerStatus);
+  }
+
+  /**
+   * An overridable function for a layer-set to process a layer status changed event.
+   * @param {ConfigBaseClass} config - The layer config class
+   * @param {string} layerPath - The layer path being affected
+   * @param {TypeLayerStatus} layerStatus - The new layer status
+   */
+  protected onProcessLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
+    // if layer's status flag exists and is different than the new one
+    if (this.resultSet?.[layerPath]?.layerStatus && this.resultSet?.[layerPath]?.layerStatus !== layerStatus) {
+      // Change the layer status!
+      this.resultSet[layerPath].layerStatus = layerStatus;
+
+      // TODO: Cleanup - Commenting this for now.. not that useful and complicates things..
+      // if (['processed', 'error'].includes(layerStatus) && !this.resultSet[layerPath].layerName) {
+      //   const layerConfig = this.layerApi.getLayerEntryConfig(layerPath)!;
+      //   const layerName = getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId));
+      //   if (layerName) this.resultSet[layerPath].layerName = layerName;
+      //   else {
+      //     this.resultSet[layerPath].layerName = getLocalizedValue(
+      //       {
+      //         en: `Anonymous Layer`,
+      //         fr: `Couche Anonyme`,
+      //       },
+      //       AppEventProcessor.getDisplayLanguage(this.mapId)
+      //     );
+      //   }
+
+      //   // Synchronize the layer name property in the config and the layer set object when the geoview instance is ready.
+      //   if (!layerConfig.layerName) layerConfig.layerName = createLocalizedString(this.resultSet[layerPath].layerName!);
+
+      //   // There is a synch issue when layerName is not set on the layerConfig when layer is registered, it wil not appear in UI
+      //   if (this.resultSet[layerPath].data)
+      //     (Cast<TypeJsonObject>(this.resultSet[layerPath].data).layerName as string) = this.resultSet[layerPath].layerName!;
+      // }
+
+      // Inform that the layer set has been updated
+      this.onLayerSetUpdatedProcess(layerPath);
+    }
+  }
+
+  /**
    * An overridable layer set updated function for a layer-set to indicate the layer set has been updated.
    * @param {string} layerPath - The layer path
    */
@@ -183,16 +184,16 @@ export abstract class AbstractLayerSet {
   protected static queryLayerFeatures(
     data: TypeLayerData | TypeHoverLayerData,
     layerConfig: TypeLayerEntryConfig,
-    layerPath: string,
+    geoviewLayer: AbstractGeoViewLayer | AbstractGVLayer,
     queryType: QueryType,
     location: TypeLocation
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // If event listener is enabled, query status isn't in error, and geoview layer instance is defined
-    if (data.eventListenerEnabled && data.queryStatus !== 'error' && layerConfig.geoviewLayerInstance) {
+    if (data.eventListenerEnabled && data.queryStatus !== 'error') {
       // If source is queryable
       if (layerConfig?.source?.featureInfo?.queryable) {
         // Get Feature Info
-        return Promise.resolve(layerConfig.geoviewLayerInstance.getFeatureInfo(queryType, layerPath, location));
+        return Promise.resolve(geoviewLayer.getFeatureInfo(queryType, layerConfig.layerPath, location));
       }
     }
     // No query made
