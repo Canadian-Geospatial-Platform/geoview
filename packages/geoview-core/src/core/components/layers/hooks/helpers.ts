@@ -178,8 +178,8 @@ export function useLegendHelpers(): unknown {
 
       const item: TypeLegendLayer = {
         bounds: undefined,
-        layerId: setData.data?.layerPath ?? `layer${i}`,
-        layerPath: `test_${setData.data?.layerPath ?? generateId()}`,
+        layerId: `layer${i}`,
+        layerPath: `test_${generateId()}`,
         layerName: `TEST---${setData.data?.layerName?.en ?? 'Unknown Layer name'}`,
         type: setData.data?.type ?? CONST_LAYER_TYPES.IMAGE_STATIC,
         layerStatus: setData.layerStatus,

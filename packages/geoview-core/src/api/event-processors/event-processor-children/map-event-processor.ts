@@ -518,7 +518,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
           // Go for it
           // eslint-disable-next-line no-param-reassign
           layerInfo.visible = newVisibility;
-          this.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerInfo.layerPath)?.setVisible(layerInfo.visible, layerInfo.layerPath);
+          this.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layerInfo.layerPath)?.setVisible(layerInfo.visible, layerInfo.layerPath);
         }
       }
     });
@@ -528,7 +528,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       if ((!layerVisibility || newValue) && parentLayerVisibility === false) {
         if (parentLayerInfo) {
           parentLayerInfo.visible = true;
-          this.getMapViewerLayerAPI(mapId).getGeoviewLayer(parentLayerPath)?.setVisible(true, parentLayerPath);
+          this.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(parentLayerPath)?.setVisible(true, parentLayerPath);
         }
       }
       const children = curOrderedLayerInfo.filter(
@@ -803,7 +803,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static setLayerZIndices = (mapId: string): void => {
     const reversedLayers = [...this.getMapStateProtected(mapId).orderedLayerInfo].reverse();
     reversedLayers.forEach((orderedLayerInfo, index) => {
-      const olLayer = this.getMapViewerLayerAPI(mapId).getLayerEntryConfig(orderedLayerInfo.layerPath)?.olLayer;
+      const olLayer = this.getMapViewerLayerAPI(mapId).getOLLayer(orderedLayerInfo.layerPath);
       if (olLayer) olLayer?.setZIndex(index + 10);
     });
   };

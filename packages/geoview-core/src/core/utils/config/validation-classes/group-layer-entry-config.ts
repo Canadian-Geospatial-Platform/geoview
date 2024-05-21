@@ -1,5 +1,3 @@
-import { TypeLocalizedString } from '@config/types/map-schema-types';
-
 import { CONST_LAYER_ENTRY_TYPES, TypeLayerEntryConfig, TypeLayerInitialSettings } from '@/geo/map/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 
@@ -16,16 +14,13 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
   /** The ending element of the layer configuration path is not used on groups. */
   declare layerIdExtension: never;
 
-  /** The display name of the layer (English/French). */
-  layerName?: TypeLocalizedString;
-
   /**
    * Initial settings to apply to the GeoView layer entry at creation time. Initial settings are inherited from the parent in the
    * configuration tree.
    */
   initialSettings?: TypeLayerInitialSettings;
 
-  /** Source settings to apply to the GeoView vector layer source at creation time is not used by groups. */
+  /** Source settings to apply to the GeoView layer source at creation time is not used by groups. */
   declare source: never;
 
   /** The list of layer entry configurations to use from the GeoView layer group. */

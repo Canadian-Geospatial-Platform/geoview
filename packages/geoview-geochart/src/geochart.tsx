@@ -55,7 +55,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
 
   // Use Store
   const displayLanguage = useAppDisplayLanguageById(mapId);
-  const addNotification = useAppStoreActions();
+  const { addNotification } = useAppStoreActions();
 
   // #endregion
 
@@ -97,7 +97,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
       logger.logTraceUseCallback('GEOVIEW-GEOCHART - handleError', mapId, error);
 
       // Show error
-      addNotification({ key: 'geochart', message: error, notificationType: 'error' });
+      addNotification({ key: 'geochart', message: error, notificationType: 'error', count: 0 });
     },
     [addNotification, mapId]
   );
@@ -112,7 +112,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
       GeoViewGeoChartConfigLayer | undefined,
       TypeLayerEntryConfig | undefined,
       TypeFeatureInfoEntry[] | undefined
-    ] = findLayerDataAndConfigFromQueryResults(config, MapEventProcessor.getMapViewerLayerAPI(mapId).registeredLayers, layers);
+    ] = findLayerDataAndConfigFromQueryResults(config, MapEventProcessor.getMapViewerLayerAPI(mapId), layers);
 
     // If found a chart for the layer
     let chartConfig;
