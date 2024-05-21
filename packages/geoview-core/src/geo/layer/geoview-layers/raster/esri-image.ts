@@ -22,7 +22,6 @@ import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
   TypeUniqueValueStyleConfig,
-  TypeListOfLayerEntryConfig,
   TypeUniqueValueStyleInfo,
   TypeStyleConfig,
   layerEntryIsGroupLayer,
@@ -135,7 +134,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    */
   override async getLegend(layerPath: string): Promise<TypeLegend | null> {
     try {
-      const layerConfig = this.getLayerConfig(layerPath) as EsriImageLayerEntryConfig | undefined | null;
+      const layerConfig = this.getLayerEntryConfig(layerPath) as EsriImageLayerEntryConfig | undefined | null;
       if (!layerConfig) return null;
       const legendUrl = `${getLocalizedValue(
         layerConfig.geoviewLayerConfig.metadataAccessPath,
@@ -206,11 +205,11 @@ export class EsriImage extends AbstractGeoViewRaster {
    * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
    * extra configuration may be done here.
    *
-   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    *
-   * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
+   * @returns {TypeLayerEntryConfig[]} A new list of layer entries configuration with deleted error layers.
    */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
+  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
@@ -235,8 +234,8 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
-  protected override getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
-    return commonGetFieldType.call(this, fieldName, layerConfig);
+  protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number' {
+    return commonGetFieldType(this, fieldName, layerConfig);
   }
 
   /** ***************************************************************************************************************************
@@ -247,8 +246,8 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
-  protected override getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
-    return commonGetFieldDomain.call(this, fieldName, layerConfig);
+  protected override getFieldDomain(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): null | codedValueType | rangeDomainType {
+    return commonGetFieldDomain(this, fieldName, layerConfig);
   }
 
   /** ***************************************************************************************************************************
@@ -266,7 +265,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
    */
   processFeatureInfoConfig(layerConfig: EsriImageLayerEntryConfig): void {
-    commonProcessFeatureInfoConfig.call(this, layerConfig);
+    commonProcessFeatureInfoConfig(this, layerConfig);
   }
 
   /** ***************************************************************************************************************************
@@ -276,7 +275,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
    */
   processInitialSettings(layerConfig: EsriImageLayerEntryConfig): void {
-    commonProcessInitialSettings.call(this, layerConfig);
+    commonProcessInitialSettings(this, layerConfig);
   }
 
   /** ***************************************************************************************************************************
@@ -288,7 +287,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
   protected override processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
-    return commonProcessLayerMetadata.call(this, layerConfig);
+    return commonProcessLayerMetadata(this, layerConfig);
   }
 
   /** ****************************************************************************************************************************
@@ -298,7 +297,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  protected override async processOneLayerEntry(layerConfig: EsriImageLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected override async processOneLayerEntry(layerConfig: EsriImageLayerEntryConfig): Promise<TypeBaseRasterLayer | undefined> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
     await super.processOneLayerEntry(layerConfig);
@@ -329,39 +328,37 @@ export class EsriImage extends AbstractGeoViewRaster {
     // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
     // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
 
-    // eslint-disable-next-line no-param-reassign
-    layerConfig.olLayerAndLoadEndListeners = {
+    // TODO: Refactor - Wire it up
+    this.setLayerAndLoadEndListeners(layerConfig, {
       olLayer: new ImageLayer(imageLayerOptions),
       loadEndListenerType: 'image',
-    };
-    // eslint-disable-next-line no-param-reassign
-    layerConfig.geoviewLayerInstance = this;
+    });
 
     return Promise.resolve(layerConfig.olLayer);
   }
 
   /** ***************************************************************************************************************************
-   * Apply a view filter to the layer. When the CombineLegendFilter flag is false, the filter paramater is used alone to display
+   * Apply a view filter to the layer. When the combineLegendFilter flag is false, the filter paramater is used alone to display
    * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
    * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
    * is done.
    *
    * @param {string} layerPath The layer path to the layer's configuration.
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
-   * @param {boolean} CombineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
+   * @param {boolean} combineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
-  applyViewFilter(layerPath: string, filter: string, CombineLegendFilter?: boolean): void {
+  applyViewFilter(layerPath: string, filter: string, combineLegendFilter?: boolean): void {
     // Log
     logger.logTraceCore('ESRIImage - applyViewFilter', layerPath);
 
-    const layerConfig = this.getLayerConfig(layerPath) as EsriImageLayerEntryConfig;
+    const layerConfig = this.getLayerEntryConfig(layerPath) as EsriImageLayerEntryConfig;
 
     // Get source
     const source = (layerConfig.olLayer as ImageLayer<ImageArcGISRest>).getSource();
     if (source) {
       let filterValueToUse = filter;
-      layerConfig.olLayer!.set('legendFilterIsOff', !CombineLegendFilter);
-      if (CombineLegendFilter) layerConfig.olLayer?.set('layerFilter', filter);
+      layerConfig.legendFilterIsOff = !combineLegendFilter;
+      if (combineLegendFilter) layerConfig.layerFilter = filter;
 
       if (filterValueToUse) {
         filterValueToUse = filterValueToUse.replaceAll(/\s{2,}/g, ' ').trim();
@@ -397,7 +394,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @returns {Extent | undefined} The new layer bounding box.
    */
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
-    const layerConfig = this.getLayerConfig(layerPath);
+    const layerConfig = this.getLayerEntryConfig(layerPath);
     const layerBounds = layerConfig?.initialSettings?.bounds || [];
     const projection = this.metadata?.fullExtent?.spatialReference?.wkid || MapEventProcessor.getMapState(this.mapId).currentProjection;
 

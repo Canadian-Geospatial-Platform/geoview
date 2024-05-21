@@ -4,7 +4,7 @@ import { Coordinate } from 'ol/coordinate';
 import { logger } from '@/core/utils/logger';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLayerEntryConfig, TypeLayerStatus } from '@/geo/map/map-schema-types';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractLayerSet, TypeFieldEntry, TypeQueryStatus } from './abstract-layer-set';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -41,7 +41,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    * @param {TypeLayerEntryConfig} layerConfig - The layer config
    * @returns {boolean} True when the layer should be registered to this hover-feature-info-layer-set.
    */
-  protected override onRegisterLayerCheck(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): boolean {
+  protected override onRegisterLayerCheck(layerConfig: TypeLayerEntryConfig): boolean {
     // Log
     logger.logTraceCore('HOVER-FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerConfig.layerPath, Object.keys(this.resultSet));
 
@@ -53,15 +53,14 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a hover-feature-info-layer-set wants to register a layer in its set.
-   * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer being registered
    * @param {TypeLayerEntryConfig} layerConfig - The layer config
    */
-  protected override onRegisterLayer(geoviewLayer: AbstractGeoViewLayer, layerConfig: TypeLayerEntryConfig): void {
+  protected override onRegisterLayer(layerConfig: TypeLayerEntryConfig): void {
     // Log
     logger.logTraceCore('HOVER-FEATURE-INFO-LAYER-SET - onRegisterLayer', layerConfig.layerPath, Object.keys(this.resultSet));
 
     // Call parent
-    super.onRegisterLayer(geoviewLayer, layerConfig);
+    super.onRegisterLayer(layerConfig);
 
     // TODO: refactor layer - we should use the layerPath associated to the layer we register and do not use layerPath parameter
     this.resultSet[layerConfig.layerPath] = {
@@ -108,7 +107,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     // Reinitialize the resultSet
     // Loop on each layer path in the resultSet
     Object.keys(this.resultSet).forEach((layerPath) => {
-      const layerConfig = this.layerApi.registeredLayers[layerPath];
+      const layerConfig = this.layerApi.getLayerEntryConfig(layerPath)!;
       const { data } = this.resultSet[layerPath];
       if (!data.eventListenerEnabled) return;
       if (layerConfig.layerStatus === 'loaded') {

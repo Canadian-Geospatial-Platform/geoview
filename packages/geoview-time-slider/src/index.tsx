@@ -130,18 +130,19 @@ class TimeSliderPlugin extends FooterPlugin {
         // TO.DOCONT: If this Plugin has temporal dimension settings, for various layers, those should be set in synch with the layers
         // TO.DOCONT: using event listeners, not at Plugin creation.
         MapEventProcessor.getMapViewerLayerAPI(this.pluginProps.mapId)
-          .geoviewLayer(obj.layerPaths[0])
+          .getGeoviewLayer(obj.layerPaths[0])
           .setTemporalDimension(obj.layerPaths[0], timeDimension);
       }
 
       // Set override default value under time dimension if applicable
       if (obj.defaultValue) {
         const layerPath = obj.layerPaths[0];
-        const timeDimension = MapEventProcessor.getMapViewerLayerAPI(this.pluginProps.mapId).geoviewLayer(layerPath).layerTemporalDimension[
-          layerPath
-        ];
+        const timeDimension = MapEventProcessor.getMapViewerLayerAPI(this.pluginProps.mapId)
+          .getGeoviewLayer(layerPath)
+          .getTemporalDimension(layerPath);
+
         MapEventProcessor.getMapViewerLayerAPI(this.pluginProps.mapId)
-          .geoviewLayer(layerPath)
+          .getGeoviewLayer(layerPath)
           .setTemporalDimension(layerPath, {
             ...timeDimension,
             default: obj.defaultValue,
@@ -170,7 +171,7 @@ class TimeSliderPlugin extends FooterPlugin {
       if (initialTimeSliderLayerPaths) {
         initialTimeSliderLayerPaths.forEach((layerPath) => {
           // Get the layer
-          const geoviewLayer = this.mapViewer().layer.geoviewLayer(layerPath);
+          const geoviewLayer = this.mapViewer().layer.getGeoviewLayer(layerPath);
 
           // Get the config
           const layerConfig = this.mapViewer().layer.registeredLayers[layerPath];
@@ -194,8 +195,8 @@ class TimeSliderPlugin extends FooterPlugin {
    * @private
    */
   #filterTimeSliderLayers(layerPaths: string[]): string[] {
-    const filteredLayerPaths = layerPaths.filter(
-      (layerPath) => this.mapViewer().layer.geoviewLayers[layerPath.split('/')[0]].layerTemporalDimension[layerPath]
+    const filteredLayerPaths = layerPaths.filter((layerPath) =>
+      this.mapViewer().layer.getGeoviewLayer(layerPath).getTemporalDimension(layerPath)
     );
     return filteredLayerPaths;
   }

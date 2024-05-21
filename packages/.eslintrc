@@ -85,7 +85,15 @@
         "endOfLine": "auto"
       }
     ],
-    "require-await": 1 // Warning
+    "no-restricted-syntax": [
+      1, // Warning
+      {
+          "selector": ":matches(PropertyDefinition, MethodDefinition)[accessibility='private']",
+          "message": "Use # prefix for private instead"
+      }
+    ],
+    "require-await": 1, // Warning
+    "@typescript-eslint/await-thenable": "warn"
   },
   "overrides": [
     {

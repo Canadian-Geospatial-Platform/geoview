@@ -158,7 +158,7 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
         });
 
         // Get the layer using the map event processor (setValues() was called a too many places to provide geoviewLayer by params for now..)
-        const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).geoviewLayer(layerPath);
+        const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayer(layerPath)!;
 
         // Apply the filters
         get().timeSliderState.actions.applyFilters(geoviewLayer, layerPath, values);

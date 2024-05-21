@@ -48,13 +48,7 @@ import {
   TypeGeoviewLayerTypeWithGeoCore,
   AbstractGeoViewLayer,
 } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import {
-  CONST_LAYER_ENTRY_TYPES,
-  TypeListOfGeoviewLayerConfig,
-  TypeLayerEntryConfig,
-  TypeListOfLayerEntryConfig,
-  TypeGeoviewLayerConfig,
-} from '@/geo/map/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, TypeLayerEntryConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
 import { EsriDynamic, TypeEsriDynamicLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { TypeXYZTilesConfig, XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 import { EsriFeature, TypeEsriFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
@@ -81,9 +75,9 @@ export function AddNewLayer(): JSX.Element {
   const [layerURL, setLayerURL] = useState('');
   const [displayURL, setDisplayURL] = useState('');
   const [layerType, setLayerType] = useState<TypeGeoviewLayerTypeWithGeoCore | ''>('');
-  const [layerList, setLayerList] = useState<TypeListOfLayerEntryConfig | TypeListOfGeoviewLayerConfig>([]);
+  const [layerList, setLayerList] = useState<TypeLayerEntryConfig[] | TypeGeoviewLayerConfig[]>([]);
   const [layerName, setLayerName] = useState('');
-  const [layerEntries, setLayerEntries] = useState<TypeListOfLayerEntryConfig | TypeListOfGeoviewLayerConfig>([]);
+  const [layerEntries, setLayerEntries] = useState<TypeLayerEntryConfig[] | TypeGeoviewLayerConfig[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [drag, setDrag] = useState<boolean>(false);
   const [hasMetadata, setHasMetadata] = useState<boolean>(false);
@@ -865,12 +859,12 @@ export function AddNewLayer(): JSX.Element {
       // TODO: Refactor - When reworking on this component, fix this weird thing of layerList vs layerEntries confusion for GeoCore
       const addedLayers: GeoViewLayerAddedResult[] = [];
       if (layerList.length > 1) {
-        (layerList as TypeListOfGeoviewLayerConfig).forEach((geoviewLayerConfig) => {
+        (layerList as TypeGeoviewLayerConfig[]).forEach((geoviewLayerConfig) => {
           const addedLayer = api.maps[mapId].layer.addGeoviewLayer(geoviewLayerConfig);
           if (addedLayer) addedLayers.push(addedLayer);
         });
       } else if (layerEntries.length > 0) {
-        (layerEntries as TypeListOfGeoviewLayerConfig).forEach((geoviewLayerConfig) => {
+        (layerEntries as TypeGeoviewLayerConfig[]).forEach((geoviewLayerConfig) => {
           const addedLayer = api.maps[mapId].layer.addGeoviewLayer(geoviewLayerConfig);
           if (addedLayer) addedLayers.push(addedLayer);
         });
@@ -896,7 +890,7 @@ export function AddNewLayer(): JSX.Element {
       // TO.DOCONT: The recursion is necessary, but can the root be a derived type of the branches/leaves or something?
       // TO.DOCONT: Maybe just me, but seems a bit hard to understand what needs to be set in the `geoviewLayerConfig.listOfLayerEntryConfig`.
       // TO.DOCONT: Anyways, this works as-it-was before the refactor for now.
-      geoviewLayerConfig.listOfLayerEntryConfig = layerEntries as TypeListOfLayerEntryConfig;
+      geoviewLayerConfig.listOfLayerEntryConfig = layerEntries as TypeLayerEntryConfig[];
 
       // TODO: Bug - Fix this layer naming not working, wasn't working before the refactor either, leaving it as-is
       geoviewLayerConfig.geoviewLayerName = createLocalizedString(layerName);
@@ -977,16 +971,14 @@ export function AddNewLayer(): JSX.Element {
    * Set the currently selected layer from a list
    *
    * @param {Event} event - Select event
-   * @param {TypeListOfLayerEntryConfig | TypeLayerEntryConfig} newValue - The new layer entry config value
+   * @param {TypeLayerEntryConfig[] | TypeLayerEntryConfig} newValue - The new layer entry config value
    *
    * @param newValue value/label pairs of select options
    */
-  const handleSelectLayer = (event: Event, newValue: TypeListOfLayerEntryConfig | TypeLayerEntryConfig): void => {
+  const handleSelectLayer = (event: Event, newValue: TypeLayerEntryConfig[] | TypeLayerEntryConfig): void => {
     if (isMultiple()) {
-      setLayerEntries(newValue as TypeListOfLayerEntryConfig);
-      setLayerName(
-        (newValue as TypeListOfLayerEntryConfig).map((layerConfig: TypeLayerEntryConfig) => layerConfig.layerName!.en).join(', ')
-      );
+      setLayerEntries(newValue as TypeLayerEntryConfig[]);
+      setLayerName((newValue as TypeLayerEntryConfig[]).map((layerConfig) => layerConfig.layerName!.en).join(', '));
     } else {
       setLayerEntries([newValue as TypeLayerEntryConfig]);
       setLayerName((newValue as TypeLayerEntryConfig).layerName!.en!);
@@ -1209,7 +1201,7 @@ export function AddNewLayer(): JSX.Element {
                       disableClearable={!isMultiple()}
                       disableCloseOnSelect
                       id="service-layer-label"
-                      options={layerList as TypeListOfLayerEntryConfig}
+                      options={layerList as TypeLayerEntryConfig[]}
                       getOptionLabel={(option) => `${option.layerName!.en} (${option.layerId})`}
                       renderOption={(props, option, { selected }) => (
                         <li {...props}>
@@ -1228,7 +1220,7 @@ export function AddNewLayer(): JSX.Element {
                       multiple={isMultiple()}
                       disableClearable={!isMultiple()}
                       id="service-layer-label"
-                      options={layerList as TypeListOfGeoviewLayerConfig}
+                      options={layerList as TypeGeoviewLayerConfig[]}
                       getOptionLabel={(option) => `${option.geoviewLayerName!.en} (${option.geoviewLayerId})`}
                       disableCloseOnSelect
                       renderOption={(props, option, { selected }) => (

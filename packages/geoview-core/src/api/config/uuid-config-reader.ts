@@ -34,9 +34,9 @@ export class UUIDmapConfigReader {
   /**
    * Reads and parses Layers configs from uuid request result
    * @param {TypeJsonObject} result the uuid request result
-   * @returns {TypeListOfGeoviewLayerConfig} layers parsed from uuid result
+   * @returns {TypeJsonObject[]} layers parsed from uuid result
    */
-  private static getLayerConfigFromResponse(result: AxiosResponse<TypeJsonObject>, lang: string): TypeJsonObject[] {
+  static #getLayerConfigFromResponse(result: AxiosResponse<TypeJsonObject>, lang: string): TypeJsonObject[] {
     // If invalid response
     if (!result?.data || !result.data.reponse || !result.data.reponse.rcs || !result.data.reponse.rcs[lang])
       throw new Error('Invalid response from GeoCore service');
@@ -160,6 +160,6 @@ export class UUIDmapConfigReader {
     const result = await axios.get<GeoChartGeoCoreConfig>(url);
 
     // Return the parsed response
-    return this.getLayerConfigFromResponse(result, lang);
+    return this.#getLayerConfigFromResponse(result, lang);
   }
 }
