@@ -4,7 +4,11 @@ import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 
-// GV Important: See notes in header of UIEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
+// GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
+
+// #region INTERFACES & TYPES
+
+type UIActions = IUIState['actions'];
 
 type FocusItemProps = {
   activeElementId: string | false;
@@ -51,6 +55,14 @@ export interface IUIState {
   };
 }
 
+// #endregion INTERFACES & TYPES
+
+/**
+ * Initializes an UI State and provide functions which use the get/set Zustand mechanisms.
+ * @param {TypeSetStore} set - The setter callback to be used by this state
+ * @param {TypeGetStore} get - The getter callback to be used by this state
+ * @returns {IUIState} - The initialized UI State
+ */
 export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIState {
   const init = {
     appBarComponents: ['geolocator'],
@@ -77,6 +89,8 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         },
       });
     },
+
+    // #region ACTIONS
 
     actions: {
       closeModal: () => {
@@ -184,7 +198,6 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         });
       },
       setFooterBarIsCollapsed: (collapsed: boolean) => {
-        // Redirect to setter
         set({
           uiState: {
             ...get().uiState,
@@ -193,6 +206,8 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         });
       },
     },
+
+    // #endregion ACTIONS
   } as IUIState;
 
   return init;
@@ -215,6 +230,4 @@ export const useUIMapInfoExpanded = (): boolean => useStore(useGeoViewStore(), (
 export const useUINavbarComponents = (): TypeNavBarProps => useStore(useGeoViewStore(), (state) => state.uiState.navBarComponents);
 export const useUIFooterBarIsCollapsed = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.footerBarIsCollapsed);
 
-// TODO: Refactor - We should explicit a type for the uiState.actions
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const useUIStoreActions = (): any => useStore(useGeoViewStore(), (state) => state.uiState.actions);
+export const useUIStoreActions = (): UIActions => useStore(useGeoViewStore(), (state) => state.uiState.actions);

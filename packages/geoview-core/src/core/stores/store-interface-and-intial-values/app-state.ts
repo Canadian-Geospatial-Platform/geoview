@@ -7,6 +7,12 @@ import { NotificationDetailsType } from '@/core/components/notifications/notific
 import { TypeHTMLElement, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 
+// GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with AppEventProcessor vs AppState
+
+// #region INTERFACES & TYPES
+
+type AppActions = IAppState['actions'];
+
 export interface IAppState {
   displayLanguage: TypeDisplayLanguage;
   displayTheme: TypeDisplayTheme;
@@ -40,11 +46,13 @@ export interface IAppState {
   };
 }
 
+// #endregion INTERFACES & TYPES
+
 /**
  * Initializes an App State and provide functions which use the get/set Zustand mechanisms.
  * @param {TypeSetStore} set - The setter callback to be used by this state
  * @param {TypeGetStore} get - The getter callback to be used by this state
- * @returns The initialized Map State
+ * @returns {IAppState} - The initialized App State
  */
 export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppState {
   return {
@@ -72,6 +80,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     },
 
     // #region ACTIONS
+
     actions: {
       /**
        * Adds a notification.
@@ -132,9 +141,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
         AppEventProcessor.removeNotification(get().mapId, key);
       },
     },
-    // #endregion ACTIONS
 
-    // #region SETTER ACTIONS
     setterActions: {
       /**
        * Sets the circularProgress state.
@@ -232,7 +239,8 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
         });
       },
     },
-    // #endregion SETTER ACTIONS
+
+    // #endregion ACTIONS
   } as IAppState;
 }
 
@@ -258,13 +266,11 @@ export const useAppGeoviewHTMLElement = (): HTMLElement => useStore(useGeoViewSt
 export const useAppGuide = (): TypeGuideObject | undefined => useStore(useGeoViewStore(), (state) => state.appState.guide);
 export const useAppNotifications = (): NotificationDetailsType[] => useStore(useGeoViewStore(), (state) => state.appState.notifications);
 
-// GV these 2 selector are use in app-start.tsx before context is assigned to the map
+// GV these 2 selectors are use in app-start.tsx before context is assigned to the map
 // GV DO NOT USE this technique elsewhere, it is only to reload language and theme
 export const useAppDisplayLanguageById = (mapId: string): TypeDisplayLanguage =>
   useStore(getGeoViewStore(mapId), (state) => state.appState.displayLanguage);
 export const useAppDisplayThemeById = (mapId: string): TypeDisplayTheme =>
   useStore(getGeoViewStore(mapId), (state) => state.appState.displayTheme);
 
-// TODO: Refactor - We should explicit a type for the appState.actions
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const useAppStoreActions = (): any => useStore(useGeoViewStore(), (state) => state.appState.actions);
+export const useAppStoreActions = (): AppActions => useStore(useGeoViewStore(), (state) => state.appState.actions);

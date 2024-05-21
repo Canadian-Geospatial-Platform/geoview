@@ -19,6 +19,10 @@ import { TypeFeatureInfoResultSet } from '@/geo/layer/layer-sets/feature-info-la
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with MapEventProcessor vs MapState
 
+// #region INTERFACES & TYPES
+
+type MapActions = IMapState['actions'];
+
 export interface IMapState {
   attribution: string[];
   basemapOptions: TypeBasemapOptions;
@@ -105,11 +109,13 @@ export interface IMapState {
   };
 }
 
+// #endregion INTERFACES & TYPES
+
 /**
  * Initializes a Map State and provide functions which use the get/set Zustand mechanisms.
  * @param {TypeSetStore} set - The setter callback to be used by this state
  * @param {TypeGetStore} get - The getter callback to be used by this state
- * @returns The initialized Map State
+ * @returns {IMapState} - The initialized Map State
  */
 export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapState {
   const init = {
@@ -162,6 +168,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     },
 
     // #region ACTIONS
+
     actions: {
       /**
        * Resets the base map.
@@ -381,6 +388,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
        */
       setOverlayClickMarkerRef: (htmlRef: HTMLElement): void => {
         // Quick function to set the element on the overlay
+        // Only fot UI, no redirect to setterAction
         const overlay = get().mapState.overlayClickMarker;
         if (overlay !== undefined) overlay.setElement(htmlRef);
       },
@@ -391,6 +399,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
        */
       setOverlayNorthMarkerRef: (htmlRef: HTMLElement): void => {
         // Quick function to set the element on the overlay
+        // Only fot UI, no redirect to setterAction
         const overlay = get().mapState.overlayNorthMarker;
         if (overlay !== undefined) overlay.setElement(htmlRef);
       },
@@ -398,7 +407,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     },
 
     setterActions: {
-      // #region SETTER ACTIONS
       /**
        * Sets the map size and scale.
        * @param {[number, number]} size - The size of the map.
@@ -627,7 +635,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       setOrderedLayerInfo: (orderedLayerInfo: TypeOrderedLayerInfo[]): void => {
         // We need to explicitly define ... for the array. If not subscribe does not fired
         // TODO: refactor - setterActions in setState will recreate array if needed. We need to implement the pattern in all setterActions
-        // TD.CONT: We should have a deep equality function to compare previous / current
+        // TO.DOCONT: We should have a deep equality function to compare previous / current
         set({
           mapState: {
             ...get().mapState,
@@ -687,8 +695,9 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           },
         });
       },
-      // #endregion SETTER ACTIONS
     },
+
+    // #endregion ACTIONS
   } as IMapState;
 
   return init;
@@ -740,6 +749,4 @@ export const useMapSize = (): [number, number] => useStore(useGeoViewStore(), (s
 export const useMapVisibleLayers = (): string[] => useStore(useGeoViewStore(), (state) => state.mapState.visibleLayers);
 export const useMapZoom = (): number => useStore(useGeoViewStore(), (state) => state.mapState.zoom);
 
-// TODO: Refactor - We should explicit a type for the mapState.actions
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const useMapStoreActions = (): any => useStore(useGeoViewStore(), (state) => state.mapState.actions);
+export const useMapStoreActions = (): MapActions => useStore(useGeoViewStore(), (state) => state.mapState.actions);

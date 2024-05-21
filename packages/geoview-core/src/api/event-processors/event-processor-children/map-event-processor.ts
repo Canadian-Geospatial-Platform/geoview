@@ -218,7 +218,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     try {
       // Check if the plugins exist
       // TODO: if you run the code fast enough (only happened to me in the TimeSliderEventProcessor),
-      // TD.CONT: the getMapViewer should be async, because it can be unset as well ( so not just getMapViewerPlugins() ).
+      // TO.DOCONT: the getMapViewer should be async, because it can be unset as well ( so not just getMapViewerPlugins() ).
       await whenThisThen(() => api && api.maps && api.maps[mapId] && api.maps[mapId].plugins);
     } catch (error) {
       // Log

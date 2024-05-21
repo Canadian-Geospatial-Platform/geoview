@@ -5,7 +5,11 @@ import { TypeFeatureInfoEntry, TypeLayerData } from '@/geo/layer/layer-sets/abst
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 
-// GV Important: See notes in header of DataTableEventProcessor file for information on the paradigm to apply when working with DataTableEventProcessor vs DataTaleState
+// GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with DataTableEventProcessor vs DataTaleState
+
+// #region INTERFACES & TYPES
+
+type DataTableActions = IDataTableState['actions'];
 
 // Import { MRTColumnFiltersState } from 'material-react-table' fails - This is likely not portable. a type annotation is necessary
 // Create a type to mimic
@@ -60,6 +64,14 @@ export interface IDataTableState {
   };
 }
 
+// #endregion INTERFACES & TYPES
+
+/**
+ * Initializes an DataTable State and provide functions which use the get/set Zustand mechanisms.
+ * @param {TypeSetStore} set - The setter callback to be used by this state
+ * @param {TypeGetStore} get - The getter callback to be used by this state
+ * @returns {IDataTableState} - The initialized DataTable State
+ */
 export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDataTableState {
   return {
     activeLayerData: [],
@@ -68,6 +80,8 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
     selectedLayerPath: '',
     tableHeight: 600,
     selectedFeature: null,
+
+    // #region ACTIONS
 
     actions: {
       applyMapFilters: (filterStrings: string): void => {
@@ -234,6 +248,8 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
         });
       },
     },
+
+    // #endregion ACTIONS
   } as IDataTableState;
 }
 
@@ -249,6 +265,4 @@ export const useDataTableTableHeight = (): number => useStore(useGeoViewStore(),
 export const useDataTableSelectedFeature = (): TypeFeatureInfoEntry | null =>
   useStore(useGeoViewStore(), (state) => state.dataTableState.selectedFeature);
 
-// TODO: Refactor - We should explicit a type for the dataTableState.actions
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const useDataTableStoreActions = (): any => useStore(useGeoViewStore(), (state) => state.dataTableState.actions);
+export const useDataTableStoreActions = (): DataTableActions => useStore(useGeoViewStore(), (state) => state.dataTableState.actions);

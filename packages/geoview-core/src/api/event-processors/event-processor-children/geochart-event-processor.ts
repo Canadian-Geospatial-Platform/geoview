@@ -6,6 +6,8 @@ import { TypeLayerData } from '@/geo/layer/layer-sets/abstract-layer-set';
 
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
 
+// GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
+
 /**
  * Event processor focusing on interacting with the geochart state in the store.
  */
@@ -102,7 +104,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
     });
 
     // set store charts config
-    this.getGeochartState(mapId)?.actions.setGeochartCharts(chartData);
+    this.getGeochartState(mapId)?.setterActions.setGeochartCharts(chartData);
 
     // Log
     logger.logInfo('Added GeoChart configs for layer paths:', layerPaths);
@@ -124,7 +126,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
     toAdd[layerPath] = chartConfig;
 
     // Update the layer data array in the store
-    this.getGeochartState(mapId)!.actions.setGeochartCharts({ ...this.getGeochartState(mapId)?.geochartChartsConfig, ...toAdd });
+    this.getGeochartState(mapId)!.setterActions.setGeochartCharts({ ...this.getGeochartState(mapId)?.geochartChartsConfig, ...toAdd });
 
     // Log
     logger.logInfo('Added GeoChart configs for layer path:', layerPath);
@@ -150,7 +152,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
       delete chartConfigs[layerPath];
 
       // Update the layer data array in the store
-      this.getGeochartState(mapId)!.actions.setGeochartCharts({ ...chartConfigs });
+      this.getGeochartState(mapId)!.setterActions.setGeochartCharts({ ...chartConfigs });
 
       // Log
       logger.logInfo('Removed GeoChart configs for layer path:', layerPath);
@@ -170,7 +172,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
     if (!this.getGeochartState(mapId)) return;
 
     // Update the layer data array in the store
-    this.getGeochartState(mapId)!.actions.setLayerDataArray(layerDataArray);
+    this.getGeochartState(mapId)!.setterActions.setLayerDataArray(layerDataArray);
   }
 
   /**
@@ -198,10 +200,10 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
       layerDataArray,
       this.batchedPropagationLayerDataArray,
       this.timeDelayBetweenPropagationsForBatch,
-      geochartState.actions.setLayerDataArrayBatch,
+      geochartState.setterActions.setLayerDataArrayBatch,
       'geochart-processor',
       geochartState.layerDataArrayBatchLayerPathBypass,
-      geochartState.actions.setLayerDataArrayBatchLayerPathBypass
+      geochartState.setterActions.setLayerDataArrayBatchLayerPathBypass
     );
   }
 
