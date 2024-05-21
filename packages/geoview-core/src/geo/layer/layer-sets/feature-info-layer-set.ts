@@ -72,7 +72,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
       return false;
 
     // TODO: there is a synching issue, sometimes source is undefined when layer is registered. To overcome this,
-    // TD.CONT: if not specified to false by default, we will set it to true
+    // TO.DOCONT: if not specified to false by default, we will set it to true
     const queryable = layerConfig?.source?.featureInfo?.queryable;
     return !!(queryable || queryable === undefined);
   }

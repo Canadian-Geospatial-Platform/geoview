@@ -8,19 +8,7 @@ import { TypeLayerData } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { TypeAllFeatureInfoResultSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
 import { MapEventProcessor } from './map-event-processor';
 
-// GV The paradigm when working with DataTableEventProcessor vs DataTableState goes like this:
-// GV DataTableState provides: 'state values', 'actions' and 'setterActions'.
-// GV Whereas Zustand would suggest having 'state values' and 'actions', in GeoView, we have a 'DataTableEventProcessor' in the middle.
-// GV This is because we wanted to have centralized code between UI actions and backend actions via a DataTableEventProcessor.
-// GV In summary:
-// GV The UI components should use DataTableState's 'state values' to read and 'actions' to set states (which simply redirect to DataTableEventProcessor).
-// GV The back-end code should use DataTableEventProcessor which uses 'state values' and 'setterActions'
-// GV Essentially 3 main call-stacks:
-// GV   - DataTableEventProcessor ---calls---> DataTableState.setterActions
-// GV   - UI Component ---calls---> DataTableState.actions ---calls---> DataTableEventProcessor ---calls---> DataTableState.setterActions
-// GV   - DataTableEventProcessor ---triggers---> DataTableViewer events ---calls---> DataTableState.setterActions
-// GV The reason for this pattern is so that UI components and processes performing back-end code
-// GV both end up running code in DataTableEventProcessor (UI: via 'actions' and back-end code via 'DataTableEventProcessor')
+// GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
 export class DataTableEventProcessor extends AbstractEventProcessor {
   // **********************************************************

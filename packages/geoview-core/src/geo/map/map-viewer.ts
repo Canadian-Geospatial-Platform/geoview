@@ -1442,7 +1442,7 @@ export class MapViewer {
 
         // delete the map instance from the maps array, will delete attached plugins
         // TODO: need a time out here because if not, map is deleted before everything is done on the map
-        // TD.CONT: This whole sequence need to be async
+        // TO.DOCONT: This whole sequence need to be async
         setTimeout(() => delete api.maps[this.mapId], 1000);
       })
       .catch((error) => {
@@ -1461,7 +1461,7 @@ export class MapViewer {
     const mapDiv = this.remove(false);
     const config = MapEventProcessor.getStoreConfig(this.mapId);
     // TODO: Remove time out and make this async so remove/recreate work one after the other
-    // TD.CONT: There is still as problem with bad config schema value and layers loading... should be refactor when config is done
+    // TO.DOCONT: There is still as problem with bad config schema value and layers loading... should be refactor when config is done
     setTimeout(
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       () =>

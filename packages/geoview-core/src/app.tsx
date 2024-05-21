@@ -102,8 +102,8 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
   }
 
   // TODO: inject 'data-geocore-keys' inside the config for later processing by the configAPI
-  // TD.CONT: This injectioon can be done in api.configApi.getMapConfig with optional parameter keys
-  // TD.CONT: This will return the listOfGeoviewLAyer with a new entry: {'geoviewLayerType': 'geoCore','geoviewLayerId': '21b821cf-0f1c-40ee-8925-eab12d357668'},
+  // TO.DOCONT: This injectioon can be done in api.configApi.getMapConfig with optional parameter keys
+  // TO.DOCONT: This will return the listOfGeoviewLAyer with a new entry: {'geoviewLayerType': 'geoCore','geoviewLayerId': '21b821cf-0f1c-40ee-8925-eab12d357668'},
 
   // add the map display language and the map id to config (extend the MapFeatureConfig)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
