@@ -92,7 +92,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   static getInitialTimeSliderValues(mapId: string, layerConfig: TypeLayerEntryConfig): TypeTimeSliderValues | undefined {
     // Get the layer using the map event processor, If no temporal dimension OR layerPath, return undefined
     if (!layerConfig.layerPath) return undefined;
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).geoviewLayer(layerConfig.layerPath);
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerConfig.layerPath)!;
     const temporalDimensionInfo = geoviewLayer.getTemporalDimension(layerConfig.layerPath);
     if (!temporalDimensionInfo || !temporalDimensionInfo.range) return undefined;
 
@@ -174,7 +174,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     values: number[]
   ): void {
     // Get the layer using the map event processor
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).geoviewLayer(layerPath);
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath)!;
 
     const layerType = geoviewLayer.type;
     if (layerType === CONST_LAYER_TYPES.WMS) {

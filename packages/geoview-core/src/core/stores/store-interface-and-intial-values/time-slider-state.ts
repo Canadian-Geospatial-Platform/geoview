@@ -87,7 +87,7 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
         get().timeSliderState.setterActions.setDelay(layerPath, delay);
       },
       setFiltering(layerPath: string, filtering: boolean): void {
-        // Redirect to TimeSlidierEventProcessor
+        // Redirect to TimeSliderEventProcessor
         const { defaultValue, field, minAndMax, values } = get().timeSliderState.timeSliderLayers[layerPath];
         TimeSliderEventProcessor.applyFilters(get().mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
       },
@@ -104,7 +104,7 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
         get().timeSliderState.setterActions.setDefaultValue(layerPath, defaultValue);
       },
       setValues(layerPath: string, values: number[]): void {
-        // Redirect to TimeSlidierEventProcessor
+        // Redirect to TimeSliderEventProcessor
         const { defaultValue, field, minAndMax, filtering } = get().timeSliderState.timeSliderLayers[layerPath];
         TimeSliderEventProcessor.applyFilters(get().mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
       },
