@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useCallback } from 'react';
 import { useTheme } from '@mui/material';
 import { Box } from '@/ui';
 import { useLayerDisplayState, useLayerStoreActions, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -85,11 +85,14 @@ export function LayersPanel(): JSX.Element {
     );
   };
 
-  const handleGuideIsOpen = (guideIsOpen: boolean): void => {
-    if (guideIsOpen) {
-      setSelectedLayerPath('');
-    }
-  };
+  const handleGuideIsOpen = useCallback(
+    (guideIsOpen: boolean): void => {
+      if (guideIsOpen) {
+        setSelectedLayerPath('');
+      }
+    },
+    [setSelectedLayerPath]
+  );
 
   return (
     <ResponsiveGridLayout

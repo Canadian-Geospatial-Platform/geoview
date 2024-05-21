@@ -39,6 +39,10 @@ export class UIEventProcessor extends AbstractEventProcessor {
     return this.getUIState(mapId).activeFooterBarTabId;
   }
 
+  static getActiveAppBarTabId(mapId: string): string {
+    return this.getUIState(mapId).activeAppBarTabId;
+  }
+
   static getAppBarComponents(mapId: string): TypeValidAppBarCoreProps {
     return this.getUIState(mapId).appBarComponents;
   }
@@ -55,5 +59,9 @@ export class UIEventProcessor extends AbstractEventProcessor {
   // GV Review the action in store state to make sure
   static setActiveFooterBarTab(mapId: string, id: string): void {
     this.getUIState(mapId).setterActions.setActiveFooterBarTab(id);
+  }
+
+  static setActiveAppBarTabId(mapId: string, id: string): void {
+    this.getUIState(mapId).setterActions.setActiveAppBarTabId(id);
   }
 }

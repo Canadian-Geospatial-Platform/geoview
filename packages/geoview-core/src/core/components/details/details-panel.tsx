@@ -370,11 +370,14 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
     resetCurrentIndex();
   }
 
-  const handleGuideIsOpen = (guideIsOpenVal: boolean): void => {
-    if (guideIsOpenVal) {
-      setSelectedLayerPath('');
-    }
-  };
+  const handleGuideIsOpen = useCallback(
+    (guideIsOpenVal: boolean): void => {
+      if (guideIsOpenVal) {
+        setSelectedLayerPath('');
+      }
+    },
+    [setSelectedLayerPath]
+  );
 
   /**
    * Select the layer after layer is selected from map.

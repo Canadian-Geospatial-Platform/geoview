@@ -234,11 +234,14 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     );
   };
 
-  const handleGuideIsOpen = (guideIsOpen: boolean): void => {
-    if (guideIsOpen) {
-      setSelectedLayerPath('');
-    }
-  };
+  const handleGuideIsOpen = useCallback(
+    (guideIsOpen: boolean): void => {
+      if (guideIsOpen) {
+        setSelectedLayerPath('');
+      }
+    },
+    [setSelectedLayerPath]
+  );
 
   /**
    * Renders the complete GeoChart Panel component
