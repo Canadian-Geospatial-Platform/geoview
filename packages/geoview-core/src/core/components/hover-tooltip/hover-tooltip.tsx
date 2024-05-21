@@ -12,7 +12,7 @@ import { getSxClasses } from './hover-tooltip-styles';
  *
  * @returns {JSX.Element} the hover tooltip component
  */
-export function HoverTooltip():  JSX.Element | null {
+export function HoverTooltip(): JSX.Element | null {
   // Log, commented too annoying
   // logger.logTraceRender('components/hover-tooltip/hover-tooltip');
 
