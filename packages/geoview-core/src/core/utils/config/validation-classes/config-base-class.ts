@@ -221,9 +221,9 @@ export class ConfigBaseClass {
    * @param {LayerStatusChangedEvent} event The event to emit
    * @private
    */
-  // TODO: refactor - if this emit is private with #, abstract-base-layer-entry-config.ts:28 Uncaught (in promise) TypeError: Private element is not present on this object
-  // TD.CONT: this by pass the error, I need to set this public. The problem come from the groupLayer object trying to emit this event but
-  // TD.CONT: the event is not define so this.onLayerStatus.... failed
+  // TODO: refactor - if this emit is privare with #,  abstract-base-layer-entry-config.ts:28 Uncaught (in promise) TypeError: Private element is not present on this object
+  // TO.DOCONT: this by pass the error, I need to set this public. The problem come from the groupLayer object trying to emit this event but
+  // TO.DOCONT: the event is not define so this.onLayerStatus.... failed
   #emitLayerStatusChanged(event: LayerStatusChangedEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerStatusChangedHandlers, event);

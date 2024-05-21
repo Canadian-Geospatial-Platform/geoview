@@ -79,7 +79,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
     // Redirect to helper function
     this.#deleteFromArray(featureInfoState.layerDataArray, layerPath, (layerArrayResult) => {
       // Update the layer data array in the store
-      featureInfoState.actions.setLayerDataArray(layerArrayResult);
+      featureInfoState.setterActions.setLayerDataArray(layerArrayResult);
 
       // Log
       logger.logInfo('Removed Feature Info in stores for layer path:', layerPath);
@@ -137,7 +137,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       const atLeastOneFeature = layerDataArray.find((layerEntry) => !!layerEntry.features?.length) || false;
 
       // Update the layer data array in the store, all the time, for all statuses
-      featureInfoState.actions.setLayerDataArray(layerDataArray);
+      featureInfoState.setterActions.setLayerDataArray(layerDataArray);
 
       // If there was some features on this propagation
       if (atLeastOneFeature) {
@@ -177,10 +177,10 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       layerDataArray,
       this.#batchedPropagationLayerDataArray,
       this.#timeDelayBetweenPropagationsForBatch,
-      featureInfoState.actions.setLayerDataArrayBatch,
+      featureInfoState.setterActions.setLayerDataArrayBatch,
       'feature-info-processor',
       featureInfoState.layerDataArrayBatchLayerPathBypass,
-      featureInfoState.actions.setLayerDataArrayBatchLayerPathBypass
+      featureInfoState.setterActions.setLayerDataArrayBatchLayerPathBypass
     );
   }
 

@@ -2,8 +2,6 @@ import { useStore } from 'zustand';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with TimeSliderEventProcessor vs TimeSliderState
 
@@ -40,7 +38,7 @@ export interface ITimeSliderState {
     setTitle: (layerPath: string, title: string) => void;
     setDescription: (layerPath: string, description: string) => void;
     setDelay: (layerPath: string, delay: number) => void;
-    setFiltering: (geoviewLayer: AbstractGeoViewLayer, layerPath: string, filter: boolean) => void;
+    setFiltering: (layerPath: string, filter: boolean) => void;
     setLocked: (layerPath: string, locked: boolean) => void;
     setReversed: (layerPath: string, locked: boolean) => void;
     setDefaultValue: (layerPath: string, defaultValue: string) => void;
@@ -49,12 +47,11 @@ export interface ITimeSliderState {
 
   setterActions: {
     addTimeSliderLayer: (newLayer: TimeSliderLayerSet) => void;
-    applyFilters: (geoviewLayer: AbstractGeoViewLayer, layerPath: string, values: number[]) => void;
     removeTimeSliderLayer: (layerPath: string) => void;
     setTitle: (layerPath: string, title: string) => void;
     setDescription: (layerPath: string, description: string) => void;
     setDelay: (layerPath: string, delay: number) => void;
-    setFiltering: (geoviewLayer: AbstractGeoViewLayer, layerPath: string, filter: boolean) => void;
+    setFiltering: (layerPath: string, filter: boolean) => void;
     setLocked: (layerPath: string, locked: boolean) => void;
     setReversed: (layerPath: string, locked: boolean) => void;
     setDefaultValue: (layerPath: string, defaultValue: string) => void;
@@ -89,10 +86,10 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
         // Redirect to setter
         get().timeSliderState.setterActions.setDelay(layerPath, delay);
       },
-      setFiltering(geoviewLayer: AbstractGeoViewLayer, layerPath: string, filtering: boolean): void {
-        // Redirect to setter
-        TimeSliderEventProcessor.applyFilters((geoviewLayer, layerPath, filtering);
-        get().timeSliderState.setterActions.setFiltering(geoviewLayer, layerPath, filtering);
+      setFiltering(layerPath: string, filtering: boolean): void {
+        // Redirect to TimeSlidierEventProcessor
+        const { defaultValue, field, minAndMax, values } = get().timeSliderState.timeSliderLayers[layerPath];
+        TimeSliderEventProcessor.applyFilters(get().mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
       },
       setLocked(layerPath: string, locked: boolean): void {
         // Redirect to setter
@@ -107,8 +104,9 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
         get().timeSliderState.setterActions.setDefaultValue(layerPath, defaultValue);
       },
       setValues(layerPath: string, values: number[]): void {
-        // Redirect to setter
-        get().timeSliderState.setterActions.setValues(layerPath, values);
+        // Redirect to TimeSlidierEventProcessor
+        const { defaultValue, field, minAndMax, filtering } = get().timeSliderState.timeSliderLayers[layerPath];
+        TimeSliderEventProcessor.applyFilters(get().mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
       },
     },
 
@@ -120,10 +118,6 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
             timeSliderLayers: { ...get().timeSliderState.timeSliderLayers, ...newLayer },
           },
         });
-      },
-      applyFilters(geoviewLayer: AbstractGeoViewLayer, layerPath: string, values: number[]): void {
-        const { defaultValue, field, filtering, minAndMax } = get().timeSliderState.timeSliderLayers[layerPath];
-        TimeSliderEventProcessor.applyFilters(geoviewLayer, layerPath, defaultValue, field, filtering, minAndMax, values);
       },
       removeTimeSliderLayer(layerPath: string): void {
         const sliderLayers = get().timeSliderState.timeSliderLayers;
@@ -165,9 +159,8 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
           },
         });
       },
-      setFiltering(geoviewLayer: AbstractGeoViewLayer, layerPath: string, filtering: boolean): void {
+      setFiltering(layerPath: string, filtering: boolean): void {
         const sliderLayers = get().timeSliderState.timeSliderLayers;
-        const { values } = get().timeSliderState.timeSliderLayers[layerPath];
         sliderLayers[layerPath].filtering = filtering;
         set({
           timeSliderState: {
@@ -215,12 +208,6 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
             timeSliderLayers: { ...sliderLayers },
           },
         });
-
-        // Get the layer using the map event processor (setValues() was called a too many places to provide geoviewLayer by params for now..)
-        const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayer(layerPath)!;
-
-        // Apply the filters
-        get().timeSliderState.setterActions.applyFilters(geoviewLayer, layerPath, values);
       },
     },
 
