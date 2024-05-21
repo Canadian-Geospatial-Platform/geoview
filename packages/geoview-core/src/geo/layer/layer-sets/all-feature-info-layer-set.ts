@@ -2,7 +2,7 @@ import { DataTableEventProcessor } from '@/api/event-processors/event-processor-
 import { logger } from '@/core/utils/logger';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { getLocalizedValue } from '@/core/utils/utilities';
-import { TypeLayerEntryConfig, TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 import { AbstractLayerSet, QueryType, TypeLayerData } from './abstract-layer-set';
@@ -19,13 +19,22 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
   declare resultSet: TypeAllFeatureInfoResultSet;
 
   /**
+   * Propagate to store
+   * @param {string} layerPath - Layer path to propagate
+   * @private
+   */
+  #propagateToStore(layerPath: string): void {
+    DataTableEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, this.resultSet);
+  }
+
+  /**
    * Overrides the behavior to apply when an all-feature-info-layer-set wants to check for condition to register a layer in its set.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer config
+   * @param {ConfigBaseClass} layerConfig - The layer config
    * @returns {boolean} True when the layer should be registered to this all-feature-info-layer-set.
    */
-  protected override onRegisterLayerCheck(layerConfig: TypeLayerEntryConfig): boolean {
+  protected override onRegisterLayerCheck(layerConfig: ConfigBaseClass): boolean {
     // Log
-    logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerConfig.layerPath, Object.keys(this.resultSet));
+    logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerConfig.layerPath);
 
     // TODO: Make a util function for this check - this can be done prior to layer creation in config section
     // for some layer type, we know there is no data-table
@@ -41,47 +50,43 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     )
       return false;
 
-    // TODO: there is a synching issue, sometimes source is undefined when layer is registered. To overcome this,
-    // TO.DOCONT: if not specified to false by default, we will set it to true
-    const queryable = layerConfig?.source?.featureInfo?.queryable;
-    return !!(queryable || queryable === undefined);
+    // Default
+    return super.onRegisterLayerCheck(layerConfig);
   }
 
   /**
    * Overrides the behavior to apply when an all-feature-info-layer-set wants to register a layer in its set.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer config
+   * @param {ConfigBaseClass} layerConfig - The layer config
    */
-  protected override onRegisterLayer(layerConfig: TypeLayerEntryConfig): void {
+  protected override onRegisterLayer(layerConfig: ConfigBaseClass): void {
     // Log
-    logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET - onRegisterLayer', layerConfig.layerPath, Object.keys(this.resultSet));
+    logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET - onRegisterLayer', layerConfig.layerPath);
 
     // Call parent
     super.onRegisterLayer(layerConfig);
 
-    this.resultSet[layerConfig.layerPath] = {
+    // Update the resultSet data
+    this.resultSet[layerConfig.layerPath].data = {
       layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
       layerStatus: layerConfig.layerStatus!,
-      data: {
-        layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
-        layerStatus: layerConfig.layerStatus!,
-        eventListenerEnabled: true,
-        queryStatus: 'processed',
-        features: [],
-        layerPath: layerConfig.layerPath,
-      },
+      eventListenerEnabled: true,
+      queryStatus: 'processed',
+      features: [],
+      layerPath: layerConfig.layerPath,
     };
 
-    DataTableEventProcessor.propagateFeatureInfoToStore(this.mapId, layerConfig.layerPath, this.resultSet);
+    // Propagate to store on registration
+    this.#propagateToStore(layerConfig.layerPath);
     DataTableEventProcessor.setInitialSettings(this.mapId, layerConfig.layerPath);
   }
 
   /**
    * Overrides the behavior to apply when unregistering a layer from the all-feature-info-layer-set.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer config
+   * @param {ConfigBaseClass} layerConfig - The layer config
    */
-  protected override onUnregisterLayer(layerConfig: TypeLayerEntryConfig): void {
+  protected override onUnregisterLayer(layerConfig: ConfigBaseClass): void {
     // Log
-    logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET - onUnregisterLayer', layerConfig.layerPath, Object.keys(this.resultSet));
+    logger.logTraceCore('ALL-FEATURE-INFO-LAYER-SET - onUnregisterLayer', layerConfig.layerPath);
 
     // Call parent
     super.onUnregisterLayer(layerConfig);
@@ -92,32 +97,27 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a layer status changed for a all-feature-info-layer-set.
-   * @param {ConfigBaseClass} config - The layer config class
-   * @param {string} layerPath - The layer path being affected
-   * @param {string} layerStatus - The new layer status
+   * @param {ConfigBaseClass} layerConfig - The layer config
+   * @param {TypeLayerStatus} layerStatus - The new layer status
    */
-  protected override onProcessLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
+  protected override onProcessLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatus: TypeLayerStatus): void {
     // TODO: Refactor - This function (and the same function in feature-info-layer-set and hover-feature-info-layer-set) are all very similar if not identical
-    // TO.DOCONT: Move the code to the mother class. Be mindful of legends-layer-set that also has a onProcessLayerStatusChanged which is different though.
-    // TO.DOCONT: The status of layers should not matters to child layer set (all feature, feature, hover).
-    // TO.DOCONT: The layer set is the one who decide who goes in and out of these 3 sets. So he knows the status of the layer and if
-    // TO.DOCONT: not loaded he does not add the layer to the sets. If a layer becomes unstable and get in error, layer set will remove the layers
-    // TO.DOCONT: from al feature, feature and hover set.
+    // TO.DOCONT: Move the code to the mother class? Be mindful of legends-layer-set that also has a onProcessLayerStatusChanged which is different though.
 
-    // if layer's status flag exists and is different than the new one
-    if (this.resultSet?.[layerPath]?.layerStatus && this.resultSet?.[layerPath]?.layerStatus !== layerStatus) {
-      if (layerStatus === 'error') delete this.resultSet[layerPath];
-      else {
-        // Call parent. After this call, this.resultSet?.[layerPath]?.layerStatus may have changed!
-        super.onProcessLayerStatusChanged(config, layerPath, layerStatus);
+    // Call parent. After this call, this.resultSet?.[layerPath]?.layerStatus may have changed!
+    super.onProcessLayerStatusChanged(layerConfig, layerStatus);
 
-        const layerConfig = this.layerApi.getLayerEntryConfig(layerPath)!;
-        if (this?.resultSet?.[layerPath]?.data) {
-          this.resultSet[layerPath].data.layerStatus = layerStatus;
-          DataTableEventProcessor.propagateFeatureInfoToStore(this.mapId, layerConfig.layerPath, this.resultSet);
-        }
-      }
-    }
+    // TODO: Check - Why are we updating the layer status in 'data' when it's also in this.resultSet[layerConfig.layerPath]?
+    // Update the layer status
+    this.resultSet[layerConfig.layerPath].data.layerStatus = layerStatus;
+    this.resultSet[layerConfig.layerPath].data.layerName =
+      getLocalizedValue(
+        layerConfig.layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
+        AppEventProcessor.getDisplayLanguage(this.mapId)
+      ) ?? '';
+
+    // Propagate to the store on layer status changed
+    this.#propagateToStore(layerConfig.layerPath);
   }
 
   /**
@@ -131,23 +131,27 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     // TODO: REFACTOR - Watch out for code reentrancy between queries!
     // TO.DOCONT: Consider using a LIFO pattern, per layer path, as the race condition resolution
     // GV Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
-    // GV As it is (and was like this befor events refactor), the this.resultSet is mutating between async calls.
+    // GV As it is (and was like this before events refactor), the this.resultSet is mutating between async calls.
 
     // TODO: Refactor - Make this function throw an error instead of returning void as option of the promise (to have same behavior as feature-info-layer-set)
 
     // If valid layer path
     if (this.layerApi.isLayerEntryConfigRegistered(layerPath) && this.resultSet[layerPath]) {
-      const { data } = this.resultSet[layerPath];
-      const layerConfig = this.layerApi.getLayerEntryConfig(layerPath)!;
+      // Get the layer config and layer associated with the layer path
+      const layer = this.layerApi.getGeoviewLayerHybrid(layerPath)!;
+      const layerConfig = layer.getLayerConfig(layerPath)!;
 
+      // If event listener disabled
       if (!this.resultSet[layerPath].data.eventListenerEnabled) return Promise.resolve();
+      if (!AbstractLayerSet.isQueryable(layerConfig)) return Promise.resolve();
 
+      const { data } = this.resultSet[layerPath];
       if (layerConfig.layerStatus === 'loaded') {
         data.features = undefined;
         data.queryStatus = 'processing';
 
         // Process query on results data
-        const promiseResult = AllFeatureInfoLayerSet.queryLayerFeatures(data, layerConfig, layerPath, queryType, layerPath);
+        const promiseResult = AbstractLayerSet.queryLayerFeatures(data, layerConfig, layer, queryType, layerPath);
 
         // Wait for promise to resolve
         const arrayOfRecords = await promiseResult;
@@ -165,8 +169,8 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
         data.queryStatus = 'error';
       }
 
-      // Propagate to the store
-      DataTableEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, this.resultSet);
+      // Propagate to the store on layer status changed
+      this.#propagateToStore(layerConfig.layerPath);
 
       // Return the resultsSet
       return this.resultSet;

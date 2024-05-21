@@ -11,10 +11,41 @@
     },
     "listOfGeoviewLayerConfig": [
       {
+        "geoviewLayerId": "airborne_radioactivity",
+        "geoviewLayerName": {
+          "en": "Airborne Radioactivity"
+        },
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer"
+        },
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1"
+          }
+        ]
+      },
+      {
         "geoviewLayerId": "uniqueValueId",
         "geoviewLayerName": { "en": "uniqueValue" },
         "metadataAccessPath": { "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/" },
         "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1",
+            "layerFilter": "E_Province = 'Alberta' or E_Province = 'Manitoba'"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "fail_bad_url",
+        "geoviewLayerName": {
+          "en": "Test fail bad url"
+        },
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.services.geo.caaaaaa/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer"
+        },
+        "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [
           {
             "layerId": "1"
@@ -37,6 +68,21 @@
         ]
       },
       {
+        "geoviewLayerId": "nonmetalmines",
+        "geoviewLayerName": {
+          "en": "Non metal mines"
+        },
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer/"
+        },
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "5"
+          }
+        ]
+      },
+      {
         "geoviewLayerId": "geojsonLYR1",
         "geoviewLayerName": { "en": "GeoJSON Sample" },
         "metadataAccessPath": { "en": "./datasets/geojson/metadata.json" },
@@ -53,7 +99,7 @@
           {
             "entryType": "group",
             "layerId": "point-feature-group",
-            "layerName": { "en": "point-feature-group" },
+            "layerName": { "en": "Points & Icons" },
             "listOfLayerEntryConfig": [
               {
                 "layerId": "icon_points.json",

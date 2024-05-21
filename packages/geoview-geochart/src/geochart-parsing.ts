@@ -1,6 +1,7 @@
 import { TypeJsonObject } from 'geoview-core/src/core/types/global-types';
 import { TypeLayerEntryConfig } from 'geoview-core/src/geo/map/map-schema-types';
 import { ChartType, GeoChartDatasource } from 'geochart';
+import { LayerApi } from 'geoview-core/src/geo/layer/layer';
 import { TypeLayerData, TypeFeatureInfoEntry, TypeFeatureInfoEntryPartial } from 'geoview-core/src/geo/layer/layer-sets/abstract-layer-set';
 import { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
 
@@ -64,9 +65,9 @@ const simplifyTypeFeatureInfoEntries = (entries: TypeFeatureInfoEntryPartial[]):
 
 /**
  * Finds complete configuration necessary to build a GeoChart based on a given results set.
- * @param config PluginGeoChartConfig<ChartType> The complete GeoChart Plugin configuration
- * @param registeredLayers { [layerEntryConfigId: string]: TypeLayerEntryConfig } The registered layers
- * @param resultSet TypeFeatureInfoResultSet The Results set of results to be simplified
+ * @param {PluginGeoChartConfig<ChartType>} config - The complete GeoChart Plugin configuration
+ * @param {LayerApi} layerApi - The GeoView core layer api
+ * @param {TypeLayerData[]} layerDataArray - The Results set of results to search for a chart
  * @return [
     GeoViewGeoChartConfig<ChartType> | undefined,
     GeoViewGeoChartConfigLayer | undefined,
@@ -76,7 +77,7 @@ const simplifyTypeFeatureInfoEntries = (entries: TypeFeatureInfoEntryPartial[]):
  */
 export const findLayerDataAndConfigFromQueryResults = (
   config: PluginGeoChartConfig<ChartType>,
-  registeredLayers: { [layerEntryConfigId: string]: TypeLayerEntryConfig },
+  layerApi: LayerApi,
   layerDataArray: TypeLayerData[]
 ): [
   GeoViewGeoChartConfig<ChartType> | undefined,
@@ -99,8 +100,8 @@ export const findLayerDataAndConfigFromQueryResults = (
 
         // If found a corresponding layer config
         if (foundConfigChartLyr) {
-          // Grab the layer entry config
-          foundLayerEntry = registeredLayers[layerData.layerPath];
+          // Grab the layer entry config associated with the layer path
+          foundLayerEntry = layerApi.getLayerEntryConfig(layerData.layerPath);
 
           // Grab the working data and this will exit the loop
           foundData = layerData.features;
