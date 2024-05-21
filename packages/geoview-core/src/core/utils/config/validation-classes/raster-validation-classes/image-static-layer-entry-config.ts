@@ -1,5 +1,5 @@
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { CONST_LAYER_ENTRY_TYPES, GeoviewChild, TypeSourceImageStaticInitialConfig } from '@/geo/map/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, TypeSourceImageStaticInitialConfig } from '@/geo/map/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 /** ******************************************************************************************************************************
@@ -31,14 +31,5 @@ export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
         `source.dataAccessPath on layer entry ${this.layerPath} is mandatory for GeoView layer ${this.geoviewLayerConfig.geoviewLayerId} of type ${this.geoviewLayerConfig.geoviewLayerType}`
       );
     }
-  }
-
-  /**
-   * Method to execute when the layer is loaded.
-   */
-  override loadedFunction(): void {
-    super.loadedFunction();
-    if ('applyViewFilter' in this.geoviewLayerInstance!)
-      (this.geoviewLayerInstance as GeoviewChild).applyViewFilter(this.layerPath, this.layerFilter || '');
   }
 }
