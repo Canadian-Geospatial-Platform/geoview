@@ -72,7 +72,10 @@ export function Datapanel({ fullWidth = false }: DataPanelType): JSX.Element {
         !orderedLayerData.filter((layers) => layers.layerPath === _layer.layerPath && !!layers?.features?.length).length ||
         _layer.layerStatus === LAYER_STATUS.ERROR
       ) {
-        triggerGetAllFeatureInfo(_layer.layerPath);
+        triggerGetAllFeatureInfo(_layer.layerPath).catch((error) => {
+          // Log
+          logger.logPromiseFailed('Failed to triggerGetAllFeatureInfo in data-panel.handleLayerChange', error);
+        });
       }
     },
     [orderedLayerData, setSelectedLayerPath, triggerGetAllFeatureInfo]

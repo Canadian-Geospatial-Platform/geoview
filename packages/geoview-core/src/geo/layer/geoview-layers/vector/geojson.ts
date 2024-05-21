@@ -86,6 +86,7 @@ export const geoviewEntryIsGeoJSON = (verifyIfGeoViewEntry: TypeLayerEntryConfig
  * @class GeoJSON
  */
 // ******************************************************************************************************************************
+// GV Layers Refactoring - Obsolete (in layers)
 export class GeoJSON extends AbstractGeoViewVector {
   /** ***************************************************************************************************************************
    * Initialize layer
@@ -103,6 +104,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    *
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
@@ -156,6 +158,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected override processLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     if (this.metadata) {
       const metadataLayerList = Cast<VectorLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
@@ -163,7 +166,7 @@ export class GeoJSON extends AbstractGeoViewVector {
         (layerMetadata) => layerMetadata.layerId === layerConfig.layerId && layerMetadata.layerIdExtension === layerConfig.layerIdExtension
       );
       if (layerMetadataFound) {
-        this.layerMetadata[layerConfig.layerPath] = toJsonObject(layerMetadataFound);
+        this.setLayerMetadata(layerConfig.layerPath, toJsonObject(layerMetadataFound));
         layerConfig.layerName = layerConfig.layerName || layerMetadataFound.layerName;
         layerConfig.source = defaultsDeep(layerConfig.source, layerMetadataFound.source);
         layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, layerMetadataFound.initialSettings);
@@ -215,6 +218,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected override createVectorSource(
     layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},

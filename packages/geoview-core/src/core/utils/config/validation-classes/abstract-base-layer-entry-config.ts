@@ -1,8 +1,5 @@
 /* eslint-disable no-underscore-dangle */
 // ? we escape all private attribute in this file
-import { TypeLocalizedString } from '@config/types/map-schema-types';
-// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
-
 import {
   TypeBaseSourceVectorInitialConfig,
   TypeLayerInitialSettings,
@@ -15,7 +12,7 @@ import {
   TypeVectorTileSourceInitialConfig,
 } from '@/geo/map/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { TypeJsonValue } from '@/core/types/global-types';
+import { TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
 import { FilterNodeArrayType } from '@/geo/utils/renderer/geoview-renderer-types';
 
 /** ******************************************************************************************************************************
@@ -25,8 +22,8 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /** The ending element of the layer configuration path. */
   override layerIdExtension?: string | undefined = undefined;
 
-  /** The display name of the layer (English/French). */
-  layerName?: TypeLocalizedString;
+  /** The metadata associated with the layer */
+  #metadata?: TypeJsonObject;
 
   /** The calculated filter equation */
   filterEquation?: FilterNodeArrayType;
@@ -40,7 +37,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    */
   initialSettings?: TypeLayerInitialSettings = {};
 
-  /** Source settings to apply to the GeoView vector layer source at creation time. */
+  /** Source settings to apply to the GeoView layer source at creation time. */
   source?:
     | TypeBaseSourceVectorInitialConfig
     | TypeSourceTileInitialConfig
@@ -64,12 +61,19 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
-   * Overridable method being executed when the layer is loaded.
+   * Gets the metadata that is associated to the layer.
+   * @returns {TypeJsonObject} The layer metadata.
    */
-  loadedFunction(): void {
-    // TODO: Refactor - Review design surrounding that function. Shouldn't be here.
-    // Set visibility
-    this.geoviewLayerInstance?.setVisible(this.initialSettings?.states?.visible !== false, this.layerPath);
+  getMetadata(): TypeJsonObject | undefined {
+    return this.#metadata;
+  }
+
+  /**
+   * Sets the layer metadata for the layer.
+   * @param {TypeJsonObject} layerMetadata - The layer metadata to set
+   */
+  setMetadata(layerMetadata: TypeJsonObject): void {
+    this.#metadata = layerMetadata;
   }
 
   /**

@@ -16,7 +16,7 @@
           "en": "Water quality at monitoring sites"
         },
         "metadataAccessPath": {
-          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer"
+          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/CSO_volume/MapServer"
         },
         "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [

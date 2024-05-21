@@ -30,6 +30,7 @@ export interface TypeLegendLayer {
   layerPath: string;
   layerAttribution?: string[];
   layerName: string;
+  legendQueryStatus: string;
   type?: TypeGeoviewLayerType;
   styleConfig?: TypeStyleConfig | null;
   layerStatus?: TypeLayerStatus;

@@ -59,6 +59,7 @@ export function useLegendHelpers(): unknown {
         layerName: 'TEST--TestLayer1',
         type: CONST_LAYER_TYPES.GEOJSON,
         layerStatus: 'loaded',
+        legendQueryStatus: 'queried',
         querySent: true,
         children: [],
         items: layerItems,
@@ -70,6 +71,7 @@ export function useLegendHelpers(): unknown {
         layerName: 'TEST--Layer with groups',
         type: CONST_LAYER_TYPES.GEOJSON,
         layerStatus: 'loaded',
+        legendQueryStatus: 'queried',
         querySent: true,
         children: [],
         items: [],
@@ -81,6 +83,7 @@ export function useLegendHelpers(): unknown {
         layerName: 'TEST--chrisparentlayer1',
         type: CONST_LAYER_TYPES.GEOJSON,
         layerStatus: 'loaded',
+        legendQueryStatus: 'queried',
         querySent: true,
         children: [
           {
@@ -90,6 +93,7 @@ export function useLegendHelpers(): unknown {
             layerName: 'TEST--chrisparentchild1',
             type: CONST_LAYER_TYPES.GEOJSON,
             layerStatus: 'loaded',
+            legendQueryStatus: 'queried',
             querySent: true,
             children: [
               {
@@ -99,6 +103,7 @@ export function useLegendHelpers(): unknown {
                 layerName: 'TEST--chris parent child2',
                 type: CONST_LAYER_TYPES.GEOJSON,
                 layerStatus: 'error',
+                legendQueryStatus: 'init',
                 querySent: true,
                 children: [],
                 items: layerItems,
@@ -110,6 +115,7 @@ export function useLegendHelpers(): unknown {
                 layerName: 'TEST--chris parent child25555',
                 type: CONST_LAYER_TYPES.GEOJSON,
                 layerStatus: 'processing',
+                legendQueryStatus: 'init',
                 querySent: true,
                 children: [],
                 items: layerItems,
@@ -121,6 +127,7 @@ export function useLegendHelpers(): unknown {
                 layerName: 'TEST--chris parent child3',
                 type: CONST_LAYER_TYPES.GEOJSON,
                 layerStatus: 'newInstance',
+                legendQueryStatus: 'init',
                 querySent: true,
                 children: [],
                 items: layerItems,
@@ -135,6 +142,7 @@ export function useLegendHelpers(): unknown {
             layerName: 'TEST--chirslyerss',
             type: CONST_LAYER_TYPES.GEOJSON,
             layerStatus: 'loaded',
+            legendQueryStatus: 'queried',
             querySent: true,
             children: [],
             items: layerItems,
@@ -146,6 +154,7 @@ export function useLegendHelpers(): unknown {
             layerName: 'TEST--chris-child32edd',
             type: CONST_LAYER_TYPES.GEOJSON,
             layerStatus: 'loaded',
+            legendQueryStatus: 'queried',
             querySent: true,
             children: [],
             items: layerItems,
@@ -178,11 +187,12 @@ export function useLegendHelpers(): unknown {
 
       const item: TypeLegendLayer = {
         bounds: undefined,
-        layerId: setData.data?.layerPath ?? `layer${i}`,
-        layerPath: `test_${setData.data?.layerPath ?? generateId()}`,
+        layerId: `layer${i}`,
+        layerPath: `test_${generateId()}`,
         layerName: `TEST---${setData.data?.layerName?.en ?? 'Unknown Layer name'}`,
         type: setData.data?.type ?? CONST_LAYER_TYPES.IMAGE_STATIC,
         layerStatus: setData.layerStatus,
+        legendQueryStatus: 'queried',
         children: [],
         items,
       };
