@@ -1,5 +1,5 @@
-import { ListItem } from '@mui/material'; // TODO because of forward ref problem we can't use it inside the tooltip if provided by UI
-import { Box, ListItemButton, Grid, Tooltip, Typography } from '@/ui';
+import { useCallback } from 'react';
+import { Box, ListItemButton, Grid, Tooltip, Typography, ListItem } from '@/ui';
 import { GeoListItem } from './geolocator';
 import { sxClassesList } from './geolocator-style';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -13,54 +13,6 @@ type GeoListProps = {
 type tooltipProp = Pick<GeoListItem, 'name' | 'province' | 'category'>;
 
 /**
- * Get the title for tooltip
- * @param {name} - name of the geo item
- * @param {province} - province of the geo item
- * @param {category} - category of the geo item
- * @returns {string} - tooltip title
- */
-const getTooltipTitle = ({ name, province, category }: tooltipProp): string => {
-  let title = name;
-  if (category && category !== 'null') {
-    title += `, ${category}`;
-  }
-
-  if (province && province !== 'null') {
-    title += `, ${province}`;
-  }
-
-  return title;
-};
-
-/**
- * Transform the search value in search result with bold css.
- * @param {string} title list title in search result
- * @param {string} searchValue value with user did the search
- * @param {string} province province of the list title in search result
- * @returns {JSX.Element}
- */
-const transformListTitle = (_title: string, _searchValue: string, province: string): JSX.Element => {
-  const title = _title.toUpperCase();
-  const searchValue = _searchValue.toUpperCase();
-  const idx = title.indexOf(searchValue);
-  if (!searchValue || idx === -1) {
-    return (
-      <Box className="list-title">
-        <Box>{_title}</Box>
-      </Box>
-    );
-  }
-
-  const len = searchValue.length;
-  return (
-    <HtmlToReact
-      className="list-title"
-      htmlContent={`${_title.slice(0, idx)}<b>${_title.slice(idx, idx + len)}</b>${_title.slice(idx + len)}${province}`}
-    />
-  );
-};
-
-/**
  * Create list of items to display under search.
  * @param {GeoListItem[]} geoListItems - items to display
  * @param {string} searchValue - search text
@@ -68,6 +20,49 @@ const transformListTitle = (_title: string, _searchValue: string, province: stri
  */
 export default function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Element {
   const { zoomToGeoLocatorLocation } = useMapStoreActions();
+
+  /**
+   * Get the title for tooltip
+   * @param {name} - name of the geo item
+   * @param {province} - province of the geo item
+   * @param {category} - category of the geo item
+   * @returns {string} - tooltip title
+   */
+  const getTooltipTitle = useCallback(({ name, province, category }: tooltipProp): string => {
+    let title = name;
+    if (category && category !== 'null') {
+      title += `, ${category}`;
+    }
+
+    if (province && province !== 'null') {
+      title += `, ${province}`;
+    }
+
+    return title;
+  }, []);
+
+  /**
+   * Transform the search value in search result with bold css.
+   * @param {string} title list title in search result
+   * @param {string} searchValue value with user did the search
+   * @param {string} province province of the list title in search result
+   * @returns {JSX.Element}
+   */
+  const transformListTitle = useCallback((_title: string, _searchValue: string, province: string): JSX.Element | string => {
+    const title = _title.toUpperCase();
+    const searchItem = _searchValue.toUpperCase();
+    const idx = title.indexOf(searchItem);
+    const len = searchItem.length;
+    if (!searchItem || idx === -1) return _title;
+
+    return (
+      <HtmlToReact
+        extraOptions={{ component: 'span' }}
+        itemOptions={{ component: 'span' }}
+        htmlContent={`${_title.slice(0, idx)}<b>${_title.slice(idx, idx + len)}</b>${_title.slice(idx + len)}${province}`}
+      />
+    );
+  }, []);
 
   return (
     <Box>
@@ -82,7 +77,7 @@ export default function GeoList({ geoListItems, searchValue }: GeoListProps): JS
             <ListItemButton onClick={() => zoomToGeoLocatorLocation([geoListItem.lng, geoListItem.lat], geoListItem.bbox)}>
               <Grid container>
                 <Grid item xs={12} sm={8}>
-                  <Typography component="div" sx={sxClassesList.listStyle}>
+                  <Typography sx={sxClassesList.listStyle}>
                     {transformListTitle(
                       geoListItem.name,
                       searchValue,

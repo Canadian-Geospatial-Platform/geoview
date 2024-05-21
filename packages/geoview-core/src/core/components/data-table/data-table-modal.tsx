@@ -15,7 +15,7 @@ import {
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useLayerSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
-import { FieldInfos } from './data-table';
+import { FieldInfos } from './data-table-type';
 import { getSxClasses } from './data-table-style';
 import { logger } from '@/core/utils/logger';
 import { useDataTableAllFeaturesDataArray } from '@/core/stores/store-interface-and-intial-values/data-table-state';
@@ -63,9 +63,19 @@ export default function DataTableModal(): JSX.Element {
    * @param {string} cellValue cell value to be displayed in cell
    * @returns {JSX.Element}
    */
-  const getCellValue = (cellValue: string): JSX.Element => {
-    return <Box sx={sxClasses.tableCell}>{cellValue}</Box>;
-  };
+  const getCellValue = useCallback(
+    (cellValue: string): JSX.Element => {
+      // Log
+      logger.logTraceUseCallback('DATA-TABLE-MODAL - getCellValue');
+
+      return (
+        <Box component="div" sx={sxClasses.tableCell}>
+          {cellValue}
+        </Box>
+      );
+    },
+    [sxClasses.tableCell]
+  );
 
   /**
    * Create table header cell

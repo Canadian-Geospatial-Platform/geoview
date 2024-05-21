@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getCenter } from 'ol/extent';
 
@@ -47,25 +47,36 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
   const { addCheckedFeature, removeCheckedFeature } = useDetailsStoreActions();
   const { zoomToExtent, transformPoints, showClickMarker } = useMapStoreActions();
 
-  const featureInfoList: TypeFieldEntry[] = Object.keys(feature?.fieldInfo ?? {}).map((fieldName) => {
-    return {
-      fieldKey: feature.fieldInfo[fieldName]!.fieldKey,
-      value: feature.fieldInfo[fieldName]!.value,
-      dataType: feature.fieldInfo[fieldName]!.dataType,
-      alias: feature.fieldInfo[fieldName]!.alias ? feature.fieldInfo[fieldName]!.alias : fieldName,
-      domain: null,
-    };
-  });
+  /**
+   * Build feature list to be displayed inside table.
+   */
+  const featureInfoList: TypeFieldEntry[] = useMemo(() => {
+    return Object.keys(feature?.fieldInfo ?? {}).map((fieldName) => {
+      return {
+        fieldKey: feature.fieldInfo[fieldName]!.fieldKey,
+        value: feature.fieldInfo[fieldName]!.value,
+        dataType: feature.fieldInfo[fieldName]!.dataType,
+        alias: feature.fieldInfo[fieldName]!.alias ? feature.fieldInfo[fieldName]!.alias : fieldName,
+        domain: null,
+      };
+    });
+  }, [feature]);
 
-  const handleSelect = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    e.stopPropagation();
+  /**
+   * Toggle feature selected.
+   */
+  const handleFeatureSelectedChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>): void => {
+      e.stopPropagation();
 
-    if (!checked) {
-      addCheckedFeature(feature);
-    } else {
-      removeCheckedFeature(feature);
-    }
-  };
+      if (!checked) {
+        addCheckedFeature(feature);
+      } else {
+        removeCheckedFeature(feature);
+      }
+    },
+    [addCheckedFeature, checked, feature, removeCheckedFeature]
+  );
 
   const handleZoomIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
     e.stopPropagation();
@@ -96,15 +107,14 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('FEATURE-INFO-NEW - checkedFeatures', checkedFeatures, feature);
+    logger.logTraceUseEffect('FEATURE-INFO-NEW - checkedFeatures', checkedFeatures);
 
     setChecked(
       checkedFeatures.some((checkedFeature) => {
         return (checkedFeature.geometry as TypeGeometry)?.ol_uid === featureUid;
       })
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checkedFeatures, feature]); // GV Check if feature is necessary in this dependency array? If so explain it in comment? Should be featurUid?
+  }, [checkedFeatures, featureUid]);
 
   return (
     <Paper sx={{ boxShadow: 'none', border: 'none', paddingTop: '0.5rem' }}>
@@ -128,7 +138,7 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
           <Tooltip title={t('details.keepFeatureSelected')} placement="top" enterDelay={1000}>
             <Checkbox
               disabled={!feature?.geometry}
-              onChange={(e) => handleSelect(e)}
+              onChange={(e) => handleFeatureSelectedChange(e)}
               checked={checked}
               sx={sxClasses.selectFeatureCheckbox}
             />

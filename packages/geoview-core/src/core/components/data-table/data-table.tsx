@@ -46,69 +46,14 @@ import { DateMgt } from '@/core/utils/date-mgt';
 import { isImage, delay } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/abstract-layer-set';
-
-import { MappedLayerDataType } from './data-panel';
-import { useLightBox, useFilterRows, useToolbarActionMessage, useGlobalFilter } from './hooks';
+import { useFilterRows, useToolbarActionMessage, useGlobalFilter } from './hooks';
 import { getSxClasses } from './data-table-style';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
-
-export interface FieldInfos {
-  alias: string;
-  dataType: string;
-  domain?: string;
-  fieldKey: number;
-  value: string | null;
-}
-
-export interface ColumnsType {
-  ICON: FieldInfos;
-  ZOOM: FieldInfos;
-  [key: string]: FieldInfos;
-}
-
-interface DataTableProps {
-  data: MappedLayerDataType;
-  layerPath: string;
-  tableHeight: number;
-}
-
-const DATE_FILTER: Record<string, string> = {
-  greaterThan: `> date 'value'`,
-  greaterThanOrEqualTo: `>= date 'value'`,
-  lessThan: `< date 'value'`,
-  lessThanOrEqualTo: `<= date 'value'`,
-  equals: `= date 'value'`,
-  empty: 'is null',
-  notEmpty: 'is not null',
-  notEquals: `<> date 'value'`,
-  between: `> date 'value'`,
-  betweenInclusive: `>= date 'value'`,
-};
-
-const STRING_FILTER: Record<string, string> = {
-  contains: `(filterId) like ('%value%')`,
-  startsWith: `(filterId) like ('value%')`,
-  endsWith: `(filterId) like ('%value')`,
-  empty: '(filterId) is null',
-  notEmpty: '(filterId) is not null',
-  equals: `filterId = 'value'`,
-  notEquals: `filterId <> 'value'`,
-};
-
-const NUMBER_FILTER: Record<string, string> = {
-  lessThanOrEqualTo: '<=',
-  lessThan: '<',
-  greaterThan: '>',
-  greaterThanOrEqualTo: '>=',
-  empty: 'is null',
-  notEmpty: 'is not null',
-  between: '>',
-  betweenInclusive: '>=',
-  equals: '=',
-  notEquals: '<>',
-};
+import { useLightBox } from '../common';
+import { NUMBER_FILTER, DATE_FILTER, STRING_FILTER } from '@/core/utils/constant';
+import { DataTableProps, ColumnsType } from './data-table-type';
 
 /**
  * Build Data table from map.
@@ -176,22 +121,28 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps): JSX.
    * @param {string} cellId id of the column.
    * @returns {string | number | JSX.Element}
    */
-  const createLightBoxButton = (cellValue: string | number, cellId: string): string | number | JSX.Element => {
-    if (typeof cellValue === 'string' && isImage(cellValue)) {
-      return (
-        <Button
-          type="text"
-          size="small"
-          onClick={() => initLightBox(cellValue, cellId)}
-          sx={{ height: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem', textTransform: 'none' }}
-        >
-          {t('dataTable.images')}
-        </Button>
-      );
-    }
-    // convert string to react component.
-    return typeof cellValue === 'string' ? <HtmlToReact htmlContent={cellValue} /> : cellValue;
-  };
+  const createLightBoxButton = useCallback(
+    (cellValue: string | number, cellId: string): string | number | JSX.Element => {
+      // Log
+      logger.logTraceUseCallback('DATA-TABLE - createLightBoxButton');
+
+      if (typeof cellValue === 'string' && isImage(cellValue)) {
+        return (
+          <Button
+            type="text"
+            size="small"
+            onClick={() => initLightBox(cellValue, cellId, 0)}
+            sx={{ height: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem', textTransform: 'none' }}
+          >
+            {t('dataTable.images')}
+          </Button>
+        );
+      }
+      // convert string to react component.
+      return typeof cellValue === 'string' ? <HtmlToReact htmlContent={cellValue} /> : cellValue;
+    },
+    [initLightBox, t]
+  );
 
   /**
    * Create data table body cell with tooltip
@@ -199,19 +150,25 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps): JSX.
    * @param {string | number | JSX.Element} cellValue - Cell value to be displayed in cell
    * @returns {JSX.Element}
    */
-  const getCellValueWithTooltip = (cellValue: string | number | JSX.Element, cellId: string): JSX.Element => {
-    return typeof cellValue === 'string' || typeof cellValue === 'number' ? (
-      <Tooltip title={cellValue} placement="top" arrow>
+  const getCellValueWithTooltip = useCallback(
+    (cellValue: string | number | JSX.Element, cellId: string): JSX.Element => {
+      // Log
+      logger.logTraceUseCallback('DATA-TABLE - getCellValueWithTooltip');
+
+      return typeof cellValue === 'string' || typeof cellValue === 'number' ? (
+        <Tooltip title={cellValue} placement="top" arrow>
+          <Box component="span" sx={density === 'compact' ? sxClasses.tableCell : {}}>
+            {createLightBoxButton(cellValue, cellId)}
+          </Box>
+        </Tooltip>
+      ) : (
         <Box component="span" sx={density === 'compact' ? sxClasses.tableCell : {}}>
-          {createLightBoxButton(cellValue, cellId)}
+          {cellValue}
         </Box>
-      </Tooltip>
-    ) : (
-      <Box component="span" sx={density === 'compact' ? sxClasses.tableCell : {}}>
-        {cellValue}
-      </Box>
-    );
-  };
+      );
+    },
+    [createLightBoxButton, density, sxClasses.tableCell]
+  );
 
   /**
    * Create Date filter with Datepicker.
@@ -219,45 +176,54 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps): JSX.
    * @param {MRTColumn<ColumnsType>} column - Filter column.
    * @returns {JSX.Element}
    */
-  const getDateFilter = (column: MRTColumn<ColumnsType>): JSX.Element => {
-    // eslint-disable-next-line no-underscore-dangle
-    const filterFn = startCase(column.columnDef._filterFn).replaceAll(' ', '');
-    const key = `filter${filterFn}` as keyof MRTLocalization;
-    const filterFnKey = dataTableLocalization[key];
-    const helperText = dataTableLocalization.filterMode.replace('{filterType}', filterFnKey);
-    return (
-      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={language}>
-        <DatePicker
-          timezone="UTC"
-          format="YYYY/MM/DD"
-          onChange={(newValue) => {
-            column.setFilterValue(newValue);
-          }}
-          slotProps={{
-            textField: {
-              placeholder: language === 'fr' ? 'AAAA/MM/JJ' : 'YYYY/MM/DD',
-              helperText,
-              sx: { minWidth: '120px', width: '100%' },
-              variant: 'standard',
-            },
-          }}
-        />
-      </LocalizationProvider>
-    );
-  };
+  const getDateFilter = useCallback(
+    (column: MRTColumn<ColumnsType>): JSX.Element => {
+      // Log
+      logger.logTraceUseCallback('DATA-TABLE - getDateFilter');
+
+      // eslint-disable-next-line no-underscore-dangle
+      const filterFn = startCase(column.columnDef._filterFn).replaceAll(' ', '');
+      const key = `filter${filterFn}` as keyof MRTLocalization;
+      const helperText = dataTableLocalization.filterMode.replace('{filterType}', dataTableLocalization[key]);
+      return (
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={language}>
+          <DatePicker
+            timezone="UTC"
+            format="YYYY/MM/DD"
+            onChange={(newValue) => {
+              column.setFilterValue(newValue);
+            }}
+            slotProps={{
+              textField: {
+                placeholder: language === 'fr' ? 'AAAA/MM/JJ' : 'YYYY/MM/DD',
+                helperText,
+                sx: { minWidth: '120px', width: '100%' },
+                variant: 'standard',
+              },
+            }}
+          />
+        </LocalizationProvider>
+      );
+    },
+    [dataTableLocalization, language]
+  );
 
   /**
    * Custom date type Column tooltip
    * @param {Date} date value to be shown in column.
    * @returns JSX.Element
    */
-  const getDateColumnTooltip = (date: Date): JSX.Element => {
+  const getDateColumnTooltip = useCallback((date: Date): JSX.Element => {
+    // Log
+    logger.logTraceUseCallback('DATA-TABLE - getDateColumnTooltip');
+
+    const formattedDate = DateMgt.formatDate(date, 'YYYY-MM-DDThh:mm:ss');
     return (
-      <Tooltip title={DateMgt.formatDate(date, 'YYYY-MM-DDThh:mm:ss')} arrow>
-        <Box>{DateMgt.formatDate(date, 'YYYY-MM-DDThh:mm:ss')}</Box>
+      <Tooltip title={formattedDate} arrow>
+        <Box>{formattedDate}</Box>
       </Tooltip>
     );
-  };
+  }, []);
 
   /**
    * Build material react data table column header.
@@ -523,6 +489,9 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps): JSX.
    * @param {MRTColumnFiltersState} columnFilter list of filter from table.
    */
   const buildFilterList = useCallback((columnFilter: MRTColumnFiltersState) => {
+    // Log
+    logger.logTraceUseEffect('DATA-TABLE - buildFilterList');
+
     const tableState = useTable!.getState();
 
     if (!columnFilter.length) return [''];

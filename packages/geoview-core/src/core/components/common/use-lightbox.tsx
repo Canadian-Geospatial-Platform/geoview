@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import { Box } from '@/ui';
 import { LightBoxSlides, LightboxImg } from '@/core/components/lightbox/lightbox';
+
+interface UseLightBoxReturnType {
+  initLightBox: (images: string, alias: string, index: number | undefined) => void;
+  LightBoxComponent: () => JSX.Element;
+}
+
 /**
  * Custom Lightbox hook which handle rendering of the lightbox.
- * @returns {Object}
+ * @returns {UseLightBoxReturnType}
  */
-// TODO: Refactor - Maybe worth creating an explicit type here instead of 'any'?
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function useLightBox(): any {
+export function useLightBox(): UseLightBoxReturnType {
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [slides, setSlides] = useState<LightBoxSlides[]>([]);
   const [slidesIndex, setSlidesIndex] = useState(0);
@@ -15,12 +19,13 @@ export function useLightBox(): any {
   /**
    * Initialize lightbox with state.
    * @param {string} images images url formatted as string and joined with ';' identifier.
-   * @param {string} cellId id of the cell.
+   * @param {string} alias alt tag for the image.
    */
-  const initLightBox = (images: string, cellId: string): void => {
+  const initLightBox = (images: string, alias: string, index: number | undefined): void => {
     setIsLightBoxOpen(true);
-    const slidesList = images.split(';').map((item) => ({ src: item, alt: cellId, downloadUrl: item }));
+    const slidesList = images.split(';').map((item) => ({ src: item, alt: alias, downloadUrl: item }));
     setSlides(slidesList);
+    setSlidesIndex(index ?? 0);
   };
 
   /**

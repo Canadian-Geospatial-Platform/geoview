@@ -1,4 +1,4 @@
-import { ReactElement, useState } from 'react';
+import { ReactElement, useState, useCallback, useMemo } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -8,7 +8,7 @@ import { type MRT_ColumnDef as MRTColumnDef } from 'material-react-table';
 
 import { IconButton, DownloadIcon, Tooltip, Menu, MenuItem } from '@/ui';
 import { logger } from '@/core/utils/logger';
-import { ColumnsType } from './data-table';
+import { ColumnsType } from './data-table-type';
 
 interface ExportButtonProps {
   rows: ColumnsType[];
@@ -36,23 +36,23 @@ function ExportButton({ rows, columns, children }: ExportButtonProps): JSX.Eleme
    * Show export menu.
    */
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>): void => {
+  const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
-  };
+  }, []);
 
   /**
    * Close export menu.
    */
 
-  const handleClose = (): void => {
+  const handleClose = useCallback(() => {
     setAnchorEl(null);
-  };
+  }, []);
 
   /**
    * Build CSV Options for download.
    */
-  const getCsvOptions = (): Options => {
-    return {
+  const getCsvOptions = useMemo(() => {
+    return (): Options => ({
       fieldSeparator: ',',
       quoteStrings: '"',
       decimalSeparator: '.',
@@ -60,13 +60,14 @@ function ExportButton({ rows, columns, children }: ExportButtonProps): JSX.Eleme
       useBom: true,
       useKeysAsHeaders: false,
       headers: columns.map((c) => c.id as string),
-    };
-  };
+    });
+  }, [columns]);
 
   /**
    * Export data table in csv format.
    */
-  const handleExportData = (): void => {
+
+  const handleExportData = useCallback((): void => {
     // format the rows for csv.
     const csvRows = rows.map((row) => {
       const mappedRow = Object.keys(row).reduce((acc, curr) => {
@@ -77,7 +78,7 @@ function ExportButton({ rows, columns, children }: ExportButtonProps): JSX.Eleme
     });
     const csvExporter = new ExportToCsv(getCsvOptions());
     csvExporter.generateCsv(csvRows);
-  };
+  }, [getCsvOptions, rows]);
 
   return (
     <>
