@@ -180,7 +180,7 @@ export function useLegendHelpers(): unknown {
         bounds: undefined,
         layerId: setData.data?.layerPath ?? `layer${i}`,
         layerPath: `test_${setData.data?.layerPath ?? generateId()}`,
-        layerName: `TEST---${setData.data?.layerName?.en ?? 'Uknown Laer name'}`,
+        layerName: `TEST---${setData.data?.layerName?.en ?? 'Unknown Layer name'}`,
         type: setData.data?.type ?? CONST_LAYER_TYPES.IMAGE_STATIC,
         layerStatus: setData.layerStatus,
         children: [],

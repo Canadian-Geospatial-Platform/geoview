@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 
 import { TypeJsonObject, TypeJsonArray } from '@/core/types/global-types';
-import { CONST_LAYER_ENTRY_TYPES, TypeListOfGeoviewLayerConfig, TypeOfServer, TypeTileGrid } from '@/geo/map/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, TypeGeoviewLayerConfig, TypeOfServer, TypeTileGrid } from '@/geo/map/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeEsriDynamicLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { TypeEsriFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
@@ -46,7 +46,7 @@ export type GeoChartConfig = TypeJsonObject & {
 
 // The returned parsed response
 export type UUIDmapConfigReaderResponse = {
-  layers: TypeListOfGeoviewLayerConfig;
+  layers: TypeGeoviewLayerConfig[];
   geocharts?: GeoChartConfig[];
 };
 
@@ -61,15 +61,16 @@ export class UUIDmapConfigReader {
   /**
    * Reads and parses Layers configs from uuid request result
    * @param {TypeJsonObject} result the uuid request result
-   * @returns {TypeListOfGeoviewLayerConfig} layers parsed from uuid result
+   * @returns {TypeGeoviewLayerConfig[]} layers parsed from uuid result
+   * @private
    */
-  private static getLayerConfigFromResponse(result: AxiosResponse<TypeJsonObject>, lang: string): TypeListOfGeoviewLayerConfig {
+  static #getLayerConfigFromResponse(result: AxiosResponse<TypeJsonObject>, lang: string): TypeGeoviewLayerConfig[] {
     // If invalid response
     if (!result?.data || !result.data.reponse || !result.data.reponse.rcs || !result.data.reponse.rcs[lang])
       throw new Error('Invalid response from GeoCore service');
     if (result.data.reponse.rcs[lang].length === 0) throw new Error('No layers returned by GeoCore service');
 
-    const listOfGeoviewLayerConfig: TypeListOfGeoviewLayerConfig = [];
+    const listOfGeoviewLayerConfig: TypeGeoviewLayerConfig[] = [];
     for (let i = 0; i < (result.data.reponse.rcs[lang] as TypeJsonArray).length; i++) {
       const data = result.data.reponse.rcs[lang][i];
 
@@ -98,7 +99,7 @@ export class UUIDmapConfigReader {
                 source: {
                   dataAccessPath: createLocalizedString(url as string),
                 },
-              } as EsriDynamicLayerEntryConfig);
+              } as unknown as EsriDynamicLayerEntryConfig);
               return esriDynamicLayerEntryConfig;
             });
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
@@ -337,8 +338,9 @@ export class UUIDmapConfigReader {
    * @param {AxiosResponse<GeoChartGeoCoreConfig>} result the uuid request result
    * @param {string} lang the language to use to read results
    * @returns {GeoChartConfig[]} the list of GeoChart configs
+   * @private
    */
-  private static getGeoChartConfigFromResponse(result: AxiosResponse<GeoChartGeoCoreConfig>, lang: string): GeoChartConfig[] {
+  static #getGeoChartConfigFromResponse(result: AxiosResponse<GeoChartGeoCoreConfig>, lang: string): GeoChartConfig[] {
     // If no geochart information
     if (!result?.data || !result.data.reponse || !result.data.reponse.gcs || !Array.isArray(result.data.reponse.gcs)) return [];
 
@@ -374,8 +376,8 @@ export class UUIDmapConfigReader {
 
     // Return the parsed response
     return {
-      layers: this.getLayerConfigFromResponse(result, lang),
-      geocharts: this.getGeoChartConfigFromResponse(result, lang),
+      layers: this.#getLayerConfigFromResponse(result, lang),
+      geocharts: this.#getGeoChartConfigFromResponse(result, lang),
     };
   }
 }

@@ -22,7 +22,6 @@ import {
   TypeLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
-  TypeListOfLayerEntryConfig,
   TypeSimpleSymbolVectorConfig,
   TypeStrokeSymbolConfig,
   TypeLineStringVectorConfig,
@@ -142,9 +141,9 @@ export class GeoPackage extends AbstractGeoViewVector {
    * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
    * with a numeric layerId and creates a group entry when a layer is a group.
    *
-   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
+  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
@@ -166,7 +165,7 @@ export class GeoPackage extends AbstractGeoViewVector {
   /** ***************************************************************************************************************************
    * Process recursively the list of layer Entries to create the layers and the layer groups.
    *
-   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries to process.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries to process.
    * @param {LayerGroup} layerGroup Optional layer group to use when we have many layers. The very first call to
    *  processListOfLayerEntryConfig must not provide a value for this parameter. It is defined for internal use.
    *
@@ -174,10 +173,10 @@ export class GeoPackage extends AbstractGeoViewVector {
    */
   // TODO: Question - Is this function still used or should it be removed in favor of the mother class implementation?
   override processListOfLayerEntryConfig(
-    listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
+    listOfLayerEntryConfig: TypeLayerEntryConfig[],
     layerGroup?: LayerGroup
-  ): Promise<BaseLayer | null> {
-    const promisedListOfLayerEntryProcessed = new Promise<BaseLayer | null>((resolve) => {
+  ): Promise<BaseLayer | undefined> {
+    const promisedListOfLayerEntryProcessed = new Promise<BaseLayer | undefined>((resolve) => {
       // Single group layer handled recursively
       if (listOfLayerEntryConfig.length === 1 && layerEntryIsGroupLayer(listOfLayerEntryConfig[0])) {
         const newLayerGroup = GeoPackage.createLayerGroup(listOfLayerEntryConfig[0], listOfLayerEntryConfig[0].initialSettings!);
@@ -192,7 +191,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                 layer: listOfLayerEntryConfig[0].layerPath,
                 loggerMessage: `Unable to create group layer ${listOfLayerEntryConfig[0].layerPath} on map ${this.mapId}`,
               });
-              resolve(null);
+              resolve(undefined);
             }
           })
           .catch((error) => {
@@ -219,7 +218,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                     layer: listOfLayerEntryConfig[0].layerPath,
                     loggerMessage: `Unable to create group layer ${layerConfig.layerPath} on map ${this.mapId}`,
                   });
-                  resolve(null);
+                  resolve(undefined);
                 }
               })
               .catch((error) => {
@@ -577,11 +576,11 @@ export class GeoPackage extends AbstractGeoViewVector {
   protected override async processOneLayerEntry(
     layerConfig: AbstractBaseLayerEntryConfig,
     layerGroup?: LayerGroup
-  ): Promise<BaseLayer | null> {
+  ): Promise<BaseLayer | undefined> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
     await super.processOneLayerEntry(layerConfig);
-    const promisedLayers = new Promise<BaseLayer | LayerGroup | null>((resolve) => {
+    const promisedLayers = new Promise<BaseLayer | undefined>((resolve) => {
       this.extractGeopackageData(layerConfig)
         .then(([layers, slds]) => {
           if (layers.length === 1) {
@@ -597,7 +596,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                     loggerMessage: `Unable to create layer ${layerConfig.layerPath} on map ${this.mapId}`,
                   });
                   layerConfig.layerStatus = 'error';
-                  resolve(null);
+                  resolve(undefined);
                 }
               })
               .catch((error) => {
@@ -627,7 +626,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                       loggerMessage: `Unable to create layer ${layerConfig.layerPath} on map ${this.mapId}`,
                     });
                     layerConfig.layerStatus = 'error';
-                    resolve(null);
+                    resolve(undefined);
                   }
                 })
                 .catch((error) => {

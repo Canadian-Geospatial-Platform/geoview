@@ -198,7 +198,7 @@ export type TypeLayerStatus = 'registered' | 'newInstance' | 'processing' | 'pro
 export type TypeLoadEndListenerType = 'features' | 'tile' | 'image';
 
 export type TypeLayerAndListenerType = {
-  olLayer: BaseLayer | LayerGroup | null;
+  olLayer?: BaseLayer | LayerGroup;
   loadEndListenerType?: TypeLoadEndListenerType;
 };
 
@@ -290,29 +290,11 @@ export interface TypeVectorTileSourceInitialConfig extends TypeBaseSourceVectorI
   tileGrid?: TypeTileGrid;
 }
 
-export type TypeLayerEntryConfig =
-  | AbstractBaseLayerEntryConfig
-  | VectorLayerEntryConfig
-  | VectorLayerEntryConfig
-  | OgcWmsLayerEntryConfig
-  | EsriDynamicLayerEntryConfig
-  | EsriImageLayerEntryConfig
-  | ImageStaticLayerEntryConfig
-  | TileLayerEntryConfig
-  | GroupLayerEntryConfig;
+export type TypeLayerEntryConfig = AbstractBaseLayerEntryConfig | GroupLayerEntryConfig;
 
 /** ******************************************************************************************************************************
- * List of layers. Corresponds to the layerList defined in the schema.
+ *  Definition of a single Geoview layer configuration.
  */
-// TODO: Suggestion - Get rid of this type. Simply use TypeLayerEntryConfig[]. It'd simplify types management accross the source code.
-export type TypeListOfLayerEntryConfig = TypeLayerEntryConfig[];
-
-/** ******************************************************************************************************************************
- *  Definition of the Geoview layer list.
- */
-// TODO: Suggestion - Get rid of this type. Simply use TypeGeoviewLayerConfig[]. It'd simplify types management accross the source code.
-export type TypeListOfGeoviewLayerConfig = TypeGeoviewLayerConfig[];
-
 export type TypeGeoviewLayerConfig = {
   /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
   olLayer?: Promise<BaseLayer>;
@@ -338,7 +320,7 @@ export type TypeGeoviewLayerConfig = {
   initialSettings?: TypeLayerInitialSettings;
 
   /** The layer entries to use from the GeoView layer. */
-  listOfLayerEntryConfig: TypeListOfLayerEntryConfig;
+  listOfLayerEntryConfig: TypeLayerEntryConfig[];
 };
 
 export type GeoCoreLayerConfig = {

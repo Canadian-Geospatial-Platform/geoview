@@ -2,7 +2,7 @@
 
 import {
   convertLayerTypeToEntry,
-  TypeListOfLayerEntryConfig,
+  TypeLayerEntryConfig,
   mapConfigLayerEntryIsGeoCore,
   TypeGeoviewLayerConfig,
   MapConfigLayerEntry,
@@ -56,7 +56,7 @@ export class Config {
           //  Skip it, because we don't validate the GeoCore configuration anymore. Not the same way as typical GeoView Layer Types at least.
         } else if (Object.values(CONST_LAYER_TYPES).includes((geoviewLayerEntry as TypeGeoviewLayerConfig).geoviewLayerType)) {
           const geoViewLayerEntryCasted = geoviewLayerEntry as TypeGeoviewLayerConfig;
-          this.setLayerEntryType(geoViewLayerEntryCasted.listOfLayerEntryConfig!, geoViewLayerEntryCasted.geoviewLayerType);
+          this.#setLayerEntryType(geoViewLayerEntryCasted.listOfLayerEntryConfig!, geoViewLayerEntryCasted.geoviewLayerType);
         } else throw new Error(`Invalid GeoView Layer Type ${geoviewLayerEntry.geoviewLayerType}`);
       });
     }
@@ -70,13 +70,14 @@ export class Config {
 
   /** ***************************************************************************************************************************
    * Initialize all layer entry type fields accordingly to the GeoView layer type.
-   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entry configuration to adjust.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entry configuration to adjust.
    * @param {TypeGeoviewLayerType} geoviewLayerType The GeoView layer type.
+   * @private
    */
-  private setLayerEntryType(listOfLayerEntryConfig: TypeListOfLayerEntryConfig, geoviewLayerType: TypeGeoviewLayerType): void {
+  #setLayerEntryType(listOfLayerEntryConfig: TypeLayerEntryConfig[], geoviewLayerType: TypeGeoviewLayerType): void {
     listOfLayerEntryConfig?.forEach((layerConfig) => {
       if (layerEntryIsGroupLayer(layerConfig as ConfigBaseClass))
-        this.setLayerEntryType(layerConfig.listOfLayerEntryConfig!, geoviewLayerType);
+        this.#setLayerEntryType(layerConfig.listOfLayerEntryConfig!, geoviewLayerType);
       else {
         // eslint-disable-next-line no-param-reassign
         layerConfig.schemaTag = geoviewLayerType;

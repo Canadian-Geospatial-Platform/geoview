@@ -9,12 +9,7 @@ import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import {
-  TypeLayerEntryConfig,
-  TypeVectorSourceInitialConfig,
-  TypeGeoviewLayerConfig,
-  TypeListOfLayerEntryConfig,
-} from '@/geo/map/map-schema-types';
+import { TypeLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/abstract-layer-set';
 
@@ -34,7 +29,7 @@ export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourc
   format: 'EsriJSON';
 }
 
-export interface TypeEsriFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
+export interface TypeEsriFeatureLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_FEATURE;
   listOfLayerEntryConfig: EsriFeatureLayerEntryConfig[];
 }
@@ -107,17 +102,17 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @returns {Promise<void>} A promise that the execution is completed.
    */
   protected override fetchServiceMetadata(): Promise<void> {
-    return commonfetchServiceMetadata.call(this);
+    return commonfetchServiceMetadata(this);
   }
 
   /** ***************************************************************************************************************************
    * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
    * with a numeric layerId and creates a group entry when a layer is a group.
    *
-   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
-  validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
-    commonValidateListOfLayerEntryConfig.call(this, listOfLayerEntryConfig);
+  validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
+    commonValidateListOfLayerEntryConfig(this, listOfLayerEntryConfig);
   }
 
   /** ***************************************************************************************************************************
@@ -146,8 +141,8 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
-  protected override getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
-    return commonGetFieldType.call(this, fieldName, layerConfig);
+  protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number' {
+    return commonGetFieldType(this, fieldName, layerConfig);
   }
 
   /** ***************************************************************************************************************************
@@ -158,8 +153,8 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
-  protected override getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
-    return commonGetFieldDomain.call(this, fieldName, layerConfig);
+  protected override getFieldDomain(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): null | codedValueType | rangeDomainType {
+    return commonGetFieldDomain(this, fieldName, layerConfig);
   }
 
   /** ***************************************************************************************************************************
@@ -177,7 +172,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {EsriFeatureLayerEntryConfig} layerConfig The layer entry to configure.
    */
   processFeatureInfoConfig(layerConfig: EsriFeatureLayerEntryConfig): void {
-    commonProcessFeatureInfoConfig.call(this, layerConfig);
+    commonProcessFeatureInfoConfig(this, layerConfig);
   }
 
   /** ***************************************************************************************************************************
@@ -187,7 +182,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {EsriFeatureLayerEntryConfig} layerConfig The layer entry to configure.
    */
   processInitialSettings(layerConfig: EsriFeatureLayerEntryConfig): void {
-    commonProcessInitialSettings.call(this, layerConfig);
+    commonProcessInitialSettings(this, layerConfig);
   }
 
   /** ***************************************************************************************************************************
@@ -199,7 +194,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
   protected override processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
-    return commonProcessLayerMetadata.call(this, layerConfig);
+    return commonProcessLayerMetadata(this, layerConfig);
   }
 
   /** ***************************************************************************************************************************

@@ -18,7 +18,6 @@ import {
   TypeLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
-  TypeListOfLayerEntryConfig,
   TypeBaseSourceVectorInitialConfig,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
@@ -124,9 +123,9 @@ export class CSV extends AbstractGeoViewVector {
    * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
    * extra configuration may be done here.
    *
-   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
+  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {

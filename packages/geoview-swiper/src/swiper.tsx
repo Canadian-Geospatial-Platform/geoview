@@ -170,7 +170,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
     async (layerPath: string) => {
       try {
         // Get the layer at the layer path
-        const olLayer = await viewer.layer.getOLLayerByLayerPathAsync(layerPath);
+        const olLayer = await viewer.layer.getOLLayerAsync(layerPath);
         if (olLayer) {
           // Set the OL layers
           setOlLayers((prevArray: BaseLayer[]) => [...prevArray, olLayer]);
@@ -219,7 +219,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
       associatedLayerPaths.forEach((layerPath: string) => {
         try {
           // Get the layer at the layer path
-          const olLayer = viewer.layer.getOLLayerByLayerPath(layerPath);
+          const olLayer = viewer.layer.getOLLayer(layerPath);
           if (olLayer) {
             // Unwire the events on the layer
             olLayer.un(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);

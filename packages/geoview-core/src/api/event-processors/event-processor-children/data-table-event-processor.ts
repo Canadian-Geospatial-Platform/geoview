@@ -1,6 +1,5 @@
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
-import { TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { TypeFeatureInfoResultSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
 import { IDataTableState } from '@/core/stores/store-interface-and-intial-values/data-table-state';
@@ -53,8 +52,8 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
    */
   static applyFilters(mapId: string, layerPath: string, filterStrings: string, isMapRecordExist: boolean): void {
     // TODO: Refactor - Take a look at the TimeSliderEventProcessor.applyFilters and do same here, passing geoviewLayer in params to save a MapEventProcessor (api.maps[] in disguise)?
-    const geoviewLayerInstance = MapEventProcessor.getMapViewerLayerAPI(mapId).geoviewLayer(layerPath);
-    const filterLayerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).registeredLayers[layerPath] as TypeLayerEntryConfig;
+    const geoviewLayerInstance = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
+    const filterLayerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath);
 
     // TODO: Check - Is the condition `filterLayerConfig !== undefined` really necessary here if it's not to be used after anyways?
     if (isMapRecordExist && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined && filterStrings.length) {

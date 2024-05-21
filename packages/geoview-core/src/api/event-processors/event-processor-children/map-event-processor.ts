@@ -205,8 +205,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @returns {LayerApi} The Map viewer layer API instance
    */
   static getMapViewerLayerAPI(mapId: string): LayerApi {
-    // TODO: refactor layer - It seems sometimes we use getMapViewerLayerAPI(mapId).geoviewLayer(layerPath)
-    // TD.CONT: and sometimes like the above. Should 'registeredLayers' be #private to have a single way of getting a layer using a layer path?
     return api.maps[mapId].layer;
   }
 
@@ -520,7 +518,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
           // Go for it
           // eslint-disable-next-line no-param-reassign
           layerInfo.visible = newVisibility;
-          this.getMapViewerLayerAPI(mapId).geoviewLayer(layerInfo.layerPath).setVisible(layerInfo.visible, layerInfo.layerPath);
+          this.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerInfo.layerPath)?.setVisible(layerInfo.visible, layerInfo.layerPath);
         }
       }
     });
@@ -530,7 +528,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       if ((!layerVisibility || newValue) && parentLayerVisibility === false) {
         if (parentLayerInfo) {
           parentLayerInfo.visible = true;
-          this.getMapViewerLayerAPI(mapId).geoviewLayer(parentLayerPath).setVisible(true, parentLayerPath);
+          this.getMapViewerLayerAPI(mapId).getGeoviewLayer(parentLayerPath)?.setVisible(true, parentLayerPath);
         }
       }
       const children = curOrderedLayerInfo.filter(
@@ -805,7 +803,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static setLayerZIndices = (mapId: string): void => {
     const reversedLayers = [...this.getMapStateProtected(mapId).orderedLayerInfo].reverse();
     reversedLayers.forEach((orderedLayerInfo, index) => {
-      const olLayer = this.getMapViewerLayerAPI(mapId).registeredLayers[orderedLayerInfo.layerPath]?.olLayer;
+      const olLayer = this.getMapViewerLayerAPI(mapId).getLayerEntryConfig(orderedLayerInfo.layerPath)?.olLayer;
       if (olLayer) olLayer?.setZIndex(index + 10);
     });
   };

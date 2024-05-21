@@ -1,5 +1,5 @@
 // TODO: When we are done with the config extraction, do a review of all the constants, types and utilities to
-// TODOCONT: remove code duplication.
+// TO.DOCONT: remove code duplication.
 
 import { Cast, LayerEntryTypesKey, LayerTypesKey, TypeGeoviewLayerType } from '@config/types/config-types';
 import { TypeBasemapId, TypeLayerEntryType, TypeValidMapProjectionCodes } from '@config/types/map-schema-types';
