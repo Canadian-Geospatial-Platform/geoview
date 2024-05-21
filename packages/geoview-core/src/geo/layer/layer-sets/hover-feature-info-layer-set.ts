@@ -46,7 +46,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     logger.logTraceCore('HOVER-FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerConfig.layerPath, Object.keys(this.resultSet));
 
     // TODO: refactor layer - get flag from layer itself, not config
-    // TD.CONT: we should use the layerPath associated to thelayer we register and do not use layerPath parameter
+    // TO.DOCONT: we should use the layerPath associated to thelayer we register and do not use layerPath parameter
     const queryable = layerConfig.schemaTag === CONST_LAYER_TYPES.WMS ? false : layerConfig?.source?.featureInfo?.queryable;
     return !!queryable;
   }

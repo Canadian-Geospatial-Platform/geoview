@@ -206,7 +206,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    */
   static getMapViewerLayerAPI(mapId: string): LayerApi {
     // TODO: refactor layer - It seems sometimes we use getMapViewerLayerAPI(mapId).geoviewLayer(layerPath)
-    // TD.CONT: and sometimes like the above. Should 'registeredLayers' be #private to have a single way of getting a layer using a layer path?
+    // TO.DOCONT: and sometimes like the above. Should 'registeredLayers' be #private to have a single way of getting a layer using a layer path?
     return api.maps[mapId].layer;
   }
 
@@ -220,7 +220,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     try {
       // Check if the plugins exist
       // TODO: if you run the code fast enough (only happened to me in the TimeSliderEventProcessor),
-      // TD.CONT: the getMapViewer should be async, because it can be unset as well ( so not just getMapViewerPlugins() ).
+      // TO.DOCONT: the getMapViewer should be async, because it can be unset as well ( so not just getMapViewerPlugins() ).
       await whenThisThen(() => api && api.maps && api.maps[mapId] && api.maps[mapId].plugins);
     } catch (error) {
       // Log

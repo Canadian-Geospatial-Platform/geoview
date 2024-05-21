@@ -182,7 +182,6 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         });
       },
       setFooterBarIsCollapsed: (collapsed: boolean) => {
-        // Redirect to setter
         set({
           uiState: {
             ...get().uiState,

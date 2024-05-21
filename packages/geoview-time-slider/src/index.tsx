@@ -169,14 +169,11 @@ class TimeSliderPlugin extends FooterPlugin {
       const initialTimeSliderLayerPaths = this.#filterTimeSliderLayers(orderedLayerPaths);
       if (initialTimeSliderLayerPaths) {
         initialTimeSliderLayerPaths.forEach((layerPath) => {
-          // Get the layer
-          const geoviewLayer = this.mapViewer().layer.geoviewLayer(layerPath);
-
           // Get the config
           const layerConfig = this.mapViewer().layer.registeredLayers[layerPath];
 
           // Check and add time slider layer when needed
-          TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.pluginProps.mapId, geoviewLayer, layerConfig);
+          TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.pluginProps.mapId, layerConfig);
         });
       }
     });

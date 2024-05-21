@@ -388,6 +388,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
        */
       setOverlayClickMarkerRef: (htmlRef: HTMLElement): void => {
         // Quick function to set the element on the overlay
+        // Only fot UI, no redirect to setterAction
         const overlay = get().mapState.overlayClickMarker;
         if (overlay !== undefined) overlay.setElement(htmlRef);
       },
@@ -398,6 +399,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
        */
       setOverlayNorthMarkerRef: (htmlRef: HTMLElement): void => {
         // Quick function to set the element on the overlay
+        // Only fot UI, no redirect to setterAction
         const overlay = get().mapState.overlayNorthMarker;
         if (overlay !== undefined) overlay.setElement(htmlRef);
       },
@@ -633,7 +635,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       setOrderedLayerInfo: (orderedLayerInfo: TypeOrderedLayerInfo[]): void => {
         // We need to explicitly define ... for the array. If not subscribe does not fired
         // TODO: refactor - setterActions in setState will recreate array if needed. We need to implement the pattern in all setterActions
-        // TD.CONT: We should have a deep equality function to compare previous / current
+        // TO.DOCONT: We should have a deep equality function to compare previous / current
         set({
           mapState: {
             ...get().mapState,
