@@ -5,13 +5,14 @@ import { useTheme, Theme } from '@mui/material/styles';
 import { Box } from '@/ui';
 import { logger } from '@/core/utils/logger';
 import { useMapHoverFeatureInfo, useMapPointerPosition } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { getSxClasses } from './hover-tooltip-styles';
 
 /**
  * Hover tooltip component to show name field information on hover
  *
  * @returns {JSX.Element} the hover tooltip component
  */
-export function HoverTooltip(): JSX.Element {
+export function HoverTooltip(): JSX.Element | null {
   // Log, commented too annoying
   // logger.logTraceRender('components/hover-tooltip/hover-tooltip');
 
@@ -21,37 +22,13 @@ export function HoverTooltip(): JSX.Element {
     iconImage: React.CSSProperties;
   } = useTheme();
 
-  const sxClasses = {
-    tooltipItem: {
-      color: theme.palette.geoViewColor.bgColor.light[900],
-      background: theme.palette.geoViewColor.bgColor.dark[900],
-      opacity: 0.9,
-      fontSize: theme.palette.geoViewFontSize.default,
-      padding: '3px 8px',
-      borderRadius: '5px',
-      textAlign: 'center',
-      maxWidth: '350px',
-      maxHeight: '60px',
-      position: 'absolute',
-      display: 'flex',
-      top: '-5px',
-      left: '3px',
-    },
-    tooltipText: {
-      fontSize: theme.palette.geoViewFontSize.default,
-      color: theme.palette.geoViewColor.bgColor.light[900],
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
-      overflow: 'hidden',
-      padding: '5px',
-    },
-  };
-
   // internal component state
   const [pixel, setPixel] = useState<[number, number]>([0, 0]);
   const [tooltipValue, setTooltipValue] = useState<string>('');
   const [tooltipIcon, setTooltipIcon] = useState<string>('');
   const [showTooltip, setShowTooltip] = useState<boolean>(false);
+
+  const sxClasses = getSxClasses(theme);
 
   // store state
   const hoverFeatureInfo = useMapHoverFeatureInfo();
@@ -80,6 +57,10 @@ export function HoverTooltip(): JSX.Element {
 
     if (pointerPosition !== undefined) setPixel(pointerPosition.pixel as [number, number]);
   }, [pointerPosition]);
+
+  if (showTooltip && !tooltipValue) {
+    return null;
+  }
 
   return (
     <Box

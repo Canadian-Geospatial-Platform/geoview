@@ -213,13 +213,14 @@ export function Modal(props: TypeDialogProps): JSX.Element {
           </Box>
         </Box>
         <DialogContent>
-          <div
+          <Box
+            component="div"
             id={contentTextId}
             className={`${sxClasses.content} ${contentTextClassName && contentTextClassName}`}
             style={contentTextStyle}
           >
             {typeof modal.content === 'string' ? <HtmlToReact htmlContent={modal.content} /> : modal.content}
-          </div>
+          </Box>
         </DialogContent>
         {modal.footer?.actions && modal.footer?.actions.length >= 1 ? (
           <DialogActions>

@@ -289,7 +289,7 @@ const ResponsiveGridLayout = forwardRef(
                 [theme.breakpoints.down('md')]: { justifyContent: 'space-between' },
               }}
             >
-              {rightTop ?? <div />}
+              {rightTop ?? <Box />}
 
               <Box sx={{ display: 'flex', flexDirection: 'row', gap: '0.6rem' }}>
                 {!fullWidth && !hideEnlargeBtn && renderEnlargeButton()}

@@ -96,7 +96,7 @@ export default function Notifications(): JSX.Element {
       <Box sx={sxClasses.notificationItem} key={index}>
         <Box>{getNotificationIcon(notification)}</Box>
         <Box sx={{ flexGrow: 1, fontSize: theme.palette.geoViewFontSize.sm, color: theme.palette.geoViewColor.textColor.light[250] }}>
-          <span>{notification.message}</span>
+          <Box component="span">{notification.message}</Box>
         </Box>
         {notification.count > 1 ? (
           <Box>
@@ -112,8 +112,8 @@ export default function Notifications(): JSX.Element {
 
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
-      <div>
-        <Badge badgeContent={notificationsCount} color="error">
+      <Box>
+        <Badge badgeContent={notificationsCount > 99 ? '99+' : notificationsCount} color="error">
           <IconButton
             id="notification"
             tooltip="appbar.notifications"
@@ -142,7 +142,7 @@ export default function Notifications(): JSX.Element {
             </Box>
           </Paper>
         </Popper>
-      </div>
+      </Box>
     </ClickAwayListener>
   );
 }

@@ -37,6 +37,7 @@ import {
 import { LAYER_STATUS } from '@/core/utils/constant';
 import { ArrowDownwardIcon, ArrowUpIcon, TableViewIcon } from '@/ui/icons';
 import { Divider } from '@/ui/divider/divider';
+import { Box } from '@/ui/layout';
 
 interface SingleLayerProps {
   layer: TypeLegendLayer;
@@ -123,10 +124,10 @@ export function SingleLayer({ depth, layer, setIsLayersListPanelVisible, index, 
 
     if (datatableSettings[layer.layerPath]) {
       return (
-        <span>
+        <Box component="span">
           {itemsLengthDesc} &nbsp;
           <TableViewIcon sx={{ marginBottom: '-5px' }} fontSize="small" />
-        </span>
+        </Box>
       );
     }
     return itemsLengthDesc;

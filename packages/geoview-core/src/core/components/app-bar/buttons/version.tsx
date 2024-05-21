@@ -73,7 +73,7 @@ export default function Version(): JSX.Element {
 
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
-      <div>
+      <Box>
         <IconButton
           id="version-button"
           tooltip="appbar.version"
@@ -111,7 +111,7 @@ export default function Version(): JSX.Element {
             </Box>
           </Paper>
         </Popper>
-      </div>
+      </Box>
     </ClickAwayListener>
   );
 }

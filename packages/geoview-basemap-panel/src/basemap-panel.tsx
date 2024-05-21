@@ -288,7 +288,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
                     // eslint-disable-next-line react/no-array-index-key
                     return <img key={index} src={thumbnail} alt={basemap.altText} className="basemapCardThumbnail" />;
                   })}
-                <div className={basemap.basemapId !== activeBasemapId ? 'basemapCardThumbnailOverlay' : ''} />
+                <Box className={basemap.basemapId !== activeBasemapId ? 'basemapCardThumbnailOverlay' : ''} />
               </>
             }
           />

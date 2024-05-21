@@ -7,6 +7,7 @@ import makeStyles from '@mui/styles/makeStyles';
 
 import { ChevronLeftIcon, Tooltip } from '@/ui';
 import { logger } from '@/core/utils/logger';
+import { Box } from '@/ui/layout';
 
 // TODO: We need to find solution to remove makeStyles with either plain css or material ui.
 const useStyles = makeStyles(() => ({
@@ -98,8 +99,9 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element {
 
   return (
     <Tooltip title={tooltipAndAria}>
-      <div ref={divRef} className={classes.toggleBtnContainer}>
-        <div
+      <Box ref={divRef} className={classes.toggleBtnContainer}>
+        <Box
+          component="div"
           className={`${classes.toggleBtn} ${!status ? classes.minimapOpen : classes.minimapClosed}`}
           style={{
             margin: 0,
@@ -109,8 +111,8 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element {
           }}
         >
           <ChevronLeftIcon />
-        </div>
-      </div>
+        </Box>
+      </Box>
     </Tooltip>
   );
 }

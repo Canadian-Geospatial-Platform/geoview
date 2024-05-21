@@ -153,7 +153,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
               {renderHeaderCheckbox()}
             </Grid>
             <Grid item xs="auto">
-              <span>{t('general.name')}</span>
+              <Box component="span">{t('general.name')}</Box>
             </Grid>
           </Grid>
         )}
@@ -164,7 +164,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             </Grid>
             <Grid item xs="auto">
               {item.icon ? <img alt={item.name} src={item.icon} /> : <BrowserNotSupportedIcon />}
-              <span style={sxClasses.tableIconLabel}>{item.name}</span>
+              <Box component="span" style={sxClasses.tableIconLabel}>
+                {item.name}
+              </Box>
             </Grid>
           </Grid>
         ))}

@@ -1090,7 +1090,7 @@ export function AddNewLayer(): JSX.Element {
             },
             stepContent: {
               children: (
-                <div
+                <Box
                   className="dropzone"
                   style={{ position: 'relative' }}
                   onDrop={(e) => handleDrop(e)}
@@ -1099,7 +1099,7 @@ export function AddNewLayer(): JSX.Element {
                   onDragLeave={(e) => handleDragLeave(e)}
                 >
                   {drag && (
-                    <div
+                    <Box
                       ref={dragPopover}
                       style={{
                         backgroundColor: 'rgba(128,128,128,.95)',
@@ -1119,9 +1119,9 @@ export function AddNewLayer(): JSX.Element {
                         <br />
                         {t('layers.dropzone')}
                       </h3>
-                    </div>
+                    </Box>
                   )}
-                  <div>
+                  <Box>
                     <input
                       type="file"
                       id="fileUpload"
@@ -1131,10 +1131,10 @@ export function AddNewLayer(): JSX.Element {
                       }}
                       accept=".gpkg, .json, .geojson, .csv"
                     />
-                  </div>
+                  </Box>
                   <Button type="text" onClick={() => document.getElementById('fileUpload')?.click()} className="">
                     <FileUploadIcon />
-                    <span>{t('layers.upload')}</span>
+                    <Box component="span">{t('layers.upload')}</Box>
                   </Button>
                   <p style={{ textAlign: 'center' }}>
                     <small>{t('layers.drop')}</small>
@@ -1150,7 +1150,7 @@ export function AddNewLayer(): JSX.Element {
                   />
                   <br />
                   <NavButtons isFirst handleNext={handleStep1} />
-                </div>
+                </Box>
               ),
             },
           },

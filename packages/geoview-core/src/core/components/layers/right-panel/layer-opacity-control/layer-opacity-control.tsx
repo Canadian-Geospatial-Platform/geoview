@@ -42,7 +42,7 @@ export function LayerOpacityControl(props: LayerOpacityControlProps): JSX.Elemen
   };
 
   return (
-    <div style={{ padding: '16px 17px 16px 23px' }}>
+    <Box style={{ padding: '16px 17px 16px 23px' }}>
       <Box sx={sxClasses.layerOpacityControl}>
         <Typography sx={{ fontWeight: 'bold' }}>{t('layers.opacity')}</Typography>
         <Slider
@@ -54,6 +54,6 @@ export function LayerOpacityControl(props: LayerOpacityControlProps): JSX.Elemen
           marks={marks}
         />
       </Box>
-    </div>
+    </Box>
   );
 }
