@@ -23,7 +23,19 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
  */
 export class ConfigBaseClass {
   /** The identifier of the layer to display on the map. This element is part of the schema. */
+  // GV Cannot put it #layerId as it breaks things
+  // eslint-disable-next-line no-restricted-syntax
   private _layerId = '';
+
+  /** The layer path to this instance. */
+  // GV Cannot put it #layerPath as it breaks things
+  // eslint-disable-next-line no-restricted-syntax
+  private _layerPath = '';
+
+  /** It is used to identified unprocessed layers and shows the final layer state */
+  // GV Cannot put it #layerStatus as it breaks things
+  // eslint-disable-next-line no-restricted-syntax
+  private _layerStatus: TypeLayerStatus = 'newInstance';
 
   /** The ending extension (element) of the layer identifier. This element is part of the schema. */
   layerIdExtension?: string;
@@ -47,20 +59,24 @@ export class ConfigBaseClass {
   isMetadataLayerGroup?: boolean;
 
   /** It is used to link the layer entry config to the parent's layer config. */
-  parentLayerConfig?: TypeGeoviewLayerConfig | GroupLayerEntryConfig;
-
-  /** The layer path to this instance. */
-  protected _layerPath = '';
+  parentLayerConfig?: GroupLayerEntryConfig;
 
   // TODO: Refactor - There shouldn't be a coupling to an OpenLayers `BaseLayer` inside a Configuration class.
   // TO.DOCONT: That logic should be elsewhere so that the Configuration class remains portable and immutable.
   /** This property is used to link the displayed layer to its layer entry config. it is not part of the schema. */
-  protected _olLayer: BaseLayer | LayerGroup | null = null;
+  _olLayer?: BaseLayer | LayerGroup;
 
-  /** It is used to identified unprocessed layers and shows the final layer state */
-  protected _layerStatus: TypeLayerStatus = 'newInstance';
+  /** Flag indicating that the loaded signal arrived before the processed one */
+  #waitForProcessedBeforeSendingLoaded = false;
 
-  protected layerStatusWeight = {
+  // Keep all callback delegates references
+  // TODO: refactor - if this handler is privare with #,  abstract-base-layer-entry-config.ts:28 Uncaught (in promise) TypeError: Private element is not present on this object
+  // TD.CONT: this by pass the error, I need to set this public. The problem come from the groupLayer object trying to emit this event but
+  // TD.CONT: the event is not define so this.onLayerStatus.... failed
+  #onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
+
+  // TODO: Review - The status. I think we should have: newInstance, processsing, loading, - loaded : error
+  static #layerStatusWeight = {
     newInstance: 10,
     registered: 20,
     processing: 30,
@@ -70,54 +86,16 @@ export class ConfigBaseClass {
     error: 70,
   };
 
-  /** Flag indicating that the loaded signal arrived before the processed one */
-  protected waitForProcessedBeforeSendingLoaded = false;
-
-  // Keep all callback delegates references
-  // TODO: refactor - if this handler is privare with #,  abstract-base-layer-entry-config.ts:28 Uncaught (in promise) TypeError: Private element is not present on this object
-  // TD.CONT: this by pass the error, I need to set this public. The problem come from the groupLayer object trying to emit this event but
-  // TD.CONT: the event is not define so this.onLayerStatus.... failed
-  #onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
-
   /**
    * The class constructor.
    * @param {ConfigBaseClass} layerConfig The layer configuration we want to instanciate.
    */
   constructor(layerConfig: ConfigBaseClass) {
+    // TODO: Refactor - Get rid of this Object.assign pattern here and elsewhere unless explicitely commented why.
     Object.assign(this, layerConfig);
     // eslint-disable-next-line no-underscore-dangle
-    if (this.geoviewLayerConfig) this._layerPath = ConfigBaseClass.evaluateLayerPath(layerConfig);
+    if (this.geoviewLayerConfig) this._layerPath = ConfigBaseClass.#evaluateLayerPath(layerConfig);
     else logger.logError("Couldn't calculate layerPath because geoviewLayerConfig has an invalid value");
-  }
-
-  /**
-   * The layerPath getter method for the ConfigBaseClass class and its descendant classes.
-   * @returns {string} The layer path
-   */
-  get layerPath(): string {
-    // eslint-disable-next-line no-underscore-dangle
-    this._layerPath = ConfigBaseClass.evaluateLayerPath(this);
-    // eslint-disable-next-line no-underscore-dangle
-    return this._layerPath;
-  }
-
-  /**
-   * Getter for the layer Path of the layer configuration parameter.
-   * @param {ConfigBaseClass} layerConfig The layer configuration for which we want to get the layer path.
-   * @param {string} layerPath Internal parameter used to build the layer path (should not be used by the user).
-   *
-   * @returns {string} Returns the layer path.
-   */
-  static evaluateLayerPath(layerConfig: ConfigBaseClass, layerPath?: string): string {
-    let pathEnding = layerPath;
-    if (pathEnding === undefined)
-      pathEnding =
-        layerConfig.layerIdExtension === undefined ? layerConfig.layerId : `${layerConfig.layerId}.${layerConfig.layerIdExtension}`;
-    if (!layerConfig.parentLayerConfig) return `${layerConfig.geoviewLayerConfig!.geoviewLayerId!}/${pathEnding}`;
-    return this.evaluateLayerPath(
-      layerConfig.parentLayerConfig as GroupLayerEntryConfig,
-      `${(layerConfig.parentLayerConfig as GroupLayerEntryConfig).layerId}/${pathEnding}`
-    );
   }
 
   /**
@@ -137,7 +115,44 @@ export class ConfigBaseClass {
     // eslint-disable-next-line no-underscore-dangle
     this._layerId = newLayerId;
     // eslint-disable-next-line no-underscore-dangle
-    this._layerPath = ConfigBaseClass.evaluateLayerPath(this);
+    this._layerPath = ConfigBaseClass.#evaluateLayerPath(this);
+  }
+
+  /**
+   * The layerPath getter method for the ConfigBaseClass class and its descendant classes.
+   * @returns {string} The layer path
+   */
+  get layerPath(): string {
+    // TODO: Refactor - It would be better to not have a 'getter' that 'sets' a value at the same time.
+    // TO.DOCONT: Unfortunately, when commenting this out (to rely on the one in layerId) things almost work, except for the Groups inside Groups which don't.
+    // TO.DOCONT: The fix for this should be elsewhere and the line below commented out asap to prevent other issues like that.
+    // eslint-disable-next-line no-underscore-dangle
+    this._layerPath = ConfigBaseClass.#evaluateLayerPath(this);
+    // eslint-disable-next-line no-underscore-dangle
+    return this._layerPath;
+  }
+
+  /**
+   * The olLayer getter method for the ConfigBaseClass class and its descendant classes.
+   * All layerConfig has an olLayer property, but the olLayer setter can only be use on group layers.
+   * @returns {BaseLayer | LayerGroup | undefined} The OL layer
+   */
+  get olLayer(): BaseLayer | LayerGroup | undefined {
+    // eslint-disable-next-line no-underscore-dangle
+    return this._olLayer;
+  }
+
+  /**
+   * The olLayer setter method for the ConfigBaseClass class and its descendant classes.
+   * All layerConfig has an olLayer property, but the olLayer setter can only be use on group layers.
+   * If you want to set the olLayer property for a descendant of AbstractBaseLayerEntryConfig, you must
+   * use its olLayerAndLoadEndListeners because it enforce the creation of the load end listeners.
+   * @param {LayerGroup} olLayerValue The new olLayerd value.
+   */
+  set olLayer(olLayerValue: BaseLayer | LayerGroup | undefined) {
+    // eslint-disable-next-line no-underscore-dangle
+    if (layerEntryIsGroupLayer(this)) this._olLayer = olLayerValue;
+    else throw new Error(`The olLayer setter can only be used on layer group and layerPath refers to a layer of type "${this.entryType}".`);
   }
 
   /**
@@ -153,24 +168,25 @@ export class ConfigBaseClass {
    * The layerStatus setter method for the ConfigBaseClass class and its descendant classes.
    * @param {string} newLayerStatus The new layerId value.
    */
+  // TODO: Refactor - Change this from a 'setter' to an actual set function, arguably too complex for just a 'setter'
   set layerStatus(newLayerStatus: TypeLayerStatus) {
     if (
       newLayerStatus === 'loaded' &&
       !layerEntryIsGroupLayer(this) &&
-      !this.IsGreaterThanOrEqualTo('loading') &&
-      !this.waitForProcessedBeforeSendingLoaded
+      !this.isGreaterThanOrEqualTo('loading') &&
+      !this.#waitForProcessedBeforeSendingLoaded
     ) {
-      this.waitForProcessedBeforeSendingLoaded = true;
+      this.#waitForProcessedBeforeSendingLoaded = true;
       return;
     }
-    if (!this.IsGreaterThanOrEqualTo(newLayerStatus)) {
+    if (!this.isGreaterThanOrEqualTo(newLayerStatus)) {
       // eslint-disable-next-line no-underscore-dangle
       this._layerStatus = newLayerStatus;
       // TODO: Refactor - Suggestion to hold the layer status elsewhere than in a configuration file. Can it be on the layer itself?
       // TO.DOCONT: It'd be "nicer" to have a configuration file that doesn't raise events
       this.#emitLayerStatusChanged({ layerPath: this.layerPath, layerStatus: newLayerStatus });
     }
-    if (newLayerStatus === 'processed' && this.waitForProcessedBeforeSendingLoaded) this.layerStatus = 'loaded';
+    if (newLayerStatus === 'processed' && this.#waitForProcessedBeforeSendingLoaded) this.layerStatus = 'loaded';
 
     if (
       // eslint-disable-next-line no-underscore-dangle
@@ -178,7 +194,26 @@ export class ConfigBaseClass {
       this.parentLayerConfig &&
       this.geoviewLayerInstance!.allLayerStatusAreGreaterThanOrEqualTo('loaded', [this.parentLayerConfig as GroupLayerEntryConfig])
     )
-      (this.parentLayerConfig as GroupLayerEntryConfig).layerStatus = 'loaded';
+      this.parentLayerConfig.layerStatus = 'loaded';
+  }
+
+  /**
+   * Getter for the layer Path of the layer configuration parameter.
+   * @param {ConfigBaseClass} layerConfig The layer configuration for which we want to get the layer path.
+   * @param {string} layerPath Internal parameter used to build the layer path (should not be used by the user).
+   *
+   * @returns {string} Returns the layer path.
+   */
+  static #evaluateLayerPath(layerConfig: ConfigBaseClass, layerPath?: string): string {
+    let pathEnding = layerPath;
+    if (pathEnding === undefined)
+      pathEnding =
+        layerConfig.layerIdExtension === undefined ? layerConfig.layerId : `${layerConfig.layerId}.${layerConfig.layerIdExtension}`;
+    if (!layerConfig.parentLayerConfig) return `${layerConfig.geoviewLayerConfig!.geoviewLayerId!}/${pathEnding}`;
+    return this.#evaluateLayerPath(
+      layerConfig.parentLayerConfig as GroupLayerEntryConfig,
+      `${(layerConfig.parentLayerConfig as GroupLayerEntryConfig).layerId}/${pathEnding}`
+    );
   }
 
   /**
@@ -186,7 +221,7 @@ export class ConfigBaseClass {
    * @param {LayerStatusChangedEvent} event The event to emit
    * @private
    */
-  // TODO: refactor - if this emit is privare with #,  abstract-base-layer-entry-config.ts:28 Uncaught (in promise) TypeError: Private element is not present on this object
+  // TODO: refactor - if this emit is private with #, abstract-base-layer-entry-config.ts:28 Uncaught (in promise) TypeError: Private element is not present on this object
   // TD.CONT: this by pass the error, I need to set this public. The problem come from the groupLayer object trying to emit this event but
   // TD.CONT: the event is not define so this.onLayerStatus.... failed
   #emitLayerStatusChanged(event: LayerStatusChangedEvent): void {
@@ -218,12 +253,16 @@ export class ConfigBaseClass {
    * @returns {boolean} Returns false if the layer configuration can't be registered.
    */
   registerLayerConfig(): boolean {
-    const { registeredLayers } = MapEventProcessor.getMapViewerLayerAPI(this.geoviewLayerInstance!.mapId);
-    if (registeredLayers[this.layerPath]) return false;
-    (registeredLayers[this.layerPath] as ConfigBaseClass) = this;
+    // TODO: Refactor - Move this function elsewhere. Shouldn't be here.
+    const layerApi = MapEventProcessor.getMapViewerLayerAPI(this.geoviewLayerInstance!.mapId);
+    const isRegistered = layerApi.isLayerEntryConfigRegistered(this.layerPath);
+    if (isRegistered) return false;
 
-    // TODO: Check - Move this registerToLayerSets closer to the others, when I comment the line it seems good, except
-    // TO.DOCONT: for an 'Anonymous' group layer that never got 'loaded'. See if we can fix this elsewhere and remove this.
+    // TODO: REFACTOR - Do NOT do this! Bad design.
+    (layerApi.registeredLayers[this.layerPath] as ConfigBaseClass) = this;
+
+    // TODO: Check - Move this registerToLayerSets closer to the others, when I comment the line the Groups start breaking
+    // TO.DOCONT: See if we can fix this elsewhere and remove this.
     if (this.entryType !== CONST_LAYER_ENTRY_TYPES.GROUP)
       (this.geoviewLayerInstance as AbstractGeoViewLayer).registerToLayerSets(Cast<AbstractBaseLayerEntryConfig>(this));
 
@@ -239,8 +278,8 @@ export class ConfigBaseClass {
    *
    * @returns {boolean} Returns true if the internal value is greater or equal than the value of the parameter.
    */
-  IsGreaterThanOrEqualTo(layerStatus: TypeLayerStatus): boolean {
-    return this.layerStatusWeight[this.layerStatus] >= this.layerStatusWeight[layerStatus];
+  isGreaterThanOrEqualTo(layerStatus: TypeLayerStatus): boolean {
+    return ConfigBaseClass.#layerStatusWeight[this.layerStatus] >= ConfigBaseClass.#layerStatusWeight[layerStatus];
   }
 
   /**

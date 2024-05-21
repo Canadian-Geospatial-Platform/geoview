@@ -10,12 +10,7 @@ import { Extent } from 'ol/extent';
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import {
-  TypeLayerEntryConfig,
-  TypeGeoviewLayerConfig,
-  TypeListOfLayerEntryConfig,
-  layerEntryIsGroupLayer,
-} from '@/geo/map/map-schema-types';
+import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { Projection } from '@/geo/utils/projection';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
@@ -109,8 +104,9 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @param {ImageStaticLayerEntryConfig} layerConfig layer configuration.
    *
    * @returns {blob} image blob
+   * @private
    */
-  private getLegendImage(layerConfig: ImageStaticLayerEntryConfig): Promise<string | ArrayBuffer | null> {
+  #getLegendImage(layerConfig: ImageStaticLayerEntryConfig): Promise<string | ArrayBuffer | null> {
     const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
       const readImage = (blob: Blob): Promise<string | ArrayBuffer | null> =>
         // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -150,10 +146,10 @@ export class ImageStatic extends AbstractGeoViewRaster {
    */
   override async getLegend(layerPath: string): Promise<TypeLegend | null> {
     try {
-      const layerConfig = this.getLayerConfig(layerPath) as ImageStaticLayerEntryConfig | undefined | null;
+      const layerConfig = this.getLayerEntryConfig(layerPath) as ImageStaticLayerEntryConfig | undefined | null;
       if (!layerConfig) return null;
 
-      const legendImage = await this.getLegendImage(layerConfig!);
+      const legendImage = await this.#getLegendImage(layerConfig!);
       if (!legendImage) {
         const legend: TypeLegend = {
           type: this.type,
@@ -195,11 +191,11 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
    * extra configuration may be done here.
    *
-   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    *
-   * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
+   * @returns {TypeLayerEntryConfig[]} A new list of layer entries configuration with deleted error layers.
    */
-  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void {
+  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
       if (layerEntryIsGroupLayer(layerConfig)) {
@@ -251,7 +247,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  protected override async processOneLayerEntry(layerConfig: ImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  protected override async processOneLayerEntry(layerConfig: ImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | undefined> {
     await super.processOneLayerEntry(layerConfig);
 
     if (!layerConfig?.source?.extent) throw new Error('Parameter extent is not defined in source element of layerConfig.');
@@ -279,13 +275,11 @@ export class ImageStatic extends AbstractGeoViewRaster {
     // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
     // GV            in the 'loading' state if the flag value is false.
 
-    // eslint-disable-next-line no-param-reassign
-    layerConfig.olLayerAndLoadEndListeners = {
+    // TODO: Refactor - Wire it up
+    this.setLayerAndLoadEndListeners(layerConfig, {
       olLayer: new ImageLayer(staticImageOptions),
       loadEndListenerType: 'image',
-    };
-    // eslint-disable-next-line no-param-reassign
-    layerConfig.geoviewLayerInstance = this;
+    });
 
     return Promise.resolve(layerConfig.olLayer);
   }
@@ -299,7 +293,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @returns {Extent} The new layer bounding box.
    */
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
-    const layerConfig = this.getLayerConfig(layerPath);
+    const layerConfig = this.getLayerEntryConfig(layerPath);
     const layerBounds = (layerConfig?.olLayer as ImageLayer<Static>).getSource()?.getImageExtent();
     const projection =
       (layerConfig?.olLayer as ImageLayer<Static>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||

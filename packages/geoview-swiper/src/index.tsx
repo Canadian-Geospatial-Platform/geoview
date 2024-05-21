@@ -73,7 +73,8 @@ class SwiperPlugin extends MapPlugin {
   activateForLayer(layerPath: string): void {
     try {
       // Check if the layer exists on the map
-      this.mapViewer().layer.getOLLayerByLayerPath(layerPath);
+      const olLayer = this.mapViewer().layer.getOLLayer(layerPath);
+      if (!olLayer) throw new Error(`Layer at path ${layerPath} not found.`);
 
       // Add the layer path
       SwiperEventProcessor.addLayerPath(this.pluginProps.mapId, layerPath);

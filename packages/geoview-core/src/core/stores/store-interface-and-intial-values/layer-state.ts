@@ -62,7 +62,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         return layer;
       },
       getLayerBounds: (layerPath: string) => {
-        const layer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).geoviewLayer(layerPath);
+        const layer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayer(layerPath);
         if (layer) {
           const bounds = layer.calculateBounds(layerPath);
           if (bounds) return bounds;
@@ -161,7 +161,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           });
 
           // apply filter to layer
-          (MapEventProcessor.getMapViewerLayerAPI(get().mapId).geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter(
+          (MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter(
             layerPath,
             ''
           );
@@ -220,7 +220,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         // GV try to make reusable store actions....
         // GV we can have always item.... we cannot set visibility so if present we will need to trap. Need more use case
         // GV create a function setItemVisibility called with layer path and this function set the registered layer (from store values) then apply the filter.
-        (MapEventProcessor.getMapViewerLayerAPI(get().mapId).geoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter(
+        (MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter(
           layerPath,
           ''
         );
@@ -265,7 +265,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
 function setOpacityInLayerAndChildren(layer: TypeLegendLayer, opacity: number, mapId: string, isChild = false): void {
   _.set(layer, 'opacity', opacity);
-  MapEventProcessor.getMapViewerLayerAPI(mapId).geoviewLayer(layer.layerPath).setOpacity(opacity, layer.layerPath);
+  MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layer.layerPath)?.setOpacity(opacity, layer.layerPath);
   if (isChild) {
     _.set(layer, 'opacityFromParent', opacity);
   }

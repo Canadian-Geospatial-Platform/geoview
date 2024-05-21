@@ -1565,8 +1565,8 @@ export function getFeatureStyle(
       '',
       styleSettings,
       feature,
-      layerConfig.olLayer!.get('filterEquation'),
-      layerConfig.olLayer!.get('legendFilterIsOff')
+      layerConfig.filterEquation,
+      layerConfig.legendFilterIsOff
     );
   }
   return undefined;
@@ -1599,8 +1599,8 @@ export async function getFeatureCanvas(
       const featureStyle = processStyle[styleType][geometryType](
         styleSettings,
         feature,
-        layerConfig.olLayer!.get('filterEquation'),
-        layerConfig.olLayer!.get('legendFilterIsOff')
+        layerConfig.filterEquation,
+        layerConfig.legendFilterIsOff
       );
       if (featureStyle) {
         if (geometryType === 'Point') {
