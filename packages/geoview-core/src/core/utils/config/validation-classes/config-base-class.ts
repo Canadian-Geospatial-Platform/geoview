@@ -75,6 +75,7 @@ export class ConfigBaseClass {
   // TD.CONT: the event is not define so this.onLayerStatus.... failed
   #onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
 
+  // TODO: Review - The status. I think we should have: newInstance, processsing, loading, - loaded : error
   static #layerStatusWeight = {
     newInstance: 10,
     registered: 20,

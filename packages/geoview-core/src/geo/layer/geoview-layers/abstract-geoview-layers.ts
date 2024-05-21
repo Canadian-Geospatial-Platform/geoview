@@ -282,7 +282,7 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Registers a legend queried event handler.
+   * Registers a visible changed event handler.
    * @param {VisibleChangedDelegate} callback The callback to be executed whenever the event is emitted
    */
   onVisibleChanged(callback: VisibleChangedDelegate): void {
@@ -291,7 +291,7 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Unregisters a legend queried event handler.
+   * Unregisters a visible changed event handler.
    * @param {VisibleChangedDelegate} callback The callback to stop being called whenever the event is emitted
    */
   offVisibleChanged(callback: VisibleChangedDelegate): void {
@@ -310,7 +310,7 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Registers a legend queried event handler.
+   * Registers a layer creation event handler.
    * @param {LayerCreationDelegate} callback The callback to be executed whenever the event is emitted
    */
   onLayerCreation(callback: LayerCreationDelegate): void {
@@ -319,7 +319,7 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Unregisters a legend queried event handler.
+   * Unregisters a layer creation event handler.
    * @param {LayerCreationDelegate} callback The callback to stop being called whenever the event is emitted
    */
   offLayerCreation(callback: LayerCreationDelegate): void {

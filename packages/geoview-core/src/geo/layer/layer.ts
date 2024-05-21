@@ -201,6 +201,8 @@ export class LayerApi {
       }
     }
 
+    // TODO: Refactor - There should be no Geocore layer in layers in the geo folder, can the above be moved in an earlier process?
+
     // Wait for all promises (GeoCore ones) to process
     // The reason for the Promise.allSettled is because of synch issues with the 'setMapOrderedLayerInfo' which happens below and the
     // other setMapOrderedLayerInfos that happen in parallel via the ADD_LAYER events ping/pong'ing, making the setMapOrdered below fail
