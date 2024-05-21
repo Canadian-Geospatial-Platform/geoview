@@ -171,6 +171,11 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
     // The feature info state
     const featureInfoState = this.getFeatureInfoState(mapId);
 
+    // TODO: Fix 'details propagation' when some layers have been loaded in the UI, but their queries fail (very specific case that happened during a weekend)
+    // TO.DOCONT: Putting the TODO here, but not sure where the fix should be.
+    // TO.DOCONT: When layers have spotty query happening (but are loaded with their legends fine in the ui) the Details panel has trouble maitaining the
+    // TO.DOCONT: currently selected layer, selected, in the ui when clicking on various features on the map.
+
     // Redirect to batch propagate
     return this.helperPropagateArrayStoreBatch(
       mapId,

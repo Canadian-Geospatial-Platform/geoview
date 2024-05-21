@@ -104,6 +104,7 @@ export const geoviewEntryIsVectorTiles = (
  * @class VectorTiles
  */
 // ******************************************************************************************************************************
+// GV Layers Refactoring - Obsolete (in layers)
 export class VectorTiles extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * Initialize layer
@@ -123,8 +124,9 @@ export class VectorTiles extends AbstractGeoViewRaster {
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number' {
-    const fieldDefinitions = this.layerMetadata[layerConfig.layerPath].source.featureInfo;
+    const fieldDefinitions = this.getLayerMetadata(layerConfig.layerPath).source.featureInfo;
     const fieldIndex = getLocalizedValue(
       Cast<TypeLocalizedString>(fieldDefinitions.outfields),
       AppEventProcessor.getDisplayLanguage(this.mapId)
@@ -141,6 +143,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    *
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
@@ -167,8 +170,9 @@ export class VectorTiles extends AbstractGeoViewRaster {
    *
    * @param {VectorTilesLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
+   * @returns {Promise<TypeBaseRasterLayer | undefined>} The GeoView raster layer that has been created.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected override async processOneLayerEntry(layerConfig: VectorTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | undefined> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
@@ -219,17 +223,20 @@ export class VectorTiles extends AbstractGeoViewRaster {
     // TODO remove after demoing again
     const declutter = this.mapId !== 'LYR2';
 
+    // Create the OpenLayer layer
+    const olLayer = new VectorTileLayer({ ...tileLayerOptions, declutter });
+
     // TODO: Refactor - Wire it up
     this.setLayerAndLoadEndListeners(layerConfig, {
-      olLayer: new VectorTileLayer({ ...tileLayerOptions, declutter }),
+      olLayer,
       loadEndListenerType: 'tile',
     });
 
-    const resolutions = (layerConfig.olLayer as VectorTileLayer).getSource()?.getTileGrid()?.getResolutions();
+    const resolutions = olLayer.getSource()?.getTileGrid()?.getResolutions();
 
     if (this.metadata?.defaultStyles)
       applyStyle(
-        layerConfig.olLayer as VectorTileLayer,
+        olLayer,
         `${getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId))}${
           this.metadata.defaultStyles
         }/root.json`,
@@ -239,7 +246,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
         logger.logPromiseFailed('applyStyle in processOneLayerEntry in VectorTiles', error);
       });
 
-    return Promise.resolve(layerConfig.olLayer);
+    return Promise.resolve(olLayer);
   }
 
   /** ***************************************************************************************************************************
@@ -250,6 +257,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected override processLayerMetadata(layerConfig: TileLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     if (this.metadata) {
       const { tileInfo } = this.metadata;
@@ -282,12 +290,13 @@ export class VectorTiles extends AbstractGeoViewRaster {
    *
    * @returns {Extent | undefined} The new layer bounding box.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
-    const layerConfig = this.getLayerEntryConfig(layerPath);
-    const layerBounds = (layerConfig?.olLayer as TileLayer<VectorTileSource>).getSource()?.getTileGrid()?.getExtent();
+    const layer = this.getOLLayer(layerPath) as TileLayer<VectorTileSource> | undefined;
+
+    const layerBounds = layer?.getSource()?.getTileGrid()?.getExtent();
     const projection =
-      (layerConfig?.olLayer as TileLayer<VectorTileSource>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
-      MapEventProcessor.getMapState(this.mapId).currentProjection;
+      layer?.getSource()?.getProjection()?.getCode().replace('EPSG:', '') || MapEventProcessor.getMapState(this.mapId).currentProjection;
 
     if (layerBounds) {
       let transformedBounds = layerBounds;
@@ -309,6 +318,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
   }
 
   // TODO: This section needs documentation (a header at least). Also, is it normal to have things hardcoded like that?
+  // GV Layers Refactoring - Obsolete (just should be removed?)
   static async addVectorTileLayer(): Promise<void> {
     // GV from code sandbox https://codesandbox.io/s/vector-tile-info-forked-g28jud?file=/main.js it works good
     // GV from inside GeoView, even when not use, something is wrong.
@@ -334,7 +344,8 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @param {string} styleUrl The url of the styles to apply.
    * @returns {Promise<unknown>}
    */
+  // GV Layers Refactoring - Obsolete (just should be removed?)
   setVectorTileStyle(layerPath: string, styleUrl: string): Promise<unknown> {
-    return applyStyle(MapEventProcessor.getMapViewerLayerAPI(this.mapId).registeredLayers[layerPath].olLayer as VectorTileLayer, styleUrl);
+    return applyStyle(MapEventProcessor.getMapViewerLayerAPI(this.mapId).getOLLayer(layerPath) as VectorTileLayer, styleUrl);
   }
 }

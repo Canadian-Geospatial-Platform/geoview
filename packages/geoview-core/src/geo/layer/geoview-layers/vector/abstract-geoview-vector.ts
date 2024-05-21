@@ -23,6 +23,7 @@ import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { VECTOR_LAYER } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { CSV } from './csv';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
@@ -41,6 +42,16 @@ export type TypeVectorLayerGroup = LayerGroup;
 export type TypeVectorLayer = VectorSource<Feature>;
 export type TypeBaseVectorLayer = BaseLayer | TypeVectorLayerGroup | TypeVectorLayer;
 
+/**
+ * Determine if layer instance is a vector layer
+ *
+ * @param {AbstractGeoViewLayer} layer the layer to check
+ * @returns {boolean} true if layer is a vector layer
+ */
+export const isVectorLayer = (layer: AbstractGeoViewLayer): boolean => {
+  return layer?.type in VECTOR_LAYER;
+};
+
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
 /** *****************************************************************************************************************************
@@ -57,6 +68,7 @@ export type TypeBaseVectorLayer = BaseLayer | TypeVectorLayerGroup | TypeVectorL
  * features are placed and can be considered as a feature group.
  */
 // ******************************************************************************************************************************
+// GV Layers Refactoring - Obsolete (in layers)
 export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined. If
@@ -64,6 +76,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected abstract override validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void;
 
   /** ***************************************************************************************************************************
@@ -74,8 +87,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number' {
-    const fieldDefinitions = this.layerMetadata[layerConfig.layerPath].source.featureInfo;
+    const fieldDefinitions = this.getLayerMetadata(layerConfig.layerPath).source.featureInfo;
     const fieldIndex = getLocalizedValue(
       Cast<TypeLocalizedString>(fieldDefinitions.outfields),
       AppEventProcessor.getDisplayLanguage(this.mapId)
@@ -91,9 +105,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @param {TypeLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
+   * @returns {Promise<BaseLayer | undefined>} The GeoView base layer that has been created.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected override async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined> {
+    // TODO: Refactor - Convert the return type to Promise<VectorLayer<VectorSource> | undefined> once the GeoPackage.processOneLayerEntry is fixed
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
     await super.processOneLayerEntry(layerConfig);
@@ -111,6 +127,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected createVectorSource(
     layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
@@ -190,7 +207,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           if (features) {
             vectorSource.addFeatures(features);
             if (success) success(features as Feature[]);
-            layerConfig.olLayer!.changed();
+            const layer = this.getOLLayer(layerConfig.layerPath);
+            layer?.changed();
           }
         } else {
           onError();
@@ -213,6 +231,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {VectorLayer<VectorSource>} The vector layer created.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected createVectorLayer(layerConfig: VectorLayerEntryConfig, vectorSource: VectorSource<Feature>): VectorLayer<VectorSource> {
     // TODO: remove link to language, layer should be created in one language and recreated if needed to change
     const language = AppEventProcessor.getDisplayLanguage(this.mapId);
@@ -229,15 +248,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       },
     };
 
-    if (layerConfig.initialSettings?.extent !== undefined) this.setExtent(layerConfig.initialSettings.extent, layerConfig.layerPath);
-    if (layerConfig.initialSettings?.maxZoom !== undefined) this.setMaxZoom(layerConfig.initialSettings.maxZoom, layerConfig.layerPath);
-    if (layerConfig.initialSettings?.minZoom !== undefined) this.setMinZoom(layerConfig.initialSettings.minZoom, layerConfig.layerPath);
-    if (layerConfig.initialSettings?.states?.opacity !== undefined)
-      this.setOpacity(layerConfig.initialSettings.states.opacity, layerConfig.layerPath);
-    // If a layer on the map has an initialSettings.visible set to false, its status will never reach the status 'loaded' because
-    // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
-    // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
-
     // Create the OpenLayer layer
     const olLayer = new VectorLayer(layerOptions);
 
@@ -246,6 +256,15 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       olLayer,
       loadEndListenerType: 'features',
     });
+
+    if (layerConfig.initialSettings?.extent !== undefined) this.setExtent(layerConfig.initialSettings.extent, layerConfig.layerPath);
+    if (layerConfig.initialSettings?.maxZoom !== undefined) this.setMaxZoom(layerConfig.initialSettings.maxZoom, layerConfig.layerPath);
+    if (layerConfig.initialSettings?.minZoom !== undefined) this.setMinZoom(layerConfig.initialSettings.minZoom, layerConfig.layerPath);
+    if (layerConfig.initialSettings?.states?.opacity !== undefined)
+      this.setOpacity(layerConfig.initialSettings.states.opacity, layerConfig.layerPath);
+    // If a layer on the map has an initialSettings.visible set to false, its status will never reach the status 'loaded' because
+    // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
+    // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
 
     return olLayer;
   }
@@ -257,12 +276,14 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected override async getAllFeatureInfo(layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       // Get the layer config in a loaded phase
-      const layerConfig = this.getLayerEntryConfig(layerPath) as VectorLayerEntryConfig;
-      const features = (layerConfig.olLayer as VectorLayer<VectorSource>).getSource()!.getFeatures();
-      const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig as VectorLayerEntryConfig);
+      const layerConfig = this.getLayerConfig(layerPath) as VectorLayerEntryConfig;
+      const layer = this.getOLLayer(layerPath) as VectorLayer<VectorSource>;
+      const features = layer.getSource()!.getFeatures();
+      const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig);
       return arrayOfFeatureInfoEntries;
     } catch (error) {
       // Log
@@ -279,10 +300,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table or null if an error occured.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected override async getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       // Get the layer config in a loaded phase
-      const layerConfig = this.getLayerEntryConfig(layerPath) as VectorLayerEntryConfig;
+      const layerConfig = this.getLayerConfig(layerPath) as VectorLayerEntryConfig;
       const layerFilter = (layer: BaseLayer): boolean => {
         const layerSource = layer.get('layerConfig')?.source;
         const configSource = layerConfig?.source;
@@ -306,6 +328,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected override getFeatureInfoAtCoordinate(
     location: Coordinate,
     layerPath: string
@@ -322,6 +345,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected override getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     const { map } = MapEventProcessor.getMapViewer(this.mapId);
     const convertedLocation = Projection.transform(
@@ -340,9 +364,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {Extent | undefined} The new layer bounding box.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
-    const layerConfig = this.getLayerEntryConfig(layerPath);
-    const layerBounds = (layerConfig?.olLayer as VectorLayer<VectorSource>)?.getSource()?.getExtent();
+    const layer = this.getOLLayer(layerPath) as VectorLayer<VectorSource> | undefined;
+    const layerBounds = layer?.getSource()?.getExtent();
 
     if (layerBounds) {
       if (!bounds) bounds = [layerBounds[0], layerBounds[1], layerBounds[2], layerBounds[3]];
@@ -352,8 +377,20 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     return bounds;
   }
 
+  /**
+   * Overrides when the layer gets in loaded status.
+   */
+  // GV Layers Refactoring - Obsolete (in layers)
+  override onLoaded(layerConfig: AbstractBaseLayerEntryConfig): void {
+    // Call parent
+    super.onLoaded(layerConfig);
+
+    // Apply view filter immediately
+    this.applyViewFilter(layerConfig.layerPath, (layerConfig as VectorLayerEntryConfig).layerFilter || '');
+  }
+
   /** ***************************************************************************************************************************
-   * Apply a view filter to the layer. When the combineLegendFilter flag is false, the filter parameter is used alone to display
+   * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter parameter is used alone to display
    * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
    * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
    * is done.
@@ -362,10 +399,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {string} filter A filter to be used in place of the getViewFilter value.
    * @param {boolean} combineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   applyViewFilter(layerPath: string, filter: string, combineLegendFilter = true): void {
-    const layerConfig = this.getLayerEntryConfig(layerPath) as VectorLayerEntryConfig;
     // Log
     logger.logTraceCore('ABSTRACT-GEOVIEW-VECTOR - applyViewFilter', layerPath);
+
+    const layerConfig = this.getLayerConfig(layerPath) as VectorLayerEntryConfig;
+    const olLayer = this.getOLLayer(layerPath);
 
     let filterValueToUse = filter.replaceAll(/\s{2,}/g, ' ').trim();
     layerConfig.legendFilterIsOff = !combineLegendFilter;
@@ -398,6 +438,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       );
     }
 
-    layerConfig.olLayer?.changed();
+    olLayer?.changed();
   }
 }

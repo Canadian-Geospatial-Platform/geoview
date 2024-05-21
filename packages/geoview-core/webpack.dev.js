@@ -16,6 +16,8 @@ const config = {
     },
     compress: true,
     open: true,
+    hot: false,
+    liveReload: false,
   },
 };
 

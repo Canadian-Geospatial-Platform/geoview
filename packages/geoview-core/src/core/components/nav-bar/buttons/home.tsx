@@ -20,8 +20,18 @@ export default function Home(): JSX.Element {
   // get store actions
   const { zoomToInitialExtent } = useMapStoreActions();
 
+  /**
+   * Handles a click on the home button
+   */
+  const handleZoom = (): void => {
+    zoomToInitialExtent().catch((error) => {
+      // Log
+      logger.logPromiseFailed('Failed to zoomToInitialExtent in home.handleZoom', error);
+    });
+  };
+
   return (
-    <IconButton id="home" tooltip="mapnav.home" tooltipPlacement="left" onClick={() => zoomToInitialExtent()} sx={sxClasses.navButton}>
+    <IconButton id="home" tooltip="mapnav.home" tooltipPlacement="left" onClick={handleZoom} sx={sxClasses.navButton}>
       <HomeIcon />
     </IconButton>
   );

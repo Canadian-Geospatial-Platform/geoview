@@ -14,8 +14,7 @@ import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { xmlToJson } from '@/core/utils/utilities';
 
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { VECTOR_LAYER } from '@/core/utils/constant';
+import { CONST_LAYER_TYPES, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { TypeStyleConfig } from '@/geo/map/map-schema-types';
@@ -347,13 +346,3 @@ export function getMinOrMaxExtents(extentsA: Extent, extentsB: Extent, minmax = 
     ];
   return bounds;
 }
-
-/**
- * Determine if layer instance is a vector layer
- *
- * @param {AbstractGeoViewLayer} layer the layer to check
- * @returns {boolean} true if layer is a vector layer
- */
-export const isVectorLayer = (layer: AbstractGeoViewLayer): boolean => {
-  return layer?.type in VECTOR_LAYER;
-};

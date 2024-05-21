@@ -506,13 +506,13 @@
             // Cycle through the temporal data
             let i = 0;
             window.setInterval(() => {
-              const layerConfig = cgpv.api.maps.LYR1.layer.registeredLayers['wmsLYR1-spatiotemporel/RADAR_1KM_RSNO'];
+              const layerConfig = cgpv.api.maps.LYR1.layer.getLayerEntryConfig('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO');
               const temporalData = cgpv.api.maps.LYR1.layer
-                .getGeoviewLayer('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO')
+                .getGeoviewLayerHybrid('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO')
                 .getTemporalDimension('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO');
               if (temporalData) {
                 cgpv.api.maps.LYR1.layer
-                  .getGeoviewLayer('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO')
+                  .getGeoviewLayerHybrid('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO')
                   .applyViewFilter('wmsLYR1-spatiotemporel/RADAR_1KM_RSNO', `time=date '${temporalData.range.range[i]}'`);
                 if (++i === temporalData.range.range.length) i = 0;
               }
@@ -520,13 +520,13 @@
 
             let j = 0;
             window.setInterval(() => {
-              const layerConfig = cgpv.api.maps.LYR1.layer.registeredLayers['wmsLYR1-msi/msi-94-or-more'];
+              const layerConfig = cgpv.api.maps.LYR1.layer.getLayerEntryConfig('wmsLYR1-msi/msi-94-or-more');
               const temporalData = cgpv.api.maps.LYR1.layer
-                .getGeoviewLayer('wmsLYR1-msi/msi-94-or-more')
+                .getGeoviewLayerHybrid('wmsLYR1-msi/msi-94-or-more')
                 .getTemporalDimension('wmsLYR1-msi/msi-94-or-more');
               if (temporalData) {
                 cgpv.api.maps.LYR1.layer
-                  .getGeoviewLayer('wmsLYR1-msi/msi-94-or-more')
+                  .getGeoviewLayerHybrid('wmsLYR1-msi/msi-94-or-more')
                   .applyViewFilter('wmsLYR1-msi/msi-94-or-more', `time=date '${temporalData.range.range[j]}'`);
                 if (++j === temporalData.range.range.length) j = 0;
               }
@@ -535,7 +535,7 @@
             createTableOfFilter('LYR2');
           } else if (mapId === 'LYR33') {
             const intervalId = window.setInterval(() => {
-              const lyr3LayerConfig = cgpv.api.maps.LYR3.layer.registeredLayers['wmsLYR3-Root/landcover_2015_19classes'];
+              const lyr3LayerConfig = cgpv.api.maps.LYR3.layer.getLayerEntryConfig('wmsLYR3-Root/landcover_2015_19classes');
               if (Array.isArray(lyr3LayerConfig?.source?.style)) {
                 const dropDownContent = document.getElementById('style');
                 lyr3LayerConfig.source.style.forEach((style) => {
@@ -545,7 +545,7 @@
                   dropDownContent.appendChild(element);
                 });
                 dropDownContent.addEventListener('click', (e) => {
-                  cgpv.api.maps.LYR3.layer.geoviewLayers['wmsLYR3-Root'].setStyle(
+                  cgpv.api.maps.LYR3.layer.getGeoviewLayer('wmsLYR3-Root').setStyle(
                     dropDownContent.value,
                     'wmsLYR3-Root/landcover_2015_19classes'
                   );
