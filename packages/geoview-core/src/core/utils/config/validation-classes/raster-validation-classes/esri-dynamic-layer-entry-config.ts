@@ -1,7 +1,6 @@
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   CONST_LAYER_ENTRY_TYPES,
-  GeoviewChild,
   TypeSourceImageEsriInitialConfig,
   TypeStyleConfig,
   TypeStyleGeometry,
@@ -54,14 +53,5 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    */
   getStyleSettings(): TypeStyleSettings | undefined {
     return this.style?.[this.getTypeGeometry()];
-  }
-
-  /**
-   * Method to execute when the layer is loaded.
-   */
-  override loadedFunction(): void {
-    super.loadedFunction();
-    if ('applyViewFilter' in this.geoviewLayerInstance!)
-      (this.geoviewLayerInstance as GeoviewChild).applyViewFilter(this.layerPath, this.layerFilter || '');
   }
 }

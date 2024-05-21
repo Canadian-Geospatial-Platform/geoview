@@ -262,7 +262,7 @@
             {
               'geoviewLayerId': 'classBreaksId',
               'geoviewLayerName': { 'en': 'classBreaks' },
-              'metadataAccessPath': { 'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer/' },
+              'metadataAccessPath': { 'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/CSO_volume/MapServer/' },
               'geoviewLayerType': 'esriDynamic',
               'listOfLayerEntryConfig': [
                 {
@@ -643,10 +643,9 @@
         window.setInterval(() => {
           const input = document.getElementById('filter-input-LYR1-esriFeatureLYR1');
           if (input) {
-            const layerConfig = cgpv.api.maps.LYR1.layer.registeredLayers['esriFeatureLYR1/0'];
             const checkbox = document.getElementById('checkbox-LYR1-esriFeatureLYR1');
-            const temporalData = cgpv.api.maps.LYR1.layer.getGeoviewLayer('esriFeatureLYR1/0').getTemporalDimension('esriFeatureLYR1/0');
-            cgpv.api.maps.LYR1.layer.getGeoviewLayer('esriFeatureLYR1/0').applyViewFilter('esriFeatureLYR1/0',
+            const temporalData = cgpv.api.maps.LYR1.layer.getGeoviewLayerHybrid('esriFeatureLYR1/0').getTemporalDimension('esriFeatureLYR1/0');
+            cgpv.api.maps.LYR1.layer.getGeoviewLayerHybrid('esriFeatureLYR1/0').applyViewFilter('esriFeatureLYR1/0',
               `Date < date '${temporalData.range.range[k]}'`,
               checkbox.value !== 'true'
             );
@@ -664,7 +663,7 @@
           createInfoTable('LYR2', 'ResultSetId2', resultSet, 'all-features');
         });
 
-        const field1 = cgpv.api.maps.LYR2.layer.getGeoviewLayer('historical-flood/0').getTemporalDimension('historical-flood/0').field;
+        const field1 = cgpv.api.maps.LYR2.layer.getGeoviewLayerHybrid('historical-flood/0').getTemporalDimension('historical-flood/0').field;
         const LYR2_FILTERS = [`${field1} >= date '01/01/2018 05:00:00' and ${field1} <= date '12/31/2019 19:00:00-05:00'`,
         `${field1} > date '01/01/2018 05:00:00' and ${field1} <= date '01/01/2020 05:00:00Z'`,
         `${field1} >= date '01/01/2018 05:00:00' and ${field1} < date '01/01/2020 00:00:00+05:00'`];
@@ -673,9 +672,8 @@
           const input = document.getElementById('filter-input-LYR2-historical-flood');
           if (input) {
             input.value = LYR2_FILTERS[i];
-            const layerConfig = cgpv.api.maps.LYR2.layer.registeredLayers['historical-flood/0'];
             const checkbox = document.getElementById('checkbox-LYR2-historical-flood');
-            cgpv.api.maps.LYR2.layer.getGeoviewLayer('historical-flood/0').applyViewFilter('historical-flood/0',
+            cgpv.api.maps.LYR2.layer.getGeoviewLayerHybrid('historical-flood/0').applyViewFilter('historical-flood/0',
               LYR2_FILTERS[i],
               checkbox.value !== 'true'
             );
@@ -692,7 +690,7 @@
           createInfoTable('LYR3', 'ResultSetId3', resultSet, 'all-features');
         });
 
-        const field2 = cgpv.api.maps.LYR3.layer.getGeoviewLayer('historical-flood/0').getTemporalDimension('historical-flood/0').field;
+        const field2 = cgpv.api.maps.LYR3.layer.getGeoviewLayerHybrid('historical-flood/0').getTemporalDimension('historical-flood/0').field;
         const LYR3_FILTERS = [`${field2} >= date '2018-01-01T00:00:00' and ${field2} <= date '2020-01-01T00:00:00'`,
         `${field2} > date '2018-01-01T00:00:00' and ${field2} <= date '2020-01-01T00:00:00'`,
         `${field2} >= date '2018-01-01T00:00:00' and ${field2} < date '2020-01-01T00:00:00'`];
@@ -701,9 +699,8 @@
           const input = document.getElementById('filter-input-LYR3-historical-flood');
           if (input) {
             input.value = LYR3_FILTERS[j];
-            const layerConfig = cgpv.api.maps.LYR3.layer.registeredLayers['historical-flood/0'];
             const checkbox = document.getElementById('checkbox-LYR3-historical-flood');
-            cgpv.api.maps.LYR3.layer.getGeoviewLayer('historical-flood/0').applyViewFilter('historical-flood/0',
+            cgpv.api.maps.LYR3.layer.getGeoviewLayerHybrid('historical-flood/0').applyViewFilter('historical-flood/0',
               LYR3_FILTERS[j],
               checkbox.value !== 'true'
             );

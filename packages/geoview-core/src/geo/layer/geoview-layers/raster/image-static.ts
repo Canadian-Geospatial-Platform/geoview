@@ -75,6 +75,7 @@ export const geoviewEntryIsImageStatic = (
  * @class ImageStatic
  */
 // ******************************************************************************************************************************
+// GV Layers Refactoring - Obsolete (in layers)
 export class ImageStatic extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * Initialize layer
@@ -91,6 +92,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected override fetchServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
       resolve();
@@ -106,6 +108,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @returns {blob} image blob
    * @private
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   #getLegendImage(layerConfig: ImageStaticLayerEntryConfig): Promise<string | ArrayBuffer | null> {
     const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
       const readImage = (blob: Blob): Promise<string | ArrayBuffer | null> =>
@@ -144,16 +147,16 @@ export class ImageStatic extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeLegend | null>} The legend of the layer.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   override async getLegend(layerPath: string): Promise<TypeLegend | null> {
     try {
-      const layerConfig = this.getLayerEntryConfig(layerPath) as ImageStaticLayerEntryConfig | undefined | null;
+      const layerConfig = this.getLayerConfig(layerPath) as ImageStaticLayerEntryConfig | undefined | null;
       if (!layerConfig) return null;
 
       const legendImage = await this.#getLegendImage(layerConfig!);
       if (!legendImage) {
         const legend: TypeLegend = {
           type: this.type,
-          layerPath: layerConfig.layerPath,
           layerName: layerConfig!.layerName,
           legend: null,
         };
@@ -168,7 +171,6 @@ export class ImageStatic extends AbstractGeoViewRaster {
         drawingContext.drawImage(image, 0, 0);
         const legend: TypeLegend = {
           type: this.type,
-          layerPath: layerConfig.layerPath,
           layerName: layerConfig!.layerName,
           legend: drawingCanvas,
         };
@@ -176,7 +178,6 @@ export class ImageStatic extends AbstractGeoViewRaster {
       }
       const legend: TypeLegend = {
         type: this.type,
-        layerPath: layerConfig.layerPath,
         layerName: layerConfig!.layerName,
         legend: null,
       };
@@ -195,6 +196,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    *
    * @returns {TypeLayerEntryConfig[]} A new list of layer entries configuration with deleted error layers.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
@@ -245,8 +247,9 @@ export class ImageStatic extends AbstractGeoViewRaster {
    *
    * @param {ImageStaticLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
+   * @returns {Promise<TypeBaseRasterLayer | undefined>} The GeoView raster layer that has been created.
    */
+  // GV Layers Refactoring - Obsolete (in config?, in layers?)
   protected override async processOneLayerEntry(layerConfig: ImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | undefined> {
     await super.processOneLayerEntry(layerConfig);
 
@@ -275,13 +278,13 @@ export class ImageStatic extends AbstractGeoViewRaster {
     // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
     // GV            in the 'loading' state if the flag value is false.
 
-    // TODO: Refactor - Wire it up
-    this.setLayerAndLoadEndListeners(layerConfig, {
-      olLayer: new ImageLayer(staticImageOptions),
-      loadEndListenerType: 'image',
-    });
+    // Create the OpenLayer layer
+    const olLayer = new ImageLayer(staticImageOptions);
 
-    return Promise.resolve(layerConfig.olLayer);
+    // TODO: Refactor - Wire it up
+    this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'image');
+
+    return Promise.resolve(olLayer);
   }
 
   /** ***************************************************************************************************************************
@@ -292,12 +295,13 @@ export class ImageStatic extends AbstractGeoViewRaster {
    *
    * @returns {Extent} The new layer bounding box.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
-    const layerConfig = this.getLayerEntryConfig(layerPath);
-    const layerBounds = (layerConfig?.olLayer as ImageLayer<Static>).getSource()?.getImageExtent();
+    const layer = this.getOLLayer(layerPath) as ImageLayer<Static> | undefined;
+
+    const layerBounds = layer?.getSource()?.getImageExtent();
     const projection =
-      (layerConfig?.olLayer as ImageLayer<Static>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
-      MapEventProcessor.getMapState(this.mapId).currentProjection;
+      layer?.getSource()?.getProjection()?.getCode().replace('EPSG:', '') || MapEventProcessor.getMapState(this.mapId).currentProjection;
 
     if (layerBounds) {
       let transformedBounds = layerBounds;

@@ -1,4 +1,4 @@
-import { CONST_LAYER_ENTRY_TYPES, GeoviewChild, TypeStyleConfig, TypeVectorSourceInitialConfig } from '@/geo/map/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, TypeStyleConfig, TypeVectorSourceInitialConfig } from '@/geo/map/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
 
 /** ******************************************************************************************************************************
@@ -24,14 +24,5 @@ export class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   constructor(layerConfig: VectorLayerEntryConfig) {
     super(layerConfig);
     Object.assign(this, layerConfig);
-  }
-
-  /**
-   * Method to execute when the layer is loaded.
-   */
-  override loadedFunction(): void {
-    super.loadedFunction();
-    if ('applyViewFilter' in this.geoviewLayerInstance!)
-      (this.geoviewLayerInstance as GeoviewChild).applyViewFilter(this.layerPath, this.layerFilter || '');
   }
 }
