@@ -1,4 +1,4 @@
-import { useCallback, ReactNode, useRef } from 'react';
+import { useCallback, ReactNode, useRef, useMemo } from 'react';
 import { logger } from '@/core/utils/logger';
 import { LayerList, LayerListEntry } from './layer-list';
 import { ResponsiveGridLayout, ResponsiveGridLayoutExposedMethods } from './responsive-grid-layout';
@@ -53,13 +53,24 @@ export function Layout({
     return <LayerList selectedLayerPath={selectedLayerPath} onListItemClick={handleLayerChange} layerList={layerList} />;
   }, [selectedLayerPath, layerList, handleLayerChange]);
 
-  const renderLayerTitle = (): JSX.Element => {
+  /**
+   * Get the layer title
+   */
+  const memoLayerTitle = useMemo(() => {
+    return layerList.find((layer) => layer.layerPath === selectedLayerPath)?.layerName ?? '';
+  }, [layerList, selectedLayerPath]);
+
+  /**
+   * Render layer title
+   * @returns JSX.Element
+   */
+  const renderLayerTitle = useCallback((): JSX.Element => {
     return (
       <LayerTitle hideTitle fullWidth={fullWidth}>
-        {layerList.find((layer) => layer.layerPath === selectedLayerPath)?.layerName ?? ''}
+        {memoLayerTitle}
       </LayerTitle>
     );
-  };
+  }, [fullWidth, memoLayerTitle]);
 
   return (
     <ResponsiveGridLayout

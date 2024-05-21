@@ -1,4 +1,4 @@
-import { ReactNode, memo } from 'react';
+import { ReactNode, memo, useCallback } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { animated, useSpring } from '@react-spring/web';
@@ -48,55 +48,49 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
     layer.layerStatus === 'loading' ||
     layer.layerStatus === 'processing';
 
+  /**
+   * Render Layer Icon based on layerPath
+   * @returns
+   */
   const renderLayerIcon = (): JSX.Element | null => {
-    switch (layer.layerStatus) {
-      case 'error':
-        return null;
-
-      default:
-        // If there is content, this is a guide section with no icon
-        if (layer.content) return null;
-        // If there's a layer path
-        if (layer.layerPath) {
-          return (
-            <ListItemIcon aria-hidden="true">
-              <LayerIcon layer={layer} />
-            </ListItemIcon>
-          );
-        }
-        return null;
+    if (layer.layerPath) {
+      return (
+        <ListItemIcon aria-hidden="true">
+          <LayerIcon layer={layer} />
+        </ListItemIcon>
+      );
     }
+    return null;
   };
 
-  const renderLayerStatus = (): JSX.Element | string | null => {
-    switch (layer.layerStatus) {
-      case 'error':
-        return t('legend.layerError');
-
-      default:
-        switch (layer.queryStatus) {
-          case 'init':
-          case 'processing':
-            return `${t('layers.querying')}...`;
-          case 'error':
-            return t('legend.layerError');
-          default:
-            return (
-              <>
-                {layer.layerFeatures} {layer?.mapFilteredIcon ?? ''}
-              </>
-            );
-        }
+  /**
+   * Get layer status based on query status and layer status
+   */
+  const getLayerStatus = useCallback((): JSX.Element | string => {
+    if (layer.layerStatus === 'error' || layer?.queryStatus === 'error') {
+      return `${t('legend.layerError')}`;
     }
-  };
+    if (['init', 'processing'].includes(layer.queryStatus)) {
+      return `${t('layers.querying')}...`;
+    }
+    return (
+      <>
+        {layer.layerFeatures} {layer?.mapFilteredIcon ?? ''}
+      </>
+    );
+  }, [layer, t]);
 
+  /**
+   * Render Layer body.
+   * @returns JSX.Element
+   */
   const renderLayerBody = (): JSX.Element => {
     return (
       <Box sx={sxClasses.listPrimaryText}>
         <Typography className="layerTitle">{layer.layerName}</Typography>
         <Box display="flex" alignContent="center">
           <Typography component="p" variant="subtitle1" noWrap display="flex">
-            {renderLayerStatus()}
+            {getLayerStatus()}
           </Typography>
         </Box>
       </Box>
@@ -119,9 +113,15 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
     to: { opacity: 1 },
   });
 
-  const handleLayerKeyDown = (e: React.KeyboardEvent, selectedLayer: LayerListEntry): void => {
-    if (e.key === 'Enter') onListItemClick(selectedLayer);
-  };
+  /**
+   * Handle layer click when mouse enter is pressed.
+   */
+  const handleLayerKeyDown = useCallback(
+    (e: React.KeyboardEvent, selectedLayer: LayerListEntry): void => {
+      if (e.key === 'Enter') onListItemClick(selectedLayer);
+    },
+    [onListItemClick]
+  );
 
   const AnimatedPaper = animated(Paper);
 

@@ -14,6 +14,7 @@ type FocusItemProps = {
 export interface IUIState {
   activeFooterBarTabId: string;
   activeTrapGeoView: boolean;
+  activeAppBarTabId: string;
   appBarComponents: TypeValidAppBarCoreProps;
   corePackagesComponents: TypeMapCorePackages;
   focusITem: FocusItemProps;
@@ -29,6 +30,7 @@ export interface IUIState {
     closeModal: () => void;
     openModal: (uiFocus: FocusItemProps) => void;
     setActiveFooterBarTab: (id: string) => void;
+    setActiveAppBarTabId: (id: string) => void;
     setActiveTrapGeoView: (active: boolean) => void;
     setGeolocatorActive: (active: boolean) => void;
     setFooterPanelResizeValue: (value: number) => void;
@@ -40,6 +42,7 @@ export interface IUIState {
     closeModal: () => void;
     openModal: (uiFocus: FocusItemProps) => void;
     setActiveFooterBarTab: (id: string) => void;
+    setActiveAppBarTabId: (id: string) => void;
     setActiveTrapGeoView: (active: boolean) => void;
     setGeolocatorActive: (active: boolean) => void;
     setFooterPanelResizeValue: (value: number) => void;
@@ -52,6 +55,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
   const init = {
     appBarComponents: ['geolocator'],
     activeFooterBarTabId: 'legend',
+    activeAppBarTabId: '',
     activeTrapGeoView: false,
     corePackagesComponents: [],
     focusITem: { activeElementId: false, callbackElementId: false },
@@ -86,6 +90,10 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
       setActiveFooterBarTab: (id: string) => {
         // Redirect to setter
         get().uiState.setterActions.setActiveFooterBarTab(id);
+      },
+      setActiveAppBarTabId: (id: string) => {
+        // Redirect to setter
+        get().uiState.setterActions.setActiveAppBarTabId(id);
       },
       setActiveTrapGeoView: (active: boolean) => {
         // Redirect to setter
@@ -132,6 +140,14 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           uiState: {
             ...get().uiState,
             activeFooterBarTabId: id,
+          },
+        });
+      },
+      setActiveAppBarTabId: (id: string) => {
+        set({
+          uiState: {
+            ...get().uiState,
+            activeAppBarTabId: id,
           },
         });
       },
@@ -187,6 +203,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
 // **********************************************************
 export const useUIActiveFocusItem = (): FocusItemProps => useStore(useGeoViewStore(), (state) => state.uiState.focusITem);
 export const useUIActiveFooterBarTabId = (): string => useStore(useGeoViewStore(), (state) => state.uiState.activeFooterBarTabId);
+export const useUIActiveAppBarTabId = (): string => useStore(useGeoViewStore(), (state) => state.uiState.activeAppBarTabId);
 export const useUIActiveTrapGeoView = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.activeTrapGeoView);
 export const useUIAppbarComponents = (): TypeValidAppBarCoreProps => useStore(useGeoViewStore(), (state) => state.uiState.appBarComponents);
 export const useUIAppbarGeolocatorActive = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.geoLocatorActive);

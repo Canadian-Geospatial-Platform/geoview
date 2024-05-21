@@ -21,11 +21,9 @@ type CrosshairProps = {
  * @param {CrosshairProps} - Crossahir props who caintain the mapTargetELement
  * @returns {JSX.Element} the crosshair component
  */
-export function Crosshair(props: CrosshairProps): JSX.Element {
+export function Crosshair({ mapTargetElement }: CrosshairProps): JSX.Element {
   // Log
   logger.logTraceRender('components/crosshair/crosshair');
-
-  const { mapTargetElement } = props;
 
   const { t } = useTranslation<string>();
 
@@ -98,14 +96,7 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
   }, [isCrosshairsActive, mapTargetElement, simulateClick, managePanDelta]);
 
   return (
-    <Box
-      sx={[
-        sxClasses.crosshairContainer,
-        {
-          visibility: isCrosshairsActive ? 'visible' : 'hidden',
-        },
-      ]}
-    >
+    <Box sx={{ ...sxClasses.crosshairContainer, visibility: isCrosshairsActive ? 'visible' : 'hidden' }}>
       <Fade in={isCrosshairsActive}>
         <Box sx={sxClasses.crosshairIcon}>
           <CrosshairIcon />

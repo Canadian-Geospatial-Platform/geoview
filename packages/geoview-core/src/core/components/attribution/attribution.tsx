@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { useTheme } from '@mui/material/styles';
 
@@ -30,17 +30,15 @@ export function Attribution(): JSX.Element {
 
   // getStore value
   const mapAttribution = useMapAttribution();
-
-  const handleOpenPopover = (event: React.MouseEvent<HTMLButtonElement>): void => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClosePopover = (): void => {
-    setAnchorEl(null);
-  };
-
-  // get store value
   const expanded = useUIMapInfoExpanded();
+
+  const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>): void => {
+    setAnchorEl(event.currentTarget);
+  }, []);
+
+  const handleClosePopover = useCallback(() => {
+    setAnchorEl(null);
+  }, []);
 
   return (
     <>
@@ -52,9 +50,9 @@ export function Attribution(): JSX.Element {
         tooltip="mapctrl.attribution.tooltip"
         sx={{
           color: theme.palette.geoViewColor.bgColor.light[800],
-          marginTop: expanded ? '12px' : '4px',
+          marginTop: expanded ? '0.75rem' : '0.25rem',
           [theme.breakpoints.up('md')]: {
-            marginTop: expanded ? '23px' : 'none',
+            marginTop: expanded ? '1.4375rem' : 'none',
           },
           width: '30px',
           height: '30px',
@@ -77,7 +75,7 @@ export function Attribution(): JSX.Element {
         }}
         onClose={handleClosePopover}
       >
-        <Box sx={{ padding: '15px', width: '450px' }}>
+        <Box sx={{ padding: '1rem', width: '28.125rem' }}>
           {mapAttribution.map((attribution) => {
             return <Typography key={generateId()}>{attribution}</Typography>;
           })}

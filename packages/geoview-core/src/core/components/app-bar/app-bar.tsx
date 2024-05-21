@@ -9,8 +9,8 @@ import { Plugin } from '@/api/plugin/plugin';
 import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import ExportButton from '@/core/components/export/export-modal-button';
 import {
+  useUIActiveAppBarTabId,
   useUIActiveFocusItem,
-  useUIActiveFooterBarTabId,
   useUIAppbarComponents,
   useUIAppbarGeolocatorActive,
   useUIStoreActions,
@@ -28,6 +28,7 @@ import { getSxClasses } from './app-bar-style';
 import { enforceArrayOrder, helpCloseAll, helpClosePanelById, helpOpenPanelById } from './app-bar-helper';
 import { TypeJsonObject, TypeJsonValue, toJsonObject } from '@/core/types/global-types';
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
+import { CV_DEFAULT_APPBAR_TABS_ORDER } from '@/api/config/types/config-constants';
 
 interface GroupPanelType {
   icon: ReactNode;
@@ -56,7 +57,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   // internal component state
   const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
-  const [selectedAppBarButtonId, setSelectedAppbarButtonId] = useState<string>('');
   const appBar = useRef<HTMLDivElement>(null);
 
   // get store values and action
@@ -64,11 +64,10 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const interaction = useMapInteraction();
   const appBarComponents = useUIAppbarComponents();
   const { hideClickMarker } = useMapStoreActions();
+  const activeAppBarTabId = useUIActiveAppBarTabId();
   const geoviewElement = useAppGeoviewHTMLElement().querySelector('[id^="mapTargetElement-"]') as HTMLElement;
-  // TODO: remove active footerTab Id and create new one for AppBar id.
-  const activeFooterTabId = useUIActiveFooterBarTabId();
 
-  const { setGeolocatorActive } = useUIStoreActions();
+  const { setGeolocatorActive, setActiveAppBarTabId } = useUIStoreActions();
   const isGeolocatorActive = useUIAppbarGeolocatorActive();
 
   // get store config for app bar to add (similar logic as in footer-bar)
@@ -106,9 +105,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
       // Redirect to helper
       helpClosePanelById(mapId, buttonPanelGroups, buttonId, groupName, setButtonPanelGroups, focusWhenNoElementCallback);
-      setSelectedAppbarButtonId('');
+      setActiveAppBarTabId('');
     },
-    [buttonPanelGroups, geoviewElement, mapId]
+    [buttonPanelGroups, geoviewElement, mapId, setActiveAppBarTabId]
   );
 
   const closeAll = useCallback(() => {
@@ -126,9 +125,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
       // Redirect to helper
       helpOpenPanelById(buttonPanelGroups, buttonId, groupName, setButtonPanelGroups, closeAll);
-      setSelectedAppbarButtonId(buttonId);
+      setActiveAppBarTabId(buttonId);
     },
-    [buttonPanelGroups, closeAll]
+    [buttonPanelGroups, closeAll, setActiveAppBarTabId]
   );
 
   const handleButtonClicked = useCallback(
@@ -157,11 +156,11 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   const handleGeneralCloseClicked = useCallback(() => {
     // Log
-    logger.logTraceUseCallback('APP-BAR - handleGeneralCloseClicked', selectedAppBarButtonId);
+    logger.logTraceUseCallback('APP-BAR - handleGeneralCloseClicked', activeAppBarTabId);
 
     // Close it
-    closePanelById(selectedAppBarButtonId, undefined);
-  }, [selectedAppBarButtonId, closePanelById]);
+    closePanelById(activeAppBarTabId, undefined);
+  }, [activeAppBarTabId, closePanelById]);
 
   const handleAddButtonPanel = useCallback(
     (sender: AppBarApi, event: AppBarCreatedEvent) => {
@@ -218,9 +217,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('APP-BAR - open detail panel when clicked on map', mapId);
-    // TODO: remove active footerTab Id and create new one for AppBar id.
     // open AppBar detail drawer when click on map.
-    if (activeFooterTabId === 'details' && buttonPanelGroups?.details?.AppbarPanelButtonDetails?.panel) {
+    if (activeAppBarTabId === 'AppbarPanelButtonDetails' && buttonPanelGroups?.details?.AppbarPanelButtonDetails?.panel) {
       // close geolocator when user click on map layer.
       if (isGeolocatorActive) {
         setGeolocatorActive(false);
@@ -229,7 +227,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
       openPanelById(buttonPanelGroups?.details?.AppbarPanelButtonDetails?.button?.id || '', undefined);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeFooterTabId]);
+  }, [activeAppBarTabId]);
 
   /**
    * Create default tabs from configuration parameters (similar logic as in footer-bar).
@@ -268,7 +266,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
     // render footer bar tabs
     (appBarConfig?.tabs.core ?? [])
-      .filter((tab) => tab === 'guide' || tab === 'details' || tab === 'legend')
+      .filter((tab) => CV_DEFAULT_APPBAR_TABS_ORDER.includes(tab))
       .map((tab): [TypeIconButtonProps, TypePanelProps, string] => {
         const button: TypeIconButtonProps = {
           id: `AppbarPanelButton${capitalize(tab)}`,
@@ -290,16 +288,29 @@ export function AppBar(props: AppBarProps): JSX.Element {
         return [button, panel, tab];
       })
       .forEach((footerGroup) => appBarApi.createAppbarPanel(footerGroup[0], footerGroup[1], footerGroup[2]));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appBarConfig?.tabs.core, appBarApi]); // Not exhaustive, because it'd be dangerous to trigger on `panels` or on `t`, because of how the AppBar panels are just recreated all the time (should refactor this, maybe..)
+  }, [appBarConfig?.tabs.core, appBarApi, t, memoPanels]);
 
   // #endregion
 
-  let buttonPanelGroupNames = Object.keys(buttonPanelGroups);
-  buttonPanelGroupNames = enforceArrayOrder(buttonPanelGroupNames, ['legend', 'details', 'guide']);
-  const topGroupNames = buttonPanelGroupNames.filter((groupName) => groupName !== 'guide');
-  const bottomGroupNames = buttonPanelGroupNames.filter((groupName) => groupName === 'guide');
+  /**
+   * Re-order the appbar buttons.
+   */
+  const { topGroupNames, bottomGroupNames } = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('APP-BAR - panels');
 
+    let buttonPanelGroupNames = Object.keys(buttonPanelGroups);
+    buttonPanelGroupNames = enforceArrayOrder(buttonPanelGroupNames, CV_DEFAULT_APPBAR_TABS_ORDER);
+    const topGroup = buttonPanelGroupNames.filter((groupName) => groupName !== 'guide');
+    const bottomGroup = buttonPanelGroupNames.filter((groupName) => groupName === 'guide');
+    return { topGroupNames: topGroup, bottomGroupNames: bottomGroup };
+  }, [buttonPanelGroups]);
+
+  /**
+   * Render Tab groups in appbar.
+   * @param {string[]} groupNames group that will be rendered in appbar.
+   * @returns JSX.Element
+   */
   const renderButtonGroup = (groupNames: string[]): ReactNode => {
     return (
       <>
@@ -320,9 +331,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
                         aria-label={buttonPanel.button.tooltip}
                         tooltip={buttonPanel.button.tooltip}
                         tooltipPlacement="right"
-                        className={`style3 ${selectedAppBarButtonId === buttonPanel.button.id ? 'active' : ''}`}
+                        className={`style3 ${activeAppBarTabId === buttonPanel.button.id ? 'active' : ''}`}
                         size="small"
-                        onClick={(): void => handleButtonClicked(buttonPanel.button.id!, groupName)}
+                        onClick={() => handleButtonClicked(buttonPanel.button.id!, groupName)}
                       >
                         {buttonPanel.button.children}
                       </IconButton>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { RefObject, useCallback, useEffect, useRef } from 'react';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIActiveFooterBarTabId, useUIFooterPanelResizeValue } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useDetailsLayerDataArray } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
@@ -11,17 +11,22 @@ import { TABS } from '@/core/utils/constant';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 interface UseFooterPanelHeightType {
-  footerPanelTab: 'layers' | 'details' | 'data-table' | 'legend' | 'default' | 'guide';
+  footerPanelTab: 'legend' | 'default';
+}
+
+interface UseFooterPanelHeightReturnType {
+  leftPanelRef: RefObject<HTMLDivElement>;
+  rightPanelRef: RefObject<HTMLDivElement>;
+  panelTitleRef: (node: HTMLDivElement) => void;
+  activeFooterBarTabId: string;
 }
 
 /**
  * Custom Hook to calculate the height of footer panel content when we set the map in fullscreen mode.
- * @param {'layers' | 'details' | 'datatable' | 'legend'} footerPanelTab type of footer tab.
- * @returns {any} An object of ref objects that are attached to DOM.
+ * @param {'legend' | 'default'} footerPanelTab type of footer tab.
+ * @returns {UseFooterPanelHeightReturnType} An object of ref objects that are attached to DOM.
  */
-// ? I doubt we want to define an explicit type for that utility hook?
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightType): any {
+export function useFooterPanelHeight({ footerPanelTab = 'default' }: UseFooterPanelHeightType): UseFooterPanelHeightReturnType {
   const defaultHeight = 600;
 
   const mapId = useGeoViewMapId();

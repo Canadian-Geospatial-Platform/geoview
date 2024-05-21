@@ -56,7 +56,15 @@ const getLeftPanelSize = (fullWidth: boolean, isRightPanelVisible: boolean, isEn
  */
 const ResponsiveGridLeftPanel = forwardRef(
   (
-    { children, className, isRightPanelVisible = false, sxProps = {}, isEnlarged, fullWidth = false, ...rest }: ResponsiveGridPanelProps,
+    {
+      children,
+      className = '',
+      isRightPanelVisible = false,
+      sxProps = {},
+      isEnlarged,
+      fullWidth = false,
+      ...rest
+    }: ResponsiveGridPanelProps,
     ref
   ) => {
     const theme = useTheme();
@@ -111,7 +119,15 @@ const getRightPanelSize = (fullWidth: boolean, isRightPanelVisible: boolean, isE
  */
 const ResponsiveGridRightPanel = forwardRef(
   (
-    { children, className, isRightPanelVisible = false, sxProps = {}, isEnlarged, fullWidth = false, ...rest }: ResponsiveGridPanelProps,
+    {
+      children,
+      className = '',
+      isRightPanelVisible = false,
+      sxProps = {},
+      isEnlarged,
+      fullWidth = false,
+      ...rest
+    }: ResponsiveGridPanelProps,
     ref
   ) => {
     const theme = useTheme();
@@ -142,18 +158,4 @@ export const ResponsiveGrid = {
   Root: ResponsiveGridRoot,
   Left: ResponsiveGridLeftPanel,
   Right: ResponsiveGridRightPanel,
-};
-
-// TODO: Refactor - Remove defaultProps as it's no longer a good practice
-ResponsiveGridLeftPanel.defaultProps = {
-  sxProps: undefined,
-  fullWidth: false,
-  className: '',
-};
-
-// TODO: Refactor - Remove defaultProps as it's no longer a good practice
-ResponsiveGridRightPanel.defaultProps = {
-  sxProps: undefined,
-  fullWidth: false,
-  className: '',
 };
