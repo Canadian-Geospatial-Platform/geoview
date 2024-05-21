@@ -679,7 +679,7 @@ export class LayerApi {
     // If the layer is loaded, continue
     if (geoviewLayer) {
       // Check and add time slider layer when needed
-      TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.mapId, geoviewLayer, layerConfig);
+      TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.mapId, layerConfig);
     }
   }
 
