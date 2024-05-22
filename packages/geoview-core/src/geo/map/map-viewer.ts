@@ -1487,6 +1487,21 @@ export class MapViewer {
     return MapEventProcessor.zoomToExtent(this.mapId, extent, options);
   }
 
+  /**
+   * Zoom to specified extent or coordinate provided in lnglat.
+   *
+   * @param {Extent | Coordinate} extent - The extent or coordinate to zoom to.
+   * @param {FitOptions} options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
+   */
+  zoomToLngLatExtentOrCoordinate(extent: Extent | Coordinate, options?: FitOptions): Promise<void> {
+    const fullExtent = extent.length === 2 ? [extent[0], extent[1], extent[0], extent[1]] : extent;
+    const projectedExtent = Projection.transformExtent(
+      fullExtent,
+      Projection.PROJECTION_NAMES.LNGLAT,
+      `EPSG:${this.getMapState().currentProjection}`
+    );
+    return MapEventProcessor.zoomToExtent(this.mapId, projectedExtent, options);
+  }
   // #endregion
 
   /**

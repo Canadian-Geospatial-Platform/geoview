@@ -9,7 +9,7 @@ import { FeatureHighlight } from '@/geo/map/feature-highlight';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 import { ConfigValidation } from '@/core/utils/config/config-validation';
-import { generateId, whenThisThen } from '@/core/utils/utilities';
+import { createLocalizedString, generateId, whenThisThen } from '@/core/utils/utilities';
 import { ConfigBaseClass, LayerStatusChangedEvent } from '@/core/utils/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
 import { AbstractGeoViewLayer, LayerRegistrationEvent } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -19,6 +19,8 @@ import {
   TypeLayerEntryConfig,
   mapConfigLayerEntryIsGeoCore,
   layerEntryIsGroupLayer,
+  TypeClassBreakStyleConfig,
+  TypeUniqueValueStyleConfig,
 } from '@/geo/map/map-schema-types';
 import { GeoJSON, layerConfigIsGeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { GeoPackage, layerConfigIsGeoPackage } from '@/geo/layer/geoview-layers/vector/geopackage';
@@ -43,11 +45,15 @@ import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { api } from '@/app';
+import { AbstractGeoViewVector, api } from '@/app';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
 import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
+import { TypeLegendItem } from '@/core/components/layers/types';
+import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 
 export type TypeRegisteredLayers = { [layerPath: string]: TypeLayerEntryConfig };
 
@@ -105,6 +111,10 @@ export class LayerApi {
 
   // Keep all callback delegates references
   #onLayerAddedHandlers: LayerAddedDelegate[] = [];
+
+  #onLayerRemovedHandlers: LayerRemovedDelegate[] = [];
+
+  #onLayerVisibilityToggledHandlers: LayerVisibilityToggledDelegate[] = [];
 
   // Maximum time duration to wait when registering a layer for the time slider
   static #MAX_WAIT_TIME_SLIDER_REGISTRATION = 20000;
@@ -767,66 +777,149 @@ export class LayerApi {
   }
 
   /**
+   * Emits an event to all handlers.
+   * @param {LayerRemovedEvent} event - The event to emit
+   * @private
+   */
+  emitLayerRemoved(event: LayerRemovedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerRemovedHandlers, event);
+  }
+
+  /**
+   * Registers a layer removed event handler.
+   * @param {LayerRemovedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerRemoved(callback: LayerRemovedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerRemovedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer removed event handler.
+   * @param {LayerRemovedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerRemoved(callback: LayerRemovedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerRemovedHandlers, callback);
+  }
+
+  /**
+   * Emits layer visibility toggled event.
+   * @param {LayerVisibilityToggledEvent} event - The event to emit
+   */
+  emitLayerVisibilityToggled(event: LayerVisibilityToggledEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerVisibilityToggledHandlers, event);
+  }
+
+  /**
+   * Registers a layer visibility toggled event handler.
+   * @param {LayerVisibilityToggledDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerVisibilityToggled(callback: LayerVisibilityToggledDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerVisibilityToggledHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer visibility toggled event handler.
+   * @param {LayerVisibilityToggledDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerVisibilityToggled(callback: LayerVisibilityToggledDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerVisibilityToggledHandlers, callback);
+  }
+
+  /**
    * Removes all geoview layers from the map
    */
   removeAllGeoviewLayers(): void {
     // For each Geoview layers
-    Object.values(this.geoviewLayers).forEach((layer: AbstractGeoViewLayer) => {
+    Object.keys(this.registeredLayers).forEach((layerPath) => {
       // Remove it
-      this.removeGeoviewLayer(layer.geoviewLayerId);
+      this.removeLayerUsingPath(layerPath);
     });
-  }
-
-  /**
-   * Removes a geoview layer from the map
-   * @param {string} geoviewLayerId - The geoview layer id to remove
-   */
-  removeGeoviewLayer(geoviewLayerId: string): void {
-    // Redirect (weird, but at the time of writing for this refactor - this was what it was doing)
-    this.removeLayersUsingPath(geoviewLayerId);
   }
 
   /**
    * Removes a layer from the map using its layer path. The path may point to the root geoview layer
    * or a sub layer.
-   * @param {string} partialLayerPath - The path of the layer to be removed
+   * @param {string} layerPath - The path or ID of the layer to be removed
    */
-  removeLayersUsingPath(partialLayerPath: string): void {
+  removeLayerUsingPath(layerPath: string): void {
     // A layer path is a slash seperated string made of the GeoView layer Id followed by the layer Ids
-    const partialLayerPathNodes = partialLayerPath.split('/');
+    const layerPathNodes = layerPath.split('/');
 
     // initialize these two constant now because we will delete the information used to get their values.
-    const indexToDelete = this.registeredLayers[partialLayerPath]
-      ? this.registeredLayers[partialLayerPath].parentLayerConfig?.listOfLayerEntryConfig.findIndex(
-          (layerConfig) => layerConfig === this.registeredLayers?.[partialLayerPath]
+    const indexToDelete = this.registeredLayers[layerPath]
+      ? this.registeredLayers[layerPath].parentLayerConfig?.listOfLayerEntryConfig.findIndex(
+          (layerConfig) => layerConfig === this.registeredLayers?.[layerPath]
         )
       : undefined;
-    const listOfLayerEntryConfigAffected = this.registeredLayers[partialLayerPath]?.parentLayerConfig?.listOfLayerEntryConfig;
+    const listOfLayerEntryConfigAffected = this.registeredLayers[layerPath]?.parentLayerConfig?.listOfLayerEntryConfig;
 
-    Object.keys(this.registeredLayers).forEach((completeLayerPath) => {
-      const completeLayerPathNodes = completeLayerPath.split('/');
-      const pathBeginningAreEqual = partialLayerPathNodes.reduce<boolean>((areEqual, partialLayerPathNode, nodeIndex) => {
-        return areEqual && partialLayerPathNode === completeLayerPathNodes[nodeIndex];
-      }, true);
-      if (pathBeginningAreEqual && this.getLayerEntryConfig(completeLayerPath)) {
-        this.unregisterLayer(this.getLayerEntryConfig(completeLayerPath)!);
-        delete this.registeredLayers[completeLayerPath];
+    // Remove layer info from registered layers
+    Object.keys(this.registeredLayers).forEach((registeredLayerPath) => {
+      if (registeredLayerPath.startsWith(layerPath)) {
+        // Remove ol layer
+        this.mapViewer.map.removeLayer(this.registeredLayers[registeredLayerPath].olLayer as BaseLayer);
+        // Unregister layer
+        this.unregisterLayer(this.getLayerEntryConfig(registeredLayerPath)!);
+        // Remove from registered layers
+        delete MapEventProcessor.getMapViewerLayerAPI(this.mapId).registeredLayers[registeredLayerPath];
       }
     });
+
+    // Remove from parents listOfLayerEntryConfig
     if (listOfLayerEntryConfigAffected) listOfLayerEntryConfigAffected.splice(indexToDelete!, 1);
 
-    if (this.geoviewLayers[partialLayerPath]) {
-      this.geoviewLayers[partialLayerPath].olRootLayer!.dispose();
-      delete this.geoviewLayers[partialLayerPath];
-      const { mapFeaturesConfig } = this.mapViewer;
-      if (mapFeaturesConfig.map.listOfGeoviewLayerConfig)
-        mapFeaturesConfig.map.listOfGeoviewLayerConfig = mapFeaturesConfig.map.listOfGeoviewLayerConfig.filter(
-          (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerId !== partialLayerPath
+    // Remove layer from geoview layers
+    if (this.geoviewLayers[layerPathNodes[0]]) {
+      const geoviewLayer = this.geoviewLayers[layerPathNodes[0]];
+
+      // If it is a single layer, remove geoview layer
+      if (layerPathNodes.length === 1 || (layerPathNodes.length === 2 && geoviewLayer.listOfLayerEntryConfig.length === 1)) {
+        geoviewLayer.olRootLayer!.dispose();
+        delete this.geoviewLayers[layerPathNodes[0]];
+        const { mapFeaturesConfig } = this.mapViewer;
+
+        if (mapFeaturesConfig.map.listOfGeoviewLayerConfig)
+          mapFeaturesConfig.map.listOfGeoviewLayerConfig = mapFeaturesConfig.map.listOfGeoviewLayerConfig.filter(
+            (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerId !== layerPath
+          );
+      } else if (layerPathNodes.length === 2) {
+        const updatedListOfLayerEntryConfig = geoviewLayer.listOfLayerEntryConfig.filter(
+          (entryConfig) => entryConfig.layerId !== layerPathNodes[1]
         );
+        geoviewLayer.listOfLayerEntryConfig = updatedListOfLayerEntryConfig;
+      } else {
+        // For layer paths more than two deep, drill down through listOfLayerEntryConfigs to layer entry config to remove
+        let layerEntryConfig = geoviewLayer.listOfLayerEntryConfig.find((entryConfig) => entryConfig.layerId === layerPathNodes[1]);
+
+        for (let i = 1; i < layerPathNodes.length; i++) {
+          if (i === layerPathNodes.length - 1 && layerEntryConfig) {
+            // When we get to the top level, remove the layer entry config
+            const updatedListOfLayerEntryConfig = layerEntryConfig.listOfLayerEntryConfig.filter(
+              (entryConfig) => entryConfig.layerId !== layerPathNodes[i]
+            );
+            geoviewLayer.listOfLayerEntryConfig = updatedListOfLayerEntryConfig;
+          } else if (layerEntryConfig) {
+            // Not on the top level, so update to the latest
+            layerEntryConfig = layerEntryConfig.listOfLayerEntryConfig.find((entryConfig) => entryConfig.layerId === layerPathNodes[i]);
+          }
+        }
+      }
     }
 
+    // Emit about it
+    this.emitLayerRemoved({ layerPath });
+
     // Log
-    logger.logInfo(`Layer removed for ${partialLayerPath}`);
+    logger.logInfo(`Layer removed for ${layerPath}`);
+
+    // Redirect to feature info delete
+    FeatureInfoEventProcessor.deleteFeatureInfo(this.mapId, layerPath);
   }
 
   /**
@@ -1004,6 +1097,43 @@ export class LayerApi {
   }
 
   /**
+   * Toggle visibility of an item.
+   * @param {string} layerPath - The layer path of the layer to change.
+   * @param {TypeLegendItem} item - The item to change.
+   * @param {boolean} visibility - The visibility to set.
+   * @param {boolean} updateLegendLayers - Should legend layers be updated (here to avoid repeated rerendering when setting all items in layer).
+   */
+  setItemVisibility(layerPath: string, item: TypeLegendItem, visibility: boolean, updateLegendLayers: boolean = true): void {
+    // Get registered layer config
+    const registeredLayer = this.registeredLayers[layerPath] as VectorLayerEntryConfig;
+
+    if (visibility && !MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(this.mapId, layerPath)) {
+      MapEventProcessor.setOrToggleMapLayerVisibility(this.mapId, layerPath, true);
+    }
+
+    // Assign value to registered layer. This is use by applyFilter function to set visibility
+    // TODO: check if we need to refactor to centralize attribute setting....
+    // TODO: know issue when we toggle a default visibility item https://github.com/Canadian-Geospatial-Platform/geoview/issues/1564
+    if (registeredLayer.style![item.geometryType]?.styleType === 'classBreaks') {
+      const geometryStyleConfig = registeredLayer.style![item.geometryType]! as TypeClassBreakStyleConfig;
+      const classBreakStyleInfo = geometryStyleConfig.classBreakStyleInfo.find((styleInfo) => styleInfo.label === item.name);
+      if (classBreakStyleInfo) classBreakStyleInfo.visible = visibility;
+      else geometryStyleConfig.defaultVisible = visibility;
+    } else if (registeredLayer.style![item.geometryType]?.styleType === 'uniqueValue') {
+      const geometryStyleConfig = registeredLayer.style![item.geometryType]! as TypeUniqueValueStyleConfig;
+      const uniqueStyleInfo = geometryStyleConfig.uniqueValueStyleInfo.find((styleInfo) => styleInfo.label === item.name);
+      if (uniqueStyleInfo) uniqueStyleInfo.visible = visibility;
+      else geometryStyleConfig.defaultVisible = visibility;
+    }
+
+    // Update the legend layers if necessary
+    if (updateLegendLayers) LegendEventProcessor.setItemVisibility(this.mapId, item, visibility);
+
+    // Apply filter to layer
+    (this.getGeoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter(layerPath, '');
+  }
+
+  /**
    * Gets the max extent of all layers on the map, or of a provided subset of layers.
    *
    * @param {string[]} layerIds - IDs of layer to get max extents from.
@@ -1027,6 +1157,62 @@ export class LayerApi {
 
     return bounds;
   }
+
+  /**
+   * Set visibility of all geoview layers on the map
+   *
+   * @param {boolean} newValue - The new visibility.
+   */
+  setAllLayersVisibility(newValue: boolean): void {
+    Object.keys(this.registeredLayers).forEach((layerPath) => {
+      this.setOrToggleLayerVisibility(layerPath, newValue);
+    });
+  }
+
+  /**
+   * Sets or toggles the visibility of a layer.
+   *
+   * @param {string} layerPath - The path of the layer.
+   * @param {boolean} newValue - The new value of visibility.
+   */
+  setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): void {
+    // Redirect to processor
+    MapEventProcessor.setOrToggleMapLayerVisibility(this.mapId, layerPath, newValue);
+  }
+
+  /**
+   * Renames a layer.
+   *
+   * @param {string} layerPath - The path of the layer.
+   * @param {string} name - The new name to use.
+   */
+  setLayerName(layerPath: string, name: string): void {
+    const layerConfig = this.registeredLayers[layerPath];
+    if (layerConfig) {
+      layerConfig.layerName = createLocalizedString(name);
+      [this.legendsLayerSet, this.hoverFeatureInfoLayerSet, this.allFeatureInfoLayerSet, this.featureInfoLayerSet].forEach((layerSet) => {
+        // Process the layer status change
+        layerSet.processNameChanged(name, layerPath);
+      });
+    } else {
+      logger.logError(`Unable to find layer ${layerPath}`);
+    }
+  }
+
+  /**
+   * Redefine feature info fields.
+   *
+   * @param {string} layerPath - The path of the layer.
+   * @param {string} fieldNames - The new field names to use, separated by commas.
+   * @param {'aliasFields' | 'outfields'} fields - The fields to change.
+   */
+  redefineFeatureFields(layerPath: string, fieldNames: string, fields: 'aliasFields' | 'outfields'): void {
+    const layerConfig = this.registeredLayers[layerPath];
+    if (!layerConfig) logger.logError(`Unable to find layer ${layerPath}`);
+    else if (layerConfig.source?.featureInfo && layerConfig.source?.featureInfo.queryable !== false)
+      layerConfig.source.featureInfo[fields] = createLocalizedString(fieldNames);
+    else logger.logError(`${layerPath} is not queryable`);
+  }
 }
 
 /**
@@ -1040,4 +1226,32 @@ type LayerAddedDelegate = EventDelegateBase<LayerApi, LayerAddedEvent>;
 export type LayerAddedEvent = {
   // The added layer
   layer: AbstractGeoViewLayer;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerRemovedDelegate = EventDelegateBase<LayerApi, LayerRemovedEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerRemovedEvent = {
+  // The added layer
+  layerPath: string;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerVisibilityToggledDelegate = EventDelegateBase<LayerApi, LayerVisibilityToggledEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerVisibilityToggledEvent = {
+  // The layer path of the affected layer
+  layerPath: string;
+  // The new visibility
+  visibility: boolean;
 };

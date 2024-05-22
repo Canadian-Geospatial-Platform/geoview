@@ -97,6 +97,28 @@ export abstract class AbstractLayerSet {
   }
 
   /**
+   * Processes the layer name change in the layer-set.
+   * @param {string} name - The new layer name
+   * @param {string} layerPath - The layer path being affected
+   */
+  public processNameChanged(name: string, layerPath: string): void {
+    // Call the overridable function to process a layer name change
+    this.onProcessNameChanged(name, layerPath);
+  }
+
+  /**
+   * An overridable function for a layer-set to process a layer name change.
+   * @param {string} name - The new layer name
+   * @param {string} layerPath - The layer path being affected
+   */
+  protected onProcessNameChanged(name: string, layerPath: string): void {
+    if (this.resultSet?.[layerPath]) {
+      // Inform that the layer set has been updated
+      this.onLayerSetUpdatedProcess(layerPath);
+    }
+  }
+
+  /**
    * Registers or Unregisters the layer in the layer-set, making sure the layer-set is aware of the layer.
    * @param {TypeLayerEntryConfig} layerConfig - The layer config
    * @param {'add' | 'remove'} action - The action to perform: 'add' to register or 'remove' to unregister
