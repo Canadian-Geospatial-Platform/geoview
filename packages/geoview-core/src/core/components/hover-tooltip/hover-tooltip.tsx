@@ -36,7 +36,6 @@ export function HoverTooltip(): JSX.Element | null {
   const hoverFeatureInfo = useMapHoverFeatureInfo();
   const pointerPosition = useMapPointerPosition();
   const mapElem = useAppGeoviewHTMLElement().querySelector(`[id^="mapTargetElement-${mapId}"]`) as HTMLElement;
-  // document.getElementById(`mapTargetElement-${mapId}`) as HTMLElement;
 
   const tooltipRef = useRef<HTMLDivElement>(null);
 
