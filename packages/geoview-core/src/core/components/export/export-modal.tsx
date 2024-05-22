@@ -122,6 +122,7 @@ export default function ExportModal(): JSX.Element {
             .toPng(legendContainer)
             .then((dataUrl) => {
               setIsLegendLoading(false);
+              // TODO: we need to render the legend even if its hidden.
               // Note: When legend is hidden in appbar
               if (dataUrl.indexOf('base64') !== -1) {
                 const img = new Image();
