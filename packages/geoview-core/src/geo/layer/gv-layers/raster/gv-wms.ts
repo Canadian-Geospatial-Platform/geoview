@@ -532,6 +532,12 @@ export class GVWMS extends AbstractGVRaster {
         });
         source.updateParams({ [dimension]: filterValueToUse.replace(/\s*/g, '') });
         olLayer.changed();
+
+        // Emit event
+        layerConfig.emitLayerFilterApplied({
+          layerPath,
+          filter: filterValueToUse,
+        });
       }
     }
   }

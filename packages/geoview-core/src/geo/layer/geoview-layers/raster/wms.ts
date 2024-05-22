@@ -1119,6 +1119,12 @@ export class WMS extends AbstractGeoViewRaster {
         });
         source.updateParams({ [dimension]: filterValueToUse.replace(/\s*/g, '') });
         olLayer.changed();
+
+        // Emit event
+        layerConfig.emitLayerFilterApplied({
+          layerPath,
+          filter: filterValueToUse,
+        });
       }
     }
   }

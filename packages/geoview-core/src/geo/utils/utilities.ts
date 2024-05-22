@@ -10,6 +10,7 @@ import { Extent } from 'ol/extent';
 import XYZ from 'ol/source/XYZ';
 import TileLayer from 'ol/layer/Tile';
 
+import { Polygon } from 'ol/geom';
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { xmlToJson } from '@/core/utils/utilities';
@@ -297,7 +298,7 @@ export function getTranslateValues(element: HTMLElement): {
  * @param {number} value the value to format
  * @returns {string} the formatted value
  */
-export function coordFormnatDMS(value: number): string {
+export function coordFormatDMS(value: number): string {
   // degree char
   const deg = String.fromCharCode(176);
 
@@ -345,4 +346,44 @@ export function getMinOrMaxExtents(extentsA: Extent, extentsB: Extent, minmax = 
       Math.min(extentsA[3], extentsB[3]),
     ];
   return bounds;
+}
+
+/**
+ * Convert an extent to a polygon
+ *
+ * @param {Extent} extent - The extent to convert
+ * @returns {Polygon} The created polygon
+ */
+export function extentToPolygon(extent: Extent): Polygon {
+  const polygon = new Polygon([
+    [
+      [extent[0], extent[1]],
+      [extent[0], extent[3]],
+      [extent[2], extent[3]],
+      [extent[2], extent[1]],
+    ],
+  ]);
+  return polygon;
+}
+
+/**
+ * Convert an polygon to an extent
+ *
+ * @param {Polygon} polygon - The polygon to convert
+ * @returns {Extent} The created extent
+ */
+export function polygonToExtent(polygon: Polygon): Extent {
+  const outerRing = polygon.getCoordinates()[0];
+  let minx = outerRing[0][0];
+  let miny = outerRing[0][1];
+  let maxx = outerRing[0][0];
+  let maxy = outerRing[0][1];
+  for (let i = 1; i < outerRing.length; i++) {
+    minx = Math.min(outerRing[i][0], minx);
+    miny = Math.min(outerRing[i][1], miny);
+    maxx = Math.max(outerRing[i][0], maxx);
+    maxy = Math.max(outerRing[i][1], maxy);
+  }
+  const extent: Extent = [minx, miny, maxx, maxy];
+  return extent;
 }

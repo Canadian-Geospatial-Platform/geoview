@@ -1,7 +1,7 @@
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
-import { TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { TypeLayerStatus, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { AbstractLayerSet } from './abstract-layer-set';
 import { TypeLegend, TypeLegendResultSet, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
@@ -44,6 +44,35 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
     // Propagate to the store on registration
     this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
+  }
+
+  /**
+   * Overrides the behavior to apply when unregistering a layer from the feature-info-layer-set.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer config
+   */
+  protected override onUnregisterLayer(layerConfig: ConfigBaseClass): void {
+    // Log
+    logger.logTraceCore('LEGENDS-LAYER-SET - onUnregisterLayer', layerConfig.layerPath, Object.keys(this.resultSet));
+
+    // Call parent
+    super.onUnregisterLayer(layerConfig);
+
+    // Delete from store
+    LegendEventProcessor.deleteLayerFromLegendLayers(this.getMapId(), layerConfig.layerPath);
+  }
+
+  /**
+   * Registers or Unregisters the layer in the layer-set, making sure the layer-set is aware of the layer.
+   * @param {TypeLayerEntryConfig} layerConfig - The layer config
+   * @param {'add' | 'remove'} action - The action to perform: 'add' to register or 'remove' to unregister
+   */
+  override registerOrUnregisterLayer(layerConfig: ConfigBaseClass, action: 'add' | 'remove'): void {
+    // Group layers do not have an entry in this layer set, but need to be removed from legend layers
+    if (action === 'remove' && layerEntryIsGroupLayer(layerConfig)) {
+      // Delete from store
+      LegendEventProcessor.deleteLayerFromLegendLayers(this.getMapId(), layerConfig.layerPath);
+    }
+    super.registerOrUnregisterLayer(layerConfig, action);
   }
 
   /**
@@ -109,5 +138,23 @@ export class LegendsLayerSet extends AbstractLayerSet {
   #legendShouldBeQueried(layerConfig: ConfigBaseClass | undefined): boolean {
     // A legend is ready to be queried when its status is > processed and legendQueryStatus is 'init' (not already queried)
     return !!layerConfig?.isGreaterThanOrEqualTo('processed') && this.resultSet[layerConfig.layerPath].legendQueryStatus === 'init';
+  }
+
+  /**
+   * Overrides behaviour when layer name is changed.
+   * @param {string} name - The new layer name
+   * @param {string} layerPath - The layer path being affected
+   */
+  protected override onProcessNameChanged(name: string, layerPath: string): void {
+    if (this.resultSet?.[layerPath]) {
+      // Update name
+      this.resultSet[layerPath].layerName = name;
+
+      // Call parent
+      super.onProcessNameChanged(name, layerPath);
+
+      // Propagate to store
+      LegendEventProcessor.propagateLegendToStore(this.getMapId(), this.resultSet[layerPath]);
+    }
   }
 }

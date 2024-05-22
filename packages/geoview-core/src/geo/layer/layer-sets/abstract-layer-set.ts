@@ -1,5 +1,12 @@
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { QueryType, TypeFeatureInfoEntry, TypeLayerStatus, TypeLocation, TypeResultSet } from '@/geo/map/map-schema-types';
+import {
+  QueryType,
+  TypeFeatureInfoEntry,
+  TypeLayerEntryConfig,
+  TypeLayerStatus,
+  TypeLocation,
+  TypeResultSet,
+} from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { ConfigBaseClass, LayerStatusChangedEvent } from '@/core/utils/config/validation-classes/config-base-class';
@@ -41,6 +48,28 @@ export abstract class AbstractLayerSet {
   // Shortcut to get the map id
   protected getMapId(): string {
     return this.layerApi.getMapId();
+  }
+
+  /**
+   * Processes the layer name change in the layer-set.
+   * @param {string} name - The new layer name
+   * @param {string} layerPath - The layer path being affected
+   */
+  public processNameChanged(name: string, layerPath: string): void {
+    // Call the overridable function to process a layer name change
+    this.onProcessNameChanged(name, layerPath);
+  }
+
+  /**
+   * An overridable function for a layer-set to process a layer name change.
+   * @param {string} name - The new layer name
+   * @param {string} layerPath - The layer path being affected
+   */
+  protected onProcessNameChanged(name: string, layerPath: string): void {
+    if (this.resultSet?.[layerPath] && this.layerApi.getLayerEntryConfig(layerPath)) {
+      // Inform that the layer set has been updated
+      this.onLayerSetUpdatedProcess(this.layerApi.getLayerEntryConfig(layerPath) as TypeLayerEntryConfig);
+    }
   }
 
   /**

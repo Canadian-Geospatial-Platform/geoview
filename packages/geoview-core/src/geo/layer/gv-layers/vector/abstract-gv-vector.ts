@@ -191,6 +191,12 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     }
 
     olLayer.changed();
+
+    // Emit event
+    layerConfig.emitLayerFilterApplied({
+      layerPath,
+      filter: filterValueToUse,
+    });
   }
 
   /**

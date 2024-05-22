@@ -620,6 +620,12 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // TO.DOCONT: flood_cause in ('freshet', 'heavy rain', 'coastal storm', 'beaver dam failure', 'frazil', 'dam failure', 'municipal water main break', 'unknown') and (time_slider_date >= date '1696-01-01T05:00:00.000Z' and time_slider_date <= date '2023-01-01T05:00:00.000Z')
     olLayer.getSource()!.updateParams({ layerDefs: `{"${layerConfig.layerId}": "${filterValueToUse}"}` });
     olLayer.changed();
+
+    // Emit event
+    layerConfig.emitLayerFilterApplied({
+      layerPath,
+      filter: filterValueToUse,
+    });
   }
 
   /**

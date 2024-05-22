@@ -62,6 +62,8 @@ export abstract class ConfigBaseClass {
   // TD.CONT: the event is not define so this.onLayerStatus.... failed
   #onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
 
+  #onLayerFilterAppliedHandlers: LayerFilterAppliedDelegate[] = [];
+
   // TODO: Review - The status. I think we should have: newInstance, processsing, loading, - loaded : error
   static #layerStatusWeight = {
     newInstance: 10,
@@ -210,6 +212,34 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * Emits filter applied event.
+   * @param {FilterAppliedEvent} event - The event to emit
+   * @private
+   */
+  emitLayerFilterApplied(event: LayerFilterAppliedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerFilterAppliedHandlers, event);
+  }
+
+  /**
+   * Registers a filter applied event handler.
+   * @param {FilterAppliedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerFilterApplied(callback: LayerFilterAppliedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerFilterAppliedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a filter applied event handler.
+   * @param {FilterAppliedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerFilterApplied(callback: LayerFilterAppliedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerFilterAppliedHandlers, callback);
+  }
+
+  /**
    * This method compares the internal layer status of the config with the layer status passed as a parameter and it
    * returns true if the internal value is greater or equal to the value of the parameter.
    *
@@ -276,4 +306,19 @@ export type LayerStatusChangedEvent = {
   layerPath: string;
   // The new layer status to assign to the layer path.
   layerStatus: TypeLayerStatus;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerFilterAppliedDelegate = EventDelegateBase<ConfigBaseClass, LayerFilterAppliedEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerFilterAppliedEvent = {
+  // The layer path of the affected layer
+  layerPath: string;
+  // The filter
+  filter: string;
 };
