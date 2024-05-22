@@ -76,6 +76,9 @@ export abstract class AbstractGVLayer {
   // Keep all callback delegate references
   #onVisibleChangedHandlers: VisibleChangedDelegate[] = [];
 
+  // Keep all callback delegate references
+  #onLayerFilterAppliedHandlers: LayerFilterAppliedDelegate[] = [];
+
   /**
    * Constructs a GeoView layer to manage an OpenLayer layer.
    * @param {string} mapId - The map id
@@ -822,6 +825,34 @@ export abstract class AbstractGVLayer {
     // Unregister the event handler
     EventHelper.offEvent(this.#onVisibleChangedHandlers, callback);
   }
+
+  /**
+   * Emits filter applied event.
+   * @param {FilterAppliedEvent} event - The event to emit
+   * @private
+   */
+  protected emitLayerFilterApplied(event: LayerFilterAppliedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerFilterAppliedHandlers, event);
+  }
+
+  /**
+   * Registers a filter applied event handler.
+   * @param {FilterAppliedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerFilterApplied(callback: LayerFilterAppliedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerFilterAppliedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a filter applied event handler.
+   * @param {FilterAppliedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerFilterApplied(callback: LayerFilterAppliedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerFilterAppliedHandlers, callback);
+  }
 }
 
 /**
@@ -857,3 +888,18 @@ export type VisibleChangedEvent = {
  * Define a delegate for the event handler function signature
  */
 type VisibleChangedDelegate = EventDelegateBase<AbstractGVLayer, VisibleChangedEvent>;
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGVLayer, LayerFilterAppliedEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerFilterAppliedEvent = {
+  // The layer path of the affected layer
+  layerPath: string;
+  // The filter
+  filter: string;
+};

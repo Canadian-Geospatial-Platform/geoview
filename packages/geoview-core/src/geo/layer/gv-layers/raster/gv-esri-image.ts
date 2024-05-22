@@ -213,6 +213,12 @@ export class GVEsriImage extends AbstractGVRaster {
         });
         source.updateParams({ [dimension]: filterValueToUse.replace(/\s*/g, '') });
         olLayer.changed();
+
+        // Emit event
+        this.emitLayerFilterApplied({
+          layerPath,
+          filter: filterValueToUse,
+        });
       }
     }
   }

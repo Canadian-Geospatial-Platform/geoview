@@ -150,6 +150,9 @@ export abstract class AbstractGeoViewLayer {
   // Keep all callback delegate references
   #onLayerCreationHandlers: LayerCreationDelegate[] = [];
 
+  // Keep all callback delegate references
+  #onLayerFilterAppliedHandlers: LayerFilterAppliedDelegate[] = [];
+
   /** ***************************************************************************************************************************
    * The class constructor saves parameters and common configuration parameters in attributes.
    *
@@ -431,6 +434,34 @@ export abstract class AbstractGeoViewLayer {
   offLayerCreation(callback: LayerCreationDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerCreationHandlers, callback);
+  }
+
+  /**
+   * Emits filter applied event.
+   * @param {FilterAppliedEvent} event - The event to emit
+   * @private
+   */
+  protected emitLayerFilterApplied(event: LayerFilterAppliedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerFilterAppliedHandlers, event);
+  }
+
+  /**
+   * Registers a filter applied event handler.
+   * @param {FilterAppliedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerFilterApplied(callback: LayerFilterAppliedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerFilterAppliedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a filter applied event handler.
+   * @param {FilterAppliedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerFilterApplied(callback: LayerFilterAppliedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerFilterAppliedHandlers, callback);
   }
 
   /** ***************************************************************************************************************************
@@ -1719,6 +1750,21 @@ export interface TypeWmsLegendStyle {
   name: string;
   legend: HTMLCanvasElement | null;
 }
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerFilterAppliedEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerFilterAppliedEvent = {
+  // The layer path of the affected layer
+  layerPath: string;
+  // The filter
+  filter: string;
+};
 
 export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {
   legend: HTMLCanvasElement | null;

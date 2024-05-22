@@ -209,7 +209,6 @@ export interface TypeTimeSliderValues {
   filtering: boolean;
   locked?: boolean;
   minAndMax: number[];
-  name: string;
   range: string[];
   reversed?: boolean;
   singleHandle: boolean;
