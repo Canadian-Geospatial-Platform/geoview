@@ -63,6 +63,7 @@ export default function Notifications(): JSX.Element {
   const { removeNotification } = useAppStoreActions();
 
   useEffect(() => {
+    logger.logTraceUseEffect('Notifications - notifications list changed', notificationsCount, notifications);
     const curNotificationCount = _.sumBy(notifications, (n) => n.count);
     if (curNotificationCount > notificationsCount) {
       setHasNewNotification(true);
@@ -71,6 +72,7 @@ export default function Notifications(): JSX.Element {
   }, [notifications, notificationsCount]);
 
   useEffect(() => {
+    logger.logTraceUseEffect('Notifications - hasNewNotification change', hasNewNotification);
     if (hasNewNotification) {
       const timeoutId = setTimeout(() => setHasNewNotification(false), 1000); // Remove after 3 seconds
       return () => clearTimeout(timeoutId);
@@ -107,6 +109,8 @@ export default function Notifications(): JSX.Element {
   const handleRemoveNotificationClick = (notification: NotificationDetailsType): void => {
     removeNotification(notification.key);
   };
+
+  const AnimatedBox = animated(Box);
 
   function getNotificationIcon(notification: NotificationDetailsType): JSX.Element {
     switch (notification.notificationType) {
@@ -153,18 +157,18 @@ export default function Notifications(): JSX.Element {
             color="primary"
           >
             {!hasNewNotification && (
-              <div>
+              <Box>
                 <NotificationsIcon />
-              </div>
+              </Box>
             )}
             {hasNewNotification && (
-              <animated.div
+              <AnimatedBox
                 style={{
                   ...shakeAnimation,
                 }}
               >
                 <NotificationsActiveIcon />
-              </animated.div>
+              </AnimatedBox>
             )}
           </IconButton>
         </Badge>

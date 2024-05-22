@@ -62,7 +62,9 @@ export function HoverTooltip(): JSX.Element | null {
 
   // Update tooltip position when we have the dimensions of the tooltip
   useEffect(() => {
-    if (!mapElem || !tooltipRef.current || !pointerPosition || !pointerPosition.pixel) {
+    logger.logTraceUseEffect('HOVER-TOOLTIP - tooltipValue changed', tooltipValue);
+
+    if (!mapElem || !tooltipRef.current || !pointerPosition || !pointerPosition.pixel || !tooltipValue) {
       return;
     }
 
@@ -83,7 +85,7 @@ export function HoverTooltip(): JSX.Element | null {
 
     tooltipRef.current.style.left = `${tooltipX}px`;
     tooltipRef.current.style.top = `${tooltipY}px`;
-  }, [tooltipValue]);
+  }, [tooltipValue, mapElem, pointerPosition]);
 
   if (showTooltip && !tooltipValue) {
     return null;

@@ -17,6 +17,7 @@ import {
   VisibilityOutlinedIcon,
   RestartAltIcon,
   Paper,
+  Typography,
 } from '@/ui';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import {
@@ -37,7 +38,6 @@ import {
 import { LAYER_STATUS } from '@/core/utils/constant';
 import { ArrowDownwardIcon, ArrowUpIcon, TableViewIcon } from '@/ui/icons';
 import { Divider } from '@/ui/divider/divider';
-import { Typography } from '@/ui/typography/typography';
 
 interface SingleLayerProps {
   layer: TypeLegendLayer;
