@@ -316,23 +316,34 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
    *
    * @param {-1 | 1} change The change to index number (-1 for back, 1 for forward)
    */
-  const handleFeatureNavigateChange = (change: -1 | 1): void => {
-    // Keep previous index for navigation
-    prevFeatureIndex.current = currentFeatureIndex;
+  const handleFeatureNavigateChange = useCallback(
+    (change: -1 | 1): void => {
+      // Log
+      logger.logTraceUseCallback('DETAILS PANEL - handleFeatureNavigateChange', currentFeatureIndex);
 
-    // Update current index
-    updateFeatureSelected(currentFeatureIndex + change, memoSelectedLayerData!);
-  };
+      // Keep previous index for navigation
+      prevFeatureIndex.current = currentFeatureIndex;
+
+      // Update current index
+      updateFeatureSelected(currentFeatureIndex + change, memoSelectedLayerData!);
+    },
+    [currentFeatureIndex, memoSelectedLayerData, updateFeatureSelected]
+  );
 
   /**
    * Handles click to change the selected layer in left panel.
    *
    * @param {LayerListEntry} layerEntry The data of the newly selected layer
    */
-  const handleLayerChange = (layerEntry: LayerListEntry): void => {
-    // Set the selected layer path in the store which will in turn trigger the store listeners on this component
-    setSelectedLayerPath(layerEntry.layerPath);
-  };
+  const handleLayerChange = useCallback(
+    (layerEntry: LayerListEntry): void => {
+      // Log
+      logger.logTraceUseCallback('DETAILS-PANEL - handleLayerChange', layerEntry.layerPath);
+      // Set the selected layer path in the store which will in turn trigger the store listeners on this component
+      setSelectedLayerPath(layerEntry.layerPath);
+    },
+    [setSelectedLayerPath]
+  );
 
   // #endregion
 
@@ -370,8 +381,13 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
     resetCurrentIndex();
   }
 
+  /**
+   * Callback function to update the store state for clearing the details selected layer from left panel.
+   */
   const handleGuideIsOpen = useCallback(
     (guideIsOpenVal: boolean): void => {
+      // Log
+      logger.logTraceUseCallback('DETAILS PANEL - handleGuideIsOpen');
       if (guideIsOpenVal) {
         setSelectedLayerPath('');
       }
@@ -383,6 +399,9 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
    * Select the layer after layer is selected from map.
    */
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DETAILS-PANEL- mapClickCoordinates', mapClickCoordinates);
+
     if (mapClickCoordinates && memoLayersList?.length && !selectedLayerPath.length) {
       const selectedLayer = memoLayersList.find((layer) => !!layer.numOffeatures);
       setSelectedLayerPath(selectedLayer?.layerPath ?? '');
@@ -395,7 +414,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
    */
   const memoIsLayerQueryStatusProcessing = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('DATA-PANEL - order layer status processing.');
+    logger.logTraceUseMemo('DETAILS-PANEL - order layer status processing.');
 
     return () => !!arrayOfLayerDataBatch?.find((layer) => layer.queryStatus === LAYER_STATUS.PROCESSING);
   }, [arrayOfLayerDataBatch]);
@@ -405,11 +424,11 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   // #region RENDER SECTION *******************************************************************************************
 
   /**
-   * Renders the complete Details Panel component
-   * @returns {JSX.Element}
+   * Render the right panel content based on detail's layer and loading status.
+   * NOTE: Here we return null, so that in responsive grid layout, it can be used as flag to render the guide for details.
+   * @returns {JSX.Element | null} JSX.Element | null
    */
   const renderContent = (): JSX.Element | null => {
-    // render skeleton when layer is fetching data.
     if (memoIsLayerQueryStatusProcessing()) {
       return <Skeleton variant="rounded" width="100%" height={500} sx={{ bgcolor: theme.palette.grey[400] }} />;
     }
@@ -418,12 +437,12 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
         <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer }}>
           <Grid container sx={sxClasses.rightPanelBtnHolder}>
             <Grid item xs={6}>
-              <Box style={{ marginLeft: '22px' }}>
+              <Box style={{ marginLeft: '1.375rem' }}>
                 {t('details.featureDetailsTitle')
                   .replace('{count}', `${currentFeatureIndex + 1}`)
                   .replace('{total}', `${memoSelectedLayerDataFeatures?.length}`)}
                 <IconButton
-                  sx={{ marginLeft: '20px', [theme.breakpoints.down('sm')]: { display: 'none' } }}
+                  sx={{ marginLeft: '1.25rem', [theme.breakpoints.down('sm')]: { display: 'none' } }}
                   aria-label="clear-all-features"
                   tooltip="details.clearAllfeatures"
                   tooltipPlacement="top"
@@ -436,7 +455,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
               </Box>
             </Grid>
             <Grid item xs={6}>
-              <Box sx={{ textAlign: 'right', marginRight: '26px' }}>
+              <Box sx={{ textAlign: 'right', marginRight: '1.625rem' }}>
                 <IconButton
                   aria-label="backward"
                   tooltip="details.previousFeatureBtn"
@@ -448,7 +467,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
                   <ArrowBackIosOutlinedIcon />
                 </IconButton>
                 <IconButton
-                  sx={{ marginLeft: '20px' }}
+                  sx={{ marginLeft: '1.25rem' }}
                   aria-label="forward"
                   tooltip="details.nextFeatureBtn"
                   tooltipPlacement="top"
@@ -465,7 +484,6 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
         </Box>
       );
     }
-    // return null to render the guide when detail tab is opened.
     return null;
   };
 

@@ -1,4 +1,4 @@
-import { ReactElement, useState } from 'react';
+import { ReactElement, useState, useCallback, useMemo } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -8,7 +8,7 @@ import { type MRT_ColumnDef as MRTColumnDef } from 'material-react-table';
 
 import { IconButton, DownloadIcon, Tooltip, Menu, MenuItem } from '@/ui';
 import { logger } from '@/core/utils/logger';
-import { ColumnsType } from './data-table';
+import { ColumnsType } from './data-table-types';
 
 interface ExportButtonProps {
   rows: ColumnsType[];
@@ -36,23 +36,32 @@ function ExportButton({ rows, columns, children }: ExportButtonProps): JSX.Eleme
    * Show export menu.
    */
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>): void => {
+  const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+    // Log
+    logger.logTraceUseCallback('DATA-TABLE - EXPORT BUTTON - handleClick');
+
     setAnchorEl(event.currentTarget);
-  };
+  }, []);
 
   /**
    * Close export menu.
    */
 
-  const handleClose = (): void => {
+  const handleClose = useCallback(() => {
+    // Log
+    logger.logTraceUseCallback('DATA-TABLE - EXPORT BUTTON - handleClose');
+
     setAnchorEl(null);
-  };
+  }, []);
 
   /**
    * Build CSV Options for download.
    */
-  const getCsvOptions = (): Options => {
-    return {
+  const getCsvOptions = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DATA-TABLE - EXPORT BUTTON - getCsvOptions', columns);
+
+    return (): Options => ({
       fieldSeparator: ',',
       quoteStrings: '"',
       decimalSeparator: '.',
@@ -60,24 +69,28 @@ function ExportButton({ rows, columns, children }: ExportButtonProps): JSX.Eleme
       useBom: true,
       useKeysAsHeaders: false,
       headers: columns.map((c) => c.id as string),
-    };
-  };
+    });
+  }, [columns]);
 
   /**
    * Export data table in csv format.
    */
-  const handleExportData = (): void => {
+
+  const handleExportData = useCallback((): void => {
+    // Log
+    logger.logTraceUseCallback('DATA-TABLE - EXPORT BUTTON - handleExportData');
+
     // format the rows for csv.
     const csvRows = rows.map((row) => {
       const mappedRow = Object.keys(row).reduce((acc, curr) => {
         acc[curr] = row[curr]?.value ?? '';
         return acc;
-      }, {} as Record<string, string | null>);
+      }, {} as Record<string, unknown>);
       return mappedRow;
     });
     const csvExporter = new ExportToCsv(getCsvOptions());
     csvExporter.generateCsv(csvRows);
-  };
+  }, [getCsvOptions, rows]);
 
   return (
     <>

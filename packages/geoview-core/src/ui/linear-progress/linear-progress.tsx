@@ -22,21 +22,9 @@ interface ProgressbarProps {
  * @param {ProgressbarProps} props the properties passed to the element
  * @returns {JSX.Element} the created element
  */
-export function ProgressBar(props: ProgressbarProps): JSX.Element {
-  const { className, variant, value } = props;
-
+export function ProgressBar({ className = '', variant = 'indeterminate', value = 0 }: ProgressbarProps): JSX.Element {
   return <LinearProgressBar variant={variant} value={value} className={className} />;
 }
-
-/**
- * Default property values
- */
-// TODO: Refactor - Remove defaultProps as it's no longer a good practice
-ProgressBar.defaultProps = {
-  className: '',
-  variant: 'indeterminate',
-  value: 0,
-};
 
 /**
  * Example of usage by application code
