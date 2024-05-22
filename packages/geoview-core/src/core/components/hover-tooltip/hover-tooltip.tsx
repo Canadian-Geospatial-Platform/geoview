@@ -38,8 +38,6 @@ export function HoverTooltip(): JSX.Element | null {
 
   const tooltipRef = useRef<HTMLDivElement>(null);
 
-
-
   // Update tooltip when store value change from propagation by hover-layer-set to map-event-processor
   useEffect(() => {
     // Log
@@ -49,7 +47,7 @@ export function HoverTooltip(): JSX.Element | null {
       setTooltipValue(hoverFeatureInfo!.fieldInfo?.value as string | '');
       setTooltipIcon(hoverFeatureInfo!.featureIcon.toDataURL());
       setShowTooltip(true);
-    } 
+    }
   }, [hoverFeatureInfo]);
 
   // clear the tooltip and mouse move and set pixel location
@@ -60,13 +58,11 @@ export function HoverTooltip(): JSX.Element | null {
     setTooltipValue('');
     setTooltipIcon('');
     setShowTooltip(false);
-
   }, [pointerPosition]);
-
 
   // Update tooltip position when we have the dimensions of the tooltip
   useEffect(() => {
-    if(!mapElem || !tooltipRef.current || !pointerPosition || !pointerPosition.pixel) {
+    if (!mapElem || !tooltipRef.current || !pointerPosition || !pointerPosition.pixel) {
       return;
     }
 
@@ -78,19 +74,16 @@ export function HoverTooltip(): JSX.Element | null {
     let tooltipY = pointerPosition.pixel[1] - 35;
 
     if (pointerPosition.pixel[0] + tooltipRect.width > mapRect.width) {
-      tooltipX = pointerPosition.pixel[0] - (tooltipRect.width );
+      tooltipX = pointerPosition.pixel[0] - tooltipRect.width;
     }
 
     if (pointerPosition.pixel[1] - tooltipRect.height < mapRect.top) {
-      tooltipY = pointerPosition.pixel[1]+ 10;
+      tooltipY = pointerPosition.pixel[1] + 10;
     }
 
     tooltipRef.current.style.left = `${tooltipX}px`;
     tooltipRef.current.style.top = `${tooltipY}px`;
-
   }, [tooltipValue]);
-
-  
 
   if (showTooltip && !tooltipValue) {
     return null;
