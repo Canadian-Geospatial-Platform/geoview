@@ -96,9 +96,6 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     const temporalDimensionInfo = geoviewLayer.getTemporalDimension(layerConfig.layerPath);
     if (!temporalDimensionInfo || !temporalDimensionInfo.range) return undefined;
 
-    // Get layer name and temporal dimension
-    const name = getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(mapId)) || layerConfig.layerId;
-
     // Set defaults values from temporal dimension
     const { range } = temporalDimensionInfo.range;
     const defaultValueIsArray = Array.isArray(temporalDimensionInfo.default);
@@ -128,7 +125,6 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       : [...minAndMax];
 
     return {
-      name,
       range,
       defaultValue,
       discreteValues: nearestValues === 'discrete',
