@@ -7,6 +7,7 @@ import { logger } from '@/core/utils/logger';
 import { useMapHoverFeatureInfo, useMapPointerPosition } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { getSxClasses } from './hover-tooltip-styles';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 /**
  * Hover tooltip component to show name field information on hover
@@ -34,7 +35,8 @@ export function HoverTooltip(): JSX.Element | null {
   // store state
   const hoverFeatureInfo = useMapHoverFeatureInfo();
   const pointerPosition = useMapPointerPosition();
-  const mapElem = document.getElementById(`mapTargetElement-${mapId}`) as HTMLElement;
+  const mapElem = useAppGeoviewHTMLElement().querySelector(`[id^="mapTargetElement-${mapId}"]`) as HTMLElement;
+  // document.getElementById(`mapTargetElement-${mapId}`) as HTMLElement;
 
   const tooltipRef = useRef<HTMLDivElement>(null);
 
