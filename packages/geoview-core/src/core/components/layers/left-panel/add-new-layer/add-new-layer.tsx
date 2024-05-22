@@ -789,6 +789,9 @@ export function AddNewLayer(): JSX.Element {
       setLayerType(WMS);
     } else if (displayURL.toUpperCase().endsWith('.CSV')) {
       setLayerType(CSV);
+    } else {
+      setLayerType('');
+      setStepButtonDisable(true);
     }
   };
 
@@ -804,10 +807,6 @@ export function AddNewLayer(): JSX.Element {
     if (valid) {
       bestGuessLayerType();
       setActiveStep(1);
-
-      // disable continue button until a service type is selected
-      setLayerType('');
-      setStepButtonDisable(true);
     }
   };
 
@@ -988,7 +987,7 @@ export function AddNewLayer(): JSX.Element {
     setLayerEntries([]);
 
     // TODO: create a utilities function to test valid URL before we enable the continue button
-    // TODO.CONT: This function shuold try to ping the server for an answer...
+    // TODO.CONT: This function should try to ping the server for an answer...
     setStepButtonDisable(!event.target.value.trim().startsWith('https://'));
   };
 
