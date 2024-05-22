@@ -121,6 +121,24 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
   }
 
   /**
+   * Overrides behaviour when layer name is changed.
+   * @param {string} layerPath - The layer path being affected
+   * @param {string} name - The new layer name
+   */
+  protected override onProcessNameChanged(layerPath: string, name: string): void {
+    if (this.resultSet?.[layerPath]) {
+      // Change the layer name
+      this.resultSet[layerPath].data.layerName = name;
+
+      // Inform that the layer set has been updated
+      this.onLayerSetUpdatedProcess(layerPath);
+
+      // Propagate to store
+      DataTableEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, this.resultSet);
+    }
+  }
+
+  /**
    * Helper function used to launch the query on a layer to get all of its feature information.
    * @param {string} layerPath - The layerPath that will be queried
    * @param {QueryType} queryType - The query's type to perform

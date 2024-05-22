@@ -113,6 +113,21 @@ export class LegendsLayerSet extends AbstractLayerSet {
       }
     }
   }
+
+  /**
+   * Overrides behaviour when layer name is changed.
+   * @param {string} layerPath - The layer path being affected
+   * @param {string} name - The new layer name
+   */
+  protected override onProcessNameChanged(layerPath: string, name: string): void {
+    if (this.resultSet?.[layerPath]) {
+      // Call parent
+      super.onProcessNameChanged(layerPath, name);
+
+      // Propagate to store
+      LegendEventProcessor.propagateLegendToStore(this.mapId, layerPath, this.resultSet[layerPath]);
+    }
+  }
 }
 
 export type TypeLegendResultSetEntry = {

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div class="header-table">
+      <table>
+        <tbody>
+          <tr>
+            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
+            <td class="header-title">
+              <h1><strong>API Functions and Events</strong></h1>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <a href="./index.html">Main</a><br />
+            </td>
+          </tr>
+          <tr>
+            <td><p>This page is used to test functions and events</p></td>
+          </tr>
+          </tr>
+          <tr>
+            <td>
+              <a href="#HMap1">1. Basic Map</a><br />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="map-title-holder">
+      <h4 id="HMap1">1. Basic Map</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <button class="collapsible active">Map Status Flags</button>
+    <pre id="HMap1-state" class="panel map-title-holder"></pre>
+    <hr />
+    <div
+      id="Map1"
+      class="geoview-map"
+      data-lang="en"
+      data-config-url="./configs/navigator/06-basic-footer.json"
+    ></div>
+    <hr />
+    <div>
+      <h3>API Functions</h3>
+      <ul>
+        <li><button id="Add-layer">Add WMS layer</button><br />
+          cgpv.api.maps.Map1.layer.removeLayersUsingPath('geojsonLYR1/geojsonLYR1')
+        </li>
+        <li><button id="Remove-layer">Remove GeoJSON layer</button><br />
+          cgpv.api.maps.Map1.layer.addGeoviewLayer(config)
+        </li>
+        <li><button id="Remove-all-layers">Remove All layers</button><br />
+          cgpv.api.maps.Map1.layer.removeAllGeoviewLayers()
+        </li>
+        <li><button id="Toggle-visibility">Toggle Top 100 visibility</button><br />
+          cgpv.api.maps.Map1.layer.setOrToggleLayerVisibility('esriFeatureLYR5/0')
+        </li>
+        <li><button id="Set-all-visible">Set all layers visible</button><br />
+          cgpv.api.maps.Map1.layer.setAllLayersVisibility(true)
+        </li>
+        <li><button id="Set-all-not-visible">Set all layers not visible</button><br />
+          cgpv.api.maps.Map1.layer.setAllLayersVisibility(false)
+        </li>
+        <li><button id="Rename-layer">Rename Water Quantity layer</button><br />
+          cgpv.api.maps.Map1.layer.setLayerName('uniqueValueId/1', 'Water Quantity')
+        </li>
+      </ul>
+      <h3>Events that will generate notifications:</h3>
+      <p>onLayerAdded, onLayerRemoved, onLayerVisibilityToggled, onMapZoomEnd, onMapMoveEnd</p>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script src="layerlib.js"></script>
+    <script>
+      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init((mapId) => {
+          listenToLegendLayerSetChanges('HMap1-state', 'Map1');
+      // Events=====================================================================================================================
+      // listen to layer added event
+      cgpv.api.maps.Map1.layer.onLayerAdded((sender, payload) => {
+        cgpv.api.maps.Map1.notifications.addNotificationSuccess(payload.layer.geoviewLayerId + ' added');
+      });
+
+      // listen to layer removed event
+      cgpv.api.maps.Map1.layer.onLayerRemoved((sender, payload) => {
+        cgpv.api.maps.Map1.notifications.addNotificationSuccess(payload.layerPath + ' removed');
+      });
+
+      // listen to layer visibility changed event
+      cgpv.api.maps.Map1.layer.onLayerVisibilityToggled((sender, payload) => {
+        cgpv.api.maps.Map1.notifications.addNotificationSuccess(`${payload.layerPath} visibility set to ${payload.visibility}`);
+      });
+
+      // listen to map zoom event
+      cgpv.api.maps.Map1.onMapZoomEnd((sender, payload) => {
+        cgpv.api.maps.Map1.notifications.addNotificationSuccess(`Zoomed to level ${payload.zoom}`);
+      });
+
+      // listen to map move event
+      cgpv.api.maps.Map1.onMapMoveEnd((sender, payload) => {
+        cgpv.api.maps.Map1.notifications.addNotificationSuccess(`Map moved to center latitude ${payload.lnglat[1]} and longitude ${payload.lnglat[0]}`);
+      });
+      });
+
+      // Add WMS Button======================================================================================================
+      // find the button element by ID
+      var addLayerButton = document.getElementById('Add-layer');
+      const config = 
+        {
+          'geoviewLayerId': 'wmsLYR1-msi',
+          'geoviewLayerName': { 'en': 'MSI' },
+          'metadataAccessPath': { 'en': 'https://datacube.services.geo.ca/ows/msi' },
+          'geoviewLayerType': 'ogcWms',
+          'listOfLayerEntryConfig': [
+            {
+              'layerId': 'msi-94-or-more',
+              'layerName': { 'en': 'Permanent Snow' },
+              'source': {
+                'style': 'msi-binary',
+                'featureInfo': {
+                  'queryable': true,
+                  'nameField': { 'en': 'band-0-pixel-value', 'fr': 'band-0-pixel-value' },
+                  'fieldTypes': 'number',
+                  'outfields': { 'en': 'band-0-pixel-value', 'fr': 'band-0-pixel-value' },
+                  'aliasFields':  { 'en': 'Pixel value', 'fr': 'Valeur du pixel' }
+                }
+              }
+            }
+          ]
+        }
+
+      // add an event listener when a button is clicked
+      addLayerButton.addEventListener('click', async () => {
+        const wmsLayerAlreadyExists = Object.keys(cgpv.api.maps.Map1.layer.registeredLayers).includes('wmsLYR1-msi/msi-94-or-more');
+        if (!wmsLayerAlreadyExists) cgpv.api.maps.Map1.layer.addGeoviewLayer(config);
+        else console.log('WMS layer already exists');
+      });
+
+      // Remove GeoJSON Button======================================================================================================
+      // find the button element by ID
+      var removeLayerButton = document.getElementById('Remove-layer');
+
+      // add an event listener when a button is clicked
+      removeLayerButton.addEventListener('click', async () => {
+        const geojsonLayerAlreadyExists = Object.keys(cgpv.api.maps.Map1.layer.registeredLayers).includes('geojsonLYR1/geojsonLYR1');
+        if (geojsonLayerAlreadyExists) cgpv.api.maps.Map1.layer.removeLayersUsingPath('geojsonLYR1/geojsonLYR1');
+        else console.log('GeoJSON layer does not exist');
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });
+
+      // Remove All Button==========================================================================================================
+      // find the button element by ID
+      var removeAllLayersButton = document.getElementById('Remove-all-layers');
+
+      // add an event listener when a button is clicked
+      removeAllLayersButton.addEventListener('click', async () => {
+        cgpv.api.maps.Map1.layer.removeAllGeoviewLayers();
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });
+
+      // Toggle Visibility Button===================================================================================================
+      // find the button element by ID
+      var toggleVisibilityButton = document.getElementById('Toggle-visibility');
+
+      // add an event listener when a button is clicked
+      toggleVisibilityButton.addEventListener('click', async () => {
+        cgpv.api.maps.Map1.layer.setOrToggleLayerVisibility('esriFeatureLYR5/0');
+      });
+
+      // Set All Visible Button=====================================================================================================
+      // find the button element by ID
+      var setAllVisibleButton = document.getElementById('Set-all-visible');
+
+      // add an event listener when a button is clicked
+      setAllVisibleButton.addEventListener('click', async () => {
+        cgpv.api.maps.Map1.layer.setAllLayersVisibility(true);
+      });
+
+      // Set All Not Visible Button=================================================================================================
+      // find the button element by ID
+      var setAllNotVisibleButton = document.getElementById('Set-all-not-visible');
+
+      // add an event listener when a button is clicked
+      setAllNotVisibleButton.addEventListener('click', async () => {
+        cgpv.api.maps.Map1.layer.setAllLayersVisibility(false);
+      });
+
+      // Rename Layer Button========================================================================================================
+      // find the button element by ID
+      var renameLayerButton = document.getElementById('Rename-layer');
+
+      // add an event listener when a button is clicked
+      renameLayerButton.addEventListener('click', async () => {
+        cgpv.api.maps.Map1.layer.setLayerName('uniqueValueId/1', 'Water Quantity')
+      });
+
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });
+
+    </script>
+  </body>
+</html>

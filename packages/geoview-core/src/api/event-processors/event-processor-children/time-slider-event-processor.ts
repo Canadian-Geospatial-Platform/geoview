@@ -83,6 +83,19 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Set the name of a time slider layer.
+   * @param {string} mapId - The map id of the state to act on
+   * @param {string} layerPath - The layer path of the layer to change
+   * @param {string} name - The new layer name
+   */
+  static setLayerName(mapId: string, layerPath: string, name: string): void {
+    if (this.getTimesliderState(mapId) && this.getTimesliderState(mapId)?.timeSliderLayers[layerPath]) {
+      // Redirect
+      this.getTimesliderState(mapId)?.setterActions.setName(layerPath, name);
+    }
+  }
+
+  /**
    * Get initial values for a layer's time slider states
    *
    * @param {string} mapId - The id of the map

@@ -144,6 +144,24 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   }
 
   /**
+   * Overrides behaviour when layer name is changed.
+   * @param {string} layerPath - The layer path being affected
+   * @param {string} name - The new layer name
+   */
+  protected override onProcessNameChanged(layerPath: string, name: string): void {
+    if (this.resultSet?.[layerPath]) {
+      // Change the layer name
+      this.resultSet[layerPath].data.layerName = name;
+
+      // Inform that the layer set has been updated
+      this.onLayerSetUpdatedProcess(layerPath);
+
+      // Propagate to store
+      this.#propagateToStore(layerPath);
+    }
+  }
+
+  /**
    * Emits a query ended event to all handlers.
    * @param {QueryEndedEvent} event - The event to emit
    * @private
