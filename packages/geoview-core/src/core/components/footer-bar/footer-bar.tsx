@@ -31,6 +31,7 @@ import { Datapanel } from '@/core/components/data-table/data-panel';
 import { logger } from '@/core/utils/logger';
 import { GuidePanel } from '@/core/components/guide/guide-panel';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 
 interface Tab {
   icon: ReactNode;
@@ -231,11 +232,10 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // If clicked on a tab with a plugin
     MapEventProcessor.getMapViewerPlugins(mapId)
       .then((plugins) => {
-        if (plugins[selectedTab]) {
+        const selectedTabKey = 'selectedTab' as keyof TypeRecordOfPlugin;
+        if (plugins[selectedTabKey]) {
           // Get the plugin
-          // ? unknown type cannot be use, need to escape
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const theSelectedPlugin = plugins[selectedTab] as any;
+          const theSelectedPlugin = plugins[selectedTabKey];
 
           // A bit hacky, but not much other choice for now...
           if (typeof theSelectedPlugin.onSelected === 'function') {
@@ -340,12 +340,15 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   }, [footerBarTabsConfig, mapId]);
 
   // Handle focus using dynamic focus button
-  const handleDynamicFocus = (): void => {
+  const handleDynamicFocus = useCallback((): void => {
+    // Log
+    logger.logTraceUseCallback('FOOTER BAR - handleDynamicFocus', isFocusToMap, mapId);
+
     const shell = document.getElementById(`shell-${mapId}`);
     const block = isFocusToMap ? 'start' : 'end';
     shell?.scrollIntoView({ behavior: 'smooth', block });
     setIsFocusToMap(!isFocusToMap);
-  };
+  }, [isFocusToMap, mapId]);
 
   return memoFooterBarTabs.length > 0 ? (
     <Box

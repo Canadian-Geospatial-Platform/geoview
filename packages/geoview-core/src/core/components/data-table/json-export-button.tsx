@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Geometry, Point, Polygon, LineString, MultiPoint } from 'ol/geom';
@@ -27,38 +28,38 @@ function JSONExportButton({ features, layerPath }: JSONExportButtonProps): JSX.E
 
   /**
    * Creates a geometry json
-   *
    * @param {Geometry} geometry - The geometry
    * @returns {TypeJsonObject} The geometry json
-   *
    */
-  const buildGeometry = (geometry: Geometry): TypeJsonObject => {
-    let builtGeometry = {};
+  const buildGeometry = useCallback(
+    (geometry: Geometry): TypeJsonObject => {
+      let builtGeometry = {};
 
-    if (geometry instanceof Polygon) {
-      builtGeometry = {
-        type: 'Polygon',
-        coordinates: geometry.getCoordinates().map((coords) => {
-          return coords.map((coord) => transformPoints([coord], 4326)[0]);
-        }),
-      };
-    } else if (geometry instanceof LineString) {
-      builtGeometry = { type: 'LineString', coordinates: geometry.getCoordinates().map((coord) => transformPoints([coord], 4326)[0]) };
-    } else if (geometry instanceof Point) {
-      builtGeometry = { type: 'Point', coordinates: transformPoints([geometry.getCoordinates()], 4326)[0] };
-    } else if (geometry instanceof MultiPoint) {
-      builtGeometry = { type: 'MultiPoint', coordinates: geometry.getCoordinates().map((coord) => transformPoints([coord], 4326)[0]) };
-    }
+      if (geometry instanceof Polygon) {
+        builtGeometry = {
+          type: 'Polygon',
+          coordinates: geometry.getCoordinates().map((coords) => {
+            return coords.map((coord) => transformPoints([coord], 4326)[0]);
+          }),
+        };
+      } else if (geometry instanceof LineString) {
+        builtGeometry = { type: 'LineString', coordinates: geometry.getCoordinates().map((coord) => transformPoints([coord], 4326)[0]) };
+      } else if (geometry instanceof Point) {
+        builtGeometry = { type: 'Point', coordinates: transformPoints([geometry.getCoordinates()], 4326)[0] };
+      } else if (geometry instanceof MultiPoint) {
+        builtGeometry = { type: 'MultiPoint', coordinates: geometry.getCoordinates().map((coord) => transformPoints([coord], 4326)[0]) };
+      }
 
-    return builtGeometry;
-  };
+      return builtGeometry;
+    },
+    [transformPoints]
+  );
 
   /**
    * Builds the JSON file
    * @returns {string} Json file content as string
-   *
    */
-  const getJson = (): string => {
+  const getJson = useCallback((): string => {
     const geoData = features.map((feature) => {
       const { geometry, fieldInfo } = feature;
       return {
@@ -70,14 +71,14 @@ function JSONExportButton({ features, layerPath }: JSONExportButtonProps): JSX.E
 
     // Stringify with some indentation
     return JSON.stringify({ type: 'FeatureCollection', features: geoData }, null, 2);
-  };
+  }, [buildGeometry, features]);
 
   /**
    * Exports the blob to a file
    * @param {Blob} blob - The blob to save to file
    * @param {string} filename - File name
    */
-  const exportBlob = (blob: Blob, filename: string): void => {
+  const exportBlob = useCallback((blob: Blob, filename: string): void => {
     // Save the blob in a json file
     const url = URL.createObjectURL(blob);
 
@@ -87,19 +88,19 @@ function JSONExportButton({ features, layerPath }: JSONExportButtonProps): JSX.E
     a.click();
 
     URL.revokeObjectURL(url);
-  };
+  }, []);
 
   /**
    * Exports data table in csv format.
    */
-  const handleExportData = (): void => {
+  const handleExportData = useCallback((): void => {
     const jsonString = getJson();
     const blob = new Blob([jsonString], {
       type: 'text/json',
     });
 
     exportBlob(blob, `table-${layerPath}.json`);
-  };
+  }, [exportBlob, getJson, layerPath]);
 
   return <MenuItem onClick={handleExportData}>{t('dataTable.jsonExportBtn')}</MenuItem>;
 }

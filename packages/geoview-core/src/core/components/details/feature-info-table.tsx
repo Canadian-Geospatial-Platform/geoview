@@ -1,16 +1,16 @@
-import { useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import linkifyHtml from 'linkify-html';
 
 import { CardMedia, Box, Grid } from '@/ui';
-import { LightboxImg, LightBoxSlides } from '@/core/components/lightbox/lightbox';
 import { isImage, stringify, generateId, sanitizeHtmlContent } from '@/core/utils/utilities';
 import { HtmlToReact } from '@/core/containers/html-to-react';
 import { logger } from '@/core/utils/logger';
 import { TypeFieldEntry } from '@/geo/layer/layer-sets/abstract-layer-set';
 
 import { getSxClasses } from './details-style';
+import { useLightBox } from '../common';
 
 interface FeatureInfoTableProps {
   featureInfoList: TypeFieldEntry[];
@@ -31,23 +31,25 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  // internal state
-  const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
-  const [slides, setSlides] = useState<LightBoxSlides[]>([]);
-  const [slidesIndex, setSlidesIndex] = useState(0);
+  const { initLightBox, LightBoxComponent } = useLightBox();
 
   // linkify options
-  const linkifyOptions = {
-    attributes: {
-      title: t('details.externalLink'),
-    },
-    defaultProtocol: 'https',
-    format: {
-      url: (value: string) => (value.length > 50 ? `${value.slice(0, 40)}…${value.slice(value.length - 10, value.length)}` : value),
-    },
-    ignoreTags: ['script', 'style', 'img'],
-    target: '_blank',
-  };
+  const linkifyOptions = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DETAILS PANEL - Feature Info table - linkifyOptions');
+
+    return {
+      attributes: {
+        title: t('details.externalLink'),
+      },
+      defaultProtocol: 'https',
+      format: {
+        url: (value: string) => (value.length > 50 ? `${value.slice(0, 40)}…${value.slice(value.length - 10, value.length)}` : value),
+      },
+      ignoreTags: ['script', 'style', 'img'],
+      target: '_blank',
+    };
+  }, [t]);
 
   /**
    * Parse the content of the field to see if we need to create an image, a string element or a link
@@ -55,28 +57,20 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
    * @returns {JSX.Element | JSX.Element[]} the React element(s)
    */
   function setFeatureItem(featureInfoItem: TypeFieldEntry): JSX.Element | JSX.Element[] {
-    const slidesSetup: LightBoxSlides[] = [];
-
     function process(item: string, alias: string, index: number): JSX.Element {
       let element: JSX.Element;
       if (typeof item === 'string' && isImage(item)) {
-        slidesSetup.push({ src: item, alt: alias, downloadUrl: item });
         element = (
           <CardMedia
             key={generateId()}
             sx={{ ...sxClasses.featureInfoItemValue, cursor: 'pointer' }}
-            alt={alias}
+            alt={`${alias} ${index}`}
             src={item}
             tabIndex={0}
-            click={() => {
-              setIsLightBoxOpen(true);
-              setSlides(slidesSetup);
-              setSlidesIndex(index);
-            }}
+            click={() => initLightBox(featureInfoItem.value as string, featureInfoItem.alias, index)}
             keyDown={(e: KeyboardEvent) => {
               if (e.key === 'Enter') {
-                setIsLightBoxOpen(true);
-                setSlides(slidesSetup);
+                initLightBox(featureInfoItem.value as string, featureInfoItem.alias, index);
               }
             }}
           />
@@ -104,20 +98,6 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
 
   return (
     <Box sx={sxClasses.boxContainerFeatureInfo}>
-      {isLightBoxOpen && (
-        <LightboxImg
-          open={isLightBoxOpen}
-          slides={slides}
-          index={slidesIndex}
-          exited={() => {
-            // TODO: because lighbox element is render outside the map container, the focus trap is not able to access it.
-            // TODO: if we use the keyboard to access the image, we can only close with esc key.
-            // TODO: #1113
-            setIsLightBoxOpen(false);
-            setSlides([]);
-          }}
-        />
-      )}
       {featureInfoList.map((featureInfoItem, index) => (
         <Grid
           container
@@ -125,19 +105,19 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
           sx={{
             backgroundColor: index % 2 > 0 ? theme.palette.geoViewColor.bgColor.darken(0.1) : '',
             color: index % 2 > 0 ? theme.palette.geoViewColor.bgColor.darken(0.9) : '',
-            marginBottom: '20px',
+            marginBottom: '1.25rem',
           }}
-          // eslint-disable-next-line react/no-array-index-key
-          key={index}
+          key={`${featureInfoItem.alias} ${index.toString()}`}
         >
           <Grid item xs="auto" sx={{ fontWeight: 'bold', width: '80% !important' }}>
             {featureInfoItem.alias}
           </Grid>
-          <Grid item sx={{ ml: 'auto', wordWrap: 'break-word', pr: '5px' }}>
+          <Grid item sx={{ ml: 'auto', wordWrap: 'break-word', pr: '0.3125rem' }}>
             {setFeatureItem(featureInfoItem)}
           </Grid>
         </Grid>
       ))}
+      <LightBoxComponent />
     </Box>
   );
 }

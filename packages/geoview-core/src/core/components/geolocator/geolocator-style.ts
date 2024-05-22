@@ -70,13 +70,9 @@ export const sxClasses = {
 export const sxClassesList = {
   listStyle: {
     fontSize: (theme: Theme) => theme.palette.geoViewFontSize.sm,
-    '& .list-title': {
-      '>div': {
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-      },
-    },
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   main: {
     whiteSpace: 'nowrap',

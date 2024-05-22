@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
+import { delay } from 'lodash';
 import { Box, FilterAltIcon, Skeleton } from '@/ui';
 import DataTable from './data-table';
 import {
@@ -15,12 +16,8 @@ import { useUIActiveFooterBarTabId } from '@/core/stores/store-interface-and-int
 import { LayerListEntry, Layout } from '@/core/components/common';
 import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
-import { TypeFieldEntry, TypeLayerData } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { LAYER_STATUS, TABS } from '@/core/utils/constant';
-
-export interface MappedLayerDataType extends TypeLayerData {
-  fieldInfos: Record<string, TypeFieldEntry | undefined>;
-}
+import { MappedLayerDataType } from './data-table-types';
 
 interface DataPanelType {
   fullWidth?: boolean;
@@ -64,6 +61,9 @@ export function Datapanel({ fullWidth = false }: DataPanelType): JSX.Element {
    */
   const handleLayerChange = useCallback(
     (_layer: LayerListEntry) => {
+      // Log
+      logger.logTraceUseCallback('DATA-PANEL - handleLayerChange');
+
       setSelectedLayerPath(_layer.layerPath);
       setIsLoading(true);
 
@@ -83,25 +83,38 @@ export function Datapanel({ fullWidth = false }: DataPanelType): JSX.Element {
    * @param {string} layerPath The path of the layer
    * @returns boolean
    */
-  const isMapFilteredSelectedForLayer = (layerPath: string): boolean =>
-    !!datatableSettings[layerPath].mapFilteredRecord && !!datatableSettings[layerPath].rowsFilteredRecord;
+  const isMapFilteredSelectedForLayer = useCallback(
+    (layerPath: string): boolean => {
+      // Log
+      logger.logTraceUseCallback('DATA-PANEL - isMapFilteredSelectedForLayer');
+
+      return !datatableSettings[layerPath].mapFilteredRecord && !!datatableSettings[layerPath].rowsFilteredRecord;
+    },
+    [datatableSettings]
+  );
 
   /**
    * Get number of features of a layer with filtered or selected layer or unknown when data table is loaded.
    * @param {string} layerPath the path of the layer
    * @returns
    */
-  const getFeaturesOfLayer = (layerPath: string): string => {
-    if (datatableSettings[layerPath] && datatableSettings[layerPath].rowsFilteredRecord) {
-      return `${datatableSettings[layerPath].rowsFilteredRecord} ${t('dataTable.featureFiltered')}`;
-    }
-    let featureStr = t('dataTable.noFeatures');
-    const features = orderedLayerData?.find((layer) => layer.layerPath === layerPath)?.features?.length ?? 0;
-    if (features > 0) {
-      featureStr = `${features} ${t('dataTable.features')}`;
-    }
-    return featureStr;
-  };
+  const getFeaturesOfLayer = useCallback(
+    (layerPath: string): string => {
+      // Log
+      logger.logTraceUseCallback('DATA-PANEL - getFeaturesOfLayer');
+
+      if (datatableSettings[layerPath] && datatableSettings[layerPath].rowsFilteredRecord) {
+        return `${datatableSettings[layerPath].rowsFilteredRecord} ${t('dataTable.featureFiltered')}`;
+      }
+      let featureStr = t('dataTable.noFeatures');
+      const features = orderedLayerData?.find((layer) => layer.layerPath === layerPath)?.features?.length ?? 0;
+      if (features > 0) {
+        featureStr = `${features} ${t('dataTable.features')}`;
+      }
+      return featureStr;
+    },
+    [datatableSettings, orderedLayerData, t]
+  );
 
   /**
    * Create layer tooltip
@@ -109,14 +122,20 @@ export function Datapanel({ fullWidth = false }: DataPanelType): JSX.Element {
    * @param {string} layerPath the path of the layer.
    * @returns
    */
-  const getLayerTooltip = (layerName: string, layerPath: string): JSX.Element => {
-    return (
-      <Box sx={{ display: 'flex', alignContent: 'center', '& svg ': { width: '0.75em', height: '0.75em' } }}>
-        {`${layerName}, ${getFeaturesOfLayer(layerPath)}`}
-        {isMapFilteredSelectedForLayer(layerPath) && <FilterAltIcon />}
-      </Box>
-    );
-  };
+  const getLayerTooltip = useCallback(
+    (layerName: string, layerPath: string): JSX.Element => {
+      // Log
+      logger.logTraceUseCallback('DATA-PANEL - getLayerTooltip');
+
+      return (
+        <Box sx={{ display: 'flex', alignContent: 'center', '& svg ': { width: '0.75em', height: '0.75em' } }}>
+          {`${layerName}, ${getFeaturesOfLayer(layerPath)}`}
+          {isMapFilteredSelectedForLayer(layerPath) && <FilterAltIcon />}
+        </Box>
+      );
+    },
+    [getFeaturesOfLayer, isMapFilteredSelectedForLayer]
+  );
 
   /**
    * Checks if layer is disabled when layer is selected and features have null value.
@@ -143,8 +162,7 @@ export function Datapanel({ fullWidth = false }: DataPanelType): JSX.Element {
     // Log
     logger.logTraceUseEffect('DATA-PANEL - isLoading', isLoading, selectedLayerPath);
 
-    // TODO: Get rid of this setTimeout of 1 second?
-    const clearLoading = setTimeout(() => {
+    const clearLoading = delay(() => {
       setIsLoading(false);
     }, 100);
     return () => clearTimeout(clearLoading);
@@ -172,6 +190,11 @@ export function Datapanel({ fullWidth = false }: DataPanelType): JSX.Element {
     return () => !!orderedLayerData.find((layer) => layer.queryStatus === LAYER_STATUS.PROCESSING);
   }, [orderedLayerData]);
 
+  /**
+   * Render the right panel content based on table data and layer loading status.
+   * NOTE: Here we return null, so that in responsive grid layout, it can be used as flag to render the guide for data table.
+   * @returns {JSX.Element | null} JSX.Element | null
+   */
   const renderContent = (): JSX.Element | null => {
     if (isLoading || memoIsLayerQueryStatusProcessing()) {
       return <Skeleton variant="rounded" width="100%" height={400} sx={{ bgcolor: theme.palette.grey[400] }} />;
@@ -191,6 +214,9 @@ export function Datapanel({ fullWidth = false }: DataPanelType): JSX.Element {
     return null;
   };
 
+  /**
+   * Callback function to update the store state for clearing the selecting layer from left panel.
+   */
   const handleGuideIsOpen = useCallback(
     (guideIsOpen: boolean): void => {
       if (guideIsOpen) {

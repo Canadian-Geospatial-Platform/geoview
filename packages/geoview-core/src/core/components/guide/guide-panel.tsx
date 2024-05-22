@@ -77,11 +77,17 @@ export function GuidePanel({ fullWidth }: GuidePanelType): JSX.Element {
    * Handle Guide layer list.
    * @param {LayerListEntry} layer geoview layer.
    */
-  const handleGuideItemClick = (layer: LayerListEntry): void => {
-    const index: number = layersList.findIndex((item) => item.layerName === layer.layerName);
-    setGuideItemIndex(index);
-    setSelectedLayerPath(layer.layerPath);
-  };
+  const handleGuideItemClick = useCallback(
+    (layer: LayerListEntry): void => {
+      // Log
+      logger.logTraceUseCallback('GUIDE PANEL - handleGuideItemClick', layer);
+
+      const index: number = layersList.findIndex((item) => item.layerName === layer.layerName);
+      setGuideItemIndex(index);
+      setSelectedLayerPath(layer.layerPath);
+    },
+    [layersList]
+  );
 
   return (
     <Box sx={sxClasses.guideContainer}>
@@ -93,9 +99,7 @@ export function GuidePanel({ fullWidth }: GuidePanelType): JSX.Element {
         aria-label={t('guide.title')}
       >
         <Box sx={sxClasses.rightPanelContainer} aria-label={t('guide.title')} className="guidebox-container">
-          <Box sx={sxClasses.guideBox} className="guideBox">
-            {layersList[guideItemIndex]?.content}
-          </Box>
+          <Box className="guideBox">{layersList[guideItemIndex]?.content}</Box>
         </Box>
       </Layout>
     </Box>

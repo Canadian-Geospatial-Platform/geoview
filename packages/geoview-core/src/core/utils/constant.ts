@@ -43,3 +43,39 @@ export const TABS = {
   TIME_SLIDER: 'time-slider',
   GEO_CHART: 'geochart',
 } as const;
+
+export const NUMBER_FILTER: Record<string, string> = {
+  lessThanOrEqualTo: '<=',
+  lessThan: '<',
+  greaterThan: '>',
+  greaterThanOrEqualTo: '>=',
+  empty: 'is null',
+  notEmpty: 'is not null',
+  between: '>',
+  betweenInclusive: '>=',
+  equals: '=',
+  notEquals: '<>',
+};
+
+export const DATE_FILTER: Record<string, string> = {
+  greaterThan: `> date 'value'`,
+  greaterThanOrEqualTo: `>= date 'value'`,
+  lessThan: `< date 'value'`,
+  lessThanOrEqualTo: `<= date 'value'`,
+  equals: `= date 'value'`,
+  empty: 'is null',
+  notEmpty: 'is not null',
+  notEquals: `<> date 'value'`,
+  between: `> date 'value'`,
+  betweenInclusive: `>= date 'value'`,
+};
+
+export const STRING_FILTER: Record<string, string> = {
+  contains: `(filterId) like ('%value%')`,
+  startsWith: `(filterId) like ('value%')`,
+  endsWith: `(filterId) like ('%value')`,
+  empty: '(filterId) is null',
+  notEmpty: '(filterId) is not null',
+  equals: `filterId = 'value'`,
+  notEquals: `filterId <> 'value'`,
+};
