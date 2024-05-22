@@ -1,5 +1,4 @@
-import { TypeLayerControls } from '@config/types/map-schema-types';
-// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
+import { TypeClassBreakStyleConfig, TypeLayerControls, TypeUniqueValueStyleConfig } from '@config/types/map-schema-types';
 import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import {
   CONST_LAYER_TYPES,
@@ -24,6 +23,8 @@ import {
 } from '@/geo/map/map-schema-types';
 import { AppEventProcessor } from './app-event-processor';
 import { MapEventProcessor } from './map-event-processor';
+import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -231,7 +232,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     createNewLegendEntries(layerPathNodes[0], 1, layers);
 
     // Update the legend layers with the updated array, triggering the subscribe
-    this.getLayerState(mapId).actions.setLegendLayers(layers);
+    this.getLayerState(mapId).setterActions.setLegendLayers(layers);
   }
   // #endregion
 
@@ -240,4 +241,185 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // GV NEVER add a store action who does set state AND map action at a same time.
   // GV Review the action in store state to make sure
+
+  /**
+   * Sets the highlighted layer state.
+   * @param {string} mapId - The ID of the map
+   * @param {string} layerPath - The layer path to set as the highlighted layer
+   */
+  static setHighlightLayer(mapId: string, layerPath: string): void {
+    // Get highlighted layer to set active button state because there can only be one highlighted layer at a time.
+    const currentHighlight = this.getLayerState(mapId).highlightedLayer;
+    // Highlight layer and get new highlighted layer path from map event processor.
+    const highlightedLayerpath = MapEventProcessor.changeOrRemoveLayerHighlight(mapId, layerPath, currentHighlight);
+    this.getLayerState(mapId).setterActions.setHighlightLayer(highlightedLayerpath);
+  }
+
+  /**
+   * Finds a legend layer by a layerPath.
+   * @param {TypeLegendLayer[]} layers - The legend layers to search.
+   * @param {string} layerPath - The path of the layer.
+   * @returns {TypeLegendLayer | undefined}
+   */
+  static findLayerByPath(layers: TypeLegendLayer[], layerPath: string): TypeLegendLayer | undefined {
+    let foundLayer: TypeLegendLayer | undefined;
+
+    layers.forEach((layer) => {
+      if (layerPath === layer.layerPath) {
+        foundLayer = layer;
+      }
+
+      if (layerPath?.startsWith(layer.layerPath) && layer.children?.length > 0) {
+        const result: TypeLegendLayer | undefined = LegendEventProcessor.findLayerByPath(layer.children, layerPath);
+        if (result) {
+          foundLayer = result;
+        }
+      }
+    });
+
+    return foundLayer;
+  }
+
+  /**
+   * Delete layer from legend layers.
+   * @param {string} mapId - The ID of the map.
+   * @param {string} layerPath - The layer path of the layer to change.
+   */
+  static deleteLayerFromLegendLayers(mapId: string, layerPath: string): void {
+    // Get legend layers to pass to recursive function
+    const curLayers = this.getLayerState(mapId).legendLayers;
+    // Remove layer and children
+    LegendEventProcessor.deleteLayersFromLegendLayersAndChildren(mapId, curLayers, layerPath);
+  }
+
+  /**
+   * Delete layer from legend layers.
+   * @param {string} mapId - The ID of the map.
+   * @param {TypeLegendLayer[]} legendLayers - The legend layers list to remove layer from.
+   * @param {string} layerPath - The layer path of the layer to change.
+   */
+  static deleteLayersFromLegendLayersAndChildren(mapId: string, legendLayers: TypeLegendLayer[], layerPath: string): void {
+    // Find index of layer and remove it
+    const layersIndexToDelete = legendLayers.findIndex((l) => l.layerPath === layerPath);
+    if (layersIndexToDelete >= 0) {
+      legendLayers.splice(layersIndexToDelete, 1);
+    } else {
+      // Check for layer to remove in children
+      legendLayers.forEach((layer) => {
+        if (layer.children && layer.children.length > 0) {
+          LegendEventProcessor.deleteLayersFromLegendLayersAndChildren(mapId, layer.children, layerPath);
+        }
+      });
+    }
+  }
+
+  /**
+   * Delete layer.
+   * @param {string} mapId - The ID of the map.
+   * @param {string} layerPath - The layer path of the layer to change.
+   */
+  static deleteLayer(mapId: string, layerPath: string): void {
+    // Delete layer through layer API
+    MapEventProcessor.getMapViewerLayerAPI(mapId).removeLayersUsingPath(layerPath);
+  }
+
+  /**
+   * Toggle visibility of an item.
+   * @param {string} mapId - The ID of the map.
+   * @param {string} layerPath - The layer path of the layer to change.
+   * @param {TypeStyleGeometry} geometryType - The geometry type of the item.
+   * @param {string} itemName - The name of the item to change.
+   */
+  static toggleItemVisibility(mapId: string, layerPath: string, geometryType: TypeStyleGeometry, itemName: string): void {
+    // Get legend layers, registered layer config, and legend layer
+    const curLayers = this.getLayerState(mapId).legendLayers;
+    const registeredLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).registeredLayers[layerPath] as VectorLayerEntryConfig;
+    const layer = this.findLayerByPath(curLayers, layerPath);
+
+    if (layer) {
+      layer.items.forEach((item) => {
+        if (item.geometryType === geometryType && item.name === itemName) {
+          // eslint-disable-next-line no-param-reassign
+          item.isVisible = !item.isVisible;
+
+          if (item.isVisible && MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(mapId, layerPath)) {
+            MapEventProcessor.setOrToggleMapLayerVisibility(mapId, layerPath, true);
+          }
+
+          // assign value to registered layer. This is use by applyFilter function to set visibility
+          // TODO: check if we need to refactor to centralize attribute setting....
+          // TODO: know issue when we toggle a default visibility item https://github.com/Canadian-Geospatial-Platform/geoview/issues/1564
+          if (registeredLayer.style![geometryType]?.styleType === 'classBreaks') {
+            const geometryStyleConfig = registeredLayer.style![geometryType]! as TypeClassBreakStyleConfig;
+            const classBreakStyleInfo = geometryStyleConfig.classBreakStyleInfo.find((styleInfo) => styleInfo.label === itemName);
+            if (classBreakStyleInfo) classBreakStyleInfo.visible = item.isVisible;
+            else geometryStyleConfig.defaultVisible = item.isVisible;
+          } else if (registeredLayer.style![geometryType]?.styleType === 'uniqueValue') {
+            const geometryStyleConfig = registeredLayer.style![geometryType]! as TypeUniqueValueStyleConfig;
+            const uniqueStyleInfo = geometryStyleConfig.uniqueValueStyleInfo.find((styleInfo) => styleInfo.label === itemName);
+            if (uniqueStyleInfo) uniqueStyleInfo.visible = item.isVisible;
+            else geometryStyleConfig.defaultVisible = item.isVisible;
+          }
+        }
+      });
+
+      // Set updated legend layers
+      this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
+
+      // Apply filter to layer
+      (MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter(layerPath, '');
+    }
+  }
+
+  /**
+   * Sets the visibility of all items in the layer.
+   * @param {string} mapId - The ID of the map.
+   * @param {string} layerPath - The layer path of the layer to change.
+   * @param {boolean} visibility - The visibility.
+   */
+  static setAllItemsVisibility(mapId: string, layerPath: string, visibility: boolean): void {
+    // Set layer to visible
+    MapEventProcessor.setOrToggleMapLayerVisibility(mapId, layerPath, true);
+    // Get legend layers, registered layer config, and legend layer
+    const curLayers = this.getLayerState(mapId).legendLayers;
+    const registeredLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).registeredLayers[layerPath] as VectorLayerEntryConfig;
+    const layer = this.findLayerByPath(curLayers, layerPath);
+
+    if (layer) {
+      layer.items.forEach((item) => {
+        // eslint-disable-next-line no-param-reassign
+        item.isVisible = visibility;
+      });
+      // assign value to registered layer. This is use by applyFilter function to set visibility
+      // TODO: check if we need to refactor to centralize attribute setting....
+      if (registeredLayer.style) {
+        ['Point', 'LineString', 'Polygon'].forEach((geometry) => {
+          if (registeredLayer.style![geometry as TypeStyleGeometry]) {
+            if (registeredLayer.style![geometry as TypeStyleGeometry]?.styleType === 'classBreaks') {
+              const geometryStyleConfig = registeredLayer.style![geometry as TypeStyleGeometry]! as TypeClassBreakStyleConfig;
+              if (geometryStyleConfig.defaultVisible !== undefined) geometryStyleConfig.defaultVisible = visibility;
+              geometryStyleConfig.classBreakStyleInfo.forEach((styleInfo) => {
+                // eslint-disable-next-line no-param-reassign
+                styleInfo.visible = visibility;
+              });
+            } else if (registeredLayer.style![geometry as TypeStyleGeometry]?.styleType === 'uniqueValue') {
+              const geometryStyleConfig = registeredLayer.style![geometry as TypeStyleGeometry]! as TypeUniqueValueStyleConfig;
+              if (geometryStyleConfig.defaultVisible !== undefined) geometryStyleConfig.defaultVisible = visibility;
+              geometryStyleConfig.uniqueValueStyleInfo.forEach((styleInfo) => {
+                // eslint-disable-next-line no-param-reassign
+                styleInfo.visible = visibility;
+              });
+            }
+          }
+        });
+      }
+    }
+
+    // Set updated legend layers
+    this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
+
+    // GV try to make reusable store actions....
+    // GV create a function setItemVisibility called with layer path and this function set the registered layer (from store values) then apply the filter.
+    (MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter(layerPath, '');
+  }
 }

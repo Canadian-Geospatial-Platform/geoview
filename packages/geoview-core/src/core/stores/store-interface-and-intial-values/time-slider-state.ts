@@ -53,6 +53,7 @@ export interface ITimeSliderState {
     setDelay: (layerPath: string, delay: number) => void;
     setFiltering: (layerPath: string, filter: boolean) => void;
     setLocked: (layerPath: string, locked: boolean) => void;
+    setName: (layerPath: string, name: string) => void;
     setReversed: (layerPath: string, locked: boolean) => void;
     setDefaultValue: (layerPath: string, defaultValue: string) => void;
     setValues: (layerPath: string, values: number[]) => void;
@@ -172,6 +173,16 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
       setLocked(layerPath: string, locked: boolean): void {
         const sliderLayers = get().timeSliderState.timeSliderLayers;
         sliderLayers[layerPath].locked = locked;
+        set({
+          timeSliderState: {
+            ...get().timeSliderState,
+            timeSliderLayers: { ...sliderLayers },
+          },
+        });
+      },
+      setName(layerPath: string, name: string): void {
+        const sliderLayers = get().timeSliderState.timeSliderLayers;
+        sliderLayers[layerPath].name = name;
         set({
           timeSliderState: {
             ...get().timeSliderState,
