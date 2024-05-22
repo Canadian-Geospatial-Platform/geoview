@@ -45,6 +45,7 @@ export function Geolocator(): JSX.Element {
   const urlRef = useRef<string>(`${geolocatorServiceURL}&lang=${displayLanguage}`);
   const abortControllerRef = useRef<AbortController | null>(null);
   const MIN_SEARCH_LENGTH = 3;
+
   /**
    * Checks if search term is decimal degree coordinate and return geo list item.
    * @param {string} searchTerm search term user searched.

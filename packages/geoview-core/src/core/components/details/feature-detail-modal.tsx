@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { useDataTableSelectedFeature } from '@/core/stores/store-interface-and-intial-values/data-table-state';
@@ -27,15 +28,23 @@ export default function FeatureDetailModal(): JSX.Element {
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const feature = useDataTableSelectedFeature()!;
 
-  const featureInfoList: TypeFieldEntry[] = Object.keys(feature?.fieldInfo ?? {}).map((fieldName) => {
-    return {
-      fieldKey: feature.fieldInfo[fieldName]!.fieldKey,
-      value: feature.fieldInfo[fieldName]!.value,
-      dataType: feature.fieldInfo[fieldName]!.dataType,
-      alias: feature.fieldInfo[fieldName]!.alias ? feature.fieldInfo[fieldName]!.alias : fieldName,
-      domain: null,
-    };
-  });
+  /**
+   * Build features list to displayed in table
+   */
+  const featureInfoList: TypeFieldEntry[] = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DETAILS PANEL - Feature Detail Modal - featureInfoList');
+
+    return Object.keys(feature?.fieldInfo ?? {}).map((fieldName) => {
+      return {
+        fieldKey: feature.fieldInfo[fieldName]!.fieldKey,
+        value: feature.fieldInfo[fieldName]!.value,
+        dataType: feature.fieldInfo[fieldName]!.dataType,
+        alias: feature.fieldInfo[fieldName]!.alias ? feature.fieldInfo[fieldName]!.alias : fieldName,
+        domain: null,
+      };
+    });
+  }, [feature]);
 
   return (
     <Dialog

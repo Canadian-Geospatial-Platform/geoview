@@ -105,19 +105,12 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [geoLocationData]);
 
-  useEffect(() => {
+  // Cache the filter data
+  const memoFilterData = useMemo(() => {
     // Log
-    logger.logTraceUseEffect('GEOLOCATOR-RESULT - geoLocationData', geoLocationData);
+    logger.logTraceUseMemo('GEOLOCATOR-RESULT - memoFilterData', geoLocationData, province, category);
 
-    setData(geoLocationData);
-  }, [geoLocationData]);
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('GEOLOCATOR-RESULT - geoLocationData province category', geoLocationData, province, category);
-
-    // update result list after setting the province and type.
-    const filterData = geoLocationData.filter((item) => {
+    return geoLocationData.filter((item) => {
       let result = true;
       if (province.length && !category.length) {
         result = item.province.toLowerCase() === province.toLowerCase();
@@ -128,8 +121,22 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
       }
       return result;
     });
-    setData(filterData);
-  }, [geoLocationData, province, category, categories, provinces]);
+  }, [category, geoLocationData, province]);
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('GEOLOCATOR-RESULT - geoLocationData', geoLocationData);
+
+    setData(geoLocationData);
+  }, [geoLocationData]);
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('GEOLOCATOR-RESULT - geoLocationData province category', memoFilterData);
+
+    // update result list after setting the province and type.
+    setData(memoFilterData);
+  }, [memoFilterData]);
 
   useEffect(() => {
     // Log

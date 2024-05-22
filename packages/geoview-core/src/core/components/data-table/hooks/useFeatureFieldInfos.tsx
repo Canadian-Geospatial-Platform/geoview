@@ -1,5 +1,7 @@
-import { TypeLayerData, TypeFieldEntry } from '@/geo/layer/layer-sets/abstract-layer-set';
-import { MappedLayerDataType } from '@/core/components/data-table/data-panel';
+import { useMemo } from 'react';
+import { TypeLayerData } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { MappedLayerDataType } from '@/core/components/data-table/data-table-types';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Custom hook for caching the mapping of fieldInfos aka columns for data table.
@@ -7,13 +9,14 @@ import { MappedLayerDataType } from '@/core/components/data-table/data-panel';
  * @returns {MappedLayerDataType[]} layerData with columns.
  */
 export function useFeatureFieldInfos(layerData: TypeLayerData[]): MappedLayerDataType[] {
-  const mappedLayerData = layerData?.map((layer) => {
-    let fieldInfos = {} as Record<string, TypeFieldEntry | undefined>;
-    if (layer.features?.length) {
-      fieldInfos = layer.features[0].fieldInfo;
-    }
-    return { ...layer, fieldInfos };
-  });
+  const mappedLayerData = useMemo(() => {
+    // Log
+    logger.logTraceUseEffect('DATA TABLE - useFeatureFieldInfos', layerData);
+
+    return layerData?.map((layer) => {
+      return { ...layer, fieldInfos: layer.features?.length ? layer.features[0].fieldInfo : {} };
+    });
+  }, [layerData]);
 
   return mappedLayerData;
 }
