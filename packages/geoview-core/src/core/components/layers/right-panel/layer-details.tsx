@@ -306,7 +306,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
                   sx={{
                     marginTop: '10px',
                     color: theme.palette.geoViewColor.textColor.light[200],
-                    fontSize: theme.palette.geoViewFontSize.xs,
+                    fontSize: theme.palette.geoViewFontSize.sm,
                     textAlign: 'center',
                   }}
                   key={generateId()}
