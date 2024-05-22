@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import _ from 'lodash';
 import { ClickAwayListener } from '@mui/material';
+import { animated, useSpring } from '@react-spring/web';
 import {
   Box,
   InfoIcon,
@@ -12,6 +13,7 @@ import {
   CloseIcon,
   IconButton,
   NotificationsIcon,
+  NotificationsActiveIcon,
   Badge,
   Typography,
   Popper,
@@ -51,13 +53,32 @@ export default function Notifications(): JSX.Element {
 
   // internal state
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [hasNewNotification, setHasNewNotification] = useState(false);
+  const [notificationsCount, setNotificationsCount] = useState(0);
   const [open, setOpen] = useState(false);
 
   // get values from the store
   const notifications = useAppNotifications();
   const interaction = useMapInteraction();
   const { removeNotification } = useAppStoreActions();
-  const notificationsCount = _.sumBy(notifications, (n) => n.count);
+
+  useEffect(() => {
+    logger.logTraceUseEffect('Notifications - notifications list changed', notificationsCount, notifications);
+    const curNotificationCount = _.sumBy(notifications, (n) => n.count);
+    if (curNotificationCount > notificationsCount) {
+      setHasNewNotification(true);
+    }
+    setNotificationsCount(curNotificationCount);
+  }, [notifications, notificationsCount]);
+
+  useEffect(() => {
+    logger.logTraceUseEffect('Notifications - hasNewNotification change', hasNewNotification);
+    if (hasNewNotification) {
+      const timeoutId = setTimeout(() => setHasNewNotification(false), 1000); // Remove after 3 seconds
+      return () => clearTimeout(timeoutId);
+    }
+    return undefined;
+  }, [hasNewNotification]);
 
   // handle open/close
   const handleOpenPopover = (event: React.MouseEvent<HTMLButtonElement>): void => {
@@ -71,12 +92,25 @@ export default function Notifications(): JSX.Element {
     }
   };
 
+  const shakeAnimation = useSpring({
+    from: { x: 0, scale: 1 },
+    to: async (next) => {
+      await next({ x: 2 }); // Move 10px right and scale up 10%
+      await next({ x: -2 }); // Move 10px left and scale down 10%
+      await next({ x: 0 }); // Reset position and scale
+    },
+    config: { duration: 50 }, // Adjust duration for faster shake
+    loop: true,
+  });
+
   /**
    * Remove a notification
    */
   const handleRemoveNotificationClick = (notification: NotificationDetailsType): void => {
     removeNotification(notification.key);
   };
+
+  const AnimatedBox = animated(Box);
 
   function getNotificationIcon(notification: NotificationDetailsType): JSX.Element {
     switch (notification.notificationType) {
@@ -122,7 +156,20 @@ export default function Notifications(): JSX.Element {
             className={`${interaction === 'dynamic' ? 'style3' : 'style4'} ${open ? 'active' : ''}`}
             color="primary"
           >
-            <NotificationsIcon />
+            {!hasNewNotification && (
+              <Box>
+                <NotificationsIcon />
+              </Box>
+            )}
+            {hasNewNotification && (
+              <AnimatedBox
+                style={{
+                  ...shakeAnimation,
+                }}
+              >
+                <NotificationsActiveIcon />
+              </AnimatedBox>
+            )}
           </IconButton>
         </Badge>
 
