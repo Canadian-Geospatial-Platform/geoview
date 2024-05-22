@@ -4,6 +4,8 @@ import {
   useTimeSliderLayers,
   useTimeSliderStoreActions,
 } from 'geoview-core/src/core/stores/store-interface-and-intial-values/time-slider-state';
+import { useLayerLegendLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/layer-state';
+import { LegendEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/legend-event-processor';
 import { getLocalizedValue, getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from 'geoview-core/src/core/utils/logger';
@@ -68,7 +70,6 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const {
     title,
     description,
-    name,
     defaultValue,
     discreteValues,
     range,
@@ -82,6 +83,10 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     locked,
     reversed,
   } = useTimeSliderLayers()[layerPath];
+
+  // Get name from legend layers
+  const legendLayers = useLayerLegendLayers();
+  const name = LegendEventProcessor.findLayerByPath(legendLayers, layerPath).layerName;
 
   // slider config
   useEffect(() => {
