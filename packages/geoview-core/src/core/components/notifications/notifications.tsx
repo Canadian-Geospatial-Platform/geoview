@@ -93,9 +93,9 @@ export default function Notifications(): JSX.Element {
   const shakeAnimation = useSpring({
     from: { x: 0, scale: 1 },
     to: async (next) => {
-      await next({ x: 2  }); // Move 10px right and scale up 10%
+      await next({ x: 2 }); // Move 10px right and scale up 10%
       await next({ x: -2 }); // Move 10px left and scale down 10%
-      await next({ x: 0,}); // Reset position and scale
+      await next({ x: 0 }); // Reset position and scale
     },
     config: { duration: 50 }, // Adjust duration for faster shake
     loop: true,
@@ -152,7 +152,11 @@ export default function Notifications(): JSX.Element {
             className={`${interaction === 'dynamic' ? 'style3' : 'style4'} ${open ? 'active' : ''}`}
             color="primary"
           >
-             {!hasNewNotification && <div><NotificationsIcon /></div>}
+            {!hasNewNotification && (
+              <div>
+                <NotificationsIcon />
+              </div>
+            )}
             {hasNewNotification && (
               <animated.div
                 style={{
