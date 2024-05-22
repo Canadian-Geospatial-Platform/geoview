@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import _delay from 'lodash/delay';
+import { delay } from 'lodash';
 import { Box, FilterAltIcon, Skeleton } from '@/ui';
 import DataTable from './data-table';
 import {
@@ -17,7 +17,7 @@ import { LayerListEntry, Layout } from '@/core/components/common';
 import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
 import { LAYER_STATUS, TABS } from '@/core/utils/constant';
-import { MappedLayerDataType } from './data-table-type';
+import { MappedLayerDataType } from './data-table-types';
 
 interface DataPanelType {
   fullWidth?: boolean;
@@ -162,7 +162,7 @@ export function Datapanel({ fullWidth = false }: DataPanelType): JSX.Element {
     // Log
     logger.logTraceUseEffect('DATA-PANEL - isLoading', isLoading, selectedLayerPath);
 
-    const clearLoading = _delay(() => {
+    const clearLoading = delay(() => {
       setIsLoading(false);
     }, 100);
     return () => clearTimeout(clearLoading);

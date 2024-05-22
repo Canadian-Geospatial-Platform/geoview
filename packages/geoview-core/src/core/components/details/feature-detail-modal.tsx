@@ -32,6 +32,9 @@ export default function FeatureDetailModal(): JSX.Element {
    * Build features list to displayed in table
    */
   const featureInfoList: TypeFieldEntry[] = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DETAILS PANEL - Feature Detail Modal - featureInfoList');
+
     return Object.keys(feature?.fieldInfo ?? {}).map((fieldName) => {
       return {
         fieldKey: feature.fieldInfo[fieldName]!.fieldKey,

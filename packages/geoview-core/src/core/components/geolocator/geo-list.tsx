@@ -4,6 +4,7 @@ import { GeoListItem } from './geolocator';
 import { sxClassesList } from './geolocator-style';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { HtmlToReact } from '@/core/containers/html-to-react';
+import { logger } from '@/core/utils/logger';
 
 type GeoListProps = {
   geoListItems: GeoListItem[];
@@ -29,6 +30,9 @@ export default function GeoList({ geoListItems, searchValue }: GeoListProps): JS
    * @returns {string} - tooltip title
    */
   const getTooltipTitle = useCallback(({ name, province, category }: tooltipProp): string => {
+    // Log
+    logger.logTraceUseCallback('GEOLOCATOR - geolist - getTooltipTitle', name, province, category);
+
     let title = name;
     if (category && category !== 'null') {
       title += `, ${category}`;
@@ -49,6 +53,9 @@ export default function GeoList({ geoListItems, searchValue }: GeoListProps): JS
    * @returns {JSX.Element}
    */
   const transformListTitle = useCallback((_title: string, _searchValue: string, province: string): JSX.Element | string => {
+    // Log
+    logger.logTraceUseCallback('GEOLOCATOR - geolist - transformListTitle', _title, _searchValue, province);
+
     const title = _title.toUpperCase();
     const searchItem = _searchValue.toUpperCase();
     const idx = title.indexOf(searchItem);

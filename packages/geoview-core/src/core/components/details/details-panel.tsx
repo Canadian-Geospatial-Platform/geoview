@@ -318,6 +318,9 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
    */
   const handleFeatureNavigateChange = useCallback(
     (change: -1 | 1): void => {
+      // Log
+      logger.logTraceUseCallback('DETAILS PANEL - handleFeatureNavigateChange', currentFeatureIndex);
+
       // Keep previous index for navigation
       prevFeatureIndex.current = currentFeatureIndex;
 
@@ -334,6 +337,8 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
    */
   const handleLayerChange = useCallback(
     (layerEntry: LayerListEntry): void => {
+      // Log
+      logger.logTraceUseCallback('DETAILS-PANEL - handleLayerChange', layerEntry.layerPath);
       // Set the selected layer path in the store which will in turn trigger the store listeners on this component
       setSelectedLayerPath(layerEntry.layerPath);
     },
@@ -381,6 +386,8 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
    */
   const handleGuideIsOpen = useCallback(
     (guideIsOpenVal: boolean): void => {
+      // Log
+      logger.logTraceUseCallback('DETAILS PANEL - handleGuideIsOpen');
       if (guideIsOpenVal) {
         setSelectedLayerPath('');
       }
@@ -392,6 +399,9 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
    * Select the layer after layer is selected from map.
    */
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DETAILS-PANEL- mapClickCoordinates', mapClickCoordinates);
+
     if (mapClickCoordinates && memoLayersList?.length && !selectedLayerPath.length) {
       const selectedLayer = memoLayersList.find((layer) => !!layer.numOffeatures);
       setSelectedLayerPath(selectedLayer?.layerPath ?? '');
@@ -404,7 +414,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
    */
   const memoIsLayerQueryStatusProcessing = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('DATA-PANEL - order layer status processing.');
+    logger.logTraceUseMemo('DETAILS-PANEL - order layer status processing.');
 
     return () => !!arrayOfLayerDataBatch?.find((layer) => layer.queryStatus === LAYER_STATUS.PROCESSING);
   }, [arrayOfLayerDataBatch]);

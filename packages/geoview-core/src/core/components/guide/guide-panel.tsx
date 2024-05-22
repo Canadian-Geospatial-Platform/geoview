@@ -79,6 +79,9 @@ export function GuidePanel({ fullWidth }: GuidePanelType): JSX.Element {
    */
   const handleGuideItemClick = useCallback(
     (layer: LayerListEntry): void => {
+      // Log
+      logger.logTraceUseCallback('GUIDE PANEL - handleGuideItemClick', layer);
+
       const index: number = layersList.findIndex((item) => item.layerName === layer.layerName);
       setGuideItemIndex(index);
       setSelectedLayerPath(layer.layerPath);

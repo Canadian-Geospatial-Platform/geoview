@@ -8,7 +8,7 @@ import { type MRT_ColumnDef as MRTColumnDef } from 'material-react-table';
 
 import { IconButton, DownloadIcon, Tooltip, Menu, MenuItem } from '@/ui';
 import { logger } from '@/core/utils/logger';
-import { ColumnsType } from './data-table-type';
+import { ColumnsType } from './data-table-types';
 
 interface ExportButtonProps {
   rows: ColumnsType[];
@@ -37,6 +37,9 @@ function ExportButton({ rows, columns, children }: ExportButtonProps): JSX.Eleme
    */
 
   const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+    // Log
+    logger.logTraceUseCallback('DATA-TABLE - EXPORT BUTTON - handleClick');
+
     setAnchorEl(event.currentTarget);
   }, []);
 
@@ -45,6 +48,9 @@ function ExportButton({ rows, columns, children }: ExportButtonProps): JSX.Eleme
    */
 
   const handleClose = useCallback(() => {
+    // Log
+    logger.logTraceUseCallback('DATA-TABLE - EXPORT BUTTON - handleClose');
+
     setAnchorEl(null);
   }, []);
 
@@ -52,6 +58,9 @@ function ExportButton({ rows, columns, children }: ExportButtonProps): JSX.Eleme
    * Build CSV Options for download.
    */
   const getCsvOptions = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DATA-TABLE - EXPORT BUTTON - getCsvOptions', columns);
+
     return (): Options => ({
       fieldSeparator: ',',
       quoteStrings: '"',
@@ -68,12 +77,15 @@ function ExportButton({ rows, columns, children }: ExportButtonProps): JSX.Eleme
    */
 
   const handleExportData = useCallback((): void => {
+    // Log
+    logger.logTraceUseCallback('DATA-TABLE - EXPORT BUTTON - handleExportData');
+
     // format the rows for csv.
     const csvRows = rows.map((row) => {
       const mappedRow = Object.keys(row).reduce((acc, curr) => {
         acc[curr] = row[curr]?.value ?? '';
         return acc;
-      }, {} as Record<string, string | null>);
+      }, {} as Record<string, unknown>);
       return mappedRow;
     });
     const csvExporter = new ExportToCsv(getCsvOptions());

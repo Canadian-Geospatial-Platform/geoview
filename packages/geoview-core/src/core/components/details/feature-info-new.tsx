@@ -51,6 +51,9 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
    * Build feature list to be displayed inside table.
    */
   const featureInfoList: TypeFieldEntry[] = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DETAILS PANEL - Feature Info new - featureInfoList');
+
     return Object.keys(feature?.fieldInfo ?? {}).map((fieldName) => {
       return {
         fieldKey: feature.fieldInfo[fieldName]!.fieldKey,

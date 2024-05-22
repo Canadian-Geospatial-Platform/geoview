@@ -1,21 +1,13 @@
 import { TypeFieldEntry, TypeLayerData } from '@/geo/layer/layer-sets/abstract-layer-set';
 
 export interface MappedLayerDataType extends TypeLayerData {
-  fieldInfos: Record<string, TypeFieldEntry | undefined>;
-}
-
-export interface FieldInfos {
-  alias: string;
-  dataType: string;
-  domain?: string;
-  fieldKey: number;
-  value: string | null;
+  fieldInfos: Partial<Record<string, TypeFieldEntry>>;
 }
 
 export interface ColumnsType {
-  ICON: FieldInfos;
-  ZOOM: FieldInfos;
-  [key: string]: FieldInfos;
+  ICON: TypeFieldEntry;
+  ZOOM: TypeFieldEntry;
+  [key: string]: TypeFieldEntry;
 }
 
 export interface DataTableProps {

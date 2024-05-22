@@ -14,15 +14,14 @@ import {
 } from '@/ui';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useLayerSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
-
-import { FieldInfos } from './data-table-type';
 import { getSxClasses } from './data-table-style';
 import { logger } from '@/core/utils/logger';
 import { useDataTableAllFeaturesDataArray } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useFeatureFieldInfos } from './hooks';
+import { TypeFieldEntry } from '@/geo/layer/layer-sets/abstract-layer-set';
 
 interface ColumnsType {
-  [key: string]: FieldInfos;
+  [key: string]: TypeFieldEntry;
 }
 /**
  * Open lighweight version (no function) of data table in a modal window

@@ -3,7 +3,7 @@ import { type MRT_TableInstance as MRTTableInstance, type MRT_ColumnFiltersState
 import { useTranslation } from 'react-i18next';
 import { useDataTableStoreActions, useDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
-import { MappedLayerDataType, ColumnsType } from '@/core/components/data-table/data-table-type';
+import { MappedLayerDataType, ColumnsType } from '@/core/components/data-table/data-table-types';
 
 interface UseSelectedRowMessageProps {
   data: MappedLayerDataType;

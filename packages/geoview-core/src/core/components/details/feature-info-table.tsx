@@ -35,6 +35,9 @@ export function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JS
 
   // linkify options
   const linkifyOptions = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DETAILS PANEL - Feature Info table - linkifyOptions');
+
     return {
       attributes: {
         title: t('details.externalLink'),

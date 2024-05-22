@@ -341,6 +341,9 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
 
   // Handle focus using dynamic focus button
   const handleDynamicFocus = useCallback((): void => {
+    // Log
+    logger.logTraceUseCallback('FOOTER BAR - handleDynamicFocus', isFocusToMap, mapId);
+
     const shell = document.getElementById(`shell-${mapId}`);
     const block = isFocusToMap ? 'start' : 'end';
     shell?.scrollIntoView({ behavior: 'smooth', block });
