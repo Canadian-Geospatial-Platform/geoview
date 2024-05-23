@@ -2,7 +2,8 @@ import { useCallback, ReactNode, useRef, useMemo } from 'react';
 import { logger } from '@/core/utils/logger';
 import { LayerList, LayerListEntry } from './layer-list';
 import { ResponsiveGridLayout, ResponsiveGridLayoutExposedMethods } from './responsive-grid-layout';
-import { LayerTitle } from './layer-title';
+import { useTheme } from '@mui/material/styles';
+import { Tooltip, Typography } from '@/ui';
 
 interface LayoutProps {
   children?: ReactNode;
@@ -26,6 +27,7 @@ export function Layout({
   onGuideIsOpen,
 }: LayoutProps): JSX.Element {
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
+  const theme = useTheme();
 
   /**
    * Handles clicks to layers in left panel. Sets selected layer.
@@ -65,11 +67,26 @@ export function Layout({
    * @returns JSX.Element
    */
   const renderLayerTitle = useCallback((): JSX.Element => {
-    return (
-      <LayerTitle hideTitle fullWidth={fullWidth}>
+
+    // clamping code copied from https://tailwindcss.com/docs/line-clamp
+  const sxClasses = {
+    fontSize: fullWidth ? theme.palette.geoViewFontSize.sm : theme.palette.geoViewFontSize.lg,
+    fontWeight: '600',
+    marginTop: '12px',
+    overflow: 'hidden',
+    display: '-webkit-box',
+    '-webkit-box-orient': 'vertical',
+    '-webkit-line-clamp': '2',
+    ...(!fullWidth && { [theme.breakpoints.up('md')]: { display:  'none' } }),
+  };
+
+  return (
+    <Tooltip title={memoLayerTitle} placement="top" arrow>
+      <Typography sx={sxClasses} component="div">
         {memoLayerTitle}
-      </LayerTitle>
-    );
+      </Typography>
+    </Tooltip>
+  );
   }, [fullWidth, memoLayerTitle]);
 
   return (
