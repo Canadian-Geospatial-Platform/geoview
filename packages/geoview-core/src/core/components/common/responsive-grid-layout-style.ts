@@ -4,14 +4,15 @@ import { Theme } from '@mui/material/styles';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getSxClasses = (theme: Theme): any => ({
   rightButtonsContainer: {
-    display: 'flex', 
-    flexDirection: 'row', 
-    gap: '0.6rem', 
+    display: 'flex',
+    flexDirection: 'row',
+    gap: '0.6rem',
     backgroundColor: theme.palette.geoViewColor.primary.lighten(0.5, 0.4),
     borderTopLeftRadius: '1.8rem',
     borderTopRightRadius: '0.5rem',
     padding: ' 0.5rem 0.5rem 0.5rem 2rem',
-    //marginBottom: '-0.2rem',
+    borderTop: `0.2rem solid ${theme.palette.geoViewColor.primary.lighten(0.2, 0.4)}`,
+    borderLeft: `0.2rem solid ${theme.palette.geoViewColor.primary.lighten(0.2, 0.4)}`,
   },
   rightGridContent: {
     border: `2px solid ${theme.palette.geoViewColor.primary.main}`,
