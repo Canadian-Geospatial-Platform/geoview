@@ -17,14 +17,21 @@ interface LayerTitleProp {
 export function LayerTitle({ children, hideTitle, fullWidth }: LayerTitleProp): JSX.Element {
   const theme = useTheme();
 
+   // clamping code copied from https://tailwindcss.com/docs/line-clamp
+  const sxClasses = {
+    fontSize: fullWidth ? theme.palette.geoViewFontSize.sm : theme.palette.geoViewFontSize.lg,
+    fontWeight: '600',
+    marginTop: '12px',
+    overflow: 'hidden',
+    display: '-webkit-box',
+    '-webkit-box-orient': 'vertical',
+    '-webkit-line-clamp': '2',
+    ...(!fullWidth && { [theme.breakpoints.up('md')]: { display: hideTitle ? 'none' : 'block' } }),
+  };
+
   return (
     <Typography
-      sx={{
-        fontSize: fullWidth ? theme.palette.geoViewFontSize.sm : theme.palette.geoViewFontSize.lg,
-        fontWeight: '600',
-        marginTop: '12px',
-        ...(!fullWidth && { [theme.breakpoints.up('md')]: { display: hideTitle ? 'none' : 'block' } }),
-      }}
+      sx={sxClasses}
       component="div"
     >
       {children}
