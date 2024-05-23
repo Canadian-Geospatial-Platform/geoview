@@ -453,8 +453,8 @@ export async function createGuideObject(
     const response = await fetch(`${assetsURL}/locales/${language}/guide.md`);
     const content = await response.text();
 
-    // Split by first level sections (Split with =1!<key>=)
-    const sections = content.split(/=(?=1!)(.*?)=/);
+    // Split by first level sections (Split with =1!<key>=) AND set URL for images from the assetURL
+    const sections = content.replaceAll('{{assetsURL}}', assetsURL).split(/=(?=1!)(.*?)=/);
 
     if (!sections[0].trim()) {
       sections.shift();
