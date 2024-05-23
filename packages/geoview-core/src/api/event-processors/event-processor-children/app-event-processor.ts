@@ -113,7 +113,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
    */
   static async setGuide(mapId: string): Promise<void> {
     const language = AppEventProcessor.getDisplayLanguage(mapId);
-    const guide = await createGuideObject(mapId, language);
+    const guide = await createGuideObject(mapId, language, this.getAppState(mapId).geoviewAssetsURL);
     if (guide !== undefined) this.getAppState(mapId).setterActions.setGuide(guide);
   }
 
