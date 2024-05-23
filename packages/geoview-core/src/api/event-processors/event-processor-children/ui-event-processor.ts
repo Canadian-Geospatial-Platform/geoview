@@ -31,7 +31,7 @@ export class UIEventProcessor extends AbstractEventProcessor {
     return this.getUIState(mapId).activeAppBarTabId;
   }
 
-  static getAppBarComponents(mapId: string): TypeValidAppBarCoreProps {
+  static getAppBarComponents(mapId: string): TypeValidAppBarCoreProps[] {
     return this.getUIState(mapId).appBarComponents;
   }
 

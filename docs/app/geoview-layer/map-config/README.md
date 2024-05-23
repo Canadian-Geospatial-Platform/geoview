@@ -41,7 +41,7 @@ The `navBar` property is optional and its type is `TypeNavBarProps`. It is used 
 
 ## components
 
-The `components` property is optional and its type is `TypeMapComponents` which is an array whose value domain is `'north-arrow', 'overview-map'`.
+The `components` property is optional and its type is `TypeMapComponents[]` which is an array whose value domain is `'north-arrow', 'overview-map'`.
 
 ## corePackages
 

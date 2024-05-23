@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useState, useRef, useEffect, useCallback, Fragment, useMemo, ReactNode } from 'react';
 import { capitalize } from 'lodash';
 import { useTheme } from '@mui/material/styles';
+import { CV_DEFAULT_APPBAR_TABS_ORDER } from '@config/types/config-constants';
 import { Box, List, ListItem, Panel, IconButton, TypeIconButtonProps, SchoolIcon, InfoOutlinedIcon, HubOutlinedIcon } from '@/ui';
 
 import { Plugin } from '@/api/plugin/plugin';
@@ -28,7 +29,6 @@ import { getSxClasses } from './app-bar-style';
 import { enforceArrayOrder, helpCloseAll, helpClosePanelById, helpOpenPanelById } from './app-bar-helper';
 import { TypeJsonObject, TypeJsonValue, toJsonObject } from '@/core/types/global-types';
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
-import { CV_DEFAULT_APPBAR_TABS_ORDER } from '@/api/config/types/config-constants';
 
 interface GroupPanelType {
   icon: ReactNode;
