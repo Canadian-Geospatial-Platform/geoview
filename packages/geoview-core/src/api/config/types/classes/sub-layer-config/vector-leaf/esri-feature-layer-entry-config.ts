@@ -3,13 +3,13 @@
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@config/types/config-constants';
 import { Cast, TypeJsonObject } from '@config/types/config-types';
 import {
-  TypeSourceImageEsriInitialConfig,
   TypeStyleConfig,
-  TypeLayerInitialSettings,
   TypeLayerEntryType,
-  TypeEsriFormatParameter,
+  TypeLayerInitialSettings,
   TypeDisplayLanguage,
-} from '@config/types/map-schema-types';
+  TypeVectorSourceFormats,
+  TypeSourceEsriFeatureInitialConfig,
+} from '@config/types/map-schema-types-new';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
 import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
@@ -20,7 +20,7 @@ import { isvalidComparedToSchema } from '@config/utils';
  */
 export class EsriFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** Source settings to apply to the GeoView image layer source at creation time. */
-  declare source: TypeSourceImageEsriInitialConfig;
+  declare source: TypeSourceEsriFeatureInitialConfig;
 
   /** Style to apply to the raster layer. */
   style?: TypeStyleConfig;
@@ -46,7 +46,7 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     if (Number.isNaN(this.layerId)) {
       throw new Error(`The layer entry with layerId equal to ${this.layerPath} must be an integer string`);
     }
-    this.source.format = 'EsriJSON' as TypeEsriFormatParameter; // Set the source.format property
+    this.source.format = 'EsriJSON' as TypeVectorSourceFormats; // Set the source.format property
     if (!isvalidComparedToSchema(this.schemaPath, layerConfig)) this.propagateError();
     if (!isvalidComparedToSchema(this.schemaPath, this)) this.propagateError();
   }

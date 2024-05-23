@@ -7,6 +7,13 @@ import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/gr
 import { EsriDynamicLayerEntryConfig } from '@config/types/classes/sub-layer-config/raster-leaf/esri-dynamic-layer-entry-config';
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LAYER_TYPES } from '@config/types/config-constants';
 import { TypeJsonObject } from '@config/types/config-types';
+import {
+  TypeBaseVectorConfig,
+  TypeIconSymbolVectorConfig,
+  TypeLineStringVectorConfig,
+  TypePolygonVectorConfig,
+  TypeSimpleSymbolVectorConfig,
+} from './map-schema-types-new';
 
 /**
  * Type guard function that redefines a ConfigBaseClass as a GroupLayerEntryConfig if the entryType attribute of the verifyIfLayer
@@ -159,3 +166,55 @@ export const geoviewConfigIsEsriDynamic = (verifyIfLayer: AbstractGeoviewLayerCo
 export const layerConfigIsCSV = (verifyIfLayer: AbstractGeoviewLayerConfig): verifyIfLayer is CsvLayerConfig => {
   return verifyIfLayer?.geoviewLayerType === CV_CONST_LAYER_TYPES.CSV;
 }; */
+
+/**
+ * type guard function that redefines a TypeBaseVectorConfig as a TypeLineStringVectorConfig if the type attribute of the
+ * verifyIfConfig parameter is 'lineString'. The type assertion applies only to the true block of the if clause that use
+ * this function.
+ *
+ * @param {TypeBaseVectorConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
+ *
+ * @returns {boolean} true if the type assertion is valid.
+ */
+export const isLineStringVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): verifyIfConfig is TypeLineStringVectorConfig => {
+  return verifyIfConfig?.type === 'lineString';
+};
+
+/**
+ * type guard function that redefines a TypeBaseVectorConfig as a TypePolygonVectorConfig if the type attribute of the
+ * verifyIfConfig parameter is 'filledPolygon'. The type assertion applies only to the true block of the if clause that use
+ * this function.
+ *
+ * @param {TypeBaseVectorConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
+ *
+ * @returns {boolean} true if the type assertion is valid.
+ */
+export const isFilledPolygonVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): verifyIfConfig is TypePolygonVectorConfig => {
+  return verifyIfConfig?.type === 'filledPolygon';
+};
+
+/**
+ * type guard function that redefines a TypeBaseVectorConfig as a TypeSimpleSymbolVectorConfig if the type attribute of the
+ * verifyIfConfig parameter is 'simpleSymbol'. The type assertion applies only to the true block of the if clause that use
+ * this function.
+ *
+ * @param {TypeBaseVectorConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
+ *
+ * @returns {boolean} true if the type assertion is valid.
+ */
+export const isSimpleSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): verifyIfConfig is TypeSimpleSymbolVectorConfig => {
+  return verifyIfConfig?.type === 'simpleSymbol';
+};
+
+/**
+ * type guard function that redefines a TypeBaseVectorConfig as a TypeIconSymbolVectorConfig if the type attribute of the
+ * verifyIfConfig parameter is 'iconSymbol'. The type assertion applies only to the true block of the if clause that use
+ * this function.
+ *
+ * @param {TypeBaseVectorConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
+ *
+ * @returns {boolean} true if the type assertion is valid.
+ */
+export const isIconSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): verifyIfConfig is TypeIconSymbolVectorConfig => {
+  return verifyIfConfig?.type === 'iconSymbol';
+};

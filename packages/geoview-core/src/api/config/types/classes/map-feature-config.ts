@@ -16,9 +16,7 @@ import {
   TypeServiceUrls,
   TypeValidMapProjectionCodes,
   TypeValidVersions,
-  VALID_PROJECTION_CODES,
-  VALID_VERSIONS,
-} from '@config/types/map-schema-types';
+} from '@config/types/map-schema-types-new';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { EsriDynamicLayerConfig } from '@config/types/classes/geoview-config/raster-config/esri-dynamic-config';
 import { Cast, TypeJsonArray, TypeJsonObject, toJsonObject } from '@config/types/config-types';
@@ -32,6 +30,8 @@ import {
   CV_MAP_CENTER,
   CV_MAP_CONFIG_SCHEMA_PATH,
   CV_MAP_EXTENTS,
+  ACCEPTED_SCHEMA_VERSIONS,
+  VALID_PROJECTION_CODES,
 } from '@config/types/config-constants';
 import { isvalidComparedToSchema } from '@config/utils';
 import { isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
@@ -299,7 +299,7 @@ export class MapFeatureConfig {
 
     this.#validateBasemap();
 
-    this.schemaVersionUsed = VALID_VERSIONS.includes(this.schemaVersionUsed!)
+    this.schemaVersionUsed = ACCEPTED_SCHEMA_VERSIONS.includes(this.schemaVersionUsed!)
       ? this.schemaVersionUsed
       : CV_DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed!;
     const minZoom = this.map.viewSettings.minZoom!;

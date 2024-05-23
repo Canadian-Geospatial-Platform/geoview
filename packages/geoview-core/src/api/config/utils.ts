@@ -2,7 +2,7 @@ import Ajv from 'ajv';
 
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LAYER_TYPES } from '@config/types/config-constants';
 import { TypeGeoviewLayerType, TypeJsonObject } from '@config/types/config-types';
-import { TypeLayerEntryType, TypeLocalizedString } from '@config/types/map-schema-types';
+import { TypeLayerEntryType, TypeLocalizedString } from '@config/types/map-schema-types-new';
 import schema from '@config/types/config-validation-schema.json';
 import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
 import { MapFeatureConfig } from '@config/types/classes/map-feature-config';

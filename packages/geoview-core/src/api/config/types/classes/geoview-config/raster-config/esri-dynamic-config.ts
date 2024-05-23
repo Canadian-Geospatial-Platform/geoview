@@ -3,22 +3,17 @@ import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config
 import { EsriDynamicLayerEntryConfig } from '@config/types/classes/sub-layer-config/raster-leaf/esri-dynamic-layer-entry-config';
 import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
 import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
-import { TypeGeoviewLayerType, TypeJsonObject } from '@config/types/config-types';
-import { TypeDisplayLanguage, TypeLayerInitialSettings } from '@config/types/map-schema-types';
+import { TypeJsonObject } from '@config/types/config-types';
+import { TypeDisplayLanguage, TypeLayerInitialSettings } from '@config/types/map-schema-types-new';
 import { isvalidComparedToSchema } from '@config/utils';
 import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
 
-/* */
+export type TypeEsriDynamicLayerNode = GroupLayerEntryConfig | EsriDynamicLayerEntryConfig;
 
-export type TypeEsriDynamicLayerNode = GroupLayerEntryConfig | (AbstractBaseLayerEntryConfig & EsriDynamicLayerEntryConfig);
-
-/**
- * The ESRI dynamic geoview layer class.
- */
+/** The ESRI dynamic geoview layer class. */
 export class EsriDynamicLayerConfig extends AbstractGeoviewLayerConfig {
   /** Type of GeoView layer. */
-  geoviewLayerType: TypeGeoviewLayerType;
+  geoviewLayerType = CV_CONST_LAYER_TYPES.ESRI_DYNAMIC;
 
   /** The layer entries to use from the GeoView layer. */
   declare listOfLayerEntryConfig: TypeEsriDynamicLayerNode[];
@@ -32,7 +27,6 @@ export class EsriDynamicLayerConfig extends AbstractGeoviewLayerConfig {
    */
   constructor(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, mapFeatureConfig?: MapFeatureConfig) {
     super(layerConfig, language, mapFeatureConfig);
-    this.geoviewLayerType = CV_CONST_LAYER_TYPES.ESRI_DYNAMIC;
     if (!isvalidComparedToSchema(this.geoviewLayerSchema, layerConfig)) this.propagateError();
     if (!isvalidComparedToSchema(this.geoviewLayerSchema, this)) this.propagateError();
     this.validate();

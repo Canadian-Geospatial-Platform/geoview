@@ -2,7 +2,15 @@
 // TODOCONT: remove code duplication.
 
 import { Cast, LayerEntryTypesKey, LayerTypesKey, TypeGeoviewLayerType } from '@config/types/config-types';
-import { TypeBasemapId, TypeLayerEntryType, TypeValidMapProjectionCodes } from '@config/types/map-schema-types';
+import {
+  TypeBasemapId,
+  TypeDisplayLanguage,
+  TypeDisplayTheme,
+  TypeInteraction,
+  TypeLayerEntryType,
+  TypeValidMapProjectionCodes,
+  TypeValidVersions,
+} from '@config/types/map-schema-types-new';
 import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
 
 /** The default geocore url */
@@ -18,14 +26,13 @@ export const CV_CONST_SUB_LAYER_TYPES: Record<LayerEntryTypesKey, TypeLayerEntry
   RASTER_TILE: 'raster-tile',
   RASTER_IMAGE: 'raster-image',
   GROUP: 'group',
-  GEOCORE: 'geoCore',
 };
 
 /**
  * This type is created to only be used when validating the configuration schema types.
  * Indeed, GeoCore is not an official Abstract Geoview Layer, but it can be used in schema types.
  */
-export type TypeGeoviewLayerTypeWithGeoCore = TypeGeoviewLayerType | typeof CV_CONST_SUB_LAYER_TYPES.GEOCORE;
+export type TypeGeoviewLayerTypeWithGeoCore = TypeGeoviewLayerType;
 
 /**
  * Definition of the GeoView layer constants
@@ -49,24 +56,24 @@ export const CV_CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> =
  * Definition of the sub schema to use for each type of Geoview layer
  */
 export const CV_CONST_LEAF_LAYER_SCHEMA_PATH: Record<LayerTypesKey, string> = {
-  CSV: 'https://cgpv/schema#/definitions/TypeVectorLayerEntryConfig',
-  ESRI_DYNAMIC: 'https://cgpv/schema#/definitions/TypeEsriDynamicLayerEntryConfig',
-  ESRI_FEATURE: 'https://cgpv/schema#/definitions/TypeVectorLayerEntryConfig',
-  ESRI_IMAGE: 'https://cgpv/schema#/definitions/TypeEsriImageLayerEntryConfig',
-  IMAGE_STATIC: 'https://cgpv/schema#/definitions/TypeImageStaticLayerEntryConfig',
-  GEOJSON: 'https://cgpv/schema#/definitions/TypeVectorLayerEntryConfig',
-  GEOPACKAGE: 'https://cgpv/schema#/definitions/TypeVectorLayerEntryConfig',
-  XYZ_TILES: 'https://cgpv/schema#/definitions/TypeTileLayerEntryConfig',
-  VECTOR_TILES: 'Thttps://cgpv/schema#/definitions/ypeTileLayerEntryConfig',
-  OGC_FEATURE: 'https://cgpv/schema#/definitions/TypeVectorLayerEntryConfig',
-  WFS: 'https://cgpv/schema#/definitions/TypeVectorLayerEntryConfig',
-  WMS: 'https://cgpv/schema#/definitions/TypeOgcWmsLayerEntryConfig',
+  CSV: 'https://cgpv/schema#/definitions/VectorLayerEntryConfig',
+  ESRI_DYNAMIC: 'https://cgpv/schema#/definitions/EsriDynamicLayerEntryConfig',
+  ESRI_FEATURE: 'https://cgpv/schema#/definitions/EsriFeatureLayerEntryConfig',
+  ESRI_IMAGE: 'https://cgpv/schema#/definitions/EsriImageLayerEntryConfig',
+  IMAGE_STATIC: 'https://cgpv/schema#/definitions/ImageStaticLayerEntryConfig',
+  GEOJSON: 'https://cgpv/schema#/definitions/VectorLayerEntryConfig',
+  GEOPACKAGE: 'https://cgpv/schema#/definitions/VectorLayerEntryConfig',
+  XYZ_TILES: 'https://cgpv/schema#/definitions/TileLayerEntryConfig',
+  VECTOR_TILES: 'Thttps://cgpv/schema#/definitions/TileLayerEntryConfig',
+  OGC_FEATURE: 'https://cgpv/schema#/definitions/VectorLayerEntryConfig',
+  WFS: 'https://cgpv/schema#/definitions/VectorLayerEntryConfig',
+  WMS: 'https://cgpv/schema#/definitions/OgcWmsLayerEntryConfig',
 };
 
 export const CV_GEOVIEW_SCHEMA_PATH: Record<LayerTypesKey, string> = {
   CSV: '',
-  ESRI_DYNAMIC: 'https://cgpv/schema#/definitions/AbstractGeoviewLayerConfig',
-  ESRI_FEATURE: 'https://cgpv/schema#/definitions/AbstractGeoviewLayerConfig',
+  ESRI_DYNAMIC: 'https://cgpv/schema#/definitions/EsriDynamicLayerConfig',
+  ESRI_FEATURE: 'https://cgpv/schema#/definitions/EsriFeatureLayerConfig',
   ESRI_IMAGE: '',
   IMAGE_STATIC: '',
   GEOJSON: '',
@@ -79,6 +86,21 @@ export const CV_GEOVIEW_SCHEMA_PATH: Record<LayerTypesKey, string> = {
 };
 export const CV_MAP_CONFIG_SCHEMA_PATH = 'https://cgpv/schema#/definitions/MapFeatureConfig';
 export const CV_LAYER_GROUP_SCHEMA_PATH = 'https://cgpv/schema#/definitions/TypeLayerGroupEntryConfig';
+
+/** Array of schema versions accepted by the viewer. */
+export const ACCEPTED_SCHEMA_VERSIONS: TypeValidVersions[] = ['1.0'];
+
+/** Constante mainly use for language validation. */
+export const VALID_DISPLAY_LANGUAGE: TypeDisplayLanguage[] = ['en', 'fr'];
+
+/** Array of valid geoview themes. */
+export const VALID_DISPLAY_THEME: TypeDisplayTheme[] = ['dark', 'light', 'geo.ca'];
+
+/** Constante mainly use for interaction validation. */
+export const VALID_INTERACTION: TypeInteraction[] = ['static', 'dynamic'];
+
+/** Constant mainly used to test if a TypeValidMapProjectionCodes variable is a valid projection codes. */
+export const VALID_PROJECTION_CODES = [3978, 3857];
 
 /**
  *  Definition of the basemap options type.
@@ -120,13 +142,17 @@ export const CV_MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]> = {
  *  Definition of the MapFeatureConfig default values. All the default values that applies to the map feature configuration are
  * defined here.
  */
+// TODO: Revise default values.
 export const CV_DEFAULT_MAP_FEATURE_CONFIG = Cast<MapFeatureConfig>({
   map: {
     interaction: 'dynamic',
     highlightColor: 'black',
     viewSettings: {
       initialView: {
-        zoomAndCenter: [3.5, [-90, 60]],
+        zoomAndCenter: [4.5, [-90, 67]],
+        enableRotation: true,
+        rotation: 0,
+        maxExtent: [-125, 30, -60, 89],
       },
       enableRotation: true,
       rotation: 0,
@@ -143,12 +169,18 @@ export const CV_DEFAULT_MAP_FEATURE_CONFIG = Cast<MapFeatureConfig>({
     listOfGeoviewLayerConfig: [],
     extraOptions: {},
   },
-  theme: 'geo.ca',
+  theme: 'dark',
+  navBar: ['zoom', 'fullscreen', 'home'],
+  footerBar: {
+    tabs: {
+      core: ['legend', 'layers', 'details', 'data-table'],
+      custom: [],
+    },
+  },
   components: ['north-arrow', 'overview-map'],
   appBar: { tabs: { core: ['geolocator'] } },
-  navBar: ['zoom', 'fullscreen', 'home'],
   corePackages: [],
-  overviewMap: undefined,
+  overviewMap: { hideOnZoom: 0 },
   externalPackages: [],
   serviceUrls: {
     geocoreUrl: CV_CONFIG_GEOCORE_URL,

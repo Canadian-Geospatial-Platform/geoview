@@ -9,6 +9,8 @@ import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/gr
 import { EsriDynamicLayerEntryConfig } from '@config/types/classes/sub-layer-config/raster-leaf/esri-dynamic-layer-entry-config';
 import { EsriFeatureLayerEntryConfig } from '@config/types/classes/sub-layer-config/vector-leaf/esri-feature-layer-entry-config';
 
+export { MapFeatureConfig } from '@config/types/classes/map-feature-config';
+
 // #region UTILITIES TYPES
 
 /**
@@ -310,15 +312,11 @@ export type TypeGeoviewLayerConfig = AbstractGeoviewLayerConfig;
 /**
  * List of supported geoview theme.
  */
-// TODO: Move all the constants in the config-constants file.
 export type TypeDisplayTheme = 'dark' | 'light' | 'geo.ca';
-export const VALID_DISPLAY_THEME: TypeDisplayTheme[] = ['dark', 'light', 'geo.ca'];
 
 /**
 /** ISO 639-1  language code prefix. */
 export type TypeDisplayLanguage = 'en' | 'fr';
-/** Constante mainly use for language prefix validation. */
-export const VALID_DISPLAY_LANGUAGE: TypeDisplayLanguage[] = ['en', 'fr'];
 /**
  * ISO 639-1 code indicating the languages supported by the configuration file. It will use value(s) provided here to access
  * bilangual nodes. For value(s) provided here, each bilingual node MUST provide a value.
@@ -453,10 +451,10 @@ export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'home' | 'location'>
  */
 export type TypeAppBarProps = {
   tabs: {
-    core: TypeValidAppBarCoreProps;
+    core: TypeValidAppBarCoreProps[];
   };
 };
-export type TypeValidAppBarCoreProps = Array<'geolocator' | 'export' | 'basemap-panel' | 'geochart' | 'guide' | 'legend' | 'details'>;
+export type TypeValidAppBarCoreProps = 'geolocator' | 'export' | 'basemap-panel' | 'geochart' | 'guide' | 'legend' | 'details';
 
 /**
  * Configuration available for the footer bar component.

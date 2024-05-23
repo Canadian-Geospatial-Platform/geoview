@@ -1,6 +1,6 @@
 import { CV_CONST_SUB_LAYER_TYPES, CV_LAYER_GROUP_SCHEMA_PATH } from '@config/types/config-constants';
 import { TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
-import { TypeDisplayLanguage, TypeLayerEntryType, TypeLayerInitialSettings } from '@config/types/map-schema-types';
+import { TypeDisplayLanguage, TypeLayerEntryType, TypeLayerInitialSettings } from '@config/types/map-schema-types-new';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
 import { layerEntryIsGroupLayer } from '@config/types/type-guards';
@@ -9,6 +9,9 @@ import { layerEntryIsGroupLayer } from '@config/types/type-guards';
  * Type used to define a group of layers. It can be either subgroups or sublayers.
  */
 export class GroupLayerEntryConfig extends ConfigBaseClass {
+  /** Used internally to distinguish layer groups derived from the metadata. */
+  isMetadataLayerGroup = false;
+
   /** Layer entry data type. */
   override entryType = CV_CONST_SUB_LAYER_TYPES.GROUP;
 

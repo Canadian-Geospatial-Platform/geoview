@@ -1,7 +1,7 @@
 import defaultsDeep from 'lodash/defaultsDeep';
 
 import { TypeGeoviewLayerType, TypeJsonObject } from '@config/types/config-types';
-import { TypeLayerEntryType, TypeLayerInitialSettings, TypeDisplayLanguage, Extent } from '@config/types/map-schema-types';
+import { TypeLayerEntryType, TypeLayerInitialSettings, TypeDisplayLanguage, Extent } from '@config/types/map-schema-types-new';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { normalizeLocalizedString } from '@config/utils';
 
@@ -18,10 +18,6 @@ export abstract class ConfigBaseClass {
 
   /** Parent node (used to compute the layerPath). */
   #parentNode: ConfigBaseClass | undefined = undefined;
-
-  /** Used internally to distinguish layer groups derived from the metadata. */
-  // TODO: Refactor - Add this back?
-  // #isMetadataLayerGroup?: false;
 
   /** The identifier of the layer to display on the map. */
   layerId: string;

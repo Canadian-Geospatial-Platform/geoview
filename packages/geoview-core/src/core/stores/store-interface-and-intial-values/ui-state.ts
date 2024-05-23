@@ -14,7 +14,7 @@ type FocusItemProps = {
 export interface IUIState {
   activeFooterBarTabId: string;
   activeTrapGeoView: boolean;
-  appBarComponents: TypeValidAppBarCoreProps;
+  appBarComponents: TypeValidAppBarCoreProps[];
   corePackagesComponents: TypeMapCorePackages;
   focusITem: FocusItemProps;
   geoLocatorActive: boolean;
@@ -188,7 +188,8 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
 export const useUIActiveFocusItem = (): FocusItemProps => useStore(useGeoViewStore(), (state) => state.uiState.focusITem);
 export const useUIActiveFooterBarTabId = (): string => useStore(useGeoViewStore(), (state) => state.uiState.activeFooterBarTabId);
 export const useUIActiveTrapGeoView = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.activeTrapGeoView);
-export const useUIAppbarComponents = (): TypeValidAppBarCoreProps => useStore(useGeoViewStore(), (state) => state.uiState.appBarComponents);
+export const useUIAppbarComponents = (): TypeValidAppBarCoreProps[] =>
+  useStore(useGeoViewStore(), (state) => state.uiState.appBarComponents);
 export const useUIAppbarGeolocatorActive = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.geoLocatorActive);
 export const useUICorePackagesComponents = (): TypeMapCorePackages =>
   useStore(useGeoViewStore(), (state) => state.uiState.corePackagesComponents);

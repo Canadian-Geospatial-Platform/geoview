@@ -1,6 +1,6 @@
 import { CV_DEFAULT_MAP_FEATURE_CONFIG } from '@config/types/config-constants';
 import { Cast, TypeJsonValue, TypeJsonObject, toJsonObject, TypeJsonArray } from '@config/types/config-types';
-import { TypeDisplayLanguage } from '@config/types/map-schema-types';
+import { TypeDisplayLanguage } from '@config/types/map-schema-types-new';
 import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
 import { UUIDmapConfigReader } from '@config/uuid-config-reader';
 import { logger } from '@/core//utils/logger';
