@@ -70,7 +70,8 @@ export function Layout({
 
     // clamping code copied from https://tailwindcss.com/docs/line-clamp
   const sxClasses = {
-    fontSize: fullWidth ? theme.palette.geoViewFontSize.sm : theme.palette.geoViewFontSize.lg,
+    fontSize: theme.palette.geoViewFontSize.lg,
+    textAlign: fullWidth ? 'center' : 'left',
     fontWeight: '600',
     marginTop: '12px',
     overflow: 'hidden',

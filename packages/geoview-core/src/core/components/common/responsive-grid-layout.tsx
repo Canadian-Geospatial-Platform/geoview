@@ -284,7 +284,9 @@ const ResponsiveGridLayout = forwardRef(
             <Box
               sx={{
                 display: 'flex',
-                alignItems: 'center',
+                alignItems: fullWidth ? 'end' : 'center',
+                flexDirection: fullWidth ? 'column' : 'row',
+                gap: fullWidth ? '10px' : '0',
                 [theme.breakpoints.up('md')]: { justifyContent: fullWidth ? 'space-between' : 'right' },
                 [theme.breakpoints.down('md')]: { justifyContent: 'space-between' },
               }}
