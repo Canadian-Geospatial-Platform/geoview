@@ -43,7 +43,7 @@ export function toJsonObject(p: unknown): TypeJsonObject {
 }
 
 // Definition of the keys used to create the constants of the GeoView layer
-export type LayerEntryTypesKey = 'VECTOR' | 'VECTOR_TILE' | 'RASTER_TILE' | 'RASTER_IMAGE' | 'GROUP' | 'GEOCORE';
+export type LayerEntryTypesKey = 'VECTOR' | 'VECTOR_TILE' | 'RASTER_TILE' | 'RASTER_IMAGE' | 'GROUP';
 
 // Definition of the keys used to create the constants of the GeoView layer
 export type LayerTypesKey =

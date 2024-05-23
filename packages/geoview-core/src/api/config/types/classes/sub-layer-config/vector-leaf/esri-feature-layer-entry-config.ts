@@ -1,14 +1,12 @@
-// Needs to disable class-methods-use-this because we need to pass the instance reference 'this' to the validator.
-// eslint-disable-next-line @typescript-eslint/class-methods-use-this
+import { defaultsDeep } from 'lodash';
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@config/types/config-constants';
 import { Cast, TypeJsonObject } from '@config/types/config-types';
 import {
-  TypeSourceImageEsriInitialConfig,
   TypeStyleConfig,
-  TypeLayerInitialSettings,
   TypeLayerEntryType,
-  TypeEsriFormatParameter,
+  TypeLayerInitialSettings,
   TypeDisplayLanguage,
+  TypeSourceEsriFeatureInitialConfig,
 } from '@config/types/map-schema-types';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
@@ -19,10 +17,10 @@ import { isvalidComparedToSchema } from '@config/utils';
  * The ESRI feature geoview sublayer class.
  */
 export class EsriFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-  /** Source settings to apply to the GeoView image layer source at creation time. */
-  declare source: TypeSourceImageEsriInitialConfig;
+  /** Source settings to apply to the GeoView feature layer source at creation time. */
+  declare source: TypeSourceEsriFeatureInitialConfig;
 
-  /** Style to apply to the raster layer. */
+  /** Style to apply to the feature layer. */
   style?: TypeStyleConfig;
 
   /**
@@ -42,11 +40,12 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     parentNode?: ConfigBaseClass
   ) {
     super(layerConfig, initialSettings, language, geoviewLayerConfig, parentNode);
+    // Set default values.
+    this.source = defaultsDeep(this.source, { maxRecordCount: 0, format: 'EsriJSON' });
     this.style = layerConfig.style ? { ...Cast<TypeStyleConfig>(layerConfig.style) } : undefined;
     if (Number.isNaN(this.layerId)) {
       throw new Error(`The layer entry with layerId equal to ${this.layerPath} must be an integer string`);
     }
-    this.source.format = 'EsriJSON' as TypeEsriFormatParameter; // Set the source.format property
     if (!isvalidComparedToSchema(this.schemaPath, layerConfig)) this.propagateError();
     if (!isvalidComparedToSchema(this.schemaPath, this)) this.propagateError();
   }

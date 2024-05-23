@@ -103,6 +103,7 @@
       <tbody>
         <tr>
           <td>
+            <span style="margin:10px;">Input Configuration</span>
             <div class="editor">
               <div class="line-numbers" id="inputLineNumbers">
                 <span></span>
@@ -112,6 +113,7 @@
             </div>
           </td>
           <td>
+            <span style="margin:10px;">Internal configuration:</span>
             <span id="validationMessage" style="margin:10px;">File not validated...</span>
             <div class="editor">
               <div class="line-numbers" id="outputLineNumbers">
@@ -184,7 +186,7 @@ p=3857&z=4&c=-100,40&l=en&t=dark&b=basemapId:transport,shaded:false,labeled:true
             return res.text();
           })
           .then((data) => {
-            document.getElementById('configGeoview').textContent = data;
+            document.getElementById('configGeoview').value = data;
 
             // set default number of lines
             const textarea = document.querySelector('textarea');
@@ -212,18 +214,18 @@ p=3857&z=4&c=-100,40&l=en&t=dark&b=basemapId:transport,shaded:false,labeled:true
         const configArea = document.getElementById('configGeoview');
         const configOutput = document.getElementById('configOutput');
 
-      // get config and test if JSON is valid
-      const mapConfig = cgpv.api.configApi.getMapConfig(configArea.value.replaceAll('"', "'").replaceAll("\\'", "\'"), langue);
-      configOutput.textContent = mapConfig.getIndentedJsonString();
+        // get config and test if JSON is valid
+        const mapConfig = cgpv.api.configApi.getMapConfig(configArea.value.replaceAll('"', "'").replaceAll("\\'", "\'"), langue);
+        configOutput.value = mapConfig.getIndentedJsonString();
 
-      // Generate line numbers
-      (() => {
-        const textarea = document.getElementById('configOutput');
-        const lineNumbersContainer = document.getElementById('outputLineNumbers');
-        const lines = textarea.value.split('\n').length+1;
-        const lineNumbers = Array.from({ length: lines }, (_, index) => '').join('<span />');
-        lineNumbersContainer.innerHTML = lineNumbers;
-      })();
+        // Generate line numbers
+        (() => {
+          const textarea = document.getElementById('configOutput');
+          const lineNumbersContainer = document.getElementById('outputLineNumbers');
+          const lines = textarea.value.split('\n').length+1;
+          const lineNumbers = Array.from({ length: lines }, (_, index) => '').join('<span />');
+          lineNumbersContainer.innerHTML = lineNumbers;
+        })();
 
         // set class and message
         message.classList.add('config-json-valid');
