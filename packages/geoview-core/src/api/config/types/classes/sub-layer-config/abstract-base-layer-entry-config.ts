@@ -1,39 +1,26 @@
 import cloneDeep from 'lodash/cloneDeep';
 
 import { Cast, TypeJsonObject } from '@config/types/config-types';
-import {
-  TypeBaseSourceVectorInitialConfig,
-  TypeDisplayLanguage,
-  TypeLayerInitialSettings,
-  TypeSourceImageEsriInitialConfig,
-  TypeSourceImageInitialConfig,
-  TypeSourceImageStaticInitialConfig,
-  TypeSourceImageWmsInitialConfig,
-  TypeSourceTileInitialConfig,
-  TypeTemporalDimension,
-  TypeVectorSourceInitialConfig,
-  TypeVectorTileSourceInitialConfig,
-} from '@config/types/map-schema-types';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
-
-// TODO: Refactor - Instead of listing all the possible types, for the `source` attribute, use a parent type
-export type TypeSourceInitialConfig =
-  | TypeBaseSourceVectorInitialConfig
-  | TypeSourceTileInitialConfig
-  | TypeVectorSourceInitialConfig
-  | TypeVectorTileSourceInitialConfig
-  | TypeSourceImageInitialConfig
-  | TypeSourceImageWmsInitialConfig
-  | TypeSourceImageEsriInitialConfig
-  | TypeSourceImageStaticInitialConfig;
+import {
+  TypeDisplayLanguage,
+  TypeLayerInitialSettings,
+  TypeBaseSourceInitialConfig,
+  TypeTemporalDimension,
+  TypeGeometryType,
+} from '@config/types/map-schema-types';
+import { CV_DEFAULT_MAP_FEATURE_CONFIG } from '../../config-constants';
 
 /**
  * Base type used to define a GeoView sublayer to display on the map.
  */
 export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
+  /** The geometry type of the leaf node. */
+  geometryType: TypeGeometryType;
+
   /** Source settings to apply to the GeoView vector layer source at creation time. */
-  source: TypeSourceInitialConfig;
+  source?: TypeBaseSourceInitialConfig;
 
   /** Optional temporal dimension. */
   temporalDimension?: TypeTemporalDimension;
@@ -55,12 +42,11 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     parentNode?: ConfigBaseClass
   ) {
     super(layerConfig, initialSettings, language, geoviewLayerConfig, parentNode);
+    this.geometryType = layerConfig.geometryType as TypeGeometryType;
     // If the user has provided a source then keep it, else create one using default values.
-    if (layerConfig.source) this.source = Cast<TypeBaseSourceVectorInitialConfig>(cloneDeep(layerConfig.source));
-    else
-      this.source = {
-        maxRecordCount: 0,
-      };
+    // GV: This Cast operation uses a cloned version of the entire configuration, it covers even the child properties.
+    if (layerConfig.source) this.source = Cast<TypeBaseSourceInitialConfig>(cloneDeep(layerConfig.source));
+    else this.source = Cast<TypeBaseSourceInitialConfig>({ projection: CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.projection });
     if (layerConfig.temporalDimension) this.temporalDimension = Cast<TypeTemporalDimension>(cloneDeep(layerConfig.temporalDimension));
   }
 }

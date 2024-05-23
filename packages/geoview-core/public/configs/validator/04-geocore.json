@@ -1,0 +1,48 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "minZoom": 5,
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "12acd145-626a-49eb-b850-0a59c9bc7506",
+        "isGeocore": true
+      },
+      {
+        "geoviewLayerId": "ccc75c12-5acc-4a6a-959f-ef6f621147b9",
+        "isGeocore": true
+      }
+    ],
+    "highlightColor": "black",
+    "extraOptions": {}
+  },
+  "theme": "geo.ca",
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator"
+      ]
+    }
+  },
+  "overviewMap": {
+    "hideOnZoom": 0
+  },
+  "components": [
+    "overview-map"
+  ],
+  "corePackages": [],
+  "externalPackages": [],
+  "schemaVersionUsed": "1.0"
+}
