@@ -1,8 +1,8 @@
 import { useCallback, ReactNode, useRef, useMemo } from 'react';
+import { useTheme } from '@mui/material/styles';
 import { logger } from '@/core/utils/logger';
 import { LayerList, LayerListEntry } from './layer-list';
 import { ResponsiveGridLayout, ResponsiveGridLayoutExposedMethods } from './responsive-grid-layout';
-import { useTheme } from '@mui/material/styles';
 import { Tooltip, Typography } from '@/ui';
 
 interface LayoutProps {
@@ -67,27 +67,26 @@ export function Layout({
    * @returns JSX.Element
    */
   const renderLayerTitle = useCallback((): JSX.Element => {
-
     // clamping code copied from https://tailwindcss.com/docs/line-clamp
-  const sxClasses = {
-    fontSize: theme.palette.geoViewFontSize.lg,
-    textAlign: fullWidth ? 'center' : 'left',
-    fontWeight: '600',
-    marginTop: '12px',
-    overflow: 'hidden',
-    display: '-webkit-box',
-    '-webkit-box-orient': 'vertical',
-    '-webkit-line-clamp': '2',
-    ...(!fullWidth && { [theme.breakpoints.up('md')]: { display:  'none' } }),
-  };
+    const sxClasses = {
+      fontSize: theme.palette.geoViewFontSize.lg,
+      textAlign: fullWidth ? 'center' : 'left',
+      fontWeight: '600',
+      marginTop: '12px',
+      overflow: 'hidden',
+      display: '-webkit-box',
+      '-webkit-box-orient': 'vertical',
+      '-webkit-line-clamp': '2',
+      ...(!fullWidth && { [theme.breakpoints.up('md')]: { display: 'none' } }),
+    };
 
-  return (
-    <Tooltip title={memoLayerTitle} placement="top" arrow>
-      <Typography sx={sxClasses} component="div">
-        {memoLayerTitle}
-      </Typography>
-    </Tooltip>
-  );
+    return (
+      <Tooltip title={memoLayerTitle} placement="top" arrow>
+        <Typography sx={sxClasses} component="div">
+          {memoLayerTitle}
+        </Typography>
+      </Tooltip>
+    );
   }, [fullWidth, memoLayerTitle]);
 
   return (
