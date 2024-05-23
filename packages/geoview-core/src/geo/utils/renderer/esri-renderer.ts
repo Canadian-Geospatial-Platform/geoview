@@ -1,6 +1,6 @@
 import { asString } from 'ol/color';
 
-import { TypeKindOfVectorSettings } from '@config/types/map-schema-types';
+import { TypeKindOfVectorSettings } from '@/api/config/types/map-schema-types';
 
 import {
   isFilledPolygonVectorConfig,

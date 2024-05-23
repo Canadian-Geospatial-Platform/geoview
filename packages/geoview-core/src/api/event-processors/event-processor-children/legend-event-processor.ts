@@ -1,4 +1,4 @@
-import { TypeLayerControls } from '@config/types/map-schema-types';
+import { TypeLayerControls } from '@/api/config/types/map-schema-types';
 // import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import {

@@ -10,6 +10,7 @@ import '@/ui/style/vendor.css';
 import '@fontsource/roboto/400.css';
 
 import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
+import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import * as UI from '@/ui';
 
 import AppStart from '@/core/app-start';
@@ -20,7 +21,6 @@ import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
 import { logger } from '@/core/utils/logger';
 import { removeCommentsFromJSON } from '@/core/utils/utilities';
-import { TypeDisplayLanguage } from './api/config/types/map-schema-types';
 
 // The next export allow to import the exernal-types from 'geoview-core' from outside of the geoview-core package.
 export * from './core/types/external-types';

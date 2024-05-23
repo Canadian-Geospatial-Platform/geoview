@@ -1,4 +1,4 @@
-import { TypeMapCorePackages, TypeValidAppBarCoreProps } from '@config/types/map-schema-types';
+import { TypeMapCorePackages, TypeValidAppBarCoreProps } from '@/api/config/types/map-schema-types';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { IUIState } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
@@ -31,7 +31,7 @@ export class UIEventProcessor extends AbstractEventProcessor {
     return this.getUIState(mapId).activeAppBarTabId;
   }
 
-  static getAppBarComponents(mapId: string): TypeValidAppBarCoreProps {
+  static getAppBarComponents(mapId: string): TypeValidAppBarCoreProps[] {
     return this.getUIState(mapId).appBarComponents;
   }
 

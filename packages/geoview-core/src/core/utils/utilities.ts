@@ -4,7 +4,7 @@ import i18n from 'i18next';
 
 import sanitizeHtml from 'sanitize-html';
 
-import { TypeDisplayLanguage, TypeLocalizedString } from '@config/types/map-schema-types';
+import { TypeDisplayLanguage, TypeLocalizedString } from '@/api/config/types/map-schema-types';
 
 import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';

@@ -1,5 +1,5 @@
 import { Extent } from 'ol/extent';
-import { TypeLayerControls } from '@config/types/map-schema-types';
+import { TypeLayerControls } from '@/api/config/types/map-schema-types';
 import { TypeLayerStatus, TypeStyleConfig, TypeStyleGeometry } from '@/geo/map/map-schema-types';
 import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 

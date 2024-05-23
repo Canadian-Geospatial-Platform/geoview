@@ -8,7 +8,7 @@ import Feature from 'ol/Feature';
 
 import defaultsDeep from 'lodash/defaultsDeep';
 
-import { TypeLocalizedString } from '@config/types/map-schema-types';
+import { TypeLocalizedString } from '@/api/config/types/map-schema-types';
 
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';

@@ -9,11 +9,11 @@ import { Extent } from 'ol/extent';
 
 import olms, { applyStyle } from 'ol-mapbox-style';
 
-import { TypeLocalizedString } from '@config/types/map-schema-types';
 // import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 
 import Feature from 'ol/Feature';
 import { MVT } from 'ol/format';
+import { TypeLocalizedString } from '@/api/config/types/map-schema-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {

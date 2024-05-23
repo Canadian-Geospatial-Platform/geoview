@@ -15,17 +15,14 @@ import Collection from 'ol/Collection';
 import { Source } from 'ol/source';
 
 import queryString from 'query-string';
-import { CV_MAP_EXTENTS } from '@config/types/config-constants';
+import { CV_MAP_EXTENTS, VALID_DISPLAY_LANGUAGE, VALID_DISPLAY_THEME, VALID_PROJECTION_CODES } from '@config/types/config-constants';
 import {
   TypeViewSettings,
   TypeInteraction,
   TypeValidMapProjectionCodes,
   TypeDisplayLanguage,
-  VALID_DISPLAY_LANGUAGE,
   TypeDisplayTheme,
-  VALID_DISPLAY_THEME,
-  VALID_PROJECTION_CODES,
-} from '@config/types/map-schema-types';
+} from '@/api/config/types/map-schema-types';
 import { removeGeoviewStore } from '@/core/stores/stores-managers';
 
 import { Basemap } from '@/geo/layer/basemap/basemap';

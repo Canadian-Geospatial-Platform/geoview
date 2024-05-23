@@ -9,7 +9,7 @@ import { fromExtent } from 'ol/geom/Polygon';
 import { Coordinate } from 'ol/coordinate';
 import { Color } from 'ol/color';
 
-import { TypeHighlightColors } from '@config/types/map-schema-types';
+import { TypeHighlightColors } from '@/api/config/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { TypeFeatureInfoEntry } from '../layer/layer-sets/abstract-layer-set';

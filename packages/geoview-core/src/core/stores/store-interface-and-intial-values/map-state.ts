@@ -4,7 +4,7 @@ import { Extent } from 'ol/extent'; // only for Typing
 import { FitOptions } from 'ol/View'; // only for typing
 
 import { useStore } from 'zustand';
-import { TypeBasemapOptions, TypeInteraction, TypeValidMapProjectionCodes } from '@config/types/map-schema-types';
+import { TypeBasemapOptions, TypeInteraction, TypeValidMapProjectionCodes } from '@/api/config/types/map-schema-types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/abstract-layer-set';

@@ -12,7 +12,7 @@ import Feature from 'ol/Feature';
 import { toContext } from 'ol/render';
 import { Size } from 'ol/size';
 
-import { TypeDisplayLanguage } from '@config/types/map-schema-types';
+import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 
 import { getLocalizedValue, setAlphaColor } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';

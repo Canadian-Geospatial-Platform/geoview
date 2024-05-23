@@ -1,8 +1,7 @@
-// Needs to disable class-methods-use-this because we need to pass the instance reference 'this' to the agregated sublayers.
-// eslint-disable-next-line @typescript-eslint/class-methods-use-this
 import defaultsDeep from 'lodash/defaultsDeep';
 import cloneDeep from 'lodash/cloneDeep';
 
+import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
 import { Cast, TypeGeoviewLayerType, TypeJsonObject, TypeJsonArray } from '@config/types/config-types';
 import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
 import { TypeDisplayLanguage, TypeLayerInitialSettings } from '@config/types/map-schema-types';
@@ -10,9 +9,7 @@ import { normalizeLocalizedString } from '@config/utils';
 import { CV_CONST_SUB_LAYER_TYPES, CV_DEFAULT_LAYER_INITIAL_SETTINGS } from '@config/types/config-constants';
 import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-layer-entry-config';
 import { layerEntryIsGroupLayer } from '@config/types/type-guards';
-import { logger } from '@/core/utils/logger';
 import { generateId } from '@/core/utils/utilities';
-import { MapFeatureConfig } from '@/api/config/types/classes/map-feature-config';
 
 /**
  *  Base class for the definition of a Geoview layer configuration.
@@ -76,7 +73,7 @@ export abstract class AbstractGeoviewLayerConfig {
     this.initialSettings = Cast<TypeLayerInitialSettings>(
       defaultsDeep(this.#originalgeoviewLayerConfig.initialSettings, CV_DEFAULT_LAYER_INITIAL_SETTINGS)
     );
-    // Topmost layer must be a layer group or a leaf node.
+    // The top layer must be a layer group or a leaf node.
     if ((this.#originalgeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray).length > 1)
       (this.#originalgeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray) = [
         {
@@ -108,22 +105,13 @@ export abstract class AbstractGeoviewLayerConfig {
    * @private
    */
   protected validate(): void {
-    if (!this.geoviewLayerType) {
-      logger.logError(`Property geoviewLayerType is mandatory for GeoView layer ${this.geoviewLayerId} of type ${this.geoviewLayerType}.`);
-      this.propagateError();
-    }
-    if (!this.geoviewLayerId) {
-      throw new Error(`geoviewLayerId is mandatory for GeoView layer of type ${this.geoviewLayerType}.`);
-      this.propagateError();
-    }
-    if (!this.geoviewLayerName) {
-      logger.logError(`Property geoviewLayerName is mandatory for GeoView layer ${this.geoviewLayerId} of type ${this.geoviewLayerType}.`);
-      this.propagateError();
-    }
-    if (!this.metadataAccessPath) {
+    if (!this.geoviewLayerType)
+      throw new Error(`Property geoviewLayerType is mandatory for GeoView layer ${this.geoviewLayerId} of type ${this.geoviewLayerType}.`);
+    if (!this.geoviewLayerId) throw new Error(`geoviewLayerId is mandatory for GeoView layer of type ${this.geoviewLayerType}.`);
+    if (!this.geoviewLayerName)
+      throw new Error(`Property geoviewLayerName is mandatory for GeoView layer ${this.geoviewLayerId} of type ${this.geoviewLayerType}.`);
+    if (!this.metadataAccessPath)
       throw new Error(`metadataAccessPath is mandatory for GeoView layer ${this.geoviewLayerId} of type ${this.geoviewLayerType}.`);
-      this.propagateError();
-    }
   }
 
   /**

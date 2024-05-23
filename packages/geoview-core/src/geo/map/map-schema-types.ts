@@ -22,7 +22,7 @@ import {
   TypeMapComponents,
   TypeMapCorePackages,
   TypeExternalPackages,
-} from '@config/types/map-schema-types';
+} from '@/api/config/types/map-schema-types';
 
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';

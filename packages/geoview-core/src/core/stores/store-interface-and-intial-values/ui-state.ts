@@ -1,5 +1,5 @@
 import { useStore } from 'zustand';
-import { TypeMapCorePackages, TypeNavBarProps, TypeValidAppBarCoreProps } from '@config/types/map-schema-types';
+import { TypeMapCorePackages, TypeNavBarProps, TypeValidAppBarCoreProps } from '@/api/config/types/map-schema-types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
@@ -19,7 +19,7 @@ export interface IUIState {
   activeFooterBarTabId: string;
   activeTrapGeoView: boolean;
   activeAppBarTabId: string;
-  appBarComponents: TypeValidAppBarCoreProps;
+  appBarComponents: TypeValidAppBarCoreProps[];
   corePackagesComponents: TypeMapCorePackages;
   focusITem: FocusItemProps;
   geoLocatorActive: boolean;
@@ -220,7 +220,8 @@ export const useUIActiveFocusItem = (): FocusItemProps => useStore(useGeoViewSto
 export const useUIActiveFooterBarTabId = (): string => useStore(useGeoViewStore(), (state) => state.uiState.activeFooterBarTabId);
 export const useUIActiveAppBarTabId = (): string => useStore(useGeoViewStore(), (state) => state.uiState.activeAppBarTabId);
 export const useUIActiveTrapGeoView = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.activeTrapGeoView);
-export const useUIAppbarComponents = (): TypeValidAppBarCoreProps => useStore(useGeoViewStore(), (state) => state.uiState.appBarComponents);
+export const useUIAppbarComponents = (): TypeValidAppBarCoreProps[] =>
+  useStore(useGeoViewStore(), (state) => state.uiState.appBarComponents);
 export const useUIAppbarGeolocatorActive = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.geoLocatorActive);
 export const useUICorePackagesComponents = (): TypeMapCorePackages =>
   useStore(useGeoViewStore(), (state) => state.uiState.corePackagesComponents);

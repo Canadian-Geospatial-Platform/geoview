@@ -6,7 +6,7 @@ import { Extent } from 'ol/extent';
 
 import defaultsDeep from 'lodash/defaultsDeep';
 
-import { TypeLocalizedString } from '@config/types/map-schema-types';
+import { TypeLocalizedString } from '@/api/config/types/map-schema-types';
 // import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';

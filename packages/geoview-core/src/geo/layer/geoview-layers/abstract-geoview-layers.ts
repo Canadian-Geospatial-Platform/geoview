@@ -9,7 +9,7 @@ import { Extent } from 'ol/extent';
 import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
 import Feature from 'ol/Feature';
 
-import { TypeLocalizedString } from '@config/types/map-schema-types';
+import { TypeLocalizedString } from '@/api/config/types/map-schema-types';
 
 import { generateId, getXMLHttpRequest, createLocalizedString, getLocalizedValue, whenThisThen } from '@/core/utils/utilities';
 import { TypeJsonObject, toJsonObject } from '@/core/types/global-types';

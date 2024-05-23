@@ -16,7 +16,7 @@ import cloneDeep from 'lodash/cloneDeep';
 
 import Static from 'ol/source/ImageStatic';
 
-import { TypeLocalizedString } from '@config/types/map-schema-types';
+import { TypeLocalizedString } from '@/api/config/types/map-schema-types';
 // import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 
 import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';

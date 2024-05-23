@@ -5,7 +5,7 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
-import { TypeLocalizedLanguages } from '@config/types/map-schema-types';
+import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 import { TypeJsonObject } from '@/core/types/global-types';
 
 dayjs.extend(duration);
@@ -377,7 +377,7 @@ export abstract class DateMgt {
    * @param locale {string} locale to use (fr-CA or en-CA)
    * @returns {string} locale tooltip
    */
-  static createDateLocaleTooltip(date: string, locale: TypeLocalizedLanguages): string {
+  static createDateLocaleTooltip(date: string, locale: TypeDisplayLanguage): string {
     // Handle locale for date label
     const tooltips = dayjs(date)
       .locale(`${locale}-CA`)
