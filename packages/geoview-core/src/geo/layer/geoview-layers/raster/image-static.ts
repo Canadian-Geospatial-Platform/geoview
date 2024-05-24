@@ -75,6 +75,7 @@ export const geoviewEntryIsImageStatic = (
  * @class ImageStatic
  */
 // ******************************************************************************************************************************
+// GV Layers Refactoring - Obsolete (in layers)
 export class ImageStatic extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * Initialize layer
@@ -91,6 +92,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected override fetchServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
       resolve();
@@ -106,6 +108,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @returns {blob} image blob
    * @private
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   #getLegendImage(layerConfig: ImageStaticLayerEntryConfig): Promise<string | ArrayBuffer | null> {
     const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
       const readImage = (blob: Blob): Promise<string | ArrayBuffer | null> =>
@@ -144,6 +147,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeLegend | null>} The legend of the layer.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   override async getLegend(layerPath: string): Promise<TypeLegend | null> {
     try {
       const layerConfig = this.getLayerEntryConfig(layerPath) as ImageStaticLayerEntryConfig | undefined | null;
@@ -192,6 +196,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    *
    * @returns {TypeLayerEntryConfig[]} A new list of layer entries configuration with deleted error layers.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
@@ -244,6 +249,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeBaseRasterLayer | undefined>} The GeoView raster layer that has been created.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected override async processOneLayerEntry(layerConfig: ImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | undefined> {
     await super.processOneLayerEntry(layerConfig);
 
@@ -292,6 +298,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    *
    * @returns {Extent} The new layer bounding box.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
     const layer = this.getOLLayer(layerPath) as ImageLayer<Static> | undefined;
 

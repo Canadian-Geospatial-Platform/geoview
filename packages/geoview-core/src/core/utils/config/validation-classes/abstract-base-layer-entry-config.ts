@@ -28,7 +28,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /** The display name of the layer (English/French). */
   layerName?: TypeLocalizedString;
 
-  /** The metadata associated witht he layer */
+  /** The metadata associated with the layer */
   #metadata?: TypeJsonObject;
 
   /** The calculated filter equation */
@@ -68,8 +68,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Gets the metadata that is associated to the layer.
-   * @param {string} layerPath The layer path to the layer's configuration.
-   *
    * @returns {TypeJsonObject} The layer metadata.
    */
   getMetadata(): TypeJsonObject | undefined {
@@ -78,6 +76,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Sets the layer metadata for the layer.
+   * @param {TypeJsonObject} layerMetadata - The layer metadata to set
    */
   setMetadata(layerMetadata: TypeJsonObject): void {
     this.#metadata = layerMetadata;

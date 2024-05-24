@@ -112,6 +112,7 @@ export const geoviewEntryIsEsriImage = (verifyIfGeoViewEntry: TypeLayerEntryConf
  * @class EsriImage
  */
 // ******************************************************************************************************************************
+// GV Layers Refactoring - Obsolete (in layers)
 export class EsriImage extends AbstractGeoViewRaster {
   /** ****************************************************************************************************************************
    * Initialize layer.
@@ -132,6 +133,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeLegend | null>} The legend of the layer.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   override async getLegend(layerPath: string): Promise<TypeLegend | null> {
     try {
       const layerConfig = this.getLayerEntryConfig(layerPath) as EsriImageLayerEntryConfig | undefined | null;
@@ -207,6 +209,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns {TypeLayerEntryConfig[]} A new list of layer entries configuration with deleted error layers.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
@@ -232,6 +235,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number' {
     return commonGetFieldType(this, fieldName, layerConfig);
   }
@@ -244,6 +248,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected override getFieldDomain(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): null | codedValueType | rangeDomainType {
     return commonGetFieldDomain(this, fieldName, layerConfig);
   }
@@ -253,6 +258,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
    * @param {EsriImageLayerEntryConfig} layerConfig The layer entry to configure
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: EsriImageLayerEntryConfig): void {
     commonProcessTemporalDimension(this, esriTimeDimension, layerConfig, true);
   }
@@ -262,6 +268,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @param {EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   processFeatureInfoConfig(layerConfig: EsriImageLayerEntryConfig): void {
     commonProcessFeatureInfoConfig(this, layerConfig);
   }
@@ -272,6 +279,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {EsriImage} this The ESRI layer instance pointer.
    * @param {EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   processInitialSettings(layerConfig: EsriImageLayerEntryConfig): void {
     commonProcessInitialSettings(this, layerConfig);
   }
@@ -284,6 +292,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected override processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     return commonProcessLayerMetadata(this, layerConfig);
   }
@@ -295,6 +304,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns { Promise<TypeBaseRasterLayer | undefined>} The GeoView raster layer that has been created.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected override async processOneLayerEntry(layerConfig: EsriImageLayerEntryConfig): Promise<TypeBaseRasterLayer | undefined> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
@@ -341,6 +351,7 @@ export class EsriImage extends AbstractGeoViewRaster {
   /**
    * Overrides when the layer gets in loaded status.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   override onLoaded(layerConfig: AbstractBaseLayerEntryConfig): void {
     // Call parent
     super.onLoaded(layerConfig);
@@ -359,6 +370,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} combineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   applyViewFilter(layerPath: string, filter: string, combineLegendFilter?: boolean): void {
     // Log
     logger.logTraceCore('ESRIImage - applyViewFilter', layerPath);
@@ -406,6 +418,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns {Extent | undefined} The new layer bounding box.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
     const layerConfig = this.getLayerEntryConfig(layerPath);
     const layerBounds = layerConfig?.initialSettings?.bounds || [];

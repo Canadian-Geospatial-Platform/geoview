@@ -54,7 +54,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer path
+   * @param {TypeLayerEntryConfig} layerConfig - The layer config
    * @returns {boolean} True when the layer should be registered to this feature-info-layer-set.
    */
   protected override onRegisterLayerCheck(layerConfig: TypeLayerEntryConfig): boolean {
@@ -244,7 +244,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Apply status to item in results set reference by the layer path and propagate to store
-   * @param {string} layerPath - Layer path
+   * @param {string} layerPath - The layer path
    * @param {boolean} isEnable - Status to apply
    * @private
    */
