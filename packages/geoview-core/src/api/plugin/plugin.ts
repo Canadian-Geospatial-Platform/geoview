@@ -4,7 +4,7 @@ import * as translate from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import Ajv from 'ajv';
 
-import { whenThisThen } from '@/core/utils/utilities';
+import { whenThisThen, getScriptAndAssetURL } from '@/core/utils/utilities';
 import { api } from '@/app';
 import { TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
@@ -35,25 +35,8 @@ export abstract class Plugin {
       const existingScript = document.getElementById(pluginId);
 
       if (!existingScript) {
-        // get all loaded js scripts on the page
-        const scripts = document.getElementsByTagName('script');
-        let scriptPath: string | null = null;
-
-        if (scripts && scripts.length) {
-          // go through all loaded scripts on the page
-          for (let scriptIndex = 0; scriptIndex < scripts.length; scriptIndex++) {
-            // search for the core script
-            if (scripts[scriptIndex].src.includes('cgpv-main')) {
-              // get the src of the core script
-              const { src } = scripts[scriptIndex];
-
-              // extract the host from the loaded core script
-              scriptPath = src.substring(0, src.lastIndexOf('/'));
-
-              break;
-            }
-          }
-        }
+        // Get the main script URL
+        const scriptPath = getScriptAndAssetURL();
 
         // create a script element
         const script = document.createElement('script');
