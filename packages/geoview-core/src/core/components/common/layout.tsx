@@ -71,6 +71,7 @@ export function Layout({
     const sxClasses = {
       fontSize: theme.palette.geoViewFontSize.lg,
       textAlign: fullWidth ? 'center' : 'left',
+      width: fullWidth ? '100%' : 'auto',
       fontWeight: '600',
       marginTop: '12px',
       overflow: 'hidden',
