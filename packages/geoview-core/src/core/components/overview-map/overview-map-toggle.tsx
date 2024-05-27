@@ -3,35 +3,10 @@ import { useEffect, useRef, useState } from 'react';
 import { OverviewMap as OLOverviewMap } from 'ol/control';
 import { useTranslation } from 'react-i18next';
 
-import makeStyles from '@mui/styles/makeStyles';
-
 import { ChevronLeftIcon, Tooltip } from '@/ui';
 import { logger } from '@/core/utils/logger';
 import { Box } from '@/ui/layout';
-
-// TODO: We need to find solution to remove makeStyles with either plain css or material ui.
-const useStyles = makeStyles(() => ({
-  toggleBtn: {
-    transform: 'rotate(45deg)',
-    color: 'black',
-    zIndex: 150,
-    '&:hover': {
-      cursor: 'pointer',
-    },
-  },
-  toggleBtnContainer: {
-    zIndex: 150,
-    position: 'absolute',
-    top: 0,
-    right: 0,
-  },
-  minimapOpen: {
-    transform: 'rotate(-45deg)',
-  },
-  minimapClosed: {
-    transform: 'rotate(135deg)',
-  },
-}));
+import { sxClasses } from './overview-map-toggle-styles';
 
 /**
  * Properties for the overview map toggle
@@ -58,9 +33,6 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element {
   // internal state
   const [status, setStatus] = useState(true);
   const divRef = useRef<HTMLDivElement>(null);
-
-  // TODO: Remove useStyle
-  const classes = useStyles();
 
   useEffect(() => {
     // Log
@@ -99,10 +71,11 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element {
 
   return (
     <Tooltip title={tooltipAndAria}>
-      <Box ref={divRef} className={classes.toggleBtnContainer}>
+      <Box ref={divRef} sx={sxClasses.toggleBtnContainer}>
         <Box
           component="div"
-          className={`${classes.toggleBtn} ${!status ? classes.minimapOpen : classes.minimapClosed}`}
+          sx={sxClasses.toggleBtn}
+          className={status ? `minimapOpen` : `minimapClosed`}
           style={{
             margin: 0,
             padding: 0,
