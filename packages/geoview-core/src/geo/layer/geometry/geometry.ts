@@ -9,7 +9,7 @@ import { asArray, asString } from 'ol/color';
 
 import { MapViewer } from '@/geo/map/map-viewer';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { generateId, setAlphaColor } from '@/core/utils/utilities';
+import { generateId, setAlphaColor, getScriptAndAssetURL } from '@/core/utils/utilities';
 import { TypeStyleGeometry } from '@/geo/map/map-schema-types';
 import { Projection } from '@/geo/utils/projection';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -342,7 +342,7 @@ export class GeometryApi {
         scale: 0.1,
         anchorXUnits: 'fraction',
         anchorYUnits: 'pixels',
-        src: './img/Marker.png',
+        src: `${getScriptAndAssetURL()}/img/Marker.png`,
       },
     };
 

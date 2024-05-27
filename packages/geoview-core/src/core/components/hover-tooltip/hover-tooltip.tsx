@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme, Theme } from '@mui/material/styles';
 
@@ -6,6 +6,8 @@ import { Box } from '@/ui';
 import { logger } from '@/core/utils/logger';
 import { useMapHoverFeatureInfo, useMapPointerPosition } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { getSxClasses } from './hover-tooltip-styles';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 /**
  * Hover tooltip component to show name field information on hover
@@ -17,13 +19,13 @@ export function HoverTooltip(): JSX.Element | null {
   // logger.logTraceRender('components/hover-tooltip/hover-tooltip');
 
   const { t } = useTranslation<string>();
+  const mapId = useGeoViewMapId();
 
   const theme: Theme & {
     iconImage: React.CSSProperties;
   } = useTheme();
 
   // internal component state
-  const [pixel, setPixel] = useState<[number, number]>([0, 0]);
   const [tooltipValue, setTooltipValue] = useState<string>('');
   const [tooltipIcon, setTooltipIcon] = useState<string>('');
   const [showTooltip, setShowTooltip] = useState<boolean>(false);
@@ -33,6 +35,9 @@ export function HoverTooltip(): JSX.Element | null {
   // store state
   const hoverFeatureInfo = useMapHoverFeatureInfo();
   const pointerPosition = useMapPointerPosition();
+  const mapElem = useAppGeoviewHTMLElement().querySelector(`[id^="mapTargetElement-${mapId}"]`) as HTMLElement;
+
+  const tooltipRef = useRef<HTMLDivElement>(null);
 
   // Update tooltip when store value change from propagation by hover-layer-set to map-event-processor
   useEffect(() => {
@@ -54,9 +59,34 @@ export function HoverTooltip(): JSX.Element | null {
     setTooltipValue('');
     setTooltipIcon('');
     setShowTooltip(false);
-
-    if (pointerPosition !== undefined) setPixel(pointerPosition.pixel as [number, number]);
   }, [pointerPosition]);
+
+  // Update tooltip position when we have the dimensions of the tooltip
+  useEffect(() => {
+    logger.logTraceUseEffect('HOVER-TOOLTIP - tooltipValue changed', tooltipValue);
+
+    if (!mapElem || !tooltipRef.current || !pointerPosition || !pointerPosition.pixel || !tooltipValue) {
+      return;
+    }
+
+    const mapRect = mapElem.getBoundingClientRect();
+    const tooltipRect = tooltipRef.current.getBoundingClientRect();
+
+    // Check if the tooltip is outside the map
+    let tooltipX = pointerPosition.pixel[0];
+    let tooltipY = pointerPosition.pixel[1] - 35;
+
+    if (pointerPosition.pixel[0] + tooltipRect.width > mapRect.width) {
+      tooltipX = pointerPosition.pixel[0] - tooltipRect.width;
+    }
+
+    if (pointerPosition.pixel[1] - tooltipRect.height < mapRect.top) {
+      tooltipY = pointerPosition.pixel[1] + 10;
+    }
+
+    tooltipRef.current.style.left = `${tooltipX}px`;
+    tooltipRef.current.style.top = `${tooltipY}px`;
+  }, [tooltipValue, mapElem, pointerPosition]);
 
   if (showTooltip && !tooltipValue) {
     return null;
@@ -64,9 +94,9 @@ export function HoverTooltip(): JSX.Element | null {
 
   return (
     <Box
+      ref={tooltipRef}
       sx={sxClasses.tooltipItem}
       style={{
-        transform: `translate(${pixel[0]}px, ${pixel[1] - 35}px)`,
         visibility: showTooltip ? 'visible' : 'hidden',
       }}
     >

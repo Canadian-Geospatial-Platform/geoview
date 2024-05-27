@@ -6,6 +6,7 @@ import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { NotificationDetailsType } from '@/core/components/notifications/notifications';
 import { TypeHTMLElement, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
+import { getScriptAndAssetURL } from '@/core/utils/utilities';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with AppEventProcessor vs AppState
 
@@ -19,6 +20,7 @@ export interface IAppState {
   guide: TypeGuideObject | undefined;
   geolocatorServiceURL: string | undefined;
   geoviewHTMLElement: HTMLElement;
+  geoviewAssetsURL: string;
   isCircularProgressActive: boolean;
   isCrosshairsActive: boolean;
   isFullscreenActive: boolean;
@@ -61,6 +63,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     guide: {},
     geolocatorServiceURL: '',
     geoviewHTMLElement: document.createElement('div'), // create an empty div before real one is assigned
+    geoviewAssetsURL: getScriptAndAssetURL(),
     isCircularProgressActive: false,
     isCrosshairsActive: false,
     isFullscreenActive: false,
@@ -263,6 +266,7 @@ export const useAppFullscreenActive = (): boolean => useStore(useGeoViewStore(),
 export const useAppGeolocatorServiceURL = (): string | undefined =>
   useStore(useGeoViewStore(), (state) => state.appState.geolocatorServiceURL);
 export const useAppGeoviewHTMLElement = (): HTMLElement => useStore(useGeoViewStore(), (state) => state.appState.geoviewHTMLElement);
+export const useAppGeoviewAssetsURL = (): string => useStore(useGeoViewStore(), (state) => state.appState.geoviewAssetsURL);
 export const useAppGuide = (): TypeGuideObject | undefined => useStore(useGeoViewStore(), (state) => state.appState.guide);
 export const useAppNotifications = (): NotificationDetailsType[] => useStore(useGeoViewStore(), (state) => state.appState.notifications);
 

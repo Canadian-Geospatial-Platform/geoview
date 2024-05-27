@@ -81,6 +81,7 @@ export function AddNewLayer(): JSX.Element {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [drag, setDrag] = useState<boolean>(false);
   const [hasMetadata, setHasMetadata] = useState<boolean>(false);
+  const [stepButtonDisable, setStepButtonDisable] = useState<boolean>(true);
 
   const dragPopover = useRef(null);
 
@@ -214,6 +215,12 @@ export function AddNewLayer(): JSX.Element {
     api.maps[mapId].notifications.showError(message, [], false);
   };
 
+  // TODO: REFACTOR ALL VALIDATION!!!
+  // TODOCONT: All validation MUST be refactored. For the moment they are creating config entries to be able to produce the needed
+  // TODOCONT: information for user to select the layer he wants. In the refactor we NEED single function to read metadata from url
+  // TODOCONT: and service type. At this point no layer or neither config is created, metadata is read to create the selection tree (step 3)
+  // TODOCONT: Once the user has selected the layers he wants, we create the config snippet and start the config validation process.
+
   /**
    * Using the layerURL state object, check whether URL is a valid WMS,
    * and add either Name and Entry directly to state if a single layer,
@@ -230,7 +237,7 @@ export function AddNewLayer(): JSX.Element {
     try {
       const [accessPath, queryString] = layerURL.split('?');
       const urlParams = new URLSearchParams(queryString);
-      const paramLayers = urlParams.get('Layers')?.split(',') || [];
+      const paramLayers = urlParams.get('layers')?.split(',') || [];
       // query layers are not sent, as not all services support asking for multiple layers
       const wmsGeoviewLayerConfig = {
         geoviewLayerType: WMS,
@@ -259,19 +266,22 @@ export function AddNewLayer(): JSX.Element {
       const hasChildLayers = (layer: TypeJsonObject): void => {
         if (layer.Layer && (layer.Layer as TypeJsonArray).length > 0) {
           (layer.Layer as TypeJsonObject[]).forEach((childLayer: TypeJsonObject) => {
-            hasChildLayers(childLayer);
-          });
-        } else {
-          for (let i = 0; i < paramLayers.length; i++) {
-            if ((layer.Name as string) === paramLayers[i])
+            const name = childLayer.Name as string;
+
+            // if there is no paramLayers, take them all; If there is paramLayers must be included in layers parameter from url
+            if (paramLayers.length === 0 || paramLayers.includes(name)) {
+              logger.logDebug('NAME', name);
               layers.push(
                 new OgcWmsLayerEntryConfig({
                   geoviewLayerConfig: wmsGeoviewLayerConfig,
-                  layerId: layer.Name as string,
-                  layerName: createLocalizedString(layer.Title as string),
+                  layerId: childLayer.Name as string,
+                  layerName: createLocalizedString(childLayer.Title as string),
                 } as OgcWmsLayerEntryConfig)
               );
-          }
+            }
+
+            hasChildLayers(childLayer);
+          });
         }
       };
 
@@ -351,7 +361,7 @@ export function AddNewLayer(): JSX.Element {
       const ogcFeatureGeoviewLayerConfig = {
         geoviewLayerType: OGC_FEATURE,
         listOfLayerEntryConfig: [] as OgcFeatureLayerEntryConfig[],
-        metadataAccessPath: createLocalizedString(layerURL),
+        metadataAccessPath: createLocalizedString(layerURL.split('collections')[0]),
       } as TypeOgcFeatureLayerConfig;
       const ogcFeatureInstance = new OgcFeature(mapId, ogcFeatureGeoviewLayerConfig);
       // Synchronize the geoviewLayerId.
@@ -387,14 +397,35 @@ export function AddNewLayer(): JSX.Element {
       const keys = ['collections', 'links'];
       const isCollectionValid = keys.every((key) => Object.keys(ogcFeatureMetadata).includes(key));
       if (!isCollectionValid) throw new Error('err');
-      const layers = (ogcFeatureMetadata.collections as TypeJsonArray).map(
-        (aFeatureType) =>
-          new OgcFeatureLayerEntryConfig({
-            geoviewLayerConfig: ogcFeatureGeoviewLayerConfig,
-            layerId: aFeatureType.id as string,
-            layerName: createLocalizedString(aFeatureType.title as string),
-          } as OgcFeatureLayerEntryConfig)
-      );
+
+      // If there is collections, only the selected collection is set
+      let layers: OgcFeatureLayerEntryConfig[] = [];
+      if (layerURL.split('/collections/').length === 2) {
+        (ogcFeatureMetadata.collections as TypeJsonArray).forEach((aFeatureType) => {
+          if (layerURL.split('/collections/')[1] === aFeatureType.id) {
+            layers.push(
+              new OgcFeatureLayerEntryConfig({
+                geoviewLayerConfig: ogcFeatureGeoviewLayerConfig,
+                layerId: aFeatureType.id as string,
+                layerName: createLocalizedString(aFeatureType.title as string),
+              } as OgcFeatureLayerEntryConfig)
+            );
+          }
+        });
+      }
+
+      // if there is no collections in url, or layers not set properly from provided collection take them all;
+      if (layers.length === 0) {
+        layers = (ogcFeatureMetadata.collections as TypeJsonArray).map(
+          (aFeatureType) =>
+            new OgcFeatureLayerEntryConfig({
+              geoviewLayerConfig: ogcFeatureGeoviewLayerConfig,
+              layerId: aFeatureType.id as string,
+              layerName: createLocalizedString(aFeatureType.title as string),
+            } as OgcFeatureLayerEntryConfig)
+        );
+      }
+
       if (layers.length === 1) {
         setLayerName(layers[0].layerName!.en! as string);
         setLayerEntries([layers[0]]);
@@ -454,7 +485,7 @@ export function AddNewLayer(): JSX.Element {
           : ({
               geoviewLayerType: type,
               listOfLayerEntryConfig: [] as EsriFeatureLayerEntryConfig[],
-              metadataAccessPath: createLocalizedString(layerURL),
+              metadataAccessPath: createLocalizedString(layerURL.substring(0, layerURL.lastIndexOf('/'))),
             } as TypeEsriFeatureLayerConfig);
       const esriGeoviewLayerInstance =
         type === ESRI_DYNAMIC
@@ -469,43 +500,34 @@ export function AddNewLayer(): JSX.Element {
       setHasMetadata(true);
       if (esriMetadata !== null && (esriMetadata.capabilities as string).includes(esriOptions(type).capability)) {
         if ('layers' in esriMetadata) {
-          const layers =
-            type === ESRI_DYNAMIC
-              ? (esriMetadata.layers as TypeJsonArray).map(
-                  (aLayer) =>
-                    new EsriDynamicLayerEntryConfig({
-                      geoviewLayerConfig: esriGeoviewLayerConfig,
-                      layerId: aLayer.id as string,
-                      layerName: createLocalizedString(aLayer.name as string),
-                    } as EsriDynamicLayerEntryConfig)
-                )
-              : (esriMetadata.layers as TypeJsonArray).map(
-                  (aLayer) =>
-                    new EsriFeatureLayerEntryConfig({
-                      geoviewLayerConfig: esriGeoviewLayerConfig,
-                      layerId: aLayer.id as string,
-                      layerName: createLocalizedString(aLayer.name as string),
-                    } as EsriFeatureLayerEntryConfig)
-                );
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const layers: any = [];
+          if (type === ESRI_DYNAMIC) {
+            (esriMetadata.layers as TypeJsonArray).forEach((aLayer) =>
+              layers.push(
+                new EsriDynamicLayerEntryConfig({
+                  geoviewLayerConfig: esriGeoviewLayerConfig,
+                  layerId: aLayer.id as string,
+                  layerName: createLocalizedString(aLayer.name as string),
+                } as EsriDynamicLayerEntryConfig)
+              )
+            );
+          } else {
+            layers.push(
+              new EsriFeatureLayerEntryConfig({
+                geoviewLayerConfig: esriGeoviewLayerConfig,
+                layerId: esriMetadata.layers[0].id as string,
+                layerName: createLocalizedString(esriMetadata.layers[0].name as string),
+              } as EsriFeatureLayerEntryConfig)
+            );
+          }
+
           if (layers.length === 1) {
             setLayerName(layers[0].layerName!.en!);
             setLayerEntries([layers[0]]);
           } else {
             setLayerList(layers);
           }
-        } else {
-          setLayerName(esriMetadata.name as string);
-          setLayerEntries([
-            type === ESRI_DYNAMIC
-              ? new EsriDynamicLayerEntryConfig({
-                  layerId: esriMetadata.id as string,
-                  layerName: createLocalizedString(esriMetadata.name as string),
-                } as EsriDynamicLayerEntryConfig)
-              : new EsriFeatureLayerEntryConfig({
-                  layerId: esriMetadata.id as string,
-                  layerName: createLocalizedString(esriMetadata.name as string),
-                } as EsriFeatureLayerEntryConfig),
-          ]);
         }
       } else {
         throw new Error('err');
@@ -767,6 +789,9 @@ export function AddNewLayer(): JSX.Element {
       setLayerType(WMS);
     } else if (displayURL.toUpperCase().endsWith('.CSV')) {
       setLayerType(CSV);
+    } else {
+      setLayerType('');
+      setStepButtonDisable(true);
     }
   };
 
@@ -814,6 +839,9 @@ export function AddNewLayer(): JSX.Element {
           if (isValid) {
             setIsLoading(false);
             setActiveStep(2);
+
+            // disable continue button until a layer entry is selected
+            setStepButtonDisable(true);
           }
         })
         .catch((error) => {
@@ -924,6 +952,9 @@ export function AddNewLayer(): JSX.Element {
    */
   const handleBack = (): void => {
     setActiveStep((prevActiveStep: number) => prevActiveStep - 1);
+
+    // We assume previous step ok, so enable continue button
+    setStepButtonDisable(false);
   };
 
   /**
@@ -954,6 +985,10 @@ export function AddNewLayer(): JSX.Element {
     setLayerList([]);
     setLayerName('');
     setLayerEntries([]);
+
+    // TODO: create a utilities function to test valid URL before we enable the continue button
+    // TODO.CONT: This function should try to ping the server for an answer...
+    setStepButtonDisable(!event.target.value.trim().startsWith('https://'));
   };
 
   /**
@@ -965,6 +1000,8 @@ export function AddNewLayer(): JSX.Element {
     setLayerType(event.target.value as TypeGeoviewLayerTypeWithGeoCore);
     setLayerList([]);
     setLayerEntries([]);
+
+    setStepButtonDisable(false);
   };
 
   /**
@@ -976,12 +1013,20 @@ export function AddNewLayer(): JSX.Element {
    * @param newValue value/label pairs of select options
    */
   const handleSelectLayer = (event: Event, newValue: TypeLayerEntryConfig[] | TypeLayerEntryConfig): void => {
+    setStepButtonDisable(true);
+
     if (isMultiple()) {
-      setLayerEntries(newValue as TypeLayerEntryConfig[]);
-      setLayerName((newValue as TypeLayerEntryConfig[]).map((layerConfig) => layerConfig.layerName!.en).join(', '));
+      if (!((newValue as TypeLayerEntryConfig[]).length === 0)) {
+        setLayerEntries(newValue as TypeLayerEntryConfig[]);
+        setLayerName((newValue as TypeLayerEntryConfig[]).map((layerConfig) => layerConfig.layerName!.en).join(', '));
+
+        setStepButtonDisable(false);
+      }
     } else {
       setLayerEntries([newValue as TypeLayerEntryConfig]);
       setLayerName((newValue as TypeLayerEntryConfig).layerName!.en!);
+
+      setStepButtonDisable(false);
     }
   };
 
@@ -991,8 +1036,14 @@ export function AddNewLayer(): JSX.Element {
    * @param {ChangeEvent<HTMLInputElement>} event - TextField event
    */
   const handleNameLayer = (event: ChangeEvent<HTMLInputElement>): void => {
+    setStepButtonDisable(false);
     setLayerName(event.target.value);
   };
+
+  // To set the button enable when validation set the layerName
+  useEffect(() => {
+    if (activeStep === 2 && layerEntries.length > 0) setStepButtonDisable(false);
+  }, [layerName, activeStep, layerEntries]);
 
   /**
    * Handle file dragged into dropzone
@@ -1063,7 +1114,7 @@ export function AddNewLayer(): JSX.Element {
       </Box>
     ) : (
       <ButtonGroup sx={sxClasses.buttonGroup}>
-        <Button variant="contained" type="text" onClick={handleNext}>
+        <Button variant="contained" type="text" disabled={stepButtonDisable} onClick={handleNext}>
           {isLast ? t('layers.finish') : t('layers.continue')}
         </Button>
         {!isFirst && (
