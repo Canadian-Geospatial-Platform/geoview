@@ -374,7 +374,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
             <IconButton
               onClick={handleDynamicFocus}
               tooltip={isFocusToMap ? 'footerBar.focusToMap' : 'footerBar.focusToFooter'}
-              className="style3"
+              className="buttonFilled"
               disabled={
                 isCollapsed || isMapFullScreen || footerPanelResizeValues[footerPanelResizeValues.length - 1] === footerPanelResizeValue
               }

@@ -447,7 +447,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
                   tooltip="details.clearAllfeatures"
                   tooltipPlacement="top"
                   onClick={() => handleClearAllHighlights()}
-                  className="style1"
+                  className="buttonOutline"
                   disabled={checkedFeatures.length === 0}
                 >
                   <LayersClearOutlinedIcon />
@@ -462,7 +462,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
                   tooltipPlacement="top"
                   onClick={() => handleFeatureNavigateChange(-1)}
                   disabled={currentFeatureIndex <= 0}
-                  className="style1"
+                  className="buttonOutline"
                 >
                   <ArrowBackIosOutlinedIcon />
                 </IconButton>
@@ -473,7 +473,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
                   tooltipPlacement="top"
                   onClick={() => handleFeatureNavigateChange(1)}
                   disabled={!memoSelectedLayerData?.features || currentFeatureIndex + 1 >= memoSelectedLayerData!.features!.length}
-                  className="style1"
+                  className="buttonOutline"
                 >
                   <ArrowForwardIosOutlinedIcon />
                 </IconButton>

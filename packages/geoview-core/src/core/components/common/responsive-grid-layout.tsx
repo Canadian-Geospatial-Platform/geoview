@@ -124,7 +124,7 @@ const ResponsiveGridLayout = forwardRef(
           size="small"
           color="primary"
           variant="contained"
-          className="style2"
+          className="buttonFilledOutline"
           startIcon={isEnlarged ? <ArrowForwardIcon /> : <ArrowBackIcon />}
           sx={{ height: '40px', borderRadius: '1.5rem', boxShadow: 'none', [theme.breakpoints.down('md')]: { display: 'none' } }}
           onClick={() => handleIsEnlarge(!isEnlarged)}
@@ -143,7 +143,7 @@ const ResponsiveGridLayout = forwardRef(
           size="small"
           color="primary"
           variant="contained"
-          className="style2"
+          className="buttonFilledOutline"
           sx={{
             height: '40px',
             borderRadius: '1.5rem',
@@ -176,7 +176,7 @@ const ResponsiveGridLayout = forwardRef(
           size="small"
           onClick={() => handleOpenGuide()}
           tooltip={t('general.openGuide')!}
-          className="style2"
+          className="buttonFilledOutline"
           color="primary"
         >
           <QuestionMarkIcon />
@@ -190,7 +190,7 @@ const ResponsiveGridLayout = forwardRef(
           size="small"
           onClick={() => setIsFullScreen(!isFullScreen)}
           tooltip={isFullScreen ? t('general.closeFullscreen')! : t('general.openFullscreen')!}
-          className="style2"
+          className="buttonFilledOutline"
           color="primary"
         >
           <FullscreenIcon />

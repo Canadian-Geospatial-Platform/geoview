@@ -331,7 +331,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                         aria-label={buttonPanel.button.tooltip}
                         tooltip={buttonPanel.button.tooltip}
                         tooltipPlacement="right"
-                        className={`style3 ${activeAppBarTabId === buttonPanel.button.id ? 'active' : ''}`}
+                        className={`buttonFilled ${activeAppBarTabId === buttonPanel.button.id ? 'active' : ''}`}
                         size="small"
                         onClick={() => handleButtonClicked(buttonPanel.button.id!, groupName)}
                       >
@@ -368,7 +368,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
           {appBarComponents.includes('export') && interaction === 'dynamic' && (
             <List sx={sxClasses.appBarList}>
               <ListItem>
-                <ExportButton className={` style3 ${activeModalId ? 'active' : ''}`} />
+                <ExportButton className={` buttonFilled ${activeModalId ? 'active' : ''}`} />
               </ListItem>
             </List>
           )}

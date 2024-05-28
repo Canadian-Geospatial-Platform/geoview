@@ -411,17 +411,17 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps): JSX.
         </Box>
         <Box>
           <Box>
-            <MRTToggleFiltersButton className="style1" table={table} />
+            <MRTToggleFiltersButton className="buttonOutline" table={table} />
             <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} />
             {/* enable column pinning options is override, so that pinning option in menu can be hide. */}
-            <MRTShowHideColumnsButton className="style1" table={{ ...table, options: { ...table.options, enableColumnPinning: false } }} />
-            <MRTToggleDensePaddingButton className="style1" table={table} />
+            <MRTShowHideColumnsButton className="buttonOutline" table={{ ...table, options: { ...table.options, enableColumnPinning: false } }} />
+            <MRTToggleDensePaddingButton className="buttonOutline" table={table} />
             <ExportButton rows={rows} columns={columns}>
               <JSONExportButton features={data.features as TypeFeatureInfoEntry[]} layerPath={layerPath} />
             </ExportButton>
           </Box>
           <Box sx={{ marginLeft: 'auto', maxWidth: '15rem', marginRight: '1rem' }}>
-            <MRTGlobalFilterTextField className="style1" table={table} />
+            <MRTGlobalFilterTextField className="buttonOutline" table={table} />
           </Box>
         </Box>
       </Box>

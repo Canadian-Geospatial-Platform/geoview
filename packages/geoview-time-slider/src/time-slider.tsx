@@ -405,7 +405,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
           <div style={{ textAlign: 'center', paddingTop: '20px' }}>
             {!singleHandle && (
               <IconButton
-                className="style1"
+                className="buttonOutline"
                 aria-label={returnLockTooltip()}
                 tooltip={returnLockTooltip()}
                 tooltipPlacement="top"
@@ -415,7 +415,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
               </IconButton>
             )}
             <IconButton
-              className="style1"
+              className="buttonOutline"
               aria-label={getLocalizedMessage('timeSlider.slider.back', displayLanguage) as string}
               tooltip="timeSlider.slider.back"
               tooltipPlacement="top"
@@ -425,7 +425,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
               <ArrowLeftIcon />
             </IconButton>
             <IconButton
-              className="style1"
+              className="buttonOutline"
               aria-label={
                 isPlaying
                   ? (getLocalizedMessage('timeSlider.slider.pauseAnimation', displayLanguage) as string)
@@ -439,7 +439,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
               {!isPlaying ? <PlayArrowIcon /> : <PauseIcon />}
             </IconButton>
             <IconButton
-              className="style1"
+              className="buttonOutline"
               aria-label={getLocalizedMessage('timeSlider.slider.forward', displayLanguage) as string}
               tooltip="timeSlider.slider.forward"
               tooltipPlacement="top"
@@ -449,7 +449,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
               <ArrowRightIcon />
             </IconButton>
             <IconButton
-              className="style1"
+              className="buttonOutline"
               aria-label={getLocalizedMessage('timeSlider.slider.changeDirection', displayLanguage) as string}
               tooltip="timeSlider.slider.changeDirection"
               tooltipPlacement="top"

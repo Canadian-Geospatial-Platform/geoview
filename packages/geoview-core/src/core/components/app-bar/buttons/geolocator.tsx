@@ -29,7 +29,7 @@ export default function Geolocator({ closeAllPanels }: GeoLocatorType): JSX.Elem
       tooltipPlacement="bottom-end"
       onClick={click}
       color="primary"
-      className={`style3 ${active ? 'active' : ''}`}
+      className={`buttonFilled ${active ? 'active' : ''}`}
     >
       <SearchIcon />
     </IconButton>

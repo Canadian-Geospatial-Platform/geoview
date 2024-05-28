@@ -210,7 +210,7 @@ export function SingleLayer({ depth, layer, setIsLayersListPanelVisible, index, 
     }
     if (layer.layerStatus === 'error') {
       return (
-        <IconButton edge="end" size="small" onClick={handleReloadLayer} tooltip="layers.reloadLayer" className="style1">
+        <IconButton edge="end" size="small" onClick={handleReloadLayer} tooltip="layers.reloadLayer" className="buttonOutline">
           <RestartAltIcon />
         </IconButton>
       );
@@ -218,14 +218,14 @@ export function SingleLayer({ depth, layer, setIsLayersListPanelVisible, index, 
 
     if (isLayerAlwaysVisible) {
       return (
-        <IconButton edge="end" size="small" tooltip="layers.visibilityIsAlways" className="style1" disabled>
+        <IconButton edge="end" size="small" tooltip="layers.visibilityIsAlways" className="buttonOutline" disabled>
           <VisibilityOutlinedIcon color="disabled" />
         </IconButton>
       );
     }
 
     return (
-      <IconButton edge="end" size="small" onClick={() => handleToggleVisibility()} tooltip="layers.toggleVisibility" className="style1">
+      <IconButton edge="end" size="small" onClick={() => handleToggleVisibility()} tooltip="layers.toggleVisibility" className="buttonOutline">
         {(() => {
           if (!getVisibilityFromOrderedLayerInfo(layer.layerPath)) return <VisibilityOffOutlinedIcon />;
           return <VisibilityOutlinedIcon />;
@@ -246,7 +246,7 @@ export function SingleLayer({ depth, layer, setIsLayersListPanelVisible, index, 
           size="small"
           onClick={handleExpandGroupClick}
           tooltip="layers.toggleCollapse"
-          className="style1"
+          className="buttonOutline"
         >
           {isGroupOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
         </IconButton>
