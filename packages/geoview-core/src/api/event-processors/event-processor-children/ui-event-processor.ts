@@ -1,6 +1,6 @@
 import { TypeMapCorePackages, TypeValidAppBarCoreProps } from '@config/types/map-schema-types';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import { IUIState } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { IUIState, ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -27,10 +27,6 @@ export class UIEventProcessor extends AbstractEventProcessor {
     return this.getUIState(mapId).activeFooterBarTabId;
   }
 
-  static getActiveAppBarTabId(mapId: string): string {
-    return this.getUIState(mapId).activeAppBarTabId;
-  }
-
   static getAppBarComponents(mapId: string): TypeValidAppBarCoreProps {
     return this.getUIState(mapId).appBarComponents;
   }
@@ -49,7 +45,11 @@ export class UIEventProcessor extends AbstractEventProcessor {
     this.getUIState(mapId).setterActions.setActiveFooterBarTab(id);
   }
 
-  static setActiveAppBarTabId(mapId: string, id: string): void {
-    this.getUIState(mapId).setterActions.setActiveAppBarTabId(id);
+  static setActiveAppBarTab(mapId: string, tabId: string, tabGroup: string, isOpen: boolean): void {
+    this.getUIState(mapId).setterActions.setActiveAppBarTab(tabId, tabGroup, isOpen);
+  }
+
+  static getActiveAppBarTab(mapId: string): ActiveAppBarTabType {
+    return this.getUIState(mapId).activeAppBarTab;
   }
 }

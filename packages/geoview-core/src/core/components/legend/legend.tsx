@@ -12,9 +12,10 @@ import { useFooterPanelHeight } from '@/core/components/common';
 
 interface LegendType {
   fullWidth?: boolean;
+  containerType?: 'appBar' | 'footerBar';
 }
 
-export function Legend({ fullWidth }: LegendType): JSX.Element {
+export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): JSX.Element {
   // Log
   logger.logTraceRender('components/legend/legend');
 
@@ -98,7 +99,7 @@ export function Legend({ fullWidth }: LegendType): JSX.Element {
   }, [legendLayers]);
 
   return (
-    <Box sx={sxClasses.container} {...(!fullWidth && { ref: leftPanelRef })} id={`${mapId}-legendContainer`}>
+    <Box sx={sxClasses.container} {...(!fullWidth && { ref: leftPanelRef })} id={`${mapId}-${containerType}-legendContainer`}>
       <Box display="flex" flexDirection="row" flexWrap="wrap">
         {!!legendLayers.length &&
           formattedLegendLayerList.map((layers, idx) => {

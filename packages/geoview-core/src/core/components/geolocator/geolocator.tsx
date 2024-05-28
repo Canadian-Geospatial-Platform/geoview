@@ -5,10 +5,11 @@ import { useTheme } from '@mui/material';
 import { CloseIcon, SearchIcon, AppBarUI, Box, Divider, IconButton, ProgressBar, Toolbar } from '@/ui';
 import { StyledInputField, sxClasses } from './geolocator-style';
 import { OL_ZOOM_DURATION } from '@/core/utils/constant';
-import { useUIAppbarGeolocatorActive, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useActiveAppBarTab, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useAppGeolocatorServiceURL, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { GeolocatorResult } from './geolocator-result';
 import { logger } from '@/core/utils/logger';
+import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
 
 export interface GeoListItem {
   key: string;
@@ -37,10 +38,9 @@ export function Geolocator(): JSX.Element {
   // get store values
   const displayLanguage = useAppDisplayLanguage();
   const geolocatorServiceURL = useAppGeolocatorServiceURL();
-  const { setGeolocatorActive } = useUIStoreActions();
+  const { setActiveAppBarTab } = useUIStoreActions();
 
-  // set the active (visible) or not active (hidden) from geolocator button click
-  const active = useUIAppbarGeolocatorActive();
+  const { tabGroup, isOpen } = useActiveAppBarTab();
 
   const urlRef = useRef<string>(`${geolocatorServiceURL}&lang=${displayLanguage}`);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -124,8 +124,8 @@ export function Geolocator(): JSX.Element {
   const resetSearch = useCallback(() => {
     setSearchValue('');
     setData(undefined);
-    setGeolocatorActive(false);
-  }, [setGeolocatorActive]);
+    setActiveAppBarTab('AppbarPanelButtonGeolocator', CV_DEFAULT_APPBAR_CORE.GEOLOCATOR, false);
+  }, [setActiveAppBarTab]);
 
   /**
    * Do service request after debouncing.
@@ -195,7 +195,11 @@ export function Geolocator(): JSX.Element {
   }, []);
 
   return (
-    <Box sx={sxClasses.root} visibility={active ? 'visible' : 'hidden'} id="geolocator-search">
+    <Box
+      sx={sxClasses.root}
+      visibility={tabGroup === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen ? 'visible' : 'hidden'}
+      id="geolocator-search"
+    >
       <Box sx={sxClasses.geolocator}>
         <AppBarUI position="static">
           <Toolbar variant="dense">
