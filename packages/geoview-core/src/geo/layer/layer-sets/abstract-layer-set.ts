@@ -1,19 +1,17 @@
 import { Pixel } from 'ol/pixel';
 import { Coordinate } from 'ol/coordinate';
-import { Extent } from 'ol/extent';
-import Feature from 'ol/Feature';
-import RenderFeature from 'ol/render/Feature';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeLayerStatus } from '@/geo/map/map-schema-types';
-import { AbstractGeoViewLayer, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeFeatureInfoEntry, TypeLayerData, TypeLayerStatus, TypeResultSet } from '@/geo/map/map-schema-types';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { ConfigBaseClass, LayerStatusChangedEvent } from '@/core/utils/config/validation-classes/config-base-class';
-import { TypeHoverLayerData } from './hover-feature-info-layer-set';
 import { LayerApi } from '@/geo/layer/layer';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { logger } from '@/core/utils/logger';
+import { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { TypeFeatureInfoResultSetEntry, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 
 /**
  * A class to hold a set of layers associated with a value of any type.
@@ -102,9 +100,9 @@ export abstract class AbstractLayerSet {
 
     // Prep the resultSet
     this.resultSet[layerConfig.layerPath] = {
-      data: undefined,
+      layerPath: layerConfig.layerPath,
       layerStatus: layerConfig.layerStatus,
-      layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.getMapId())),
+      layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.getMapId()))!,
     };
 
     // Override this function to perform further registration logic in the inherited classes
@@ -189,7 +187,7 @@ export abstract class AbstractLayerSet {
 
   /**
    * Processes layer data to query features on it, if the layer path can be queried.
-   * @param {TypeLayerData | TypeHoverLayerData} data - The layer data
+   * @param {TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry} data - The layer data
    * @param {ConfigBaseClass} layerConfig - The layer configuration
    * @param {AbstractGeoViewLayer | AbstractGVLayer} geoviewLayer - The geoview layer
    * @param {QueryType} queryType - The query type
@@ -197,7 +195,7 @@ export abstract class AbstractLayerSet {
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise resolving to the query results
    */
   protected static queryLayerFeatures(
-    data: TypeLayerData | TypeHoverLayerData,
+    data: TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry,
     layerConfig: ConfigBaseClass,
     geoviewLayer: AbstractGeoViewLayer | AbstractGVLayer,
     queryType: QueryType,
@@ -261,21 +259,7 @@ export const ArrayOfEventTypes: EventType[] = ['click', 'hover', 'all-features']
 
 export type QueryType = 'at_pixel' | 'at_coordinate' | 'at_long_lat' | 'using_a_bounding_box' | 'using_a_polygon' | 'all';
 
-export type TypeQueryStatus = 'init' | 'processing' | 'processed' | 'error';
-
 export type TypeLocation = null | Pixel | Coordinate | Coordinate[] | string;
-
-export type TypeLayerData = {
-  layerPath: string;
-  layerName: string;
-  layerStatus: TypeLayerStatus;
-  eventListenerEnabled: boolean;
-  // When property features is undefined, we are waiting for the query result.
-  // when Array.isArray(features) is true, the features property contains the query result.
-  // when property features is null, the query ended with an error.
-  queryStatus: TypeQueryStatus;
-  features: TypeFeatureInfoEntry[] | undefined | null;
-};
 
 export type TypeFeatureInfoByEventTypes = {
   [eventName in EventType]?: TypeLayerData;
@@ -283,52 +267,6 @@ export type TypeFeatureInfoByEventTypes = {
 
 // TODO: Move the definition of the domain in the new schema
 // TODO.CONT: Starting here vvvv
-export type codeValueEntryType = {
-  name: string;
-  code: unknown;
-};
-
-export type codedValueType = {
-  type: 'codedValue';
-  name: string;
-  description: string;
-  codedValues: codeValueEntryType[];
-};
-
-export type rangeDomainType = {
-  type: 'range';
-  name: string;
-  range: [minValue: unknown, maxValue: unknown];
-};
-
-export type TypeFieldEntry = {
-  fieldKey: number;
-  value: unknown;
-  dataType: 'string' | 'date' | 'number';
-  alias: string;
-  domain: null | codedValueType | rangeDomainType;
-};
-
-export interface TypeGeometry extends RenderFeature {
-  ol_uid: string;
-}
-
-export type TypeFeatureInfoEntry = {
-  featureKey: number;
-  geoviewLayerType: TypeGeoviewLayerType;
-  extent: Extent | undefined;
-  geometry: TypeGeometry | Feature | null;
-  featureIcon: HTMLCanvasElement;
-  fieldInfo: Partial<Record<string, TypeFieldEntry>>;
-  nameField: string | null;
-};
-
-/**
- * Partial definition of a TypeFeatureInfoEntry for simpler use case queries.
- * Purposely linking this simpler type to the main TypeFeatureInfoEntry type here, in case, for future we want
- * to add more information on one or the other and keep things loosely linked together.
- */
-export type TypeFeatureInfoEntryPartial = Pick<TypeFeatureInfoEntry, 'fieldInfo'>;
 
 /**
  * Define a delegate for the event handler function signature
@@ -341,14 +279,4 @@ type LayerSetUpdatedDelegate = EventDelegateBase<AbstractLayerSet, LayerSetUpdat
 export type LayerSetUpdatedEvent = {
   layerPath: string;
   resultSet: TypeResultSet;
-};
-
-export type TypeResultSetEntry = {
-  layerName?: string;
-  layerStatus: TypeLayerStatus;
-  data: unknown;
-};
-
-export type TypeResultSet = {
-  [layerPath: string]: TypeResultSetEntry;
 };

@@ -7,15 +7,14 @@ import { useStore } from 'zustand';
 import { TypeBasemapOptions, TypeInteraction, TypeValidMapProjectionCodes } from '@config/types/map-schema-types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { Projection } from '@/geo/utils/projection';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
-import { TypeHoverFeatureInfo } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
-import { TypeFeatureInfoResultSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
+import { TypeFeatureInfoEntry, TypeHoverFeatureInfo } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoResultSet } from './feature-info-state';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with MapEventProcessor vs MapState
 

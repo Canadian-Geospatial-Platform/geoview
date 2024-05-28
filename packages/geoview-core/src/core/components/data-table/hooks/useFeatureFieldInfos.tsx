@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { TypeLayerData } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { TypeLayerData } from '@/geo/map/map-schema-types';
 import { MappedLayerDataType } from '@/core/components/data-table/data-table-types';
 import { logger } from '@/core/utils/logger';
 

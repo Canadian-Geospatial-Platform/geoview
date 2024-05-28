@@ -4,6 +4,7 @@ import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-b
 import { logger } from '@/core/utils/logger';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeLegendResultSet } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 /**
  * A class to hold a set of layers associated with an array of TypeLegend. When this class is instantiated, all layers already
@@ -109,18 +110,11 @@ export class LegendsLayerSet extends AbstractLayerSet {
   }
 }
 
-export type TypeLegendResultSetEntry = {
+export type TypeLegendResultInfo = {
   layerName?: string;
   layerStatus: TypeLayerStatus;
   legendQueryStatus: LegendQueryStatus;
   data: TypeLegend | undefined | null;
-};
-
-/** The legend resultset type associate a layer path to a legend object. The undefined value indicate that the get legend query
- * hasn't been run and the null value indicate that there was a get legend error.
- */
-export type TypeLegendResultSet = {
-  [layerPath: string]: TypeLegendResultSetEntry;
 };
 
 export type LegendQueryStatus = 'init' | 'querying' | 'queried';

@@ -1,11 +1,15 @@
-import { GeoviewStoreType } from '@/core/stores';
-import { IFeatureInfoState } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { logger } from '@/core/utils/logger';
-import { TypeFeatureInfoResultSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
-import { EventType, TypeLayerData } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { EventType } from '@/geo/layer/layer-sets/abstract-layer-set';
 
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
 import { UIEventProcessor } from './ui-event-processor';
+import { TypeResultSetEntry } from '@/geo/map/map-schema-types';
+import {
+  IFeatureInfoState,
+  TypeFeatureInfoResultSet,
+  TypeFeatureInfoResultSetEntry,
+} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { GeoviewStoreType } from '@/core/stores/geoview-store';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -49,7 +53,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
 
   // #region
   // Holds the list of layer data arrays being buffered in the propagation process for the batch
-  static #batchedPropagationLayerDataArray: BatchedPropagationLayerDataArrayByMap = {};
+  static #batchedPropagationLayerDataArray: BatchedPropagationLayerDataArrayByMap<TypeFeatureInfoResultSetEntry> = {};
 
   // The time delay between propagations in the batch layer data array.
   // The longer the delay, the more the layers will have a chance to get in a loaded state before changing the layerDataArray.
@@ -88,13 +92,17 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
 
   /**
    * Helper function to delete a layer information from an array when found
-   * @param {TypeLayerData[]} layerArray - The layer array to work with
+   * @param {T[]} layerArray - The layer array to work with
    * @param {string} layerPath - The layer path to delete
-   * @param {(layerArray: TypeLayerData[]) => void} onDeleteCallback - The callback executed when the array is updated
+   * @param {(layerArray: T[]) => void} onDeleteCallback - The callback executed when the array is updated
    * @returns {Promise<void>}
    * @private
    */
-  static #deleteFromArray<T extends TypeLayerData>(layerArray: T[], layerPath: string, onDeleteCallback: (layerArray: T[]) => void): void {
+  static #deleteFromArray<T extends TypeResultSetEntry>(
+    layerArray: T[],
+    layerPath: string,
+    onDeleteCallback: (layerArray: T[]) => void
+  ): void {
     // Find the layer data info to delete from the array
     const layerDataInfoToDelIndex = layerArray.findIndex((layerInfo) => layerInfo.layerPath === layerPath);
 
@@ -132,8 +140,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
        * Create a details object for each layer which is then used to render layers in details panel.
        */
       const layerDataArray = [...featureInfoState.layerDataArray];
-      if (!layerDataArray.find((layerEntry) => layerEntry.layerPath === layerPath))
-        layerDataArray.push(resultSet?.[layerPath]?.data as TypeLayerData);
+      if (!layerDataArray.find((layerEntry) => layerEntry.layerPath === layerPath)) layerDataArray.push(resultSet?.[layerPath]);
       const atLeastOneFeature = layerDataArray.find((layerEntry) => !!layerEntry.features?.length) || false;
 
       // Update the layer data array in the store, all the time, for all statuses
@@ -164,11 +171,11 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * The propagation can be bypassed using the store 'layerDataArrayBatchLayerPathBypass' state which tells the process to
    * immediately batch out the array in the store for faster triggering of the state, for faster updating of the UI.
    * @param {string} mapId - The map id
-   * @param {TypeLayerData[]} layerDataArray - The layer data array to batch on
+   * @param {TypeFeatureInfoResultSetEntry[]} layerDataArray - The layer data array to batch on
    * @returns {Promise<void>} Promise upon completion
    * @private
    */
-  static #propagateFeatureInfoToStoreBatch(mapId: string, layerDataArray: TypeLayerData[]): Promise<void> {
+  static #propagateFeatureInfoToStoreBatch(mapId: string, layerDataArray: TypeFeatureInfoResultSetEntry[]): Promise<void> {
     // The feature info state
     const featureInfoState = this.getFeatureInfoState(mapId);
 

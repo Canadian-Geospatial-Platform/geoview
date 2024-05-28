@@ -9,8 +9,7 @@ import {
   isVectorLegend,
   isWmsLegend,
 } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeLegendResultSetEntry } from '@/geo/layer/layer-sets/legends-layer-set';
-import { ILayerState } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { ILayerState, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 

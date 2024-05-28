@@ -35,13 +35,16 @@ import {
   TypeStyleGeometry,
   CONST_LAYER_ENTRY_TYPES,
   TypeLoadEndListenerType,
+  TypeFeatureInfoEntry,
+  codedValueType,
+  rangeDomainType,
 } from '@/geo/map/map-schema-types';
 import { GeoViewLayerCreatedTwiceError } from '@/geo/layer/exceptions/layer-exceptions';
-import { QueryType, TypeFeatureInfoEntry, TypeLocation, codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { Projection } from '@/geo/utils/projection';
 import { getLegendStyles, getFeatureCanvas } from '@/geo/utils/renderer/geoview-renderer';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { LayerApi } from '../layer';
+import { QueryType, TypeLocation } from '../layer-sets/abstract-layer-set';
 
 // Constant used to define the default layer names
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {

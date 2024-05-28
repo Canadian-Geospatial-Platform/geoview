@@ -8,14 +8,25 @@ import { FitOptions } from 'ol/View';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeLayersViewDisplayState, TypeLegendLayer } from '@/core/components/layers/types';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
-import { TypeClassBreakStyleConfig, TypeStyleGeometry, TypeUniqueValueStyleConfig } from '@/geo/map/map-schema-types';
+import {
+  TypeClassBreakStyleConfig,
+  TypeResultSet,
+  TypeResultSetEntry,
+  TypeStyleGeometry,
+  TypeUniqueValueStyleConfig,
+} from '@/geo/map/map-schema-types';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
+import { TypeLegendResultInfo } from '@/geo/layer/layer-sets/legends-layer-set';
 
 // #region INTERFACES & TYPES
+
+export type TypeLegendResultSetEntry = TypeResultSetEntry & TypeLegendResultInfo;
+
+export type TypeLegendResultSet = TypeResultSet<TypeLegendResultSetEntry>;
 
 export interface ILayerState {
   highlightedLayer: string;

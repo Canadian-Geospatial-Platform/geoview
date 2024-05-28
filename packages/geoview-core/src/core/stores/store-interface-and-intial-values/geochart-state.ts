@@ -1,6 +1,6 @@
 import { useStore } from 'zustand';
 import { GeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
-import { TypeLayerData } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { TypeLayerData, TypeResultSet, TypeResultSetEntry } from '@/geo/map/map-schema-types';
 
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
@@ -11,29 +11,33 @@ import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 
 type GeochartActions = IGeochartState['actions'];
 
+export type TypeGeochartResultSetEntry = TypeResultSetEntry & TypeLayerData;
+
+export type TypeGeochartResultSet = TypeResultSet<TypeGeochartResultSetEntry>;
+
 export type GeoChartStoreByLayerPath = {
   [layerPath: string]: GeoChartConfig;
 };
 
 export interface IGeochartState {
   geochartChartsConfig: GeoChartStoreByLayerPath;
-  layerDataArray: TypeLayerData[];
-  layerDataArrayBatch: TypeLayerData[];
+  layerDataArray: TypeGeochartResultSetEntry[];
+  layerDataArrayBatch: TypeGeochartResultSetEntry[];
   layerDataArrayBatchLayerPathBypass: string;
   selectedLayerPath: string;
 
   actions: {
     setGeochartCharts: (charts: GeoChartStoreByLayerPath) => void;
-    setLayerDataArray: (layerDataArray: TypeLayerData[]) => void;
-    setLayerDataArrayBatch: (layerDataArray: TypeLayerData[]) => void;
+    setLayerDataArray: (layerDataArray: TypeGeochartResultSetEntry[]) => void;
+    setLayerDataArrayBatch: (layerDataArray: TypeGeochartResultSetEntry[]) => void;
     setLayerDataArrayBatchLayerPathBypass: (layerPath: string) => void;
     setSelectedLayerPath: (selectedLayerPath: string) => void;
   };
 
   setterActions: {
     setGeochartCharts: (charts: GeoChartStoreByLayerPath) => void;
-    setLayerDataArray: (layerDataArray: TypeLayerData[]) => void;
-    setLayerDataArrayBatch: (layerDataArray: TypeLayerData[]) => void;
+    setLayerDataArray: (layerDataArray: TypeGeochartResultSetEntry[]) => void;
+    setLayerDataArrayBatch: (layerDataArray: TypeGeochartResultSetEntry[]) => void;
     setLayerDataArrayBatchLayerPathBypass: (layerPath: string) => void;
     setSelectedLayerPath: (selectedLayerPath: string) => void;
   };
@@ -62,11 +66,11 @@ export function initializeGeochartState(set: TypeSetStore, get: TypeGetStore): I
         // Redirect to setter
         get().geochartState.setterActions.setGeochartCharts(charts);
       },
-      setLayerDataArray(layerDataArray: TypeLayerData[]) {
+      setLayerDataArray(layerDataArray: TypeGeochartResultSetEntry[]) {
         // Redirect to setter
         get().geochartState.setterActions.setLayerDataArray(layerDataArray);
       },
-      setLayerDataArrayBatch(layerDataArrayBatch: TypeLayerData[]) {
+      setLayerDataArrayBatch(layerDataArrayBatch: TypeGeochartResultSetEntry[]) {
         // Redirect to setter
         get().geochartState.setterActions.setLayerDataArrayBatch(layerDataArrayBatch);
       },
@@ -89,7 +93,7 @@ export function initializeGeochartState(set: TypeSetStore, get: TypeGetStore): I
           },
         });
       },
-      setLayerDataArray(layerDataArray: TypeLayerData[]) {
+      setLayerDataArray(layerDataArray: TypeGeochartResultSetEntry[]) {
         set({
           geochartState: {
             ...get().geochartState,
@@ -97,7 +101,7 @@ export function initializeGeochartState(set: TypeSetStore, get: TypeGetStore): I
           },
         });
       },
-      setLayerDataArrayBatch(layerDataArrayBatch: TypeLayerData[]) {
+      setLayerDataArrayBatch(layerDataArrayBatch: TypeGeochartResultSetEntry[]) {
         set({
           geochartState: {
             ...get().geochartState,

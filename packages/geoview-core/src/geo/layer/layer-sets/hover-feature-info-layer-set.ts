@@ -3,11 +3,11 @@ import debounce from 'lodash/debounce';
 import { Coordinate } from 'ol/coordinate';
 import { logger } from '@/core/utils/logger';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { TypeLayerStatus } from '@/geo/map/map-schema-types';
-import { CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { AbstractLayerSet, TypeFieldEntry, TypeQueryStatus } from './abstract-layer-set';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractLayerSet } from './abstract-layer-set';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { TypeHoverResultSet } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 
 /**
  * A class containing a set of layers associated with a TypeLayerData object, which will receive the result of a
@@ -17,7 +17,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
  */
 export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   /** The resultSet object as existing in the base class, retyped here as a TypeHoverFeatureInfoResultSet */
-  declare resultSet: TypeHoverFeatureInfoResultSet;
+  declare resultSet: TypeHoverResultSet;
 
   /**
    * The class constructor that instanciate a set of layer.
@@ -62,29 +62,21 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     // Call parent
     super.onRegisterLayer(layerConfig);
 
-    // TODO: Check - Why are we updating the layer status in 'data' when it's also in this.resultSet[layerConfig.layerPath]?
     // Update the resultSet data
-    this.resultSet[layerConfig.layerPath].data = {
-      layerStatus: layerConfig.layerStatus!,
-      eventListenerEnabled: true,
-      queryStatus: 'processed',
-      feature: undefined,
-    };
+    this.resultSet[layerConfig.layerPath].eventListenerEnabled = true;
+    this.resultSet[layerConfig.layerPath].queryStatus = 'processed';
+    this.resultSet[layerConfig.layerPath].feature = undefined;
   }
 
-  /**
-   * Overrides the behavior to apply when a layer status changed for a hover-feature-info-layer-set.
-   * @param {ConfigBaseClass} layerConfig - The layer config
-   * @param {string} layerStatus - The new layer status
-   */
-  protected override onProcessLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatus: TypeLayerStatus): void {
-    // Call parent. After this call, this.resultSet?.[layerPath]?.layerStatus may have changed!
-    super.onProcessLayerStatusChanged(layerConfig, layerStatus);
-
-    // TODO: Check - Why are we updating the layer status in 'data' when it's also in this.resultSet[layerConfig.layerPath]?
-    // Update the layer status
-    this.resultSet[layerConfig.layerPath].data.layerStatus = layerStatus;
-  }
+  // /**
+  //  * Overrides the behavior to apply when a layer status changed for a hover-feature-info-layer-set.
+  //  * @param {ConfigBaseClass} layerConfig - The layer config
+  //  * @param {string} layerStatus - The new layer status
+  //  */
+  // protected override onProcessLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatus: TypeLayerStatus): void {
+  //   // Call parent. After this call, this.resultSet?.[layerPath]?.layerStatus may have changed!
+  //   super.onProcessLayerStatusChanged(layerConfig, layerStatus);
+  // }
 
   /**
    * Queries the features at the provided coordinate for all the registered layers.
@@ -100,49 +92,49 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
       const layer = this.layerApi.getGeoviewLayerHybrid(layerPath)!;
       const layerConfig = layer.getLayerConfig(layerPath)!;
 
-      const { data } = this.resultSet[layerPath];
-      if (!data.eventListenerEnabled) return;
+      if (!this.resultSet[layerPath].eventListenerEnabled) return;
       if (!AbstractLayerSet.isQueryable(layerConfig)) return;
 
       if (layerConfig.layerStatus === 'loaded') {
-        data.feature = undefined;
-        data.queryStatus = 'init';
+        this.resultSet[layerPath].feature = undefined;
+        this.resultSet[layerPath].queryStatus = 'init';
+
+        // Propagate to the store
+        MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), this.resultSet[layerPath].feature);
 
         // Process query on results data
-        AbstractLayerSet.queryLayerFeatures(data, layerConfig, layer, queryType, pixelCoordinate)
+        AbstractLayerSet.queryLayerFeatures(this.resultSet[layerPath], layerConfig, layer, queryType, pixelCoordinate)
           .then((arrayOfRecords) => {
             if (arrayOfRecords === null) {
-              this.resultSet[layerPath].data.queryStatus = 'error';
-              this.resultSet[layerPath].data.layerStatus = layerConfig.layerStatus!;
-              this.resultSet[layerPath].data.feature = null;
+              this.resultSet[layerPath].queryStatus = 'error';
+              this.resultSet[layerPath].feature = null;
             } else {
               if (arrayOfRecords?.length) {
                 const nameField = arrayOfRecords![0].nameField || (Object.entries(arrayOfRecords![0].fieldInfo)[0] as unknown as string);
                 const fieldInfo = arrayOfRecords![0].fieldInfo[nameField as string];
 
-                data.feature = {
+                this.resultSet[layerPath].feature = {
                   featureIcon: arrayOfRecords![0].featureIcon,
                   fieldInfo,
                   geoviewLayerType: arrayOfRecords![0].geoviewLayerType,
                   nameField,
                 };
               } else {
-                data.feature = undefined;
+                this.resultSet[layerPath].feature = undefined;
               }
-              data.layerStatus = layerConfig.layerStatus!;
-              data.queryStatus = 'processed';
+              this.resultSet[layerPath].queryStatus = 'processed';
             }
 
             // Propagate to the store
-            MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), this.resultSet[layerPath].data.feature);
+            MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), this.resultSet[layerPath].feature);
           })
           .catch((error) => {
             // Log
             logger.logPromiseFailed('queryLayerFeatures in queryLayers in hoverFeatureInfoLayerSet', error);
           });
       } else {
-        data.feature = null;
-        data.queryStatus = 'error';
+        this.resultSet[layerPath].feature = null;
+        this.resultSet[layerPath].queryStatus = 'error';
       }
     });
   }
@@ -153,10 +145,10 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    * @param {string} layerPath - Optional parameter used to enable only one layer
    */
   enableHoverListener(layerPath?: string): void {
-    if (layerPath) this.resultSet[layerPath].data.eventListenerEnabled = true;
+    if (layerPath) this.resultSet[layerPath].eventListenerEnabled = true;
     else
       Object.keys(this.resultSet).forEach((key: string) => {
-        this.resultSet[key].data.eventListenerEnabled = true;
+        this.resultSet[key].eventListenerEnabled = true;
       });
   }
 
@@ -166,10 +158,10 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    * @param {string} layerPath - Optional parameter used to disable only one layer
    */
   disableHoverListener(layerPath?: string): void {
-    if (layerPath) this.resultSet[layerPath].data.eventListenerEnabled = false;
+    if (layerPath) this.resultSet[layerPath].eventListenerEnabled = false;
     else
       Object.keys(this.resultSet).forEach((key: string) => {
-        this.resultSet[key].data.eventListenerEnabled = false;
+        this.resultSet[key].eventListenerEnabled = false;
       });
   }
 
@@ -180,39 +172,13 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    * @returns {boolean | undefined} The flag value for the map or layer.
    */
   isHoverListenerEnabled(layerPath?: string): boolean | undefined {
-    if (layerPath) return !!this.resultSet?.[layerPath]?.data?.eventListenerEnabled;
+    if (layerPath) return !!this.resultSet?.[layerPath]?.eventListenerEnabled;
 
     let returnValue: boolean | undefined;
     Object.keys(this.resultSet).forEach((key: string, i) => {
-      if (i === 0) returnValue = this.resultSet[key].data.eventListenerEnabled;
-      if (returnValue !== this.resultSet[key].data.eventListenerEnabled) returnValue = undefined;
+      if (i === 0) returnValue = this.resultSet[key].eventListenerEnabled;
+      if (returnValue !== this.resultSet[key].eventListenerEnabled) returnValue = undefined;
     });
     return returnValue;
   }
 }
-
-export type TypeHoverFeatureInfo =
-  | {
-      geoviewLayerType: TypeGeoviewLayerType;
-      featureIcon: HTMLCanvasElement;
-      fieldInfo: TypeFieldEntry | undefined;
-      nameField: string | null;
-    }
-  | undefined
-  | null;
-
-export type TypeHoverLayerData = {
-  layerStatus: TypeLayerStatus;
-  eventListenerEnabled: boolean;
-  queryStatus: TypeQueryStatus;
-  feature: TypeHoverFeatureInfo;
-};
-
-export type TypeHoverFeatureInfoResultSetEntry = {
-  layerStatus: TypeLayerStatus;
-  data: TypeHoverLayerData;
-};
-
-export type TypeHoverFeatureInfoResultSet = {
-  [layerPath: string]: TypeHoverFeatureInfoResultSetEntry;
-};
