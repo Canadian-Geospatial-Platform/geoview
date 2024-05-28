@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -10,12 +10,12 @@ import Fullscreen from './buttons/fullscreen';
 import Home from './buttons/home';
 import Location from './buttons/location';
 
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { Panel, ButtonGroup, IconButton, Box } from '@/ui';
-import { TypeButtonPanel } from '@/ui/panel/panel-types';
+// import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { ButtonGroup, Box } from '@/ui';
+// import { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
-import { NavBarApi, NavBarCreatedEvent, NavBarRemovedEvent } from '@/core/components';
-import { helpCloseAll, helpClosePanelById, helpOpenPanelById } from '@/core/components/app-bar/app-bar-helper';
+import { NavBarApi } from '@/core/components';
+// import { helpCloseAll, helpClosePanelById, helpOpenPanelById } from '@/core/components/app-bar/app-bar-helper';
 import { useUINavbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
 
@@ -32,7 +32,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
   const { api: navBarApi } = props;
 
-  const mapId = useGeoViewMapId();
+  // const mapId = useGeoViewMapId();
 
   const { t } = useTranslation();
 
@@ -41,116 +41,119 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
   // internal state
   const navBarRef = useRef<HTMLDivElement>(null);
-  const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
+  // const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
 
   // get the expand or collapse from store
   const navBarComponents = useUINavbarComponents();
 
   // #region REACT HOOKS
 
-  const closePanelById = useCallback(
-    (buttonId: string, groupName: string | undefined) => {
-      // Log
-      logger.logTraceUseCallback('NAV-BAR - closePanelById', buttonId);
+  // const closePanelById = useCallback(
+  //   (buttonId: string, groupName: string | undefined) => {
+  //     // Log
+  //     logger.logTraceUseCallback('NAV-BAR - closePanelById', buttonId);
 
-      // Redirect to helper
-      helpClosePanelById(mapId, buttonPanelGroups, buttonId, groupName, setButtonPanelGroups);
-    },
-    [buttonPanelGroups, mapId]
-  );
+  //     // Redirect to helper
+  //     helpClosePanelById(mapId, buttonPanelGroups, buttonId, groupName, setButtonPanelGroups);
+  //   },
+  //   [buttonPanelGroups, mapId]
+  // );
 
-  const closeAll = useCallback(() => {
-    // Log
-    logger.logTraceUseCallback('NAV-BAR - closeAll');
+  // const closeAll = useCallback(() => {
+  //   // Log
+  //   logger.logTraceUseCallback('NAV-BAR - closeAll');
 
-    // Redirect to helper
-    helpCloseAll(buttonPanelGroups, closePanelById);
-  }, [buttonPanelGroups, closePanelById]);
+  //   // Redirect to helper
+  //   helpCloseAll(buttonPanelGroups, closePanelById);
+  // }, [buttonPanelGroups, closePanelById]);
 
-  const openPanelById = useCallback(
-    (buttonId: string, groupName: string | undefined) => {
-      // Log
-      logger.logTraceUseCallback('NAV-BAR - openPanelById', buttonId);
+  // const openPanelById = useCallback(
+  //   (buttonId: string, groupName: string | undefined) => {
+  //     // Log
+  //     logger.logTraceUseCallback('NAV-BAR - openPanelById', buttonId);
 
-      // Redirect to helper
-      helpOpenPanelById(buttonPanelGroups, buttonId, groupName, setButtonPanelGroups, closeAll);
-    },
-    [buttonPanelGroups, closeAll]
-  );
+  //     // Redirect to helper
+  //     helpOpenPanelById(buttonPanelGroups, buttonId, groupName, setButtonPanelGroups, closeAll);
+  //   },
+  //   [buttonPanelGroups, closeAll]
+  // );
 
-  const handleButtonClicked = useCallback(
-    (buttonId: string, groupName: string) => {
-      // Log
-      logger.logTraceUseCallback('NAV-BAR - handleButtonClicked', buttonId);
+  // const handleButtonClicked = useCallback(
+  //   (buttonId: string, groupName: string) => {
+  //     // Log
+  //     logger.logTraceUseCallback('NAV-BAR - handleButtonClicked', buttonId);
 
-      // Get the button panel
-      const buttonPanel = buttonPanelGroups[groupName][buttonId];
+  //     // Get the button panel
+  //     const buttonPanel = buttonPanelGroups[groupName][buttonId];
 
-      if (!buttonPanel.panel?.status) {
-        // Redirect
-        openPanelById(buttonId, groupName);
-      } else {
-        // Redirect
-        closePanelById(buttonId, groupName);
-      }
-    },
-    [buttonPanelGroups, closePanelById, openPanelById]
-  );
+  //     if (!buttonPanel.panel?.status) {
+  //       // Redirect
+  //       openPanelById(buttonId, groupName);
+  //     } else {
+  //       // Redirect
+  //       closePanelById(buttonId, groupName);
+  //     }
+  //   },
+  //   [buttonPanelGroups, closePanelById, openPanelById]
+  // );
 
-  const handleAddButtonPanel = useCallback(
-    (sender: NavBarApi, event: NavBarCreatedEvent) => {
-      // Log
-      logger.logTraceUseCallback('NAV-BAR - handleAddButtonPanel', event);
+  // const handleAddButtonPanel = useCallback(
+  //   (sender: NavBarApi, event: NavBarCreatedEvent) => {
+  //     // Log
+  //     logger.logTraceUseCallback('NAV-BAR - handleAddButtonPanel', event);
 
-      setButtonPanelGroups({
-        ...buttonPanelGroups,
-        [event.group]: {
-          ...buttonPanelGroups[event.group],
-          [event.buttonPanelId]: event.buttonPanel,
-        },
-      });
-    },
-    [buttonPanelGroups]
-  );
+  //     setButtonPanelGroups({
+  //       ...buttonPanelGroups,
+  //       [event.group]: {
+  //         ...buttonPanelGroups[event.group],
+  //         [event.buttonPanelId]: event.buttonPanel,
+  //       },
+  //     });
+  //   },
+  //   [buttonPanelGroups]
+  // );
 
-  const handleRemoveButtonPanel = useCallback(
-    (sender: NavBarApi, event: NavBarRemovedEvent) => {
-      // Log
-      logger.logTraceUseCallback('NAV-BAR - handleRemoveButtonPanel', event);
+  // const handleRemoveButtonPanel = useCallback(
+  //   (sender: NavBarApi, event: NavBarRemovedEvent) => {
+  //     // Log
+  //     logger.logTraceUseCallback('NAV-BAR - handleRemoveButtonPanel', event);
 
-      setButtonPanelGroups((prevState) => {
-        const state = { ...prevState };
-        const group = state[event.group];
+  //     setButtonPanelGroups((prevState) => {
+  //       const state = { ...prevState };
+  //       const group = state[event.group];
 
-        delete group[event.buttonPanelId];
+  //       delete group[event.buttonPanelId];
 
-        return state;
-      });
-    },
-    [setButtonPanelGroups]
-  );
+  //       return state;
+  //     });
+  //   },
+  //   [setButtonPanelGroups]
+  // );
 
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('NAV-BAR - mount');
-
+    // TODO: it will be fixed in #2180
+    const dummyNavBarCreated = (): void => logger.logInfo('NavbarCreated');
     // Register NavBar created/removed handlers
-    navBarApi.onNavbarCreated(handleAddButtonPanel);
-    navBarApi.onNavbarRemoved(handleRemoveButtonPanel);
+    navBarApi.onNavbarCreated(dummyNavBarCreated);
+    // navBarApi.onNavbarRemoved(handleRemoveButtonPanel);
 
     return () => {
       // Unregister events
-      navBarApi.offNavbarCreated(handleAddButtonPanel);
-      navBarApi.offNavbarRemoved(handleRemoveButtonPanel);
+      navBarApi.offNavbarCreated(dummyNavBarCreated);
+      // navBarApi.offNavbarRemoved(handleRemoveButtonPanel);
     };
-  }, [navBarApi, handleAddButtonPanel, handleRemoveButtonPanel]);
+    // }, [navBarApi, handleAddButtonPanel, handleRemoveButtonPanel]);
+  }, [navBarApi]);
 
   // #endregion
 
   return (
     /** TODO - KenChase Need to add styling for scenario when more buttons that can fit vertically occurs (or limit number of buttons that can be added) */
     <Box ref={navBarRef} sx={[sxClasses.navBarRef]}>
-      {Object.keys(buttonPanelGroups).map((groupName) => {
+      {/* TODO: it will be fixed in #2180 */}
+      {/* {Object.keys(buttonPanelGroups).map((groupName) => {
         const buttonPanelGroup = buttonPanelGroups[groupName];
 
         // display the panels in the list
@@ -164,9 +167,10 @@ export function NavBar(props: NavBarProps): JSX.Element {
           return <Box key={groupName}>{panels}</Box>;
         }
         return null;
-      })}
+      })} */}
       <Box sx={sxClasses.navBtnGroupContainer}>
-        {Object.keys(buttonPanelGroups).map((groupName) => {
+        {/* TODO: it will be fixed in #2180 */}
+        {/* {Object.keys(buttonPanelGroups).map((groupName) => {
           const buttonPanelGroup = buttonPanelGroups[groupName];
 
           // if not an empty object, only then render any HTML
@@ -212,7 +216,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
             );
           }
           return null;
-        })}
+        })} */}
         <ButtonGroup orientation="vertical" aria-label={t('mapnav.arianavbar')!} variant="contained" sx={sxClasses.navBtnGroup}>
           <ZoomIn />
           <ZoomOut />
