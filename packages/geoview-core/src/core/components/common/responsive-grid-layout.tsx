@@ -126,7 +126,7 @@ const ResponsiveGridLayout = forwardRef(
           variant="contained"
           className="style2"
           startIcon={isEnlarged ? <ArrowForwardIcon /> : <ArrowBackIcon />}
-          sx={{ height: '40px', borderRadius: '1.5rem', [theme.breakpoints.down('md')]: { display: 'none' } }}
+          sx={{ height: '40px', borderRadius: '1.5rem', boxShadow: 'none', [theme.breakpoints.down('md')]: { display: 'none' } }}
           onClick={() => handleIsEnlarge(!isEnlarged)}
           tooltip={isEnlarged ? t('dataTable.reduceBtn')! : t('dataTable.enlargeBtn')!}
           tooltipPlacement="top"
@@ -261,7 +261,7 @@ const ResponsiveGridLayout = forwardRef(
 
     return (
       <Box ref={ref}>
-        <ResponsiveGrid.Root sx={{ pt: 8, pb: 8 }} ref={panelTitleRef}>
+        <ResponsiveGrid.Root sx={{ pt: 8, pb: 0 }} ref={panelTitleRef}>
           {!fullWidth && (
             <ResponsiveGrid.Left
               isRightPanelVisible={isRightPanelVisible}
@@ -284,14 +284,16 @@ const ResponsiveGridLayout = forwardRef(
             <Box
               sx={{
                 display: 'flex',
-                alignItems: 'center',
+                alignItems: fullWidth ? 'end' : 'center',
+                flexDirection: fullWidth ? 'column' : 'row',
+                gap: fullWidth ? '10px' : '0',
                 [theme.breakpoints.up('md')]: { justifyContent: fullWidth ? 'space-between' : 'right' },
                 [theme.breakpoints.down('md')]: { justifyContent: 'space-between' },
               }}
             >
               {rightTop ?? <Box />}
 
-              <Box sx={{ display: 'flex', flexDirection: 'row', gap: '0.6rem' }}>
+              <Box sx={sxClasses.rightButtonsContainer}>
                 {!fullWidth && !hideEnlargeBtn && renderEnlargeButton()}
                 {!!guideContentIds?.length && renderGuideButton()}
                 {!isMapFullScreen && renderFullScreenButton()}
