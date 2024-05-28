@@ -1,13 +1,12 @@
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import { logger } from '@/core/utils/logger';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { getLocalizedValue } from '@/core/utils/utilities';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
-import { AbstractLayerSet, QueryType, TypeLayerData } from './abstract-layer-set';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { AbstractLayerSet, QueryType } from './abstract-layer-set';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { TypeAllFeatureInfoResultSet } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 
 /**
  * A class containing a set of layers associated with a TypeLayerData object, which will receive the result of a
@@ -69,14 +68,10 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     super.onRegisterLayer(layerConfig);
 
     // Update the resultSet data
-    this.resultSet[layerConfig.layerPath].data = {
-      layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
-      layerStatus: layerConfig.layerStatus!,
-      eventListenerEnabled: true,
-      queryStatus: 'processed',
-      features: [],
-      layerPath: layerConfig.layerPath,
-    };
+    this.resultSet[layerConfig.layerPath].layerPath = layerConfig.layerPath;
+    this.resultSet[layerConfig.layerPath].eventListenerEnabled = true;
+    this.resultSet[layerConfig.layerPath].queryStatus = 'processed';
+    this.resultSet[layerConfig.layerPath].features = [];
 
     // Propagate to store on registration
     this.#propagateToStore(layerConfig.layerPath);
@@ -110,10 +105,6 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     // Call parent. After this call, this.resultSet?.[layerPath]?.layerStatus may have changed!
     super.onProcessLayerStatusChanged(layerConfig, layerStatus);
 
-    // TODO: Check - Why are we updating the layer status in 'data' when it's also in this.resultSet[layerConfig.layerPath]?
-    // Update the layer status
-    this.resultSet[layerConfig.layerPath].data.layerStatus = layerStatus;
-
     // If the layer status isn't an error
     if (layerStatus !== 'error') {
       // Propagate to the store on layer status changed
@@ -142,34 +133,35 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     // If valid layer path
     if (this.layerApi.isLayerEntryConfigRegistered(layerPath) && this.resultSet[layerPath]) {
       // If event listener disabled
-      if (!this.resultSet[layerPath].data.eventListenerEnabled) return Promise.resolve();
+      if (!this.resultSet[layerPath].eventListenerEnabled) return Promise.resolve();
 
       // Get the layer config and layer associated with the layer path
       const layer = this.layerApi.getGeoviewLayerHybrid(layerPath)!;
       const layerConfig = layer.getLayerConfig(layerPath)!;
 
-      const { data } = this.resultSet[layerPath];
       if (layerConfig.layerStatus === 'loaded' && layer) {
-        data.features = undefined;
-        data.queryStatus = 'processing';
+        this.resultSet[layerPath].features = undefined;
+        this.resultSet[layerPath].queryStatus = 'processing';
+
+        // Propagate to the store
+        DataTableEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, this.resultSet);
 
         // Process query on results data
-        const promiseResult = AbstractLayerSet.queryLayerFeatures(data, layerConfig, layer, queryType, layerPath);
+        const promiseResult = AbstractLayerSet.queryLayerFeatures(this.resultSet[layerPath], layerConfig, layer, queryType, layerPath);
 
         // Wait for promise to resolve
         const arrayOfRecords = await promiseResult;
 
         // Keep the features retrieved
-        data.features = arrayOfRecords;
-        data.layerStatus = layerConfig.layerStatus!;
+        this.resultSet[layerPath].features = arrayOfRecords;
 
         // When property features is undefined, we are waiting for the query result.
         // when Array.isArray(features) is true, the features property contains the query result.
         // when property features is null, the query ended with an error.
-        data.queryStatus = arrayOfRecords ? 'processed' : 'error';
+        this.resultSet[layerPath].queryStatus = arrayOfRecords ? 'processed' : 'error';
       } else {
-        data.features = null;
-        data.queryStatus = 'error';
+        this.resultSet[layerPath].features = null;
+        this.resultSet[layerPath].queryStatus = 'error';
       }
 
       // Propagate to the store
@@ -184,13 +176,3 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     return Promise.resolve();
   }
 }
-
-export type TypeAllFeatureInfoResultSetEntry = {
-  layerName?: string;
-  layerStatus: TypeLayerStatus;
-  data: TypeLayerData;
-};
-
-export type TypeAllFeatureInfoResultSet = {
-  [layerPath: string]: TypeAllFeatureInfoResultSetEntry;
-};

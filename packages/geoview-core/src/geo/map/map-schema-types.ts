@@ -1,6 +1,8 @@
 // We use _ for layerPth and olLayer all over the file. We keep it global...
 import { Extent } from 'ol/extent';
 import BaseLayer from 'ol/layer/Base';
+import Feature from 'ol/Feature';
+import RenderFeature from 'ol/render/Feature';
 
 import {
   TypeBasemapOptions,
@@ -193,6 +195,90 @@ export const layerEntryIsImageStatic = (verifyIfLayer: TypeLayerEntryConfig): ve
 };
 
 export type TypeLayerStatus = 'registered' | 'newInstance' | 'processing' | 'processed' | 'loading' | 'loaded' | 'error';
+
+export type TypeResultSetEntry = {
+  layerPath: string;
+  layerName: string;
+  layerStatus: TypeLayerStatus;
+};
+
+export type TypeResultSet<T extends TypeResultSetEntry = TypeResultSetEntry> = {
+  [layerPath: string]: T;
+};
+
+export type TypeLayerData = {
+  eventListenerEnabled: boolean;
+  // When property features is undefined, we are waiting for the query result.
+  // when Array.isArray(features) is true, the features property contains the query result.
+  // when property features is null, the query ended with an error.
+  queryStatus: TypeQueryStatus;
+  features: TypeFeatureInfoEntry[] | undefined | null;
+};
+
+export type TypeHoverLayerData = {
+  eventListenerEnabled: boolean;
+  queryStatus: TypeQueryStatus;
+  feature: TypeHoverFeatureInfo;
+};
+
+export type TypeHoverFeatureInfo =
+  | {
+      geoviewLayerType: TypeGeoviewLayerType;
+      featureIcon: HTMLCanvasElement;
+      fieldInfo: TypeFieldEntry | undefined;
+      nameField: string | null;
+    }
+  | undefined
+  | null;
+
+export type TypeQueryStatus = 'init' | 'processing' | 'processed' | 'error';
+
+export type TypeFeatureInfoEntry = {
+  featureKey: number;
+  geoviewLayerType: TypeGeoviewLayerType;
+  extent: Extent | undefined;
+  geometry: TypeGeometry | Feature | null;
+  featureIcon: HTMLCanvasElement;
+  fieldInfo: Partial<Record<string, TypeFieldEntry>>;
+  nameField: string | null;
+};
+
+export interface TypeGeometry extends RenderFeature {
+  ol_uid: string;
+}
+
+export type codeValueEntryType = {
+  name: string;
+  code: unknown;
+};
+
+export type codedValueType = {
+  type: 'codedValue';
+  name: string;
+  description: string;
+  codedValues: codeValueEntryType[];
+};
+
+export type rangeDomainType = {
+  type: 'range';
+  name: string;
+  range: [minValue: unknown, maxValue: unknown];
+};
+
+export type TypeFieldEntry = {
+  fieldKey: number;
+  value: unknown;
+  dataType: 'string' | 'date' | 'number';
+  alias: string;
+  domain: null | codedValueType | rangeDomainType;
+};
+
+/**
+ * Partial definition of a TypeFeatureInfoEntry for simpler use case queries.
+ * Purposely linking this simpler type to the main TypeFeatureInfoEntry type here, in case, for future we want
+ * to add more information on one or the other and keep things loosely linked together.
+ */
+export type TypeFeatureInfoEntryPartial = Pick<TypeFeatureInfoEntry, 'fieldInfo'>;
 
 /** The simplified layer statuses */
 export type TypeLayerStatusSimplified = 'loading' | 'loaded' | 'error';

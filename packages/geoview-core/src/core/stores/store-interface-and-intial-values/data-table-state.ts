@@ -1,15 +1,18 @@
 import { useStore } from 'zustand';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
-import { TypeAllFeatureInfoResultSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
-import { TypeFeatureInfoEntry, TypeLayerData } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
+import { TypeFeatureInfoEntry, TypeLayerData, TypeResultSet, TypeResultSetEntry } from '@/geo/map/map-schema-types';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with DataTableEventProcessor vs DataTaleState
 
 // #region INTERFACES & TYPES
 
 type DataTableActions = IDataTableState['actions'];
+
+export type TypeAllFeatureInfoResultSetEntry = TypeResultSetEntry & TypeLayerData;
+
+export type TypeAllFeatureInfoResultSet = TypeResultSet<TypeAllFeatureInfoResultSetEntry>;
 
 // Import { MRTColumnFiltersState } from 'material-react-table' fails - This is likely not portable. a type annotation is necessary
 // Create a type to mimic
@@ -28,7 +31,7 @@ interface IDataTableSettings {
 }
 
 export interface IDataTableState {
-  allFeaturesDataArray: TypeLayerData[];
+  allFeaturesDataArray: TypeAllFeatureInfoResultSetEntry[];
   activeLayerData: TypeLayerData[];
   layersDataTableSetting: Record<string, IDataTableSettings>;
   selectedLayerPath: string;
@@ -51,7 +54,7 @@ export interface IDataTableState {
 
   setterActions: {
     setActiveLayersData: (layers: TypeLayerData[]) => void;
-    setAllFeaturesDataArray: (allFeaturesDataArray: TypeLayerData[]) => void;
+    setAllFeaturesDataArray: (allFeaturesDataArray: TypeAllFeatureInfoResultSetEntry[]) => void;
     setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
     setInitiallayerDataTableSetting: (layerPath: string) => void;
     setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
@@ -144,7 +147,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
           },
         });
       },
-      setAllFeaturesDataArray(allFeaturesDataArray: TypeLayerData[]) {
+      setAllFeaturesDataArray(allFeaturesDataArray: TypeAllFeatureInfoResultSetEntry[]) {
         set({
           dataTableState: {
             ...get().dataTableState,

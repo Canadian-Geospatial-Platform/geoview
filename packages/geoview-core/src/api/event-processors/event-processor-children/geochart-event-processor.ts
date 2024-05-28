@@ -1,8 +1,11 @@
 import { GeoviewStoreType } from '@/core/stores';
-import { GeoChartStoreByLayerPath, IGeochartState } from '@/core/stores/store-interface-and-intial-values/geochart-state';
+import {
+  GeoChartStoreByLayerPath,
+  IGeochartState,
+  TypeGeochartResultSetEntry,
+} from '@/core/stores/store-interface-and-intial-values/geochart-state';
 import { GeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
 import { logger } from '@/core/utils/logger';
-import { TypeLayerData } from '@/geo/layer/layer-sets/abstract-layer-set';
 
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
 
@@ -60,12 +63,12 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
 
   // #region
   // Holds the list of layer data arrays being buffered in the propagation process for the batch
-  static batchedPropagationLayerDataArray: BatchedPropagationLayerDataArrayByMap = {};
+  static #batchedPropagationLayerDataArray: BatchedPropagationLayerDataArrayByMap<TypeGeochartResultSetEntry> = {};
 
   // The time delay between propagations in the batch layer data array.
   // The longer the delay, the more the layers will have a chance to get in a loaded state before changing the layerDataArray.
   // The longer the delay, the longer it'll take to update the UI. The delay can be bypassed using the layer path bypass method.
-  static timeDelayBetweenPropagationsForBatch = 2000;
+  static #timeDelayBetweenPropagationsForBatch = 2000;
 
   /**
    * Shortcut to get the Geochart state for a given map id
@@ -166,7 +169,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * @returns {Promise<void>}
    * @private
    */
-  static #propagateArrayDataToStore(mapId: string, layerDataArray: TypeLayerData[]): void {
+  static #propagateArrayDataToStore(mapId: string, layerDataArray: TypeGeochartResultSetEntry[]): void {
     // To propagate in the store, the processor needs an initialized chart store which is only initialized if the Geochart plugin exists.
     // Therefore, we validate its existence first.
     if (!this.getGeochartState(mapId)) return;
@@ -186,7 +189,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * @returns {Promise<void>} Promise upon completion
    * @private
    */
-  static #propagateFeatureInfoToStoreBatch(mapId: string, layerDataArray: TypeLayerData[]): Promise<void> {
+  static #propagateFeatureInfoToStoreBatch(mapId: string, layerDataArray: TypeGeochartResultSetEntry[]): Promise<void> {
     // To propagate in the store, the processor needs an initialized chart store which is only initialized if the Geochart plugin exists.
     // Therefore, we validate its existence first.
     if (!this.getGeochartState(mapId)) return Promise.resolve();
@@ -198,8 +201,8 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
     return this.helperPropagateArrayStoreBatch(
       mapId,
       layerDataArray,
-      this.batchedPropagationLayerDataArray,
-      this.timeDelayBetweenPropagationsForBatch,
+      this.#batchedPropagationLayerDataArray,
+      this.#timeDelayBetweenPropagationsForBatch,
       geochartState.setterActions.setLayerDataArrayBatch,
       'geochart-processor',
       geochartState.layerDataArrayBatchLayerPathBypass,

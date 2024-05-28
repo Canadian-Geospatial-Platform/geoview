@@ -1,7 +1,14 @@
 import { useStore } from 'zustand';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
-import { TypeLayerData, TypeFeatureInfoEntry, TypeGeometry } from '@/geo/layer/layer-sets/abstract-layer-set';
+import {
+  TypeLayerData,
+  TypeFeatureInfoEntry,
+  TypeHoverLayerData,
+  TypeResultSet,
+  TypeResultSetEntry,
+  TypeGeometry,
+} from '@/geo/map/map-schema-types';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with FeatureInfoEventProcessor vs FeatureInfoState
 
@@ -9,18 +16,26 @@ import { TypeLayerData, TypeFeatureInfoEntry, TypeGeometry } from '@/geo/layer/l
 
 type FeatureInfoActions = IFeatureInfoState['actions'];
 
+export type TypeFeatureInfoResultSetEntry = TypeResultSetEntry & TypeLayerData;
+
+export type TypeFeatureInfoResultSet = TypeResultSet<TypeFeatureInfoResultSetEntry>;
+
+export type TypeHoverResultSetEntry = TypeResultSetEntry & TypeHoverLayerData;
+
+export type TypeHoverResultSet = TypeResultSet<TypeHoverResultSetEntry>;
+
 export interface IFeatureInfoState {
   checkedFeatures: Array<TypeFeatureInfoEntry>;
-  layerDataArray: TypeLayerData[];
-  layerDataArrayBatch: TypeLayerData[];
+  layerDataArray: TypeFeatureInfoResultSetEntry[];
+  layerDataArrayBatch: TypeFeatureInfoResultSetEntry[];
   layerDataArrayBatchLayerPathBypass: string;
   selectedLayerPath: string;
 
   actions: {
     addCheckedFeature: (feature: TypeFeatureInfoEntry) => void;
     removeCheckedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
-    setLayerDataArray: (layerDataArray: TypeLayerData[]) => void;
-    setLayerDataArrayBatch: (layerDataArray: TypeLayerData[]) => void;
+    setLayerDataArray: (layerDataArray: TypeFeatureInfoResultSetEntry[]) => void;
+    setLayerDataArrayBatch: (layerDataArray: TypeFeatureInfoResultSetEntry[]) => void;
     setLayerDataArrayBatchLayerPathBypass: (layerPath: string) => void;
     setSelectedLayerPath: (selectedLayerPath: string) => void;
   };
@@ -28,8 +43,8 @@ export interface IFeatureInfoState {
   setterActions: {
     addCheckedFeature: (feature: TypeFeatureInfoEntry) => void;
     removeCheckedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
-    setLayerDataArray: (layerDataArray: TypeLayerData[]) => void;
-    setLayerDataArrayBatch: (layerDataArray: TypeLayerData[]) => void;
+    setLayerDataArray: (layerDataArray: TypeFeatureInfoResultSetEntry[]) => void;
+    setLayerDataArrayBatch: (layerDataArray: TypeFeatureInfoResultSetEntry[]) => void;
     setLayerDataArrayBatchLayerPathBypass: (layerPath: string) => void;
     setSelectedLayerPath: (selectedLayerPath: string) => void;
   };
@@ -62,11 +77,11 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
         // Redirect to setter
         get().detailsState.setterActions.removeCheckedFeature(feature);
       },
-      setLayerDataArray(layerDataArray: TypeLayerData[]) {
+      setLayerDataArray(layerDataArray: TypeFeatureInfoResultSetEntry[]) {
         // Redirect to setter
         get().detailsState.setterActions.setLayerDataArray(layerDataArray);
       },
-      setLayerDataArrayBatch(layerDataArrayBatch: TypeLayerData[]) {
+      setLayerDataArrayBatch(layerDataArrayBatch: TypeFeatureInfoResultSetEntry[]) {
         // Redirect to setter
         get().detailsState.setterActions.setLayerDataArrayBatch(layerDataArrayBatch);
       },
@@ -103,7 +118,7 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
           },
         });
       },
-      setLayerDataArray(layerDataArray: TypeLayerData[]) {
+      setLayerDataArray(layerDataArray: TypeFeatureInfoResultSetEntry[]) {
         set({
           detailsState: {
             ...get().detailsState,
@@ -111,7 +126,7 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
           },
         });
       },
-      setLayerDataArrayBatch(layerDataArrayBatch: TypeLayerData[]) {
+      setLayerDataArrayBatch(layerDataArrayBatch: TypeFeatureInfoResultSetEntry[]) {
         set({
           detailsState: {
             ...get().detailsState,
@@ -146,8 +161,9 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
 // **********************************************************
 export const useDetailsCheckedFeatures = (): TypeFeatureInfoEntry[] =>
   useStore(useGeoViewStore(), (state) => state.detailsState.checkedFeatures);
-export const useDetailsLayerDataArray = (): TypeLayerData[] => useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArray);
-export const useDetailsLayerDataArrayBatch = (): TypeLayerData[] =>
+export const useDetailsLayerDataArray = (): TypeFeatureInfoResultSetEntry[] =>
+  useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArray);
+export const useDetailsLayerDataArrayBatch = (): TypeFeatureInfoResultSetEntry[] =>
   useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArrayBatch);
 export const useDetailsSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.detailsState.selectedLayerPath);
 

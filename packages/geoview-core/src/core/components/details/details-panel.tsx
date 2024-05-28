@@ -10,7 +10,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useMapStoreActions, useMapVisibleLayers, useMapClickCoordinates } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
-import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { TypeFeatureInfoEntry, TypeGeometry, TypeLayerData } from '@/geo/map/map-schema-types';
 
 import { LayerListEntry, Layout } from '@/core/components/common';
 import { getSxClasses } from './details-style';

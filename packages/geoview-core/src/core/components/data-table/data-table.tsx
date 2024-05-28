@@ -45,7 +45,6 @@ import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-valu
 import { DateMgt } from '@/core/utils/date-mgt';
 import { isImage, delay } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { useFilterRows, useToolbarActionMessage, useGlobalFilter } from './hooks';
 import { getSxClasses } from './data-table-style';
 import ExportButton from './export-button';
@@ -54,6 +53,7 @@ import FilterMap from './filter-map';
 import { useLightBox } from '../common';
 import { NUMBER_FILTER, DATE_FILTER, STRING_FILTER } from '@/core/utils/constant';
 import { DataTableProps, ColumnsType } from './data-table-types';
+import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 
 /**
  * Build Data table from map.
