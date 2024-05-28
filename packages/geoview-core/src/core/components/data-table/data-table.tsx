@@ -414,7 +414,10 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps): JSX.
             <MRTToggleFiltersButton className="buttonOutline" table={table} />
             <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} />
             {/* enable column pinning options is override, so that pinning option in menu can be hide. */}
-            <MRTShowHideColumnsButton className="buttonOutline" table={{ ...table, options: { ...table.options, enableColumnPinning: false } }} />
+            <MRTShowHideColumnsButton
+              className="buttonOutline"
+              table={{ ...table, options: { ...table.options, enableColumnPinning: false } }}
+            />
             <MRTToggleDensePaddingButton className="buttonOutline" table={table} />
             <ExportButton rows={rows} columns={columns}>
               <JSONExportButton features={data.features as TypeFeatureInfoEntry[]} layerPath={layerPath} />

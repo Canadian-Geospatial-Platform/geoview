@@ -225,7 +225,13 @@ export function SingleLayer({ depth, layer, setIsLayersListPanelVisible, index, 
     }
 
     return (
-      <IconButton edge="end" size="small" onClick={() => handleToggleVisibility()} tooltip="layers.toggleVisibility" className="buttonOutline">
+      <IconButton
+        edge="end"
+        size="small"
+        onClick={() => handleToggleVisibility()}
+        tooltip="layers.toggleVisibility"
+        className="buttonOutline"
+      >
         {(() => {
           if (!getVisibilityFromOrderedLayerInfo(layer.layerPath)) return <VisibilityOffOutlinedIcon />;
           return <VisibilityOutlinedIcon />;
