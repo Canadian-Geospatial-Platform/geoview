@@ -2,7 +2,18 @@ import { useTranslation } from 'react-i18next';
 import { useState, useRef, useEffect, useCallback, Fragment, useMemo, ReactNode } from 'react';
 import { capitalize } from 'lodash';
 import { useTheme } from '@mui/material/styles';
-import { Box, List, ListItem, Panel, IconButton, TypeIconButtonProps, SchoolIcon, InfoOutlinedIcon, HubOutlinedIcon } from '@/ui';
+import {
+  Box,
+  List,
+  ListItem,
+  Panel,
+  IconButton,
+  TypeIconButtonProps,
+  SchoolIcon,
+  InfoOutlinedIcon,
+  HubOutlinedIcon,
+  StorageIcon,
+} from '@/ui';
 
 import { Plugin } from '@/api/plugin/plugin';
 
@@ -19,7 +30,7 @@ import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-inter
 import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
-import { GuidePanel, Legend, DetailsPanel, AppBarApi, AppBarCreatedEvent, AppBarRemovedEvent } from '@/core/components';
+import { GuidePanel, Legend, DetailsPanel, AppBarApi, AppBarCreatedEvent, AppBarRemovedEvent, Datapanel } from '@/core/components';
 import Notifications from '@/core/components/notifications/notifications';
 
 import Geolocator from './buttons/geolocator';
@@ -84,6 +95,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
       legend: { icon: <HubOutlinedIcon />, content: <Legend fullWidth /> },
       guide: { icon: <SchoolIcon />, content: <GuidePanel fullWidth /> },
       details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel fullWidth /> },
+      'data-table': { icon: <StorageIcon />, content: <Datapanel /> },
     } as unknown as Record<string, GroupPanelType>;
   }, []);
 
@@ -263,7 +275,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('APP-BAR - create group of AppBar buttons');
-
+    console.log('geo view element', geoviewElement);
     // render footer bar tabs
     (appBarConfig?.tabs.core ?? [])
       .filter((tab) => CV_DEFAULT_APPBAR_TABS_ORDER.includes(tab))
@@ -280,7 +292,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
           title: capitalize(tab),
           icon: memoPanels[tab].icon,
           content: memoPanels[tab].content,
-          width: 400,
+          width: tab === 'data-table' ? geoviewElement?.clientWidth ?? 0 : 400,
           panelStyles: {
             panelCardContent: { padding: '0' },
           },
@@ -288,7 +300,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
         return [button, panel, tab];
       })
       .forEach((footerGroup) => appBarApi.createAppbarPanel(footerGroup[0], footerGroup[1], footerGroup[2]));
-  }, [appBarConfig?.tabs.core, appBarApi, t, memoPanels]);
+  }, [appBarConfig?.tabs.core, appBarApi, t, memoPanels, geoviewElement]);
 
   // #endregion
 
@@ -395,8 +407,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
               return buttonPanel?.panel ? (
                 <Panel
-                  // eslint-disable-next-line react/no-array-index-key
-                  key={`panel-${index}`}
+                  key={`panel-${index.toString()}`}
                   panel={buttonPanel.panel}
                   button={buttonPanel.button}
                   onPanelOpened={buttonPanel.onPanelOpened}

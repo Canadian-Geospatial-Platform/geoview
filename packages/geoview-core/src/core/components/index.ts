@@ -11,6 +11,7 @@ export * from './data-table/export-button';
 export * from './data-table/filter-map';
 export * from './data-table/json-export-button';
 export * from './data-table/data-table';
+export * from './data-table/data-panel';
 export * from './details/details-panel';
 export * from './export/export-modal-button';
 export * from './export/export-modal';

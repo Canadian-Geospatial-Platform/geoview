@@ -16,7 +16,7 @@ import { useUIActiveFooterBarTabId } from '@/core/stores/store-interface-and-int
 import { LayerListEntry, Layout } from '@/core/components/common';
 import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
-import { LAYER_STATUS, TABS } from '@/core/utils/constant';
+import { LAYER_STATUS } from '@/core/utils/constant';
 import { MappedLayerDataType } from './data-table-types';
 
 interface DataPanelType {
@@ -174,9 +174,9 @@ export function Datapanel({ fullWidth = false }: DataPanelType): JSX.Element {
 
     // NOTE: Reason for not using component unmount, because we are not mounting and unmounting components
     // when we switch tabs.
-    if (selectedTab !== TABS.DATA_TABLE) {
-      setSelectedLayerPath('');
-    }
+    // if (selectedTab !== TABS.DATA_TABLE) {
+    setSelectedLayerPath('');
+    // }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTab]);
 
@@ -199,7 +199,7 @@ export function Datapanel({ fullWidth = false }: DataPanelType): JSX.Element {
     if (isLoading || memoIsLayerQueryStatusProcessing()) {
       return <Skeleton variant="rounded" width="100%" height={400} sx={{ bgcolor: theme.palette.grey[400] }} />;
     }
-    if (selectedTab === TABS.DATA_TABLE && !isLayerDisabled() && isSelectedLayerHasFeatures()) {
+    if (!isLayerDisabled() && isSelectedLayerHasFeatures()) {
       return (
         <>
           {orderedLayerData.map((data: MappedLayerDataType) => (

@@ -56,7 +56,10 @@
           }
         }
       },
-      "required": ["nameField", "outfields"]
+      "required": [
+        "nameField",
+        "outfields"
+      ]
     },
     "TypeStrokeSymbolConfig": {
       "minProperties": 1,
@@ -92,20 +95,27 @@
       "type": "object",
       "properties": {
         "type": {
-          "enum": ["lineString"]
+          "enum": [
+            "lineString"
+          ]
         },
         "stroke": {
           "$ref": "#/definitions/TypeStrokeSymbolConfig"
         }
       },
-      "required": ["type", "stroke"]
+      "required": [
+        "type",
+        "stroke"
+      ]
     },
     "TypePolygonVectorConfig": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
         "type": {
-          "enum": ["filledPolygon"]
+          "enum": [
+            "filledPolygon"
+          ]
         },
         "color": {
           "type": "string"
@@ -122,18 +132,32 @@
           "description": "Patern line width.default = 1."
         },
         "fillStyle": {
-          "enum": ["solid", "backwardDiagonal", "cross", "diagonalCross", "forwardDiagonal", "horizontal", "null", "vertical"],
+          "enum": [
+            "solid",
+            "backwardDiagonal",
+            "cross",
+            "diagonalCross",
+            "forwardDiagonal",
+            "horizontal",
+            "null",
+            "vertical"
+          ],
           "description": "Kind of filling  for vector features. Default = solid. "
         }
       },
-      "required": ["type", "stroke"]
+      "required": [
+        "type",
+        "stroke"
+      ]
     },
     "TypeSimpleSymbolVectorConfig": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
         "type": {
-          "enum": ["simpleSymbol"]
+          "enum": [
+            "simpleSymbol"
+          ]
         },
         "rotation": {
           "type": "number",
@@ -157,17 +181,30 @@
           "maxItems": 2
         },
         "symbol": {
-          "enum": ["circle", "+", "diamond", "square", "triangle", "X", "star"]
+          "enum": [
+            "circle",
+            "+",
+            "diamond",
+            "square",
+            "triangle",
+            "X",
+            "star"
+          ]
         }
       },
-      "required": ["type", "symbol"]
+      "required": [
+        "type",
+        "symbol"
+      ]
     },
     "TypeIconSymbolVectorConfig": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
         "type": {
-          "enum": ["iconSymbol"]
+          "enum": [
+            "iconSymbol"
+          ]
         },
         "mimeType": {
           "type": "string"
@@ -206,14 +243,20 @@
           "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer."
         }
       },
-      "required": ["type", "mimeType", "src"]
+      "required": [
+        "type",
+        "mimeType",
+        "src"
+      ]
     },
     "TypeSimpleStyleConfig": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
         "styleType": {
-          "enum": ["simple"]
+          "enum": [
+            "simple"
+          ]
         },
         "label": {
           "type": "string"
@@ -222,14 +265,20 @@
           "$ref": "#/definitions/TypeKindOfVectorSettings"
         }
       },
-      "required": ["styleType", "label", "settings"]
+      "required": [
+        "styleType",
+        "label",
+        "settings"
+      ]
     },
     "TypeUniqueValueStyleConfig": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
         "styleType": {
-          "enum": ["uniqueValue"]
+          "enum": [
+            "uniqueValue"
+          ]
         },
         "defaultLabel": {
           "type": "string",
@@ -254,7 +303,11 @@
           "$ref": "#/definitions/TypeUniqueValueStyleInfo"
         }
       },
-      "required": ["styleType", "fields", "uniqueValueStyleInfo"]
+      "required": [
+        "styleType",
+        "fields",
+        "uniqueValueStyleInfo"
+      ]
     },
     "TypeUniqueValueStyleInfo": {
       "type": "array",
@@ -289,14 +342,20 @@
         }
       },
       "minItems": 1,
-      "required": ["label", "values", "options"]
+      "required": [
+        "label",
+        "values",
+        "options"
+      ]
     },
     "TypeClassBreakStyleConfig": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
         "styleType": {
-          "enum": ["classBreaks"]
+          "enum": [
+            "classBreaks"
+          ]
         },
         "defaultLabel": {
           "type": "string",
@@ -317,7 +376,11 @@
           "$ref": "#/definitions/TypeClassBreakStyleInfo"
         }
       },
-      "required": ["styleType", "field", "classBreakStyleInfo"]
+      "required": [
+        "styleType",
+        "field",
+        "classBreakStyleInfo"
+      ]
     },
     "TypeClassBreakStyleInfo": {
       "additionalProperties": false,
@@ -359,7 +422,12 @@
         }
       },
       "minItems": 1,
-      "required": ["label", "minValue", "maxValue", "settings"]
+      "required": [
+        "label",
+        "minValue",
+        "maxValue",
+        "settings"
+      ]
     },
     "TypeKindOfVectorSettings": {
       "oneOf": [
@@ -395,7 +463,11 @@
       "type": "object",
       "properties": {
         "type": {
-          "enum": ["simple", "uniqueValue", "classBreaks"],
+          "enum": [
+            "simple",
+            "uniqueValue",
+            "classBreaks"
+          ],
           "description": "The type of style used by the layer."
         },
         "fields": {
@@ -413,7 +485,7 @@
           "type": "array",
           "description": "Array of style information.",
           "items": {
-              "$ref": "#/definitions/TypeStyleConfigInfo"
+            "$ref": "#/definitions/TypeStyleConfigInfo"
           }
         }
       }
@@ -564,7 +636,15 @@
       }
     },
     "TypeVectorSourceFormats": {
-      "enum": ["GeoJSON", "EsriJSON", "KML", "WFS", "featureAPI", "GeoPackage", "CSV"],
+      "enum": [
+        "GeoJSON",
+        "EsriJSON",
+        "KML",
+        "WFS",
+        "featureAPI",
+        "GeoPackage",
+        "CSV"
+      ],
       "description": "The feature format used by the XHR feature loader when access path is set."
     },
     "TypeVectorSourceInitialConfig": {
@@ -593,7 +673,10 @@
           "$ref": "#/definitions/TypeFeatureInfoLayerConfig"
         },
         "strategy": {
-          "enum": ["all", "bbox"],
+          "enum": [
+            "all",
+            "bbox"
+          ],
           "default": "all",
           "description": "The loading strategy to use. By default an all strategy is used, a one-off strategy which loads all features at once."
         },
@@ -640,7 +723,11 @@
       }
     },
     "TypeOfServer": {
-      "enum": ["mapserver", "geoserver", "qgis"],
+      "enum": [
+        "mapserver",
+        "geoserver",
+        "qgis"
+      ],
       "description": "The type of the remote WMS server. The default value is mapserver."
     },
     "TypeSourceImageStaticInitialConfig": {
@@ -700,7 +787,12 @@
       }
     },
     "TypeEsriFormatParameter": {
-      "enum": ["png", "jpg", "gif", "svg"],
+      "enum": [
+        "png",
+        "jpg",
+        "gif",
+        "svg"
+      ],
       "default": "png",
       "description": "The format of the exported image. The default format is png."
     },
@@ -759,14 +851,24 @@
           "items": {
             "type": "number"
           },
-          "default": [256, 256],
+          "default": [
+            256,
+            256
+          ],
           "description": "The tile grid origin, i.e. where the x and y axes meet ([z, 0, 0]). Tile coordinates increase left to right and downwards. If not specified, extent must be provided."
         }
       },
-      "required": ["origin", "resolutions"]
+      "required": [
+        "origin",
+        "resolutions"
+      ]
     },
     "TypeGeometryType": {
-      "enum": ["point", "linestring", "polygon"],
+      "enum": [
+        "point",
+        "linestring",
+        "polygon"
+      ],
       "description": "Display languages supported."
     },
     "TypeVectorLayerEntryConfig": {
@@ -774,7 +876,9 @@
       "type": "object",
       "properties": {
         "entryType": {
-          "enum": ["vector"]
+          "enum": [
+            "vector"
+          ]
         },
         "layerId": {
           "type": "string",
@@ -839,11 +943,15 @@
       "if": {
         "properties": {
           "entryType": {
-            "enum": ["vector"],
+            "enum": [
+              "vector"
+            ],
             "description": "The entryType property is not defined by the user but by the viewer according to the geoview layer type. It is used as a flag indicating the type of schema used (input/internal)."
           }
         },
-        "required": ["entryType"]
+        "required": [
+          "entryType"
+        ]
       },
       "then": {
         "properties": {
@@ -861,7 +969,9 @@
           }
         }
       },
-      "required": ["layerId"]
+      "required": [
+        "layerId"
+      ]
     },
     "TypeTemporalDimension": {
       "additionalProperties": false,
@@ -881,7 +991,10 @@
           "$ref": "#/definitions/TypeRangeItems"
         },
         "nearestValues": {
-          "enum": ["discrete", "absolute"]
+          "enum": [
+            "discrete",
+            "absolute"
+          ]
         },
         "singleHandle": {
           "type": "boolean"
@@ -910,7 +1023,9 @@
       "description": "Layer sources providing vector data divided into a tile grid.",
       "properties": {
         "entryType": {
-          "enum": ["vector-tile"]
+          "enum": [
+            "vector-tile"
+          ]
         },
         "layerId": {
           "type": "string",
@@ -959,11 +1074,15 @@
       "if": {
         "properties": {
           "entryType": {
-            "enum": ["vector-tile"],
+            "enum": [
+              "vector-tile"
+            ],
             "description": "The entryType property is not defined by the user but by the viewer according to the geoview layer type. It is used as a flag indicating the type of schema used (input/internal)."
           }
         },
-        "required": ["entryType"]
+        "required": [
+          "entryType"
+        ]
       },
       "then": {
         "properties": {
@@ -981,7 +1100,9 @@
           }
         }
       },
-      "required": ["layerId"]
+      "required": [
+        "layerId"
+      ]
     },
     "TypeVectorTileSourceInitialConfig": {
       "additionalProperties": false,
@@ -989,7 +1110,14 @@
       "description": "Layer sources providing vector data divided into a tile grid.",
       "properties": {
         "format": {
-          "enum": ["GeoJSON", "EsriJSON", "KML", "WFS", "MVT", "featureAPI"],
+          "enum": [
+            "GeoJSON",
+            "EsriJSON",
+            "KML",
+            "WFS",
+            "MVT",
+            "featureAPI"
+          ],
           "description": "The feature format used by the XHR feature loader when access path is set."
         },
         "dataProjection": {
@@ -1009,7 +1137,9 @@
       "type": "object",
       "properties": {
         "entryType": {
-          "enum": ["raster-image"]
+          "enum": [
+            "raster-image"
+          ]
         },
         "layerId": {
           "type": "string",
@@ -1053,11 +1183,15 @@
       "if": {
         "properties": {
           "entryType": {
-            "enum": ["raster-image"],
+            "enum": [
+              "raster-image"
+            ],
             "description": "The entryType property is not defined by the user but by the viewer according to the geoview layer type. It is used as a flag indicating the type of schema used (input/internal)."
           }
         },
-        "required": ["entryType"]
+        "required": [
+          "entryType"
+        ]
       },
       "then": {
         "properties": {
@@ -1075,14 +1209,18 @@
           }
         }
       },
-      "required": ["layerId"]
+      "required": [
+        "layerId"
+      ]
     },
     "TypeEsriDynamicLayerEntryConfig": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
         "entryType": {
-          "enum": ["raster-image"]
+          "enum": [
+            "raster-image"
+          ]
         },
         "layerId": {
           "type": "string",
@@ -1147,11 +1285,15 @@
       "if": {
         "properties": {
           "entryType": {
-            "enum": ["raster-image"],
+            "enum": [
+              "raster-image"
+            ],
             "description": "The entryType property is not defined by the user but by the viewer according to the geoview layer type. It is used as a flag indicating the type of schema used (input/internal)."
           }
         },
-        "required": ["entryType"]
+        "required": [
+          "entryType"
+        ]
       },
       "then": {
         "properties": {
@@ -1169,14 +1311,18 @@
           }
         }
       },
-      "required": ["layerId"]
+      "required": [
+        "layerId"
+      ]
     },
     "TypeEsriImageLayerEntryConfig": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
         "entryType": {
-          "enum": ["raster-image"]
+          "enum": [
+            "raster-image"
+          ]
         },
         "layerId": {
           "type": "string",
@@ -1220,11 +1366,15 @@
       "if": {
         "properties": {
           "entryType": {
-            "enum": ["raster-image"],
+            "enum": [
+              "raster-image"
+            ],
             "description": "The entryType property is not defined by the user but by the viewer according to the geoview layer type. It is used as a flag indicating the type of schema used (input/internal)."
           }
         },
-        "required": ["entryType"]
+        "required": [
+          "entryType"
+        ]
       },
       "then": {
         "properties": {
@@ -1242,14 +1392,18 @@
           }
         }
       },
-      "required": ["layerId"]
+      "required": [
+        "layerId"
+      ]
     },
     "TypeImageStaticLayerEntryConfig": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
         "entryType": {
-          "enum": ["raster-image"]
+          "enum": [
+            "raster-image"
+          ]
         },
         "layerId": {
           "type": "string",
@@ -1290,11 +1444,15 @@
       "if": {
         "properties": {
           "entryType": {
-            "enum": ["raster-image"],
+            "enum": [
+              "raster-image"
+            ],
             "description": "The entryType property is not defined by the user but by the viewer according to the geoview layer type. It is used as a flag indicating the type of schema used (input/internal)."
           }
         },
-        "required": ["entryType"]
+        "required": [
+          "entryType"
+        ]
       },
       "then": {
         "properties": {
@@ -1312,14 +1470,18 @@
           }
         }
       },
-      "required": ["layerId"]
+      "required": [
+        "layerId"
+      ]
     },
     "TypeTileLayerEntryConfig": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
         "entryType": {
-          "enum": ["raster-tile"]
+          "enum": [
+            "raster-tile"
+          ]
         },
         "layerId": {
           "type": "string",
@@ -1360,11 +1522,15 @@
       "if": {
         "properties": {
           "entryType": {
-            "enum": ["raster-tile"],
+            "enum": [
+              "raster-tile"
+            ],
             "description": "The entryType property is not defined by the user but by the viewer according to the geoview layer type. It is used as a flag indicating the type of schema used (input/internal)."
           }
         },
-        "required": ["entryType"]
+        "required": [
+          "entryType"
+        ]
       },
       "then": {
         "properties": {
@@ -1382,10 +1548,18 @@
           }
         }
       },
-      "required": ["layerId"]
+      "required": [
+        "layerId"
+      ]
     },
     "TypeLayerEntryType": {
-      "enum": ["vector", "vector-tile", "raster-tile", "raster-image", "geoCore"],
+      "enum": [
+        "vector",
+        "vector-tile",
+        "raster-tile",
+        "raster-image",
+        "geoCore"
+      ],
       "description": "Layer entry data type."
     },
     "TypeLayerGroupEntryConfig": {
@@ -1394,7 +1568,9 @@
       "description": "Entry used to define a layer Group.",
       "properties": {
         "entryType": {
-          "enum": ["group"]
+          "enum": [
+            "group"
+          ]
         },
         "layerId": {
           "type": "string",
@@ -1420,11 +1596,15 @@
       "if": {
         "properties": {
           "entryType": {
-            "enum": ["group"],
+            "enum": [
+              "group"
+            ],
             "description": "The entryType property is not defined by the user but by the viewer according to the geoview layer type. It is used as a flag indicating the type of schema used (input/internal)."
           }
         },
-        "required": ["entryType"]
+        "required": [
+          "entryType"
+        ]
       },
       "then": {
         "properties": {
@@ -1442,7 +1622,10 @@
           }
         }
       },
-      "required": ["layerId", "listOfLayerEntryConfig"]
+      "required": [
+        "layerId",
+        "listOfLayerEntryConfig"
+      ]
     },
     "TypeListOfLayerEntryConfig": {
       "type": "array",
@@ -1472,7 +1655,11 @@
           "description": "Additional options used for OpenLayers map options"
         }
       },
-      "required": ["basemapOptions", "interaction", "viewSettings"]
+      "required": [
+        "basemapOptions",
+        "interaction",
+        "viewSettings"
+      ]
     },
     "TypeBasemapOptions": {
       "additionalProperties": false,
@@ -1492,20 +1679,38 @@
           "description": "Enable or disable basemap labels"
         }
       },
-      "required": ["basemapId", "shaded", "labeled"]
+      "required": [
+        "basemapId",
+        "shaded",
+        "labeled"
+      ]
     },
     "TypeBasemapId": {
-      "enum": ["transport", "osm", "simple", "nogeom", "shaded"],
+      "enum": [
+        "transport",
+        "osm",
+        "simple",
+        "nogeom",
+        "shaded"
+      ],
       "default": "transport",
       "description": "Id of the basemap to use."
     },
     "TypeInteraction": {
-      "enum": ["static", "dynamic"],
+      "enum": [
+        "static",
+        "dynamic"
+      ],
       "default": "dynamic",
       "description": "If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar)."
     },
     "TypeHighlightColors": {
-      "enum": ["black", "white", "red", "green"],
+      "enum": [
+        "black",
+        "white",
+        "red",
+        "green"
+      ],
       "default": "black",
       "description": "Color to use for feature highlights."
     },
@@ -1576,7 +1781,12 @@
           "description": "The layer entries to use from the GeoView layer."
         }
       },
-      "required": ["geoviewLayerId", "geoviewLayerName", "geoviewLayerType", "listOfLayerEntryConfig"]
+      "required": [
+        "geoviewLayerId",
+        "geoviewLayerName",
+        "geoviewLayerType",
+        "listOfLayerEntryConfig"
+      ]
     },
     "TypeGeoviewLayerType": {
       "type": "string",
@@ -1601,7 +1811,9 @@
     "TypeGeoCoreLayerType": {
       "type": "string",
       "items": {
-        "enum": ["geoCore"]
+        "enum": [
+          "geoCore"
+        ]
       },
       "description": "Type of GeoCore layer."
     },
@@ -1625,7 +1837,12 @@
           "items": {
             "type": "number"
           },
-          "default": [-125, 30, -60, 89],
+          "default": [
+            -125,
+            30,
+            -60,
+            89
+          ],
           "description": "The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates."
         },
         "minZoom": {
@@ -1706,11 +1923,20 @@
           }
         ]
       ],
-      "default": [4.5, [-90, 67]],
+      "default": [
+        4.5,
+        [
+          -90,
+          67
+        ]
+      ],
       "description": "Initial zoom and center coordinates to set map view."
     },
     "TypeValidMapProjectionCodes": {
-      "enum": [3978, 3857],
+      "enum": [
+        3978,
+        3857
+      ],
       "default": 3978,
       "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
     },
@@ -1718,9 +1944,18 @@
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "enum": ["zoom", "fullscreen", "home", "location"]
+        "enum": [
+          "zoom",
+          "fullscreen",
+          "home",
+          "location"
+        ]
       },
-      "default": ["zoom", "fullscreen", "home"],
+      "default": [
+        "zoom",
+        "fullscreen",
+        "home"
+      ],
       "description": "Controls available on the navigation bar.",
       "minItems": 0
     },
@@ -1736,10 +1971,22 @@
               "type": "array",
               "items": {
                 "type": "string",
-                "enum": ["legend", "layers", "details", "data-table", "time-slider", "geochart"]
+                "enum": [
+                  "legend",
+                  "layers",
+                  "details",
+                  "data-table",
+                  "time-slider",
+                  "geochart"
+                ]
               },
               "minItems": 1,
-              "default": ["legend", "layers", "details", "data-table"],
+              "default": [
+                "legend",
+                "layers",
+                "details",
+                "data-table"
+              ],
               "uniqueItems": true,
               "description": "Default core tabs of footer bar to use. NOTE: config from packages for time-slider and geochart are in the same loaction as core config (<<core config name>>-<<package name>>.json)."
             },
@@ -1773,7 +2020,9 @@
           "description": "State of footer bar when map is loaded (expanded or collapsed)"
         }
       },
-      "required": ["tabs"]
+      "required": [
+        "tabs"
+      ]
     },
     "TypeAppBarProps": {
       "type": "object",
@@ -1787,10 +2036,20 @@
               "type": "array",
               "items": {
                 "type": "string",
-                "enum": ["geolocator", "export", "basemap-panel", "geochart", "details", "legend", "guide"]
+                "enum": [
+                  "geolocator",
+                  "export",
+                  "basemap-panel",
+                  "geochart",
+                  "details",
+                  "legend",
+                  "guide"
+                ]
               },
               "minItems": 0,
-              "default": ["geolocator"],
+              "default": [
+                "geolocator"
+              ],
               "uniqueItems": true,
               "description": "Default core tabs of app-bar to use. NOTE: config from packages like geochart are in the same loaction as core config (<<core config name>>-<<package name>>.json)."
             }
@@ -1798,7 +2057,9 @@
           "additionalProperties": false
         }
       },
-      "required": ["tabs"]
+      "required": [
+        "tabs"
+      ]
     },
     "TypeOverviewMapProps": {
       "type": "object",
@@ -1817,9 +2078,15 @@
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "enum": ["overview-map", "north-arrow"]
+        "enum": [
+          "overview-map",
+          "north-arrow"
+        ]
       },
-      "default": ["overview-map", "north-arrow"],
+      "default": [
+        "overview-map",
+        "north-arrow"
+      ],
       "description": "Core components to initialize on viewer load. The schema for those are inside this file.",
       "minItems": 0
     },
@@ -1827,7 +2094,9 @@
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "enum": ["swiper"]
+        "enum": [
+          "swiper"
+        ]
       },
       "default": [],
       "description": "Core map packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in the same loaction as core config (<<core config name>>-<<package name>>.json).",
@@ -1848,7 +2117,9 @@
             "description": "The url to the external package configuration setting. The core package will read the configuration and pass it inside the package."
           }
         },
-        "required": ["name"]
+        "required": [
+          "name"
+        ]
       },
       "default": [],
       "description": "List of external packages to initialize on viewer load.",
@@ -1873,7 +2144,9 @@
           "description": "Service end point to access geo location of searched value."
         }
       },
-      "required": ["geocoreUrl"]
+      "required": [
+        "geocoreUrl"
+      ]
     },
     "TypePostSettings": {
       "type": "object",
@@ -1887,11 +2160,17 @@
       }
     },
     "TypeDisplayLanguage": {
-      "enum": ["en", "fr"],
+      "enum": [
+        "en",
+        "fr"
+      ],
       "description": "Display languages supported."
     },
     "TypeLocalizedLanguages": {
-      "enum": ["en", "fr"],
+      "enum": [
+        "en",
+        "fr"
+      ],
       "description": "ISO 639-1 code indicating the languages supported by the configuration file."
     },
     "TypeListOfLocalizedLanguages": {
@@ -1900,12 +2179,17 @@
       "items": {
         "$ref": "#/definitions/TypeLocalizedLanguages"
       },
-      "default": ["en", "fr"],
+      "default": [
+        "en",
+        "fr"
+      ],
       "description": "ISO 639-1 code indicating the languages supported by the configuration file. It will use value(s) provided here to access bilangual configuration nodes. For value(s) provided here, each bilingual configuration node MUST provide a value.",
       "minItems": 1
     },
     "TypeValidVersions": {
-      "enum": ["1.0"],
+      "enum": [
+        "1.0"
+      ],
       "description": "The schema version that can be used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
     },
     "MapFeatureConfig": {
@@ -1917,7 +2201,11 @@
           "$ref": "#/definitions/TypeMapConfig"
         },
         "theme": {
-          "enum": ["dark", "light", "geo.ca"],
+          "enum": [
+            "dark",
+            "light",
+            "geo.ca"
+          ],
           "default": "dark",
           "description": "Theme style the viewer."
         },
@@ -1949,7 +2237,9 @@
           "$ref": "#/definitions/TypeValidVersions"
         }
       },
-      "required": ["map"]
+      "required": [
+        "map"
+      ]
     }
   }
 }

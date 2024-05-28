@@ -55,7 +55,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   const panelContainerStyles = {
     ...(panelStyles?.panelContainer && { ...panelStyles.panelContainer }),
     width: open ? panelWidth : 0,
-    maxWidth: 400,
+    maxWidth: panel?.width ?? 400,
     [theme.breakpoints.down('sm')]: {
       width: 'calc(100% - 64px)',
       maxWidth: 'calc(100% - 64px)',
