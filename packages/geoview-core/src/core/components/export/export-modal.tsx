@@ -122,8 +122,7 @@ export default function ExportModal(): JSX.Element {
           });
 
         // add legend
-
-        // check if footer tab exist then we dnt need
+        // check if footer tab exist then we don't need appBar Legend.
         const legendContainer = (footerbarLegendContainer ?? appBarLegendContainer) as HTMLElement;
         if (legendContainer && legendContainerRef.current) {
           legendContainer.removeAttribute('style');
