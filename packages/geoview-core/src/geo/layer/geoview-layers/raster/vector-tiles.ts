@@ -24,11 +24,9 @@ import {
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
-import { Projection } from '@/geo/utils/projection';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { api } from '@/app';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
 import { TileLayerEntryConfig } from '@/core/utils/config/validation-classes/tile-layer-entry-config';
@@ -183,7 +181,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
 
     if (
       this.metadata?.tileInfo?.spatialReference?.wkid &&
-      MapEventProcessor.getMapState(this.mapId).currentProjection !== this.metadata.tileInfo.spatialReference.wkid
+      this.getMapViewer().getProjection().getCode().replace('EPSG:', '') !== this.metadata.tileInfo.spatialReference.wkid
     ) {
       // TODO: find a more centralized way to trap error and display message
       api.maps[this.mapId].notifications.showError(
@@ -208,7 +206,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     }
 
     sourceOptions.format = new MVT();
-    sourceOptions.projection = `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`;
+    sourceOptions.projection = this.getMapViewer().getProjection().getCode();
     sourceOptions.tileGrid = new TileGrid(layerConfig.source!.tileGrid!);
     const tileLayerOptions: TileOptions<VectorTileSource> = { source: new VectorTileSource(sourceOptions) };
     // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
@@ -270,11 +268,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
 
       if (layerConfig.initialSettings?.extent)
         // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings.extent = Projection.transformExtent(
-          layerConfig.initialSettings.extent,
-          Projection.PROJECTION_NAMES.LNGLAT,
-          `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
-        );
+        layerConfig.initialSettings.extent = this.getMapViewer().convertExtentLngLatToMapProj(layerConfig.initialSettings.extent);
     }
     return Promise.resolve(layerConfig);
   }
@@ -292,17 +286,12 @@ export class VectorTiles extends AbstractGeoViewRaster {
     const layer = this.getOLLayer(layerPath) as TileLayer<VectorTileSource> | undefined;
 
     const layerBounds = layer?.getSource()?.getTileGrid()?.getExtent();
-    const projection =
-      layer?.getSource()?.getProjection()?.getCode().replace('EPSG:', '') || MapEventProcessor.getMapState(this.mapId).currentProjection;
+    const projection = layer?.getSource()?.getProjection()?.getCode() || this.getMapViewer().getProjection().getCode();
 
     if (layerBounds) {
       let transformedBounds = layerBounds;
-      if (this.metadata?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.mapId).currentProjection) {
-        transformedBounds = Projection.transformExtent(
-          layerBounds,
-          `EPSG:${projection}`,
-          `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
-        );
+      if (this.metadata?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')) {
+        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, projection);
       }
 
       // eslint-disable-next-line no-param-reassign
@@ -343,6 +332,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    */
   // GV Layers Refactoring - Obsolete (just should be removed?)
   setVectorTileStyle(layerPath: string, styleUrl: string): Promise<unknown> {
-    return applyStyle(MapEventProcessor.getMapViewerLayerAPI(this.mapId).getOLLayer(layerPath) as VectorTileLayer, styleUrl);
+    // FIXME: Check if this should be removed or done somewhere else?
+    return applyStyle(this.getMapViewer().layer.getOLLayer(layerPath) as VectorTileLayer, styleUrl);
   }
 }

@@ -4,16 +4,15 @@ import { Extent } from 'ol/extent';
 import axios from 'axios';
 
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
-import { CONST_LAYER_TYPES, TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { Projection } from '@/geo/utils/projection';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from './abstract-gv-raster';
+import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 /**
  * Manages an Image static layer.
@@ -39,6 +38,15 @@ export class GVImageStatic extends AbstractGVRaster {
   override getOLLayer(): ImageLayer<Static> {
     // Call parent and cast
     return super.getOLLayer() as ImageLayer<Static>;
+  }
+
+  /**
+   * Overrides the get of the OpenLayers Layer Source
+   * @returns {Static} The OpenLayers Layer Source
+   */
+  override getOLSource(): Static | undefined {
+    // Get source from OL
+    return this.getOLLayer().getSource() || undefined;
   }
 
   /**
@@ -133,25 +141,18 @@ export class GVImageStatic extends AbstractGVRaster {
    * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    * @returns {Extent} The new layer bounding box.
    */
-  protected getBounds(bounds?: Extent): Extent | undefined {
+  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     const layerConfig = this.getLayerConfig();
-    const layer = this.getOLLayer();
+    const projection = this.getOLSource()?.getProjection()?.getCode() || this.getMapViewer().getProjection().getCode();
 
-    const layerBounds = layer?.getSource()?.getImageExtent();
-    const projection =
-      layer?.getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
-      MapEventProcessor.getMapState(this.getMapId()).currentProjection;
-
+    const layerBounds = this.getOLSource()?.getImageExtent();
     if (layerBounds) {
       let transformedBounds = layerBounds;
       if (
-        layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.getMapId()).currentProjection
+        layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')
       ) {
-        transformedBounds = Projection.transformExtent(
-          layerBounds,
-          `EPSG:${projection}`,
-          `EPSG:${MapEventProcessor.getMapState(this.getMapId()).currentProjection}`
-        );
+        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, projection);
       }
 
       // eslint-disable-next-line no-param-reassign

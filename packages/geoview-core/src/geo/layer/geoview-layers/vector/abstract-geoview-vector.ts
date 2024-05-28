@@ -16,19 +16,16 @@ import { Pixel } from 'ol/pixel';
 import { TypeLocalizedString } from '@config/types/map-schema-types';
 
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeBaseSourceVectorInitialConfig, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { TypeBaseSourceVectorInitialConfig, TypeFeatureInfoEntry, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
-import { Projection } from '@/geo/utils/projection';
 import { NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { VECTOR_LAYER } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { CSV } from './csv';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { Cast } from '@/core/types/global-types';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { analyzeLayerFilter, getFeatureStyle } from '@/geo/utils/renderer/geoview-renderer';
@@ -164,7 +161,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           let features: Feature[] | null;
           if (layerConfig.schemaTag === CONST_LAYER_TYPES.CSV) {
             // TODO Refactor - Layers refactoring. There needs to be a convertCsv on both CSV and GVCSV (old layer and new layer) to complete the layers migration
-            features = (MapEventProcessor.getMapViewerLayerAPI(this.mapId).getGeoviewLayer(layerPath) as CSV).convertCsv(
+            features = (this.getMapViewer().layer.getGeoviewLayer(layerPath) as CSV).convertCsv(
               xhr.responseText,
               layerConfig as VectorLayerEntryConfig
             );
@@ -293,36 +290,41 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * Return feature information for all the features around the provided Pixel.
    *
-   * @param {Coordinate} location The pixel coordinate that will be used by the query.
-   * @param {string} layerPath The layer path to the layer's configuration.
+   * @param {Coordinate} location - The pixel coordinate that will be used by the query.
+   * @param {string} layerPath - The layer path to the layer's configuration.
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table or null if an error occured.
    */
   // GV Layers Refactoring - Obsolete (in layers)
-  protected override async getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+  protected override getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
-      // Get the layer config in a loaded phase
-      const layerConfig = this.getLayerConfig(layerPath) as VectorLayerEntryConfig;
-      const layerFilter = (layer: BaseLayer): boolean => {
-        const layerSource = layer.get('layerConfig')?.source;
-        const configSource = layerConfig?.source;
-        return layerSource !== undefined && configSource !== undefined && layerSource === configSource;
+      // Get the layer source
+      const layerSource = this.getOLLayer(layerPath)?.get('source');
+
+      // Prepare a filter by layer to know on which layer we want to query features
+      const layerFilter = (layerCandidate: BaseLayer): boolean => {
+        // We know it's the right layer to query on if the source is the same as the current layer
+        const candidateSource = layerCandidate.get('source');
+        return layerSource && candidateSource && layerSource === candidateSource;
       };
-      const { map } = MapEventProcessor.getMapViewer(this.mapId);
-      const features = map.getFeaturesAtPixel(location, { hitTolerance: 4, layerFilter });
-      return await this.formatFeatureInfoResult(features as Feature[], layerConfig as VectorLayerEntryConfig);
+
+      // Query the map using the layer filter and a hit tolerance
+      const features = this.getMapViewer().map.getFeaturesAtPixel(location, { hitTolerance: this.hitTolerance, layerFilter }) as Feature[];
+
+      // Format and return the features
+      return this.formatFeatureInfoResult(features, this.getLayerConfig(layerPath) as VectorLayerEntryConfig);
     } catch (error) {
       // Log
       logger.logError('abstract-geoview-vector.getFeatureInfoAtPixel()\n', error);
-      return null;
+      return Promise.resolve(null);
     }
   }
 
   /** ***************************************************************************************************************************
    * Return feature information for all the features around the provided projected coordinate.
    *
-   * @param {Coordinate} location The pixel coordinate that will be used by the query.
-   * @param {string} layerPath The layer path to the layer's configuration.
+   * @param {Coordinate} location - The pixel coordinate that will be used by the query.
+   * @param {string} layerPath - The layer path to the layer's configuration.
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
@@ -331,27 +333,25 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     location: Coordinate,
     layerPath: string
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const { map } = MapEventProcessor.getMapViewer(this.mapId);
-    return this.getFeatureInfoAtPixel(map.getPixelFromCoordinate(location as Coordinate), layerPath);
+    // Redirect to getFeatureInfoAtPixel
+    return this.getFeatureInfoAtPixel(this.getMapViewer().map.getPixelFromCoordinate(location), layerPath);
   }
 
   /** ***************************************************************************************************************************
    * Return feature information for all the features around the provided longitude latitude.
    *
-   * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {string} layerPath The layer path to the layer's configuration.
+   * @param {Coordinate} lnglat - The coordinate that will be used by the query.
+   * @param {string} layerPath - The layer path to the layer's configuration.
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
   // GV Layers Refactoring - Obsolete (in layers)
-  protected override getFeatureInfoAtLongLat(location: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const { map } = MapEventProcessor.getMapViewer(this.mapId);
-    const convertedLocation = Projection.transform(
-      location,
-      Projection.PROJECTION_NAMES.LNGLAT,
-      `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
-    );
-    return this.getFeatureInfoAtPixel(map.getPixelFromCoordinate(convertedLocation as Coordinate), layerPath);
+  protected override getFeatureInfoAtLongLat(lnglat: Coordinate, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+    // Convert Coordinates LngLat to map projection
+    const projCoordinate = this.getMapViewer().convertCoordinateLngLatToMapProj(lnglat);
+
+    // Redirect to getFeatureInfoAtPixel
+    return this.getFeatureInfoAtPixel(this.getMapViewer().map.getPixelFromCoordinate(projCoordinate), layerPath);
   }
 
   /** ***************************************************************************************************************************

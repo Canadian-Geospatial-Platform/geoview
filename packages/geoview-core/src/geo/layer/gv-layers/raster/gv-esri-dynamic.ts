@@ -11,7 +11,6 @@ import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -23,8 +22,10 @@ import {
   TypeClassBreakStyleConfig,
   isSimpleStyleConfig,
   TypeFeatureInfoLayerConfig,
+  TypeFeatureInfoEntry,
+  rangeDomainType,
+  codedValueType,
 } from '@/geo/map/map-schema-types';
-import { TypeFeatureInfoEntry, codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { esriGetFieldType, esriGetFieldDomain } from '../utils';
 import { AbstractGVRaster } from './abstract-gv-raster';
 
@@ -38,6 +39,9 @@ type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryT
  * @class GVEsriDynamic
  */
 export class GVEsriDynamic extends AbstractGVRaster {
+  // Override the hit tolerance for a GVEsriDynamic layer
+  override hitTolerance: number = 7;
+
   /**
    * Constructs a GVEsriDynamic layer to manage an OpenLayer layer.
    * @param {string} mapId - The map id
@@ -55,6 +59,15 @@ export class GVEsriDynamic extends AbstractGVRaster {
   override getOLLayer(): ImageLayer<ImageArcGISRest> {
     // Call parent and cast
     return super.getOLLayer() as ImageLayer<ImageArcGISRest>;
+  }
+
+  /**
+   * Overrides the get of the OpenLayers Layer Source
+   * @returns {ImageArcGISRest} The OpenLayers Layer Source
+   */
+  override getOLSource(): ImageArcGISRest | undefined {
+    // Get source from OL
+    return this.getOLLayer().getSource() || undefined;
   }
 
   /**
@@ -141,8 +154,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected override getFeatureInfoAtPixel(location: Pixel): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const { map } = MapEventProcessor.getMapViewer(this.getMapId());
-    return this.getFeatureInfoAtCoordinate(map.getCoordinateFromPixel(location));
+    // Redirect to getFeatureInfoAtCoordinate
+    return this.getFeatureInfoAtCoordinate(this.getMapViewer().map.getCoordinateFromPixel(location));
   }
 
   /**
@@ -151,12 +164,11 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected override getFeatureInfoAtCoordinate(location: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const convertedLocation = Projection.transform(
-      location,
-      `EPSG:${MapEventProcessor.getMapState(this.getMapId()).currentProjection}`,
-      Projection.PROJECTION_NAMES.LNGLAT
-    );
-    return this.getFeatureInfoAtLongLat(convertedLocation);
+    // Transform coordinate from map project to lntlat
+    const projCoordinate = this.getMapViewer().convertCoordinateMapProjToLngLat(location);
+
+    // Redirect to getFeatureInfoAtLongLat
+    return this.getFeatureInfoAtLongLat(projCoordinate);
   }
 
   /**
@@ -166,30 +178,30 @@ export class GVEsriDynamic extends AbstractGVRaster {
    */
   protected override async getFeatureInfoAtLongLat(lnglat: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
+      // If invisible
+      if (!this.getVisible()) return [];
+
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig();
-      const layer = this.getOLLayer();
 
-      if (!this.getVisible()) return [];
+      // If not queryable
       if (!layerConfig.source?.featureInfo?.queryable) return [];
 
       let identifyUrl = getLocalizedValue(layerConfig.source?.dataAccessPath, AppEventProcessor.getDisplayLanguage(this.getMapId()));
       if (!identifyUrl) return [];
 
       identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
-      const mapLayer = MapEventProcessor.getMapViewer(this.getMapId()).map;
-      const { currentProjection } = MapEventProcessor.getMapState(this.getMapId());
-      const size = mapLayer.getSize()!;
-      let bounds = mapLayer.getView().calculateExtent();
-      bounds = Projection.transformExtent(bounds, `EPSG:${currentProjection}`, Projection.PROJECTION_NAMES.LNGLAT);
+
+      const mapViewer = this.getMapViewer();
+      const bounds = mapViewer.convertExtentMapProjToLngLat(mapViewer.getView().calculateExtent());
 
       const extent = { xmin: bounds[0], ymin: bounds[1], xmax: bounds[2], ymax: bounds[3] };
 
-      const source = layer.getSource()!;
-      const { layerDefs } = source.getParams();
+      const layerDefs = this.getOLSource()?.getParams()?.layerDefs || '';
+      const size = mapViewer.map.getSize()!;
 
       identifyUrl =
-        `${identifyUrl}identify?f=json&tolerance=7` +
+        `${identifyUrl}identify?f=json&tolerance=${this.hitTolerance}` +
         `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
         `&imageDisplay=${size[0]},${size[1]},96` +
         `&layers=visible:${layerConfig.layerId}` +
@@ -205,7 +217,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       }
       const features = new EsriJSON().readFeatures(
         { features: jsonResponse.results },
-        { dataProjection: Projection.PROJECTION_NAMES.LNGLAT, featureProjection: `EPSG:${currentProjection}` }
+        { dataProjection: Projection.PROJECTION_NAMES.LNGLAT, featureProjection: mapViewer.getProjection().getCode() }
       ) as Feature<Geometry>[];
       const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig);
       return arrayOfFeatureInfoEntries;
@@ -612,11 +624,12 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {Extent | undefined} bounds - The current bounding box to be adjusted.
    * @returns {Extent | undefined} The new layer bounding box.
    */
-  protected getBounds(bounds?: Extent): Extent | undefined {
+  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     const layerConfig = this.getLayerConfig();
     const layerBounds = layerConfig?.initialSettings?.bounds || [];
     const projection =
-      layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid || MapEventProcessor.getMapState(this.getMapId()).currentProjection;
+      layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid || this.getMapViewer().getProjection().getCode().replace('EPSG:', '');
 
     if (layerConfig.getMetadata()?.fullExtent) {
       layerBounds[0] = layerConfig.getMetadata()?.fullExtent.xmin as number;
@@ -628,13 +641,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
     if (layerBounds) {
       let transformedBounds = layerBounds;
       if (
-        layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.getMapId()).currentProjection
+        layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')
       ) {
-        transformedBounds = Projection.transformExtent(
-          layerBounds,
-          `EPSG:${projection}`,
-          `EPSG:${MapEventProcessor.getMapState(this.getMapId()).currentProjection}`
-        );
+        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, `EPSG:${projection}`);
       }
 
       // eslint-disable-next-line no-param-reassign

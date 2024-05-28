@@ -9,28 +9,6 @@ import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor
 
 type TimeSliderActions = ITimeSliderState['actions'];
 
-export type TimeSliderLayerSet = {
-  [layerPath: string]: TypeTimeSliderValues;
-};
-
-export interface TypeTimeSliderValues {
-  defaultValue: string;
-  delay: number;
-  description?: string;
-  discreteValues: boolean;
-  field: string;
-  fieldAlias: string;
-  filtering: boolean;
-  locked?: boolean;
-  minAndMax: number[];
-  name: string;
-  range: string[];
-  reversed?: boolean;
-  singleHandle: boolean;
-  title?: string;
-  values: number[];
-}
-
 export interface ITimeSliderState {
   timeSliderLayers: TimeSliderLayerSet;
 
@@ -215,6 +193,28 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
   } as ITimeSliderState;
 
   return init;
+}
+
+export type TimeSliderLayerSet = {
+  [layerPath: string]: TypeTimeSliderValues;
+};
+
+export interface TypeTimeSliderValues {
+  defaultValue: string;
+  delay: number;
+  description?: string;
+  discreteValues: boolean;
+  field: string;
+  fieldAlias: string;
+  filtering: boolean;
+  locked?: boolean;
+  minAndMax: number[];
+  name: string;
+  range: string[];
+  reversed?: boolean;
+  singleHandle: boolean;
+  title?: string;
+  values: number[];
 }
 
 // **********************************************************

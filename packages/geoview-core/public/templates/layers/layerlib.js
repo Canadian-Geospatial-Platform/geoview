@@ -52,7 +52,7 @@ const createInfoTable = (mapId, resultSetId, resultSet, eventType) => {
   infoTable.appendChild(content);
   Object.keys(resultSet).forEach((layerPath) => {
     const activeResultSet = resultSet[layerPath];
-    const layerData = activeResultSet.data.features;
+    const layerData = activeResultSet.features;
 
     // Header of the layer
     const infoH1 = document.createElement('h1');

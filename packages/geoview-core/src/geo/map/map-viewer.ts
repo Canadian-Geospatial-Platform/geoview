@@ -9,6 +9,7 @@ import OLMap from 'ol/Map';
 import View, { FitOptions, ViewOptions } from 'ol/View';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
+import { Projection as OLProjection, ProjectionLike } from 'ol/proj';
 
 import queryString from 'query-string';
 import { CV_MAP_EXTENTS, VALID_DISPLAY_LANGUAGE, VALID_DISPLAY_THEME, VALID_PROJECTION_CODES } from '@config/types/config-constants';
@@ -67,12 +68,6 @@ interface TypeDocument extends Document {
 export class MapViewer {
   // Minimum delay (in milliseconds) for map to be in loading state
   static readonly #MIN_DELAY_LOADING = 2000;
-
-  // The starting time of the timer for the map ready
-  #checkMapReadyStartTime: number | undefined;
-
-  // Function create-map-from-config has run
-  createMapConfigHasRun = false;
 
   // map config properties
   mapFeaturesConfig: TypeMapFeaturesConfig;
@@ -162,6 +157,9 @@ export class MapViewer {
 
   // Keep all callback delegates references
   #onMapComponentRemovedHandlers: MapComponentRemovedDelegate[] = [];
+
+  // The starting time of the timer for the map ready
+  #checkMapReadyStartTime: number | undefined;
 
   // Getter for map is init
   get mapInit(): boolean {
@@ -266,8 +264,8 @@ export class MapViewer {
   initMap(): void {
     // Register essential map handlers
     this.map.on('moveend', this.#handleMapMoveEnd.bind(this));
-    this.map.getView().on('change:resolution', debounce(this.#handleMapZoomEnd.bind(this), 100).bind(this));
-    this.map.getView().on('change:rotation', debounce(this.#handleMapRotation.bind(this), 100).bind(this));
+    this.getView().on('change:resolution', debounce(this.#handleMapZoomEnd.bind(this), 100).bind(this));
+    this.getView().on('change:rotation', debounce(this.#handleMapRotation.bind(this), 100).bind(this));
 
     // If map isn't static
     if (this.mapFeaturesConfig.map.interaction !== 'static') {
@@ -315,10 +313,10 @@ export class MapViewer {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async #handleMapMoveEnd(event: MapEvent): Promise<void> {
     // Get the center coordinates
-    const centerCoordinates = this.map.getView().getCenter()!;
+    const centerCoordinates = this.getView().getCenter()!;
 
     // Get the projection code
-    const projCode = this.map.getView().getProjection().getCode();
+    const projCode = this.getView().getProjection().getCode();
 
     // Get the pointer position
     const pointerPosition = {
@@ -351,7 +349,7 @@ export class MapViewer {
    */
   #handleMapPointerMove(event: MapEvent): void {
     // Get the projection code
-    const projCode = this.map.getView().getProjection().getCode();
+    const projCode = this.getView().getProjection().getCode();
 
     // Get the pointer position info
     const pointerPosition = {
@@ -375,7 +373,7 @@ export class MapViewer {
    */
   #handleMapSingleClick(event: MapEvent): void {
     // Get the projection code
-    const projCode = this.map.getView().getProjection().getCode();
+    const projCode = this.getView().getProjection().getCode();
 
     // Get the click coordinates
     const clickCoordinates = {
@@ -403,7 +401,7 @@ export class MapViewer {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   #handleMapZoomEnd(event: ObjectEvent): void {
     // Read the zoom value
-    const zoom = this.map.getView().getZoom()!;
+    const zoom = this.getView().getZoom()!;
 
     // Save in the store
     MapEventProcessor.setZoom(this.mapId, zoom);
@@ -420,7 +418,7 @@ export class MapViewer {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   #handleMapRotation(event: ObjectEvent): void {
     // Get the map rotation
-    const rotation = this.map.getView().getRotation();
+    const rotation = this.getView().getRotation();
 
     // Save in the store
     MapEventProcessor.setRotation(this.mapId, rotation);
@@ -676,6 +674,732 @@ export class MapViewer {
       }, 250);
     });
   }
+
+  /**
+   * Add a new custom component to the map
+   *
+   * @param {string} mapComponentId - An id to the new component
+   * @param {JSX.Element} component - The component to add
+   */
+  addComponent(mapComponentId: string, component: JSX.Element): void {
+    if (mapComponentId && component) {
+      // emit an event to add the component
+      this.#emitMapComponentAdded({ mapComponentId, component });
+    }
+  }
+
+  /**
+   * Remove an existing custom component from the map
+   *
+   * @param mapComponentId - The id of the component to remove
+   */
+  removeComponent(mapComponentId: string): void {
+    if (mapComponentId) {
+      // emit an event to add the component
+      this.#emitMapComponentRemoved({ mapComponentId });
+    }
+  }
+
+  /**
+   * Add a localization ressource bundle for a supported language (fr, en). Then the new key added can be
+   * access from the utilies function getLocalizesMessage to reuse in ui from outside the core viewer.
+   *
+   * @param {TypeDisplayLanguage} language - The language to add the ressoruce for (en, fr)
+   * @param {TypeJsonObject} translations - The translation object to add
+   */
+  addLocalizeRessourceBundle(language: TypeDisplayLanguage, translations: TypeJsonObject): void {
+    this.#i18nInstance.addResourceBundle(language, 'translation', translations, true, false);
+  }
+
+  // #region MAP STATES
+
+  /**
+   * Returns the current display language
+   * @returns {TypeDisplayLanguage} The display language
+   */
+  getDisplayLanguage(): TypeDisplayLanguage {
+    return AppEventProcessor.getDisplayLanguage(this.mapId);
+  }
+
+  /**
+   * Returns the current display theme
+   * @returns {TypeDisplayTheme} The display theme
+   */
+  getDisplayTheme(): TypeDisplayTheme {
+    return AppEventProcessor.getDisplayTheme(this.mapId);
+  }
+
+  /**
+   * Returns the map current state information
+   * @returns {TypeMapState} The map state
+   */
+  getMapState(): TypeMapState {
+    // map state initialize with store data coming from configuration file/object.
+    // updated values will be added by store subscription in map-event-processor
+    return MapEventProcessor.getMapState(this.mapId);
+  }
+
+  /**
+   * Gets the map viewSettings
+   * @returns the map viewSettings
+   */
+  getView(): View {
+    return this.map.getView();
+  }
+
+  /**
+   * Gets the map projection
+   * @returns the map viewSettings
+   */
+  getProjection(): OLProjection {
+    return this.getView().getProjection();
+  }
+
+  /**
+   * set fullscreen / exit fullscreen
+   *
+   * @param status - Toggle fullscreen or exit fullscreen status
+   * @param {HTMLElement} element - The element to toggle fullscreen on
+   */
+  static setFullscreen(status: boolean, element: TypeHTMLElement): void {
+    // TODO: Refactor - For reusability, this function should be static and moved to a browser-utilities class
+    // TO.DOCONT: If we want to keep a function here, in MapViewer, it should just be a redirect to the browser-utilities'
+    // enter fullscreen
+    if (status) {
+      if (element.requestFullscreen) {
+        element.requestFullscreen().catch((error) => {
+          // Log
+          logger.logPromiseFailed('element.requestFullscreen', error);
+        });
+      } else if (element.webkitRequestFullscreen) {
+        /* Safari */
+        element.webkitRequestFullscreen();
+      } else if (element.msRequestFullscreen) {
+        /* IE11 */
+        element.msRequestFullscreen();
+      } else if (element.mozRequestFullScreen) {
+        /* Firefox */
+        element.mozRequestFullScreen();
+      }
+    }
+
+    // exit fullscreen
+    if (!status) {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch((error) => {
+          // Log
+          logger.logPromiseFailed('document.exitFullscreen', error);
+        });
+      } else if ((document as TypeDocument).webkitExitFullscreen) {
+        /* Safari */
+        (document as TypeDocument).webkitExitFullscreen();
+      } else if ((document as TypeDocument).msExitFullscreen) {
+        /* IE11 */
+        (document as TypeDocument).msExitFullscreen();
+      } else if ((document as TypeDocument).mozCancelFullScreen) {
+        /* Firefox */
+        (document as TypeDocument).mozCancelFullScreen();
+      }
+    }
+  }
+
+  /**
+   * Set map to either dynamic or static
+   *
+   * @param {TypeInteraction} interaction - Map interaction
+   */
+  setInteraction(interaction: TypeInteraction): void {
+    MapEventProcessor.setInteraction(this.mapId, interaction);
+  }
+
+  /**
+   * Set the display language of the map
+   *
+   * @param {TypeDisplayLanguage} displayLanguage - The language to use (en, fr)
+   * @param {boolean} resetLayer - Optional flag to ask viewer to reload layers with the new localize language
+   * @returns {Promise<[void, void]>}
+   */
+  setLanguage(displayLanguage: TypeDisplayLanguage, resetLayer?: boolean | false): Promise<[void, void]> {
+    if (VALID_DISPLAY_LANGUAGE.includes(displayLanguage)) {
+      const promise = AppEventProcessor.setDisplayLanguage(this.mapId, displayLanguage);
+
+      // if flag is true, check if config support the layers change and apply
+      if (resetLayer) {
+        logger.logInfo('reset layers not implemented yet');
+      }
+
+      // Return the promise
+      return promise;
+    }
+
+    // Unsupported
+    this.notifications.addNotificationError(getLocalizedMessage('validation.changeDisplayLanguage', displayLanguage));
+    return Promise.resolve([undefined, undefined]);
+  }
+
+  /**
+   * Set the display projection of the map
+   *
+   * @param {TypeValidMapProjectionCodes} projectionCode - The projection code (3978, 3857)
+   * @returns {Promise<void>}
+   */
+  setProjection(projectionCode: TypeValidMapProjectionCodes): Promise<void> {
+    if (VALID_PROJECTION_CODES.includes(Number(projectionCode))) {
+      // Propagate to the store
+      const promise = MapEventProcessor.setProjection(this.mapId, projectionCode);
+
+      // TODO: Emit to outside
+      // this.#emitMapInit...
+
+      // Return the promise
+      return promise;
+    }
+
+    // Unsupported
+    this.notifications.addNotificationError('validation.changeDisplayProjection');
+    return Promise.resolve();
+  }
+
+  /**
+   * Rotates the view to align it at the given degrees
+   *
+   * @param {number} degree - The degrees to rotate the map to
+   */
+  rotate(degree: number): void {
+    // Rotate the view, the store will get updated via this.#handleMapRotation listener
+    this.getView().animate({ rotation: degree });
+  }
+
+  /**
+   * Set the display theme of the map
+   *
+   * @param {TypeDisplayTheme} displayTheme - The theme to use (geo.ca, light, dark)
+   */
+  setTheme(displayTheme: TypeDisplayTheme): void {
+    if (VALID_DISPLAY_THEME.includes(displayTheme)) {
+      AppEventProcessor.setDisplayTheme(this.mapId, displayTheme);
+    } else this.notifications.addNotificationError(getLocalizedMessage('validation.changeDisplayTheme', this.getDisplayLanguage()));
+  }
+
+  /**
+   * Set the map viewSettings
+   *
+   * @param {TypeViewSettings} mapView - Map viewSettings object
+   */
+  setView(mapView: TypeViewSettings): void {
+    const currentView = this.getView();
+    const viewOptions: ViewOptions = {};
+    viewOptions.projection = mapView.projection ? `EPSG:${mapView.projection}` : currentView.getProjection();
+    viewOptions.zoom = mapView.initialView?.zoomAndCenter ? mapView.initialView?.zoomAndCenter[0] : currentView.getZoom();
+    viewOptions.center = mapView.initialView?.zoomAndCenter
+      ? Projection.transformFromLonLat(mapView.initialView?.zoomAndCenter[1], viewOptions.projection)
+      : Projection.transformFromLonLat(
+          Projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
+          viewOptions.projection
+        );
+    viewOptions.minZoom = mapView.minZoom ? mapView.minZoom : currentView.getMinZoom();
+    viewOptions.maxZoom = mapView.maxZoom ? mapView.maxZoom : currentView.getMaxZoom();
+    if (mapView.maxExtent) viewOptions.extent = mapView.maxExtent;
+
+    this.map.setView(new View(viewOptions));
+  }
+
+  /**
+   * Set the map center.
+   *
+   * @param {Coordinate} center - New center to use
+   */
+  setCenter(center: Coordinate): void {
+    const currentView = this.getView();
+    const transformedCenter = Projection.transformFromLonLat(center, currentView.getProjection());
+
+    currentView.setCenter(transformedCenter);
+  }
+
+  /**
+   * Set the map zoom level.
+   *
+   * @param {number} zoom - New zoom level
+   */
+  setZoomLevel(zoom: number): void {
+    this.getView().setZoom(zoom);
+  }
+
+  /**
+   * Set the minimum map zoom level.
+   *
+   * @param {number} zoom - New minimum zoom level
+   */
+  setMinZoomLevel(zoom: number): void {
+    this.getView().setMinZoom(zoom);
+  }
+
+  /**
+   * Set the maximum map zoom level.
+   *
+   * @param {number} zoom - New maximum zoom level
+   */
+  setMaxZoomLevel(zoom: number): void {
+    this.getView().setMaxZoom(zoom);
+  }
+
+  /**
+   * Set map extent.
+   *
+   * @param {Extent} extent - New extent to zoom to.
+   */
+  async setExtent(extent: Extent): Promise<void> {
+    await MapEventProcessor.zoomToExtent(this.mapId, extent);
+  }
+
+  /**
+   * Set the maximum extent of the map.
+   *
+   * @param {Extent} extent - New extent to use.
+   */
+  setMaxExtent(extent: Extent): void {
+    const currentView = this.getView();
+    const viewOptions: ViewOptions = {};
+    viewOptions.projection = currentView.getProjection();
+    viewOptions.zoom = currentView.getZoom();
+    viewOptions.center = Projection.transformFromLonLat(
+      Projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
+      viewOptions.projection
+    );
+    viewOptions.minZoom = currentView.getMinZoom();
+    viewOptions.maxZoom = currentView.getMaxZoom();
+    viewOptions.extent = Projection.transformExtent(extent, Projection.PROJECTION_NAMES.LNGLAT, currentView.getProjection());
+
+    this.map.setView(new View(viewOptions));
+  }
+
+  // #endregion
+
+  // #region MAP ACTIONS
+
+  /**
+   * Loops through all geoview layers and refresh their respective source.
+   * Use this function on projection change or other viewer modification who may affect rendering.
+   *
+   * @returns A Promise which resolves when the rendering is completed after the source(s) were changed.
+   */
+  refreshLayers(): Promise<void> {
+    // Redirect
+    this.layer.refreshLayers();
+
+    // Return a promise for when rendering will complete
+    return new Promise<void>((resolve) => {
+      this.map.once('rendercomplete', () => {
+        // Done
+        resolve();
+      });
+    });
+  }
+
+  /**
+   * Hide a click marker from the map
+   */
+  clickMarkerIconHide(): void {
+    // Redirect to the processor
+    MapEventProcessor.clickMarkerIconHide(this.mapId);
+  }
+
+  /**
+   * Show a marker on the map
+   * @param {TypeClickMarker} marker - The marker to add
+   */
+  clickMarkerIconShow(marker: TypeClickMarker): void {
+    // Redirect to the processor
+    MapEventProcessor.clickMarkerIconShow(this.mapId, marker);
+  }
+
+  /**
+   * Check if geometries needs to be loaded from a URL geoms parameter
+   */
+  loadGeometries(): void {
+    // see if a data geometry endpoint is configured and geoms param is provided then get the param value(s)
+    const servEndpoint = this.map.getTargetElement()?.closest('.geoview-map')?.getAttribute('data-geometry-endpoint') || '';
+
+    // eslint-disable-next-line no-restricted-globals
+    const parsed = queryString.parse(location.search);
+
+    if (parsed.geoms && servEndpoint !== '') {
+      const geoms = (parsed.geoms as string).split(',');
+
+      // for the moment, only polygon are supported but if need be, other geometries can easely be use as well
+      geoms.forEach((key: string) => {
+        fetch(`${servEndpoint}${key}`)
+          .then((response) => {
+            // only process valid response
+            if (response.status === 200) {
+              response
+                .json()
+                .then((data) => {
+                  if (data.geometry !== undefined) {
+                    // add the geometry
+                    // TODO: use the geometry as GeoJSON and add properties to by queried by the details panel
+                    this.layer.geometry.addPolygon(data.geometry.coordinates, undefined, generateId(null));
+                  }
+                })
+                .catch((error) => {
+                  // Log
+                  logger.logPromiseFailed('response.json in loadGeometry in MapViewer', error);
+                });
+            }
+          })
+          .catch((error) => {
+            // Log
+            logger.logPromiseFailed('fetch in loadGeometries in MapViewer', error);
+          });
+      });
+    }
+  }
+
+  /**
+   * Remove map
+   *
+   * @param {boolean} deleteContainer true if we want to delete div from the page
+   * @returns {HTMLElement} return the HTML element
+   */
+  remove(deleteContainer: boolean): HTMLElement {
+    // get the map container to unmount
+    // remove geoview-class if we need to reuse the div
+    const mapContainer = document.getElementById(this.mapId)!;
+    mapContainer.classList.remove('geoview-map');
+
+    // unload all loaded plugins on the map
+    Plugin.removePlugins(this.mapId)
+      .then(() => {
+        // Remove all layers
+        try {
+          this.layer.removeAllGeoviewLayers();
+        } catch (err) {
+          // Failed to remove layers, eat the exception and continue to remove the map
+        }
+
+        // remove the dom element (remove rendered map and overview map)
+        if (this.overviewRoot) this.overviewRoot?.unmount();
+        unmountMap(this.mapId);
+
+        // delete store and event processor
+        removeGeoviewStore(this.mapId);
+
+        // if deleteContainer, delete the HTML div
+        if (deleteContainer) mapContainer.remove();
+
+        // delete the map instance from the maps array, will delete attached plugins
+        // TODO: need a time out here because if not, map is deleted before everything is done on the map
+        // TO.DOCONT: This whole sequence need to be async
+        setTimeout(() => delete api.maps[this.mapId], 1000);
+      })
+      .catch((error) => {
+        logger.logError(`Couldn't remove map in map-viewer`, error);
+      });
+
+    // return the map container to be remove
+    return mapContainer;
+  }
+
+  /**
+   * Reload a map from a config object stored in store. It first remove then recreate the map.
+   */
+  reload(): void {
+    // remove the map, then get config to use to recreate it
+    const mapDiv = this.remove(false);
+    const config = MapEventProcessor.getStoreConfig(this.mapId);
+    // TODO: Remove time out and make this async so remove/recreate work one after the other
+    // TO.DOCONT: There is still as problem with bad config schema value and layers loading... should be refactor when config is done
+    setTimeout(
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      () =>
+        api.createMapFromConfig(mapDiv.id, JSON.stringify(config)).catch((error) => {
+          // Log
+          logger.logError(`Couldn't reload the map in map-viewer`, error);
+        }),
+      1500
+    );
+  }
+
+  /**
+   * Zoom to the specified extent.
+   *
+   * @param {Extent} extent - The extent to zoom to.
+   * @param {FitOptions} options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
+   */
+  zoomToExtent(extent: Extent, options?: FitOptions): Promise<void> {
+    // TODO: Discussion - Where is the line between a function using MapEventProcessor in MapViewer vs in MapState action?
+    // TO.DOCONT: This function (and there are many others in this class) redirects to the MapEventProcessor, should it be in MapState with the others or do we keep some in MapViewer and some in MapState?
+    // TO.DOCONT: If we keep some, we should maybe add a fourth call-stack possibility in the MapEventProcessor paradigm documentation.
+    // Redirect to the processor
+    return MapEventProcessor.zoomToExtent(this.mapId, extent, options);
+  }
+
+  // #endregion
+
+  /**
+   * Fit the map to its boundaries. It is assumed that the boundaries use the map projection. If projectionCode is undefined,
+   * the boundaries are used as is, otherwise they are reprojected from the specified projection code to the map projection.
+   *
+   * @param {Extent} bounds - Bounding box to zoom to
+   * @param {string | number | undefined} projectionCode - Optional projection code used by the bounds.
+   */
+  // TODO: only use in the layers panel package... see if still needed and if it is the right place
+  fitBounds(bounds?: Extent, projectionCode: string | number | undefined = undefined): void {
+    let mapBounds: Extent | undefined;
+    if (bounds) {
+      const { currentProjection } = this.getMapState();
+      mapBounds = projectionCode
+        ? Projection.transformExtent(bounds, `EPSG:${projectionCode}`, Projection.PROJECTIONS[currentProjection], 20)
+        : Projection.transformExtent(bounds, Projection.PROJECTIONS[currentProjection], Projection.PROJECTIONS[currentProjection], 25);
+    } else {
+      this.layer.getGeoviewLayerIds().forEach((geoviewLayerId) => {
+        // TODO Refactor - Layers refactoring. There needs to be a getMetadataBounds (new layers and new config) to complete the full layers migration.
+        // TO.DOCONT: Johann: Need on both, config extract bounds from metadata and layers do it again at the end from features for vector and compound bound for group
+        if (!mapBounds) mapBounds = this.layer.getGeoviewLayer(geoviewLayerId)?.getMetadataBounds(geoviewLayerId);
+        else {
+          const newMapBounds = this.layer.getGeoviewLayer(geoviewLayerId)?.getMetadataBounds(geoviewLayerId);
+          if (newMapBounds) {
+            mapBounds = [
+              Math.min(newMapBounds[0], mapBounds[0]),
+              Math.min(newMapBounds[1], mapBounds[1]),
+              Math.max(newMapBounds[2], mapBounds[2]),
+              Math.max(newMapBounds[3], mapBounds[3]),
+            ];
+          }
+        }
+      });
+    }
+
+    if (mapBounds) {
+      this.getView().fit(mapBounds, { size: this.map.getSize() });
+      this.getView().setZoom(this.getView().getZoom()! - 0.15);
+    }
+  }
+
+  // #region MAP INTERACTIONS
+
+  /**
+   * Initializes selection interactions
+   */
+  initSelectInteractions(): Select {
+    // Create selecting capabilities
+    const select = new Select({
+      mapViewer: this,
+      hitTolerance: 5,
+    });
+    select.startInteraction();
+    return select;
+  }
+
+  /**
+   * Initializes extent interactions
+   */
+  initExtentInteractions(): ExtentInteraction {
+    // Create selecting capabilities
+    const extent = new ExtentInteraction({
+      mapViewer: this,
+      pixelTolerance: 5,
+    });
+    extent.startInteraction();
+    return extent;
+  }
+
+  /**
+   * Initializes translation interactions
+   */
+  initTranslateInteractions(): Translate {
+    // Create selecting capabilities
+    const features = this.initSelectInteractions().getFeatures();
+
+    // Create translating capabilities
+    const translate = new Translate({
+      mapViewer: this,
+      features,
+    });
+    translate.startInteraction();
+    return translate;
+  }
+
+  /**
+   * Initializes drawing interactions on the given vector source
+   * @param {string} geomGroupKey - The geometry group key in which to hold the geometries
+   * @param {string} type - The type of geometry to draw (Polygon, LineString, Circle, etc)
+   * @param {TypeFeatureStyle} styles - The styles for the drawing
+   */
+  initDrawInteractions(geomGroupKey: string, type: string, style: TypeFeatureStyle): Draw {
+    // Create the Draw component
+    const draw = new Draw({
+      mapViewer: this,
+      geometryGroupKey: geomGroupKey,
+      type,
+      style,
+    });
+    draw.startInteraction();
+    return draw;
+  }
+
+  /**
+   * Initializes modifying interactions on the given vector source
+   * @param {string} geomGroupKey - The geometry group key in which to hold the geometries
+   */
+  initModifyInteractions(geomGroupKey: string): Modify {
+    // Create the modify component
+    const modify = new Modify({
+      mapViewer: this,
+      geometryGroupKey: geomGroupKey,
+    });
+    modify.startInteraction();
+    return modify;
+  }
+
+  /**
+   * Initializes snapping interactions on the given vector source
+   * @param {string} geomGroupKey - The geometry group key in which to hold the geometries
+   */
+  initSnapInteractions(geomGroupKey: string): Snap {
+    // Create snapping capabilities
+    const snap = new Snap({
+      mapViewer: this,
+      geometryGroupKey: geomGroupKey,
+    });
+    snap.startInteraction();
+    return snap;
+  }
+
+  // #endregion
+
+  /**
+   * Check if north is visible. This is not a perfect solution and is more a work around
+   *
+   * @returns {boolean} true if visible, false otherwise
+   */
+  checkNorth(): boolean {
+    // Check the container value for top middle of the screen
+    // Convert this value to a lat long coordinate
+    const pointXY = [this.map.getSize()![0] / 2, 1];
+    const pt = Projection.transformToLonLat(this.map.getCoordinateFromPixel(pointXY), this.getView().getProjection());
+
+    // If user is pass north, long value will start to be positive (other side of the earth).
+    // This will work only for LCC Canada.
+    return pt ? pt[0] > 0 : true;
+  }
+
+  /**
+   * Get north arrow bearing. Angle use to rotate north arrow for non Web Mercator projection
+   * https://www.movable-type.co.uk/scripts/latlong.html
+   *
+   * @returns {string} the arrow angle
+   */
+  getNorthArrowAngle(): string {
+    try {
+      // north value
+      const pointA = { x: NORTH_POLE_POSITION[1], y: NORTH_POLE_POSITION[0] };
+
+      // map center (we use botton parallel to introduce less distortion)
+      const extent = this.getView().calculateExtent();
+      const center: Coordinate = Projection.transformToLonLat([(extent[0] + extent[2]) / 2, extent[1]], this.getView().getProjection());
+      const pointB = { x: center[0], y: center[1] };
+
+      // set info on longitude and latitude
+      const dLon = ((pointB.x - pointA.x) * Math.PI) / 180;
+      const lat1 = (pointA.y * Math.PI) / 180;
+      const lat2 = (pointB.y * Math.PI) / 180;
+
+      // calculate bearing
+      const y = Math.sin(dLon) * Math.cos(lat2);
+      const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+      const bearing = (Math.atan2(y, x) * 180) / Math.PI;
+
+      // return angle (180 is pointing north)
+      return ((bearing + 360) % 360).toFixed(1);
+    } catch (error) {
+      return '180.0';
+    }
+  }
+
+  /**
+   * Transforms coordinate from LngLat to the current projection of the map.
+   * @param {Coordinate} coordinate - The LngLat coordinate
+   * @returns {Coordinate} The coordinate in the map projection
+   */
+  convertCoordinateLngLatToMapProj(coordinate: Coordinate): Coordinate {
+    // Redirect
+    return this.convertCoordinateFromProjToMapProj(coordinate, Projection.PROJECTION_NAMES.LNGLAT);
+  }
+
+  /**
+   * Transforms coordinate from current projection of the map to LngLat.
+   * @param {Coordinate} coordinate - The coordinate in map projection
+   * @returns {Coordinate} The coordinate in LngLat
+   */
+  convertCoordinateMapProjToLngLat(coordinate: Coordinate): Coordinate {
+    // Redirect
+    return this.convertCoordinateFromMapProjToProj(coordinate, Projection.PROJECTION_NAMES.LNGLAT);
+  }
+
+  /**
+   * Transforms extent from LngLat to the current projection of the map.
+   * @param {Extent} extent - The LngLat extent
+   * @returns {Extent} The extent in the map projection
+   */
+  convertExtentLngLatToMapProj(extent: Extent): Extent {
+    // Redirect
+    return this.convertExtentFromProjToMapProj(extent, Projection.PROJECTION_NAMES.LNGLAT);
+  }
+
+  /**
+   * Transforms extent from current projection of the map to LngLat.
+   * @param {Extent} extent - The extent in map projection
+   * @returns {Extent} The extent in LngLat
+   */
+  convertExtentMapProjToLngLat(extent: Extent): Extent {
+    // Redirect
+    return this.convertExtentFromMapProjToProj(extent, Projection.PROJECTION_NAMES.LNGLAT);
+  }
+
+  /**
+   * Transforms coordinate from given projection to the current projection of the map.
+   * @param {Coordinate} coordinate - The given coordinate
+   * @param {ProjectionLike} fromProj - The projection of the given coordinate
+   * @returns {Coordinate} The coordinate in the map projection
+   */
+  convertCoordinateFromProjToMapProj(coordinate: Coordinate, fromProj: ProjectionLike): Coordinate {
+    // TODO: In this function and equivalent 3 others below, make it so if the given projection is the same as the map projection
+    // TO.DOCONT: just skip and return the same geometry. It'd save many 'if' like 'if projA <> projB then call this' in the code base
+    return Projection.transform(coordinate, fromProj, this.getProjection());
+  }
+
+  /**
+   * Transforms coordinate from map projection to given projection.
+   * @param {Coordinate} coordinate - The given coordinate
+   * @param {ProjectionLike} toProj - The projection that should be output
+   * @returns {Coordinate} The coordinate in the map projection
+   */
+  convertCoordinateFromMapProjToProj(coordinate: Coordinate, toProj: ProjectionLike): Coordinate {
+    return Projection.transform(coordinate, this.getProjection(), toProj);
+  }
+
+  /**
+   * Transforms extent from given projection to the current projection of the map.
+   * @param {Extent} extent - The given extent
+   * @param {ProjectionLike} fromProj - The projection of the given extent
+   * @returns {Extent} The extent in the map projection
+   */
+  convertExtentFromProjToMapProj(extent: Extent, fromProj: ProjectionLike): Extent {
+    return Projection.transformExtent(extent, fromProj, this.getProjection());
+  }
+
+  /**
+   * Transforms extent from map projection to given projection.
+   * @param {Extent} extent - The given extent
+   * @param {ProjectionLike} toProj - The projection that should be output
+   * @returns {Extent} The extent in the map projection
+   */
+  convertExtentFromMapProjToProj(extent: Extent, toProj: ProjectionLike): Extent {
+    return Projection.transformExtent(extent, this.getProjection(), toProj);
+  }
+
+  // #region EVENTS
 
   /**
    * Emits a map init event to all handlers.
@@ -1001,643 +1725,7 @@ export class MapViewer {
     EventHelper.offEvent(this.#onMapComponentRemovedHandlers, callback);
   }
 
-  /**
-   * Add a new custom component to the map
-   *
-   * @param {string} mapComponentId - An id to the new component
-   * @param {JSX.Element} component - The component to add
-   */
-  addComponent(mapComponentId: string, component: JSX.Element): void {
-    if (mapComponentId && component) {
-      // emit an event to add the component
-      this.#emitMapComponentAdded({ mapComponentId, component });
-    }
-  }
-
-  /**
-   * Remove an existing custom component from the map
-   *
-   * @param mapComponentId - The id of the component to remove
-   */
-  removeComponent(mapComponentId: string): void {
-    if (mapComponentId) {
-      // emit an event to add the component
-      this.#emitMapComponentRemoved({ mapComponentId });
-    }
-  }
-
-  /**
-   * Add a localization ressource bundle for a supported language (fr, en). Then the new key added can be
-   * access from the utilies function getLocalizesMessage to reuse in ui from outside the core viewer.
-   *
-   * @param {TypeDisplayLanguage} language - The language to add the ressoruce for (en, fr)
-   * @param {TypeJsonObject} translations - The translation object to add
-   */
-  addLocalizeRessourceBundle(language: TypeDisplayLanguage, translations: TypeJsonObject): void {
-    this.#i18nInstance.addResourceBundle(language, 'translation', translations, true, false);
-  }
-
-  // #region MAP STATES
-
-  /**
-   * Return the current display language
-   *
-   * @returns {TypeDisplayLanguage} The display language
-   */
-  getDisplayLanguage(): TypeDisplayLanguage {
-    return AppEventProcessor.getDisplayLanguage(this.mapId);
-  }
-
-  /**
-   * Return the current display theme
-   *
-   * @returns {TypeDisplayTheme} The display theme
-   */
-  getDisplayTheme(): TypeDisplayTheme {
-    return AppEventProcessor.getDisplayTheme(this.mapId);
-  }
-
-  /**
-   * Return the map current state information
-   *
-   * @returns {TypeMapState} The map state
-   */
-  getMapState(): TypeMapState {
-    // map state initialize with store data coming from configuration file/object.
-    // updated values will be added by store subscription in map-event-processor
-    return MapEventProcessor.getMapState(this.mapId);
-  }
-
-  /**
-   * Get the map viewSettings
-   *
-   * @returns the map viewSettings
-   */
-  getView(): View {
-    return this.map.getView();
-  }
-
-  /**
-   * set fullscreen / exit fullscreen
-   *
-   * @param status - Toggle fullscreen or exit fullscreen status
-   * @param {HTMLElement} element - The element to toggle fullscreen on
-   */
-  static setFullscreen(status: boolean, element: TypeHTMLElement): void {
-    // TODO: Refactor - For reusability, this function should be static and moved to a browser-utilities class
-    // TO.DOCONT: If we want to keep a function here, in MapViewer, it should just be a redirect to the browser-utilities'
-    // enter fullscreen
-    if (status) {
-      if (element.requestFullscreen) {
-        element.requestFullscreen().catch((error) => {
-          // Log
-          logger.logPromiseFailed('element.requestFullscreen', error);
-        });
-      } else if (element.webkitRequestFullscreen) {
-        /* Safari */
-        element.webkitRequestFullscreen();
-      } else if (element.msRequestFullscreen) {
-        /* IE11 */
-        element.msRequestFullscreen();
-      } else if (element.mozRequestFullScreen) {
-        /* Firefox */
-        element.mozRequestFullScreen();
-      }
-    }
-
-    // exit fullscreen
-    if (!status) {
-      if (document.exitFullscreen) {
-        document.exitFullscreen().catch((error) => {
-          // Log
-          logger.logPromiseFailed('document.exitFullscreen', error);
-        });
-      } else if ((document as TypeDocument).webkitExitFullscreen) {
-        /* Safari */
-        (document as TypeDocument).webkitExitFullscreen();
-      } else if ((document as TypeDocument).msExitFullscreen) {
-        /* IE11 */
-        (document as TypeDocument).msExitFullscreen();
-      } else if ((document as TypeDocument).mozCancelFullScreen) {
-        /* Firefox */
-        (document as TypeDocument).mozCancelFullScreen();
-      }
-    }
-  }
-
-  /**
-   * Set map to either dynamic or static
-   *
-   * @param {TypeInteraction} interaction - Map interaction
-   */
-  setInteraction(interaction: TypeInteraction): void {
-    MapEventProcessor.setInteraction(this.mapId, interaction);
-  }
-
-  /**
-   * Set the display language of the map
-   *
-   * @param {TypeDisplayLanguage} displayLanguage - The language to use (en, fr)
-   * @param {boolean} resetLayer - Optional flag to ask viewer to reload layers with the new localize language
-   * @returns {Promise<[void, void]>}
-   */
-  setLanguage(displayLanguage: TypeDisplayLanguage, resetLayer?: boolean | false): Promise<[void, void]> {
-    if (VALID_DISPLAY_LANGUAGE.includes(displayLanguage)) {
-      const promise = AppEventProcessor.setDisplayLanguage(this.mapId, displayLanguage);
-
-      // if flag is true, check if config support the layers change and apply
-      if (resetLayer) {
-        logger.logInfo('reset layers not implemented yet');
-      }
-
-      // Return the promise
-      return promise;
-    }
-
-    // Unsupported
-    this.notifications.addNotificationError(getLocalizedMessage('validation.changeDisplayLanguage', displayLanguage));
-    return Promise.resolve([undefined, undefined]);
-  }
-
-  /**
-   * Set the display projection of the map
-   *
-   * @param {TypeValidMapProjectionCodes} projectionCode - The projection code (3978, 3857)
-   * @returns {Promise<void>}
-   */
-  setProjection(projectionCode: TypeValidMapProjectionCodes): Promise<void> {
-    if (VALID_PROJECTION_CODES.includes(Number(projectionCode))) {
-      // Propagate to the store
-      const promise = MapEventProcessor.setProjection(this.mapId, projectionCode);
-
-      // TODO: Emit to outside
-      // this.#emitMapInit...
-
-      // Return the promise
-      return promise;
-    }
-
-    // Unsupported
-    this.notifications.addNotificationError('validation.changeDisplayProjection');
-    return Promise.resolve();
-  }
-
-  /**
-   * Rotates the view to align it at the given degrees
-   *
-   * @param {number} degree - The degrees to rotate the map to
-   */
-  rotate(degree: number): void {
-    // Rotate the view, the store will get updated via this.#handleMapRotation listener
-    this.map.getView().animate({ rotation: degree });
-  }
-
-  /**
-   * Set the display theme of the map
-   *
-   * @param {TypeDisplayTheme} displayTheme - The theme to use (geo.ca, light, dark)
-   */
-  setTheme(displayTheme: TypeDisplayTheme): void {
-    if (VALID_DISPLAY_THEME.includes(displayTheme)) {
-      AppEventProcessor.setDisplayTheme(this.mapId, displayTheme);
-    } else this.notifications.addNotificationError(getLocalizedMessage('validation.changeDisplayTheme', this.getDisplayLanguage()));
-  }
-
-  /**
-   * Set the map viewSettings
-   *
-   * @param {TypeViewSettings} mapView - Map viewSettings object
-   */
-  setView(mapView: TypeViewSettings): void {
-    const currentView = this.map.getView();
-    const viewOptions: ViewOptions = {};
-    viewOptions.projection = mapView.projection ? `EPSG:${mapView.projection}` : currentView.getProjection();
-    viewOptions.zoom = mapView.initialView?.zoomAndCenter ? mapView.initialView?.zoomAndCenter[0] : currentView.getZoom();
-    viewOptions.center = mapView.initialView?.zoomAndCenter
-      ? Projection.transformFromLonLat(mapView.initialView?.zoomAndCenter[1], viewOptions.projection)
-      : Projection.transformFromLonLat(
-          Projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
-          viewOptions.projection
-        );
-    viewOptions.minZoom = mapView.minZoom ? mapView.minZoom : currentView.getMinZoom();
-    viewOptions.maxZoom = mapView.maxZoom ? mapView.maxZoom : currentView.getMaxZoom();
-    if (mapView.maxExtent) viewOptions.extent = mapView.maxExtent;
-
-    this.map.setView(new View(viewOptions));
-  }
-
-  /**
-   * Set the map center.
-   *
-   * @param {Coordinate} center - New center to use
-   */
-  setCenter(center: Coordinate): void {
-    const currentView = this.map.getView();
-    const transformedCenter = Projection.transformFromLonLat(center, currentView.getProjection());
-
-    currentView.setCenter(transformedCenter);
-  }
-
-  /**
-   * Set the map zoom level.
-   *
-   * @param {number} zoom - New zoom level
-   */
-  setZoomLevel(zoom: number): void {
-    this.map.getView().setZoom(zoom);
-  }
-
-  /**
-   * Set the minimum map zoom level.
-   *
-   * @param {number} zoom - New minimum zoom level
-   */
-  setMinZoomLevel(zoom: number): void {
-    this.map.getView().setMinZoom(zoom);
-  }
-
-  /**
-   * Set the maximum map zoom level.
-   *
-   * @param {number} zoom - New maximum zoom level
-   */
-  setMaxZoomLevel(zoom: number): void {
-    this.map.getView().setMaxZoom(zoom);
-  }
-
-  /**
-   * Set map extent.
-   *
-   * @param {Extent} extent - New extent to zoom to.
-   */
-  async setExtent(extent: Extent): Promise<void> {
-    await MapEventProcessor.zoomToExtent(this.mapId, extent);
-  }
-
-  /**
-   * Set the maximum extent of the map.
-   *
-   * @param {Extent} extent - New extent to use.
-   */
-  setMaxExtent(extent: Extent): void {
-    const currentView = this.map.getView();
-    const viewOptions: ViewOptions = {};
-    viewOptions.projection = currentView.getProjection();
-    viewOptions.zoom = currentView.getZoom();
-    viewOptions.center = Projection.transformFromLonLat(
-      Projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
-      viewOptions.projection
-    );
-    viewOptions.minZoom = currentView.getMinZoom();
-    viewOptions.maxZoom = currentView.getMaxZoom();
-    viewOptions.extent = Projection.transformExtent(extent, Projection.PROJECTION_NAMES.LNGLAT, currentView.getProjection());
-
-    this.map.setView(new View(viewOptions));
-  }
-
-  /**
-   * Loops through all geoview layers and refresh their respective source.
-   * Use this function on projection change or other viewer modification who may affect rendering.
-   *
-   * @returns A Promise which resolves when the rendering is completed after the source(s) were changed.
-   */
-  refreshLayers(): Promise<void> {
-    // Redirect
-    this.layer.refreshLayers();
-
-    // Return a promise for when rendering will complete
-    return new Promise<void>((resolve) => {
-      this.map.once('rendercomplete', () => {
-        // Done
-        resolve();
-      });
-    });
-  }
-
   // #endregion
-
-  // #region MAP ACTIONS
-
-  /**
-   * Hide a click marker from the map
-   */
-  clickMarkerIconHide(): void {
-    // Redirect to the processor
-    MapEventProcessor.clickMarkerIconHide(this.mapId);
-  }
-
-  /**
-   * Show a marker on the map
-   * @param {TypeClickMarker} marker - The marker to add
-   */
-  clickMarkerIconShow(marker: TypeClickMarker): void {
-    // Redirect to the processor
-    MapEventProcessor.clickMarkerIconShow(this.mapId, marker);
-  }
-
-  /**
-   * Check if geometries needs to be loaded from a URL geoms parameter
-   */
-  loadGeometries(): void {
-    // see if a data geometry endpoint is configured and geoms param is provided then get the param value(s)
-    const servEndpoint = this.map.getTargetElement()?.closest('.geoview-map')?.getAttribute('data-geometry-endpoint') || '';
-
-    // eslint-disable-next-line no-restricted-globals
-    const parsed = queryString.parse(location.search);
-
-    if (parsed.geoms && servEndpoint !== '') {
-      const geoms = (parsed.geoms as string).split(',');
-
-      // for the moment, only polygon are supported but if need be, other geometries can easely be use as well
-      geoms.forEach((key: string) => {
-        fetch(`${servEndpoint}${key}`)
-          .then((response) => {
-            // only process valid response
-            if (response.status === 200) {
-              response
-                .json()
-                .then((data) => {
-                  if (data.geometry !== undefined) {
-                    // add the geometry
-                    // TODO: use the geometry as GeoJSON and add properties to by queried by the details panel
-                    this.layer.geometry.addPolygon(data.geometry.coordinates, undefined, generateId(null));
-                  }
-                })
-                .catch((error) => {
-                  // Log
-                  logger.logPromiseFailed('response.json in loadGeometry in MapViewer', error);
-                });
-            }
-          })
-          .catch((error) => {
-            // Log
-            logger.logPromiseFailed('fetch in loadGeometries in MapViewer', error);
-          });
-      });
-    }
-  }
-
-  /**
-   * Remove map
-   *
-   * @param {boolean} deleteContainer true if we want to delete div from the page
-   * @returns {HTMLElement} return the HTML element
-   */
-  remove(deleteContainer: boolean): HTMLElement {
-    // get the map container to unmount
-    // remove geoview-class if we need to reuse the div
-    const mapContainer = document.getElementById(this.mapId)!;
-    mapContainer.classList.remove('geoview-map');
-
-    // unload all loaded plugins on the map
-    Plugin.removePlugins(this.mapId)
-      .then(() => {
-        // Remove all layers
-        try {
-          this.layer.removeAllGeoviewLayers();
-        } catch (err) {
-          // Failed to remove layers, eat the exception and continue to remove the map
-        }
-
-        // remove the dom element (remove rendered map and overview map)
-        if (this.overviewRoot) this.overviewRoot?.unmount();
-        unmountMap(this.mapId);
-
-        // delete store and event processor
-        removeGeoviewStore(this.mapId);
-
-        // if deleteContainer, delete the HTML div
-        if (deleteContainer) mapContainer.remove();
-
-        // delete the map instance from the maps array, will delete attached plugins
-        // TODO: need a time out here because if not, map is deleted before everything is done on the map
-        // TO.DOCONT: This whole sequence need to be async
-        setTimeout(() => delete api.maps[this.mapId], 1000);
-      })
-      .catch((error) => {
-        logger.logError(`Couldn't remove map in map-viewer`, error);
-      });
-
-    // return the map container to be remove
-    return mapContainer;
-  }
-
-  /**
-   * Reload a map from a config object stored in store. It first remove then recreate the map.
-   */
-  reload(): void {
-    // remove the map, then get config to use to recreate it
-    const mapDiv = this.remove(false);
-    const config = MapEventProcessor.getStoreConfig(this.mapId);
-    // TODO: Remove time out and make this async so remove/recreate work one after the other
-    // TO.DOCONT: There is still as problem with bad config schema value and layers loading... should be refactor when config is done
-    setTimeout(
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      () =>
-        api.createMapFromConfig(mapDiv.id, JSON.stringify(config)).catch((error) => {
-          // Log
-          logger.logError(`Couldn't reload the map in map-viewer`, error);
-        }),
-      1500
-    );
-  }
-
-  /**
-   * Zoom to the specified extent.
-   *
-   * @param {Extent} extent - The extent to zoom to.
-   * @param {FitOptions} options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
-   */
-  zoomToExtent(extent: Extent, options?: FitOptions): Promise<void> {
-    // TODO: Discussion - Where is the line between a function using MapEventProcessor in MapViewer vs in MapState action?
-    // TO.DOCONT: This function (and there are many others in this class) redirects to the MapEventProcessor, should it be in MapState with the others or do we keep some in MapViewer and some in MapState?
-    // TO.DOCONT: If we keep some, we should maybe add a fourth call-stack possibility in the MapEventProcessor paradigm documentation.
-    // Redirect to the processor
-    return MapEventProcessor.zoomToExtent(this.mapId, extent, options);
-  }
-
-  // #endregion
-
-  /**
-   * Fit the map to its boundaries. It is assumed that the boundaries use the map projection. If projectionCode is undefined,
-   * the boundaries are used as is, otherwise they are reprojected from the specified projection code to the map projection.
-   *
-   * @param {Extent} bounds - Bounding box to zoom to
-   * @param {string | number | undefined} projectionCode - Optional projection code used by the bounds.
-   */
-  // TODO: only use in the layers panel package... see if still needed and if it is the right place
-  fitBounds(bounds?: Extent, projectionCode: string | number | undefined = undefined): void {
-    let mapBounds: Extent | undefined;
-    if (bounds) {
-      const { currentProjection } = this.getMapState();
-      mapBounds = projectionCode
-        ? Projection.transformExtent(bounds, `EPSG:${projectionCode}`, Projection.PROJECTIONS[currentProjection], 20)
-        : Projection.transformExtent(bounds, Projection.PROJECTIONS[currentProjection], Projection.PROJECTIONS[currentProjection], 25);
-    } else {
-      this.layer.getGeoviewLayerIds().forEach((geoviewLayerId) => {
-        // TODO Refactor - Layers refactoring. There needs to be a getMetadataBounds (new layers and new config) to complete the full layers migration.
-        // TO.DOCONT: Johann: Need on both, config extract bounds from metadata and layers do it again at the end from features for vector and compound bound for group
-        if (!mapBounds) mapBounds = this.layer.getGeoviewLayer(geoviewLayerId)?.getMetadataBounds(geoviewLayerId);
-        else {
-          const newMapBounds = this.layer.getGeoviewLayer(geoviewLayerId)?.getMetadataBounds(geoviewLayerId);
-          if (newMapBounds) {
-            mapBounds = [
-              Math.min(newMapBounds[0], mapBounds[0]),
-              Math.min(newMapBounds[1], mapBounds[1]),
-              Math.max(newMapBounds[2], mapBounds[2]),
-              Math.max(newMapBounds[3], mapBounds[3]),
-            ];
-          }
-        }
-      });
-    }
-
-    if (mapBounds) {
-      this.map.getView().fit(mapBounds, { size: this.map.getSize() });
-      this.map.getView().setZoom(this.map.getView().getZoom()! - 0.15);
-    }
-  }
-
-  // #region MAP INTERACTIONS
-
-  /**
-   * Initializes selection interactions
-   */
-  initSelectInteractions(): Select {
-    // Create selecting capabilities
-    const select = new Select({
-      mapViewer: this,
-      hitTolerance: 5,
-    });
-    select.startInteraction();
-    return select;
-  }
-
-  /**
-   * Initializes extent interactions
-   */
-  initExtentInteractions(): ExtentInteraction {
-    // Create selecting capabilities
-    const extent = new ExtentInteraction({
-      mapViewer: this,
-      pixelTolerance: 5,
-    });
-    extent.startInteraction();
-    return extent;
-  }
-
-  /**
-   * Initializes translation interactions
-   */
-  initTranslateInteractions(): Translate {
-    // Create selecting capabilities
-    const features = this.initSelectInteractions().getFeatures();
-
-    // Create translating capabilities
-    const translate = new Translate({
-      mapViewer: this,
-      features,
-    });
-    translate.startInteraction();
-    return translate;
-  }
-
-  /**
-   * Initializes drawing interactions on the given vector source
-   * @param {string} geomGroupKey - The geometry group key in which to hold the geometries
-   * @param {string} type - The type of geometry to draw (Polygon, LineString, Circle, etc)
-   * @param {TypeFeatureStyle} styles - The styles for the drawing
-   */
-  initDrawInteractions(geomGroupKey: string, type: string, style: TypeFeatureStyle): Draw {
-    // Create the Draw component
-    const draw = new Draw({
-      mapViewer: this,
-      geometryGroupKey: geomGroupKey,
-      type,
-      style,
-    });
-    draw.startInteraction();
-    return draw;
-  }
-
-  /**
-   * Initializes modifying interactions on the given vector source
-   * @param {string} geomGroupKey - The geometry group key in which to hold the geometries
-   */
-  initModifyInteractions(geomGroupKey: string): Modify {
-    // Create the modify component
-    const modify = new Modify({
-      mapViewer: this,
-      geometryGroupKey: geomGroupKey,
-    });
-    modify.startInteraction();
-    return modify;
-  }
-
-  /**
-   * Initializes snapping interactions on the given vector source
-   * @param {string} geomGroupKey - The geometry group key in which to hold the geometries
-   */
-  initSnapInteractions(geomGroupKey: string): Snap {
-    // Create snapping capabilities
-    const snap = new Snap({
-      mapViewer: this,
-      geometryGroupKey: geomGroupKey,
-    });
-    snap.startInteraction();
-    return snap;
-  }
-
-  // #endregion
-
-  /**
-   * Check if north is visible. This is not a perfect solution and is more a work around
-   *
-   * @returns {boolean} true if visible, false otherwise
-   */
-  checkNorth(): boolean {
-    // Check the container value for top middle of the screen
-    // Convert this value to a lat long coordinate
-    const pointXY = [this.map.getSize()![0] / 2, 1];
-    const pt = Projection.transformToLonLat(this.map.getCoordinateFromPixel(pointXY), this.map.getView().getProjection());
-
-    // If user is pass north, long value will start to be positive (other side of the earth).
-    // This will work only for LCC Canada.
-    return pt ? pt[0] > 0 : true;
-  }
-
-  /**
-   * Get north arrow bearing. Angle use to rotate north arrow for non Web Mercator projection
-   * https://www.movable-type.co.uk/scripts/latlong.html
-   *
-   * @returns {string} the arrow angle
-   */
-  getNorthArrowAngle(): string {
-    try {
-      // north value
-      const pointA = { x: NORTH_POLE_POSITION[1], y: NORTH_POLE_POSITION[0] };
-
-      // map center (we use botton parallel to introduce less distortion)
-      const extent = this.map.getView().calculateExtent();
-      const center: Coordinate = Projection.transformToLonLat([(extent[0] + extent[2]) / 2, extent[1]], this.map.getView().getProjection());
-      const pointB = { x: center[0], y: center[1] };
-
-      // set info on longitude and latitude
-      const dLon = ((pointB.x - pointA.x) * Math.PI) / 180;
-      const lat1 = (pointA.y * Math.PI) / 180;
-      const lat2 = (pointB.y * Math.PI) / 180;
-
-      // calculate bearing
-      const y = Math.sin(dLon) * Math.cos(lat2);
-      const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
-      const bearing = (Math.atan2(y, x) * 180) / Math.PI;
-
-      // return angle (180 is pointing north)
-      return ((bearing + 360) % 360).toFixed(1);
-    } catch (error) {
-      return '180.0';
-    }
-  }
 }
 
 /**

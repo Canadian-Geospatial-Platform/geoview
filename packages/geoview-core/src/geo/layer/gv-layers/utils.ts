@@ -1,7 +1,12 @@
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
-import { TypeFeatureInfoEntryPartial, TypeFieldEntry, codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/abstract-layer-set';
-import { TypeStyleGeometry } from '@/geo/map/map-schema-types';
+import {
+  TypeStyleGeometry,
+  TypeFeatureInfoEntryPartial,
+  codedValueType,
+  rangeDomainType,
+  TypeFieldEntry,
+} from '@/geo/map/map-schema-types';
 import { TypeDisplayLanguage, TypeLocalizedString } from '@/api/config/types/map-schema-types';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';

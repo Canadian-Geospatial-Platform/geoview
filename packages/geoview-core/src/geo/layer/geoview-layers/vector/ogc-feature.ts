@@ -21,7 +21,6 @@ import {
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
 import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
@@ -196,20 +195,14 @@ export class OgcFeature extends AbstractGeoViewVector {
             fr: foundCollection.description as string,
           };
 
-        const { currentProjection } = MapEventProcessor.getMapState(this.mapId);
         if (layerConfig.initialSettings?.extent)
-          layerConfig.initialSettings.extent = Projection.transformExtent(
-            layerConfig.initialSettings.extent,
-            Projection.PROJECTION_NAMES.LNGLAT,
-            `EPSG:${currentProjection}`
-          );
+          layerConfig.initialSettings.extent = this.getMapViewer().convertExtentLngLatToMapProj(layerConfig.initialSettings.extent);
 
         if (!layerConfig.initialSettings?.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
           // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-          layerConfig.initialSettings!.bounds = Projection.transformExtent(
+          layerConfig.initialSettings!.bounds = this.getMapViewer().convertExtentFromProjToMapProj(
             foundCollection.extent.spatial.bbox[0] as number[],
-            Projection.getProjection(foundCollection.extent.spatial.crs as string)!,
-            `EPSG:${currentProjection}`
+            Projection.getProjection(foundCollection.extent.spatial.crs as string)!
           );
         }
         return;
