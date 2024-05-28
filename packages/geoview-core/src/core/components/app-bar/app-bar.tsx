@@ -206,8 +206,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
       appBarApi.offAppBarCreated(handleAddButtonPanel);
       appBarApi.offAppBarRemoved(handleRemoveButtonPanel);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appBarApi]);
+  }, [appBarApi, handleAddButtonPanel, handleRemoveButtonPanel]);
 
   useEffect(() => {
     // Log
