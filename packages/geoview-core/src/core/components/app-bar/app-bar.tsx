@@ -2,16 +2,26 @@ import { useTranslation } from 'react-i18next';
 import { useState, useRef, useEffect, useCallback, Fragment, useMemo, ReactNode } from 'react';
 import { capitalize } from 'lodash';
 import { useTheme } from '@mui/material/styles';
-import { Box, List, ListItem, Panel, IconButton, TypeIconButtonProps, SchoolIcon, InfoOutlinedIcon, HubOutlinedIcon } from '@/ui';
+import {
+  Box,
+  List,
+  ListItem,
+  Panel,
+  IconButton,
+  TypeIconButtonProps,
+  SchoolIcon,
+  InfoOutlinedIcon,
+  HubOutlinedIcon,
+  SearchIcon,
+} from '@/ui';
 
 import { Plugin } from '@/api/plugin/plugin';
-
+import { Geolocator } from '@/core/components/geolocator/geolocator';
 import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import ExportButton from '@/core/components/export/export-modal-button';
 import {
   useUIActiveFocusItem,
   useUIAppbarComponents,
-  useUIAppbarGeolocatorActive,
   useActiveAppBarTab,
   useUIStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
@@ -22,13 +32,12 @@ import { logger } from '@/core/utils/logger';
 import { GuidePanel, Legend, DetailsPanel, AppBarApi, AppBarCreatedEvent, AppBarRemovedEvent } from '@/core/components';
 import Notifications from '@/core/components/notifications/notifications';
 
-import Geolocator from './buttons/geolocator';
 import Version from './buttons/version';
 import { getSxClasses } from './app-bar-style';
-import { enforceArrayOrder, helpCloseAll, helpClosePanelById, helpOpenPanelById } from './app-bar-helper';
+import { enforceArrayOrder, helpClosePanelById, helpOpenPanelById } from './app-bar-helper';
 import { TypeJsonObject, TypeJsonValue, toJsonObject } from '@/core/types/global-types';
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
-import { CV_DEFAULT_APPBAR_TABS_ORDER } from '@/api/config/types/config-constants';
+import { CV_DEFAULT_APPBAR_CORE, CV_DEFAULT_APPBAR_TABS_ORDER } from '@/api/config/types/config-constants';
 
 interface GroupPanelType {
   icon: ReactNode;
@@ -70,12 +79,11 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const interaction = useMapInteraction();
   const appBarComponents = useUIAppbarComponents();
-  const isGeolocatorActive = useUIAppbarGeolocatorActive();
   const { tabId, tabGroup, isOpen } = useActiveAppBarTab();
   const { hideClickMarker } = useMapStoreActions();
   const geoviewElement = useAppGeoviewHTMLElement().querySelector('[id^="mapTargetElement-"]') as HTMLElement;
 
-  const { setGeolocatorActive, setActiveAppBarTab } = useUIStoreActions();
+  const { setActiveAppBarTab } = useUIStoreActions();
 
   // get store config for app bar to add (similar logic as in footer-bar)
   const appBarConfig = useGeoViewConfig()?.appBar;
@@ -88,6 +96,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
     // TODO: Refactor - We should find a way to make this 'dictionary of supported components' dynamic.
     return {
+      geolocator: { icon: <SearchIcon />, content: <Geolocator /> },
       legend: { icon: <HubOutlinedIcon />, content: <Legend fullWidth containerType="appBar" /> },
       guide: { icon: <SchoolIcon />, content: <GuidePanel fullWidth /> },
       details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel fullWidth /> },
@@ -98,7 +107,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
     (buttonId: string, groupName: string | undefined) => {
       // Log
       logger.logTraceUseCallback('APP-BAR - closePanelById', buttonId);
-
       // Callback when removing and focus is lost
       const focusWhenNoElementCallback = (): void => {
         const mapCont = geoviewElement;
@@ -115,15 +123,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
     },
     [buttonPanelGroups, geoviewElement, mapId]
   );
-
-  const closeAll = useCallback(() => {
-    // Log
-    logger.logTraceUseCallback('APP-BAR - closeAll');
-
-    // reset the active appbar tab
-    setActiveAppBarTab('', '', false);
-    helpCloseAll(buttonPanelGroups, setButtonPanelGroups);
-  }, [buttonPanelGroups, setActiveAppBarTab]);
 
   const openPanelById = useCallback(
     (buttonId: string, groupName: string | undefined) => {
@@ -213,10 +212,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
     logger.logTraceUseEffect('APP-BAR - PANEL - OPEN/CLOSE ', isOpen);
 
     if (isOpen) {
-      // close geolocator if opened when panel is open.
-      if (isGeolocatorActive) {
-        setGeolocatorActive(false);
-      }
       openPanelById(tabId, tabGroup);
     } else {
       closePanelById(tabId, tabGroup);
@@ -298,8 +293,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
     let buttonPanelGroupNames = Object.keys(buttonPanelGroups);
     buttonPanelGroupNames = enforceArrayOrder(buttonPanelGroupNames, CV_DEFAULT_APPBAR_TABS_ORDER);
-    const topGroup = buttonPanelGroupNames.filter((groupName) => groupName !== 'guide');
-    const bottomGroup = buttonPanelGroupNames.filter((groupName) => groupName === 'guide');
+    const topGroup = buttonPanelGroupNames.filter((groupName) => groupName !== CV_DEFAULT_APPBAR_CORE.GUIDE);
+    const bottomGroup = buttonPanelGroupNames.filter((groupName) => groupName === CV_DEFAULT_APPBAR_CORE.GUIDE);
     return { topGroupNames: topGroup, bottomGroupNames: bottomGroup };
   }, [buttonPanelGroups]);
 
@@ -348,21 +343,10 @@ export function AppBar(props: AppBarProps): JSX.Element {
   return (
     <Box sx={sxClasses.appBar} className={`interaction-${interaction}`} ref={appBar}>
       <Box sx={sxClasses.appBarButtons}>
-        {appBarComponents.includes('geolocator') && interaction === 'dynamic' && (
-          <Box>
-            <List sx={sxClasses.appBarList}>
-              <ListItem>
-                <Geolocator closeAllPanels={closeAll} />
-              </ListItem>
-            </List>
-          </Box>
-        )}
-
         {renderButtonGroup(topGroupNames)}
-
         <Box sx={sxClasses.versionButtonDiv}>
           {renderButtonGroup(bottomGroupNames)}
-          {appBarComponents.includes('export') && interaction === 'dynamic' && (
+          {appBarComponents.includes(CV_DEFAULT_APPBAR_CORE.EXPORT) && interaction === 'dynamic' && (
             <List sx={sxClasses.appBarList}>
               <ListItem>
                 <ExportButton className={` style3 ${activeModalId ? 'active' : ''}`} />
@@ -388,19 +372,23 @@ export function AppBar(props: AppBarProps): JSX.Element {
         return (
           <Fragment key={groupName}>
             {Object.keys(buttonPanels).map((buttonPanelsKey, index) => {
+              let content = null;
               const buttonPanel = buttonPanels[buttonPanelsKey];
-
-              return buttonPanel?.panel ? (
-                <Panel
-                  // eslint-disable-next-line react/no-array-index-key
-                  key={`panel-${index}`}
-                  panel={buttonPanel.panel}
-                  button={buttonPanel.button}
-                  onPanelOpened={buttonPanel.onPanelOpened}
-                  onPanelClosed={hideClickMarker}
-                  onGeneralCloseClicked={handleGeneralCloseClicked}
-                />
-              ) : null;
+              if (buttonPanel?.groupName === CV_DEFAULT_APPBAR_CORE.GEOLOCATOR) {
+                content = buttonPanel?.panel?.content ?? '';
+              } else if (buttonPanel?.panel) {
+                content = (
+                  <Panel
+                    key={`panel-${index.toString()}`}
+                    panel={buttonPanel.panel}
+                    button={buttonPanel.button}
+                    onPanelOpened={buttonPanel.onPanelOpened}
+                    onPanelClosed={hideClickMarker}
+                    onGeneralCloseClicked={handleGeneralCloseClicked}
+                  />
+                );
+              }
+              return content;
             })}
           </Fragment>
         );
