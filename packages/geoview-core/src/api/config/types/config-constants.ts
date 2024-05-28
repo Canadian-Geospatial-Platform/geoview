@@ -182,4 +182,12 @@ export const CV_DEFAULT_LAYER_INITIAL_SETTINGS = {
 /**
  * Definition of the default order of the tabs inside appbar
  */
-export const CV_DEFAULT_APPBAR_TABS_ORDER = ['legend', 'details', 'guide'];
+export const CV_DEFAULT_APPBAR_TABS_ORDER = ['geolocator', 'legend', 'details', 'guide'];
+
+export const CV_DEFAULT_APPBAR_CORE = {
+  GEOLOCATOR: 'geolocator',
+  EXPORT: 'export',
+  GUIDE: 'guide',
+  DETAILS: 'details',
+  LEGEND: 'legend',
+} as const;

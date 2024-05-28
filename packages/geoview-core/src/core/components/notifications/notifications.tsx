@@ -156,11 +156,7 @@ export default function Notifications(): JSX.Element {
             className={`${interaction === 'dynamic' ? 'buttonFilled' : 'style4'} ${open ? 'active' : ''}`}
             color="primary"
           >
-            {!hasNewNotification && (
-              <Box>
-                <NotificationsIcon />
-              </Box>
-            )}
+            {!hasNewNotification && <NotificationsIcon />}
             {hasNewNotification && (
               <AnimatedBox
                 style={{

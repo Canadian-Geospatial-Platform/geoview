@@ -6,7 +6,7 @@ import * as htmlToImage from 'html-to-image';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, LoadingButton, Skeleton, TextField } from '@/ui';
 import { exportPNG } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useActiveAppBarTab, useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { NorthArrowIcon } from '@/core/components/north-arrow/north-arrow-icon';
@@ -21,9 +21,11 @@ import { logger } from '@/core/utils/logger';
  */
 export default function ExportModal(): JSX.Element {
   const { t } = useTranslation();
+  const mapId = useGeoViewMapId();
   const mapElement = useAppGeoviewHTMLElement();
   const mapViewport = mapElement.getElementsByClassName('ol-viewport')[0];
-  const mapId = useGeoViewMapId();
+  const footerbarLegendContainer = mapElement.querySelector(`[id^="${mapId}-footerBar-legendContainer"]`);
+  const appBarLegendContainer = mapElement.querySelector(`[id^="${mapId}-appBar-legendContainer"]`);
 
   const theme = useTheme();
 
@@ -47,8 +49,9 @@ export default function ExportModal(): JSX.Element {
   const { rotationAngle } = useManageArrow();
 
   // get store function
-  const { closeModal } = useUIStoreActions();
+  const { closeModal, setActiveAppBarTab } = useUIStoreActions();
   const activeModalId = useUIActiveFocusItem().activeElementId;
+  const { isOpen } = useActiveAppBarTab();
 
   const exportMap = ((): void => {
     if (exportContainerRef.current && textFieldRef.current && exportTitleRef.current) {
@@ -56,11 +59,13 @@ export default function ExportModal(): JSX.Element {
       exportTitleRef.current.style.padding = '1rem';
       exportTitleRef.current.innerHTML = exportTitle;
       setIsMapExporting(true);
+
       htmlToImage
         .toPng(exportContainerRef.current, { backgroundColor: theme.palette.common.white })
         .then((dataUrl) => {
           setIsMapExporting(false);
           exportPNG(dataUrl, mapId);
+          setActiveAppBarTab('AppbarPanelButtonLegend', 'legend', false);
           closeModal();
         })
         .catch((error: Error) => {
@@ -69,6 +74,10 @@ export default function ExportModal(): JSX.Element {
     }
   }) as MouseEventHandler<HTMLButtonElement>;
 
+  const handleCloseModal = (): void => {
+    setActiveAppBarTab('AppbarPanelButtonLegend', 'legend', false);
+    closeModal();
+  };
   /**
    * Calculate the width of the canvas based on dialog box container width.
    * @param {HTMLDivElement} dialogBox - Container where canvas will be rendered.
@@ -91,7 +100,10 @@ export default function ExportModal(): JSX.Element {
     if (activeModalId === 'export' && mapImageRef.current && dialogRef.current) {
       const mapImage = mapImageRef.current;
       const dialogBox = dialogRef.current;
-
+      // open legend in appbar when only appbar exists
+      if (appBarLegendContainer && !footerbarLegendContainer) {
+        setActiveAppBarTab('AppbarPanelButtonLegend', 'legend', true);
+      }
       // Reason for timer, so that content of the export modal will be loaded
       // after modal is fully opened.
       timer = setTimeout(() => {
@@ -110,7 +122,8 @@ export default function ExportModal(): JSX.Element {
           });
 
         // add legend
-        const legendContainer = document.getElementById(`${mapId}-legendContainer`);
+        // check if footer tab exist then we don't need appBar Legend.
+        const legendContainer = (footerbarLegendContainer ?? appBarLegendContainer) as HTMLElement;
         if (legendContainer && legendContainerRef.current) {
           legendContainer.removeAttribute('style');
           setIsLegendLoading(true);
@@ -122,21 +135,17 @@ export default function ExportModal(): JSX.Element {
             .toPng(legendContainer)
             .then((dataUrl) => {
               setIsLegendLoading(false);
-              // TODO: we need to render the legend even if its hidden.
-              // Note: When legend is hidden in appbar
-              if (dataUrl.indexOf('base64') !== -1) {
-                const img = new Image();
-                img.src = dataUrl;
-                img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
-                legendContainerRef.current?.appendChild(img);
-                if (hasHiddenAttr) legendTab.hidden = true;
-              }
+              const img = new Image();
+              img.src = dataUrl;
+              img.style.maxWidth = `${getCanvasWidth(dialogBox)}px`;
+              legendContainerRef.current?.appendChild(img);
+              if (hasHiddenAttr) legendTab.hidden = true;
             })
             .catch((error: Error) => {
               logger.logError('Error occured while converting legend to image', error);
             });
         }
-      }, 10);
+      }, 500);
     }
     return () => {
       if (timer) clearTimeout(timer);
@@ -144,7 +153,7 @@ export default function ExportModal(): JSX.Element {
       setIsLegendLoading(true);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeModalId]);
+  }, [activeModalId, isOpen]);
 
   return (
     <Dialog open={activeModalId === 'export'} onClose={closeModal} fullWidth maxWidth="xl" disablePortal>
@@ -202,7 +211,7 @@ export default function ExportModal(): JSX.Element {
       </DialogContent>
       <DialogActions>
         <Button
-          onClick={closeModal}
+          onClick={handleCloseModal}
           type="text"
           size="small"
           role="button"
