@@ -134,7 +134,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
             }
 
             // Propagate to the store
-            MapEventProcessor.setMapHoverFeatureInfo(this.mapId, this.resultSet[layerPath].data.feature);
+            MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), this.resultSet[layerPath].data.feature);
           })
           .catch((error) => {
             // Log

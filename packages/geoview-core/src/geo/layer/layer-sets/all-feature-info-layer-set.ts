@@ -24,7 +24,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    * @private
    */
   #propagateToStore(layerPath: string): void {
-    DataTableEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, this.resultSet);
+    DataTableEventProcessor.propagateFeatureInfoToStore(this.getMapId(), layerPath, this.resultSet);
   }
 
   /**
@@ -67,7 +67,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
     // Update the resultSet data
     this.resultSet[layerConfig.layerPath].data = {
-      layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
+      layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.getMapId())) ?? '',
       layerStatus: layerConfig.layerStatus!,
       eventListenerEnabled: true,
       queryStatus: 'processed',
@@ -77,7 +77,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
     // Propagate to store on registration
     this.#propagateToStore(layerConfig.layerPath);
-    DataTableEventProcessor.setInitialSettings(this.mapId, layerConfig.layerPath);
+    DataTableEventProcessor.setInitialSettings(this.getMapId(), layerConfig.layerPath);
   }
 
   /**
@@ -92,7 +92,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     super.onUnregisterLayer(layerConfig);
 
     // Remove it from data table info array
-    DataTableEventProcessor.deleteFeatureAllInfo(this.mapId, layerConfig.layerPath);
+    DataTableEventProcessor.deleteFeatureAllInfo(this.getMapId(), layerConfig.layerPath);
   }
 
   /**
@@ -113,7 +113,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     this.resultSet[layerConfig.layerPath].data.layerName =
       getLocalizedValue(
         layerConfig.layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
-        AppEventProcessor.getDisplayLanguage(this.mapId)
+        AppEventProcessor.getDisplayLanguage(this.getMapId())
       ) ?? '';
 
     // Propagate to the store on layer status changed

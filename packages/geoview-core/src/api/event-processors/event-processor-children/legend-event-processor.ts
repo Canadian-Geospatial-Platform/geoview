@@ -176,7 +176,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             layerPath: entryLayerPath,
             layerStatus: legendResultSetEntry.layerStatus,
             layerName:
-              // ! legendResultSetEntry.layerName || This overwrites all group names all the way down to the leaf with the name of the first loaded leaf.. wrong, commenting the line..
               getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(mapId)) ||
               getLocalizedValue(layerConfig.geoviewLayerConfig.geoviewLayerName, AppEventProcessor.getDisplayLanguage(mapId)) ||
               layerConfig.layerPath,

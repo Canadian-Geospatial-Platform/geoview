@@ -59,6 +59,7 @@ export class GVEsriImage extends AbstractGVRaster {
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
   protected override getFieldType(fieldName: string): 'string' | 'date' | 'number' {
+    // TODO: Refactor - Layers refactoring. Is this function really valid for an esri-image? Remove?
     // Redirect
     return esriGetFieldType(this.getLayerConfig(), fieldName);
   }

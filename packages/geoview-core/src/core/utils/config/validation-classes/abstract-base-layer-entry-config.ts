@@ -73,6 +73,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * @param {TypeJsonObject} layerMetadata - The layer metadata to set
    */
   setMetadata(layerMetadata: TypeJsonObject): void {
+    // TODO: Refactor - Layers refactoring. Reminder: turn this function private eventually?
     this.#metadata = layerMetadata;
   }
 

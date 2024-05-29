@@ -653,7 +653,7 @@ export class MapViewer {
       const layersInterval = setInterval(() => {
         if (this.layer) {
           // Check if all registered layers have their results set
-          const allGood = this.layer.checkLayerResultSetsReady((layerEntryConfig) => {
+          const allGood = this.layer.checkFeatureInfoLayerResultSetsReady((layerEntryConfig) => {
             logger.logTraceDetailed('checkMapReady - 4 - waiting on layer resultSet...', layerEntryConfig.layerPath);
           });
 
@@ -1475,7 +1475,8 @@ export class MapViewer {
         : Projection.transformExtent(bounds, Projection.PROJECTIONS[currentProjection], Projection.PROJECTIONS[currentProjection], 25);
     } else {
       this.layer.getGeoviewLayerIds().forEach((geoviewLayerId) => {
-        // TODO Refactor - Layers refactoring. There needs to be a getMetadataBounds somewhere (new layers, new config?) to complete the full layers migration.
+        // TODO Refactor - Layers refactoring. There needs to be a getMetadataBounds (new layers and new config) to complete the full layers migration.
+        // TO.DOCONT: Johann: Need on both, config extract bounds from metadata and layers do it again at the end from features for vector and compound bound for group
         if (!mapBounds) mapBounds = this.layer.getGeoviewLayer(geoviewLayerId)?.getMetadataBounds(geoviewLayerId);
         else {
           const newMapBounds = this.layer.getGeoviewLayer(geoviewLayerId)?.getMetadataBounds(geoviewLayerId);

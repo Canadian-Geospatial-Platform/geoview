@@ -46,7 +46,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * @private
    */
   #propagateToStore(layerPath: string): void {
-    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, 'click', this.resultSet).catch((error) => {
+    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.getMapId(), layerPath, 'click', this.resultSet).catch((error) => {
       // Log
       logger.logPromiseFailed('FeatureInfoEventProcessor.propagateToStore in FeatureInfoLayerSet', error);
     });
@@ -90,7 +90,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // TODO: Check - Why is the layerName also copied in 'data' when it's in this.resultSet[layerConfig.layerPath]?
     // Update the resultSet data
     this.resultSet[layerConfig.layerPath].data = {
-      layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
+      layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.getMapId())) ?? '',
       layerStatus: layerConfig.layerStatus!,
       eventListenerEnabled: true,
       queryStatus: 'processed',
@@ -114,7 +114,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     super.onUnregisterLayer(layerConfig);
 
     // Remove it from feature info array (propagating to the store)
-    FeatureInfoEventProcessor.deleteFeatureInfo(this.mapId, layerConfig.layerPath);
+    FeatureInfoEventProcessor.deleteFeatureInfo(this.getMapId(), layerConfig.layerPath);
   }
 
   /**
@@ -132,7 +132,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     this.resultSet[layerConfig.layerPath].data.layerName =
       getLocalizedValue(
         layerConfig.layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
-        AppEventProcessor.getDisplayLanguage(this.mapId)
+        AppEventProcessor.getDisplayLanguage(this.getMapId())
       ) ?? '';
 
     // Propagate to the store on layer status changed

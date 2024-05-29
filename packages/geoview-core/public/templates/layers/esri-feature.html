@@ -281,7 +281,7 @@
     }, (mapId) => {
       if (mapId === 'LYR1') {
         createTableOfFilter('LYR1');
-        // TODO: Check - Shouldn't have to check for 'loaded' as we're in the map layers loaded callback
+
         if (cgpv.api.maps.LYR1.layer.getLayerEntryConfig('esriFeatureLYR1/0').layerStatus === 'loaded') {
           let k = 0;
           window.setInterval(() => {
@@ -314,7 +314,7 @@
         const lyr1RegisteredLayers = cgpv.api.maps.LYR1.layer.getLayerEntryConfigIds();
         lyr1RegisteredLayers.forEach((layerPath) => {
           const layerConfig = cgpv.api.maps.LYR1.layer.getLayerEntryConfig(layerPath);
-          // TODO: Check - Shouldn't have to check for 'loaded' as we're in the map layers loaded callback
+
           if (layerConfig.layerStatus === 'loaded') {
             const layerName = layerConfig.layerName?.en;
             element = document.createElement('option');
@@ -331,7 +331,7 @@
         });
       } else if (mapId === 'LYR2') {
         createTableOfFilter('LYR2');
-        // TODO: Check - Shouldn't have to check for 'loaded' as we're in the map layers loaded callback
+
         if (cgpv.api.maps?.LYR2?.layer?.getLayerEntryConfig('historical-flood/0')?.layerStatus === 'loaded') {
           const field2 = cgpv.api.maps.LYR2.layer.getGeoviewLayerHybrid('historical-flood/0').getTemporalDimension('historical-flood/0').field;
           const LYR2_FILTERS = [`${field2} >= date '01/01/2018 05:00:00' and ${field2} <= date '12/31/2019 19:00:00-05:00'`,
@@ -354,7 +354,7 @@
 
       } else if (mapId === 'LYR3') {
         createTableOfFilter('LYR3');
-        // Shouldn't have to check for 'loaded' as we're in the map layers loaded callback
+
         if (cgpv.api.maps?.LYR3?.layer?.getLayerEntryConfig('historical-flood/0')?.layerStatus === 'loaded') {
           const field3 = cgpv.api.maps.LYR3.layer.getGeoviewLayerHybrid('historical-flood/0').getTemporalDimension('historical-flood/0').field;
           const LYR3_FILTERS = [`${field3} >= date '2018-01-01T00:00:00' and ${field3} <= date '2020-01-01T00:00:00'`,

@@ -911,7 +911,7 @@ export class WMS extends AbstractGeoViewRaster {
       // If more than 1
       if (this.WMSStyles.length > 1) {
         for (let i = 0; i < this.WMSStyles.length; i++) {
-          // TODO: refactor - does this await in a loop may haev an impact on performance?
+          // TODO: refactor - does this await in a loop may have an impact on performance?
           // TO.DOCONT: In this case here, when glancing at the code, the only reason to await would be if the order that the styleLegend
           // TO.DOCONT: get added to the styleLegends array MUST be the same order as they are in the WMSStyles array (as in they are 2 arrays with same indexes pointers).
           // TO.DOCONT: Without the await, WMSStyles[2] stuff could be associated with something in styleLegends[1] position for example (1<>2).

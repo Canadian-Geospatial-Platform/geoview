@@ -43,8 +43,8 @@ export abstract class AbstractLayerSet {
   }
 
   // Shortcut to get the map id
-  protected get mapId(): string {
-    return this.layerApi.mapId;
+  protected getMapId(): string {
+    return this.layerApi.getMapId();
   }
 
   /**
@@ -104,7 +104,7 @@ export abstract class AbstractLayerSet {
     this.resultSet[layerConfig.layerPath] = {
       data: undefined,
       layerStatus: layerConfig.layerStatus,
-      layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)),
+      layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.getMapId())),
     };
 
     // Override this function to perform further registration logic in the inherited classes

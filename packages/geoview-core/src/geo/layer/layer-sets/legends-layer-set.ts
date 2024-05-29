@@ -22,7 +22,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * @private
    */
   #propagateToStore(layerPath: string): void {
-    LegendEventProcessor.propagateLegendToStore(this.mapId, layerPath, this.resultSet[layerPath]);
+    LegendEventProcessor.propagateLegendToStore(this.getMapId(), layerPath, this.resultSet[layerPath]);
   }
 
   /**

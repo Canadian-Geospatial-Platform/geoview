@@ -237,6 +237,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    */
   // GV Layers Refactoring - Obsolete (in layers)
   protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number' {
+    // TODO: Refactor - Layers refactoring. Is this function really valid for an esri-image? Remove?
     return commonGetFieldType(this, fieldName, layerConfig);
   }
 

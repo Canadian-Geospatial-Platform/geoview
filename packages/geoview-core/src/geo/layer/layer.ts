@@ -164,7 +164,11 @@ export class LayerApi {
     this.featureHighlight = new FeatureHighlight(this.mapViewer);
   }
 
-  get mapId(): string {
+  /**
+   * Gets the Map Id.
+   * @returns {string} The map id
+   */
+  getMapId(): string {
     // TODO: Check - Resign to `getMapId()` instead?
     return this.mapViewer.mapId;
   }
@@ -447,7 +451,7 @@ export class LayerApi {
       // If the layer is GeoCore add it via the core function
       if (mapConfigLayerEntryIsGeoCore(geoviewLayerConfig)) {
         // Prep the GeoCore
-        const geoCore = new GeoCore(this.mapId, this.mapViewer.getDisplayLanguage());
+        const geoCore = new GeoCore(this.getMapId(), this.mapViewer.getDisplayLanguage());
 
         // Create the layers from the UUID
         promisesOfGeoCoreGeoviewLayers.push(geoCore.createLayersFromUUID(geoviewLayerConfig.geoviewLayerId));
@@ -496,15 +500,15 @@ export class LayerApi {
                   if (error instanceof GeoViewLayerCreatedTwiceError) {
                     this.mapViewer.notifications.showError('validation.layer.createtwice', [
                       (error as GeoViewLayerCreatedTwiceError).geoviewLayerId,
-                      this.mapId,
+                      this.getMapId(),
                     ]);
                   } else {
-                    this.mapViewer.notifications.showError('validation.layer.genericError', [this.mapId]);
+                    this.mapViewer.notifications.showError('validation.layer.genericError', [this.getMapId()]);
                   }
                 });
               } else {
                 // Layer failed to get created
-                throw new GeoViewLayerNotCreatedError(geoviewLayerConfig.geoviewLayerId, this.mapId);
+                throw new GeoViewLayerNotCreatedError(geoviewLayerConfig.geoviewLayerId, this.getMapId());
               }
             } catch (error) {
               // Layer encountered a generic error when being created and added to the map
@@ -513,11 +517,11 @@ export class LayerApi {
               logger.logError(error);
 
               // TODO: Use a generic error message
-              this.mapViewer.notifications.showError('validation.layer.genericError', [this.mapId]);
+              this.mapViewer.notifications.showError('validation.layer.genericError', [this.getMapId()]);
             }
           });
         });
-      MapEventProcessor.setMapOrderedLayerInfo(this.mapId, orderedLayerInfos);
+      MapEventProcessor.setMapOrderedLayerInfo(this.getMapId(), orderedLayerInfos);
     });
   }
 
@@ -554,10 +558,10 @@ export class LayerApi {
    */
   #printDuplicateGeoviewLayerConfigError(mapConfigLayerEntry: MapConfigLayerEntry): void {
     // TODO: find a more centralized way to trap error and display message
-    api.maps[this.mapId].notifications.showError('validation.layer.usedtwice', [mapConfigLayerEntry.geoviewLayerId, this.mapId]);
+    api.maps[this.getMapId()].notifications.showError('validation.layer.usedtwice', [mapConfigLayerEntry.geoviewLayerId, this.getMapId()]);
 
     // Log
-    logger.logError(`Duplicate use of geoview layer identifier ${mapConfigLayerEntry.geoviewLayerId} on map ${this.mapId}`);
+    logger.logError(`Duplicate use of geoview layer identifier ${mapConfigLayerEntry.geoviewLayerId} on map ${this.getMapId()}`);
   }
 
   /**
@@ -566,7 +570,7 @@ export class LayerApi {
    * @returns {Promise<void>} A promise which resolves when done adding
    */
   async addGeoviewLayerByGeoCoreUUID(uuid: string): Promise<void> {
-    const geoCoreGeoviewLayerInstance = new GeoCore(this.mapId, this.mapViewer.getDisplayLanguage());
+    const geoCoreGeoviewLayerInstance = new GeoCore(this.getMapId(), this.mapViewer.getDisplayLanguage());
     const layers = await geoCoreGeoviewLayerInstance.createLayersFromUUID(uuid);
     layers.forEach((geoviewLayerConfig) => {
       // Redirect
@@ -611,29 +615,29 @@ export class LayerApi {
     // TODO: Refactor - Here the function should use the structure created by validation config with the metadata fetch and no need to pass the validation.
     let layerBeingAdded: AbstractGeoViewLayer | undefined;
     if (layerConfigIsGeoJSON(geoviewLayerConfig)) {
-      layerBeingAdded = new GeoJSON(this.mapId, geoviewLayerConfig);
+      layerBeingAdded = new GeoJSON(this.getMapId(), geoviewLayerConfig);
     } else if (layerConfigIsGeoPackage(geoviewLayerConfig)) {
-      layerBeingAdded = new GeoPackage(this.mapId, geoviewLayerConfig);
+      layerBeingAdded = new GeoPackage(this.getMapId(), geoviewLayerConfig);
     } else if (layerConfigIsCSV(geoviewLayerConfig)) {
-      layerBeingAdded = new CSV(this.mapId, geoviewLayerConfig);
+      layerBeingAdded = new CSV(this.getMapId(), geoviewLayerConfig);
     } else if (layerConfigIsWMS(geoviewLayerConfig)) {
-      layerBeingAdded = new WMS(this.mapId, geoviewLayerConfig);
+      layerBeingAdded = new WMS(this.getMapId(), geoviewLayerConfig);
     } else if (layerConfigIsEsriDynamic(geoviewLayerConfig)) {
-      layerBeingAdded = new EsriDynamic(this.mapId, geoviewLayerConfig);
+      layerBeingAdded = new EsriDynamic(this.getMapId(), geoviewLayerConfig);
     } else if (layerConfigIsEsriFeature(geoviewLayerConfig)) {
-      layerBeingAdded = new EsriFeature(this.mapId, geoviewLayerConfig);
+      layerBeingAdded = new EsriFeature(this.getMapId(), geoviewLayerConfig);
     } else if (layerConfigIsEsriImage(geoviewLayerConfig)) {
-      layerBeingAdded = new EsriImage(this.mapId, geoviewLayerConfig);
+      layerBeingAdded = new EsriImage(this.getMapId(), geoviewLayerConfig);
     } else if (layerConfigIsImageStatic(geoviewLayerConfig)) {
-      layerBeingAdded = new ImageStatic(this.mapId, geoviewLayerConfig);
+      layerBeingAdded = new ImageStatic(this.getMapId(), geoviewLayerConfig);
     } else if (layerConfigIsWFS(geoviewLayerConfig)) {
-      layerBeingAdded = new WFS(this.mapId, geoviewLayerConfig);
+      layerBeingAdded = new WFS(this.getMapId(), geoviewLayerConfig);
     } else if (layerConfigIsOgcFeature(geoviewLayerConfig)) {
-      layerBeingAdded = new OgcFeature(this.mapId, geoviewLayerConfig);
+      layerBeingAdded = new OgcFeature(this.getMapId(), geoviewLayerConfig);
     } else if (layerConfigIsXYZTiles(geoviewLayerConfig)) {
-      layerBeingAdded = new XYZTiles(this.mapId, geoviewLayerConfig);
+      layerBeingAdded = new XYZTiles(this.getMapId(), geoviewLayerConfig);
     } else if (layerConfigIsVectorTiles(geoviewLayerConfig)) {
-      layerBeingAdded = new VectorTiles(this.mapId, geoviewLayerConfig);
+      layerBeingAdded = new VectorTiles(this.getMapId(), geoviewLayerConfig);
     } else {
       // TODO: Refactor - Throw an Error when falling in this else and change return type to AbstractGeoViewLayer without undefined
     }
@@ -646,7 +650,7 @@ export class LayerApi {
       // For each layer entry config in the geoview layer
       layerBeingAdded.getAllLayerEntryConfigs().forEach((layerConfig) => {
         // Log
-        logger.logDebug(`Layer entry config being registered for ${layerConfig.layerPath} on map ${this.mapId}`, layerConfig);
+        logger.logDebug(`Layer entry config being registered for ${layerConfig.layerPath} on map ${this.getMapId()}`, layerConfig);
 
         // Register it
         this.registerLayerConfigInit(layerConfig);
@@ -655,7 +659,7 @@ export class LayerApi {
       // Register when layer entry config has become processed (catching on-the-fly layer entry configs as they are further processed)
       layerBeingAdded.onLayerEntryProcessed((geoviewLayer, event) => {
         // Log
-        logger.logDebug(`Layer entry config processed for ${event.config.layerPath} on map ${this.mapId}`, event.config);
+        logger.logDebug(`Layer entry config processed for ${event.config.layerPath} on map ${this.getMapId()}`, event.config);
 
         // GV Leaving the commented line here, might come handy for layer refactoring migration
         // Register it
@@ -665,7 +669,7 @@ export class LayerApi {
       // Register when OpenLayer layer has been created
       layerBeingAdded.onLayerCreation((geoviewLayer: AbstractGeoViewLayer, event: LayerCreationEvent) => {
         // Log
-        logger.logDebug(`OpenLayer created for ${event.config.layerPath} on map ${this.mapId}`, event.config);
+        logger.logDebug(`OpenLayer created for ${event.config.layerPath} on map ${this.getMapId()}`, event.config);
 
         // Keep a reference
         this.#olLayers[event.config.layerPath] = event.layer;
@@ -673,7 +677,7 @@ export class LayerApi {
         // If new layers mode, create the corresponding GVLayer
         if (LayerApi.NEW_MODE) {
           // Create the right type of GVLayer
-          const gvLayer = LayerApi.createGVLayer(event.layer, this.mapId, geoviewLayer, event.config);
+          const gvLayer = LayerApi.createGVLayer(event.layer, this.getMapId(), geoviewLayer, event.config);
           if (gvLayer) this.#gvLayers[event.config.layerPath] = gvLayer;
         }
 
@@ -752,7 +756,7 @@ export class LayerApi {
     // Register an event on the layer visible changed
     // geoviewLayer.onVisibleChanged((layer, event) => {
     //   // Propagate in the store
-    //   MapEventProcessor.setOrToggleMapLayerVisibility(this.mapId, registrationEvent.layerPath, event.visible);
+    //   MapEventProcessor.setOrToggleMapLayerVisibility(this.getMapId(), registrationEvent.layerPath, event.visible);
     // });
 
     // Tell the layer sets about it
@@ -782,7 +786,7 @@ export class LayerApi {
         logger.logError(loggerMessage);
 
         // TODO: find a more centralized way to trap error and display message
-        api.maps[this.mapId].notifications.showError('validation.layer.loadfailed', [layer, this.mapId]);
+        api.maps[this.getMapId()].notifications.showError('validation.layer.loadfailed', [layer, this.getMapId()]);
       });
     }
 
@@ -793,10 +797,10 @@ export class LayerApi {
     }
 
     // Log
-    logger.logInfo(`GeoView Layer ${geoviewLayer.geoviewLayerId} added to map ${this.mapId}`, geoviewLayer);
+    logger.logInfo(`GeoView Layer ${geoviewLayer.geoviewLayerId} added to map ${this.getMapId()}`, geoviewLayer);
 
     // Set the layer z indices
-    MapEventProcessor.setLayerZIndices(this.mapId);
+    MapEventProcessor.setLayerZIndices(this.getMapId());
   }
 
   /**
@@ -806,14 +810,14 @@ export class LayerApi {
    */
   #registerForOrderedLayerInfo(layerConfig: TypeLayerEntryConfig): void {
     // If the map index for the given layer path hasn't been set yet
-    if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, layerConfig.layerPath) === -1) {
+    if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), layerConfig.layerPath) === -1) {
       // Get the sub-layer-path
       const subLayerPath = layerConfig.layerPath.split('.')[1];
 
       // If the map index of a sub-layer-path has been set
-      if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, subLayerPath) !== -1) {
+      if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), subLayerPath) !== -1) {
         // Replace the order layer info of the layer with the index of the sub-layer-path by calling replaceOrderedLayerInfo
-        MapEventProcessor.replaceOrderedLayerInfo(this.mapId, layerConfig, subLayerPath);
+        MapEventProcessor.replaceOrderedLayerInfo(this.getMapId(), layerConfig, subLayerPath);
       } else if (layerConfig.parentLayerConfig) {
         // Here the map index of a sub-layer-path hasn't been set and there's a parent layer config for the current layer config
         // Get the sub-layer-path
@@ -824,10 +828,10 @@ export class LayerApi {
         const parentLayerPath = parentLayerPathArray.join('/');
 
         // Get the map index of the parent layer path
-        const parentLayerIndex = MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.mapId, parentLayerPath);
+        const parentLayerIndex = MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), parentLayerPath);
 
         // Get the number of child layers
-        const numberOfLayers = MapEventProcessor.getMapOrderedLayerInfo(this.mapId).filter((layerInfo) =>
+        const numberOfLayers = MapEventProcessor.getMapOrderedLayerInfo(this.getMapId()).filter((layerInfo) =>
           layerInfo.layerPath.startsWith(parentLayerPath)
         ).length;
 
@@ -835,17 +839,17 @@ export class LayerApi {
         if (parentLayerIndex !== -1) {
           // Add the ordered layer information for the layer path based on the parent index + the number of child layers
           // TODO: Check - This addition seems wrong? Seems like it's not going to scale well when multiple layers/groups and a single index order
-          MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig, parentLayerIndex + numberOfLayers);
+          MapEventProcessor.addOrderedLayerInfo(this.getMapId(), layerConfig, parentLayerIndex + numberOfLayers);
         } else {
           // Add the ordered layer information for the layer path based unshifting the current array by calling addOrderedLayerInfo
           // TODO: Check - Could use more comment here, not sure what it's meant for
-          MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig.parentLayerConfig!);
+          MapEventProcessor.addOrderedLayerInfo(this.getMapId(), layerConfig.parentLayerConfig!);
         }
       } else {
         // Here the map index of a sub-layer-path hasn't been set and there's no parent layer config for the current layer config
         // Add the ordered layer information for the layer path based unshifting the current array by calling addOrderedLayerInfo
         // TODO: Check - Could use more comment here, not sure what it's meant for
-        MapEventProcessor.addOrderedLayerInfo(this.mapId, layerConfig);
+        MapEventProcessor.addOrderedLayerInfo(this.getMapId(), layerConfig);
       }
     }
   }
@@ -864,7 +868,7 @@ export class LayerApi {
       // If the layer is loaded, continue
       if (geoviewLayer) {
         // Check and add time slider layer when needed
-        TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.mapId, layerConfig);
+        TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.getMapId(), layerConfig);
       }
     } catch (error) {
       // Layer failed to load, abandon it for the TimeSlider registration, too bad.
@@ -911,7 +915,7 @@ export class LayerApi {
    */
   #unregisterFromOrderedLayerInfo(layerConfig: TypeLayerEntryConfig): void {
     // Remove from ordered layer info
-    MapEventProcessor.removeOrderedLayerInfo(this.mapId, layerConfig.layerPath);
+    MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), layerConfig.layerPath);
   }
 
   /**
@@ -921,7 +925,7 @@ export class LayerApi {
    */
   #unregisterFromTimeSlider(layerConfig: TypeLayerEntryConfig): void {
     // Remove from the TimeSlider
-    TimeSliderEventProcessor.removeTimeSliderLayer(this.mapId, layerConfig.layerPath);
+    TimeSliderEventProcessor.removeTimeSliderLayer(this.getMapId(), layerConfig.layerPath);
   }
 
   /**
@@ -931,7 +935,7 @@ export class LayerApi {
    */
   #unregisterFromGeoChart(layerConfig: TypeLayerEntryConfig): void {
     // Remove from the GeoChart Charts
-    GeochartEventProcessor.removeGeochartChart(this.mapId, layerConfig.layerPath);
+    GeochartEventProcessor.removeGeochartChart(this.getMapId(), layerConfig.layerPath);
   }
 
   /**
@@ -941,7 +945,7 @@ export class LayerApi {
    */
   #unregisterFromSwiper(layerConfig: TypeLayerEntryConfig): void {
     // Remove it from the Swiper
-    SwiperEventProcessor.removeLayerPath(this.mapId, layerConfig.layerPath);
+    SwiperEventProcessor.removeLayerPath(this.getMapId(), layerConfig.layerPath);
   }
 
   /**
@@ -972,7 +976,7 @@ export class LayerApi {
   /**
    * Checks if the layer results sets are all ready using the resultSet from the FeatureInfoLayerSet
    */
-  checkLayerResultSetsReady(callbackNotReady?: (layerEntryConfig: TypeLayerEntryConfig) => void): boolean {
+  checkFeatureInfoLayerResultSetsReady(callbackNotReady?: (layerEntryConfig: TypeLayerEntryConfig) => void): boolean {
     // For each registered layer entry
     let allGood = true;
     Object.entries(this.#layerEntryConfigs).forEach(([layerPath, registeredLayer]) => {
@@ -1127,7 +1131,7 @@ export class LayerApi {
           } else theLayer.setOpacity(originalOpacity || 1, registeredLayerPath);
         });
       }
-      MapEventProcessor.setLayerZIndices(this.mapId);
+      MapEventProcessor.setLayerZIndices(this.getMapId());
       this.#highlightedLayer.layerPath = undefined;
       this.#highlightedLayer.originalOpacity = undefined;
     }
