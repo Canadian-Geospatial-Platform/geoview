@@ -20,10 +20,10 @@ export const sxClasses = {
       '& .ol-overviewmap-map': {
         border: 'none',
         display: 'block !important',
-        '-webkit-transition': '300ms linear',
-        '-moz-transition': '300ms linear',
-        '-o-transition': '300ms linear',
-        '-ms-transition': '300ms linear',
+        WebkitTransition: '300ms linear',
+        MozTransition: '300ms linear',
+        OTransition: '300ms linear',
+        msTransition: '300ms linear',
         transition: '300ms linear',
       },
       '&.ol-uncollapsible': {

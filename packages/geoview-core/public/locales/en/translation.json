@@ -73,7 +73,9 @@
     "highlightLayer": "Highlight layer",
     "subLayersCount": "{count} sub-layers",
     "itemsCount": "{count} of {totalCount} items",
-    "legendInstructions": "Legend Instructions"
+    "legendInstructions": "Legend Instructions",
+    "noLayersAdded": "No layers added to the map",
+    "noLayersAddedDescription": "Add layers to the map by clicking on the 'Layers' button and adding the layers you want to display."
   },
   "layers": {
     "title": "Layers",
