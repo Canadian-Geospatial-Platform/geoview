@@ -460,7 +460,7 @@ export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLay
     metadataAccessPath: geoviewLayerConfigCasted.metadataAccessPath,
     serviceDateFormat: geoviewLayerConfigCasted.serviceDateFormat,
     externalDateFormat: geoviewLayerConfigCasted.externalDateFormat,
-    initialSettingss: geoviewLayerConfigCasted.initialSettings,
+    initialSettings: geoviewLayerConfigCasted.initialSettings,
     listOfLayerEntryConfig: [],
   } as TypeGeoviewLayerConfig;
 

@@ -65,6 +65,9 @@ export abstract class AbstractGeoviewLayerConfig {
    */
   constructor(geoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage, mapFeatureConfig?: MapFeatureConfig) {
     this.#originalgeoviewLayerConfig = cloneDeep(geoviewLayerConfig);
+    // GV: One thing to know about default values: The way to determine whether a property has
+    // GV: been supplied by the user rather than initialized using a default value is to look
+    // GV: in the original configuration copy kept in the instance
     this.#mapFeatureConfig = mapFeatureConfig;
     this.#language = language;
 
