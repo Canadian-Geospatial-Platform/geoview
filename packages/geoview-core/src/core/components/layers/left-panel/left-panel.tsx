@@ -1,5 +1,9 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { useLayerDisplayState, useLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  useLayerDisplayState,
+  useLayerLegendLayers,
+  useLayerStoreActions,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useMapOrderedLayerInfo, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { LayersList } from './layers-list';
 import { AddNewLayer } from './add-new-layer/add-new-layer';
@@ -19,6 +23,7 @@ export function LeftPanel({ setIsLayersListPanelVisible }: LeftPanelProps): JSX.
   const displayState = useLayerDisplayState();
   const orderedLayerInfo = useMapOrderedLayerInfo();
   const { getIndexFromOrderedLayerInfo } = useMapStoreActions();
+  const { setDisplayState } = useLayerStoreActions();
   const [orderedLegendLayers, setOrderedLegendLayers] = useState<TypeLegendLayer[]>([]);
 
   useEffect(() => {
@@ -27,6 +32,12 @@ export function LeftPanel({ setIsLayersListPanelVisible }: LeftPanelProps): JSX.
     );
     setOrderedLegendLayers(sortedLayers);
   }, [orderedLayerInfo, legendLayers, getIndexFromOrderedLayerInfo]);
+
+  useEffect(() => {
+    if (displayState !== 'add' && !legendLayers.length) {
+      setDisplayState('add');
+    }
+  }, [displayState, legendLayers, setDisplayState]);
 
   if (displayState === 'add') {
     return <AddNewLayer />;
