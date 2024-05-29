@@ -6,6 +6,7 @@ import Feature from 'ol/Feature';
 import VectorTileLayer from 'ol/layer/VectorTile';
 import BaseVectorLayer from 'ol/layer/BaseVector';
 import ImageLayer from 'ol/layer/Image';
+import Source from 'ol/source/Source';
 
 import { TypeLocalizedString } from '@config/types/map-schema-types';
 
@@ -32,11 +33,16 @@ import {
 // TODO: Downgrade those types from abstract-layer-set
 import { getLegendStyles, getFeatureCanvas } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { MapViewer } from '@/geo/map/map-viewer';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
  */
 export abstract class AbstractGVLayer {
+  // The hit tolerance the query should use
+  hitTolerance: number = 4;
+
   // The map id
   #mapId: string;
 
@@ -130,11 +136,29 @@ export abstract class AbstractGVLayer {
   }
 
   /**
+   * Gets the MapViewer where the layer resides
+   * @returns {MapViewer} The MapViewer
+   */
+  getMapViewer(): MapViewer {
+    // GV The GVLayers need a reference to the MapViewer to be able to perform operations.
+    // GV This is a trick to obtain it. Otherwise, it'd need to be provided via constructor.
+    return MapEventProcessor.getMapViewer(this.getMapId());
+  }
+
+  /**
    * Gets the OpenLayers Layer
    * @returns The OpenLayers Layer
    */
   getOLLayer(): BaseLayer {
     return this.#olLayer;
+  }
+
+  /**
+   * Gets the OpenLayers Layer Source
+   * @returns The OpenLayers Layer Source
+   */
+  getOLSource(): Source | undefined {
+    return this.getOLLayer().get('source') || undefined;
   }
 
   /**

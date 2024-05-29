@@ -37,6 +37,15 @@ export class GVXYZTiles extends AbstractGVTile {
   }
 
   /**
+   * Overrides the get of the OpenLayers Layer Source
+   * @returns {XYZ} The OpenLayers Layer Source
+   */
+  override getOLSource(): XYZ | undefined {
+    // Get source from OL
+    return this.getOLLayer().getSource() || undefined;
+  }
+
+  /**
    * Overrides the get of the layer configuration associated with the layer.
    * @returns {XYZTilesLayerEntryConfig} The layer configuration or undefined if not found.
    */

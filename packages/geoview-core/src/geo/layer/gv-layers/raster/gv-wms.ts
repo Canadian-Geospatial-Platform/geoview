@@ -52,6 +52,15 @@ export class GVWMS extends AbstractGVRaster {
   }
 
   /**
+   * Overrides the get of the OpenLayers Layer Source
+   * @returns {ImageWMS} The OpenLayers Layer Source
+   */
+  override getOLSource(): ImageWMS | undefined {
+    // Get source from OL
+    return this.getOLLayer().getSource() || undefined;
+  }
+
+  /**
    * Overrides the get of the layer configuration associated with the layer.
    * @returns {OgcWmsLayerEntryConfig} The layer configuration or undefined if not found.
    */
@@ -91,11 +100,12 @@ export class GVWMS extends AbstractGVRaster {
    */
   protected override async getFeatureInfoAtLongLat(lnglat: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
-      // Get the layer config in a loaded phase
-      const layerConfig = this.getLayerConfig();
-      const layer = this.getOLLayer();
-
+      // If the layer is invisible
       if (!this.getVisible()) return [];
+
+      // Get the layer config and source
+      const layerConfig = this.getLayerConfig();
+      const wmsSource = this.getOLSource();
 
       const viewResolution = MapEventProcessor.getMapViewer(this.getMapId()).getView().getResolution() as number;
       const crs = `EPSG:${MapEventProcessor.getMapState(this.getMapId()).currentProjection}`;
@@ -108,7 +118,6 @@ export class GVWMS extends AbstractGVRaster {
       )
         return [];
 
-      const wmsSource = layer.getSource() as ImageWMS;
       let infoFormat = '';
       const featureInfoFormat = this.getLayerConfig().getMetadata()?.Capability?.Request?.GetFeatureInfo?.Format as TypeJsonArray;
       if (featureInfoFormat)
@@ -116,7 +125,7 @@ export class GVWMS extends AbstractGVRaster {
         else if (featureInfoFormat.includes('text/plain' as TypeJsonObject)) infoFormat = 'text/plain';
         else throw new Error('Parameter info_format of GetFeatureInfo only support text/xml and text/plain for WMS services.');
 
-      const featureInfoUrl = wmsSource.getFeatureInfoUrl(clickCoordinate, viewResolution, crs, {
+      const featureInfoUrl = wmsSource?.getFeatureInfoUrl(clickCoordinate, viewResolution, crs, {
         INFO_FORMAT: infoFormat,
       });
       if (featureInfoUrl) {

@@ -47,6 +47,7 @@ import { getLegendStyles, getFeatureCanvas } from '@/geo/utils/renderer/geoview-
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { LayerApi } from '../layer';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { MapViewer } from '@/geo/map/map-viewer';
 
 // Constant used to define the default layer names
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
@@ -72,8 +73,10 @@ const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
  * metadataAccessPath attribute whose value is passed as an attribute of the mapLayerConfig object.
  */
 export abstract class AbstractGeoViewLayer {
-  // TODO: Refactor - The layer object should probably not be aware of a "map id". Check if necessary and redesign.
-  /** The unique identifier of the map on which the GeoView layer will be drawn. */
+  // The hit tolerance the query should use
+  hitTolerance: number = 4;
+
+  /** The map id on which the GeoView layer will be drawn. */
   mapId: string;
 
   /** The type of GeoView layer that is instantiated. */
@@ -194,6 +197,16 @@ export abstract class AbstractGeoViewLayer {
     this.listOfLayerEntryConfig[0].geoviewLayerConfig.listOfLayerEntryConfig = listOfLayerEntryConfig;
   }
 
+  /**
+   * Gets the MapViewer where the layer resides
+   * @returns {MapViewer} The MapViewer
+   */
+  getMapViewer(): MapViewer {
+    // GV The GVLayers need a reference to the MapViewer to be able to perform operations.
+    // GV This is a trick to obtain it. Otherwise, it'd need to be provided via constructor.
+    return MapEventProcessor.getMapViewer(this.mapId);
+  }
+
   /** ***************************************************************************************************************************
    * Gets the layer configuration of the specified layer path.
    *
@@ -202,8 +215,8 @@ export abstract class AbstractGeoViewLayer {
    * @returns {TypeLayerEntryConfig | undefined} The layer configuration or undefined if not found.
    */
   getLayerConfig(layerPath: string): TypeLayerEntryConfig | undefined {
-    // FIXME: This function should be moved elsewhere than in this class.
-    return MapEventProcessor.getMapViewerLayerAPI(this.mapId).getLayerEntryConfig(layerPath);
+    // Trick to get a layer config from a layer class
+    return this.getMapViewer().layer.getLayerEntryConfig(layerPath);
   }
 
   /** ***************************************************************************************************************************
@@ -214,8 +227,8 @@ export abstract class AbstractGeoViewLayer {
    * @returns {TypeLayerEntryConfig | undefined} The layer configuration or undefined if not found.
    */
   getOLLayer(layerPath: string): BaseLayer | undefined {
-    // FIXME: This function should be moved elsewhere than in this class.
-    return MapEventProcessor.getMapViewerLayerAPI(this.mapId).getOLLayer(layerPath);
+    // Trick to get an open layer layer from a layer class
+    return this.getMapViewer().layer.getOLLayer(layerPath);
   }
 
   /** ***************************************************************************************************************************
@@ -695,15 +708,15 @@ export abstract class AbstractGeoViewLayer {
       listOfLayerCreated.forEach((baseLayer, i) => {
         const { layerPath } = listOfLayerEntryConfig[i];
         if (baseLayer) {
-          const layerConfig = baseLayer?.get('layerConfig') as AbstractBaseLayerEntryConfig;
-          if (layerConfig) {
-            // if (!layerEntryIsGroupLayer(listOfLayerEntryConfig[i])) {
-            //   // FIXME: Temporary patch to keep the behavior until those layer classes don't exist. Looks like we won't need this anymore afterall!
-            //   // GV Why did we need this? For the layer-sets?
-            //   MapEventProcessor.getMapViewerLayerAPI(this.mapId).registerLayerConfigUpdate(layerConfig);
-            // }
-            layerGroup!.getLayers().push(baseLayer);
-          }
+          // FIXME: Temporary patch to keep the behavior until those layer classes don't exist. Looks like we won't need this anymore afterall!
+          // GV Why did we need this? For the layer-sets?
+          // const layerConfig = baseLayer?.get('layerConfig') as AbstractBaseLayerEntryConfig;
+          // if (layerConfig) {
+          //   if (!layerEntryIsGroupLayer(listOfLayerEntryConfig[i])) {
+          //     MapEventProcessor.getMapViewerLayerAPI(this.mapId).registerLayerConfigUpdate(layerConfig);
+          //   }
+          layerGroup!.getLayers().push(baseLayer);
+          // }
         } else {
           this.layerLoadError.push({
             layer: listOfLayerEntryConfig[i].layerPath,
@@ -1586,8 +1599,8 @@ export abstract class AbstractGeoViewLayer {
         (olLayer! as any).get('source').un(`${listenerType}loadend`, loadEndListener);
       };
 
-      // If not NEW MODE (in NEW_MODE we want the new classes to handle that)
-      if (!LayerApi.NEW_MODE) {
+      // If not LAYERS_HYBRID_MODE MODE (in LAYERS_HYBRID_MODE we want the new classes to handle that)
+      if (!LayerApi.LAYERS_HYBRID_MODE) {
         // Activation of the load end listeners
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (olLayer! as any).get('source').once(`${listenerType}loaderror`, loadErrorListener);
@@ -1619,7 +1632,7 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Recursively gather the layer entry configs
+   * Recursively gathers the layer entry configs
    * @param {TypeLayerEntryConfig[]} totalList - The total gathered thus far
    * @param {TypeLayerEntryConfig} currentNode - The current layer entry config being worked on
    */

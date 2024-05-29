@@ -51,6 +51,15 @@ export class GVEsriImage extends AbstractGVRaster {
   }
 
   /**
+   * Overrides the get of the OpenLayers Layer Source
+   * @returns {ImageArcGISRest} The OpenLayers Layer Source
+   */
+  override getOLSource(): ImageArcGISRest | undefined {
+    // Get source from OL
+    return this.getOLLayer().getSource() || undefined;
+  }
+
+  /**
    * Overrides the get of the layer configuration associated with the layer.
    * @returns {EsriImageLayerEntryConfig} The layer configuration or undefined if not found.
    */

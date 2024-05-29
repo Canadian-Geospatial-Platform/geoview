@@ -9,6 +9,7 @@ import OLMap from 'ol/Map';
 import View, { FitOptions, ViewOptions } from 'ol/View';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
+import { Projection as OLProjection } from 'ol/proj';
 
 import queryString from 'query-string';
 import { CV_MAP_EXTENTS, VALID_DISPLAY_LANGUAGE, VALID_DISPLAY_THEME, VALID_PROJECTION_CODES } from '@config/types/config-constants';
@@ -263,8 +264,8 @@ export class MapViewer {
   initMap(): void {
     // Register essential map handlers
     this.map.on('moveend', this.#handleMapMoveEnd.bind(this));
-    this.map.getView().on('change:resolution', debounce(this.#handleMapZoomEnd.bind(this), 100).bind(this));
-    this.map.getView().on('change:rotation', debounce(this.#handleMapRotation.bind(this), 100).bind(this));
+    this.getView().on('change:resolution', debounce(this.#handleMapZoomEnd.bind(this), 100).bind(this));
+    this.getView().on('change:rotation', debounce(this.#handleMapRotation.bind(this), 100).bind(this));
 
     // If map isn't static
     if (this.mapFeaturesConfig.map.interaction !== 'static') {
@@ -312,10 +313,10 @@ export class MapViewer {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async #handleMapMoveEnd(event: MapEvent): Promise<void> {
     // Get the center coordinates
-    const centerCoordinates = this.map.getView().getCenter()!;
+    const centerCoordinates = this.getView().getCenter()!;
 
     // Get the projection code
-    const projCode = this.map.getView().getProjection().getCode();
+    const projCode = this.getView().getProjection().getCode();
 
     // Get the pointer position
     const pointerPosition = {
@@ -348,7 +349,7 @@ export class MapViewer {
    */
   #handleMapPointerMove(event: MapEvent): void {
     // Get the projection code
-    const projCode = this.map.getView().getProjection().getCode();
+    const projCode = this.getView().getProjection().getCode();
 
     // Get the pointer position info
     const pointerPosition = {
@@ -372,7 +373,7 @@ export class MapViewer {
    */
   #handleMapSingleClick(event: MapEvent): void {
     // Get the projection code
-    const projCode = this.map.getView().getProjection().getCode();
+    const projCode = this.getView().getProjection().getCode();
 
     // Get the click coordinates
     const clickCoordinates = {
@@ -400,7 +401,7 @@ export class MapViewer {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   #handleMapZoomEnd(event: ObjectEvent): void {
     // Read the zoom value
-    const zoom = this.map.getView().getZoom()!;
+    const zoom = this.getView().getZoom()!;
 
     // Save in the store
     MapEventProcessor.setZoom(this.mapId, zoom);
@@ -417,7 +418,7 @@ export class MapViewer {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   #handleMapRotation(event: ObjectEvent): void {
     // Get the map rotation
-    const rotation = this.map.getView().getRotation();
+    const rotation = this.getView().getRotation();
 
     // Save in the store
     MapEventProcessor.setRotation(this.mapId, rotation);
@@ -742,12 +743,21 @@ export class MapViewer {
   }
 
   /**
-   * Get the map viewSettings
+   * Gets the map viewSettings
    *
    * @returns the map viewSettings
    */
   getView(): View {
-    return this.map.getView();
+    return this.getView();
+  }
+
+  /**
+   * Gets the map projection
+   *
+   * @returns the map viewSettings
+   */
+  getProjection(): OLProjection {
+    return this.getView().getProjection();
   }
 
   /**
@@ -862,7 +872,7 @@ export class MapViewer {
    */
   rotate(degree: number): void {
     // Rotate the view, the store will get updated via this.#handleMapRotation listener
-    this.map.getView().animate({ rotation: degree });
+    this.getView().animate({ rotation: degree });
   }
 
   /**
@@ -882,7 +892,7 @@ export class MapViewer {
    * @param {TypeViewSettings} mapView - Map viewSettings object
    */
   setView(mapView: TypeViewSettings): void {
-    const currentView = this.map.getView();
+    const currentView = this.getView();
     const viewOptions: ViewOptions = {};
     viewOptions.projection = mapView.projection ? `EPSG:${mapView.projection}` : currentView.getProjection();
     viewOptions.zoom = mapView.initialView?.zoomAndCenter ? mapView.initialView?.zoomAndCenter[0] : currentView.getZoom();
@@ -905,7 +915,7 @@ export class MapViewer {
    * @param {Coordinate} center - New center to use
    */
   setCenter(center: Coordinate): void {
-    const currentView = this.map.getView();
+    const currentView = this.getView();
     const transformedCenter = Projection.transformFromLonLat(center, currentView.getProjection());
 
     currentView.setCenter(transformedCenter);
@@ -917,7 +927,7 @@ export class MapViewer {
    * @param {number} zoom - New zoom level
    */
   setZoomLevel(zoom: number): void {
-    this.map.getView().setZoom(zoom);
+    this.getView().setZoom(zoom);
   }
 
   /**
@@ -926,7 +936,7 @@ export class MapViewer {
    * @param {number} zoom - New minimum zoom level
    */
   setMinZoomLevel(zoom: number): void {
-    this.map.getView().setMinZoom(zoom);
+    this.getView().setMinZoom(zoom);
   }
 
   /**
@@ -935,7 +945,7 @@ export class MapViewer {
    * @param {number} zoom - New maximum zoom level
    */
   setMaxZoomLevel(zoom: number): void {
-    this.map.getView().setMaxZoom(zoom);
+    this.getView().setMaxZoom(zoom);
   }
 
   /**
@@ -953,7 +963,7 @@ export class MapViewer {
    * @param {Extent} extent - New extent to use.
    */
   setMaxExtent(extent: Extent): void {
-    const currentView = this.map.getView();
+    const currentView = this.getView();
     const viewOptions: ViewOptions = {};
     viewOptions.projection = currentView.getProjection();
     viewOptions.zoom = currentView.getZoom();
@@ -1166,8 +1176,8 @@ export class MapViewer {
     }
 
     if (mapBounds) {
-      this.map.getView().fit(mapBounds, { size: this.map.getSize() });
-      this.map.getView().setZoom(this.map.getView().getZoom()! - 0.15);
+      this.getView().fit(mapBounds, { size: this.map.getSize() });
+      this.getView().setZoom(this.getView().getZoom()! - 0.15);
     }
   }
 
@@ -1272,7 +1282,7 @@ export class MapViewer {
     // Check the container value for top middle of the screen
     // Convert this value to a lat long coordinate
     const pointXY = [this.map.getSize()![0] / 2, 1];
-    const pt = Projection.transformToLonLat(this.map.getCoordinateFromPixel(pointXY), this.map.getView().getProjection());
+    const pt = Projection.transformToLonLat(this.map.getCoordinateFromPixel(pointXY), this.getView().getProjection());
 
     // If user is pass north, long value will start to be positive (other side of the earth).
     // This will work only for LCC Canada.
@@ -1291,8 +1301,8 @@ export class MapViewer {
       const pointA = { x: NORTH_POLE_POSITION[1], y: NORTH_POLE_POSITION[0] };
 
       // map center (we use botton parallel to introduce less distortion)
-      const extent = this.map.getView().calculateExtent();
-      const center: Coordinate = Projection.transformToLonLat([(extent[0] + extent[2]) / 2, extent[1]], this.map.getView().getProjection());
+      const extent = this.getView().calculateExtent();
+      const center: Coordinate = Projection.transformToLonLat([(extent[0] + extent[2]) / 2, extent[1]], this.getView().getProjection());
       const pointB = { x: center[0], y: center[1] };
 
       // set info on longitude and latitude
@@ -1310,6 +1320,42 @@ export class MapViewer {
     } catch (error) {
       return '180.0';
     }
+  }
+
+  /**
+   * Transforms coordinate from LngLat to the current projection of the map.
+   * @param {Coordinate} coordinate - The LngLat coordinate
+   * @returns {Coordinate} The coordinate in the map projection
+   */
+  convertCoordinateLngLatToMapProj(coordinate: Coordinate): Coordinate {
+    return Projection.transform(coordinate, Projection.PROJECTION_NAMES.LNGLAT, this.getProjection());
+  }
+
+  /**
+   * Transforms coordinate from current projection of the map to LngLat.
+   * @param {Coordinate} coordinate - The coordinate in map projection
+   * @returns {Coordinate} The coordinate in LngLat
+   */
+  convertCoordinateMapProjToLngLat(coordinate: Coordinate): Coordinate {
+    return Projection.transform(coordinate, this.getProjection(), Projection.PROJECTION_NAMES.LNGLAT);
+  }
+
+  /**
+   * Transforms extent from LngLat to the current projection of the map.
+   * @param {Extent} extent - The LngLat extent
+   * @returns {Extent} The extent in the map projection
+   */
+  convertExtentLngLatToMapProj(extent: Extent): Extent {
+    return Projection.transformExtent(extent, Projection.PROJECTION_NAMES.LNGLAT, this.getProjection());
+  }
+
+  /**
+   * Transforms extent from current projection of the map to LngLat.
+   * @param {Extent} extent - The extent in map projection
+   * @returns {Extent} The extent in LngLat
+   */
+  convertExtentMapProjToLngLat(extent: Extent): Extent {
+    return Projection.transformExtent(extent, this.getProjection(), Projection.PROJECTION_NAMES.LNGLAT);
   }
 
   // #region EVENTS

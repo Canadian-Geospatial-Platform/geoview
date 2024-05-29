@@ -60,6 +60,15 @@ export class GVEsriDynamic extends AbstractGVRaster {
   }
 
   /**
+   * Overrides the get of the OpenLayers Layer Source
+   * @returns {ImageArcGISRest} The OpenLayers Layer Source
+   */
+  override getOLSource(): ImageArcGISRest | undefined {
+    // Get source from OL
+    return this.getOLLayer().getSource() || undefined;
+  }
+
+  /**
    * Overrides the get of the layer configuration associated with the layer.
    * @returns {EsriDynamicLayerEntryConfig} The layer configuration or undefined if not found.
    */
@@ -143,8 +152,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected override getFeatureInfoAtPixel(location: Pixel): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const { map } = MapEventProcessor.getMapViewer(this.getMapId());
-    return this.getFeatureInfoAtCoordinate(map.getCoordinateFromPixel(location));
+    // Redirect to getFeatureInfoAtCoordinate
+    return this.getFeatureInfoAtCoordinate(this.getMapViewer().map.getCoordinateFromPixel(location));
   }
 
   /**
@@ -153,12 +162,11 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected override getFeatureInfoAtCoordinate(location: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const convertedLocation = Projection.transform(
-      location,
-      `EPSG:${MapEventProcessor.getMapState(this.getMapId()).currentProjection}`,
-      Projection.PROJECTION_NAMES.LNGLAT
-    );
-    return this.getFeatureInfoAtLongLat(convertedLocation);
+    // Transform coordinate from map project to lntlat
+    const projCoordinate = this.getMapViewer().convertCoordinateMapProjToLngLat(location);
+
+    // Redirect to getFeatureInfoAtLongLat
+    return this.getFeatureInfoAtLongLat(projCoordinate);
   }
 
   /**
@@ -168,11 +176,14 @@ export class GVEsriDynamic extends AbstractGVRaster {
    */
   protected override async getFeatureInfoAtLongLat(lnglat: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
+      // If invisible
+      if (!this.getVisible()) return [];
+
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig();
       const layer = this.getOLLayer();
 
-      if (!this.getVisible()) return [];
+      // If not queryable
       if (!layerConfig.source?.featureInfo?.queryable) return [];
 
       let identifyUrl = getLocalizedValue(layerConfig.source?.dataAccessPath, AppEventProcessor.getDisplayLanguage(this.getMapId()));
