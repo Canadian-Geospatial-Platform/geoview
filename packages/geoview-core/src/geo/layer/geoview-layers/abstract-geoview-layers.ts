@@ -1586,8 +1586,8 @@ export abstract class AbstractGeoViewLayer {
         (olLayer! as any).get('source').un(`${listenerType}loadend`, loadEndListener);
       };
 
-      // If not NEW MODE (in NEW_MODE we want the new classes to handle that)
-      if (!LayerApi.NEW_MODE) {
+      // If not NEW_LAYERS_MODE MODE (in NEW_LAYERS_MODE we want the new classes to handle that)
+      if (!LayerApi.NEW_LAYERS_MODE) {
         // Activation of the load end listeners
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (olLayer! as any).get('source').once(`${listenerType}loaderror`, loadErrorListener);

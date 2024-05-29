@@ -146,7 +146,7 @@ export class LayerApi {
   // ************************************************************
   // INDICATES IF USING HYBRID MODE WITH THE NEW GVLAYERS CLASSES
   // ************************************************************
-  static NEW_MODE = false;
+  static NEW_LAYERS_MODE = true;
 
   /**
    * Initializes layer types and listen to add/remove layer events from outside
@@ -275,7 +275,7 @@ export class LayerApi {
   getGeoviewLayerIdsHybrid(): string[] {
     // TODO: Refactor - This function will be replaced to jump to the new layer classes model
     // If new mode
-    if (LayerApi.NEW_MODE) return this.getGeoviewLayerIdsNew();
+    if (LayerApi.NEW_LAYERS_MODE) return this.getGeoviewLayerIdsNew();
 
     // Old mode
     return this.getGeoviewLayerIds();
@@ -289,7 +289,7 @@ export class LayerApi {
   getGeoviewLayersHybrid(): AbstractGeoViewLayer[] | AbstractGVLayer[] {
     // TODO: Refactor - This function will be replaced to jump to the new layer classes model
     // If new mode
-    if (LayerApi.NEW_MODE) return this.getGeoviewLayersNew();
+    if (LayerApi.NEW_LAYERS_MODE) return this.getGeoviewLayersNew();
 
     // Old mode
     return this.getGeoviewLayers();
@@ -303,7 +303,7 @@ export class LayerApi {
   getGeoviewLayerHybrid(layerPath: string): AbstractGeoViewLayer | AbstractGVLayer | undefined {
     // TODO: Refactor - This function will be replaced to jump to the new layer classes model
     // If new mode
-    if (LayerApi.NEW_MODE) return this.getGeoviewLayerNew(layerPath);
+    if (LayerApi.NEW_LAYERS_MODE) return this.getGeoviewLayerNew(layerPath);
 
     // Old mode
     return this.getGeoviewLayer(layerPath);
@@ -360,7 +360,7 @@ export class LayerApi {
    */
   getOLLayer(layerPath: string): BaseLayer | undefined {
     // If new mode, get the OpenLayer layer as part of the new GVLayer design
-    if (LayerApi.NEW_MODE) return this.getGeoviewLayerNew(layerPath)?.getOLLayer();
+    if (LayerApi.NEW_LAYERS_MODE) return this.getGeoviewLayerNew(layerPath)?.getOLLayer();
 
     // Old mode, get the OpenLayer layer stored in the dictionary
     return this.#olLayers[layerPath];
@@ -658,6 +658,9 @@ export class LayerApi {
       layerBeingAdded.onLayerEntryProcessed((geoviewLayer, event) => {
         // Log
         logger.logDebug(`Layer entry config processed for ${event.config.layerPath} on map ${this.getMapId()}`, event.config);
+
+        // GV Do we need to register a layer entry config here? Leave the note for now
+        // this.registerLayerConfigInit(layerConfig);
       });
 
       // Register when OpenLayer layer has been created
@@ -669,9 +672,9 @@ export class LayerApi {
         this.#olLayers[event.config.layerPath] = event.layer;
 
         // If new layers mode, create the corresponding GVLayer
-        if (LayerApi.NEW_MODE) {
+        if (LayerApi.NEW_LAYERS_MODE) {
           // Create the right type of GVLayer
-          this.createGVLayer(event.layer, this.getMapId(), geoviewLayer, event.config);
+          this.#createGVLayer(this.getMapId(), geoviewLayer, event.layer, event.config);
         }
       });
 
@@ -756,6 +759,110 @@ export class LayerApi {
 
     // eslint-disable-next-line no-param-reassign
     layerConfig.layerStatus = 'registered';
+  }
+
+  /**
+   * Creates a GVLayer based on the provided OLLayer and layer config.
+   * @param mapId - The map id
+   * @param geoviewLayer - The GeoView layer (just to retrieve config-calculated information from it)
+   * @param olLayer - The OpenLayer layer
+   * @param config - The layer config
+   * @returns A new GV Layer which is kept track of in LayerApi and initialized
+   */
+  #createGVLayer(
+    mapId: string,
+    geoviewLayer: AbstractGeoViewLayer,
+    olLayer: BaseLayer,
+    config: ConfigBaseClass
+  ): AbstractGVLayer | undefined {
+    // If new mode
+    let metadata;
+    let timeDimension;
+    if (LayerApi.NEW_LAYERS_MODE) {
+      // Get the metadata and the time dimension information as processed
+      metadata = geoviewLayer.getLayerMetadata(config.layerPath);
+      timeDimension = geoviewLayer.getTemporalDimension(config.layerPath);
+
+      // HACK: INJECT CONFIGURATION STUFF PRETENDNG THEY WERE PROCESSED
+      // GV Keep this code commented in the source base for now
+      // if (config.layerPath === 'esriFeatureLYR5/0') {
+      //   metadata = LayerMockup.configTop100Metadata();
+      // } else if (config.layerPath === 'nonmetalmines/5') {
+      //   metadata = LayerMockup.configNonMetalMetadata();
+      // } else if (config.layerPath === 'airborne_radioactivity/1') {
+      //   metadata = LayerMockup.configAirborneMetadata();
+      // } else if (config.layerPath === 'geojsonLYR1/geojsonLYR1/polygons.json') {
+      //   metadata = LayerMockup.configPolygonsMetadata();
+      // } else if (config.layerPath === 'geojsonLYR1/geojsonLYR1/lines.json') {
+      //   metadata = LayerMockup.configLinesMetadata();
+      // } else if (config.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/icon_points.json') {
+      //   metadata = LayerMockup.configIconPointsMetadata();
+      // } else if (config.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points.json') {
+      //   metadata = LayerMockup.configPointsMetadata();
+      // } else if (config.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points_1.json') {
+      //   metadata = LayerMockup.configPoints1Metadata();
+      // } else if (config.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points_2.json') {
+      //   metadata = LayerMockup.configPoints2Metadata();
+      // } else if (config.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points_3.json') {
+      //   metadata = LayerMockup.configPoints3Metadata();
+      // } else if (config.layerPath === 'historical-flood/0') {
+      //   metadata = LayerMockup.configHistoricalFloodMetadata();
+      //   timeDimension = LayerMockup.configHistoricalFloodTemporalDimension();
+      // } else if (config.layerPath === 'uniqueValueId/1') {
+      //   metadata = LayerMockup.configCESIMetadata();
+      //   // timeDimension = LayerMockup.configHistoricalFloodTemporalDimension();
+      // } else if (config.layerPath === 'esriFeatureLYR1/0') {
+      //   metadata = LayerMockup.configTemporalTestBedMetadata();
+      //   // timeDimension = LayerMockup.configHistoricalFloodTemporalDimension();
+      // } else if (config.layerPath === 'wmsLYR1-spatiotemporel/RADAR_1KM_RSNO') {
+      //   metadata = LayerMockup.configRadarMetadata();
+      //   timeDimension = LayerMockup.configRadarTemporalDimension();
+      // } else if (config.layerPath === 'MSI/msi-94-or-more') {
+      //   metadata = LayerMockup.configMSIMetadata();
+      //   timeDimension = LayerMockup.configMSITemporalDimension();
+      // }
+
+      // If any metadata
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-param-reassign
+      if (metadata && config instanceof AbstractBaseLayerEntryConfig) config.setMetadata(metadata);
+    }
+
+    // Create the right GV Layer based on the OLLayer and config type
+    let gvLayer;
+    if (olLayer instanceof ImageLayer && config instanceof EsriDynamicLayerEntryConfig) gvLayer = new GVEsriDynamic(mapId, olLayer, config);
+    else if (olLayer instanceof ImageLayer && config instanceof EsriImageLayerEntryConfig)
+      gvLayer = new GVEsriImage(mapId, olLayer, config);
+    else if (olLayer instanceof ImageLayer && config instanceof ImageStaticLayerEntryConfig)
+      gvLayer = new GVImageStatic(mapId, olLayer, config);
+    else if (olLayer instanceof ImageLayer && config instanceof OgcWmsLayerEntryConfig) gvLayer = new GVWMS(mapId, olLayer, config);
+    else if (olLayer instanceof TileLayer && config instanceof XYZTilesLayerEntryConfig) gvLayer = new GVXYZTiles(mapId, olLayer, config);
+    else if (olLayer instanceof VectorImageLayer && config instanceof EsriFeatureLayerEntryConfig)
+      gvLayer = new GVEsriFeature(mapId, olLayer, config);
+    else if (olLayer instanceof BaseVectorLayer && config instanceof GeoJSONLayerEntryConfig)
+      gvLayer = new GVGeoJSON(mapId, olLayer, config);
+    else if (olLayer instanceof BaseVectorLayer && config instanceof OgcFeatureLayerEntryConfig)
+      gvLayer = new GVOGCFeature(mapId, olLayer, config);
+    else if (olLayer instanceof VectorTileLayer && config instanceof VectorTilesLayerEntryConfig)
+      gvLayer = new GVVectorTiles(mapId, olLayer, config);
+
+    // If created
+    if (gvLayer) {
+      // Keep track
+      this.#gvLayers[config.layerPath] = gvLayer;
+
+      // If any time dimension to inject
+      if (timeDimension) gvLayer.setTemporalDimension(timeDimension);
+
+      // Initialize the layer, triggering the loaded/error status
+      gvLayer.init();
+
+      // Return the GVLayer
+      return gvLayer;
+    }
+
+    // Couldn't create it
+    logger.logError(`Unsupported GVLayer for ${config.layerPath}`);
+    return undefined;
   }
 
   /**
@@ -963,7 +1070,7 @@ export class LayerApi {
   }
 
   /**
-   * Checks if the layer results sets are all ready using the resultSet from the FeatureInfoLayerSet
+   * Checks if the layer results sets are all ready using the resultSet from the FeatureInfo LayerSet
    */
   checkFeatureInfoLayerResultSetsReady(callbackNotReady?: (layerEntryConfig: TypeLayerEntryConfig) => void): boolean {
     // For each registered layer entry
@@ -1202,101 +1309,6 @@ export class LayerApi {
   offLayerAdded(callback: LayerAddedDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerAddedHandlers, callback);
-  }
-
-  createGVLayer(
-    olLayer: BaseLayer,
-    mapId: string,
-    geoviewLayer: AbstractGeoViewLayer,
-    config: ConfigBaseClass
-  ): AbstractGVLayer | undefined {
-    // If new mode
-    let metadata;
-    let timeDimension;
-    if (LayerApi.NEW_MODE) {
-      // Get the metadata and the time dimension information as processed
-      metadata = geoviewLayer.getLayerMetadata(config.layerPath);
-      timeDimension = geoviewLayer.getTemporalDimension(config.layerPath);
-
-      // HACK: INJECT CONFIGURATION STUFF PRETENDNG THEY WERE PROCESSED
-      // GV Keep this code commented in the source base for now
-      // if (config.layerPath === 'esriFeatureLYR5/0') {
-      //   metadata = LayerMockup.configTop100Metadata();
-      // } else if (config.layerPath === 'nonmetalmines/5') {
-      //   metadata = LayerMockup.configNonMetalMetadata();
-      // } else if (config.layerPath === 'airborne_radioactivity/1') {
-      //   metadata = LayerMockup.configAirborneMetadata();
-      // } else if (config.layerPath === 'geojsonLYR1/geojsonLYR1/polygons.json') {
-      //   metadata = LayerMockup.configPolygonsMetadata();
-      // } else if (config.layerPath === 'geojsonLYR1/geojsonLYR1/lines.json') {
-      //   metadata = LayerMockup.configLinesMetadata();
-      // } else if (config.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/icon_points.json') {
-      //   metadata = LayerMockup.configIconPointsMetadata();
-      // } else if (config.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points.json') {
-      //   metadata = LayerMockup.configPointsMetadata();
-      // } else if (config.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points_1.json') {
-      //   metadata = LayerMockup.configPoints1Metadata();
-      // } else if (config.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points_2.json') {
-      //   metadata = LayerMockup.configPoints2Metadata();
-      // } else if (config.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points_3.json') {
-      //   metadata = LayerMockup.configPoints3Metadata();
-      // } else if (config.layerPath === 'historical-flood/0') {
-      //   metadata = LayerMockup.configHistoricalFloodMetadata();
-      //   timeDimension = LayerMockup.configHistoricalFloodTemporalDimension();
-      // } else if (config.layerPath === 'uniqueValueId/1') {
-      //   metadata = LayerMockup.configCESIMetadata();
-      //   // timeDimension = LayerMockup.configHistoricalFloodTemporalDimension();
-      // } else if (config.layerPath === 'esriFeatureLYR1/0') {
-      //   metadata = LayerMockup.configTemporalTestBedMetadata();
-      //   // timeDimension = LayerMockup.configHistoricalFloodTemporalDimension();
-      // } else if (config.layerPath === 'wmsLYR1-spatiotemporel/RADAR_1KM_RSNO') {
-      //   metadata = LayerMockup.configRadarMetadata();
-      //   timeDimension = LayerMockup.configRadarTemporalDimension();
-      // } else if (config.layerPath === 'MSI/msi-94-or-more') {
-      //   metadata = LayerMockup.configMSIMetadata();
-      //   timeDimension = LayerMockup.configMSITemporalDimension();
-      // }
-
-      // If any metadata
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-param-reassign
-      if (metadata && config instanceof AbstractBaseLayerEntryConfig) config.setMetadata(metadata);
-    }
-
-    // Create the right GV Layer based on the OLLayer
-    let gvLayer;
-    // Depending on the config type
-    if (olLayer instanceof ImageLayer && config instanceof EsriDynamicLayerEntryConfig) gvLayer = new GVEsriDynamic(mapId, olLayer, config);
-    else if (olLayer instanceof ImageLayer && config instanceof EsriImageLayerEntryConfig)
-      gvLayer = new GVEsriImage(mapId, olLayer, config);
-    else if (olLayer instanceof ImageLayer && config instanceof ImageStaticLayerEntryConfig)
-      gvLayer = new GVImageStatic(mapId, olLayer, config);
-    else if (olLayer instanceof ImageLayer && config instanceof OgcWmsLayerEntryConfig) gvLayer = new GVWMS(mapId, olLayer, config);
-    else if (olLayer instanceof TileLayer && config instanceof XYZTilesLayerEntryConfig) gvLayer = new GVXYZTiles(mapId, olLayer, config);
-    else if (olLayer instanceof VectorImageLayer && config instanceof EsriFeatureLayerEntryConfig)
-      gvLayer = new GVEsriFeature(mapId, olLayer, config);
-    else if (olLayer instanceof BaseVectorLayer && config instanceof GeoJSONLayerEntryConfig)
-      gvLayer = new GVGeoJSON(mapId, olLayer, config);
-    else if (olLayer instanceof BaseVectorLayer && config instanceof OgcFeatureLayerEntryConfig)
-      gvLayer = new GVOGCFeature(mapId, olLayer, config);
-    else if (olLayer instanceof VectorTileLayer && config instanceof VectorTilesLayerEntryConfig)
-      gvLayer = new GVVectorTiles(mapId, olLayer, config);
-
-    // If created
-    if (gvLayer) {
-      // Keep track
-      this.#gvLayers[config.layerPath] = gvLayer;
-
-      // Initialize the layer
-      gvLayer.init();
-
-      // If any time dimension to inject
-      if (timeDimension) gvLayer.setTemporalDimension(timeDimension);
-      return gvLayer;
-    }
-
-    // Couldn't create it
-    logger.logError(`Unsupported GVLayer for ${config.layerPath}`);
-    return undefined;
   }
 }
 
