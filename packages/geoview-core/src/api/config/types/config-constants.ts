@@ -14,7 +14,7 @@ import {
 } from '@config/types/map-schema-types';
 
 /** The default geocore url */
-export const CV_CONFIG_GEOCORE_URL = 'https://geocore-stage.api.geo.ca';
+export const CV_CONFIG_GEOCORE_URL = 'https://geocore.api.geo.ca';
 
 /** The default geolocator url */
 export const CV_CONFIG_GEOLOCATOR_URL = 'https://geolocator.api.geo.ca?keys=geonames,nominatim,locate';

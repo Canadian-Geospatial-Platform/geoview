@@ -1120,6 +1120,11 @@
     "TypeFeatureInfoLayerConfig": {
       "type": "object",
       "properties": {
+        "queryable": {
+          "description": "Allow querying. Default = false.",
+          "type": "boolean",
+          "default": false
+        },
         "nameField": {
           "description": "The display field of the layer. If it is not present the viewer will make an attempt to find the first valid field.",
           "type": "string"
@@ -1131,7 +1136,7 @@
           }
         }
       },
-      "required": ["nameField", "outfields"]
+      "required": ["queryable"]
     },
     "TypeOutfields": {
       "type": "object",

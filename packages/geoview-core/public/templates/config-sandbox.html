@@ -92,6 +92,7 @@
                   <option value="./configs/validator/01-simple.json">Simple</option>
                   <option value="./configs/validator/02-unique-value.json">Unique Value</option>
                   <option value="./configs/validator/03-class-breaks.json">Class Breaks</option>
+                  <option value="./configs/validator/04-geocore.json">Geocore</option>
                 </select>
               </div>
             </div>
@@ -215,27 +216,28 @@ p=3857&z=4&c=-100,40&l=en&t=dark&b=basemapId:transport,shaded:false,labeled:true
         const configOutput = document.getElementById('configOutput');
 
         // get config and test if JSON is valid
-        const mapConfig = cgpv.api.configApi.getMapConfig(configArea.value.replaceAll('"', "'").replaceAll("\\'", "\'"), langue);
-        configOutput.value = mapConfig.getIndentedJsonString();
+        cgpv.api.configApi.getMapConfig(configArea.value.replaceAll('"', "'").replaceAll("\\'", "\'"), langue).then((mapConfig) => {
+          configOutput.value = mapConfig.getIndentedJsonString();
 
-        // Generate line numbers
-        (() => {
-          const textarea = document.getElementById('configOutput');
-          const lineNumbersContainer = document.getElementById('outputLineNumbers');
-          const lines = textarea.value.split('\n').length+1;
-          const lineNumbers = Array.from({ length: lines }, (_, index) => '').join('<span />');
-          lineNumbersContainer.innerHTML = lineNumbers;
-        })();
+          // Generate line numbers
+          (() => {
+            const textarea = document.getElementById('configOutput');
+            const lineNumbersContainer = document.getElementById('outputLineNumbers');
+            const lines = textarea.value.split('\n').length+1;
+            const lineNumbers = Array.from({ length: lines }, (_, index) => '').join('<span />');
+            lineNumbersContainer.innerHTML = lineNumbers;
+          })();
 
-        // set class and message
-        message.classList.add('config-json-valid');
-        message.classList.remove('config-error');
-        if (mapConfig.isValid) {
-          message.innerHTML = 'File is valid, see console for details...';
-          document.getElementById('createMap').disabled = true;
-        } else {
-          message.innerHTML = 'File is invalid, see console for details...';
-        }
+          // set class and message
+          message.classList.add('config-json-valid');
+          message.classList.remove('config-error');
+          if (mapConfig.isValid) {
+            message.innerHTML = 'File is valid, see console for details...';
+            document.getElementById('createMap').disabled = true;
+          } else {
+            message.innerHTML = 'File is invalid, see console for details...';
+          }
+        });
       });
 
     // Config Url Validate Button =======================================================================================================
