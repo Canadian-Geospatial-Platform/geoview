@@ -323,7 +323,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                         aria-label={buttonPanel.button.tooltip}
                         tooltip={buttonPanel.button.tooltip}
                         tooltipPlacement="right"
-                        className={`style3 ${tabId === buttonPanel.button.id && isOpen ? 'active' : ''}`}
+                        className={`buttonFilled ${tabId === buttonPanel.button.id && isOpen ? 'active' : ''}`}
                         size="small"
                         onClick={() => handleButtonClicked(buttonPanel.button.id!, groupName)}
                       >
@@ -349,7 +349,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
           {appBarComponents.includes(CV_DEFAULT_APPBAR_CORE.EXPORT) && interaction === 'dynamic' && (
             <List sx={sxClasses.appBarList}>
               <ListItem>
-                <ExportButton className={` style3 ${activeModalId ? 'active' : ''}`} />
+                <ExportButton className={` buttonFilled ${activeModalId ? 'active' : ''}`} />
               </ListItem>
             </List>
           )}

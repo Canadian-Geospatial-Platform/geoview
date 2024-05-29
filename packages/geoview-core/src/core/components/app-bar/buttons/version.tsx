@@ -79,7 +79,7 @@ export default function Version(): JSX.Element {
           tooltip="appbar.version"
           tooltipPlacement="bottom-end"
           onClick={handleClick}
-          className={`${interaction === 'dynamic' ? 'style3' : 'style4'} ${open ? 'active' : ''}`}
+          className={`${interaction === 'dynamic' ? 'buttonFilled' : 'style4'} ${open ? 'active' : ''}`}
         >
           <SvgIcon viewBox="-4 -2 38 36">
             <GeoCaIcon />

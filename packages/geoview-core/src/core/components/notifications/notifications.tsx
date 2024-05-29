@@ -153,7 +153,7 @@ export default function Notifications(): JSX.Element {
             tooltip="appbar.notifications"
             tooltipPlacement="bottom-end"
             onClick={handleOpenPopover}
-            className={`${interaction === 'dynamic' ? 'style3' : 'style4'} ${open ? 'active' : ''}`}
+            className={`${interaction === 'dynamic' ? 'buttonFilled' : 'style4'} ${open ? 'active' : ''}`}
             color="primary"
           >
             {!hasNewNotification && <NotificationsIcon />}

@@ -195,12 +195,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   function renderDetailsButton(): JSX.Element {
     if (layerDetails.controls?.table !== false)
       return (
-        <IconButton id="table-details" tooltip="legend.tableDetails" className="style1" onClick={handleOpenTable}>
+        <IconButton id="table-details" tooltip="legend.tableDetails" className="buttonOutline" onClick={handleOpenTable}>
           <TableViewIcon />
         </IconButton>
       );
     return (
-      <IconButton id="table-details" className="style1" disabled>
+      <IconButton id="table-details" className="buttonOutline" disabled>
         <TableViewIcon color="disabled" />
       </IconButton>
     );
@@ -212,13 +212,13 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         <IconButton
           tooltip="legend.highlightLayer"
           onClick={handleHighlightLayer}
-          className={highlightedLayer === layerDetails.layerPath ? 'style1 active' : 'style1'}
+          className={highlightedLayer === layerDetails.layerPath ? 'buttonOutline active' : 'buttonOutline'}
         >
           <HighlightOutlinedIcon />
         </IconButton>
       );
     return (
-      <IconButton className="style1" disabled>
+      <IconButton className="buttonOutline" disabled>
         <HighlightOutlinedIcon color="disabled" />
       </IconButton>
     );
@@ -227,12 +227,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   function renderZoomButton(): JSX.Element {
     if (layerDetails.controls?.zoom !== false)
       return (
-        <IconButton tooltip="legend.zoomTo" onClick={handleZoomTo} className="style1" disabled={layerDetails.bounds === undefined}>
+        <IconButton tooltip="legend.zoomTo" onClick={handleZoomTo} className="buttonOutline" disabled={layerDetails.bounds === undefined}>
           <ZoomInSearchIcon />
         </IconButton>
       );
     return (
-      <IconButton className="style1" disabled>
+      <IconButton className="buttonOutline" disabled>
         <ZoomInSearchIcon color="disabled" />
       </IconButton>
     );
@@ -242,7 +242,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px' }}>
         {isDataTableVisible && selectedLayer?.features?.length && renderDetailsButton()}
-        <IconButton tooltip="legend.refreshLayer" className="style1" onClick={handleRefreshLayer}>
+        <IconButton tooltip="legend.refreshLayer" className="buttonOutline" onClick={handleRefreshLayer}>
           <RestartAltIcon />
         </IconButton>
         {renderHighlightButton()}
