@@ -29,7 +29,7 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * The class constructor.
-   * @param {EsriDynamicLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+   * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: EsriDynamicLayerEntryConfig) {
     super(layerConfig);

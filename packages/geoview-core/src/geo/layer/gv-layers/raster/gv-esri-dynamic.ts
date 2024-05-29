@@ -41,8 +41,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Constructs a GVEsriDynamic layer to manage an OpenLayer layer.
    * @param {string} mapId - The map id
-   * @param {BaseLayer} olLayer - The OpenLayer layer.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration.
+   * @param {ImageLayer<ImageArcGISRest>} olLayer - The OpenLayer layer.
+   * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer configuration.
    */
   public constructor(mapId: string, olLayer: ImageLayer<ImageArcGISRest>, layerConfig: EsriDynamicLayerEntryConfig) {
     super(mapId, olLayer, layerConfig);

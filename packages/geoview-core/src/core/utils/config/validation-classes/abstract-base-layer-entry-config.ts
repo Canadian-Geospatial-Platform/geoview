@@ -53,9 +53,9 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * The class constructor.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: AbstractBaseLayerEntryConfig) {
+  protected constructor(layerConfig: AbstractBaseLayerEntryConfig) {
     super(layerConfig);
     Object.assign(this, layerConfig);
   }

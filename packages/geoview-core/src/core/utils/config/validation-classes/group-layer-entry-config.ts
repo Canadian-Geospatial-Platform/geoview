@@ -28,7 +28,7 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * The class constructor.
-   * @param {GroupLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+   * @param {GroupLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: GroupLayerEntryConfig) {
     super(layerConfig);

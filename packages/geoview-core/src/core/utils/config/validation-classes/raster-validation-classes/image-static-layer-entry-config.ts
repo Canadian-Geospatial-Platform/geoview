@@ -20,7 +20,7 @@ export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * The class constructor.
-   * @param {ImageStaticLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+   * @param {ImageStaticLayerEntryConfig} layerConfig -  The layer configuration we want to instanciate.
    */
   constructor(layerConfig: ImageStaticLayerEntryConfig) {
     super(layerConfig);

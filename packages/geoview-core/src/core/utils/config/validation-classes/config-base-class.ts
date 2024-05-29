@@ -15,7 +15,7 @@ import { GroupLayerEntryConfig } from './group-layer-entry-config';
 /** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
  */
-export class ConfigBaseClass {
+export abstract class ConfigBaseClass {
   /** The identifier of the layer to display on the map. This element is part of the schema. */
   // GV Cannot put it #layerId as it breaks things
   // eslint-disable-next-line no-restricted-syntax
@@ -75,9 +75,9 @@ export class ConfigBaseClass {
 
   /**
    * The class constructor.
-   * @param {ConfigBaseClass} layerConfig The layer configuration we want to instanciate.
+   * @param {ConfigBaseClass} layerConfig - The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: ConfigBaseClass) {
+  protected constructor(layerConfig: ConfigBaseClass) {
     // TODO: Refactor - Get rid of this Object.assign pattern here and elsewhere unless explicitely commented why.
     Object.assign(this, layerConfig);
     // eslint-disable-next-line no-underscore-dangle
@@ -96,7 +96,7 @@ export class ConfigBaseClass {
 
   /**
    * The layerId setter method for the ConfigBaseClass class and its descendant classes.
-   * @param {string} newLayerId The new layerId value.
+   * @param {string} newLayerId - The new layerId value.
    */
   set layerId(newLayerId: string) {
     // eslint-disable-next-line no-underscore-dangle
@@ -130,7 +130,7 @@ export class ConfigBaseClass {
 
   /**
    * The layerStatus setter method for the ConfigBaseClass class and its descendant classes.
-   * @param {string} newLayerStatus The new layerId value.
+   * @param {string} newLayerStatus - The new layerId value.
    */
   // TODO: Refactor - Change this from a 'setter' to an actual set function, arguably too complex for just a 'setter'
   set layerStatus(newLayerStatus: TypeLayerStatus) {
@@ -161,8 +161,8 @@ export class ConfigBaseClass {
 
   /**
    * Getter for the layer Path of the layer configuration parameter.
-   * @param {ConfigBaseClass} layerConfig The layer configuration for which we want to get the layer path.
-   * @param {string} layerPath Internal parameter used to build the layer path (should not be used by the user).
+   * @param {ConfigBaseClass} layerConfig - The layer configuration for which we want to get the layer path.
+   * @param {string} layerPath - Internal parameter used to build the layer path (should not be used by the user).
    *
    * @returns {string} Returns the layer path.
    */
@@ -180,7 +180,7 @@ export class ConfigBaseClass {
 
   /**
    * Emits an event to all handlers.
-   * @param {LayerStatusChangedEvent} event The event to emit
+   * @param {LayerStatusChangedEvent} event - The event to emit
    * @private
    */
   // TODO: refactor - if this emit is private with #, abstract-base-layer-entry-config.ts:28 Uncaught (in promise) TypeError: Private element is not present on this object
@@ -193,7 +193,7 @@ export class ConfigBaseClass {
 
   /**
    * Registers a layer status changed event handler.
-   * @param {LayerStatusChangedDelegate} callback The callback to be executed whenever the event is emitted
+   * @param {LayerStatusChangedDelegate} callback - The callback to be executed whenever the event is emitted
    */
   onLayerStatusChanged(callback: LayerStatusChangedDelegate): void {
     // Register the event handler
@@ -202,7 +202,7 @@ export class ConfigBaseClass {
 
   /**
    * Unregisters a layer status changed event handler.
-   * @param {LayerStatusChangedDelegate} callback The callback to stop being called whenever the event is emitted
+   * @param {LayerStatusChangedDelegate} callback - The callback to stop being called whenever the event is emitted
    */
   offLayerStatusChanged(callback: LayerStatusChangedDelegate): void {
     // Unregister the event handler
@@ -213,7 +213,7 @@ export class ConfigBaseClass {
    * This method compares the internal layer status of the config with the layer status passed as a parameter and it
    * returns true if the internal value is greater or equal to the value of the parameter.
    *
-   * @param {TypeLayerStatus} layerStatus The layer status to compare with the internal value of the config.
+   * @param {TypeLayerStatus} layerStatus - The layer status to compare with the internal value of the config.
    *
    * @returns {boolean} Returns true if the internal value is greater or equal than the value of the parameter.
    */
@@ -247,8 +247,8 @@ export class ConfigBaseClass {
   /**
    * Recursively checks the list of layer entries to see if all of them are greater than or equal to the provided layer status.
    *
-   * @param {TypeLayerStatus} layerStatus The layer status to compare with the internal value of the config.
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer's configuration
+   * @param {TypeLayerStatus} layerStatus - The layer status to compare with the internal value of the config.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer's configuration
    *                                                            (default: this.listOfLayerEntryConfig).
    *
    * @returns {boolean} true when all layers are greater than or equal to the layerStatus parameter.

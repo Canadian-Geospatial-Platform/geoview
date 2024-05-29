@@ -4,7 +4,7 @@ import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config
 /** ******************************************************************************************************************************
  * Type used to define a GeoView vector layer to display on the map.
  */
-export class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfig {
+export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** Layer entry data type. */
   override entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
 
@@ -19,9 +19,9 @@ export class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * The class constructor.
-   * @param {VectorLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+   * @param {VectorLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
-  constructor(layerConfig: VectorLayerEntryConfig) {
+  protected constructor(layerConfig: VectorLayerEntryConfig) {
     super(layerConfig);
     Object.assign(this, layerConfig);
   }
