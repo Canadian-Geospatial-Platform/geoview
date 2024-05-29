@@ -16,7 +16,7 @@ import { Pixel } from 'ol/pixel';
 import { TypeLocalizedString } from '@config/types/map-schema-types';
 
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeBaseSourceVectorInitialConfig, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { TypeBaseSourceVectorInitialConfig, TypeFeatureInfoEntry, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
@@ -28,7 +28,6 @@ import { logger } from '@/core/utils/logger';
 import { CSV } from './csv';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { Cast } from '@/core/types/global-types';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { analyzeLayerFilter, getFeatureStyle } from '@/geo/utils/renderer/geoview-renderer';

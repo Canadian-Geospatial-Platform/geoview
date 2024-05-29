@@ -12,6 +12,7 @@ import {
   TypeClassBreakStyleConfig,
   TypeResultSet,
   TypeResultSetEntry,
+  TypeStyleConfig,
   TypeStyleGeometry,
   TypeUniqueValueStyleConfig,
 } from '@/geo/map/map-schema-types';
@@ -20,13 +21,10 @@ import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
-import { TypeLegendResultInfo } from '@/geo/layer/layer-sets/legends-layer-set';
+import { TypeLocalizedString } from '@/api/config/types/map-schema-types';
+import { TypeGeoviewLayerType, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 // #region INTERFACES & TYPES
-
-export type TypeLegendResultSetEntry = TypeResultSetEntry & TypeLegendResultInfo;
-
-export type TypeLegendResultSet = TypeResultSet<TypeLegendResultSetEntry>;
 
 export interface ILayerState {
   highlightedLayer: string;
@@ -327,6 +325,25 @@ function deleteSingleLayer(layers: TypeLegendLayer[], layerPath: string): void {
     }
   }
 }
+
+export type TypeLegendResultInfo = {
+  legendQueryStatus: LegendQueryStatus;
+  data: TypeLegend | undefined | null;
+};
+
+export type LegendQueryStatus = 'init' | 'querying' | 'queried';
+
+export type TypeLegend = {
+  layerName?: TypeLocalizedString;
+  type: TypeGeoviewLayerType;
+  styleConfig?: TypeStyleConfig | null;
+  // Layers other than vector layers use the HTMLCanvasElement type for their legend.
+  legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
+};
+
+export type TypeLegendResultSetEntry = TypeResultSetEntry & TypeLegendResultInfo;
+
+export type TypeLegendResultSet = TypeResultSet<TypeLegendResultSetEntry>;
 
 // **********************************************************
 // Layer state selectors

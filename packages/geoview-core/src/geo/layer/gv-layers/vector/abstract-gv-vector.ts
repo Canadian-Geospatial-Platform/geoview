@@ -14,7 +14,7 @@ import { AppEventProcessor } from '@/api/event-processors/event-processor-childr
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 import { analyzeLayerFilter } from '@/geo/utils/renderer/geoview-renderer';
 import { featureInfoGetFieldType } from '../utils';
 import { AbstractGVLayer } from '../abstract-gv-layer';

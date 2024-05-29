@@ -12,7 +12,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { TypeHoverResultSet } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 
 /**
- * A class containing a set of layers associated with a TypeLayerData object, which will receive the result of a
+ * A class containing a set of layers associated with a TypeHoverResultSetEntry object, which will receive the result of a
  * "get feature info" request made on the map layers when the user hovers over a position in a stationary way.
  *
  * @class HoverFeatureInfoLayerSet

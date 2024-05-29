@@ -7,7 +7,7 @@ import { CardMedia, Box, Grid } from '@/ui';
 import { isImage, stringify, generateId, sanitizeHtmlContent } from '@/core/utils/utilities';
 import { HtmlToReact } from '@/core/containers/html-to-react';
 import { logger } from '@/core/utils/logger';
-import { TypeFieldEntry } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { TypeFieldEntry } from '@/geo/map/map-schema-types';
 
 import { getSxClasses } from './details-style';
 import { useLightBox } from '../common';

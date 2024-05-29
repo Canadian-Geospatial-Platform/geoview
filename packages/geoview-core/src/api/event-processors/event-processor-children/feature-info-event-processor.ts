@@ -4,11 +4,7 @@ import { EventType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
 import { UIEventProcessor } from './ui-event-processor';
 import { TypeResultSetEntry } from '@/geo/map/map-schema-types';
-import {
-  IFeatureInfoState,
-  TypeFeatureInfoResultSet,
-  TypeFeatureInfoResultSetEntry,
-} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { IFeatureInfoState, TypeFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
@@ -122,15 +118,10 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map identifier of the modified result set.
    * @param {string} layerPath - The layer path that has changed.
    * @param {EventType} eventType - The event type that triggered the layer set update.
-   * @param {TypeFeatureInfoResultSet} resultSet - The result set associated to the map.
+   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry being propagated.
    * @returns {Promise<void>}
    */
-  static propagateFeatureInfoToStore(
-    mapId: string,
-    layerPath: string,
-    eventType: EventType,
-    resultSet: TypeFeatureInfoResultSet
-  ): Promise<void> {
+  static propagateFeatureInfoToStore(mapId: string, eventType: EventType, resultSetEntry: TypeFeatureInfoResultSetEntry): Promise<void> {
     // The feature info state
     const featureInfoState = this.getFeatureInfoState(mapId);
 
@@ -140,7 +131,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
        * Create a details object for each layer which is then used to render layers in details panel.
        */
       const layerDataArray = [...featureInfoState.layerDataArray];
-      if (!layerDataArray.find((layerEntry) => layerEntry.layerPath === layerPath)) layerDataArray.push(resultSet?.[layerPath]);
+      if (!layerDataArray.find((layerEntry) => layerEntry.layerPath === resultSetEntry.layerPath)) layerDataArray.push(resultSetEntry);
       const atLeastOneFeature = layerDataArray.find((layerEntry) => !!layerEntry.features?.length) || false;
 
       // Update the layer data array in the store, all the time, for all statuses

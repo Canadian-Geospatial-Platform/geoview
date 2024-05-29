@@ -10,26 +10,6 @@ import { TypeFeatureInfoEntry, TypeLayerData, TypeResultSet, TypeResultSetEntry 
 
 type DataTableActions = IDataTableState['actions'];
 
-export type TypeAllFeatureInfoResultSetEntry = TypeResultSetEntry & TypeLayerData;
-
-export type TypeAllFeatureInfoResultSet = TypeResultSet<TypeAllFeatureInfoResultSetEntry>;
-
-// Import { MRTColumnFiltersState } from 'material-react-table' fails - This is likely not portable. a type annotation is necessary
-// Create a type to mimic
-export type TypeColumnFiltersState = ColumnFilter[];
-export interface ColumnFilter {
-  id: string;
-  value: unknown;
-}
-
-interface IDataTableSettings {
-  columnFiltersRecord: TypeColumnFiltersState;
-  mapFilteredRecord: boolean;
-  rowsFilteredRecord: number;
-  toolbarRowSelectedMessageRecord: string;
-  globalFilterRecord: string;
-}
-
 export interface IDataTableState {
   allFeaturesDataArray: TypeAllFeatureInfoResultSetEntry[];
   activeLayerData: TypeLayerData[];
@@ -256,10 +236,30 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
   } as IDataTableState;
 }
 
+// Import { MRTColumnFiltersState } from 'material-react-table' fails - This is likely not portable. a type annotation is necessary
+// Create a type to mimic
+export type TypeColumnFiltersState = ColumnFilter[];
+export interface ColumnFilter {
+  id: string;
+  value: unknown;
+}
+
+interface IDataTableSettings {
+  columnFiltersRecord: TypeColumnFiltersState;
+  mapFilteredRecord: boolean;
+  rowsFilteredRecord: number;
+  toolbarRowSelectedMessageRecord: string;
+  globalFilterRecord: string;
+}
+
+export type TypeAllFeatureInfoResultSetEntry = TypeResultSetEntry & TypeLayerData;
+
+export type TypeAllFeatureInfoResultSet = TypeResultSet<TypeAllFeatureInfoResultSetEntry>;
+
 // **********************************************************
 // Data-table state selectors
 // **********************************************************
-export const useDataTableAllFeaturesDataArray = (): TypeLayerData[] =>
+export const useDataTableAllFeaturesDataArray = (): TypeAllFeatureInfoResultSetEntry[] =>
   useStore(useGeoViewStore(), (state) => state.dataTableState.allFeaturesDataArray);
 export const useDataTableSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.dataTableState.selectedLayerPath);
 export const useDataTableLayerSettings = (): Record<string, IDataTableSettings> =>

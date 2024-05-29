@@ -1,13 +1,12 @@
-import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
-import { TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeLegendResultSet } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { AbstractLayerSet } from './abstract-layer-set';
+import { TypeLegend, TypeLegendResultSet, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 /**
- * A class to hold a set of layers associated with an array of TypeLegend. When this class is instantiated, all layers already
+ * A class to hold a set of layers associated with an array of TypeLegendResultSetEntry. When this class is instantiated, all layers already
  * loaded on the specified map will be added to the set. Layers added afterwards will be added to the set and deleted layers
  * will be removed from the set.
  *
@@ -19,11 +18,11 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
   /**
    * Propagate to store
-   * @param {string} layerPath - Layer path to propagate
+   * @param {TypeLegendResultSetEntry} resultSetEntry - The result entry to propagate
    * @private
    */
-  #propagateToStore(layerPath: string): void {
-    LegendEventProcessor.propagateLegendToStore(this.mapId, layerPath, this.resultSet[layerPath]);
+  #propagateToStore(resultSetEntry: TypeLegendResultSetEntry): void {
+    LegendEventProcessor.propagateLegendToStore(this.mapId, resultSetEntry);
   }
 
   /**
@@ -44,7 +43,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
     this.#checkQueryLegend(layerConfig);
 
     // Propagate to the store on registration
-    this.#propagateToStore(layerConfig.layerPath);
+    this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
   }
 
   /**
@@ -60,7 +59,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
     this.#checkQueryLegend(layerConfig);
 
     // Propagate to the store on layer status changed
-    this.#propagateToStore(layerConfig.layerPath);
+    this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
   }
 
   /**
@@ -88,7 +87,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
             this.resultSet[layerConfig.layerPath].data = legend;
 
             // Propagate to the store once the legend is received
-            this.#propagateToStore(layerConfig.layerPath);
+            this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
 
             // Inform that the layer set has been updated by calling parent to emit event
             this.onLayerSetUpdatedProcess(layerConfig);
@@ -109,12 +108,3 @@ export class LegendsLayerSet extends AbstractLayerSet {
     return layerConfig.isGreaterThanOrEqualTo('processed') && this.resultSet[layerConfig.layerPath].legendQueryStatus === 'init';
   }
 }
-
-export type TypeLegendResultInfo = {
-  layerName?: string;
-  layerStatus: TypeLayerStatus;
-  legendQueryStatus: LegendQueryStatus;
-  data: TypeLegend | undefined | null;
-};
-
-export type LegendQueryStatus = 'init' | 'querying' | 'queried';

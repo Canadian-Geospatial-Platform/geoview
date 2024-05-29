@@ -1,6 +1,7 @@
-import { TypeFieldEntry, TypeLayerData } from '@/geo/map/map-schema-types';
+import { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { TypeFieldEntry } from '@/geo/map/map-schema-types';
 
-export interface MappedLayerDataType extends TypeLayerData {
+export interface MappedLayerDataType extends TypeAllFeatureInfoResultSetEntry {
   fieldInfos: Partial<Record<string, TypeFieldEntry>>;
 }
 
