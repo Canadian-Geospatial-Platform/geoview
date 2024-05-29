@@ -25,7 +25,7 @@ export interface IUIState {
   activeFooterBarTabId: string;
   activeTrapGeoView: boolean;
   activeAppBarTab: ActiveAppBarTabType;
-  appBarComponents: TypeValidAppBarCoreProps;
+  appBarComponents: TypeValidAppBarCoreProps[];
   corePackagesComponents: TypeMapCorePackages;
   focusITem: FocusItemProps;
   mapInfoExpanded: boolean;
@@ -214,7 +214,8 @@ export const useUIActiveFocusItem = (): FocusItemProps => useStore(useGeoViewSto
 export const useUIActiveFooterBarTabId = (): string => useStore(useGeoViewStore(), (state) => state.uiState.activeFooterBarTabId);
 export const useActiveAppBarTab = (): ActiveAppBarTabType => useStore(useGeoViewStore(), (state) => state.uiState.activeAppBarTab);
 export const useUIActiveTrapGeoView = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.activeTrapGeoView);
-export const useUIAppbarComponents = (): TypeValidAppBarCoreProps => useStore(useGeoViewStore(), (state) => state.uiState.appBarComponents);
+export const useUIAppbarComponents = (): TypeValidAppBarCoreProps[] =>
+  useStore(useGeoViewStore(), (state) => state.uiState.appBarComponents);
 export const useUICorePackagesComponents = (): TypeMapCorePackages =>
   useStore(useGeoViewStore(), (state) => state.uiState.corePackagesComponents);
 export const useUIFooterPanelResizeValue = (): number => useStore(useGeoViewStore(), (state) => state.uiState.footerPanelResizeValue);
