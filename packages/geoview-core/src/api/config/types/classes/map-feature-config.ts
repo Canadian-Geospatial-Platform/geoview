@@ -3,7 +3,7 @@ import defaultsDeep from 'lodash/defaultsDeep';
 
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { EsriDynamicLayerConfig } from '@config/types/classes/geoview-config/raster-config/esri-dynamic-config';
-import { Cast, TypeJsonArray, TypeJsonObject, toJsonObject } from '@config/types/config-types';
+import { Cast, TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
 import { EsriFeatureLayerConfig } from '@config/types/classes/geoview-config/vector-config/esri-feature-config';
 import {
   CV_BASEMAP_ID,
@@ -34,7 +34,6 @@ import {
   TypeValidMapProjectionCodes,
   TypeValidVersions,
 } from '@config/types/map-schema-types';
-import { isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { logger } from '@/core//utils/logger';
 
 /**
@@ -99,9 +98,9 @@ export class MapFeatureConfig {
    * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
    * @constructor
    */
-  constructor(providedMapFeatureConfig: string | TypeJsonObject, language: TypeDisplayLanguage) {
+  constructor(providedMapFeatureConfig: TypeJsonObject, language: TypeDisplayLanguage) {
     // Convert string to JSON object and clone the config.
-    this.#originalgeoviewLayerConfig = cloneDeep(this.#getJsonMapFeatureConfig(providedMapFeatureConfig));
+    this.#originalgeoviewLayerConfig = cloneDeep(providedMapFeatureConfig);
     const clonedJsonConfig = this.#originalgeoviewLayerConfig;
     this.#language = language;
     this.#errorDetected = this.#errorDetected || !isvalidComparedToSchema(CV_MAP_CONFIG_SCHEMA_PATH, clonedJsonConfig);
@@ -114,7 +113,9 @@ export class MapFeatureConfig {
     );
     this.map.listOfGeoviewLayerConfig = (gvMap.listOfGeoviewLayerConfig as TypeJsonArray)
       .map((geoviewLayerConfig) => {
-        return MapFeatureConfig.nodeFactory(geoviewLayerConfig, this.#language, this);
+        const returnValue = MapFeatureConfig.nodeFactory(geoviewLayerConfig, this.#language, this);
+        if (returnValue === undefined) this.#errorDetected = true;
+        return returnValue;
       })
       .filter((geoviewLayerInstance) => {
         return geoviewLayerInstance;
@@ -134,50 +135,6 @@ export class MapFeatureConfig {
     this.#errorDetected = this.#errorDetected || !isvalidComparedToSchema(CV_MAP_CONFIG_SCHEMA_PATH, this);
     if (this.#errorDetected) this.#makeMapConfigValid(); // Tries to apply a patch to invalid properties
     // this.#metadata = fetchServiceMetadata
-  }
-
-  /**
-   * Get the JSON representation of the map feature configuration.
-   *
-   * @param {string | TypeJsonObject} providedMapFeatureConfig The map feature configuration to initialize.
-   *
-   * @returns {TypeJsonObject} The cloned map feature configuration.
-   * @private
-   */
-  #getJsonMapFeatureConfig(providedMapFeatureConfig: string | TypeJsonObject): TypeJsonObject {
-    if (providedMapFeatureConfig) {
-      return typeof providedMapFeatureConfig === 'string'
-        ? this.#getJsonRepresentation(providedMapFeatureConfig as TypeJsonObject)
-        : (providedMapFeatureConfig as TypeJsonObject);
-    }
-    this.#errorDetected = true;
-    // TODO: Create a special exception for the config.
-    throw new Error(`We cannot create a map feature object without providing a configuration,`);
-  }
-
-  /**
-   * Convert the stringMapFeatureConfig to a json object. Comments will be removed from the string.
-   * @param {TypeJsonObject} stringMapFeatureConfig The map configuration string to convert to JSON format.
-   *
-   * @returns {TypeJsonObject} A JSON map feature configuration object.
-   * @private
-   */
-  #getJsonRepresentation(stringMapFeatureConfig: TypeJsonObject): TypeJsonObject {
-    // Erase comments in the config file.
-    let newStringMapFeatureConfig = removeCommentsFromJSON(stringMapFeatureConfig as string);
-
-    // If you want to use quotes in your JSON string, write \&quot or escape it using a backslash;
-    // First, replace apostrophes not preceded by a backslash with quotes
-    newStringMapFeatureConfig = newStringMapFeatureConfig.replace(/(?<!\\)'/gm, '"');
-    // Then, replace apostrophes preceded by a backslash with a single apostrophe
-    newStringMapFeatureConfig = newStringMapFeatureConfig.replace(/\\'/gm, "'");
-
-    if (isJsonString(newStringMapFeatureConfig)) {
-      // Create the config
-      return JSON.parse(newStringMapFeatureConfig);
-    }
-    this.#errorDetected = true;
-    return toJsonObject(CV_DEFAULT_MAP_FEATURE_CONFIG);
   }
 
   /**
@@ -233,7 +190,9 @@ export class MapFeatureConfig {
     language: TypeDisplayLanguage,
     mapFeatureConfig?: MapFeatureConfig
   ): AbstractGeoviewLayerConfig | undefined {
-    switch (layerConfig.geoviewLayerType) {
+    const geoviewLayerType =
+      layerConfig.geoviewLayerType.toString().toLowerCase() === 'geocore' ? 'geocore' : (layerConfig.geoviewLayerType as string);
+    switch (geoviewLayerType) {
       // case CONST_LAYER_TYPES.CSV:
       //   return new CsvLayerConfig(layerConfig);
       case CV_CONST_LAYER_TYPES.ESRI_DYNAMIC:
@@ -256,6 +215,9 @@ export class MapFeatureConfig {
       //   return new WfsLayerConfig(layerConfig);
       // case CONST_LAYER_TYPES.WMS:
       //   return new WmsLayerConfig(layerConfig);
+      case 'geocore':
+        logger.logError(`Unable to process Geocore layer (${layerConfig.geoviewLayerId}).`);
+        break;
       default:
         logger.logError(`Invalid GeoView layerType (${layerConfig.geoviewLayerType}).`);
     }

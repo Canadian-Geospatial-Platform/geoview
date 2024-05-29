@@ -4,6 +4,7 @@ import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
 import { UUIDmapConfigReader } from '@config/uuid-config-reader';
 import { TypeDisplayLanguage } from '@config/types/map-schema-types';
 import { logger } from '@/core//utils/logger';
+import { isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
 
 /**
  * The API class that create configuration object. It is used to validate and read the service and layer metadata.
@@ -73,6 +74,30 @@ export class ConfigApi {
     }
 
     return obj;
+  }
+
+  /**
+   * Convert the stringMapFeatureConfig to a json object. Comments will be removed from the string.
+   * @param {string} stringMapFeatureConfig The map configuration string to convert to JSON format.
+   *
+   * @returns {TypeJsonObject} A JSON map feature configuration object.
+   * @private
+   */
+  static #getJsonObjectFromString(stringMapFeatureConfig: string): TypeJsonObject | undefined {
+    // Erase comments in the config file.
+    let newStringMapFeatureConfig = removeCommentsFromJSON(stringMapFeatureConfig as string);
+
+    // If you want to use quotes in your JSON string, write \&quot or escape it using a backslash;
+    // First, replace apostrophes not preceded by a backslash with quotes
+    newStringMapFeatureConfig = newStringMapFeatureConfig.replace(/(?<!\\)'/gm, '"');
+    // Then, replace apostrophes preceded by a backslash with a single apostrophe
+    newStringMapFeatureConfig = newStringMapFeatureConfig.replace(/\\'/gm, "'");
+
+    if (isJsonString(newStringMapFeatureConfig)) {
+      // Create the config
+      return JSON.parse(newStringMapFeatureConfig);
+    }
+    return undefined;
   }
 
   /**
@@ -177,7 +202,48 @@ export class ConfigApi {
    *
    * @returns {MapFeatureConfig} The map feature configuration.
    */
-  static getMapConfig(mapConfig: string | TypeJsonObject, language: TypeDisplayLanguage): MapFeatureConfig {
-    return new MapFeatureConfig(mapConfig, language);
+  static async getMapConfig(mapConfig: string | TypeJsonObject, language: TypeDisplayLanguage): Promise<MapFeatureConfig> {
+    const providedMapFeatureConfig: TypeJsonObject | undefined =
+      typeof mapConfig === 'string' ? ConfigApi.#getJsonObjectFromString(mapConfig as string) : (mapConfig as TypeJsonObject);
+
+    if (providedMapFeatureConfig) {
+      if (Array.isArray(providedMapFeatureConfig?.map?.listOfGeoviewLayerConfig)) {
+        const geocoreUrl = (providedMapFeatureConfig?.serviceUrls?.geocoreUrl ||
+          CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls.geocoreUrl) as string;
+        providedMapFeatureConfig.map.listOfGeoviewLayerConfig.forEach((layerConfig, i) => {
+          if (layerConfig.geoviewLayerType.toString().toLowerCase() === 'geocore')
+            providedMapFeatureConfig.map.listOfGeoviewLayerConfig[i].geoviewLayerType = 'geocore' as TypeJsonObject;
+        });
+        const geocoreArray = providedMapFeatureConfig.map.listOfGeoviewLayerConfig.filter(
+          (layerConfig) => layerConfig.geoviewLayerType === 'geocore'
+        );
+        const geocoreArrayOfKeys = geocoreArray.map<string>((geocoreLayer) => {
+          return geocoreLayer.geoviewLayerId as string;
+        });
+        try {
+          // Get the layers config
+          const arrayOfJsonConfig = await UUIDmapConfigReader.getGVConfigFromUUIDs(geocoreUrl, language, geocoreArrayOfKeys);
+          providedMapFeatureConfig.map.listOfGeoviewLayerConfig.forEach((layerConfig, i) => {
+            if (layerConfig.geoviewLayerType === 'geocore') {
+              const jsonConfigFound = arrayOfJsonConfig.find(
+                (jsonConfig) => jsonConfig.geoviewLayerId === `rcs.${layerConfig.geoviewLayerId}.${language}`
+              );
+              if (jsonConfigFound) {
+                providedMapFeatureConfig.map.listOfGeoviewLayerConfig[i] = jsonConfigFound;
+                providedMapFeatureConfig.map.listOfGeoviewLayerConfig[i].geoviewLayerId = layerConfig.geoviewLayerId;
+                providedMapFeatureConfig.map.listOfGeoviewLayerConfig[i].isGeocore = true as TypeJsonObject;
+              }
+            }
+          });
+          return new MapFeatureConfig(providedMapFeatureConfig!, language);
+        } catch (error) {
+          // Log
+          logger.logError('Failed to get the GeoView layers', geocoreArrayOfKeys, geocoreUrl, error);
+        }
+      }
+    }
+    const defaultMapConfig = ConfigApi.getDefaultMapFeatureConfig(language);
+    defaultMapConfig.propagateError();
+    return defaultMapConfig;
   }
 }

@@ -13,11 +13,42 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "12acd145-626a-49eb-b850-0a59c9bc7506",
-        "isGeocore": true
+        "geoviewLayerType": "geocore"
+      },
+      {
+        "geoviewLayerId": "LYR1",
+        "geoviewLayerName": {
+          "en": "Temporal Test Bed",
+          "fr": "Banc d\\'essai temporel"
+        },
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/",
+          "fr": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_fr/MapServer/"
+        },
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "geometryType": "point",
+            "layerName": {
+              "en": "stations-Temporal",
+              "fr": "stations-Temporal"
+            },
+            "initialSettings": {
+              "controls": {
+                "query": true
+              },
+              "states": {
+                "queryable": true
+              }
+            },
+            "attributions": []
+          }
+        ]
       },
       {
         "geoviewLayerId": "ccc75c12-5acc-4a6a-959f-ef6f621147b9",
-        "isGeocore": true
+        "geoviewLayerType": "geocore"
       }
     ],
     "highlightColor": "black",
