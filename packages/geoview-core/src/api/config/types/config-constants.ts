@@ -190,4 +190,5 @@ export const CV_DEFAULT_APPBAR_CORE = {
   GUIDE: 'guide',
   DETAILS: 'details',
   LEGEND: 'legend',
+  DATA_TABLE: 'data-table',
 } as const;

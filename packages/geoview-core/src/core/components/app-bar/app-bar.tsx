@@ -257,7 +257,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('APP-BAR - create group of AppBar buttons');
-    console.log('geo view element', geoviewElement);
+
     // render footer bar tabs
     (appBarConfig?.tabs.core ?? [])
       .filter((tab) => CV_DEFAULT_APPBAR_TABS_ORDER.includes(tab))
