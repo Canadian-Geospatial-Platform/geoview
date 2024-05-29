@@ -8,7 +8,6 @@ import { Map } from '@/core/components/map/map';
 import { AppBar } from '@/core/components/app-bar/app-bar';
 import { NavBar } from '@/core/components/nav-bar/nav-bar';
 import { FooterBar } from '@/core/components/footer-bar/footer-bar';
-import { Geolocator } from '@/core/components/geolocator/geolocator';
 import { MapInfo } from '@/core/components/map-info/map-info';
 
 import { Box, CircularProgress, Link, Modal, Snackbar, Button, TypeModalProps, ModalApi, ModalEvent } from '@/ui';
@@ -22,7 +21,6 @@ import {
 import {
   useUIActiveFocusItem,
   useUIActiveTrapGeoView,
-  useUIAppbarComponents,
   useUIFooterPanelResizeValue,
   useUIFooterPanelResizeValues,
   useUIFooterBarIsCollapsed,
@@ -84,7 +82,6 @@ export function Shell(props: ShellProps): JSX.Element {
   const circularProgressActive = useAppCircularProgressActive();
   const activeTrapGeoView = useUIActiveTrapGeoView();
   const interaction = useMapInteraction();
-  const appBarComponents = useUIAppbarComponents();
   const geoviewConfig = useGeoViewConfig();
   const focusItem = useUIActiveFocusItem();
   const isMapFullScreen = useAppFullscreenActive();
@@ -313,8 +310,6 @@ export function Shell(props: ShellProps): JSX.Element {
           <CircularProgress isLoaded={!circularProgressActive} />
           <Box id={`map-${mapViewer.mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
             <AppBar api={mapViewer.appBarApi} />
-            {/* load geolocator component if config includes in list of components in appBar */}
-            {appBarComponents.includes('geolocator') && interaction === 'dynamic' && <Geolocator />}
             <Box sx={sxClasses.mapContainer} ref={mapContainerRef}>
               <Map viewer={mapViewer} />
               <MapInfo />

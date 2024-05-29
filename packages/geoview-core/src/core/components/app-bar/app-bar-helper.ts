@@ -1,10 +1,8 @@
 import { Dispatch, SetStateAction } from 'react';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
+import { ButtonPanelGroupType, ButtonPanelType } from './app-bar';
 
-export const helpFindGroupName = (
-  buttonPanelGroups: Record<string, Record<string, TypeButtonPanel>>,
-  buttonId: string
-): string | undefined => {
+export const helpFindGroupName = (buttonPanelGroups: ButtonPanelGroupType, buttonId: string): string | undefined => {
   let groupName: string | undefined;
   Object.entries(buttonPanelGroups).forEach(([buttonPanelGroupName, buttonPanelGroup]) => {
     if (!groupName) {
@@ -18,60 +16,41 @@ export const helpFindGroupName = (
 };
 
 export const helpOpenClosePanelByIdState = (
-  buttonPanelGroups: Record<string, Record<string, TypeButtonPanel>>,
+  buttonPanelGroups: ButtonPanelGroupType,
   buttonId: string,
   groupName: string | undefined,
-  setterCallback: Dispatch<SetStateAction<Record<string, Record<string, TypeButtonPanel>>>>,
+  setterCallback: Dispatch<SetStateAction<ButtonPanelGroupType>>,
   status: boolean
 ): void => {
   // Read the group name
   const theGroupName = groupName || helpFindGroupName(buttonPanelGroups, buttonId);
   if (!theGroupName) return;
-
   // Open or Close it
   setterCallback((prevState) => {
-    // Check if doing it
-    const doIt = !!(
-      prevState[theGroupName] &&
-      prevState[theGroupName][buttonId] &&
-      prevState[theGroupName][buttonId].panel &&
-      prevState[theGroupName][buttonId].panel?.status !== status
-    );
+    const panelGroups = {} as ButtonPanelGroupType;
+    Object.entries(prevState).forEach(([buttonPanelGroupName, buttonPanelGroup]) => {
+      panelGroups[buttonPanelGroupName] = Object.entries(buttonPanelGroup).reduce((acc, [buttonGroupName, buttonGroup]) => {
+        acc[buttonGroupName] = {
+          ...buttonGroup,
+          ...(buttonGroup.panel && { panel: { ...buttonGroup.panel, status: buttonGroupName === buttonId ? status : false } }),
+        };
 
-    // If is open/closed right now
-    if (doIt) {
-      return {
-        ...prevState,
-        [theGroupName]: {
-          ...prevState[theGroupName],
-          [buttonId]: {
-            ...prevState[theGroupName][buttonId],
-            panel: {
-              ...prevState[theGroupName][buttonId].panel!,
-              status,
-            },
-          },
-        },
-      };
-    }
+        return acc;
+      }, {} as ButtonPanelType);
+    });
 
-    // Leave as-is
-    return prevState;
+    return panelGroups;
   });
 };
 
 export const helpOpenPanelById = (
-  buttonPanelGroups: Record<string, Record<string, TypeButtonPanel>>,
+  buttonPanelGroups: ButtonPanelGroupType,
   buttonId: string,
   groupName: string | undefined,
-  setterCallback: Dispatch<SetStateAction<Record<string, Record<string, TypeButtonPanel>>>>,
-  closeAllCallback: () => void
+  setterCallback: Dispatch<SetStateAction<ButtonPanelGroupType>>
 ): void => {
   // Read the group name
   const theGroupName = groupName || helpFindGroupName(buttonPanelGroups, buttonId);
-
-  // Close any already opened panels
-  closeAllCallback();
 
   // Open the panel
   helpOpenClosePanelByIdState(buttonPanelGroups, buttonId, theGroupName, setterCallback, true);
@@ -102,17 +81,21 @@ export const helpClosePanelById = (
 };
 
 export const helpCloseAll = (
-  buttonPanelGroups: Record<string, Record<string, TypeButtonPanel>>,
-  closeCallback: (buttonId: string, groupName: string | undefined) => void
+  buttonPanelGroups: ButtonPanelGroupType,
+  setterCallback: Dispatch<SetStateAction<ButtonPanelGroupType>>
 ): void => {
-  // For each group
+  const panelGroups = {} as ButtonPanelGroupType;
   Object.entries(buttonPanelGroups).forEach(([buttonPanelGroupName, buttonPanelGroup]) => {
-    // For each button
-    Object.keys(buttonPanelGroup).forEach((buttonId) => {
-      // Callback to close it
-      closeCallback(buttonId, buttonPanelGroupName);
-    });
+    panelGroups[buttonPanelGroupName] = Object.entries(buttonPanelGroup).reduce((acc, [buttonGroupName, buttonGroup]) => {
+      acc[buttonGroupName] = {
+        ...buttonGroup,
+        ...(buttonGroup.panel && { panel: { ...buttonGroup.panel, status: false } }),
+      };
+      return acc;
+    }, {} as ButtonPanelType);
   });
+
+  setterCallback(panelGroups);
 };
 
 export const enforceArrayOrder = (sourceArray: string[], enforce: string[]): string[] => {

@@ -48,7 +48,6 @@
   },
   "appbar": {
     "export": "Export",
-    "geolocator": "Geolocator",
     "notifications": "Notifications",
     "no_notifications_available": "No notifications available",
     "fullscreen": "Full Screen",
@@ -180,6 +179,7 @@
     "approx": "approx"
   },
   "geolocator": {
+    "title": "Geolocator",
     "search": "Search",
     "errorMessage": "No matches found for",
     "province": "Province",

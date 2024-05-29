@@ -110,7 +110,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
           <IconButton
             edge="end"
             tooltip="layers.visibilityIsAlways"
-            className="style1"
+            className="buttonOutline"
             onClick={(e) => handleToggleVisibility(e)}
             disabled={!isLayerVisible}
           >
@@ -119,12 +119,12 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
           <IconButton
             tooltip="legend.highlightLayer"
             sx={{ marginTop: '-0.3125rem' }}
-            className="style1"
+            className="buttonOutline"
             onClick={(e) => handleHighlightLayer(e)}
           >
             {highlightedLayer === layer.layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
           </IconButton>
-          <IconButton tooltip="legend.zoomTo" className="style1" onClick={(e) => handleZoomTo(e)}>
+          <IconButton tooltip="legend.zoomTo" className="buttonOutline" onClick={(e) => handleZoomTo(e)}>
             <ZoomInSearchIcon />
           </IconButton>
         </Stack>
@@ -203,7 +203,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
             />
           </Tooltip>
           {!!(layer.children?.length > 1 || layer.items?.length > 1) && (
-            <IconButton sx={{ marginBottom: '20px' }} className="style1" edge="end" size="small" tooltip="layers.toggleCollapse">
+            <IconButton sx={{ marginBottom: '20px' }} className="buttonOutline" edge="end" size="small" tooltip="layers.toggleCollapse">
               {isGroupOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
             </IconButton>
           )}
