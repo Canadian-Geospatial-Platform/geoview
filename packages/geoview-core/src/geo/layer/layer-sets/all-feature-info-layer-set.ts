@@ -68,7 +68,6 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     super.onRegisterLayer(layerConfig);
 
     // Update the resultSet data
-    this.resultSet[layerConfig.layerPath].layerPath = layerConfig.layerPath;
     this.resultSet[layerConfig.layerPath].eventListenerEnabled = true;
     this.resultSet[layerConfig.layerPath].queryStatus = 'processed';
     this.resultSet[layerConfig.layerPath].features = [];
@@ -105,7 +104,6 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     // Call parent. After this call, this.resultSet?.[layerPath]?.layerStatus may have changed!
     super.onProcessLayerStatusChanged(layerConfig, layerStatus);
 
-    // If the layer status isn't an error
     // Propagate to the store on layer status changed
     this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
   }
@@ -128,45 +126,44 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     // If valid layer path
     if (this.layerApi.isLayerEntryConfigRegistered(layerPath) && this.resultSet[layerPath]) {
       // Get the layer config and layer associated with the layer path
-      const layer = this.layerApi.getGeoviewLayerHybrid(layerPath)!;
-      const layerConfig = layer.getLayerConfig(layerPath)!;
+      const layer = this.layerApi.getGeoviewLayerHybrid(layerPath);
+      const layerConfig = layer?.getLayerConfig(layerPath);
 
       // If event listener disabled
       if (!this.resultSet[layerPath].eventListenerEnabled) return Promise.resolve();
-
-      const { data } = this.resultSet[layerPath];
-      // If event listener disabled
-      if (!this.resultSet[layerPath].data.eventListenerEnabled) return Promise.resolve();
       if (!AbstractLayerSet.isQueryable(layerConfig)) return Promise.resolve();
 
-      const { data } = this.resultSet[layerPath];
-      if (layerConfig.layerStatus === 'loaded') {
-        this.resultSet[layerPath].features = undefined;
-        this.resultSet[layerPath].queryStatus = 'processing';
+      // If layer is good
+      if (layer && layerConfig) {
+        // If layer is loaded
+        if (layerConfig.layerStatus === 'loaded') {
+          this.resultSet[layerPath].features = undefined;
+          this.resultSet[layerPath].queryStatus = 'processing';
+
+          // Propagate to the store
+          this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
+
+          // Process query on results data
+          const promiseResult = AbstractLayerSet.queryLayerFeatures(this.resultSet[layerPath], layerConfig, layer, queryType, layerPath);
+
+          // Wait for promise to resolve
+          const arrayOfRecords = await promiseResult;
+
+          // Keep the features retrieved
+          this.resultSet[layerPath].features = arrayOfRecords;
+
+          // When property features is undefined, we are waiting for the query result.
+          // when Array.isArray(features) is true, the features property contains the query result.
+          // when property features is null, the query ended with an error.
+          this.resultSet[layerPath].queryStatus = arrayOfRecords ? 'processed' : 'error';
+        } else {
+          this.resultSet[layerPath].features = null;
+          this.resultSet[layerPath].queryStatus = 'error';
+        }
 
         // Propagate to the store
         this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
-
-        // Process query on results data
-        const promiseResult = AbstractLayerSet.queryLayerFeatures(this.resultSet[layerPath], layerConfig, layer, queryType, layerPath);
-
-        // Wait for promise to resolve
-        const arrayOfRecords = await promiseResult;
-
-        // Keep the features retrieved
-        this.resultSet[layerPath].features = arrayOfRecords;
-
-        // When property features is undefined, we are waiting for the query result.
-        // when Array.isArray(features) is true, the features property contains the query result.
-        // when property features is null, the query ended with an error.
-        this.resultSet[layerPath].queryStatus = arrayOfRecords ? 'processed' : 'error';
-      } else {
-        this.resultSet[layerPath].features = null;
-        this.resultSet[layerPath].queryStatus = 'error';
       }
-
-      // Propagate to the store
-      this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
 
       // Return the resultsSet
       return this.resultSet;

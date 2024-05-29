@@ -68,16 +68,6 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     this.resultSet[layerConfig.layerPath].feature = undefined;
   }
 
-  // /**
-  //  * Overrides the behavior to apply when a layer status changed for a hover-feature-info-layer-set.
-  //  * @param {ConfigBaseClass} layerConfig - The layer config
-  //  * @param {string} layerStatus - The new layer status
-  //  */
-  // protected override onProcessLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatus: TypeLayerStatus): void {
-  //   // Call parent. After this call, this.resultSet?.[layerPath]?.layerStatus may have changed!
-  //   super.onProcessLayerStatusChanged(layerConfig, layerStatus);
-  // }
-
   /**
    * Queries the features at the provided coordinate for all the registered layers.
    * @param {Coordinate} pixelCoordinate - The pixel coordinate where to query the features
@@ -89,13 +79,14 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     // Reinitialize the resultSet
     // Loop on each layer path in the resultSet
     Object.keys(this.resultSet).forEach((layerPath) => {
-      const layer = this.layerApi.getGeoviewLayerHybrid(layerPath)!;
-      const layerConfig = layer.getLayerConfig(layerPath)!;
+      const layer = this.layerApi.getGeoviewLayerHybrid(layerPath);
+      const layerConfig = layer?.getLayerConfig(layerPath);
 
       if (!this.resultSet[layerPath].eventListenerEnabled) return;
       if (!AbstractLayerSet.isQueryable(layerConfig)) return;
 
-      if (layerConfig.layerStatus === 'loaded') {
+      // If layer is loaded
+      if (layer && layerConfig?.layerStatus === 'loaded') {
         this.resultSet[layerPath].feature = undefined;
         this.resultSet[layerPath].queryStatus = 'init';
 

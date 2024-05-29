@@ -165,7 +165,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
   /**
    * Propagates feature info layer sets to the store. The update of the array will also trigger an update in a batched manner.
    * @param {string} mapId The map id
-   * @param {string} layerDataArray The layer data array to propagate in the store
+   * @param {TypeGeochartResultSetEntry[]} layerDataArray The layer data array to propagate in the store
    * @returns {Promise<void>}
    * @private
    */
@@ -185,7 +185,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * The propagation can be bypassed using the store 'layerDataArrayBatchLayerPathBypass' state which tells the process to
    * immediately batch out the array in the store for faster triggering of the state, for faster updating of the UI.
    * @param {string} mapId - The map id
-   * @param {TypeLayerData[]} layerDataArray - The layer data array to batch on
+   * @param {TypeGeochartResultSetEntry[]} layerDataArray - The layer data array to batch on
    * @returns {Promise<void>} Promise upon completion
    * @private
    */

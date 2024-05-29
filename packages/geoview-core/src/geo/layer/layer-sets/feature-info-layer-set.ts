@@ -89,7 +89,6 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     super.onRegisterLayer(layerConfig);
 
     // Update the resultSet data
-    this.resultSet[layerConfig.layerPath].layerPath = layerConfig.layerPath;
     this.resultSet[layerConfig.layerPath].eventListenerEnabled = true;
     this.resultSet[layerConfig.layerPath].queryStatus = 'processed';
     this.resultSet[layerConfig.layerPath].features = [];
@@ -122,7 +121,6 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // Call parent. After this call, this.resultSet?.[layerPath]?.layerStatus may have changed!
     super.onProcessLayerStatusChanged(layerConfig, layerStatus);
 
-    // If the layer status isn't an error
     // Propagate to the store on layer status changed
     this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
   }
@@ -176,13 +174,14 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // Loop on each layer path in the resultSet
     Object.keys(this.resultSet).forEach((layerPath) => {
       // Get the layer config and layer associated with the layer path
-      const layer = this.layerApi.getGeoviewLayerHybrid(layerPath)!;
-      const layerConfig = layer.getLayerConfig(layerPath)!;
+      const layer = this.layerApi.getGeoviewLayerHybrid(layerPath);
+      const layerConfig = layer?.getLayerConfig(layerPath);
 
       if (!this.resultSet[layerPath].eventListenerEnabled) return;
       if (!AbstractLayerSet.isQueryable(layerConfig)) return;
 
-      if (layerConfig.layerStatus === 'loaded') {
+      // If layer is loaded
+      if (layer && layerConfig?.layerStatus === 'loaded') {
         this.resultSet[layerPath].features = undefined;
         this.resultSet[layerPath].queryStatus = 'processing';
 

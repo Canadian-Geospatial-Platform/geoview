@@ -150,28 +150,12 @@ export abstract class AbstractLayerSet {
     // Change the layer status!
     this.resultSet[layerConfig.layerPath].layerStatus = layerStatus;
 
-    // TODO: Cleanup - Commenting this for now.. not that useful and confusing with other similar processing happening in other places too..
-    // if (['processed', 'error'].includes(layerStatus) && !this.resultSet[layerPath].layerName) {
-    //   const layerConfig = this.layerApi.getLayerEntryConfig(layerPath)!;
-    //   const layerName = getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId));
-    //   if (layerName) this.resultSet[layerPath].layerName = layerName;
-    //   else {
-    //     this.resultSet[layerPath].layerName = getLocalizedValue(
-    //       {
-    //         en: `Anonymous Layer`,
-    //         fr: `Couche Anonyme`,
-    //       },
-    //       AppEventProcessor.getDisplayLanguage(this.mapId)
-    //     );
-    //   }
-
-    //   // Synchronize the layer name property in the config and the layer set object when the geoview instance is ready.
-    //   if (!layerConfig.layerName) layerConfig.layerName = createLocalizedString(this.resultSet[layerPath].layerName!);
-
-    //   // There is a synch issue when layerName is not set on the layerConfig when layer is registered, it wil not appear in UI
-    //   if (this.resultSet[layerPath].data)
-    //     (Cast<TypeJsonObject>(this.resultSet[layerPath].data).layerName as string) = this.resultSet[layerPath].layerName!;
-    // }
+    // Update the name with a possibly updated layerName during layer status progression
+    // (depending on this translates in the new layers process, might not need this anymore)
+    this.resultSet[layerConfig.layerPath].layerName = getLocalizedValue(
+      layerConfig.layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
+      AppEventProcessor.getDisplayLanguage(this.getMapId())
+    )!;
   }
 
   /**
@@ -215,7 +199,8 @@ export abstract class AbstractLayerSet {
    * Checks if the layer config is queryable
    * @param {ConfigBaseClass} layerConfig - The layer config
    */
-  protected static isQueryable(layerConfig: ConfigBaseClass): boolean {
+  protected static isQueryable(layerConfig: ConfigBaseClass | undefined): boolean {
+    // TODO: Add a check on the initialSettings.state.queryable here too?
     return !!(layerConfig as AbstractBaseLayerEntryConfig)?.source?.featureInfo?.queryable;
   }
 

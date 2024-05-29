@@ -67,13 +67,16 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * @param {ConfigBaseClass} layerConfig - The layer config
    */
   #checkQueryLegend(layerConfig: ConfigBaseClass): void {
+    // Get the layer
+    const layer = this.layerApi.getGeoviewLayerHybrid(layerConfig.layerPath);
+
     // If the layer legend should be queried
-    if (this.#layerPathShouldBeQueried(layerConfig)) {
+    if (layer && this.#legendShouldBeQueried(layerConfig)) {
       // Flag
       this.resultSet[layerConfig.layerPath].legendQueryStatus = 'querying';
 
       // Query the legend
-      const legendPromise = this.layerApi.getGeoviewLayerHybrid(layerConfig.layerPath)?.queryLegend(layerConfig.layerPath);
+      const legendPromise = layer.queryLegend(layerConfig.layerPath);
 
       // Whenever the legend response comes in
       legendPromise
@@ -103,8 +106,8 @@ export class LegendsLayerSet extends AbstractLayerSet {
   /**
    * Indicates if the layer path should be queried
    */
-  #layerPathShouldBeQueried(layerConfig: ConfigBaseClass): boolean {
+  #legendShouldBeQueried(layerConfig: ConfigBaseClass | undefined): boolean {
     // A legend is ready to be queried when its status is > processed and legendQueryStatus is 'init' (not already queried)
-    return layerConfig.isGreaterThanOrEqualTo('processed') && this.resultSet[layerConfig.layerPath].legendQueryStatus === 'init';
+    return !!layerConfig?.isGreaterThanOrEqualTo('processed') && this.resultSet[layerConfig.layerPath].legendQueryStatus === 'init';
   }
 }

@@ -169,7 +169,6 @@ export class LayerApi {
    * @returns {string} The map id
    */
   getMapId(): string {
-    // TODO: Check - Resign to `getMapId()` instead?
     return this.mapViewer.mapId;
   }
 
@@ -179,7 +178,6 @@ export class LayerApi {
    * @returns {string[]} The GeoView Layer Ids
    */
   getGeoviewLayerIds(): string[] {
-    // TODO: Refactor - This function could be removed eventually?
     return Object.keys(this.#geoviewLayers);
   }
 
@@ -660,10 +658,6 @@ export class LayerApi {
       layerBeingAdded.onLayerEntryProcessed((geoviewLayer, event) => {
         // Log
         logger.logDebug(`Layer entry config processed for ${event.config.layerPath} on map ${this.getMapId()}`, event.config);
-
-        // GV Leaving the commented line here, might come handy for layer refactoring migration
-        // Register it
-        // this.registerLayerConfigInit(event.config);
       });
 
       // Register when OpenLayer layer has been created
@@ -677,13 +671,8 @@ export class LayerApi {
         // If new layers mode, create the corresponding GVLayer
         if (LayerApi.NEW_MODE) {
           // Create the right type of GVLayer
-          const gvLayer = LayerApi.createGVLayer(event.layer, this.getMapId(), geoviewLayer, event.config);
-          if (gvLayer) this.#gvLayers[event.config.layerPath] = gvLayer;
+          this.createGVLayer(event.layer, this.getMapId(), geoviewLayer, event.config);
         }
-
-        // GV Leaving the commented line here, might come handy for layer refactoring migration
-        // Register it
-        // this.registerLayerConfigInit(event.config as TypeLayerEntryConfig);
       });
 
       // Create a promise about the layer will be on the map
@@ -1215,7 +1204,7 @@ export class LayerApi {
     EventHelper.offEvent(this.#onLayerAddedHandlers, callback);
   }
 
-  static createGVLayer(
+  createGVLayer(
     olLayer: BaseLayer,
     mapId: string,
     geoviewLayer: AbstractGeoViewLayer,
@@ -1294,6 +1283,9 @@ export class LayerApi {
 
     // If created
     if (gvLayer) {
+      // Keep track
+      this.#gvLayers[config.layerPath] = gvLayer;
+
       // Initialize the layer
       gvLayer.init();
 
