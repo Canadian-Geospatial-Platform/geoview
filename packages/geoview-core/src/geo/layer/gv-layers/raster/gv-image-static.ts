@@ -4,7 +4,7 @@ import { Extent } from 'ol/extent';
 import axios from 'axios';
 
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
-import { CONST_LAYER_TYPES, TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { Projection } from '@/geo/utils/projection';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
@@ -14,6 +14,7 @@ import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-clas
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from './abstract-gv-raster';
+import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 /**
  * Manages an Image static layer.

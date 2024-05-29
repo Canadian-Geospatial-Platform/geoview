@@ -1,8 +1,9 @@
-// We use _ for layerPth and olLayer all over the file. We keep it global...
 import { Extent } from 'ol/extent';
 import BaseLayer from 'ol/layer/Base';
 import Feature from 'ol/Feature';
 import RenderFeature from 'ol/render/Feature';
+import { Coordinate } from 'ol/coordinate';
+import { Pixel } from 'ol/pixel';
 
 import {
   TypeBasemapOptions,
@@ -215,21 +216,9 @@ export type TypeLayerData = {
   features: TypeFeatureInfoEntry[] | undefined | null;
 };
 
-export type TypeHoverLayerData = {
-  eventListenerEnabled: boolean;
-  queryStatus: TypeQueryStatus;
-  feature: TypeHoverFeatureInfo;
-};
+export type QueryType = 'at_pixel' | 'at_coordinate' | 'at_long_lat' | 'using_a_bounding_box' | 'using_a_polygon' | 'all';
 
-export type TypeHoverFeatureInfo =
-  | {
-      geoviewLayerType: TypeGeoviewLayerType;
-      featureIcon: HTMLCanvasElement;
-      fieldInfo: TypeFieldEntry | undefined;
-      nameField: string | null;
-    }
-  | undefined
-  | null;
+export type TypeLocation = null | Pixel | Coordinate | Coordinate[] | string;
 
 export type TypeQueryStatus = 'init' | 'processing' | 'processed' | 'error';
 

@@ -8,7 +8,7 @@ import { Extent } from 'ol/extent';
 
 import { TypeLocalizedString } from '@config/types/map-schema-types';
 import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
-import { CONST_LAYER_TYPES, TypeLegend, TypeWmsLegend, TypeWmsLegendStyle } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { CONST_LAYER_TYPES, TypeWmsLegend, TypeWmsLegendStyle } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { xmlToJson, getLocalizedValue } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
@@ -16,10 +16,11 @@ import { Projection } from '@/geo/utils/projection';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from './abstract-gv-raster';
+import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 /**
  * Manages a WMS layer.

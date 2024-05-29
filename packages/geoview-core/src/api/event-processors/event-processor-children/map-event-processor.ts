@@ -11,13 +11,7 @@ import { TypeBasemapOptions, TypeInteraction, TypeValidMapProjectionCodes } from
 import { api } from '@/app';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
-import {
-  TypeFeatureInfoEntry,
-  TypeGeometry,
-  TypeGeoviewLayerConfig,
-  TypeHoverFeatureInfo,
-  TypeLayerEntryConfig,
-} from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoEntry, TypeGeometry, TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { Projection } from '@/geo/utils/projection';
@@ -32,7 +26,7 @@ import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-pr
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeClickMarker } from '@/core/components';
 import { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { TypeFeatureInfoResultSet } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { TypeFeatureInfoResultSet, TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:

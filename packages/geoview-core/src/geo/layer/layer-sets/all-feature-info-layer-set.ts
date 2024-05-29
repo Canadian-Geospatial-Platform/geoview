@@ -1,14 +1,17 @@
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import { logger } from '@/core/utils/logger';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { QueryType, TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
-import { AbstractLayerSet, QueryType } from './abstract-layer-set';
-import { TypeAllFeatureInfoResultSet } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { AbstractLayerSet } from './abstract-layer-set';
+import {
+  TypeAllFeatureInfoResultSet,
+  TypeAllFeatureInfoResultSetEntry,
+} from '@/core/stores/store-interface-and-intial-values/data-table-state';
 
 /**
- * A class containing a set of layers associated with a TypeLayerData object, which will receive the result of a
+ * A class containing a set of layers associated with a TypeAllFeatureInfoResultSet object, which will receive the result of a
  * "get  all feature info" request made on a specific layer of the map. The query is made for one layer at a time.
  *
  * @class AllFeatureInfoLayerSet
@@ -19,11 +22,11 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Propagate to store
-   * @param {string} layerPath - Layer path to propagate
+   * @param {TypeAllFeatureInfoResultSetEntry} resultSetEntry - The result entry to propagate
    * @private
    */
-  #propagateToStore(layerPath: string): void {
-    DataTableEventProcessor.propagateFeatureInfoToStore(this.getMapId(), layerPath, this.resultSet);
+  #propagateToStore(resultSetEntry: TypeAllFeatureInfoResultSetEntry): void {
+    DataTableEventProcessor.propagateFeatureInfoToStore(this.getMapId(), resultSetEntry);
   }
 
   /**
@@ -71,7 +74,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     this.resultSet[layerConfig.layerPath].features = [];
 
     // Propagate to store on registration
-    this.#propagateToStore(layerConfig.layerPath);
+    this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
     DataTableEventProcessor.setInitialSettings(this.getMapId(), layerConfig.layerPath);
   }
 
@@ -104,7 +107,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
     // If the layer status isn't an error
     // Propagate to the store on layer status changed
-    this.#propagateToStore(layerConfig.layerPath);
+    this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
   }
 
   /**
@@ -142,7 +145,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
         this.resultSet[layerPath].queryStatus = 'processing';
 
         // Propagate to the store
-        DataTableEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, this.resultSet);
+        this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
 
         // Process query on results data
         const promiseResult = AbstractLayerSet.queryLayerFeatures(this.resultSet[layerPath], layerConfig, layer, queryType, layerPath);
@@ -162,8 +165,8 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
         this.resultSet[layerPath].queryStatus = 'error';
       }
 
-      // Propagate to the store on layer status changed
-      this.#propagateToStore(layerConfig.layerPath);
+      // Propagate to the store
+      this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
 
       // Return the resultsSet
       return this.resultSet;

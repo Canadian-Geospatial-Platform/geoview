@@ -31,8 +31,10 @@ import {
   TypeClassBreakStyleConfig,
   isSimpleStyleConfig,
   TypeFeatureInfoLayerConfig,
+  codedValueType,
+  rangeDomainType,
+  TypeFeatureInfoEntry,
 } from '@/geo/map/map-schema-types';
-import { TypeFeatureInfoEntry, codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/abstract-layer-set';
 
 import {
   commonGetFieldDomain,

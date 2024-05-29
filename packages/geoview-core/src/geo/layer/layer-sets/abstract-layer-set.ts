@@ -1,7 +1,5 @@
-import { Pixel } from 'ol/pixel';
-import { Coordinate } from 'ol/coordinate';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
-import { TypeFeatureInfoEntry, TypeLayerData, TypeLayerStatus, TypeResultSet } from '@/geo/map/map-schema-types';
+import { QueryType, TypeFeatureInfoEntry, TypeLayerStatus, TypeLocation, TypeResultSet } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { ConfigBaseClass, LayerStatusChangedEvent } from '@/core/utils/config/validation-classes/config-base-class';
@@ -255,18 +253,9 @@ export abstract class AbstractLayerSet {
 // TO.DOCONT: Ideally, get rid of it completely. The templates should be self aware of the layer-set that responded to their request now.
 export type EventType = 'click' | 'hover' | 'all-features';
 
-export const ArrayOfEventTypes: EventType[] = ['click', 'hover', 'all-features'];
-
-export type QueryType = 'at_pixel' | 'at_coordinate' | 'at_long_lat' | 'using_a_bounding_box' | 'using_a_polygon' | 'all';
-
-export type TypeLocation = null | Pixel | Coordinate | Coordinate[] | string;
-
-export type TypeFeatureInfoByEventTypes = {
-  [eventName in EventType]?: TypeLayerData;
-};
-
 // TODO: Move the definition of the domain in the new schema
 // TODO.CONT: Starting here vvvv
+// TODO.CONT: Not anymore. Types were moved, below is event stuff and good here (leaving the TODO here in case it's meant as reference for migration).
 
 /**
  * Define a delegate for the event handler function signature

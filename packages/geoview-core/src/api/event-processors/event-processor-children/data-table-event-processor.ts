@@ -1,7 +1,11 @@
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import { IDataTableState, TypeAllFeatureInfoResultSet } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import {
+  IDataTableState,
+  TypeAllFeatureInfoResultSet,
+  TypeAllFeatureInfoResultSetEntry,
+} from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
 import { MapEventProcessor } from './map-event-processor';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
@@ -74,19 +78,19 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Propagates feature info layer sets to the store
-   *
+   * Propagates feature info layer sets to the store.
+   * The propagation actually happens only if it wasn't already there. Otherwise, no update is propagated.
    * @param {string} mapId - The map identifier of the modified result set.
    * @param {string} layerPath - The layer path that has changed.
    * @param {TypeFeatureInfoResultSet} resultSet - The result set associated to the map.
    */
-  static propagateFeatureInfoToStore(mapId: string, layerPath: string, resultSet: TypeAllFeatureInfoResultSet): void {
+  static propagateFeatureInfoToStore(mapId: string, resultSetEntry: TypeAllFeatureInfoResultSetEntry): void {
     /**
      * Create a get all features info object for each layer which is then used to render layers
      */
     const allFeaturesDataArray = [...this.getDataTableState(mapId).allFeaturesDataArray];
-    if (!allFeaturesDataArray.find((layerEntry) => layerEntry.layerPath === layerPath)) {
-      allFeaturesDataArray.push(resultSet?.[layerPath]);
+    if (!allFeaturesDataArray.find((layerEntry) => layerEntry.layerPath === resultSetEntry.layerPath)) {
+      allFeaturesDataArray.push(resultSetEntry);
     }
 
     // Update the layer data array in the store, all the time

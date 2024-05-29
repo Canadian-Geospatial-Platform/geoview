@@ -7,10 +7,13 @@ import { TypeFeatureInfoEntry, TypeLayerStatus, TypeResultSet } from '@/geo/map/
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { EventType, AbstractLayerSet } from './abstract-layer-set';
 import { LayerApi } from '@/geo/layer/layer';
-import { TypeFeatureInfoResultSet } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import {
+  TypeFeatureInfoResultSet,
+  TypeFeatureInfoResultSetEntry,
+} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 
 /**
- * A class containing a set of layers associated with a TypeLayerData object, which will receive the result of a
+ * A class containing a set of layers associated with a TypeFeatureInfoResultSetEntry object, which will receive the result of a
  * "get feature info" request made on the map layers when the user click a location on the map.
  *
  * @class FeatureInfoLayerSet
@@ -41,11 +44,11 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Propagate to store
-   * @param {string} layerPath - Layer path to propagate
+   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result entry to propagate
    * @private
    */
-  #propagateToStore(layerPath: string): void {
-    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.getMapId(), layerPath, 'click', this.resultSet).catch((error) => {
+  #propagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry): void {
+    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.getMapId(), 'click', resultSetEntry).catch((error) => {
       // Log
       logger.logPromiseFailed('FeatureInfoEventProcessor.propagateToStore in FeatureInfoLayerSet', error);
     });
@@ -92,7 +95,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     this.resultSet[layerConfig.layerPath].features = [];
 
     // Propagate to store on registration
-    this.#propagateToStore(layerConfig.layerPath);
+    this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
   }
 
   /**
@@ -121,7 +124,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
     // If the layer status isn't an error
     // Propagate to the store on layer status changed
-    this.#propagateToStore(layerConfig.layerPath);
+    this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
   }
 
   /**
@@ -184,7 +187,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         this.resultSet[layerPath].queryStatus = 'processing';
 
         // Propagate to store
-        this.#propagateToStore(layerPath);
+        this.#propagateToStore(this.resultSet[layerPath]);
 
         // Process query on results data
         const promiseResult = AbstractLayerSet.queryLayerFeatures(
@@ -210,7 +213,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
             this.resultSet[layerPath].queryStatus = arrayOfRecords ? 'processed' : 'error';
 
             // Propagate to store
-            this.#propagateToStore(layerPath);
+            this.#propagateToStore(this.resultSet[layerPath]);
           })
           .catch((error) => {
             // Log
@@ -241,7 +244,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   #processListenerStatusChanged(layerPath: string, isEnable: boolean): void {
     this.resultSet[layerPath].eventListenerEnabled = isEnable;
     this.resultSet[layerPath].features = [];
-    this.#propagateToStore(layerPath);
+    this.#propagateToStore(this.resultSet[layerPath]);
   }
 
   /**

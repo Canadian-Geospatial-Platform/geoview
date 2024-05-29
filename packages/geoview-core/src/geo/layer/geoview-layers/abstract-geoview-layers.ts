@@ -38,13 +38,15 @@ import {
   TypeFeatureInfoEntry,
   codedValueType,
   rangeDomainType,
+  TypeLocation,
+  QueryType,
 } from '@/geo/map/map-schema-types';
 import { GeoViewLayerCreatedTwiceError } from '@/geo/layer/exceptions/layer-exceptions';
 import { Projection } from '@/geo/utils/projection';
 import { getLegendStyles, getFeatureCanvas } from '@/geo/utils/renderer/geoview-renderer';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { LayerApi } from '../layer';
-import { QueryType, TypeLocation } from '../layer-sets/abstract-layer-set';
+import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 // Constant used to define the default layer names
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
@@ -1669,14 +1671,6 @@ export type VisibleChangedEvent = {
  * Define a delegate for the event handler function signature
  */
 type VisibleChangedDelegate = EventDelegateBase<AbstractGeoViewLayer, VisibleChangedEvent>;
-
-export type TypeLegend = {
-  layerName?: TypeLocalizedString;
-  type: TypeGeoviewLayerType;
-  styleConfig?: TypeStyleConfig | null;
-  // Layers other than vector layers use the HTMLCanvasElement type for their legend.
-  legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
-};
 
 /**
  * Define an event for the delegate

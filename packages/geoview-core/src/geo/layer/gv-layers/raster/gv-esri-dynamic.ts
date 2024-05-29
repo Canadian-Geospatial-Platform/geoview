@@ -23,8 +23,10 @@ import {
   TypeClassBreakStyleConfig,
   isSimpleStyleConfig,
   TypeFeatureInfoLayerConfig,
+  TypeFeatureInfoEntry,
+  rangeDomainType,
+  codedValueType,
 } from '@/geo/map/map-schema-types';
-import { TypeFeatureInfoEntry, codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { esriGetFieldType, esriGetFieldDomain } from '../utils';
 import { AbstractGVRaster } from './abstract-gv-raster';
 

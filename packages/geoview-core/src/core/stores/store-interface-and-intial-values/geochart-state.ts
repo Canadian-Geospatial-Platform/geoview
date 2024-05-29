@@ -11,14 +11,6 @@ import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 
 type GeochartActions = IGeochartState['actions'];
 
-export type TypeGeochartResultSetEntry = TypeResultSetEntry & TypeLayerData;
-
-export type TypeGeochartResultSet = TypeResultSet<TypeGeochartResultSetEntry>;
-
-export type GeoChartStoreByLayerPath = {
-  [layerPath: string]: GeoChartConfig;
-};
-
 export interface IGeochartState {
   geochartChartsConfig: GeoChartStoreByLayerPath;
   layerDataArray: TypeGeochartResultSetEntry[];
@@ -132,6 +124,14 @@ export function initializeGeochartState(set: TypeSetStore, get: TypeGetStore): I
 
   return init;
 }
+
+export type GeoChartStoreByLayerPath = {
+  [layerPath: string]: GeoChartConfig;
+};
+
+export type TypeGeochartResultSetEntry = TypeResultSetEntry & TypeLayerData;
+
+export type TypeGeochartResultSet = TypeResultSet<TypeGeochartResultSetEntry>;
 
 // **********************************************************
 // Layer state selectors

@@ -9,14 +9,20 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { logger } from '@/core/utils/logger';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/abstract-layer-set';
-import { CONST_LAYER_TYPES, TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { Projection } from '@/geo/utils/projection';
-import { TypeUniqueValueStyleConfig, TypeUniqueValueStyleInfo, TypeStyleConfig } from '@/geo/map/map-schema-types';
+import {
+  TypeUniqueValueStyleConfig,
+  TypeUniqueValueStyleInfo,
+  TypeStyleConfig,
+  codedValueType,
+  rangeDomainType,
+} from '@/geo/map/map-schema-types';
 import { esriGetFieldType, esriGetFieldDomain } from '../utils';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from './abstract-gv-raster';
+import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 /**
  * Manages an Esri Image layer.

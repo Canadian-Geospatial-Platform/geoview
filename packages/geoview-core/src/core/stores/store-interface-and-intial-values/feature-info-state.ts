@@ -4,25 +4,19 @@ import { useGeoViewStore } from '@/core/stores/stores-managers';
 import {
   TypeLayerData,
   TypeFeatureInfoEntry,
-  TypeHoverLayerData,
   TypeResultSet,
   TypeResultSetEntry,
   TypeGeometry,
+  TypeQueryStatus,
+  TypeFieldEntry,
 } from '@/geo/map/map-schema-types';
+import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with FeatureInfoEventProcessor vs FeatureInfoState
 
 // #region INTERFACES & TYPES
 
 type FeatureInfoActions = IFeatureInfoState['actions'];
-
-export type TypeFeatureInfoResultSetEntry = TypeResultSetEntry & TypeLayerData;
-
-export type TypeFeatureInfoResultSet = TypeResultSet<TypeFeatureInfoResultSetEntry>;
-
-export type TypeHoverResultSetEntry = TypeResultSetEntry & TypeHoverLayerData;
-
-export type TypeHoverResultSet = TypeResultSet<TypeHoverResultSetEntry>;
 
 export interface IFeatureInfoState {
   checkedFeatures: Array<TypeFeatureInfoEntry>;
@@ -155,6 +149,30 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
     // #endregion ACTIONS
   } as IFeatureInfoState;
 }
+
+export type TypeFeatureInfoResultSetEntry = TypeResultSetEntry & TypeLayerData;
+
+export type TypeFeatureInfoResultSet = TypeResultSet<TypeFeatureInfoResultSetEntry>;
+
+export type TypeHoverFeatureInfo =
+  | {
+      geoviewLayerType: TypeGeoviewLayerType;
+      featureIcon: HTMLCanvasElement;
+      fieldInfo: TypeFieldEntry | undefined;
+      nameField: string | null;
+    }
+  | undefined
+  | null;
+
+export type TypeHoverLayerData = {
+  eventListenerEnabled: boolean;
+  queryStatus: TypeQueryStatus;
+  feature: TypeHoverFeatureInfo;
+};
+
+export type TypeHoverResultSetEntry = TypeResultSetEntry & TypeHoverLayerData;
+
+export type TypeHoverResultSet = TypeResultSet<TypeHoverResultSetEntry>;
 
 // **********************************************************
 // Details state selectors

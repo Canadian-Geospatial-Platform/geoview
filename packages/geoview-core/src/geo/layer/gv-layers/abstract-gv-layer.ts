@@ -19,10 +19,19 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
-import { TypeStyleConfig, TypeLayerStatusSimplified, TypeLayerStatus } from '@/geo/map/map-schema-types';
-import { QueryType, TypeFeatureInfoEntry, TypeLocation, codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/abstract-layer-set';
+import {
+  TypeStyleConfig,
+  TypeLayerStatusSimplified,
+  TypeLayerStatus,
+  TypeFeatureInfoEntry,
+  codedValueType,
+  rangeDomainType,
+  TypeLocation,
+  QueryType,
+} from '@/geo/map/map-schema-types';
+// TODO: Downgrade those types from abstract-layer-set
 import { getLegendStyles, getFeatureCanvas } from '@/geo/utils/renderer/geoview-renderer';
-import { TypeGeoviewLayerType, TypeVectorLayerStyles } from '../geoview-layers/abstract-geoview-layers';
+import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
@@ -821,11 +830,3 @@ export type VisibleChangedEvent = {
  * Define a delegate for the event handler function signature
  */
 type VisibleChangedDelegate = EventDelegateBase<AbstractGVLayer, VisibleChangedEvent>;
-
-export type TypeLegend = {
-  layerName?: TypeLocalizedString;
-  type: TypeGeoviewLayerType;
-  styleConfig?: TypeStyleConfig | null;
-  // Layers other than vector layers use the HTMLCanvasElement type for their legend.
-  legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
-};

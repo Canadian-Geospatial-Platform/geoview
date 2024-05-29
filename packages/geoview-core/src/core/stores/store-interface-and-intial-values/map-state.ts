@@ -13,8 +13,8 @@ import { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
-import { TypeFeatureInfoEntry, TypeHoverFeatureInfo } from '@/geo/map/map-schema-types';
-import { TypeFeatureInfoResultSet } from './feature-info-state';
+import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoResultSet, TypeHoverFeatureInfo } from './feature-info-state';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with MapEventProcessor vs MapState
 

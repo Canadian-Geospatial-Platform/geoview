@@ -4,12 +4,11 @@ import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendI
 import {
   CONST_LAYER_TYPES,
   TypeGeoviewLayerType,
-  TypeLegend,
   isImageStaticLegend,
   isVectorLegend,
   isWmsLegend,
 } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { ILayerState, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 
@@ -135,10 +134,10 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * This method propagates the information stored in the legend layer set to the store.
    *
    * @param {string} mapId The map identifier.
-   * @param {string} layerPath The layer path that changed.
    * @param {TypeLegendResultSetEntry} legendResultSetEntry The legend result set that triggered the propagation.
    */
-  public static propagateLegendToStore(mapId: string, layerPath: string, legendResultSetEntry: TypeLegendResultSetEntry): void {
+  public static propagateLegendToStore(mapId: string, legendResultSetEntry: TypeLegendResultSetEntry): void {
+    const { layerPath } = legendResultSetEntry;
     const layerPathNodes = layerPath.split('/');
 
     const setLayerControls = (layerConfig: TypeLayerEntryConfig): TypeLayerControls => {
