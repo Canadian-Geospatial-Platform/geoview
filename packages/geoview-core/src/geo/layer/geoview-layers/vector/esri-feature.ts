@@ -85,6 +85,7 @@ export const geoviewEntryIsEsriFeature = (
  * @class EsriFeature
  */
 // ******************************************************************************************************************************
+// GV Layers Refactoring - Obsolete (in layers)
 export class EsriFeature extends AbstractGeoViewVector {
   /** ***************************************************************************************************************************
    * Initialize layer.
@@ -101,6 +102,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected override fetchServiceMetadata(): Promise<void> {
     return commonfetchServiceMetadata(this);
   }
@@ -111,6 +113,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     commonValidateListOfLayerEntryConfig(this, listOfLayerEntryConfig);
   }
@@ -122,6 +125,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @returns {boolean} true if an error is detected.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig, esriIndex: number): boolean {
     if (this.metadata!.layers[esriIndex].type !== 'Feature Layer') {
       this.layerLoadError.push({
@@ -141,6 +145,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number' {
     return commonGetFieldType(this, fieldName, layerConfig);
   }
@@ -153,6 +158,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected override getFieldDomain(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): null | codedValueType | rangeDomainType {
     return commonGetFieldDomain(this, fieldName, layerConfig);
   }
@@ -162,6 +168,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
    * @param {EsriFeatureLayerEntryConfig} layerConfig The layer entry to configure
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: EsriFeatureLayerEntryConfig): void {
     commonProcessTemporalDimension(this, esriTimeDimension, layerConfig);
   }
@@ -171,6 +178,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @param {EsriFeatureLayerEntryConfig} layerConfig The layer entry to configure.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   processFeatureInfoConfig(layerConfig: EsriFeatureLayerEntryConfig): void {
     commonProcessFeatureInfoConfig(this, layerConfig);
   }
@@ -181,6 +189,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {EsriFeature} this The ESRI layer instance pointer.
    * @param {EsriFeatureLayerEntryConfig} layerConfig The layer entry to configure.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   processInitialSettings(layerConfig: EsriFeatureLayerEntryConfig): void {
     commonProcessInitialSettings(this, layerConfig);
   }
@@ -193,6 +202,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected override processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     return commonProcessLayerMetadata(this, layerConfig);
   }
@@ -206,6 +216,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
+  // GV Layers Refactoring - Obsolete (in config?, in layers?)
   protected override createVectorSource(
     layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
@@ -217,7 +228,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     // eslint-disable-next-line no-param-reassign
     sourceOptions.url = getLocalizedValue(layerConfig.source!.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
     // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = `${sourceOptions.url}/${String(layerConfig.layerId)}/query?f=pjson&outfields=*&where=1%3D1`;
+    sourceOptions.url = `${sourceOptions.url}/${layerConfig.layerId}/query?f=pjson&outfields=*&where=1%3D1`;
     // eslint-disable-next-line no-param-reassign
     sourceOptions.format = new EsriJSON();
 

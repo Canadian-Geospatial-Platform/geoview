@@ -13,7 +13,7 @@ export class TileLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * The class constructor.
-   * @param {TileLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+   * @param {TileLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: TileLayerEntryConfig) {
     super(layerConfig);

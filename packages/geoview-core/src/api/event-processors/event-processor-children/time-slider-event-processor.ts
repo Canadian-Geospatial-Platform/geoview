@@ -2,13 +2,15 @@ import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-pr
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { ITimeSliderState, TypeTimeSliderValues } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { getLocalizedValue } from '@/core/utils/utilities';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { TypeFeatureInfoLayerConfig, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { AppEventProcessor } from './app-event-processor';
 import { MapEventProcessor } from './map-event-processor';
+import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
+import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
+import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -92,7 +94,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   static getInitialTimeSliderValues(mapId: string, layerConfig: TypeLayerEntryConfig): TypeTimeSliderValues | undefined {
     // Get the layer using the map event processor, If no temporal dimension OR layerPath, return undefined
     if (!layerConfig.layerPath) return undefined;
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerConfig.layerPath)!;
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layerConfig.layerPath)!;
     const temporalDimensionInfo = geoviewLayer.getTemporalDimension(layerConfig.layerPath);
     if (!temporalDimensionInfo || !temporalDimensionInfo.range) return undefined;
 
@@ -174,19 +176,18 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     values: number[]
   ): void {
     // Get the layer using the map event processor
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath)!;
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layerPath)!;
 
-    const layerType = geoviewLayer.type;
-    if (layerType === CONST_LAYER_TYPES.WMS) {
+    if (geoviewLayer instanceof WMS || geoviewLayer instanceof GVWMS) {
       if (filtering) {
         const newValue = `${new Date(values[0]).toISOString().slice(0, new Date(values[0]).toISOString().length - 5)}Z`;
         const filter = `${field}=date '${newValue}'`;
-        (geoviewLayer as WMS).applyViewFilter(layerPath, filter);
+        geoviewLayer.applyViewFilter(layerPath, filter);
       } else {
         const filter = `${field}=date '${defaultValue}'`;
-        (geoviewLayer as WMS).applyViewFilter(layerPath, filter);
+        geoviewLayer.applyViewFilter(layerPath, filter);
       }
-    } else if (layerType === CONST_LAYER_TYPES.ESRI_IMAGE) {
+    } else if (geoviewLayer instanceof EsriImage || geoviewLayer instanceof GVEsriImage) {
       if (filtering) {
         const filter = `time=${minAndMax[0]},${values[0]}`;
         (geoviewLayer as EsriImage).applyViewFilter(layerPath, filter);
@@ -199,13 +200,13 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       if (values.length > 1) {
         filter += ` and ${field} <= date '${new Date(values[1]).toISOString()}'`;
       }
-      (geoviewLayer as AbstractGeoViewVector | EsriDynamic).applyViewFilter(layerPath, filter);
+      (geoviewLayer as AbstractGeoViewVector | AbstractGVVector | EsriDynamic).applyViewFilter(layerPath, filter);
     } else {
       let filter = `${field} >= date '${new Date(minAndMax[0]).toISOString()}'`;
       if (values.length > 1) {
         filter += `and ${field} <= date '${new Date(minAndMax[1]).toISOString()}'`;
       }
-      (geoviewLayer as AbstractGeoViewVector | EsriDynamic).applyViewFilter(layerPath, filter);
+      (geoviewLayer as AbstractGeoViewVector | AbstractGVVector | EsriDynamic).applyViewFilter(layerPath, filter);
     }
 
     this.getTimesliderState(mapId)?.setterActions.setFiltering(layerPath, filtering);

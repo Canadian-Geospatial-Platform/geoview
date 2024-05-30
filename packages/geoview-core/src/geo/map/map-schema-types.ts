@@ -1,7 +1,6 @@
 // We use _ for layerPth and olLayer all over the file. We keep it global...
 import { Extent } from 'ol/extent';
 import BaseLayer from 'ol/layer/Base';
-import LayerGroup from 'ol/layer/Group';
 
 import {
   TypeBasemapOptions,
@@ -24,7 +23,7 @@ import {
   TypeExternalPackages,
 } from '@config/types/map-schema-types';
 
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
@@ -195,14 +194,11 @@ export const layerEntryIsImageStatic = (verifyIfLayer: TypeLayerEntryConfig): ve
 
 export type TypeLayerStatus = 'registered' | 'newInstance' | 'processing' | 'processed' | 'loading' | 'loaded' | 'error';
 
+/** The simplified layer statuses */
+export type TypeLayerStatusSimplified = 'loading' | 'loaded' | 'error';
+
+// TODO: Refactor - Layers refactoring. After migration, can get rid of this type
 export type TypeLoadEndListenerType = 'features' | 'tile' | 'image';
-
-export type TypeLayerAndListenerType = {
-  olLayer?: BaseLayer | LayerGroup;
-  loadEndListenerType?: TypeLoadEndListenerType;
-};
-
-export type GeoviewChild = AbstractGeoViewLayer & Record<'applyViewFilter', (layerPath: string, layerFilter: string) => void>;
 
 export type TypeEsriFormatParameter = 'png' | 'jpg' | 'gif' | 'svg';
 
@@ -290,6 +286,7 @@ export interface TypeVectorTileSourceInitialConfig extends TypeBaseSourceVectorI
   tileGrid?: TypeTileGrid;
 }
 
+// TODO: Refactor - This type should be deleted and 'ConfigBaseClass' should be used instead
 export type TypeLayerEntryConfig = AbstractBaseLayerEntryConfig | GroupLayerEntryConfig;
 
 /** ******************************************************************************************************************************

@@ -28,4 +28,5 @@ export type TypeBaseRasterLayer = BaseLayer | TypeRasterLayerGroup | TypeRasterL
  * features are placed.
  */
 // ******************************************************************************************************************************
+// GV Layers Refactoring - Obsolete (in layers)
 export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {}

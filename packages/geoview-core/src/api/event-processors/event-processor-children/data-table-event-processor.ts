@@ -7,6 +7,7 @@ import { logger } from '@/core/utils/logger';
 import { TypeLayerData } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { TypeAllFeatureInfoResultSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
 import { MapEventProcessor } from './map-event-processor';
+import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -40,14 +41,18 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
    */
   static applyFilters(mapId: string, layerPath: string, filterStrings: string, isMapRecordExist: boolean): void {
     // TODO: Refactor - Take a look at the TimeSliderEventProcessor.applyFilters and do same here, passing geoviewLayer in params to save a MapEventProcessor (api.maps[] in disguise)?
-    const geoviewLayerInstance = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
-    const filterLayerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath);
+    const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layerPath) as
+      | AbstractGeoViewVector
+      | AbstractGVVector
+      | EsriDynamic
+      | undefined;
+    const filterLayerConfig = layer?.getLayerConfig(layerPath);
 
-    // TODO: Check - Is the condition `filterLayerConfig !== undefined` really necessary here if it's not to be used after anyways?
-    if (isMapRecordExist && geoviewLayerInstance !== undefined && filterLayerConfig !== undefined && filterStrings.length) {
-      (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(layerPath, filterStrings);
+    // TODO: Check - Is the condition `filterLayerConfig !== undefined` really necessary here if it's not to be used after? It requires getLayerConfig() which is also unnecessary?
+    if (isMapRecordExist && filterLayerConfig !== undefined && filterStrings.length) {
+      layer?.applyViewFilter(layerPath, filterStrings);
     } else {
-      (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(layerPath, '');
+      layer?.applyViewFilter(layerPath, '');
     }
   }
 

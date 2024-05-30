@@ -22,28 +22,33 @@ export default function Location(): JSX.Element {
   const { zoomToMyLocation } = useMapStoreActions();
   const { addNotification } = useAppStoreActions();
 
+  const successCallback = (position: GeolocationPosition): void => {
+    // Zoom to my location
+    zoomToMyLocation(position).catch((error) => {
+      // Log
+      logger.logPromiseFailed('Failed to zoomToMyLocation in location.successCallback', error);
+    });
+  };
+
+  const errorCallback = (err: GeolocationPositionError): void => {
+    addNotification({
+      key: 'location',
+      message: `ERROR(${err.code}): ${err.message}`,
+      notificationType: 'warning',
+      count: 0,
+    });
+  };
+
   /**
-   * Zoom to user location
+   * Handles a click to zoom to the user location when the user location can be retrieved
    */
-  function zoomToMe(): void {
-    function success(position: GeolocationPosition): void {
-      zoomToMyLocation(position);
-    }
-
-    function error(err: GeolocationPositionError): void {
-      addNotification({
-        key: 'location',
-        message: `ERROR(${err.code}): ${err.message}`,
-        notificationType: 'warning',
-        count: 0,
-      });
-    }
-
-    navigator.geolocation.getCurrentPosition(success, error);
-  }
+  const handleZoomToMe = (): void => {
+    // Try to get current position and callback
+    navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
+  };
 
   return (
-    <IconButton id="location" tooltip="mapnav.location" tooltipPlacement="left" onClick={() => zoomToMe()} sx={sxClasses.navButton}>
+    <IconButton id="location" tooltip="mapnav.location" tooltipPlacement="left" onClick={handleZoomToMe} sx={sxClasses.navButton}>
       <EmojiPeopleIcon />
     </IconButton>
   );

@@ -11,6 +11,7 @@ import { ProjectionLike } from 'ol/proj';
 
 // import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 
+import { Cast, TypeJsonObject } from '@config/types/config-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { Projection } from '@/geo/utils/projection';
@@ -29,7 +30,6 @@ import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vect
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { Cast, TypeJsonObject } from '@/api/config/types/config-types';
 
 // GV: CONFIG EXTRACTION
 // GV: This section of code was extracted and copied to the geoview config section
@@ -158,7 +158,7 @@ export class CSV extends AbstractGeoViewVector {
    */
   protected override processLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     // process the feature info configuration and attach the config to the instance for access by parent class
-    this.layerMetadata[layerConfig.layerPath] = Cast<TypeJsonObject>(layerConfig);
+    this.setLayerMetadata(layerConfig.layerPath, Cast<TypeJsonObject>(layerConfig));
     return Promise.resolve(layerConfig);
   }
 
