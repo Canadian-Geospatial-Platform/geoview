@@ -151,7 +151,7 @@ export abstract class AbstractLayerSet {
     this.resultSet[layerConfig.layerPath].layerStatus = layerStatus;
 
     // Update the name with a possibly updated layerName during layer status progression
-    // (depending on this translates in the new layers process, might not need this anymore)
+    // (depending on how this translates in the new layers process, might not need this anymore)
     this.resultSet[layerConfig.layerPath].layerName = getLocalizedValue(
       layerConfig.layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
       AppEventProcessor.getDisplayLanguage(this.getMapId())
