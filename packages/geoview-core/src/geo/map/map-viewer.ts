@@ -9,10 +9,6 @@ import OLMap from 'ol/Map';
 import View, { FitOptions, ViewOptions } from 'ol/View';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
-import BaseLayer from 'ol/layer/Base';
-import LayerGroup from 'ol/layer/Group';
-import Collection from 'ol/Collection';
-import { Source } from 'ol/source';
 
 import queryString from 'query-string';
 import { CV_MAP_EXTENTS, VALID_DISPLAY_LANGUAGE, VALID_DISPLAY_THEME, VALID_PROJECTION_CODES } from '@config/types/config-constants';
@@ -49,7 +45,6 @@ import { ModalApi } from '@/ui';
 import { delay, generateId, getLocalizedMessage } from '@/core/utils/utilities';
 import { createEmptyBasemap } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 import { TypeMapFeaturesConfig, TypeHTMLElement, TypeJsonObject } from '@/core/types/global-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -466,22 +461,26 @@ export class MapViewer {
     // TODO: Refactor minimal - Rewrite the code here to not have to rely on a setInterval anymore.
     // Start an interval checker
     const mapInterval = setInterval(() => {
-      if (this.layer.geoviewLayers) {
-        const { geoviewLayers } = this.layer;
-        let allGeoviewLayerRegistered =
-          this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
-        Object.values(geoviewLayers).forEach((geoviewLayer) => {
-          const layerIsRegistered = geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('registered');
-          if (!layerIsRegistered) logger.logTraceDetailed('checkMapReady - wating on layer registration...', geoviewLayer.geoviewLayerId);
-          allGeoviewLayerRegistered &&= layerIsRegistered;
-        });
+      if (this.layer) {
+        // Check if all registered layers are registered
+        const [allGood, layersCount] = this.layer.checkLayerStatus(
+          'registered',
+          this.mapFeaturesConfig.map.listOfGeoviewLayerConfig,
+          (geoviewLayer) => {
+            logger.logTraceDetailed('checkMapReady - 1 - waiting on layer registration...', geoviewLayer.geoviewLayerId);
+          }
+        );
 
-        if (allGeoviewLayerRegistered) {
+        if (allGood) {
           // Clear interval
           clearInterval(mapInterval);
 
+          // Log
+          logger.logInfo(`Map is ready with ${layersCount} registered layers`, this.mapId);
+          logger.logMarkerCheck(`mapReady-${this.mapId}`, `for map to be ready. Layers are still being processed...`);
+
           // Redirect
-          this.#checkMapReadyGo(geoviewLayers).catch((error) => {
+          this.#checkMapReadyGo().catch((error) => {
             // Log
             logger.logPromiseFailed('checkMapReadyGo in checkMapReady in MapViewer', error);
           });
@@ -492,25 +491,22 @@ export class MapViewer {
 
   /**
    * Function called when the map is ready and additional processing can happen.
-   * @param {{ [geoviewLayerId: string]: AbstractGeoViewLayer }} geoviewLayers - The GeoView Layers
    * @returns {Promise<void>}
    * @private
    */
-  async #checkMapReadyGo(geoviewLayers: { [geoviewLayerId: string]: AbstractGeoViewLayer }): Promise<void> {
-    // How many layers?
-    const layersCount = Object.keys(geoviewLayers).length;
-
-    // Log
-    logger.logInfo(`Map is ready with ${layersCount} registered layers`, this.mapId);
-    logger.logMarkerCheck(`mapReady-${this.mapId}`, `for map to be ready. Layers are still being processed...`);
-
+  async #checkMapReadyGo(): Promise<void> {
     // Is ready
     this.#mapReady = true;
     this.#emitMapReady();
 
     // Load the Map itself and the UI controls
     MapEventProcessor.initMapControls(this.mapId);
-    await AppEventProcessor.setGuide(this.mapId);
+
+    // Load the guide
+    AppEventProcessor.setGuide(this.mapId).catch((error) => {
+      // Log
+      logger.logPromiseFailed('in setGuide in #checkMapReadyGo', error);
+    });
 
     // Now that the map dom is loaded, register a handle when size is changing
     this.map.on('change:size', this.#handleMapChangeSize.bind(this));
@@ -567,20 +563,23 @@ export class MapViewer {
     // Start an interval checker
     // TODO: Refactor minimal - Rewrite the code here to not have to rely on a setInterval anymore.
     const mapInterval = setInterval(() => {
-      if (this.layer.geoviewLayers) {
-        const { geoviewLayers } = this.layer;
-        let allGeoviewLayerLoaded =
-          this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
-        Object.values(geoviewLayers).forEach((geoviewLayer) => {
-          const layerIsLoaded = geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('processed');
-          if (!layerIsLoaded)
-            logger.logTraceDetailed('checkMapLayersProcessed - waiting on layer processed...', geoviewLayer.geoviewLayerId);
-          allGeoviewLayerLoaded &&= layerIsLoaded;
-        });
+      if (this.layer) {
+        // Check if all registered layers are processed
+        const [allGood, layersCount] = this.layer.checkLayerStatus(
+          'processed',
+          this.mapFeaturesConfig.map.listOfGeoviewLayerConfig,
+          (geoviewLayer) => {
+            logger.logTraceDetailed('checkMapReady - 2 - waiting on layer processed...', geoviewLayer.geoviewLayerId);
+          }
+        );
 
-        if (allGeoviewLayerLoaded) {
+        if (allGood) {
           // Clear interval
           clearInterval(mapInterval);
+
+          // Log
+          logger.logInfo(`Map is ready with ${layersCount} processed layers`, this.mapId);
+          logger.logMarkerCheck(`mapReady-${this.mapId}`, `for all ${layersCount} layers to be processed`);
 
           // Zoom to extents of layers selected in config, if provided.
           if (this.mapFeaturesConfig.map.viewSettings.initialView?.layerIds) {
@@ -596,13 +595,6 @@ export class MapViewer {
                 logger.logPromiseFailed('promiseMapLayers in #checkMapLayersProcessed in map-viewer', error)
               );
           }
-
-          // How many layers?
-          const layersCount = Object.keys(geoviewLayers).length;
-
-          // Log
-          logger.logInfo(`Map is ready with ${layersCount} processed layers`, this.mapId);
-          logger.logMarkerCheck(`mapReady-${this.mapId}`, `for all ${layersCount} layers to be processed`);
 
           // Is ready
           this.#mapLayersProcessed = true;
@@ -623,23 +615,19 @@ export class MapViewer {
     // Start an interval checker
     // TODO: Refactor minimal - Rewrite the code here to not have to rely on a setInterval anymore.
     const mapInterval = setInterval(() => {
-      if (this.layer.geoviewLayers) {
-        const { geoviewLayers } = this.layer;
-        let allGeoviewLayerLoaded =
-          this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length === 0 || Object.keys(geoviewLayers).length !== 0;
-        Object.values(geoviewLayers).forEach((geoviewLayer) => {
-          const layerIsLoaded = geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('loaded');
-          if (!layerIsLoaded)
-            logger.logTraceDetailed('checkMapLayersLoaded - waiting on layer loaded/error...', geoviewLayer.geoviewLayerId);
-          allGeoviewLayerLoaded &&= layerIsLoaded;
-        });
+      if (this.layer) {
+        // Check if all registered layers are loaded
+        const [allGood, layersCount] = this.layer.checkLayerStatus(
+          'loaded',
+          this.mapFeaturesConfig.map.listOfGeoviewLayerConfig,
+          (geoviewLayer) => {
+            logger.logTraceDetailed('checkMapReady - 3 - waiting on layer loaded/error status...', geoviewLayer.geoviewLayerId);
+          }
+        );
 
-        if (allGeoviewLayerLoaded) {
+        if (allGood) {
           // Clear interval
           clearInterval(mapInterval);
-
-          // How many layers?
-          const layersCount = Object.keys(geoviewLayers).length;
 
           // Log
           logger.logInfo(`Map is ready with ${layersCount} loaded layers`, this.mapId);
@@ -665,8 +653,8 @@ export class MapViewer {
       const layersInterval = setInterval(() => {
         if (this.layer) {
           // Check if all registered layers have their results set
-          const allGood = this.layer.checkLayerResultSetsReady((layerEntryConfig) => {
-            logger.logTraceDetailed('checkLayerResultSetReady - waiting on layer resultSet...', layerEntryConfig.layerPath);
+          const allGood = this.layer.checkFeatureInfoLayerResultSetsReady((layerEntryConfig) => {
+            logger.logTraceDetailed('checkMapReady - 4 - waiting on layer resultSet...', layerEntryConfig.layerPath);
           });
 
           // If all good
@@ -1308,30 +1296,14 @@ export class MapViewer {
   }
 
   /**
-   * Loop through all geoview layers and refresh their respective source.
+   * Loops through all geoview layers and refresh their respective source.
    * Use this function on projection change or other viewer modification who may affect rendering.
    *
    * @returns A Promise which resolves when the rendering is completed after the source(s) were changed.
    */
   refreshLayers(): Promise<void> {
-    const mapLayers = this.layer.geoviewLayers;
-    Object.entries(mapLayers).forEach((mapLayerEntry) => {
-      const refreshBaseLayer = (baseLayer: BaseLayer | LayerGroup | undefined): void => {
-        if (baseLayer) {
-          const layerGroup: Array<BaseLayer> | Collection<BaseLayer> | undefined = baseLayer.get('layers');
-          if (layerGroup) {
-            layerGroup.forEach((baseLayerEntry) => {
-              refreshBaseLayer(baseLayerEntry);
-            });
-          } else {
-            const layerSource: Source = baseLayer.get('source');
-            layerSource.refresh();
-          }
-        }
-      };
-      // TODO: Check - The index [1] seems wrong here. Should probably have a refresh function in AbstractGeoViewLayer being called here in this loop.
-      refreshBaseLayer(mapLayerEntry[1].olRootLayer);
-    });
+    // Redirect
+    this.layer.refreshLayers();
 
     // Return a promise for when rendering will complete
     return new Promise<void>((resolve) => {
@@ -1502,10 +1474,12 @@ export class MapViewer {
         ? Projection.transformExtent(bounds, `EPSG:${projectionCode}`, Projection.PROJECTIONS[currentProjection], 20)
         : Projection.transformExtent(bounds, Projection.PROJECTIONS[currentProjection], Projection.PROJECTIONS[currentProjection], 25);
     } else {
-      Object.keys(this.layer.geoviewLayers).forEach((geoviewLayerId) => {
-        if (!mapBounds) mapBounds = this.layer.geoviewLayers[geoviewLayerId].getMetadataBounds(geoviewLayerId);
+      this.layer.getGeoviewLayerIds().forEach((geoviewLayerId) => {
+        // TODO Refactor - Layers refactoring. There needs to be a getMetadataBounds (new layers and new config) to complete the full layers migration.
+        // TO.DOCONT: Johann: Need on both, config extract bounds from metadata and layers do it again at the end from features for vector and compound bound for group
+        if (!mapBounds) mapBounds = this.layer.getGeoviewLayer(geoviewLayerId)?.getMetadataBounds(geoviewLayerId);
         else {
-          const newMapBounds = this.layer.geoviewLayers[geoviewLayerId].getMetadataBounds(geoviewLayerId);
+          const newMapBounds = this.layer.getGeoviewLayer(geoviewLayerId)?.getMetadataBounds(geoviewLayerId);
           if (newMapBounds) {
             mapBounds = [
               Math.min(newMapBounds[0], mapBounds[0]),

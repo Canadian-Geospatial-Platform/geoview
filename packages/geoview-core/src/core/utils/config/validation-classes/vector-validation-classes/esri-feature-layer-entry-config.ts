@@ -6,7 +6,7 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * The class constructor.
-   * @param {EsriFeatureLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+   * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: EsriFeatureLayerEntryConfig) {
     super(layerConfig);

@@ -156,7 +156,10 @@ export function SingleLayer({ depth, layer, setIsLayersListPanelVisible, index, 
         !layerData.filter((layers) => layers.layerPath === layer.layerPath && !!layers?.features?.length).length ||
         layer.layerStatus === LAYER_STATUS.ERROR
       ) {
-        triggerGetAllFeatureInfo(layer.layerPath);
+        triggerGetAllFeatureInfo(layer.layerPath).catch((error) => {
+          // Log
+          logger.logPromiseFailed('Failed to triggerGetAllFeatureInfo in single-layer.handleLayerClick', error);
+        });
       }
     }
   };
@@ -241,9 +244,6 @@ export function SingleLayer({ depth, layer, setIsLayersListPanelVisible, index, 
   }
 
   function renderArrowButtons(): JSX.Element | null {
-    if (!['processed', 'loaded'].includes(layer.layerStatus!)) {
-      return null;
-    }
     if (layer.children?.length) {
       return (
         <IconButton

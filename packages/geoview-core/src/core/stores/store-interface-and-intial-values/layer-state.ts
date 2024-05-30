@@ -13,6 +13,7 @@ import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstrac
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 
 // #region INTERFACES & TYPES
 
@@ -68,6 +69,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       getLayerBounds: (layerPath: string) => {
         const layer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayer(layerPath);
         if (layer) {
+          // TODO: Refactor - Layers refactoring. There needs to be a calculateBounds somewhere (new layers, new config?) to complete the full layers migration.
           const bounds = layer.calculateBounds(layerPath);
           if (bounds) return bounds;
         }
@@ -136,7 +138,9 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       toggleItemVisibility: (layerPath: string, geometryType: TypeStyleGeometry, itemName: string) => {
         const curLayers = get().layerState.legendLayers;
 
-        const registeredLayer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).registeredLayers[layerPath] as VectorLayerEntryConfig;
+        const registeredLayer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).getLayerEntryConfig(
+          layerPath
+        ) as VectorLayerEntryConfig;
         const layer = findLayerByPath(curLayers, layerPath);
         if (layer) {
           _.each(layer.items, (item) => {
@@ -165,10 +169,9 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           });
 
           // apply filter to layer
-          (MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter(
-            layerPath,
-            ''
-          );
+          (
+            MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayerHybrid(layerPath) as AbstractGeoViewVector | AbstractGVVector
+          ).applyViewFilter(layerPath, '');
         }
         set({
           layerState: {
@@ -181,7 +184,9 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         MapEventProcessor.setOrToggleMapLayerVisibility(get().mapId, layerPath, true);
         const curLayers = get().layerState.legendLayers;
 
-        const registeredLayer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).registeredLayers[layerPath] as VectorLayerEntryConfig;
+        const registeredLayer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).getLayerEntryConfig(
+          layerPath
+        ) as VectorLayerEntryConfig;
         const layer = findLayerByPath(curLayers, layerPath);
         if (layer) {
           _.each(layer.items, (item) => {
@@ -224,10 +229,9 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         // GV try to make reusable store actions....
         // GV we can have always item.... we cannot set visibility so if present we will need to trap. Need more use case
         // GV create a function setItemVisibility called with layer path and this function set the registered layer (from store values) then apply the filter.
-        (MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter(
-          layerPath,
-          ''
-        );
+        (
+          MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayerHybrid(layerPath) as AbstractGeoViewVector | AbstractGVVector
+        ).applyViewFilter(layerPath, '');
       },
       getLayerDeleteInProgress: () => get().layerState.layerDeleteInProgress,
       setLayerDeleteInProgress: (newVal: boolean) => {
@@ -269,7 +273,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
 function setOpacityInLayerAndChildren(layer: TypeLegendLayer, opacity: number, mapId: string, isChild = false): void {
   _.set(layer, 'opacity', opacity);
-  MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layer.layerPath)?.setOpacity(opacity, layer.layerPath);
+  MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layer.layerPath)?.setOpacity(opacity, layer.layerPath);
   if (isChild) {
     _.set(layer, 'opacityFromParent', opacity);
   }

@@ -1,5 +1,5 @@
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { CONST_LAYER_ENTRY_TYPES, GeoviewChild, TypeSourceImageEsriInitialConfig, TypeStyleConfig } from '@/geo/map/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, TypeSourceImageEsriInitialConfig, TypeStyleConfig } from '@/geo/map/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 /** ******************************************************************************************************************************
@@ -23,7 +23,7 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * The class constructor.
-   * @param {EsriImageLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+   * @param {EsriImageLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: EsriImageLayerEntryConfig) {
     super(layerConfig);
@@ -35,14 +35,5 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // if layerConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
     if (!this.source) this.source = {};
     if (!this.source.dataAccessPath) this.source.dataAccessPath = { ...this.geoviewLayerConfig.metadataAccessPath! };
-  }
-
-  /**
-   * Method to execute when the layer is loaded.
-   */
-  override loadedFunction(): void {
-    super.loadedFunction();
-    if ('applyViewFilter' in this.geoviewLayerInstance!)
-      (this.geoviewLayerInstance as GeoviewChild).applyViewFilter(this.layerPath, this.layerFilter || '');
   }
 }

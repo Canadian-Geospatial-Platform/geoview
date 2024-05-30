@@ -8,7 +8,7 @@ export class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * The class constructor.
-   * @param {GeoJSONLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+   * @param {GeoJSONLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: GeoJSONLayerEntryConfig) {
     super(layerConfig);

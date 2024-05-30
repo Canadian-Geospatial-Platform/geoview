@@ -114,11 +114,11 @@ export class MapFeatureConfig {
     );
     this.map.listOfGeoviewLayerConfig = (gvMap.listOfGeoviewLayerConfig as TypeJsonArray)
       .map((geoviewLayerConfig) => {
-        return MapFeatureConfig.nodeFactory(geoviewLayerConfig, this.#language, this);
+        return MapFeatureConfig.nodeFactory(geoviewLayerConfig, this.#language, this)!;
       })
-      .filter((geoviewLayerInstance) => {
-        return geoviewLayerInstance;
-      }) as AbstractGeoviewLayerConfig[];
+      .filter((layerConfig) => {
+        return layerConfig;
+      });
     this.serviceUrls = Cast<TypeServiceUrls>(defaultsDeep(clonedJsonConfig.serviceUrls, CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls));
     this.theme = (clonedJsonConfig.theme || CV_DEFAULT_MAP_FEATURE_CONFIG.theme) as TypeDisplayTheme;
     this.navBar = [...((clonedJsonConfig.navBar || CV_DEFAULT_MAP_FEATURE_CONFIG.navBar) as TypeNavBarProps)];
@@ -402,7 +402,7 @@ export class MapFeatureConfig {
         this.map.viewSettings.initialView?.zoomAndCenter[0]
     ) {
       logger.logWarning(
-        `- Invalid zoom level ${(this.#originalgeoviewLayerConfig?.map as TypeJsonObject)?.viewSettings?.initialView?.zoomAndCenter[0]} 
+        `- Invalid zoom level ${(this.#originalgeoviewLayerConfig?.map as TypeJsonObject)?.viewSettings?.initialView?.zoomAndCenter[0]}
         replaced by ${this.map.viewSettings.initialView?.zoomAndCenter[0]} -`
       );
     }
@@ -417,7 +417,7 @@ export class MapFeatureConfig {
       Cast<[number, number]>(originalZoomAndCenter[1]) !== this.map.viewSettings.initialView!.zoomAndCenter![1]
     ) {
       logger.logWarning(
-        `- Invalid center ${originalZoomAndCenter[1]} 
+        `- Invalid center ${originalZoomAndCenter[1]}
         replaced by ${this.map.viewSettings.initialView!.zoomAndCenter![1]}`
       );
     }

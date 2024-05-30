@@ -6,6 +6,7 @@ import { TypeHTMLElement } from '@/core/types/global-types';
 import { createGuideObject } from '@/core/utils/utilities';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { MapEventProcessor } from './map-event-processor';
+import { logger } from '@/core/utils/logger';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -112,9 +113,15 @@ export class AppEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - ID of map to create guide object for.
    */
   static async setGuide(mapId: string): Promise<void> {
+    // Start guide loading tracker
+    logger.logMarkerStart('map-guide');
+
     const language = AppEventProcessor.getDisplayLanguage(mapId);
     const guide = await createGuideObject(mapId, language, this.getAppState(mapId).geoviewAssetsURL);
     if (guide !== undefined) this.getAppState(mapId).setterActions.setGuide(guide);
+
+    // Check guide loading tracker
+    logger.logMarkerCheck('map-guide', 'for guide to be loaded');
   }
 
   // #endregion
