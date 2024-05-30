@@ -269,18 +269,13 @@ export class XYZTiles extends AbstractGeoViewRaster {
   // GV Layers Refactoring - Obsolete (in layers)
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
     const layer = this.getOLLayer(layerPath) as TileLayer<XYZ> | undefined;
-    const layerBounds = layer?.getSource()?.getTileGrid()?.getExtent();
-    const projection =
-      layer?.getSource()?.getProjection()?.getCode().replace('EPSG:', '') || MapEventProcessor.getMapState(this.mapId).currentProjection;
+    const projection = layer?.getSource()?.getProjection()?.getCode() || this.getMapViewer().getProjection().getCode();
 
+    const layerBounds = layer?.getSource()?.getTileGrid()?.getExtent();
     if (layerBounds) {
       let transformedBounds = layerBounds;
-      if (this.metadata?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.mapId).currentProjection) {
-        transformedBounds = Projection.transformExtent(
-          layerBounds,
-          `EPSG:${projection}`,
-          `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
-        );
+      if (this.metadata?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')) {
+        transformedBounds = Projection.transformExtent(layerBounds, projection, this.getMapViewer().getProjection().getCode());
       }
 
       // eslint-disable-next-line no-param-reassign

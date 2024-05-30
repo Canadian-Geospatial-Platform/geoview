@@ -11,7 +11,6 @@ import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -190,16 +189,15 @@ export class GVEsriDynamic extends AbstractGVRaster {
       if (!identifyUrl) return [];
 
       identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
-      const mapLayer = MapEventProcessor.getMapViewer(this.getMapId()).map;
-      const { currentProjection } = MapEventProcessor.getMapState(this.getMapId());
-      const size = mapLayer.getSize()!;
-      let bounds = mapLayer.getView().calculateExtent();
-      bounds = Projection.transformExtent(bounds, `EPSG:${currentProjection}`, Projection.PROJECTION_NAMES.LNGLAT);
+
+      const mapViewer = this.getMapViewer();
+      const bounds = mapViewer.convertExtentMapProjToLngLat(mapViewer.map.getView().calculateExtent());
 
       const extent = { xmin: bounds[0], ymin: bounds[1], xmax: bounds[2], ymax: bounds[3] };
 
       const source = layer.getSource()!;
       const { layerDefs } = source.getParams();
+      const size = mapViewer.map.getSize()!;
 
       identifyUrl =
         `${identifyUrl}identify?f=json&tolerance=7` +
@@ -218,7 +216,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       }
       const features = new EsriJSON().readFeatures(
         { features: jsonResponse.results },
-        { dataProjection: Projection.PROJECTION_NAMES.LNGLAT, featureProjection: `EPSG:${currentProjection}` }
+        { dataProjection: Projection.PROJECTION_NAMES.LNGLAT, featureProjection: mapViewer.getProjection().getCode() }
       ) as Feature<Geometry>[];
       const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig);
       return arrayOfFeatureInfoEntries;
@@ -625,11 +623,12 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {Extent | undefined} bounds - The current bounding box to be adjusted.
    * @returns {Extent | undefined} The new layer bounding box.
    */
-  protected getBounds(bounds?: Extent): Extent | undefined {
+  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     const layerConfig = this.getLayerConfig();
     const layerBounds = layerConfig?.initialSettings?.bounds || [];
     const projection =
-      layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid || MapEventProcessor.getMapState(this.getMapId()).currentProjection;
+      layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid || this.getMapViewer().getProjection().getCode().replace('EPSG:', '');
 
     if (layerConfig.getMetadata()?.fullExtent) {
       layerBounds[0] = layerConfig.getMetadata()?.fullExtent.xmin as number;
@@ -641,13 +640,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
     if (layerBounds) {
       let transformedBounds = layerBounds;
       if (
-        layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.getMapId()).currentProjection
+        layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')
       ) {
-        transformedBounds = Projection.transformExtent(
-          layerBounds,
-          `EPSG:${projection}`,
-          `EPSG:${MapEventProcessor.getMapState(this.getMapId()).currentProjection}`
-        );
+        transformedBounds = Projection.transformExtent(layerBounds, `EPSG:${projection}`, this.getMapViewer().getProjection().getCode());
       }
 
       // eslint-disable-next-line no-param-reassign

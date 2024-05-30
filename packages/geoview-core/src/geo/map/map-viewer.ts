@@ -714,8 +714,7 @@ export class MapViewer {
   // #region MAP STATES
 
   /**
-   * Return the current display language
-   *
+   * Returns the current display language
    * @returns {TypeDisplayLanguage} The display language
    */
   getDisplayLanguage(): TypeDisplayLanguage {
@@ -723,8 +722,7 @@ export class MapViewer {
   }
 
   /**
-   * Return the current display theme
-   *
+   * Returns the current display theme
    * @returns {TypeDisplayTheme} The display theme
    */
   getDisplayTheme(): TypeDisplayTheme {
@@ -732,8 +730,7 @@ export class MapViewer {
   }
 
   /**
-   * Return the map current state information
-   *
+   * Returns the map current state information
    * @returns {TypeMapState} The map state
    */
   getMapState(): TypeMapState {
@@ -744,16 +741,14 @@ export class MapViewer {
 
   /**
    * Gets the map viewSettings
-   *
    * @returns the map viewSettings
    */
   getView(): View {
-    return this.getView();
+    return this.map.getView();
   }
 
   /**
    * Gets the map projection
-   *
    * @returns the map viewSettings
    */
   getProjection(): OLProjection {

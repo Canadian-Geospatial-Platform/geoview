@@ -8,10 +8,8 @@ import Feature from 'ol/Feature';
 
 import { DateMgt } from '@/core/utils/date-mgt';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
-import { Projection } from '@/geo/utils/projection';
 import { NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
@@ -25,15 +23,24 @@ import { AbstractGVLayer } from '../abstract-gv-layer';
 export abstract class AbstractGVVector extends AbstractGVLayer {
   /**
    * Overrides the get of the OpenLayers Layer
-   * @returns {BaseVectorLayer<VectorSource<Feature>, any>} The OpenLayers Layer
+   * @returns {BaseVectorLayer<VectorSource, any>} The OpenLayers Layer
    */
   // Disabling 'any', because too many renderer types in OpenLayers
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  override getOLLayer(): BaseVectorLayer<VectorSource<Feature>, any> {
+  override getOLLayer(): BaseVectorLayer<VectorSource, any> {
     // Call parent and cast
     // Disabling 'any', because too many renderer types in OpenLayers
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return super.getOLLayer() as BaseVectorLayer<VectorSource<Feature>, any>;
+    return super.getOLLayer() as BaseVectorLayer<VectorSource, any>;
+  }
+
+  /**
+   * Overrides the get of the OpenLayers Layer Source
+   * @returns {VectorSource} The OpenLayers Layer Source
+   */
+  override getOLSource(): VectorSource | undefined {
+    // Get source from OL
+    return this.getOLLayer().getSource() || undefined;
   }
 
   /**
@@ -64,8 +71,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     try {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig();
-      const layer = this.getOLLayer();
-      const features = layer.getSource()!.getFeatures();
+      const features = this.getOLSource()!.getFeatures();
       return this.formatFeatureInfoResult(features, layerConfig);
     } catch (error) {
       // Log
@@ -81,17 +87,21 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    */
   protected override getFeatureInfoAtPixel(location: Pixel): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
-      // Get the layer config in a loaded phase
-      const layerConfig = this.getLayerConfig();
-      // TODO: Check - Why getting the layerConfig this way here!? Use regular way instead?
-      const layerFilter = (layer: BaseLayer): boolean => {
-        const layerSource = layer.get('layerConfig')?.source;
-        const configSource = layerConfig?.source;
-        return layerSource !== undefined && configSource !== undefined && layerSource === configSource;
+      // Get the layer source
+      const layerSource = this.getOLSource();
+
+      // Prepare a filter by layer to know on which layer we want to query features
+      const layerFilter = (layerCandidate: BaseLayer): boolean => {
+        // We know it's the right layer to query on if the source is the same as the current layer
+        const candidateSource = layerCandidate.get('source');
+        return layerSource && candidateSource && layerSource === candidateSource;
       };
-      const { map } = MapEventProcessor.getMapViewer(this.getMapId());
-      const features = map.getFeaturesAtPixel(location, { hitTolerance: 4, layerFilter });
-      return this.formatFeatureInfoResult(features as Feature[], layerConfig as VectorLayerEntryConfig);
+
+      // Query the map using the layer filter and a hit tolerance
+      const features = this.getMapViewer().map.getFeaturesAtPixel(location, { hitTolerance: this.hitTolerance, layerFilter }) as Feature[];
+
+      // Format and return the features
+      return this.formatFeatureInfoResult(features, this.getLayerConfig());
     } catch (error) {
       // Log
       logger.logError('abstract-gv-vector.getFeatureInfoAtPixel()\n', error);
@@ -105,8 +115,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected override getFeatureInfoAtCoordinate(location: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const { map } = MapEventProcessor.getMapViewer(this.getMapId());
-    return this.getFeatureInfoAtPixel(map.getPixelFromCoordinate(location as Coordinate));
+    // Redirect to getFeatureInfoAtPixel
+    return this.getFeatureInfoAtPixel(this.getMapViewer().map.getPixelFromCoordinate(location));
   }
 
   /**
@@ -114,14 +124,12 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param {Coordinate} lnglat - The coordinate that will be used by the query.
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override getFeatureInfoAtLongLat(location: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const { map } = MapEventProcessor.getMapViewer(this.getMapId());
-    const convertedLocation = Projection.transform(
-      location,
-      Projection.PROJECTION_NAMES.LNGLAT,
-      `EPSG:${MapEventProcessor.getMapState(this.getMapId()).currentProjection}`
-    );
-    return this.getFeatureInfoAtPixel(map.getPixelFromCoordinate(convertedLocation as Coordinate));
+  protected override getFeatureInfoAtLongLat(lnglat: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null> {
+    // Convert Coordinates LngLat to map projection
+    const projCoordinate = this.getMapViewer().convertCoordinateLngLatToMapProj(lnglat);
+
+    // Redirect to getFeatureInfoAtPixel
+    return this.getFeatureInfoAtPixel(this.getMapViewer().map.getPixelFromCoordinate(projCoordinate));
   }
 
   /**
@@ -190,7 +198,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param {Extent | undefined} bounds - The current bounding box to be adjusted.
    * @returns {Extent | undefined} The new layer bounding box.
    */
-  protected getBounds(bounds?: Extent): Extent | undefined {
+  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     const layerBounds = this.getOLLayer().getSource()?.getExtent();
 
     if (layerBounds) {

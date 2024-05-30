@@ -1145,16 +1145,18 @@ export class WMS extends AbstractGeoViewRaster {
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
     const layerConfig = this.getLayerConfig(layerPath);
     const layer = this.getOLLayer(layerPath) as ImageLayer<Static> | undefined;
-    const projection =
-      layer?.getSource()?.getProjection()?.getCode().replace('EPSG:', '') || MapEventProcessor.getMapState(this.mapId).currentProjection;
+    const projection = layer?.getSource()?.getProjection()?.getCode() || this.getMapViewer().getProjection().getCode();
+
     let layerBounds = layerConfig?.initialSettings?.bounds || [];
-    layerBounds = Projection.transformExtent(layerBounds, 'EPSG:4326', `EPSG:${projection}`);
+    // TODO: Check - Are we sure this is 4326, always?
+    layerBounds = Projection.transformExtent(layerBounds, 'EPSG:4326', projection);
+
     const boundingBoxes = this.metadata?.Capability.Layer.BoundingBox;
     let bbExtent: Extent | undefined;
 
     if (boundingBoxes) {
       for (let i = 0; i < (boundingBoxes.length as number); i++) {
-        if (boundingBoxes[i].crs === `EPSG:${projection}`)
+        if (boundingBoxes[i].crs === projection)
           bbExtent = [
             boundingBoxes[i].extent[1],
             boundingBoxes[i].extent[0],

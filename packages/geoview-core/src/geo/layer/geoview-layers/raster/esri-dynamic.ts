@@ -17,7 +17,6 @@ import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-lay
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { Projection } from '@/geo/utils/projection';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -354,8 +353,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    */
   // GV Layers Refactoring - Obsolete (in layers)
   protected override getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const { map } = MapEventProcessor.getMapViewer(this.mapId);
-    return this.getFeatureInfoAtCoordinate(map.getCoordinateFromPixel(location), layerPath);
+    // Redirect to getFeatureInfoAtCoordinate
+    return this.getFeatureInfoAtCoordinate(this.getMapViewer().map.getCoordinateFromPixel(location), layerPath);
   }
 
   /** ***************************************************************************************************************************
@@ -371,12 +370,11 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     location: Coordinate,
     layerPath: string
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const convertedLocation = Projection.transform(
-      location,
-      `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`,
-      Projection.PROJECTION_NAMES.LNGLAT
-    );
-    return this.getFeatureInfoAtLongLat(convertedLocation, layerPath);
+    // Transform coordinate from map project to lntlat
+    const projCoordinate = this.getMapViewer().convertCoordinateMapProjToLngLat(location);
+
+    // Redirect to getFeatureInfoAtLongLat
+    return this.getFeatureInfoAtLongLat(projCoordinate, layerPath);
   }
 
   /** ***************************************************************************************************************************
@@ -393,27 +391,29 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     layerPath: string
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
+      // If invisible
+      if (!this.getVisible(layerPath)) return [];
+
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig(layerPath) as EsriDynamicLayerEntryConfig;
       const layer = this.getOLLayer(layerPath) as ImageLayer<ImageArcGISRest>;
 
-      if (!this.getVisible(layerPath)) return [];
+      // If not queryable
       if (!layerConfig.source?.featureInfo?.queryable) return [];
 
       let identifyUrl = getLocalizedValue(layerConfig.source?.dataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
       if (!identifyUrl) return [];
 
       identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
-      const mapLayer = MapEventProcessor.getMapViewer(this.mapId).map;
-      const { currentProjection } = MapEventProcessor.getMapState(this.mapId);
-      const size = mapLayer.getSize()!;
-      let bounds = mapLayer.getView().calculateExtent();
-      bounds = Projection.transformExtent(bounds, `EPSG:${currentProjection}`, Projection.PROJECTION_NAMES.LNGLAT);
+
+      const mapViewer = this.getMapViewer();
+      const bounds = mapViewer.convertExtentMapProjToLngLat(mapViewer.map.getView().calculateExtent());
 
       const extent = { xmin: bounds[0], ymin: bounds[1], xmax: bounds[2], ymax: bounds[3] };
 
       const source = layer.getSource()!;
       const { layerDefs } = source.getParams();
+      const size = mapViewer.map.getSize()!;
 
       identifyUrl =
         `${identifyUrl}identify?f=json&tolerance=7` +
@@ -432,7 +432,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       }
       const features = new EsriJSON().readFeatures(
         { features: jsonResponse.results },
-        { dataProjection: Projection.PROJECTION_NAMES.LNGLAT, featureProjection: `EPSG:${currentProjection}` }
+        { dataProjection: Projection.PROJECTION_NAMES.LNGLAT, featureProjection: mapViewer.getProjection().getCode() }
       ) as Feature<Geometry>[];
       const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig);
       return arrayOfFeatureInfoEntries;
@@ -867,7 +867,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
     const layerConfig = this.getLayerConfig(layerPath);
     const layerBounds = layerConfig?.initialSettings?.bounds || [];
-    const projection = this.metadata?.fullExtent?.spatialReference?.wkid || MapEventProcessor.getMapState(this.mapId).currentProjection;
+    const projection =
+      this.metadata?.fullExtent?.spatialReference?.wkid || this.getMapViewer().getProjection().getCode().replace('EPSG:', '');
 
     if (this.metadata?.fullExtent) {
       layerBounds[0] = this.metadata?.fullExtent.xmin as number;
@@ -878,12 +879,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
     if (layerBounds) {
       let transformedBounds = layerBounds;
-      if (this.metadata?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.mapId).currentProjection) {
-        transformedBounds = Projection.transformExtent(
-          layerBounds,
-          `EPSG:${projection}`,
-          `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
-        );
+      if (this.metadata?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')) {
+        transformedBounds = Projection.transformExtent(layerBounds, `EPSG:${projection}`, this.getMapViewer().getProjection().getCode());
       }
 
       if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];

@@ -4,7 +4,6 @@ import { Extent } from 'ol/extent';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { featureInfoGetFieldType } from '../utils';
 import { AbstractGVVectorTile } from './abstract-gv-vector-tile';
@@ -60,24 +59,19 @@ export class GVVectorTiles extends AbstractGVVectorTile {
    * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    * @returns {Extent | undefined} The new layer bounding box.
    */
-  protected getBounds(bounds?: Extent): Extent | undefined {
+  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     const layerConfig = this.getLayerConfig();
     const layer = this.getOLLayer();
-    const layerBounds = layer?.getSource()?.getTileGrid()?.getExtent();
-    const projection =
-      layer?.getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
-      MapEventProcessor.getMapState(this.getMapId()).currentProjection;
+    const projection = layer?.getSource()?.getProjection()?.getCode() || this.getMapViewer().getProjection().getCode();
 
+    const layerBounds = layer?.getSource()?.getTileGrid()?.getExtent();
     if (layerBounds) {
       let transformedBounds = layerBounds;
       if (
-        layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.getMapId()).currentProjection
+        layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')
       ) {
-        transformedBounds = Projection.transformExtent(
-          layerBounds,
-          `EPSG:${projection}`,
-          `EPSG:${MapEventProcessor.getMapState(this.getMapId()).currentProjection}`
-        );
+        transformedBounds = Projection.transformExtent(layerBounds, projection, this.getMapViewer().getProjection().getCode());
       }
 
       // eslint-disable-next-line no-param-reassign

@@ -13,7 +13,6 @@ import { xmlToJson, getLocalizedValue } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
@@ -75,8 +74,8 @@ export class GVWMS extends AbstractGVRaster {
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected override getFeatureInfoAtPixel(location: Pixel): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const { map } = MapEventProcessor.getMapViewer(this.getMapId());
-    return this.getFeatureInfoAtCoordinate(map.getCoordinateFromPixel(location));
+    // Redirect to getFeatureInfoAtCoordinate
+    return this.getFeatureInfoAtCoordinate(this.getMapViewer().map.getCoordinateFromPixel(location));
   }
 
   /**
@@ -85,12 +84,11 @@ export class GVWMS extends AbstractGVRaster {
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected override getFeatureInfoAtCoordinate(location: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const convertedLocation = Projection.transform(
-      location,
-      `EPSG:${MapEventProcessor.getMapState(this.getMapId()).currentProjection}`,
-      Projection.PROJECTION_NAMES.LNGLAT
-    );
-    return this.getFeatureInfoAtLongLat(convertedLocation);
+    // Transform coordinate from map project to lntlat
+    const projCoordinate = this.getMapViewer().convertCoordinateMapProjToLngLat(location);
+
+    // Redirect to getFeatureInfoAtLongLat
+    return this.getFeatureInfoAtLongLat(projCoordinate);
   }
 
   /**
@@ -105,11 +103,8 @@ export class GVWMS extends AbstractGVRaster {
 
       // Get the layer config and source
       const layerConfig = this.getLayerConfig();
-      const wmsSource = this.getOLSource();
 
-      const viewResolution = MapEventProcessor.getMapViewer(this.getMapId()).getView().getResolution() as number;
-      const crs = `EPSG:${MapEventProcessor.getMapState(this.getMapId()).currentProjection}`;
-      const clickCoordinate = Projection.transform(lnglat, Projection.PROJECTION_NAMES.LNGLAT, crs);
+      const clickCoordinate = this.getMapViewer().convertCoordinateLngLatToMapProj(lnglat);
       if (
         lnglat[0] < layerConfig.initialSettings!.bounds![0] ||
         layerConfig.initialSettings!.bounds![2] < lnglat[0] ||
@@ -125,7 +120,9 @@ export class GVWMS extends AbstractGVRaster {
         else if (featureInfoFormat.includes('text/plain' as TypeJsonObject)) infoFormat = 'text/plain';
         else throw new Error('Parameter info_format of GetFeatureInfo only support text/xml and text/plain for WMS services.');
 
-      const featureInfoUrl = wmsSource?.getFeatureInfoUrl(clickCoordinate, viewResolution, crs, {
+      const wmsSource = this.getOLSource();
+      const viewResolution = this.getMapViewer().getView().getResolution()!;
+      const featureInfoUrl = wmsSource?.getFeatureInfoUrl(clickCoordinate, viewResolution, this.getMapViewer().getProjection().getCode(), {
         INFO_FORMAT: infoFormat,
       });
       if (featureInfoUrl) {
@@ -552,17 +549,18 @@ export class GVWMS extends AbstractGVRaster {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     const layerConfig = this.getLayerConfig();
     const layer = this.getOLLayer();
-    const projection =
-      layer?.getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
-      MapEventProcessor.getMapState(this.getMapId()).currentProjection;
+    const projection = layer?.getSource()?.getProjection()?.getCode() || this.getMapViewer().getProjection().getCode();
+
     let layerBounds = layerConfig?.initialSettings?.bounds || [];
-    layerBounds = Projection.transformExtent(layerBounds, 'EPSG:4326', `EPSG:${projection}`);
-    const boundingBoxes = this.getLayerConfig().getMetadata()?.Capability.Layer.BoundingBox;
+    // TODO: Check - Are we sure this is 4326, always?
+    layerBounds = Projection.transformExtent(layerBounds, 'EPSG:4326', projection);
+
+    const boundingBoxes = layerConfig.getMetadata()?.Capability.Layer.BoundingBox;
     let bbExtent: Extent | undefined;
 
     if (boundingBoxes) {
       for (let i = 0; i < (boundingBoxes.length as number); i++) {
-        if (boundingBoxes[i].crs === `EPSG:${projection}`)
+        if (boundingBoxes[i].crs === projection)
           bbExtent = [
             boundingBoxes[i].extent[1],
             boundingBoxes[i].extent[0],
