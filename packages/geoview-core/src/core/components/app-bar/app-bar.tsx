@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useState, useRef, useEffect, useCallback, Fragment, useMemo, ReactNode } from 'react';
-import { capitalize } from 'lodash';
+import { capitalize, camelCase } from 'lodash';
 import { useTheme } from '@mui/material/styles';
 import {
   Box,
@@ -27,7 +27,7 @@ import {
   useUIStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppFullscreenActive, useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import { GuidePanel, Legend, DetailsPanel, AppBarApi, AppBarCreatedEvent, AppBarRemovedEvent, Datapanel } from '@/core/components';
@@ -82,6 +82,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const appBarComponents = useUIAppbarComponents();
   const { tabId, tabGroup, isOpen } = useActiveAppBarTab();
   const { hideClickMarker } = useMapStoreActions();
+
+  const isMapFullScreen = useAppFullscreenActive();
+
   const geoviewElement = useAppGeoviewHTMLElement().querySelector('[id^="mapTargetElement-"]') as HTMLElement;
 
   const { setActiveAppBarTab } = useUIStoreActions();
@@ -97,7 +100,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
     // TODO: Refactor - We should find a way to make this 'dictionary of supported components' dynamic.
     return {
-      geolocator: { icon: <SearchIcon />, content: <Geolocator /> },
+      geolocator: { icon: <SearchIcon />, content: <Geolocator key="geolocator" /> },
       legend: { icon: <HubOutlinedIcon />, content: <Legend fullWidth containerType="appBar" /> },
       guide: { icon: <SchoolIcon />, content: <GuidePanel fullWidth /> },
       details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel fullWidth /> },
@@ -194,6 +197,24 @@ export function AppBar(props: AppBarProps): JSX.Element {
     [setButtonPanelGroups]
   );
 
+  /**
+   * Get panel width based on window screen for data table and default for other panels
+   * @param {string} tab tab which open the panel.
+   */
+  const getPanelWidth = useCallback(
+    (tab: string): number => {
+      let width = 400;
+      if (tab === CV_DEFAULT_APPBAR_CORE.DATA_TABLE && isMapFullScreen) {
+        width = window.screen.width - 65;
+      }
+      if (tab === CV_DEFAULT_APPBAR_CORE.DATA_TABLE && !isMapFullScreen) {
+        width = geoviewElement?.clientWidth ?? 0;
+      }
+      return width;
+    },
+    [geoviewElement, isMapFullScreen]
+  );
+
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('APP-BAR - mount');
@@ -264,17 +285,18 @@ export function AppBar(props: AppBarProps): JSX.Element {
       .map((tab): [TypeIconButtonProps, TypePanelProps, string] => {
         const button: TypeIconButtonProps = {
           id: `AppbarPanelButton${capitalize(tab)}`,
-          tooltip: t(`${tab}.title`)!,
+          tooltip: t(`${camelCase(tab)}.title`)!,
           tooltipPlacement: 'bottom',
           children: memoPanels[tab].icon,
         };
         const panel: TypePanelProps = {
           panelId: `Appbar${capitalize(tab)}PanelId`,
+          panelGroupName: tab,
           type: 'app-bar',
           title: capitalize(tab),
           icon: memoPanels[tab].icon,
           content: memoPanels[tab].content,
-          width: tab === 'data-table' ? geoviewElement?.clientWidth ?? 0 : 400,
+          width: getPanelWidth(tab),
           panelStyles: {
             panelCardContent: { padding: '0' },
           },
@@ -282,7 +304,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
         return [button, panel, tab];
       })
       .forEach((footerGroup) => appBarApi.createAppbarPanel(footerGroup[0], footerGroup[1], footerGroup[2]));
-  }, [appBarConfig?.tabs.core, appBarApi, t, memoPanels, geoviewElement]);
+  }, [appBarConfig?.tabs.core, appBarApi, t, memoPanels, geoviewElement, getPanelWidth]);
 
   // #endregion
 

@@ -60,11 +60,11 @@ import { DataTableProps, ColumnsType } from './data-table-types';
  * @param {DataTableProps} data map data which will be used to build data table.
  * @param {string} mapId id of the map.
  * @param {string} layerKey key of the layer.
- * @param {number} tableHeight Height of the container which contains all rows.
+ * @param {string} tableHeight Height of the container which contains all rows.
  * @returns {JSX.Element} Data table as react element.
  */
 
-function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps): JSX.Element {
+function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): JSX.Element {
   const { t } = useTranslation();
 
   const sxtheme = useTheme();
@@ -434,7 +434,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps): JSX.
     enableColumnVirtualization: true,
     enablePagination: false,
     enableRowVirtualization: true,
-    muiTableContainerProps: { sx: { maxHeight: `${tableHeight - 100}px` } },
+    muiTableContainerProps: { sx: { maxHeight: tableHeight } },
     rowVirtualizerInstanceRef,
     rowVirtualizerOptions: { overscan: 5 },
     columnVirtualizerOptions: { overscan: 2 },
@@ -558,7 +558,7 @@ function DataTable({ data, layerPath, tableHeight = 600 }: DataTableProps): JSX.
   const debouncedColumnFilters = useCallback(
     (filters: MRTColumnFiltersState) => filterMap(filters),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [datatableSettings[layerPath].mapFilteredRecord]
+    [datatableSettings[layerPath]?.mapFilteredRecord]
   );
 
   // update map when column filters change

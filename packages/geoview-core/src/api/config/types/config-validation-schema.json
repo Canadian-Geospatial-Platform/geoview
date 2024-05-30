@@ -206,7 +206,8 @@
         "geochart",
         "details",
         "legend",
-        "guide"
+        "guide",
+        "data-table"
       ]
     },
     "TypeAppBarProps": {

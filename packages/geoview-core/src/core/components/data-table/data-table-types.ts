@@ -13,5 +13,5 @@ export interface ColumnsType {
 export interface DataTableProps {
   data: MappedLayerDataType;
   layerPath: string;
-  tableHeight: number;
+  tableHeight: string;
 }

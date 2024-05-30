@@ -13,6 +13,8 @@ import { logger } from '@/core/utils/logger';
 import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 import { getSxClasses } from './panel-style';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
 
 /**
  * Interface for panel properties
@@ -37,7 +39,7 @@ export type TypePanelAppProps = {
  */
 export function Panel(props: TypePanelAppProps): JSX.Element {
   const { panel, button, onPanelOpened, onPanelClosed, onGeneralCloseClicked } = props;
-  const { status: open, panelStyles } = panel;
+  const { status: open, panelStyles, panelGroupName } = panel;
 
   const { t } = useTranslation<string>();
 
@@ -45,13 +47,16 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
+  const mapSize = useMapSize();
+
   // internal state
   // set the active trap value for FocusTrap
   const activeTrapGeoView = useUIActiveTrapGeoView();
+  const panelContainerRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLButtonElement>(null);
   const panelHeader = useRef<HTMLButtonElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
-  const panelWidth = panel?.width ?? 350;
+  const panelWidth = panel?.width ?? 400;
   const panelContainerStyles = {
     ...(panelStyles?.panelContainer && { ...panelStyles.panelContainer }),
     width: open ? panelWidth : 0,
@@ -88,9 +93,21 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     }
   }, [open, theme.transitions.duration.standard, onPanelOpened, onPanelClosed]);
 
+  /**
+   * Update the width of data table panel when window is resize based on mapsize
+   */
+  useEffect(() => {
+    if (panelGroupName === CV_DEFAULT_APPBAR_CORE.DATA_TABLE && panelContainerRef.current && open) {
+      panelContainerRef.current.style.width = `${mapSize[0]}px`;
+      panelContainerRef.current.style.maxWidth = `${mapSize[0]}px`;
+    } else {
+      panelContainerRef.current?.removeAttribute('style');
+    }
+  }, [mapSize, panelGroupName, open]);
+
   // TODO: refactor - remove comment in tsx for production build facebook/create-react-app#9507
   return (
-    <Box sx={panelContainerStyles}>
+    <Box sx={panelContainerStyles} ref={panelContainerRef}>
       <FocusTrap
         active={activeTrapGeoView && open}
         focusTrapOptions={{
@@ -133,8 +150,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
                   <CloseIcon />
                 </IconButton>
               ) : (
-                // eslint-disable-next-line react/jsx-no-useless-fragment
-                <></>
+                ''
               )
             }
           />

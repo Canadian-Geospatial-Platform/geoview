@@ -1,6 +1,10 @@
 import { RefObject, useCallback, useEffect, useRef } from 'react';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useUIActiveFooterBarTabId, useUIFooterPanelResizeValue } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import {
+  useActiveAppBarTab,
+  useUIActiveFooterBarTabId,
+  useUIFooterPanelResizeValue,
+} from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useDetailsLayerDataArray } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import {
   useDataTableAllFeaturesDataArray,
@@ -9,6 +13,7 @@ import {
 import { logger } from '@/core/utils/logger';
 import { TABS } from '@/core/utils/constant';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
 
 interface UseFooterPanelHeightType {
   footerPanelTab: 'legend' | 'default';
@@ -48,15 +53,16 @@ export function useFooterPanelHeight({ footerPanelTab = 'default' }: UseFooterPa
   const arrayOfLayerData = useDetailsLayerDataArray();
   const allFeaturesLayerData = useDataTableAllFeaturesDataArray();
   const { setTableHeight } = useDataTableStoreActions();
+  const { tabGroup } = useActiveAppBarTab();
 
   /**
    * Set the height of right panel
-   * @param {number} height calculate height of the right panel based on footerPanelTab
+   * @param {string} height calculate height of the right panel based on footerPanelTab
    */
-  const rightPanelHeight = (height?: number): void => {
+  const rightPanelHeight = (height?: string): void => {
     const rightPanel = (rightPanelRef.current?.firstElementChild ?? null) as HTMLElement | null;
     if (rightPanel) {
-      rightPanel.style.maxHeight = `${height ?? defaultHeight}px`;
+      rightPanel.style.maxHeight = height ?? `${defaultHeight}px`;
       rightPanel.style.overflowY = 'auto';
     }
   };
@@ -71,15 +77,19 @@ export function useFooterPanelHeight({ footerPanelTab = 'default' }: UseFooterPa
 
       const footerBarHeight = footerBar?.clientHeight ?? 0;
 
-      const leftPanelHeight = (window.screen.height * footerPanelResizeValue) / 100 - panelTitleRefHeight.current - footerBarHeight - 10;
+      let leftPanelHeight = (window.screen.height * footerPanelResizeValue) / 100 - panelTitleRefHeight.current - footerBarHeight - 10;
+
+      if (tabGroup === CV_DEFAULT_APPBAR_CORE.DATA_TABLE) {
+        leftPanelHeight = window.screen.height - 200;
+      }
 
       leftPanelRef.current.style.maxHeight = `${leftPanelHeight}px`;
       leftPanelRef.current.style.overflow = 'auto';
       leftPanelRef.current.style.paddingBottom = '24px';
 
-      if (activeFooterBarTabId === TABS.DATA_TABLE) {
-        rightPanelHeight(leftPanelHeight);
-        setTableHeight(leftPanelHeight);
+      if (activeFooterBarTabId === TABS.DATA_TABLE || tabGroup === CV_DEFAULT_APPBAR_CORE.DATA_TABLE) {
+        rightPanelHeight(`${leftPanelHeight}px`);
+        setTableHeight(`${leftPanelHeight - 100}px`);
       } else if (activeFooterBarTabId === TABS.GEO_CHART && rightPanelRef.current) {
         const childElem = rightPanelRef.current?.firstElementChild as HTMLElement | null;
         if (childElem) {
@@ -87,7 +97,7 @@ export function useFooterPanelHeight({ footerPanelTab = 'default' }: UseFooterPa
           childElem.style.overflowY = 'auto';
         }
       } else {
-        rightPanelHeight(leftPanelHeight);
+        rightPanelHeight(`${leftPanelHeight}px`);
       }
     }
     // reset the footer panel after map is not in fullscreen.
@@ -95,8 +105,8 @@ export function useFooterPanelHeight({ footerPanelTab = 'default' }: UseFooterPa
       leftPanelRef.current.style.maxHeight = `${defaultHeight}px`;
       leftPanelRef.current.style.overflow = 'auto';
       rightPanelHeight();
-      if (activeFooterBarTabId === TABS.DATA_TABLE) {
-        setTableHeight(defaultHeight);
+      if (activeFooterBarTabId === TABS.DATA_TABLE || tabGroup === CV_DEFAULT_APPBAR_CORE.DATA_TABLE) {
+        setTableHeight(`${defaultHeight - 100}px`);
         // check if table exist as child in right panel.
       } else if (activeFooterBarTabId === TABS.GEO_CHART && rightPanelRef.current) {
         const childElem = rightPanelRef.current?.firstElementChild as HTMLElement | null;
@@ -115,6 +125,7 @@ export function useFooterPanelHeight({ footerPanelTab = 'default' }: UseFooterPa
     setTableHeight,
     arrayOfLayerData,
     allFeaturesLayerData,
+    tabGroup,
   ]);
 
   return { leftPanelRef, rightPanelRef, panelTitleRef, activeFooterBarTabId };

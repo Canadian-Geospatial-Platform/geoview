@@ -20,6 +20,8 @@ export type TypeButtonPanelProps = {
 export type TypePanelProps = {
   /** Panel id. */
   panelId?: string;
+  /** Panel group name. */
+  panelGroupName?: string;
   /** Panel type (app-bar, nav-bar). */
   type?: string;
   /** Panel open status (open/closed). */
