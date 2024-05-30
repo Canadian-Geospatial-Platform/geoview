@@ -52,7 +52,8 @@ const LayerListItem = memo(function LayerListItem({ isSelected, layer, onListIte
    * @returns
    */
   const renderLayerIcon = (): JSX.Element | null => {
-    if (layer.layerPath) {
+    // If there is content, this is a guide section with no icon
+    if (layer.layerPath && !layer.content) {
       return (
         <ListItemIcon aria-hidden="true">
           <LayerIcon layer={layer} />

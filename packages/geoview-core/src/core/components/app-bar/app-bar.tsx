@@ -9,7 +9,7 @@ import {
   Panel,
   IconButton,
   TypeIconButtonProps,
-  SchoolIcon,
+  QuestionMarkIcon,
   InfoOutlinedIcon,
   HubOutlinedIcon,
   SearchIcon,
@@ -98,7 +98,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
     return {
       geolocator: { icon: <SearchIcon />, content: <Geolocator /> },
       legend: { icon: <HubOutlinedIcon />, content: <Legend fullWidth containerType="appBar" /> },
-      guide: { icon: <SchoolIcon />, content: <GuidePanel fullWidth /> },
+      guide: { icon: <QuestionMarkIcon />, content: <GuidePanel fullWidth /> },
       details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel fullWidth /> },
     } as unknown as Record<string, GroupPanelType>;
   }, []);

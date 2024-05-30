@@ -70,6 +70,9 @@ export function GuidePanel({ fullWidth }: GuidePanelType): JSX.Element {
     // Log
     logger.logTraceUseMemo('GUIDE_PANEL - layerlist');
 
+    // set the first tab by default
+    setSelectedLayerPath('navigationControls');
+
     return getListOfGuides();
   }, [getListOfGuides]);
 
