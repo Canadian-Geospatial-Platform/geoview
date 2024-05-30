@@ -21,8 +21,6 @@ import {
 } from '@/geo/map/map-schema-types';
 
 import { getLocalizedValue, getXMLHttpRequest, xmlToJson, findPropertyNameByRegex } from '@/core/utils/utilities';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
 import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
@@ -209,24 +207,15 @@ export class WFS extends AbstractGeoViewVector {
           return;
         }
 
-        const { currentProjection } = MapEventProcessor.getMapState(this.mapId);
         if (layerConfig.initialSettings?.extent)
-          layerConfig.initialSettings.extent = Projection.transformExtent(
-            layerConfig.initialSettings.extent,
-            Projection.PROJECTION_NAMES.LNGLAT,
-            `EPSG:${currentProjection}`
-          );
+          layerConfig.initialSettings.extent = this.getMapViewer().convertExtentLngLatToMapProj(layerConfig.initialSettings.extent);
 
         if (!layerConfig.initialSettings?.bounds && foundMetadata['ows:WGS84BoundingBox']) {
           const lowerCorner = (foundMetadata['ows:WGS84BoundingBox']['ows:LowerCorner']['#text'] as string).split(' ');
           const upperCorner = (foundMetadata['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'] as string).split(' ');
           const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
           // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-          layerConfig.initialSettings!.bounds = Projection.transformExtent(
-            bounds,
-            Projection.PROJECTION_NAMES.LNGLAT,
-            `EPSG:${currentProjection}`
-          );
+          layerConfig.initialSettings!.bounds = this.getMapViewer().convertExtentLngLatToMapProj(bounds);
         }
       }
     });
@@ -377,7 +366,7 @@ export class WFS extends AbstractGeoViewVector {
       sourceUrl = `${sourceUrl}&typeName=${layerConfig.layerId}`;
       // if an extent is provided, use it in the url
       if (sourceOptions.strategy === bbox && Number.isFinite(extent[0])) {
-        sourceUrl = `${sourceUrl}&bbox=${extent},EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`;
+        sourceUrl = `${sourceUrl}&bbox=${extent},${this.getMapViewer().getProjection().getCode()}`;
       }
       return sourceUrl;
     };

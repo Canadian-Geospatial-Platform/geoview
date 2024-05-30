@@ -30,7 +30,6 @@ import {
   CONST_LAYER_ENTRY_TYPES,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { GeoPackageLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geopackage-layer-config-entry';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
@@ -48,17 +47,17 @@ export interface TypeGeoPackageLayerConfig extends Omit<TypeGeoviewLayerConfig, 
   listOfLayerEntryConfig: GeoPackageLayerEntryConfig[];
 }
 
-interface sldsInterface {
+interface SldsInterface {
   [key: string | number]: string | number | Uint8Array;
 }
 
-interface layerData {
+interface LayerData {
   name: string;
   source: VectorSource<Feature>;
   properties: initSqlJs.ParamsObject | undefined;
 }
 
-type tableInfo = {
+type TableInfo = {
   table_name: SqlValue;
   srs_id?: string;
   geometry_column_name: SqlValue;
@@ -282,12 +281,12 @@ export class GeoPackage extends AbstractGeoViewVector {
     layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
-  ): Promise<[layerData[], sldsInterface]> {
-    const promisedGeopackageData = new Promise<[layerData[], sldsInterface]>((resolve) => {
+  ): Promise<[LayerData[], SldsInterface]> {
+    const promisedGeopackageData = new Promise<[LayerData[], SldsInterface]>((resolve) => {
       const url = getLocalizedValue(layerConfig.source!.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
       if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
-      const layersInfo: layerData[] = [];
-      const styleSlds: sldsInterface = {};
+      const layersInfo: LayerData[] = [];
+      const styleSlds: SldsInterface = {};
 
       const xhr = new XMLHttpRequest();
       xhr.responseType = 'arraybuffer';
@@ -300,7 +299,7 @@ export class GeoPackage extends AbstractGeoViewVector {
           xhr.onload = () => {
             if (xhr.status === 200) {
               const db = new SQL.Database(new Uint8Array(xhr.response as ArrayBuffer));
-              const tables: tableInfo[] = [];
+              const tables: TableInfo[] = [];
 
               let stmt = db.prepare(`
             SELECT gpkg_contents.table_name, gpkg_contents.srs_id,
@@ -354,7 +353,7 @@ export class GeoPackage extends AbstractGeoViewVector {
                   const formattedFeature = format.readFeatures(feature, {
                     ...readOptions,
                     dataProjection: tableDataProjection,
-                    featureProjection: `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`,
+                    featureProjection: this.getMapViewer().getProjection().getCode(),
                   });
                   formattedFeature[0].setProperties(properties);
                   features.push(formattedFeature[0]);
@@ -540,11 +539,11 @@ export class GeoPackage extends AbstractGeoViewVector {
    */
   protected processOneGeopackageLayer(
     layerConfig: AbstractBaseLayerEntryConfig,
-    layerInfo: layerData,
-    sld?: sldsInterface
+    layerInfo: LayerData,
+    sld?: SldsInterface
   ): Promise<BaseLayer | undefined> {
     // FIXME: Temporary patch to keep the behavior until those layer classes don't exist
-    MapEventProcessor.getMapViewerLayerAPI(this.mapId).registerLayerConfigInit(layerConfig);
+    this.getMapViewer().layer.registerLayerConfigInit(layerConfig);
 
     const { name, source } = layerInfo;
 

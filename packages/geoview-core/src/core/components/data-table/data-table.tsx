@@ -45,7 +45,7 @@ import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-valu
 import { DateMgt } from '@/core/utils/date-mgt';
 import { isImage, delay } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 import { useFilterRows, useToolbarActionMessage, useGlobalFilter } from './hooks';
 import { getSxClasses } from './data-table-style';
 import ExportButton from './export-button';

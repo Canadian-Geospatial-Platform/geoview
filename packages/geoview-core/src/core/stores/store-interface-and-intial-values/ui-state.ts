@@ -10,11 +10,6 @@ import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 
 type UIActions = IUIState['actions'];
 
-type FocusItemProps = {
-  activeElementId: string | false;
-  callbackElementId: string | false;
-};
-
 export type ActiveAppBarTabType = {
   tabId: string;
   tabGroup: string;
@@ -206,6 +201,11 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
 
   return init;
 }
+
+type FocusItemProps = {
+  activeElementId: string | false;
+  callbackElementId: string | false;
+};
 
 // **********************************************************
 // UI state selectors

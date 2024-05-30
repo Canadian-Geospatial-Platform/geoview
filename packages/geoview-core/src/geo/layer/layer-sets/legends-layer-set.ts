@@ -1,12 +1,12 @@
-import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
-import { TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractLayerSet } from './abstract-layer-set';
+import { TypeLegend, TypeLegendResultSet, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 /**
- * A class to hold a set of layers associated with an array of TypeLegend. When this class is instantiated, all layers already
+ * A class to hold a set of layers associated with an array of TypeLegendResultSetEntry. When this class is instantiated, all layers already
  * loaded on the specified map will be added to the set. Layers added afterwards will be added to the set and deleted layers
  * will be removed from the set.
  *
@@ -18,11 +18,11 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
   /**
    * Propagate to store
-   * @param {string} layerPath - Layer path to propagate
+   * @param {TypeLegendResultSetEntry} resultSetEntry - The result entry to propagate
    * @private
    */
-  #propagateToStore(layerPath: string): void {
-    LegendEventProcessor.propagateLegendToStore(this.getMapId(), layerPath, this.resultSet[layerPath]);
+  #propagateToStore(resultSetEntry: TypeLegendResultSetEntry): void {
+    LegendEventProcessor.propagateLegendToStore(this.getMapId(), resultSetEntry);
   }
 
   /**
@@ -43,7 +43,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
     this.#checkQueryLegend(layerConfig);
 
     // Propagate to the store on registration
-    this.#propagateToStore(layerConfig.layerPath);
+    this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
   }
 
   /**
@@ -59,7 +59,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
     this.#checkQueryLegend(layerConfig);
 
     // Propagate to the store on layer status changed
-    this.#propagateToStore(layerConfig.layerPath);
+    this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
   }
 
   /**
@@ -67,13 +67,16 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * @param {ConfigBaseClass} layerConfig - The layer config
    */
   #checkQueryLegend(layerConfig: ConfigBaseClass): void {
+    // Get the layer
+    const layer = this.layerApi.getGeoviewLayerHybrid(layerConfig.layerPath);
+
     // If the layer legend should be queried
-    if (this.#layerPathShouldBeQueried(layerConfig)) {
+    if (layer && this.#legendShouldBeQueried(layerConfig)) {
       // Flag
       this.resultSet[layerConfig.layerPath].legendQueryStatus = 'querying';
 
       // Query the legend
-      const legendPromise = this.layerApi.getGeoviewLayerHybrid(layerConfig.layerPath)?.queryLegend(layerConfig.layerPath);
+      const legendPromise = layer.queryLegend(layerConfig.layerPath);
 
       // Whenever the legend response comes in
       legendPromise
@@ -87,7 +90,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
             this.resultSet[layerConfig.layerPath].data = legend;
 
             // Propagate to the store once the legend is received
-            this.#propagateToStore(layerConfig.layerPath);
+            this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
 
             // Inform that the layer set has been updated by calling parent to emit event
             this.onLayerSetUpdatedProcess(layerConfig);
@@ -103,24 +106,8 @@ export class LegendsLayerSet extends AbstractLayerSet {
   /**
    * Indicates if the layer path should be queried
    */
-  #layerPathShouldBeQueried(layerConfig: ConfigBaseClass): boolean {
+  #legendShouldBeQueried(layerConfig: ConfigBaseClass | undefined): boolean {
     // A legend is ready to be queried when its status is > processed and legendQueryStatus is 'init' (not already queried)
-    return layerConfig.isGreaterThanOrEqualTo('processed') && this.resultSet[layerConfig.layerPath].legendQueryStatus === 'init';
+    return !!layerConfig?.isGreaterThanOrEqualTo('processed') && this.resultSet[layerConfig.layerPath].legendQueryStatus === 'init';
   }
 }
-
-export type TypeLegendResultSetEntry = {
-  layerName?: string;
-  layerStatus: TypeLayerStatus;
-  legendQueryStatus: LegendQueryStatus;
-  data: TypeLegend | undefined | null;
-};
-
-/** The legend resultset type associate a layer path to a legend object. The undefined value indicate that the get legend query
- * hasn't been run and the null value indicate that there was a get legend error.
- */
-export type TypeLegendResultSet = {
-  [layerPath: string]: TypeLegendResultSetEntry;
-};
-
-export type LegendQueryStatus = 'init' | 'querying' | 'queried';

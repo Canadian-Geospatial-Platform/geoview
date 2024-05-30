@@ -8,18 +8,17 @@ import { Extent } from 'ol/extent';
 
 import { TypeLocalizedString } from '@config/types/map-schema-types';
 import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
-import { CONST_LAYER_TYPES, TypeLegend, TypeWmsLegend, TypeWmsLegendStyle } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { CONST_LAYER_TYPES, TypeWmsLegend, TypeWmsLegendStyle } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { xmlToJson, getLocalizedValue } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
-import { Projection } from '@/geo/utils/projection';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from './abstract-gv-raster';
+import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 /**
  * Manages a WMS layer.
@@ -51,6 +50,15 @@ export class GVWMS extends AbstractGVRaster {
   }
 
   /**
+   * Overrides the get of the OpenLayers Layer Source
+   * @returns {ImageWMS} The OpenLayers Layer Source
+   */
+  override getOLSource(): ImageWMS | undefined {
+    // Get source from OL
+    return this.getOLLayer().getSource() || undefined;
+  }
+
+  /**
    * Overrides the get of the layer configuration associated with the layer.
    * @returns {OgcWmsLayerEntryConfig} The layer configuration or undefined if not found.
    */
@@ -65,8 +73,8 @@ export class GVWMS extends AbstractGVRaster {
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected override getFeatureInfoAtPixel(location: Pixel): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const { map } = MapEventProcessor.getMapViewer(this.getMapId());
-    return this.getFeatureInfoAtCoordinate(map.getCoordinateFromPixel(location));
+    // Redirect to getFeatureInfoAtCoordinate
+    return this.getFeatureInfoAtCoordinate(this.getMapViewer().map.getCoordinateFromPixel(location));
   }
 
   /**
@@ -75,12 +83,11 @@ export class GVWMS extends AbstractGVRaster {
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected override getFeatureInfoAtCoordinate(location: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const convertedLocation = Projection.transform(
-      location,
-      `EPSG:${MapEventProcessor.getMapState(this.getMapId()).currentProjection}`,
-      Projection.PROJECTION_NAMES.LNGLAT
-    );
-    return this.getFeatureInfoAtLongLat(convertedLocation);
+    // Transform coordinate from map project to lntlat
+    const projCoordinate = this.getMapViewer().convertCoordinateMapProjToLngLat(location);
+
+    // Redirect to getFeatureInfoAtLongLat
+    return this.getFeatureInfoAtLongLat(projCoordinate);
   }
 
   /**
@@ -90,15 +97,13 @@ export class GVWMS extends AbstractGVRaster {
    */
   protected override async getFeatureInfoAtLongLat(lnglat: Coordinate): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
-      // Get the layer config in a loaded phase
-      const layerConfig = this.getLayerConfig();
-      const layer = this.getOLLayer();
-
+      // If the layer is invisible
       if (!this.getVisible()) return [];
 
-      const viewResolution = MapEventProcessor.getMapViewer(this.getMapId()).getView().getResolution() as number;
-      const crs = `EPSG:${MapEventProcessor.getMapState(this.getMapId()).currentProjection}`;
-      const clickCoordinate = Projection.transform(lnglat, Projection.PROJECTION_NAMES.LNGLAT, crs);
+      // Get the layer config and source
+      const layerConfig = this.getLayerConfig();
+
+      const clickCoordinate = this.getMapViewer().convertCoordinateLngLatToMapProj(lnglat);
       if (
         lnglat[0] < layerConfig.initialSettings!.bounds![0] ||
         layerConfig.initialSettings!.bounds![2] < lnglat[0] ||
@@ -107,7 +112,6 @@ export class GVWMS extends AbstractGVRaster {
       )
         return [];
 
-      const wmsSource = layer.getSource() as ImageWMS;
       let infoFormat = '';
       const featureInfoFormat = this.getLayerConfig().getMetadata()?.Capability?.Request?.GetFeatureInfo?.Format as TypeJsonArray;
       if (featureInfoFormat)
@@ -115,7 +119,9 @@ export class GVWMS extends AbstractGVRaster {
         else if (featureInfoFormat.includes('text/plain' as TypeJsonObject)) infoFormat = 'text/plain';
         else throw new Error('Parameter info_format of GetFeatureInfo only support text/xml and text/plain for WMS services.');
 
-      const featureInfoUrl = wmsSource.getFeatureInfoUrl(clickCoordinate, viewResolution, crs, {
+      const wmsSource = this.getOLSource();
+      const viewResolution = this.getMapViewer().getView().getResolution()!;
+      const featureInfoUrl = wmsSource?.getFeatureInfoUrl(clickCoordinate, viewResolution, this.getMapViewer().getProjection().getCode(), {
         INFO_FORMAT: infoFormat,
       });
       if (featureInfoUrl) {
@@ -466,11 +472,8 @@ export class GVWMS extends AbstractGVRaster {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setWmsStyle(wmsStyleId: string, layerPath: string): void {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done (it should be moved when calling getLayerFilter below too)
-    // Get the Layer using the trick for now
-    const layer = this.getOLLayer();
-
     // TODO: Verify if we can apply more than one style at the same time since the parameter name is STYLES
-    if (layer) layer.getSource()?.updateParams({ STYLES: wmsStyleId });
+    this.getOLSource()?.updateParams({ STYLES: wmsStyleId });
   }
 
   /**
@@ -541,18 +544,18 @@ export class GVWMS extends AbstractGVRaster {
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     const layerConfig = this.getLayerConfig();
-    const layer = this.getOLLayer();
-    const projection =
-      layer?.getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
-      MapEventProcessor.getMapState(this.getMapId()).currentProjection;
+    const projection = this.getOLSource()?.getProjection()?.getCode() || this.getMapViewer().getProjection().getCode();
+
     let layerBounds = layerConfig?.initialSettings?.bounds || [];
-    layerBounds = Projection.transformExtent(layerBounds, 'EPSG:4326', `EPSG:${projection}`);
-    const boundingBoxes = this.getLayerConfig().getMetadata()?.Capability.Layer.BoundingBox;
+    // TODO: Check - Are we sure this is 4326, always?
+    layerBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, 'EPSG:4326');
+
+    const boundingBoxes = layerConfig.getMetadata()?.Capability.Layer.BoundingBox;
     let bbExtent: Extent | undefined;
 
     if (boundingBoxes) {
       for (let i = 0; i < (boundingBoxes.length as number); i++) {
-        if (boundingBoxes[i].crs === `EPSG:${projection}`)
+        if (boundingBoxes[i].crs === projection)
           bbExtent = [
             boundingBoxes[i].extent[1],
             boundingBoxes[i].extent[0],

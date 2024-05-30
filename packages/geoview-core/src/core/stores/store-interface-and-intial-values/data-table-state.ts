@@ -1,9 +1,8 @@
 import { useStore } from 'zustand';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
-import { TypeAllFeatureInfoResultSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
-import { TypeFeatureInfoEntry, TypeLayerData } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
+import { TypeFeatureInfoEntry, TypeLayerData, TypeResultSet, TypeResultSetEntry } from '@/geo/map/map-schema-types';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with DataTableEventProcessor vs DataTaleState
 
@@ -11,24 +10,8 @@ import { useGeoViewStore } from '@/core/stores/stores-managers';
 
 type DataTableActions = IDataTableState['actions'];
 
-// Import { MRTColumnFiltersState } from 'material-react-table' fails - This is likely not portable. a type annotation is necessary
-// Create a type to mimic
-export type TypeColumnFiltersState = ColumnFilter[];
-export interface ColumnFilter {
-  id: string;
-  value: unknown;
-}
-
-interface IDataTableSettings {
-  columnFiltersRecord: TypeColumnFiltersState;
-  mapFilteredRecord: boolean;
-  rowsFilteredRecord: number;
-  toolbarRowSelectedMessageRecord: string;
-  globalFilterRecord: string;
-}
-
 export interface IDataTableState {
-  allFeaturesDataArray: TypeLayerData[];
+  allFeaturesDataArray: TypeAllFeatureInfoResultSetEntry[];
   activeLayerData: TypeLayerData[];
   layersDataTableSetting: Record<string, IDataTableSettings>;
   selectedLayerPath: string;
@@ -51,7 +34,7 @@ export interface IDataTableState {
 
   setterActions: {
     setActiveLayersData: (layers: TypeLayerData[]) => void;
-    setAllFeaturesDataArray: (allFeaturesDataArray: TypeLayerData[]) => void;
+    setAllFeaturesDataArray: (allFeaturesDataArray: TypeAllFeatureInfoResultSetEntry[]) => void;
     setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
     setInitiallayerDataTableSetting: (layerPath: string) => void;
     setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
@@ -144,7 +127,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
           },
         });
       },
-      setAllFeaturesDataArray(allFeaturesDataArray: TypeLayerData[]) {
+      setAllFeaturesDataArray(allFeaturesDataArray: TypeAllFeatureInfoResultSetEntry[]) {
         set({
           dataTableState: {
             ...get().dataTableState,
@@ -253,10 +236,30 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
   } as IDataTableState;
 }
 
+// Import { MRTColumnFiltersState } from 'material-react-table' fails - This is likely not portable. a type annotation is necessary
+// Create a type to mimic
+export type TypeColumnFiltersState = ColumnFilter[];
+export interface ColumnFilter {
+  id: string;
+  value: unknown;
+}
+
+interface IDataTableSettings {
+  columnFiltersRecord: TypeColumnFiltersState;
+  mapFilteredRecord: boolean;
+  rowsFilteredRecord: number;
+  toolbarRowSelectedMessageRecord: string;
+  globalFilterRecord: string;
+}
+
+export type TypeAllFeatureInfoResultSetEntry = TypeResultSetEntry & TypeLayerData;
+
+export type TypeAllFeatureInfoResultSet = TypeResultSet<TypeAllFeatureInfoResultSetEntry>;
+
 // **********************************************************
 // Data-table state selectors
 // **********************************************************
-export const useDataTableAllFeaturesDataArray = (): TypeLayerData[] =>
+export const useDataTableAllFeaturesDataArray = (): TypeAllFeatureInfoResultSetEntry[] =>
   useStore(useGeoViewStore(), (state) => state.dataTableState.allFeaturesDataArray);
 export const useDataTableSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.dataTableState.selectedLayerPath);
 export const useDataTableLayerSettings = (): Record<string, IDataTableSettings> =>
