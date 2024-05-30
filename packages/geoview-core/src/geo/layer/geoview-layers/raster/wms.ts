@@ -17,29 +17,32 @@ import cloneDeep from 'lodash/cloneDeep';
 import Static from 'ol/source/ImageStatic';
 
 import { TypeLocalizedString } from '@config/types/map-schema-types';
-// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 
 import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import {
   AbstractGeoViewLayer,
   CONST_LAYER_TYPES,
-  TypeLegend,
   TypeWmsLegend,
   TypeWmsLegendStyle,
 } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, CONST_LAYER_ENTRY_TYPES, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
+import {
+  TypeLayerEntryConfig,
+  TypeGeoviewLayerConfig,
+  CONST_LAYER_ENTRY_TYPES,
+  layerEntryIsGroupLayer,
+  TypeFeatureInfoEntry,
+} from '@/geo/map/map-schema-types';
 import { xmlToJson, getLocalizedValue } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
-import { Projection } from '@/geo/utils/projection';
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
-import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 
@@ -457,7 +460,7 @@ export class WMS extends AbstractGeoViewRaster {
       newListOfLayerEntryConfig.push(subLayerEntryConfig);
 
       // FIXME: Temporary patch to keep the behavior until those layer classes don't exist
-      MapEventProcessor.getMapViewerLayerAPI(this.mapId).registerLayerConfigInit(subLayerEntryConfig);
+      this.getMapViewer().layer.registerLayerConfigInit(subLayerEntryConfig);
     });
 
     const switchToGroupLayer = Cast<GroupLayerEntryConfig>(layerConfig);
@@ -606,11 +609,7 @@ export class WMS extends AbstractGeoViewRaster {
         // if (layerConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
         //   layerConfig.initialSettings.maxZoom = layerCapabilities.MaxScaleDenominator as number;
         if (layerConfig.initialSettings?.extent)
-          layerConfig.initialSettings.extent = Projection.transformExtent(
-            layerConfig.initialSettings.extent,
-            Projection.PROJECTION_NAMES.LNGLAT,
-            `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
-          );
+          layerConfig.initialSettings.extent = this.getMapViewer().convertExtentLngLatToMapProj(layerConfig.initialSettings.extent);
 
         if (!layerConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox) {
           layerConfig.initialSettings!.bounds = layerCapabilities.EX_GeographicBoundingBox as Extent;
@@ -649,8 +648,8 @@ export class WMS extends AbstractGeoViewRaster {
    */
   // GV Layers Refactoring - Obsolete (in layers)
   protected override getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const { map } = MapEventProcessor.getMapViewer(this.mapId);
-    return this.getFeatureInfoAtCoordinate(map.getCoordinateFromPixel(location), layerPath);
+    // Redirect to getFeatureInfoAtCoordinate
+    return this.getFeatureInfoAtCoordinate(this.getMapViewer().map.getCoordinateFromPixel(location), layerPath);
   }
 
   /** ***************************************************************************************************************************
@@ -666,11 +665,7 @@ export class WMS extends AbstractGeoViewRaster {
     location: Coordinate,
     layerPath: string
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const convertedLocation = Projection.transform(
-      location,
-      `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`,
-      Projection.PROJECTION_NAMES.LNGLAT
-    );
+    const convertedLocation = this.getMapViewer().convertCoordinateMapProjToLngLat(location);
     return this.getFeatureInfoAtLongLat(convertedLocation, layerPath);
   }
 
@@ -694,9 +689,7 @@ export class WMS extends AbstractGeoViewRaster {
 
       if (!this.getVisible(layerPath)) return [];
 
-      const viewResolution = MapEventProcessor.getMapViewer(this.mapId).getView().getResolution() as number;
-      const crs = `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`;
-      const clickCoordinate = Projection.transform(lnglat, Projection.PROJECTION_NAMES.LNGLAT, crs);
+      const clickCoordinate = this.getMapViewer().convertCoordinateLngLatToMapProj(lnglat);
       if (
         lnglat[0] < layerConfig.initialSettings!.bounds![0] ||
         layerConfig.initialSettings!.bounds![2] < lnglat[0] ||
@@ -713,7 +706,8 @@ export class WMS extends AbstractGeoViewRaster {
         else if (featureInfoFormat.includes('text/plain' as TypeJsonObject)) infoFormat = 'text/plain';
         else throw new Error('Parameter info_format of GetFeatureInfo only support text/xml and text/plain for WMS services.');
 
-      const featureInfoUrl = wmsSource.getFeatureInfoUrl(clickCoordinate, viewResolution, crs, {
+      const viewResolution = this.getMapViewer().getView().getResolution()!;
+      const featureInfoUrl = wmsSource.getFeatureInfoUrl(clickCoordinate, viewResolution, this.getMapViewer().getProjection().getCode(), {
         INFO_FORMAT: infoFormat,
       });
       if (featureInfoUrl) {
@@ -1141,16 +1135,18 @@ export class WMS extends AbstractGeoViewRaster {
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
     const layerConfig = this.getLayerConfig(layerPath);
     const layer = this.getOLLayer(layerPath) as ImageLayer<Static> | undefined;
-    const projection =
-      layer?.getSource()?.getProjection()?.getCode().replace('EPSG:', '') || MapEventProcessor.getMapState(this.mapId).currentProjection;
+    const projection = layer?.getSource()?.getProjection()?.getCode() || this.getMapViewer().getProjection().getCode();
+
     let layerBounds = layerConfig?.initialSettings?.bounds || [];
-    layerBounds = Projection.transformExtent(layerBounds, 'EPSG:4326', `EPSG:${projection}`);
+    // TODO: Check - Are we sure this is 4326, always?
+    layerBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, 'EPSG:4326');
+
     const boundingBoxes = this.metadata?.Capability.Layer.BoundingBox;
     let bbExtent: Extent | undefined;
 
     if (boundingBoxes) {
       for (let i = 0; i < (boundingBoxes.length as number); i++) {
-        if (boundingBoxes[i].crs === `EPSG:${projection}`)
+        if (boundingBoxes[i].crs === projection)
           bbExtent = [
             boundingBoxes[i].extent[1],
             boundingBoxes[i].extent[0],

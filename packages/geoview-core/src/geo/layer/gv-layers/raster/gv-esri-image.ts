@@ -5,18 +5,22 @@ import { Extent } from 'ol/extent';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/abstract-layer-set';
-import { CONST_LAYER_TYPES, TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { Projection } from '@/geo/utils/projection';
-import { TypeUniqueValueStyleConfig, TypeUniqueValueStyleInfo, TypeStyleConfig } from '@/geo/map/map-schema-types';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import {
+  TypeUniqueValueStyleConfig,
+  TypeUniqueValueStyleInfo,
+  TypeStyleConfig,
+  codedValueType,
+  rangeDomainType,
+} from '@/geo/map/map-schema-types';
 import { esriGetFieldType, esriGetFieldDomain } from '../utils';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from './abstract-gv-raster';
+import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 /**
  * Manages an Esri Image layer.
@@ -42,6 +46,15 @@ export class GVEsriImage extends AbstractGVRaster {
   override getOLLayer(): ImageLayer<ImageArcGISRest> {
     // Call parent and cast
     return super.getOLLayer() as ImageLayer<ImageArcGISRest>;
+  }
+
+  /**
+   * Overrides the get of the OpenLayers Layer Source
+   * @returns {ImageArcGISRest} The OpenLayers Layer Source
+   */
+  override getOLSource(): ImageArcGISRest | undefined {
+    // Get source from OL
+    return this.getOLLayer().getSource() || undefined;
   }
 
   /**
@@ -209,11 +222,13 @@ export class GVEsriImage extends AbstractGVRaster {
    * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    * @returns {Extent | undefined} The new layer bounding box.
    */
-  protected getBounds(bounds?: Extent): Extent | undefined {
+  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     const layerConfig = this.getLayerConfig();
     const layerBounds = layerConfig?.initialSettings?.bounds || [];
+
     const projection =
-      layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid || MapEventProcessor.getMapState(this.getMapId()).currentProjection;
+      layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid || this.getMapViewer().getProjection().getCode().replace('EPSG:', '');
 
     if (layerConfig.getMetadata()?.fullExtent) {
       layerBounds[0] = layerConfig.getMetadata()?.fullExtent.xmin as number;
@@ -225,13 +240,9 @@ export class GVEsriImage extends AbstractGVRaster {
     if (layerBounds) {
       let transformedBounds = layerBounds;
       if (
-        layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.getMapId()).currentProjection
+        layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')
       ) {
-        transformedBounds = Projection.transformExtent(
-          layerBounds,
-          `EPSG:${projection}`,
-          `EPSG:${MapEventProcessor.getMapState(this.getMapId()).currentProjection}`
-        );
+        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, `EPSG:${projection}`);
       }
 
       // eslint-disable-next-line no-param-reassign

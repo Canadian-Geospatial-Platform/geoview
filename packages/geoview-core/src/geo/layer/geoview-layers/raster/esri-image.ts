@@ -9,15 +9,12 @@ import { Extent } from 'ol/extent';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/abstract-layer-set';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { Projection } from '@/geo/utils/projection';
 import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
@@ -25,6 +22,8 @@ import {
   TypeUniqueValueStyleInfo,
   TypeStyleConfig,
   layerEntryIsGroupLayer,
+  codedValueType,
+  rangeDomainType,
 } from '@/geo/map/map-schema-types';
 
 import {
@@ -37,6 +36,7 @@ import {
 } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
+import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
@@ -419,9 +419,10 @@ export class EsriImage extends AbstractGeoViewRaster {
   // GV Layers Refactoring - Obsolete (in layers)
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
     const layerConfig = this.getLayerConfig(layerPath);
-    const layerBounds = layerConfig?.initialSettings?.bounds || [];
-    const projection = this.metadata?.fullExtent?.spatialReference?.wkid || MapEventProcessor.getMapState(this.mapId).currentProjection;
+    const projection =
+      this.metadata?.fullExtent?.spatialReference?.wkid || this.getMapViewer().getProjection().getCode().replace('EPSG:', '');
 
+    const layerBounds = layerConfig?.initialSettings?.bounds || [];
     if (this.metadata?.fullExtent) {
       layerBounds[0] = this.metadata?.fullExtent.xmin as number;
       layerBounds[1] = this.metadata?.fullExtent.ymin as number;
@@ -431,12 +432,8 @@ export class EsriImage extends AbstractGeoViewRaster {
 
     if (layerBounds) {
       let transformedBounds = layerBounds;
-      if (this.metadata?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.mapId).currentProjection) {
-        transformedBounds = Projection.transformExtent(
-          layerBounds,
-          `EPSG:${projection}`,
-          `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
-        );
+      if (this.metadata?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')) {
+        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, `EPSG:${projection}`);
       }
 
       // eslint-disable-next-line no-param-reassign

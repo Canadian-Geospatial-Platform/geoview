@@ -6,6 +6,7 @@ import Feature from 'ol/Feature';
 import VectorTileLayer from 'ol/layer/VectorTile';
 import BaseVectorLayer from 'ol/layer/BaseVector';
 import ImageLayer from 'ol/layer/Image';
+import Source from 'ol/source/Source';
 
 import { TypeLocalizedString } from '@config/types/map-schema-types';
 
@@ -19,15 +20,32 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
-import { TypeStyleConfig, TypeLayerStatusSimplified, TypeLayerStatus } from '@/geo/map/map-schema-types';
-import { QueryType, TypeFeatureInfoEntry, TypeLocation, codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/abstract-layer-set';
+import {
+  TypeStyleConfig,
+  TypeLayerStatusSimplified,
+  TypeLayerStatus,
+  TypeFeatureInfoEntry,
+  codedValueType,
+  rangeDomainType,
+  TypeLocation,
+  QueryType,
+} from '@/geo/map/map-schema-types';
+// TODO: Downgrade those types from abstract-layer-set
 import { getLegendStyles, getFeatureCanvas } from '@/geo/utils/renderer/geoview-renderer';
-import { TypeGeoviewLayerType, TypeVectorLayerStyles } from '../geoview-layers/abstract-geoview-layers';
+import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { MapViewer } from '@/geo/map/map-viewer';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
  */
 export abstract class AbstractGVLayer {
+  // The default hit tolerance the query should be using
+  static DEFAULT_HIT_TOLERANCE: number = 4;
+
+  // The default hit tolerance
+  hitTolerance: number = AbstractGVLayer.DEFAULT_HIT_TOLERANCE;
+
   // The map id
   #mapId: string;
 
@@ -121,11 +139,29 @@ export abstract class AbstractGVLayer {
   }
 
   /**
+   * Gets the MapViewer where the layer resides
+   * @returns {MapViewer} The MapViewer
+   */
+  getMapViewer(): MapViewer {
+    // GV The GVLayers need a reference to the MapViewer to be able to perform operations.
+    // GV This is a trick to obtain it. Otherwise, it'd need to be provided via constructor.
+    return MapEventProcessor.getMapViewer(this.getMapId());
+  }
+
+  /**
    * Gets the OpenLayers Layer
    * @returns The OpenLayers Layer
    */
   getOLLayer(): BaseLayer {
     return this.#olLayer;
+  }
+
+  /**
+   * Gets the OpenLayers Layer Source
+   * @returns The OpenLayers Layer Source
+   */
+  getOLSource(): Source | undefined {
+    return this.getOLLayer().get('source') || undefined;
   }
 
   /**
@@ -821,11 +857,3 @@ export type VisibleChangedEvent = {
  * Define a delegate for the event handler function signature
  */
 type VisibleChangedDelegate = EventDelegateBase<AbstractGVLayer, VisibleChangedEvent>;
-
-export type TypeLegend = {
-  layerName?: TypeLocalizedString;
-  type: TypeGeoviewLayerType;
-  styleConfig?: TypeStyleConfig | null;
-  // Layers other than vector layers use the HTMLCanvasElement type for their legend.
-  legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
-};

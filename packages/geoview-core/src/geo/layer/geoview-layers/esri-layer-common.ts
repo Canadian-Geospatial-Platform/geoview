@@ -17,8 +17,16 @@ import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-clas
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
-import { TypeFeatureInfoEntryPartial, TypeFieldEntry, codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/abstract-layer-set';
-import { CONST_LAYER_ENTRY_TYPES, TypeLayerEntryConfig, TypeStyleGeometry, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
+import {
+  CONST_LAYER_ENTRY_TYPES,
+  TypeFeatureInfoEntryPartial,
+  TypeFieldEntry,
+  TypeLayerEntryConfig,
+  TypeStyleGeometry,
+  codedValueType,
+  layerEntryIsGroupLayer,
+  rangeDomainType,
+} from '@/geo/map/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
 import { EsriFeature, geoviewEntryIsEsriFeature } from './vector/esri-feature';

@@ -1,6 +1,5 @@
 import BaseVectorLayer from 'ol/layer/BaseVector';
 import VectorSource from 'ol/source/Vector';
-import Feature from 'ol/Feature';
 import { AbstractGVVector } from './abstract-gv-vector';
 import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 
@@ -14,11 +13,12 @@ export class GVOGCFeature extends AbstractGVVector {
   /**
    * Constructs a GVOGCFeature layer to manage an OpenLayer layer.
    * @param {string} mapId - The map id
-   * @param {BaseVectorLayer<VectorSource<Feature>, any>} olLayer - The OpenLayer layer.
+   * @param {BaseVectorLayer<VectorSource, any>} olLayer - The OpenLayer layer.
    * @param {OgcFeatureLayerEntryConfig} layerConfig - The layer configuration.
    */
+  // Disabling 'any', because that's how it is in OpenLayers
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public constructor(mapId: string, olLayer: BaseVectorLayer<VectorSource<Feature>, any>, layerConfig: OgcFeatureLayerEntryConfig) {
+  public constructor(mapId: string, olLayer: BaseVectorLayer<VectorSource, any>, layerConfig: OgcFeatureLayerEntryConfig) {
     super(mapId, olLayer, layerConfig);
   }
 

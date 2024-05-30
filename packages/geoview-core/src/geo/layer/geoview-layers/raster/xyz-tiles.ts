@@ -20,8 +20,6 @@ import {
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { Cast, toJsonObject } from '@/core/types/global-types';
-import { Projection } from '@/geo/utils/projection';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
@@ -249,11 +247,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
       if (layerConfig.initialSettings?.extent)
         // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings.extent = Projection.transformExtent(
-          layerConfig.initialSettings.extent,
-          Projection.PROJECTION_NAMES.LNGLAT,
-          `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
-        );
+        layerConfig.initialSettings.extent = this.getMapViewer().convertExtentLngLatToMapProj(layerConfig.initialSettings.extent);
     }
     return Promise.resolve(layerConfig);
   }
@@ -269,18 +263,13 @@ export class XYZTiles extends AbstractGeoViewRaster {
   // GV Layers Refactoring - Obsolete (in layers)
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
     const layer = this.getOLLayer(layerPath) as TileLayer<XYZ> | undefined;
-    const layerBounds = layer?.getSource()?.getTileGrid()?.getExtent();
-    const projection =
-      layer?.getSource()?.getProjection()?.getCode().replace('EPSG:', '') || MapEventProcessor.getMapState(this.mapId).currentProjection;
+    const projection = layer?.getSource()?.getProjection()?.getCode() || this.getMapViewer().getProjection().getCode();
 
+    const layerBounds = layer?.getSource()?.getTileGrid()?.getExtent();
     if (layerBounds) {
       let transformedBounds = layerBounds;
-      if (this.metadata?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.mapId).currentProjection) {
-        transformedBounds = Projection.transformExtent(
-          layerBounds,
-          `EPSG:${projection}`,
-          `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
-        );
+      if (this.metadata?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')) {
+        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, projection);
       }
 
       // eslint-disable-next-line no-param-reassign

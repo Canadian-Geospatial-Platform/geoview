@@ -3,9 +3,7 @@ import XYZ from 'ol/source/XYZ';
 import { Extent } from 'ol/extent';
 
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
-import { Projection } from '@/geo/utils/projection';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { AbstractGVTile } from './abstract-gv-tile';
 import { featureInfoGetFieldType } from '../utils';
@@ -37,6 +35,15 @@ export class GVXYZTiles extends AbstractGVTile {
   }
 
   /**
+   * Overrides the get of the OpenLayers Layer Source
+   * @returns {XYZ} The OpenLayers Layer Source
+   */
+  override getOLSource(): XYZ | undefined {
+    // Get source from OL
+    return this.getOLLayer().getSource() || undefined;
+  }
+
+  /**
    * Overrides the get of the layer configuration associated with the layer.
    * @returns {XYZTilesLayerEntryConfig} The layer configuration or undefined if not found.
    */
@@ -60,24 +67,18 @@ export class GVXYZTiles extends AbstractGVTile {
    * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    * @returns {Extent | undefined} The new layer bounding box.
    */
-  protected getBounds(bounds?: Extent): Extent | undefined {
+  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     const layerConfig = this.getLayerConfig();
-    const layer = this.getOLLayer();
-    const layerBounds = layer?.getSource()?.getTileGrid()?.getExtent();
-    const projection =
-      layer?.getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
-      MapEventProcessor.getMapState(this.getMapId()).currentProjection;
+    const projection = this.getOLSource()?.getProjection()?.getCode() || this.getMapViewer().getProjection().getCode();
 
+    const layerBounds = this.getOLSource()?.getTileGrid()?.getExtent();
     if (layerBounds) {
       let transformedBounds = layerBounds;
       if (
-        layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.getMapId()).currentProjection
+        layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')
       ) {
-        transformedBounds = Projection.transformExtent(
-          layerBounds,
-          `EPSG:${projection}`,
-          `EPSG:${MapEventProcessor.getMapState(this.getMapId()).currentProjection}`
-        );
+        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, projection);
       }
 
       // eslint-disable-next-line no-param-reassign
