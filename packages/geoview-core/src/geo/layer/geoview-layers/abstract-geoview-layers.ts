@@ -73,8 +73,11 @@ const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
  * metadataAccessPath attribute whose value is passed as an attribute of the mapLayerConfig object.
  */
 export abstract class AbstractGeoViewLayer {
-  // The hit tolerance the query should use
-  hitTolerance: number = 4;
+  // The default hit tolerance the query should be using
+  static DEFAULT_HIT_TOLERANCE: number = 4;
+
+  // The default hit tolerance
+  hitTolerance: number = AbstractGeoViewLayer.DEFAULT_HIT_TOLERANCE;
 
   /** The map id on which the GeoView layer will be drawn. */
   mapId: string;

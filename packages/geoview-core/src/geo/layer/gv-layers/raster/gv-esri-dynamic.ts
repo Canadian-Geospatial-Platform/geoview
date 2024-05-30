@@ -39,8 +39,11 @@ type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryT
  * @class GVEsriDynamic
  */
 export class GVEsriDynamic extends AbstractGVRaster {
+  // The default hit tolerance the query should be using
+  static override DEFAULT_HIT_TOLERANCE: number = 7;
+
   // Override the hit tolerance for a GVEsriDynamic layer
-  override hitTolerance: number = 7;
+  override hitTolerance: number = GVEsriDynamic.DEFAULT_HIT_TOLERANCE;
 
   /**
    * Constructs a GVEsriDynamic layer to manage an OpenLayer layer.

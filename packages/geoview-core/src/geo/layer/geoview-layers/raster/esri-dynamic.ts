@@ -124,8 +124,11 @@ export const geoviewEntryIsEsriDynamic = (
 // ******************************************************************************************************************************
 // GV Layers Refactoring - Obsolete (in layers)
 export class EsriDynamic extends AbstractGeoViewRaster {
-  // Override the hit tolerance for an EsriDynamic layer
-  override hitTolerance: number = 7;
+  // The default hit tolerance the query should be using
+  static override DEFAULT_HIT_TOLERANCE: number = 7;
+
+  // Override the hit tolerance for a EsriDynamic layer
+  override hitTolerance: number = EsriDynamic.DEFAULT_HIT_TOLERANCE;
 
   /** ****************************************************************************************************************************
    * Initialize layer.

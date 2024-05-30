@@ -40,8 +40,11 @@ import { MapViewer } from '@/geo/map/map-viewer';
  * Abstract Geoview Layer managing an OpenLayer layer.
  */
 export abstract class AbstractGVLayer {
-  // The hit tolerance the query should use
-  hitTolerance: number = 4;
+  // The default hit tolerance the query should be using
+  static DEFAULT_HIT_TOLERANCE: number = 4;
+
+  // The default hit tolerance
+  hitTolerance: number = AbstractGVLayer.DEFAULT_HIT_TOLERANCE;
 
   // The map id
   #mapId: string;

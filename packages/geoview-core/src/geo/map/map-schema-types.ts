@@ -197,6 +197,7 @@ export const layerEntryIsImageStatic = (verifyIfLayer: TypeLayerEntryConfig): ve
 
 export type TypeLayerStatus = 'registered' | 'newInstance' | 'processing' | 'processed' | 'loading' | 'loaded' | 'error';
 
+// TODO: Refactor - Config refactoring. The types below MUST be migrated to the config map-schema-type
 export type TypeResultSetEntry = {
   layerPath: string;
   layerName: string;

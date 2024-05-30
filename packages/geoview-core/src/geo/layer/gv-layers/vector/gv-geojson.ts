@@ -16,6 +16,7 @@ export class GVGeoJSON extends AbstractGVVector {
    * @param {BaseVectorLayer<VectorSource, any>} olLayer - The OpenLayer layer.
    * @param {GeoJSONLayerEntryConfig} layerConfig - The layer configuration.
    */
+  // Disabling 'any', because that's how it is in OpenLayers
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public constructor(mapId: string, olLayer: BaseVectorLayer<VectorSource, any>, layerConfig: GeoJSONLayerEntryConfig) {
     super(mapId, olLayer, layerConfig);

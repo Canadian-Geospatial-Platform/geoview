@@ -98,14 +98,17 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    * @param {TypeLayerStatus} layerStatus - The new layer status
    */
   protected override onProcessLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatus: TypeLayerStatus): void {
-    // TODO: Refactor - This function (and the same function in feature-info-layer-set and hover-feature-info-layer-set) are all very similar if not identical
-    // TO.DOCONT: Move the code to the mother class? Be mindful of legends-layer-set that also has a onProcessLayerStatusChanged which is different though.
-
     // Call parent. After this call, this.resultSet?.[layerPath]?.layerStatus may have changed!
     super.onProcessLayerStatusChanged(layerConfig, layerStatus);
 
     // Propagate to the store on layer status changed
     this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
+
+    // If the layer is in error
+    if (this.resultSet[layerConfig.layerPath].layerStatus === 'error') {
+      // Remove it from the store immediately
+      this.onUnregisterLayer(layerConfig);
+    }
   }
 
   /**

@@ -123,6 +123,12 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
     // Propagate to the store on layer status changed
     this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
+
+    // If the layer is in error
+    if (this.resultSet[layerConfig.layerPath].layerStatus === 'error') {
+      // Remove it from the store immediately
+      this.onUnregisterLayer(layerConfig);
+    }
   }
 
   /**

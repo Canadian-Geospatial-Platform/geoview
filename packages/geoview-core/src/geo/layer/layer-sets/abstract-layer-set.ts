@@ -91,6 +91,10 @@ export abstract class AbstractLayerSet {
    * @param {ConfigBaseClass} layerConfig - The layer config
    */
   protected onRegisterLayer(layerConfig: ConfigBaseClass): void {
+    // TODO: Refactor - Separate the logic of registering a layer to status changes events vs logic of actually creating a resultSet for a layerPath which gets populated in the store (affecting the UI)
+    // TO.DOCONT: Distinguishing between (1) do we want to listen to layer status vs (2) do we want the resultSet to be there (appearing in the UI).
+    // TO.DOCONT: Indeed, we could want to listen to layer status updates without creating the resultSet necessarily
+
     // Register the layer status changed handler
     layerConfig.onLayerStatusChanged((config: ConfigBaseClass, layerStatusEvent: LayerStatusChangedEvent) => {
       this.#handleLayerStatusChanged(config, layerStatusEvent.layerStatus);
@@ -151,7 +155,7 @@ export abstract class AbstractLayerSet {
     this.resultSet[layerConfig.layerPath].layerStatus = layerStatus;
 
     // Update the name with a possibly updated layerName during layer status progression
-    // (depending on this translates in the new layers process, might not need this anymore)
+    // (depending on how this translates in the new layers process, might not need this anymore)
     this.resultSet[layerConfig.layerPath].layerName = getLocalizedValue(
       layerConfig.layerName || layerConfig.geoviewLayerConfig.geoviewLayerName,
       AppEventProcessor.getDisplayLanguage(this.getMapId())
