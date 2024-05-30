@@ -12,7 +12,6 @@ import { CONST_LAYER_TYPES, TypeWmsLegend, TypeWmsLegendStyle } from '@/geo/laye
 import { xmlToJson, getLocalizedValue } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
-import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
@@ -473,11 +472,8 @@ export class GVWMS extends AbstractGVRaster {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setWmsStyle(wmsStyleId: string, layerPath: string): void {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done (it should be moved when calling getLayerFilter below too)
-    // Get the Layer using the trick for now
-    const layer = this.getOLLayer();
-
     // TODO: Verify if we can apply more than one style at the same time since the parameter name is STYLES
-    if (layer) layer.getSource()?.updateParams({ STYLES: wmsStyleId });
+    this.getOLSource()?.updateParams({ STYLES: wmsStyleId });
   }
 
   /**
@@ -548,12 +544,11 @@ export class GVWMS extends AbstractGVRaster {
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     const layerConfig = this.getLayerConfig();
-    const layer = this.getOLLayer();
-    const projection = layer?.getSource()?.getProjection()?.getCode() || this.getMapViewer().getProjection().getCode();
+    const projection = this.getOLSource()?.getProjection()?.getCode() || this.getMapViewer().getProjection().getCode();
 
     let layerBounds = layerConfig?.initialSettings?.bounds || [];
     // TODO: Check - Are we sure this is 4326, always?
-    layerBounds = Projection.transformExtent(layerBounds, 'EPSG:4326', projection);
+    layerBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, 'EPSG:4326');
 
     const boundingBoxes = layerConfig.getMetadata()?.Capability.Layer.BoundingBox;
     let bbExtent: Extent | undefined;

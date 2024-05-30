@@ -124,6 +124,9 @@ export const geoviewEntryIsEsriDynamic = (
 // ******************************************************************************************************************************
 // GV Layers Refactoring - Obsolete (in layers)
 export class EsriDynamic extends AbstractGeoViewRaster {
+  // Override the hit tolerance for an EsriDynamic layer
+  override hitTolerance: number = 7;
+
   /** ****************************************************************************************************************************
    * Initialize layer.
    * @param {string} mapId The id of the map.
@@ -407,16 +410,16 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
 
       const mapViewer = this.getMapViewer();
-      const bounds = mapViewer.convertExtentMapProjToLngLat(mapViewer.map.getView().calculateExtent());
+      const bounds = mapViewer.convertExtentMapProjToLngLat(mapViewer.getView().calculateExtent());
 
       const extent = { xmin: bounds[0], ymin: bounds[1], xmax: bounds[2], ymax: bounds[3] };
 
-      const source = layer.getSource()!;
-      const { layerDefs } = source.getParams();
+      const source = layer.getSource();
+      const layerDefs = source?.getParams().layerDefs || '';
       const size = mapViewer.map.getSize()!;
 
       identifyUrl =
-        `${identifyUrl}identify?f=json&tolerance=7` +
+        `${identifyUrl}identify?f=json&tolerance=${this.hitTolerance}` +
         `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
         `&imageDisplay=${size[0]},${size[1]},96` +
         `&layers=visible:${layerConfig.layerId}` +
@@ -880,7 +883,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     if (layerBounds) {
       let transformedBounds = layerBounds;
       if (this.metadata?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')) {
-        transformedBounds = Projection.transformExtent(layerBounds, `EPSG:${projection}`, this.getMapViewer().getProjection().getCode());
+        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, `EPSG:${projection}`);
       }
 
       if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];

@@ -5,12 +5,10 @@ import { Extent } from 'ol/extent';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { Projection } from '@/geo/utils/projection';
 import {
   TypeUniqueValueStyleConfig,
   TypeUniqueValueStyleInfo,
@@ -224,11 +222,13 @@ export class GVEsriImage extends AbstractGVRaster {
    * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    * @returns {Extent | undefined} The new layer bounding box.
    */
-  protected getBounds(bounds?: Extent): Extent | undefined {
+  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     const layerConfig = this.getLayerConfig();
     const layerBounds = layerConfig?.initialSettings?.bounds || [];
+
     const projection =
-      layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid || MapEventProcessor.getMapState(this.getMapId()).currentProjection;
+      layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid || this.getMapViewer().getProjection().getCode().replace('EPSG:', '');
 
     if (layerConfig.getMetadata()?.fullExtent) {
       layerBounds[0] = layerConfig.getMetadata()?.fullExtent.xmin as number;
@@ -240,13 +240,9 @@ export class GVEsriImage extends AbstractGVRaster {
     if (layerBounds) {
       let transformedBounds = layerBounds;
       if (
-        layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.getMapId()).currentProjection
+        layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')
       ) {
-        transformedBounds = Projection.transformExtent(
-          layerBounds,
-          `EPSG:${projection}`,
-          `EPSG:${MapEventProcessor.getMapState(this.getMapId()).currentProjection}`
-        );
+        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, `EPSG:${projection}`);
       }
 
       // eslint-disable-next-line no-param-reassign

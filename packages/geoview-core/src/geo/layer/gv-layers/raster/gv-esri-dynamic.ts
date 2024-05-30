@@ -39,6 +39,9 @@ type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryT
  * @class GVEsriDynamic
  */
 export class GVEsriDynamic extends AbstractGVRaster {
+  // Override the hit tolerance for a GVEsriDynamic layer
+  override hitTolerance: number = 7;
+
   /**
    * Constructs a GVEsriDynamic layer to manage an OpenLayer layer.
    * @param {string} mapId - The map id
@@ -180,7 +183,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig();
-      const layer = this.getOLLayer();
 
       // If not queryable
       if (!layerConfig.source?.featureInfo?.queryable) return [];
@@ -191,16 +193,15 @@ export class GVEsriDynamic extends AbstractGVRaster {
       identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
 
       const mapViewer = this.getMapViewer();
-      const bounds = mapViewer.convertExtentMapProjToLngLat(mapViewer.map.getView().calculateExtent());
+      const bounds = mapViewer.convertExtentMapProjToLngLat(mapViewer.getView().calculateExtent());
 
       const extent = { xmin: bounds[0], ymin: bounds[1], xmax: bounds[2], ymax: bounds[3] };
 
-      const source = layer.getSource()!;
-      const { layerDefs } = source.getParams();
+      const layerDefs = this.getOLSource()?.getParams()?.layerDefs || '';
       const size = mapViewer.map.getSize()!;
 
       identifyUrl =
-        `${identifyUrl}identify?f=json&tolerance=7` +
+        `${identifyUrl}identify?f=json&tolerance=${this.hitTolerance}` +
         `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
         `&imageDisplay=${size[0]},${size[1]},96` +
         `&layers=visible:${layerConfig.layerId}` +
@@ -642,7 +643,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       if (
         layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')
       ) {
-        transformedBounds = Projection.transformExtent(layerBounds, `EPSG:${projection}`, this.getMapViewer().getProjection().getCode());
+        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, `EPSG:${projection}`);
       }
 
       // eslint-disable-next-line no-param-reassign

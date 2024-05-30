@@ -200,7 +200,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    */
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
-    const layerBounds = this.getOLLayer().getSource()?.getExtent();
+    const layerBounds = this.getOLSource()?.getExtent();
 
     if (layerBounds) {
       // eslint-disable-next-line no-param-reassign

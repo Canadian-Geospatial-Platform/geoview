@@ -9,7 +9,7 @@ import OLMap from 'ol/Map';
 import View, { FitOptions, ViewOptions } from 'ol/View';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
-import { Projection as OLProjection } from 'ol/proj';
+import { Projection as OLProjection, ProjectionLike } from 'ol/proj';
 
 import queryString from 'query-string';
 import { CV_MAP_EXTENTS, VALID_DISPLAY_LANGUAGE, VALID_DISPLAY_THEME, VALID_PROJECTION_CODES } from '@config/types/config-constants';
@@ -1323,7 +1323,8 @@ export class MapViewer {
    * @returns {Coordinate} The coordinate in the map projection
    */
   convertCoordinateLngLatToMapProj(coordinate: Coordinate): Coordinate {
-    return Projection.transform(coordinate, Projection.PROJECTION_NAMES.LNGLAT, this.getProjection());
+    // Redirect
+    return this.convertCoordinateFromProjToMapProj(coordinate, Projection.PROJECTION_NAMES.LNGLAT);
   }
 
   /**
@@ -1332,7 +1333,8 @@ export class MapViewer {
    * @returns {Coordinate} The coordinate in LngLat
    */
   convertCoordinateMapProjToLngLat(coordinate: Coordinate): Coordinate {
-    return Projection.transform(coordinate, this.getProjection(), Projection.PROJECTION_NAMES.LNGLAT);
+    // Redirect
+    return this.convertCoordinateFromMapProjToProj(coordinate, Projection.PROJECTION_NAMES.LNGLAT);
   }
 
   /**
@@ -1341,7 +1343,8 @@ export class MapViewer {
    * @returns {Extent} The extent in the map projection
    */
   convertExtentLngLatToMapProj(extent: Extent): Extent {
-    return Projection.transformExtent(extent, Projection.PROJECTION_NAMES.LNGLAT, this.getProjection());
+    // Redirect
+    return this.convertExtentFromProjToMapProj(extent, Projection.PROJECTION_NAMES.LNGLAT);
   }
 
   /**
@@ -1350,7 +1353,50 @@ export class MapViewer {
    * @returns {Extent} The extent in LngLat
    */
   convertExtentMapProjToLngLat(extent: Extent): Extent {
-    return Projection.transformExtent(extent, this.getProjection(), Projection.PROJECTION_NAMES.LNGLAT);
+    // Redirect
+    return this.convertExtentFromMapProjToProj(extent, Projection.PROJECTION_NAMES.LNGLAT);
+  }
+
+  /**
+   * Transforms coordinate from given projection to the current projection of the map.
+   * @param {Coordinate} coordinate - The given coordinate
+   * @param {ProjectionLike} fromProj - The projection of the given coordinate
+   * @returns {Coordinate} The coordinate in the map projection
+   */
+  convertCoordinateFromProjToMapProj(coordinate: Coordinate, fromProj: ProjectionLike): Coordinate {
+    // TODO: In this function and equivalent 3 others below, make it so if the given projection is the same as the map projection
+    // TO.DOCONT: just skip and return the same geometry. It'd save many 'if' like 'if projA <> projB then call this' in the code base
+    return Projection.transform(coordinate, fromProj, this.getProjection());
+  }
+
+  /**
+   * Transforms coordinate from map projection to given projection.
+   * @param {Coordinate} coordinate - The given coordinate
+   * @param {ProjectionLike} toProj - The projection that should be output
+   * @returns {Coordinate} The coordinate in the map projection
+   */
+  convertCoordinateFromMapProjToProj(coordinate: Coordinate, toProj: ProjectionLike): Coordinate {
+    return Projection.transform(coordinate, this.getProjection(), toProj);
+  }
+
+  /**
+   * Transforms extent from given projection to the current projection of the map.
+   * @param {Extent} extent - The given extent
+   * @param {ProjectionLike} fromProj - The projection of the given extent
+   * @returns {Extent} The extent in the map projection
+   */
+  convertExtentFromProjToMapProj(extent: Extent, fromProj: ProjectionLike): Extent {
+    return Projection.transformExtent(extent, fromProj, this.getProjection());
+  }
+
+  /**
+   * Transforms extent from map projection to given projection.
+   * @param {Extent} extent - The given extent
+   * @param {ProjectionLike} toProj - The projection that should be output
+   * @returns {Extent} The extent in the map projection
+   */
+  convertExtentFromMapProjToProj(extent: Extent, toProj: ProjectionLike): Extent {
+    return Projection.transformExtent(extent, this.getProjection(), toProj);
   }
 
   // #region EVENTS

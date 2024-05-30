@@ -1,8 +1,8 @@
 import VectorTileLayer from 'ol/layer/VectorTile';
+import { VectorTile } from 'ol/source';
 import { Extent } from 'ol/extent';
 
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
-import { Projection } from '@/geo/utils/projection';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { featureInfoGetFieldType } from '../utils';
@@ -36,6 +36,15 @@ export class GVVectorTiles extends AbstractGVVectorTile {
   }
 
   /**
+   * Overrides the get of the OpenLayers Layer
+   * @returns {VectorTile} The OpenLayers Layer
+   */
+  override getOLSource(): VectorTile | undefined {
+    // Get source from OL
+    return this.getOLLayer().getSource() || undefined;
+  }
+
+  /**
    * Overrides the get of the layer configuration associated with the layer.
    * @returns {VectorTilesLayerEntryConfig} The layer configuration or undefined if not found.
    */
@@ -62,16 +71,15 @@ export class GVVectorTiles extends AbstractGVVectorTile {
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     const layerConfig = this.getLayerConfig();
-    const layer = this.getOLLayer();
-    const projection = layer?.getSource()?.getProjection()?.getCode() || this.getMapViewer().getProjection().getCode();
+    const projection = this.getOLSource()?.getProjection()?.getCode() || this.getMapViewer().getProjection().getCode();
 
-    const layerBounds = layer?.getSource()?.getTileGrid()?.getExtent();
+    const layerBounds = this.getOLSource()?.getTileGrid()?.getExtent();
     if (layerBounds) {
       let transformedBounds = layerBounds;
       if (
         layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')
       ) {
-        transformedBounds = Projection.transformExtent(layerBounds, projection, this.getMapViewer().getProjection().getCode());
+        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, projection);
       }
 
       // eslint-disable-next-line no-param-reassign
