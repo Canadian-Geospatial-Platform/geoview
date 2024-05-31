@@ -214,7 +214,7 @@
     removeGeoJSONButton.addEventListener('click', function (e) {
       // removing a geojson layer using the ID
       const layerPath = document.getElementById('new-layer-id-label').innerText;
-      if (layerPath) cgpv.api.maps['LYR1'].layer.removeLayersUsingPath(layerPath);
+      if (layerPath) cgpv.api.maps['LYR1'].layer.removeLayerUsingPath(layerPath);
       document.getElementById('new-layer-id-label').innerText = '';
       createTableOfFilter('LYR1');
     });
