@@ -71,7 +71,7 @@
     "linkifyjs": "^4.1.0",
     "lodash": "^4.17.21",
     "material-react-table": "~2.12.1",
-    "ol": "^9.2.0",
+    "ol": "^9.0.0",
     "ol-mapbox-style": "^12.2.1",
     "proj4": "^2.7.5",
     "prop-types": "^15.8.1",
