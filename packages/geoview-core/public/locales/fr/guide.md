@@ -16,12 +16,12 @@ The following navigation controls can be found in the bottom right corner of the
 
 You can also pan the map by using your left, right, up and down arrow keys, or by click-holding on the map and dragging. Using the mouse scroll wheel while hovering over the map will zoom the map in/out.
 
-Press the SHIFT key while click-holding and dragging the mouse to define a map extent region. When the mouse button is released, the view will zoom to the chosen area.
+Press the __Shift__ key while click-holding and dragging the mouse to define a map extent region. When the mouse button is released, the view will zoom to the chosen area.
 
-PRESS SHIFT and ALT while click-holding and dragging the mouse to rotate the map.
+Press __Shift__ and __Alt__ keys while click-holding and dragging the mouse to rotate the map.
 To reset the map orientation, click the reset rotation arrow located at the right side of the Map Information Bar at the bottom of the map.
 
-Note that the map **must be** focused for key binding to work.
+Note that the map __must be__ focused for key binding to work.
 
 =2!overviewMap=
 
@@ -37,23 +37,25 @@ Click-hold on the box in the overview map and drag it to change the extent of th
 
 ### Keyboard Navigation
 
-Keyboard functionality is provided as an alternative for users who are unable to use a mouse. Use the Tab key to navigate forward to links and controls on the page. Press Shift+Tab to go back one step. Use the Enter or Spacebar keys to activate links and controls.
+Keyboard functionality is provided as an alternative for users who are unable to use a mouse. Use the __Tab__ key to navigate forward to links and controls on the page. Press __Shift__ and __Tab__ keys to go back one step. Use the __Enter__ or __Spacebar__ keys to activate links and controls.
 
-Using the Tab key, navigate to the map and the following prompt appears. Select Enable and press Enter to use keyboard navigation.
-
-![]({{assetsURL}}/img/guide/navigation/keyboard_nav.png)
+Using the __Tab__ key to navigate to the map and the __Keyboard Navigation__ prompt will appears. Select Enable and press Enter to use keyboard navigation.
 
 When the map gains focus, a crosshair is displayed in the center of the map:
 
 ![]({{assetsURL}}/img/guide/navigation/crosshair.svg)
 
-Use the **arrow** keys to move the map and **+** / **-** keys to zoom in and out. Press **Enter** to select a feature under the crosshairs and display associated data in the Details panel.
+Use the __arrow__ keys to move the map and __+__ / __-__ keys to zoom in and out. Press __Enter__ to select a feature under the crosshairs and display associated data in the Details panel.
 
 Information will be shown for supported features when the crosshair is positioned over them.
 
-Press CTRL Q to exit keyboard navigation.
+Press __CTRL__ and __Q__ to exit keyboard navigation.
 
-Note that the map **must be** focused for key binding to work. The map has focus when the crosshairs marker is present.
+Note: that the map __must be__ focused for key binding to work. The map has focus when the crosshairs marker is present.
+
+# Accessibility
+
+This page is not fully WCAG 2.0 AA compliant.
 
 =1!mapInformationBar=
 
@@ -70,18 +72,18 @@ The following navigation information can be found in the Map Information Bar (ma
 | <img src="{{assetsURL}}/img/guide/navigation/attribute.svg" width="30"/> | Attributes              | Copyright and other map attributes.                                                                                                                                      |
 |                                                            | Positioning coordinates | Click on the positioning coordinates to toggle between degrees minutes seconds (DMS), decimal degrees or projected coordinates.                                          |
 |                                                            | Map scale               | Click on the map scale to toggle between scale and resolution.                                                                                                           |
-| <img src="{{assetsURL}}/img/guide/navigation/up_arrow.svg" width="30"/>  | Reset rotation          | Click on reset rotation to return map to the initial orientation. Note: Fix North must be Off.                                                                           |
+| <img src="{{assetsURL}}/img/guide/navigation/up_arrow.svg" width="30"/>  | Reset rotation          | Click on the arrow to return map to the initial orientation. Note: Fix North must be Off.                                                                           |
 | <img src="{{assetsURL}}/img/guide/navigation/fix_north.png" width="30"/> | Fix North               | On or Off. Set to On to keep map oriented with North to the top. Only available with some projections (eg. LCC) Note: Reset rotation will not work when Fix North is On. |
 
 =1!sidebar=
 
-### Sidebar
+### App Bar
 
-The sidebar to the left of the map shows the available tools.
+The App Bar to the left of the map shows the available tools.
 
-_The tools shown in the Sidebar vary depending on the map._
+_The tools shown in the App Bar vary depending on the map._
 
-**_Note: Some tools in the Sidebar are also available as tabs in the Footer Panel, such as Legend or Details. Tools opened from the Sidebar are displayed on the map, in a condensed 'mobile' view (single column). The same tool opened from a tab in the Footer Panel is displayed below the map in a fully expanded view._**
+**_Note: Some tools in the App Bar are also available as tabs in the Footer Bar, such as Legend or Details. Tools opened from the App Bar are displayed on the map, in a condensed 'mobile' view (single column). The same tool opened from a tab in the Footer Bar is displayed below the map in a fully expanded view._**
 
 | Symbol                                                      | Name          | Description                                                                                        |
 | ----------------------------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------- |
@@ -98,7 +100,7 @@ _The tools shown in the Sidebar vary depending on the map._
 
 ### ![]({{assetsURL}}/img/guide/sidebar/geolocator.svg) Geolocator
 
-The geolocator component functions to allow users to search for places in Canada. When the geolocator icon ![]({{assetsURL}}/img/guide/geosearch/geolocator_20.svg) in the Sidebar is clicked, an input field for search keywords will appear on the map:
+The geolocator component functions to allow users to search for places in Canada. When the geolocator icon ![]({{assetsURL}}/img/guide/geosearch/geolocator_20.svg) in the App Bar is clicked, an input field for search keywords will appear on the map:
 
 ![]({{assetsURL}}/img/guide/geosearch/searchbar_en.png)
 
@@ -173,11 +175,11 @@ Click on the Export button at the bottom to get the final generated map image.
 
 =1!footerPanel=
 
-### Footer Panel
+### Footer Bar
 
-The Footer Panel appears below the map. The Footer Panel can be expanded or collapsed by clicking on a tab in the Footer Panel menu bar (collapse by clicking active tab).
+The Footer Bar appears below the map. The Footer Bar can be expanded or collapsed by clicking on a tab in the Footer Bar menu bar (collapse by clicking active tab).
 
-The Footer Panel menu bar has the following tabs:
+The Footer Bar menu bar has the following tabs:
 
 - Legend
 - Layers
@@ -454,22 +456,6 @@ Select from the Download dropdown (upper right of chart section) to download cha
 Points on line charts can be changed to steps, by selecting from the Steps dropdown in the upper left of the chart section.
 
 Click hold and drag the handles on the the line chart slider bars to change the X or Y axis values displayed for the chart.
-
-=1!keyboardNavigation=
-
-### Keyboard Navigation
-
-Keyboard functionality is provided as an alternative for users who are unable to use a mouse. Use the Tab key to navigate forward to links and controls on the page. Press Shift+Tab to go back one step. Use the Enter or Spacebar keys to activate links and controls.
-
-When the map gains focus, a crosshair is displayed in the center of the map. Use the **arrow** keys to move the map and **+** / **-** keys to zoom in and out. Press **Enter** to select a feature under the crosshairs and display associated data in the Details panel.
-
-![]({{assetsURL}}/img/guide/navigation/crosshair.svg)
-
-Tooltips will be shown for supported features when the crosshair is positioned over them.
-
-# Accessibility
-
-This page is WCAG 2.0 AA compliant.
 
 =1!issues=
 
