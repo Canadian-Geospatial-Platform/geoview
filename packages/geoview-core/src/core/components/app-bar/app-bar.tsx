@@ -99,7 +99,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
     // Log
     logger.logTraceUseMemo('APP-BAR - panels');
 
-    // TODO: Refactor - We should find a way to make this 'dictionary of supported components' dynamic.
+    // TODO: Refactor - We should find a way to make this 'dictionary of supported components' dynamic
     return {
       geolocator: { icon: <SearchIcon />, content: <Geolocator key="geolocator" /> },
       legend: { icon: <HubOutlinedIcon />, content: <Legend fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
