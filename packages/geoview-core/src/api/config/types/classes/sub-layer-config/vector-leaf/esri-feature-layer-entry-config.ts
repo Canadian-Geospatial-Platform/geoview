@@ -41,13 +41,13 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   ) {
     super(layerConfig, initialSettings, language, geoviewLayerConfig, parentNode);
     // Set default values.
-    this.source = defaultsDeep(this.source, { maxRecordCount: 0, format: 'EsriJSON' });
+    this.source = defaultsDeep(this.source, { maxRecordCount: 0, format: 'EsriJSON', featureInfo: { queryable: false } });
     this.style = layerConfig.style ? { ...Cast<TypeStyleConfig>(layerConfig.style) } : undefined;
     if (Number.isNaN(this.layerId)) {
       throw new Error(`The layer entry with layerId equal to ${this.layerPath} must be an integer string`);
     }
-    if (!isvalidComparedToSchema(this.schemaPath, layerConfig)) this.propagateError();
-    if (!isvalidComparedToSchema(this.schemaPath, this)) this.propagateError();
+    if (!isvalidComparedToSchema(this.schemaPath, layerConfig)) this.propagateError(); // Input schema validation.
+    if (!isvalidComparedToSchema(this.schemaPath, this)) this.propagateError(); // Internal schema validation.
   }
 
   /**

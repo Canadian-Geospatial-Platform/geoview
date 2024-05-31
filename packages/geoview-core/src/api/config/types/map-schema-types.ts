@@ -426,6 +426,8 @@ export type TypeEsriFormatParameter = 'png' | 'jpg' | 'gif' | 'svg';
 
 /** Type used to configure the feature info for a layer. */
 export type TypeFeatureInfoLayerConfig = {
+  /** Allow querying. Default = false. */
+  queryable: boolean;
   /**
    * The display field of the layer. If it is not present the viewer will make an attempt to find the first valid
    * field.

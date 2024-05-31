@@ -41,6 +41,7 @@
               "layerFilter": "",
               "maxRecordCount": 0,
               "featureInfo": {
+                "queryable": true,
                 "nameField": "Owner",
                 "outfields": [
                   {

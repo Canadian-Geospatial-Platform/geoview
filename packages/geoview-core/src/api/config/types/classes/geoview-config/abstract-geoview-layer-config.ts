@@ -64,11 +64,18 @@ export abstract class AbstractGeoviewLayerConfig {
    * @param {MapFeatureConfig} mapFeatureConfig An optional mapFeatureConfig instance if the layer is part of it.
    */
   constructor(geoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage, mapFeatureConfig?: MapFeatureConfig) {
+    this.isGeocore = (geoviewLayerConfig.isGeocore as boolean) || false;
+    // The isGeocore property is not part of the input schema. Now that it has been transferd to the internal representation,
+    // It must be removed from the input config to make the input validation successful.
+    // eslint-disable-next-line no-param-reassign
+    delete geoviewLayerConfig.isGeocore;
+
     this.#originalgeoviewLayerConfig = cloneDeep(geoviewLayerConfig);
+    // GV: One thing to know about default values: The way to determine whether a property has
+    // GV: been supplied by the user rather than initialized using a default value is to look
+    // GV: in the original configuration copy kept in the instance
     this.#mapFeatureConfig = mapFeatureConfig;
     this.#language = language;
-
-    this.isGeocore = (this.#originalgeoviewLayerConfig.isGeocore as boolean) || false;
 
     this.initialSettings = Cast<TypeLayerInitialSettings>(
       defaultsDeep(this.#originalgeoviewLayerConfig.initialSettings, CV_DEFAULT_LAYER_INITIAL_SETTINGS)
