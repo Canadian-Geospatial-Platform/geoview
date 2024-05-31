@@ -125,7 +125,7 @@ const ResponsiveGridLayout = forwardRef(
       if (window.innerWidth <= theme.breakpoints.values.md) {
         return null; // Return null if on small screens (down to md)
       }
-    
+
       return (
         <ResponsiveButton
           size="small"
@@ -144,11 +144,11 @@ const ResponsiveGridLayout = forwardRef(
       if (!fullWidth && window.innerWidth >= theme.breakpoints.values.md) {
         return null; // Return null if conditions are met
       }
-    
+
       if (!fullWidth && !isRightPanelVisible) {
         return null; // Return null for another hiding condition
       }
-    
+
       return (
         <ResponsiveButton
           size="small"
@@ -171,7 +171,7 @@ const ResponsiveGridLayout = forwardRef(
       if (window.innerWidth <= theme.breakpoints.values.md) {
         return null; // Return null if on small screens (down to md)
       }
-    
+
       return (
         <ResponsiveButton
           disabled={isGuideOpen}
@@ -300,7 +300,7 @@ const ResponsiveGridLayout = forwardRef(
                   {!fullWidth && !hideEnlargeBtn && renderEnlargeButton()}
                   {!!guideContentIds?.length && renderGuideButton()}
                   {!isMapFullScreen && renderFullScreenButton()}
-                  {!!((leftMain || leftTop)) && renderCloseButton()}
+                  {!!(leftMain || leftTop) && renderCloseButton()}
                 </ButtonGroup>
               </Box>
             </Box>
