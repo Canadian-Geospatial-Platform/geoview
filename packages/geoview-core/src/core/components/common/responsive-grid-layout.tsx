@@ -121,12 +121,16 @@ const ResponsiveGridLayout = forwardRef(
       }
     }
 
-    const renderEnlargeButton = (): JSX.Element => {
+    const renderEnlargeButton = (): JSX.Element | null => {
+      if (window.innerWidth <= theme.breakpoints.values.md) {
+        return null; // Return null if on small screens (down to md)
+      }
+    
       return (
         <ResponsiveButton
           size="small"
           startIcon={isEnlarged ? <ArrowForwardIcon /> : <ArrowBackIcon />}
-          sx={{ height: '40px', borderRadius: '1.5rem', boxShadow: 'none', [theme.breakpoints.down('md')]: { display: 'none' } }}
+          sx={{ boxShadow: 'none' }}
           onClick={() => handleIsEnlarge(!isEnlarged)}
           tooltipKey={isEnlarged ? t('dataTable.reduceBtn')! : t('dataTable.enlargeBtn')!}
         >
@@ -135,7 +139,16 @@ const ResponsiveGridLayout = forwardRef(
       );
     };
 
-    const renderCloseButton = (): JSX.Element => {
+    const renderCloseButton = (): JSX.Element | null => {
+      // Check conditions for hiding the button
+      if (!fullWidth && window.innerWidth >= theme.breakpoints.values.md) {
+        return null; // Return null if conditions are met
+      }
+    
+      if (!fullWidth && !isRightPanelVisible) {
+        return null; // Return null for another hiding condition
+      }
+    
       return (
         <ResponsiveButton
           size="small"
@@ -144,15 +157,7 @@ const ResponsiveGridLayout = forwardRef(
           className="buttonFilledOutline"
           startIcon={<CloseIcon fontSize={theme.palette.geoViewFontSize.sm} />}
           sx={{
-            height: '40px',
-            borderRadius: '1.5rem',
-            marginLeft: '1rem',
-            padding: '0 0.75rem',
             ...(fullWidth ? sxClasses.appBarEnlargeButton : sxClasses.footerBarEnlargeButton),
-            ...(fullWidth && { display: !isRightPanelVisible ? 'none' : 'block' }),
-            ...(!fullWidth && {
-              [theme.breakpoints.up('md')]: { display: 'none' },
-            }),
           }}
           onClick={() => setIsRightPanelVisible(false)}
           tooltipKey={t('dataTable.close') ?? ''}
@@ -162,13 +167,14 @@ const ResponsiveGridLayout = forwardRef(
       );
     };
 
-    const renderGuideButton = (): JSX.Element => {
+    const renderGuideButton = (): JSX.Element | null => {
+      if (window.innerWidth <= theme.breakpoints.values.md) {
+        return null; // Return null if on small screens (down to md)
+      }
+    
       return (
         <ResponsiveButton
           disabled={isGuideOpen}
-          sx={{
-            [theme.breakpoints.down('md')]: { display: 'none' },
-          }}
           size="small"
           onClick={() => handleOpenGuide()}
           tooltipKey={t('general.openGuide')!}
@@ -290,11 +296,11 @@ const ResponsiveGridLayout = forwardRef(
               {rightTop ?? <Box />}
 
               <Box sx={sxClasses.rightButtonsContainer}>
-                <ButtonGroup size="small" variant="outlined" sx={{ marginRight: '10px' }}>
+                <ButtonGroup size="small" variant="outlined" sx={{ marginRight: '10px' }} aria-label="outlined button group">
                   {!fullWidth && !hideEnlargeBtn && renderEnlargeButton()}
                   {!!guideContentIds?.length && renderGuideButton()}
                   {!isMapFullScreen && renderFullScreenButton()}
-                  {!!(leftMain || leftTop) && renderCloseButton()}
+                  {!!((leftMain || leftTop)) && renderCloseButton()}
                 </ButtonGroup>
               </Box>
             </Box>

@@ -11,7 +11,7 @@ export type ResponsiveButtonProps = {
 export function ResponsiveButton(props: ResponsiveButtonProps): JSX.Element {
   const { tooltipKey, children, variant, startIcon, onClick, ...rest } = props;
   const { t } = useTranslation<string>();
-  const breakpoint = 510;
+  const breakpoint = 710;
 
   // state
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
