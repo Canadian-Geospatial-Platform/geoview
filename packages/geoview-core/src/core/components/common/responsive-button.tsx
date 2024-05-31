@@ -9,7 +9,7 @@ export type ResponsiveButtonProps = {
 } & ButtonProps;
 
 export function ResponsiveButton(props: ResponsiveButtonProps): JSX.Element {
-  const { tooltipKey, children, variant, startIcon, type = 'text', onClick, ...rest } = props;
+  const { tooltipKey, children, variant, startIcon, onClick, ...rest } = props;
   const { t } = useTranslation<string>();
   const breakpoint = 510;
 
