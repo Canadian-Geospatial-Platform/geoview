@@ -1555,8 +1555,11 @@ export function getFeatureStyle(
   const geometryType = getGeometryType(feature);
   // If style does not exist for the geometryType, create it.
   let { style } = layerConfig as VectorLayerEntryConfig;
-  if (style === undefined || style[geometryType] === undefined)
+  if (style === undefined || style[geometryType] === undefined) {
     style = createDefaultStyle(geometryType, layerConfig as VectorLayerEntryConfig, language);
+    // Emit event to update legend icons
+    layerConfig.emitLayerStyleChanged({ layerPath: layerConfig.layerPath });
+  }
   // Get the style accordingly to its type and geometry.
   if (style![geometryType] !== undefined) {
     const styleSettings = style![geometryType]!;

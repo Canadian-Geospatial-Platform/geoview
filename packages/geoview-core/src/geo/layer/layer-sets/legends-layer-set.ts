@@ -36,6 +36,11 @@ export class LegendsLayerSet extends AbstractLayerSet {
     // Call parent
     super.onRegisterLayer(layerConfig);
 
+    // Register the layer style changed handler
+    layerConfig.onLayerStyleChanged((config: ConfigBaseClass) => {
+      this.#handleLayerStyleChanged(config);
+    });
+
     // Keep track if the legend has been queried
     this.resultSet[layerConfig.layerPath].legendQueryStatus = 'init';
 
@@ -135,14 +140,17 @@ export class LegendsLayerSet extends AbstractLayerSet {
   /**
    * Indicates if the layer path should be queried
    */
-  #legendShouldBeQueried(layerConfig: ConfigBaseClass | undefined): boolean {
+  #legendShouldBeQueried(layerConfig: ConfigBaseClass): boolean {
     // A legend is ready to be queried when its status is > processed and legendQueryStatus is 'init' (not already queried)
-    return !!layerConfig?.isGreaterThanOrEqualTo('processed') && this.resultSet[layerConfig.layerPath].legendQueryStatus === 'init';
+    return (
+      !!layerConfig?.isGreaterThanOrEqualTo('processed') &&
+      (this.resultSet[layerConfig.layerPath].legendQueryStatus === 'init' || !this.resultSet[layerConfig.layerPath].data?.legend)
+    );
   }
 
   /**
    * Overrides behaviour when layer name is changed.
-   * @param {ConfigBaseClass} layerConfig - The layer path being affected
+   * @param {ConfigBaseClass} layerConfig - The layer config being affected
    * @param {string} name - The new layer name
    */
   protected override onProcessNameChanged(layerConfig: ConfigBaseClass, name: string): void {
@@ -151,7 +159,17 @@ export class LegendsLayerSet extends AbstractLayerSet {
       super.onProcessNameChanged(layerConfig, name);
 
       // Propagate to store
-      LegendEventProcessor.propagateLegendToStore(this.getMapId(), this.resultSet[layerConfig.layerPath]);
+      this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
+    }
+  }
+
+  /**
+   * Query legend when style is changed.
+   * @param {ConfigBaseClass} layerConfig - The layer config being affected
+   */
+  #handleLayerStyleChanged(layerConfig: ConfigBaseClass): void {
+    if (this.resultSet?.[layerConfig.layerPath]) {
+      this.#checkQueryLegend(layerConfig);
     }
   }
 }

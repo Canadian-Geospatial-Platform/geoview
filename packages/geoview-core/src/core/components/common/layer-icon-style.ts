@@ -43,10 +43,11 @@ export const getSxClasses = (theme: Theme): any => ({
     justifyContent: 'center',
     alignItems: 'center',
     width: 24,
-    height: 24,
+    height: '24px !important',
     backgroundColor: theme.palette.geoViewColor.white,
     border: '1px solid',
     borderColor: theme.palette.geoViewColor.bgColor.dark[600],
+    borderRadius: 0.5,
   },
   stackIconsBox: {
     width: 24,
