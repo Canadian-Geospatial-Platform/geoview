@@ -437,5 +437,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     }
 
     olLayer?.changed();
+
+    // Emit event
+    this.emitLayerFilterApplied({
+      layerPath,
+      filter: filterValueToUse,
+    });
   }
 }

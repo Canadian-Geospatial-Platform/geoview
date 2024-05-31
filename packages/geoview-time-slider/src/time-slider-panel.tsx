@@ -5,6 +5,8 @@ import {
   useTimeSliderLayers,
 } from 'geoview-core/src/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
+import { useLayerLegendLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/layer-state';
+import { LegendEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/legend-event-processor';
 import { Box } from 'geoview-core/src/ui';
 import { logger } from 'geoview-core/src/core/utils/logger';
 
@@ -35,6 +37,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   // get values from store
   const visibleLayers = useMapVisibleLayers() as string[];
   const timeSliderLayers = useTimeSliderLayers();
+  const legendLayers = useLayerLegendLayers();
 
   /**
    * handle Layer list when clicked on each layer.
@@ -70,12 +73,13 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     /**
      * Create layer tooltip
      * @param {TypeTimeSliderValues} timeSliderLayerInfo Time slider layer info.
+     * @param {string} name Time slider layer name.
      * @returns
      */
-    const getLayerTooltip = (timeSliderLayerInfo: TypeTimeSliderValues): ReactNode => {
+    const getLayerTooltip = (timeSliderLayerInfo: TypeTimeSliderValues, name: string): ReactNode => {
       return (
         <Box sx={{ display: 'flex', alignContent: 'center', '& svg ': { width: '0.75em', height: '0.75em' } }}>
-          {timeSliderLayerInfo.name}
+          {name}
           {timeSliderLayerInfo.filtering && `: ${getFilterInfo(timeSliderLayerInfo)}`}
         </Box>
       );
@@ -89,15 +93,18 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       .filter((layer) => layer && layer.timeSliderLayerInfo)
       .map((layer) => {
         return {
-          layerName: layer.timeSliderLayerInfo.name,
+          layerName: LegendEventProcessor.findLayerByPath(legendLayers, layer.layerPath).layerName,
           layerPath: layer.layerPath,
           layerFeatures: getFilterInfo(layer.timeSliderLayerInfo),
-          tooltip: getLayerTooltip(layer.timeSliderLayerInfo),
+          tooltip: getLayerTooltip(
+            layer.timeSliderLayerInfo,
+            LegendEventProcessor.findLayerByPath(legendLayers, layer.layerPath).layerName
+          ),
           layerStatus: 'loaded',
           queryStatus: 'processed',
         } as LayerListEntry;
       });
-  }, [timeSliderLayers, visibleLayers]);
+  }, [legendLayers, timeSliderLayers, visibleLayers]);
 
   useEffect(() => {
     // Log
