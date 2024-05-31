@@ -30,7 +30,6 @@ import {
   TypeLocation,
   QueryType,
 } from '@/geo/map/map-schema-types';
-// TODO: Downgrade those types from abstract-layer-set
 import { getLegendStyles, getFeatureCanvas } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -58,6 +57,9 @@ export abstract class AbstractGVLayer {
   // The layer status
   #layerStatus: TypeLayerStatusSimplified;
 
+  // The layer name
+  #layerName: TypeLocalizedString | undefined;
+
   /** Layer temporal dimension */
   #layerTemporalDimension?: TimeDimension;
 
@@ -66,6 +68,9 @@ export abstract class AbstractGVLayer {
 
   /** Date format object used to translate internal UTC ISO format to the external format, the one used by the user */
   #externalFragmentsOrder?: TypeDateFragments;
+
+  // Keep all callback delegates references
+  #onLayerNameChangedHandlers: LayerNameChangedDelegate[] = [];
 
   // Keep all callback delegate references
   #onLegendQueryingHandlers: LegendQueryingDelegate[] = [];
@@ -89,6 +94,7 @@ export abstract class AbstractGVLayer {
     this.#mapId = mapId;
     this.#olLayer = olLayer;
     this.#layerConfig = layerConfig;
+    this.#layerName = layerConfig.layerName;
     this.#layerStatus = 'loading';
 
     // Keep the date formatting information
@@ -216,6 +222,26 @@ export abstract class AbstractGVLayer {
   }
 
   /**
+   * Gets the layer name
+   * @returns The layer status
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getLayerName(layerPath: string): TypeLocalizedString | undefined {
+    // TODO: Refactor - After layers refactoring, remove the layerPath parameter here (gotta keep it in the signature for now for the layers-set active switch)
+    return this.#layerName;
+  }
+
+  /**
+   * Sets the layer name
+   * @param {TypeLocalizedString | undefined} name - The layer name
+   */
+  setLayerName(layerPath: string, name: TypeLocalizedString | undefined): void {
+    // TODO: Refactor - After layers refactoring, remove the layerPath parameter here (gotta keep it in the signature for now for the layers-set active switch)
+    this.#layerName = name;
+    this.#emitLayerNameChanged({ layerPath, layerName: name });
+  }
+
+  /**
    * Gets the temporal dimension that is associated to the layer.
    * @returns {TimeDimension | undefined} The temporal dimension associated to the layer or undefined.
    */
@@ -225,7 +251,7 @@ export abstract class AbstractGVLayer {
 
   /**
    * Sets the temporal dimension for the layer.
-   * @param {TimeDimension} temporalDimension The value to assign to the layer temporal dimension property.
+   * @param {TimeDimension} temporalDimension - The value to assign to the layer temporal dimension property.
    */
   setTemporalDimension(temporalDimension: TimeDimension): void {
     this.#layerTemporalDimension = temporalDimension;
@@ -266,9 +292,9 @@ export abstract class AbstractGVLayer {
 
   /**
    * Returns feature information for the layer specified.
-   * @param {QueryType} queryType  The type of query to perform.
-   * @param {TypeLocation} location An optionsl pixel, coordinate or polygon that will be used by the query.
-   * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+   * @param {QueryType} queryType - The type of query to perform.
+   * @param {TypeLocation} location - An optionsl pixel, coordinate or polygon that will be used by the query.
+   * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
   async getFeatureInfo(
     queryType: QueryType,
@@ -277,9 +303,12 @@ export abstract class AbstractGVLayer {
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     // TODO: Refactor - After layers refactoring, remove the layerPath parameter here (gotta keep it in the signature for now for the layers-set active switch)
     try {
+      // Get the layer config
+      const layerConfig = this.getLayerConfig();
+
       // If queryable
-      if (!this.getLayerConfig().source?.featureInfo?.queryable) {
-        logger.logError(`Layer is not queryable`);
+      if (!layerConfig.source?.featureInfo?.queryable) {
+        logger.logError(`Layer at path ${layerConfig.layerPath} is not queryable`);
         return null;
       }
 
@@ -744,6 +773,34 @@ export abstract class AbstractGVLayer {
 
   /**
    * Emits an event to all handlers.
+   * @param {LayerNameChangedEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerNameChanged(event: LayerNameChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerNameChangedHandlers, event);
+  }
+
+  /**
+   * Registers a layer name changed event handler.
+   * @param {LayerNameChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerNameChanged(callback: LayerNameChangedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerNameChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer name changed event handler.
+   * @param {LayerNameChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerNameChanged(callback: LayerNameChangedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerNameChangedHandlers, callback);
+  }
+
+  /**
+   * Emits an event to all handlers.
    * @param {LegendQueryingEvent} event The event to emit
    * @private
    */
@@ -854,6 +911,22 @@ export abstract class AbstractGVLayer {
     EventHelper.offEvent(this.#onLayerFilterAppliedHandlers, callback);
   }
 }
+
+/**
+ * Define an event for the delegate.
+ */
+export type LayerNameChangedEvent = {
+  // The new layer name.
+  layerName?: TypeLocalizedString;
+  // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
+  // The layer path.
+  layerPath: string;
+};
+
+/**
+ * Define a delegate for the event handler function signature.
+ */
+type LayerNameChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerNameChangedEvent>;
 
 /**
  * Define an event for the delegate

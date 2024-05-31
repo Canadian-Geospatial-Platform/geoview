@@ -5,7 +5,7 @@ import { logger } from '@/core/utils/logger';
 
 /**
  * Custom hook for caching the mapping of fieldInfos aka columns for data table.
- * @param {TypeLayerData[]} layerData data from the query
+ * @param {TypeAllFeatureInfoResultSetEntry[]} layerData data from the query
  * @returns {MappedLayerDataType[]} layerData with columns.
  */
 export function useFeatureFieldInfos(layerData: TypeAllFeatureInfoResultSetEntry[]): MappedLayerDataType[] {

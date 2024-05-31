@@ -28,7 +28,7 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { Cast } from '@/core/types/global-types';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { analyzeLayerFilter, getFeatureStyle } from '@/geo/utils/renderer/geoview-renderer';
+import { analyzeLayerFilter, getAndCreateFeatureStyle } from '@/geo/utils/renderer/geoview-renderer';
 
 /* *******************************************************************************************************************************
  * AbstractGeoViewVector types
@@ -234,12 +234,20 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // TODO: remove link to language, layer should be created in one language and recreated if needed to change
     const language = AppEventProcessor.getDisplayLanguage(this.mapId);
 
+    // Get the style label
+    const label = getLocalizedValue(layerConfig.layerName, language) || layerConfig.layerId;
+
+    // Create the vector layer options.
+    // GV In this style callback below, it's possible that more styles get created on-the-fly depending on the features being queried.
+    // GV Because of this, we want the config to emit a style changed event everytime this happens so that we can adjust the UI accordingly.
+    // TODO: Refactor - Layers refactoring. When the layers refactoring is done. It should be the layer that emits this event, not the layerConfig.
+    // TO.DOCONT: Right now, it can't be the layer, because this code only exists in AbstractGeoViewLayer, not in the new GVLayers.
     const layerOptions: VectorLayerOptions<VectorSource> = {
       properties: { layerConfig },
       source: vectorSource as VectorSource<Feature>,
       style: (feature) => {
         if ('style' in layerConfig) {
-          return getFeatureStyle(feature as Feature, layerConfig, language);
+          return getAndCreateFeatureStyle(feature, layerConfig, label);
         }
 
         return undefined;

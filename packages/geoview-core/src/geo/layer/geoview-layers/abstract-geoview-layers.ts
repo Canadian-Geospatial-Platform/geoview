@@ -120,6 +120,9 @@ export abstract class AbstractGeoViewLayer {
   // The service metadata.
   metadata: TypeJsonObject | null = null;
 
+  /** Layer name */
+  #layerName: Record<string, TypeLocalizedString | undefined> = {};
+
   /** Layer metadata */
   #layerMetadata: Record<string, TypeJsonObject> = {};
 
@@ -153,27 +156,34 @@ export abstract class AbstractGeoViewLayer {
   // Keep all callback delegate references
   #onLayerFilterAppliedHandlers: LayerFilterAppliedDelegate[] = [];
 
+  // Keep all callback delegates references
+  #onLayerNameChangedHandlers: LayerNameChangedDelegate[] = [];
+
   /** ***************************************************************************************************************************
    * The class constructor saves parameters and common configuration parameters in attributes.
    *
    * @param {TypeGeoviewLayerType} type - The type of GeoView layer that is instantiated.
-   * @param {TypeGeoviewLayerConfig} mapLayerConfig - The GeoView layer configuration options.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration options.
    * @param {string} mapId - The unique identifier of the map on which the GeoView layer will be drawn.
    */
-  constructor(type: TypeGeoviewLayerType, mapLayerConfig: TypeGeoviewLayerConfig, mapId: string) {
+  constructor(type: TypeGeoviewLayerType, geoviewLayerConfig: TypeGeoviewLayerConfig, mapId: string) {
     this.mapId = mapId;
     this.type = type;
-    this.geoviewLayerId = mapLayerConfig.geoviewLayerId || generateId('');
-    this.geoviewLayerName.en = mapLayerConfig?.geoviewLayerName?.en ? mapLayerConfig.geoviewLayerName.en : DEFAULT_LAYER_NAMES[type];
-    this.geoviewLayerName.fr = mapLayerConfig?.geoviewLayerName?.fr ? mapLayerConfig.geoviewLayerName.fr : DEFAULT_LAYER_NAMES[type];
-    if (mapLayerConfig.metadataAccessPath?.en) this.metadataAccessPath.en = mapLayerConfig.metadataAccessPath.en.trim();
-    if (mapLayerConfig.metadataAccessPath?.fr) this.metadataAccessPath.fr = mapLayerConfig.metadataAccessPath.fr.trim();
-    this.initialSettings = mapLayerConfig.initialSettings;
-    this.serverDateFragmentsOrder = mapLayerConfig.serviceDateFormat
-      ? DateMgt.getDateFragmentsOrder(mapLayerConfig.serviceDateFormat)
+    this.geoviewLayerId = geoviewLayerConfig.geoviewLayerId || generateId('');
+    this.geoviewLayerName.en = geoviewLayerConfig?.geoviewLayerName?.en
+      ? geoviewLayerConfig.geoviewLayerName.en
+      : DEFAULT_LAYER_NAMES[type];
+    this.geoviewLayerName.fr = geoviewLayerConfig?.geoviewLayerName?.fr
+      ? geoviewLayerConfig.geoviewLayerName.fr
+      : DEFAULT_LAYER_NAMES[type];
+    if (geoviewLayerConfig.metadataAccessPath?.en) this.metadataAccessPath.en = geoviewLayerConfig.metadataAccessPath.en.trim();
+    if (geoviewLayerConfig.metadataAccessPath?.fr) this.metadataAccessPath.fr = geoviewLayerConfig.metadataAccessPath.fr.trim();
+    this.initialSettings = geoviewLayerConfig.initialSettings;
+    this.serverDateFragmentsOrder = geoviewLayerConfig.serviceDateFormat
+      ? DateMgt.getDateFragmentsOrder(geoviewLayerConfig.serviceDateFormat)
       : undefined;
-    this.externalFragmentsOrder = DateMgt.getDateFragmentsOrder(mapLayerConfig.externalDateFormat);
-    this.#setListOfLayerEntryConfig(mapLayerConfig, mapLayerConfig.listOfLayerEntryConfig);
+    this.externalFragmentsOrder = DateMgt.getDateFragmentsOrder(geoviewLayerConfig.externalDateFormat);
+    this.#setListOfLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
   }
 
   /** ***************************************************************************************************************************
@@ -196,8 +206,8 @@ export abstract class AbstractGeoViewLayer {
         listOfLayerEntryConfig,
       } as GroupLayerEntryConfig);
       this.listOfLayerEntryConfig = [layerGroup];
-      layerGroup.listOfLayerEntryConfig.forEach((layerConfig, i) => {
-        (layerGroup.listOfLayerEntryConfig[i] as AbstractBaseLayerEntryConfig).parentLayerConfig = layerGroup;
+      layerGroup.listOfLayerEntryConfig.forEach((layerConfig) => {
+        (layerConfig as AbstractBaseLayerEntryConfig).parentLayerConfig = layerGroup;
       });
     }
     this.listOfLayerEntryConfig[0].geoviewLayerConfig.listOfLayerEntryConfig = listOfLayerEntryConfig;
@@ -218,9 +228,9 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param {string} layerPath The layer path.
    *
-   * @returns {TypeLayerEntryConfig | undefined} The layer configuration or undefined if not found.
+   * @returns {ConfigBaseClass | undefined} The layer configuration or undefined if not found.
    */
-  getLayerConfig(layerPath: string): TypeLayerEntryConfig | undefined {
+  getLayerConfig(layerPath: string): ConfigBaseClass | undefined {
     // Trick to get a layer config from a layer class
     return this.getMapViewer().layer.getLayerEntryConfig(layerPath);
   }
@@ -230,7 +240,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param {string} layerPath The layer path.
    *
-   * @returns {TypeLayerEntryConfig | undefined} The layer configuration or undefined if not found.
+   * @returns {BaseLayer | undefined} The layer configuration or undefined if not found.
    */
   getOLLayer(layerPath: string): BaseLayer | undefined {
     // Trick to get an open layer layer from a layer class
@@ -251,6 +261,37 @@ export abstract class AbstractGeoViewLayer {
    */
   getGeoviewLayerName(): TypeLocalizedString | undefined {
     return this.geoviewLayerName;
+  }
+
+  /**
+   * Gets the layer status
+   * @returns The layer status
+   */
+  getLayerStatus(layerPath: string): TypeLayerStatus {
+    // Take the layer status from the config, temporary patch until layers refactoring is done
+    return this.getLayerConfig(layerPath)!.layerStatus;
+  }
+
+  /** ***************************************************************************************************************************
+   * Gets the layer name.
+   * @returns {TypeLocalizedString | undefined} The geoview layer name
+   */
+  getLayerName(layerPath: string): TypeLocalizedString | undefined {
+    // If a new layer name is set
+    if (this.#layerName[layerPath]) return this.#layerName[layerPath];
+    // TODO: Refactor - Temporary patch until configs refactoring is done, the style should have been set already
+    // Take name from config
+    return this.getLayerConfig(layerPath)?.layerName;
+  }
+
+  /** ***************************************************************************************************************************
+   * Sets the layer name.
+   * @param {string} layerPath The layer path.
+   * @param {TypeLocalizedString} name The layer name.
+   */
+  setLayerName(layerPath: string, name: TypeLocalizedString | undefined): void {
+    this.#layerName[layerPath] = name;
+    this.#emitLayerNameChanged({ layerPath, layerName: name });
   }
 
   /** ***************************************************************************************************************************
@@ -294,174 +335,6 @@ export abstract class AbstractGeoViewLayer {
    */
   setTemporalDimension(layerPath: string, temporalDimension: TimeDimension): void {
     this.#layerTemporalDimension[layerPath] = temporalDimension;
-  }
-
-  /**
-   * Emits an event to all handlers.
-   * @param {LegendQueryingEvent} event The event to emit
-   * @private
-   */
-  #emitLegendQuerying(event: LegendQueryingEvent): void {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLegendQueryingHandlers, event);
-  }
-
-  /**
-   * Registers a legend querying event handler.
-   * @param {LegendQueryingDelegate} callback The callback to be executed whenever the event is emitted
-   */
-  onLegendQuerying(callback: LegendQueryingDelegate): void {
-    // Register the event handler
-    EventHelper.onEvent(this.#onLegendQueryingHandlers, callback);
-  }
-
-  /**
-   * Unregisters a legend querying event handler.
-   * @param {LegendQueryingDelegate} callback The callback to stop being called whenever the event is emitted
-   */
-  offLegendQuerying(callback: LegendQueryingDelegate): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onLegendQueryingHandlers, callback);
-  }
-
-  /**
-   * Emits an event to all handlers.
-   * @param {LegendQueriedEvent} event The event to emit
-   * @private
-   */
-  #emitLegendQueried(event: LegendQueriedEvent): void {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLegendQueriedHandlers, event);
-  }
-
-  /**
-   * Registers a legend queried event handler.
-   * @param {LegendQueriedDelegate} callback The callback to be executed whenever the event is emitted
-   */
-  onLegendQueried(callback: LegendQueriedDelegate): void {
-    // Register the event handler
-    EventHelper.onEvent(this.#onLegendQueriedHandlers, callback);
-  }
-
-  /**
-   * Unregisters a legend queried event handler.
-   * @param {LegendQueriedDelegate} callback The callback to stop being called whenever the event is emitted
-   */
-  offLegendQueried(callback: LegendQueriedDelegate): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onLegendQueriedHandlers, callback);
-  }
-
-  /**
-   * Emits an event to all handlers.
-   * @param {VisibleChangedEvent} event The event to emit
-   * @private
-   */
-  #emitVisibleChanged(event: VisibleChangedEvent): void {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onVisibleChangedHandlers, event);
-  }
-
-  /**
-   * Registers a visible changed event handler.
-   * @param {VisibleChangedDelegate} callback The callback to be executed whenever the event is emitted
-   */
-  onVisibleChanged(callback: VisibleChangedDelegate): void {
-    // Register the event handler
-    EventHelper.onEvent(this.#onVisibleChangedHandlers, callback);
-  }
-
-  /**
-   * Unregisters a visible changed event handler.
-   * @param {VisibleChangedDelegate} callback The callback to stop being called whenever the event is emitted
-   */
-  offVisibleChanged(callback: VisibleChangedDelegate): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onVisibleChangedHandlers, callback);
-  }
-
-  /**
-   * Emits an event to all handlers.
-   * @param {LayerEntryProcessedEvent} event The event to emit
-   * @private
-   */
-  #emitLayerEntryProcessed(event: LayerEntryProcessedEvent): void {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerEntryProcessedHandlers, event);
-  }
-
-  /**
-   * Registers a layer entry config processed event handler.
-   * @param {LayerEntryProcessedDelegate} callback The callback to be executed whenever the event is emitted
-   */
-  onLayerEntryProcessed(callback: LayerEntryProcessedDelegate): void {
-    // Register the event handler
-    EventHelper.onEvent(this.#onLayerEntryProcessedHandlers, callback);
-  }
-
-  /**
-   * Unregisters a layer entry config processed event handler.
-   * @param {LayerEntryProcessedDelegate} callback The callback to stop being called whenever the event is emitted
-   */
-  offLayerEntryProcessed(callback: LayerEntryProcessedDelegate): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onLayerEntryProcessedHandlers, callback);
-  }
-
-  /**
-   * Emits an event to all handlers.
-   * @param {LayerCreationEvent} event The event to emit
-   * @private
-   */
-  #emitLayerCreation(event: LayerCreationEvent): void {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerCreationHandlers, event);
-  }
-
-  /**
-   * Registers a layer creation event handler.
-   * @param {LayerCreationDelegate} callback The callback to be executed whenever the event is emitted
-   */
-  onLayerCreation(callback: LayerCreationDelegate): void {
-    // Register the event handler
-    EventHelper.onEvent(this.#onLayerCreationHandlers, callback);
-  }
-
-  /**
-   * Unregisters a layer creation event handler.
-   * @param {LayerCreationDelegate} callback The callback to stop being called whenever the event is emitted
-   */
-  offLayerCreation(callback: LayerCreationDelegate): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onLayerCreationHandlers, callback);
-  }
-
-  /**
-   * Emits filter applied event.
-   * @param {FilterAppliedEvent} event - The event to emit
-   * @private
-   */
-  protected emitLayerFilterApplied(event: LayerFilterAppliedEvent): void {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerFilterAppliedHandlers, event);
-  }
-
-  /**
-   * Registers a filter applied event handler.
-   * @param {FilterAppliedDelegate} callback - The callback to be executed whenever the event is emitted
-   */
-  onLayerFilterApplied(callback: LayerFilterAppliedDelegate): void {
-    // Register the event handler
-    EventHelper.onEvent(this.#onLayerFilterAppliedHandlers, callback);
-  }
-
-  /**
-   * Unregisters a filter applied event handler.
-   * @param {FilterAppliedDelegate} callback - The callback to stop being called whenever the event is emitted
-   */
-  offLayerFilterApplied(callback: LayerFilterAppliedDelegate): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onLayerFilterAppliedHandlers, callback);
   }
 
   /** ***************************************************************************************************************************
@@ -607,7 +480,7 @@ export abstract class AbstractGeoViewLayer {
       const arrayOfLayerConfigs = await Promise.all(promisedAllLayerDone);
       arrayOfLayerConfigs.forEach((layerConfig) => {
         if (layerConfig.layerStatus === 'error') {
-          const message = `Error while loading layer path "${layerConfig.layerPath})" on map "${this.mapId}"`;
+          const message = `Error while loading layer path ${layerConfig.layerPath} on map ${this.mapId}`;
           this.layerLoadError.push({ layer: layerConfig.layerPath, loggerMessage: message });
           throw new Error(message);
         } else {
@@ -810,15 +683,12 @@ export abstract class AbstractGeoViewLayer {
     location: TypeLocation = null
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
-      // TODO: Refactor - Rework this function to not need a layer path in the param, nor a need to get a layer config here..
-      // TO.DOCONT: For example, this call seems to have logic redundancy: `layerConfig.gvLayerInstance.getFeatureInfo(queryType, layerPath, location)`
+      // TODO: Refactor - Remove the layerPath parameter once hybrid work is done
       // Get the layer config
-      const layerConfig = this.getLayerConfig(layerPath);
+      const layerConfig = this.getLayerConfig(layerPath) as AbstractBaseLayerEntryConfig;
 
-      if (!layerConfig || !layerConfig?.source?.featureInfo?.queryable) {
-        logger.logError('Invalid usage of getFeatureInfo\nlayerConfig = ', layerConfig);
-        const queryableOrNot = layerConfig?.source?.featureInfo?.queryable ? '' : 'not';
-        logger.logError(`Layer is ${queryableOrNot} queryable`);
+      if (!layerConfig?.source?.featureInfo?.queryable) {
+        logger.logError(`Layer at path ${layerConfig.layerPath} is not queryable`);
         return null;
       }
 
@@ -1041,7 +911,7 @@ export abstract class AbstractGeoViewLayer {
    */
   getMetadataBounds(layerPath: string, projectionCode: string | number | undefined = undefined): Extent | undefined {
     let bounds: Extent | undefined;
-    const processGroupLayerBounds = (listOfLayerEntryConfig: TypeLayerEntryConfig[]): void => {
+    const processGroupLayerBounds = (listOfLayerEntryConfig: ConfigBaseClass[]): void => {
       listOfLayerEntryConfig.forEach((layerConfig) => {
         if (layerEntryIsGroupLayer(layerConfig)) processGroupLayerBounds(layerConfig.listOfLayerEntryConfig);
         else if (layerConfig.initialSettings?.bounds) {
@@ -1064,7 +934,7 @@ export abstract class AbstractGeoViewLayer {
     };
     // GV The following code will need to be modified when the topmost layer of a GeoView
     // GV layer creates dynamicaly a group out of a list of layers.
-    const layerConfig: TypeLayerEntryConfig | TypeLayerEntryConfig[] | undefined = layerPath.includes('/')
+    const layerConfig: ConfigBaseClass | ConfigBaseClass[] | undefined = layerPath.includes('/')
       ? this.getLayerConfig(layerPath)
       : this.listOfLayerEntryConfig;
     if (layerConfig) {
@@ -1516,7 +1386,7 @@ export abstract class AbstractGeoViewLayer {
   calculateBounds(layerPath: string): Extent | undefined {
     try {
       let bounds: Extent | undefined;
-      const processGroupLayerBounds = (listOfLayerEntryConfig: TypeLayerEntryConfig[]): void => {
+      const processGroupLayerBounds = (listOfLayerEntryConfig: ConfigBaseClass[]): void => {
         listOfLayerEntryConfig.forEach((layerConfig) => {
           if (layerEntryIsGroupLayer(layerConfig)) processGroupLayerBounds(layerConfig.listOfLayerEntryConfig);
           else {
@@ -1651,11 +1521,11 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Recursively gets all layer entry configs in the GeoView Layer.
-   * @returns {TypeLayerEntryConfig[]} The list of layer entry configs
+   * @returns {ConfigBaseClass[]} The list of layer entry configs
    */
-  getAllLayerEntryConfigs(): TypeLayerEntryConfig[] {
+  getAllLayerEntryConfigs(): ConfigBaseClass[] {
     // Prepare the container
-    const allLayerEntryConfigs: TypeLayerEntryConfig[] = [];
+    const allLayerEntryConfigs: ConfigBaseClass[] = [];
 
     // Call recursive method on each root
     this.listOfLayerEntryConfig.forEach((layerEntryConfig) => {
@@ -1669,10 +1539,10 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Recursively gathers the layer entry configs
-   * @param {TypeLayerEntryConfig[]} totalList - The total gathered thus far
+   * @param {ConfigBaseClass[]} totalList - The total gathered thus far
    * @param {TypeLayerEntryConfig} currentNode - The current layer entry config being worked on
    */
-  #getAllLayerEntryConfigsRec(totalList: TypeLayerEntryConfig[], currentNode: TypeLayerEntryConfig): void {
+  #getAllLayerEntryConfigsRec(totalList: ConfigBaseClass[], currentNode: TypeLayerEntryConfig): void {
     // Add it
     totalList.push(currentNode);
 
@@ -1682,6 +1552,206 @@ export abstract class AbstractGeoViewLayer {
       this.#getAllLayerEntryConfigsRec(totalList, layerEntryConfig);
     });
   }
+
+  // #region EVENTS
+
+  /**
+   * Emits an event to all handlers.
+   * @param {LegendQueryingEvent} event The event to emit
+   * @private
+   */
+  #emitLegendQuerying(event: LegendQueryingEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLegendQueryingHandlers, event);
+  }
+
+  /**
+   * Registers a legend querying event handler.
+   * @param {LegendQueryingDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onLegendQuerying(callback: LegendQueryingDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLegendQueryingHandlers, callback);
+  }
+
+  /**
+   * Unregisters a legend querying event handler.
+   * @param {LegendQueryingDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offLegendQuerying(callback: LegendQueryingDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLegendQueryingHandlers, callback);
+  }
+
+  /**
+   * Emits an event to all handlers.
+   * @param {LegendQueriedEvent} event The event to emit
+   * @private
+   */
+  #emitLegendQueried(event: LegendQueriedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLegendQueriedHandlers, event);
+  }
+
+  /**
+   * Registers a legend queried event handler.
+   * @param {LegendQueriedDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onLegendQueried(callback: LegendQueriedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLegendQueriedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a legend queried event handler.
+   * @param {LegendQueriedDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offLegendQueried(callback: LegendQueriedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLegendQueriedHandlers, callback);
+  }
+
+  /**
+   * Emits an event to all handlers.
+   * @param {VisibleChangedEvent} event The event to emit
+   * @private
+   */
+  #emitVisibleChanged(event: VisibleChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onVisibleChangedHandlers, event);
+  }
+
+  /**
+   * Registers a visible changed event handler.
+   * @param {VisibleChangedDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onVisibleChanged(callback: VisibleChangedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onVisibleChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a visible changed event handler.
+   * @param {VisibleChangedDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offVisibleChanged(callback: VisibleChangedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onVisibleChangedHandlers, callback);
+  }
+
+  /**
+   * Emits an event to all handlers.
+   * @param {LayerEntryProcessedEvent} event The event to emit
+   * @private
+   */
+  #emitLayerEntryProcessed(event: LayerEntryProcessedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerEntryProcessedHandlers, event);
+  }
+
+  /**
+   * Registers a layer entry config processed event handler.
+   * @param {LayerEntryProcessedDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onLayerEntryProcessed(callback: LayerEntryProcessedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerEntryProcessedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer entry config processed event handler.
+   * @param {LayerEntryProcessedDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offLayerEntryProcessed(callback: LayerEntryProcessedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerEntryProcessedHandlers, callback);
+  }
+
+  /**
+   * Emits an event to all handlers.
+   * @param {LayerCreationEvent} event The event to emit
+   * @private
+   */
+  #emitLayerCreation(event: LayerCreationEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerCreationHandlers, event);
+  }
+
+  /**
+   * Registers a layer creation event handler.
+   * @param {LayerCreationDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onLayerCreation(callback: LayerCreationDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerCreationHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer creation event handler.
+   * @param {LayerCreationDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offLayerCreation(callback: LayerCreationDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerCreationHandlers, callback);
+  }
+
+  /**
+   * Emits filter applied event.
+   * @param {FilterAppliedEvent} event - The event to emit
+   * @private
+   */
+  protected emitLayerFilterApplied(event: LayerFilterAppliedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerFilterAppliedHandlers, event);
+  }
+
+  /**
+   * Registers a filter applied event handler.
+   * @param {FilterAppliedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerFilterApplied(callback: LayerFilterAppliedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerFilterAppliedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a filter applied event handler.
+   * @param {FilterAppliedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerFilterApplied(callback: LayerFilterAppliedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerFilterAppliedHandlers, callback);
+  }
+
+  /**
+   * Emits an event to all handlers.
+   * @param {LayerNameChangedEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerNameChanged(event: LayerNameChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerNameChangedHandlers, event);
+  }
+
+  /**
+   * Registers a layer name changed event handler.
+   * @param {LayerNameChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerNameChanged(callback: LayerNameChangedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerNameChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer name changed event handler.
+   * @param {LayerNameChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerNameChanged(callback: LayerNameChangedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerNameChangedHandlers, callback);
+  }
+
+  // #endregion
 }
 
 /**
@@ -1764,6 +1834,22 @@ export type LayerFilterAppliedEvent = {
   layerPath: string;
   // The filter
   filter: string;
+};
+
+/**
+ * Define a delegate for the event handler function signature.
+ */
+type LayerNameChangedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerNameChangedEvent>;
+
+/**
+ * Define an event for the delegate.
+ */
+export type LayerNameChangedEvent = {
+  // The new layer name.
+  layerName?: TypeLocalizedString;
+  // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
+  // The layer path.
+  layerPath: string;
 };
 
 export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {

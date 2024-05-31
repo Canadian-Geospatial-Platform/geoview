@@ -2,15 +2,20 @@ import { TypeLocalizedString } from '@config/types/map-schema-types';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
+  TypeBaseStyleConfig,
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   TypeLayerEntryType,
+  TypeLayerInitialSettings,
   TypeLayerStatus,
+  TypeStyleGeometry,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { logger } from '@/core/utils/logger';
-import { TypeJsonValue } from '@/core/types/global-types';
+import { TypeJsonObject } from '@/core/types/global-types';
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
+import { VectorTilesLayerEntryConfig } from './raster-validation-classes/vector-tiles-layer-entry-config';
+import { VectorLayerEntryConfig } from './vector-layer-entry-config';
 
 /** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
@@ -46,6 +51,12 @@ export abstract class ConfigBaseClass {
   /** It is used to link the layer entry config to the GeoView layer config. */
   geoviewLayerConfig = {} as TypeGeoviewLayerConfig;
 
+  /**
+   * Initial settings to apply to the GeoView layer entry at creation time. Initial settings are inherited from the parent in the
+   * configuration tree.
+   */
+  initialSettings: TypeLayerInitialSettings = {};
+
   /** It is used internally to distinguish layer groups derived from the
    * metadata. */
   isMetadataLayerGroup?: boolean;
@@ -57,12 +68,10 @@ export abstract class ConfigBaseClass {
   #waitForProcessedBeforeSendingLoaded = false;
 
   // Keep all callback delegates references
-  // TODO: refactor - if this handler is privare with #,  abstract-base-layer-entry-config.ts:28 Uncaught (in promise) TypeError: Private element is not present on this object
-  // TD.CONT: this by pass the error, I need to set this public. The problem come from the groupLayer object trying to emit this event but
-  // TD.CONT: the event is not define so this.onLayerStatus.... failed
   #onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
 
-  // TODO Refactor layer style changed - move to layer
+  // TODO: Refactor - Layers refactoring. When layers refactoring is done, move this to the layer class
+  // Keep all callback delegates references
   #onLayerStyleChangedHandlers: LayerStyleChangedDelegate[] = [];
 
   // TODO: Review - The status. I think we should have: newInstance, processsing, loading, - loaded : error
@@ -113,9 +122,6 @@ export abstract class ConfigBaseClass {
    * @returns {string} The layer path
    */
   get layerPath(): string {
-    // TODO: Refactor - It would be better to not have a 'getter' that 'sets' a value at the same time.
-    // TO.DOCONT: Unfortunately, when commenting this out (to rely on the one in layerId) things almost work, except for the Groups inside Groups which don't.
-    // TO.DOCONT: The fix for this should be elsewhere and the line below commented out asap to prevent other issues like that.
     // eslint-disable-next-line no-underscore-dangle
     this._layerPath = ConfigBaseClass.#evaluateLayerPath(this);
     // eslint-disable-next-line no-underscore-dangle
@@ -132,7 +138,7 @@ export abstract class ConfigBaseClass {
   }
 
   /**
-   * The layerStatus setter method for the ConfigBaseClass class and its descendant classes.
+   * Sets the layer status and emits an event when changed.
    * @param {string} newLayerStatus - The new layerId value.
    */
   // TODO: Refactor - Change this from a 'setter' to an actual set function, arguably too complex for just a 'setter'
@@ -149,7 +155,7 @@ export abstract class ConfigBaseClass {
     if (!this.isGreaterThanOrEqualTo(newLayerStatus)) {
       // eslint-disable-next-line no-underscore-dangle
       this._layerStatus = newLayerStatus;
-      this.#emitLayerStatusChanged({ layerPath: this.layerPath, layerStatus: newLayerStatus });
+      this.#emitLayerStatusChanged({ layerStatus: newLayerStatus });
     }
     if (newLayerStatus === 'processed' && this.#waitForProcessedBeforeSendingLoaded) this.layerStatus = 'loaded';
 
@@ -182,13 +188,78 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * This method compares the internal layer status of the config with the layer status passed as a parameter and it
+   * returns true if the internal value is greater or equal to the value of the parameter.
+   *
+   * @param {TypeLayerStatus} layerStatus - The layer status to compare with the internal value of the config.
+   *
+   * @returns {boolean} Returns true if the internal value is greater or equal than the value of the parameter.
+   */
+  isGreaterThanOrEqualTo(layerStatus: TypeLayerStatus): boolean {
+    return ConfigBaseClass.#layerStatusWeight[this.layerStatus] >= ConfigBaseClass.#layerStatusWeight[layerStatus];
+  }
+
+  /**
+   * Serializes the ConfigBaseClass class
+   * @returns {TypeJsonObject} The serialized ConfigBaseClass
+   */
+  serialize(): TypeJsonObject {
+    // Redirect
+    return this.onSerialize();
+  }
+
+  /**
+   * Overridable function to serialize a ConfigBaseClass
+   * @returns {TypeJsonObject} The serialized ConfigBaseClass
+   */
+  onSerialize(): TypeJsonObject {
+    return {
+      layerIdExtension: this.layerIdExtension,
+      schemaTag: this.schemaTag,
+      entryType: this.entryType,
+      layerStatus: this.layerStatus,
+      isMetadataLayerGroup: this.isMetadataLayerGroup,
+    } as unknown as TypeJsonObject;
+  }
+
+  /**
+   * Recursively checks the list of layer entries to see if all of them are greater than or equal to the provided layer status.
+   *
+   * @param {TypeLayerStatus} layerStatus - The layer status to compare with the internal value of the config.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer's configuration
+   *                                                            (default: this.listOfLayerEntryConfig).
+   *
+   * @returns {boolean} true when all layers are greater than or equal to the layerStatus parameter.
+   */
+  static allLayerStatusAreGreaterThanOrEqualTo(layerStatus: TypeLayerStatus, listOfLayerEntryConfig: TypeLayerEntryConfig[]): boolean {
+    // Try to find a layer that is not greater than or equal to the layerStatus parameter. If you can, return false
+    return !listOfLayerEntryConfig.find((layerConfig: TypeLayerEntryConfig) => {
+      if (layerEntryIsGroupLayer(layerConfig))
+        return !this.allLayerStatusAreGreaterThanOrEqualTo(layerStatus, layerConfig.listOfLayerEntryConfig);
+      return !layerConfig.isGreaterThanOrEqualTo(layerStatus || 'newInstance');
+    });
+  }
+
+  /**
+   * Adds a default style in the configuration
+   * @param geometryType - The geometry type associated with the style to add
+   * @param style - The style to add
+   */
+  addDefaultStyle(geometryType: TypeStyleGeometry, style: TypeBaseStyleConfig): void {
+    // Cast (instead of duplicating code in 2 child class for now)
+    const thisConfig = this as unknown as VectorLayerEntryConfig | VectorTilesLayerEntryConfig;
+    if (!thisConfig.style) thisConfig.style = {};
+    thisConfig.style![geometryType] = style;
+
+    // Emit about the style change
+    this.#emitLayerStyleChanged({ geometryType, style });
+  }
+
+  /**
    * Emits an event to all handlers.
    * @param {LayerStatusChangedEvent} event - The event to emit
    * @private
    */
-  // TODO: refactor - if this emit is private with #, abstract-base-layer-entry-config.ts:28 Uncaught (in promise) TypeError: Private element is not present on this object
-  // TO.DOCONT: this by pass the error, I need to set this public. The problem come from the groupLayer object trying to emit this event but
-  // TO.DOCONT: the event is not define so this.onLayerStatus.... failed
   #emitLayerStatusChanged(event: LayerStatusChangedEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerStatusChangedHandlers, event);
@@ -212,12 +283,11 @@ export abstract class ConfigBaseClass {
     EventHelper.offEvent(this.#onLayerStatusChangedHandlers, callback);
   }
 
-  // TODO Refactor layer style changed - move to layer
   /**
    * Emits an event to all handlers.
    * @param {LayerStyleChangedEvent} event - The event to emit
    */
-  emitLayerStyleChanged(event: LayerStyleChangedEvent): void {
+  #emitLayerStyleChanged(event: LayerStyleChangedEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerStyleChangedHandlers, event);
   }
@@ -239,77 +309,21 @@ export abstract class ConfigBaseClass {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerStyleChangedHandlers, callback);
   }
-
-  /**
-   * This method compares the internal layer status of the config with the layer status passed as a parameter and it
-   * returns true if the internal value is greater or equal to the value of the parameter.
-   *
-   * @param {TypeLayerStatus} layerStatus - The layer status to compare with the internal value of the config.
-   *
-   * @returns {boolean} Returns true if the internal value is greater or equal than the value of the parameter.
-   */
-  isGreaterThanOrEqualTo(layerStatus: TypeLayerStatus): boolean {
-    return ConfigBaseClass.#layerStatusWeight[this.layerStatus] >= ConfigBaseClass.#layerStatusWeight[layerStatus];
-  }
-
-  /**
-   * Serializes the ConfigBaseClass class
-   * @returns {TypeJsonValue} The serialized ConfigBaseClass
-   */
-  serialize(): TypeJsonValue {
-    // Redirect
-    return this.onSerialize();
-  }
-
-  /**
-   * Overridable function to serialize a ConfigBaseClass
-   * @returns {TypeJsonValue} The serialized ConfigBaseClass
-   */
-  onSerialize(): TypeJsonValue {
-    return {
-      layerIdExtension: this.layerIdExtension,
-      schemaTag: this.schemaTag,
-      entryType: this.entryType,
-      layerStatus: this.layerStatus,
-      isMetadataLayerGroup: this.isMetadataLayerGroup,
-    } as unknown as TypeJsonValue;
-  }
-
-  /**
-   * Recursively checks the list of layer entries to see if all of them are greater than or equal to the provided layer status.
-   *
-   * @param {TypeLayerStatus} layerStatus - The layer status to compare with the internal value of the config.
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer's configuration
-   *                                                            (default: this.listOfLayerEntryConfig).
-   *
-   * @returns {boolean} true when all layers are greater than or equal to the layerStatus parameter.
-   */
-  static allLayerStatusAreGreaterThanOrEqualTo(layerStatus: TypeLayerStatus, listOfLayerEntryConfig: TypeLayerEntryConfig[]): boolean {
-    // Try to find a layer that is not greater than or equal to the layerStatus parameter. If you can, return false
-    return !listOfLayerEntryConfig.find((layerConfig: TypeLayerEntryConfig) => {
-      if (layerEntryIsGroupLayer(layerConfig))
-        return !this.allLayerStatusAreGreaterThanOrEqualTo(layerStatus, layerConfig.listOfLayerEntryConfig);
-      return !layerConfig.isGreaterThanOrEqualTo(layerStatus || 'newInstance');
-    });
-  }
 }
 
 /**
- * Define a delegate for the event handler function signature
+ * Define a delegate for the event handler function signature.
  */
 type LayerStatusChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStatusChangedEvent>;
 
 /**
- * Define an event for the delegate
+ * Define an event for the delegate.
  */
 export type LayerStatusChangedEvent = {
-  // The layer path affected.
-  layerPath: string;
-  // The new layer status to assign to the layer path.
+  // The new layer status.
   layerStatus: TypeLayerStatus;
 };
 
-// TODO Refactor layer style changed - move to layer
 /**
  * Define a delegate for the event handler function signature
  */
@@ -319,6 +333,9 @@ type LayerStyleChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStyleCh
  * Define an event for the delegate
  */
 export type LayerStyleChangedEvent = {
-  // The layer path affected.
-  layerPath: string;
+  // The style gometry
+  geometryType: TypeStyleGeometry;
+
+  // The style
+  style: TypeBaseStyleConfig;
 };

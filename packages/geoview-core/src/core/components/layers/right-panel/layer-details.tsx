@@ -77,7 +77,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   }, [layersData, layerDetails, selectedLayer]);
 
   const handleZoomTo = (): void => {
-    zoomToLayerExtent(layerDetails.layerPath);
+    zoomToLayerExtent(layerDetails.layerPath).catch((error) => {
+      // Log
+      logger.logPromiseFailed('in zoomToLayerExtent in layer-details.handleZoomTo', error);
+    });
   };
 
   const handleOpenTable = (): void => {
