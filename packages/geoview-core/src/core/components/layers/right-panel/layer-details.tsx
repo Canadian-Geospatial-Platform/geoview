@@ -121,7 +121,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     }
 
     return (
-      <IconButton color="primary" onClick={() => toggleItemVisibility(layerDetails.layerPath, item.geometryType, item.name)}>
+      <IconButton color="primary" onClick={() => toggleItemVisibility(layerDetails.layerPath, item)}>
         {item.isVisible === true ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
       </IconButton>
     );

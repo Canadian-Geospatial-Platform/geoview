@@ -5,7 +5,7 @@ import { useTheme } from '@mui/material/styles';
 import { Box, Button, CheckIcon } from '@/ui';
 import { useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapPointerPosition } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { coordFormnatDMS } from '@/geo/utils/utilities';
+import { coordFormatDMS } from '@/geo/utils/utilities';
 
 import { getSxClasses } from './mouse-position-style';
 
@@ -51,8 +51,8 @@ export function MousePosition(): JSX.Element {
       const labelX = lnglat[0] < 0 ? t('mapctrl.mouseposition.west') : t('mapctrl.mouseposition.east');
       const labelY = lnglat[1] < 0 ? t('mapctrl.mouseposition.south') : t('mapctrl.mouseposition.north');
 
-      const lng = `${DMS ? coordFormnatDMS(lnglat[0]) : Math.abs(lnglat[0]).toFixed(4)} ${labelX}`;
-      const lat = `${DMS ? coordFormnatDMS(lnglat[1]) : Math.abs(lnglat[1]).toFixed(4)} ${labelY}`;
+      const lng = `${DMS ? coordFormatDMS(lnglat[0]) : Math.abs(lnglat[0]).toFixed(4)} ${labelX}`;
+      const lat = `${DMS ? coordFormatDMS(lnglat[1]) : Math.abs(lnglat[1]).toFixed(4)} ${labelY}`;
 
       return { lng, lat };
     }
