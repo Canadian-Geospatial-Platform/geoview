@@ -479,6 +479,29 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
   }
 
+  /**
+   * Update or remove the layer highlight.
+   * @param {string} mapId - The ID of the map.
+   * @param {string} layerPath - The layer path to set as the highlighted layer.
+   * @param {string} hilightedLayerPath - The layer path of the currently highlighted layer.
+   * @returns {string} The layer path of the highlighted layer.
+   */
+  static changeOrRemoveLayerHighlight(mapId: string, layerPath: string, hilightedLayerPath: string): string {
+    // If layer is currently highlighted layer, remove highlight
+    if (hilightedLayerPath === layerPath) {
+      MapEventProcessor.getMapViewerLayerAPI(mapId).removeHighlightLayer();
+      return '';
+    }
+
+    // Redirect to layer to highlight
+    MapEventProcessor.getMapViewerLayerAPI(mapId).highlightLayer(layerPath);
+    // Get bounds and highlight a bounding box for the layer
+    const bounds = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath)?.calculateBounds(layerPath);
+    if (bounds && bounds[0] !== Infinity) this.getMapStateProtected(mapId).actions.highlightBBox(bounds, true);
+
+    return layerPath;
+  }
+
   static setMapLayerHoverable(mapId: string, layerPath: string, hoverable: boolean): void {
     this.getMapStateProtected(mapId).setterActions.setHoverable(layerPath, hoverable);
   }
@@ -500,6 +523,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Apply some visibility logic
     const curOrderedLayerInfo = this.getMapStateProtected(mapId).orderedLayerInfo;
     const layerVisibility = this.getMapVisibilityFromOrderedLayerInfo(mapId, layerPath);
+    // Determine the outcome of the new visibility based on parameters
+    const newVisibility = newValue !== undefined ? newValue : !layerVisibility;
     const layerInfos = curOrderedLayerInfo.filter((info) => info.layerPath.startsWith(layerPath));
     const parentLayerPathArray = layerPath.split('/');
     parentLayerPathArray.pop();
@@ -508,9 +533,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     layerInfos.forEach((layerInfo) => {
       if (layerInfo) {
-        // Determine the outcome of the new visibility based on parameters
-        const newVisibility = newValue !== undefined ? newValue : !layerVisibility;
-
         // If the new visibility is different than before
         if (newVisibility !== layerVisibility) {
           // Go for it
@@ -535,6 +557,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
       if (!children.some((child) => child.visible === true)) this.setOrToggleMapLayerVisibility(mapId, parentLayerPath, false);
     }
 
+    // Emit event
+    this.getMapViewerLayerAPI(mapId).emitLayerVisibilityToggled({ layerPath, visibility: newVisibility });
     // Redirect
     this.getMapStateProtected(mapId).setterActions.setOrderedLayerInfo([...curOrderedLayerInfo]);
   }
@@ -813,6 +837,21 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static setClickMarkerOnPosition = (mapId: string, position: number[]): void => {
     this.getMapViewer(mapId).map.getOverlayById(`${mapId}-clickmarker`)!.setPosition(position);
   };
+
+  /**
+   * Get layer bounds for given layer path.
+   * @param {string} mapId - ID of map.
+   * @param {string} layerPath - The layer path to get bounds for.
+   * @return {Extent | undefined}
+   */
+  static getLayerBounds(mapId: string, layerPath: string): Extent | undefined {
+    const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
+    if (layer) {
+      const bounds = layer.calculateBounds(layerPath);
+      if (bounds) return bounds;
+    }
+    return undefined;
+  }
 
   // #endregion
 }

@@ -132,16 +132,12 @@ export class FooterBarApi {
   }
 
   /**
-   * Selects a tab by id
+   * Selects a tab by id, if the id is not a tab, the footer bar will close
    *
    * @param {string} id - The id of the tab to be selected
    */
   selectTab(id: string): void {
-    // find the tab to be selected
-    const tabToSelect = this.tabs.find((tab) => tab.id === id);
-    if (tabToSelect) {
-      UIEventProcessor.setActiveFooterBarTab(this.mapId, id);
-    }
+    UIEventProcessor.setActiveFooterBarTab(this.mapId, id);
   }
 }
 

@@ -3,6 +3,7 @@ import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 
 import { generateId } from '@/core/utils/utilities';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
+import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 
 /**
  * Class to manage buttons on the app-bar
@@ -211,6 +212,17 @@ export class AppBarApi {
       // trigger an event that a panel has been removed to update the state and re-render
       this.#emitAppBarRemoved({ buttonPanelId, group: groupName });
     });
+  }
+
+  /**
+   * Selects a tab by id and tab group
+   *
+   * @param {string} tabId - The id of the tab to be selected
+   * @param {string} tabGroup - The id of the panel
+   * @param {boolean} open - Open (true) or closed (false) panel: default = true
+   */
+  selectAppBarTab(tabId: string, tabGroup: string, open: boolean = true): void {
+    UIEventProcessor.setActiveAppBarTab(this.mapId, tabId, tabGroup, open);
   }
 }
 

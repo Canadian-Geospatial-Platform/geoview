@@ -11,10 +11,6 @@ import schema from '../schema.json';
 import defaultConfig from '../default-config-time-slider-panel.json';
 import { SliderProps } from './time-slider-types';
 
-export interface LayerProps {
-  layerPath: string;
-  layerName: string;
-}
 export interface SliderFilterProps {
   title: string;
   description: string;
