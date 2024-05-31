@@ -98,18 +98,18 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [legendLayers]);
 
-
-  if(layersList.length === 0) {
+  if (layersList.length === 0) {
     return (
-      <Box display="flex" flexDirection="column" justifyItems="center" alignItems="center" sx={{py: 9 }}>
-        <Typography component="h2" sx={{pb: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>No layers added
-        {t('legend.noLayersAdded')}
+      <Box display="flex" flexDirection="column" justifyItems="center" alignItems="center" sx={{ py: 9 }}>
+        <Typography component="h2" sx={{ pb: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>
+          No layers added
+          {t('legend.noLayersAdded')}
         </Typography>
-        <Typography component="p" sx={{p: 0 }}>
-        {t('legend.noLayersAddedDescription')}
+        <Typography component="p" sx={{ p: 0 }}>
+          {t('legend.noLayersAddedDescription')}
         </Typography>
       </Box>
-    )
+    );
   }
 
   return (
