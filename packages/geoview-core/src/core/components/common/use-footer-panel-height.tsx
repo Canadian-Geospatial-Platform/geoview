@@ -1,4 +1,6 @@
 import { RefObject, useCallback, useEffect, useRef } from 'react';
+import { useTheme } from '@mui/material/styles';
+import { useMediaQuery } from '@mui/material';
 import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
   useActiveAppBarTab,
@@ -14,6 +16,7 @@ import { logger } from '@/core/utils/logger';
 import { TABS } from '@/core/utils/constant';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
+import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 interface UseFooterPanelHeightType {
   footerPanelTab: 'legend' | 'default';
@@ -33,12 +36,14 @@ interface UseFooterPanelHeightReturnType {
  */
 export function useFooterPanelHeight({ footerPanelTab = 'default' }: UseFooterPanelHeightType): UseFooterPanelHeightReturnType {
   const defaultHeight = 600;
-
+  const theme = useTheme();
   const mapId = useGeoViewMapId();
   const leftPanelRef = useRef<HTMLDivElement>(null);
   const rightPanelRef = useRef<HTMLDivElement>(null);
 
   const panelTitleRefHeight = useRef<number>(0);
+
+  const mobileView = useMediaQuery(theme.breakpoints.down('md'));
 
   // NOTE: this will keep the reference of panel title when tabs are changed.
   const panelTitleRef = useCallback((node: HTMLDivElement) => {
@@ -48,6 +53,7 @@ export function useFooterPanelHeight({ footerPanelTab = 'default' }: UseFooterPa
   }, []);
 
   const isMapFullScreen = useAppFullscreenActive();
+  const mapSize = useMapSize();
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
   const activeFooterBarTabId = useUIActiveFooterBarTabId();
   const arrayOfLayerData = useDetailsLayerDataArray();
@@ -79,6 +85,7 @@ export function useFooterPanelHeight({ footerPanelTab = 'default' }: UseFooterPa
 
       let leftPanelHeight = (window.screen.height * footerPanelResizeValue) / 100 - panelTitleRefHeight.current - footerBarHeight - 10;
 
+      // update the height of left panel when data table is rendered in appbar and map is in fullscreen.
       if (tabGroup === CV_DEFAULT_APPBAR_CORE.DATA_TABLE) {
         leftPanelHeight = window.screen.height - 200;
       }
@@ -127,6 +134,19 @@ export function useFooterPanelHeight({ footerPanelTab = 'default' }: UseFooterPa
     allFeaturesLayerData,
     tabGroup,
   ]);
+
+  /**
+   * Update the height of the left panel when data panel rendered in appbar.
+   */
+  useEffect(() => {
+    if (leftPanelRef.current && !isMapFullScreen) {
+      if (tabGroup === CV_DEFAULT_APPBAR_CORE.DATA_TABLE && mobileView) {
+        leftPanelRef.current.style.maxHeight = `100%`;
+      } else {
+        leftPanelRef.current.style.maxHeight = `${defaultHeight}px`;
+      }
+    }
+  }, [mapSize, isMapFullScreen, tabGroup, mobileView]);
 
   return { leftPanelRef, rightPanelRef, panelTitleRef, activeFooterBarTabId };
 }

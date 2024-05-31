@@ -20,19 +20,21 @@ import {
 import { LayerListEntry, Layout } from '@/core/components/common';
 import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
-import { LAYER_STATUS, TABS } from '@/core/utils/constant';
+import { CONTAINER_TYPE, LAYER_STATUS, TABS } from '@/core/utils/constant';
 import { MappedLayerDataType } from './data-table-types';
 import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
+import { TypeContainerBox } from '@/core/types/global-types';
 
 interface DataPanelType {
   fullWidth?: boolean;
+  containerType?: TypeContainerBox;
 }
 /**
  * Build Data panel from map.
  * @returns {JSX.Element} Data table as react element.
  */
 
-export function Datapanel({ fullWidth = false }: DataPanelType): JSX.Element {
+export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPanelType): JSX.Element {
   const { t } = useTranslation();
   const theme = useTheme();
 
@@ -263,6 +265,7 @@ export function Datapanel({ fullWidth = false }: DataPanelType): JSX.Element {
 
   return (
     <Layout
+      containerType={containerType}
       selectedLayerPath={selectedLayerPath || ''}
       layerList={memoLayerList}
       onLayerListClicked={handleLayerChange}

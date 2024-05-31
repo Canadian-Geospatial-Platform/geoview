@@ -39,6 +39,7 @@ import { enforceArrayOrder, helpClosePanelById, helpOpenPanelById } from './app-
 import { TypeJsonObject, TypeJsonValue, toJsonObject } from '@/core/types/global-types';
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { CV_DEFAULT_APPBAR_CORE, CV_DEFAULT_APPBAR_TABS_ORDER } from '@/api/config/types/config-constants';
+import { CONTAINER_TYPE } from '@/core/utils/constant';
 
 interface GroupPanelType {
   icon: ReactNode;
@@ -101,10 +102,10 @@ export function AppBar(props: AppBarProps): JSX.Element {
     // TODO: Refactor - We should find a way to make this 'dictionary of supported components' dynamic.
     return {
       geolocator: { icon: <SearchIcon />, content: <Geolocator key="geolocator" /> },
-      legend: { icon: <HubOutlinedIcon />, content: <Legend fullWidth containerType="appBar" /> },
+      legend: { icon: <HubOutlinedIcon />, content: <Legend fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
       guide: { icon: <SchoolIcon />, content: <GuidePanel fullWidth /> },
       details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel fullWidth /> },
-      'data-table': { icon: <StorageIcon />, content: <Datapanel /> },
+      'data-table': { icon: <StorageIcon />, content: <Datapanel containerType={CONTAINER_TYPE.APP_BAR} /> },
     } as unknown as Record<string, GroupPanelType>;
   }, []);
 

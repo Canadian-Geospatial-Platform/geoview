@@ -4,15 +4,18 @@ import { logger } from '@/core/utils/logger';
 import { LayerList, LayerListEntry } from './layer-list';
 import { ResponsiveGridLayout, ResponsiveGridLayoutExposedMethods } from './responsive-grid-layout';
 import { Tooltip, Typography } from '@/ui';
+import { TypeContainerBox } from '@/core/types/global-types';
+import { CONTAINER_TYPE } from '@/core/utils/constant';
 
 interface LayoutProps {
   children?: ReactNode;
   guideContentIds?: string[];
   layerList: LayerListEntry[];
   selectedLayerPath: string | undefined;
+  fullWidth?: boolean;
+  containerType?: TypeContainerBox;
   onLayerListClicked: (layer: LayerListEntry) => void;
   onIsEnlargeClicked?: (isEnlarge: boolean) => void;
-  fullWidth?: boolean;
   onGuideIsOpen?: (isGuideOpen: boolean) => void;
 }
 
@@ -25,6 +28,7 @@ export function Layout({
   onIsEnlargeClicked,
   fullWidth,
   onGuideIsOpen,
+  containerType = CONTAINER_TYPE.FOOTER_BAR,
 }: LayoutProps): JSX.Element {
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
   const theme = useTheme();
@@ -70,8 +74,8 @@ export function Layout({
     // clamping code copied from https://tailwindcss.com/docs/line-clamp
     const sxClasses = {
       fontSize: theme.palette.geoViewFontSize.lg,
-      textAlign: fullWidth ? 'center' : 'left',
-      width: fullWidth ? '100%' : 'auto',
+      textAlign: fullWidth || containerType === CONTAINER_TYPE.APP_BAR ? 'center' : 'left',
+      width: fullWidth || containerType === CONTAINER_TYPE.APP_BAR ? '100%' : 'auto',
       fontWeight: '600',
       marginTop: '12px',
       overflow: 'hidden',
@@ -88,7 +92,7 @@ export function Layout({
         </Typography>
       </Tooltip>
     );
-  }, [fullWidth, memoLayerTitle]);
+  }, [containerType, fullWidth, memoLayerTitle, theme.breakpoints, theme.palette.geoViewFontSize.lg]);
 
   return (
     <ResponsiveGridLayout
@@ -101,6 +105,7 @@ export function Layout({
       onIsEnlargeClicked={onIsEnlargeClicked}
       fullWidth={fullWidth}
       onGuideIsOpen={onGuideIsOpen}
+      containerType={containerType}
     />
   );
 }
