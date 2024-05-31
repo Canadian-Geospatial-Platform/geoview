@@ -1,15 +1,14 @@
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
-import { TypeLayerStatus, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
-import { AbstractLayerSet } from './abstract-layer-set';
+import { TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { AbstractLayerSet, PropagationType } from './abstract-layer-set';
 import { TypeLegend, TypeLegendResultSet, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 /**
- * A class to hold a set of layers associated with an array of TypeLegendResultSetEntry. When this class is instantiated, all layers already
- * loaded on the specified map will be added to the set. Layers added afterwards will be added to the set and deleted layers
- * will be removed from the set.
- *
+ * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
+ * events happening on them (in this case when the layers are going through the layer statuses and legend querying) with a store
+ * for UI updates.
  * @class LegendsLayerSet
  */
 export class LegendsLayerSet extends AbstractLayerSet {
@@ -17,24 +16,23 @@ export class LegendsLayerSet extends AbstractLayerSet {
   declare resultSet: TypeLegendResultSet;
 
   /**
-   * Propagate to store
-   * @param {TypeLegendResultSetEntry} resultSetEntry - The result entry to propagate
-   * @private
+   * Overrides the behavior to apply when an all-feature-info-layer-set wants to check for condition to register a layer in its set.
+   * @param {ConfigBaseClass} layerConfig - The layer config
+   * @returns {boolean} True when the layer should be registered to this all-feature-info-layer-set.
    */
-  #propagateToStore(resultSetEntry: TypeLegendResultSetEntry): void {
-    LegendEventProcessor.propagateLegendToStore(this.getMapId(), resultSetEntry);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected override onRegisterLayerConfigCheck(layerConfig: ConfigBaseClass): boolean {
+    // Always register layer configs for the legends-layer-set, because we want 'the box' in the UI to show the layer status progression
+    return true;
   }
 
   /**
    * Overrides the behavior to apply when a legends-layer-set wants to register a layer in its set.
    * @param {ConfigBaseClass} layerConfig - The layer config
    */
-  protected override onRegisterLayer(layerConfig: ConfigBaseClass): void {
-    // Log
-    logger.logTraceCore('LEGENDS-LAYER-SET - onRegisterLayer', layerConfig.layerPath);
-
+  protected override onRegisterLayerConfig(layerConfig: ConfigBaseClass): void {
     // Call parent
-    super.onRegisterLayer(layerConfig);
+    super.onRegisterLayerConfig(layerConfig);
 
     // Register the layer style changed handler
     layerConfig.onLayerStyleChanged((config: ConfigBaseClass) => {
@@ -45,69 +43,67 @@ export class LegendsLayerSet extends AbstractLayerSet {
     this.resultSet[layerConfig.layerPath].legendQueryStatus = 'init';
 
     // Check if ready to query legend
-    this.#checkQueryLegend(layerConfig);
-
-    // Propagate to the store on registration
-    this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
-  }
-
-  /**
-   * Overrides the behavior to apply when unregistering a layer from the feature-info-layer-set.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer config
-   */
-  protected override onUnregisterLayer(layerConfig: ConfigBaseClass): void {
-    // Log
-    logger.logTraceCore('LEGENDS-LAYER-SET - onUnregisterLayer', layerConfig.layerPath, Object.keys(this.resultSet));
-
-    // Call parent
-    super.onUnregisterLayer(layerConfig);
-
-    // Delete from store
-    LegendEventProcessor.deleteLayerFromLegendLayers(this.getMapId(), layerConfig.layerPath);
-  }
-
-  /**
-   * Registers or Unregisters the layer in the layer-set, making sure the layer-set is aware of the layer.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer config
-   * @param {'add' | 'remove'} action - The action to perform: 'add' to register or 'remove' to unregister
-   */
-  override registerOrUnregisterLayer(layerConfig: ConfigBaseClass, action: 'add' | 'remove'): void {
-    // Group layers do not have an entry in this layer set, but need to be removed from legend layers
-    if (action === 'remove' && layerEntryIsGroupLayer(layerConfig)) {
-      // Delete from store
-      LegendEventProcessor.deleteLayerFromLegendLayers(this.getMapId(), layerConfig.layerPath);
-    }
-    super.registerOrUnregisterLayer(layerConfig, action);
+    this.#checkQueryLegend(layerConfig, false);
   }
 
   /**
    * Overrides the behavior to apply when a layer status changed for a legends-layer-set.
    * @param {ConfigBaseClass} layerConfig - The layer config
-   * @param {string} layerStatus - The new layer status
+   * @param {TypeLayerStatus} layerStatus - The new layer status
    */
   protected override onProcessLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatus: TypeLayerStatus): void {
     // Call parent. After this call, this.resultSet?.[layerPath]?.layerStatus may have changed!
     super.onProcessLayerStatusChanged(layerConfig, layerStatus);
 
     // Check if ready to query legend
-    this.#checkQueryLegend(layerConfig);
+    this.#checkQueryLegend(layerConfig, false);
+  }
 
-    // Propagate to the store on layer status changed
-    this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
+  /**
+   * Overrides the behavior to apply when propagating to the store
+   * @param {TypeLegendResultSetEntry} resultSetEntry - The result set entry to propagate
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected override onPropagateToStore(resultSetEntry: TypeLegendResultSetEntry, type: PropagationType): void {
+    // Redirect
+    this.#propagateToStore(resultSetEntry);
+  }
+
+  /**
+   * Propagates the resultSetEntry to the store
+   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate to the store
+   * @private
+   */
+  #propagateToStore(resultSetEntry: TypeLegendResultSetEntry): void {
+    // Propagate
+    LegendEventProcessor.propagateLegendToStore(this.getMapId(), resultSetEntry);
+  }
+
+  /**
+   * Overrides the behavior to apply when deleting from the store
+   * @param {string} layerPath - The layer path to delete form the store
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected override onDeleteFromStore(layerPath: string): void {
+    // Delete from store
+    LegendEventProcessor.deleteLayerFromLegendLayers(this.getMapId(), layerPath);
   }
 
   /**
    * Checks if the layer config has reached the 'processed' status or greater and if so queries the legend.
    * @param {ConfigBaseClass} layerConfig - The layer config
    */
-  #checkQueryLegend(layerConfig: ConfigBaseClass): void {
+  #checkQueryLegend(layerConfig: ConfigBaseClass, forced: boolean): void {
     // Get the layer
     const layer = this.layerApi.getGeoviewLayerHybrid(layerConfig.layerPath);
 
     // If the layer legend should be queried
-    if (layer && this.#legendShouldBeQueried(layerConfig)) {
+    if (layer && (this.#legendShouldBeQueried(layerConfig) || forced)) {
       // Flag
       this.resultSet[layerConfig.layerPath].legendQueryStatus = 'querying';
+
+      // Propagate to the store about the querying happening
+      this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
 
       // Query the legend
       const legendPromise = layer.queryLegend(layerConfig.layerPath);
@@ -127,7 +123,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
             this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
 
             // Inform that the layer set has been updated by calling parent to emit event
-            this.onLayerSetUpdatedProcess(layerConfig);
+            this.onLayerSetUpdatedProcess(layerConfig.layerPath);
           }
         })
         .catch((error) => {
@@ -138,29 +134,12 @@ export class LegendsLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Indicates if the layer path should be queried
+   * Indicates if the legend should be queried
+   * @param {ConfigBaseClass} layerConfig - The layer config
    */
   #legendShouldBeQueried(layerConfig: ConfigBaseClass): boolean {
     // A legend is ready to be queried when its status is > processed and legendQueryStatus is 'init' (not already queried)
-    return (
-      !!layerConfig?.isGreaterThanOrEqualTo('processed') &&
-      (this.resultSet[layerConfig.layerPath].legendQueryStatus === 'init' || !this.resultSet[layerConfig.layerPath].data?.legend)
-    );
-  }
-
-  /**
-   * Overrides behaviour when layer name is changed.
-   * @param {ConfigBaseClass} layerConfig - The layer config being affected
-   * @param {string} name - The new layer name
-   */
-  protected override onProcessNameChanged(layerConfig: ConfigBaseClass, name: string): void {
-    if (this.resultSet?.[layerConfig.layerPath]) {
-      // Call parent
-      super.onProcessNameChanged(layerConfig, name);
-
-      // Propagate to store
-      this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
-    }
+    return !!layerConfig?.isGreaterThanOrEqualTo('processed') && this.resultSet[layerConfig.layerPath].legendQueryStatus === 'init';
   }
 
   /**
@@ -169,7 +148,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
    */
   #handleLayerStyleChanged(layerConfig: ConfigBaseClass): void {
     if (this.resultSet?.[layerConfig.layerPath]) {
-      this.#checkQueryLegend(layerConfig);
+      this.#checkQueryLegend(layerConfig, true);
     }
   }
 }

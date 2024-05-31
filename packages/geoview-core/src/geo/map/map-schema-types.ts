@@ -208,6 +208,7 @@ export type TypeResultSet<T extends TypeResultSetEntry = TypeResultSetEntry> = {
   [layerPath: string]: T;
 };
 
+// TODO: Refactor - Check if this type is still used and replace it with something like TypeAllFeatureInfoResultSetEntry?
 export type TypeLayerData = {
   eventListenerEnabled: boolean;
   // When property features is undefined, we are waiting for the query result.

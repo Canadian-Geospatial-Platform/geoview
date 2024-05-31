@@ -2,7 +2,6 @@
 // ? we escape all private attribute in this file
 import {
   TypeBaseSourceVectorInitialConfig,
-  TypeLayerInitialSettings,
   TypeSourceImageEsriInitialConfig,
   TypeSourceImageInitialConfig,
   TypeSourceImageStaticInitialConfig,
@@ -12,7 +11,7 @@ import {
   TypeVectorTileSourceInitialConfig,
 } from '@/geo/map/map-schema-types';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
+import { TypeJsonObject } from '@/core/types/global-types';
 import { FilterNodeArrayType } from '@/geo/utils/renderer/geoview-renderer-types';
 
 /** ******************************************************************************************************************************
@@ -30,12 +29,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /** Indicates if filter is on/off */
   legendFilterIsOff: boolean = false;
-
-  /**
-   * Initial settings to apply to the GeoView layer entry at creation time. Initial settings are inherited from the parent in the
-   * configuration tree.
-   */
-  initialSettings?: TypeLayerInitialSettings = {};
 
   /** Source settings to apply to the GeoView layer source at creation time. */
   source?:
@@ -81,9 +74,11 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * Overrides the serialization of the mother class
    * @returns {TypeJsonValue} The serialized TypeBaseLayerEntryConfig
    */
-  override onSerialize(): TypeJsonValue {
+  override onSerialize(): TypeJsonObject {
     // Call parent
-    const serialized = super.onSerialize() as unknown as AbstractBaseLayerEntryConfig;
+    // Can be any object so disable eslint
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const serialized = super.onSerialize() as any;
 
     // Copy values
     serialized.layerIdExtension = this.layerIdExtension;
@@ -91,6 +86,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     serialized.initialSettings = this.initialSettings;
 
     // Return it
-    return serialized as unknown as TypeJsonValue;
+    return serialized;
   }
 }

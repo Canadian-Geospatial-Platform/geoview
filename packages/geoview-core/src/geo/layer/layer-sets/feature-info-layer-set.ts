@@ -2,10 +2,10 @@ import { Coordinate } from 'ol/coordinate';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { logger } from '@/core/utils/logger';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { TypeFeatureInfoEntry, TypeLayerStatus, TypeResultSet } from '@/geo/map/map-schema-types';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { EventType, AbstractLayerSet } from './abstract-layer-set';
+import { TypeFeatureInfoEntry, TypeResultSet } from '@/geo/map/map-schema-types';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
+import { EventType, AbstractLayerSet, PropagationType } from './abstract-layer-set';
 import { LayerApi } from '@/geo/layer/layer';
 import {
   TypeFeatureInfoResultSet,
@@ -13,9 +13,9 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 
 /**
- * A class containing a set of layers associated with a TypeFeatureInfoResultSetEntry object, which will receive the result of a
- * "get feature info" request made on the map layers when the user click a location on the map.
- *
+ * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
+ * events happening on them (in this case when the user click a location on the map) with a store
+ * for UI updates.
  * @class FeatureInfoLayerSet
  */
 export class FeatureInfoLayerSet extends AbstractLayerSet {
@@ -43,135 +43,61 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Propagate to store
-   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result entry to propagate
+   * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
+   * @param {AbstractGeoViewLayer | AbstractGVLayer} layer - The layer
+   * @returns {boolean} True when the layer should be registered to this feature-info-layer-set.
+   */
+  protected override onRegisterLayerCheck(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): boolean {
+    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
+    // Return if the layer is of queryable type and source is queryable
+    return AbstractLayerSet.isQueryableType(layer) && AbstractLayerSet.isSourceQueryable(layer, layerPath);
+  }
+
+  /**
+   * Overrides the behavior to apply when a feature-info-layer-set wants to register a layer in its set.
+   * @param {AbstractGeoViewLayer | AbstractGVLayer} layer - The layer
+   */
+  protected override onRegisterLayer(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): void {
+    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
+    // Call parent
+    super.onRegisterLayer(layer, layerPath);
+
+    // Update the resultSet data
+    this.resultSet[layerPath].eventListenerEnabled = true;
+    this.resultSet[layerPath].queryStatus = 'processed';
+    this.resultSet[layerPath].features = [];
+  }
+
+  /**
+   * Overrides the behavior to apply when propagating to the store
+   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected override onPropagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry, type: PropagationType): void {
+    // Redirect
+    this.#propagateToStore(resultSetEntry, type === 'layerName' ? 'name' : 'click');
+  }
+
+  /**
+   * Propagates the resultSetEntry to the store
+   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate to the store
    * @private
    */
-  #propagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry): void {
-    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.getMapId(), 'click', resultSetEntry).catch((error) => {
+  #propagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry, eventType: EventType = 'click'): void {
+    // Propagate
+    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.getMapId(), eventType, resultSetEntry).catch((error) => {
       // Log
       logger.logPromiseFailed('FeatureInfoEventProcessor.propagateToStore in FeatureInfoLayerSet', error);
     });
   }
 
   /**
-   * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
-   * @param {ConfigBaseClass} layerConfig - The layer config
-   * @returns {boolean} True when the layer should be registered to this feature-info-layer-set.
+   * Overrides the behavior to apply when deleting from the store
+   * @param {string} layerPath - The layer path to delete from the store
    */
-  protected override onRegisterLayerCheck(layerConfig: ConfigBaseClass): boolean {
-    // Log
-    logger.logTraceCore('FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerConfig.layerPath);
-
-    // TODO: Make a util function for this check - this can be done prior to layer creation in config section
-    // for some layer type, we know there is no details
-    if (
-      layerConfig.schemaTag &&
-      [CONST_LAYER_TYPES.ESRI_IMAGE, CONST_LAYER_TYPES.IMAGE_STATIC, CONST_LAYER_TYPES.XYZ_TILES, CONST_LAYER_TYPES.VECTOR_TILES].includes(
-        layerConfig.schemaTag
-      )
-    )
-      return false;
-
-    // Default
-    return super.onRegisterLayerCheck(layerConfig);
-  }
-
-  /**
-   * Overrides the behavior to apply when a feature-info-layer-set wants to register a layer in its set.
-   * @param {ConfigBaseClass} layerConfig - The layer config
-   */
-  protected override onRegisterLayer(layerConfig: ConfigBaseClass): void {
-    // Log
-    logger.logTraceCore('FEATURE-INFO-LAYER-SET - onRegisterLayer', layerConfig.layerPath);
-
-    // Call parent
-    super.onRegisterLayer(layerConfig);
-
-    // Update the resultSet data
-    this.resultSet[layerConfig.layerPath].eventListenerEnabled = true;
-    this.resultSet[layerConfig.layerPath].queryStatus = 'processed';
-    this.resultSet[layerConfig.layerPath].features = [];
-
-    // Propagate to store on registration
-    this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
-  }
-
-  /**
-   * Overrides the behavior to apply when unregistering a layer from the feature-info-layer-set.
-   * @param {ConfigBaseClass} layerConfig - The layer config
-   */
-  protected override onUnregisterLayer(layerConfig: ConfigBaseClass): void {
-    // Log
-    logger.logTraceCore('FEATURE-INFO-LAYER-SET - onUnregisterLayer', layerConfig.layerPath);
-
-    // Call parent
-    super.onUnregisterLayer(layerConfig);
-
+  protected override onDeleteFromStore(layerPath: string): void {
     // Remove it from feature info array (propagating to the store)
-    FeatureInfoEventProcessor.deleteFeatureInfo(this.getMapId(), layerConfig.layerPath);
-  }
-
-  /**
-   * Overrides the behavior to apply when a layer status changed for a feature-info-layer-set.
-   * @param {ConfigBaseClass} layerConfig - The layer config
-   * @param {string} layerStatus - The new layer status
-   */
-  protected override onProcessLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatus: TypeLayerStatus): void {
-    // Call parent. After this call, this.resultSet?.[layerPath]?.layerStatus may have changed!
-    super.onProcessLayerStatusChanged(layerConfig, layerStatus);
-
-    // Propagate to the store on layer status changed
-    this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
-
-    // If the layer is in error
-    if (this.resultSet[layerConfig.layerPath].layerStatus === 'error') {
-      // Remove it from the store immediately
-      this.onUnregisterLayer(layerConfig);
-    }
-  }
-
-  /**
-   * Overrides behaviour when layer name is changed.
-   * @param {ConfigBaseClass} layerConfig - The layer path being affected
-   * @param {string} name - The new layer name
-   */
-  protected override onProcessNameChanged(layerConfig: ConfigBaseClass, name: string): void {
-    if (this.resultSet?.[layerConfig.layerPath]) {
-      // Call parent
-      super.onProcessNameChanged(layerConfig, name);
-
-      // Propagate to store
-      this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
-    }
-  }
-
-  /**
-   * Emits a query ended event to all handlers.
-   * @param {QueryEndedEvent} event - The event to emit
-   * @private
-   */
-  #emitQueryEnded(event: QueryEndedEvent): void {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onQueryEndedHandlers, event);
-  }
-
-  /**
-   * Registers a query ended event handler.
-   * @param {QueryEndedDelegate} callback - The callback to be executed whenever the event is emitted
-   */
-  onQueryEnded(callback: QueryEndedDelegate): void {
-    // Register the event handler
-    EventHelper.onEvent(this.#onQueryEndedHandlers, callback);
-  }
-
-  /**
-   * Unregisters a query ended event handler.
-   * @param {QueryEndedDelegate} callback - The callback to stop being called whenever the event is emitted
-   */
-  offQueryEnded(callback: QueryEndedDelegate): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onQueryEndedHandlers, callback);
+    FeatureInfoEventProcessor.deleteFeatureInfo(this.getMapId(), layerPath);
   }
 
   /**
@@ -180,8 +106,8 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * @returns {Promise<TypeFeatureInfoResultSet>} A promise which will hold the result of the query
    */
   async queryLayers(longLatCoordinate: Coordinate): Promise<TypeFeatureInfoResultSet> {
-    // TODO: REFACTOR - Watch out for code reentrancy between queries!
-    // TO.DOCONT: Consider using a LIFO pattern, per layer path, as the race condition resolution
+    // FIXME: Watch out for code reentrancy between queries!
+    // FIX.MECONT: Consider using a LIFO pattern, per layer path, as the race condition resolution
     // GV Each query should be distinct as far as the resultSet goes! The 'reinitialization' below isn't sufficient.
     // GV As it is (and was like this before events refactor), the this.resultSet is mutating between async calls.
 
@@ -194,15 +120,18 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // Reinitialize the resultSet
     // Loop on each layer path in the resultSet
     Object.keys(this.resultSet).forEach((layerPath) => {
+      // If event listener is disabled
+      if (!this.resultSet[layerPath].eventListenerEnabled) return;
+
       // Get the layer config and layer associated with the layer path
       const layer = this.layerApi.getGeoviewLayerHybrid(layerPath);
-      const layerConfig = layer?.getLayerConfig(layerPath);
 
-      if (!this.resultSet[layerPath].eventListenerEnabled) return;
-      if (!AbstractLayerSet.isQueryable(layerConfig)) return;
+      // If layer was found
+      if (layer) {
+        // If state is not queryable
+        if (!AbstractLayerSet.isStateQueryable(layer, layerPath)) return;
 
-      // If layer is loaded
-      if (layer && layerConfig?.layerStatus === 'loaded') {
+        // Flag processing
         this.resultSet[layerPath].features = undefined;
         this.resultSet[layerPath].queryStatus = 'processing';
 
@@ -210,13 +139,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         this.#propagateToStore(this.resultSet[layerPath]);
 
         // Process query on results data
-        const promiseResult = AbstractLayerSet.queryLayerFeatures(
-          this.resultSet[layerPath],
-          layerConfig,
-          layer,
-          queryType,
-          longLatCoordinate
-        );
+        const promiseResult = AbstractLayerSet.queryLayerFeatures(this.resultSet[layerPath], layer, queryType, longLatCoordinate);
 
         // Add the promise
         allPromises.push(promiseResult);
@@ -262,8 +185,11 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * @private
    */
   #processListenerStatusChanged(layerPath: string, isEnable: boolean): void {
+    // Edit the result set
     this.resultSet[layerPath].eventListenerEnabled = isEnable;
     this.resultSet[layerPath].features = [];
+
+    // Propagate to store
     this.#propagateToStore(this.resultSet[layerPath]);
   }
 
@@ -308,6 +234,34 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
       if (returnValue !== this.resultSet[key].eventListenerEnabled) returnValue = undefined;
     });
     return returnValue;
+  }
+
+  /**
+   * Emits a query ended event to all handlers.
+   * @param {QueryEndedEvent} event - The event to emit
+   * @private
+   */
+  #emitQueryEnded(event: QueryEndedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onQueryEndedHandlers, event);
+  }
+
+  /**
+   * Registers a query ended event handler.
+   * @param {QueryEndedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onQueryEnded(callback: QueryEndedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onQueryEndedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a query ended event handler.
+   * @param {QueryEndedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offQueryEnded(callback: QueryEndedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onQueryEndedHandlers, callback);
   }
 }
 

@@ -280,7 +280,7 @@ export class MapViewer {
     // initialize layers and load the layers passed in from map config if any
     this.layer = new LayerApi(this);
 
-    // TODO: Check - Maybe we want to await on this (for the Geocore layers that take longer to initialize) - to confirm
+    // Load the list of geoview layers in the config to add all layers on the map
     this.layer.loadListOfGeoviewLayer(this.mapFeaturesConfig.map.listOfGeoviewLayerConfig).catch((error) => {
       // Log
       logger.logPromiseFailed('loadListOfGeoviewLayer in initMap in MapViewer', error);
@@ -1380,8 +1380,8 @@ export class MapViewer {
    * @returns {Coordinate} The coordinate in the map projection
    */
   convertCoordinateFromProjToMapProj(coordinate: Coordinate, fromProj: ProjectionLike): Coordinate {
-    // TODO: In this function and equivalent 3 others below, make it so if the given projection is the same as the map projection
-    // TO.DOCONT: just skip and return the same geometry. It'd save many 'if' like 'if projA <> projB then call this' in the code base
+    // TODO: In this function and equivalent 3 others below, make it so that if the given projection is the same as the map projection
+    // TO.DOCONT: it just skips and returns the same geometry. It'd save many 'if' like 'if projA <> projB then call this' in the code base
     return Projection.transform(coordinate, fromProj, this.getProjection());
   }
 

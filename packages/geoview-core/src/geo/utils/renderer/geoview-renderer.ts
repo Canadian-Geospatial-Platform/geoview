@@ -8,13 +8,11 @@ import { Options as CircleOptions } from 'ol/style/Circle';
 import { Options as RegularShapeOptions } from 'ol/style/RegularShape';
 import { Options as StrokeOptions } from 'ol/style/Stroke';
 import { Options as FillOptions } from 'ol/style/Fill';
-import Feature from 'ol/Feature';
+import Feature, { FeatureLike } from 'ol/Feature';
 import { toContext } from 'ol/render';
 import { Size } from 'ol/size';
 
-import { TypeDisplayLanguage } from '@config/types/map-schema-types';
-
-import { getLocalizedValue, setAlphaColor } from '@/core/utils/utilities';
+import { setAlphaColor } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import {
   isFilledPolygonVectorConfig,
@@ -89,11 +87,11 @@ function getDefaultColor(alpha: number, increment = false): string {
  * This method returns the type of geometry. It removes the Multi prefix because for the geoviewRenderer, a MultiPoint has
  * the same behaviour than a Point.
  *
- * @param {Feature} feature - Optional feature. This method does not use it, it is there to have a homogeneous signature.
+ * @param {FeatureLike} feature - The feature to check
  *
  * @returns {TypeStyleGeometry} The type of geometry (Point, LineString, Polygon).
  */
-const getGeometryType = (feature: Feature): TypeStyleGeometry => {
+export const getGeometryType = (feature: FeatureLike): TypeStyleGeometry => {
   const geometryType = feature.getGeometry()?.getType();
   if (!geometryType) throw new Error('Features must have a geometry type.');
   return (geometryType.startsWith('Multi') ? geometryType.slice(5) : geometryType) as TypeStyleGeometry;
@@ -1231,18 +1229,11 @@ export async function getLegendStyles(
  * Create a default style to use with a vector feature that has no style configuration.
  *
  * @param {TypeStyleGeometry} geometryType - Type of geometry (Point, LineString, Polygon).
- * @param {VectorTileLayerEntryConfig | VectorLayerEntryConfig} layerConfig - Layer entry config to configure.
  * @param {TypeDisplayLanguage} language - Language for the style
  *
- * @returns {TypeStyleConfig | undefined} The Style configurationcreated. Undefined if unable to create it.
+ * @returns {TypeSimpleStyleConfig | undefined} The Style configurationcreated. Undefined if unable to create it.
  */
-function createDefaultStyle(
-  geometryType: TypeStyleGeometry,
-  layerConfig: VectorTilesLayerEntryConfig | VectorLayerEntryConfig,
-  language: TypeDisplayLanguage
-): TypeStyleConfig | undefined {
-  if (layerConfig.style === undefined) layerConfig.style = {};
-  const label = getLocalizedValue(layerConfig.layerName, language) || layerConfig.layerId;
+function createDefaultStyle(geometryType: TypeStyleGeometry, label: string): TypeSimpleStyleConfig | undefined {
   if (geometryType === 'Point') {
     const settings: TypeSimpleSymbolVectorConfig = {
       type: 'simpleSymbol',
@@ -1254,18 +1245,14 @@ function createDefaultStyle(
       },
       symbol: 'circle',
     };
-    const styleSettings: TypeSimpleStyleConfig = { styleType: 'simple', label, settings };
-    layerConfig.style[geometryType] = styleSettings;
-    return layerConfig.style;
+    return { styleType: 'simple', label, settings };
   }
   if (geometryType === 'LineString') {
     const settings: TypeLineStringVectorConfig = {
       type: 'lineString',
       stroke: { color: getDefaultColor(1, true) },
     };
-    const styleSettings: TypeSimpleStyleConfig = { styleType: 'simple', label, settings };
-    layerConfig.style[geometryType] = styleSettings;
-    return layerConfig.style;
+    return { styleType: 'simple', label, settings };
   }
   if (geometryType === 'Polygon') {
     const settings: TypePolygonVectorConfig = {
@@ -1274,9 +1261,7 @@ function createDefaultStyle(
       stroke: { color: getDefaultColor(1, true) },
       fillStyle: 'solid',
     };
-    const styleSettings: TypeSimpleStyleConfig = { styleType: 'simple', label, settings };
-    layerConfig.style[geometryType] = styleSettings;
-    return layerConfig.style;
+    return { styleType: 'simple', label, settings };
   }
   logger.logError(`Geometry type ${geometryType} is not supported by the GeoView viewer.`);
   return undefined;
@@ -1540,35 +1525,36 @@ const processStyle: Record<TypeBaseStyleType, Record<TypeStyleGeometry, TypeStyl
  * This method gets the style of the feature using the layer entry config. If the style does not exist for the geometryType,
  * create it using the default style strategy.
  *
- * @param {Feature} feature - Feature that need its style to be defined.
- * @param {AbstractBaseLayerEntryConfig | VectorTileLayerEntryConfig | VectorLayerEntryConfig} layerConfig - Layer
+ * @param {FeatureLike} feature - Feature that need its style to be defined.
+ * @param {VectorTileLayerEntryConfig | VectorLayerEntryConfig} layerConfig - Layer
  * entry config that may have a style configuration for the feature. If style does not exist for the geometryType, create it.
- * @param {TypeDisplayLanguage} language - Language for the style
+ * @param {string} label - The style label when one has to be created
  *
  * @returns {Style | undefined} The style applied to the feature or undefined if not found.
  */
-export function getFeatureStyle(
-  feature: Feature,
-  layerConfig: AbstractBaseLayerEntryConfig | VectorTilesLayerEntryConfig | VectorLayerEntryConfig,
-  language: TypeDisplayLanguage
+export function getAndCreateFeatureStyle(
+  feature: FeatureLike,
+  layerConfig: VectorTilesLayerEntryConfig | VectorLayerEntryConfig,
+  label: string
 ): Style | undefined {
   const geometryType = getGeometryType(feature);
   // If style does not exist for the geometryType, create it.
-  let { style } = layerConfig as VectorLayerEntryConfig;
-  if (style === undefined || style[geometryType] === undefined) {
-    style = createDefaultStyle(geometryType, layerConfig as VectorLayerEntryConfig, language);
-    // TODO Refactor layer style changed - move this to call
-    // Emit event to update legend icons
-    layerConfig.emitLayerStyleChanged({ layerPath: layerConfig.layerPath });
+  if (!layerConfig.style || !layerConfig.style[geometryType]) {
+    // Create a style on-the-fly for the geometry type, because the layer config didn't have one already
+    const styleConfig = createDefaultStyle(geometryType, label);
+
+    // Add a default style to the layer config
+    if (styleConfig) layerConfig.addDefaultStyle(geometryType, styleConfig);
   }
+
   // Get the style accordingly to its type and geometry.
-  if (style![geometryType] !== undefined) {
-    const styleSettings = style![geometryType]!;
+  if (layerConfig.style![geometryType]) {
+    const styleSettings = layerConfig.style![geometryType]!;
     const { styleType } = styleSettings;
     return processStyle[styleType][geometryType].call(
       '',
       styleSettings,
-      feature,
+      feature as Feature,
       layerConfig.filterEquation,
       layerConfig.legendFilterIsOff
     );
