@@ -62,6 +62,8 @@ export abstract class ConfigBaseClass {
   // TD.CONT: the event is not define so this.onLayerStatus.... failed
   #onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
 
+  #onLayerStyleChangedHandlers: LayerStyleChangedDelegate[] = [];
+
   // TODO: Review - The status. I think we should have: newInstance, processsing, loading, - loaded : error
   static #layerStatusWeight = {
     newInstance: 10,
@@ -210,6 +212,33 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * Emits an event to all handlers.
+   * @param {LayerStyleChangedEvent} event - The event to emit
+   */
+  emitLayerStyleChanged(event: LayerStyleChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerStyleChangedHandlers, event);
+  }
+
+  /**
+   * Registers a layer style changed event handler.
+   * @param {LayerStyleChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerStyleChanged(callback: LayerStyleChangedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerStyleChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer style changed event handler.
+   * @param {LayerStyleChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerStyleChanged(callback: LayerStyleChangedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerStyleChangedHandlers, callback);
+  }
+
+  /**
    * This method compares the internal layer status of the config with the layer status passed as a parameter and it
    * returns true if the internal value is greater or equal to the value of the parameter.
    *
@@ -276,4 +305,17 @@ export type LayerStatusChangedEvent = {
   layerPath: string;
   // The new layer status to assign to the layer path.
   layerStatus: TypeLayerStatus;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerStyleChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStyleChangedEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerStyleChangedEvent = {
+  // The layer path affected.
+  layerPath: string;
 };
