@@ -21,7 +21,7 @@ Press the **Shift** key while click-holding and dragging the mouse to define a m
 Press **Shift** and **Alt** keys while click-holding and dragging the mouse to rotate the map.
 To reset the map orientation, click the reset rotation arrow located at the right side of the Map Information Bar at the bottom of the map.
 
-_Note: The map **must be** focused for key binding to work._
+_Note: The map must be focused for key binding to work._
 
 <br>
 =2!overviewMap=
@@ -53,11 +53,11 @@ Information will be shown for supported features when the crosshair is positione
 
 Press **CTRL** and **Q** to exit keyboard navigation.
 
-_Note: The map **must be** focused for key binding to work. The map has focus when the crosshairs marker is present._
+_Note: The map must be focused for key binding to work. The map has focus when the crosshairs marker is present._
 
 **Accessibility**
 
-This page is WCAG 2.0 AA compliant.
+This map is not fully WCAG 2.0 AA compliant.
 
 =1!mapInformationBar=
 
@@ -79,13 +79,13 @@ The following navigation information can be found in the Map Information Bar (ma
 
 =1!sidebar=
 
-# App Bar
+# Side Bar
 
-The App Bar to the left of the map shows the available tools.
+The Side Bar to the left of the map shows the available tools.
 
-_The tools shown in the App Bar vary depending on the map._
+_The tools shown in the Side Bar vary depending on the map._
 
-**_Note: Some tools in the App Bar are also available as tabs in the Footer Bar, such as Legend or Details. Tools opened from the App Bar are displayed on the map, in a condensed 'mobile' view (single column). The same tool opened from a tab in the Footer Bar is displayed below the map in a fully expanded view._**
+_Note: Some tools in the Side Bar are also available as tabs in the Footer Bar, such as Legend or Details. Tools opened from the Side Bar are displayed on the map, in a condensed 'mobile' view (single column). The same tool opened from a tab in the Footer Bar is displayed below the map in a fully expanded view._
 
 | Symbol                                                      | Name          | Description                                                                                        |
 | ----------------------------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------- |
@@ -103,7 +103,7 @@ _The tools shown in the App Bar vary depending on the map._
 
 ### <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" width="30"/> Geolocator
 
-The geolocator component functions to allow users to search for places in Canada. When the geolocator icon ![]({{assetsURL}}/img/guide/geosearch/geolocator_20.svg) in the App Bar is clicked, an input field for search keywords will appear on the map:
+The geolocator component functions to allow users to search for places in Canada. When the geolocator icon ![]({{assetsURL}}/img/guide/geosearch/geolocator_20.svg) in the Side Bar is clicked, an input field for search keywords will appear on the map:
 
 ![]({{assetsURL}}/img/guide/geosearch/searchbar_en.png)
 
@@ -178,7 +178,7 @@ The _Footer Bar_ menu bar has the following tabs:
 
 _Depending on viewer configuration some tabs may not be available_
 
-**_Note: Some tabs in the Footer Bar are also available as tools in the Side Bar, such as Legend or Details. A tool opened from the Side Bar is displayed on the map, in a condensed 'mobile' view (single column). The same tab opened in the Footer Bar is displayed below the map in a fully expanded view._**
+_Note: Some tabs in the Footer Bar are also available as tools in the Side Bar, such as Legend or Details. A tool opened from the Side Bar is displayed on the map, in a condensed 'mobile' view (single column). The same tab opened in the Footer Bar is displayed below the map in a fully expanded view._
 
 <br>
 =2!legend=
@@ -238,7 +238,7 @@ Layers can either be in raster format or vector format. The following layer type
 | Static Image       | CSV                   |
 | Vector tiles layer | WFS                   |
 
-_Note: If a layer fails to load correctly it will be identified by an error notice in the notifications tool on the **Side Bar**. Instead of the standard layer actions you can select to either reload the layer (this is particularly helpful if there is a temporary network connectivity issue) or remove the layer. If a layer is removed it will be taken out of the layer selector completely._
+_Note: If a layer fails to load correctly it will be identified by an error notice in the notifications tool on the Side Bar. Instead of the standard layer actions you can select to either reload the layer (this is particularly helpful if there is a temporary network connectivity issue) or remove the layer. If a layer is removed it will be taken out of the layer selector completely._
 
 =3!layerSettings=
 
