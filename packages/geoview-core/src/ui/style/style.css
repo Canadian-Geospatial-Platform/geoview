@@ -26,3 +26,14 @@ Hold viewer specific css not inside theme
     display: none;
   }
 }
+
+/* specifiv style for icon alignement in guide component */
+.guideBox h3 img {
+  vertical-align: bottom;
+}
+.guideBox h4 img {
+  vertical-align: bottom;
+}
+.guideBox p img {
+  vertical-align: bottom;
+}
