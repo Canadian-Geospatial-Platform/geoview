@@ -2,15 +2,15 @@ import React, { useState, ReactNode, useCallback, forwardRef, useImperativeHandl
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import Markdown from 'markdown-to-jsx';
-import { Box, FullscreenIcon, IconButton } from '@/ui';
+import { Box, FullscreenIcon, ButtonGroup } from '@/ui';
 import { ResponsiveGrid } from './responsive-grid';
 import { useFooterPanelHeight } from './use-footer-panel-height';
 import { getSxClasses } from './responsive-grid-layout-style';
 import FullScreenDialog from './full-screen-dialog';
 import { logger } from '@/core/utils/logger';
-import { ArrowBackIcon, ArrowForwardIcon, QuestionMarkIcon } from '@/ui/icons';
-import { Button } from '@/ui/button/button';
+import { ArrowBackIcon, ArrowForwardIcon, CloseIcon, QuestionMarkIcon } from '@/ui/icons';
 import { useAppGuide, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { ResponsiveButton } from './responsive-button';
 
 interface ResponsiveGridLayoutProps {
   leftTop?: ReactNode;
@@ -119,31 +119,26 @@ const ResponsiveGridLayout = forwardRef(
 
     const renderEnlargeButton = (): JSX.Element => {
       return (
-        <Button
-          type="text"
+        <ResponsiveButton
           size="small"
-          color="primary"
-          variant="contained"
-          className="buttonFilledOutline"
           startIcon={isEnlarged ? <ArrowForwardIcon /> : <ArrowBackIcon />}
           sx={{ height: '40px', borderRadius: '1.5rem', boxShadow: 'none', [theme.breakpoints.down('md')]: { display: 'none' } }}
           onClick={() => handleIsEnlarge(!isEnlarged)}
-          tooltip={isEnlarged ? t('dataTable.reduceBtn')! : t('dataTable.enlargeBtn')!}
-          tooltipPlacement="top"
+          tooltipKey={isEnlarged ? t('dataTable.reduceBtn')! : t('dataTable.enlargeBtn')!}
         >
           {isEnlarged ? t('dataTable.reduceBtn') : t('dataTable.enlargeBtn')}
-        </Button>
+        </ResponsiveButton>
       );
     };
 
     const renderCloseButton = (): JSX.Element => {
       return (
-        <Button
-          type="text"
+        <ResponsiveButton
           size="small"
           color="primary"
           variant="contained"
           className="buttonFilledOutline"
+          startIcon={<CloseIcon fontSize={theme.palette.geoViewFontSize.sm} />}
           sx={{
             height: '40px',
             borderRadius: '1.5rem',
@@ -156,45 +151,41 @@ const ResponsiveGridLayout = forwardRef(
             }),
           }}
           onClick={() => setIsRightPanelVisible(false)}
-          tooltip={t('dataTable.close') ?? ''}
-          tooltipPlacement="top"
+          tooltipKey={t('dataTable.close') ?? ''}
         >
           {t('dataTable.close')}
-        </Button>
+        </ResponsiveButton>
       );
     };
 
     const renderGuideButton = (): JSX.Element => {
       return (
-        <IconButton
+        <ResponsiveButton
           disabled={isGuideOpen}
           sx={{
-            width: '2.5rem',
-            height: '2.5rem',
             [theme.breakpoints.down('md')]: { display: 'none' },
           }}
           size="small"
           onClick={() => handleOpenGuide()}
-          tooltip={t('general.openGuide')!}
-          className="buttonFilledOutline"
-          color="primary"
+          tooltipKey={t('general.openGuide')!}
+
+          startIcon={<QuestionMarkIcon />}
         >
-          <QuestionMarkIcon />
-        </IconButton>
+          {t('general.guide')}
+        </ResponsiveButton>
       );
     };
 
     const renderFullScreenButton = (): JSX.Element => {
       return (
-        <IconButton
+        <ResponsiveButton
           size="small"
           onClick={() => setIsFullScreen(!isFullScreen)}
-          tooltip={isFullScreen ? t('general.closeFullscreen')! : t('general.openFullscreen')!}
-          className="buttonFilledOutline"
-          color="primary"
+          tooltipKey={isFullScreen ? t('general.closeFullscreen')! : t('general.openFullscreen')!}
+          startIcon={<FullscreenIcon />}
         >
-          <FullscreenIcon />
-        </IconButton>
+          { t('general.fullScreen')!}
+        </ResponsiveButton>
       );
     };
 
@@ -294,10 +285,12 @@ const ResponsiveGridLayout = forwardRef(
               {rightTop ?? <Box />}
 
               <Box sx={sxClasses.rightButtonsContainer}>
-                {!fullWidth && !hideEnlargeBtn && renderEnlargeButton()}
-                {!!guideContentIds?.length && renderGuideButton()}
-                {!isMapFullScreen && renderFullScreenButton()}
-                {!!(leftMain || leftTop) && renderCloseButton()}
+                <ButtonGroup size="small" variant="outlined" sx={{marginRight: '10px'}}>
+                  {!fullWidth && !hideEnlargeBtn && renderEnlargeButton()}
+                  {!!guideContentIds?.length && renderGuideButton()}
+                  {!isMapFullScreen && renderFullScreenButton()}
+                  {!!(leftMain || leftTop) && renderCloseButton()}
+                </ButtonGroup>
               </Box>
             </Box>
           </ResponsiveGrid.Right>

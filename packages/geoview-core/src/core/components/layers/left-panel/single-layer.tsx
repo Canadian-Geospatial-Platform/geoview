@@ -15,7 +15,6 @@ import {
   Tooltip,
   VisibilityOffOutlinedIcon,
   VisibilityOutlinedIcon,
-  RestartAltIcon,
   Paper,
   Typography,
 } from '@/ui';

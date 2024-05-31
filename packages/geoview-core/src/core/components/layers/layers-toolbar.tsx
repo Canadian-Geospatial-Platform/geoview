@@ -1,28 +1,14 @@
 import { useTranslation } from 'react-i18next';
-import { Button, useTheme } from '@mui/material';
-import { useEffect, useState } from 'react';
-import { Box, AddCircleOutlineIcon, ButtonGroup, DeleteOutlineIcon, HandleIcon, Tooltip, VisibilityOutlinedIcon } from '@/ui';
+import { useTheme } from '@mui/material';
+import { Box, AddCircleOutlineIcon, ButtonGroup, DeleteOutlineIcon, HandleIcon, VisibilityOutlinedIcon } from '@/ui';
 import { useLayerStoreActions, useLayerDisplayState } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeLayersViewDisplayState } from './types';
-import { logger } from '@/core/utils/logger';
+import { ResponsiveButton } from '../common';
 
-interface ResponsiveButtonProps {
-  tooltipKey: string;
-  translationKey: string;
-  icon: JSX.Element;
-  newState: TypeLayersViewDisplayState;
-}
 
-function ResponsiveButton(props: ResponsiveButtonProps): JSX.Element {
-  // Log
-  logger.logTraceRender('components/layers/layers-toolbar');
-
-  const { tooltipKey, translationKey, icon, newState } = props;
+export function LayersToolbar(): JSX.Element {
+  const theme = useTheme();
   const { t } = useTranslation<string>();
-  const breakpoint = 510;
-
-  // state
-  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
 
   // access store
   const displayState = useLayerDisplayState();
@@ -32,78 +18,45 @@ function ResponsiveButton(props: ResponsiveButtonProps): JSX.Element {
     setDisplayState(dispState);
   };
 
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('LAYERS-TOOLBAR - mount');
-
-    const handleResize = (): void => {
-      // Log
-      logger.logTraceCore('LAYERS-TOOLBAR - window resize event');
-
-      setScreenWidth(window.innerWidth);
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  if (screenWidth < breakpoint) {
-    return (
-      <Tooltip title={t(tooltipKey)} placement="top" enterDelay={1000}>
-        <Button
-          sx={{ paddingLeft: '20px' }}
-          variant={displayState === newState ? 'contained' : 'outlined'}
-          startIcon={icon}
-          onClick={() => handleSetDisplayState(newState)}
-        />
-      </Tooltip>
-    );
-  }
-  return (
-    <Tooltip title={t(tooltipKey)} placement="top" enterDelay={1000}>
-      <Button
-        variant={displayState === newState ? 'contained' : 'outlined'}
-        startIcon={icon}
-        onClick={() => handleSetDisplayState(newState)}
-      >
-        {t(translationKey)}
-      </Button>
-    </Tooltip>
-  );
-}
-
-export function LayersToolbar(): JSX.Element {
-  const theme = useTheme();
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'left', padding: '18px 18px 0px 18px' }}>
       <ButtonGroup size="small" variant="outlined" aria-label="outlined button group">
         <ResponsiveButton
+          size="small"
           tooltipKey="general.view"
-          translationKey="general.view"
-          icon={<VisibilityOutlinedIcon fontSize={theme.palette.geoViewFontSize.sm} />}
-          newState="view"
-        />
+          variant={displayState === "view" ? 'contained' : 'outlined'}
+          startIcon={<VisibilityOutlinedIcon fontSize={theme.palette.geoViewFontSize.sm} />}
+          onClick={() => handleSetDisplayState('view')}
+        >
+          {t("general.view")}
+        </ResponsiveButton>
         <ResponsiveButton
+          size="small"
           tooltipKey="legend.addLayer"
-          translationKey="general.add"
-          icon={<AddCircleOutlineIcon fontSize={theme.palette.geoViewFontSize.sm} />}
-          newState="add"
-        />
+          variant={displayState === "add" ? 'contained' : 'outlined'}
+          startIcon={<AddCircleOutlineIcon fontSize={theme.palette.geoViewFontSize.sm} />}
+          onClick={() => handleSetDisplayState('add')}
+        >
+          {t("general.add")}
+        </ResponsiveButton>
         <ResponsiveButton
+          size="small"
           tooltipKey="legend.sortLayers"
-          translationKey="legend.sort"
-          icon={<HandleIcon fontSize={theme.palette.geoViewFontSize.sm} />}
-          newState="order"
-        />
+          variant={displayState === "order" ? 'contained' : 'outlined'}
+          startIcon={<HandleIcon fontSize={theme.palette.geoViewFontSize.sm} />}
+          onClick={() => handleSetDisplayState('order')}
+        >
+          {t("legend.sort")}
+        </ResponsiveButton>
         <ResponsiveButton
+          size="small"
           tooltipKey="legend.removeLayer"
-          translationKey="general.remove"
-          icon={<DeleteOutlineIcon fontSize={theme.palette.geoViewFontSize.sm} />}
-          newState="remove"
-        />
+          variant={displayState === "remove" ? 'contained' : 'outlined'}
+          startIcon={<DeleteOutlineIcon fontSize={theme.palette.geoViewFontSize.sm} />}
+          onClick={() => handleSetDisplayState('remove')}
+        >
+          {t("general.remove")}
+        </ResponsiveButton>
       </ButtonGroup>
     </Box>
   );

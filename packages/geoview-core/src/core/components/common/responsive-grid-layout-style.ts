@@ -7,7 +7,7 @@ export const getSxClasses = (theme: Theme): any => ({
     display: 'flex',
     flexDirection: 'row',
     gap: '0.6rem',
-    backgroundColor: theme.palette.geoViewColor.primary.lighten(0.5, 0.4),
+    backgroundColor: theme.palette.geoViewColor.primary.lighten(0.5, 0.1),
     borderTopLeftRadius: '1.8rem',
     borderTopRightRadius: '0.5rem',
     padding: ' 0.5rem 0.5rem 0.5rem 2rem',

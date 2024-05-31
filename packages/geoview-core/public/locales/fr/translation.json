@@ -10,7 +10,9 @@
     "view": "Vue",
     "openFullscreen": "Ouvrir en plein écran",
     "closeFullscreen": "Fermer le plein écran",
-    "openGuide": "Ouvrir le guide"
+    "openGuide": "Ouvrir le guide",
+    "guide": "Guide",
+    "fullScreen": "Plein écran"
   },
   "mapnav": {
     "arianavbar": "groupe de buttons vertical pour navigation sur la carte",
