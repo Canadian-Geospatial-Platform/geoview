@@ -20,8 +20,6 @@ import {
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { Cast, toJsonObject } from '@/core/types/global-types';
-import { Projection } from '@/geo/utils/projection';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
@@ -91,6 +89,7 @@ export const geoviewEntryIsXYZTiles = (verifyIfGeoViewEntry: TypeLayerEntryConfi
  * @class XYZTiles
  */
 // ******************************************************************************************************************************
+// GV Layers Refactoring - Obsolete (in layers)
 export class XYZTiles extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * Initialize layer
@@ -110,8 +109,9 @@ export class XYZTiles extends AbstractGeoViewRaster {
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number' {
-    const fieldDefinitions = this.layerMetadata[layerConfig.layerPath].source.featureInfo;
+    const fieldDefinitions = this.getLayerMetadata(layerConfig.layerPath).source.featureInfo;
     const fieldIndex = getLocalizedValue(
       Cast<TypeLocalizedString>(fieldDefinitions.outfields),
       AppEventProcessor.getDisplayLanguage(this.mapId)
@@ -128,6 +128,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
    *
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
@@ -178,8 +179,9 @@ export class XYZTiles extends AbstractGeoViewRaster {
    *
    * @param {XYZTilesLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
+   * @returns {Promise<TypeBaseRasterLayer | undefined>} The GeoView raster layer that has been created.
    */
+  // GV Layers Refactoring - Obsolete (in config? in layers?)
   protected override async processOneLayerEntry(layerConfig: XYZTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | undefined> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
@@ -213,13 +215,13 @@ export class XYZTiles extends AbstractGeoViewRaster {
     // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
     // GV            in the 'loading' state if the flag value is false.
 
-    // TODO: Refactor - Wire it up
-    this.setLayerAndLoadEndListeners(layerConfig, {
-      olLayer: new TileLayer(tileLayerOptions),
-      loadEndListenerType: 'tile',
-    });
+    // Create the OpenLayer layer
+    const olLayer = new TileLayer(tileLayerOptions);
 
-    return Promise.resolve(layerConfig.olLayer);
+    // TODO: Refactor - Wire it up
+    this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'tile');
+
+    return Promise.resolve(olLayer);
   }
 
   /** ***************************************************************************************************************************
@@ -230,13 +232,14 @@ export class XYZTiles extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected override processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     if (this.metadata) {
       const metadataLayerConfigFound = Cast<XYZTilesLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig).find(
         (metadataLayerConfig) => metadataLayerConfig.layerId === layerConfig.layerId
       );
       // metadataLayerConfigFound can not be undefined because we have already validated the config exist
-      this.layerMetadata[layerConfig.layerPath] = toJsonObject(metadataLayerConfigFound);
+      this.setLayerMetadata(layerConfig.layerPath, toJsonObject(metadataLayerConfigFound));
       // eslint-disable-next-line no-param-reassign
       layerConfig.source = defaultsDeep(layerConfig.source, metadataLayerConfigFound!.source);
       // eslint-disable-next-line no-param-reassign
@@ -244,11 +247,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
       if (layerConfig.initialSettings?.extent)
         // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings.extent = Projection.transformExtent(
-          layerConfig.initialSettings.extent,
-          Projection.PROJECTION_NAMES.LNGLAT,
-          `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
-        );
+        layerConfig.initialSettings.extent = this.getMapViewer().convertExtentLngLatToMapProj(layerConfig.initialSettings.extent);
     }
     return Promise.resolve(layerConfig);
   }
@@ -261,21 +260,16 @@ export class XYZTiles extends AbstractGeoViewRaster {
    *
    * @returns {Extent | undefined} The new layer bounding box.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
-    const layerConfig = this.getLayerEntryConfig(layerPath);
-    const layerBounds = (layerConfig?.olLayer as TileLayer<XYZ>)?.getSource()?.getTileGrid()?.getExtent();
-    const projection =
-      (layerConfig?.olLayer as TileLayer<XYZ>).getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
-      MapEventProcessor.getMapState(this.mapId).currentProjection;
+    const layer = this.getOLLayer(layerPath) as TileLayer<XYZ> | undefined;
+    const projection = layer?.getSource()?.getProjection()?.getCode() || this.getMapViewer().getProjection().getCode();
 
+    const layerBounds = layer?.getSource()?.getTileGrid()?.getExtent();
     if (layerBounds) {
       let transformedBounds = layerBounds;
-      if (this.metadata?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.mapId).currentProjection) {
-        transformedBounds = Projection.transformExtent(
-          layerBounds,
-          `EPSG:${projection}`,
-          `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
-        );
+      if (this.metadata?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')) {
+        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, projection);
       }
 
       // eslint-disable-next-line no-param-reassign

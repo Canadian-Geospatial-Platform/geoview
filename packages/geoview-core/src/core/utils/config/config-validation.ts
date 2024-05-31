@@ -7,7 +7,7 @@ import { AnyValidateFunction } from 'ajv/dist/types';
 
 import defaultsDeep from 'lodash/defaultsDeep';
 
-import { TypeDisplayLanguage, TypeLocalizedString, TypeListOfLocalizedLanguages } from '@config/types/map-schema-types';
+import { TypeDisplayLanguage, TypeLocalizedString } from '@config/types/map-schema-types';
 // import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 
 import { geoviewEntryIsWMS } from '@/geo/layer/geoview-layers/raster/wms';
@@ -378,7 +378,7 @@ export class ConfigValidation {
    * to the supported languages array content.
    * @private
    */
-  static #processLocalizedString(suportedLanguages: TypeListOfLocalizedLanguages, listOfMapConfigLayerEntry?: MapConfigLayerEntry[]): void {
+  static #processLocalizedString(suportedLanguages: TypeDisplayLanguage[], listOfMapConfigLayerEntry?: MapConfigLayerEntry[]): void {
     if (suportedLanguages.includes('en') && suportedLanguages.includes('fr') && listOfMapConfigLayerEntry) {
       const validateLocalizedString = (config: TypeJsonObject): void => {
         if (typeof config === 'object') {

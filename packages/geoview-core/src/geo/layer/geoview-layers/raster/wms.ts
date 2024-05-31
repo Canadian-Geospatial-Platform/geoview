@@ -17,29 +17,32 @@ import cloneDeep from 'lodash/cloneDeep';
 import Static from 'ol/source/ImageStatic';
 
 import { TypeLocalizedString } from '@config/types/map-schema-types';
-// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 
 import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import {
   AbstractGeoViewLayer,
   CONST_LAYER_TYPES,
-  TypeLegend,
   TypeWmsLegend,
   TypeWmsLegendStyle,
 } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, CONST_LAYER_ENTRY_TYPES, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
+import {
+  TypeLayerEntryConfig,
+  TypeGeoviewLayerConfig,
+  CONST_LAYER_ENTRY_TYPES,
+  layerEntryIsGroupLayer,
+  TypeFeatureInfoEntry,
+} from '@/geo/map/map-schema-types';
 import { xmlToJson, getLocalizedValue } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
-import { Projection } from '@/geo/utils/projection';
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
-import { TypeFeatureInfoEntry } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 
@@ -96,6 +99,7 @@ export const geoviewEntryIsWMS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): v
  * @class WMS
  */
 // ******************************************************************************************************************************
+// GV Layers Refactoring - Obsolete (in layers)
 export class WMS extends AbstractGeoViewRaster {
   WMSStyles: string[];
 
@@ -114,6 +118,7 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected override async fetchServiceMetadata(): Promise<void> {
     const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
     if (metadataUrl) {
@@ -154,11 +159,11 @@ export class WMS extends AbstractGeoViewRaster {
           try {
             const arrayOfMetadata = await Promise.all(promisedArrayOfMetadata);
             for (i = 0; i < arrayOfMetadata.length && !arrayOfMetadata[i]?.Capability; i++)
-              this.getLayerEntryConfig(layerConfigsToQuery[i].layerPath)!.layerStatus = 'error';
+              this.getLayerConfig(layerConfigsToQuery[i].layerPath)!.layerStatus = 'error';
             this.metadata = i < arrayOfMetadata.length ? arrayOfMetadata[i] : null;
             if (this.metadata) {
               for (; i < arrayOfMetadata.length; i++) {
-                if (!arrayOfMetadata[i]?.Capability) this.getLayerEntryConfig(layerConfigsToQuery[i].layerPath)!.layerStatus = 'error';
+                if (!arrayOfMetadata[i]?.Capability) this.getLayerConfig(layerConfigsToQuery[i].layerPath)!.layerStatus = 'error';
                 else if (!this.#getLayerMetadataEntry(layerConfigsToQuery[i].layerId!)) {
                   const metadataLayerPathToAdd = this.#getMetadataLayerPath(
                     layerConfigsToQuery[i].layerId!,
@@ -191,6 +196,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the execution is completed.
    * @private
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   async #getServiceMetadata(url: string): Promise<TypeJsonObject | null> {
     try {
       const response = await fetch(url);
@@ -212,6 +218,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<void>} A promise that the execution is completed.
    * @private
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   async #fetchXmlServiceMetadata(metadataUrl: string): Promise<void> {
     try {
       const parser = new WMSCapabilities();
@@ -255,6 +262,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {number[]} An array containing the path to the layer or [] if not found.
    * @private
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   #getMetadataLayerPath(layerName: string, layerProperty: TypeJsonObject, pathToTheParentLayer: number[] = []): number[] {
     const newLayerPath = [...pathToTheParentLayer];
     if (Array.isArray(layerProperty)) {
@@ -287,6 +295,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeJsonObject} layerToAdd The layer property to add
    * @private
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   #addLayerToMetadataInstance(
     metadataLayerPathToAdd: number[],
     metadataLayer: TypeJsonObject | undefined,
@@ -315,6 +324,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {TypeLayerEntryConfig[]} The array of layer configurations.
    * @private
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   #getLayersToQuery(): TypeLayerEntryConfig[] {
     const arrayOfLayerIds: TypeLayerEntryConfig[] = [];
     const gatherLayerIds = (listOfLayerEntryConfig = this.listOfLayerEntryConfig): void => {
@@ -336,6 +346,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeJsonObject | undefined} layer The layer property from the metadata that will inherit the values
    * @private
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   #processMetadataInheritance(parentLayer?: TypeJsonObject, layer: TypeJsonObject | undefined = this.metadata?.Capability?.Layer): void {
     if (parentLayer && layer) {
       // Table 7 — Inheritance of Layer properties specified in the standard with 'replace' behaviour.
@@ -378,6 +389,7 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
@@ -427,6 +439,8 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer configurstion associated to the dynamic group.
    * @private
    */
+  // TODO: Refactor - Layers Refactoring - Check here for layer metadata config vs layers
+  // GV Layers Refactoring - Obsolete (in config? in layers?)
   #createGroupLayer(layer: TypeJsonObject, layerConfig: AbstractBaseLayerEntryConfig): void {
     // TODO: Refactor - createGroup is the same thing for all the layers type? group is a geoview structure.
     // TO.DOCONT: Should it be handle upper in abstract class to loop in structure and launch the creation of a leaf?
@@ -444,7 +458,9 @@ export class WMS extends AbstractGeoViewRaster {
         fr: subLayer.Title as string,
       };
       newListOfLayerEntryConfig.push(subLayerEntryConfig);
-      subLayerEntryConfig.registerLayerConfig();
+
+      // FIXME: Temporary patch to keep the behavior until those layer classes don't exist
+      this.getMapViewer().layer.registerLayerConfigInit(subLayerEntryConfig);
     });
 
     const switchToGroupLayer = Cast<GroupLayerEntryConfig>(layerConfig);
@@ -467,6 +483,8 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {TypeJsonObject | null} The found layer from the capabilities or null if not found.
    * @private
    */
+  // TODO: Refactor - Layers Refactoring - Check here for layer metadata config vs layers
+  // GV Layers Refactoring - Obsolete (in config? in layers?)
   #getLayerMetadataEntry(layerId: string, layer: TypeJsonObject | undefined = this.metadata?.Capability?.Layer): TypeJsonObject | null {
     if (!layer) return null;
     if ('Name' in layer && (layer.Name as string) === layerId) return layer;
@@ -488,8 +506,9 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns {TypeBaseRasterLayer | null} The GeoView raster layer that has been created.
+   * @returns {Promise<TypeBaseRasterLayer | undefined>} The GeoView raster layer that has been created.
    */
+  // GV Layers Refactoring - Obsolete (in config?, in layers?)
   protected override async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | undefined> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
@@ -551,13 +570,13 @@ export class WMS extends AbstractGeoViewRaster {
         // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
         // GV            in the 'loading' state if the flag value is false.
 
-        // TODO: Refactor - Wire it up
-        this.setLayerAndLoadEndListeners(layerConfig, {
-          olLayer: new ImageLayer(imageLayerOptions),
-          loadEndListenerType: 'image',
-        });
+        // Create the OpenLayer layer
+        const olLayer = new ImageLayer(imageLayerOptions);
 
-        return Promise.resolve(layerConfig.olLayer);
+        // TODO: Refactor - Wire it up
+        this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'image');
+
+        return Promise.resolve(olLayer);
       }
 
       // TODO: find a more centralized way to trap error and display message
@@ -575,10 +594,11 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected override processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     if (geoviewEntryIsWMS(layerConfig)) {
       const layerCapabilities = this.#getLayerMetadataEntry(layerConfig.layerId)!;
-      this.layerMetadata[layerConfig.layerPath] = layerCapabilities;
+      this.setLayerMetadata(layerConfig.layerPath, layerCapabilities);
       if (layerCapabilities) {
         if (layerCapabilities.Attribution) this.attributions.push(layerCapabilities.Attribution.Title as string);
         if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
@@ -589,11 +609,7 @@ export class WMS extends AbstractGeoViewRaster {
         // if (layerConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
         //   layerConfig.initialSettings.maxZoom = layerCapabilities.MaxScaleDenominator as number;
         if (layerConfig.initialSettings?.extent)
-          layerConfig.initialSettings.extent = Projection.transformExtent(
-            layerConfig.initialSettings.extent,
-            Projection.PROJECTION_NAMES.LNGLAT,
-            `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
-          );
+          layerConfig.initialSettings.extent = this.getMapViewer().convertExtentLngLatToMapProj(layerConfig.initialSettings.extent);
 
         if (!layerConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox) {
           layerConfig.initialSettings!.bounds = layerCapabilities.EX_GeographicBoundingBox as Extent;
@@ -615,6 +631,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeJsonObject} wmsTimeDimension The WMS time dimension object
    * @param {OgcWmsLayerEntryConfig} layerConfig The layer entry to configure
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected processTemporalDimension(wmsTimeDimension: TypeJsonObject, layerConfig: OgcWmsLayerEntryConfig): void {
     if (wmsTimeDimension !== undefined) {
       this.setTemporalDimension(layerConfig.layerPath, DateMgt.createDimensionFromOGC(wmsTimeDimension));
@@ -629,9 +646,10 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected override getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const { map } = MapEventProcessor.getMapViewer(this.mapId);
-    return this.getFeatureInfoAtCoordinate(map.getCoordinateFromPixel(location), layerPath);
+    // Redirect to getFeatureInfoAtCoordinate
+    return this.getFeatureInfoAtCoordinate(this.getMapViewer().map.getCoordinateFromPixel(location), layerPath);
   }
 
   /** ***************************************************************************************************************************
@@ -642,15 +660,12 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The promised feature info table.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected override getFeatureInfoAtCoordinate(
     location: Coordinate,
     layerPath: string
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const convertedLocation = Projection.transform(
-      location,
-      `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`,
-      Projection.PROJECTION_NAMES.LNGLAT
-    );
+    const convertedLocation = this.getMapViewer().convertCoordinateMapProjToLngLat(location);
     return this.getFeatureInfoAtLongLat(convertedLocation, layerPath);
   }
 
@@ -662,18 +677,19 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The promised feature info table.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected override async getFeatureInfoAtLongLat(
     lnglat: Coordinate,
     layerPath: string
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       // Get the layer config in a loaded phase
-      const layerConfig = this.getLayerEntryConfig(layerPath) as OgcWmsLayerEntryConfig;
+      const layerConfig = this.getLayerConfig(layerPath) as OgcWmsLayerEntryConfig;
+      const layer = this.getOLLayer(layerPath) as OlLayer;
+
       if (!this.getVisible(layerPath)) return [];
 
-      const viewResolution = MapEventProcessor.getMapViewer(this.mapId).getView().getResolution() as number;
-      const crs = `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`;
-      const clickCoordinate = Projection.transform(lnglat, Projection.PROJECTION_NAMES.LNGLAT, crs);
+      const clickCoordinate = this.getMapViewer().convertCoordinateLngLatToMapProj(lnglat);
       if (
         lnglat[0] < layerConfig.initialSettings!.bounds![0] ||
         layerConfig.initialSettings!.bounds![2] < lnglat[0] ||
@@ -682,7 +698,7 @@ export class WMS extends AbstractGeoViewRaster {
       )
         return [];
 
-      const wmsSource = (layerConfig.olLayer as OlLayer).getSource() as ImageWMS;
+      const wmsSource = layer.getSource() as ImageWMS;
       let infoFormat = '';
       const featureInfoFormat = this.metadata?.Capability?.Request?.GetFeatureInfo?.Format as TypeJsonArray;
       if (featureInfoFormat)
@@ -690,7 +706,8 @@ export class WMS extends AbstractGeoViewRaster {
         else if (featureInfoFormat.includes('text/plain' as TypeJsonObject)) infoFormat = 'text/plain';
         else throw new Error('Parameter info_format of GetFeatureInfo only support text/xml and text/plain for WMS services.');
 
-      const featureInfoUrl = wmsSource.getFeatureInfoUrl(clickCoordinate, viewResolution, crs, {
+      const viewResolution = this.getMapViewer().getView().getResolution()!;
+      const featureInfoUrl = wmsSource.getFeatureInfoUrl(clickCoordinate, viewResolution, this.getMapViewer().getProjection().getCode(), {
         INFO_FORMAT: infoFormat,
       });
       if (featureInfoUrl) {
@@ -746,6 +763,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {TypeJsonObject | null} URL of a Legend image in png format or null
    * @private
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   #getLegendUrlFromCapabilities(layerConfig: OgcWmsLayerEntryConfig, chosenStyle?: string): TypeJsonObject | null {
     const layerCapabilities = this.#getLayerMetadataEntry(layerConfig.layerId);
     if (Array.isArray(layerCapabilities?.Style)) {
@@ -781,6 +799,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {blob} image blob
    * @private
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   #getLegendImage(layerConfig: OgcWmsLayerEntryConfig, chosenStyle?: string): Promise<string | ArrayBuffer | null> {
     const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
       const readImage = (blob: Blob): Promise<string | ArrayBuffer | null> =>
@@ -825,14 +844,15 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<TypeWmsLegendStylel>} The legend of the style.
    * @private
    */
-  async #getStyleLegend(layerConfig: OgcWmsLayerEntryConfig, position: number): Promise<TypeWmsLegendStyle> {
+  // GV Layers Refactoring - Obsolete (in layers)
+  async #getStyleLegend(layerConfig: OgcWmsLayerEntryConfig, wmsStyle: string): Promise<TypeWmsLegendStyle> {
     try {
-      const chosenStyle: string | undefined = this.WMSStyles[position];
+      const chosenStyle: string | undefined = wmsStyle;
       let styleLegend: TypeWmsLegendStyle;
       const styleLegendImage = await this.#getLegendImage(layerConfig!, chosenStyle);
       if (!styleLegendImage) {
         styleLegend = {
-          name: this.WMSStyles[position],
+          name: wmsStyle,
           legend: null,
         };
         return styleLegend;
@@ -846,19 +866,19 @@ export class WMS extends AbstractGeoViewRaster {
         const drawingContext = drawingCanvas.getContext('2d')!;
         drawingContext.drawImage(styleImage, 0, 0);
         styleLegend = {
-          name: this.WMSStyles[position],
+          name: wmsStyle,
           legend: drawingCanvas,
         };
         return styleLegend;
       }
 
       return {
-        name: this.WMSStyles[position],
+        name: wmsStyle,
         legend: null,
       } as TypeWmsLegendStyle;
     } catch (error) {
       return {
-        name: this.WMSStyles[position],
+        name: wmsStyle,
         legend: null,
       } as TypeWmsLegendStyle;
     }
@@ -872,25 +892,27 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   override async getLegend(layerPath: string): Promise<TypeLegend | null> {
     try {
       // Get the layer config in a loaded phase
-      const layerConfig = this.getLayerEntryConfig(layerPath) as OgcWmsLayerEntryConfig;
+      const layerConfig = this.getLayerConfig(layerPath) as OgcWmsLayerEntryConfig;
 
       let legend: TypeWmsLegend;
       const legendImage = await this.#getLegendImage(layerConfig!);
       const styleLegends: TypeWmsLegendStyle[] = [];
+
+      // If more than 1
       if (this.WMSStyles.length > 1) {
         for (let i = 0; i < this.WMSStyles.length; i++) {
-          // TODO: refactor - does this await in a loop may haev an impact on performance?
+          // TODO: refactor - does this await in a loop may have an impact on performance?
           // TO.DOCONT: In this case here, when glancing at the code, the only reason to await would be if the order that the styleLegend
           // TO.DOCONT: get added to the styleLegends array MUST be the same order as they are in the WMSStyles array (as in they are 2 arrays with same indexes pointers).
           // TO.DOCONT: Without the await, WMSStyles[2] stuff could be associated with something in styleLegends[1] position for example (1<>2).
           // TO.DOCONT: If we remove the await, be mindful of that (maybe add this remark in the TODO?).
           // TO.DOCONT: In any case, I'd suggest to remove the await indeed, for performance, and rewrite the code to make it work (probably not 2 distinct arrays).
-          // TODO: refactor - never call an explicit function with an index counter. this.WMSStyles[i] should be sent to the getStyleLegend function instead of doing the this.WMSStyles[i] in the latter. Would read a lot better and more easily reused.
           // eslint-disable-next-line no-await-in-loop
-          const styleLegend = await this.#getStyleLegend(layerConfig!, i);
+          const styleLegend = await this.#getStyleLegend(layerConfig!, this.WMSStyles[i]);
           styleLegends.push(styleLegend);
         }
       }
@@ -905,7 +927,6 @@ export class WMS extends AbstractGeoViewRaster {
           drawingContext.drawImage(image, 0, 0);
           legend = {
             type: this.type,
-            layerPath: layerConfig.layerPath,
             layerName: layerConfig!.layerName,
             legend: drawingCanvas,
             styles: styleLegends.length ? styleLegends : undefined,
@@ -916,7 +937,6 @@ export class WMS extends AbstractGeoViewRaster {
 
       legend = {
         type: this.type,
-        layerPath: layerConfig.layerPath,
         layerName: layerConfig!.layerName,
         legend: null,
         styles: styleLegends.length > 1 ? styleLegends : undefined,
@@ -939,6 +959,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {TypeFeatureInfoEntry[]} The feature info table.
    * @private
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   #formatWmsFeatureInfoResult(
     featureMember: TypeJsonObject,
     layerConfig: OgcWmsLayerEntryConfig,
@@ -1018,6 +1039,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {TypeJsonObject | undefined} The promised feature info table.
    * @private
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   static #getAttribute(jsonObject: TypeJsonObject, attributeEnding: string): TypeJsonObject | undefined {
     const keyFound = Object.keys(jsonObject).find((key) => key.endsWith(attributeEnding));
     return keyFound ? jsonObject[keyFound] : undefined;
@@ -1029,14 +1051,29 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {string} wmsStyleId The style identifier that will be used.
    * @param {string} layerPath The layer path to the layer's configuration.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   setWmsStyle(wmsStyleId: string, layerPath: string): void {
-    const layerConfig = this.getLayerEntryConfig(layerPath) as OgcWmsLayerEntryConfig | undefined | null;
+    // Get the Layer using the trick for now
+    const layer = this.getOLLayer(layerPath) as ImageLayer<ImageWMS> | undefined;
+
     // TODO: Verify if we can apply more than one style at the same time since the parameter name is STYLES
-    if (layerConfig?.olLayer) (layerConfig.olLayer as ImageLayer<ImageWMS>).getSource()?.updateParams({ STYLES: wmsStyleId });
+    if (layer) layer.getSource()?.updateParams({ STYLES: wmsStyleId });
+  }
+
+  /**
+   * Overrides when the layer gets in loaded status.
+   */
+  // GV Layers Refactoring - Obsolete (in layers)
+  override onLoaded(layerConfig: AbstractBaseLayerEntryConfig): void {
+    // Call parent
+    super.onLoaded(layerConfig);
+
+    // Apply view filter immediately
+    this.applyViewFilter(layerConfig.layerPath, (layerConfig as OgcWmsLayerEntryConfig).layerFilter || '');
   }
 
   /** ***************************************************************************************************************************
-   * Apply a view filter to the layer. When the combineLegendFilter flag is false, the filter paramater is used alone to display
+   * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter paramater is used alone to display
    * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
    * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
    * is done.
@@ -1046,13 +1083,16 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} combineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   applyViewFilter(layerPath: string, filter: string, combineLegendFilter = true): void {
-    const layerConfig = this.getLayerEntryConfig(layerPath) as OgcWmsLayerEntryConfig;
+    const layerConfig = this.getLayerConfig(layerPath) as OgcWmsLayerEntryConfig;
+    const olLayer = this.getOLLayer(layerPath) as ImageLayer<ImageWMS>;
+
     // Log
     logger.logTraceCore('WMS - applyViewFilter', layerPath);
 
     // Get source
-    const source = (layerConfig.olLayer as ImageLayer<ImageWMS>).getSource();
+    const source = olLayer.getSource();
     if (source) {
       let filterValueToUse = filter;
       layerConfig.legendFilterIsOff = !combineLegendFilter;
@@ -1078,7 +1118,7 @@ export class WMS extends AbstractGeoViewRaster {
           )}`;
         });
         source.updateParams({ [dimension]: filterValueToUse.replace(/\s*/g, '') });
-        layerConfig.olLayer!.changed();
+        olLayer.changed();
       }
     }
   }
@@ -1091,19 +1131,22 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {Extent | undefined} The new layer bounding box.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
-    const layerConfig = this.getLayerEntryConfig(layerPath);
-    const projection =
-      (layerConfig?.olLayer as ImageLayer<Static>)?.getSource()?.getProjection()?.getCode().replace('EPSG:', '') ||
-      MapEventProcessor.getMapState(this.mapId).currentProjection;
+    const layerConfig = this.getLayerConfig(layerPath);
+    const layer = this.getOLLayer(layerPath) as ImageLayer<Static> | undefined;
+    const projection = layer?.getSource()?.getProjection()?.getCode() || this.getMapViewer().getProjection().getCode();
+
     let layerBounds = layerConfig?.initialSettings?.bounds || [];
-    layerBounds = Projection.transformExtent(layerBounds, 'EPSG:4326', `EPSG:${projection}`);
+    // TODO: Check - Are we sure this is 4326, always?
+    layerBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, 'EPSG:4326');
+
     const boundingBoxes = this.metadata?.Capability.Layer.BoundingBox;
     let bbExtent: Extent | undefined;
 
     if (boundingBoxes) {
       for (let i = 0; i < (boundingBoxes.length as number); i++) {
-        if (boundingBoxes[i].crs === `EPSG:${projection}`)
+        if (boundingBoxes[i].crs === projection)
           bbExtent = [
             boundingBoxes[i].extent[1],
             boundingBoxes[i].extent[0],

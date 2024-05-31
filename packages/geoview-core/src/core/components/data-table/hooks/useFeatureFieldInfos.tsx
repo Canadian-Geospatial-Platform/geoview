@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { TypeLayerData } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { MappedLayerDataType } from '@/core/components/data-table/data-table-types';
 import { logger } from '@/core/utils/logger';
 
@@ -8,7 +8,7 @@ import { logger } from '@/core/utils/logger';
  * @param {TypeLayerData[]} layerData data from the query
  * @returns {MappedLayerDataType[]} layerData with columns.
  */
-export function useFeatureFieldInfos(layerData: TypeLayerData[]): MappedLayerDataType[] {
+export function useFeatureFieldInfos(layerData: TypeAllFeatureInfoResultSetEntry[]): MappedLayerDataType[] {
   const mappedLayerData = useMemo(() => {
     // Log
     logger.logTraceUseEffect('DATA TABLE - useFeatureFieldInfos', layerData);

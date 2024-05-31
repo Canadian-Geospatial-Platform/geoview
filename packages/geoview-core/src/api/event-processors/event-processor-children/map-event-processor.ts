@@ -6,12 +6,12 @@ import View, { FitOptions } from 'ol/View';
 import { KeyboardPan } from 'ol/interaction';
 import { Coordinate } from 'ol/coordinate';
 
-import { TypeBasemapOptions, TypeInteraction, TypeValidMapProjectionCodes } from '@config/types/map-schema-types';
 import { CV_MAP_EXTENTS } from '@config/types/config-constants';
+import { TypeBasemapOptions, TypeInteraction, TypeValidMapProjectionCodes } from '@config/types/map-schema-types';
 import { api } from '@/app';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
-import { TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoEntry, TypeGeometry, TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { Projection } from '@/geo/utils/projection';
@@ -20,16 +20,14 @@ import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { whenThisThen } from '@/core/utils/utilities';
-import { TypeFeatureInfoEntry, TypeGeometry } from '@/geo/layer/layer-sets/abstract-layer-set';
 
 import { AppEventProcessor } from './app-event-processor';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TypeClickMarker } from '@/core/components';
 import { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { TypeFeatureInfoResultSet, TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
-import { TypeHoverFeatureInfo } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
-import { TypeFeatureInfoResultSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.
@@ -518,7 +516,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
           // Go for it
           // eslint-disable-next-line no-param-reassign
           layerInfo.visible = newVisibility;
-          this.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerInfo.layerPath)?.setVisible(layerInfo.visible, layerInfo.layerPath);
+          this.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layerInfo.layerPath)?.setVisible(layerInfo.visible, layerInfo.layerPath);
         }
       }
     });
@@ -528,7 +526,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       if ((!layerVisibility || newValue) && parentLayerVisibility === false) {
         if (parentLayerInfo) {
           parentLayerInfo.visible = true;
-          this.getMapViewerLayerAPI(mapId).getGeoviewLayer(parentLayerPath)?.setVisible(true, parentLayerPath);
+          this.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(parentLayerPath)?.setVisible(true, parentLayerPath);
         }
       }
       const children = curOrderedLayerInfo.filter(
@@ -803,7 +801,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static setLayerZIndices = (mapId: string): void => {
     const reversedLayers = [...this.getMapStateProtected(mapId).orderedLayerInfo].reverse();
     reversedLayers.forEach((orderedLayerInfo, index) => {
-      const olLayer = this.getMapViewerLayerAPI(mapId).getLayerEntryConfig(orderedLayerInfo.layerPath)?.olLayer;
+      const olLayer = this.getMapViewerLayerAPI(mapId).getOLLayer(orderedLayerInfo.layerPath);
       if (olLayer) olLayer?.setZIndex(index + 10);
     });
   };

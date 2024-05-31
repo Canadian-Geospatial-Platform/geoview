@@ -9,15 +9,12 @@ import { Extent } from 'ol/extent';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
-import { codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/abstract-layer-set';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { Projection } from '@/geo/utils/projection';
 import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
@@ -25,6 +22,8 @@ import {
   TypeUniqueValueStyleInfo,
   TypeStyleConfig,
   layerEntryIsGroupLayer,
+  codedValueType,
+  rangeDomainType,
 } from '@/geo/map/map-schema-types';
 
 import {
@@ -37,6 +36,7 @@ import {
 } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
+import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
@@ -112,6 +112,7 @@ export const geoviewEntryIsEsriImage = (verifyIfGeoViewEntry: TypeLayerEntryConf
  * @class EsriImage
  */
 // ******************************************************************************************************************************
+// GV Layers Refactoring - Obsolete (in layers)
 export class EsriImage extends AbstractGeoViewRaster {
   /** ****************************************************************************************************************************
    * Initialize layer.
@@ -132,9 +133,10 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeLegend | null>} The legend of the layer.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   override async getLegend(layerPath: string): Promise<TypeLegend | null> {
     try {
-      const layerConfig = this.getLayerEntryConfig(layerPath) as EsriImageLayerEntryConfig | undefined | null;
+      const layerConfig = this.getLayerConfig(layerPath) as EsriImageLayerEntryConfig | undefined | null;
       if (!layerConfig) return null;
       const legendUrl = `${getLocalizedValue(
         layerConfig.geoviewLayerConfig.metadataAccessPath,
@@ -152,7 +154,6 @@ export class EsriImage extends AbstractGeoViewRaster {
       if (!legendInfo) {
         const legend: TypeLegend = {
           type: this.type,
-          layerPath,
           layerName: layerConfig.layerName!,
           styleConfig: layerConfig.style,
           legend: null,
@@ -185,7 +186,6 @@ export class EsriImage extends AbstractGeoViewRaster {
       layerConfig.style = styleConfig;
       const legend: TypeLegend = {
         type: this.type,
-        layerPath,
         layerName: layerConfig?.layerName,
         styleConfig,
         legend: await getLegendStyles(
@@ -209,6 +209,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns {TypeLayerEntryConfig[]} A new list of layer entries configuration with deleted error layers.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
@@ -234,7 +235,9 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number' {
+    // TODO: Refactor - Layers refactoring. Is this function really valid for an esri-image? Remove?
     return commonGetFieldType(this, fieldName, layerConfig);
   }
 
@@ -246,6 +249,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected override getFieldDomain(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): null | codedValueType | rangeDomainType {
     return commonGetFieldDomain(this, fieldName, layerConfig);
   }
@@ -255,6 +259,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
    * @param {EsriImageLayerEntryConfig} layerConfig The layer entry to configure
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: EsriImageLayerEntryConfig): void {
     commonProcessTemporalDimension(this, esriTimeDimension, layerConfig, true);
   }
@@ -264,6 +269,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @param {EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   processFeatureInfoConfig(layerConfig: EsriImageLayerEntryConfig): void {
     commonProcessFeatureInfoConfig(this, layerConfig);
   }
@@ -274,6 +280,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {EsriImage} this The ESRI layer instance pointer.
    * @param {EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   processInitialSettings(layerConfig: EsriImageLayerEntryConfig): void {
     commonProcessInitialSettings(this, layerConfig);
   }
@@ -286,6 +293,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected override processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     return commonProcessLayerMetadata(this, layerConfig);
   }
@@ -295,8 +303,9 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @param {EsriImageLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
+   * @returns { Promise<TypeBaseRasterLayer | undefined>} The GeoView raster layer that has been created.
    */
+  // GV Layers Refactoring - Obsolete (in config?, in layers?)
   protected override async processOneLayerEntry(layerConfig: EsriImageLayerEntryConfig): Promise<TypeBaseRasterLayer | undefined> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
@@ -328,17 +337,29 @@ export class EsriImage extends AbstractGeoViewRaster {
     // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
     // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
 
-    // TODO: Refactor - Wire it up
-    this.setLayerAndLoadEndListeners(layerConfig, {
-      olLayer: new ImageLayer(imageLayerOptions),
-      loadEndListenerType: 'image',
-    });
+    // Create the OpenLayer layer
+    const olLayer = new ImageLayer(imageLayerOptions);
 
-    return Promise.resolve(layerConfig.olLayer);
+    // TODO: Refactor - Wire it up
+    this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'image');
+
+    return Promise.resolve(olLayer);
+  }
+
+  /**
+   * Overrides when the layer gets in loaded status.
+   */
+  // GV Layers Refactoring - Obsolete (in layers)
+  override onLoaded(layerConfig: AbstractBaseLayerEntryConfig): void {
+    // Call parent
+    super.onLoaded(layerConfig);
+
+    // Apply view filter immediately
+    this.applyViewFilter(layerConfig.layerPath, (layerConfig as EsriImageLayerEntryConfig).layerFilter || '');
   }
 
   /** ***************************************************************************************************************************
-   * Apply a view filter to the layer. When the combineLegendFilter flag is false, the filter paramater is used alone to display
+   * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter paramater is used alone to display
    * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
    * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
    * is done.
@@ -347,14 +368,16 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} combineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   applyViewFilter(layerPath: string, filter: string, combineLegendFilter?: boolean): void {
     // Log
     logger.logTraceCore('ESRIImage - applyViewFilter', layerPath);
 
-    const layerConfig = this.getLayerEntryConfig(layerPath) as EsriImageLayerEntryConfig;
+    const layerConfig = this.getLayerConfig(layerPath) as EsriImageLayerEntryConfig;
+    const olLayer = this.getOLLayer(layerPath) as ImageLayer<ImageArcGISRest>;
 
     // Get source
-    const source = (layerConfig.olLayer as ImageLayer<ImageArcGISRest>).getSource();
+    const source = olLayer.getSource();
     if (source) {
       let filterValueToUse = filter;
       layerConfig.legendFilterIsOff = !combineLegendFilter;
@@ -380,7 +403,7 @@ export class EsriImage extends AbstractGeoViewRaster {
           )}`;
         });
         source.updateParams({ [dimension]: filterValueToUse.replace(/\s*/g, '') });
-        layerConfig.olLayer!.changed();
+        olLayer.changed();
       }
     }
   }
@@ -393,11 +416,13 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * @returns {Extent | undefined} The new layer bounding box.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
-    const layerConfig = this.getLayerEntryConfig(layerPath);
-    const layerBounds = layerConfig?.initialSettings?.bounds || [];
-    const projection = this.metadata?.fullExtent?.spatialReference?.wkid || MapEventProcessor.getMapState(this.mapId).currentProjection;
+    const layerConfig = this.getLayerConfig(layerPath);
+    const projection =
+      this.metadata?.fullExtent?.spatialReference?.wkid || this.getMapViewer().getProjection().getCode().replace('EPSG:', '');
 
+    const layerBounds = layerConfig?.initialSettings?.bounds || [];
     if (this.metadata?.fullExtent) {
       layerBounds[0] = this.metadata?.fullExtent.xmin as number;
       layerBounds[1] = this.metadata?.fullExtent.ymin as number;
@@ -407,12 +432,8 @@ export class EsriImage extends AbstractGeoViewRaster {
 
     if (layerBounds) {
       let transformedBounds = layerBounds;
-      if (this.metadata?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.mapId).currentProjection) {
-        transformedBounds = Projection.transformExtent(
-          layerBounds,
-          `EPSG:${projection}`,
-          `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
-        );
+      if (this.metadata?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')) {
+        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, `EPSG:${projection}`);
       }
 
       // eslint-disable-next-line no-param-reassign

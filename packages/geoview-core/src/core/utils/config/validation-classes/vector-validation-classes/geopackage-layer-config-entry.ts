@@ -8,7 +8,7 @@ export class GeoPackageLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * The class constructor.
-   * @param {GeoPackageLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
+   * @param {GeoPackageLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: GeoPackageLayerEntryConfig) {
     super(layerConfig);

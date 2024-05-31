@@ -10,11 +10,6 @@ import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 
 type UIActions = IUIState['actions'];
 
-type FocusItemProps = {
-  activeElementId: string | false;
-  callbackElementId: string | false;
-};
-
 export type ActiveAppBarTabType = {
   tabId: string;
   tabGroup: string;
@@ -25,7 +20,7 @@ export interface IUIState {
   activeFooterBarTabId: string;
   activeTrapGeoView: boolean;
   activeAppBarTab: ActiveAppBarTabType;
-  appBarComponents: TypeValidAppBarCoreProps;
+  appBarComponents: TypeValidAppBarCoreProps[];
   corePackagesComponents: TypeMapCorePackages;
   focusITem: FocusItemProps;
   mapInfoExpanded: boolean;
@@ -207,6 +202,11 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
   return init;
 }
 
+type FocusItemProps = {
+  activeElementId: string | false;
+  callbackElementId: string | false;
+};
+
 // **********************************************************
 // UI state selectors
 // **********************************************************
@@ -214,7 +214,8 @@ export const useUIActiveFocusItem = (): FocusItemProps => useStore(useGeoViewSto
 export const useUIActiveFooterBarTabId = (): string => useStore(useGeoViewStore(), (state) => state.uiState.activeFooterBarTabId);
 export const useActiveAppBarTab = (): ActiveAppBarTabType => useStore(useGeoViewStore(), (state) => state.uiState.activeAppBarTab);
 export const useUIActiveTrapGeoView = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.activeTrapGeoView);
-export const useUIAppbarComponents = (): TypeValidAppBarCoreProps => useStore(useGeoViewStore(), (state) => state.uiState.appBarComponents);
+export const useUIAppbarComponents = (): TypeValidAppBarCoreProps[] =>
+  useStore(useGeoViewStore(), (state) => state.uiState.appBarComponents);
 export const useUICorePackagesComponents = (): TypeMapCorePackages =>
   useStore(useGeoViewStore(), (state) => state.uiState.corePackagesComponents);
 export const useUIFooterPanelResizeValue = (): number => useStore(useGeoViewStore(), (state) => state.uiState.footerPanelResizeValue);

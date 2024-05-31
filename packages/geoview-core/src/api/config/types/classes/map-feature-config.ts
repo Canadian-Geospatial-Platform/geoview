@@ -1,6 +1,23 @@
 import cloneDeep from 'lodash/cloneDeep';
 import defaultsDeep from 'lodash/defaultsDeep';
 
+import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
+import { EsriDynamicLayerConfig } from '@config/types/classes/geoview-config/raster-config/esri-dynamic-config';
+import { Cast, TypeJsonArray, TypeJsonObject, toJsonObject } from '@config/types/config-types';
+import { EsriFeatureLayerConfig } from '@config/types/classes/geoview-config/vector-config/esri-feature-config';
+import {
+  CV_BASEMAP_ID,
+  CV_BASEMAP_LABEL,
+  CV_BASEMAP_SHADED,
+  CV_CONST_LAYER_TYPES,
+  CV_DEFAULT_MAP_FEATURE_CONFIG,
+  CV_MAP_CENTER,
+  CV_MAP_CONFIG_SCHEMA_PATH,
+  CV_MAP_EXTENTS,
+  ACCEPTED_SCHEMA_VERSIONS,
+  VALID_PROJECTION_CODES,
+} from '@config/types/config-constants';
+import { isvalidComparedToSchema } from '@config/utils';
 import {
   Extent,
   TypeAppBarProps,
@@ -16,24 +33,7 @@ import {
   TypeServiceUrls,
   TypeValidMapProjectionCodes,
   TypeValidVersions,
-  VALID_PROJECTION_CODES,
-  VALID_VERSIONS,
 } from '@config/types/map-schema-types';
-import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { EsriDynamicLayerConfig } from '@config/types/classes/geoview-config/raster-config/esri-dynamic-config';
-import { Cast, TypeJsonArray, TypeJsonObject, toJsonObject } from '@config/types/config-types';
-import { EsriFeatureLayerConfig } from '@config/types/classes/geoview-config/vector-config/esri-feature-config';
-import {
-  CV_BASEMAP_ID,
-  CV_BASEMAP_LABEL,
-  CV_BASEMAP_SHADED,
-  CV_CONST_LAYER_TYPES,
-  CV_DEFAULT_MAP_FEATURE_CONFIG,
-  CV_MAP_CENTER,
-  CV_MAP_CONFIG_SCHEMA_PATH,
-  CV_MAP_EXTENTS,
-} from '@config/types/config-constants';
-import { isvalidComparedToSchema } from '@config/utils';
 import { isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { logger } from '@/core//utils/logger';
 
@@ -114,11 +114,11 @@ export class MapFeatureConfig {
     );
     this.map.listOfGeoviewLayerConfig = (gvMap.listOfGeoviewLayerConfig as TypeJsonArray)
       .map((geoviewLayerConfig) => {
-        return MapFeatureConfig.nodeFactory(geoviewLayerConfig, this.#language, this);
+        return MapFeatureConfig.nodeFactory(geoviewLayerConfig, this.#language, this)!;
       })
-      .filter((geoviewLayerInstance) => {
-        return geoviewLayerInstance;
-      }) as AbstractGeoviewLayerConfig[];
+      .filter((layerConfig) => {
+        return layerConfig;
+      });
     this.serviceUrls = Cast<TypeServiceUrls>(defaultsDeep(clonedJsonConfig.serviceUrls, CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls));
     this.theme = (clonedJsonConfig.theme || CV_DEFAULT_MAP_FEATURE_CONFIG.theme) as TypeDisplayTheme;
     this.navBar = [...((clonedJsonConfig.navBar || CV_DEFAULT_MAP_FEATURE_CONFIG.navBar) as TypeNavBarProps)];
@@ -292,14 +292,14 @@ export class MapFeatureConfig {
 
     this.#validateCenter();
 
-    // zoom cannot be undefined because udefined values were set with default values.
+    // zoom cannot be undefined because undefined values were set with default values.
     const zoom = this.map.viewSettings.initialView!.zoomAndCenter![0];
     this.map.viewSettings.initialView!.zoomAndCenter![0] =
       !Number.isNaN(zoom) && zoom >= 0 && zoom <= 28 ? zoom : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![0];
 
     this.#validateBasemap();
 
-    this.schemaVersionUsed = VALID_VERSIONS.includes(this.schemaVersionUsed!)
+    this.schemaVersionUsed = ACCEPTED_SCHEMA_VERSIONS.includes(this.schemaVersionUsed!)
       ? this.schemaVersionUsed
       : CV_DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed!;
     const minZoom = this.map.viewSettings.minZoom!;
@@ -402,7 +402,7 @@ export class MapFeatureConfig {
         this.map.viewSettings.initialView?.zoomAndCenter[0]
     ) {
       logger.logWarning(
-        `- Invalid zoom level ${(this.#originalgeoviewLayerConfig?.map as TypeJsonObject)?.viewSettings?.initialView?.zoomAndCenter[0]} 
+        `- Invalid zoom level ${(this.#originalgeoviewLayerConfig?.map as TypeJsonObject)?.viewSettings?.initialView?.zoomAndCenter[0]}
         replaced by ${this.map.viewSettings.initialView?.zoomAndCenter[0]} -`
       );
     }
@@ -417,7 +417,7 @@ export class MapFeatureConfig {
       Cast<[number, number]>(originalZoomAndCenter[1]) !== this.map.viewSettings.initialView!.zoomAndCenter![1]
     ) {
       logger.logWarning(
-        `- Invalid center ${originalZoomAndCenter[1]} 
+        `- Invalid center ${originalZoomAndCenter[1]}
         replaced by ${this.map.viewSettings.initialView!.zoomAndCenter![1]}`
       );
     }

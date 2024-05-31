@@ -1,12 +1,12 @@
-import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
-import { TypeLayerEntryConfig, TypeLayerStatus } from '@/geo/map/map-schema-types';
-import { TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { AbstractLayerSet } from './abstract-layer-set';
+import { TypeLegend, TypeLegendResultSet, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 /**
- * A class to hold a set of layers associated with an array of TypeLegend. When this class is instantiated, all layers already
+ * A class to hold a set of layers associated with an array of TypeLegendResultSetEntry. When this class is instantiated, all layers already
  * loaded on the specified map will be added to the set. Layers added afterwards will be added to the set and deleted layers
  * will be removed from the set.
  *
@@ -17,113 +17,97 @@ export class LegendsLayerSet extends AbstractLayerSet {
   declare resultSet: TypeLegendResultSet;
 
   /**
-   * Overrides the behavior to apply when a legends-layer-set wants to register a layer in its set.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer config
+   * Propagate to store
+   * @param {TypeLegendResultSetEntry} resultSetEntry - The result entry to propagate
+   * @private
    */
-  protected override onRegisterLayer(layerConfig: TypeLayerEntryConfig): void {
+  #propagateToStore(resultSetEntry: TypeLegendResultSetEntry): void {
+    LegendEventProcessor.propagateLegendToStore(this.getMapId(), resultSetEntry);
+  }
+
+  /**
+   * Overrides the behavior to apply when a legends-layer-set wants to register a layer in its set.
+   * @param {ConfigBaseClass} layerConfig - The layer config
+   */
+  protected override onRegisterLayer(layerConfig: ConfigBaseClass): void {
     // Log
-    logger.logTraceCore('LEGENDS-LAYER-SET - onRegisterLayer', layerConfig.layerPath, Object.keys(this.resultSet));
+    logger.logTraceCore('LEGENDS-LAYER-SET - onRegisterLayer', layerConfig.layerPath);
 
     // Call parent
     super.onRegisterLayer(layerConfig);
 
-    // Leaving this here for now, likely can be refactored later
-    this.resultSet[layerConfig.layerPath].data = undefined;
+    // Keep track if the legend has been queried
+    this.resultSet[layerConfig.layerPath].legendQueryStatus = 'init';
+
+    // Check if ready to query legend
+    this.#checkQueryLegend(layerConfig);
+
+    // Propagate to the store on registration
+    this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
   }
 
   /**
    * Overrides the behavior to apply when a layer status changed for a legends-layer-set.
-   * @param {ConfigBaseClass} config - The layer config class
-   * @param {string} layerPath - The layer path being affected
+   * @param {ConfigBaseClass} layerConfig - The layer config
    * @param {string} layerStatus - The new layer status
    */
-  protected override onProcessLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
-    // Check some variables as received
-    const layerExists = !!this.resultSet?.[layerPath];
-    const statusHasChanged = this.resultSet?.[layerPath]?.layerStatus !== layerStatus;
-
+  protected override onProcessLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatus: TypeLayerStatus): void {
     // Call parent. After this call, this.resultSet?.[layerPath]?.layerStatus may have changed!
-    super.onProcessLayerStatusChanged(config, layerPath, layerStatus);
+    super.onProcessLayerStatusChanged(layerConfig, layerStatus);
 
-    if (statusHasChanged) {
-      // If the layer has been at least processed, we know its metadata has been processed and legend is ready to be queried (logic to move?)
-      if (layerExists && ['processed', 'loaded'].includes(layerStatus)) {
-        // Query for the legend
-        const legendPromise = this.layerApi.getGeoviewLayer(layerPath)!.queryLegend(layerPath);
+    // Check if ready to query legend
+    this.#checkQueryLegend(layerConfig);
 
-        // Whenever the legend response comes in
-        legendPromise
-          .then((legend: TypeLegend | null | undefined) => {
-            // If legend received
-            if (legend) {
-              // Query completed keep it
-              this.resultSet[layerPath].data = legend;
+    // Propagate to the store on layer status changed
+    this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
+  }
 
-              // Propagate to store
-              LegendEventProcessor.propagateLegendToStore(this.mapId, layerPath, this.resultSet[layerPath]);
+  /**
+   * Checks if the layer config has reached the 'processed' status or greater and if so queries the legend.
+   * @param {ConfigBaseClass} layerConfig - The layer config
+   */
+  #checkQueryLegend(layerConfig: ConfigBaseClass): void {
+    // Get the layer
+    const layer = this.layerApi.getGeoviewLayerHybrid(layerConfig.layerPath);
 
-              // Inform that the layer set has been updated by triggering an event down the road
-              this.onLayerSetUpdatedProcess(layerPath);
-            }
-          })
-          .catch((error) => {
-            // Log
-            logger.logPromiseFailed('legendPromise in onProcessLayerStatusChanged in legendsLayerSet', error);
-          });
-      }
+    // If the layer legend should be queried
+    if (layer && this.#legendShouldBeQueried(layerConfig)) {
+      // Flag
+      this.resultSet[layerConfig.layerPath].legendQueryStatus = 'querying';
 
-      if (layerExists || layerStatus === 'loaded') {
-        // Get the config from the registered layers
-        const layerConfig = this.layerApi.getLayerEntryConfig(layerPath)!;
+      // Query the legend
+      const legendPromise = layer.queryLegend(layerConfig.layerPath);
 
-        // TODO: Check - I'm not sure where the logic to set layer status for the parent to loaded when a child is loaded/error is, but
-        // TO.DOCONT: I had to add this as part of the refactor to make it work
-        // Possibly update the layer status(es) of the parent(s)
-        this.#changeLayerStatusOfParentsRecursive(layerConfig, layerStatus);
+      // Whenever the legend response comes in
+      legendPromise
+        ?.then((legend: TypeLegend | null | undefined) => {
+          // If legend received
+          if (legend) {
+            // Flag
+            this.resultSet[layerConfig.layerPath].legendQueryStatus = 'queried';
 
-        // Propagate to store
-        LegendEventProcessor.propagateLegendToStore(this.mapId, layerPath, this.resultSet[layerPath]);
-      }
+            // Query completed, keep it
+            this.resultSet[layerConfig.layerPath].data = legend;
+
+            // Propagate to the store once the legend is received
+            this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
+
+            // Inform that the layer set has been updated by calling parent to emit event
+            this.onLayerSetUpdatedProcess(layerConfig);
+          }
+        })
+        .catch((error) => {
+          // Log
+          logger.logPromiseFailed('legendPromise in #checkQueryLegend in LegendsLayerSet', error);
+        });
     }
   }
 
   /**
-   * Recursively tries to set the layer status on the parent group layer(s), depending if the layer entry has a parent and
-   * if the current layer status is loaded or error.
-   * @param {TypeLayerEntryConfig} currentLayerConfig - The current layer config being checked
-   * @param {TypeLayerStatus} currentLayerStatus - The layer status that triggered the check on the parent(s)
-   * @private
+   * Indicates if the layer path should be queried
    */
-  #changeLayerStatusOfParentsRecursive(currentLayerConfig: TypeLayerEntryConfig, currentLayerStatus: TypeLayerStatus): void {
-    // If layer has a parent
-    if (currentLayerConfig.parentLayerConfig) {
-      // If the current status to set is at least loaded (or error), make the parent loaded
-      if (['loaded', 'error'].includes(currentLayerStatus)) {
-        // Get the parent config
-        const parentGroupLayer = currentLayerConfig.parentLayerConfig;
-
-        // Update the status on the parent
-        parentGroupLayer.layerStatus = 'loaded';
-
-        // If has another parent, go recursive
-        if (parentGroupLayer.parentLayerConfig) {
-          // Going recursive
-          this.#changeLayerStatusOfParentsRecursive(parentGroupLayer, currentLayerStatus);
-        }
-      }
-    }
+  #legendShouldBeQueried(layerConfig: ConfigBaseClass | undefined): boolean {
+    // A legend is ready to be queried when its status is > processed and legendQueryStatus is 'init' (not already queried)
+    return !!layerConfig?.isGreaterThanOrEqualTo('processed') && this.resultSet[layerConfig.layerPath].legendQueryStatus === 'init';
   }
 }
-
-export type TypeLegendResultSetEntry = {
-  layerName?: string;
-  layerStatus: TypeLayerStatus;
-  data: TypeLegend | undefined | null;
-};
-
-/** The legend resultset type associate a layer path to a legend object. The undefined value indicate that the get legend query
- * hasn't been run and the null value indicate that there was a get legend error.
- */
-export type TypeLegendResultSet = {
-  [layerPath: string]: TypeLegendResultSetEntry;
-};

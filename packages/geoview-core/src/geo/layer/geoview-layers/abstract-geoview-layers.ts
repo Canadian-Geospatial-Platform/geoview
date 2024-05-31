@@ -34,12 +34,20 @@ import {
   TypeLayerStatus,
   TypeStyleGeometry,
   CONST_LAYER_ENTRY_TYPES,
-  TypeLayerAndListenerType,
+  TypeLoadEndListenerType,
+  TypeFeatureInfoEntry,
+  codedValueType,
+  rangeDomainType,
+  TypeLocation,
+  QueryType,
 } from '@/geo/map/map-schema-types';
 import { GeoViewLayerCreatedTwiceError } from '@/geo/layer/exceptions/layer-exceptions';
-import { QueryType, TypeFeatureInfoEntry, TypeLocation, codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { Projection } from '@/geo/utils/projection';
 import { getLegendStyles, getFeatureCanvas } from '@/geo/utils/renderer/geoview-renderer';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { LayerApi } from '../layer';
+import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { MapViewer } from '@/geo/map/map-viewer';
 
 // Constant used to define the default layer names
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
@@ -65,8 +73,13 @@ const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
  * metadataAccessPath attribute whose value is passed as an attribute of the mapLayerConfig object.
  */
 export abstract class AbstractGeoViewLayer {
-  // TODO: Refactor - The layer object should probably not be aware of a "map id". Check if necessary and redesign.
-  /** The unique identifier of the map on which the GeoView layer will be drawn. */
+  // The default hit tolerance the query should be using
+  static DEFAULT_HIT_TOLERANCE: number = 4;
+
+  // The default hit tolerance
+  hitTolerance: number = AbstractGeoViewLayer.DEFAULT_HIT_TOLERANCE;
+
+  /** The map id on which the GeoView layer will be drawn. */
   mapId: string;
 
   /** The type of GeoView layer that is instantiated. */
@@ -102,13 +115,13 @@ export abstract class AbstractGeoViewLayer {
   /**
    * The OpenLayer root layer representing this GeoView Layer.
    */
-  olRootLayer?: BaseLayer | LayerGroup;
+  olRootLayer?: BaseLayer;
 
   // The service metadata.
   metadata: TypeJsonObject | null = null;
 
   /** Layer metadata */
-  layerMetadata: Record<string, TypeJsonObject> = {};
+  #layerMetadata: Record<string, TypeJsonObject> = {};
 
   /** Layer temporal dimension indexed by layerPath. */
   #layerTemporalDimension: Record<string, TimeDimension> = {};
@@ -123,9 +136,6 @@ export abstract class AbstractGeoViewLayer {
   externalFragmentsOrder: TypeDateFragments;
 
   // Keep all callback delegate references
-  #onLayerRegistrationHandlers: LayerRegistrationDelegate[] = [];
-
-  // Keep all callback delegate references
   #onLegendQueryingHandlers: LegendQueryingDelegate[] = [];
 
   // Keep all callback delegate references
@@ -133,6 +143,9 @@ export abstract class AbstractGeoViewLayer {
 
   // Keep all callback delegate references
   #onVisibleChangedHandlers: VisibleChangedDelegate[] = [];
+
+  // Keep all callback delegate references
+  #onLayerEntryProcessedHandlers: LayerEntryProcessedDelegate[] = [];
 
   // Keep all callback delegate references
   #onLayerCreationHandlers: LayerCreationDelegate[] = [];
@@ -188,31 +201,96 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Emits an event to all handlers.
-   * @param {LayerRegistrationEvent} event The event to emit
-   * @private
+   * Gets the MapViewer where the layer resides
+   * @returns {MapViewer} The MapViewer
    */
-  #emitGeoViewLayerRegistration(event: LayerRegistrationEvent): void {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerRegistrationHandlers, event);
+  getMapViewer(): MapViewer {
+    // GV The GVLayers need a reference to the MapViewer to be able to perform operations.
+    // GV This is a trick to obtain it. Otherwise, it'd need to be provided via constructor.
+    return MapEventProcessor.getMapViewer(this.mapId);
   }
 
-  /**
-   * Registers a geoview layer registration event handler.
-   * @param {LayerRegistrationDelegate} callback The callback to be executed whenever the event is emitted
+  /** ***************************************************************************************************************************
+   * Gets the layer configuration of the specified layer path.
+   *
+   * @param {string} layerPath The layer path.
+   *
+   * @returns {TypeLayerEntryConfig | undefined} The layer configuration or undefined if not found.
    */
-  onGeoViewLayerRegistration(callback: LayerRegistrationDelegate): void {
-    // Register the event handler
-    EventHelper.onEvent(this.#onLayerRegistrationHandlers, callback);
+  getLayerConfig(layerPath: string): TypeLayerEntryConfig | undefined {
+    // Trick to get a layer config from a layer class
+    return this.getMapViewer().layer.getLayerEntryConfig(layerPath);
   }
 
-  /**
-   * Unregisters a geoview layer registration event handler.
-   * @param {LayerRegistrationDelegate} callback The callback to stop being called whenever the event is emitted
+  /** ***************************************************************************************************************************
+   * Gets the OpenLayer of the specified layer path.
+   *
+   * @param {string} layerPath The layer path.
+   *
+   * @returns {TypeLayerEntryConfig | undefined} The layer configuration or undefined if not found.
    */
-  offGeoViewLayerRegistration(callback: LayerRegistrationDelegate): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onLayerRegistrationHandlers, callback);
+  getOLLayer(layerPath: string): BaseLayer | undefined {
+    // Trick to get an open layer layer from a layer class
+    return this.getMapViewer().layer.getOLLayer(layerPath);
+  }
+
+  /** ***************************************************************************************************************************
+   * Gets the Geoview layer id.
+   * @returns {string} The geoview layer id
+   */
+  getGeoviewLayerId(): string {
+    return this.geoviewLayerId;
+  }
+
+  /** ***************************************************************************************************************************
+   * Gets the Geoview layer name.
+   * @returns {TypeLocalizedString | undefined} The geoview layer name
+   */
+  getGeoviewLayerName(): TypeLocalizedString | undefined {
+    return this.geoviewLayerName;
+  }
+
+  /** ***************************************************************************************************************************
+   * Get the layer metadata that is associated to the layer.
+   *
+   * @param {string} layerPath The layer path to the layer's configuration.
+   *
+   * @returns {TypeJsonObject} The layer metadata.
+   */
+  getLayerMetadata(layerPath: string): TypeJsonObject {
+    return this.#layerMetadata[layerPath];
+  }
+
+  /** ***************************************************************************************************************************
+   * Set the layer metadata for the layer identified by specified layerPath.
+   *
+   * @param {string} layerPath The layer path to the layer's configuration affected by the change.
+   * @param {TypeJsonObject} layerMetadata The value to assign to the layer metadata property.
+   */
+  setLayerMetadata(layerPath: string, layerMetadata: TypeJsonObject): void {
+    this.#layerMetadata[layerPath] = layerMetadata;
+  }
+
+  /** ***************************************************************************************************************************
+   * Get the temporal dimension that is associated to the layer. Returns undefined when the layer config can't be found using the layer
+   * path.
+   *
+   * @param {string} layerPath The layer path to the layer's configuration.
+   *
+   * @returns {TimeDimension} The temporal dimension associated to the layer or undefined.
+   */
+  getTemporalDimension(layerPath: string): TimeDimension {
+    return this.#layerTemporalDimension[layerPath];
+  }
+
+  /** ***************************************************************************************************************************
+   * Set the layerTemporalDimension for the layer identified by specified layerPath.
+   *
+   * @param {string} layerPath The layer path to the layer's configuration affected by the change.
+   * @param {TimeDimension} temporalDimension The value to assign to the layer temporal dimension property.
+   */
+  setTemporalDimension(layerPath: string, temporalDimension: TimeDimension): void {
+    this.#layerTemporalDimension[layerPath] = temporalDimension;
   }
 
   /**
@@ -301,6 +379,34 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Emits an event to all handlers.
+   * @param {LayerEntryProcessedEvent} event The event to emit
+   * @private
+   */
+  #emitLayerEntryProcessed(event: LayerEntryProcessedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerEntryProcessedHandlers, event);
+  }
+
+  /**
+   * Registers a layer entry config processed event handler.
+   * @param {LayerEntryProcessedDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onLayerEntryProcessed(callback: LayerEntryProcessedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerEntryProcessedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer entry config processed event handler.
+   * @param {LayerEntryProcessedDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offLayerEntryProcessed(callback: LayerEntryProcessedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerEntryProcessedHandlers, callback);
+  }
+
+  /**
+   * Emits an event to all handlers.
    * @param {LayerCreationEvent} event The event to emit
    * @private
    */
@@ -325,27 +431,6 @@ export abstract class AbstractGeoViewLayer {
   offLayerCreation(callback: LayerCreationDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerCreationHandlers, callback);
-  }
-
-  /** ***************************************************************************************************************************
-   * Process recursively the list of layer entries to see if all of them are processed.
-   *
-   * @param {TypeLayerStatus} layerStatus The layer status to compare with the internal value of the config.
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer's configuration
-   *                                                            (default: this.listOfLayerEntryConfig).
-   *
-   * @returns {boolean} true when all layers are greater than or equal to the layerStatus parameter.
-   */
-  allLayerStatusAreGreaterThanOrEqualTo(
-    layerStatus: TypeLayerStatus,
-    listOfLayerEntryConfig: TypeLayerEntryConfig[] = this.listOfLayerEntryConfig
-  ): boolean {
-    // Try to find a layer that is not greater than or equal to the layerStatus parameter. If you can, return false
-    return !listOfLayerEntryConfig.find((layerConfig: TypeLayerEntryConfig) => {
-      if (layerEntryIsGroupLayer(layerConfig))
-        return !this.allLayerStatusAreGreaterThanOrEqualTo(layerStatus, layerConfig.listOfLayerEntryConfig);
-      return !layerConfig.isGreaterThanOrEqualTo(layerStatus || 'newInstance');
-    });
   }
 
   /** ***************************************************************************************************************************
@@ -500,6 +585,7 @@ export abstract class AbstractGeoViewLayer {
           // GV TODO: For the moment, be aware that the layerStatus setter is doing a lot of things behind the scene.
           // GV       The layerStatus setter contains a lot of code and we will change it in favor of a method.
           layerConfig.layerStatus = 'processed';
+          this.#emitLayerEntryProcessed({ config: layerConfig });
         }
       });
     } catch (error) {
@@ -523,6 +609,7 @@ export abstract class AbstractGeoViewLayer {
       await this.processLayerMetadata(layerConfig);
       await this.processListOfLayerEntryMetadata(layerConfig.listOfLayerEntryConfig!);
       layerConfig.layerStatus = 'processed';
+      this.#emitLayerEntryProcessed({ config: layerConfig });
       return layerConfig;
     } catch (error) {
       // Log
@@ -568,10 +655,7 @@ export abstract class AbstractGeoViewLayer {
       if (listOfLayerEntryConfig.length === 0) return undefined;
       if (listOfLayerEntryConfig.length === 1) {
         if (layerEntryIsGroupLayer(listOfLayerEntryConfig[0])) {
-          const newLayerGroup = AbstractGeoViewLayer.createLayerGroup(
-            listOfLayerEntryConfig[0],
-            listOfLayerEntryConfig[0].initialSettings!
-          );
+          const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[0], listOfLayerEntryConfig[0].initialSettings!);
           const groupReturned = await this.processListOfLayerEntryConfig(listOfLayerEntryConfig[0].listOfLayerEntryConfig!, newLayerGroup);
           if (groupReturned) {
             if (layerGroup) layerGroup.getLayers().push(groupReturned);
@@ -588,7 +672,12 @@ export abstract class AbstractGeoViewLayer {
         const { layerPath } = listOfLayerEntryConfig[0];
         const baseLayer = await this.processOneLayerEntry(listOfLayerEntryConfig[0] as AbstractBaseLayerEntryConfig);
         if (baseLayer) {
-          this.registerToLayerSets(listOfLayerEntryConfig[0] as AbstractBaseLayerEntryConfig);
+          // FIXME: Temporary patch to keep the behavior until those layer classes don't exist. Looks like we won't need this anymore afterall!
+          // GV Why did we need this? For the layer-sets?
+          // MapEventProcessor.getMapViewerLayerAPI(this.mapId).registerLayerConfigUpdate(
+          //   listOfLayerEntryConfig[0] as AbstractBaseLayerEntryConfig
+          // );
+
           if (layerGroup) layerGroup!.getLayers().push(baseLayer!);
           return layerGroup || baseLayer;
         }
@@ -596,24 +685,21 @@ export abstract class AbstractGeoViewLayer {
           layer: listOfLayerEntryConfig[0].layerPath,
           loggerMessage: `Unable to create layer ${listOfLayerEntryConfig[0].layerPath} on map ${this.mapId}`,
         });
-        this.getLayerEntryConfig(layerPath)!.layerStatus = 'error';
+        this.getLayerConfig(layerPath)!.layerStatus = 'error';
         return undefined;
       }
 
       if (!layerGroup) {
         // All children of this level in the tree have the same parent, so we use the first element of the array to retrieve the parent node.
-        layerGroup = AbstractGeoViewLayer.createLayerGroup(
+        layerGroup = this.createLayerGroup(
           (listOfLayerEntryConfig[0] as AbstractBaseLayerEntryConfig).parentLayerConfig as TypeLayerEntryConfig,
           listOfLayerEntryConfig[0].initialSettings!
         );
       }
-      const promiseOfLayerCreated: Promise<BaseLayer | LayerGroup | undefined>[] = [];
+      const promiseOfLayerCreated: Promise<BaseLayer | undefined>[] = [];
       listOfLayerEntryConfig.forEach((layerConfig, i) => {
         if (layerEntryIsGroupLayer(layerConfig)) {
-          const newLayerGroup = AbstractGeoViewLayer.createLayerGroup(
-            listOfLayerEntryConfig[i],
-            listOfLayerEntryConfig[i].initialSettings!
-          );
+          const newLayerGroup = this.createLayerGroup(listOfLayerEntryConfig[i], listOfLayerEntryConfig[i].initialSettings!);
           promiseOfLayerCreated.push(this.processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig!, newLayerGroup));
         } else if ((listOfLayerEntryConfig[i] as AbstractBaseLayerEntryConfig).layerStatus === 'error')
           promiseOfLayerCreated.push(Promise.resolve(undefined));
@@ -625,13 +711,15 @@ export abstract class AbstractGeoViewLayer {
       listOfLayerCreated.forEach((baseLayer, i) => {
         const { layerPath } = listOfLayerEntryConfig[i];
         if (baseLayer) {
-          const layerConfig = baseLayer?.get('layerConfig') as AbstractBaseLayerEntryConfig;
-          if (layerConfig) {
-            if (!layerEntryIsGroupLayer(listOfLayerEntryConfig[i])) {
-              this.registerToLayerSets(baseLayer.get('layerConfig') as AbstractBaseLayerEntryConfig);
-            }
-            layerGroup!.getLayers().push(baseLayer);
-          }
+          // FIXME: Temporary patch to keep the behavior until those layer classes don't exist. Looks like we won't need this anymore afterall!
+          // GV Why did we need this? For the layer-sets?
+          // const layerConfig = baseLayer?.get('layerConfig') as AbstractBaseLayerEntryConfig;
+          // if (layerConfig) {
+          //   if (!layerEntryIsGroupLayer(listOfLayerEntryConfig[i])) {
+          //     MapEventProcessor.getMapViewerLayerAPI(this.mapId).registerLayerConfigUpdate(layerConfig);
+          //   }
+          layerGroup!.getLayers().push(baseLayer);
+          // }
         } else {
           this.layerLoadError.push({
             layer: listOfLayerEntryConfig[i].layerPath,
@@ -639,7 +727,7 @@ export abstract class AbstractGeoViewLayer {
               layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) ? CONST_LAYER_ENTRY_TYPES.GROUP : ''
             } layer ${listOfLayerEntryConfig[i].layerPath} on map ${this.mapId}`,
           });
-          this.getLayerEntryConfig(layerPath)!.layerStatus = 'error';
+          this.getLayerConfig(layerPath)!.layerStatus = 'error';
         }
       });
 
@@ -656,7 +744,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns {Promise<BaseLayer | null>} The GeoView layer that has been created.
+   * @returns {Promise<BaseLayer | undefined>} The GeoView layer that has been created.
    */
   // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
@@ -692,9 +780,9 @@ export abstract class AbstractGeoViewLayer {
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       // TODO: Refactor - Rework this function to not need a layer path in the param, nor a need to get a layer config here..
-      // TO.DOCONT: For example, this call seems to have logic redundancy: `layerConfig.geoviewLayerInstance.getFeatureInfo(queryType, layerPath, location)`
+      // TO.DOCONT: For example, this call seems to have logic redundancy: `layerConfig.gvLayerInstance.getFeatureInfo(queryType, layerPath, location)`
       // Get the layer config
-      const layerConfig = this.getLayerEntryConfig(layerPath);
+      const layerConfig = this.getLayerConfig(layerPath);
 
       if (!layerConfig || !layerConfig?.source?.featureInfo?.queryable) {
         logger.logError('Invalid usage of getFeatureInfo\nlayerConfig = ', layerConfig);
@@ -852,20 +940,6 @@ export abstract class AbstractGeoViewLayer {
     return Promise.resolve(null);
   }
 
-  /** ***************************************************************************************************************************
-   * This method register the layer entry to layer sets. Nothing is done if the registration is already done.
-   *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer config to register.
-   */
-  registerToLayerSets(layerConfig: AbstractBaseLayerEntryConfig): void {
-    // TODO: Refactor - This function should be deleted eventually. It's up to the layer orchestrator to manage the layers.
-    // TO.DOCONT: The layer itself shouldn't know about it nor should have an explicit function mentioning the layer sets.
-
-    // Register to layer sets that are already created.
-    // Emit the layer registration
-    this.#emitGeoViewLayerRegistration({ layerPath: layerConfig.layerPath, layerConfig, action: 'add' });
-  }
-
   /**
    * Queries the legend.
    * This function raises legend querying and queried events.
@@ -902,8 +976,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {TypeLayerInitialSettings } initialSettings Initial settings to apply to the layer.
    * @returns {LayerGroup} A new layer group.
    */
-  protected static createLayerGroup(layerConfig: TypeLayerEntryConfig, initialSettings: TypeLayerInitialSettings): LayerGroup {
-    // TODO: Move this function and especially the assignation to  layerConfig.olLayer below, elsewhere than in this class
+  protected createLayerGroup(layerConfig: TypeLayerEntryConfig, initialSettings: TypeLayerInitialSettings): LayerGroup {
     const layerGroupOptions: LayerGroupOptions = {
       layers: new Collection(),
       properties: { layerConfig },
@@ -913,21 +986,15 @@ export abstract class AbstractGeoViewLayer {
     if (initialSettings?.minZoom !== undefined) layerGroupOptions.minZoom = initialSettings.minZoom;
     if (initialSettings?.states?.opacity !== undefined) layerGroupOptions.opacity = initialSettings.states.opacity;
     if (initialSettings?.states?.visible !== undefined) layerGroupOptions.visible = initialSettings.states.visible;
-    // You dont have to provide the loadEndListenerType when you set the olLayer of an entryType to CONST_LAYER_ENTRY_TYPES.GROUP.
-    layerConfig.olLayer = new LayerGroup(layerGroupOptions);
-    return layerConfig.olLayer as LayerGroup;
-  }
 
-  /** ***************************************************************************************************************************
-   * Get the layer configuration of the specified layer path.
-   *
-   * @param {string} layerPath The layer path.
-   *
-   * @returns {TypeLayerEntryConfig | undefined} The layer configuration or undefined if not found.
-   */
-  getLayerEntryConfig(layerPath: string): TypeLayerEntryConfig | undefined {
-    // TODO: This function should be moved elsewhere than in this class.
-    return MapEventProcessor.getMapViewerLayerAPI(this.mapId).getLayerEntryConfig(layerPath);
+    // Create the OpenLayer layer
+    const layerGroup = new LayerGroup(layerGroupOptions);
+
+    // Emit about it
+    this.#emitLayerCreation({ layer: layerGroup, config: layerConfig });
+
+    // Return it
+    return layerGroup;
   }
 
   /** ***************************************************************************************************************************
@@ -967,11 +1034,13 @@ export abstract class AbstractGeoViewLayer {
     // GV The following code will need to be modified when the topmost layer of a GeoView
     // GV layer creates dynamicaly a group out of a list of layers.
     const layerConfig: TypeLayerEntryConfig | TypeLayerEntryConfig[] | undefined = layerPath.includes('/')
-      ? this.getLayerEntryConfig(layerPath)
+      ? this.getLayerConfig(layerPath)
       : this.listOfLayerEntryConfig;
     if (layerConfig) {
       if (Array.isArray(layerConfig)) processGroupLayerBounds(layerConfig);
       else processGroupLayerBounds([layerConfig]);
+
+      // TODO: Check - Are the bounds initially always 4326?
       if (projectionCode && bounds) return Projection.transformExtent(bounds, `EPSG:4326`, `EPSG:${projectionCode}`);
     }
     return bounds;
@@ -1019,7 +1088,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Extent | undefined} The layer extent.
    */
   getExtent(layerPath: string): Extent | undefined {
-    const olLayer = this.getLayerEntryConfig(layerPath)?.olLayer;
+    const olLayer = this.getOLLayer(layerPath);
     return olLayer?.getExtent();
   }
 
@@ -1032,7 +1101,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {string} layerPath The layer path to the layer's configuration.
    */
   setExtent(layerExtent: Extent, layerPath: string): void {
-    const olLayer = this.getLayerEntryConfig(layerPath)?.olLayer;
+    const olLayer = this.getOLLayer(layerPath);
     if (olLayer) olLayer.setExtent(layerExtent);
   }
 
@@ -1044,7 +1113,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {number | undefined} The opacity of the layer.
    */
   getOpacity(layerPath: string): number | undefined {
-    const olLayer = this.getLayerEntryConfig(layerPath)?.olLayer;
+    const olLayer = this.getOLLayer(layerPath);
     return olLayer?.getOpacity();
   }
 
@@ -1056,7 +1125,7 @@ export abstract class AbstractGeoViewLayer {
    *
    */
   setOpacity(layerOpacity: number, layerPath: string): void {
-    const olLayer = this.getLayerEntryConfig(layerPath)?.olLayer;
+    const olLayer = this.getOLLayer(layerPath);
     if (olLayer) olLayer.setOpacity(layerOpacity);
   }
 
@@ -1068,7 +1137,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {boolean | undefined} The visibility of the layer.
    */
   getVisible(layerPath: string): boolean | undefined {
-    const olLayer = this.getLayerEntryConfig(layerPath)?.olLayer;
+    const olLayer = this.getOLLayer(layerPath);
     return olLayer?.getVisible();
   }
 
@@ -1079,7 +1148,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {string} layerPath The layer path to the layer's configuration.
    */
   setVisible(layerVisibility: boolean, layerPath: string): void {
-    const olLayer = this.getLayerEntryConfig(layerPath)?.olLayer;
+    const olLayer = this.getOLLayer(layerPath);
     if (olLayer) {
       olLayer.setVisible(layerVisibility);
       // olLayer.changed();
@@ -1096,7 +1165,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {number | undefined} The min zoom of the layer.
    */
   getMinZoom(layerPath: string): number | undefined {
-    const olLayer = this.getLayerEntryConfig(layerPath)?.olLayer;
+    const olLayer = this.getOLLayer(layerPath);
     return olLayer?.getMinZoom();
   }
 
@@ -1107,7 +1176,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {string} layerPath The layer path to the layer's configuration.
    */
   setMinZoom(minZoom: number, layerPath: string): void {
-    const olLayer = this.getLayerEntryConfig(layerPath)?.olLayer;
+    const olLayer = this.getOLLayer(layerPath);
     if (olLayer) olLayer.setMinZoom(minZoom);
   }
 
@@ -1119,7 +1188,7 @@ export abstract class AbstractGeoViewLayer {
    * @returns {number | undefined} The max zoom of the layer.
    */
   getMaxZoom(layerPath: string): number | undefined {
-    const olLayer = this.getLayerEntryConfig(layerPath)?.olLayer;
+    const olLayer = this.getOLLayer(layerPath);
     return olLayer?.getMaxZoom();
   }
 
@@ -1130,21 +1199,19 @@ export abstract class AbstractGeoViewLayer {
    * @param {string} layerPath The layer path to the layer's configuration.
    */
   setMaxZoom(maxZoom: number, layerPath: string): void {
-    const olLayer = this.getLayerEntryConfig(layerPath)?.olLayer;
+    const olLayer = this.getOLLayer(layerPath);
     if (olLayer) olLayer.setMaxZoom(maxZoom);
   }
 
   /** ***************************************************************************************************************************
-   * Return the legend of the layer. This routine returns null when the layerPath specified is not found. If the style property
+   * Overridable function returning the legend of the layer. Returns null when the layerPath specified is not found. If the style property
    * of the layerConfig object is undefined, the legend property of the object returned will be null.
-   *
    * @param {string} layerPath The layer path to the layer's configuration.
-   *
    * @returns {Promise<TypeLegend | null>} The legend of the layer.
    */
   async getLegend(layerPath: string): Promise<TypeLegend | null> {
     try {
-      const layerConfig = this.getLayerEntryConfig(layerPath) as
+      const layerConfig = this.getLayerConfig(layerPath) as
         | (AbstractBaseLayerEntryConfig & {
             style: TypeStyleConfig;
           })
@@ -1153,7 +1220,6 @@ export abstract class AbstractGeoViewLayer {
       if (!layerConfig) {
         const legend: TypeLegend = {
           type: this.type,
-          layerPath: `error - layerPath = ${layerPath}`,
           layerName: { en: 'config not found', fr: 'config inexistante' } as TypeLocalizedString,
           styleConfig: null,
           legend: null,
@@ -1164,7 +1230,6 @@ export abstract class AbstractGeoViewLayer {
       if (!layerConfig.style) {
         const legend: TypeLegend = {
           type: this.type,
-          layerPath,
           layerName: layerConfig.layerName!,
           styleConfig: layerConfig.style,
           legend: null,
@@ -1174,7 +1239,6 @@ export abstract class AbstractGeoViewLayer {
 
       const legend: TypeLegend = {
         type: this.type,
-        layerPath,
         layerName: layerConfig?.layerName,
         styleConfig: layerConfig?.style,
         legend: await getLegendStyles(layerConfig),
@@ -1367,32 +1431,33 @@ export abstract class AbstractGeoViewLayer {
    * @returns {string | undefined} The filter associated to the layer or undefined.
    */
   getLayerFilter(layerPath: string): string | undefined {
-    const layerConfig = this.getLayerEntryConfig(layerPath);
+    const layerConfig = this.getLayerConfig(layerPath);
     // TODO: Refactor to put the 'layerFilter' at the right place. Meanwhile, using `any` here
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (layerConfig as any)?.layerFilter;
   }
 
-  /** ***************************************************************************************************************************
-   * Get the temporal dimension that is associated to the layer. Returns undefined when the layer config can't be found using the layer
-   * path.
-   *
-   * @param {string} layerPath The layer path to the layer's configuration.
-   *
-   * @returns {TimeDimension} The temporal dimension associated to the layer or undefined.
+  /**
+   * Overridable function called when the layer gets in loaded status.
+   * @param layerConfig - The layer configuration
    */
-  getTemporalDimension(layerPath: string): TimeDimension {
-    return this.#layerTemporalDimension[layerPath];
+  onLoaded(layerConfig: AbstractBaseLayerEntryConfig): void {
+    // Set loaded
+    layerConfig.layerStatus = 'loaded';
+
+    // Set visibility
+    this.setVisible(layerConfig.initialSettings?.states?.visible !== false, layerConfig.layerPath);
   }
 
-  /** ***************************************************************************************************************************
-   * Set the layerTemporalDimension for the layer identified by specified layerPath.
-   *
-   * @param {string} layerPath The layer path to the layer's configuration affected by the change.
-   * @param {TimeDimension} temporalDimension The value to assign to the layer temporal dimension property.
+  /**
+   * Overridable function called when the layer gets in error status.
+   * @param layerConfig - The layer configuration
    */
-  setTemporalDimension(layerPath: string, temporalDimension: TimeDimension): void {
-    this.#layerTemporalDimension[layerPath] = temporalDimension;
+  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  onError(layerConfig: AbstractBaseLayerEntryConfig): void {
+    // Set error
+    layerConfig.layerStatus = 'error';
   }
 
   /** ***************************************************************************************************************************
@@ -1429,7 +1494,7 @@ export abstract class AbstractGeoViewLayer {
         });
       };
 
-      const initialLayerConfig = this.getLayerEntryConfig(layerPath);
+      const initialLayerConfig = this.getLayerConfig(layerPath);
       if (initialLayerConfig) {
         if (Array.isArray(initialLayerConfig)) processGroupLayerBounds(initialLayerConfig);
         else processGroupLayerBounds([initialLayerConfig]);
@@ -1467,51 +1532,21 @@ export abstract class AbstractGeoViewLayer {
     });
   }
 
-  /**
-   * The olLayerAndLoadEndListeners setter method for the ConfigBaseClass class and its descendant classes.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer configuration we are creating a layer for.
-   * @param {TypeLayerAndListenerType} layerAndListenerType The layer configuration we want to instanciate
-   *                                                        and its listener type.
+  /** ***************************************************************************************************************************
+   * Process recursively the list of layer entries to see if all of them are greater than or equal to the provided layer status.
+   *
+   * @param {TypeLayerStatus} layerStatus The layer status to compare with the internal value of the config.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer's configuration
+   *                                                            (default: this.listOfLayerEntryConfig).
+   *
+   * @returns {boolean} true when all layers are greater than or equal to the layerStatus parameter.
    */
-  setLayerAndLoadEndListeners(layerConfig: AbstractBaseLayerEntryConfig, layerAndListenerType: TypeLayerAndListenerType): void {
-    const { olLayer, loadEndListenerType } = layerAndListenerType;
-    // eslint-disable-next-line no-param-reassign, no-underscore-dangle
-    layerConfig._olLayer = olLayer;
-
-    // Keep reference
-    layerConfig.geoviewLayerInstance = this;
-
-    // Group layers have no listener
-    if (olLayer && layerConfig.entryType !== CONST_LAYER_ENTRY_TYPES.GROUP) {
-      if (loadEndListenerType) {
-        let loadErrorListener: () => void;
-
-        // Definition of the load end listener functions
-        const loadEndListener = (): void => {
-          layerConfig.loadedFunction();
-          // eslint-disable-next-line no-param-reassign
-          layerConfig.layerStatus = 'loaded';
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (olLayer! as any).get('source').un(`${loadEndListenerType}loaderror`, loadErrorListener);
-        };
-
-        loadErrorListener = (): void => {
-          // eslint-disable-next-line no-param-reassign
-          layerConfig.layerStatus = 'error';
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (olLayer! as any).get('source').un(`${loadEndListenerType}loadend`, loadEndListener);
-        };
-
-        // Activation of the load end listeners
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (olLayer! as any).get('source').once(`${loadEndListenerType}loaderror`, loadErrorListener);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (olLayer! as any).get('source').once(`${loadEndListenerType}loadend`, loadEndListener);
-      } else logger.logError(`Provision of a load end listener type is mandatory for layer path "${layerConfig.layerPath}".`);
-    }
-
-    // Emit about the layer creation so we can do something about it (part of the major layer refactor)
-    this.#emitLayerCreation({ layer: olLayer! });
+  allLayerStatusAreGreaterThanOrEqualTo(
+    layerStatus: TypeLayerStatus,
+    listOfLayerEntryConfig: TypeLayerEntryConfig[] = this.listOfLayerEntryConfig
+  ): boolean {
+    // Redirect
+    return ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo(layerStatus, listOfLayerEntryConfig);
   }
 
   /**
@@ -1536,21 +1571,87 @@ export abstract class AbstractGeoViewLayer {
     // Resolve successfully, otherwise an exception has been thrown already
     return Promise.resolve();
   }
+
+  /**
+   * The olLayerAndLoadEndListeners setter method for the ConfigBaseClass class and its descendant classes.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration we are creating a layer for.
+   * @param {BaseLayer} olLayer - The OpenLayer we are creating
+   * @param {TypeLoadEndListenerType} listenerType - The layer listener type.
+   */
+  setLayerAndLoadEndListeners(layerConfig: AbstractBaseLayerEntryConfig, olLayer: BaseLayer, listenerType: TypeLoadEndListenerType): void {
+    // Precond:
+    if (!olLayer) throw new Error(`An OpenLayer must be provided to register listeners. Layer path ${layerConfig.layerPath}`);
+    if (!listenerType) throw new Error(`A listenerType must be provided to register listeners. Layer path ${layerConfig.layerPath}`);
+
+    // Group layers have no listener
+    if (layerConfig.entryType !== CONST_LAYER_ENTRY_TYPES.GROUP) {
+      let loadErrorListener: () => void;
+
+      // Definition of the load end listener functions
+      const loadEndListener = (): void => {
+        // Call the overridable loaded function
+        this.onLoaded(layerConfig);
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (olLayer! as any).get('source').un(`${listenerType}loaderror`, loadErrorListener);
+      };
+
+      loadErrorListener = (): void => {
+        // Call the overridable error function
+        this.onError(layerConfig);
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (olLayer! as any).get('source').un(`${listenerType}loadend`, loadEndListener);
+      };
+
+      // If not LAYERS_HYBRID_MODE MODE (in LAYERS_HYBRID_MODE we want the new classes to handle that)
+      if (!LayerApi.LAYERS_HYBRID_MODE) {
+        // Activation of the load end listeners
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (olLayer! as any).get('source').once(`${listenerType}loaderror`, loadErrorListener);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (olLayer! as any).get('source').once(`${listenerType}loadend`, loadEndListener);
+      }
+    }
+
+    // Emit about the layer creation so we can do something about it (part of the major layer refactor)
+    this.#emitLayerCreation({ layer: olLayer!, config: layerConfig });
+  }
+
+  /**
+   * Recursively gets all layer entry configs in the GeoView Layer.
+   * @returns {TypeLayerEntryConfig[]} The list of layer entry configs
+   */
+  getAllLayerEntryConfigs(): TypeLayerEntryConfig[] {
+    // Prepare the container
+    const allLayerEntryConfigs: TypeLayerEntryConfig[] = [];
+
+    // Call recursive method on each root
+    this.listOfLayerEntryConfig.forEach((layerEntryConfig) => {
+      // Call
+      this.#getAllLayerEntryConfigsRec(allLayerEntryConfigs, layerEntryConfig);
+    });
+
+    // Return the list
+    return allLayerEntryConfigs;
+  }
+
+  /**
+   * Recursively gathers the layer entry configs
+   * @param {TypeLayerEntryConfig[]} totalList - The total gathered thus far
+   * @param {TypeLayerEntryConfig} currentNode - The current layer entry config being worked on
+   */
+  #getAllLayerEntryConfigsRec(totalList: TypeLayerEntryConfig[], currentNode: TypeLayerEntryConfig): void {
+    // Add it
+    totalList.push(currentNode);
+
+    // For each children
+    currentNode.listOfLayerEntryConfig?.forEach((layerEntryConfig) => {
+      // Go recursive
+      this.#getAllLayerEntryConfigsRec(totalList, layerEntryConfig);
+    });
+  }
 }
-
-/**
- * Define an event for the delegate
- */
-export type LayerRegistrationEvent = {
-  layerPath: string;
-  layerConfig: AbstractBaseLayerEntryConfig;
-  action: 'add' | 'remove';
-};
-
-/**
- * Define a delegate for the event handler function signature
- */
-type LayerRegistrationDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerRegistrationEvent>;
 
 /**
  * Define an event for the delegate
@@ -1589,20 +1690,24 @@ export type VisibleChangedEvent = {
  */
 type VisibleChangedDelegate = EventDelegateBase<AbstractGeoViewLayer, VisibleChangedEvent>;
 
-export type TypeLegend = {
-  layerPath: string;
-  layerName?: TypeLocalizedString;
-  type: TypeGeoviewLayerType;
-  styleConfig?: TypeStyleConfig | null;
-  // Layers other than vector layers use the HTMLCanvasElement type for their legend.
-  legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
+/**
+ * Define an event for the delegate
+ */
+export type LayerEntryProcessedEvent = {
+  config: TypeLayerEntryConfig;
 };
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerEntryProcessedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerEntryProcessedEvent>;
 
 /**
  * Define an event for the delegate
  */
 export type LayerCreationEvent = {
-  layer: BaseLayer | LayerGroup;
+  layer: BaseLayer;
+  config: ConfigBaseClass;
 };
 
 /**

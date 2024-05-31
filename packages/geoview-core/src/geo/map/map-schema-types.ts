@@ -1,7 +1,9 @@
-// We use _ for layerPth and olLayer all over the file. We keep it global...
 import { Extent } from 'ol/extent';
 import BaseLayer from 'ol/layer/Base';
-import LayerGroup from 'ol/layer/Group';
+import Feature from 'ol/Feature';
+import RenderFeature from 'ol/render/Feature';
+import { Coordinate } from 'ol/coordinate';
+import { Pixel } from 'ol/pixel';
 
 import {
   TypeBasemapOptions,
@@ -24,7 +26,7 @@ import {
   TypeExternalPackages,
 } from '@config/types/map-schema-types';
 
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { CONST_LAYER_TYPES, TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
@@ -195,14 +197,84 @@ export const layerEntryIsImageStatic = (verifyIfLayer: TypeLayerEntryConfig): ve
 
 export type TypeLayerStatus = 'registered' | 'newInstance' | 'processing' | 'processed' | 'loading' | 'loaded' | 'error';
 
-export type TypeLoadEndListenerType = 'features' | 'tile' | 'image';
-
-export type TypeLayerAndListenerType = {
-  olLayer?: BaseLayer | LayerGroup;
-  loadEndListenerType?: TypeLoadEndListenerType;
+// TODO: Refactor - Config refactoring. The types below MUST be migrated to the config map-schema-type
+export type TypeResultSetEntry = {
+  layerPath: string;
+  layerName: string;
+  layerStatus: TypeLayerStatus;
 };
 
-export type GeoviewChild = AbstractGeoViewLayer & Record<'applyViewFilter', (layerPath: string, layerFilter: string) => void>;
+export type TypeResultSet<T extends TypeResultSetEntry = TypeResultSetEntry> = {
+  [layerPath: string]: T;
+};
+
+export type TypeLayerData = {
+  eventListenerEnabled: boolean;
+  // When property features is undefined, we are waiting for the query result.
+  // when Array.isArray(features) is true, the features property contains the query result.
+  // when property features is null, the query ended with an error.
+  queryStatus: TypeQueryStatus;
+  features: TypeFeatureInfoEntry[] | undefined | null;
+};
+
+export type QueryType = 'at_pixel' | 'at_coordinate' | 'at_long_lat' | 'using_a_bounding_box' | 'using_a_polygon' | 'all';
+
+export type TypeLocation = null | Pixel | Coordinate | Coordinate[] | string;
+
+export type TypeQueryStatus = 'init' | 'processing' | 'processed' | 'error';
+
+export type TypeFeatureInfoEntry = {
+  featureKey: number;
+  geoviewLayerType: TypeGeoviewLayerType;
+  extent: Extent | undefined;
+  geometry: TypeGeometry | Feature | null;
+  featureIcon: HTMLCanvasElement;
+  fieldInfo: Partial<Record<string, TypeFieldEntry>>;
+  nameField: string | null;
+};
+
+export interface TypeGeometry extends RenderFeature {
+  ol_uid: string;
+}
+
+export type codeValueEntryType = {
+  name: string;
+  code: unknown;
+};
+
+export type codedValueType = {
+  type: 'codedValue';
+  name: string;
+  description: string;
+  codedValues: codeValueEntryType[];
+};
+
+export type rangeDomainType = {
+  type: 'range';
+  name: string;
+  range: [minValue: unknown, maxValue: unknown];
+};
+
+export type TypeFieldEntry = {
+  fieldKey: number;
+  value: unknown;
+  dataType: 'string' | 'date' | 'number';
+  alias: string;
+  domain: null | codedValueType | rangeDomainType;
+};
+
+/**
+ * Partial definition of a TypeFeatureInfoEntry for simpler use case queries.
+ * Purposely linking this simpler type to the main TypeFeatureInfoEntry type here, in case, for future we want
+ * to add more information on one or the other and keep things loosely linked together.
+ */
+export type TypeFeatureInfoEntryPartial = Pick<TypeFeatureInfoEntry, 'fieldInfo'>;
+
+/** The simplified layer statuses */
+export type TypeLayerStatusSimplified = 'loading' | 'loaded' | 'error';
+
+// TODO: Refactor - Layers refactoring. After migration, can get rid of this type
+export type TypeLoadEndListenerType = 'features' | 'tile' | 'image';
 
 export type TypeEsriFormatParameter = 'png' | 'jpg' | 'gif' | 'svg';
 
@@ -290,6 +362,7 @@ export interface TypeVectorTileSourceInitialConfig extends TypeBaseSourceVectorI
   tileGrid?: TypeTileGrid;
 }
 
+// TODO: Refactor - This type should be deleted and 'ConfigBaseClass' should be used instead
 export type TypeLayerEntryConfig = AbstractBaseLayerEntryConfig | GroupLayerEntryConfig;
 
 /** ******************************************************************************************************************************

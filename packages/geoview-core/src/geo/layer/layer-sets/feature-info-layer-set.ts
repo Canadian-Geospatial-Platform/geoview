@@ -2,16 +2,18 @@ import { Coordinate } from 'ol/coordinate';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { logger } from '@/core/utils/logger';
-import { getLocalizedValue } from '@/core/utils/utilities';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { TypeLayerEntryConfig, TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoEntry, TypeLayerStatus, TypeResultSet } from '@/geo/map/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { EventType, AbstractLayerSet, TypeFeatureInfoEntry, TypeLayerData, TypeResultSet } from './abstract-layer-set';
+import { EventType, AbstractLayerSet } from './abstract-layer-set';
 import { LayerApi } from '@/geo/layer/layer';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import {
+  TypeFeatureInfoResultSet,
+  TypeFeatureInfoResultSetEntry,
+} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 
 /**
- * A class containing a set of layers associated with a TypeLayerData object, which will receive the result of a
+ * A class containing a set of layers associated with a TypeFeatureInfoResultSetEntry object, which will receive the result of a
  * "get feature info" request made on the map layers when the user click a location on the map.
  *
  * @class FeatureInfoLayerSet
@@ -42,24 +44,24 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Propagate to store
-   * @param {string} layerPath - Layer path to propagate
+   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result entry to propagate
    * @private
    */
-  #propagateToStore(layerPath: string): void {
-    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.mapId, layerPath, 'click', this.resultSet).catch((error) => {
+  #propagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry): void {
+    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.getMapId(), 'click', resultSetEntry).catch((error) => {
       // Log
-      logger.logPromiseFailed('FeatureInfoEventProcessor.propagateFeatureInfoToStore in onRegisterLayer in FeatureInfoLayerSet', error);
+      logger.logPromiseFailed('FeatureInfoEventProcessor.propagateToStore in FeatureInfoLayerSet', error);
     });
   }
 
   /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
-   * @param {string} layerPath - The layer path
+   * @param {ConfigBaseClass} layerConfig - The layer config
    * @returns {boolean} True when the layer should be registered to this feature-info-layer-set.
    */
-  protected override onRegisterLayerCheck(layerConfig: TypeLayerEntryConfig): boolean {
+  protected override onRegisterLayerCheck(layerConfig: ConfigBaseClass): boolean {
     // Log
-    logger.logTraceCore('FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerConfig.layerPath, Object.keys(this.resultSet));
+    logger.logTraceCore('FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerConfig.layerPath);
 
     // TODO: Make a util function for this check - this can be done prior to layer creation in config section
     // for some layer type, we know there is no details
@@ -71,75 +73,61 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     )
       return false;
 
-    // TODO: there is a synching issue, sometimes source is undefined when layer is registered. To overcome this,
-    // TO.DOCONT: if not specified to false by default, we will set it to true
-    const queryable = layerConfig?.source?.featureInfo?.queryable;
-    return !!(queryable || queryable === undefined);
+    // Default
+    return super.onRegisterLayerCheck(layerConfig);
   }
 
   /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to register a layer in its set.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer config
+   * @param {ConfigBaseClass} layerConfig - The layer config
    */
-  protected override onRegisterLayer(layerConfig: TypeLayerEntryConfig): void {
+  protected override onRegisterLayer(layerConfig: ConfigBaseClass): void {
     // Log
-    logger.logTraceCore('FEATURE-INFO-LAYER-SET - onRegisterLayer', layerConfig.layerPath, Object.keys(this.resultSet));
+    logger.logTraceCore('FEATURE-INFO-LAYER-SET - onRegisterLayer', layerConfig.layerPath);
 
     // Call parent
     super.onRegisterLayer(layerConfig);
 
-    this.resultSet[layerConfig.layerPath] = {
-      layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
-      layerStatus: layerConfig.layerStatus!,
-      data: {
-        layerName: getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(this.mapId)) ?? '',
-        layerStatus: layerConfig.layerStatus!,
-        eventListenerEnabled: true,
-        queryStatus: 'processed',
-        features: [],
-        layerPath: layerConfig.layerPath,
-      },
-    };
+    // Update the resultSet data
+    this.resultSet[layerConfig.layerPath].eventListenerEnabled = true;
+    this.resultSet[layerConfig.layerPath].queryStatus = 'processed';
+    this.resultSet[layerConfig.layerPath].features = [];
 
-    // Propagate to store
-    this.#propagateToStore(layerConfig.layerPath);
+    // Propagate to store on registration
+    this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
   }
 
   /**
    * Overrides the behavior to apply when unregistering a layer from the feature-info-layer-set.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer config
+   * @param {ConfigBaseClass} layerConfig - The layer config
    */
-  protected override onUnregisterLayer(layerConfig: TypeLayerEntryConfig): void {
+  protected override onUnregisterLayer(layerConfig: ConfigBaseClass): void {
     // Log
-    logger.logTraceCore('FEATURE-INFO-LAYER-SET - onUnregisterLayer', layerConfig.layerPath, Object.keys(this.resultSet));
+    logger.logTraceCore('FEATURE-INFO-LAYER-SET - onUnregisterLayer', layerConfig.layerPath);
 
     // Call parent
     super.onUnregisterLayer(layerConfig);
 
-    // Remove it from feature info array
-    FeatureInfoEventProcessor.deleteFeatureInfo(this.mapId, layerConfig.layerPath);
+    // Remove it from feature info array (propagating to the store)
+    FeatureInfoEventProcessor.deleteFeatureInfo(this.getMapId(), layerConfig.layerPath);
   }
 
   /**
    * Overrides the behavior to apply when a layer status changed for a feature-info-layer-set.
-   * @param {ConfigBaseClass} config - The layer config class
-   * @param {string} layerPath - The layer path being affected
+   * @param {ConfigBaseClass} layerConfig - The layer config
    * @param {string} layerStatus - The new layer status
    */
-  protected override onProcessLayerStatusChanged(config: ConfigBaseClass, layerPath: string, layerStatus: TypeLayerStatus): void {
-    // if layer's status flag exists and is different than the new one
-    if (this.resultSet?.[layerPath]?.layerStatus && this.resultSet?.[layerPath]?.layerStatus !== layerStatus) {
-      if (layerStatus === 'error') delete this.resultSet[layerPath];
-      else {
-        // Call parent. After this call, this.resultSet?.[layerPath]?.layerStatus may have changed!
-        super.onProcessLayerStatusChanged(config, layerPath, layerStatus);
+  protected override onProcessLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatus: TypeLayerStatus): void {
+    // Call parent. After this call, this.resultSet?.[layerPath]?.layerStatus may have changed!
+    super.onProcessLayerStatusChanged(layerConfig, layerStatus);
 
-        const layerConfig = this.layerApi.getLayerEntryConfig(layerPath)!;
-        if (this?.resultSet?.[layerPath]?.data) {
-          this.resultSet[layerPath].data.layerStatus = layerStatus;
-          this.#propagateToStore(layerConfig.layerPath);
-        }
-      }
+    // Propagate to the store on layer status changed
+    this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
+
+    // If the layer is in error
+    if (this.resultSet[layerConfig.layerPath].layerStatus === 'error') {
+      // Remove it from the store immediately
+      this.onUnregisterLayer(layerConfig);
     }
   }
 
@@ -191,15 +179,29 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // Reinitialize the resultSet
     // Loop on each layer path in the resultSet
     Object.keys(this.resultSet).forEach((layerPath) => {
-      const layerConfig = this.layerApi.getLayerEntryConfig(layerPath)!;
-      const { data } = this.resultSet[layerPath];
-      if (!data.eventListenerEnabled) return;
-      if (layerConfig.layerStatus === 'loaded') {
-        data.features = undefined;
-        data.queryStatus = 'processing';
+      // Get the layer config and layer associated with the layer path
+      const layer = this.layerApi.getGeoviewLayerHybrid(layerPath);
+      const layerConfig = layer?.getLayerConfig(layerPath);
+
+      if (!this.resultSet[layerPath].eventListenerEnabled) return;
+      if (!AbstractLayerSet.isQueryable(layerConfig)) return;
+
+      // If layer is loaded
+      if (layer && layerConfig?.layerStatus === 'loaded') {
+        this.resultSet[layerPath].features = undefined;
+        this.resultSet[layerPath].queryStatus = 'processing';
+
+        // Propagate to store
+        this.#propagateToStore(this.resultSet[layerPath]);
 
         // Process query on results data
-        const promiseResult = FeatureInfoLayerSet.queryLayerFeatures(data, layerConfig, layerPath, queryType, longLatCoordinate);
+        const promiseResult = AbstractLayerSet.queryLayerFeatures(
+          this.resultSet[layerPath],
+          layerConfig,
+          layer,
+          queryType,
+          longLatCoordinate
+        );
 
         // Add the promise
         allPromises.push(promiseResult);
@@ -208,24 +210,23 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         promiseResult
           .then((arrayOfRecords) => {
             // Keep the features retrieved
-            data.features = arrayOfRecords;
-            data.layerStatus = layerConfig.layerStatus!;
+            this.resultSet[layerPath].features = arrayOfRecords;
 
             // When property features is undefined, we are waiting for the query result.
             // when Array.isArray(features) is true, the features property contains the query result.
             // when property features is null, the query ended with an error.
-            data.queryStatus = arrayOfRecords ? 'processed' : 'error';
+            this.resultSet[layerPath].queryStatus = arrayOfRecords ? 'processed' : 'error';
 
             // Propagate to store
-            this.#propagateToStore(layerPath);
+            this.#propagateToStore(this.resultSet[layerPath]);
           })
           .catch((error) => {
             // Log
             logger.logPromiseFailed('queryLayerFeatures in queryLayers in FeatureInfoLayerSet', error);
           });
       } else {
-        data.features = null;
-        data.queryStatus = 'error';
+        this.resultSet[layerPath].features = null;
+        this.resultSet[layerPath].queryStatus = 'error';
       }
     });
 
@@ -241,14 +242,14 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Apply status to item in results set reference by the layer path and propagate to store
-   * @param {string} layerPath - Layer path
+   * @param {string} layerPath - The layer path
    * @param {boolean} isEnable - Status to apply
    * @private
    */
   #processListenerStatusChanged(layerPath: string, isEnable: boolean): void {
-    this.resultSet[layerPath].data.eventListenerEnabled = isEnable;
-    this.resultSet[layerPath].data.features = [];
-    this.#propagateToStore(layerPath);
+    this.resultSet[layerPath].eventListenerEnabled = isEnable;
+    this.resultSet[layerPath].features = [];
+    this.#propagateToStore(this.resultSet[layerPath]);
   }
 
   /**
@@ -284,26 +285,16 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * @returns {boolean | undefined} The flag value for the map or layer.
    */
   isClickListenerEnabled(layerPath?: string): boolean | undefined {
-    if (layerPath) return !!this.resultSet?.[layerPath]?.data?.eventListenerEnabled;
+    if (layerPath) return !!this.resultSet?.[layerPath]?.eventListenerEnabled;
 
     let returnValue: boolean | undefined;
     Object.keys(this.resultSet).forEach((key: string, i) => {
-      if (i === 0) returnValue = this.resultSet[key].data.eventListenerEnabled;
-      if (returnValue !== this.resultSet[key].data.eventListenerEnabled) returnValue = undefined;
+      if (i === 0) returnValue = this.resultSet[key].eventListenerEnabled;
+      if (returnValue !== this.resultSet[key].eventListenerEnabled) returnValue = undefined;
     });
     return returnValue;
   }
 }
-
-export type TypeFeatureInfoResultSetEntry = {
-  layerName?: string;
-  layerStatus: TypeLayerStatus;
-  data: TypeLayerData;
-};
-
-export type TypeFeatureInfoResultSet = {
-  [layerPath: string]: TypeFeatureInfoResultSetEntry;
-};
 
 /**
  * Define a delegate for the event handler function signature

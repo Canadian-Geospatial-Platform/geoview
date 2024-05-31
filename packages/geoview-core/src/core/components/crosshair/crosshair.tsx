@@ -49,7 +49,10 @@ export function Crosshair({ mapTargetElement }: CrosshairProps): JSX.Element {
       logger.logTraceUseCallback('CROSSHAIR - simulateClick', pointerPosition);
       if (event.key === 'Enter' && pointerPosition) {
         // Update the store
-        setClickCoordinates(pointerPosition);
+        setClickCoordinates(pointerPosition).catch((error) => {
+          // Log
+          logger.logPromiseFailed('Failed to setClickCoordinates in crosshair.simulateClick', error);
+        });
       }
     },
     [pointerPosition, setClickCoordinates]

@@ -17,8 +17,16 @@ import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-clas
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
-import { TypeFeatureInfoEntryPartial, TypeFieldEntry, codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/abstract-layer-set';
-import { CONST_LAYER_ENTRY_TYPES, TypeLayerEntryConfig, TypeStyleGeometry, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
+import {
+  CONST_LAYER_ENTRY_TYPES,
+  TypeFeatureInfoEntryPartial,
+  TypeFieldEntry,
+  TypeLayerEntryConfig,
+  TypeStyleGeometry,
+  codedValueType,
+  layerEntryIsGroupLayer,
+  rangeDomainType,
+} from '@/geo/map/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { EsriDynamic, geoviewEntryIsEsriDynamic } from './raster/esri-dynamic';
 import { EsriFeature, geoviewEntryIsEsriFeature } from './vector/esri-feature';
@@ -112,19 +120,27 @@ export function commonValidateListOfLayerEntryConfig(
       const newListOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
       const switchToGroupLayer = Cast<GroupLayerEntryConfig>(cloneDeep(layerConfig));
       switchToGroupLayer.entryType = CONST_LAYER_ENTRY_TYPES.GROUP;
-      switchToGroupLayer.layerName = {
-        en: layer.metadata!.layers[esriIndex].name as string,
-        fr: layer.metadata!.layers[esriIndex].name as string,
-      };
+
+      // Only switch the layer name by the metadata if there were none pre-set (config wins over metadata rule?)
+      if (!switchToGroupLayer.layerName) {
+        switchToGroupLayer.layerName = {
+          en: layer.metadata!.layers[esriIndex].name as string,
+          fr: layer.metadata!.layers[esriIndex].name as string,
+        };
+      } else {
+        if (!switchToGroupLayer.layerName.en) switchToGroupLayer.layerName.en = layer.metadata!.layers[esriIndex].name as string;
+        if (!switchToGroupLayer.layerName.fr) switchToGroupLayer.layerName.fr = layer.metadata!.layers[esriIndex].name as string;
+      }
       switchToGroupLayer.isMetadataLayerGroup = true;
       switchToGroupLayer.listOfLayerEntryConfig = newListOfLayerEntryConfig;
+
       const groupLayerConfig = new GroupLayerEntryConfig(switchToGroupLayer as GroupLayerEntryConfig);
       // Replace the old version of the layer with the new layer group
       listOfLayerEntryConfig[i] = groupLayerConfig;
 
       // TODO: Refactor: Do not do this on the fly here anymore with the new configs (quite unpredictable)...
-      // Don't forget to replace the old version in registeredLayers
-      MapEventProcessor.getMapViewerLayerAPI(layer.mapId).registeredLayers[groupLayerConfig.layerPath] = groupLayerConfig;
+      // Don't forget to replace the old version in the registered layers
+      MapEventProcessor.getMapViewerLayerAPI(layer.mapId).setLayerEntryConfigObsolete(groupLayerConfig);
 
       (layer.metadata!.layers[esriIndex].subLayerIds as TypeJsonArray).forEach((layerId) => {
         // Make sure to copy the layerConfig source before recycling it in the constructors. This was causing the 'source' value to leak between layer entry configs
@@ -146,7 +162,9 @@ export function commonValidateListOfLayerEntryConfig(
           fr: layer.metadata!.layers[layerId as number].name as string,
         };
         newListOfLayerEntryConfig.push(subLayerEntryConfig);
-        subLayerEntryConfig.registerLayerConfig();
+
+        // FIXME: Temporary patch to keep the behavior until those layer classes don't exist
+        MapEventProcessor.getMapViewerLayerAPI(layer.mapId).registerLayerConfigInit(subLayerEntryConfig);
       });
 
       layer.validateListOfLayerEntryConfig(newListOfLayerEntryConfig);
@@ -180,7 +198,7 @@ export function commonGetFieldType(
   fieldName: string,
   layerConfig: AbstractBaseLayerEntryConfig
 ): 'string' | 'date' | 'number' {
-  const esriFieldDefinitions = layer.layerMetadata[layerConfig.layerPath].fields as TypeJsonArray;
+  const esriFieldDefinitions = layer.getLayerMetadata(layerConfig.layerPath).fields as TypeJsonArray;
   const fieldDefinition = esriFieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
   if (!fieldDefinition) return 'string';
   const esriFieldType = fieldDefinition.type as string;
@@ -208,7 +226,7 @@ export function commonGetFieldDomain(
   fieldName: string,
   layerConfig: AbstractBaseLayerEntryConfig
 ): null | codedValueType | rangeDomainType {
-  const esriFieldDefinitions = layer.layerMetadata[layerConfig.layerPath].fields as TypeJsonArray;
+  const esriFieldDefinitions = layer.getLayerMetadata(layerConfig.layerPath).fields as TypeJsonArray;
   const fieldDefinition = esriFieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
   return fieldDefinition ? Cast<codedValueType | rangeDomainType>(fieldDefinition.domain) : null;
 }
@@ -250,7 +268,7 @@ export function commonProcessFeatureInfoConfig(
   layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
 ): void {
   const { layerPath } = layerConfig;
-  const layerMetadata = layer.layerMetadata[layerPath];
+  const layerMetadata = layer.getLayerMetadata(layerPath);
   const queryable = (layerMetadata.capabilities as string).includes('Query');
   if (layerConfig.source.featureInfo) {
     // if queryable flag is undefined, set it accordingly to what is specified in the metadata
@@ -324,7 +342,7 @@ export function commonProcessInitialSettings(
   layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
 ): void {
   // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-  const layerMetadata = layer.layerMetadata[layerConfig.layerPath];
+  const layerMetadata = layer.getLayerMetadata(layerConfig.layerPath);
   if (layerConfig.initialSettings?.states?.visible === undefined)
     layerConfig.initialSettings!.states = { visible: !!layerMetadata.defaultVisibility };
   // GV TODO: The solution implemented in the following two lines is not right. scale and zoom are not the same things.
@@ -375,7 +393,7 @@ export async function commonProcessLayerMetadata(
         layerConfig.layerStatus = 'error';
         throw new Error(`Error code = ${data.error.code}, ${data.error.message}`);
       }
-      layer.layerMetadata[layerPath] = data;
+      layer.setLayerMetadata(layerPath, data);
       // The following line allow the type ascention of the type guard functions on the second line below
       const EsriLayerConfig = layerConfig;
       if (geoviewEntryIsEsriDynamic(EsriLayerConfig) || geoviewEntryIsEsriFeature(EsriLayerConfig)) {

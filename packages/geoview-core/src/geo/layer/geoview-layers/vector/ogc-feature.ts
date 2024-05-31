@@ -21,7 +21,6 @@ import {
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
 import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
@@ -91,6 +90,7 @@ export const geoviewEntryIsOgcFeature = (
  * @class OgcFeature
  */
 // ******************************************************************************************************************************
+// GV Layers Refactoring - Obsolete (in layers)
 export class OgcFeature extends AbstractGeoViewVector {
   // TODO: Check - If this still used?
   // private variable holding wfs version
@@ -114,8 +114,9 @@ export class OgcFeature extends AbstractGeoViewVector {
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number' {
-    const fieldDefinitions = this.layerMetadata[layerConfig.layerPath];
+    const fieldDefinitions = this.getLayerMetadata(layerConfig.layerPath);
     const fieldEntryType = (fieldDefinitions[fieldName].type as string).split(':').slice(-1)[0] as string;
     if (fieldEntryType === 'date') return 'date';
     if (['int', 'number'].includes(fieldEntryType)) return 'number';
@@ -127,6 +128,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected override fetchServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
@@ -156,6 +158,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    *
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     listOfLayerEntryConfig.forEach((layerConfig: TypeLayerEntryConfig) => {
       const { layerPath } = layerConfig;
@@ -192,20 +195,14 @@ export class OgcFeature extends AbstractGeoViewVector {
             fr: foundCollection.description as string,
           };
 
-        const { currentProjection } = MapEventProcessor.getMapState(this.mapId);
         if (layerConfig.initialSettings?.extent)
-          layerConfig.initialSettings.extent = Projection.transformExtent(
-            layerConfig.initialSettings.extent,
-            Projection.PROJECTION_NAMES.LNGLAT,
-            `EPSG:${currentProjection}`
-          );
+          layerConfig.initialSettings.extent = this.getMapViewer().convertExtentLngLatToMapProj(layerConfig.initialSettings.extent);
 
         if (!layerConfig.initialSettings?.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
           // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-          layerConfig.initialSettings!.bounds = Projection.transformExtent(
+          layerConfig.initialSettings!.bounds = this.getMapViewer().convertExtentFromProjToMapProj(
             foundCollection.extent.spatial.bbox[0] as number[],
-            Projection.getProjection(foundCollection.extent.spatial.crs as string)!,
-            `EPSG:${currentProjection}`
+            Projection.getProjection(foundCollection.extent.spatial.crs as string)!
           );
         }
         return;
@@ -223,16 +220,17 @@ export class OgcFeature extends AbstractGeoViewVector {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected override async processLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     try {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
       if (metadataUrl) {
         const queryUrl = metadataUrl.endsWith('/')
-          ? `${metadataUrl}collections/${String(layerConfig.layerId)}/queryables?f=json`
-          : `${metadataUrl}/collections/${String(layerConfig.layerId)}/queryables?f=json`;
+          ? `${metadataUrl}collections/${layerConfig.layerId}/queryables?f=json`
+          : `${metadataUrl}/collections/${layerConfig.layerId}/queryables?f=json`;
         const queryResult = await axios.get<TypeJsonObject>(queryUrl);
         if (queryResult.data.properties) {
-          this.layerMetadata[layerConfig.layerPath] = queryResult.data.properties;
+          this.setLayerMetadata(layerConfig.layerPath, queryResult.data.properties);
           OgcFeature.#processFeatureInfoConfig(queryResult.data.properties, layerConfig);
         }
       }
@@ -250,6 +248,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @param {VectorLayerEntryConfig} layerConfig The vector layer entry to configure.
    * @private
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   static #processFeatureInfoConfig(fields: TypeJsonObject, layerConfig: VectorLayerEntryConfig): void {
     if (!layerConfig.source) layerConfig.source = {};
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
@@ -300,6 +299,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
+  // GV Layers Refactoring - Obsolete (in config?, in layers?)
   protected override createVectorSource(
     layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},

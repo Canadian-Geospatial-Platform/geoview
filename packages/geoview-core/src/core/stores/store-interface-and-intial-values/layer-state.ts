@@ -8,11 +8,21 @@ import { FitOptions } from 'ol/View';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeLayersViewDisplayState, TypeLegendLayer } from '@/core/components/layers/types';
 import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
-import { TypeClassBreakStyleConfig, TypeStyleGeometry, TypeUniqueValueStyleConfig } from '@/geo/map/map-schema-types';
+import {
+  TypeClassBreakStyleConfig,
+  TypeResultSet,
+  TypeResultSetEntry,
+  TypeStyleConfig,
+  TypeStyleGeometry,
+  TypeUniqueValueStyleConfig,
+} from '@/geo/map/map-schema-types';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
+import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
+import { TypeLocalizedString } from '@/api/config/types/map-schema-types';
+import { TypeGeoviewLayerType, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 // #region INTERFACES & TYPES
 
@@ -68,6 +78,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       getLayerBounds: (layerPath: string) => {
         const layer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayer(layerPath);
         if (layer) {
+          // TODO: Refactor - Layers refactoring. There needs to be a calculateBounds somewhere (new layers, new config?) to complete the full layers migration.
           const bounds = layer.calculateBounds(layerPath);
           if (bounds) return bounds;
         }
@@ -136,7 +147,9 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       toggleItemVisibility: (layerPath: string, geometryType: TypeStyleGeometry, itemName: string) => {
         const curLayers = get().layerState.legendLayers;
 
-        const registeredLayer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).registeredLayers[layerPath] as VectorLayerEntryConfig;
+        const registeredLayer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).getLayerEntryConfig(
+          layerPath
+        ) as VectorLayerEntryConfig;
         const layer = findLayerByPath(curLayers, layerPath);
         if (layer) {
           _.each(layer.items, (item) => {
@@ -165,10 +178,9 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
           });
 
           // apply filter to layer
-          (MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter(
-            layerPath,
-            ''
-          );
+          (
+            MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayerHybrid(layerPath) as AbstractGeoViewVector | AbstractGVVector
+          ).applyViewFilter(layerPath, '');
         }
         set({
           layerState: {
@@ -181,7 +193,9 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         MapEventProcessor.setOrToggleMapLayerVisibility(get().mapId, layerPath, true);
         const curLayers = get().layerState.legendLayers;
 
-        const registeredLayer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).registeredLayers[layerPath] as VectorLayerEntryConfig;
+        const registeredLayer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).getLayerEntryConfig(
+          layerPath
+        ) as VectorLayerEntryConfig;
         const layer = findLayerByPath(curLayers, layerPath);
         if (layer) {
           _.each(layer.items, (item) => {
@@ -224,10 +238,9 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         // GV try to make reusable store actions....
         // GV we can have always item.... we cannot set visibility so if present we will need to trap. Need more use case
         // GV create a function setItemVisibility called with layer path and this function set the registered layer (from store values) then apply the filter.
-        (MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter(
-          layerPath,
-          ''
-        );
+        (
+          MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayerHybrid(layerPath) as AbstractGeoViewVector | AbstractGVVector
+        ).applyViewFilter(layerPath, '');
       },
       getLayerDeleteInProgress: () => get().layerState.layerDeleteInProgress,
       setLayerDeleteInProgress: (newVal: boolean) => {
@@ -269,7 +282,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
 function setOpacityInLayerAndChildren(layer: TypeLegendLayer, opacity: number, mapId: string, isChild = false): void {
   _.set(layer, 'opacity', opacity);
-  MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layer.layerPath)?.setOpacity(opacity, layer.layerPath);
+  MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layer.layerPath)?.setOpacity(opacity, layer.layerPath);
   if (isChild) {
     _.set(layer, 'opacityFromParent', opacity);
   }
@@ -312,6 +325,25 @@ function deleteSingleLayer(layers: TypeLegendLayer[], layerPath: string): void {
     }
   }
 }
+
+export type TypeLegendResultInfo = {
+  legendQueryStatus: LegendQueryStatus;
+  data: TypeLegend | undefined | null;
+};
+
+export type LegendQueryStatus = 'init' | 'querying' | 'queried';
+
+export type TypeLegend = {
+  layerName?: TypeLocalizedString;
+  type: TypeGeoviewLayerType;
+  styleConfig?: TypeStyleConfig | null;
+  // Layers other than vector layers use the HTMLCanvasElement type for their legend.
+  legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
+};
+
+export type TypeLegendResultSetEntry = TypeResultSetEntry & TypeLegendResultInfo;
+
+export type TypeLegendResultSet = TypeResultSet<TypeLegendResultSetEntry>;
 
 // **********************************************************
 // Layer state selectors

@@ -17,7 +17,6 @@ import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-lay
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { Projection } from '@/geo/utils/projection';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -31,8 +30,10 @@ import {
   TypeClassBreakStyleConfig,
   isSimpleStyleConfig,
   TypeFeatureInfoLayerConfig,
+  codedValueType,
+  rangeDomainType,
+  TypeFeatureInfoEntry,
 } from '@/geo/map/map-schema-types';
-import { TypeFeatureInfoEntry, codedValueType, rangeDomainType } from '@/geo/layer/layer-sets/abstract-layer-set';
 
 import {
   commonGetFieldDomain,
@@ -121,7 +122,14 @@ export const geoviewEntryIsEsriDynamic = (
  * @class EsriDynamic
  */
 // ******************************************************************************************************************************
+// GV Layers Refactoring - Obsolete (in layers)
 export class EsriDynamic extends AbstractGeoViewRaster {
+  // The default hit tolerance the query should be using
+  static override DEFAULT_HIT_TOLERANCE: number = 7;
+
+  // Override the hit tolerance for a EsriDynamic layer
+  override hitTolerance: number = EsriDynamic.DEFAULT_HIT_TOLERANCE;
+
   /** ****************************************************************************************************************************
    * Initialize layer.
    * @param {string} mapId The id of the map.
@@ -137,6 +145,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected override fetchServiceMetadata(): Promise<void> {
     return commonfetchServiceMetadata(this);
   }
@@ -147,6 +156,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     commonValidateListOfLayerEntryConfig(this, listOfLayerEntryConfig);
   }
@@ -158,6 +168,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {boolean} true if an error is detected.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   esriChildHasDetectedAnError(layerConfig: TypeLayerEntryConfig): boolean {
     if (!this.metadata!.supportsDynamicLayers) {
       this.layerLoadError.push({
@@ -177,6 +188,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected override getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number' {
     return commonGetFieldType(this, fieldName, layerConfig);
   }
@@ -189,6 +201,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected override getFieldDomain(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): null | codedValueType | rangeDomainType {
     return commonGetFieldDomain(this, fieldName, layerConfig);
   }
@@ -198,6 +211,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
    * @param {EsriDynamicLayerEntryConfig} layerConfig The layer entry to configure
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: EsriDynamicLayerEntryConfig): void {
     commonProcessTemporalDimension(this, esriTimeDimension, layerConfig);
   }
@@ -207,9 +221,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @param {EsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
    */
-  processFeatureInfoConfig = (layerConfig: EsriDynamicLayerEntryConfig): void => {
+  // GV Layers Refactoring - Obsolete (in config?)
+  processFeatureInfoConfig(layerConfig: EsriDynamicLayerEntryConfig): void {
     commonProcessFeatureInfoConfig(this, layerConfig);
-  };
+  }
 
   /** ***************************************************************************************************************************
    * This method set the initial settings based on the service metadata. Priority is given to the layer configuration.
@@ -217,6 +232,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {EsriDynamic} this The ESRI layer instance pointer.
    * @param {EsriDynamicLayerEntryConfig} layerConfig The layer entry to configure.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   processInitialSettings(layerConfig: EsriDynamicLayerEntryConfig): void {
     commonProcessInitialSettings(this, layerConfig);
   }
@@ -229,6 +245,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
+  // GV Layers Refactoring - Obsolete (in config?)
   protected override processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
     return commonProcessLayerMetadata(this, layerConfig);
   }
@@ -238,8 +255,9 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @param {EsriDynamicLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
+   * @returns {Promise<TypeBaseRasterLayer | undefined>} The GeoView raster layer that has been created.
    */
+  // GV Layers Refactoring - Obsolete (in config?, in layers?)
   protected override async processOneLayerEntry(layerConfig: EsriDynamicLayerEntryConfig): Promise<TypeBaseRasterLayer | undefined> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
@@ -271,14 +289,11 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
     // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
 
-    // Create the OpenLayer
+    // Create the OpenLayer layer
     const olLayer = new ImageLayer(imageLayerOptions);
 
     // TODO: Refactor - Wire it up
-    this.setLayerAndLoadEndListeners(layerConfig, {
-      olLayer,
-      loadEndListenerType: 'image',
-    });
+    this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'image');
 
     return Promise.resolve(olLayer);
   }
@@ -288,10 +303,11 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {string} layerPath - The layer path to the layer's configuration.
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected override async getAllFeatureInfo(layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
       // Get the layer config in a loaded phase
-      const layerConfig = this.getLayerEntryConfig(layerPath)! as EsriDynamicLayerEntryConfig;
+      const layerConfig = this.getLayerConfig(layerPath)! as EsriDynamicLayerEntryConfig;
 
       // Guess the geometry type
       const geometryType = layerConfig.getTypeGeometry();
@@ -341,9 +357,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The feature info table.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected override getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const { map } = MapEventProcessor.getMapViewer(this.mapId);
-    return this.getFeatureInfoAtCoordinate(map.getCoordinateFromPixel(location), layerPath);
+    // Redirect to getFeatureInfoAtCoordinate
+    return this.getFeatureInfoAtCoordinate(this.getMapViewer().map.getCoordinateFromPixel(location), layerPath);
   }
 
   /** ***************************************************************************************************************************
@@ -354,16 +371,16 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The promised feature info table.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected override getFeatureInfoAtCoordinate(
     location: Coordinate,
     layerPath: string
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
-    const convertedLocation = Projection.transform(
-      location,
-      `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`,
-      Projection.PROJECTION_NAMES.LNGLAT
-    );
-    return this.getFeatureInfoAtLongLat(convertedLocation, layerPath);
+    // Transform coordinate from map project to lntlat
+    const projCoordinate = this.getMapViewer().convertCoordinateMapProjToLngLat(location);
+
+    // Redirect to getFeatureInfoAtLongLat
+    return this.getFeatureInfoAtLongLat(projCoordinate, layerPath);
   }
 
   /** ***************************************************************************************************************************
@@ -374,33 +391,38 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {Promise<TypeFeatureInfoEntry[] | undefined | null>} The promised feature info table.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected override async getFeatureInfoAtLongLat(
     lnglat: Coordinate,
     layerPath: string
   ): Promise<TypeFeatureInfoEntry[] | undefined | null> {
     try {
-      // Get the layer config in a loaded phase
-      const layerConfig = this.getLayerEntryConfig(layerPath) as EsriDynamicLayerEntryConfig;
+      // If invisible
       if (!this.getVisible(layerPath)) return [];
+
+      // Get the layer config in a loaded phase
+      const layerConfig = this.getLayerConfig(layerPath) as EsriDynamicLayerEntryConfig;
+      const layer = this.getOLLayer(layerPath) as ImageLayer<ImageArcGISRest>;
+
+      // If not queryable
       if (!layerConfig.source?.featureInfo?.queryable) return [];
 
       let identifyUrl = getLocalizedValue(layerConfig.source?.dataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
       if (!identifyUrl) return [];
 
       identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
-      const mapLayer = MapEventProcessor.getMapViewer(this.mapId).map;
-      const { currentProjection } = MapEventProcessor.getMapState(this.mapId);
-      const size = mapLayer.getSize()!;
-      let bounds = mapLayer.getView().calculateExtent();
-      bounds = Projection.transformExtent(bounds, `EPSG:${currentProjection}`, Projection.PROJECTION_NAMES.LNGLAT);
+
+      const mapViewer = this.getMapViewer();
+      const bounds = mapViewer.convertExtentMapProjToLngLat(mapViewer.getView().calculateExtent());
 
       const extent = { xmin: bounds[0], ymin: bounds[1], xmax: bounds[2], ymax: bounds[3] };
 
-      const source = (layerConfig.olLayer as ImageLayer<ImageArcGISRest>).getSource()!;
-      const { layerDefs } = source.getParams();
+      const source = layer.getSource();
+      const layerDefs = source?.getParams().layerDefs || '';
+      const size = mapViewer.map.getSize()!;
 
       identifyUrl =
-        `${identifyUrl}identify?f=json&tolerance=7` +
+        `${identifyUrl}identify?f=json&tolerance=${this.hitTolerance}` +
         `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
         `&imageDisplay=${size[0]},${size[1]},96` +
         `&layers=visible:${layerConfig.layerId}` +
@@ -416,7 +438,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       }
       const features = new EsriJSON().readFeatures(
         { features: jsonResponse.results },
-        { dataProjection: Projection.PROJECTION_NAMES.LNGLAT, featureProjection: `EPSG:${currentProjection}` }
+        { dataProjection: Projection.PROJECTION_NAMES.LNGLAT, featureProjection: mapViewer.getProjection().getCode() }
       ) as Feature<Geometry>[];
       const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig);
       return arrayOfFeatureInfoEntries;
@@ -438,6 +460,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * the feature.
    * @private
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   static #countFieldOfTheSameValue(styleSettings: TypeUniqueValueStyleConfig): TypeFieldOfTheSameValue[][] {
     return styleSettings.uniqueValueStyleInfo.reduce<TypeFieldOfTheSameValue[][]>(
       (counter, styleEntry): TypeFieldOfTheSameValue[][] => {
@@ -469,6 +492,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns {number[]} An array that gives the field order to use to build the query tree.
    * @private
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   static #sortFieldOfTheSameValue(styleSettings: TypeUniqueValueStyleConfig, fieldOfTheSameValue: TypeFieldOfTheSameValue[][]): number[] {
     const fieldNotUsed = styleSettings.fields.map(() => true);
     const fieldOrder: number[] = [];
@@ -516,6 +540,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns {TypeQueryTree} The query tree to use when building the final query string.
    * @private
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   static #getQueryTree(
     styleSettings: TypeUniqueValueStyleConfig,
     fieldOfTheSameValue: TypeFieldOfTheSameValue[][],
@@ -552,6 +577,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns {string} The resulting field value.
    * @private
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   #formatFieldValue(fieldName: string, rawValue: string | number | Date, sourceFeatureInfo: TypeFeatureInfoLayerConfig): string {
     const fieldIndex = getLocalizedValue(sourceFeatureInfo.outfields, AppEventProcessor.getDisplayLanguage(this.mapId))
       ?.split(',')
@@ -579,6 +605,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns {string} The resulting query.
    * @private
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   #buildQuery(
     queryTree: TypeQueryTree,
     level: number,
@@ -619,8 +646,9 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {string} the filter associated to the layerPath
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   getViewFilter(layerPath: string): string {
-    const layerConfig = this.getLayerEntryConfig(layerPath) as EsriDynamicLayerEntryConfig;
+    const layerConfig = this.getLayerConfig(layerPath) as EsriDynamicLayerEntryConfig;
     const { layerFilter } = layerConfig;
 
     if (layerConfig?.style) {
@@ -774,8 +802,20 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     return '(1=1)';
   }
 
+  /**
+   * Overrides when the layer gets in loaded status.
+   */
+  // GV Layers Refactoring - Obsolete (in layers)
+  override onLoaded(layerConfig: AbstractBaseLayerEntryConfig): void {
+    // Call parent
+    super.onLoaded(layerConfig);
+
+    // Apply view filter immediately
+    this.applyViewFilter(layerConfig.layerPath, (layerConfig as EsriDynamicLayerEntryConfig).layerFilter || '');
+  }
+
   /** ***************************************************************************************************************************
-   * Apply a view filter to the layer. When the combineLegendFilter flag is false, the filter paramater is used alone to display
+   * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter paramater is used alone to display
    * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
    * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
    * is done.
@@ -784,11 +824,14 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
    * @param {boolean} combineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   applyViewFilter(layerPath: string, filter: string, combineLegendFilter = true): void {
     // Log
     logger.logTraceCore('ESRI-DYNAMIC - applyViewFilter', layerPath);
 
-    const layerConfig = this.getLayerEntryConfig(layerPath) as EsriDynamicLayerEntryConfig;
+    const layerConfig = this.getLayerConfig(layerPath) as EsriDynamicLayerEntryConfig;
+    const olLayer = this.getOLLayer(layerPath) as ImageLayer<ImageArcGISRest> | undefined;
+
     let filterValueToUse = filter.replaceAll(/\s{2,}/g, ' ').trim();
     layerConfig.legendFilterIsOff = !combineLegendFilter;
     layerConfig.layerFilter = filterValueToUse;
@@ -814,10 +857,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
     // TODO: Bug - The layerDefs filter being generated here fails when the filterValueToUse is for example for the historical_flood:
     // TO.DOCONT: flood_cause in ('freshet', 'heavy rain', 'coastal storm', 'beaver dam failure', 'frazil', 'dam failure', 'municipal water main break', 'unknown') and (time_slider_date >= date '1696-01-01T05:00:00.000Z' and time_slider_date <= date '2023-01-01T05:00:00.000Z')
-    (layerConfig.olLayer as ImageLayer<ImageArcGISRest>)
-      .getSource()!
-      .updateParams({ layerDefs: `{"${layerConfig.layerId}": "${filterValueToUse}"}` });
-    layerConfig.olLayer!.changed();
+    olLayer?.getSource()!.updateParams({ layerDefs: `{"${layerConfig.layerId}": "${filterValueToUse}"}` });
+    olLayer?.changed();
   }
 
   /** ***************************************************************************************************************************
@@ -828,10 +869,12 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {Extent | undefined} The new layer bounding box.
    */
+  // GV Layers Refactoring - Obsolete (in layers)
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
-    const layerConfig = this.getLayerEntryConfig(layerPath);
+    const layerConfig = this.getLayerConfig(layerPath);
     const layerBounds = layerConfig?.initialSettings?.bounds || [];
-    const projection = this.metadata?.fullExtent?.spatialReference?.wkid || MapEventProcessor.getMapState(this.mapId).currentProjection;
+    const projection =
+      this.metadata?.fullExtent?.spatialReference?.wkid || this.getMapViewer().getProjection().getCode().replace('EPSG:', '');
 
     if (this.metadata?.fullExtent) {
       layerBounds[0] = this.metadata?.fullExtent.xmin as number;
@@ -842,12 +885,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
     if (layerBounds) {
       let transformedBounds = layerBounds;
-      if (this.metadata?.fullExtent?.spatialReference?.wkid !== MapEventProcessor.getMapState(this.mapId).currentProjection) {
-        transformedBounds = Projection.transformExtent(
-          layerBounds,
-          `EPSG:${projection}`,
-          `EPSG:${MapEventProcessor.getMapState(this.mapId).currentProjection}`
-        );
+      if (this.metadata?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')) {
+        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, `EPSG:${projection}`);
       }
 
       if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
