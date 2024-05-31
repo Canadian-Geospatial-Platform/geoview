@@ -11,6 +11,8 @@ import { logger } from '@/core/utils/logger';
 import { ArrowBackIcon, ArrowForwardIcon, CloseIcon, QuestionMarkIcon } from '@/ui/icons';
 import { useAppGuide, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { ResponsiveButton } from './responsive-button';
+import { TypeContainerBox } from '@/core/types/global-types';
+import { CONTAINER_TYPE } from '@/core/utils/constant';
 
 interface ResponsiveGridLayoutProps {
   leftTop?: ReactNode;
@@ -22,6 +24,7 @@ interface ResponsiveGridLayoutProps {
   onIsEnlargeClicked?: (isEnlarge: boolean) => void;
   onGuideIsOpen?: (isGuideOpen: boolean) => void;
   hideEnlargeBtn?: boolean;
+  containerType?: TypeContainerBox;
 }
 
 interface ResponsiveGridLayoutExposedMethods {
@@ -40,6 +43,7 @@ const ResponsiveGridLayout = forwardRef(
       onIsEnlargeClicked,
       onGuideIsOpen,
       hideEnlargeBtn = false,
+      containerType,
     }: ResponsiveGridLayoutProps,
     ref: Ref<ResponsiveGridLayoutExposedMethods>
   ) => {
@@ -274,10 +278,12 @@ const ResponsiveGridLayout = forwardRef(
             <Box
               sx={{
                 display: 'flex',
-                alignItems: fullWidth ? 'end' : 'center',
-                flexDirection: fullWidth ? 'column' : 'row',
-                gap: fullWidth ? '10px' : '0',
-                [theme.breakpoints.up('md')]: { justifyContent: fullWidth ? 'space-between' : 'right' },
+                alignItems: fullWidth || containerType === CONTAINER_TYPE.APP_BAR ? 'end' : 'center',
+                flexDirection: fullWidth || containerType === CONTAINER_TYPE.APP_BAR ? 'column' : 'row',
+                gap: fullWidth || containerType === CONTAINER_TYPE.APP_BAR ? '10px' : '0',
+                [theme.breakpoints.up('md')]: {
+                  justifyContent: fullWidth || containerType === CONTAINER_TYPE.APP_BAR ? 'space-between' : 'right',
+                },
                 [theme.breakpoints.down('md')]: { justifyContent: 'space-between' },
               }}
             >

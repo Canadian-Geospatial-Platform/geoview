@@ -73,11 +73,11 @@ export function HoverTooltip(): JSX.Element | null {
     const tooltipRect = tooltipRef.current.getBoundingClientRect();
 
     // Check if the tooltip is outside the map
-    let tooltipX = pointerPosition.pixel[0];
+    let tooltipX = pointerPosition.pixel[0] + 10;
     let tooltipY = pointerPosition.pixel[1] - 35;
 
     if (pointerPosition.pixel[0] + tooltipRect.width > mapRect.width) {
-      tooltipX = pointerPosition.pixel[0] - tooltipRect.width;
+      tooltipX = pointerPosition.pixel[0] - tooltipRect.width - 10;
     }
 
     if (pointerPosition.pixel[1] - tooltipRect.height < mapRect.top) {

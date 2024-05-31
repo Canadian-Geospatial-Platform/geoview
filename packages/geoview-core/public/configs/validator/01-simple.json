@@ -65,6 +65,7 @@
               "layerFilter": "",
               "maxRecordCount": 0,
               "featureInfo": {
+                "queryable": true,
                 "nameField": "Location_Emplacement",
                 "outfields": [
                   {

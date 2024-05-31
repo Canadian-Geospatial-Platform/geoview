@@ -77,11 +77,13 @@
     "itemsCount": "{count} of {totalCount} items",
     "legendInstructions": "Legend Instructions",
     "noLayersAdded": "No layers added to the map",
-    "noLayersAddedDescription": "Add layers to the map by clicking on the 'Layers' button and adding the layers you want to display."
+    "noLayersAddedDescription": "Add layers to the map by clicking on the 'Layers' button and adding the layers you want to display.",
+    "itemsCount": "{count} of {totalCount} classes",
+    "legendInstructions": "Legend Instructions"
   },
   "layers": {
     "title": "Layers",
-    "subLayersList": "Sub-Layers List",
+    "subLayersList": "Sublayers List",
     "removingLayers": "Removing Layers",
     "reArrangeLayers": "Re-arrange Layers",
     "addingNewLayer": "Adding a new layer",

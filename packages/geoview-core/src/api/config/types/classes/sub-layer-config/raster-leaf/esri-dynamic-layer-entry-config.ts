@@ -44,7 +44,7 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   ) {
     super(layerConfig, initialSettings, language, geoviewLayerConfig, parentNode);
     // Set default values.
-    this.source = defaultsDeep(this.source, { maxRecordCount: 0, format: 'png' });
+    this.source = defaultsDeep(this.source, { maxRecordCount: 0, format: 'png', featureInfo: { queryable: false } });
     this.style = layerConfig.style ? { ...Cast<TypeStyleConfig>(layerConfig.style) } : undefined;
     if (Number.isNaN(this.layerId)) {
       throw new Error(`The layer entry with layer path equal to ${this.layerPath} must be an integer string`);

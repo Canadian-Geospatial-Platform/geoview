@@ -14,7 +14,7 @@ import {
 } from '@config/types/map-schema-types';
 
 /** The default geocore url */
-export const CV_CONFIG_GEOCORE_URL = 'https://geocore-stage.api.geo.ca';
+export const CV_CONFIG_GEOCORE_URL = 'https://geocore.api.geo.ca';
 
 /** The default geolocator url */
 export const CV_CONFIG_GEOLOCATOR_URL = 'https://geolocator.api.geo.ca?keys=geonames,nominatim,locate';
@@ -212,7 +212,7 @@ export const CV_DEFAULT_LAYER_INITIAL_SETTINGS = {
 /**
  * Definition of the default order of the tabs inside appbar
  */
-export const CV_DEFAULT_APPBAR_TABS_ORDER = ['geolocator', 'legend', 'details', 'guide'];
+export const CV_DEFAULT_APPBAR_TABS_ORDER = ['geolocator', 'legend', 'details', 'data-table', 'guide'];
 
 export const CV_DEFAULT_APPBAR_CORE = {
   GEOLOCATOR: 'geolocator',
@@ -220,4 +220,5 @@ export const CV_DEFAULT_APPBAR_CORE = {
   GUIDE: 'guide',
   DETAILS: 'details',
   LEGEND: 'legend',
+  DATA_TABLE: 'data-table',
 } as const;
