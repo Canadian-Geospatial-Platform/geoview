@@ -168,7 +168,6 @@ const ResponsiveGridLayout = forwardRef(
           size="small"
           onClick={() => handleOpenGuide()}
           tooltipKey={t('general.openGuide')!}
-
           startIcon={<QuestionMarkIcon />}
         >
           {t('general.guide')}
@@ -184,7 +183,7 @@ const ResponsiveGridLayout = forwardRef(
           tooltipKey={isFullScreen ? t('general.closeFullscreen')! : t('general.openFullscreen')!}
           startIcon={<FullscreenIcon />}
         >
-          { t('general.fullScreen')!}
+          {t('general.fullScreen')!}
         </ResponsiveButton>
       );
     };
@@ -285,7 +284,7 @@ const ResponsiveGridLayout = forwardRef(
               {rightTop ?? <Box />}
 
               <Box sx={sxClasses.rightButtonsContainer}>
-                <ButtonGroup size="small" variant="outlined" sx={{marginRight: '10px'}}>
+                <ButtonGroup size="small" variant="outlined" sx={{ marginRight: '10px' }}>
                   {!fullWidth && !hideEnlargeBtn && renderEnlargeButton()}
                   {!!guideContentIds?.length && renderGuideButton()}
                   {!isMapFullScreen && renderFullScreenButton()}

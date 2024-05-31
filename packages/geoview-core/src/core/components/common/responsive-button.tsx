@@ -1,16 +1,15 @@
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
+import { Button, ButtonProps } from '@mui/material';
 import { Tooltip } from '@/ui';
 import { logger } from '@/core/utils/logger';
-import { Button, ButtonProps } from '@mui/material';
 
 export type ResponsiveButtonProps = {
   tooltipKey: string;
 } & ButtonProps;
 
 export function ResponsiveButton(props: ResponsiveButtonProps): JSX.Element {
-
-  const { tooltipKey, children, variant, startIcon, type = "text", onClick, ...rest } = props;
+  const { tooltipKey, children, variant, startIcon, type = 'text', onClick, ...rest } = props;
   const { t } = useTranslation<string>();
   const breakpoint = 510;
 
@@ -38,26 +37,13 @@ export function ResponsiveButton(props: ResponsiveButtonProps): JSX.Element {
   if (screenWidth < breakpoint) {
     return (
       <Tooltip title={t(tooltipKey)} placement="top" enterDelay={1000}>
-        <Button
-          variant={variant}
-          startIcon={startIcon}
-          onClick={onClick}
-          className='OutlinedButton'
-          {...rest}
-        />
+        <Button variant={variant} startIcon={startIcon} onClick={onClick} className="OutlinedButton" {...rest} />
       </Tooltip>
     );
   }
   return (
     <Tooltip title={t(tooltipKey)} placement="top" enterDelay={1000}>
-      <Button
-        color="primary"
-        variant={variant}
-        startIcon={startIcon}
-        onClick={onClick}
-        className='OutlinedButton'
-        {...rest}
-      >
+      <Button color="primary" variant={variant} startIcon={startIcon} onClick={onClick} className="OutlinedButton" {...rest}>
         {children}
       </Button>
     </Tooltip>
