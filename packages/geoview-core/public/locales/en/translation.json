@@ -71,13 +71,13 @@
     "tableDetails": "Table details",
     "refreshLayer": "Refresh layer",
     "highlightLayer": "Highlight layer",
-    "subLayersCount": "{count} sub-layers",
-    "itemsCount": "{count} of {totalCount} items",
+    "subLayersCount": "{count} sublayers",
+    "itemsCount": "{count} of {totalCount} classes",
     "legendInstructions": "Legend Instructions"
   },
   "layers": {
     "title": "Layers",
-    "subLayersList": "Sub-Layers List",
+    "subLayersList": "Sublayers List",
     "removingLayers": "Removing Layers",
     "reArrangeLayers": "Re-arrange Layers",
     "addingNewLayer": "Adding a new layer",
