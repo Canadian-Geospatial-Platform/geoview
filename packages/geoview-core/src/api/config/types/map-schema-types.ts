@@ -56,7 +56,15 @@ export type TypeFooterBarProps = {
 };
 
 /** Supported app bar values. */
-export type TypeValidAppBarCoreProps = 'geolocator' | 'export' | 'basemap-panel' | 'geochart' | 'guide' | 'legend' | 'details';
+export type TypeValidAppBarCoreProps =
+  | 'geolocator'
+  | 'export'
+  | 'basemap-panel'
+  | 'geochart'
+  | 'guide'
+  | 'legend'
+  | 'details'
+  | 'data-table';
 
 /** Configuration available on the application bar. Default = ['geolocator']. The about GeoView and notification are always there. */
 export type TypeAppBarProps = {

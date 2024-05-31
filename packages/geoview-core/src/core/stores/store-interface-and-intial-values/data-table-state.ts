@@ -15,7 +15,7 @@ export interface IDataTableState {
   activeLayerData: TypeLayerData[];
   layersDataTableSetting: Record<string, IDataTableSettings>;
   selectedLayerPath: string;
-  tableHeight: number;
+  tableHeight: string;
   selectedFeature: TypeFeatureInfoEntry | null;
 
   actions: {
@@ -25,7 +25,7 @@ export interface IDataTableState {
     setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
     setRowsFilteredEntry: (rows: number, layerPath: string) => void;
     setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
-    setTableHeight: (tableHeight: number) => void;
+    setTableHeight: (tableHeight: string) => void;
     setSelectedLayerPath: (layerPath: string) => void;
     triggerGetAllFeatureInfo: (layerPath: string) => Promise<TypeAllFeatureInfoResultSet | void>;
     setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
@@ -40,7 +40,7 @@ export interface IDataTableState {
     setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
     setRowsFilteredEntry: (rows: number, layerPath: string) => void;
     setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
-    setTableHeight: (tableHeight: number) => void;
+    setTableHeight: (tableHeight: string) => void;
     setSelectedLayerPath: (layerPath: string) => void;
     setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
     setSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
@@ -61,7 +61,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
     allFeaturesDataArray: [],
     layersDataTableSetting: {},
     selectedLayerPath: '',
-    tableHeight: 600,
+    tableHeight: '500px',
     selectedFeature: null,
 
     // #region ACTIONS
@@ -96,7 +96,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
         // Redirect to setter
         get().dataTableState.setterActions.setToolbarRowSelectedMessageEntry(message, layerPath);
       },
-      setTableHeight: (tableHeight: number): void => {
+      setTableHeight: (tableHeight: string): void => {
         // Redirect to setter
         get().dataTableState.setterActions.setTableHeight(tableHeight);
       },
@@ -195,7 +195,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
           },
         });
       },
-      setTableHeight: (tableHeight: number): void => {
+      setTableHeight: (tableHeight: string): void => {
         set({
           dataTableState: {
             ...get().dataTableState,
@@ -264,7 +264,7 @@ export const useDataTableAllFeaturesDataArray = (): TypeAllFeatureInfoResultSetE
 export const useDataTableSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.dataTableState.selectedLayerPath);
 export const useDataTableLayerSettings = (): Record<string, IDataTableSettings> =>
   useStore(useGeoViewStore(), (state) => state.dataTableState.layersDataTableSetting);
-export const useDataTableTableHeight = (): number => useStore(useGeoViewStore(), (state) => state.dataTableState.tableHeight);
+export const useDataTableTableHeight = (): string => useStore(useGeoViewStore(), (state) => state.dataTableState.tableHeight);
 export const useDataTableSelectedFeature = (): TypeFeatureInfoEntry | null =>
   useStore(useGeoViewStore(), (state) => state.dataTableState.selectedFeature);
 

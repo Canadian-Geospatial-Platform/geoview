@@ -79,3 +79,8 @@ export const STRING_FILTER: Record<string, string> = {
   equals: `filterId = 'value'`,
   notEquals: `filterId <> 'value'`,
 };
+
+export const CONTAINER_TYPE = {
+  APP_BAR: 'appBar',
+  FOOTER_BAR: 'footerBar',
+} as const;

@@ -135,3 +135,8 @@ export interface TypeHTMLElement extends HTMLElement {
   msRequestFullscreen: () => void;
   mozRequestFullScreen: () => void;
 }
+
+/** ******************************************************************************************************************************
+ *  Definition of an Container where components are rendered.
+ */
+export type TypeContainerBox = 'appBar' | 'footerBar';

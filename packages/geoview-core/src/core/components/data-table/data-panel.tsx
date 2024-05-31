@@ -12,22 +12,29 @@ import {
   useDataTableStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useMapVisibleLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useUIActiveFooterBarTabId } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import {
+  useActiveAppBarTab,
+  useUIActiveFooterBarTabId,
+  useUIAppbarComponents,
+} from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { LayerListEntry, Layout } from '@/core/components/common';
 import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
-import { LAYER_STATUS, TABS } from '@/core/utils/constant';
+import { CONTAINER_TYPE, LAYER_STATUS, TABS } from '@/core/utils/constant';
 import { MappedLayerDataType } from './data-table-types';
+import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
+import { TypeContainerBox } from '@/core/types/global-types';
 
 interface DataPanelType {
   fullWidth?: boolean;
+  containerType?: TypeContainerBox;
 }
 /**
  * Build Data panel from map.
  * @returns {JSX.Element} Data table as react element.
  */
 
-export function Datapanel({ fullWidth = false }: DataPanelType): JSX.Element {
+export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPanelType): JSX.Element {
   const { t } = useTranslation();
   const theme = useTheme();
 
@@ -42,6 +49,8 @@ export function Datapanel({ fullWidth = false }: DataPanelType): JSX.Element {
   const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
   const selectedTab = useUIActiveFooterBarTabId();
   const visibleLayers = useMapVisibleLayers();
+  const { tabGroup, isOpen } = useActiveAppBarTab();
+  const appBarComponents = useUIAppbarComponents();
 
   // Create columns for data table.
   const mappedLayerData = useFeatureFieldInfos(layerData);
@@ -184,6 +193,16 @@ export function Datapanel({ fullWidth = false }: DataPanelType): JSX.Element {
   }, [selectedTab]);
 
   /**
+   * This effect will only run when appbar will have data table as component
+   * It will unselect the layer path when component is unmounted.
+   */
+  useEffect(() => {
+    if ((tabGroup !== CV_DEFAULT_APPBAR_CORE.DATA_TABLE || !isOpen) && appBarComponents.includes(CV_DEFAULT_APPBAR_CORE.DATA_TABLE)) {
+      setSelectedLayerPath('');
+    }
+  }, [tabGroup, isOpen, setSelectedLayerPath, appBarComponents]);
+
+  /**
    * Check if layer sttaus is processing while querying
    */
   const memoIsLayerQueryStatusProcessing = useMemo(() => {
@@ -202,7 +221,7 @@ export function Datapanel({ fullWidth = false }: DataPanelType): JSX.Element {
     if (isLoading || memoIsLayerQueryStatusProcessing()) {
       return <Skeleton variant="rounded" width="100%" height={400} sx={{ bgcolor: theme.palette.grey[400] }} />;
     }
-    if (selectedTab === TABS.DATA_TABLE && !isLayerDisabled() && isSelectedLayerHasFeatures()) {
+    if (!isLayerDisabled() && isSelectedLayerHasFeatures()) {
       return (
         <>
           {orderedLayerData.map((data: MappedLayerDataType) => (
@@ -246,6 +265,7 @@ export function Datapanel({ fullWidth = false }: DataPanelType): JSX.Element {
 
   return (
     <Layout
+      containerType={containerType}
       selectedLayerPath={selectedLayerPath || ''}
       layerList={memoLayerList}
       onLayerListClicked={handleLayerChange}
