@@ -28,46 +28,52 @@ function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIconStackPr
   const numOfIcons: number | undefined = iconData?.length;
 
   const iconStackContent = (): JSX.Element | null => {
-    // TODO: refactor - try to remove the nested ternary to simplify reading
-    // eslint-disable-next-line no-nested-ternary
-    return numOfIcons === 1 ? (
-      <IconButton
-        tabIndex={-1}
-        sx={sxClasses.iconPreview}
-        color="primary"
-        size="small"
-        onClick={iconImage === 'no data' ? undefined : onIconClick}
-        aria-hidden="true"
-      >
-        {iconImage === 'no data' ? (
-          <BrowserNotSupportedIcon />
-        ) : (
-          <Box sx={sxClasses.legendIcon}>
-            <img alt="icon" src={iconImage} style={sxClasses.maxIconImg} />
-          </Box>
-        )}
-      </IconButton>
-    ) : // eslint-disable-next-line no-nested-ternary
-    numOfIcons && numOfIcons > 0 ? (
-      <Box tabIndex={-1} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyPress={(e) => onStackIconClick?.(e)} aria-hidden="true">
-        <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1} aria-hidden="true">
-          <Box sx={sxClasses.legendIconTransparent}>
-            {iconImageStacked && <img alt="icon" src={iconImageStacked} style={sxClasses.maxIconImg} />}
-          </Box>
-        </IconButton>
-        <IconButton sx={sxClasses.iconPreviewHoverable} color="primary" size="small" tabIndex={-1} aria-hidden="true">
-          <Box sx={sxClasses.legendIcon}>{iconImage && <img alt="icon" src={iconImage} style={sxClasses.maxIconImg} />}</Box>
-        </IconButton>
-      </Box>
-    ) : layerPath !== '' && iconData.length === 0 && layerPath.charAt(0) !== '!' ? (
-      <Box tabIndex={-1} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyPress={(e) => onStackIconClick?.(e)} aria-hidden="true">
-        <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1} aria-hidden="true">
-          <Box sx={sxClasses.legendIconTransparent}>
+    if (numOfIcons === 1) {
+      return (
+        <IconButton
+          tabIndex={-1}
+          sx={sxClasses.iconPreview}
+          color="primary"
+          size="small"
+          onClick={iconImage === 'no data' ? undefined : onIconClick}
+          aria-hidden="true"
+        >
+          {iconImage === 'no data' ? (
             <BrowserNotSupportedIcon />
-          </Box>
+          ) : (
+            <Box sx={sxClasses.legendIcon}>
+              <img alt="icon" src={iconImage} style={sxClasses.maxIconImg} />
+            </Box>
+          )}
         </IconButton>
-      </Box>
-    ) : null;
+      );
+    }
+    if (numOfIcons && numOfIcons > 0) {
+      return (
+        <Box tabIndex={-1} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyPress={(e) => onStackIconClick?.(e)} aria-hidden="true">
+          <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1} aria-hidden="true">
+            <Box sx={sxClasses.legendIconTransparent}>
+              {iconImageStacked && <img alt="icon" src={iconImageStacked} style={sxClasses.maxIconImg} />}
+            </Box>
+          </IconButton>
+          <IconButton sx={sxClasses.iconPreviewHoverable} color="primary" size="small" tabIndex={-1} aria-hidden="true">
+            <Box sx={sxClasses.legendIcon}>{iconImage && <img alt="icon" src={iconImage} style={sxClasses.maxIconImg} />}</Box>
+          </IconButton>
+        </Box>
+      );
+    }
+    if (layerPath !== '' && iconData.length === 0 && layerPath.charAt(0) !== '!') {
+      return (
+        <Box tabIndex={-1} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyPress={(e) => onStackIconClick?.(e)} aria-hidden="true">
+          <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1} aria-hidden="true">
+            <Box sx={sxClasses.legendIconTransparent}>
+              <BrowserNotSupportedIcon />
+            </Box>
+          </IconButton>
+        </Box>
+      );
+    }
+    return null;
   };
 
   return iconStackContent();
