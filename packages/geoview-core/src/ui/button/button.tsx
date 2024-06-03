@@ -1,18 +1,21 @@
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
-import { Button as MaterialButton, Fade, Tooltip } from '@mui/material';
+import { Button as MaterialButton, Fade, Tooltip, useMediaQuery } from '@mui/material';
 
 import { TypeButtonProps } from '@/ui/panel/panel-types';
-import { getSxClasses } from './button-style';
+
+export type ButtonProps = {
+  makeResponsive?: boolean;
+} & TypeButtonProps;
 
 /**
  * Create a customized Material UI button
  *
- * @param {TypeButtonProps} props the properties of the Button UI element
+ * @param {ButtonProps} props the properties of the Button UI element
  * @returns {JSX.Element} the new UI element
  */
-export function Button(props: TypeButtonProps): JSX.Element {
+export function Button(props: ButtonProps): JSX.Element {
   const {
     id,
     sx,
@@ -27,27 +30,22 @@ export function Button(props: TypeButtonProps): JSX.Element {
     disableRipple = false,
     startIcon,
     endIcon,
+    size,
+    makeResponsive,
   } = props;
 
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const mobileView = useMediaQuery(theme.breakpoints.down('md'));
 
-  const sxProps = {
-    ...(theme.palette.mode === 'light' && {
-      backgroundColor: 'primary.light',
-      color: 'primary.dark',
-      '&:hover': { backgroundColor: 'primary.main', color: 'white' },
-    }),
-    ...sx,
-  };
 
   return (
     <Tooltip title={t(tooltip || '')} placement={tooltipPlacement || 'bottom'} TransitionComponent={Fade}>
       <MaterialButton
         id={id}
-        sx={{ ...sxClasses.buttonClass, ...sxProps }}
+        size={size || 'medium'}
+        sx={{ ...sx }}
         variant={variant || 'text'}
         className={`${className || ''}`}
         onClick={onClick}
@@ -57,7 +55,7 @@ export function Button(props: TypeButtonProps): JSX.Element {
         startIcon={startIcon}
         endIcon={endIcon}
       >
-        {children}
+        {!(makeResponsive && mobileView) && children}
       </MaterialButton>
     </Tooltip>
   );

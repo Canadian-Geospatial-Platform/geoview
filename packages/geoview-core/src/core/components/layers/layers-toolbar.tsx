@@ -1,9 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material';
-import { Box, AddCircleOutlineIcon, ButtonGroup, DeleteOutlineIcon, HandleIcon, VisibilityOutlinedIcon } from '@/ui';
-import { useLayerStoreActions, useLayerDisplayState, useLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { Box, AddCircleOutlineIcon, ButtonGroup, DeleteOutlineIcon, HandleIcon, VisibilityOutlinedIcon, Button } from '@/ui';
+import {
+  useLayerStoreActions,
+  useLayerDisplayState,
+  useLayerLegendLayers,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeLayersViewDisplayState } from './types';
-import { ResponsiveButton } from '../common';
 
 export function LayersToolbar(): JSX.Element {
   const theme = useTheme();
@@ -21,45 +24,53 @@ export function LayersToolbar(): JSX.Element {
   return (
     <Box id="layers-toolbar" sx={{ padding: '8px 18px 0px 18px' }}>
       <ButtonGroup size="small" variant="outlined" aria-label="outlined button group">
-        <ResponsiveButton
+        <Button
+          makeResponsive
+          type="text"
           disabled={!legendLayers.length}
           size="small"
-          tooltipKey="general.view"
+          tooltip="general.view"
           variant={displayState === 'view' ? 'contained' : 'outlined'}
           startIcon={<VisibilityOutlinedIcon fontSize={theme.palette.geoViewFontSize.sm} />}
           onClick={() => handleSetDisplayState('view')}
         >
           {t('general.view')}
-        </ResponsiveButton>
-        <ResponsiveButton
+        </Button>
+        <Button
+          makeResponsive
+          type="text"
           size="small"
-          tooltipKey="legend.addLayer"
+          tooltip="legend.addLayer"
           variant={displayState === 'add' ? 'contained' : 'outlined'}
           startIcon={<AddCircleOutlineIcon fontSize={theme.palette.geoViewFontSize.sm} />}
           onClick={() => handleSetDisplayState('add')}
         >
           {t('general.add')}
-        </ResponsiveButton>
-        <ResponsiveButton
+        </Button>
+        <Button
+          makeResponsive
+          type="text"
           disabled={!legendLayers.length}
           size="small"
-          tooltipKey="legend.sortLayers"
+          tooltip="legend.sortLayers"
           variant={displayState === 'order' ? 'contained' : 'outlined'}
           startIcon={<HandleIcon fontSize={theme.palette.geoViewFontSize.sm} />}
           onClick={() => handleSetDisplayState('order')}
         >
           {t('legend.sort')}
-        </ResponsiveButton>
-        <ResponsiveButton
+        </Button>
+        <Button
+          makeResponsive
+          type="text"
           disabled={!legendLayers.length}
           size="small"
-          tooltipKey="legend.removeLayer"
+          tooltip="legend.removeLayer"
           variant={displayState === 'remove' ? 'contained' : 'outlined'}
           startIcon={<DeleteOutlineIcon fontSize={theme.palette.geoViewFontSize.sm} />}
           onClick={() => handleSetDisplayState('remove')}
         >
           {t('general.remove')}
-        </ResponsiveButton>
+        </Button>
       </ButtonGroup>
     </Box>
   );

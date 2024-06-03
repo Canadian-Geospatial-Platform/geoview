@@ -25,14 +25,5 @@ export const getSxClasses = (theme: Theme): any => ({
     '& $buttonClass': {
       justifyContent: 'flex-start',
     },
-  },
-  buttonClass: {
-    display: 'flex',
-    fontSize: theme.palette.geoViewFontSize?.default,
-    paddingLeft: '16px',
-    paddingRight: '16px',
-    justifyContent: 'center',
-    width: '100%',
-    height: 50,
-  },
+  }
 });
