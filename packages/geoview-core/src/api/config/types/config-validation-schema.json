@@ -767,7 +767,7 @@
           "description": "Initial map zoom level. Zoom level are define by the basemap zoom levels. Levels between whole numbers are supported to fine tune initial view.",
           "minimum": 0,
           "maximum": 28,
-          "default": 4.5
+          "default": 3.5
         },
         [
           {

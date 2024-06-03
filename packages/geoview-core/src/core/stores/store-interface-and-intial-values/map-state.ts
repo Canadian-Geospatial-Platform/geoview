@@ -15,6 +15,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 import { TypeFeatureInfoResultSet, TypeHoverFeatureInfo } from './feature-info-state';
+import { CV_MAP_CENTER } from '@/api/config/types/config-constants';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with MapEventProcessor vs MapState
 
@@ -151,7 +152,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           basemapOptions: geoviewConfig.map.basemapOptions,
           centerCoordinates: geoviewConfig.map.viewSettings.initialView?.zoomAndCenter
             ? (geoviewConfig.map.viewSettings.initialView.zoomAndCenter[1] as Coordinate)
-            : [-90, 67],
+            : CV_MAP_CENTER[geoviewConfig.map.viewSettings.projection],
           currentProjection: geoviewConfig.map.viewSettings.projection,
           interaction: geoviewConfig.map.interaction || 'dynamic',
           mapExtent: geoviewConfig.map.viewSettings.maxExtent,
@@ -161,7 +162,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           rotation: geoviewConfig.map.viewSettings.rotation || 0,
           zoom: geoviewConfig.map.viewSettings.initialView?.zoomAndCenter
             ? geoviewConfig.map.viewSettings.initialView.zoomAndCenter[0]
-            : 4.5,
+            : 3.5,
         },
       });
     },

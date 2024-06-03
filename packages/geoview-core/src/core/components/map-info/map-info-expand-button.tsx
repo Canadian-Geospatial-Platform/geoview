@@ -21,7 +21,7 @@ export function MapInfoExpandButton(): JSX.Element {
   const expanded = useUIMapInfoExpanded();
   const { setMapInfoExpanded } = useUIStoreActions();
 
-  const tooltipAndAria = expanded ? 'mapnav.collapseBtn' : 'mapnav.expandBtn';
+  const tooltipAndAria = 'layers.toggleCollapse';
 
   const handleTransitionEnd = (): void => {
     setMapInfoExpanded(true);
