@@ -1,7 +1,7 @@
 import { useTheme } from '@mui/material';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, Paper, Typography } from '@/ui';
+import { Box, Typography } from '@/ui';
 import { useLayerLegendLayers, useMapVisibleLayers, useGeoViewMapId } from '@/core/stores/';
 import { logger } from '@/core/utils/logger';
 
@@ -98,19 +98,6 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [legendLayers]);
 
-  if (layersList.length === 0) {
-    return (
-      <Box display="flex" flexDirection="column" justifyItems="center" alignItems="center" sx={{ py: 9 }}>
-        <Typography component="h2" sx={{ pb: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>
-          {t('legend.noLayersAdded')}
-        </Typography>
-        <Typography component="p" sx={{ p: 0 }}>
-          {t('legend.noLayersAddedDescription')}
-        </Typography>
-      </Box>
-    );
-  }
-
   return (
     <Box sx={sxClasses.container} {...(!fullWidth && { ref: leftPanelRef })} id={`${mapId}-${containerType}-legendContainer`}>
       <Box display="flex" flexDirection="row" flexWrap="wrap">
@@ -131,14 +118,14 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
 
         {/* Show legend Instructions when no layer found. */}
         {!legendLayers.length && (
-          <Paper sx={{ padding: '2rem', width: '100%' }}>
+          <Box sx={{ padding: '2rem', margin: '2rem', width: '100%', textAlign: 'center' }}>
             <Typography variant="h3" gutterBottom sx={sxClasses.legendInstructionsTitle}>
-              {t('legend.legendInstructions')}
+              {t('legend.noLayersAdded')}
             </Typography>
             <Typography component="p" sx={sxClasses.legendInstructionsBody}>
-              {t('legend.legendInstructions')}
+              {t('legend.noLayersAddedDescription')}
             </Typography>
-          </Paper>
+          </Box>
         )}
       </Box>
     </Box>

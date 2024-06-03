@@ -143,8 +143,8 @@ const ResponsiveGridLayout = forwardRef(
 
     const renderCloseButton = (): JSX.Element | null => {
       // Check conditions for hiding the button
-      if (!fullWidth &&  (window.innerWidth >= theme.breakpoints.values.md || !isRightPanelVisible)) {
-        return null; // Return null if conditions are met
+      if (!fullWidth && (window.innerWidth >= theme.breakpoints.values.md || !isRightPanelVisible)) {
+        return null;
       }
 
       return (

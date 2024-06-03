@@ -39,13 +39,12 @@ export function Button(props: ButtonProps): JSX.Element {
   const theme = useTheme();
   const mobileView = useMediaQuery(theme.breakpoints.down('md'));
 
-
   return (
     <Tooltip title={t(tooltip || '')} placement={tooltipPlacement || 'bottom'} TransitionComponent={Fade}>
       <MaterialButton
         id={id}
         size={size || 'medium'}
-        sx={{ ...sx }}
+        sx={sx}
         variant={variant || 'text'}
         className={`${className || ''}`}
         onClick={onClick}
@@ -55,7 +54,7 @@ export function Button(props: ButtonProps): JSX.Element {
         startIcon={startIcon}
         endIcon={endIcon}
       >
-        {!(makeResponsive && mobileView) && children}
+        {!(makeResponsive && mobileView) ? children : null}
       </MaterialButton>
     </Tooltip>
   );

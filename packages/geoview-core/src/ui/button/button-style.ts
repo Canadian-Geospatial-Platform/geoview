@@ -25,5 +25,5 @@ export const getSxClasses = (theme: Theme): any => ({
     '& $buttonClass': {
       justifyContent: 'flex-start',
     },
-  }
+  },
 });
