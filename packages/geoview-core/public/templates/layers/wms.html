@@ -142,19 +142,25 @@
               ]
             },
             'components': ['overview-map'],
+            'footerBar': {
+              'tabs': {
+                'core': ['legend', 'layers', 'details', 'data-table']
+              }
+            },
             'corePackages': [],
             'theme': 'geo.ca'
-          }"></div>
-  <button type="button" class="collapsible">Visibility and filters</button>
-  <pre id="layer1-buttons-pre" class="panel"></pre>
-  <button class="collapsible">Get Legend</button>
-  <pre id="LegendsId1-table-pre" class="panel"></pre>
-  <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="ResultSetId1-click" class="panel">Click on feature on the map</pre>
-  <hr />
-  <p>This map has a wms layer added from configuration.</p>
-  <button type="button" class="collapsible">Configuration Snippet</button>
-  <pre id="LYR1CS" class="panel"></pre>
+          }"
+    ></div>
+    <button type="button" class="collapsible">Visibility and filters</button>
+    <pre id="layer1-buttons-pre" class="panel"></pre>
+    <button class="collapsible">Get Legend</button>
+    <pre id="LegendsId1-table-pre" class="panel"></pre>
+    <button type="button" class="collapsible">Get Feature Info</button>
+    <pre id="ResultSetId1-click" class="panel">Click on feature on the map</pre>
+    <hr />
+    <p>This map has a wms layer added from configuration.</p>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="LYR1CS" class="panel"></pre>
 
     <div class="map-title-holder">
       <h4 id="HLYR2">2. All Styles of a WMS Layer</h4>
@@ -323,6 +329,12 @@
         ]
       },
       'components': ['overview-map'],
+      'components': ['overview-map'],
+      'footerBar': {
+        'tabs': {
+          'core': ['legend', 'layers', 'details', 'data-table']
+        }
+      },
       'corePackages': [],
       'theme': 'geo.ca'
     }"
@@ -386,18 +398,19 @@
       },
       'corePackages': [],
       'theme': 'geo.ca'
-    }"></div>
-  <label for="language">Select a layer style:</label>
-  <select name="style" id="style"></select>
-  <button class="collapsible">Get Legend</button>
-  <pre id="LegendsId3-table-pre" class="panel"></pre>
-  <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="ResultSetId3-click" class="panel">Click on feature on the map</pre>
-  <hr />
-  <p>This map has a wms layer added from configuration.</p>
-  <button type="button" class="collapsible">Configuration Snippet</button>
-  <pre id="LYR3CS" class="panel"></pre>
-  <hr />
+    }"
+    ></div>
+    <label for="language">Select a layer style:</label>
+    <select name="style" id="style"></select>
+    <button class="collapsible">Get Legend</button>
+    <pre id="LegendsId3-table-pre" class="panel"></pre>
+    <button type="button" class="collapsible">Get Feature Info</button>
+    <pre id="ResultSetId3-click" class="panel">Click on feature on the map</pre>
+    <hr />
+    <p>This map has a wms layer added from configuration.</p>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="LYR3CS" class="panel"></pre>
+    <hr />
 
     <div class="map-title-holder">
       <h4 id="HLYR4">4. Automatic group creation from metadata information</h4>
@@ -437,20 +450,26 @@
           ]
         },
         'components': ['overview-map'],
+        'footerBar': {
+          'tabs': {
+            'core': ['legend', 'layers', 'details', 'data-table']
+          }
+        },
         'corePackages': [],
         'theme': 'geo.ca'
-      }"></div>
-  <button type="button" class="collapsible">Visibility and filters</button>
-  <pre id="layer4-buttons-pre" class="panel"></pre>
-  <button class="collapsible">Get Legend</button>
-  <pre id="LegendsId4-table-pre" class="panel"></pre>
-  <hr />
-  <p>This map has a wms layer added from configuration.</p>
-  <button type="button" class="collapsible">Configuration Snippet</button>
-  <pre id="LYR4CS" class="panel"></pre>
-  <hr />
-  <button type="button" class="collapsible">Code Snippet</button>
-  <pre id="codeSnippet" class="panel"></pre>
+      }"
+    ></div>
+    <button type="button" class="collapsible">Visibility and filters</button>
+    <pre id="layer4-buttons-pre" class="panel"></pre>
+    <button class="collapsible">Get Legend</button>
+    <pre id="LegendsId4-table-pre" class="panel"></pre>
+    <hr />
+    <p>This map has a wms layer added from configuration.</p>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="LYR4CS" class="panel"></pre>
+    <hr />
+    <button type="button" class="collapsible">Code Snippet</button>
+    <pre id="codeSnippet" class="panel"></pre>
 
     <script src="codedoc.js"></script>
     <script src="layerlib.js"></script>
@@ -546,10 +565,9 @@
                   // TODO: Refactor - Layers refactoring. There needs to be a setStyle somewhere (new layers, new config?) to complete the full layers migration.
                   // TO.DOCONT: Johann: This was to select a style for a WMS on the fly.... I think it is not use anymore. But I think it may be good to have this
                   // TO.DOCONT: and this mean we need the config section who extract and get the style and layers who apply the style form config or from function call.
-                  cgpv.api.maps.LYR3.layer.getGeoviewLayer('wmsLYR3-Root').setStyle(
-                    dropDownContent.value,
-                    'wmsLYR3-Root/landcover_2015_19classes'
-                  );
+                  cgpv.api.maps.LYR3.layer
+                    .getGeoviewLayer('wmsLYR3-Root')
+                    .setStyle(dropDownContent.value, 'wmsLYR3-Root/landcover_2015_19classes');
                 });
               }
               clearInterval(intervalId);

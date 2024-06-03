@@ -1,9 +1,10 @@
 import { TypeLayerControls } from '@config/types/map-schema-types';
 import _ from 'lodash';
-import { TypeLegendLayer, TypeLegendLayerIcons, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
+import { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import {
   CONST_LAYER_TYPES,
   TypeGeoviewLayerType,
+  TypeWmsLegend,
   isImageStaticLegend,
   isVectorLegend,
   isWmsLegend,
@@ -45,18 +46,23 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     return super.getState(mapId).layerState;
   }
 
-  static getLayerIconImage(layerLegend: TypeLegend | null): TypeLegendLayerIcons | undefined {
+  static getLayerIconImage(layerLegend: TypeLegend | null): TypeLegendLayerItem[] | undefined {
     // TODO: Refactor - Move this function to a utility class instead of at the 'processor' level so it's safer to call from a layer framework level class
-    const iconDetails: TypeLegendLayerIcons = [];
+    const iconDetails: TypeLegendLayerItem[] = [];
     if (layerLegend) {
-      if (layerLegend.legend === null) {
-        if (layerLegend.styleConfig === null) iconDetails[0] = { iconImage: 'config not found' };
-        else if (layerLegend.styleConfig === undefined) iconDetails[0] = { iconImage: 'undefined style config' };
-      } else if (Object.keys(layerLegend.legend).length === 0) iconDetails[0] = { iconImage: 'no data' };
-      else if (isWmsLegend(layerLegend) || isImageStaticLegend(layerLegend)) {
-        iconDetails[0].iconType = 'simple';
-        iconDetails[0].iconImage = layerLegend.legend ? layerLegend.legend.toDataURL() : '';
-      } else if (isVectorLegend(layerLegend)) {
+      if (isWmsLegend(layerLegend) || isImageStaticLegend(layerLegend)) {
+        const iconDetailsEntry: TypeLegendLayerItem = {};
+        iconDetailsEntry.iconType = 'simple';
+        // Use icon image if available
+        if (layerLegend.legend) iconDetailsEntry.iconImage = layerLegend.legend.toDataURL();
+        // Otherwise use image from first style
+        else if ((layerLegend as TypeWmsLegend).styles && (layerLegend as TypeWmsLegend).styles![0].legend)
+          iconDetailsEntry.iconImage = (layerLegend as TypeWmsLegend).styles![0].legend!.toDataURL();
+        // No styles or image, no icon
+        else iconDetailsEntry.iconImage = 'no data';
+        iconDetails.push(iconDetailsEntry);
+      } else if (layerLegend.legend === null || Object.keys(layerLegend.legend).length === 0) iconDetails[0] = { iconImage: 'no data' };
+      else if (isVectorLegend(layerLegend)) {
         Object.entries(layerLegend.legend).forEach(([key, styleRepresentation]) => {
           const geometryType = key as TypeStyleGeometry;
           const styleSettings = layerLegend.styleConfig![geometryType]!;
@@ -181,6 +187,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             type: layerConfig.entryType as TypeGeoviewLayerType,
             canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
             opacity: layerConfig.initialSettings?.states?.opacity ? layerConfig.initialSettings.states.opacity : 1,
+            icons: [] as TypeLegendLayerItem[],
             items: [] as TypeLegendItem[],
             children: [] as TypeLegendLayer[],
           };
@@ -211,11 +218,10 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           opacity: layerConfig.initialSettings?.states?.opacity || 1,
           items: [] as TypeLegendItem[],
           children: [] as TypeLegendLayer[],
-          icons: LegendEventProcessor.getLayerIconImage(legendResultSetEntry.data!),
+          icons: LegendEventProcessor.getLayerIconImage(legendResultSetEntry.data!) || [],
         };
 
-        newLegendLayer.items = [];
-        newLegendLayer.icons?.forEach((legendLayerItem) => {
+        newLegendLayer.icons.forEach((legendLayerItem) => {
           if (legendLayerItem.iconList)
             legendLayerItem.iconList.forEach((legendLayerListItem) => {
               newLegendLayer.items.push(legendLayerListItem);
