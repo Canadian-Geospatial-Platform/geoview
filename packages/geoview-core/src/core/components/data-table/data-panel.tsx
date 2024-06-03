@@ -100,7 +100,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
       // Log
       logger.logTraceUseCallback('DATA-PANEL - isMapFilteredSelectedForLayer');
 
-      return !datatableSettings[layerPath].mapFilteredRecord && !!datatableSettings[layerPath].rowsFilteredRecord;
+      return datatableSettings[layerPath].mapFilteredRecord && !!datatableSettings[layerPath].rowsFilteredRecord;
     },
     [datatableSettings]
   );

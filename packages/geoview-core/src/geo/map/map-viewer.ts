@@ -12,7 +12,13 @@ import { Extent } from 'ol/extent';
 import { Projection as OLProjection, ProjectionLike } from 'ol/proj';
 
 import queryString from 'query-string';
-import { CV_MAP_EXTENTS, VALID_DISPLAY_LANGUAGE, VALID_DISPLAY_THEME, VALID_PROJECTION_CODES } from '@config/types/config-constants';
+import {
+  CV_MAP_CENTER,
+  CV_MAP_EXTENTS,
+  VALID_DISPLAY_LANGUAGE,
+  VALID_DISPLAY_THEME,
+  VALID_PROJECTION_CODES,
+} from '@config/types/config-constants';
 import {
   TypeViewSettings,
   TypeInteraction,
@@ -216,18 +222,14 @@ export class MapViewer {
    */
   createMap(mapElement: HTMLElement): OLMap {
     // config object
-    const { mapFeaturesConfig } = this;
+    const mapViewSettings = this.mapFeaturesConfig?.map.viewSettings;
 
     // create map projection object from code
-    const projection = Projection.PROJECTIONS[mapFeaturesConfig.map.viewSettings.projection];
+    const projection = Projection.PROJECTIONS[mapViewSettings.projection];
 
     let extentProjected: Extent | undefined;
-    if (mapFeaturesConfig?.map.viewSettings.maxExtent)
-      extentProjected = Projection.transformExtent(
-        mapFeaturesConfig?.map.viewSettings.maxExtent,
-        Projection.PROJECTION_NAMES.LNGLAT,
-        projection.getCode()
-      );
+    if (mapViewSettings.maxExtent)
+      extentProjected = Projection.transformExtent(mapViewSettings.maxExtent, Projection.PROJECTION_NAMES.LNGLAT, projection.getCode());
 
     const initialMap = new OLMap({
       target: mapElement,
@@ -235,17 +237,15 @@ export class MapViewer {
       view: new View({
         projection,
         center: Projection.transformFromLonLat(
-          mapFeaturesConfig?.map.viewSettings.initialView?.zoomAndCenter
-            ? mapFeaturesConfig?.map.viewSettings.initialView?.zoomAndCenter[1]
-            : [-90, 60],
+          mapViewSettings.initialView?.zoomAndCenter
+            ? mapViewSettings.initialView?.zoomAndCenter[1]
+            : CV_MAP_CENTER[mapViewSettings.projection],
           projection
         ),
-        zoom: mapFeaturesConfig?.map.viewSettings.initialView?.zoomAndCenter
-          ? mapFeaturesConfig?.map.viewSettings.initialView?.zoomAndCenter[0]
-          : 3.5,
+        zoom: mapViewSettings.initialView?.zoomAndCenter ? mapViewSettings.initialView?.zoomAndCenter[0] : 3.5,
         extent: extentProjected || undefined,
-        minZoom: mapFeaturesConfig?.map.viewSettings.minZoom || 0,
-        maxZoom: mapFeaturesConfig?.map.viewSettings.maxZoom || 17,
+        minZoom: mapViewSettings.minZoom || 0,
+        maxZoom: mapViewSettings.maxZoom || 17,
       }),
       controls: [],
       keyboardEventTarget: document.getElementById(`map-${this.mapId}`) as HTMLElement,

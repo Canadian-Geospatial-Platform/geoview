@@ -171,8 +171,10 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        */
       zoomToLayerExtent: (layerPath: string): Promise<void> => {
         const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
-        const layer = LegendEventProcessor.findLayerByPath(get().layerState.legendLayers, layerPath);
-        const { bounds } = layer as TypeLegendLayer;
+
+        // Get the layer and always calculate the bounds. This will prevent bounds undefined error
+        const myLayer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayer(layerPath.split('/')[0])!;
+        const bounds = myLayer.calculateBounds(layerPath);
         if (bounds) return MapEventProcessor.zoomToExtent(get().mapId, bounds, options);
         return Promise.resolve();
       },
