@@ -5,8 +5,6 @@ import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geovie
 
 export type TypeLayersViewDisplayState = 'remove' | 'add' | 'order' | 'view';
 
-export type TypeLegendLayerIcons = TypeLegendLayerItem[];
-
 export type TypeLegendLayerItem = {
   geometryType?: TypeStyleGeometry;
   iconType?: 'simple' | 'list';
@@ -37,7 +35,7 @@ export interface TypeLegendLayer {
   querySent?: boolean;
   canToggle?: boolean; // can sublayer visibility be toggled
 
-  icons?: TypeLegendLayerIcons;
+  icons: TypeLegendLayerItem[];
   // data: TypeLegend | undefined | null;
   items: TypeLegendItem[];
   children: TypeLegendLayer[];
