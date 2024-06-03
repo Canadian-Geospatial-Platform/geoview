@@ -49,7 +49,10 @@
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "msi-94-or-more"
+            "layerId": "msi-94-or-more",
+            "source": {
+              "style": "msi-binary"
+            }
           }
         ]
       }

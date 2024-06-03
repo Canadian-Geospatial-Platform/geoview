@@ -63,6 +63,7 @@ export function useLegendHelpers(): unknown {
         querySent: true,
         children: [],
         items: layerItems,
+        icons: [],
       },
       {
         bounds: undefined,
@@ -75,6 +76,7 @@ export function useLegendHelpers(): unknown {
         querySent: true,
         children: [],
         items: [],
+        icons: [],
       },
       {
         bounds: undefined,
@@ -107,6 +109,7 @@ export function useLegendHelpers(): unknown {
                 querySent: true,
                 children: [],
                 items: layerItems,
+                icons: [],
               },
               {
                 bounds: undefined,
@@ -119,6 +122,7 @@ export function useLegendHelpers(): unknown {
                 querySent: true,
                 children: [],
                 items: layerItems,
+                icons: [],
               },
               {
                 bounds: undefined,
@@ -131,9 +135,11 @@ export function useLegendHelpers(): unknown {
                 querySent: true,
                 children: [],
                 items: layerItems,
+                icons: [],
               },
             ],
             items: [],
+            icons: [],
           },
           {
             bounds: undefined,
@@ -146,6 +152,7 @@ export function useLegendHelpers(): unknown {
             querySent: true,
             children: [],
             items: layerItems,
+            icons: [],
           },
           {
             bounds: undefined,
@@ -158,9 +165,11 @@ export function useLegendHelpers(): unknown {
             querySent: true,
             children: [],
             items: layerItems,
+            icons: [],
           },
         ],
         items: [],
+        icons: [],
       },
     ];
 
@@ -195,6 +204,7 @@ export function useLegendHelpers(): unknown {
         legendQueryStatus: 'queried',
         children: [],
         items,
+        icons: [],
       };
 
       if (i.startsWith('geojsonLYR5')) {
