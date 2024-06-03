@@ -32,6 +32,7 @@ export function Button(props: ButtonProps): JSX.Element {
     endIcon,
     size,
     makeResponsive,
+    fullWidth
   } = props;
 
   const { t } = useTranslation<string>();
@@ -42,6 +43,7 @@ export function Button(props: ButtonProps): JSX.Element {
   return (
     <Tooltip title={t(tooltip || '')} placement={tooltipPlacement || 'bottom'} TransitionComponent={Fade}>
       <MaterialButton
+        fullWidth={fullWidth}
         id={id}
         size={size || 'medium'}
         sx={sx}
