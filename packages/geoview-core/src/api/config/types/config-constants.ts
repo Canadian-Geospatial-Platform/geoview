@@ -124,15 +124,19 @@ export const CV_BASEMAP_LABEL: Record<TypeValidMapProjectionCodes, boolean[]> = 
 };
 
 // valid center levels from each projection
-export const CV_MAP_CENTER: Record<TypeValidMapProjectionCodes, Record<string, number[]>> = {
+export const CV_VALID_MAP_CENTER: Record<TypeValidMapProjectionCodes, Record<string, number[]>> = {
   3857: { lat: [-90, 90], long: [-180, 180] },
   3978: { lat: [40, 90], long: [-140, 40] },
 };
 
-// extents for each projection
+// extents and center for each projection
 export const CV_MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]> = {
-  3857: [-150, 38, -40, 84],
-  3978: [-125, 30, -60, 89],
+  3857: [-170, 35, -20, 84],
+  3978: [-135, 25, -50, 89],
+};
+export const CV_MAP_CENTER: Record<TypeValidMapProjectionCodes, number[]> = {
+  3857: [-90, 55],
+  3978: [-90, 60],
 };
 
 /**
@@ -154,13 +158,13 @@ export const CV_DEFAULT_MAP_FEATURE_CONFIG = Cast<MapFeatureConfig>({
     highlightColor: 'black',
     viewSettings: {
       initialView: {
-        zoomAndCenter: [4.5, [-90, 67]],
+        zoomAndCenter: [3.5, CV_MAP_CENTER[3978]],
       },
       enableRotation: true,
       rotation: 0,
       minZoom: 0,
       maxZoom: 50,
-      maxExtent: [-125, 30, -60, 89],
+      maxExtent: CV_MAP_EXTENTS[3978],
       projection: 3978,
     },
     extraOptions: {},

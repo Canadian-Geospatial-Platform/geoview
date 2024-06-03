@@ -11,7 +11,7 @@ import {
   CV_BASEMAP_SHADED,
   CV_CONST_LAYER_TYPES,
   CV_DEFAULT_MAP_FEATURE_CONFIG,
-  CV_MAP_CENTER,
+  CV_VALID_MAP_CENTER,
   CV_MAP_CONFIG_SCHEMA_PATH,
   CV_MAP_EXTENTS,
   ACCEPTED_SCHEMA_VERSIONS,
@@ -287,11 +287,11 @@ export class MapFeatureConfig {
     const { projection } = this.map.viewSettings;
 
     this.map.viewSettings.initialView!.zoomAndCenter![1][0] =
-      !Number.isNaN(xVal) && xVal > CV_MAP_CENTER[projection].long[0] && xVal < CV_MAP_CENTER[projection].long[1]
+      !Number.isNaN(xVal) && xVal > CV_VALID_MAP_CENTER[projection].long[0] && xVal < CV_VALID_MAP_CENTER[projection].long[1]
         ? xVal
         : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![1][0];
     this.map.viewSettings.initialView!.zoomAndCenter![1][1] =
-      !Number.isNaN(yVal) && yVal > CV_MAP_CENTER[projection].lat[0] && yVal < CV_MAP_CENTER[projection].lat[1]
+      !Number.isNaN(yVal) && yVal > CV_VALID_MAP_CENTER[projection].lat[0] && yVal < CV_VALID_MAP_CENTER[projection].lat[1]
         ? yVal
         : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![1][1];
   }
@@ -328,10 +328,10 @@ export class MapFeatureConfig {
     // const [extentMinX, extentMinY, extentMaxX, extentMaxY] = getMinOrMaxExtents(maxExtent, CV_MAP_EXTENTS[projection], 'min');
     const [extentMinX, extentMinY, extentMaxX, extentMaxY] = maxExtent;
 
-    const minX = !Number.isNaN(extentMinX) && extentMinX < center[0] ? extentMinX : CV_MAP_CENTER[projection].long[0];
-    const minY = !Number.isNaN(extentMinY) && extentMinY < center[1] ? extentMinY : CV_MAP_CENTER[projection].lat[0];
-    const maxX = !Number.isNaN(extentMaxX) && extentMaxX > center[0] ? extentMaxX : CV_MAP_CENTER[projection].long[1];
-    const maxY = !Number.isNaN(extentMaxY) && extentMaxY > center[1] ? extentMaxY : CV_MAP_CENTER[projection].lat[1];
+    const minX = !Number.isNaN(extentMinX) && extentMinX < center[0] ? extentMinX : CV_VALID_MAP_CENTER[projection].long[0];
+    const minY = !Number.isNaN(extentMinY) && extentMinY < center[1] ? extentMinY : CV_VALID_MAP_CENTER[projection].lat[0];
+    const maxX = !Number.isNaN(extentMaxX) && extentMaxX > center[0] ? extentMaxX : CV_VALID_MAP_CENTER[projection].long[1];
+    const maxY = !Number.isNaN(extentMaxY) && extentMaxY > center[1] ? extentMaxY : CV_VALID_MAP_CENTER[projection].lat[1];
 
     this.map.viewSettings.maxExtent! = [minX, minY, maxX, maxY] as Extent;
   }

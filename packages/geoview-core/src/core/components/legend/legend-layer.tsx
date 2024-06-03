@@ -84,7 +84,10 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
    */
   const handleZoomTo = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
     e.stopPropagation();
-    zoomToLayerExtent(layer.layerPath);
+    zoomToLayerExtent(layer.layerPath).catch((error) => {
+      // Log
+      logger.logPromiseFailed('handleZoomTo layer in legend-layers', error);
+    });
   };
 
   const visibility = !getVisibilityFromOrderedLayerInfo(layer.layerPath);
@@ -109,7 +112,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
           </Typography>
           <IconButton
             edge="end"
-            tooltip="layers.visibilityIsAlways"
+            tooltip="layers.toggleVisibility"
             className="buttonOutline"
             onClick={(e) => handleToggleVisibility(e)}
             disabled={!isLayerVisible}
