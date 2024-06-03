@@ -302,7 +302,7 @@ const ResponsiveGridLayout = forwardRef(
               {rightTop ?? <Box />}
 
               <Box sx={sxClasses.rightButtonsContainer}>
-                <ButtonGroup size="small" variant="outlined" sx={{ marginRight: '10px' }} aria-label="outlined button group">
+                <ButtonGroup size="small" variant="outlined" aria-label="outlined button group">
                   {!fullWidth && !hideEnlargeBtn && renderEnlargeButton()}
                   {!!guideContentIds?.length && renderGuideButton()}
                   {!isMapFullScreen && renderFullScreenButton()}
