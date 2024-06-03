@@ -1114,7 +1114,14 @@ export function AddNewLayer(): JSX.Element {
       </Box>
     ) : (
       <ButtonGroup sx={sxClasses.buttonGroup}>
-        <Button variant="contained" className="buttonOutlineFilled" size="small" type="text" disabled={stepButtonDisable} onClick={handleNext}>
+        <Button
+          variant="contained"
+          className="buttonOutlineFilled"
+          size="small"
+          type="text"
+          disabled={stepButtonDisable}
+          onClick={handleNext}
+        >
           {isLast ? t('layers.finish') : t('layers.continue')}
         </Button>
         {!isFirst && (
@@ -1183,7 +1190,15 @@ export function AddNewLayer(): JSX.Element {
                       accept=".gpkg, .json, .geojson, .csv"
                     />
                   </Box>
-                  <Button fullWidth variant="outlined" size="small"sx={{width: '100%'}}  type="text" onClick={() => document.getElementById('fileUpload')?.click()} className="buttonOutlineFilled">
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    size="small"
+                    sx={{ width: '100%' }}
+                    type="text"
+                    onClick={() => document.getElementById('fileUpload')?.click()}
+                    className="buttonOutlineFilled"
+                  >
                     <FileUploadIcon />
                     <Box component="span">{t('layers.upload')}</Box>
                   </Button>

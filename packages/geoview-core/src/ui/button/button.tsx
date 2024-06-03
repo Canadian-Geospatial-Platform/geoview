@@ -32,7 +32,7 @@ export function Button(props: ButtonProps): JSX.Element {
     endIcon,
     size,
     makeResponsive,
-    fullWidth
+    fullWidth,
   } = props;
 
   const { t } = useTranslation<string>();

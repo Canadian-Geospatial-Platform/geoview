@@ -67,7 +67,7 @@ export default function FeatureDetailModal(): JSX.Element {
         </List>
       </DialogContent>
       <DialogActions>
-        <Button  fullWidth variant="contained" className="buttonOutlineFilled" onClick={closeModal} type="text" size="small" autoFocus>
+        <Button fullWidth variant="contained" className="buttonOutlineFilled" onClick={closeModal} type="text" size="small" autoFocus>
           {t('general.close')}
         </Button>
       </DialogActions>
