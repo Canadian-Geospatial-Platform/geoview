@@ -102,7 +102,6 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
     return (
       <Box display="flex" flexDirection="column" justifyItems="center" alignItems="center" sx={{ py: 9 }}>
         <Typography component="h2" sx={{ pb: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>
-          No layers added
           {t('legend.noLayersAdded')}
         </Typography>
         <Typography component="p" sx={{ p: 0 }}>

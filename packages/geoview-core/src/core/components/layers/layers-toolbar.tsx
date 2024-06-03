@@ -18,7 +18,7 @@ export function LayersToolbar(): JSX.Element {
   };
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'left', padding: '18px 18px 0px 18px' }}>
+    <Box id="layers-toolbar" sx={{padding: '8px 18px 0px 18px' }}>
       <ButtonGroup size="small" variant="outlined" aria-label="outlined button group">
         <ResponsiveButton
           size="small"
