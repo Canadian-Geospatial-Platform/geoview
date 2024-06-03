@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material';
 import { Box, AddCircleOutlineIcon, ButtonGroup, DeleteOutlineIcon, HandleIcon, VisibilityOutlinedIcon } from '@/ui';
-import { useLayerStoreActions, useLayerDisplayState } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerStoreActions, useLayerDisplayState, useLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeLayersViewDisplayState } from './types';
 import { ResponsiveButton } from '../common';
 
@@ -11,6 +11,7 @@ export function LayersToolbar(): JSX.Element {
 
   // access store
   const displayState = useLayerDisplayState();
+  const legendLayers = useLayerLegendLayers();
   const { setDisplayState } = useLayerStoreActions();
 
   const handleSetDisplayState = (dispState: TypeLayersViewDisplayState): void => {
@@ -18,9 +19,10 @@ export function LayersToolbar(): JSX.Element {
   };
 
   return (
-    <Box id="layers-toolbar" sx={{padding: '8px 18px 0px 18px' }}>
+    <Box id="layers-toolbar" sx={{ padding: '8px 18px 0px 18px' }}>
       <ButtonGroup size="small" variant="outlined" aria-label="outlined button group">
         <ResponsiveButton
+          disabled={!legendLayers.length}
           size="small"
           tooltipKey="general.view"
           variant={displayState === 'view' ? 'contained' : 'outlined'}
@@ -39,6 +41,7 @@ export function LayersToolbar(): JSX.Element {
           {t('general.add')}
         </ResponsiveButton>
         <ResponsiveButton
+          disabled={!legendLayers.length}
           size="small"
           tooltipKey="legend.sortLayers"
           variant={displayState === 'order' ? 'contained' : 'outlined'}
@@ -48,6 +51,7 @@ export function LayersToolbar(): JSX.Element {
           {t('legend.sort')}
         </ResponsiveButton>
         <ResponsiveButton
+          disabled={!legendLayers.length}
           size="small"
           tooltipKey="legend.removeLayer"
           variant={displayState === 'remove' ? 'contained' : 'outlined'}
