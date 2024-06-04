@@ -2,6 +2,8 @@ import { DataTableEventProcessor } from '@/api/event-processors/event-processor-
 import { QueryType } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
+import { WMS } from '../geoview-layers/raster/wms';
+import { GVWMS } from '../gv-layers/raster/gv-wms';
 import { AbstractLayerSet, PropagationType } from './abstract-layer-set';
 import {
   TypeAllFeatureInfoResultSet,
@@ -26,7 +28,12 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
   protected override onRegisterLayerCheck(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): boolean {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     // Return if the layer is of queryable type and source is queryable
-    return AbstractLayerSet.isQueryableType(layer) && AbstractLayerSet.isSourceQueryable(layer, layerPath);
+    return (
+      AbstractLayerSet.isQueryableType(layer) &&
+      !(layer instanceof WMS) &&
+      !(layer instanceof GVWMS) &&
+      AbstractLayerSet.isSourceQueryable(layer, layerPath)
+    );
   }
 
   /**

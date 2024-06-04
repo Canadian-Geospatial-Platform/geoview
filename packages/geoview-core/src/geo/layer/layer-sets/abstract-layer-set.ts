@@ -43,6 +43,9 @@ export abstract class AbstractLayerSet {
   /** Indicates the default when registering a layer */
   #defaultRegisterLayerCheck = true;
 
+  // The registered layers
+  #registeredLayers: (AbstractGeoViewLayer | AbstractGVLayer)[] = [];
+
   // Keep all callback delegates references
   #onLayerSetUpdatedHandlers: LayerSetUpdatedDelegate[] = [];
 
@@ -162,6 +165,9 @@ export abstract class AbstractLayerSet {
   async registerLayer(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): Promise<void> {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
 
+    // If the layer is already registered, skip it, we don't register twice
+    if (this.#registeredLayers.includes(layer)) return;
+
     // Wait a maximum of 20 seconds for the layer to get to loaded state so that it can get registered, otherwise another attempt will have to be made
     // This await is important when devs call this method directly to register ad-hoc layers.
     await whenThisThen(() => layer.getLayerConfig(layerPath)?.layerStatus === 'loaded', 20000);
@@ -216,6 +222,9 @@ export abstract class AbstractLayerSet {
       this.resultSet[layerPath].layerStatus = layer.getLayerStatus(layerPath);
       this.resultSet[layerPath].layerName = layerName;
     }
+
+    // Add to the registered layers array
+    this.#registeredLayers.push(layer);
 
     // Register the layer name changed handler
     layer.onLayerNameChanged(this.#boundHandleLayerNameChanged);
