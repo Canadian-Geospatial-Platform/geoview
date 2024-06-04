@@ -1,26 +1,69 @@
 import BaseLayer from 'ol/layer/Base';
 import BaseVectorLayer from 'ol/layer/BaseVector';
+import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
+import { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
+import Style from 'ol/style/Style';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
-import Feature from 'ol/Feature';
+import Feature, { FeatureLike } from 'ol/Feature';
 
 import { DateMgt } from '@/core/utils/date-mgt';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
-import { NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
+import { FilterNodeArrayType, NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
-import { analyzeLayerFilter } from '@/geo/utils/renderer/geoview-renderer';
+import { analyzeLayerFilter, getAndCreateFeatureStyle } from '@/geo/utils/renderer/geoview-renderer';
 import { featureInfoGetFieldType } from '../utils';
 import { AbstractGVLayer } from '../abstract-gv-layer';
+import { AbstractGeoViewLayer } from '../../geoview-layers/abstract-geoview-layers';
+import { getLocalizedValue } from '@/core/utils/utilities';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer vector type layer.
  */
 export abstract class AbstractGVVector extends AbstractGVLayer {
+  /**
+   * Constructs a GeoView Vector layer to manage an OpenLayer layer.
+   * @param {string} mapId - The map id
+   * @param {VectorSource} olSource - The OpenLayer source.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration.
+   */
+  protected constructor(mapId: string, olSource: VectorSource, layerConfig: VectorLayerEntryConfig) {
+    super(mapId, olSource, layerConfig);
+
+    // TODO: remove link to language, layer should be created in one language and recreated if needed to change
+    const language = AppEventProcessor.getDisplayLanguage(mapId);
+
+    // Get the style label in case we need it later
+    const label = getLocalizedValue(layerConfig.layerName, language) || layerConfig.layerId;
+
+    // Create the vector layer options.
+    const layerOptions: VectorLayerOptions<VectorSource> = {
+      properties: { layerConfig },
+      source: olSource,
+      style: (feature) => {
+        return AbstractGVVector.calculateStyleForFeature(
+          this,
+          feature,
+          label,
+          layerConfig.layerPath,
+          layerConfig.filterEquation,
+          layerConfig.legendFilterIsOff
+        );
+      },
+    };
+
+    // Init the layer options with initial settings
+    AbstractGVVector.initOptionsWithInitialSettings(layerOptions, layerConfig);
+
+    // Create and set the OpenLayer layer
+    this.olLayer = new VectorLayer(layerOptions);
+  }
+
   /**
    * Overrides the get of the OpenLayers Layer
    * @returns {BaseVectorLayer<VectorSource, any>} The OpenLayers Layer
@@ -38,9 +81,9 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * Overrides the get of the OpenLayers Layer Source
    * @returns {VectorSource} The OpenLayers Layer Source
    */
-  override getOLSource(): VectorSource | undefined {
+  override getOLSource(): VectorSource {
     // Get source from OL
-    return this.getOLLayer().getSource() || undefined;
+    return super.getOLSource() as VectorSource;
   }
 
   /**
@@ -216,5 +259,35 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     }
 
     return bounds;
+  }
+
+  /**
+   * Calculates a style for the given feature, based on the layer current style and options.
+   * @param {AbstractGeoViewLayer | AbstractGVLayer} layer - The layer on which to work for the style.
+   * @param {FeatureLike} feature - Feature that need its style to be defined.
+   * @param {string} label - The style label when one has to be created
+   * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
+   * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
+   * @returns {Style} The style for the feature
+   */
+  static calculateStyleForFeature(
+    layer: AbstractGeoViewLayer | AbstractGVLayer,
+    feature: FeatureLike,
+    label: string,
+    layerPath: string,
+    filterEquation?: FilterNodeArrayType,
+    legendFilterIsOff?: boolean
+  ): Style | undefined {
+    // TODO: Refactor - After layers refactoring, remove the layerPath parameter here.
+    // Get the style
+    const style = layer.getStyle(layerPath) || {};
+
+    // Get and create Feature style if necessary
+    return getAndCreateFeatureStyle(feature, style, label, filterEquation, legendFilterIsOff, (geometryType, theStyle) => {
+      // A new style has been created
+      logger.logDebug('A new style has been created on-the-fly', geometryType, layer);
+      // Update the layer style
+      layer.setStyle(layerPath, { ...style, ...{ [geometryType]: theStyle } });
+    });
   }
 }

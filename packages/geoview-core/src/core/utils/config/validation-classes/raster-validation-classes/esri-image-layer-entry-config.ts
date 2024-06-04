@@ -1,5 +1,5 @@
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { CONST_LAYER_ENTRY_TYPES, TypeSourceImageEsriInitialConfig, TypeStyleConfig } from '@/geo/map/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, TypeSourceImageEsriInitialConfig } from '@/geo/map/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 /** ******************************************************************************************************************************
@@ -17,9 +17,6 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /** Source settings to apply to the GeoView image layer source at creation time. */
   declare source: TypeSourceImageEsriInitialConfig;
-
-  /** Style to apply to the raster layer. */
-  style?: TypeStyleConfig;
 
   /**
    * The class constructor.

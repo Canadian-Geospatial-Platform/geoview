@@ -15,8 +15,6 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
     if (Number.isNaN(this.layerId)) {
       throw new Error(`The layer entry with layerId equal to ${this.layerPath} must be an integer string`);
     }
-    // Attribute 'style' must exist in layerConfig even if it is undefined
-    if (!('style' in this)) this.style = undefined;
     // if this.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it
     // and place the layerId at the end of it.
     // Value for this.source.format can only be EsriJSON.

@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 import ImageLayer from 'ol/layer/Image';
+import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
 import { ImageWMS } from 'ol/source';
@@ -33,11 +34,26 @@ export class GVWMS extends AbstractGVRaster {
   /**
    * Constructs a GVWMS layer to manage an OpenLayer layer.
    * @param {string} mapId - The map id
-   * @param {ImageLayer<ImageWMS>} olLayer - The OpenLayer layer.
+   * @param {ImageWMS} olSource - The OpenLayer source.
    * @param {OgcWmsLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(mapId: string, olLayer: ImageLayer<ImageWMS>, layerConfig: OgcWmsLayerEntryConfig) {
-    super(mapId, olLayer, layerConfig);
+  public constructor(mapId: string, olSource: ImageWMS, layerConfig: OgcWmsLayerEntryConfig, layerCapabilities: TypeJsonObject) {
+    super(mapId, olSource, layerConfig);
+
+    // Validate
+    if (!layerCapabilities) throw new Error('No layer capabilities were provided');
+
+    // Create the image layer options.
+    const imageLayerOptions: ImageOptions<ImageWMS> = {
+      source: olSource,
+      properties: { layerCapabilities, layerConfig },
+    };
+
+    // Init the layer options with initial settings
+    AbstractGVRaster.initOptionsWithInitialSettings(imageLayerOptions, layerConfig);
+
+    // Create and set the OpenLayer layer
+    this.olLayer = new ImageLayer(imageLayerOptions);
   }
 
   /**
@@ -53,9 +69,9 @@ export class GVWMS extends AbstractGVRaster {
    * Overrides the get of the OpenLayers Layer Source
    * @returns {ImageWMS} The OpenLayers Layer Source
    */
-  override getOLSource(): ImageWMS | undefined {
+  override getOLSource(): ImageWMS {
     // Get source from OL
-    return this.getOLLayer().getSource() || undefined;
+    return super.getOLSource() as ImageWMS;
   }
 
   /**
@@ -206,7 +222,6 @@ export class GVWMS extends AbstractGVRaster {
           drawingContext.drawImage(image, 0, 0);
           legend = {
             type: CONST_LAYER_TYPES.WMS,
-            layerName: layerConfig!.layerName,
             legend: drawingCanvas,
             styles: styleLegends.length ? styleLegends : undefined,
           };
@@ -216,7 +231,6 @@ export class GVWMS extends AbstractGVRaster {
 
       legend = {
         type: CONST_LAYER_TYPES.WMS,
-        layerName: layerConfig!.layerName,
         legend: null,
         styles: styleLegends.length > 1 ? styleLegends : undefined,
       };

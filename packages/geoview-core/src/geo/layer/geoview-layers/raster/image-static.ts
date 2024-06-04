@@ -5,8 +5,6 @@ import Static, { Options as SourceOptions } from 'ol/source/ImageStatic';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Extent } from 'ol/extent';
 
-// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
-
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
@@ -155,8 +153,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
       const legendImage = await this.#getLegendImage(layerConfig!);
       if (!legendImage) {
         const legend: TypeLegend = {
-          type: this.type,
-          layerName: layerConfig!.layerName,
+          type: CONST_LAYER_TYPES.IMAGE_STATIC,
           legend: null,
         };
         return legend;
@@ -169,15 +166,13 @@ export class ImageStatic extends AbstractGeoViewRaster {
         const drawingContext = drawingCanvas.getContext('2d')!;
         drawingContext.drawImage(image, 0, 0);
         const legend: TypeLegend = {
-          type: this.type,
-          layerName: layerConfig!.layerName,
+          type: CONST_LAYER_TYPES.IMAGE_STATIC,
           legend: drawingCanvas,
         };
         return legend;
       }
       const legend: TypeLegend = {
-        type: this.type,
-        layerName: layerConfig!.layerName,
+        type: CONST_LAYER_TYPES.IMAGE_STATIC,
         legend: null,
       };
       return legend;
@@ -268,17 +263,34 @@ export class ImageStatic extends AbstractGeoViewRaster {
       sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
     } else throw new Error('Parameter projection is not define in source element of layerConfig.');
 
-    const staticImageOptions: ImageOptions<Static> = { source: new Static(sourceOptions) };
-    // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-    if (layerConfig.initialSettings?.extent !== undefined) staticImageOptions.extent = layerConfig.initialSettings.extent;
-    if (layerConfig.initialSettings?.maxZoom !== undefined) staticImageOptions.maxZoom = layerConfig.initialSettings.maxZoom;
-    if (layerConfig.initialSettings?.minZoom !== undefined) staticImageOptions.minZoom = layerConfig.initialSettings.minZoom;
-    if (layerConfig.initialSettings?.states?.opacity !== undefined) staticImageOptions.opacity = layerConfig.initialSettings.states.opacity;
-    // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
-    // GV            in the 'loading' state if the flag value is false.
+    // Create the source
+    const source = new Static(sourceOptions);
 
-    // Create the OpenLayer layer
-    const olLayer = new ImageLayer(staticImageOptions);
+    // GV Time to request an OpenLayers layer!
+    const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
+
+    // If any response
+    let olLayer: ImageLayer<Static> | undefined;
+    if (requestResult.length > 0) {
+      // Get the OpenLayer that was created
+      olLayer = requestResult[0] as ImageLayer<Static>;
+    }
+
+    // If no olLayer was obtained
+    if (!olLayer) {
+      const staticImageOptions: ImageOptions<Static> = { source };
+      // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+      if (layerConfig.initialSettings?.extent !== undefined) staticImageOptions.extent = layerConfig.initialSettings.extent;
+      if (layerConfig.initialSettings?.maxZoom !== undefined) staticImageOptions.maxZoom = layerConfig.initialSettings.maxZoom;
+      if (layerConfig.initialSettings?.minZoom !== undefined) staticImageOptions.minZoom = layerConfig.initialSettings.minZoom;
+      if (layerConfig.initialSettings?.states?.opacity !== undefined)
+        staticImageOptions.opacity = layerConfig.initialSettings.states.opacity;
+      // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
+      // GV            in the 'loading' state if the flag value is false.
+
+      // Create the OpenLayer layer
+      olLayer = new ImageLayer(staticImageOptions);
+    }
 
     // TODO: Refactor - Wire it up
     this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'image');

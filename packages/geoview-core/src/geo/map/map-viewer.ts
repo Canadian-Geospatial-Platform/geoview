@@ -1830,22 +1830,22 @@ export type TypeMapMouseInfo = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapInitDelegate = EventDelegateBase<MapViewer, undefined>;
+type MapInitDelegate = EventDelegateBase<MapViewer, undefined, void>;
 
 /**
  * Define a delegate for the event handler function signature
  */
-type MapReadyDelegate = EventDelegateBase<MapViewer, undefined>;
+type MapReadyDelegate = EventDelegateBase<MapViewer, undefined, void>;
 
 /**
  * Define a delegate for the event handler function signature
  */
-type MapLayersProcessedDelegate = EventDelegateBase<MapViewer, undefined>;
+type MapLayersProcessedDelegate = EventDelegateBase<MapViewer, undefined, void>;
 
 /**
  * Define a delegate for the event handler function signature
  */
-type MapLayersLoadedDelegate = EventDelegateBase<MapViewer, undefined>;
+type MapLayersLoadedDelegate = EventDelegateBase<MapViewer, undefined, void>;
 
 /**
  * Define an event for the delegate
@@ -1857,7 +1857,7 @@ export type MapMoveEndEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapMoveEndDelegate = EventDelegateBase<MapViewer, MapMoveEndEvent>;
+type MapMoveEndDelegate = EventDelegateBase<MapViewer, MapMoveEndEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1867,7 +1867,7 @@ export type MapPointerMoveEvent = TypeMapMouseInfo;
 /**
  * Define a delegate for the event handler function signature
  */
-type MapPointerMoveDelegate = EventDelegateBase<MapViewer, MapPointerMoveEvent>;
+type MapPointerMoveDelegate = EventDelegateBase<MapViewer, MapPointerMoveEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1877,7 +1877,7 @@ export type MapSingleClickEvent = TypeMapMouseInfo;
 /**
  * Define a delegate for the event handler function signature
  */
-type MapSingleClickDelegate = EventDelegateBase<MapViewer, MapSingleClickEvent>;
+type MapSingleClickDelegate = EventDelegateBase<MapViewer, MapSingleClickEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1889,7 +1889,7 @@ export type MapZoomEndEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapZoomEndDelegate = EventDelegateBase<MapViewer, MapZoomEndEvent>;
+type MapZoomEndDelegate = EventDelegateBase<MapViewer, MapZoomEndEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1901,7 +1901,7 @@ export type MapRotationEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapRotationDelegate = EventDelegateBase<MapViewer, MapRotationEvent>;
+type MapRotationDelegate = EventDelegateBase<MapViewer, MapRotationEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1913,7 +1913,7 @@ export type MapChangeSizeEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapChangeSizeDelegate = EventDelegateBase<MapViewer, MapChangeSizeEvent>;
+type MapChangeSizeDelegate = EventDelegateBase<MapViewer, MapChangeSizeEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1926,7 +1926,7 @@ export type MapComponentAddedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapComponentAddedDelegate = EventDelegateBase<MapViewer, MapComponentAddedEvent>;
+type MapComponentAddedDelegate = EventDelegateBase<MapViewer, MapComponentAddedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1938,7 +1938,7 @@ export type MapComponentRemovedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapComponentRemovedDelegate = EventDelegateBase<MapViewer, MapComponentRemovedEvent>;
+type MapComponentRemovedDelegate = EventDelegateBase<MapViewer, MapComponentRemovedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1950,4 +1950,4 @@ export type MapLanguageChangedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapLanguageChangedDelegate = EventDelegateBase<MapViewer, MapLanguageChangedEvent>;
+type MapLanguageChangedDelegate = EventDelegateBase<MapViewer, MapLanguageChangedEvent, void>;

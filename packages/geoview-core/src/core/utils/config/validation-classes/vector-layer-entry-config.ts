@@ -1,4 +1,4 @@
-import { CONST_LAYER_ENTRY_TYPES, TypeStyleConfig, TypeVectorSourceInitialConfig } from '@/geo/map/map-schema-types';
+import { CONST_LAYER_ENTRY_TYPES, TypeVectorSourceInitialConfig } from '@/geo/map/map-schema-types';
 import { AbstractBaseLayerEntryConfig } from './abstract-base-layer-entry-config';
 
 /** ******************************************************************************************************************************
@@ -13,9 +13,6 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
 
   /** Initial settings to apply to the GeoView vector layer source at creation time. */
   declare source?: TypeVectorSourceInitialConfig;
-
-  /** Style to apply to the vector layer. */
-  style?: TypeStyleConfig;
 
   /**
    * The class constructor.

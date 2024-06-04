@@ -1,8 +1,9 @@
-import BaseLayer from 'ol/layer/Base';
+import BaseLayer, { Options } from 'ol/layer/Base';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
 import { Extent } from 'ol/extent';
 import Feature from 'ol/Feature';
+import TileLayer from 'ol/layer/Tile';
 import VectorTileLayer from 'ol/layer/VectorTile';
 import BaseVectorLayer from 'ol/layer/BaseVector';
 import ImageLayer from 'ol/layer/Image';
@@ -48,8 +49,11 @@ export abstract class AbstractGVLayer {
   // The map id
   #mapId: string;
 
-  // The OpenLayer layer
-  #olLayer: BaseLayer;
+  // The OpenLayer layer // '!' is used here, because the children constructors are supposed to create the olLayer.
+  protected olLayer!: BaseLayer;
+
+  // The OpenLayer source
+  #olSource: Source;
 
   // The layer configuration
   #layerConfig: AbstractBaseLayerEntryConfig;
@@ -59,6 +63,9 @@ export abstract class AbstractGVLayer {
 
   // The layer name
   #layerName: TypeLocalizedString | undefined;
+
+  /** Style to apply to the vector layer. */
+  #style?: TypeStyleConfig;
 
   /** Layer temporal dimension */
   #layerTemporalDimension?: TimeDimension;
@@ -71,6 +78,9 @@ export abstract class AbstractGVLayer {
 
   // Keep all callback delegates references
   #onLayerNameChangedHandlers: LayerNameChangedDelegate[] = [];
+
+  // Keep all callback delegates references
+  #onLayerStyleChangedHandlers: LayerStyleChangedDelegate[] = [];
 
   // Keep all callback delegate references
   #onLegendQueryingHandlers: LegendQueryingDelegate[] = [];
@@ -93,9 +103,9 @@ export abstract class AbstractGVLayer {
    * @param {BaseLayer} olLayer - The OpenLayer layer.
    * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration.
    */
-  protected constructor(mapId: string, olLayer: BaseLayer, layerConfig: AbstractBaseLayerEntryConfig) {
+  protected constructor(mapId: string, olSource: Source, layerConfig: AbstractBaseLayerEntryConfig) {
     this.#mapId = mapId;
-    this.#olLayer = olLayer;
+    this.#olSource = olSource;
     this.#layerConfig = layerConfig;
     this.#layerName = layerConfig.layerName;
     this.#layerStatus = 'loading';
@@ -114,19 +124,19 @@ export abstract class AbstractGVLayer {
   init(): void {
     // Depending on the instance
     let listenerName;
-    if (this.#olLayer instanceof ImageLayer) {
+    if (this.olLayer instanceof ImageLayer) {
       listenerName = 'image';
-    } else if (this.#olLayer instanceof VectorTileLayer) {
+    } else if (this.olLayer instanceof VectorTileLayer || this.olLayer instanceof TileLayer) {
       listenerName = 'tile';
-    } else if (this.#olLayer instanceof BaseVectorLayer) {
+    } else if (this.olLayer instanceof BaseVectorLayer) {
       listenerName = 'features';
     } else {
       // Unsupported
-      throw new Error(`Unsupported OpenLayer type: ${this.#olLayer.constructor.name}`);
+      throw new Error(`Unsupported OpenLayer type: ${this.olLayer.constructor.name}`);
     }
 
     // Get the source state
-    const sourceState = this.#olLayer.get('source').getState();
+    const sourceState = this.#olSource.getState();
 
     // Check if OpenLayer is loaded, else register an event
     if (sourceState === 'ready') {
@@ -137,8 +147,10 @@ export abstract class AbstractGVLayer {
       this.onError();
     } else {
       // Activation of the load end listeners
-      this.#olLayer.get('source').once(`${listenerName}loaderror`, this.onLoaded.bind(this));
-      this.#olLayer.get('source').once(`${listenerName}loadend`, this.onError.bind(this));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (this.#olSource as any).once(`${listenerName}loaderror`, this.onLoaded.bind(this));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (this.#olSource as any).once(`${listenerName}loadend`, this.onError.bind(this));
     }
   }
 
@@ -165,15 +177,15 @@ export abstract class AbstractGVLayer {
    * @returns The OpenLayers Layer
    */
   getOLLayer(): BaseLayer {
-    return this.#olLayer;
+    return this.olLayer;
   }
 
   /**
    * Gets the OpenLayers Layer Source
    * @returns The OpenLayers Layer Source
    */
-  getOLSource(): Source | undefined {
-    return this.getOLLayer().get('source') || undefined;
+  getOLSource(): Source {
+    return this.#olSource;
   }
 
   /**
@@ -242,6 +254,26 @@ export abstract class AbstractGVLayer {
     // TODO: Refactor - After layers refactoring, remove the layerPath parameter here (gotta keep it in the signature for now for the layers-set active switch)
     this.#layerName = name;
     this.#emitLayerNameChanged({ layerPath, layerName: name });
+  }
+
+  /**
+   * Gets the layer style
+   * @returns The layer style
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getStyle(layerPath: string): TypeStyleConfig | undefined {
+    // TODO: Refactor - After layers refactoring, remove the layerPath parameter here (gotta keep it in the signature for now for the layers-set active switch)
+    return this.#style;
+  }
+
+  /**
+   * Sets the layer style
+   * @param {TypeStyleConfig | undefined} style - The layer style
+   */
+  setStyle(layerPath: string, style: TypeStyleConfig): void {
+    // TODO: Refactor - After layers refactoring, remove the layerPath parameter here (gotta keep it in the signature for now for the layers-set active switch)
+    this.#style = style;
+    this.#emitLayerStyleChanged({ style, layerPath });
   }
 
   /**
@@ -574,26 +606,21 @@ export abstract class AbstractGVLayer {
   async getLegend(): Promise<TypeLegend | null> {
     // TODO: Refactor - Layers refactoring. Rename this function to onFetchLegend() once the layers refactoring is done
     try {
-      const layerConfig = this.getLayerConfig() as
-        | AbstractBaseLayerEntryConfig & {
-            style: TypeStyleConfig;
-          };
-
-      if (!layerConfig.style) {
-        const legend: TypeLegend = {
-          type: layerConfig.geoviewLayerConfig.geoviewLayerType,
-          layerName: layerConfig.layerName!,
-          styleConfig: layerConfig.style,
-          legend: null,
-        };
-        return legend;
-      }
+      // TODO: Check - Remove this dead code? 2024-06-04
+      // if (!layerConfig.style) {
+      //   const legend: TypeLegend = {
+      //     type: layerConfig.geoviewLayerConfig.geoviewLayerType,
+      //     layerName: layerConfig.layerName!,
+      //     styleConfig: layerConfig.style,
+      //     legend: null,
+      //   };
+      //   return legend;
+      // }
 
       const legend: TypeLegend = {
-        type: layerConfig.geoviewLayerConfig.geoviewLayerType,
-        layerName: layerConfig?.layerName,
-        styleConfig: layerConfig?.style,
-        legend: await getLegendStyles(layerConfig),
+        type: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType,
+        styleConfig: this.getStyle(this.getLayerPath()),
+        legend: await getLegendStyles(this.getStyle(this.getLayerPath())),
       };
       return legend;
     } catch (error) {
@@ -675,14 +702,20 @@ export abstract class AbstractGVLayer {
       features.forEach((featureNeedingItsCanvas) => {
         promisedAllCanvasFound.push(
           new Promise((resolveCanvas) => {
-            getFeatureCanvas(featureNeedingItsCanvas, layerConfig, callbackToFetchDataUrl)
+            getFeatureCanvas(
+              featureNeedingItsCanvas,
+              this.getStyle(layerConfig.layerPath)!,
+              layerConfig.filterEquation,
+              layerConfig.legendFilterIsOff,
+              callbackToFetchDataUrl
+            )
               .then((canvas) => {
                 resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
               })
               .catch((error) => {
                 // Log
                 logger.logPromiseFailed(
-                  'getFeatureCanvas in featureNeedingItsCanvas loop in formatFeatureInfoResult in AbstractGeoViewLayer',
+                  'getFeatureCanvas in featureNeedingItsCanvas loop in formatFeatureInfoResult in AbstractGVLayer',
                   error
                 );
               });
@@ -773,6 +806,28 @@ export abstract class AbstractGVLayer {
     // TODO: Refactor to put the 'layerFilter' at the right place. Meanwhile, using `any` here
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (layerConfig as any)?.layerFilter;
+  }
+
+  /**
+   * Initializes common properties on a layer options.
+   * @param {Options} layerOptions - The layer options to initialize
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The config to read the initial settings from
+   */
+  protected static initOptionsWithInitialSettings(layerOptions: Options, layerConfig: AbstractBaseLayerEntryConfig): void {
+    // GV Note: The visible flag (and maybe others?) must be set in the 'onLoaded' function below, because the layer needs to
+    // GV attempt to be visible on the map in order to trigger its source loaded event.
+
+    // Set the options as read from the initialSettings
+    // eslint-disable-next-line no-param-reassign
+    if (layerConfig.initialSettings?.className !== undefined) layerOptions.className = layerConfig.initialSettings.className;
+    // eslint-disable-next-line no-param-reassign
+    if (layerConfig.initialSettings?.extent !== undefined) layerOptions.extent = layerConfig.initialSettings.extent;
+    // eslint-disable-next-line no-param-reassign
+    if (layerConfig.initialSettings?.maxZoom !== undefined) layerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
+    // eslint-disable-next-line no-param-reassign
+    if (layerConfig.initialSettings?.minZoom !== undefined) layerOptions.minZoom = layerConfig.initialSettings.minZoom;
+    // eslint-disable-next-line no-param-reassign
+    if (layerConfig.initialSettings?.states?.opacity !== undefined) layerOptions.opacity = layerConfig.initialSettings.states.opacity;
   }
 
   /**
@@ -942,6 +997,33 @@ export abstract class AbstractGVLayer {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerOpacityChangedHandlers, callback);
   }
+
+  /**
+   * Emits an event to all handlers.
+   * @param {LayerStyleChangedEvent} event - The event to emit
+   */
+  #emitLayerStyleChanged(event: LayerStyleChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerStyleChangedHandlers, event);
+  }
+
+  /**
+   * Registers a layer style changed event handler.
+   * @param {LayerStyleChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerStyleChanged(callback: LayerStyleChangedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerStyleChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer style changed event handler.
+   * @param {LayerStyleChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerStyleChanged(callback: LayerStyleChangedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerStyleChangedHandlers, callback);
+  }
 }
 
 /**
@@ -958,7 +1040,23 @@ export type LayerNameChangedEvent = {
 /**
  * Define a delegate for the event handler function signature.
  */
-type LayerNameChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerNameChangedEvent>;
+type LayerNameChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerNameChangedEvent, void>;
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerStyleChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerStyleChangedEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerStyleChangedEvent = {
+  // The style
+  style: TypeStyleConfig;
+
+  // TODO: Refactor - After layers refactoring, remove the layerPath parameter here
+  layerPath: string;
+};
 
 /**
  * Define an event for the delegate
@@ -968,7 +1066,7 @@ export type LegendQueryingEvent = unknown;
 /**
  * Define a delegate for the event handler function signature
  */
-type LegendQueryingDelegate = EventDelegateBase<AbstractGVLayer, LegendQueryingEvent>;
+type LegendQueryingDelegate = EventDelegateBase<AbstractGVLayer, LegendQueryingEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -980,7 +1078,7 @@ export type LegendQueriedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LegendQueriedDelegate = EventDelegateBase<AbstractGVLayer, LegendQueriedEvent>;
+type LegendQueriedDelegate = EventDelegateBase<AbstractGVLayer, LegendQueriedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -992,12 +1090,12 @@ export type VisibleChangedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type VisibleChangedDelegate = EventDelegateBase<AbstractGVLayer, VisibleChangedEvent>;
+type VisibleChangedDelegate = EventDelegateBase<AbstractGVLayer, VisibleChangedEvent, void>;
 
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGVLayer, LayerFilterAppliedEvent>;
+type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGVLayer, LayerFilterAppliedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1012,7 +1110,7 @@ export type LayerFilterAppliedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerOpacityChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerOpacityChangedEvent>;
+type LayerOpacityChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerOpacityChangedEvent, void>;
 
 /**
  * Define an event for the delegate

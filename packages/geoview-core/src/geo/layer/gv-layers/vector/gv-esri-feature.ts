@@ -16,11 +16,11 @@ export class GVEsriFeature extends AbstractGVVector {
   /**
    * Constructs a GVEsriFeature layer to manage an OpenLayer layer.
    * @param {string} mapId - The map id
-   * @param {VectorImage<VectorSource>} olLayer - The OpenLayer layer.
+   * @param {VectorSource} olSource - The OpenLayer source.
    * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(mapId: string, olLayer: VectorImage<VectorSource>, layerConfig: EsriFeatureLayerEntryConfig) {
-    super(mapId, olLayer, layerConfig);
+  public constructor(mapId: string, olSource: VectorSource, layerConfig: EsriFeatureLayerEntryConfig) {
+    super(mapId, olSource, layerConfig);
   }
 
   /**

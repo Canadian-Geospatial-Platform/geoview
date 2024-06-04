@@ -241,12 +241,12 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
-   * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
+   * @param {EsriDynamicLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
-   * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
+   * @returns {Promise<EsriDynamicLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
   // GV Layers Refactoring - Obsolete (in config?)
-  protected override processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected override processLayerMetadata(layerConfig: EsriDynamicLayerEntryConfig): Promise<EsriDynamicLayerEntryConfig> {
     return commonProcessLayerMetadata(this, layerConfig);
   }
 
@@ -275,22 +275,39 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     }
     if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
 
-    const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
-      source: new ImageArcGISRest(sourceOptions),
-      properties: { layerConfig },
-    };
-    // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-    if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings.className;
-    if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings.extent;
-    if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
-    if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
-    if (layerConfig.initialSettings?.states?.opacity !== undefined) imageLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
-    // If a layer on the map has an initialSettings.visible set to false, its status will never reach the status 'loaded' because
-    // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
-    // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
+    // Create the source
+    const source = new ImageArcGISRest(sourceOptions);
 
-    // Create the OpenLayer layer
-    const olLayer = new ImageLayer(imageLayerOptions);
+    // GV Time to request an OpenLayers layer!
+    const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
+
+    // If any response
+    let olLayer: ImageLayer<ImageArcGISRest> | undefined;
+    if (requestResult.length > 0) {
+      // Get the OpenLayer that was created
+      olLayer = requestResult[0] as ImageLayer<ImageArcGISRest>;
+    }
+
+    // If no olLayer was obtained
+    if (!olLayer) {
+      const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
+        source,
+        properties: { layerConfig },
+      };
+      // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+      if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings.className;
+      if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings.extent;
+      if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
+      if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
+      if (layerConfig.initialSettings?.states?.opacity !== undefined)
+        imageLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
+      // If a layer on the map has an initialSettings.visible set to false, its status will never reach the status 'loaded' because
+      // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
+      // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
+
+      // Create the OpenLayer layer
+      olLayer = new ImageLayer(imageLayerOptions);
+    }
 
     // TODO: Refactor - Wire it up
     this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'image');
@@ -309,8 +326,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig(layerPath)! as EsriDynamicLayerEntryConfig;
 
-      // Guess the geometry type
-      const geometryType = layerConfig.getTypeGeometry();
+      // Guess the geometry type by taking the first style key
+      const [geometryType] = layerConfig.getTypeGeometries();
 
       // Fetch the features
       let urlRoot = layerConfig.geoviewLayerConfig.metadataAccessPath![AppEventProcessor.getDisplayLanguage(this.mapId)]!;
@@ -653,7 +670,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     const layerConfig = this.getLayerConfig(layerPath) as EsriDynamicLayerEntryConfig;
     const { layerFilter } = layerConfig;
 
-    if (layerConfig?.style) {
+    // Get the style
+    const style = this.getStyle(layerConfig.layerPath);
+
+    if (style) {
       const setAllUndefinedVisibilityFlagsToYes = (styleConfig: TypeUniqueValueStyleConfig | TypeClassBreakStyleConfig): void => {
         // default value is true for all undefined visibility flags
         if (styleConfig.defaultVisible === undefined) styleConfig.defaultVisible = true;
@@ -669,7 +689,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         return allVisible;
       };
 
-      const styleSettings = layerConfig.getStyleSettings()!;
+      // Get the first style settings
+      const styleSettings = layerConfig.getFirstStyleSettings()!;
 
       if (isSimpleStyleConfig(styleSettings)) {
         return layerFilter || '(1=1)';
@@ -683,6 +704,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         const fieldOfTheSameValue = EsriDynamic.#countFieldOfTheSameValue(styleSettings);
         const fieldOrder = EsriDynamic.#sortFieldOfTheSameValue(styleSettings, fieldOfTheSameValue);
         const queryTree = EsriDynamic.#getQueryTree(styleSettings, fieldOfTheSameValue, fieldOrder);
+        // TODO: Refactor - Layers refactoring. Use the source.featureInfo from the layer, not the layerConfig anymore, here and below
         const query = this.#buildQuery(queryTree, 0, fieldOrder, styleSettings, layerConfig.source.featureInfo!);
         return `${query}${layerFilter ? ` and (${layerFilter})` : ''}`;
       }

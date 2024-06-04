@@ -10,7 +10,6 @@ import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import { TypeResultSet, TypeResultSetEntry, TypeStyleConfig } from '@/geo/map/map-schema-types';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { TypeLocalizedString } from '@/api/config/types/map-schema-types';
 import { TypeGeoviewLayerType, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 
@@ -262,7 +261,6 @@ export type TypeLegendResultInfo = {
 export type LegendQueryStatus = 'init' | 'querying' | 'queried';
 
 export type TypeLegend = {
-  layerName?: TypeLocalizedString;
   type: TypeGeoviewLayerType;
   styleConfig?: TypeStyleConfig | null;
   // Layers other than vector layers use the HTMLCanvasElement type for their legend.

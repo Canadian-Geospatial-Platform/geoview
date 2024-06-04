@@ -44,7 +44,8 @@ export abstract class AbstractLayerSet {
   #defaultRegisterLayerCheck = true;
 
   // The registered layers
-  #registeredLayers: (AbstractGeoViewLayer | AbstractGVLayer)[] = [];
+  // TODO: Refactor - Layers refactoring. Replace this array of string to array of GVLayer object instead (and rename attribute) once hybrid work is done
+  #registeredLayerLayerPaths: string[] = [];
 
   // Keep all callback delegates references
   #onLayerSetUpdatedHandlers: LayerSetUpdatedDelegate[] = [];
@@ -165,12 +166,12 @@ export abstract class AbstractLayerSet {
   async registerLayer(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): Promise<void> {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
 
-    // If the layer is already registered, skip it, we don't register twice
-    if (this.#registeredLayers.includes(layer)) return;
-
     // Wait a maximum of 20 seconds for the layer to get to loaded state so that it can get registered, otherwise another attempt will have to be made
     // This await is important when devs call this method directly to register ad-hoc layers.
     await whenThisThen(() => layer.getLayerConfig(layerPath)?.layerStatus === 'loaded', 20000);
+
+    // If the layer is already registered, skip it, we don't register twice
+    if (this.#registeredLayerLayerPaths.includes(layerPath)) return;
 
     // Update the registration of all layer sets
     if (this.onRegisterLayerCheck(layer, layerPath)) {
@@ -224,7 +225,7 @@ export abstract class AbstractLayerSet {
     }
 
     // Add to the registered layers array
-    this.#registeredLayers.push(layer);
+    this.#registeredLayerLayerPaths.push(layerPath);
 
     // Register the layer name changed handler
     layer.onLayerNameChanged(this.#boundHandleLayerNameChanged);
@@ -453,7 +454,7 @@ export type PropagationType = 'config-registration' | 'layer-registration' | 'la
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerSetUpdatedDelegate = EventDelegateBase<AbstractLayerSet, LayerSetUpdatedEvent>;
+type LayerSetUpdatedDelegate = EventDelegateBase<AbstractLayerSet, LayerSetUpdatedEvent, void>;
 
 /**
  * Define an event for the delegate

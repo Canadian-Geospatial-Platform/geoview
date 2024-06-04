@@ -153,9 +153,9 @@ export class CSV extends AbstractGeoViewVector {
    *
    * @param {VectorLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
-   * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
+   * @returns {Promise<VectorLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected override processLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected override processLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<VectorLayerEntryConfig> {
     // process the feature info configuration and attach the config to the instance for access by parent class
     this.setLayerMetadata(layerConfig.layerPath, Cast<TypeJsonObject>(layerConfig));
     return Promise.resolve(layerConfig);

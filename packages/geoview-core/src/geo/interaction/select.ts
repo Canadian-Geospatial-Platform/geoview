@@ -110,4 +110,4 @@ export class Select extends Interaction {
 /**
  * Define a delegate for the event handler function signature
  */
-type SelectChangedDelegate = EventDelegateBase<Select, OLSelectEvent>;
+type SelectChangedDelegate = EventDelegateBase<Select, OLSelectEvent, void>;

@@ -28,7 +28,8 @@ import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/v
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { Cast } from '@/core/types/global-types';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { analyzeLayerFilter, getAndCreateFeatureStyle } from '@/geo/utils/renderer/geoview-renderer';
+import { analyzeLayerFilter } from '@/geo/utils/renderer/geoview-renderer';
+import { AbstractGVVector } from '../../gv-layers/vector/abstract-gv-vector';
 
 /* *******************************************************************************************************************************
  * AbstractGeoViewVector types
@@ -229,7 +230,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {VectorLayer<VectorSource>} The vector layer created.
    */
-  // GV Layers Refactoring - Obsolete (in config? in layers?)
+  // GV Layers Refactoring - Obsolete (this is bridging between config and layers, okay)
   protected createVectorLayer(layerConfig: VectorLayerEntryConfig, vectorSource: VectorSource<Feature>): VectorLayer<VectorSource> {
     // TODO: remove link to language, layer should be created in one language and recreated if needed to change
     const language = AppEventProcessor.getDisplayLanguage(this.mapId);
@@ -237,38 +238,50 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // Get the style label
     const label = getLocalizedValue(layerConfig.layerName, language) || layerConfig.layerId;
 
-    // Create the vector layer options.
-    // GV In this style callback below, it's possible that more styles get created on-the-fly depending on the features being queried.
-    // GV Because of this, we want the config to emit a style changed event everytime this happens so that we can adjust the UI accordingly.
-    // TODO: Refactor - Layers refactoring. When the layers refactoring is done. It should be the layer that emits this event, not the layerConfig.
-    // TO.DOCONT: Right now, it can't be the layer, because this code only exists in AbstractGeoViewLayer, not in the new GVLayers.
-    const layerOptions: VectorLayerOptions<VectorSource> = {
-      properties: { layerConfig },
-      source: vectorSource as VectorSource<Feature>,
-      style: (feature) => {
-        if ('style' in layerConfig) {
-          return getAndCreateFeatureStyle(feature, layerConfig, label);
-        }
+    // GV Time to request an OpenLayers layer!
+    const requestResult = this.emitLayerRequesting({ config: layerConfig, source: vectorSource });
 
-        return undefined;
-      },
-    };
+    // If any response
+    let olLayer: VectorLayer<VectorSource> | undefined;
+    if (requestResult.length > 0) {
+      // Get the OpenLayer that was created
+      olLayer = requestResult[0] as VectorLayer<VectorSource>;
+    }
 
-    // Create the OpenLayer layer
-    const olLayer = new VectorLayer(layerOptions);
+    // If no olLayer was obtained
+    if (!olLayer) {
+      // Working in old LAYERS_HYBRID_MODE (in the new mode the code below is handle in the new classes)
+      // Create the vector layer options.
+      const layerOptions: VectorLayerOptions<VectorSource> = {
+        properties: { layerConfig },
+        source: vectorSource,
+        style: (feature) => {
+          return AbstractGVVector.calculateStyleForFeature(
+            this,
+            feature,
+            label,
+            layerConfig.layerPath,
+            layerConfig.filterEquation,
+            layerConfig.legendFilterIsOff
+          );
+        },
+      };
+
+      if (layerConfig.initialSettings?.extent !== undefined) layerOptions.extent = layerConfig.initialSettings.extent;
+      if (layerConfig.initialSettings?.maxZoom !== undefined) layerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
+      if (layerConfig.initialSettings?.minZoom !== undefined) layerOptions.minZoom = layerConfig.initialSettings.minZoom;
+      if (layerConfig.initialSettings?.states?.opacity !== undefined) layerOptions.opacity = layerConfig.initialSettings.states.opacity;
+
+      // Create the OpenLayer layer
+      olLayer = new VectorLayer(layerOptions);
+    }
 
     // TODO: Refactor - Wire it up
     this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'features');
 
-    if (layerConfig.initialSettings?.extent !== undefined) this.setExtent(layerConfig.initialSettings.extent, layerConfig.layerPath);
-    if (layerConfig.initialSettings?.maxZoom !== undefined) this.setMaxZoom(layerConfig.initialSettings.maxZoom, layerConfig.layerPath);
-    if (layerConfig.initialSettings?.minZoom !== undefined) this.setMinZoom(layerConfig.initialSettings.minZoom, layerConfig.layerPath);
-    if (layerConfig.initialSettings?.states?.opacity !== undefined)
-      this.setOpacity(layerConfig.initialSettings.states.opacity, layerConfig.layerPath);
     // If a layer on the map has an initialSettings.visible set to false, its status will never reach the status 'loaded' because
     // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
     // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
-
     return olLayer;
   }
 
