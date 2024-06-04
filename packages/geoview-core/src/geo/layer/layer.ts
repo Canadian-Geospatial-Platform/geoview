@@ -84,8 +84,6 @@ import { TypeLegendItem } from '@/core/components/layers/types';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 
-export type TypeRegisteredLayers = { [layerPath: string]: TypeLayerEntryConfig };
-
 export type GeoViewLayerAddedResult = {
   layer: AbstractGeoViewLayer;
   promiseLayer: Promise<void>;
@@ -126,7 +124,7 @@ export class LayerApi {
   #allLayerSets: AbstractLayerSet[];
 
   /** Layers with valid configuration for this map. */
-  #layerEntryConfigs: TypeRegisteredLayers = {};
+  #layerEntryConfigs: { [layerPath: string]: ConfigBaseClass } = {};
 
   // Dictionary holding all the old geoview layers
   #geoviewLayers: { [geoviewLayerId: string]: AbstractGeoViewLayer } = {};
@@ -146,10 +144,13 @@ export class LayerApi {
   // Keep all callback delegates references
   #onLayerAddedHandlers: LayerAddedDelegate[] = [];
 
+  // Keep all callback delegates references
   #onLayerRemovedHandlers: LayerRemovedDelegate[] = [];
 
+  // Keep all callback delegates references
   #onLayerVisibilityToggledHandlers: LayerVisibilityToggledDelegate[] = [];
 
+  // Keep all callback delegates references
   #onLayerItemVisibilityToggledHandlers: LayerVisibilityToggledDelegate[] = [];
 
   // Maximum time duration to wait when registering a layer for the time slider
@@ -343,23 +344,23 @@ export class LayerApi {
    * Gets the Layer Entry Configs
    * @returns {string[]} The GeoView Layer Entry Configs
    */
-  getLayerEntryConfigs(): TypeLayerEntryConfig[] {
+  getLayerEntryConfigs(): ConfigBaseClass[] {
     return Object.values(this.#layerEntryConfigs);
   }
 
   /**
    * Gets the layer configuration of the specified layer path.
    * @param {string} layerPath The layer path.
-   * @returns {TypeLayerEntryConfig | undefined} The layer configuration or undefined if not found.
+   * @returns {ConfigBaseClass | undefined} The layer configuration or undefined if not found.
    */
-  getLayerEntryConfig(layerPath: string): TypeLayerEntryConfig | undefined {
+  getLayerEntryConfig(layerPath: string): ConfigBaseClass | undefined {
     return this.#layerEntryConfigs?.[layerPath];
   }
 
   /**
    * Obsolete function to set the layer configuration in the registered layers.
    */
-  setLayerEntryConfigObsolete(layerConfig: TypeLayerEntryConfig): void {
+  setLayerEntryConfigObsolete(layerConfig: ConfigBaseClass): void {
     // FIXME: Obsolete function that should be deleted once the Layers refactoring is done
     // Keep it :( (get rid of this later)
     this.#layerEntryConfigs[layerConfig.layerPath] = layerConfig;
@@ -721,9 +722,9 @@ export class LayerApi {
 
   /**
    * Registers the layer identifier.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer entry config to register
+   * @param {ConfigBaseClass} layerConfig - The layer entry config to register
    */
-  registerLayerConfigInit(layerConfig: TypeLayerEntryConfig): void {
+  registerLayerConfigInit(layerConfig: ConfigBaseClass): void {
     // Log (keep the commented line for now)
     // logger.logDebug('registerLayerConfigInit', layerConfig.layerPath, layerConfig.layerStatus);
 
@@ -733,15 +734,15 @@ export class LayerApi {
     // If not a group
     if (layerConfig.entryType !== CONST_LAYER_ENTRY_TYPES.GROUP) {
       // Register the layer entry config
-      this.registerLayerConfigUpdate(layerConfig as AbstractBaseLayerEntryConfig);
+      this.registerLayerConfigInLayerSets(layerConfig as AbstractBaseLayerEntryConfig);
     }
   }
 
   /**
-   * Registers the layer in the LayerApi to start managing it.
+   * Registers the layer config in the LayerApi to start managing it.
    * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config to register
    */
-  registerLayerConfigUpdate(layerConfig: AbstractBaseLayerEntryConfig): void {
+  registerLayerConfigInLayerSets(layerConfig: AbstractBaseLayerEntryConfig): void {
     // TODO: Refactor - Keeping this function separate from registerLayerConfigInit for now, because this registerLayerConfigUpdate was
     // TO.DOCONT: called in 'processListOfLayerEntryConfig' processes happening externally. I've since commented those calls to try
     // TO.DOCONT: things out. If things are stable, we can remove the dead code in the processListOfLayerEntryConfig and merge
@@ -765,12 +766,29 @@ export class LayerApi {
 
     // Tell the layer sets about it
     this.#allLayerSets.forEach((layerSet) => {
-      // Register or Unregister the layer
-      layerSet.registerOrUnregisterLayer(layerConfig, 'add');
+      // Register the config to the layer set
+      layerSet.registerLayerConfig(layerConfig);
     });
 
     // eslint-disable-next-line no-param-reassign
     layerConfig.layerStatus = 'registered';
+  }
+
+  /**
+   * Registers the layer in the LayerApi layer-sets to start managing it.
+   * This function may be used to start managing a layer in the UI when said layer has been created outside of the regular config->layer flow.
+   * @param {AbstractGVLayer} layer - The layer to register
+   */
+  registerLayerInLayerSets(layer: AbstractGVLayer, layerPath: string): void {
+    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
+    // Tell the layer sets about it
+    this.#allLayerSets.forEach((layerSet) => {
+      // Register the layer to the layer set
+      layerSet.registerLayer(layer, layerPath).catch((error) => {
+        // Log
+        logger.logPromiseFailed('in registerLayer in registerLayerUpdate', error);
+      });
+    });
   }
 
   /**
@@ -987,16 +1005,9 @@ export class LayerApi {
 
   /**
    * Unregisters the layer in the LayerApi to stop managing it.
-   * @param {AbstractGeoViewLayer} geoviewLayer - The geoview layer associated with the layer entry config
-   * @param {TypeLayerEntryConfig} layerConfig - The layer entry config to unregister
+   * @param {ConfigBaseClass} layerConfig - The layer entry config to unregister
    */
-  unregisterLayer(layerConfig: TypeLayerEntryConfig): void {
-    // TODO: Fix - Reactivate and make this work
-    // // Register a handler on the layer config to track the status changed
-    // layerConfig.offLayerStatusChanged((config: ConfigBaseClass, layerStatusEvent: LayerStatusChangedEvent) => {
-    //   this.#handleLayerStatusChanged(config, layerStatusEvent);
-    // });
-
+  unregisterLayerConfig(layerConfig: ConfigBaseClass): void {
     // Unregister from ordered layer info
     this.#unregisterFromOrderedLayerInfo(layerConfig);
 
@@ -1011,47 +1022,47 @@ export class LayerApi {
 
     // Tell the layer sets about it
     this.#allLayerSets.forEach((layerSet) => {
-      // Register or Unregister the layer
-      layerSet.registerOrUnregisterLayer(layerConfig, 'remove');
+      // Unregister from the layer set
+      layerSet.unregister(layerConfig.layerPath);
     });
   }
 
   /**
    * Unregisters layer information from layer info store.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
+   * @param {ConfigBaseClass} layerConfig - The layer configuration to be unregistered.
    * @private
    */
-  #unregisterFromOrderedLayerInfo(layerConfig: TypeLayerEntryConfig): void {
+  #unregisterFromOrderedLayerInfo(layerConfig: ConfigBaseClass): void {
     // Remove from ordered layer info
     MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), layerConfig.layerPath);
   }
 
   /**
    * Unregisters layer information from TimeSlider.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
+   * @param {ConfigBaseClass} layerConfig - The layer configuration to be unregistered.
    * @private
    */
-  #unregisterFromTimeSlider(layerConfig: TypeLayerEntryConfig): void {
+  #unregisterFromTimeSlider(layerConfig: ConfigBaseClass): void {
     // Remove from the TimeSlider
     TimeSliderEventProcessor.removeTimeSliderLayer(this.getMapId(), layerConfig.layerPath);
   }
 
   /**
    * Unregisters layer information from GeoChart.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
+   * @param {ConfigBaseClass} layerConfig - The layer configuration to be unregistered.
    * @private
    */
-  #unregisterFromGeoChart(layerConfig: TypeLayerEntryConfig): void {
+  #unregisterFromGeoChart(layerConfig: ConfigBaseClass): void {
     // Remove from the GeoChart Charts
     GeochartEventProcessor.removeGeochartChart(this.getMapId(), layerConfig.layerPath);
   }
 
   /**
    * Unregisters layer information from Swiper.
-   * @param {TypeLayerEntryConfig} layerConfig - The layer configuration to be unregistered.
+   * @param {ConfigBaseClass} layerConfig - The layer configuration to be unregistered.
    * @private
    */
-  #unregisterFromSwiper(layerConfig: TypeLayerEntryConfig): void {
+  #unregisterFromSwiper(layerConfig: ConfigBaseClass): void {
     // Remove it from the Swiper
     SwiperEventProcessor.removeLayerPath(this.getMapId(), layerConfig.layerPath);
   }
@@ -1084,18 +1095,18 @@ export class LayerApi {
   /**
    * Checks if the layer results sets are all ready using the resultSet from the FeatureInfo LayerSet
    */
-  checkFeatureInfoLayerResultSetsReady(callbackNotReady?: (layerEntryConfig: TypeLayerEntryConfig) => void): boolean {
+  checkFeatureInfoLayerResultSetsReady(callbackNotReady?: (layerEntryConfig: ConfigBaseClass) => void): boolean {
     // For each registered layer entry
     let allGood = true;
-    Object.entries(this.#layerEntryConfigs).forEach(([layerPath, registeredLayer]) => {
+    this.getLayerEntryConfigs().forEach((layerConfig) => {
       // If not queryable, don't expect a result set
-      if (!registeredLayer.source?.featureInfo?.queryable) return;
+      if (!(layerConfig as AbstractBaseLayerEntryConfig).source?.featureInfo?.queryable) return;
 
       const { resultSet } = this.featureInfoLayerSet;
-      const layerResultSetReady = Object.keys(resultSet).includes(layerPath);
+      const layerResultSetReady = Object.keys(resultSet).includes(layerConfig.layerPath);
       if (!layerResultSetReady) {
         // Callback about it
-        callbackNotReady?.(registeredLayer);
+        callbackNotReady?.(layerConfig);
         allGood = false;
       }
     });
@@ -1108,6 +1119,9 @@ export class LayerApi {
    * Removes all geoview layers from the map
    */
   removeAllGeoviewLayers(): void {
+    // FIXME: Layers refactoring. When working in LAYERS_HYBRID_MODE=true, the GVLayers aren't created until the layer config gets in 'processed' layer status.
+    // FIX.MECONT: Therefore, this can't remove the layers that failed due to for example bad metadataUrl.
+    // FIX.MECONT: To effectively remove all layers in the UI boxes, this removal process should be using the 'LayerConfigs' (and the layer paths). Not the 'Layer' classes.
     // For each Geoview layers
     this.getGeoviewLayersHybrid().forEach((geoviewLayer) => {
       // Remove it
@@ -1138,7 +1152,7 @@ export class LayerApi {
         // Remove ol layer
         if (this.getOLLayer(registeredLayerPath)) this.mapViewer.map.removeLayer(this.getOLLayer(registeredLayerPath) as BaseLayer);
         // Unregister layer
-        this.unregisterLayer(this.getLayerEntryConfig(registeredLayerPath)!);
+        this.unregisterLayerConfig(this.getLayerEntryConfig(registeredLayerPath)!);
         // Remove from registered layers
         delete this.#layerEntryConfigs[layerPath];
       }
@@ -1153,7 +1167,7 @@ export class LayerApi {
 
       // If it is a single layer, remove geoview layer
       if (layerPathNodes.length === 1 || (layerPathNodes.length === 2 && geoviewLayer.listOfLayerEntryConfig.length === 1)) {
-        geoviewLayer.olRootLayer!.dispose();
+        geoviewLayer.olRootLayer?.dispose();
         delete this.#geoviewLayers[layerPathNodes[0]];
         const { mapFeaturesConfig } = this.mapViewer;
 
@@ -1391,13 +1405,13 @@ export class LayerApi {
    * @param {string} name - The new name to use.
    */
   setLayerName(layerPath: string, name: string): void {
-    const layerConfig = this.#layerEntryConfigs[layerPath];
-    if (layerConfig) {
-      layerConfig.layerName = createLocalizedString(name);
-      this.#allLayerSets.forEach((layerSet) => {
-        // Process the layer status change
-        layerSet.processNameChanged(layerConfig, name);
-      });
+    // Get the layer
+    const layer = this.getGeoviewLayerHybrid(layerPath);
+
+    // If found
+    if (layer) {
+      // Set the layer name on the layer
+      layer.setLayerName(layerPath, createLocalizedString(name));
     } else {
       logger.logError(`Unable to find layer ${layerPath}`);
     }
@@ -1411,7 +1425,7 @@ export class LayerApi {
    * @param {'aliasFields' | 'outfields'} fields - The fields to change.
    */
   redefineFeatureFields(layerPath: string, fieldNames: string, fields: 'aliasFields' | 'outfields'): void {
-    const layerConfig = this.#layerEntryConfigs[layerPath];
+    const layerConfig = this.#layerEntryConfigs[layerPath] as AbstractBaseLayerEntryConfig;
     if (!layerConfig) logger.logError(`Unable to find layer ${layerPath}`);
     else if (layerConfig.source?.featureInfo && layerConfig.source?.featureInfo.queryable !== false)
       layerConfig.source.featureInfo[fields] = createLocalizedString(fieldNames);

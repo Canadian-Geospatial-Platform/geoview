@@ -187,7 +187,7 @@
       // Add WMS Button======================================================================================================
       // find the button element by ID
       var addLayerButton = document.getElementById('Add-layer');
-      const config = 
+      const config =
         {
           'geoviewLayerId': 'wmsLYR1-msi',
           'geoviewLayerName': { 'en': 'MSI' },
@@ -356,7 +356,7 @@
       disableHoverButton.addEventListener('click', async () => {
         cgpv.api.maps.Map1.layer.hoverFeatureInfoLayerSet.disableHoverListener('esriFeatureLYR5/0')
       });
-      
+
       // Enable hover Button========================================================================================================
       // find the button element by ID
       var enableHoverButton = document.getElementById('Enable-hover');
@@ -374,7 +374,7 @@
       disableFeatureInfoButton.addEventListener('click', async () => {
         cgpv.api.maps.Map1.layer.featureInfoLayerSet.disableClickListener('esriFeatureLYR5/0')
       });
-      
+
       // Enable feature info Button========================================================================================================
       // find the button element by ID
       var enableFeatureInfoButton = document.getElementById('Enable-feature-info');

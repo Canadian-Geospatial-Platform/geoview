@@ -84,7 +84,10 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
    */
   const handleZoomTo = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
     e.stopPropagation();
-    zoomToLayerExtent(layer.layerPath);
+    zoomToLayerExtent(layer.layerPath).catch((error) => {
+      // Log
+      logger.logPromiseFailed('in zoomToLayerExtent in legend-layer.handleZoomTo', error);
+    });
   };
 
   const visibility = !getVisibilityFromOrderedLayerInfo(layer.layerPath);

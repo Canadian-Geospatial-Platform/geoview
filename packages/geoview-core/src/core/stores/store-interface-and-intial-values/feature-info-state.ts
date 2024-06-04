@@ -2,7 +2,6 @@ import { useStore } from 'zustand';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import {
-  TypeLayerData,
   TypeFeatureInfoEntry,
   TypeResultSet,
   TypeResultSetEntry,
@@ -150,7 +149,13 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
   } as IFeatureInfoState;
 }
 
-export type TypeFeatureInfoResultSetEntry = TypeResultSetEntry & TypeLayerData;
+export type TypeFeatureInfoSetEntry = {
+  eventListenerEnabled: boolean;
+  queryStatus: TypeQueryStatus;
+  features: TypeFeatureInfoEntry[] | undefined | null;
+};
+
+export type TypeFeatureInfoResultSetEntry = TypeResultSetEntry & TypeFeatureInfoSetEntry;
 
 export type TypeFeatureInfoResultSet = TypeResultSet<TypeFeatureInfoResultSetEntry>;
 
@@ -164,13 +169,13 @@ export type TypeHoverFeatureInfo =
   | undefined
   | null;
 
-export type TypeHoverLayerData = {
+export type TypeHoverSetEntry = {
   eventListenerEnabled: boolean;
   queryStatus: TypeQueryStatus;
   feature: TypeHoverFeatureInfo;
 };
 
-export type TypeHoverResultSetEntry = TypeResultSetEntry & TypeHoverLayerData;
+export type TypeHoverResultSetEntry = TypeResultSetEntry & TypeHoverSetEntry;
 
 export type TypeHoverResultSet = TypeResultSet<TypeHoverResultSetEntry>;
 

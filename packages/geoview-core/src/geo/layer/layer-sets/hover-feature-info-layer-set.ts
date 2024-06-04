@@ -2,17 +2,19 @@ import debounce from 'lodash/debounce';
 
 import { Coordinate } from 'ol/coordinate';
 import { logger } from '@/core/utils/logger';
-import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
-import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { AbstractLayerSet } from './abstract-layer-set';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
+import { WMS } from '../geoview-layers/raster/wms';
+import { GVWMS } from '../gv-layers/raster/gv-wms';
+import { AbstractLayerSet, PropagationType } from './abstract-layer-set';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { TypeHoverResultSet } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { TypeHoverResultSet, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 
 /**
- * A class containing a set of layers associated with a TypeHoverResultSetEntry object, which will receive the result of a
- * "get feature info" request made on the map layers when the user hovers over a position in a stationary way.
- *
+ * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
+ * events happening on them (in this case when the user hovers on the map) with a store
+ * for UI updates.
  * @class HoverFeatureInfoLayerSet
  */
 export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
@@ -37,35 +39,51 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a hover-feature-info-layer-set wants to check for condition to register a layer in its set.
-   * @param {ConfigBaseClass} layerConfig - The layer config
+   * @param {AbstractGeoViewLayer | AbstractGVLayer} layer - The layer
    * @returns {boolean} True when the layer should be registered to this hover-feature-info-layer-set.
    */
-  protected override onRegisterLayerCheck(layerConfig: ConfigBaseClass): boolean {
-    // Log
-    logger.logTraceCore('HOVER-FEATURE-INFO-LAYER-SET - onRegisterLayerCheck', layerConfig.layerPath);
-
-    // For WMS, there's no hover, never
-    if (layerConfig.schemaTag === CONST_LAYER_TYPES.WMS) return false;
-
-    // Default
-    return super.onRegisterLayerCheck(layerConfig);
+  protected override onRegisterLayerCheck(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): boolean {
+    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
+    // Return if the layer is of queryable type and source is queryable
+    return (
+      AbstractLayerSet.isQueryableType(layer) &&
+      !(layer instanceof WMS) &&
+      !(layer instanceof GVWMS) &&
+      AbstractLayerSet.isSourceQueryable(layer, layerPath)
+    );
   }
 
   /**
    * Overrides the behavior to apply when a hover-feature-info-layer-set wants to register a layer in its set.
-   * @param {ConfigBaseClass} layerConfig - The layer config
+   * @param {AbstractGeoViewLayer | AbstractGVLayer} layer - The layer
    */
-  protected override onRegisterLayer(layerConfig: ConfigBaseClass): void {
-    // Log
-    logger.logTraceCore('HOVER-FEATURE-INFO-LAYER-SET - onRegisterLayer', layerConfig.layerPath);
-
+  protected override onRegisterLayer(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): void {
+    // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     // Call parent
-    super.onRegisterLayer(layerConfig);
+    super.onRegisterLayer(layer, layerPath);
 
     // Update the resultSet data
-    this.resultSet[layerConfig.layerPath].eventListenerEnabled = true;
-    this.resultSet[layerConfig.layerPath].queryStatus = 'processed';
-    this.resultSet[layerConfig.layerPath].feature = undefined;
+    this.resultSet[layerPath].eventListenerEnabled = true;
+    this.resultSet[layerPath].queryStatus = 'processed';
+    this.resultSet[layerPath].feature = undefined;
+  }
+
+  /**
+   * Overrides the behavior to apply when propagating to the store
+   * @param {TypeHoverResultSetEntry} resultSetEntry - The result set entry to propagate to the store
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected override onPropagateToStore(resultSetEntry: TypeHoverResultSetEntry, type: PropagationType): void {
+    // Nothing to do here, hover's store only needs updating when a query happens
+  }
+
+  /**
+   * Overrides the behavior to apply when deleting from the store
+   * @param {string} layerPath - The layer path to delete from the store
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected override onDeleteFromStore(layerPath: string): void {
+    // Nothing to do here, hover's store only needs updating when a query happens
   }
 
   /**
@@ -73,20 +91,27 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    * @param {Coordinate} pixelCoordinate - The pixel coordinate where to query the features
    */
   queryLayers(pixelCoordinate: Coordinate): void {
+    // FIXME: Watch out for code reentrancy between queries!
+    // FIX.MECONT: Consider using a LIFO pattern, per layer path, as the race condition resolution
+    // FIX.MECONT: For this one, because there is only one at the time, we should even query first layer in order of visible layer that is query able
     // Query types of what we're doing
     const queryType = 'at_pixel';
 
     // Reinitialize the resultSet
     // Loop on each layer path in the resultSet
     Object.keys(this.resultSet).forEach((layerPath) => {
-      const layer = this.layerApi.getGeoviewLayerHybrid(layerPath);
-      const layerConfig = layer?.getLayerConfig(layerPath);
-
+      // If event listener is disabled
       if (!this.resultSet[layerPath].eventListenerEnabled) return;
-      if (!AbstractLayerSet.isQueryable(layerConfig)) return;
 
-      // If layer is loaded
-      if (layer && layerConfig?.layerStatus === 'loaded') {
+      // Get the layer config and layer associated with the layer path
+      const layer = this.layerApi.getGeoviewLayerHybrid(layerPath);
+
+      // If layer was found
+      if (layer) {
+        // If state is not queryable
+        if (!AbstractLayerSet.isStateQueryable(layer, layerPath)) return;
+
+        // Flag processing
         this.resultSet[layerPath].feature = undefined;
         this.resultSet[layerPath].queryStatus = 'init';
 
@@ -94,7 +119,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
         MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), this.resultSet[layerPath].feature);
 
         // Process query on results data
-        AbstractLayerSet.queryLayerFeatures(this.resultSet[layerPath], layerConfig, layer, queryType, pixelCoordinate)
+        AbstractLayerSet.queryLayerFeatures(this.resultSet[layerPath], layer, queryType, pixelCoordinate)
           .then((arrayOfRecords) => {
             if (arrayOfRecords === null) {
               this.resultSet[layerPath].queryStatus = 'error';
@@ -126,6 +151,9 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
       } else {
         this.resultSet[layerPath].feature = null;
         this.resultSet[layerPath].queryStatus = 'error';
+
+        // Propagate to the store
+        MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), this.resultSet[layerPath].feature);
       }
     });
   }

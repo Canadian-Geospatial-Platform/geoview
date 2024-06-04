@@ -125,13 +125,12 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
     // The feature info state
     const featureInfoState = this.getFeatureInfoState(mapId);
 
+    // Create a details object for each layer which is then used to render layers in details panel.
+    const layerDataArray = [...featureInfoState.layerDataArray];
+    if (!layerDataArray.find((layerEntry) => layerEntry.layerPath === resultSetEntry.layerPath)) layerDataArray.push(resultSetEntry);
+
     // Depending on the event type
     if (eventType === 'click') {
-      /**
-       * Create a details object for each layer which is then used to render layers in details panel.
-       */
-      const layerDataArray = [...featureInfoState.layerDataArray];
-      if (!layerDataArray.find((layerEntry) => layerEntry.layerPath === resultSetEntry.layerPath)) layerDataArray.push(resultSetEntry);
       const atLeastOneFeature = layerDataArray.find((layerEntry) => !!layerEntry.features?.length) || false;
 
       // Update the layer data array in the store, all the time, for all statuses
@@ -149,6 +148,9 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
           UIEventProcessor.setActiveAppBarTab(mapId, 'AppbarPanelButtonDetails', 'details', true);
         }
       }
+    } else if (eventType === 'name') {
+      // Update the layer data array in the store, all the time, for all statuses
+      featureInfoState.setterActions.setLayerDataArray(layerDataArray);
     }
 
     // Nothing to do

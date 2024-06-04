@@ -8,12 +8,12 @@ import {
   isVectorLegend,
   isWmsLegend,
 } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 
 import {
-  TypeLayerEntryConfig,
   TypeStyleGeometry,
   isClassBreakStyleConfig,
   isSimpleStyleConfig,
@@ -140,7 +140,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const { layerPath } = legendResultSetEntry;
     const layerPathNodes = layerPath.split('/');
 
-    const setLayerControls = (layerConfig: TypeLayerEntryConfig): TypeLayerControls => {
+    const setLayerControls = (layerConfig: ConfigBaseClass): TypeLayerControls => {
       const controls: TypeLayerControls = {
         highlight: layerConfig.initialSettings?.controls?.highlight !== undefined ? layerConfig.initialSettings?.controls?.highlight : true,
         hover: layerConfig.initialSettings?.controls?.hover !== undefined ? layerConfig.initialSettings?.controls?.hover : true,
@@ -156,6 +156,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     };
 
     const createNewLegendEntries = (currentLevel: number, existingEntries: TypeLegendLayer[]): void => {
+      // If outside of range of layer paths, stop
+      if (layerPathNodes.length < currentLevel) return;
+
       const suffix = layerPathNodes.slice(0, currentLevel);
       const entryLayerPath = suffix.join('/');
       const layerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(entryLayerPath);
