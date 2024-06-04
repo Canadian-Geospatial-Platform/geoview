@@ -782,7 +782,7 @@
             "description": "Initial latitude value for map center.",
             "minimum": -80,
             "maximum": 80,
-            "default": 65
+            "default": 60
           }
         ]
       ],

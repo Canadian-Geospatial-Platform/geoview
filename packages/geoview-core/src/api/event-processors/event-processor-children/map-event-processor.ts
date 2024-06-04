@@ -2,12 +2,12 @@ import { Root } from 'react-dom/client';
 import { ScaleLine } from 'ol/control';
 import Overlay from 'ol/Overlay';
 import { Extent } from 'ol/extent';
-import View, { FitOptions } from 'ol/View';
+import { FitOptions } from 'ol/View';
 import { KeyboardPan } from 'ol/interaction';
 import { Coordinate } from 'ol/coordinate';
 
 import { CV_MAP_EXTENTS } from '@config/types/config-constants';
-import { TypeBasemapOptions, TypeInteraction, TypeValidMapProjectionCodes } from '@config/types/map-schema-types';
+import { TypeBasemapOptions, TypeInteraction, TypeValidMapProjectionCodes, TypeViewSettings } from '@config/types/map-schema-types';
 import { api } from '@/app';
 import { LayerApi } from '@/geo/layer/layer';
 import { MapViewer, TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
@@ -394,32 +394,31 @@ export class MapEventProcessor extends AbstractEventProcessor {
       const currentView = this.getMapViewer(mapId).map.getView();
       const currentCenter = currentView.getCenter();
       const currentProjection = currentView.getProjection().getCode();
-      const newCenter = Projection.transformPoints([currentCenter!], currentProjection, Projection.PROJECTION_NAMES.LNGLAT)[0];
+      const centerLatLng = Projection.transformPoints([currentCenter!], currentProjection, Projection.PROJECTION_NAMES.LNGLAT)[0] as [
+        number,
+        number
+      ];
       const newProjection = projectionCode as TypeValidMapProjectionCodes;
 
       // If maxExtent was provided, apply
       // GV The extent is different between LCC and WM and switching from one to the other may introduce weird constraint.
       // GV We may have to keep extent as array for configuration file but, technically, user does not change projection often.
-      let extentProjected: Extent | undefined;
-      const mapMaxExtent = this.getStoreConfig(mapId)?.map.viewSettings.maxExtent;
-      if (mapMaxExtent)
-        extentProjected = Projection.transformExtent(mapMaxExtent, Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${newProjection}`);
+      const mapMaxExtent = this.getStoreConfig(mapId)?.map.viewSettings.maxExtent ? CV_MAP_EXTENTS[newProjection] : undefined;
 
-      // create new view (check if there is a maxExtent)
-      const newView = new View({
-        zoom: currentView.getZoom() as number,
+      // create new view settings
+      const newView: TypeViewSettings = {
+        initialView: { zoomAndCenter: [currentView.getZoom() as number, centerLatLng] },
         minZoom: currentView.getMinZoom(),
         maxZoom: currentView.getMaxZoom(),
-        extent: extentProjected || undefined,
-        center: Projection.transformPoints([newCenter], Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${newProjection}`)[0] as [number, number],
-        projection: `EPSG:${newProjection}`,
-      });
-
-      // set new view
-      this.getMapViewer(mapId).map.setView(newView);
+        maxExtent: mapMaxExtent,
+        projection: newProjection,
+      };
 
       // use store action to set projection value in store and apply new view to the map
       this.getMapStateProtected(mapId).setterActions.setProjection(projectionCode);
+
+      // set new view
+      this.getMapViewer(mapId).setView(newView);
 
       // reload the basemap from new projection
       await this.resetBasemap(mapId);

@@ -16,6 +16,7 @@ import {
   CV_MAP_EXTENTS,
   ACCEPTED_SCHEMA_VERSIONS,
   VALID_PROJECTION_CODES,
+  CV_MAP_CENTER,
 } from '@config/types/config-constants';
 import { isvalidComparedToSchema } from '@config/utils';
 import {
@@ -234,7 +235,11 @@ export class MapFeatureConfig {
     const proj =
       projection && VALID_PROJECTION_CODES.includes(projection) ? projection : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.projection;
     const mapConfig = cloneDeep(CV_DEFAULT_MAP_FEATURE_CONFIG.map);
+
+    // Set values specific to projection
     mapConfig.viewSettings.maxExtent = [...CV_MAP_EXTENTS[proj]];
+    if (!mapConfig.viewSettings.initialView)
+      mapConfig.viewSettings.initialView = { zoomAndCenter: [3.5, CV_MAP_CENTER[proj] as [number, number]] };
 
     return mapConfig;
   }

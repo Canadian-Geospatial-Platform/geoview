@@ -172,7 +172,7 @@ export type TypeViewSettings = {
    */
   rotation?: number;
   /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates.
-   * Default [-125, 30, -60, 89].
+   * Default [-135, 25, -50, 89].
    */
   maxExtent?: Extent;
   /**

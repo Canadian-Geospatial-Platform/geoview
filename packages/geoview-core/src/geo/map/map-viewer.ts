@@ -262,10 +262,9 @@ export class MapViewer {
    * Initializes map, layer class and geometries
    */
   initMap(): void {
-    // Register essential map handlers
+    // Register essential map-view handlers
     this.map.on('moveend', this.#handleMapMoveEnd.bind(this));
-    this.getView().on('change:resolution', debounce(this.#handleMapZoomEnd.bind(this), 100).bind(this));
-    this.getView().on('change:rotation', debounce(this.#handleMapRotation.bind(this), 100).bind(this));
+    this.#registerViewHelpers(this.getView());
 
     // If map isn't static
     if (this.mapFeaturesConfig.map.interaction !== 'static') {
@@ -302,6 +301,12 @@ export class MapViewer {
 
     // Start checking for when the map will be ready
     this.#checkMapReady();
+  }
+
+  #registerViewHelpers(view: View): void {
+    // Register essential map handlers
+    view.on('change:resolution', debounce(this.#handleMapZoomEnd.bind(this), 100).bind(this));
+    view.on('change:rotation', debounce(this.#handleMapRotation.bind(this), 100).bind(this));
   }
 
   /**
@@ -882,14 +887,14 @@ export class MapViewer {
   }
 
   /**
-   * Set the map viewSettings
+   * Set the map viewSettings (coordinate values in lat/long)
    *
    * @param {TypeViewSettings} mapView - Map viewSettings object
    */
   setView(mapView: TypeViewSettings): void {
     const currentView = this.getView();
     const viewOptions: ViewOptions = {};
-    viewOptions.projection = mapView.projection ? `EPSG:${mapView.projection}` : currentView.getProjection();
+    viewOptions.projection = `EPSG:${mapView.projection}`;
     viewOptions.zoom = mapView.initialView?.zoomAndCenter ? mapView.initialView?.zoomAndCenter[0] : currentView.getZoom();
     viewOptions.center = mapView.initialView?.zoomAndCenter
       ? Projection.transformFromLonLat(mapView.initialView?.zoomAndCenter[1], viewOptions.projection)
@@ -899,9 +904,13 @@ export class MapViewer {
         );
     viewOptions.minZoom = mapView.minZoom ? mapView.minZoom : currentView.getMinZoom();
     viewOptions.maxZoom = mapView.maxZoom ? mapView.maxZoom : currentView.getMaxZoom();
-    if (mapView.maxExtent) viewOptions.extent = mapView.maxExtent;
+    if (mapView.maxExtent)
+      viewOptions.extent = Projection.transformExtent(mapView.maxExtent, Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${mapView.projection}`);
 
-    this.map.setView(new View(viewOptions));
+    const newView = new View(viewOptions);
+    this.map.setView(newView);
+
+    this.#registerViewHelpers(newView);
   }
 
   /**
@@ -959,18 +968,22 @@ export class MapViewer {
    */
   setMaxExtent(extent: Extent): void {
     const currentView = this.getView();
-    const viewOptions: ViewOptions = {};
-    viewOptions.projection = currentView.getProjection();
-    viewOptions.zoom = currentView.getZoom();
-    viewOptions.center = Projection.transformFromLonLat(
-      Projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
-      viewOptions.projection
-    );
-    viewOptions.minZoom = currentView.getMinZoom();
-    viewOptions.maxZoom = currentView.getMaxZoom();
-    viewOptions.extent = Projection.transformExtent(extent, Projection.PROJECTION_NAMES.LNGLAT, currentView.getProjection());
 
-    this.map.setView(new View(viewOptions));
+    // create new view settings
+    const newView: TypeViewSettings = {
+      initialView: {
+        zoomAndCenter: [
+          currentView.getZoom() as number,
+          this.convertCoordinateLngLatToMapProj(currentView.getCenter()!) as [number, number],
+        ],
+      },
+      minZoom: currentView.getMinZoom(),
+      maxZoom: currentView.getMaxZoom(),
+      maxExtent: Projection.transformExtent(extent, Projection.PROJECTION_NAMES.LNGLAT, currentView.getProjection()),
+      projection: currentView.getProjection().getCode().split(':')[1] as unknown as TypeValidMapProjectionCodes,
+    };
+
+    this.setView(newView);
   }
 
   // #endregion
