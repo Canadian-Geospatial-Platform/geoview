@@ -303,6 +303,10 @@ export class MapViewer {
     this.#checkMapReady();
   }
 
+  /**
+   * Register on view initialization
+   * @param {View} view - View to register events on
+   */
   #registerViewHelpers(view: View): void {
     // Register essential map handlers
     view.on('change:resolution', debounce(this.#handleMapZoomEnd.bind(this), 100).bind(this));
