@@ -66,8 +66,8 @@
     "tableDetails": "Table details",
     "refreshLayer": "Refresh layer",
     "highlightLayer": "Highlight layer",
-    "subLayersCount": "{count} sub-layers",
-    "itemsCount": "{count} of {totalCount} items",
+    "subLayersCount": "{count} sublayers",
+    "itemsCount": "{count} of {totalCount} classes",
     "legendInstructions": "Legend Instructions",
     "noLayersAdded": "No layers added to the map",
     "noLayersAddedDescription": "Add layers to the map by clicking on the 'Layers' button and adding the layers you want to display."
