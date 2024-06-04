@@ -43,10 +43,12 @@ export function LeftPanel({ setIsLayersListPanelVisible, isLayoutEnlarged }: Lef
   if (displayState === 'add') {
     return <AddNewLayer />;
   }
-  return <LayersList 
-    layersList={orderedLegendLayers} 
-    depth={0} 
-    setIsLayersListPanelVisible={setIsLayersListPanelVisible}
-    isLayoutEnlarged={isLayoutEnlarged}
-  />;
+  return (
+    <LayersList
+      layersList={orderedLegendLayers}
+      depth={0}
+      setIsLayersListPanelVisible={setIsLayersListPanelVisible}
+      isLayoutEnlarged={isLayoutEnlarged}
+    />
+  );
 }

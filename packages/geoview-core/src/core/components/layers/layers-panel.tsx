@@ -22,7 +22,7 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
   const selectedLayer = useSelectedLayer(); // get store value
   const displayState = useLayerDisplayState();
   const { setSelectedLayerPath } = useLayerStoreActions();
-  const [isEnlarged, setIsEnlarged] = useState<boolean>(false);
+  const [isLayoutEnlarged, setIsLayoutEnlarged] = useState<boolean>(false);
 
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
 
@@ -45,7 +45,7 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
   const leftPanel = (): JSX.Element => {
     return (
       <Box>
-        <LeftPanel setIsLayersListPanelVisible={showLayerDetailsPanel} isLayoutEnlarged={isEnlarged} />
+        <LeftPanel setIsLayersListPanelVisible={showLayerDetailsPanel} isLayoutEnlarged={isLayoutEnlarged} />
       </Box>
     );
   };
@@ -100,9 +100,12 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
     [setSelectedLayerPath]
   );
 
-  const handleIsEnlargeClicked = useCallback((isEnlarged: boolean): void => {
-    setIsEnlarged(isEnlarged);
-  }, [setIsEnlarged]);
+  const handleIsEnlargeClicked = useCallback(
+    (isEnlarged: boolean): void => {
+      setIsLayoutEnlarged(isEnlarged);
+    },
+    [setIsLayoutEnlarged]
+  );
 
   return (
     <ResponsiveGridLayout
