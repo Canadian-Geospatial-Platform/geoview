@@ -45,9 +45,10 @@ interface SingleLayerProps {
   index: number;
   isFirst: boolean;
   isLast: boolean;
+  isLayoutEnlarged: boolean;
 }
 
-export function SingleLayer({ depth, layer, setIsLayersListPanelVisible, index, isFirst, isLast }: SingleLayerProps): JSX.Element {
+export function SingleLayer({ depth, layer, setIsLayersListPanelVisible, index, isFirst, isLast, isLayoutEnlarged }: SingleLayerProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/left-panel/single-layer');
 
@@ -260,7 +261,7 @@ export function SingleLayer({ depth, layer, setIsLayersListPanelVisible, index, 
 
     return (
       <Collapse in={isGroupOpen} timeout="auto">
-        <LayersList depth={1 + depth} layersList={layer.children} setIsLayersListPanelVisible={setIsLayersListPanelVisible} />
+        <LayersList depth={1 + depth} layersList={layer.children} isLayoutEnlarged={isLayoutEnlarged} setIsLayersListPanelVisible={setIsLayersListPanelVisible} />
       </Collapse>
     );
   }
@@ -303,11 +304,13 @@ export function SingleLayer({ depth, layer, setIsLayersListPanelVisible, index, 
               secondary={getLayerDescription()}
               onClick={handleLayerClick}
             />
-            <ListItemIcon className="rightIcons-container">
-              {renderMoreLayerButtons()}
-              {renderArrowButtons()}
-              {renderEditModeButtons()}
-            </ListItemIcon>
+            { !isLayoutEnlarged && 
+              <ListItemIcon className="rightIcons-container">
+                {renderMoreLayerButtons()}
+                {renderArrowButtons()}
+                {renderEditModeButtons()}
+              </ListItemIcon> 
+            }
           </ListItemButton>
         </ListItem>
       </Tooltip>

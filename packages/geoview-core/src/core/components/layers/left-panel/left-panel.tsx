@@ -12,9 +12,10 @@ import { TypeLegendLayer } from '@/core/components/layers/types';
 
 interface LeftPanelProps {
   setIsLayersListPanelVisible: Dispatch<SetStateAction<boolean>>;
+  isLayoutEnlarged: boolean;
 }
 
-export function LeftPanel({ setIsLayersListPanelVisible }: LeftPanelProps): JSX.Element {
+export function LeftPanel({ setIsLayersListPanelVisible, isLayoutEnlarged }: LeftPanelProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/left-panel/left-panel');
 
@@ -42,5 +43,10 @@ export function LeftPanel({ setIsLayersListPanelVisible }: LeftPanelProps): JSX.
   if (displayState === 'add') {
     return <AddNewLayer />;
   }
-  return <LayersList layersList={orderedLegendLayers} depth={0} setIsLayersListPanelVisible={setIsLayersListPanelVisible} />;
+  return <LayersList 
+    layersList={orderedLegendLayers} 
+    depth={0} 
+    setIsLayersListPanelVisible={setIsLayersListPanelVisible}
+    isLayoutEnlarged={isLayoutEnlarged}
+  />;
 }
