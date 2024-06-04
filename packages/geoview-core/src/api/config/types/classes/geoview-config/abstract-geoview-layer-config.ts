@@ -81,7 +81,7 @@ export abstract class AbstractGeoviewLayerConfig {
       defaultsDeep(this.#originalgeoviewLayerConfig.initialSettings, CV_DEFAULT_LAYER_INITIAL_SETTINGS)
     );
     // The top layer must be a layer group or a leaf node.
-    if ((this.#originalgeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray).length > 1)
+    if ((this.#originalgeoviewLayerConfig?.listOfLayerEntryConfig as TypeJsonArray)?.length > 1)
       (this.#originalgeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray) = [
         {
           layerId: this.#originalgeoviewLayerConfig.geoviewLayerId,
@@ -93,16 +93,16 @@ export abstract class AbstractGeoviewLayerConfig {
       ];
 
     this.geoviewLayerId = (this.#originalgeoviewLayerConfig.geoviewLayerId || generateId()) as string;
-    this.geoviewLayerName = normalizeLocalizedString(this.#originalgeoviewLayerConfig.geoviewLayerName)![this.#language]!;
+    this.geoviewLayerName = normalizeLocalizedString(this.#originalgeoviewLayerConfig?.geoviewLayerName)![this.#language]!;
     this.metadataAccessPath = normalizeLocalizedString(this.#originalgeoviewLayerConfig.metadataAccessPath)![this.#language]!;
     this.serviceDateFormat = (this.#originalgeoviewLayerConfig.serviceDateFormat || 'DD/MM/YYYY HH:MM:SSZ') as string;
     this.externalDateFormat = (this.#originalgeoviewLayerConfig.externalDateFormat || 'DD/MM/YYYY HH:MM:SSZ') as string;
-    this.listOfLayerEntryConfig = (this.#originalgeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray)
-      .map((subLayerConfig) => {
+    this.listOfLayerEntryConfig = (this.#originalgeoviewLayerConfig?.listOfLayerEntryConfig as TypeJsonArray)
+      ?.map((subLayerConfig) => {
         if (layerEntryIsGroupLayer(subLayerConfig)) return new GroupLayerEntryConfig(subLayerConfig, this.initialSettings, language, this);
         return this.createLeafNode(subLayerConfig, this.initialSettings, language, this);
       })
-      .filter((subLayerConfig) => {
+      ?.filter((subLayerConfig) => {
         return subLayerConfig;
       }) as ConfigBaseClass[];
   }

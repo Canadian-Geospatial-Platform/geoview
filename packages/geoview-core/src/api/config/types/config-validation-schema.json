@@ -502,8 +502,7 @@
     },
     "TypeListOfLayerEntryConfig": {
       "description": "The list of layer configurations. The AbstractGeoviewLayerConfig validation ends here. The only thing we need to verify for the moment is it must be an array of at least one element.",
-      "type": "array",
-      "minItems": 1
+      "type": "array"
     },
     "TypeViewSettings": {
       "additionalProperties": false,

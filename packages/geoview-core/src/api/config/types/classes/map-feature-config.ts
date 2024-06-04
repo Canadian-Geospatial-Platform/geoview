@@ -218,7 +218,8 @@ export class MapFeatureConfig {
       // case CONST_LAYER_TYPES.WMS:
       //   return new WmsLayerConfig(layerConfig);
       default:
-        logger.logError(`Invalid GeoView layerType (${layerConfig.geoviewLayerType}).`);
+      // TODO: Restore this error message when we have converted our code to the new framework.
+      // logger.logError(`Invalid GeoView layerType (${layerConfig.geoviewLayerType}).`);
     }
     return undefined;
   }
