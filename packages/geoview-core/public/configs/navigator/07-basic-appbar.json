@@ -128,7 +128,8 @@
         "guide",
         "details",
         "legend",
-        "data-table"
+        "data-table",
+        "layers"
       ]
     }
   },

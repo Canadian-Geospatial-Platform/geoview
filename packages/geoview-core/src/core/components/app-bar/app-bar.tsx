@@ -14,6 +14,7 @@ import {
   HubOutlinedIcon,
   StorageIcon,
   SearchIcon,
+  LayersOutlinedIcon,
 } from '@/ui';
 
 import { Plugin } from '@/api/plugin/plugin';
@@ -30,7 +31,16 @@ import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-inter
 import { useAppFullscreenActive, useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
-import { GuidePanel, Legend, DetailsPanel, AppBarApi, AppBarCreatedEvent, AppBarRemovedEvent, Datapanel } from '@/core/components';
+import {
+  GuidePanel,
+  Legend,
+  DetailsPanel,
+  AppBarApi,
+  AppBarCreatedEvent,
+  AppBarRemovedEvent,
+  Datapanel,
+  LayersPanel,
+} from '@/core/components';
 import Notifications from '@/core/components/notifications/notifications';
 
 import Version from './buttons/version';
@@ -102,9 +112,10 @@ export function AppBar(props: AppBarProps): JSX.Element {
     // TODO: Refactor - We should find a way to make this 'dictionary of supported components' dynamic.
     return {
       geolocator: { icon: <SearchIcon />, content: <Geolocator key="geolocator" /> },
-      legend: { icon: <HubOutlinedIcon />, content: <Legend fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
       guide: { icon: <QuestionMarkIcon />, content: <GuidePanel fullWidth /> },
       details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel fullWidth /> },
+      legend: { icon: <HubOutlinedIcon />, content: <Legend fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
+      layers: { icon: <LayersOutlinedIcon />, content: <LayersPanel containerType={CONTAINER_TYPE.APP_BAR} /> },
       'data-table': { icon: <StorageIcon />, content: <Datapanel containerType={CONTAINER_TYPE.APP_BAR} /> },
     } as unknown as Record<string, GroupPanelType>;
   }, []);
@@ -205,10 +216,10 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const getPanelWidth = useCallback(
     (tab: string): number => {
       let width = 400;
-      if (tab === CV_DEFAULT_APPBAR_CORE.DATA_TABLE && isMapFullScreen) {
+      if ((tab === CV_DEFAULT_APPBAR_CORE.DATA_TABLE || tab === CV_DEFAULT_APPBAR_CORE.LAYERS) && isMapFullScreen) {
         width = window.screen.width - 65;
       }
-      if (tab === CV_DEFAULT_APPBAR_CORE.DATA_TABLE && !isMapFullScreen) {
+      if ((tab === CV_DEFAULT_APPBAR_CORE.DATA_TABLE || tab === CV_DEFAULT_APPBAR_CORE.LAYERS) && !isMapFullScreen) {
         width = geoviewElement?.clientWidth ?? 0;
       }
       return width;

@@ -207,7 +207,8 @@
         "details",
         "legend",
         "guide",
-        "data-table"
+        "data-table",
+        "layers"
       ]
     },
     "TypeAppBarProps": {
@@ -453,10 +454,15 @@
         "properties": {
           "isGeocore": {
             "description": "The isGeocore property is not defined by the user but by the viewer according to the geoview layer type. It is used as a flag indicating the type of schema used (input/internal).",
-            "enum": [true, false]
+            "enum": [
+              true,
+              false
+            ]
           }
         },
-        "required": ["isGeocore"]
+        "required": [
+          "isGeocore"
+        ]
       },
       "then": {
         "description": "Use Internal Schema",
@@ -475,8 +481,8 @@
         "description": "Use Input Schema",
         "properties": {
           "geoviewLayerName": {
-              "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information.",
-              "$ref": "#/definitions/TypeLocalizedString"
+            "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information.",
+            "$ref": "#/definitions/TypeLocalizedString"
           },
           "geoviewLayerType": {
             "description": "Type of GeoView layer.",
@@ -498,7 +504,12 @@
           }
         }
       },
-      "required": ["geoviewLayerId", "geoviewLayerName", "geoviewLayerType", "listOfLayerEntryConfig"]
+      "required": [
+        "geoviewLayerId",
+        "geoviewLayerName",
+        "geoviewLayerType",
+        "listOfLayerEntryConfig"
+      ]
     },
     "TypeListOfLayerEntryConfig": {
       "description": "The list of layer configurations. The AbstractGeoviewLayerConfig validation ends here. The only thing we need to verify for the moment is it must be an array of at least one element.",
@@ -1319,7 +1330,9 @@
           }
         }
       },
-      "required": ["queryable"]
+      "required": [
+        "queryable"
+      ]
     },
     "TypeOutfields": {
       "type": "object",
