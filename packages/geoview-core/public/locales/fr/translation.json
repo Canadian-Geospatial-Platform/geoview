@@ -67,7 +67,7 @@
     "refreshLayer": "Rafraîchir la couche",
     "highlightLayer": "Couche mise en évidence",
     "subLayersCount": "{count} sous-couches",
-    "itemsCount": "{count} sur {totalCount} éléments",
+    "itemsCount": "{count} sur {totalCount} classes",
     "legendInstructions": "Legend Instructions",
     "noLayersAdded": "Aucune couche ajoutée",
     "noLayersAddedDescription": "Ajoutez des couches à la carte en cliquant sur le bouton 'Couches' et en sélectionnant les couches que vous souhaitez afficher."
