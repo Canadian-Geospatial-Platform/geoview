@@ -82,14 +82,54 @@
               'metadataAccessPath': { 'en': 'https://geo.weather.gc.ca/geomet' },
               'geoviewLayerType': 'ogcWms',
               'listOfLayerEntryConfig': [
-                { 'layerId': 'HRDPA.06F_WATERSHED' },
-                { 'layerId': 'HRDPA.06P_WATERSHED' },
-                { 'layerId': 'HRDPA.6F_PR' },
-                { 'layerId': 'HRDPA.6P_PR' },
-                { 'layerId': 'HRDPA.24F_WATERSHED' },
-                { 'layerId': 'HRDPA.24P_WATERSHED' },
-                { 'layerId': 'HRDPA.24F_PR' },
-                { 'layerId': 'HRDPA.24P_PR' }
+                {
+                  'layerId': 'HRDPA.06F_WATERSHED',
+                  'source': {
+                    'style': 'PRECIPMM_WATERSHED'
+                  }
+                },
+                {
+                  'layerId': 'HRDPA.06P_WATERSHED',
+                  'source': {
+                    'style': 'PRECIPMM_WATERSHED'
+                  }
+                },
+                {
+                  'layerId': 'HRDPA.6F_PR',
+                  'source': {
+                    'style': 'CAPA24-LINEAR'
+                  }
+                },
+                {
+                  'layerId': 'HRDPA.6P_PR',
+                  'source': {
+                    'style': 'CAPA24-LINEAR'
+                  }
+                },
+                {
+                  'layerId': 'HRDPA.24F_WATERSHED',
+                  'source': {
+                    'style': 'PRECIPMM_WATERSHED'
+                  }
+                },
+                { 
+                 'layerId': 'HRDPA.24P_WATERSHED',
+                  'source': {
+                    'style': 'PRECIPMM_WATERSHED'
+                  }
+                },
+                {
+                  'layerId': 'HRDPA.24F_PR',
+                  'source': {
+                    'style': 'CAPA24-LINEAR'
+                  }
+                },
+                {
+                  'layerId': 'HRDPA.24P_PR',
+                  'source': {
+                    'style': 'CAPA24-LINEAR'
+                  }
+                }
               ]
             },
             {
@@ -157,8 +197,18 @@
               'metadataAccessPath': { 'en': 'https://geo.weather.gc.ca/geomet' },
               'geoviewLayerType': 'ogcWms',
               'listOfLayerEntryConfig': [
-                { 'layerId': 'CaLDAS-NSRPS_2.5km_SnowDepth' },
-                { 'layerId': 'CaLDAS-NSRPS_2.5km_SnowWaterEquiv' }
+                {
+                  'layerId': 'CaLDAS-NSRPS_2.5km_SnowDepth',
+                  'source': {
+                    'style': 'SNOWDEPTH'
+                  }
+                },
+                {
+                  'layerId': 'CaLDAS-NSRPS_2.5km_SnowWaterEquiv',
+                  'source': {
+                    'style': 'SNOWMASS'
+                  }
+                }
               ]
             },
             {
@@ -167,9 +217,24 @@
               'metadataAccessPath': { 'en': 'https://geo.abds.is/geoserver/sambr/wms' },
               'geoviewLayerType': 'ogcWms',
               'listOfLayerEntryConfig': [
-                { 'layerId': 'C2f1_cold_currents' },
-                { 'layerId': 'C2f1_riverine_inflow' },
-                { 'layerId': 'C2f1_warm_currents' }
+                {
+                  'layerId': 'C2f1_cold_currents',
+                  'source': {
+                    'style': 'BlueEndArrow'
+                  }
+                },
+                {
+                  'layerId': 'C2f1_riverine_inflow',
+                  'source': {
+                    'style': 'sambr_c2_f1_riverine'
+                  }
+                },
+                {
+                  'layerId': 'C2f1_warm_currents',
+                  'source': {
+                    'style': 'sambr_c2_f1_warm'
+                  }
+                }
               ]
             }
           ]

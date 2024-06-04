@@ -441,7 +441,7 @@ export abstract class AbstractGeoViewLayer {
         else {
           this.metadata = toJsonObject(JSON.parse(metadataString));
           const { copyrightText } = this.metadata;
-          if (copyrightText) this.attributions.push(copyrightText as string);
+          if (copyrightText && !this.attributions.includes(copyrightText as string)) this.attributions.push(copyrightText as string);
         }
       } catch (error) {
         // Log
