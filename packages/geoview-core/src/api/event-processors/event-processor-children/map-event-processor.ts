@@ -397,11 +397,20 @@ export class MapEventProcessor extends AbstractEventProcessor {
       const newCenter = Projection.transformPoints([currentCenter!], currentProjection, Projection.PROJECTION_NAMES.LNGLAT)[0];
       const newProjection = projectionCode as TypeValidMapProjectionCodes;
 
-      // create new view
+      // If maxExtent was provided, apply
+      // GV The extent is different between LCC and WM and switching from one to the other may introduce weird constraint.
+      // GV We may have to keep extent as array for configuration file but, technically, user does not change projection often.
+      let extentProjected: Extent | undefined;
+      const mapMaxExtent = this.getStoreConfig(mapId)?.map.viewSettings.maxExtent;
+      if (mapMaxExtent)
+        extentProjected = Projection.transformExtent(mapMaxExtent, Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${newProjection}`);
+
+      // create new view (check if there is a maxExtent)
       const newView = new View({
         zoom: currentView.getZoom() as number,
         minZoom: currentView.getMinZoom(),
         maxZoom: currentView.getMaxZoom(),
+        extent: extentProjected || undefined,
         center: Projection.transformPoints([newCenter], Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${newProjection}`)[0] as [number, number],
         projection: `EPSG:${newProjection}`,
       });
