@@ -15,7 +15,6 @@ import {
   Tooltip,
   VisibilityOffOutlinedIcon,
   VisibilityOutlinedIcon,
-  RestartAltIcon,
   Paper,
   Typography,
 } from '@/ui';
@@ -172,10 +171,6 @@ export function SingleLayer({ depth, layer, setIsLayersListPanelVisible, index, 
     setOrToggleLayerVisibility(layer.layerPath);
   };
 
-  const handleReloadLayer = (): void => {
-    logger.logWarning('reloading layer not implemented...');
-  };
-
   function renderEditModeButtons(): JSX.Element | null {
     if (displayState === 'remove') {
       return <DeleteUndoButton layer={layer} />;
@@ -212,11 +207,7 @@ export function SingleLayer({ depth, layer, setIsLayersListPanelVisible, index, 
       return null;
     }
     if (layer.layerStatus === 'error') {
-      return (
-        <IconButton edge="end" size="small" onClick={handleReloadLayer} tooltip="layers.reloadLayer" className="buttonOutline">
-          <RestartAltIcon />
-        </IconButton>
-      );
+      return <DeleteUndoButton layer={layer} />;
     }
 
     if (isLayerAlwaysVisible) {

@@ -10,7 +10,9 @@
     "view": "Vue",
     "openFullscreen": "Ouvrir en plein écran",
     "closeFullscreen": "Fermer le plein écran",
-    "openGuide": "Ouvrir le guide"
+    "openGuide": "Ouvrir le guide",
+    "guide": "Guide",
+    "fullScreen": "Plein écran"
   },
   "mapnav": {
     "arianavbar": "groupe de buttons vertical pour navigation sur la carte",
@@ -73,7 +75,9 @@
     "highlightLayer": "Couche de mise en évidence",
     "subLayersCount": "{count} sous-couches",
     "itemsCount": "{count} sur {totalCount} éléments",
-    "legendInstructions": "Legend Instructions"
+    "legendInstructions": "Legend Instructions",
+    "noLayersAdded": "Aucune couche ajoutée",
+    "noLayersAddedDescription": "Ajoutez des couches à la carte en cliquant sur le bouton 'Couches' et en sélectionnant les couches que vous souhaitez afficher."
   },
   "layers": {
     "title": "Couche",

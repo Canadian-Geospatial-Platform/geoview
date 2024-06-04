@@ -2,14 +2,13 @@ import React, { useState, ReactNode, useCallback, forwardRef, useImperativeHandl
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import Markdown from 'markdown-to-jsx';
-import { Box, FullscreenIcon, IconButton } from '@/ui';
+import { Box, FullscreenIcon, ButtonGroup, Button } from '@/ui';
 import { ResponsiveGrid } from './responsive-grid';
 import { useFooterPanelHeight } from './use-footer-panel-height';
 import { getSxClasses } from './responsive-grid-layout-style';
 import FullScreenDialog from './full-screen-dialog';
 import { logger } from '@/core/utils/logger';
-import { ArrowBackIcon, ArrowForwardIcon, QuestionMarkIcon } from '@/ui/icons';
-import { Button } from '@/ui/button/button';
+import { ArrowBackIcon, ArrowForwardIcon, CloseIcon, QuestionMarkIcon } from '@/ui/icons';
 import { useAppGuide, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
@@ -121,84 +120,87 @@ const ResponsiveGridLayout = forwardRef(
       }
     }
 
-    const renderEnlargeButton = (): JSX.Element => {
+    const renderEnlargeButton = (): JSX.Element | null => {
+      if (window.innerWidth <= theme.breakpoints.values.md) {
+        return null; // Return null if on small screens (down to md)
+      }
+
       return (
         <Button
+          makeResponsive
           type="text"
           size="small"
-          color="primary"
-          variant="contained"
-          className="buttonFilledOutline"
+          variant="outlined"
           startIcon={isEnlarged ? <ArrowForwardIcon /> : <ArrowBackIcon />}
-          sx={{ height: '40px', borderRadius: '1.5rem', boxShadow: 'none', [theme.breakpoints.down('md')]: { display: 'none' } }}
+          sx={{ boxShadow: 'none' }}
           onClick={() => handleIsEnlarge(!isEnlarged)}
           tooltip={isEnlarged ? t('dataTable.reduceBtn')! : t('dataTable.enlargeBtn')!}
-          tooltipPlacement="top"
         >
           {isEnlarged ? t('dataTable.reduceBtn') : t('dataTable.enlargeBtn')}
         </Button>
       );
     };
 
-    const renderCloseButton = (): JSX.Element => {
+    const renderCloseButton = (): JSX.Element | null => {
+      // Check conditions for hiding the button
+      if (!fullWidth && (window.innerWidth >= theme.breakpoints.values.md || !isRightPanelVisible)) {
+        return null;
+      }
+
       return (
         <Button
+          makeResponsive
           type="text"
           size="small"
+          variant="outlined"
           color="primary"
-          variant="contained"
           className="buttonFilledOutline"
+          startIcon={<CloseIcon fontSize={theme.palette.geoViewFontSize.sm} />}
           sx={{
-            height: '40px',
-            borderRadius: '1.5rem',
-            marginLeft: '1rem',
-            padding: '0 0.75rem',
             ...(fullWidth ? sxClasses.appBarEnlargeButton : sxClasses.footerBarEnlargeButton),
-            ...(fullWidth && { display: !isRightPanelVisible ? 'none' : 'block' }),
-            ...(!fullWidth && {
-              [theme.breakpoints.up('md')]: { display: 'none' },
-            }),
           }}
           onClick={() => setIsRightPanelVisible(false)}
           tooltip={t('dataTable.close') ?? ''}
-          tooltipPlacement="top"
         >
           {t('dataTable.close')}
         </Button>
       );
     };
 
-    const renderGuideButton = (): JSX.Element => {
+    const renderGuideButton = (): JSX.Element | null => {
+      if (window.innerWidth <= theme.breakpoints.values.md) {
+        return null; // Return null if on small screens (down to md)
+      }
+
       return (
-        <IconButton
+        <Button
+          makeResponsive
+          type="text"
           disabled={isGuideOpen}
-          sx={{
-            width: '2.5rem',
-            height: '2.5rem',
-            [theme.breakpoints.down('md')]: { display: 'none' },
-          }}
+          variant="outlined"
           size="small"
           onClick={() => handleOpenGuide()}
           tooltip={t('general.openGuide')!}
-          className="buttonFilledOutline"
-          color="primary"
+          startIcon={<QuestionMarkIcon />}
         >
-          <QuestionMarkIcon />
-        </IconButton>
+          {t('general.guide')}
+        </Button>
       );
     };
 
     const renderFullScreenButton = (): JSX.Element => {
       return (
-        <IconButton
+        <Button
+          makeResponsive
+          type="text"
+          variant="outlined"
           size="small"
           onClick={() => setIsFullScreen(!isFullScreen)}
           tooltip={isFullScreen ? t('general.closeFullscreen')! : t('general.openFullscreen')!}
-          className="buttonFilledOutline"
-          color="primary"
+          startIcon={<FullscreenIcon />}
         >
-          <FullscreenIcon />
-        </IconButton>
+          {t('general.fullScreen')!}
+        </Button>
       );
     };
 
@@ -300,10 +302,12 @@ const ResponsiveGridLayout = forwardRef(
               {rightTop ?? <Box />}
 
               <Box sx={sxClasses.rightButtonsContainer}>
-                {!fullWidth && !hideEnlargeBtn && renderEnlargeButton()}
-                {!!guideContentIds?.length && renderGuideButton()}
-                {!isMapFullScreen && renderFullScreenButton()}
-                {!!(leftMain || leftTop) && renderCloseButton()}
+                <ButtonGroup size="small" variant="outlined" aria-label="outlined button group">
+                  {!fullWidth && !hideEnlargeBtn && renderEnlargeButton()}
+                  {!!guideContentIds?.length && renderGuideButton()}
+                  {!isMapFullScreen && renderFullScreenButton()}
+                  {!!(leftMain || leftTop) && renderCloseButton()}
+                </ButtonGroup>
               </Box>
             </Box>
           </ResponsiveGrid.Right>

@@ -190,7 +190,7 @@ export default function DataTableModal(): JSX.Element {
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={closeModal} type="text" size="small" autoFocus>
+        <Button fullWidth variant="contained" className="buttonOutlineFilled" onClick={closeModal} type="text" autoFocus>
           {t('general.close')}
         </Button>
       </DialogActions>
