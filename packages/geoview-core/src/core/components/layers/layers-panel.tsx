@@ -8,8 +8,13 @@ import { LeftPanel } from './left-panel/left-panel';
 import { logger } from '@/core/utils/logger';
 import { ResponsiveGridLayout, ResponsiveGridLayoutExposedMethods } from '../common/responsive-grid-layout';
 import { Typography } from '@/ui/typography/typography';
+import { TypeContainerBox } from '@/core/types/global-types';
 
-export function LayersPanel(): JSX.Element {
+interface TypeLayersPanel {
+  containerType?: TypeContainerBox;
+}
+
+export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
   const theme = useTheme();
   // Log
   logger.logTraceRender('components/layers/layers-panel');
@@ -105,6 +110,7 @@ export function LayersPanel(): JSX.Element {
       fullWidth={false}
       onGuideIsOpen={handleGuideIsOpen}
       hideEnlargeBtn={displayState !== 'view'}
+      containerType={containerType}
     />
   );
 }

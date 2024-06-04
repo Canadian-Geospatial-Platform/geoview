@@ -85,8 +85,8 @@ export function useFooterPanelHeight({ footerPanelTab = 'default' }: UseFooterPa
 
       let leftPanelHeight = (window.screen.height * footerPanelResizeValue) / 100 - panelTitleRefHeight.current - footerBarHeight - 10;
 
-      // update the height of left panel when data table is rendered in appbar and map is in fullscreen.
-      if (tabGroup === CV_DEFAULT_APPBAR_CORE.DATA_TABLE) {
+      // update the height of left panel when data table and layers is rendered in appbar and map is in fullscreen.
+      if (tabGroup === CV_DEFAULT_APPBAR_CORE.DATA_TABLE || tabGroup === CV_DEFAULT_APPBAR_CORE.LAYERS) {
         leftPanelHeight = window.screen.height - 200;
       }
 
@@ -136,11 +136,11 @@ export function useFooterPanelHeight({ footerPanelTab = 'default' }: UseFooterPa
   ]);
 
   /**
-   * Update the height of the left panel when data panel rendered in appbar.
+   * Update the height of the left panel when data panel and layers rendered in appbar.
    */
   useEffect(() => {
     if (leftPanelRef.current && !isMapFullScreen) {
-      if (tabGroup === CV_DEFAULT_APPBAR_CORE.DATA_TABLE && mobileView) {
+      if ((tabGroup === CV_DEFAULT_APPBAR_CORE.DATA_TABLE || tabGroup === CV_DEFAULT_APPBAR_CORE.LAYERS) && mobileView) {
         leftPanelRef.current.style.maxHeight = `100%`;
       } else {
         leftPanelRef.current.style.maxHeight = `${defaultHeight}px`;

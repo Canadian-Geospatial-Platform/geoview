@@ -94,10 +94,14 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   }, [open, theme.transitions.duration.standard, onPanelOpened, onPanelClosed]);
 
   /**
-   * Update the width of data table panel when window is resize based on mapsize
+   * Update the width of data table and layers panel when window is resize based on mapsize
    */
   useEffect(() => {
-    if (panelGroupName === CV_DEFAULT_APPBAR_CORE.DATA_TABLE && panelContainerRef.current && open) {
+    if (
+      (panelGroupName === CV_DEFAULT_APPBAR_CORE.DATA_TABLE || panelGroupName === CV_DEFAULT_APPBAR_CORE.LAYERS) &&
+      panelContainerRef.current &&
+      open
+    ) {
       panelContainerRef.current.style.width = `${mapSize[0]}px`;
       panelContainerRef.current.style.maxWidth = `${mapSize[0]}px`;
     } else {
