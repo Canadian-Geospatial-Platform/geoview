@@ -50,8 +50,8 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
       throw new Error(`The layer entry with layer path equal to ${this.layerPath} must be an integer string`);
     }
     this.source.format = (layerConfig?.source?.format || 'png') as TypeEsriFormatParameter; // Set the source.format property
-    if (!isvalidComparedToSchema(this.schemaPath, layerConfig)) this.propagateError();
-    if (!isvalidComparedToSchema(this.schemaPath, this)) this.propagateError();
+    if (!isvalidComparedToSchema(this.schemaPath, layerConfig)) this.propagateError(); // Input schema validation.
+    if (!isvalidComparedToSchema(this.schemaPath, this)) this.propagateError(); // Internal schema validation.
   }
 
   /**

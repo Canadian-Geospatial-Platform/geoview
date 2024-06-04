@@ -82,29 +82,13 @@
         <tr>
           <td>This page is used to test map configuration.</td>
         </tr>
-        <tr>
-          <td>
-            <div class="selector-container">
-              <p>Configuration to load:</p>
-              <div class="selector">
-                <select name="Config Loader" id="configLoader">
-                  <option value="">--select--</option>
-                  <option value="./configs/validator/01-simple.json">Simple</option>
-                  <option value="./configs/validator/02-unique-value.json">Unique Value</option>
-                  <option value="./configs/validator/03-class-breaks.json">Class Breaks</option>
-                  <option value="./configs/validator/04-geocore.json">Geocore</option>
-                </select>
-              </div>
-            </div>
-          </td>
-        </tr>
       </tbody>
     </table>
     <table>
       <tbody>
         <tr>
           <td>
-            <span style="margin:10px;">Input Configuration</span>
+            <span>Input Configuration</span>
             <div class="editor">
               <div class="line-numbers" id="inputLineNumbers">
                 <span></span>
@@ -114,8 +98,8 @@
             </div>
           </td>
           <td>
-            <span style="margin:10px;">Internal configuration:</span>
-            <span id="validationMessage" style="margin:10px;">File not validated...</span>
+            <span>Internal configuration:</span>
+            <span id="validationMessage" >File not validated...</span>
             <div class="editor">
               <div class="line-numbers" id="outputLineNumbers">
                 <span></span>
@@ -129,33 +113,76 @@
     </table>
   </div>
   <div>
-    <button id="validateConfig" style="margin:10px;">Validate</button>
+  <div class="selector-container">
+    <p>This section lets you select and edit a complete map configuration.<br />
+    The validate button calls the <b>ConfigApi.getMapConfig</b> method and displays the internal map configuration.</p>
+    <div class="selector">
+      Configuration to load:
+      <select name="Config Loader" id="configLoader">
+        <option value="">--select--</option>
+        <option value="./configs/validator/01-simple.json">Simple</option>
+        <option value="./configs/validator/02-unique-value.json">Unique Value</option>
+        <option value="./configs/validator/03-class-breaks.json">Class Breaks</option>
+        <option value="./configs/validator/04-geocore.json">Geocore</option>
+      </select>
+    </div>
+  </div>
+  <button id="validateConfig" style="margin-top:10px;">Validate</button>
     <select id="language">
       <option value="en">English</option>
       <option value="fr">Français</option>
     </select>
     <button id="createMap" style="margin:10px;">Create Map</button>
     <button id="deleteMap" style="margin:10px;">Delete map</button>
+  </div>
+  <hr />
+  <div class="selector">
+    <p>This section lets you select and edit a GeoView service URL or a GeoCore identifier.<br />
+      The validate button calls the <b>ConfigApi.getLayerConfig</b> method and displays the resulting internal map configuration.</p>
+      Service URL:
+    <select name="Service Config" id="serviceConfig">
+      <option value="">--select--</option>
+      <option value="esriDynamic">EsriDynamic</option>
+      <option value="esriFeature">EsriFeature</option>
+      <option value="geoCore">GeoCore</option>
+    </select>
+  </div>
+  <br />
+  </div>
+  <div class="editor" style="height:20px">
+    <div class="line-numbers" id="inputLineNumbers">
+      <span></span>
+    </div>
+    <div>
+      <textarea id="serviceUrlGeoview" name="ServiceUrlconfiguration" cols="210">
+      </textarea>
+    </div>
+  </div>
+  <div>
+    <button id="validateServiceUrlConfig" style="margin-top:10px;">Validate</button>
     <br />
   </div>
-  <div class="editor" style="height:60px">
+  <hr />
+  <p>This section allows you to enter a string of parameters that would be written at the end of a GeoView URL.<br />
+    The validation button calls the <b>ConfigApi.getConfigFromUrl</b> method and displays the resulting internal map configuration.</p>
+  <span>Parameters following the service URL:</span>
+  <br />
+  </div>
+  <div class="editor" style="height:20px">
     <div class="line-numbers" id="inputLineNumbers">
       <span></span>
     </div>
     <div>
       <textarea id="configUrlGeoview" name="Urlconfiguration" cols="210">
-p=3857&z=4&c=-100,40&l=en&t=dark&b=basemapId:transport,shaded:false,labeled:true&i=dynamic&cc=overview-map&keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9
+        p=3857&z=4&c=-100,40&l=en&t=dark&b=basemapId:transport,shaded:false,labeled:true&i=dynamic&cc=overview-map&keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9
       </textarea>
     </div>
   </div>
   <div>
-    <button id="validateUrlConfig" style="margin:10px;">Validate</button>
-    <select id="urlLanguage">
-      <option value="en">English</option>
-      <option value="fr">Français</option>
-    </select>
+    <button id="validateUrlConfig" style="margin-top:10px;">Validate</button>
     <br />
   </div>
+  <hr />
   <div class="map-title-holder">
     <h4 id="HLCONF1">Sanbox Map</h4>
     <a class="ref-link" href="#top">Top</a>
@@ -172,6 +199,17 @@ p=3857&z=4&c=-100,40&l=en&t=dark&b=basemapId:transport,shaded:false,labeled:true
   <script src="codedoc.js"></script>
 
   <script>
+    const configUrlArea = document.getElementById('configUrlGeoview');
+    configUrlArea.value = configUrlArea.value.trim();
+
+    generateLineNumbers = (textContainerId, lineNumbersContainerId) => {
+            const textarea = document.getElementById(textContainerId);
+            const lineNumbersContainer = document.getElementById(lineNumbersContainerId);
+            const lines = textarea.value.split('\n').length+1;
+            const lineNumbers = Array.from({ length: lines }, (_, index) => '').join('<span />');
+            lineNumbersContainer.innerHTML = lineNumbers;
+          };
+
     // Config Snippet Selection Button ==================================================================================================
 
     const configLoader = document.getElementById('configLoader');
@@ -189,12 +227,7 @@ p=3857&z=4&c=-100,40&l=en&t=dark&b=basemapId:transport,shaded:false,labeled:true
           .then((data) => {
             document.getElementById('configGeoview').value = data;
 
-            // set default number of lines
-            const textarea = document.querySelector('textarea');
-            const lineNumbers = document.querySelector('.line-numbers');
-            const numberOfLines = textarea.value.split('\n').length;
-            lineNumbers.innerHTML = Array(numberOfLines).fill('<span></span>').join('');
-
+            generateLineNumbers('configGeoview', 'inputLineNumbers');
           })
           .catch((error) =>
             console.error('Unable to fetch data:', error));
@@ -219,14 +252,7 @@ p=3857&z=4&c=-100,40&l=en&t=dark&b=basemapId:transport,shaded:false,labeled:true
         cgpv.api.configApi.getMapConfig(configArea.value.replaceAll('"', "'").replaceAll("\\'", "\'"), langue).then((mapConfig) => {
           configOutput.value = mapConfig.getIndentedJsonString();
 
-          // Generate line numbers
-          (() => {
-            const textarea = document.getElementById('configOutput');
-            const lineNumbersContainer = document.getElementById('outputLineNumbers');
-            const lines = textarea.value.split('\n').length+1;
-            const lineNumbers = Array.from({ length: lines }, (_, index) => '').join('<span />');
-            lineNumbersContainer.innerHTML = lineNumbers;
-          })();
+          generateLineNumbers('configOutput', 'outputLineNumbers');
 
           // set class and message
           message.classList.add('config-json-valid');
@@ -240,6 +266,52 @@ p=3857&z=4&c=-100,40&l=en&t=dark&b=basemapId:transport,shaded:false,labeled:true
         });
       });
 
+    // Service Url Validate Button =======================================================================================================
+
+    const serviceUrlChoices = {
+      geoCore: '12acd145-626a-49eb-b850-0a59c9bc7506',
+      esriDynamic: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/',
+      esriFeature: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/',
+    };
+
+    const serviceConfigDropDown = document.getElementById('serviceConfig');
+    serviceConfigDropDown.addEventListener('change', (e) => {
+      const serviceUrlArea = document.getElementById('serviceUrlGeoview');
+      serviceUrlArea.value = serviceUrlChoices[e.target.value];
+    });
+    serviceConfigDropDown.value = 'geoCore';
+    serviceConfigDropDown.dispatchEvent(new Event('change'));
+    
+    const validateServiceURLButton = document.getElementById('validateServiceUrlConfig');
+
+      // add an event listener when the button is clicked
+      validateServiceURLButton.addEventListener('click', function (e) {
+        // get message element
+        const message = document.getElementById('validationMessage');
+        const configArea = document.getElementById('configGeoview');
+        const serviceUrlArea = document.getElementById('serviceUrlGeoview');
+        const configOutput = document.getElementById('configOutput');
+
+        configArea.value = serviceUrlArea.value;
+        // get config and test if URL Config is valid
+        const returnedValue = cgpv.api.configApi.getLayerConfig(serviceUrlArea.value.trim(), document.getElementById('serviceConfig').value);
+        returnedValue.then((mapConfig) => {
+          configOutput.value = mapConfig?.getIndentedJsonString();
+
+          generateLineNumbers('configOutput', 'outputLineNumbers');
+
+          // set class and message
+          message.classList.add('config-json-valid');
+          message.classList.remove('config-error');
+          if (mapConfig) {
+            message.innerHTML = 'File is valid, see console for details...';
+            document.getElementById('createMap').disabled = true;
+          } else {
+            message.innerHTML = 'URL is invalid, see console for details...';
+          }
+        });
+      });
+
     // Config Url Validate Button =======================================================================================================
     const validateURLButton = document.getElementById('validateUrlConfig');
 
@@ -247,25 +319,17 @@ p=3857&z=4&c=-100,40&l=en&t=dark&b=basemapId:transport,shaded:false,labeled:true
       validateURLButton.addEventListener('click', function (e) {
         // get message element
         const message = document.getElementById('validationMessage');
-        const langue = document.getElementById('urlLanguage').value;
         const configArea = document.getElementById('configGeoview');
         const configUrlArea = document.getElementById('configUrlGeoview');
         const configOutput = document.getElementById('configOutput');
 
         configArea.value = configUrlArea.value;
         // get config and test if URL Config is valid
-        const returnedValue = cgpv.api.configApi.getConfigFromUrl(configUrlArea.value);
+        const returnedValue = cgpv.api.configApi.getConfigFromUrl(configUrlArea.value.trim());
         returnedValue.then((mapConfig) => {
           configOutput.value = mapConfig.getIndentedJsonString();
 
-        // Generate line numbers
-        (() => {
-          const textarea = document.getElementById('configOutput');
-          const lineNumbersContainer = document.getElementById('outputLineNumbers');
-          const lines = textarea.value.split('\n').length+1;
-          const lineNumbers = Array.from({ length: lines }, (_, index) => '').join('<span />');
-          lineNumbersContainer.innerHTML = lineNumbers;
-        })();
+          generateLineNumbers('configOutput', 'outputLineNumbers');
 
           // set class and message
           message.classList.add('config-json-valid');
