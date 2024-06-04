@@ -776,9 +776,10 @@ export class LayerApi {
 
   /**
    * Registers the layer in the LayerApi layer-sets to start managing it.
-   * @param {AbstractGeoViewLayer | AbstractGVLayer} layer - The layer to register
+   * This function may be used to start managing a layer in the UI when said layer has been created outside of the regular config->layer flow.
+   * @param {AbstractGVLayer} layer - The layer to register
    */
-  registerLayerInLayerSets(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): void {
+  registerLayerInLayerSets(layer: AbstractGVLayer, layerPath: string): void {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     // Tell the layer sets about it
     this.#allLayerSets.forEach((layerSet) => {

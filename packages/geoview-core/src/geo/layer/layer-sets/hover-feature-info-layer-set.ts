@@ -93,6 +93,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   queryLayers(pixelCoordinate: Coordinate): void {
     // FIXME: Watch out for code reentrancy between queries!
     // FIX.MECONT: Consider using a LIFO pattern, per layer path, as the race condition resolution
+    // FIX.MECONT: For this one, because there is only one at the time, we should even query first layer in order of visible layer that is query able
     // Query types of what we're doing
     const queryType = 'at_pixel';
 
