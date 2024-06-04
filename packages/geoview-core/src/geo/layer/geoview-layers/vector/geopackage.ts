@@ -13,8 +13,6 @@ import * as SLDReader from '@nieuwlandgeo/sldreader';
 
 import { cloneDeep } from 'lodash';
 
-// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
-
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
@@ -606,7 +604,9 @@ export class GeoPackage extends AbstractGeoViewVector {
             (layerConfig as TypeLayerEntryConfig).listOfLayerEntryConfig = [];
             const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings!);
             for (let i = 0; i < layers.length; i++) {
-              const newLayerEntryConfig = cloneDeep(layerConfig) as AbstractBaseLayerEntryConfig;
+              // FIXME: This attempts to clone an object instead of a type. This should be changed to clone an actual object instead.
+              // FIX.MECONT: Otherwise, we're losing the methods on the class instance and it causes a "Private element is not present on this object" error
+              const newLayerEntryConfig = cloneDeep(layerConfig);
               newLayerEntryConfig.layerId = layers[i].name;
               newLayerEntryConfig.layerName = createLocalizedString(layers[i].name);
               newLayerEntryConfig.entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;

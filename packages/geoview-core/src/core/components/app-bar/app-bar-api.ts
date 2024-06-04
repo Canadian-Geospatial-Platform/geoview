@@ -238,7 +238,7 @@ export type AppBarCreatedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type AppBarCreatedDelegate = EventDelegateBase<AppBarApi, AppBarCreatedEvent>;
+type AppBarCreatedDelegate = EventDelegateBase<AppBarApi, AppBarCreatedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -251,4 +251,4 @@ export type AppBarRemovedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type AppBarRemovedDelegate = EventDelegateBase<AppBarApi, AppBarRemovedEvent>;
+type AppBarRemovedDelegate = EventDelegateBase<AppBarApi, AppBarRemovedEvent, void>;

@@ -1,4 +1,5 @@
 import TileLayer from 'ol/layer/Tile';
+import { Options as TileOptions } from 'ol/layer/BaseTile';
 import XYZ from 'ol/source/XYZ';
 import { Extent } from 'ol/extent';
 
@@ -18,11 +19,20 @@ export class GVXYZTiles extends AbstractGVTile {
   /**
    * Constructs a GVXYZTiles layer to manage an OpenLayer layer.
    * @param {string} mapId - The map id
-   * @param {TileLayer<XYZ>} olLayer - The OpenLayer layer.
+   * @param {XYZ} olSource - The OpenLayer source.
    * @param {XYZTilesLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(mapId: string, olLayer: TileLayer<XYZ>, layerConfig: XYZTilesLayerEntryConfig) {
-    super(mapId, olLayer, layerConfig);
+  public constructor(mapId: string, olSource: XYZ, layerConfig: XYZTilesLayerEntryConfig) {
+    super(mapId, olSource, layerConfig);
+
+    // Create the tile layer options.
+    const tileLayerOptions: TileOptions<XYZ> = { source: olSource };
+
+    // Init the layer options with initial settings
+    AbstractGVTile.initOptionsWithInitialSettings(tileLayerOptions, layerConfig);
+
+    // Create and set the OpenLayer layer
+    this.olLayer = new TileLayer(tileLayerOptions);
   }
 
   /**
@@ -38,9 +48,9 @@ export class GVXYZTiles extends AbstractGVTile {
    * Overrides the get of the OpenLayers Layer Source
    * @returns {XYZ} The OpenLayers Layer Source
    */
-  override getOLSource(): XYZ | undefined {
+  override getOLSource(): XYZ {
     // Get source from OL
-    return this.getOLLayer().getSource() || undefined;
+    return super.getOLSource() as XYZ;
   }
 
   /**

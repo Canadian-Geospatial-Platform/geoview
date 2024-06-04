@@ -4,8 +4,6 @@ import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Image as ImageLayer } from 'ol/layer';
 import { Extent } from 'ol/extent';
 
-// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
-
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -153,9 +151,8 @@ export class EsriImage extends AbstractGeoViewRaster {
       }
       if (!legendInfo) {
         const legend: TypeLegend = {
-          type: this.type,
-          layerName: layerConfig.layerName!,
-          styleConfig: layerConfig.style,
+          type: CONST_LAYER_TYPES.ESRI_IMAGE,
+          styleConfig: this.getStyle(layerPath),
           legend: null,
         };
         return legend;
@@ -183,16 +180,16 @@ export class EsriImage extends AbstractGeoViewRaster {
       const styleConfig: TypeStyleConfig = {
         Point: styleSettings,
       };
-      layerConfig.style = styleConfig;
+
+      // TODO: Refactor - Find a better place to set the style than in a getter or rename this function like another TODO suggests
+      // TO.DOCONT: This setter is also dangerous, because it triggers a style changed event which is listened by the legends-layer-set.
+      // TO.DOCONT: Fortunately, we have a loop check barrier, but setting a style during a legend fetch could lead to be more problematic.
+      this.setStyle(layerPath, styleConfig);
+
       const legend: TypeLegend = {
-        type: this.type,
-        layerName: layerConfig?.layerName,
+        type: CONST_LAYER_TYPES.ESRI_IMAGE,
         styleConfig,
-        legend: await getLegendStyles(
-          layerConfig as AbstractBaseLayerEntryConfig & {
-            style: TypeStyleConfig;
-          }
-        ),
+        legend: await getLegendStyles(this.getStyle(layerPath)),
       };
       return legend;
     } catch (error) {
@@ -289,12 +286,12 @@ export class EsriImage extends AbstractGeoViewRaster {
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
-   * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
+   * @param {EsriImageLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
-   * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
+   * @returns {Promise<EsriImageLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
   // GV Layers Refactoring - Obsolete (in config?)
-  protected override processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected override processLayerMetadata(layerConfig: EsriImageLayerEntryConfig): Promise<EsriImageLayerEntryConfig> {
     return commonProcessLayerMetadata(this, layerConfig);
   }
 
@@ -323,22 +320,39 @@ export class EsriImage extends AbstractGeoViewRaster {
     }
     if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
 
-    const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
-      source: new ImageArcGISRest(sourceOptions),
-      properties: { layerConfig },
-    };
-    // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-    if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings.className;
-    if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings.extent;
-    if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
-    if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
-    if (layerConfig.initialSettings?.states?.opacity !== undefined) imageLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
-    // If a layer on the map has an initialSettings.visible set to false, its status will never reach the status 'loaded' because
-    // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
-    // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
+    // Create the source
+    const source = new ImageArcGISRest(sourceOptions);
 
-    // Create the OpenLayer layer
-    const olLayer = new ImageLayer(imageLayerOptions);
+    // GV Time to request an OpenLayers layer!
+    const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
+
+    // If any response
+    let olLayer: ImageLayer<ImageArcGISRest> | undefined;
+    if (requestResult.length > 0) {
+      // Get the OpenLayer that was created
+      olLayer = requestResult[0] as ImageLayer<ImageArcGISRest>;
+    }
+
+    // If no olLayer was obtained
+    if (!olLayer) {
+      const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
+        source,
+        properties: { layerConfig },
+      };
+      // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+      if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings.className;
+      if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings.extent;
+      if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
+      if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
+      if (layerConfig.initialSettings?.states?.opacity !== undefined)
+        imageLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
+      // If a layer on the map has an initialSettings.visible set to false, its status will never reach the status 'loaded' because
+      // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
+      // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
+
+      // Create the OpenLayer layer
+      olLayer = new ImageLayer(imageLayerOptions);
+    }
 
     // TODO: Refactor - Wire it up
     this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'image');

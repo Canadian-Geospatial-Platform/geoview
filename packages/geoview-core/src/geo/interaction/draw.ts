@@ -171,4 +171,4 @@ export class Draw extends Interaction {
 /**
  * Define a delegate for the event handler function signature
  */
-type DrawDelegate = EventDelegateBase<Draw, OLDrawEvent>;
+type DrawDelegate = EventDelegateBase<Draw, OLDrawEvent, void>;

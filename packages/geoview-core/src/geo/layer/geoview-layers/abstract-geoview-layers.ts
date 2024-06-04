@@ -8,6 +8,7 @@ import { Pixel } from 'ol/pixel';
 import { Extent } from 'ol/extent';
 import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
 import Feature from 'ol/Feature';
+import Source from 'ol/source/Source';
 
 import { TypeLocalizedString } from '@config/types/map-schema-types';
 
@@ -29,7 +30,6 @@ import {
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   layerEntryIsGroupLayer,
-  TypeStyleConfig,
   TypeLayerInitialSettings,
   TypeLayerStatus,
   TypeStyleGeometry,
@@ -40,6 +40,7 @@ import {
   rangeDomainType,
   TypeLocation,
   QueryType,
+  TypeStyleConfig,
 } from '@/geo/map/map-schema-types';
 import { GeoViewLayerCreatedTwiceError } from '@/geo/layer/exceptions/layer-exceptions';
 import { Projection } from '@/geo/utils/projection';
@@ -129,6 +130,9 @@ export abstract class AbstractGeoViewLayer {
   /** Layer temporal dimension indexed by layerPath. */
   #layerTemporalDimension: Record<string, TimeDimension> = {};
 
+  /** Style to apply to the layer. */
+  #style: Record<string, TypeStyleConfig> = {};
+
   /** Attribution used in the OpenLayer source. */
   attributions: string[] = [];
 
@@ -137,6 +141,12 @@ export abstract class AbstractGeoViewLayer {
 
   /** Date format object used to translate internal UTC ISO format to the external format, the one used by the user */
   externalFragmentsOrder: TypeDateFragments;
+
+  // Keep all callback delegates references
+  #onLayerNameChangedHandlers: LayerNameChangedDelegate[] = [];
+
+  // Keep all callback delegates references
+  #onLayerStyleChangedHandlers: LayerStyleChangedDelegate[] = [];
 
   // Keep all callback delegate references
   #onLegendQueryingHandlers: LegendQueryingDelegate[] = [];
@@ -151,13 +161,13 @@ export abstract class AbstractGeoViewLayer {
   #onLayerEntryProcessedHandlers: LayerEntryProcessedDelegate[] = [];
 
   // Keep all callback delegate references
+  #onLayerRequestingHandlers: LayerRequestingDelegate[] = [];
+
+  // Keep all callback delegate references
   #onLayerCreationHandlers: LayerCreationDelegate[] = [];
 
   // Keep all callback delegate references
   #onLayerFilterAppliedHandlers: LayerFilterAppliedDelegate[] = [];
-
-  // Keep all callback delegates references
-  #onLayerNameChangedHandlers: LayerNameChangedDelegate[] = [];
 
   // Keep all callback delegate references
   #onLayerOpacityChangedHandlers: LayerOpacityChangedDelegate[] = [];
@@ -295,6 +305,23 @@ export abstract class AbstractGeoViewLayer {
   setLayerName(layerPath: string, name: TypeLocalizedString | undefined): void {
     this.#layerName[layerPath] = name;
     this.#emitLayerNameChanged({ layerPath, layerName: name });
+  }
+
+  /**
+   * Gets the layer style
+   * @returns The layer style
+   */
+  getStyle(layerPath: string): TypeStyleConfig | undefined {
+    return this.#style[layerPath];
+  }
+
+  /**
+   * Sets the layer style
+   * @param {TypeStyleConfig | undefined} style - The layer style
+   */
+  setStyle(layerPath: string, style: TypeStyleConfig): void {
+    this.#style[layerPath] = style;
+    this.#emitLayerStyleChanged({ style, layerPath });
   }
 
   /** ***************************************************************************************************************************
@@ -458,27 +485,27 @@ export abstract class AbstractGeoViewLayer {
    * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined. If
    * necessary, additional code can be executed in the child method to complete the layer configuration.
    *
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
+   * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
-  protected abstract validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void;
+  protected abstract validateListOfLayerEntryConfig(listOfLayerEntryConfig: ConfigBaseClass[]): void;
 
   /** ***************************************************************************************************************************
    * This method processes recursively the metadata of each layer in the "layer list" configuration.
    *
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layers to process.
+   * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layers to process.
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected async processListOfLayerEntryMetadata(listOfLayerEntryConfig: TypeLayerEntryConfig[]): Promise<void> {
+  protected async processListOfLayerEntryMetadata(listOfLayerEntryConfig: ConfigBaseClass[]): Promise<void> {
     try {
-      const promisedAllLayerDone: Promise<TypeLayerEntryConfig>[] = [];
+      const promisedAllLayerDone: Promise<ConfigBaseClass>[] = [];
       for (let i = 0; i < listOfLayerEntryConfig.length; i++) {
-        const layerConfig: TypeLayerEntryConfig = listOfLayerEntryConfig[i];
+        const layerConfig = listOfLayerEntryConfig[i];
         if (layerEntryIsGroupLayer(layerConfig))
           if (layerConfig.isMetadataLayerGroup) promisedAllLayerDone.push(this.#processMetadataGroupLayer(layerConfig));
           // eslint-disable-next-line no-await-in-loop
           else await this.processListOfLayerEntryMetadata(layerConfig.listOfLayerEntryConfig);
-        else promisedAllLayerDone.push(this.processLayerMetadata(layerConfig));
+        else promisedAllLayerDone.push(this.processLayerMetadata(layerConfig as AbstractBaseLayerEntryConfig));
       }
       const arrayOfLayerConfigs = await Promise.all(promisedAllLayerDone);
       arrayOfLayerConfigs.forEach((layerConfig) => {
@@ -488,6 +515,13 @@ export abstract class AbstractGeoViewLayer {
           throw new Error(message);
         } else {
           // When we get here, we know that the metadata (if the service provide some) are processed.
+
+          //
+          // TODO: Refactor - Layers refactoring. Make a super clear function when moving config information in the layer for real
+          //
+          // Save the style in the layer as we're done processing style found in metadata
+          if (layerConfig instanceof AbstractBaseLayerEntryConfig) this.setStyle(layerConfig.layerPath, layerConfig.style!);
+
           // We need to signal to the layer sets that the 'processed' phase is done.
           // GV TODO: For the moment, be aware that the layerStatus setter is doing a lot of things behind the scene.
           // GV       The layerStatus setter contains a lot of code and we will change it in favor of a method.
@@ -513,7 +547,8 @@ export abstract class AbstractGeoViewLayer {
    */
   async #processMetadataGroupLayer(layerConfig: GroupLayerEntryConfig): Promise<GroupLayerEntryConfig> {
     try {
-      await this.processLayerMetadata(layerConfig);
+      // TODO: Check - Does this call makes sense for a metadata group layer? I'm not sure the "TypeScript" works here? Wrong type? Commenting line.. 2024-06-05
+      // await this.processLayerMetadata(layerConfig);
       await this.processListOfLayerEntryMetadata(layerConfig.listOfLayerEntryConfig!);
       layerConfig.layerStatus = 'processed';
       this.#emitLayerEntryProcessed({ config: layerConfig });
@@ -529,13 +564,13 @@ export abstract class AbstractGeoViewLayer {
    * This method is used to process the layer's metadata. It will fill the empty outfields and aliasFields properties of the
    * layer's configuration when applicable.
    *
-   * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
-   * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
   // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     if (!layerConfig.source) layerConfig.source = {};
     if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: false };
 
@@ -895,7 +930,7 @@ export abstract class AbstractGeoViewLayer {
     const layerGroup = new LayerGroup(layerGroupOptions);
 
     // Emit about it
-    this.#emitLayerCreation({ layer: layerGroup, config: layerConfig });
+    this.emitLayerCreation({ config: layerConfig, layer: layerGroup });
 
     // Return it
     return layerGroup;
@@ -1118,37 +1153,11 @@ export abstract class AbstractGeoViewLayer {
    */
   async getLegend(layerPath: string): Promise<TypeLegend | null> {
     try {
-      const layerConfig = this.getLayerConfig(layerPath) as
-        | (AbstractBaseLayerEntryConfig & {
-            style: TypeStyleConfig;
-          })
-        | undefined;
-
-      if (!layerConfig) {
-        const legend: TypeLegend = {
-          type: this.type,
-          layerName: { en: 'config not found', fr: 'config inexistante' } as TypeLocalizedString,
-          styleConfig: null,
-          legend: null,
-        };
-        return legend;
-      }
-
-      if (!layerConfig.style) {
-        const legend: TypeLegend = {
-          type: this.type,
-          layerName: layerConfig.layerName!,
-          styleConfig: layerConfig.style,
-          legend: null,
-        };
-        return legend;
-      }
-
+      // Get the legend using the layer information and layer styling
       const legend: TypeLegend = {
         type: this.type,
-        layerName: layerConfig?.layerName,
-        styleConfig: layerConfig?.style,
-        legend: await getLegendStyles(layerConfig),
+        styleConfig: this.getStyle(layerPath),
+        legend: await getLegendStyles(this.getStyle(layerPath)),
       };
       return legend;
     } catch (error) {
@@ -1239,7 +1248,13 @@ export abstract class AbstractGeoViewLayer {
       features.forEach((featureNeedingItsCanvas) => {
         promisedAllCanvasFound.push(
           new Promise((resolveCanvas) => {
-            getFeatureCanvas(featureNeedingItsCanvas, layerConfig, callbackToFetchDataUrl)
+            getFeatureCanvas(
+              featureNeedingItsCanvas,
+              this.getStyle(layerConfig.layerPath)!,
+              layerConfig.filterEquation,
+              layerConfig.legendFilterIsOff,
+              callbackToFetchDataUrl
+            )
               .then((canvas) => {
                 resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
               })
@@ -1490,29 +1505,29 @@ export abstract class AbstractGeoViewLayer {
     if (!olLayer) throw new Error(`An OpenLayer must be provided to register listeners. Layer path ${layerConfig.layerPath}`);
     if (!listenerType) throw new Error(`A listenerType must be provided to register listeners. Layer path ${layerConfig.layerPath}`);
 
-    // Group layers have no listener
-    if (layerConfig.entryType !== CONST_LAYER_ENTRY_TYPES.GROUP) {
-      let loadErrorListener: () => void;
+    // If in old LAYERS_HYBRID_MODE (in the new LAYERS_HYBRID_MODE we want the new classes to handle that)
+    if (!LayerApi.LAYERS_HYBRID_MODE) {
+      // Group layers have no listener
+      if (layerConfig.entryType !== CONST_LAYER_ENTRY_TYPES.GROUP) {
+        let loadErrorListener: () => void;
 
-      // Definition of the load end listener functions
-      const loadEndListener = (): void => {
-        // Call the overridable loaded function
-        this.onLoaded(layerConfig);
+        // Definition of the load end listener functions
+        const loadEndListener = (): void => {
+          // Call the overridable loaded function
+          this.onLoaded(layerConfig);
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (olLayer! as any).get('source').un(`${listenerType}loaderror`, loadErrorListener);
-      };
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (olLayer! as any).get('source').un(`${listenerType}loaderror`, loadErrorListener);
+        };
 
-      loadErrorListener = (): void => {
-        // Call the overridable error function
-        this.onError(layerConfig);
+        loadErrorListener = (): void => {
+          // Call the overridable error function
+          this.onError(layerConfig);
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (olLayer! as any).get('source').un(`${listenerType}loadend`, loadEndListener);
-      };
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (olLayer! as any).get('source').un(`${listenerType}loadend`, loadEndListener);
+        };
 
-      // If not LAYERS_HYBRID_MODE MODE (in LAYERS_HYBRID_MODE we want the new classes to handle that)
-      if (!LayerApi.LAYERS_HYBRID_MODE) {
         // Activation of the load end listeners
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (olLayer! as any).get('source').once(`${listenerType}loaderror`, loadErrorListener);
@@ -1522,7 +1537,7 @@ export abstract class AbstractGeoViewLayer {
     }
 
     // Emit about the layer creation so we can do something about it (part of the major layer refactor)
-    this.#emitLayerCreation({ layer: olLayer!, config: layerConfig });
+    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
   }
 
   /**
@@ -1560,6 +1575,34 @@ export abstract class AbstractGeoViewLayer {
   }
 
   // #region EVENTS
+
+  /**
+   * Emits an event to all handlers.
+   * @param {LayerNameChangedEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerNameChanged(event: LayerNameChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerNameChangedHandlers, event);
+  }
+
+  /**
+   * Registers a layer name changed event handler.
+   * @param {LayerNameChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerNameChanged(callback: LayerNameChangedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerNameChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer name changed event handler.
+   * @param {LayerNameChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerNameChanged(callback: LayerNameChangedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerNameChangedHandlers, callback);
+  }
 
   /**
    * Emits an event to all handlers.
@@ -1675,10 +1718,38 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Emits an event to all handlers.
+   * @param {LayerRequestingEvent} event The event to emit
+   * @private
+   */
+  protected emitLayerRequesting(event: LayerRequestingEvent): (BaseLayer | undefined)[] {
+    // Emit the event for all handlers
+    return EventHelper.emitEvent(this, this.#onLayerRequestingHandlers, event);
+  }
+
+  /**
+   * Registers a layer creation event handler.
+   * @param {LayerRequestingDelegate} callback The callback to be executed whenever the event is emitted
+   */
+  onLayerRequesting(callback: LayerRequestingDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerRequestingHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer creation event handler.
+   * @param {LayerRequestingDelegate} callback The callback to stop being called whenever the event is emitted
+   */
+  offLayerRequesting(callback: LayerRequestingDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerRequestingHandlers, callback);
+  }
+
+  /**
+   * Emits an event to all handlers.
    * @param {LayerCreationEvent} event The event to emit
    * @private
    */
-  #emitLayerCreation(event: LayerCreationEvent): void {
+  protected emitLayerCreation(event: LayerCreationEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerCreationHandlers, event);
   }
@@ -1731,30 +1802,29 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {LayerNameChangedEvent} event - The event to emit
-   * @private
+   * @param {LayerStyleChangedEvent} event - The event to emit
    */
-  #emitLayerNameChanged(event: LayerNameChangedEvent): void {
+  #emitLayerStyleChanged(event: LayerStyleChangedEvent): void {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerNameChangedHandlers, event);
+    EventHelper.emitEvent(this, this.#onLayerStyleChangedHandlers, event);
   }
 
   /**
-   * Registers a layer name changed event handler.
-   * @param {LayerNameChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   * Registers a layer style changed event handler.
+   * @param {LayerStyleChangedDelegate} callback - The callback to be executed whenever the event is emitted
    */
-  onLayerNameChanged(callback: LayerNameChangedDelegate): void {
+  onLayerStyleChanged(callback: LayerStyleChangedDelegate): void {
     // Register the event handler
-    EventHelper.onEvent(this.#onLayerNameChangedHandlers, callback);
+    EventHelper.onEvent(this.#onLayerStyleChangedHandlers, callback);
   }
 
   /**
-   * Unregisters a layer name changed event handler.
-   * @param {LayerNameChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+   * Unregisters a layer style changed event handler.
+   * @param {LayerStyleChangedDelegate} callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerNameChanged(callback: LayerNameChangedDelegate): void {
+  offLayerStyleChanged(callback: LayerStyleChangedDelegate): void {
     // Unregister the event handler
-    EventHelper.offEvent(this.#onLayerNameChangedHandlers, callback);
+    EventHelper.offEvent(this.#onLayerStyleChangedHandlers, callback);
   }
 
   /**
@@ -1798,7 +1868,7 @@ export type LegendQueryingEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LegendQueryingDelegate = EventDelegateBase<AbstractGeoViewLayer, LegendQueryingEvent>;
+type LegendQueryingDelegate = EventDelegateBase<AbstractGeoViewLayer, LegendQueryingEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1811,7 +1881,7 @@ export type LegendQueriedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LegendQueriedDelegate = EventDelegateBase<AbstractGeoViewLayer, LegendQueriedEvent>;
+type LegendQueriedDelegate = EventDelegateBase<AbstractGeoViewLayer, LegendQueriedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1823,32 +1893,51 @@ export type VisibleChangedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type VisibleChangedDelegate = EventDelegateBase<AbstractGeoViewLayer, VisibleChangedEvent>;
+type VisibleChangedDelegate = EventDelegateBase<AbstractGeoViewLayer, VisibleChangedEvent, void>;
 
 /**
  * Define an event for the delegate
  */
 export type LayerEntryProcessedEvent = {
-  config: TypeLayerEntryConfig;
-};
-
-/**
- * Define a delegate for the event handler function signature
- */
-type LayerEntryProcessedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerEntryProcessedEvent>;
-
-/**
- * Define an event for the delegate
- */
-export type LayerCreationEvent = {
-  layer: BaseLayer;
   config: ConfigBaseClass;
 };
 
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerCreationDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerCreationEvent>;
+type LayerEntryProcessedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerEntryProcessedEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerRequestingEvent = {
+  // The configuration associated with the layer to be created
+  config: ConfigBaseClass;
+  // The OpenLayers source associated with the layer to be created
+  source: Source;
+  // Extra configuration can be anything (for simplicity)
+  extraConfig?: unknown;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerRequestingDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerRequestingEvent, BaseLayer | undefined>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerCreationEvent = {
+  // The configuration associated with the created layer
+  config: ConfigBaseClass;
+  // The created layer
+  layer: BaseLayer;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerCreationDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerCreationEvent, void>;
 
 export interface TypeWmsLegendStyle {
   name: string;
@@ -1858,7 +1947,7 @@ export interface TypeWmsLegendStyle {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerFilterAppliedEvent>;
+type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerFilterAppliedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1873,7 +1962,7 @@ export type LayerFilterAppliedEvent = {
 /**
  * Define a delegate for the event handler function signature.
  */
-type LayerNameChangedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerNameChangedEvent>;
+type LayerNameChangedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerNameChangedEvent, void>;
 
 /**
  * Define an event for the delegate.
@@ -1889,7 +1978,7 @@ export type LayerNameChangedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerOpacityChangedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerOpacityChangedEvent>;
+type LayerOpacityChangedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerOpacityChangedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1899,6 +1988,22 @@ export type LayerOpacityChangedEvent = {
   layerPath: string;
   // The filter
   opacity: number;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerStyleChangedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerStyleChangedEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerStyleChangedEvent = {
+  // The style
+  style: TypeStyleConfig;
+
+  // TODO: Refactor - After layers refactoring, remove the layerPath parameter here
+  layerPath: string;
 };
 
 export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {

@@ -222,7 +222,7 @@ export type NavBarCreatedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type NavBarCreatedDelegate = EventDelegateBase<NavBarApi, NavBarCreatedEvent>;
+type NavBarCreatedDelegate = EventDelegateBase<NavBarApi, NavBarCreatedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -235,4 +235,4 @@ export type NavBarRemovedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type NavBarRemovedDelegate = EventDelegateBase<NavBarApi, NavBarRemovedEvent>;
+type NavBarRemovedDelegate = EventDelegateBase<NavBarApi, NavBarRemovedEvent, void>;

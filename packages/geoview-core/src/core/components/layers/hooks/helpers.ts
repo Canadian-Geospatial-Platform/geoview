@@ -198,7 +198,7 @@ export function useLegendHelpers(): unknown {
         bounds: undefined,
         layerId: `layer${i}`,
         layerPath: `test_${generateId()}`,
-        layerName: `TEST---${setData.data?.layerName?.en ?? 'Unknown Layer name'}`,
+        layerName: `TEST---Unknown Layer name`,
         type: setData.data?.type ?? CONST_LAYER_TYPES.IMAGE_STATIC,
         layerStatus: setData.layerStatus,
         legendQueryStatus: 'queried',

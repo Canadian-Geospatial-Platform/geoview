@@ -151,7 +151,7 @@ export type FooterTabCreatedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type FooterTabCreatedDelegate = EventDelegateBase<FooterBarApi, FooterTabCreatedEvent>;
+type FooterTabCreatedDelegate = EventDelegateBase<FooterBarApi, FooterTabCreatedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -163,4 +163,4 @@ export type FooterTabRemovedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type FooterTabRemovedDelegate = EventDelegateBase<FooterBarApi, FooterTabRemovedEvent>;
+type FooterTabRemovedDelegate = EventDelegateBase<FooterBarApi, FooterTabRemovedEvent, void>;

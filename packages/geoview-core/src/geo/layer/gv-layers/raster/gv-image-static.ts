@@ -1,5 +1,6 @@
 import ImageLayer from 'ol/layer/Image';
 import Static from 'ol/source/ImageStatic';
+import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Extent } from 'ol/extent';
 import axios from 'axios';
 
@@ -24,11 +25,20 @@ export class GVImageStatic extends AbstractGVRaster {
   /**
    * Constructs a GVImageStatic layer to manage an OpenLayer layer.
    * @param {string} mapId - The map id
-   * @param {ImageLayer<Static>} olLayer - The OpenLayer layer.
+   * @param {Static} olSource - The OpenLayer source.
    * @param {ImageStaticLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(mapId: string, olLayer: ImageLayer<Static>, layerConfig: ImageStaticLayerEntryConfig) {
-    super(mapId, olLayer, layerConfig);
+  public constructor(mapId: string, olSource: Static, layerConfig: ImageStaticLayerEntryConfig) {
+    super(mapId, olSource, layerConfig);
+
+    // Create the image layer options.
+    const staticImageOptions: ImageOptions<Static> = { source: olSource };
+
+    // Init the layer options with initial settings
+    AbstractGVRaster.initOptionsWithInitialSettings(staticImageOptions, layerConfig);
+
+    // Create and set the OpenLayer layer
+    this.olLayer = new ImageLayer(staticImageOptions);
   }
 
   /**
@@ -44,9 +54,9 @@ export class GVImageStatic extends AbstractGVRaster {
    * Overrides the get of the OpenLayers Layer Source
    * @returns {Static} The OpenLayers Layer Source
    */
-  override getOLSource(): Static | undefined {
+  override getOLSource(): Static {
     // Get source from OL
-    return this.getOLLayer().getSource() || undefined;
+    return super.getOLSource() as Static;
   }
 
   /**
@@ -105,7 +115,6 @@ export class GVImageStatic extends AbstractGVRaster {
       if (!legendImage) {
         const legend: TypeLegend = {
           type: CONST_LAYER_TYPES.IMAGE_STATIC,
-          layerName: layerConfig!.layerName,
           legend: null,
         };
         return legend;
@@ -119,14 +128,12 @@ export class GVImageStatic extends AbstractGVRaster {
         drawingContext.drawImage(image, 0, 0);
         const legend: TypeLegend = {
           type: CONST_LAYER_TYPES.IMAGE_STATIC,
-          layerName: layerConfig!.layerName,
           legend: drawingCanvas,
         };
         return legend;
       }
       const legend: TypeLegend = {
         type: CONST_LAYER_TYPES.IMAGE_STATIC,
-        layerName: layerConfig!.layerName,
         legend: null,
       };
       return legend;

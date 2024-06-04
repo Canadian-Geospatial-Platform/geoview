@@ -1,5 +1,6 @@
 import { ImageArcGISRest } from 'ol/source';
 import { Image as ImageLayer } from 'ol/layer';
+import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
 import { EsriJSON } from 'ol/format';
@@ -48,11 +49,23 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Constructs a GVEsriDynamic layer to manage an OpenLayer layer.
    * @param {string} mapId - The map id
-   * @param {ImageLayer<ImageArcGISRest>} olLayer - The OpenLayer layer.
+   * @param {ImageArcGISRest} olSource - The OpenLayer source.
    * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(mapId: string, olLayer: ImageLayer<ImageArcGISRest>, layerConfig: EsriDynamicLayerEntryConfig) {
-    super(mapId, olLayer, layerConfig);
+  public constructor(mapId: string, olSource: ImageArcGISRest, layerConfig: EsriDynamicLayerEntryConfig) {
+    super(mapId, olSource, layerConfig);
+
+    // Create the image layer options.
+    const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
+      source: olSource,
+      properties: { layerConfig },
+    };
+
+    // Init the layer options with initial settings
+    AbstractGVRaster.initOptionsWithInitialSettings(imageLayerOptions, layerConfig);
+
+    // Create and set the OpenLayer layer
+    this.olLayer = new ImageLayer(imageLayerOptions);
   }
 
   /**
@@ -68,9 +81,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * Overrides the get of the OpenLayers Layer Source
    * @returns {ImageArcGISRest} The OpenLayers Layer Source
    */
-  override getOLSource(): ImageArcGISRest | undefined {
+  override getOLSource(): ImageArcGISRest {
     // Get source from OL
-    return this.getOLLayer().getSource() || undefined;
+    return super.getOLSource() as ImageArcGISRest;
   }
 
   /**
@@ -111,8 +124,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig();
 
-      // Guess the geometry type
-      const geometryType = layerConfig.getTypeGeometry();
+      // Guess the geometry type by taking the first style key
+      const [geometryType] = layerConfig.getTypeGeometries();
 
       // Fetch the features
       let urlRoot = layerConfig.geoviewLayerConfig.metadataAccessPath![AppEventProcessor.getDisplayLanguage(this.getMapId())]!;
@@ -270,7 +283,10 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const layerConfig = this.getLayerConfig();
     const { layerFilter } = layerConfig;
 
-    if (layerConfig?.style) {
+    // Get the style
+    const style = this.getStyle(layerConfig.layerPath);
+
+    if (style) {
       const setAllUndefinedVisibilityFlagsToYes = (styleConfig: TypeUniqueValueStyleConfig | TypeClassBreakStyleConfig): void => {
         // default value is true for all undefined visibility flags
         // eslint-disable-next-line no-param-reassign
@@ -287,7 +303,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
         return allVisible;
       };
 
-      const styleSettings = layerConfig.getStyleSettings()!;
+      // Get the first style settings.
+      const styleSettings = layerConfig.getFirstStyleSettings()!;
 
       if (isSimpleStyleConfig(styleSettings)) {
         return layerFilter || '(1=1)';
@@ -301,6 +318,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         const fieldOfTheSameValue = GVEsriDynamic.#countFieldOfTheSameValue(styleSettings);
         const fieldOrder = GVEsriDynamic.#sortFieldOfTheSameValue(styleSettings, fieldOfTheSameValue);
         const queryTree = GVEsriDynamic.#getQueryTree(styleSettings, fieldOfTheSameValue, fieldOrder);
+        // TODO: Refactor - Layers refactoring. Use the source.featureInfo from the layer, not the layerConfig anymore, here and below
         const query = this.#buildQuery(queryTree, 0, fieldOrder, styleSettings, layerConfig.source.featureInfo!);
         return `${query}${layerFilter ? ` and (${layerFilter})` : ''}`;
       }

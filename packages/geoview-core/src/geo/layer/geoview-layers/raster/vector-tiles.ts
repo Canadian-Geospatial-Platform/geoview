@@ -9,8 +9,6 @@ import { Extent } from 'ol/extent';
 
 import olms, { applyStyle } from 'ol-mapbox-style';
 
-// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
-
 import Feature from 'ol/Feature';
 import { MVT } from 'ol/format';
 import { TypeLocalizedString } from '@config/types/map-schema-types';
@@ -29,7 +27,6 @@ import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { api } from '@/app';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
-import { TileLayerEntryConfig } from '@/core/utils/config/validation-classes/tile-layer-entry-config';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
@@ -208,21 +205,38 @@ export class VectorTiles extends AbstractGeoViewRaster {
     sourceOptions.format = new MVT();
     sourceOptions.projection = this.getMapViewer().getProjection().getCode();
     sourceOptions.tileGrid = new TileGrid(layerConfig.source!.tileGrid!);
-    const tileLayerOptions: TileOptions<VectorTileSource> = { source: new VectorTileSource(sourceOptions) };
-    // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-    if (layerConfig.initialSettings?.className !== undefined) tileLayerOptions.className = layerConfig.initialSettings.className;
-    if (layerConfig.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerConfig.initialSettings.extent;
-    if (layerConfig.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
-    if (layerConfig.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
-    if (layerConfig.initialSettings?.states?.opacity !== undefined) tileLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
-    // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
-    // GV            in the 'loading' state if the flag value is false.
 
-    // TODO remove after demoing again
-    const declutter = this.mapId !== 'LYR2';
+    // Create the source
+    const source = new VectorTileSource(sourceOptions);
 
-    // Create the OpenLayer layer
-    const olLayer = new VectorTileLayer({ ...tileLayerOptions, declutter });
+    // GV Time to request an OpenLayers layer!
+    const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
+
+    // If any response
+    let olLayer: VectorTileLayer | undefined;
+    if (requestResult.length > 0) {
+      // Get the OpenLayer that was created
+      olLayer = requestResult[0] as VectorTileLayer;
+    }
+
+    // If no olLayer was obtained
+    if (!olLayer) {
+      const tileLayerOptions: TileOptions<VectorTileSource> = { source };
+      // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+      if (layerConfig.initialSettings?.className !== undefined) tileLayerOptions.className = layerConfig.initialSettings.className;
+      if (layerConfig.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerConfig.initialSettings.extent;
+      if (layerConfig.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
+      if (layerConfig.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
+      if (layerConfig.initialSettings?.states?.opacity !== undefined) tileLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
+      // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
+      // GV            in the 'loading' state if the flag value is false.
+
+      // TODO remove after demoing again
+      const declutter = this.mapId !== 'LYR2';
+
+      // Create the OpenLayer layer
+      olLayer = new VectorTileLayer({ ...tileLayerOptions, declutter });
+    }
 
     // TODO: Refactor - Wire it up
     this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'tile');
@@ -248,12 +262,12 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
-   * @param {TileLayerEntryConfig} layerConfig The layer entry configuration to process.
+   * @param {VectorTilesLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
-   * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
+   * @returns {Promise<VectorTilesLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
   // GV Layers Refactoring - Obsolete (in config?)
-  protected override processLayerMetadata(layerConfig: TileLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected override processLayerMetadata(layerConfig: VectorTilesLayerEntryConfig): Promise<VectorTilesLayerEntryConfig> {
     if (this.metadata) {
       const { tileInfo } = this.metadata;
       const extent = this.metadata.fullExtent;

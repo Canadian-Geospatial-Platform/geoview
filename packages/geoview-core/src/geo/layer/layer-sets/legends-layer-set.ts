@@ -4,6 +4,9 @@ import { logger } from '@/core/utils/logger';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
 import { AbstractLayerSet, PropagationType } from './abstract-layer-set';
 import { TypeLegend, TypeLegendResultSet, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { AbstractGeoViewLayer, LayerStyleChangedEvent } from '../geoview-layers/abstract-geoview-layers';
+import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
+import { LayerApi } from '../layer';
 
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
@@ -14,6 +17,18 @@ import { TypeLegend, TypeLegendResultSet, TypeLegendResultSetEntry } from '@/cor
 export class LegendsLayerSet extends AbstractLayerSet {
   /** The resultSet object as existing in the base class, retyped here as a TypeLegendResultSet */
   declare resultSet: TypeLegendResultSet;
+
+  // Keep a bounded reference to the handle layer status changed
+  #boundHandleLayerStyleChanged: (layer: AbstractGeoViewLayer | AbstractGVLayer, layerStyleEvent: LayerStyleChangedEvent) => void;
+
+  /**
+   * Constructs a Legends LayerSet to manage layers legends.
+   * @param {LayerApi} layerApi - The layer api
+   */
+  constructor(layerApi: LayerApi) {
+    super(layerApi);
+    this.#boundHandleLayerStyleChanged = this.#handleLayerStyleChanged.bind(this);
+  }
 
   /**
    * Overrides the behavior to apply when an all-feature-info-layer-set wants to check for condition to register a layer in its set.
@@ -34,16 +49,24 @@ export class LegendsLayerSet extends AbstractLayerSet {
     // Call parent
     super.onRegisterLayerConfig(layerConfig);
 
-    // Register the layer style changed handler
-    layerConfig.onLayerStyleChanged((config: ConfigBaseClass) => {
-      this.#handleLayerStyleChanged(config);
-    });
-
     // Keep track if the legend has been queried
     this.resultSet[layerConfig.layerPath].legendQueryStatus = 'init';
 
     // Check if ready to query legend
-    this.#checkQueryLegend(layerConfig, false);
+    this.#checkQueryLegend(layerConfig.layerPath, false);
+  }
+
+  /**
+   * Overrides the behavior to apply when a legends-layer-set wants to register a layer in its set.
+   * @param {AbstractGeoViewLayer} layer - The layer
+   */
+  protected override onRegisterLayer(layer: AbstractGeoViewLayer, layerPath: string): void {
+    // TODO: Refactor - After layers refactoring, remove the layerPath parameter here
+    // Call parent
+    super.onRegisterLayer(layer, layerPath);
+
+    // Register handler on layer style change
+    layer.onLayerStyleChanged(this.#boundHandleLayerStyleChanged);
   }
 
   /**
@@ -56,7 +79,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
     super.onProcessLayerStatusChanged(layerConfig, layerStatus);
 
     // Check if ready to query legend
-    this.#checkQueryLegend(layerConfig, false);
+    this.#checkQueryLegend(layerConfig.layerPath, false);
   }
 
   /**
@@ -91,22 +114,31 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
   /**
    * Checks if the layer config has reached the 'processed' status or greater and if so queries the legend.
-   * @param {ConfigBaseClass} layerConfig - The layer config
+   * @param {string} layerPath - The layer path
+   * @param {boolean} forced - Indicates if the legend query should be forced to happen (example when refreshing the legend)
    */
-  #checkQueryLegend(layerConfig: ConfigBaseClass, forced: boolean): void {
+  #checkQueryLegend(layerPath: string, forced: boolean): void {
     // Get the layer
-    const layer = this.layerApi.getGeoviewLayerHybrid(layerConfig.layerPath);
+    const layer = this.layerApi.getGeoviewLayerHybrid(layerPath);
+    const layerConfig = layer?.getLayerConfig(layerPath);
 
-    // If the layer legend should be queried
-    if (layer && (this.#legendShouldBeQueried(layerConfig) || forced)) {
+    // If the layer legend should be queried (and not already querying).
+    // GV Gotta make sure that we're not already querying, because EsriImage layers, for example, adjust the
+    // GV style on the fly when querying legend. So, be careful not to loop!
+    if (
+      layer &&
+      layerConfig &&
+      this.resultSet[layerPath].legendQueryStatus !== 'querying' &&
+      (this.#legendShouldBeQueried(layerConfig) || forced)
+    ) {
       // Flag
-      this.resultSet[layerConfig.layerPath].legendQueryStatus = 'querying';
+      this.resultSet[layerPath].legendQueryStatus = 'querying';
 
       // Propagate to the store about the querying happening
-      this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
+      this.#propagateToStore(this.resultSet[layerPath]);
 
       // Query the legend
-      const legendPromise = layer.queryLegend(layerConfig.layerPath);
+      const legendPromise = layer.queryLegend(layerPath);
 
       // Whenever the legend response comes in
       legendPromise
@@ -114,16 +146,16 @@ export class LegendsLayerSet extends AbstractLayerSet {
           // If legend received
           if (legend) {
             // Flag
-            this.resultSet[layerConfig.layerPath].legendQueryStatus = 'queried';
+            this.resultSet[layerPath].legendQueryStatus = 'queried';
 
             // Query completed, keep it
-            this.resultSet[layerConfig.layerPath].data = legend;
+            this.resultSet[layerPath].data = legend;
 
             // Propagate to the store once the legend is received
-            this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
+            this.#propagateToStore(this.resultSet[layerPath]);
 
             // Inform that the layer set has been updated by calling parent to emit event
-            this.onLayerSetUpdatedProcess(layerConfig.layerPath);
+            this.onLayerSetUpdatedProcess(layerPath);
           }
         })
         .catch((error) => {
@@ -134,21 +166,22 @@ export class LegendsLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Indicates if the legend should be queried
+   * Checks if the legend should be queried as part of the regular layer status progression and legend fetching
    * @param {ConfigBaseClass} layerConfig - The layer config
    */
   #legendShouldBeQueried(layerConfig: ConfigBaseClass): boolean {
-    // A legend is ready to be queried when its status is > processed and legendQueryStatus is 'init' (not already queried)
+    // A legend is ready to be queried if its status is > processed and legendQueryStatus is 'init' (not already queried)
     return !!layerConfig?.isGreaterThanOrEqualTo('processed') && this.resultSet[layerConfig.layerPath].legendQueryStatus === 'init';
   }
 
   /**
-   * Query legend when style is changed.
-   * @param {ConfigBaseClass} layerConfig - The layer config being affected
+   * Handles when a layer style changes on a registered layer
+   * @param {AbstractGeoViewLayer | AbstractGVLayer} layer - The layer which changed its styles
+   * @param {LayerStyleChangedEvent} event - The layer style changed event
    */
-  #handleLayerStyleChanged(layerConfig: ConfigBaseClass): void {
-    if (this.resultSet?.[layerConfig.layerPath]) {
-      this.#checkQueryLegend(layerConfig, true);
-    }
+  #handleLayerStyleChanged(layer: AbstractGeoViewLayer | AbstractGVLayer, event: LayerStyleChangedEvent): void {
+    // TODO: Refactor - Layers refactoring. Replace event.layerPath by something like AbstractGVLayer.getLayerPath()
+    // Force query the legend as we have a new style
+    this.#checkQueryLegend(event.layerPath, true);
   }
 }

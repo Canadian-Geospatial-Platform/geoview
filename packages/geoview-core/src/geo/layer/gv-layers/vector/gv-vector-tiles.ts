@@ -1,4 +1,5 @@
 import VectorTileLayer from 'ol/layer/VectorTile';
+import { Options as TileOptions } from 'ol/layer/BaseTile';
 import { VectorTile } from 'ol/source';
 import { Extent } from 'ol/extent';
 
@@ -14,16 +15,24 @@ import { AbstractGVVectorTile } from './abstract-gv-vector-tile';
  * @exports
  * @class GVVectorTiles
  */
-// ******************************************************************************************************************************
 export class GVVectorTiles extends AbstractGVVectorTile {
   /**
    * Constructs a GVVectorTiles layer to manage an OpenLayer layer.
    * @param {string} mapId - The map id
-   * @param {VectorTileLayer} olLayer - The OpenLayer layer.
+   * @param {VectorTile} olSource - The OpenLayer source.
    * @param {VectorTilesLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(mapId: string, olLayer: VectorTileLayer, layerConfig: VectorTilesLayerEntryConfig) {
-    super(mapId, olLayer, layerConfig);
+  public constructor(mapId: string, olSource: VectorTile, layerConfig: VectorTilesLayerEntryConfig) {
+    super(mapId, olSource, layerConfig);
+
+    // Create the tile layer options.
+    const tileLayerOptions: TileOptions<VectorTile> = { source: olSource };
+
+    // Init the layer options with initial settings
+    AbstractGVVectorTile.initOptionsWithInitialSettings(tileLayerOptions, layerConfig);
+
+    // Create and set the OpenLayer layer
+    this.olLayer = new VectorTileLayer({ ...tileLayerOptions });
   }
 
   /**
@@ -39,9 +48,9 @@ export class GVVectorTiles extends AbstractGVVectorTile {
    * Overrides the get of the OpenLayers Layer
    * @returns {VectorTile} The OpenLayers Layer
    */
-  override getOLSource(): VectorTile | undefined {
+  override getOLSource(): VectorTile {
     // Get source from OL
-    return this.getOLLayer().getSource() || undefined;
+    return super.getOLSource() as VectorTile;
   }
 
   /**

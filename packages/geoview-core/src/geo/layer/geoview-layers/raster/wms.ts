@@ -556,22 +556,38 @@ export class WMS extends AbstractGeoViewRaster {
         }
         if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
 
-        const imageLayerOptions: ImageOptions<ImageWMS> = {
-          source: new ImageWMS(sourceOptions),
-          properties: { layerCapabilities, layerConfig },
-        };
-        // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-        if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings.className;
-        if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings.extent;
-        if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
-        if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
-        if (layerConfig.initialSettings?.states?.opacity !== undefined)
-          imageLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
-        // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
-        // GV            in the 'loading' state if the flag value is false.
+        // Create the source
+        const source = new ImageWMS(sourceOptions);
 
-        // Create the OpenLayer layer
-        const olLayer = new ImageLayer(imageLayerOptions);
+        // GV Time to request an OpenLayers layer!
+        const requestResult = this.emitLayerRequesting({ config: layerConfig, source, extraConfig: { layerCapabilities } });
+
+        // If any response
+        let olLayer: ImageLayer<ImageWMS> | undefined;
+        if (requestResult.length > 0) {
+          // Get the OpenLayer that was created
+          olLayer = requestResult[0] as ImageLayer<ImageWMS>;
+        }
+
+        // If no olLayer was obtained
+        if (!olLayer) {
+          const imageLayerOptions: ImageOptions<ImageWMS> = {
+            source,
+            properties: { layerCapabilities, layerConfig },
+          };
+          // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+          if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings.className;
+          if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings.extent;
+          if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
+          if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
+          if (layerConfig.initialSettings?.states?.opacity !== undefined)
+            imageLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
+          // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
+          // GV            in the 'loading' state if the flag value is false.
+
+          // Create the OpenLayer layer
+          olLayer = new ImageLayer(imageLayerOptions);
+        }
 
         // TODO: Refactor - Wire it up
         this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'image');
@@ -592,10 +608,12 @@ export class WMS extends AbstractGeoViewRaster {
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
-   * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
+   * @param {OgcWmsLayerEntryConfig} layerConfig The layer entry configuration to process.
+   *
+   * @returns {Promise<OgcWmsLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
   // GV Layers Refactoring - Obsolete (in config?)
-  protected override processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected override processLayerMetadata(layerConfig: OgcWmsLayerEntryConfig): Promise<OgcWmsLayerEntryConfig> {
     if (geoviewEntryIsWMS(layerConfig)) {
       const layerCapabilities = this.#getLayerMetadataEntry(layerConfig.layerId)!;
       this.setLayerMetadata(layerConfig.layerPath, layerCapabilities);
@@ -935,8 +953,7 @@ export class WMS extends AbstractGeoViewRaster {
           const drawingContext = drawingCanvas.getContext('2d')!;
           drawingContext.drawImage(image, 0, 0);
           legend = {
-            type: this.type,
-            layerName: layerConfig!.layerName,
+            type: CONST_LAYER_TYPES.WMS,
             legend: drawingCanvas,
             styles: styleLegends.length ? styleLegends : undefined,
           };
@@ -945,8 +962,7 @@ export class WMS extends AbstractGeoViewRaster {
       }
 
       legend = {
-        type: this.type,
-        layerName: layerConfig!.layerName,
+        type: CONST_LAYER_TYPES.WMS,
         legend: null,
         styles: styleLegends.length > 1 ? styleLegends : undefined,
       };

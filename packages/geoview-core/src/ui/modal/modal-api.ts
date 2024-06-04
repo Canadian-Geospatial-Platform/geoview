@@ -130,9 +130,9 @@ export type ModalEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type ModalOpenedDelegate = EventDelegateBase<ModalApi, ModalEvent>;
+type ModalOpenedDelegate = EventDelegateBase<ModalApi, ModalEvent, void>;
 
 /**
  * Define a delegate for the event handler function signature
  */
-type ModalClosedDelegate = EventDelegateBase<ModalApi, ModalEvent>;
+type ModalClosedDelegate = EventDelegateBase<ModalApi, ModalEvent, void>;

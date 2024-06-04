@@ -129,4 +129,4 @@ export class Translate extends Interaction {
 /**
  * Define a delegate for the event handler function signature
  */
-type TranslateDelegate = EventDelegateBase<Translate, OLTranslateEvent>;
+type TranslateDelegate = EventDelegateBase<Translate, OLTranslateEvent, void>;

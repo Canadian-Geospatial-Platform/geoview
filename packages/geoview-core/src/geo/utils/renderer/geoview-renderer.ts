@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-// We have many reassign for node-layerConfig. We keep it global...
 import { asArray, asString } from 'ol/color';
 import { Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon } from 'ol/style';
 import { Geometry, LineString, Point, Polygon } from 'ol/geom';
@@ -39,6 +37,7 @@ import {
   isClassBreakStyleConfig,
   TypeUniqueValueStyleConfig,
   TypeClassBreakStyleConfig,
+  TypeBaseStyleConfig,
 } from '@/geo/map/map-schema-types';
 import {
   binaryKeywors,
@@ -54,9 +53,6 @@ import {
 } from './geoview-renderer-types';
 import { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { logger } from '@/core/utils/logger';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
-import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 type TypeStyleProcessor = (
   styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
@@ -325,9 +321,12 @@ function createPolygonCanvas(polygonStyle?: Style): HTMLCanvasElement {
  * @returns {StrokeOptions} The stroke options created.
  */
 function createStrokeOptions(settings: TypeSimpleSymbolVectorConfig | TypeLineStringVectorConfig | TypePolygonVectorConfig): StrokeOptions {
+  // eslint-disable-next-line no-param-reassign
   if (settings.stroke === undefined) settings.stroke = {};
   if (settings.stroke.color === undefined) {
+    // eslint-disable-next-line no-param-reassign
     if ('color' in settings) settings.stroke.color = asString(setAlphaColor(asArray((settings as TypeSimpleSymbolVectorConfig).color!), 1));
+    // eslint-disable-next-line no-param-reassign
     else settings.stroke.color = getDefaultColor(1, true);
   }
   const strokeOptions: StrokeOptions = {
@@ -618,6 +617,7 @@ function featureIsNotVisible(feature: Feature, filterEquation: FilterNodeArrayTy
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
 function processCircleSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
+  // eslint-disable-next-line no-param-reassign
   if (settings.color === undefined) settings.color = getDefaultColor(0.25, true);
   const fillOptions: FillOptions = { color: settings.color };
   const strokeOptions: StrokeOptions = createStrokeOptions(settings);
@@ -641,6 +641,7 @@ function processCircleSymbol(settings: TypeSimpleSymbolVectorConfig): Style | un
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
 function processStarShapeSymbol(settings: TypeSimpleSymbolVectorConfig, points: number, angle: number): Style | undefined {
+  // eslint-disable-next-line no-param-reassign
   if (settings.color === undefined) settings.color = getDefaultColor(0.25, true);
   const fillOptions: FillOptions = { color: settings.color };
   const strokeOptions: StrokeOptions = createStrokeOptions(settings);
@@ -708,6 +709,7 @@ function processRegularShape(
   angle: number,
   scale: [number, number]
 ): Style | undefined {
+  // eslint-disable-next-line no-param-reassign
   if (settings.color === undefined) settings.color = getDefaultColor(0.25, true);
   const fillOptions: FillOptions = { color: settings.color };
   const strokeOptions: StrokeOptions = createStrokeOptions(settings);
@@ -852,6 +854,7 @@ function processSimpleLineString(
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
 function processSolidFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
+  // eslint-disable-next-line no-param-reassign
   if (settings.color === undefined) settings.color = getDefaultColor(0.25, true);
   const fillOptions: FillOptions = { color: settings.color };
   const strokeOptions: StrokeOptions = createStrokeOptions(settings);
@@ -870,6 +873,7 @@ function processSolidFill(settings: TypePolygonVectorConfig, geometry?: Geometry
  * @returns {Style | undefined} The Style created. Undefined if unable to create it.
  */
 function processNullFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
+  // eslint-disable-next-line no-param-reassign
   if (settings.color === undefined) settings.color = getDefaultColor(0, true);
   const fillOptions: FillOptions = { color: settings.color };
   const strokeOptions: StrokeOptions = createStrokeOptions(settings);
@@ -890,6 +894,7 @@ function processNullFill(settings: TypePolygonVectorConfig, geometry?: Geometry)
  */
 function processPaternFill(settings: TypePolygonVectorConfig, fillPaternLines: FillPaternLine[], geometry?: Geometry): Style | undefined {
   const paternSize = settings.paternSize !== undefined ? settings.paternSize : 8;
+  // eslint-disable-next-line no-param-reassign
   if (settings.color === undefined) settings.color = getDefaultColor(0.25, true);
   const fillOptions: FillOptions = { color: settings.color };
   const strokeOptions: StrokeOptions = createStrokeOptions(settings);
@@ -1129,17 +1134,12 @@ async function getPointStyleSubRoutine(
 /** ***************************************************************************************************************************
  * This method gets the legend styles used by the the layer as specified by the style configuration.
  *
- * @param {AbstractBaseLayerEntryConfig & {style: TypeStyleConfig;}} layerConfig - Layer configuration.
+ * @param {TypeStyleConfig} styleConfig - The style configuration.
  *
  * @returns {Promise<TypeVectorLayerStyles>} A promise that the layer styles are processed.
  */
-export async function getLegendStyles(
-  layerConfig: AbstractBaseLayerEntryConfig & {
-    style: TypeStyleConfig;
-  }
-): Promise<TypeVectorLayerStyles> {
+export async function getLegendStyles(styleConfig: TypeStyleConfig | undefined): Promise<TypeVectorLayerStyles> {
   try {
-    const styleConfig: TypeStyleConfig = layerConfig.style;
     if (!styleConfig) return {};
 
     const legendStyles: TypeVectorLayerStyles = {};
@@ -1231,7 +1231,7 @@ export async function getLegendStyles(
  * @param {TypeStyleGeometry} geometryType - Type of geometry (Point, LineString, Polygon).
  * @param {TypeDisplayLanguage} language - Language for the style
  *
- * @returns {TypeSimpleStyleConfig | undefined} The Style configurationcreated. Undefined if unable to create it.
+ * @returns {TypeSimpleStyleConfig | undefined} The Style configuration created. Undefined if unable to create it.
  */
 function createDefaultStyle(geometryType: TypeStyleGeometry, label: string): TypeSimpleStyleConfig | undefined {
   if (geometryType === 'Point') {
@@ -1524,40 +1524,47 @@ const processStyle: Record<TypeBaseStyleType, Record<TypeStyleGeometry, TypeStyl
 /** ***************************************************************************************************************************
  * This method gets the style of the feature using the layer entry config. If the style does not exist for the geometryType,
  * create it using the default style strategy.
- *
  * @param {FeatureLike} feature - Feature that need its style to be defined.
- * @param {VectorTileLayerEntryConfig | VectorLayerEntryConfig} layerConfig - Layer
- * entry config that may have a style configuration for the feature. If style does not exist for the geometryType, create it.
+ * @param {TypeStyleConfig} style - The style to use
  * @param {string} label - The style label when one has to be created
- *
+ * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
+ * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
+ * @param {() => Promise<string | null>} callbackWhenCreatingStyle - An optional callback to execute when a new style had to be created
  * @returns {Style | undefined} The style applied to the feature or undefined if not found.
  */
 export function getAndCreateFeatureStyle(
   feature: FeatureLike,
-  layerConfig: VectorTilesLayerEntryConfig | VectorLayerEntryConfig,
-  label: string
+  style: TypeStyleConfig,
+  label: string,
+  filterEquation?: FilterNodeArrayType,
+  legendFilterIsOff?: boolean,
+  callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeBaseStyleConfig) => void
 ): Style | undefined {
+  // Get the geometry type
   const geometryType = getGeometryType(feature);
+
+  // The style to work on
+  let styleWorkOn = style;
+
   // If style does not exist for the geometryType, create it.
-  if (!layerConfig.style || !layerConfig.style[geometryType]) {
+  if (!style || !style[geometryType]) {
     // Create a style on-the-fly for the geometry type, because the layer config didn't have one already
     const styleConfig = createDefaultStyle(geometryType, label);
 
-    // Add a default style to the layer config
-    if (styleConfig) layerConfig.addDefaultStyle(geometryType, styleConfig);
+    // If a style has been created on-the-fly
+    if (styleConfig) {
+      if (style) styleWorkOn[geometryType] = styleConfig;
+      else styleWorkOn = { [geometryType]: styleConfig };
+      callbackWhenCreatingStyle?.(geometryType, styleConfig);
+    }
   }
 
   // Get the style accordingly to its type and geometry.
-  if (layerConfig.style![geometryType]) {
-    const styleSettings = layerConfig.style![geometryType]!;
+  if (styleWorkOn![geometryType]) {
+    const styleSettings = style![geometryType]!;
     const { styleType } = styleSettings;
-    return processStyle[styleType][geometryType].call(
-      '',
-      styleSettings,
-      feature as Feature,
-      layerConfig.filterEquation,
-      layerConfig.legendFilterIsOff
-    );
+    // TODO: Refactor - Rewrite this to use explicit function calls instead, for clarity and references finding
+    return processStyle[styleType][geometryType].call('', styleSettings, feature as Feature, filterEquation, legendFilterIsOff);
   }
   return undefined;
 }
@@ -1565,13 +1572,17 @@ export function getAndCreateFeatureStyle(
 /** ***************************************************************************************************************************
  * This method gets the canvas icon from the style of the feature using the layer entry config.
  * @param {Feature} feature - The feature that need its canvas icon to be defined.
- * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config that may have a style configuration for the feature.
+ * @param {TypeStyleConfig} style - The style to use
+ * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
+ * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
  * @param {() => Promise<string | null>} callbackForDataUrl - An optional callback to execute when struggling to build a canvas and have to use a data url to make one
  * @returns {Promise<HTMLCanvasElement>} The canvas icon associated to the feature or a default empty canvas.
  */
 export async function getFeatureCanvas(
   feature: Feature,
-  layerConfig: AbstractBaseLayerEntryConfig,
+  style: TypeStyleConfig,
+  filterEquation?: FilterNodeArrayType,
+  legendFilterIsOff?: boolean,
   callbackForDataUrl?: () => Promise<string | null>
 ): Promise<HTMLCanvasElement> {
   // The canvas that will be returned (if calculated successfully)
@@ -1580,18 +1591,12 @@ export async function getFeatureCanvas(
   // If the feature has a geometry
   if (feature.getGeometry()) {
     const geometryType = getGeometryType(feature);
-    const { style } = layerConfig as VectorLayerEntryConfig;
 
     // Get the style accordingly to its type and geometry.
-    if (style![geometryType] !== undefined) {
-      const styleSettings = style![geometryType]!;
+    if (style[geometryType]) {
+      const styleSettings = style[geometryType]!;
       const { styleType } = styleSettings;
-      const featureStyle = processStyle[styleType][geometryType](
-        styleSettings,
-        feature,
-        layerConfig.filterEquation,
-        layerConfig.legendFilterIsOff
-      );
+      const featureStyle = processStyle[styleType][geometryType](styleSettings, feature, filterEquation, legendFilterIsOff);
       if (featureStyle) {
         if (geometryType === 'Point') {
           if (
@@ -1650,20 +1655,28 @@ function classifyUnprocessedNodes(keywordArray: FilterNodeArrayType): FilterNode
       if (Number.isNaN(Number((node.nodeValue as string).slice(0, 1)))) {
         if (['+', '-'].includes(node.nodeValue as string))
           if (i !== 0 && [NodeType.number, NodeType.string, NodeType.variable].includes(keywordArray[i - 1].nodeType))
+            // eslint-disable-next-line no-param-reassign
             node.nodeType = NodeType.binary;
           else {
+            // eslint-disable-next-line no-param-reassign
             node.nodeType = NodeType.unary;
+            // eslint-disable-next-line no-param-reassign
             node.nodeValue = `u${node.nodeValue}`;
           }
         else if (typeof node.nodeValue === 'string' && node.nodeValue.toLowerCase() === 'null') {
+          // eslint-disable-next-line no-param-reassign
           node.nodeType = NodeType.variable;
+          // eslint-disable-next-line no-param-reassign
           node.nodeValue = null;
         } else {
+          // eslint-disable-next-line no-param-reassign
           node.nodeType = NodeType.variable;
         }
         return node;
       }
+      // eslint-disable-next-line no-param-reassign
       node.nodeType = NodeType.number;
+      // eslint-disable-next-line no-param-reassign
       node.nodeValue = Number(node.nodeValue);
       if (Number.isNaN(node.nodeValue)) throw new Error(`${node.nodeValue} is an invalid number`);
       return node;
@@ -1695,6 +1708,7 @@ function extractKeyword(filterNodeArray: FilterNodeArrayType, keyword: string, r
   return filterNodeArray.reduce((newKeywordArray, node) => {
     if (node.nodeType !== NodeType.unprocessedNode) newKeywordArray.push(node);
     else {
+      // eslint-disable-next-line no-param-reassign
       newKeywordArray = newKeywordArray.concat(
         (node.nodeValue as string)
           .trim()

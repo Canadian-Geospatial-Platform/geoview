@@ -225,7 +225,7 @@ export class Notifications {
 /**
  * Define a delegate for the event handler function signature
  */
-type SnackBarOpenDelegate = EventDelegateBase<Notifications, SnackBarOpenEvent>;
+type SnackBarOpenDelegate = EventDelegateBase<Notifications, SnackBarOpenEvent, void>;
 
 /**
  * Define an event for the delegate

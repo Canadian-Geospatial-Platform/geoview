@@ -17,7 +17,6 @@ import { xmlToJson } from '@/core/utils/utilities';
 
 import { CONST_LAYER_TYPES, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { TypeStyleConfig } from '@/geo/map/map-schema-types';
 
 import { TypeBasemapLayer } from '../layer/basemap/basemap-types';
@@ -234,16 +233,12 @@ export function createEmptyBasemap(): TileLayer<XYZ> {
 /** ***************************************************************************************************************************
  * This method gets the legend styles used by the the layer as specified by the style configuration.
  *
- * @param {AbstractBaseLayerEntryConfig & {style: TypeStyleConfig;}} layerConfig - Layer configuration.
+ * @param {TypeStyleConfig} styleConfig - Layer style configuration.
  *
  * @returns {Promise<TypeVectorLayerStyles>} A promise that the layer styles are processed.
  */
-export function getLegendStylesFromConfig(
-  layerConfig: AbstractBaseLayerEntryConfig & {
-    style: TypeStyleConfig;
-  }
-): Promise<TypeVectorLayerStyles> {
-  return getLegendStyles(layerConfig);
+export function getLegendStylesFromConfig(styleConfig: TypeStyleConfig): Promise<TypeVectorLayerStyles> {
+  return getLegendStyles(styleConfig);
 }
 
 /**
