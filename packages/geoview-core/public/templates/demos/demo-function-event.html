@@ -13,6 +13,17 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     <link rel="stylesheet" href="css/style.css" />
+    <style>
+      li {
+        padding-top: 5px;
+        padding-bottom: 5px;
+      }
+      button {
+        margin-top: 5px;
+        margin-bottom: 5px;
+        margin-right: 5px;
+      }
+    </style>
   </head>
 
   <body>
@@ -58,7 +69,7 @@
       id="Map1"
       class="geoview-map"
       data-lang="en"
-      data-config-url="./configs/navigator/06-basic-footer.json"
+      data-config-url="./configs/OSDP/function-event.json"
     ></div>
     <button type="button" class="collapsible">Code Snippet</button>
     <pre id="codeSnippet" class="panel"></pre>
@@ -119,17 +130,44 @@
           cgpv.api.maps.Map1.layer.featureInfoLayerSet.disableClickListener('esriFeatureLYR5/0')
           cgpv.api.maps.Map1.layer.featureInfoLayerSet.enableClickListener('esriFeatureLYR5/0')
         </li>
+        <li><button id="Show-collapsed-state">Show collapsed legend state for Water Quantity</button><br />
+          cgpv.api.maps.Map1.stateApi.getLegendCollapsedState('uniqueValueId/1');
+        </li>
+        <li><button id="Toggle-collapse">Toggle legend collapsed state for Water Quantity</button><br />
+          cgpv.api.maps.Map1.stateApi.setLegendCollapsedState('uniqueValueId/1');
+        </li>
+        <li><button id="Show-layer-info">Show layer info</button><br />
+          cgpv.api.maps.Map1.getMapLayerOrderInfo()
+        </li>
+        <li><button id="Language-en">Change language to English</button><button id="Language-fr">Change language to French</button><br />
+          cgpv.api.maps.Map1.getMapLayerOrderInfo()
+        </li>
+        <li><button id="Change-basemap">Change basemap</button><br />
+          const basemap = await cgpv.api.maps.Map1.basemap.createCoreBasemap(basemapOptions = {basemapId: 'simple'})
+          cgpv.api.maps.Map1.basemap.setBasemap(basemap)
+        </li>
+        <li><button id="Set-layer">Set selected layer in layers panel to Nonmetal mines</button><br />
+          cgpv.api.maps.Map1.stateApi.setSelectedLayersTabLayer('nonmetalmines/5')
+        </li>
+        <li><button id="Swiper-add">Add Nonmetal mines to swiper</button><button id="Swiper-remove">Remove Nonmetal mines from swiper</button><br />
+          cgpv.api.maps.Map1.plugins['swiper'].activateForLayer('nonmetalmines/5')
+          cgpv.api.maps.Map1.plugins['swiper'].deActivateForLayer('nonmetalmines/5')
+        </li>
       </ul>
       <h3>Events that will generate notifications:</h3>
       <ul>
         <li>onLayerAdded</li>
         <li>onLayerRemoved</li>
-        <li>onLayerVisibilityToggled</li>
+        <li>onVisibleChanged for uniqueValueId/1</li>
         <li>onLayerItemVisibilityToggled</li>
         <li>onMapZoomEnd</li>
         <li>onMapMoveEnd</li>
         <li>onLayerStatusChanged for uniqueValueId/1</li>
         <li>onLayerFilterApplied for uniqueValueId/1</li>
+        <li>onMapLanguageChanged</li>
+        <li>onBasemapChanged</li>
+        <li>onLayersReordered</li>
+        <li>onLayerOpacityChanged for uniqueValueId/1</li>
       </ul>
     </div>
     <br>
@@ -153,8 +191,8 @@
         });
 
         // listen to layer visibility changed event
-        cgpv.api.maps.Map1.layer.onLayerVisibilityToggled((sender, payload) => {
-          cgpv.api.maps.Map1.notifications.addNotificationSuccess(`${payload.layerPath} visibility set to ${payload.visibility}`);
+        cgpv.api.maps.Map1.layer.getGeoviewLayer('uniqueValueId/1').onVisibleChanged((sender, payload) => {
+          cgpv.api.maps.Map1.notifications.addNotificationSuccess(`uniqueValueId/1 visibility set to ${payload.visible}`);
         });
 
         // listen to layer item visibility changed event
@@ -177,9 +215,29 @@
           cgpv.api.maps.Map1.notifications.addNotificationSuccess(`uniqueValueId/1 status changed to ${payload.layerStatus}`);
         });
 
-        // listen to layer status change event
+        // listen to layer filter applied event
         cgpv.api.maps.Map1.layer.getGeoviewLayer('uniqueValueId/1').onLayerFilterApplied((sender, payload) => {
-          cgpv.api.maps.Map1.notifications.addNotificationSuccess(`Filter ${payload.filter} applied to ${payload.layerPath} `);
+          cgpv.api.maps.Map1.notifications.addNotificationSuccess(`Filter ${payload.filter} applied to ${payload.layerPath}`);
+        });
+
+        // listen to map language changed event
+        cgpv.api.maps.Map1.onMapLanguageChanged((sender, payload) => {
+          cgpv.api.maps.Map1.notifications.addNotificationSuccess(`Map language changed to ${payload.language}`);
+        });
+
+        // listen to basemap changed event
+        cgpv.api.maps.Map1.basemap.onBasemapChanged((sender, payload) => {
+          cgpv.api.maps.Map1.notifications.addNotificationSuccess(`Basemap changed to ${payload.basemap.basemapId}`);
+        });
+
+        // listen to layer reordered event
+        cgpv.api.maps.Map1.stateApi.onLayersReordered((sender, payload) => {
+          cgpv.api.maps.Map1.notifications.addNotificationSuccess(`Layers reordered to ${payload.orderedLayers.map((layer) => layer.layerPath)}`);
+        });
+
+        // listen to layer opacity changed event
+        cgpv.api.maps.Map1.layer.getGeoviewLayer('uniqueValueId/1').onLayerOpacityChanged((sender, payload) => {
+          cgpv.api.maps.Map1.notifications.addNotificationSuccess(`${payload.layerPath} opacity changed to ${payload.opacity}`);
         });
 
       });
@@ -366,7 +424,7 @@
         cgpv.api.maps.Map1.layer.hoverFeatureInfoLayerSet.enableHoverListener('esriFeatureLYR5/0')
       });
 
-      // Disable feature info Button========================================================================================================
+      // Disable feature info Button=================================================================================================
       // find the button element by ID
       var disableFeatureInfoButton = document.getElementById('Disable-feature-info');
 
@@ -375,13 +433,97 @@
         cgpv.api.maps.Map1.layer.featureInfoLayerSet.disableClickListener('esriFeatureLYR5/0')
       });
 
-      // Enable feature info Button========================================================================================================
+      // Enable feature info Button==================================================================================================
       // find the button element by ID
       var enableFeatureInfoButton = document.getElementById('Enable-feature-info');
 
       // add an event listener when a button is clicked
       enableFeatureInfoButton.addEventListener('click', async () => {
         cgpv.api.maps.Map1.layer.featureInfoLayerSet.enableClickListener('esriFeatureLYR5/0')
+      });
+
+      // Enable show collapsed state Button==========================================================================================
+      // find the button element by ID
+      var showCollapsedStateButton = document.getElementById('Show-collapsed-state');
+
+      // add an event listener when a button is clicked
+      showCollapsedStateButton.addEventListener('click', async () => {
+        console.log(cgpv.api.maps.Map1.stateApi.getLegendCollapsedState('uniqueValueId/1'))
+      });
+
+      // Enable toggle collapse state Button==========================================================================================
+      // find the button element by ID
+      var toggleCollapseButton = document.getElementById('Toggle-collapse');
+
+      // add an event listener when a button is clicked
+      toggleCollapseButton.addEventListener('click', async () => {
+        cgpv.api.maps.Map1.stateApi.setLegendCollapsedState('uniqueValueId/1')
+      });
+
+      // Enable show layer info Button================================================================================================
+      // find the button element by ID
+      var showLayerInfoButton = document.getElementById('Show-layer-info');
+
+      // add an event listener when a button is clicked
+      showLayerInfoButton.addEventListener('click', async () => {
+        console.log(cgpv.api.maps.Map1.getMapLayerOrderInfo())
+      });
+
+      // Enable language en Button================================================================================================
+      // find the button element by ID
+      var changeLanguageEnglishButton = document.getElementById('Language-en');
+
+      // add an event listener when a button is clicked
+      changeLanguageEnglishButton.addEventListener('click', async () => {
+        console.log(cgpv.api.maps.Map1.setLanguage('en'));
+      });
+
+      // Enable language fr Button================================================================================================
+      // find the button element by ID
+      var changeLanguageFrenchButton = document.getElementById('Language-fr');
+
+      // add an event listener when a button is clicked
+      changeLanguageFrenchButton.addEventListener('click', async () => {
+        console.log(cgpv.api.maps.Map1.setLanguage('fr'));
+      });
+
+      // Change basemap Button================================================================================================
+      // find the button element by ID
+      var changeBasemapButton = document.getElementById('Change-basemap');
+
+      // add an event listener when a button is clicked
+      changeBasemapButton.addEventListener('click', async () => {
+        // Create basemap
+        const basemap = await cgpv.api.maps.Map1.basemap.createCoreBasemap(basemapOptions = {basemapId: 'simple'});
+        // Set on map
+        cgpv.api.maps.Map1.basemap.setBasemap(basemap);
+      });
+
+      // Set layer Button================================================================================================
+      // find the button element by ID
+      var setLayerButton = document.getElementById('Set-layer');
+
+      // add an event listener when a button is clicked
+      setLayerButton.addEventListener('click', async () => {
+        cgpv.api.maps.Map1.stateApi.setSelectedLayersTabLayer('nonmetalmines/5');
+      });
+
+      // Swiper add Button================================================================================================
+      // find the button element by ID
+      var swiperAddButton = document.getElementById('Swiper-add');
+
+      // add an event listener when a button is clicked
+      swiperAddButton.addEventListener('click', async () => {
+        cgpv.api.maps.Map1.plugins['swiper'].activateForLayer('nonmetalmines/5');
+      });
+
+      // Swiper remove Button================================================================================================
+      // find the button element by ID
+      var swiperRemoveButton = document.getElementById('Swiper-remove');
+
+      // add an event listener when a button is clicked
+      swiperRemoveButton.addEventListener('click', async () => {
+        cgpv.api.maps.Map1.plugins['swiper'].deActivateForLayer('nonmetalmines/5');
       });
 
       // create snippets

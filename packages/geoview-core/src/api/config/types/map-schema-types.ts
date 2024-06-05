@@ -277,10 +277,12 @@ export type TypeLayerControls = {
   zoom?: boolean;
 };
 
-/** Initial settings for availablity of controls. */
+/** Initial settings for layer states. */
 export type TypeLayerStates = {
   /** Is the layer initially visible. Default = true */
   visible?: boolean;
+  /** Is the layer's legend initially collapsed. Default = false */
+  legendCollapsed?: boolean;
   /** Initial opacity setting. Default = 1 */
   opacity?: number;
   /** Is layer hoverable initially. Domain = [0..1] and default = 1. */

@@ -1,6 +1,10 @@
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import { ITimeSliderState, TypeTimeSliderValues } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import {
+  ITimeSliderState,
+  TimeSliderLayerSet,
+  TypeTimeSliderValues,
+} from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
@@ -33,6 +37,15 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   protected static getTimesliderState(mapId: string): ITimeSliderState | undefined {
     // Return the time slider state
     return super.getState(mapId).timeSliderState;
+  }
+
+  /**
+   * Gets time slider layers.
+   * @param {string} mapId - The map id of the state to act on
+   * @returns {TimeSliderLayerSet | undefined} The time slider layer set or undefined
+   */
+  static getTimeSliderLayers(mapId: string): TimeSliderLayerSet | undefined {
+    return this.getTimesliderState(mapId)?.timeSliderLayers;
   }
 
   /**

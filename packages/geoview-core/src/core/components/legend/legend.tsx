@@ -2,7 +2,9 @@ import { useTheme } from '@mui/material';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Typography } from '@/ui';
-import { useLayerLegendLayers, useMapVisibleLayers, useGeoViewMapId } from '@/core/stores/';
+import { useGeoViewMapId } from '@/core/stores/';
+import { useLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useMapOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 
 import { getSxClasses } from './legend-styles';
@@ -30,7 +32,7 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
   const [formattedLegendLayerList, setFormattedLegendLayersList] = useState<TypeLegendLayer[][]>([]);
 
   // store state
-  const visibleLayers = useMapVisibleLayers();
+  const orderedLayerInfo = useMapOrderedLayerInfo();
   const layersList = useLayerLegendLayers();
 
   // Custom hook for calculating the height of footer panel
@@ -74,13 +76,13 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('LEGEND - visibleLayers', visibleLayers.length, visibleLayers);
+    logger.logTraceUseEffect('LEGEND - visibleLayers', orderedLayerInfo.length, orderedLayerInfo);
 
     setLegendLayers(layersList);
     updateLegendLayerListByWindowSize(layersList);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visibleLayers, layersList]);
+  }, [orderedLayerInfo, layersList]);
 
   useEffect(() => {
     // Log
