@@ -83,6 +83,20 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Get a specific state.
+   * @param {string} mapId - The mapId
+   * @param {'geochartChartsConfig' | 'layerDataArray' | 'layerDataArrayBatchLayerPathBypass' | 'selectedLayerPath'} state - The state to get
+   * @returns {string | TypeGeochartResultSetEntry[] | GeoChartStoreByLayerPath | undefined} The requested state
+   */
+  static getSingleGeochartState(
+    mapId: string,
+    state: 'geochartChartsConfig' | 'layerDataArray' | 'layerDataArrayBatchLayerPathBypass' | 'selectedLayerPath'
+  ): string | TypeGeochartResultSetEntry[] | GeoChartStoreByLayerPath | undefined {
+    if (this.getGeochartState(mapId)) return this.getGeochartState(mapId)![state];
+    return undefined;
+  }
+
+  /**
    * Sets the default layers from configuration.
    * In the store, the GeoChart configurations are stored in an object with layerPath as its property name
    * (to retrieve the configuration per layer faster).

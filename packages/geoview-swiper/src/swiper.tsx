@@ -13,8 +13,9 @@ import { useSwiperLayerPaths } from 'geoview-core/src/core/stores/store-interfac
 import { logger } from 'geoview-core/src/core/utils/logger';
 import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
-import { useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
+import { useMapVisibleLayers, useMapLoaded } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from 'geoview-core/src/geo/map/map-viewer';
+import { delay } from 'lodash';
 import { sxClasses } from './swiper-style';
 
 type SwiperProps = {
@@ -48,6 +49,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const layerPaths = useSwiperLayerPaths();
   const displayLanguage = useAppDisplayLanguage();
   const visibleLayers = useMapVisibleLayers();
+  const mapLoaded = useMapLoaded();
 
   /**
    * Pre compose, Pre render event callback
@@ -134,6 +136,14 @@ export function Swiper(props: SwiperProps): JSX.Element {
       layer.changed();
     });
   }, 100);
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('SWIPER - mapLoaded', mapLoaded);
+
+    const clearLoading = delay(onStop, 100);
+    return () => clearTimeout(clearLoading);
+  }, [mapLoaded, onStop]);
 
   /**
    * Update swiper and layers from keyboard CTRL + Arrow key

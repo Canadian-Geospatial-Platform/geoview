@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import {
@@ -21,6 +20,7 @@ import {
   VisibilityOffOutlinedIcon,
   HighlightIcon,
 } from '@/ui';
+import { useLayersCollapsedInLegend, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useLayerHighlightedLayer, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { useMapStoreActions } from '@/core/stores/';
@@ -42,12 +42,12 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const [isGroupOpen, setGroupOpen] = useState(true);
-
-  // get store actions
+  // Get store actions
   const highlightedLayer = useLayerHighlightedLayer();
+  const layersCollapsedInLegend = useLayersCollapsedInLegend();
   const { getVisibilityFromOrderedLayerInfo, setOrToggleLayerVisibility } = useMapStoreActions();
   const { setHighlightLayer, zoomToLayerExtent } = useLayerStoreActions();
+  const { addOrRemoveCollapsedLayer } = useUIStoreActions();
 
   const getLayerChildren = (): TypeLegendLayer[] => {
     return layer.children?.filter((c) => ['processed', 'loaded'].includes(c.layerStatus ?? ''));
@@ -57,7 +57,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
    * Handle expand/shrink of layer groups.
    */
   const handleExpandGroupClick = (): void => {
-    setGroupOpen(!isGroupOpen);
+    addOrRemoveCollapsedLayer(layer.layerPath);
   };
 
   /**
@@ -176,7 +176,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
   function renderCollapsible(): JSX.Element | null {
     if (layer.type === 'ogcWms' && layer.icons.length && layer.icons[0].iconImage && layer.icons[0].iconImage !== 'no data') {
       return (
-        <Collapse in={isGroupOpen} sx={sxClasses.collapsibleContainer} timeout="auto">
+        <Collapse in={!layersCollapsedInLegend.includes(layer.layerPath)} sx={sxClasses.collapsibleContainer} timeout="auto">
           <Box component="img" alt="icon" src={layer.icons[0].iconImage} sx={{ maxWidth: '100%' }} />
         </Collapse>
       );
@@ -187,7 +187,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
     }
 
     return (
-      <Collapse in={isGroupOpen} sx={sxClasses.collapsibleContainer} timeout="auto">
+      <Collapse in={!layersCollapsedInLegend.includes(layer.layerPath)} sx={sxClasses.collapsibleContainer} timeout="auto">
         {renderChildren()}
         {renderItems()}
       </Collapse>
@@ -214,7 +214,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
           </Tooltip>
           {!!(layer.children?.length > 1 || layer.items?.length > 1) && (
             <IconButton sx={{ marginBottom: '20px' }} className="buttonOutline" edge="end" size="small" tooltip="layers.toggleCollapse">
-              {isGroupOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+              {!layersCollapsedInLegend.includes(layer.layerPath) ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
             </IconButton>
           )}
         </>

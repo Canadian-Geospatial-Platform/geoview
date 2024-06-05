@@ -34,6 +34,10 @@ export class UIEventProcessor extends AbstractEventProcessor {
   static getCorePackageComponents(mapId: string): TypeMapCorePackages {
     return this.getUIState(mapId).corePackagesComponents;
   }
+
+  static getLayersCollapsedInLegend(mapId: string): string[] {
+    return this.getUIState(mapId).layersCollapsedInLegend;
+  }
   // #endregion
 
   // **********************************************************
@@ -51,5 +55,13 @@ export class UIEventProcessor extends AbstractEventProcessor {
 
   static getActiveAppBarTab(mapId: string): ActiveAppBarTabType {
     return this.getUIState(mapId).activeAppBarTab;
+  }
+
+  static addOrRemoveCollapsedLayer(mapId: string, layerPath: string): void {
+    const layersCollapsed = this.getLayersCollapsedInLegend(mapId);
+    const index = layersCollapsed.indexOf(layerPath);
+    if (index === -1) layersCollapsed.push(layerPath);
+    else layersCollapsed.splice(index, 1);
+    this.getUIState(mapId).setterActions.setLayersCollapsedInLegend(layersCollapsed);
   }
 }
