@@ -166,7 +166,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
               {renderItemCheckbox(item)}
             </Grid>
             <Grid item xs="auto">
-              {item.icon ? <img alt={item.name} src={item.icon} /> : <BrowserNotSupportedIcon />}
+              {item.icon ? <Box component="img" alt={item.name} src={item.icon} /> : <BrowserNotSupportedIcon />}
               <Box component="span" style={sxClasses.tableIconLabel}>
                 {item.name}
               </Box>

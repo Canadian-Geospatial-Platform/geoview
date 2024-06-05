@@ -281,12 +281,12 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
             contentCard={
               <>
                 {typeof basemap.thumbnailUrl === 'string' && (
-                  <img src={basemap.thumbnailUrl} alt={basemap.altText} className="basemapCardThumbnail" />
+                  <Box component="img" src={basemap.thumbnailUrl} alt={basemap.altText} className="basemapCardThumbnail" />
                 )}
                 {Array.isArray(basemap.thumbnailUrl) &&
                   (basemap.thumbnailUrl as string[]).map((thumbnail, index) => {
                     // eslint-disable-next-line react/no-array-index-key
-                    return <img key={index} src={thumbnail} alt={basemap.altText} className="basemapCardThumbnail" />;
+                    return <Box component="img" key={index} src={thumbnail} alt={basemap.altText} className="basemapCardThumbnail" />;
                   })}
                 <Box className={basemap.basemapId !== activeBasemapId ? 'basemapCardThumbnailOverlay' : ''} />
               </>
