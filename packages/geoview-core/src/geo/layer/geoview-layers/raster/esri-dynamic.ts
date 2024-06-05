@@ -315,7 +315,9 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       // Fetch the features
       let urlRoot = layerConfig.geoviewLayerConfig.metadataAccessPath![AppEventProcessor.getDisplayLanguage(this.mapId)]!;
       if (!urlRoot.endsWith('/')) urlRoot += '/';
-      const url = `${urlRoot}${layerConfig.layerId}/query?where=1=1&outFields=*&f=json&returnGeometry=true`;
+      // TODO: we put false so on heavy geometry, dynamic layer can load datatable. If not the featch fails.
+      // TODO.CONT: fix the zoom to feature who is disable for esri because geometry is not fetched #2215
+      const url = `${urlRoot}${layerConfig.layerId}/query?where=1=1&outFields=*&f=json&returnGeometry=false`;
 
       const response = await fetch(url);
       const jsonResponse = await response.json();

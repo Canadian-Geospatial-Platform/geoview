@@ -76,7 +76,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
   const [sorting, setSorting] = useState<MRTSortingState>([]);
 
   // get store actions and values
-  const { zoomToExtent, transformPoints, showClickMarker } = useMapStoreActions();
+  const { zoomToExtent, highlightBBox, transformPoints, showClickMarker } = useMapStoreActions();
   const { applyMapFilters, setSelectedFeature } = useDataTableStoreActions();
   const language = useAppDisplayLanguage();
   const datatableSettings = useDataTableLayerSettings();
@@ -329,6 +329,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
 
             // Add (back?) a click marker
             showClickMarker({ lnglat: newCenter });
+            highlightBBox(extent, false);
           })
           .catch((error: unknown) => {
             // Log
@@ -336,7 +337,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
           });
       }
     },
-    [zoomToExtent, transformPoints, showClickMarker]
+    [zoomToExtent, transformPoints, showClickMarker, highlightBBox]
   );
 
   /**

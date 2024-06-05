@@ -45,7 +45,7 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
   // states from store
   const checkedFeatures = useDetailsCheckedFeatures();
   const { addCheckedFeature, removeCheckedFeature } = useDetailsStoreActions();
-  const { zoomToExtent, transformPoints, showClickMarker } = useMapStoreActions();
+  const { zoomToExtent, highlightBBox, transformPoints, showClickMarker } = useMapStoreActions();
 
   /**
    * Build feature list to be displayed inside table.
@@ -100,6 +100,7 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
 
           // Add (back?) a click marker
           showClickMarker({ lnglat: newCenter });
+          highlightBBox(feature.extent!, false);
         })
         .catch((error: unknown) => {
           // Log
