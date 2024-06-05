@@ -5,7 +5,6 @@ import i18n from 'i18next';
 import { I18nextProvider } from 'react-i18next';
 
 import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
 
 import { Shell } from '@/core/containers/shell';
 import { getTheme, cgpvTheme } from '@/ui/style/theme';
@@ -14,6 +13,7 @@ import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { api } from '@/app';
 import { logger } from './utils/logger';
 import { useAppDisplayLanguageById, useAppDisplayThemeById } from './stores/store-interface-and-intial-values/app-state';
+import { ScopedCssBaseline } from '@mui/material';
 
 // create a state that will hold map config information
 // TODO: use store, only keep map id on context for store manager to gather right store on hooks
@@ -103,8 +103,9 @@ function AppStart(props: AppStartProps): JSX.Element {
   return (
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={cgpvTheme}>
-        <CssBaseline />
-        <Suspense fallback="">{getInlineMaps()}</Suspense>
+        <ScopedCssBaseline>
+          <Suspense fallback="">{getInlineMaps()}</Suspense>
+        </ScopedCssBaseline>
       </ThemeProvider>
     </StyledEngineProvider>
   );
