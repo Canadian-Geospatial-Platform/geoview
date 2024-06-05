@@ -174,6 +174,13 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
   }
 
   function renderCollapsible(): JSX.Element | null {
+    if (layer.type === 'ogcWms' && layer.icons.length && layer.icons[0].iconImage && layer.icons[0].iconImage !== 'no data') {
+      return (
+        <Collapse in={isGroupOpen} sx={sxClasses.collapsibleContainer} timeout="auto">
+          <Box component="img" alt="icon" src={layer.icons[0].iconImage} sx={{ maxWidth: '100%' }} />
+        </Collapse>
+      );
+    }
     // show sub items only when number of items are more than 1.
     if (!(layer.children?.length > 1 || layer.items?.length > 1)) {
       return null;

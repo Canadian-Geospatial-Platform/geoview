@@ -5,8 +5,8 @@ import i18n from 'i18next';
 import { I18nextProvider } from 'react-i18next';
 
 import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
 
+import { ScopedCssBaseline } from '@mui/material';
 import { Shell } from '@/core/containers/shell';
 import { getTheme, cgpvTheme } from '@/ui/style/theme';
 import { MapViewer } from '@/geo/map/map-viewer';
@@ -103,8 +103,9 @@ function AppStart(props: AppStartProps): JSX.Element {
   return (
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={cgpvTheme}>
-        <CssBaseline />
-        <Suspense fallback="">{getInlineMaps()}</Suspense>
+        <ScopedCssBaseline>
+          <Suspense fallback="">{getInlineMaps()}</Suspense>
+        </ScopedCssBaseline>
       </ThemeProvider>
     </StyledEngineProvider>
   );

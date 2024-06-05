@@ -11,9 +11,10 @@ interface LayerListProps {
   depth: number;
   layersList: TypeLegendLayer[];
   setIsLayersListPanelVisible: Dispatch<SetStateAction<boolean>>;
+  isLayoutEnlarged: boolean;
 }
 
-export function LayersList({ layersList, setIsLayersListPanelVisible, depth }: LayerListProps): JSX.Element {
+export function LayersList({ layersList, setIsLayersListPanelVisible, isLayoutEnlarged, depth }: LayerListProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/left-panel/layers-list');
 
@@ -57,6 +58,7 @@ export function LayersList({ layersList, setIsLayersListPanelVisible, depth }: L
         index={index}
         isFirst={isFirst}
         isLast={isLast}
+        isLayoutEnlarged={isLayoutEnlarged}
       />
     );
   });
