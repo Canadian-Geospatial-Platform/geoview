@@ -31,6 +31,16 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
   /**
    * Sets the layer paths on which the swiper should be activated.
    *
+   * @param {string} mapId -  The map id.
+   * @returns {}
+   */
+  static getLayerPaths(mapId: string): string[] | undefined {
+    return this.getSwiperState(mapId)?.layerPaths;
+  }
+
+  /**
+   * Sets the layer paths on which the swiper should be activated.
+   *
    * @param {string} mapId the map id
    * @param {string[]} layerPaths The array of layer paths
    */
