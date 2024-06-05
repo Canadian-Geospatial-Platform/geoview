@@ -159,6 +159,9 @@ export abstract class AbstractGeoViewLayer {
   // Keep all callback delegates references
   #onLayerNameChangedHandlers: LayerNameChangedDelegate[] = [];
 
+  // Keep all callback delegate references
+  #onLayerOpacityChangedHandlers: LayerOpacityChangedDelegate[] = [];
+
   /** ***************************************************************************************************************************
    * The class constructor saves parameters and common configuration parameters in attributes.
    *
@@ -1027,7 +1030,10 @@ export abstract class AbstractGeoViewLayer {
    */
   setOpacity(layerOpacity: number, layerPath: string): void {
     const olLayer = this.getOLLayer(layerPath);
-    if (olLayer) olLayer.setOpacity(layerOpacity);
+    if (olLayer) {
+      olLayer.setOpacity(layerOpacity);
+      this.#emitLayerOpacityChanged({ layerPath, opacity: layerOpacity });
+    }
   }
 
   /** ***************************************************************************************************************************
@@ -1051,9 +1057,9 @@ export abstract class AbstractGeoViewLayer {
   setVisible(layerVisibility: boolean, layerPath: string): void {
     const olLayer = this.getOLLayer(layerPath);
     if (olLayer) {
+      const curVisible = this.getVisible(layerPath);
       olLayer.setVisible(layerVisibility);
       // olLayer.changed();
-      const curVisible = this.getVisible(layerPath);
       if (layerVisibility !== curVisible) this.#emitVisibleChanged({ visible: layerVisibility });
     }
   }
@@ -1751,6 +1757,34 @@ export abstract class AbstractGeoViewLayer {
     EventHelper.offEvent(this.#onLayerNameChangedHandlers, callback);
   }
 
+  /**
+   * Emits opacity changed event.
+   * @param {LayerOpacityChangedEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerOpacityChanged(event: LayerOpacityChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerOpacityChangedHandlers, event);
+  }
+
+  /**
+   * Registers an opacity changed event handler.
+   * @param {LayerOpacityChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerOpacityChanged(callback: LayerOpacityChangedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerOpacityChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters an opacity changed event handler.
+   * @param {LayerOpacityChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerOpacityChanged(callback: LayerOpacityChangedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerOpacityChangedHandlers, callback);
+  }
+
   // #endregion
 }
 
@@ -1850,6 +1884,21 @@ export type LayerNameChangedEvent = {
   // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
   // The layer path.
   layerPath: string;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerOpacityChangedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerOpacityChangedEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerOpacityChangedEvent = {
+  // The layer path of the affected layer
+  layerPath: string;
+  // The filter
+  opacity: number;
 };
 
 export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {

@@ -13,7 +13,7 @@ import { useSwiperLayerPaths } from 'geoview-core/src/core/stores/store-interfac
 import { logger } from 'geoview-core/src/core/utils/logger';
 import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
-import { useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
+import { useMapVisibleLayers, useMapLoaded } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from 'geoview-core/src/geo/map/map-viewer';
 import { sxClasses } from './swiper-style';
 
@@ -48,6 +48,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const layerPaths = useSwiperLayerPaths();
   const displayLanguage = useAppDisplayLanguage();
   const visibleLayers = useMapVisibleLayers();
+  const mapLoaded = useMapLoaded();
 
   /**
    * Pre compose, Pre render event callback
@@ -108,7 +109,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
    * @returns {Number[]} the array of value for x and y position fot the swiper bar
    */
   const getSwiperStyle = (): number[] => {
-    const style = window.getComputedStyle(swiperRef!.current!);
+    const style = window.getComputedStyle(swiperRef.current!);
     const matrix = new DOMMatrixReadOnly(style.transform);
     return [matrix.m41, matrix.m42];
   };
@@ -119,21 +120,31 @@ export function Swiper(props: SwiperProps): JSX.Element {
    * @param {Boolean} keyboard true if function is called from keyboard event
    */
   const onStop = debounce(() => {
-    // get map size
-    mapSize.current = viewer.map.getSize() || [0, 0];
-    const size = orientation === 'vertical' ? mapSize.current[0] : mapSize.current[1];
-    const position = orientation === 'vertical' ? getSwiperStyle()[0] : getSwiperStyle()[1];
-    swiperValue.current = (position / size) * 100;
+    if (layerPaths.length) {
+      // get map size
+      mapSize.current = viewer.map.getSize() || [0, 0];
+      const size = orientation === 'vertical' ? mapSize.current[0] : mapSize.current[1];
+      const position = orientation === 'vertical' ? getSwiperStyle()[0] : getSwiperStyle()[1];
+      swiperValue.current = (position / size) * 100;
 
-    // Update the position
-    if (orientation === 'vertical') setXPosition(position);
-    if (orientation === 'vertical') setYPosition(position);
+      // Update the position
+      if (orientation === 'vertical') setXPosition(position);
+      if (orientation === 'vertical') setYPosition(position);
 
-    // Force refresh
-    olLayers.forEach((layer: BaseLayer) => {
-      layer.changed();
-    });
+      // Force refresh
+      olLayers.forEach((layer: BaseLayer) => {
+        layer.changed();
+      });
+    }
   }, 100);
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('SWIPER - mapLoaded', mapLoaded);
+    // Map is created after mapLoaded is set to true, so we need a delay to wait for the map size to be set
+    // TODO: Add a new state/event for when the map is set? Maybe change mapLoaded to mapProcessed and add a real mapLoaded?
+    setTimeout(onStop, 100);
+  }, [mapLoaded, onStop]);
 
   /**
    * Update swiper and layers from keyboard CTRL + Arrow key
@@ -142,7 +153,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const updateSwiper = debounce((evt: KeyboardEvent): void => {
     // * there is a know issue when stiching from keyboard to mouse swiper but we can live with it as we are not expecting to face this
     // * offset from mouse method is not working properly anymore
-    if (evt.ctrlKey && 'ArrowLeft ArrowRight ArrowUp ArrowDown'.includes(evt.key)) {
+    if (evt.ctrlKey && 'ArrowLeft ArrowRight ArrowUp ArrowDown'.includes(evt.key) && layerPaths.length) {
       // get swiper bar style then set the move
       const styleValues = getSwiperStyle();
       const move = evt.key === 'ArrowLeft' || evt.key === 'ArrowUp' ? -10 : 10;
