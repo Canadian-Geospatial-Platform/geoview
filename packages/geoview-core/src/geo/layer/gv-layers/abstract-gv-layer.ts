@@ -277,6 +277,20 @@ export abstract class AbstractGVLayer {
   }
 
   /**
+   * Gets the layer attributions
+   * @returns {string[]} The layer attributions
+   */
+  getAttributions(): string[] {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const attributionsAsRead = this.getOLSource().getAttributions()?.({} as any); // This looks very weird, but it's as documented in OpenLayers..
+
+    // Depending on the internal formatting
+    if (!attributionsAsRead) return [];
+    if (typeof attributionsAsRead === 'string') return [attributionsAsRead];
+    return attributionsAsRead;
+  }
+
+  /**
    * Gets the temporal dimension that is associated to the layer.
    * @returns {TimeDimension | undefined} The temporal dimension associated to the layer or undefined.
    */

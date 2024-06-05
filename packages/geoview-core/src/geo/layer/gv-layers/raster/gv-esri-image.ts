@@ -4,7 +4,7 @@ import { Image as ImageLayer } from 'ol/layer';
 import { Extent } from 'ol/extent';
 
 import { getLocalizedValue } from '@/core/utils/utilities';
-import { getMinOrMaxExtents } from '@/geo/utils/utilities';
+import { getExtentIntersection, getExtentUnionMaybe } from '@/geo/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
@@ -241,33 +241,32 @@ export class GVEsriImage extends AbstractGVRaster {
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     const layerConfig = this.getLayerConfig();
-    const layerBounds = layerConfig?.initialSettings?.bounds || [];
 
-    const projection =
-      layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid || this.getMapViewer().getProjection().getCode().replace('EPSG:', '');
+    // Get the layer config bounds
+    let layerConfigBounds = layerConfig?.initialSettings?.bounds;
 
-    if (layerConfig.getMetadata()?.fullExtent) {
-      layerBounds[0] = layerConfig.getMetadata()?.fullExtent.xmin as number;
-      layerBounds[1] = layerConfig.getMetadata()?.fullExtent.ymin as number;
-      layerBounds[2] = layerConfig.getMetadata()?.fullExtent.xmax as number;
-      layerBounds[3] = layerConfig.getMetadata()?.fullExtent.ymax as number;
+    // If layer bounds were found, project
+    if (layerConfigBounds) {
+      // Make sure we're in the map projection. Always EPSG:4326 when coming from our configuration.
+      layerConfigBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerConfigBounds, 'EPSG:4326');
     }
 
-    if (layerBounds) {
-      let transformedBounds = layerBounds;
-      if (
-        layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')
-      ) {
-        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, `EPSG:${projection}`);
-      }
+    // Get the metadata extent
+    const metadataExtent = this.getMetadataExtent();
 
-      // eslint-disable-next-line no-param-reassign
-      if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
-      // eslint-disable-next-line no-param-reassign
-      else bounds = getMinOrMaxExtents(bounds, transformedBounds);
+    // If found
+    let layerBounds;
+    if (metadataExtent) {
+      // Get the metadata projection
+      const metadataProjection = this.getMetadataProjection();
+      layerBounds = this.getMapViewer().convertExtentFromProjToMapProj(metadataExtent, metadataProjection);
     }
 
-    return bounds;
+    // If both layer config had bounds and layer has real bounds, take the intersection between them
+    if (layerConfigBounds && layerBounds) layerBounds = getExtentIntersection(layerBounds, layerConfigBounds);
+
+    // Return the layer bounds possibly unioned with 'bounds' received as param
+    return getExtentUnionMaybe(layerBounds, bounds);
   }
 }
 

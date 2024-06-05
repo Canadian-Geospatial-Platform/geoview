@@ -1,4 +1,4 @@
-import { TypeLayerControls } from '@config/types/map-schema-types';
+import { AbstractBaseLayerEntryConfig, TypeLayerControls } from '@config/types/map-schema-types';
 import { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import {
   CONST_LAYER_TYPES,
@@ -235,7 +235,10 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           controls,
           layerId: layerPathNodes[currentLevel],
           layerPath: entryLayerPath,
-          layerAttribution: MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPathNodes[0])!.attributions,
+          layerAttribution:
+            MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(entryLayerPath)?.getAttributions() ||
+            (MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(entryLayerPath) as AbstractBaseLayerEntryConfig | undefined)
+              ?.attributions,
           layerName:
             legendResultSetEntry.layerName ||
             getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(mapId)) ||
@@ -262,6 +265,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         // eslint-disable-next-line no-param-reassign
         else existingEntries[entryIndex] = newLegendLayer;
 
+        // TODO: Refactor - Layers refactoring. There needs to be a calculateBounds somewhere (new layers, new config?) to complete the full layers migration.
         const myLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPathNodes[0])!;
         // TODO: calculateBounds issue will be tackle ASAP in a next PR
         newLegendLayer.bounds = myLayer.allLayerStatusAreGreaterThanOrEqualTo('loaded') ? myLayer.calculateBounds(layerPath) : undefined;

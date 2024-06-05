@@ -1,5 +1,7 @@
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
+import { Extent } from 'ol/extent';
+import { Projection, get as projectionGet } from 'ol/proj';
 
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
@@ -29,4 +31,29 @@ export type TypeBaseRasterLayer = BaseLayer | TypeRasterLayerGroup | TypeRasterL
  */
 // ******************************************************************************************************************************
 // GV Layers Refactoring - Obsolete (in layers)
-export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {}
+export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
+  getSourceProjection(layerPath: string): Projection | undefined {
+    // Return the projection as read from the source or as ready from the metadata as second chance
+    return (
+      // Using any temporarily until layers migration is done and this is officially obsolete
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (super.getOLLayer(layerPath) as any).getSource()?.getProjection() || undefined
+    );
+  }
+
+  getMetadataProjection(): Projection | undefined {
+    return projectionGet(`EPSG:${this.metadata?.fullExtent?.spatialReference?.wkid}`) || undefined;
+  }
+
+  getMetadataExtent(): Extent | undefined {
+    if (this.metadata?.fullExtent) {
+      return [
+        this.metadata?.fullExtent.xmin as number,
+        this.metadata?.fullExtent.ymin as number,
+        this.metadata?.fullExtent.xmax as number,
+        this.metadata?.fullExtent.ymax as number,
+      ] as Extent;
+    }
+    return undefined;
+  }
+}

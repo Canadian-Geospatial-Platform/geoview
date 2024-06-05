@@ -7,7 +7,7 @@ import axios from 'axios';
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { getLocalizedValue } from '@/core/utils/utilities';
-import { getMinOrMaxExtents } from '@/geo/utils/utilities';
+import { getExtentUnionMaybe } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
@@ -150,24 +150,18 @@ export class GVImageStatic extends AbstractGVRaster {
    */
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
-    const layerConfig = this.getLayerConfig();
-    const projection = this.getOLSource()?.getProjection()?.getCode() || this.getMapViewer().getProjection().getCode();
 
-    const layerBounds = this.getOLSource()?.getImageExtent();
-    if (layerBounds) {
-      let transformedBounds = layerBounds;
-      if (
-        layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')
-      ) {
-        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, projection);
-      }
+    // Get the source projection code
+    const sourceProjection = this.getOLSource().getProjection() || undefined;
 
-      // eslint-disable-next-line no-param-reassign
-      if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
-      // eslint-disable-next-line no-param-reassign
-      else bounds = getMinOrMaxExtents(bounds, transformedBounds);
+    // Get the layer bounds
+    let sourceExtent = this.getOLSource()?.getImageExtent();
+    if (sourceExtent) {
+      // Make sure we're in the map projection
+      sourceExtent = this.getMapViewer().convertExtentFromProjToMapProj(sourceExtent, sourceProjection);
     }
 
-    return bounds;
+    // Return the layer bounds possibly unioned with 'bounds' received as param
+    return getExtentUnionMaybe(sourceExtent, bounds);
   }
 }

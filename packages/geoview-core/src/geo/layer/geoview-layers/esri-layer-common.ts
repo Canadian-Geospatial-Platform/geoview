@@ -51,8 +51,13 @@ export async function commonfetchServiceMetadata(layer: EsriDynamic | EsriFeatur
       else {
         layer.metadata = JSON.parse(metadataString) as TypeJsonObject;
         if ('error' in layer.metadata) throw new Error(`Error code = ${layer.metadata.error.code}, ${layer.metadata.error.message}`);
-        const { copyrightText } = layer.metadata;
-        if (copyrightText && !layer.attributions.includes(copyrightText as string)) layer.attributions.push(copyrightText as string);
+        const copyrightText = layer.metadata.copyrightText as string;
+        const attributions = layer.getAttributions();
+        if (copyrightText && !attributions.includes(copyrightText)) {
+          // Add it
+          attributions.push(copyrightText);
+          layer.setAttributions(attributions);
+        }
       }
     } catch (error) {
       logger.logInfo('Unable to read metadata', error);

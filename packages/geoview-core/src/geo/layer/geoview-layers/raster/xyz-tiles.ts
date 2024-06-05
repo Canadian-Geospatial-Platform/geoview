@@ -17,7 +17,7 @@ import {
   TypeGeoviewLayerConfig,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
-import { getMinOrMaxExtents } from '@/geo/utils/utilities';
+import { getExtentUnionMaybe } from '@/geo/utils/utilities';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { Cast, toJsonObject } from '@/core/types/global-types';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
@@ -220,6 +220,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
     // If no olLayer was obtained
     if (!olLayer) {
+      // Working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
       const tileLayerOptions: TileOptions<XYZ> = { source };
       // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
       if (layerConfig.initialSettings?.className !== undefined) tileLayerOptions.className = layerConfig.initialSettings.className;
@@ -232,10 +233,13 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
       // Create the OpenLayer layer
       olLayer = new TileLayer(tileLayerOptions);
+
+      // Hook the loaded event
+      this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'tile');
     }
 
-    // TODO: Refactor - Wire it up
-    this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'tile');
+    // GV Time to emit about the layer creation!
+    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
 
     return Promise.resolve(olLayer);
   }
@@ -262,6 +266,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
       layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, metadataLayerConfigFound!.initialSettings);
 
       if (layerConfig.initialSettings?.extent)
+        // TODO: Check - Why are we converting to the map projection in the processing? Wouldn't it be best to leave it untouched, as it's part of the initial configuration?
+        // TO.DOCONT: We're already making sure to project the settings in the map projection when we getBounds(). Seems we're doing work twice?
         // eslint-disable-next-line no-param-reassign
         layerConfig.initialSettings.extent = this.getMapViewer().convertExtentLngLatToMapProj(layerConfig.initialSettings.extent);
     }
@@ -277,23 +283,21 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @returns {Extent | undefined} The new layer bounding box.
    */
   // GV Layers Refactoring - Obsolete (in layers)
-  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+  protected override getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+    // Get the layer
     const layer = this.getOLLayer(layerPath) as TileLayer<XYZ> | undefined;
-    const projection = layer?.getSource()?.getProjection()?.getCode() || this.getMapViewer().getProjection().getCode();
 
-    const layerBounds = layer?.getSource()?.getTileGrid()?.getExtent();
-    if (layerBounds) {
-      let transformedBounds = layerBounds;
-      if (this.metadata?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')) {
-        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, projection);
-      }
+    // Get the source projection code
+    const sourceProjection = this.getSourceProjection(layerPath);
 
-      // eslint-disable-next-line no-param-reassign
-      if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
-      // eslint-disable-next-line no-param-reassign
-      else bounds = getMinOrMaxExtents(bounds, transformedBounds);
+    // Get the layer bounds
+    let sourceExtent = layer?.getSource()?.getTileGrid()?.getExtent();
+    if (sourceExtent) {
+      // Make sure we're in the map projection
+      sourceExtent = this.getMapViewer().convertExtentFromProjToMapProj(sourceExtent, sourceProjection);
     }
 
-    return bounds;
+    // Return the layer bounds possibly unioned with 'bounds' received as param
+    return getExtentUnionMaybe(sourceExtent, bounds);
   }
 }
