@@ -6,7 +6,7 @@ import TileGrid from 'ol/tilegrid/TileGrid';
 import TileLayer from 'ol/layer/Tile';
 
 import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@config/types/map-schema-types';
-import { api } from '@/app';
+import { EventDelegateBase, api } from '@/app';
 import { TypeJsonObject, toJsonObject, TypeJsonArray } from '@/core/types/global-types';
 import { getLocalizedMessage } from '@/core/utils/utilities';
 import { TypeBasemapProps, TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
@@ -14,6 +14,7 @@ import { Projection } from '@/geo/utils/projection';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
+import EventHelper from '@/api/events/event-helper';
 
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
@@ -107,6 +108,9 @@ export class Basemap {
       },
     },
   });
+
+  // Keep all callback delegates references
+  #onBasemapChangedHandlers: BasemapChangedDelegate[] = [];
 
   // #region PRIVATE UTILITY FUNCTIONS
   /**
@@ -547,6 +551,48 @@ export class Basemap {
         // render the layer
         basemapLayer.changed();
       });
+
+      // Emit basemap changed event
+      this.#emitBasemapChanged({ basemap });
     }
   }
+
+  /**
+   * Emits a component removed event to all handlers.
+   * @private
+   */
+  #emitBasemapChanged(event: BasemapChangedEvent): void {
+    // Emit the component removed event for all handlers
+    EventHelper.emitEvent(this, this.#onBasemapChangedHandlers, event);
+  }
+
+  /**
+   * Registers a component removed event callback.
+   * @param {MapComponentRemovedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onBasemapChanged(callback: BasemapChangedDelegate): void {
+    // Register the component removed event handler
+    EventHelper.onEvent(this.#onBasemapChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a component removed event callback.
+   * @param {MapComponentRemovedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offMapLanguageChanged(callback: BasemapChangedDelegate): void {
+    // Unregister the component removed event handler
+    EventHelper.offEvent(this.#onBasemapChangedHandlers, callback);
+  }
 }
+
+/**
+ * Define an event for the delegate
+ */
+export type BasemapChangedEvent = {
+  basemap: TypeBasemapProps;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type BasemapChangedDelegate = EventDelegateBase<Basemap, BasemapChangedEvent>;

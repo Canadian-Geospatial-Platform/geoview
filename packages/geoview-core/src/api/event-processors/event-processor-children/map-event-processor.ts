@@ -301,6 +301,15 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return this.getMapStateProtected(mapId).interaction;
   }
 
+  /**
+   * Gets the ordered layer info.
+   * @param {string} mapId - The map id
+   * @returns {TypeOrderedLayerInfo[]} The ordered layer info
+   */
+  static getMapLayerOrder(mapId: string): TypeOrderedLayerInfo[] {
+    return this.getMapStateProtected(mapId).orderedLayerInfo;
+  }
+
   static getMapState(mapId: string): TypeMapState {
     const mapState = this.getMapStateProtected(mapId);
     return {
@@ -454,6 +463,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return -1;
   }
 
+  static getMapLegendCollapsedFromOrderedLayerInfo(mapId: string, layerPath: string): boolean {
+    // Get legend status of a layer
+    const info = this.getMapStateProtected(mapId).orderedLayerInfo;
+    const pathInfo = info.find((item) => item.layerPath === layerPath);
+    return pathInfo?.legendCollapsed !== false;
+  }
+
   static getMapVisibilityFromOrderedLayerInfo(mapId: string, layerPath: string): boolean {
     // Get visibility of a layer
     const info = this.getMapStateProtected(mapId).orderedLayerInfo;
@@ -527,6 +543,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapStateProtected(mapId).setterActions.setQueryable(layerPath, queryable);
   }
 
+  static setMapLegendCollapsed(mapId: string, layerPath: string, collapsed?: boolean): void {
+    this.getMapStateProtected(mapId).setterActions.setLegendCollapsed(layerPath, collapsed);
+  }
+
   static setOrToggleMapLayerVisibility(mapId: string, layerPath: string, newValue?: boolean): void {
     // Apply some visibility logic
     const curOrderedLayerInfo = this.getMapStateProtected(mapId).orderedLayerInfo;
@@ -565,8 +585,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
       if (!children.some((child) => child.visible === true)) this.setOrToggleMapLayerVisibility(mapId, parentLayerPath, false);
     }
 
-    // Emit event
-    this.getMapViewerLayerAPI(mapId).emitLayerVisibilityToggled({ layerPath, visibility: newVisibility });
     // Redirect
     this.getMapStateProtected(mapId).setterActions.setOrderedLayerInfo([...curOrderedLayerInfo]);
   }
@@ -593,6 +611,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // Redirect
     this.setMapOrderedLayerInfo(mapId, orderedLayers);
+    // Emit event
+    this.getMapViewerLayerAPI(mapId).emitLayerReordered({ orderedLayers });
   }
 
   /**

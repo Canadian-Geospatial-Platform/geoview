@@ -148,10 +148,10 @@ export class LayerApi {
   #onLayerRemovedHandlers: LayerRemovedDelegate[] = [];
 
   // Keep all callback delegates references
-  #onLayerVisibilityToggledHandlers: LayerVisibilityToggledDelegate[] = [];
+  #onLayerItemVisibilityToggledHandlers: LayerItemVisibilityToggledDelegate[] = [];
 
   // Keep all callback delegates references
-  #onLayerItemVisibilityToggledHandlers: LayerVisibilityToggledDelegate[] = [];
+  #onLayerReorderedHandlers: LayerReorderedDelegate[] = [];
 
   // Maximum time duration to wait when registering a layer for the time slider
   static #MAX_WAIT_TIME_SLIDER_REGISTRATION = 20000;
@@ -415,6 +415,10 @@ export class LayerApi {
         queryable: layerEntryConfig.source?.featureInfo?.queryable !== undefined ? layerEntryConfig.source?.featureInfo?.queryable : true,
         hoverable:
           layerEntryConfig.initialSettings?.states?.hoverable !== undefined ? layerEntryConfig.initialSettings?.states?.hoverable : true,
+        legendCollapsed:
+          layerEntryConfig.initialSettings?.states?.legendCollapsed !== undefined
+            ? layerEntryConfig.initialSettings?.states?.legendCollapsed
+            : false,
       };
       newOrderedLayerInfos.push(layerInfo);
       if (layerEntryConfig.listOfLayerEntryConfig?.length) {
@@ -431,6 +435,10 @@ export class LayerApi {
         }`;
         const layerInfo: TypeOrderedLayerInfo = {
           layerPath,
+          legendCollapsed:
+            geoviewLayerConfig.initialSettings?.states?.legendCollapsed !== undefined
+              ? geoviewLayerConfig.initialSettings?.states?.legendCollapsed
+              : false,
           visible: geoviewLayerConfig.initialSettings?.states?.visible !== false,
         };
         newOrderedLayerInfos.push(layerInfo);
@@ -1200,7 +1208,7 @@ export class LayerApi {
     }
 
     // Emit about it
-    this.emitLayerRemoved({ layerPath });
+    this.#emitLayerRemoved({ layerPath });
 
     // Log
     logger.logInfo(`Layer removed for ${layerPath}`);
@@ -1465,7 +1473,7 @@ export class LayerApi {
    * @param {LayerRemovedEvent} event - The event to emit
    * @private
    */
-  emitLayerRemoved(event: LayerRemovedEvent): void {
+  #emitLayerRemoved(event: LayerRemovedEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerRemovedHandlers, event);
   }
@@ -1486,33 +1494,6 @@ export class LayerApi {
   offLayerRemoved(callback: LayerRemovedDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerRemovedHandlers, callback);
-  }
-
-  /**
-   * Emits layer visibility toggled event.
-   * @param {LayerVisibilityToggledEvent} event - The event to emit
-   */
-  emitLayerVisibilityToggled(event: LayerVisibilityToggledEvent): void {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerVisibilityToggledHandlers, event);
-  }
-
-  /**
-   * Registers a layer visibility toggled event handler.
-   * @param {LayerVisibilityToggledDelegate} callback - The callback to be executed whenever the event is emitted
-   */
-  onLayerVisibilityToggled(callback: LayerVisibilityToggledDelegate): void {
-    // Register the event handler
-    EventHelper.onEvent(this.#onLayerVisibilityToggledHandlers, callback);
-  }
-
-  /**
-   * Unregisters a layer visibility toggled event handler.
-   * @param {LayerVisibilityToggledDelegate} callback - The callback to stop being called whenever the event is emitted
-   */
-  offLayerVisibilityToggled(callback: LayerVisibilityToggledDelegate): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onLayerVisibilityToggledHandlers, callback);
   }
 
   /**
@@ -1540,6 +1521,33 @@ export class LayerApi {
   offLayerItemVisibilityToggled(callback: LayerItemVisibilityToggledDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerItemVisibilityToggledHandlers, callback);
+  }
+
+  /**
+   * Emits layer reordered event.
+   * @param {LayerReorderedEvent} event - The event to emit
+   */
+  emitLayerReordered(event: LayerReorderedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerReorderedHandlers, event);
+  }
+
+  /**
+   * Registers a layer reordered event handler.
+   * @param {LayerReorderedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerReordered(callback: LayerReorderedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerReorderedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer reordered event handler.
+   * @param {LayerReorderedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerReordered(callback: LayerReorderedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerReorderedHandlers, callback);
   }
 }
 
@@ -1572,22 +1580,7 @@ export type LayerRemovedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerVisibilityToggledDelegate = EventDelegateBase<LayerApi, LayerVisibilityToggledEvent>;
-
-/**
- * Define an event for the delegate
- */
-export type LayerVisibilityToggledEvent = {
-  // The layer path of the affected layer
-  layerPath: string;
-  // The new visibility
-  visibility: boolean;
-};
-
-/**
- * Define a delegate for the event handler function signature
- */
-type LayerItemVisibilityToggledDelegate = EventDelegateBase<LayerApi, LayerVisibilityToggledEvent>;
+type LayerItemVisibilityToggledDelegate = EventDelegateBase<LayerApi, LayerItemVisibilityToggledEvent>;
 
 /**
  * Define an event for the delegate
@@ -1599,4 +1592,17 @@ export type LayerItemVisibilityToggledEvent = {
   itemName: string;
   // The new visibility
   visibility: boolean;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerReorderedDelegate = EventDelegateBase<LayerApi, LayerReorderedEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerReorderedEvent = {
+  // The layer path of the affected layer
+  orderedLayers: TypeOrderedLayerInfo[];
 };

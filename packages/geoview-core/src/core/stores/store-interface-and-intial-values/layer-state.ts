@@ -151,8 +151,8 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        * @param {string} layerPath - The layer path to set as selected.
        */
       setSelectedLayerPath: (layerPath: string): void => {
-        // Redirect to setter
-        get().layerState.setterActions.setSelectedLayerPath(layerPath);
+        // Redirect to event processor
+        LegendEventProcessor.setSelectedLayersTabLayer(get().mapId, layerPath);
       },
 
       /**
