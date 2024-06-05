@@ -13,7 +13,7 @@ import { useSwiperLayerPaths } from 'geoview-core/src/core/stores/store-interfac
 import { logger } from 'geoview-core/src/core/utils/logger';
 import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
-import { useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
+import { useMapVisibleLayers, useMapLoaded } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from 'geoview-core/src/geo/map/map-viewer';
 import { sxClasses } from './swiper-style';
 
@@ -38,7 +38,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
   const mapSize = useRef<number[]>(viewer.map?.getSize() || [0, 0]);
   const swiperValue = useRef(50);
-  const swiperRef = useRef<HTMLElement>();
+  const swiperRef = useRef<HTMLElement | null>(null);
 
   const [olLayers, setOlLayers] = useState<BaseLayer[]>([]);
   const [xPosition, setXPosition] = useState(mapSize.current[0] / 2);
@@ -48,6 +48,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const layerPaths = useSwiperLayerPaths();
   const displayLanguage = useAppDisplayLanguage();
   const visibleLayers = useMapVisibleLayers();
+  const mapLoaded = useMapLoaded();
 
   /**
    * Pre compose, Pre render event callback
@@ -108,7 +109,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
    * @returns {Number[]} the array of value for x and y position fot the swiper bar
    */
   const getSwiperStyle = (): number[] => {
-    const style = window.getComputedStyle(swiperRef!.current!);
+    const style = window.getComputedStyle(swiperRef.current!);
     const matrix = new DOMMatrixReadOnly(style.transform);
     return [matrix.m41, matrix.m42];
   };
@@ -134,6 +135,14 @@ export function Swiper(props: SwiperProps): JSX.Element {
       layer.changed();
     });
   }, 100);
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('SWIPER - mapLoaded', mapLoaded);
+    // Map is created after mapLoaded is set to true, so we need a delay to wait for the map size to be set
+    // TODO: Add a new state/event for when the map is set? Maybe change mapLoaded to mapProcessed and add a real mapLoaded?
+    setTimeout(onStop, 100);
+  }, [mapLoaded, onStop]);
 
   /**
    * Update swiper and layers from keyboard CTRL + Arrow key
@@ -275,30 +284,27 @@ export function Swiper(props: SwiperProps): JSX.Element {
     };
   }, [viewer.mapId, updateSwiper]);
 
-  // If any layer paths
-  if (layerPaths.length > 0) {
-    // Use a swiper
-    return (
-      <Box sx={sxClasses.layerSwipe}>
-        <Draggable
-          axis={orientation === 'vertical' ? 'x' : 'y'}
-          bounds="parent"
-          defaultPosition={{ x: orientation === 'vertical' ? xPosition : 0, y: orientation === 'vertical' ? 0 : yPosition }}
-          onStop={() => onStop()}
-          onDrag={() => onStop()}
-          nodeRef={swiperRef as RefObject<HTMLElement>}
-        >
-          <Box sx={[orientation === 'vertical' ? sxClasses.vertical : sxClasses.horizontal, sxClasses.bar]} tabIndex={0} ref={swiperRef}>
-            <Tooltip title={getLocalizedMessage('swiper.tooltip', displayLanguage)}>
-              <Box className="handleContainer">
-                <HandleIcon sx={sxClasses.handle} className="handleL" />
-                <HandleIcon sx={sxClasses.handle} className="handleR" />
-              </Box>
-            </Tooltip>
-          </Box>
-        </Draggable>
-      </Box>
-    );
-  }
+  // Use a swiper
+  return (
+    <Box sx={sxClasses.layerSwipe}>
+      <Draggable
+        axis={orientation === 'vertical' ? 'x' : 'y'}
+        bounds="parent"
+        defaultPosition={{ x: orientation === 'vertical' ? xPosition : 0, y: orientation === 'vertical' ? 0 : yPosition }}
+        onStop={() => onStop()}
+        onDrag={() => onStop()}
+        nodeRef={swiperRef as RefObject<HTMLElement>}
+      >
+        <Box sx={[orientation === 'vertical' ? sxClasses.vertical : sxClasses.horizontal, sxClasses.bar]} tabIndex={0} ref={swiperRef}>
+          <Tooltip title={getLocalizedMessage('swiper.tooltip', displayLanguage)}>
+            <Box className="handleContainer">
+              <HandleIcon sx={sxClasses.handle} className="handleL" />
+              <HandleIcon sx={sxClasses.handle} className="handleR" />
+            </Box>
+          </Tooltip>
+        </Box>
+      </Draggable>
+    </Box>
+  );
   return <Box />;
 }

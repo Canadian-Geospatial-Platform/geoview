@@ -36,7 +36,10 @@
               {
                 "layerId": "GDPS.ETA_ICEC",
                 "layerFilter": "time = date'2023-04-18T07:00:00-04:00'",
-                "layerName": { "en": "Ice Cover" }
+                "layerName": { "en": "Ice Cover" },
+                "source": {
+                  "style": "SEA_ICECONC"
+                }
               }
             ]
           }
@@ -72,7 +75,10 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "RADAR_1KM_RSNO",
-            "layerName": { "en": "Test Spatiotemporel" }
+            "layerName": { "en": "Test Spatiotemporel" },
+            "source": {
+              "style": "Radar-Snow_14colors"
+            }
           }
         ]
       }

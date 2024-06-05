@@ -1,5 +1,4 @@
 import { TypeLayerControls } from '@config/types/map-schema-types';
-import _ from 'lodash';
 import { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import {
   CONST_LAYER_TYPES,
@@ -44,6 +43,35 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   protected static getLayerState(mapId: string): ILayerState {
     // Return the layer state
     return super.getState(mapId).layerState;
+  }
+
+  static setSelectedLayersTabLayer(mapId: string, layerPath: string): void {
+    // Save in store
+    this.getLayerState(mapId).setterActions.setSelectedLayerPath(layerPath);
+  }
+
+  /**
+   * Get a specific state.
+   * @param {string} mapId - The mapId
+   * @param {'highlightedLayer' | 'selectedLayerPath' | 'displayState' | 'layerDeleteInProgress'} state - The state to get
+   * @returns {string | boolean | null | undefined} The requested state
+   */
+  static getLayerPanelState(
+    mapId: string,
+    state: 'highlightedLayer' | 'selectedLayerPath' | 'displayState' | 'layerDeleteInProgress'
+  ): string | boolean | null | undefined {
+    return this.getLayerState(mapId)[state];
+  }
+
+  /**
+   * Get a legend layer.
+   * @param {string} mapId - The mapId
+   * @param {string} layerPath - The path of the layer to get
+   * @returns {TypeLegendLayer | undefined} The requested legend layer
+   */
+  static getLegendLayerInfo(mapId: string, layerPath: string): TypeLegendLayer | undefined {
+    const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
+    return this.findLayerByPath(layers, layerPath);
   }
 
   static getLayerIconImage(layerLegend: TypeLegend | null): TypeLegendLayerItem[] | undefined {
@@ -394,21 +422,31 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   /**
    * Sets the opacity of the layer.
    * @param {string} mapId - The ID of the map.
-   * @param {string} layer - The layer to set the opacity.
+   * @param {TypeLegendLayer[]} curLayers - The current legend layers.
+   * @param {string} layerPath - The layer path.
    * @param {number} opacity - The opacity to set.
    * @param {boolean} isChild - Is the layer a child layer.
    * @private
    */
-  static #setOpacityInLayerAndChildren(mapId: string, layer: TypeLegendLayer, opacity: number, isChild = false): void {
-    _.set(layer, 'opacity', opacity);
-    MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layer.layerPath)?.setOpacity(opacity, layer.layerPath);
-    if (isChild) {
-      _.set(layer, 'opacityFromParent', opacity);
-    }
-    if (layer.children && layer.children.length > 0) {
-      layer.children.forEach((child) => {
-        this.#setOpacityInLayerAndChildren(mapId, child, opacity, true);
-      });
+  static #setOpacityInLayerAndChildren(
+    mapId: string,
+    curLayers: TypeLegendLayer[],
+    layerPath: string,
+    opacity: number,
+    isChild = false
+  ): void {
+    const layer = LegendEventProcessor.findLayerByPath(curLayers, layerPath);
+    if (layer) {
+      layer.opacity = opacity;
+      MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath)?.setOpacity(opacity, layerPath);
+      if (isChild) {
+        layer.opacityFromParent = opacity;
+      }
+      if (layer.children && layer.children.length > 0) {
+        layer.children.forEach((child) => {
+          this.#setOpacityInLayerAndChildren(mapId, curLayers, child.layerPath, opacity, true);
+        });
+      }
     }
   }
 
@@ -420,11 +458,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    */
   static setLayerOpacity(mapId: string, layerPath: string, opacity: number): void {
     const curLayers = this.getLayerState(mapId).legendLayers;
-    const layer = LegendEventProcessor.findLayerByPath(curLayers, layerPath);
-    if (layer) {
-      layer.opacity = opacity;
-      this.#setOpacityInLayerAndChildren(mapId, layer, opacity);
-    }
+    this.#setOpacityInLayerAndChildren(mapId, curLayers, layerPath, opacity);
 
     // Set updated legend layers
     this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
