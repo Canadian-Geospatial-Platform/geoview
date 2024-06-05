@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import {
@@ -32,21 +31,18 @@ interface LegendLayerProps {
   layer: TypeLegendLayer;
 }
 
-export function LegendLayer(props: LegendLayerProps): JSX.Element {
+export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
   // Log
   logger.logTraceRender('components/legend/legend-layer');
-
-  const { layer } = props;
 
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const [isGroupOpen, setGroupOpen] = useState(true);
-
-  // get store actions
+  // Get store actions
   const highlightedLayer = useLayerHighlightedLayer();
-  const { getVisibilityFromOrderedLayerInfo, setOrToggleLayerVisibility } = useMapStoreActions();
+  const { getVisibilityFromOrderedLayerInfo, setOrToggleLayerVisibility, getLegendCollapsedFromOrderedLayerInfo, setLegendCollapsed } =
+    useMapStoreActions();
   const { setHighlightLayer, zoomToLayerExtent } = useLayerStoreActions();
 
   const getLayerChildren = (): TypeLegendLayer[] => {
@@ -57,7 +53,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
    * Handle expand/shrink of layer groups.
    */
   const handleExpandGroupClick = (): void => {
-    setGroupOpen(!isGroupOpen);
+    setLegendCollapsed(layer.layerPath);
   };
 
   /**
@@ -89,6 +85,8 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
       logger.logPromiseFailed('in zoomToLayerExtent in legend-layer.handleZoomTo', error);
     });
   };
+
+  const legendExpanded = !getLegendCollapsedFromOrderedLayerInfo(layer.layerPath);
 
   const visibility = !getVisibilityFromOrderedLayerInfo(layer.layerPath);
   const isLayerVisible = layer.controls?.visibility ?? false;
@@ -172,20 +170,21 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
   }
 
   function renderCollapsible(): JSX.Element | null {
-    if (layer.type === 'ogcWms' && layer.icons.length && layer.icons[0].iconImage && layer.icons[0].iconImage !== 'no data') {
-      return (
-        <Collapse in={isGroupOpen} sx={sxClasses.collapsibleContainer} timeout="auto">
-          <Box component="img" alt="icon" src={layer.icons[0].iconImage} sx={{ maxWidth: '100%' }} />
-        </Collapse>
-      );
-    }
     // show sub items only when number of items are more than 1.
     if (!(layer.children?.length > 1 || layer.items?.length > 1)) {
       return null;
     }
 
+    if (layer.type === 'ogcWms' && layer.icons.length && layer.icons[0].iconImage && layer.icons[0].iconImage !== 'no data') {
+      return (
+        <Collapse in={legendExpanded} sx={sxClasses.collapsibleContainer} timeout="auto">
+          <Box component="img" alt="icon" src={layer.icons[0].iconImage} sx={{ maxWidth: '100%' }} />
+        </Collapse>
+      );
+    }
+
     return (
-      <Collapse in={isGroupOpen} sx={sxClasses.collapsibleContainer} timeout="auto">
+      <Collapse in={legendExpanded} sx={sxClasses.collapsibleContainer} timeout="auto">
         {renderChildren()}
         {renderItems()}
       </Collapse>
@@ -212,7 +211,7 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
           </Tooltip>
           {!!(layer.children?.length > 1 || layer.items?.length > 1) && (
             <IconButton sx={{ marginBottom: '20px' }} className="buttonOutline" edge="end" size="small" tooltip="layers.toggleCollapse">
-              {isGroupOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+              {legendExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
             </IconButton>
           )}
         </>

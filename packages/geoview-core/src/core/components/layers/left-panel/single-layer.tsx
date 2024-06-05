@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
 import { animated, useSpring } from '@react-spring/web';
@@ -64,7 +64,13 @@ export function SingleLayer({
 
   // Get store states
   const { setSelectedLayerPath } = useLayerStoreActions();
-  const { getVisibilityFromOrderedLayerInfo, setOrToggleLayerVisibility, reorderLayer } = useMapStoreActions();
+  const {
+    getVisibilityFromOrderedLayerInfo,
+    setOrToggleLayerVisibility,
+    getLegendCollapsedFromOrderedLayerInfo,
+    setLegendCollapsed,
+    reorderLayer,
+  } = useMapStoreActions();
   const selectedLayerPath = useLayerSelectedLayerPath();
   const displayState = useLayerDisplayState();
   const datatableSettings = useDataTableLayerSettings();
@@ -72,6 +78,8 @@ export function SingleLayer({
   const layerData = useDataTableAllFeaturesDataArray();
 
   const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
+
+  const legendExpanded = !getLegendCollapsedFromOrderedLayerInfo(layer.layerPath);
 
   // if any of the child layers is selected return true
   const isLayerChildSelected = (startingLayer: TypeLegendLayer): boolean => {
@@ -106,9 +114,7 @@ export function SingleLayer({
 
   const isLayerAlwaysVisible = layerHasDisabledVisibility(layer);
 
-  const [isGroupOpen, setGroupOpen] = useState(layerIsSelected || layerChildIsSelected);
-
-  // get layer description
+  // Get layer description
   const getLayerDescription = (): JSX.Element | string | null => {
     if (layer.layerStatus === 'error') {
       return t('legend.layerError');
@@ -145,7 +151,7 @@ export function SingleLayer({
    * Handle expand/shrink of layer groups.
    */
   const handleExpandGroupClick = (): void => {
-    setGroupOpen(!isGroupOpen);
+    setLegendCollapsed(layer.layerPath);
   };
 
   const handleLayerClick = (): void => {
@@ -156,9 +162,6 @@ export function SingleLayer({
 
     setSelectedLayerPath(layer.layerPath);
     if (setIsLayersListPanelVisible) {
-      if (layer.children.length > 0) {
-        setGroupOpen(true);
-      }
       setIsLayersListPanelVisible(true);
       // trigger the fetching of the features when not available OR when layer status is in error
       if (
@@ -255,7 +258,7 @@ export function SingleLayer({
           tooltip="layers.toggleCollapse"
           className="buttonOutline"
         >
-          {isGroupOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          {legendExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
         </IconButton>
       );
     }
@@ -269,7 +272,7 @@ export function SingleLayer({
     }
 
     return (
-      <Collapse in={isGroupOpen} timeout="auto">
+      <Collapse in={legendExpanded} timeout="auto">
         <LayersList
           depth={1 + depth}
           layersList={layer.children}
@@ -288,7 +291,7 @@ export function SingleLayer({
     }
 
     // if layer has selected child but its not itself selected
-    if (layerChildIsSelected && !layerIsSelected && !isGroupOpen) {
+    if (layerChildIsSelected && !layerIsSelected && !legendExpanded) {
       result.push('selectedLayer bordered-primary');
     }
 
@@ -311,7 +314,11 @@ export function SingleLayer({
     <AnimatedPaper className={getContainerClass()} style={listItemSpring} data-layer-depth={depth}>
       <Tooltip title={layer.layerName} placement="top" enterDelay={1000} arrow>
         <ListItem key={layer.layerName} divider tabIndex={0} onKeyDown={(e) => handleLayerKeyDown(e)}>
-          <ListItemButton selected={layerIsSelected || (layerChildIsSelected && !isGroupOpen)} tabIndex={-1} sx={{ minHeight: '4.51rem' }}>
+          <ListItemButton
+            selected={layerIsSelected || (layerChildIsSelected && !legendExpanded)}
+            tabIndex={-1}
+            sx={{ minHeight: '4.51rem' }}
+          >
             <LayerIcon layer={layer} />
             <ListItemText
               primary={layer.layerName !== undefined ? layer.layerName : layer.layerId}
