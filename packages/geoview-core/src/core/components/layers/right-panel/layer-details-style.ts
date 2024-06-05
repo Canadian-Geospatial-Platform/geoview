@@ -57,6 +57,6 @@ export const getSxClasses = (theme: Theme): any => ({
   },
   wmsImage: {
     maxWidth: '100%',
-    height: 'auto'
-  }
+    height: 'auto',
+  },
 });

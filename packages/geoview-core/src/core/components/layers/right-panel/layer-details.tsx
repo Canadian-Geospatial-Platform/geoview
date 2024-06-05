@@ -268,12 +268,17 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   };
 
   const renderWMSImage = (): JSX.Element | null => {
-
-    if(layerDetails.type === 'ogcWms' && layerDetails.icons.length && layerDetails.icons[0].iconImage && layerDetails.icons[0].iconImage !== 'no data') {
+    if (
+      layerDetails.type === 'ogcWms' &&
+      layerDetails.icons.length &&
+      layerDetails.icons[0].iconImage &&
+      layerDetails.icons[0].iconImage !== 'no data'
+    ) {
       return (
-      <Box sx={{ marginTop: '10px' }}>
-        <img alt="icon" src={layerDetails.icons[0].iconImage} style={sxClasses.wmsImage} />
-      </Box>);
+        <Box sx={{ marginTop: '10px' }}>
+          <img alt="icon" src={layerDetails.icons[0].iconImage} style={sxClasses.wmsImage} />
+        </Box>
+      );
     }
 
     return null;
