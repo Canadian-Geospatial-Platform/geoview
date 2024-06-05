@@ -3,6 +3,12 @@ import { UIEventProcessor } from '@/api/event-processors/event-processor-childre
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { sanitizeHtmlContent } from '@/core/utils/utilities';
+import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
+import { TypeLegendLayer } from '../layers/types';
+import { GeoChartStoreByLayerPath, TypeGeochartResultSetEntry } from '@/core/stores/store-interface-and-intial-values/geochart-state';
+import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
+import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
+import { TypeTimeSliderValues } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 
 /**
  * API to manage tabs on the tabs component
@@ -29,6 +35,54 @@ export class FooterBarApi {
    */
   constructor(mapId: string) {
     this.mapId = mapId;
+  }
+
+  /**
+   * Get a specific layer panel state.
+   * @param {'highlightedLayer' | 'selectedLayerPath' | 'displayState' | 'layerDeleteInProgress'} state - The state to get
+   * @returns {string | boolean | null | undefined} The requested state
+   */
+  getLayerPanelState(
+    state: 'highlightedLayer' | 'selectedLayerPath' | 'displayState' | 'layerDeleteInProgress'
+  ): string | boolean | null | undefined {
+    return LegendEventProcessor.getLayerPanelState(this.mapId, state);
+  }
+
+  /**
+   * Get a legend layer.
+   * @param {string} layerPath - The path of the layer to get
+   * @returns {TypeLegendLayer | undefined} The requested legend layer
+   */
+  getLegendLayerInfo(layerPath: string): TypeLegendLayer | undefined {
+    return LegendEventProcessor.getLegendLayerInfo(this.mapId, layerPath);
+  }
+
+  /**
+   * Get array of layer paths that are collapsed in legend/layers.
+   * @returns {string[]} The layer path array.
+   */
+  getLayersCollapsedInLegend(): string[] {
+    // Redirect to event processor
+    return UIEventProcessor.getLayersCollapsedInLegend(this.mapId);
+  }
+
+  /**
+   * Get a specific state.
+   * @param {'geochartChartsConfig' | 'layerDataArray' | 'layerDataArrayBatchLayerPathBypass' | 'selectedLayerPath'} state - The state to get
+   * @returns {string | TypeGeochartResultSetEntry[] | GeoChartStoreByLayerPath | undefined} The requested state
+   */
+  getSingleGeochartState(
+    state: 'geochartChartsConfig' | 'layerDataArray' | 'layerDataArrayBatchLayerPathBypass' | 'selectedLayerPath'
+  ): string | TypeGeochartResultSetEntry[] | GeoChartStoreByLayerPath | undefined {
+    return GeochartEventProcessor.getSingleGeochartState(this.mapId, state);
+  }
+
+  /**
+   * Gets time slider layers.
+   * @returns {TypeTimeSliderValues | undefined} The time slider layer set or undefined
+   */
+  getTimeSliderLayers(): TypeTimeSliderValues | undefined {
+    return TimeSliderEventProcessor.getTimeSliderLayers(this.mapId)?.timeSliderLayers;
   }
 
   /**

@@ -3,6 +3,7 @@ import { TypeMapCorePackages, TypeNavBarProps, TypeValidAppBarCoreProps } from '
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -21,6 +22,7 @@ export interface IUIState {
   activeTrapGeoView: boolean;
   activeAppBarTab: ActiveAppBarTabType;
   appBarComponents: TypeValidAppBarCoreProps[];
+  layersCollapsedInLegend: string[];
   corePackagesComponents: TypeMapCorePackages;
   focusITem: FocusItemProps;
   mapInfoExpanded: boolean;
@@ -31,6 +33,7 @@ export interface IUIState {
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
+    addOrRemoveCollapsedLayer: (layerPath: string) => void;
     closeModal: () => void;
     openModal: (uiFocus: FocusItemProps) => void;
     setActiveFooterBarTab: (id: string) => void;
@@ -47,6 +50,7 @@ export interface IUIState {
     setActiveFooterBarTab: (id: string) => void;
     setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean) => void;
     setActiveTrapGeoView: (active: boolean) => void;
+    setLayersCollapsedInLegend: (layersCollapsedInLegend: string[]) => void;
     setFooterPanelResizeValue: (value: number) => void;
     setMapInfoExpanded: (expanded: boolean) => void;
     setFooterBarIsCollapsed: (collapsed: boolean) => void;
@@ -67,6 +71,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
     activeFooterBarTabId: 'legend',
     activeAppBarTab: { tabId: '', tabGroup: '', isOpen: false },
     activeTrapGeoView: false,
+    layersCollapsedInLegend: [],
     corePackagesComponents: [],
     focusITem: { activeElementId: false, callbackElementId: false },
     mapInfoExpanded: false,
@@ -90,6 +95,10 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
     // #region ACTIONS
 
     actions: {
+      addOrRemoveCollapsedLayer: (layerPath: string) => {
+        // Redirect to event processor
+        UIEventProcessor.addOrRemoveCollapsedLayer(get().mapId, layerPath);
+      },
       closeModal: () => {
         // Redirect to setter
         get().uiState.setterActions.closeModal();
@@ -158,6 +167,14 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
         });
       },
+      setLayersCollapsedInLegend: (layersCollapsedInLegend: string[]) => {
+        set({
+          uiState: {
+            ...get().uiState,
+            layersCollapsedInLegend: [...layersCollapsedInLegend],
+          },
+        });
+      },
       setFooterPanelResizeValue: (value) => {
         set({
           uiState: {
@@ -216,6 +233,7 @@ export const useActiveAppBarTab = (): ActiveAppBarTabType => useStore(useGeoView
 export const useUIActiveTrapGeoView = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.activeTrapGeoView);
 export const useUIAppbarComponents = (): TypeValidAppBarCoreProps[] =>
   useStore(useGeoViewStore(), (state) => state.uiState.appBarComponents);
+export const useLayersCollapsedInLegend = (): string[] => useStore(useGeoViewStore(), (state) => state.uiState.layersCollapsedInLegend);
 export const useUICorePackagesComponents = (): TypeMapCorePackages =>
   useStore(useGeoViewStore(), (state) => state.uiState.corePackagesComponents);
 export const useUIFooterPanelResizeValue = (): number => useStore(useGeoViewStore(), (state) => state.uiState.footerPanelResizeValue);

@@ -46,6 +46,35 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     return super.getState(mapId).layerState;
   }
 
+  static setSelectedLayersTabLayer(mapId: string, layerPath: string): void {
+    // Save in store
+    this.getLayerState(mapId).setterActions.setSelectedLayerPath(layerPath);
+  }
+
+  /**
+   * Get a specific state.
+   * @param {string} mapId - The mapId
+   * @param {'highlightedLayer' | 'selectedLayerPath' | 'displayState' | 'layerDeleteInProgress'} state - The state to get
+   * @returns {string | boolean | null | undefined} The requested state
+   */
+  static getLayerPanelState(
+    mapId: string,
+    state: 'highlightedLayer' | 'selectedLayerPath' | 'displayState' | 'layerDeleteInProgress'
+  ): string | boolean | null | undefined {
+    return this.getLayerState(mapId)[state];
+  }
+
+  /**
+   * Get a legend layer.
+   * @param {string} mapId - The mapId
+   * @param {string} layerPath - The path of the layer to get
+   * @returns {TypeLegendLayer | undefined} The requested legend layer
+   */
+  static getLegendLayerInfo(mapId: string, layerPath: string): TypeLegendLayer | undefined {
+    const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
+    return this.findLayerByPath(layers, layerPath);
+  }
+
   static getLayerIconImage(layerLegend: TypeLegend | null): TypeLegendLayerItem[] | undefined {
     // TODO: Refactor - Move this function to a utility class instead of at the 'processor' level so it's safer to call from a layer framework level class
     const iconDetails: TypeLegendLayerItem[] = [];
@@ -426,6 +455,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       this.#setOpacityInLayerAndChildren(mapId, layer, opacity);
     }
 
+    // Emit event
+    MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath)?.emitLayerOpacityChanged({ layerPath, opacity });
     // Set updated legend layers
     this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
   }
