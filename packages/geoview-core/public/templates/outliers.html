@@ -80,7 +80,12 @@
               'listOfLayerEntryConfig': [
                 {
                   'layerId': '0',
-                  'layerName': { 'en': 'CSRS Layer' }
+                  'layerName': { 'en': 'CSRS Layer' },
+                  'initialSettings': {
+                    'states': {
+                      'visible': false
+                    }
+                  }
                 }
               ]
             },
@@ -92,6 +97,11 @@
                 {
                   'layerId': 'multipolygon',
                   'layerName': { 'en': 'Multi Polygon Layer' },
+                  'initialSettings': {
+                    'states': {
+                      'visible': false
+                    }
+                  },
                   'source': {
                     'dataAccessPath': {
                       'en': './datasets/geojson/multipolygons.geojson'
@@ -108,6 +118,11 @@
                 {
                   'layerId': 'pointPolygon',
                   'layerName': { 'en': 'Point and Polygon Layer' },
+                  'initialSettings': {
+                    'states': {
+                      'visible': false
+                    }
+                  },
                   'source': {
                     'dataAccessPath': {
                       'en': './datasets/geojson/projects.json'
@@ -124,7 +139,12 @@
               'listOfLayerEntryConfig': [
                 {
                   'layerId': 'dsm-hillshade',
-                  'layerName': { 'en': 'DSM-Hillshade' }
+                  'layerName': { 'en': 'DSM-Hillshade' },
+                  'initialSettings': {
+                    'states': {
+                      'visible': false
+                    }
+                  }
                 }
               ]
             },
@@ -138,7 +158,12 @@
               'listOfLayerEntryConfig': [
                 {
                   'layerId': '0',
-                  'layerName': { 'en': 'Coral Sponge 2016' }
+                  'layerName': { 'en': 'Coral Sponge 2016' },
+                  'initialSettings': {
+                    'states': {
+                      'visible': false
+                    }
+                  }
                 }
               ]
             },
@@ -152,7 +177,40 @@
               'listOfLayerEntryConfig': [
                 {
                   'layerId': '32',
-                  'layerName': { 'en': 'CESI' }
+                  'layerName': { 'en': 'CESI' },
+                  'initialSettings': {
+                    'states': {
+                      'visible': false
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'mpmo',
+              'geoviewLayerName': { 'en': 'MPMO - Major Project' },
+              'metadataAccessPath': {
+                'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/MPMO_Major_Projects/MapServer/'
+              },
+              'geoviewLayerType': 'esriFeature',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0',
+                  'layerName': { 'en': 'MPMO - Major Project' }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'cpcad',
+              'geoviewLayerName': { 'en': 'Protected and conserved area' },
+              'metadataAccessPath': {
+                'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CWS_SCF/CPCAD/MapServer/'
+              },
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0',
+                  'layerName': { 'en': 'Protected and conserved area' }
                 }
               ]
             }
@@ -189,6 +247,12 @@
         </li>
         <li>
           CESI - conserved areas layer was not showing in legend (layer moved - now appears as empty layer) - Issue #1816
+        </li>
+        <li>
+          Major Project - esri feature layer does not load because of null field value - Issue #2208
+        </li>
+        <li>
+          Protected and conserved area - esri dynamic data table not featching because of geometry in url - Issue #2200
         </li>
       </ul>
     </div>
