@@ -16,7 +16,7 @@ import { getLocalizedValue } from '@/core/utils/utilities';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { Projection } from '@/geo/utils/projection';
-import { getMinOrMaxExtents } from '@/geo/utils/utilities';
+import { getExtentIntersection, getExtentUnionMaybe } from '@/geo/utils/utilities';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -263,7 +263,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     // GV            layerStatus values is correctly sequenced.
     await super.processOneLayerEntry(layerConfig);
     const sourceOptions: SourceOptions = {};
-    sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
+    sourceOptions.attributions = [(this.metadata?.copyrightText ? this.metadata?.copyrightText : '') as string];
     sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
     sourceOptions.params = { LAYERS: `show:${layerConfig.layerId}` };
     if (layerConfig.source.transparent) Object.defineProperty(sourceOptions.params, 'transparent', layerConfig.source.transparent!);
@@ -290,6 +290,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
     // If no olLayer was obtained
     if (!olLayer) {
+      // Working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
       const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
         source,
         properties: { layerConfig },
@@ -307,10 +308,13 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
       // Create the OpenLayer layer
       olLayer = new ImageLayer(imageLayerOptions);
+
+      // Hook the loaded event
+      this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'image');
     }
 
-    // TODO: Refactor - Wire it up
-    this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'image');
+    // GV Time to emit about the layer creation!
+    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
 
     return Promise.resolve(olLayer);
   }
@@ -900,29 +904,34 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns {Extent | undefined} The new layer bounding box.
    */
   // GV Layers Refactoring - Obsolete (in layers)
-  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+  protected override getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+    // Get the layer config
     const layerConfig = this.getLayerConfig(layerPath);
-    const layerBounds = layerConfig?.initialSettings?.bounds || [];
-    const projection =
-      this.metadata?.fullExtent?.spatialReference?.wkid || this.getMapViewer().getProjection().getCode().replace('EPSG:', '');
 
-    if (this.metadata?.fullExtent) {
-      layerBounds[0] = this.metadata?.fullExtent.xmin as number;
-      layerBounds[1] = this.metadata?.fullExtent.ymin as number;
-      layerBounds[2] = this.metadata?.fullExtent.xmax as number;
-      layerBounds[3] = this.metadata?.fullExtent.ymax as number;
+    // Get the layer config bounds
+    let layerConfigBounds = layerConfig?.initialSettings?.bounds;
+
+    // If layer bounds were found, project
+    if (layerConfigBounds) {
+      // Make sure we're in the map projection. Always EPSG:4326 when coming from our configuration.
+      layerConfigBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerConfigBounds, 'EPSG:4326');
     }
 
-    if (layerBounds) {
-      let transformedBounds = layerBounds;
-      if (this.metadata?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')) {
-        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, `EPSG:${projection}`);
-      }
+    // Get the metadata extent
+    const metadataExtent = this.getMetadataExtent();
 
-      if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
-      else bounds = getMinOrMaxExtents(bounds, transformedBounds);
+    // If found
+    let layerBounds;
+    if (metadataExtent) {
+      // Get the metadata projection
+      const metadataProjection = this.getMetadataProjection();
+      layerBounds = this.getMapViewer().convertExtentFromProjToMapProj(metadataExtent, metadataProjection);
     }
 
-    return bounds;
+    // If both layer config had bounds and layer has real bounds, take the intersection between them
+    if (layerConfigBounds && layerBounds) layerBounds = getExtentIntersection(layerBounds, layerConfigBounds);
+
+    // Return the layer bounds possibly unioned with 'bounds' received as param
+    return getExtentUnionMaybe(layerBounds, bounds);
   }
 }

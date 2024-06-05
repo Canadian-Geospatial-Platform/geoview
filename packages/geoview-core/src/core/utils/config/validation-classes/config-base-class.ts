@@ -3,7 +3,6 @@ import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   TypeGeoviewLayerConfig,
-  TypeLayerEntryConfig,
   TypeLayerEntryType,
   TypeLayerInitialSettings,
   TypeLayerStatus,
@@ -218,14 +217,13 @@ export abstract class ConfigBaseClass {
    * Recursively checks the list of layer entries to see if all of them are greater than or equal to the provided layer status.
    *
    * @param {TypeLayerStatus} layerStatus - The layer status to compare with the internal value of the config.
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer's configuration
-   *                                                            (default: this.listOfLayerEntryConfig).
+   * @param {ConfigBaseClass[]} listOfLayerEntryConfig - The list of layer's configuration (default: this.listOfLayerEntryConfig).
    *
    * @returns {boolean} true when all layers are greater than or equal to the layerStatus parameter.
    */
-  static allLayerStatusAreGreaterThanOrEqualTo(layerStatus: TypeLayerStatus, listOfLayerEntryConfig: TypeLayerEntryConfig[]): boolean {
+  static allLayerStatusAreGreaterThanOrEqualTo(layerStatus: TypeLayerStatus, listOfLayerEntryConfig: ConfigBaseClass[]): boolean {
     // Try to find a layer that is not greater than or equal to the layerStatus parameter. If you can, return false
-    return !listOfLayerEntryConfig.find((layerConfig: TypeLayerEntryConfig) => {
+    return !listOfLayerEntryConfig.find((layerConfig) => {
       if (layerEntryIsGroupLayer(layerConfig))
         return !this.allLayerStatusAreGreaterThanOrEqualTo(layerStatus, layerConfig.listOfLayerEntryConfig);
       return !layerConfig.isGreaterThanOrEqualTo(layerStatus || 'newInstance');

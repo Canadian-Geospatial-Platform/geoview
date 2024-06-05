@@ -196,6 +196,8 @@ export class OgcFeature extends AbstractGeoViewVector {
           };
 
         if (layerConfig.initialSettings?.extent)
+          // TODO: Check - Why are we converting to the map projection in the processing? Wouldn't it be best to leave it untouched, as it's part of the initial configuration?
+          // TO.DOCONT: We're already making sure to project the settings in the map projection when we getBounds(). Seems we're doing work twice?
           layerConfig.initialSettings.extent = this.getMapViewer().convertExtentLngLatToMapProj(layerConfig.initialSettings.extent);
 
         if (!layerConfig.initialSettings?.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {

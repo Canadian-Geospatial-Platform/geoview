@@ -1415,9 +1415,13 @@ export class MapViewer {
    * @returns {Coordinate} The coordinate in the map projection
    */
   convertCoordinateFromProjToMapProj(coordinate: Coordinate, fromProj: ProjectionLike): Coordinate {
-    // TODO: In this function and equivalent 3 others below, make it so that if the given projection is the same as the map projection
-    // TO.DOCONT: it just skips and returns the same geometry. It'd save many 'if' like 'if projA <> projB then call this' in the code base
-    return Projection.transform(coordinate, fromProj, this.getProjection());
+    // If different projections
+    if (fromProj !== this.getProjection().getCode()) {
+      return Projection.transform(coordinate, fromProj, this.getProjection());
+    }
+
+    // Same projection
+    return coordinate;
   }
 
   /**
@@ -1427,7 +1431,13 @@ export class MapViewer {
    * @returns {Coordinate} The coordinate in the map projection
    */
   convertCoordinateFromMapProjToProj(coordinate: Coordinate, toProj: ProjectionLike): Coordinate {
-    return Projection.transform(coordinate, this.getProjection(), toProj);
+    // If different projections
+    if (toProj !== this.getProjection().getCode()) {
+      return Projection.transform(coordinate, this.getProjection(), toProj);
+    }
+
+    // Same projection
+    return coordinate;
   }
 
   /**
@@ -1437,17 +1447,29 @@ export class MapViewer {
    * @returns {Extent} The extent in the map projection
    */
   convertExtentFromProjToMapProj(extent: Extent, fromProj: ProjectionLike): Extent {
-    return Projection.transformExtent(extent, fromProj, this.getProjection());
+    // If different projections
+    if (fromProj !== this.getProjection().getCode()) {
+      return Projection.transformExtent(extent, fromProj, this.getProjection());
+    }
+
+    // Same projection
+    return extent;
   }
 
   /**
-   * Transforms extent from map projection to given projection.
+   * Transforms extent from map projection to given projection. If the projects are the same, the extent is simply returned.
    * @param {Extent} extent - The given extent
    * @param {ProjectionLike} toProj - The projection that should be output
    * @returns {Extent} The extent in the map projection
    */
   convertExtentFromMapProjToProj(extent: Extent, toProj: ProjectionLike): Extent {
-    return Projection.transformExtent(extent, this.getProjection(), toProj);
+    // If different projections
+    if (toProj !== this.getProjection().getCode()) {
+      return Projection.transformExtent(extent, this.getProjection(), toProj);
+    }
+
+    // Same projection
+    return extent;
   }
 
   // #region EVENTS

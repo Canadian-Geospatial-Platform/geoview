@@ -134,7 +134,7 @@ export abstract class AbstractGeoViewLayer {
   #style: Record<string, TypeStyleConfig> = {};
 
   /** Attribution used in the OpenLayer source. */
-  attributions: string[] = [];
+  #attributions: string[] = [];
 
   /** Date format object used to translate server to ISO format and ISO to server format */
   serverDateFragmentsOrder?: TypeDateFragments;
@@ -324,6 +324,22 @@ export abstract class AbstractGeoViewLayer {
     this.#emitLayerStyleChanged({ style, layerPath });
   }
 
+  /**
+   * Gets the layer attributions
+   * @returns {string[]} The layer attributions
+   */
+  getAttributions(): string[] {
+    return this.#attributions;
+  }
+
+  /**
+   * Sets the layer attributions
+   * @param {string[]} attributions - The layer attributions
+   */
+  setAttributions(attributions: string[]): void {
+    this.#attributions = attributions;
+  }
+
   /** ***************************************************************************************************************************
    * Get the layer metadata that is associated to the layer.
    *
@@ -470,8 +486,13 @@ export abstract class AbstractGeoViewLayer {
         if (metadataString === '{}') this.metadata = null;
         else {
           this.metadata = toJsonObject(JSON.parse(metadataString));
-          const { copyrightText } = this.metadata;
-          if (copyrightText && !this.attributions.includes(copyrightText as string)) this.attributions.push(copyrightText as string);
+          const copyrightText = this.metadata.copyrightText as string;
+          const attributions = this.getAttributions();
+          if (copyrightText && !attributions.includes(copyrightText)) {
+            // Add it
+            attributions.push(copyrightText);
+            this.setAttributions(attributions);
+          }
         }
       } catch (error) {
         // Log
@@ -1418,8 +1439,7 @@ export abstract class AbstractGeoViewLayer {
 
       const initialLayerConfig = this.getLayerConfig(layerPath);
       if (initialLayerConfig) {
-        if (Array.isArray(initialLayerConfig)) processGroupLayerBounds(initialLayerConfig);
-        else processGroupLayerBounds([initialLayerConfig]);
+        processGroupLayerBounds([initialLayerConfig]);
       }
 
       return bounds;
@@ -1455,20 +1475,13 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Process recursively the list of layer entries to see if all of them are greater than or equal to the provided layer status.
-   *
+   * Recursively processes the list of layer entries to see if all of them are greater than or equal to the provided layer status.
    * @param {TypeLayerStatus} layerStatus The layer status to compare with the internal value of the config.
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer's configuration
-   *                                                            (default: this.listOfLayerEntryConfig).
-   *
    * @returns {boolean} true when all layers are greater than or equal to the layerStatus parameter.
    */
-  allLayerStatusAreGreaterThanOrEqualTo(
-    layerStatus: TypeLayerStatus,
-    listOfLayerEntryConfig: TypeLayerEntryConfig[] = this.listOfLayerEntryConfig
-  ): boolean {
+  allLayerStatusAreGreaterThanOrEqualTo(layerStatus: TypeLayerStatus): boolean {
     // Redirect
-    return ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo(layerStatus, listOfLayerEntryConfig);
+    return ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo(layerStatus, this.listOfLayerEntryConfig);
   }
 
   /**
@@ -1535,9 +1548,6 @@ export abstract class AbstractGeoViewLayer {
         (olLayer! as any).get('source').once(`${listenerType}loadend`, loadEndListener);
       }
     }
-
-    // Emit about the layer creation so we can do something about it (part of the major layer refactor)
-    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
   }
 
   /**

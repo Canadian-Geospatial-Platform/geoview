@@ -12,7 +12,7 @@ import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/core/types/
 import { CONST_LAYER_TYPES, TypeWmsLegend, TypeWmsLegendStyle } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { xmlToJson, getLocalizedValue } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { getMinOrMaxExtents } from '@/geo/utils/utilities';
+import { getExtentIntersection, getExtentUnionMaybe } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
@@ -572,36 +572,69 @@ export class GVWMS extends AbstractGVRaster {
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     const layerConfig = this.getLayerConfig();
-    const projection = this.getOLSource()?.getProjection()?.getCode() || this.getMapViewer().getProjection().getCode();
 
-    let layerBounds = layerConfig?.initialSettings?.bounds || [];
-    // TODO: Check - Are we sure this is 4326, always?
-    layerBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, 'EPSG:4326');
+    // Get the source projection
+    const sourceProjection = this.getOLSource().getProjection() || undefined;
 
-    const boundingBoxes = layerConfig.getMetadata()?.Capability.Layer.BoundingBox;
-    let bbExtent: Extent | undefined;
+    // Get the layer config bounds
+    let layerConfigBounds = layerConfig?.initialSettings?.bounds;
 
+    // If layer bounds were found, project
+    if (layerConfigBounds) {
+      // Make sure we're in the map projection. Always EPSG:4326 when coming from our configuration.
+      layerConfigBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerConfigBounds, 'EPSG:4326');
+    }
+
+    // Get the layer bounds from metadata
+    const metadataExtent = this.#getBoundsExtentFromMetadata(sourceProjection?.getCode() || '');
+
+    // If any
+    let layerBounds;
+    if (metadataExtent) {
+      const [metadataProj, metadataBounds] = metadataExtent;
+      layerBounds = this.getMapViewer().convertExtentFromProjToMapProj(metadataBounds, metadataProj);
+    }
+
+    // If both layer config had bounds and layer has real bounds, take the intersection between them
+    if (layerConfigBounds && layerBounds) layerBounds = getExtentIntersection(layerBounds, layerConfigBounds);
+
+    // Return the layer bounds possibly unioned with 'bounds' received as param
+    return getExtentUnionMaybe(layerBounds, bounds);
+  }
+
+  /**
+   * Gets the bounds as defined in the metadata, favoring the ones in the given projection or returning the first one found
+   * @param {string} projection - The projection to favor when looking for the bounds inside the metadata
+   * @returns {[string, Extent]} The projection and its extent as provided by the metadata
+   */
+  #getBoundsExtentFromMetadata(projection: string): [string, Extent] | undefined {
+    // Get the bounding boxes in the metadata
+    const boundingBoxes = this.getLayerConfig().getMetadata()?.Capability.Layer.BoundingBox as TypeJsonArray;
+
+    // If found any
     if (boundingBoxes) {
+      // Find the one with the right projection
       for (let i = 0; i < (boundingBoxes.length as number); i++) {
         if (boundingBoxes[i].crs === projection)
-          bbExtent = [
-            boundingBoxes[i].extent[1],
-            boundingBoxes[i].extent[0],
-            boundingBoxes[i].extent[3],
-            boundingBoxes[i].extent[2],
-          ] as Extent;
+          return [
+            boundingBoxes[i].crs as string,
+            // TODO: Check - Is it always in that order, 1, 0, 3, 2 or does that depend on the projection?
+            [boundingBoxes[i].extent[1], boundingBoxes[i].extent[0], boundingBoxes[i].extent[3], boundingBoxes[i].extent[2]] as Extent,
+          ];
+      }
+
+      // Not found. If any
+      if (boundingBoxes.length > 0) {
+        // Take the first one and return the bounds and projection
+        return [
+          boundingBoxes[0].crs as string,
+          // TODO: Check - Is it always in that order, 1, 0, 3, 2 or does that depend on the projection?
+          [boundingBoxes[0].extent[1], boundingBoxes[0].extent[0], boundingBoxes[0].extent[3], boundingBoxes[0].extent[2]] as Extent,
+        ];
       }
     }
 
-    if (layerBounds && bbExtent) layerBounds = getMinOrMaxExtents(layerBounds, bbExtent, 'min');
-
-    if (layerBounds) {
-      // eslint-disable-next-line no-param-reassign
-      if (!bounds) bounds = [layerBounds[0], layerBounds[1], layerBounds[2], layerBounds[3]];
-      // eslint-disable-next-line no-param-reassign
-      else bounds = getMinOrMaxExtents(bounds, layerBounds);
-    }
-
-    return bounds;
+    // Really not found
+    return undefined;
   }
 }

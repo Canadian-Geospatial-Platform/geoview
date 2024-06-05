@@ -10,7 +10,7 @@ import { Pixel } from 'ol/pixel';
 import Feature, { FeatureLike } from 'ol/Feature';
 
 import { DateMgt } from '@/core/utils/date-mgt';
-import { getMinOrMaxExtents } from '@/geo/utils/utilities';
+import { getExtentUnion } from '@/geo/utils/utilities';
 import { FilterNodeArrayType, NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
@@ -249,16 +249,10 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    */
   protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
-    const layerBounds = this.getOLSource()?.getExtent();
+    const sourceExtent = this.getOLSource().getExtent();
 
-    if (layerBounds) {
-      // eslint-disable-next-line no-param-reassign
-      if (!bounds) bounds = [layerBounds[0], layerBounds[1], layerBounds[2], layerBounds[3]];
-      // eslint-disable-next-line no-param-reassign
-      else bounds = getMinOrMaxExtents(bounds, layerBounds);
-    }
-
-    return bounds;
+    // Return the bounds possibly unioned with 'bounds' received as param
+    return getExtentUnion(sourceExtent, bounds);
   }
 
   /**

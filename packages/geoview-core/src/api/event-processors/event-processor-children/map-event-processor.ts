@@ -519,7 +519,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // Redirect to layer to highlight
     MapEventProcessor.getMapViewerLayerAPI(mapId).highlightLayer(layerPath);
+
     // Get bounds and highlight a bounding box for the layer
+    // TODO: Refactor - Layers refactoring. There needs to be a calculateBounds somewhere (new layers, new config?) to complete the full layers migration.
     const bounds = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath)?.calculateBounds(layerPath);
     if (bounds && bounds[0] !== Infinity) this.getMapStateProtected(mapId).actions.highlightBBox(bounds, true);
 
@@ -852,8 +854,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @return {Extent | undefined}
    */
   static getLayerBounds(mapId: string, layerPath: string): Extent | undefined {
+    // TODO: Refactor - Layers refactoring. There needs to be a calculateBounds somewhere (new layers, new config?) to complete the full layers migration.
     const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
     if (layer) {
+      // TODO: Check - Do we really want to calculate the bounds again? How many times are we calculating them!?
       const bounds = layer.calculateBounds(layerPath);
       if (bounds) return bounds;
     }

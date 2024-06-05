@@ -12,24 +12,28 @@ import LayerGroup from 'ol/layer/Group';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
+import { ProjectionLike } from 'ol/proj';
+import { Point } from 'ol/geom';
 
 import { TypeLocalizedString } from '@config/types/map-schema-types';
 
+import { api } from '@/app';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeBaseSourceVectorInitialConfig, TypeFeatureInfoEntry, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { getMinOrMaxExtents } from '@/geo/utils/utilities';
+import { getExtentUnionMaybe } from '@/geo/utils/utilities';
 import { NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { VECTOR_LAYER } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
-import { CSV } from './csv';
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { Cast } from '@/core/types/global-types';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { analyzeLayerFilter } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVVector } from '../../gv-layers/vector/abstract-gv-vector';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { Projection } from '@/geo/utils/projection';
 
 /* *******************************************************************************************************************************
  * AbstractGeoViewVector types
@@ -131,10 +135,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     sourceOptions: SourceOptions<Feature> = {},
     readOptions: ReadOptions = {}
   ): VectorSource<Feature> {
-    const { layerPath } = layerConfig;
     // The line below uses var because a var declaration has a wider scope than a let declaration.
     let vectorSource: VectorSource<Feature>;
-    if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
+    if (this.getAttributions().length > 0) sourceOptions.attributions = this.getAttributions();
 
     // set loading strategy option
     sourceOptions.strategy = (layerConfig.source! as TypeBaseSourceVectorInitialConfig).strategy === 'bbox' ? bbox : all;
@@ -161,11 +164,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         if (xhr.status === 200) {
           let features: Feature[] | null;
           if (layerConfig.schemaTag === CONST_LAYER_TYPES.CSV) {
-            // TODO Refactor - Layers refactoring. There needs to be a convertCsv on both CSV and GVCSV (old layer and new layer) to complete the layers migration
-            features = (this.getMapViewer().layer.getGeoviewLayer(layerPath) as CSV).convertCsv(
-              xhr.responseText,
-              layerConfig as VectorLayerEntryConfig
-            );
+            // Convert the CSV to features
+            features = AbstractGeoViewVector.convertCsv(this.mapId, xhr.responseText, layerConfig as VectorLayerEntryConfig);
           } else {
             features = vectorSource.getFormat()!.readFeatures(xhr.responseText, {
               ...readOptions,
@@ -250,7 +250,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     // If no olLayer was obtained
     if (!olLayer) {
-      // Working in old LAYERS_HYBRID_MODE (in the new mode the code below is handle in the new classes)
+      // Working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
       // Create the vector layer options.
       const layerOptions: VectorLayerOptions<VectorSource> = {
         properties: { layerConfig },
@@ -274,10 +274,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
       // Create the OpenLayer layer
       olLayer = new VectorLayer(layerOptions);
+
+      // Hook the loaded event
+      this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'features');
     }
 
-    // TODO: Refactor - Wire it up
-    this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'features');
+    // GV Time to emit about the layer creation!
+    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
 
     // If a layer on the map has an initialSettings.visible set to false, its status will never reach the status 'loaded' because
     // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
@@ -384,16 +387,12 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {Extent | undefined} The new layer bounding box.
    */
   // GV Layers Refactoring - Obsolete (in layers)
-  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+  protected override getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
     const layer = this.getOLLayer(layerPath) as VectorLayer<VectorSource> | undefined;
     const layerBounds = layer?.getSource()?.getExtent();
 
-    if (layerBounds) {
-      if (!bounds) bounds = [layerBounds[0], layerBounds[1], layerBounds[2], layerBounds[3]];
-      else bounds = getMinOrMaxExtents(bounds, layerBounds);
-    }
-
-    return bounds;
+    // Return the layer bounds possibly unioned with 'bounds' received as param
+    return getExtentUnionMaybe(layerBounds, bounds);
   }
 
   /**
@@ -464,5 +463,139 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       layerPath,
       filter: filterValueToUse,
     });
+  }
+
+  /** ***************************************************************************************************************************
+   * Converts csv text to feature array.
+   *
+   * @param {string} csvData The data from the .csv file.
+   * @param {VectorLayerEntryConfig} layerConfig The config of the layer.
+   *
+   * @returns {Feature[]} The array of features.
+   */
+  static convertCsv(mapId: string, csvData: string, layerConfig: VectorLayerEntryConfig): Feature[] | null {
+    const inProjection: ProjectionLike = layerConfig.source!.dataProjection || Projection.PROJECTION_NAMES.LNGLAT;
+    const outProjection: ProjectionLike = MapEventProcessor.getMapViewer(mapId).getProjection().getCode();
+    const latList = ['latitude', 'lat', 'y', 'ycoord', 'latitude/latitude', 'latitude / latitude'];
+    const lonList = ['longitude', 'lon', 'x', 'xcoord', 'longitude/longitude', 'longitude / longitude'];
+
+    const features: Feature[] = [];
+    let latIndex: number | undefined;
+    let lonIndex: number | undefined;
+    const csvRows = AbstractGeoViewVector.#csvStringToArray(csvData, layerConfig.source!.separator || ',');
+    const headers: string[] = csvRows[0];
+    for (let i = 0; i < headers.length; i++) {
+      if (latList.includes(headers[i].toLowerCase())) latIndex = i;
+      if (lonList.includes(headers[i].toLowerCase())) lonIndex = i;
+    }
+
+    if (latIndex === undefined || lonIndex === undefined) {
+      const errorMsg = `Could not find geographic data in the CSV`;
+      logger.logError(errorMsg);
+      // TODO: find a more centralized way to trap error and display message
+      api.maps[mapId].notifications.showError(errorMsg);
+      layerConfig.layerStatus = 'error';
+      return null;
+    }
+
+    AbstractGeoViewVector.#processFeatureInfoConfig(headers, csvRows[1], [latIndex, lonIndex], layerConfig);
+
+    for (let i = 1; i < csvRows.length; i++) {
+      const currentRow = csvRows[i];
+      const properties: { [key: string]: string | number } = {};
+      for (let j = 0; j < headers.length; j++) {
+        if (j !== latIndex && j !== lonIndex && currentRow[j]) {
+          properties[headers[j]] = currentRow[j] !== '' && Number(currentRow[j]) ? Number(currentRow[j]) : currentRow[j];
+        }
+      }
+
+      const lon = currentRow[lonIndex] ? Number(currentRow[lonIndex]) : Infinity;
+      const lat = currentRow[latIndex] ? Number(currentRow[latIndex]) : Infinity;
+      if (Number.isFinite(lon) && Number.isFinite(lat)) {
+        const coordinates = inProjection !== outProjection ? Projection.transform([lon, lat], inProjection, outProjection) : [lon, lat];
+        const feature = new Feature({
+          geometry: new Point(coordinates),
+          ...properties,
+        });
+        features.push(feature);
+      }
+    }
+
+    return features;
+  }
+
+  /** ***************************************************************************************************************************
+   * Converts csv to array of rows of separated values.
+   *
+   * @param {string} csvData The raw csv text.
+   * @param {string} separator The character used to separate the values.
+   *
+   * @returns {string[][]} An array of the rows of the csv, split by separator.
+   * @private
+   */
+  static #csvStringToArray(csvData: string, separator: string): string[][] {
+    const regex = new RegExp(`(\\${separator}|\\r?\\n|\\r|^)(?:"([^"]*(?:""[^"]*)*)"|([^\\${separator}\\r\\n]*))`, 'gi');
+    let matches;
+    const parsedData: string[][] = [[]];
+    // eslint-disable-next-line no-cond-assign
+    while ((matches = regex.exec(csvData))) {
+      if (matches[1].length && matches[1] !== separator) parsedData.push([]);
+      parsedData[parsedData.length - 1].push(matches[2] !== undefined ? matches[2].replace(/""/g, '"') : matches[3]);
+    }
+    return parsedData;
+  }
+
+  /** ***************************************************************************************************************************
+   * This method sets the outfields and aliasFields of the source feature info.
+   *
+   * @param {string[]} headers An array of field names.
+   * @param {string[]} firstRow The first row of data.
+   * @param {number[]} lonLatIndices The index of lon and lat in the array.
+   * @param {VectorLayerEntryConfig} layerConfig The vector layer entry to configure.
+   * @private
+   */
+  static #processFeatureInfoConfig(
+    headers: string[],
+    firstRow: string[],
+    lonLatIndices: number[],
+    layerConfig: VectorLayerEntryConfig
+  ): void {
+    if (!layerConfig.source) layerConfig.source = {};
+    if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
+    // Process undefined outfields or aliasFields ('' = false and !'' = true). Also, if en is undefined, then fr is also undefined.
+    // when en and fr are undefined, we set both en and fr to the same value.
+    if (!layerConfig.source.featureInfo.outfields?.en || !layerConfig.source.featureInfo.aliasFields?.en) {
+      const processOutField = !layerConfig.source.featureInfo.outfields?.en;
+      const processAliasFields = !layerConfig.source.featureInfo.aliasFields?.en;
+      if (processOutField) {
+        layerConfig.source.featureInfo.outfields = { en: '' };
+        layerConfig.source.featureInfo.fieldTypes = '';
+      }
+      if (processAliasFields) layerConfig.source.featureInfo.aliasFields = { en: '' };
+      headers.forEach((header) => {
+        const index = headers.indexOf(header);
+        if (index !== lonLatIndices[0] && index !== lonLatIndices[1]) {
+          let type = 'string';
+          if (firstRow[index] && firstRow[index] !== '' && Number(firstRow[index])) type = 'number';
+          if (processOutField) {
+            layerConfig.source!.featureInfo!.outfields!.en = `${layerConfig.source!.featureInfo!.outfields!.en}${header},`;
+            layerConfig.source!.featureInfo!.fieldTypes = `${layerConfig.source!.featureInfo!.fieldTypes}${type},`;
+          }
+          layerConfig.source!.featureInfo!.aliasFields!.en = `${layerConfig.source!.featureInfo!.outfields!.en}${header},`;
+        }
+      });
+      // Remove commas from end of strings
+      layerConfig.source.featureInfo!.outfields!.en = layerConfig.source.featureInfo!.outfields?.en?.slice(0, -1);
+      layerConfig.source.featureInfo!.fieldTypes = layerConfig.source.featureInfo!.fieldTypes?.slice(0, -1);
+      layerConfig.source.featureInfo!.aliasFields!.en = layerConfig.source.featureInfo!.aliasFields?.en?.slice(0, -1);
+      layerConfig.source!.featureInfo!.outfields!.fr = layerConfig.source!.featureInfo!.outfields?.en;
+      layerConfig.source!.featureInfo!.aliasFields!.fr = layerConfig.source!.featureInfo!.aliasFields?.en;
+    }
+    if (!layerConfig.source.featureInfo.nameField) {
+      const en =
+        layerConfig.source.featureInfo!.outfields!.en?.split(',')[0] || layerConfig.source.featureInfo!.outfields!.fr?.split(',')[0];
+      const fr = en;
+      if (en) layerConfig.source.featureInfo.nameField = { en, fr };
+    }
   }
 }

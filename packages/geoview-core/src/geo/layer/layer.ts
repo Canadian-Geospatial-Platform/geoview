@@ -16,6 +16,7 @@ import { createLocalizedString, generateId, whenThisThen } from '@/core/utils/ut
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
 import { AbstractGeoViewLayer, LayerCreationEvent, LayerRequestingEvent } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   MapConfigLayerEntry,
   TypeGeoviewLayerConfig,
@@ -50,7 +51,7 @@ import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { AbstractGeoViewVector, api } from '@/app';
+import { api } from '@/app';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
 import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
@@ -66,6 +67,7 @@ import { GVGeoJSON } from './gv-layers/vector/gv-geojson';
 import { GVOGCFeature } from './gv-layers/vector/gv-ogc-feature';
 import { GVVectorTiles } from './gv-layers/vector/gv-vector-tiles';
 import { GVWFS } from './gv-layers/vector/gv-wfs';
+import { GVCSV } from './gv-layers/vector/gv-csv';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
@@ -76,6 +78,7 @@ import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-clas
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
 // import { LayerMockup } from './layer-mockup';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { TypeLegendItem } from '@/core/components/layers/types';
@@ -207,46 +210,6 @@ export class LayerApi {
     // TODO: Refactor - This function will be replaced to return the new layer classes model
     // The first element of the layerPath is the geoviewLayerId
     return this.#geoviewLayers[layerPath.split('/')[0]];
-  }
-
-  /**
-   * Asynchronously gets a layer using its id and return the layer data.
-   * If the layer we're searching for has to be processed, set mustBeProcessed to true when awaiting on this method.
-   * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
-   * Note this function uses the 'Async' suffix to differentiate it from 'getGeoviewLayer()'.
-   * @param {string} geoviewLayerId - The geoview layer id to look for
-   * @param {boolean} mustBeProcessed - Indicate if the layer we're searching for must be found only once processed
-   * @param {number} timeout - Optionally indicate the timeout after which time to abandon the promise
-   * @param {number} checkFrequency - Optionally indicate the frequency at which to check for the condition on the layer
-   * @returns {Promise<AbstractGeoViewLayer>} A promise with the AbstractGeoViewLayer
-   * @throws An exception when the layer for the layer id couldn't be found, or waiting time expired
-   */
-  async getGeoviewLayerByIdAsync(
-    geoviewLayerId: string,
-    mustBeProcessed: boolean,
-    timeout?: number,
-    checkFrequency?: number
-  ): Promise<AbstractGeoViewLayer> {
-    // Redirects
-    const layer = this.getGeoviewLayer(geoviewLayerId);
-
-    // If layer was found
-    if (layer) {
-      // Check if not waiting and returning immediately
-      if (!mustBeProcessed) return Promise.resolve(layer);
-
-      try {
-        // Waiting for the processed phase, possibly throwing exception if that's not happening
-        await layer.waitForAllLayerStatusAreGreaterThanOrEqualTo(timeout, checkFrequency);
-        return layer;
-      } catch (error) {
-        // Throw
-        throw new Error(`Took too long for layer ${geoviewLayerId} to get in 'processed' phase`);
-      }
-    }
-
-    // Throw
-    throw new Error(`Layer ${geoviewLayerId} not found.`);
   }
 
   /**
@@ -880,6 +843,7 @@ export class LayerApi {
     else if (olSource instanceof VectorSource && config instanceof OgcFeatureLayerEntryConfig)
       gvLayer = new GVOGCFeature(mapId, olSource, config);
     else if (olSource instanceof VectorSource && config instanceof WfsLayerEntryConfig) gvLayer = new GVWFS(mapId, olSource, config);
+    else if (olSource instanceof VectorSource && config instanceof CsvLayerEntryConfig) gvLayer = new GVCSV(mapId, olSource, config);
     else if (olSource instanceof VectorTile && config instanceof VectorTilesLayerEntryConfig)
       gvLayer = new GVVectorTiles(mapId, olSource, config);
     else if (olSource instanceof XYZ && config instanceof XYZTilesLayerEntryConfig) gvLayer = new GVXYZTiles(mapId, olSource, config);
@@ -1370,8 +1334,8 @@ export class LayerApi {
     // Update the legend layers if necessary
     if (updateLegendLayers) LegendEventProcessor.setItemVisibility(this.getMapId(), item, visibility);
 
-    // Apply filter to layer
-    (this.getGeoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter(layerPath, '');
+    // Apply filter to layer (lazy casting here to access the function)
+    (this.getGeoviewLayerHybrid(layerPath) as AbstractGeoViewVector).applyViewFilter?.(layerPath, '');
 
     // Emit event
     this.#emitLayerItemVisibilityToggled({ layerPath, itemName: item.name, visibility });

@@ -84,9 +84,9 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         return LegendEventProcessor.findLayerByPath(curLayers, layerPath);
       },
       getLayerBounds: (layerPath: string) => {
+        // TODO: Refactor - Layers refactoring. There needs to be a calculateBounds somewhere (new layers, new config?) to complete the full layers migration.
         const layer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayer(layerPath);
         if (layer) {
-          // TODO: Refactor - Layers refactoring. There needs to be a calculateBounds somewhere (new layers, new config?) to complete the full layers migration.
           const bounds = layer.calculateBounds(layerPath);
           if (bounds) return bounds;
         }
@@ -172,6 +172,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
 
         // Get the layer and always calculate the bounds. This will prevent bounds undefined error
+        // TODO: Refactor - Layers refactoring. There needs to be a calculateBounds somewhere (new layers, new config?) to complete the full layers migration.
         const myLayer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayer(layerPath.split('/')[0])!;
         const bounds = myLayer.calculateBounds(layerPath);
         if (bounds) return MapEventProcessor.zoomToExtent(get().mapId, bounds, options);

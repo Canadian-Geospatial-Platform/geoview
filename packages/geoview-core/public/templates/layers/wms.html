@@ -581,7 +581,7 @@
                   // TO.DOCONT: Johann: This was to select a style for a WMS on the fly.... I think it is not use anymore. But I think it may be good to have this
                   // TO.DOCONT: and this mean we need the config section who extract and get the style and layers who apply the style form config or from function call.
                   cgpv.api.maps.LYR3.layer
-                    .getGeoviewLayer('wmsLYR3-Root')
+                    .getGeoviewLayerHybrid('wmsLYR3-Root')
                     .setStyle(dropDownContent.value, 'wmsLYR3-Root/landcover_2015_19classes');
                 });
               }
