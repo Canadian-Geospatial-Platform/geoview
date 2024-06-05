@@ -207,14 +207,11 @@ export abstract class DateMgt {
   /**
    * Convert a date local to a UTC date
    * @param {Date | string} date date to use
-   * @returns {string} UTC date
+   * @returns {string} UTC date or empty string if invalid date (when field value is null)
    */
   static convertToUTC(date: Date | string): string {
-    // check if it is a valid date
-    if (typeof date === 'string' && !isValidDate(date)) throw new Error(`${INVALID_DATE} (convertToUTC)`);
-
-    // return ISO string
-    return dayjs(date).utc(false).format();
+    // check if it is a valid date and if so, return ISO string
+    return typeof date === 'string' && !isValidDate(date) ? '' : dayjs(date).utc(false).format();
   }
 
   /**
@@ -641,7 +638,7 @@ export abstract class DateMgt {
    * @returns {string} The date format.
    */
   static deduceDateFormat(dateString: string): string {
-    let dateFormat = dateString.toUpperCase().replaceAll('/', '-').replaceAll(' ', 'T');
+    let dateFormat = dateString !== null ? dateString.toUpperCase().replaceAll('/', '-').replaceAll(' ', 'T') : 'YYYY-MM-DD';
     dateFormat = dateFormat
       .replace(/\d{4}/, 'YYYY')
       .replace(/^\d{1,2}(?=-\d{1,2}-YYYY)|((?<=^YYYY-\d-)|(?<=^YYYY-\d\d-))\d{1,2}/, 'DD')

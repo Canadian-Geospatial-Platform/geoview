@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import debounce from 'lodash/debounce';
 import startCase from 'lodash/startCase';
 
-import { getCenter, Extent } from 'ol/extent'; // only for typing
+import { getCenter } from 'ol/extent'; // only for typing
 
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -76,7 +76,8 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
   const [sorting, setSorting] = useState<MRTSortingState>([]);
 
   // get store actions and values
-  const { zoomToExtent, transformPoints, showClickMarker } = useMapStoreActions();
+  const { zoomToExtent, highlightBBox, transformPoints, showClickMarker, addHighlightedFeature, removeHighlightedFeature } =
+    useMapStoreActions();
   const { applyMapFilters, setSelectedFeature } = useDataTableStoreActions();
   const language = useAppDisplayLanguage();
   const datatableSettings = useDataTableLayerSettings();
@@ -313,22 +314,25 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
    *
    */
   const handleZoomIn = useCallback(
-    (extent: Extent | undefined) => {
-      if (extent) {
+    (feature: TypeFeatureInfoEntry) => {
+      if (feature.extent) {
         // Project
-        const center = getCenter(extent);
+        const center = getCenter(feature.extent);
         const newCenter = transformPoints([center], 4326)[0];
 
         // Zoom to extent and wait for it to finish
         // TODO: We have the same patch in details, see if we should create a reusable custom patch / or cahnge desing
-        zoomToExtent(extent)
+        zoomToExtent(feature.extent)
           .then(async () => {
             // Typically, the click marker is removed after a zoom, so wait a bit here and re-add it...
             // TODO: Refactor - Zoom ClickMarker - Improve the logic in general of when/if a click marker should be removed after a zoom
             await delay(150);
 
-            // Add (back?) a click marker
+            // Add (back?) a click marker, a bbox extent who will disapear and remove/add higlight the zoomed feature
             showClickMarker({ lnglat: newCenter });
+            highlightBBox(feature.extent!, false);
+            removeHighlightedFeature('all');
+            addHighlightedFeature(feature);
           })
           .catch((error: unknown) => {
             // Log
@@ -336,7 +340,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
           });
       }
     },
-    [zoomToExtent, transformPoints, showClickMarker]
+    [zoomToExtent, transformPoints, showClickMarker, highlightBBox, addHighlightedFeature, removeHighlightedFeature]
   );
 
   /**
@@ -359,7 +363,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
           />
         ),
         ZOOM: (
-          <IconButton color="primary" onClick={() => handleZoomIn(feature.extent)} disabled={!feature.extent}>
+          <IconButton color="primary" onClick={() => handleZoomIn(feature)} disabled={!feature.extent}>
             <ZoomInSearchIcon />
           </IconButton>
         ),
