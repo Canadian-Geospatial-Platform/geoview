@@ -33,7 +33,7 @@ import { LayerApi } from '@/geo/layer/layer';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { Projection } from '@/geo/utils/projection';
 
-import { api, unmountMap } from '@/app';
+import { TypeOrderedLayerInfo, api, unmountMap } from '@/app';
 import { Plugin } from '@/api/plugin/plugin';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
 
@@ -163,6 +163,9 @@ export class MapViewer {
 
   // Keep all callback delegates references
   #onMapComponentRemovedHandlers: MapComponentRemovedDelegate[] = [];
+
+  // Keep all callback delegates references
+  #onMapLanguageChangedHandlers: MapLanguageChangedDelegate[] = [];
 
   // The starting time of the timer for the map ready
   #checkMapReadyStartTime: number | undefined;
@@ -765,6 +768,14 @@ export class MapViewer {
   }
 
   /**
+   * Gets the ordered layer info.
+   * @returns {TypeOrderedLayerInfo[]} The ordered layer info
+   */
+  getMapLayerOrderInfo(): TypeOrderedLayerInfo[] {
+    return MapEventProcessor.getMapLayerOrder(this.mapId);
+  }
+
+  /**
    * set fullscreen / exit fullscreen
    *
    * @param status - Toggle fullscreen or exit fullscreen status
@@ -837,6 +848,8 @@ export class MapViewer {
         logger.logInfo('reset layers not implemented yet');
       }
 
+      // Emit language changed event
+      this.#emitMapLanguageChanged({ language: displayLanguage });
       // Return the promise
       return promise;
     }
@@ -1758,6 +1771,33 @@ export class MapViewer {
     EventHelper.offEvent(this.#onMapComponentRemovedHandlers, callback);
   }
 
+  /**
+   * Emits a component removed event to all handlers.
+   * @private
+   */
+  #emitMapLanguageChanged(event: MapLanguageChangedEvent): void {
+    // Emit the component removed event for all handlers
+    EventHelper.emitEvent(this, this.#onMapLanguageChangedHandlers, event);
+  }
+
+  /**
+   * Registers a component removed event callback.
+   * @param {MapComponentRemovedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onMapLanguageChanged(callback: MapLanguageChangedDelegate): void {
+    // Register the component removed event handler
+    EventHelper.onEvent(this.#onMapLanguageChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a component removed event callback.
+   * @param {MapComponentRemovedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offMapLanguageChanged(callback: MapLanguageChangedDelegate): void {
+    // Unregister the component removed event handler
+    EventHelper.offEvent(this.#onMapLanguageChangedHandlers, callback);
+  }
+
   // #endregion
 }
 
@@ -1894,3 +1934,15 @@ export type MapComponentRemovedEvent = {
  * Define a delegate for the event handler function signature
  */
 type MapComponentRemovedDelegate = EventDelegateBase<MapViewer, MapComponentRemovedEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type MapLanguageChangedEvent = {
+  language: TypeDisplayLanguage;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapLanguageChangedDelegate = EventDelegateBase<MapViewer, MapLanguageChangedEvent>;

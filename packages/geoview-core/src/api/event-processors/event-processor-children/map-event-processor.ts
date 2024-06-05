@@ -301,6 +301,15 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return this.getMapStateProtected(mapId).interaction;
   }
 
+  /**
+   * Gets the ordered layer info.
+   * @param {string} mapId - The map id
+   * @returns {TypeOrderedLayerInfo[]} The ordered layer info
+   */
+  static getMapLayerOrder(mapId: string): TypeOrderedLayerInfo[] {
+    return this.getMapStateProtected(mapId).orderedLayerInfo;
+  }
+
   static getMapState(mapId: string): TypeMapState {
     const mapState = this.getMapStateProtected(mapId);
     return {
@@ -593,6 +602,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // Redirect
     this.setMapOrderedLayerInfo(mapId, orderedLayers);
+    // Emit event
+    this.getMapViewerLayerAPI(mapId).emitLayerReordered({ orderedLayers });
   }
 
   /**

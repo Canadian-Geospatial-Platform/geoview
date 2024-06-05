@@ -153,6 +153,9 @@ export class LayerApi {
   // Keep all callback delegates references
   #onLayerItemVisibilityToggledHandlers: LayerVisibilityToggledDelegate[] = [];
 
+  // Keep all callback delegates references
+  #onLayerReorderedHandlers: LayerReorderedDelegate[] = [];
+
   // Maximum time duration to wait when registering a layer for the time slider
   static #MAX_WAIT_TIME_SLIDER_REGISTRATION = 20000;
 
@@ -1541,6 +1544,33 @@ export class LayerApi {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerItemVisibilityToggledHandlers, callback);
   }
+
+  /**
+   * Emits layer reordered event.
+   * @param {LayerReorderedEvent} event - The event to emit
+   */
+  emitLayerReordered(event: LayerReorderedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerReorderedHandlers, event);
+  }
+
+  /**
+   * Registers a layer reordered event handler.
+   * @param {LayerReorderedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerReordered(callback: LayerReorderedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerReorderedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer reordered event handler.
+   * @param {LayerReorderedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerReordered(callback: LayerReorderedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerReorderedHandlers, callback);
+  }
 }
 
 /**
@@ -1599,4 +1629,17 @@ export type LayerItemVisibilityToggledEvent = {
   itemName: string;
   // The new visibility
   visibility: boolean;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerReorderedDelegate = EventDelegateBase<LayerApi, LayerReorderedEvent>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerReorderedEvent = {
+  // The layer path of the affected layer
+  orderedLayers: TypeOrderedLayerInfo[];
 };
