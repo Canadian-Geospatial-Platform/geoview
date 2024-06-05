@@ -162,7 +162,7 @@ export type TypeInteraction = 'static' | 'dynamic';
 
 /** Definition of the view settings. */
 export type TypeViewSettings = {
-  /** Settings for the initial view for map, default is zoomAndCenter of [3.5, [-90, 65]] */
+  /** Settings for the initial view for map, default is zoomAndCenter of [3.5, [-90, 60]] */
   initialView?: TypeMapViewSettings;
   /** Enable rotation. If false, a rotation constraint that always sets the rotation to zero is used. Default = true. */
   enableRotation?: boolean;
@@ -172,7 +172,7 @@ export type TypeViewSettings = {
    */
   rotation?: number;
   /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates.
-   * Default [-125, 30, -60, 89].
+   * Default [-135, 25, -50, 89].
    */
   maxExtent?: Extent;
   /**

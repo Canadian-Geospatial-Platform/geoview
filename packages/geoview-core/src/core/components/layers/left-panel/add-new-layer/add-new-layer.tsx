@@ -988,7 +988,8 @@ export function AddNewLayer(): JSX.Element {
 
     // TODO: create a utilities function to test valid URL before we enable the continue button
     // TODO.CONT: This function should try to ping the server for an answer...
-    setStepButtonDisable(!event.target.value.trim().startsWith('https://'));
+    // Check if url or geocore is provided
+    setStepButtonDisable(!(event.target.value.trim().startsWith('https://') || event.target.value.trim().length !== 35));
   };
 
   /**
