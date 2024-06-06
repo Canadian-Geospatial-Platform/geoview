@@ -149,7 +149,7 @@ export function SingleLayer({
   };
 
   const handleLayerClick = (): void => {
-    //TODO: backend set layerStatus of parent groups to 'loaded' when all children are loaded. Then we will remove 'newInstance' from the condition.
+    // TODO: backend set layerStatus of parent groups to 'loaded' when all children are loaded. Then we will remove 'newInstance' from the condition.
     if (!['processed', 'loaded', 'newInstance'].includes(layer.layerStatus!)) {
       return;
     }
