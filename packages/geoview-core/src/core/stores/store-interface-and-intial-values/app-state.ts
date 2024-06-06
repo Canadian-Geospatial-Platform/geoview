@@ -35,6 +35,7 @@ export interface IAppState {
     setDisplayTheme: (theme: TypeDisplayTheme) => void;
     setFullScreenActive: (active: boolean, element?: TypeHTMLElement) => void;
     removeNotification: (key: string) => void;
+    removeAllNotifications: () => void;
   };
 
   setterActions: {
@@ -142,6 +143,13 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
       removeNotification: (key: string): void => {
         // Redirect to processor
         AppEventProcessor.removeNotification(get().mapId, key);
+      },
+      /**
+       * Remove all notifications.
+       */
+      removeAllNotifications: (): void => {
+        // Redirect to processor
+        AppEventProcessor.removeAllNotifications(get().mapId);
       },
     },
 

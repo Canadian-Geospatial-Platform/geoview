@@ -57,7 +57,8 @@
     "layers": "Couches",
     "share": "Partager",
     "version": "À propos de GéoView",
-    "repoLink": "Lien repo"
+    "repoLink": "Lien repo",
+    "removeAllNotifications": "Effacer tout"
   },
   "legend": {
     "title": "Légende",

@@ -189,7 +189,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
       // All good, keep selection
       // Reset the bypass for next time
       setLayerDataArrayBatchLayerPathBypass(memoLayerSelectedItem.layerPath);
-    } 
+    }
   }, [memoLayerSelectedItem, memoLayersList, setLayerDataArrayBatchLayerPathBypass]);
 
   // #region RENDERING ************************************************************************************************
