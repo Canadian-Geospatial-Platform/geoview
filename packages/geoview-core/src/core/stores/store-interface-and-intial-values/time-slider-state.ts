@@ -21,6 +21,7 @@ export interface ITimeSliderState {
     setReversed: (layerPath: string, locked: boolean) => void;
     setDefaultValue: (layerPath: string, defaultValue: string) => void;
     setValues: (layerPath: string, values: number[]) => void;
+    setIsFilterEnabled: (layerPath: string, filter: boolean) => void;
   };
 
   setterActions: {
@@ -34,6 +35,7 @@ export interface ITimeSliderState {
     setReversed: (layerPath: string, locked: boolean) => void;
     setDefaultValue: (layerPath: string, defaultValue: string) => void;
     setValues: (layerPath: string, values: number[]) => void;
+    setIsFilterEnabled: (layerPath: string, filter: boolean) => void;
   };
 }
 
@@ -85,6 +87,10 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
         // Redirect to TimeSliderEventProcessor
         const { defaultValue, field, minAndMax, filtering } = get().timeSliderState.timeSliderLayers[layerPath];
         TimeSliderEventProcessor.applyFilters(get().mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
+      },
+      setIsFilterEnabled(layerPath: string, filter: boolean): void {
+        // Redirect to setter
+        get().timeSliderState.setterActions.setIsFilterEnabled(layerPath, filter);
       },
     },
 
@@ -187,6 +193,16 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
           },
         });
       },
+      setIsFilterEnabled(layerPath: string, filter: boolean): void {
+        const sliderLayers = get().timeSliderState.timeSliderLayers;
+        sliderLayers[layerPath].isFilterEnabled = filter;
+        set({
+          timeSliderState: {
+            ...get().timeSliderState,
+            timeSliderLayers: { ...sliderLayers },
+          },
+        });
+      },
     },
 
     // #endregion ACTIONS
@@ -214,11 +230,13 @@ export interface TypeTimeSliderValues {
   singleHandle: boolean;
   title?: string;
   values: number[];
+  isFilterEnabled: boolean; // Create this flag so that we can track if user has made changes to time slider values, by default it will be false
 }
 
 // **********************************************************
 // Layer state selectors
 // **********************************************************
-export const useTimeSliderLayers = (): TimeSliderLayerSet => useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers);
+export const useTimeSliderLayers = (): TimeSliderLayerSet =>
+  useStore(useGeoViewStore(), (state) => state.timeSliderState?.timeSliderLayers ?? {});
 
 export const useTimeSliderStoreActions = (): TimeSliderActions => useStore(useGeoViewStore(), (state) => state.timeSliderState.actions);

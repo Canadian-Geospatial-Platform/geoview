@@ -39,6 +39,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const timeSliderLayers = useTimeSliderLayers();
   const legendLayers = useLayerLegendLayers();
 
+  console.log('we are in time slider panel');
   /**
    * handle Layer list when clicked on each layer.
    * @param {LayerListEntry} layer layer clicked by the user.

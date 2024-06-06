@@ -139,6 +139,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       delay: 1000,
       locked: undefined,
       reversed: undefined,
+      isFilterEnabled: false,
     };
   }
   // #endregion

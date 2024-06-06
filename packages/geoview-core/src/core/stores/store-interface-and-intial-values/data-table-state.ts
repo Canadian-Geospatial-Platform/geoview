@@ -22,6 +22,7 @@ export interface IDataTableState {
     applyMapFilters: (filterStrings: string) => void;
     setActiveLayersData: (layers: TypeLayerData[]) => void;
     setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
+    setColumnFilterFnsEntry: (filtered: TypeColumnFilterFnsState, layerPath: string) => void;
     setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
     setRowsFilteredEntry: (rows: number, layerPath: string) => void;
     setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
@@ -36,6 +37,7 @@ export interface IDataTableState {
     setActiveLayersData: (layers: TypeLayerData[]) => void;
     setAllFeaturesDataArray: (allFeaturesDataArray: TypeAllFeatureInfoResultSetEntry[]) => void;
     setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
+    setColumnFilterFnsEntry: (filtered: TypeColumnFilterFnsState, layerPath: string) => void;
     setInitiallayerDataTableSetting: (layerPath: string) => void;
     setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
     setRowsFilteredEntry: (rows: number, layerPath: string) => void;
@@ -83,6 +85,10 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
       setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => {
         // Redirect to setter
         get().dataTableState.setterActions.setColumnFiltersEntry(filtered, layerPath);
+      },
+      setColumnFilterFnsEntry: (filtered: TypeColumnFilterFnsState, layerPath: string) => {
+        // Redirect to setter
+        get().dataTableState.setterActions.setColumnFilterFnsEntry(filtered, layerPath);
       },
       setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => {
         // Redirect to setter
@@ -142,6 +148,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
           rowsFilteredRecord: 0,
           toolbarRowSelectedMessageRecord: '',
           globalFilterRecord: '',
+          columnFilterFnsRecord: {},
         };
 
         set({
@@ -154,6 +161,17 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
       setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => {
         const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
         layerSettings.columnFiltersRecord = filtered;
+
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            layersDataTableSetting: { ...get().dataTableState.layersDataTableSetting, [layerPath]: layerSettings },
+          },
+        });
+      },
+      setColumnFilterFnsEntry: (filtered: TypeColumnFilterFnsState, layerPath: string) => {
+        const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
+        layerSettings.columnFilterFnsRecord = filtered;
 
         set({
           dataTableState: {
@@ -244,12 +262,16 @@ export interface ColumnFilter {
   value: unknown;
 }
 
-interface IDataTableSettings {
+export interface TypeColumnFilterFnsState {
+  [key: string]: string;
+}
+export interface IDataTableSettings {
   columnFiltersRecord: TypeColumnFiltersState;
   mapFilteredRecord: boolean;
   rowsFilteredRecord: number;
   toolbarRowSelectedMessageRecord: string;
   globalFilterRecord: string;
+  columnFilterFnsRecord: TypeColumnFilterFnsState;
 }
 
 export type TypeAllFeatureInfoResultSetEntry = TypeResultSetEntry & TypeLayerData;

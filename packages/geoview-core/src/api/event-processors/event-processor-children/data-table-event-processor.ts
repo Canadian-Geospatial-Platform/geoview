@@ -2,6 +2,7 @@ import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstrac
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import {
+  ColumnFilter,
   IDataTableState,
   TypeAllFeatureInfoResultSet,
   TypeAllFeatureInfoResultSetEntry,
@@ -137,5 +138,11 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
       // Callback with updated array
       onDeleteCallback(layerArray);
     }
+  }
+
+  static getTimeSliderDateFilterRecord(mapId: string, layerPath: string): ColumnFilter | undefined {
+    return this.getDataTableState(mapId).layersDataTableSetting[layerPath].columnFiltersRecord.find(
+      (record) => record.id === 'time_slider_date'
+    );
   }
 }

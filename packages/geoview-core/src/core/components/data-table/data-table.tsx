@@ -2,13 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState, memo, isValidElement
 
 import { useTranslation } from 'react-i18next';
 import debounce from 'lodash/debounce';
-import startCase from 'lodash/startCase';
 
 import { getCenter } from 'ol/extent'; // only for typing
 
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import { MRT_Localization_FR as MRTLocalizationFR } from 'material-react-table/locales/fr';
 import { MRT_Localization_EN as MRTLocalizationEN } from 'material-react-table/locales/en';
@@ -27,8 +25,6 @@ import {
   type MRT_SortingState as MRTSortingState,
   type MRT_RowVirtualizer as MRTRowVirtualizer,
   type MRT_ColumnFiltersState as MRTColumnFiltersState,
-  type MRT_Column as MRTColumn,
-  type MRT_Localization as MRTLocalization,
   type MRT_DensityState as MRTDensityState,
   Box,
   Button,
@@ -46,7 +42,7 @@ import { DateMgt } from '@/core/utils/date-mgt';
 import { isImage, delay } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
-import { useFilterRows, useToolbarActionMessage, useGlobalFilter } from './hooks';
+import { useFilterRows, useToolbarActionMessage, useGlobalFilter, useFilterFns } from './hooks';
 import { getSxClasses } from './data-table-style';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
@@ -92,8 +88,9 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
 
   // #region REACT CUSTOM HOOKS
   const { initLightBox, LightBoxComponent } = useLightBox();
-  const { columnFilters, setColumnFilters } = useFilterRows({ layerPath });
+  const { columnFilters, setColumnFilters } = useFilterRows({ layerPath, data });
   const { globalFilter, setGlobalFilter } = useGlobalFilter({ layerPath });
+  const { filterFns, setFilterFns } = useFilterFns({ layerPath, data });
   // #endregion
 
   const { openModal } = useUIStoreActions();
@@ -172,44 +169,6 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
   );
 
   /**
-   * Create Date filter with Datepicker.
-   *
-   * @param {MRTColumn<ColumnsType>} column - Filter column.
-   * @returns {JSX.Element}
-   */
-  const getDateFilter = useCallback(
-    (column: MRTColumn<ColumnsType>): JSX.Element => {
-      // Log
-      logger.logTraceUseCallback('DATA-TABLE - getDateFilter');
-
-      // eslint-disable-next-line no-underscore-dangle
-      const filterFn = startCase(column.columnDef._filterFn).replaceAll(' ', '');
-      const key = `filter${filterFn}` as keyof MRTLocalization;
-      const helperText = dataTableLocalization.filterMode.replace('{filterType}', dataTableLocalization[key]);
-      return (
-        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={language}>
-          <DatePicker
-            timezone="UTC"
-            format="YYYY/MM/DD"
-            onChange={(newValue) => {
-              column.setFilterValue(newValue);
-            }}
-            slotProps={{
-              textField: {
-                placeholder: language === 'fr' ? 'AAAA/MM/JJ' : 'YYYY/MM/DD',
-                helperText,
-                sx: { minWidth: '120px', width: '100%' },
-                variant: 'standard',
-              },
-            }}
-          />
-        </LocalizationProvider>
-      );
-    },
-    [dataTableLocalization, language]
-  );
-
-  /**
    * Custom date type Column tooltip
    * @param {Date} date value to be shown in column.
    * @returns JSX.Element
@@ -254,7 +213,6 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
         filterFn: 'contains',
         columnFilterModeOptions: ['contains', 'startsWith', 'endsWith', 'empty', 'notEmpty'],
         ...(value.dataType === 'number' && {
-          filterFn: 'between',
           columnFilterModeOptions: [
             'equals',
             'notEquals',
@@ -274,8 +232,16 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
           accessorFn: (row) => new Date(row[key].value as string),
           sortingFn: 'datetime',
           Cell: ({ cell }) => getDateColumnTooltip(cell.getValue<Date>()),
-          Filter: ({ column }) => getDateFilter(column),
-          filterFn: 'equals',
+          filterVariant: 'date',
+          muiFilterDatePickerProps: {
+            timezone: 'UTC',
+            format: 'YYYY/MM/DD',
+            slotProps: {
+              textField: {
+                placeholder: language === 'fr' ? 'AAAA/MM/JJ' : 'YYYY/MM/DD',
+              },
+            },
+          },
           columnFilterModeOptions: [
             'equals',
             'notEquals',
@@ -399,11 +365,13 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
       density,
       columnPinning: { left: ['ICON', 'ZOOM', 'DETAILS'] },
       globalFilter,
+      columnFilterFns: filterFns,
     },
     enableColumnFilterModes: true,
     // NOTE: enable column pinning so that icon, zoom, details can be pinned to left
     enableColumnPinning: true,
     onSortingChange: setSorting,
+    onColumnFilterFnsChange: setFilterFns,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
     enableBottomToolbar: false,
@@ -590,7 +558,9 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
 
   return (
     <Box sx={sxClasses.dataTableWrapper}>
-      <MaterialReactTable table={useTable} />
+      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={language}>
+        <MaterialReactTable table={useTable} />
+      </LocalizationProvider>
       <LightBoxComponent />
     </Box>
   );
