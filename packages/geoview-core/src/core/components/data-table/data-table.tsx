@@ -366,6 +366,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
       columnPinning: { left: ['ICON', 'ZOOM', 'DETAILS'] },
       globalFilter,
       columnFilterFns: filterFns,
+      showColumnFilters: !!columnFilters.length,
     },
     enableColumnFilterModes: true,
     // NOTE: enable column pinning so that icon, zoom, details can be pinned to left
@@ -384,7 +385,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
         <Box>
           <Box>
             <MRTToggleFiltersButton className="buttonOutline" table={table} />
-            <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} />
+            <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} data={data} />
             {/* enable column pinning options is override, so that pinning option in menu can be hide. */}
             <MRTShowHideColumnsButton
               className="buttonOutline"
