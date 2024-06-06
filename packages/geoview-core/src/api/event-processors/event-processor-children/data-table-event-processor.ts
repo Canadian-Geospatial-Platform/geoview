@@ -2,7 +2,6 @@ import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstrac
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import {
-  ColumnFilter,
   IDataTableState,
   TypeAllFeatureInfoResultSet,
   TypeAllFeatureInfoResultSetEntry,
