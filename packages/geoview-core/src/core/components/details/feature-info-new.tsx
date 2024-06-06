@@ -45,7 +45,7 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
   // states from store
   const checkedFeatures = useDetailsCheckedFeatures();
   const { addCheckedFeature, removeCheckedFeature } = useDetailsStoreActions();
-  const { zoomToExtent, transformPoints, showClickMarker } = useMapStoreActions();
+  const { zoomToExtent, highlightBBox, transformPoints, showClickMarker } = useMapStoreActions();
 
   /**
    * Build feature list to be displayed inside table.
@@ -98,8 +98,9 @@ export function FeatureInfo({ features, currentFeatureIndex }: TypeFeatureInfoPr
           // TODO: Refactor - Zoom ClickMarker - Improve the logic in general of when/if a click marker should be removed after a zoom
           await delay(150);
 
-          // Add (back?) a click marker
+          // Add (back?) a click marker, and bbox extent who will disapear
           showClickMarker({ lnglat: newCenter });
+          highlightBBox(feature.extent!, false);
         })
         .catch((error: unknown) => {
           // Log

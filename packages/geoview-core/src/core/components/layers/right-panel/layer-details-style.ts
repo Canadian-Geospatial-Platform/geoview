@@ -55,4 +55,8 @@ export const getSxClasses = (theme: Theme): any => ({
     noWrap: true,
     marginLeft: 20,
   },
+  wmsImage: {
+    maxWidth: '100%',
+    height: 'auto',
+  },
 });

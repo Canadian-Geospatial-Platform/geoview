@@ -12,7 +12,13 @@ import { Extent } from 'ol/extent';
 import { Projection as OLProjection, ProjectionLike } from 'ol/proj';
 
 import queryString from 'query-string';
-import { CV_MAP_EXTENTS, VALID_DISPLAY_LANGUAGE, VALID_DISPLAY_THEME, VALID_PROJECTION_CODES } from '@config/types/config-constants';
+import {
+  CV_MAP_CENTER,
+  CV_MAP_EXTENTS,
+  VALID_DISPLAY_LANGUAGE,
+  VALID_DISPLAY_THEME,
+  VALID_PROJECTION_CODES,
+} from '@config/types/config-constants';
 import {
   TypeViewSettings,
   TypeInteraction,
@@ -216,18 +222,14 @@ export class MapViewer {
    */
   createMap(mapElement: HTMLElement): OLMap {
     // config object
-    const { mapFeaturesConfig } = this;
+    const mapViewSettings = this.mapFeaturesConfig?.map.viewSettings;
 
     // create map projection object from code
-    const projection = Projection.PROJECTIONS[mapFeaturesConfig.map.viewSettings.projection];
+    const projection = Projection.PROJECTIONS[mapViewSettings.projection];
 
     let extentProjected: Extent | undefined;
-    if (mapFeaturesConfig?.map.viewSettings.maxExtent)
-      extentProjected = Projection.transformExtent(
-        mapFeaturesConfig?.map.viewSettings.maxExtent,
-        Projection.PROJECTION_NAMES.LNGLAT,
-        projection.getCode()
-      );
+    if (mapViewSettings.maxExtent)
+      extentProjected = Projection.transformExtent(mapViewSettings.maxExtent, Projection.PROJECTION_NAMES.LNGLAT, projection.getCode());
 
     const initialMap = new OLMap({
       target: mapElement,
@@ -235,17 +237,15 @@ export class MapViewer {
       view: new View({
         projection,
         center: Projection.transformFromLonLat(
-          mapFeaturesConfig?.map.viewSettings.initialView?.zoomAndCenter
-            ? mapFeaturesConfig?.map.viewSettings.initialView?.zoomAndCenter[1]
-            : [-90, 60],
+          mapViewSettings.initialView?.zoomAndCenter
+            ? mapViewSettings.initialView?.zoomAndCenter[1]
+            : CV_MAP_CENTER[mapViewSettings.projection],
           projection
         ),
-        zoom: mapFeaturesConfig?.map.viewSettings.initialView?.zoomAndCenter
-          ? mapFeaturesConfig?.map.viewSettings.initialView?.zoomAndCenter[0]
-          : 3.5,
+        zoom: mapViewSettings.initialView?.zoomAndCenter ? mapViewSettings.initialView?.zoomAndCenter[0] : 3.5,
         extent: extentProjected || undefined,
-        minZoom: mapFeaturesConfig?.map.viewSettings.minZoom || 0,
-        maxZoom: mapFeaturesConfig?.map.viewSettings.maxZoom || 17,
+        minZoom: mapViewSettings.minZoom || 0,
+        maxZoom: mapViewSettings.maxZoom || 17,
       }),
       controls: [],
       keyboardEventTarget: document.getElementById(`map-${this.mapId}`) as HTMLElement,
@@ -262,10 +262,9 @@ export class MapViewer {
    * Initializes map, layer class and geometries
    */
   initMap(): void {
-    // Register essential map handlers
+    // Register essential map-view handlers
     this.map.on('moveend', this.#handleMapMoveEnd.bind(this));
-    this.getView().on('change:resolution', debounce(this.#handleMapZoomEnd.bind(this), 100).bind(this));
-    this.getView().on('change:rotation', debounce(this.#handleMapRotation.bind(this), 100).bind(this));
+    this.#registerViewHelpers(this.getView());
 
     // If map isn't static
     if (this.mapFeaturesConfig.map.interaction !== 'static') {
@@ -302,6 +301,16 @@ export class MapViewer {
 
     // Start checking for when the map will be ready
     this.#checkMapReady();
+  }
+
+  /**
+   * Register on view initialization
+   * @param {View} view - View to register events on
+   */
+  #registerViewHelpers(view: View): void {
+    // Register essential map handlers
+    view.on('change:resolution', debounce(this.#handleMapZoomEnd.bind(this), 100).bind(this));
+    view.on('change:rotation', debounce(this.#handleMapRotation.bind(this), 100).bind(this));
   }
 
   /**
@@ -882,14 +891,14 @@ export class MapViewer {
   }
 
   /**
-   * Set the map viewSettings
+   * Set the map viewSettings (coordinate values in lat/long)
    *
    * @param {TypeViewSettings} mapView - Map viewSettings object
    */
   setView(mapView: TypeViewSettings): void {
     const currentView = this.getView();
     const viewOptions: ViewOptions = {};
-    viewOptions.projection = mapView.projection ? `EPSG:${mapView.projection}` : currentView.getProjection();
+    viewOptions.projection = `EPSG:${mapView.projection}`;
     viewOptions.zoom = mapView.initialView?.zoomAndCenter ? mapView.initialView?.zoomAndCenter[0] : currentView.getZoom();
     viewOptions.center = mapView.initialView?.zoomAndCenter
       ? Projection.transformFromLonLat(mapView.initialView?.zoomAndCenter[1], viewOptions.projection)
@@ -899,9 +908,13 @@ export class MapViewer {
         );
     viewOptions.minZoom = mapView.minZoom ? mapView.minZoom : currentView.getMinZoom();
     viewOptions.maxZoom = mapView.maxZoom ? mapView.maxZoom : currentView.getMaxZoom();
-    if (mapView.maxExtent) viewOptions.extent = mapView.maxExtent;
+    if (mapView.maxExtent)
+      viewOptions.extent = Projection.transformExtent(mapView.maxExtent, Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${mapView.projection}`);
 
-    this.map.setView(new View(viewOptions));
+    const newView = new View(viewOptions);
+    this.map.setView(newView);
+
+    this.#registerViewHelpers(newView);
   }
 
   /**
@@ -959,18 +972,22 @@ export class MapViewer {
    */
   setMaxExtent(extent: Extent): void {
     const currentView = this.getView();
-    const viewOptions: ViewOptions = {};
-    viewOptions.projection = currentView.getProjection();
-    viewOptions.zoom = currentView.getZoom();
-    viewOptions.center = Projection.transformFromLonLat(
-      Projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
-      viewOptions.projection
-    );
-    viewOptions.minZoom = currentView.getMinZoom();
-    viewOptions.maxZoom = currentView.getMaxZoom();
-    viewOptions.extent = Projection.transformExtent(extent, Projection.PROJECTION_NAMES.LNGLAT, currentView.getProjection());
 
-    this.map.setView(new View(viewOptions));
+    // create new view settings
+    const newView: TypeViewSettings = {
+      initialView: {
+        zoomAndCenter: [
+          currentView.getZoom() as number,
+          this.convertCoordinateLngLatToMapProj(currentView.getCenter()!) as [number, number],
+        ],
+      },
+      minZoom: currentView.getMinZoom(),
+      maxZoom: currentView.getMaxZoom(),
+      maxExtent: Projection.transformExtent(extent, Projection.PROJECTION_NAMES.LNGLAT, currentView.getProjection()),
+      projection: currentView.getProjection().getCode().split(':')[1] as unknown as TypeValidMapProjectionCodes,
+    };
+
+    this.setView(newView);
   }
 
   // #endregion
