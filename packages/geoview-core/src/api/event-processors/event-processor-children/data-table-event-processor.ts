@@ -139,10 +139,4 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
       onDeleteCallback(layerArray);
     }
   }
-
-  static getTimeSliderDateFilterRecord(mapId: string, layerPath: string): ColumnFilter | undefined {
-    return this.getDataTableState(mapId).layersDataTableSetting[layerPath].columnFiltersRecord.find(
-      (record) => record.id === 'time_slider_date'
-    );
-  }
 }
