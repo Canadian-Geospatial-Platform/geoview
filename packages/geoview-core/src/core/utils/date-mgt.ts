@@ -655,11 +655,11 @@ export abstract class DateMgt {
   }
 
   /**
-   * Get dayjs date object for time in milliseconds
-   * @param {number} millseconds time in milliseconds
+   * Get dayjs date object for given date in number or string.
+   * @param {number | string} millseconds time in milliseconds or string
    * @returns {Dayjs} dayjs date object
    */
-  static getDayjsDate(millseconds: number): Dayjs {
-    return dayjs(millseconds);
+  static getDayjsDate(date: number | string): Dayjs {
+    return dayjs(date);
   }
 }

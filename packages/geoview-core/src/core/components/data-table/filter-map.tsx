@@ -9,7 +9,7 @@ import { getSxClasses } from './data-table-style';
 import { useDataTableStoreActions, useDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 
 import { logger } from '@/core/utils/logger';
-import { useTimeSliderStoreActions, useTimeSliderLayers } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import { useTimeSliderStoreActions } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useGeoViewConfig } from '@/core/stores/geoview-store';
 import { TABS } from '@/core/utils/constant';
 import { MappedLayerDataType } from './data-table-types';
@@ -37,11 +37,10 @@ function FilterMap({ layerPath, isGlobalFilterOn, data }: FilterMapProps): JSX.E
   const footerBarTabsConfig = useGeoViewConfig()?.footerBar;
 
   const datatableSettings = useDataTableLayerSettings();
-  const timeSliderSettings = useTimeSliderLayers();
 
   const { setMapFilteredEntry } = useDataTableStoreActions();
   const { setFiltering } = useTimeSliderStoreActions();
-  const { isFilterEnabled } = timeSliderSettings[layerPath] ?? {};
+
   return (
     <Tooltip title={datatableSettings[layerPath] ? t('dataTable.stopFilterMap') : t('dataTable.filterMap')}>
       <Switch
@@ -49,7 +48,7 @@ function FilterMap({ layerPath, isGlobalFilterOn, data }: FilterMapProps): JSX.E
         onChange={(event: ChangeEvent<HTMLInputElement>) => {
           setMapFilteredEntry(event.target.checked, layerPath);
           // update flag of time slider date if it exist.
-          if ((footerBarTabsConfig?.tabs?.core ?? []).includes(TABS.TIME_SLIDER) && data?.fieldInfos?.time_slider_date && isFilterEnabled) {
+          if ((footerBarTabsConfig?.tabs?.core ?? []).includes(TABS.TIME_SLIDER) && data?.fieldInfos?.time_slider_date) {
             setFiltering(layerPath, event.target.checked);
           }
         }}

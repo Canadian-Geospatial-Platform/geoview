@@ -2,9 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, memo, isValidElement
 
 import { useTranslation } from 'react-i18next';
 import debounce from 'lodash/debounce';
-
 import { getCenter } from 'ol/extent'; // only for typing
-
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
@@ -70,6 +68,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
   const [density, setDensity] = useState<MRTDensityState>('compact');
   const rowVirtualizerInstanceRef = useRef<MRTRowVirtualizer>(null);
   const [sorting, setSorting] = useState<MRTSortingState>([]);
+  const [showColumnFilters, setShowColumnFilters] = useState(false);
 
   // get store actions and values
   const { zoomToExtent, highlightBBox, transformPoints, showClickMarker, addHighlightedFeature, removeHighlightedFeature } =
@@ -88,12 +87,18 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
 
   // #region REACT CUSTOM HOOKS
   const { initLightBox, LightBoxComponent } = useLightBox();
-  const { columnFilters, setColumnFilters } = useFilterRows({ layerPath, data });
+  const { columnFilters, setColumnFilters } = useFilterRows({ layerPath });
   const { globalFilter, setGlobalFilter } = useGlobalFilter({ layerPath });
   const { filterFns, setFilterFns } = useFilterFns({ layerPath, data });
   // #endregion
 
   const { openModal } = useUIStoreActions();
+
+  useEffect(() => {
+    if (columnFilters.length) {
+      setShowColumnFilters(true);
+    }
+  }, [columnFilters]);
 
   /**
    * Create table header cell
@@ -236,6 +241,8 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
           muiFilterDatePickerProps: {
             timezone: 'UTC',
             format: 'YYYY/MM/DD',
+            // NOTE: reason for type cast as undefined as x-mui-datepicker prop type saying Data cant be assigned to undefined.
+            minDate: DateMgt.getDayjsDate('1600/01/01') as unknown as undefined,
             slotProps: {
               textField: {
                 placeholder: language === 'fr' ? 'AAAA/MM/JJ' : 'YYYY/MM/DD',
@@ -366,7 +373,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
       columnPinning: { left: ['ICON', 'ZOOM', 'DETAILS'] },
       globalFilter,
       columnFilterFns: filterFns,
-      showColumnFilters: !!columnFilters.length,
+      showColumnFilters,
     },
     enableColumnFilterModes: true,
     // NOTE: enable column pinning so that icon, zoom, details can be pinned to left
@@ -375,6 +382,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
     onColumnFilterFnsChange: setFilterFns,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
+    onShowColumnFiltersChange: setShowColumnFilters,
     enableBottomToolbar: false,
     positionToolbarAlertBanner: 'none', // hide existing row count
     renderTopToolbar: ({ table }) => (

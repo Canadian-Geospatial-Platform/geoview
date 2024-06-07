@@ -7,7 +7,12 @@ import {
 } from 'geoview-core/src/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useLayerLegendLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/layer-state';
 import { LegendEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/legend-event-processor';
-import { ColumnFilter, useDataTableLayerSettings } from 'geoview-core/src/core/stores/store-interface-and-intial-values/data-table-state';
+import { useUIActiveFooterBarTabId } from 'geoview-core/src/core/stores/store-interface-and-intial-values/ui-state';
+import {
+  ColumnFilter,
+  useDataTableLayerSettings,
+  useDataTableStoreActions,
+} from 'geoview-core/src/core/stores/store-interface-and-intial-values/data-table-state';
 import { getLocalizedValue, getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from 'geoview-core/src/core/utils/logger';
@@ -90,16 +95,16 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   // Get name from legend layers
   const legendLayers = useLayerLegendLayers();
   const name = LegendEventProcessor.findLayerByPath(legendLayers, layerPath).layerName;
-
+  const selectedTab = useUIActiveFooterBarTabId();
   const dataTableSettings = useDataTableLayerSettings()[layerPath];
+  const { setColumnFiltersEntry, setMapFilteredEntry } = useDataTableStoreActions();
 
   const timeSliderDateFilters = useMemo(() => {
     return (dataTableSettings?.columnFiltersRecord?.find((record) => record.id === 'time_slider_date') ?? {}) as ColumnFilter;
   }, [dataTableSettings?.columnFiltersRecord]);
 
   // update the values of time slider based on the filters set in data table.
-  // TODO: Update the map with new values
-  // TODO: stop play btn when other tab is opened.
+
   useEffect(() => {
     if (Object.keys(timeSliderDateFilters).length) {
       const filterValues = timeSliderDateFilters.value as Date[];
@@ -130,6 +135,18 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     if (defaultValue === undefined) setDefaultValue(layerPath, sliderConfig?.defaultValue || '');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('Time Slider - unmount');
+
+    // NOTE: Reason for not using component unmount, because we are not mounting and unmounting components
+    // when we switch tabs.
+    if (selectedTab !== 'time-slider') {
+      setIsPlaying(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTab]);
 
   useEffect(() => {
     // Log
@@ -338,6 +355,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
   function handleCheckbox(newValue: boolean): void {
     setFiltering(layerPath, newValue);
+    setMapFilteredEntry(newValue, layerPath);
+
     if (!newValue) {
       clearInterval(playIntervalRef.current);
       setIsPlaying(false);
@@ -362,13 +381,24 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     (newValues: number | number[]): void => {
       // Log
       logger.logTraceUseCallback('TIME-SLIDER - handleSliderChange', layerPath);
-      console.log('slider changes', newValues);
       clearTimeout(playIntervalRef.current);
       setIsPlaying(false);
       sliderDeltaRef.current = undefined;
       setValues(layerPath, newValues as number[]);
       setIsFilterEnabled(layerPath, true);
+
+      let formattedValues = [];
+      if (typeof newValues === 'number') {
+        formattedValues = [DateMgt.getDayjsDate(newValues), ''];
+      } else {
+        formattedValues = [DateMgt.getDayjsDate(newValues[0]), DateMgt.getDayjsDate(newValues[1])];
+      }
+      const filtersRecord = dataTableSettings.columnFiltersRecord.filter((record) => record.id !== 'time_slider_date');
+      filtersRecord.push({ id: 'time_slider_date', value: formattedValues });
+      setColumnFiltersEntry(filtersRecord, layerPath);
+      setMapFilteredEntry(true, layerPath);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [layerPath, setValues, setIsFilterEnabled]
   );
 
