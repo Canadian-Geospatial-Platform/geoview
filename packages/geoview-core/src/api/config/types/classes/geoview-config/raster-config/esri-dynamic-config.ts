@@ -7,11 +7,12 @@ import { TypeJsonObject } from '@config/types/config-types';
 import { TypeDisplayLanguage, TypeLayerInitialSettings } from '@config/types/map-schema-types';
 import { isvalidComparedToSchema } from '@config/utils';
 import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
+import { EsriCommon } from '@config/types/classes/geoview-config/esri-common';
 
 export type TypeEsriDynamicLayerNode = GroupLayerEntryConfig | EsriDynamicLayerEntryConfig;
 
 /** The ESRI dynamic geoview layer class. */
-export class EsriDynamicLayerConfig extends AbstractGeoviewLayerConfig {
+export class EsriDynamicLayerConfig extends EsriCommon {
   /** Type of GeoView layer. */
   geoviewLayerType = CV_CONST_LAYER_TYPES.ESRI_DYNAMIC;
 
@@ -45,14 +46,6 @@ export class EsriDynamicLayerConfig extends AbstractGeoviewLayerConfig {
   }
 
   /**
-   * Get the service metadata from the metadataAccessPath and store it in a private variable of the geoview layer.
-   * @protected
-   */
-  // TODO: Implement this method
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  protected override getServiceMetadata(): void {}
-
-  /**
    * The method used to implement the class factory model that returns the instance of the class based on the sublayer
    * type needed.
    *
@@ -69,7 +62,7 @@ export class EsriDynamicLayerConfig extends AbstractGeoviewLayerConfig {
     initialSettings: TypeLayerInitialSettings,
     language: TypeDisplayLanguage,
     geoviewConfig: AbstractGeoviewLayerConfig,
-    parentNode: ConfigBaseClass
+    parentNode?: ConfigBaseClass
   ): ConfigBaseClass {
     return new EsriDynamicLayerEntryConfig(layerConfig, initialSettings, language, geoviewConfig, parentNode);
   }

@@ -1,6 +1,12 @@
 import { defaultsDeep } from 'lodash';
+
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@config/types/config-constants';
 import { Cast, TypeJsonObject } from '@config/types/config-types';
+import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
+import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
+import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
+import { isvalidComparedToSchema } from '@config/utils';
+import { EsriCommon } from '@config/types/classes/geoview-config/esri-common';
 import {
   TypeStyleConfig,
   TypeLayerEntryType,
@@ -8,10 +14,9 @@ import {
   TypeDisplayLanguage,
   TypeSourceEsriFeatureInitialConfig,
 } from '@config/types/map-schema-types';
-import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
-import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
-import { isvalidComparedToSchema } from '@config/utils';
+import { GeoviewLayerInvalidParameterError } from '@config/types/classes/config-exceptions';
+
+import { logger } from '@/core/utils/logger';
 
 /**
  * The ESRI feature geoview sublayer class.
@@ -44,7 +49,8 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     this.source = defaultsDeep(this.source, { maxRecordCount: 0, format: 'EsriJSON', featureInfo: { queryable: false } });
     this.style = layerConfig.style ? { ...Cast<TypeStyleConfig>(layerConfig.style) } : undefined;
     if (Number.isNaN(this.layerId)) {
-      throw new Error(`The layer entry with layerId equal to ${this.layerPath} must be an integer string`);
+      this.propagateError();
+      throw new GeoviewLayerInvalidParameterError('LayerIdInvalidType', [this.layerPath]);
     }
     if (!isvalidComparedToSchema(this.schemaPath, layerConfig)) this.propagateError(); // Input schema validation.
     if (!isvalidComparedToSchema(this.schemaPath, this)) this.propagateError(); // Internal schema validation.
@@ -69,5 +75,15 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    */
   protected override getEntryType(): TypeLayerEntryType {
     return CV_CONST_SUB_LAYER_TYPES.VECTOR;
+  }
+
+  /**
+   * Get the sub-layer metadata from the metadataAccessPath and store it in a protected property of the sub-layer.
+   *
+   * @returns {Promise<void>} A Promise that will resolve when the execution will be completed.
+   */
+  override async getLayerMetadata(): Promise<void> {
+    this.metadata = await EsriCommon.fetchEsriLayerMetadata(this.geoviewContainer, this);
+    logger.logInfo(this.metadata);
   }
 }

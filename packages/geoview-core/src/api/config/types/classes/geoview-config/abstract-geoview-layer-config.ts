@@ -9,6 +9,7 @@ import { normalizeLocalizedString } from '@config/utils';
 import { CV_DEFAULT_LAYER_INITIAL_SETTINGS } from '@config/types/config-constants';
 import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-layer-entry-config';
 import { layerEntryIsGroupLayer } from '@config/types/type-guards';
+import { GeoviewLayerMandatoryError } from '@config/types/classes/config-exceptions';
 import { generateId } from '@/core/utils/utilities';
 
 /**
@@ -16,7 +17,7 @@ import { generateId } from '@/core/utils/utilities';
  */
 export abstract class AbstractGeoviewLayerConfig {
   /** The language used when interacting with this instance of MapFeatureConfig. */
-  #language;
+  #language: TypeDisplayLanguage;
 
   /** Original copy of the geoview layer configuration provided by the user. */
   #originalgeoviewLayerConfig: TypeJsonObject;
@@ -26,6 +27,21 @@ export abstract class AbstractGeoviewLayerConfig {
 
   /** Flag used to indicate that errors were detected in the config provided. */
   #errorDetected = false;
+
+  /** The metadata returned by the service endpoint. */
+  #metadata: TypeJsonObject = {};
+
+  #resolveLayer!: (value: void | PromiseLike<void>) => void;
+
+  #rejectLayer!: (reason?: unknown) => void;
+
+  #promiseLayerProcessed = new Promise<void>((resolve, reject) => {
+    this.#resolveLayer = resolve;
+    this.#rejectLayer = reject;
+  });
+
+  /** The metadata layer tree definition */
+  #metadataLayerTree: ConfigBaseClass[] = [];
 
   /** The GeoView layer identifier. */
   geoviewLayerId: string;
@@ -112,21 +128,93 @@ export abstract class AbstractGeoviewLayerConfig {
    * @private
    */
   protected validate(): void {
-    if (!this.geoviewLayerType)
-      throw new Error(`Property geoviewLayerType is mandatory for GeoView layer ${this.geoviewLayerId} of type ${this.geoviewLayerType}.`);
-    if (!this.geoviewLayerId) throw new Error(`geoviewLayerId is mandatory for GeoView layer of type ${this.geoviewLayerType}.`);
-    if (!this.geoviewLayerName)
-      throw new Error(`Property geoviewLayerName is mandatory for GeoView layer ${this.geoviewLayerId} of type ${this.geoviewLayerType}.`);
+    this.#errorDetected =
+      this.#errorDetected || !this.geoviewLayerType || !this.geoviewLayerId || !this.geoviewLayerName || !this.metadataAccessPath;
+    if (!this.geoviewLayerType) throw new GeoviewLayerMandatoryError('LayerTypeMandatory', [this.geoviewLayerId, this.geoviewLayerType]);
+    if (!this.geoviewLayerId) throw new GeoviewLayerMandatoryError('LayerIdMandatory', [this.geoviewLayerType]);
+    if (!this.geoviewLayerName) throw new GeoviewLayerMandatoryError('LayerNameMandatory', [this.geoviewLayerId, this.geoviewLayerType]);
     if (!this.metadataAccessPath)
-      throw new Error(`metadataAccessPath is mandatory for GeoView layer ${this.geoviewLayerId} of type ${this.geoviewLayerType}.`);
+      throw new GeoviewLayerMandatoryError('MetadataAccessPathMandatory', [this.geoviewLayerId, this.geoviewLayerType]);
   }
 
   /**
-   * The getter method that returns the geoview layer schema to use for the validation. Each geoview layer type knows what
-   * section of the schema must be used to do its validation.
+   * Get the service metadata from the metadataAccessPath and store it in a private variable of the geoview layer.
+   * @abstract
+   */
+  abstract getServiceMetadata(): void;
+
+  /**
+   * The setter method that sets the metadata private property.
+   * The benifit of using a setter/getter with a private #metadata is that it is invisible to the schema validation.
+   *
+   * @param {TypeJsonObject} metadata The GeoView service metadata.
+   * @protected
+   */
+  protected set metadata(metadata: TypeJsonObject) {
+    this.#metadata = metadata;
+  }
+
+  /**
+   * The getter method that returns the metadata private property.
+   * The benifit of using a setter/getter with a private #metadata is that it is invisible to the schema validation.
+   *
+   * @returns {TypeJsonObject} The GeoView service metadata.
+   * @protected
+   */
+  protected get metadata(): TypeJsonObject {
+    return this.#metadata;
+  }
+
+  /**
+   * The getter method that returns the promiseLayerProcessed private property.
+   * The benifit of using a setter/getter with a private #promiseLayerProcessed is that it is invisible to the schema validation.
+   *
+   * @returns {Promise<void>} The promiseLayerProcessed instance.
+   * @protected
+   */
+  get promiseLayerProcessed(): Promise<void> {
+    return this.#promiseLayerProcessed;
+  }
+
+  /**
+   * The getter method that returns the metadataLayerTree private property.
+   * The benifit of using a setter/getter with a private #metadataLayerTree is that it is invisible to the schema validation.
+   *
+   * @returns {Promise<void>} The promiseLayerProcessed instance.
+   * @protected
+   */
+  protected get metadataLayerTree(): ConfigBaseClass[] {
+    return this.#metadataLayerTree;
+  }
+
+  /**
+   * The setter method that sets the metadataLayerTree private property.
+   * The benifit of using a setter/getter with a private #metadata is that it is invisible to the schema validation.
+   *
+   * @param {TypeJsonObject} metadataLayerTree The GeoView service metadata.
+   * @protected
+   */
+  protected set metadataLayerTree(metadataLayerTree: ConfigBaseClass[]) {
+    this.#metadataLayerTree = metadataLayerTree;
+  }
+
+  protected resolveLayer(): void {
+    this.#resolveLayer();
+  }
+
+  protected rejectLayer(reason?: unknown): void {
+    this.#rejectLayer(reason);
+  }
+
+  /**
+   * The getter method that returns the language used to create the geoview layer.
+   *
+   * @returns {TypeDisplayLanguage} The GeoView layer schema associated to the config.
    * @protected @abstract
    */
-  protected abstract getServiceMetadata(): void;
+  protected get language(): TypeDisplayLanguage {
+    return this.#language;
+  }
 
   /**
    * The getter method that returns the geoview layer schema to use for the validation.

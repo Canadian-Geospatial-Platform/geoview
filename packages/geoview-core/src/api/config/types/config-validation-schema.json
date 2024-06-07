@@ -926,7 +926,7 @@
           "properties": {
             "geometryType": {
               "description": "The geometry type of the leaf node.",
-              "$ref": "#/definitions/TypeGeometryType"
+              "$ref": "#/definitions/TypeStyleGeometry"
             },
             "source": {
               "$ref": "#/definitions/TypeBaseSourceInitialConfig"
@@ -978,12 +978,12 @@
         }
       ]
     },
-    "TypeGeometryType": {
+    "TypeStyleGeometry": {
       "description": "Valid keys for the geometryType property.",
       "enum": [
-        "point",
-        "linestring",
-        "polygon"
+        "Point",
+        "LineString",
+        "Polygon"
       ]
     },
     "TypeBaseSourceInitialConfig": {

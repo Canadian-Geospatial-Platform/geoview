@@ -1,12 +1,12 @@
-// Needs to disable class-methods-use-this because we need to pass the instance reference 'this' to the validator.
-// eslint-disable-next-line @typescript-eslint/class-methods-use-this
+import { defaultsDeep } from 'lodash';
+
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@config/types/config-constants';
 import { Cast, TypeJsonObject } from '@config/types/config-types';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
 import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
 import { isvalidComparedToSchema } from '@config/utils';
-import { defaultsDeep } from 'lodash';
+import { EsriCommon } from '@config/types/classes/geoview-config/esri-common';
 import {
   TypeStyleConfig,
   TypeLayerEntryType,
@@ -15,6 +15,9 @@ import {
   TypeEsriFormatParameter,
   TypeSourceEsriDynamicInitialConfig,
 } from '@config/types/map-schema-types';
+import { GeoviewLayerInvalidParameterError } from '@config/types/classes/config-exceptions';
+
+import { logger } from '@/core/utils/logger';
 
 /**
  * The ESRI dynamic geoview sublayer class.
@@ -47,7 +50,8 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     this.source = defaultsDeep(this.source, { maxRecordCount: 0, format: 'png', featureInfo: { queryable: false } });
     this.style = layerConfig.style ? { ...Cast<TypeStyleConfig>(layerConfig.style) } : undefined;
     if (Number.isNaN(this.layerId)) {
-      throw new Error(`The layer entry with layer path equal to ${this.layerPath} must be an integer string`);
+      this.propagateError();
+      throw new GeoviewLayerInvalidParameterError('LayerIdInvalidType', [this.layerPath]);
     }
     this.source.format = (layerConfig?.source?.format || 'png') as TypeEsriFormatParameter; // Set the source.format property
     if (!isvalidComparedToSchema(this.schemaPath, layerConfig)) this.propagateError(); // Input schema validation.
@@ -73,5 +77,15 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    */
   protected override getEntryType(): TypeLayerEntryType {
     return CV_CONST_SUB_LAYER_TYPES.RASTER_IMAGE;
+  }
+
+  /**
+   * Get the sub-layer metadata from the metadataAccessPath and store it in a protected property of the sub-layer.
+   *
+   * @returns {Promise<void>} A Promise that will resolve when the execution will be completed.
+   */
+  override async getLayerMetadata(): Promise<void> {
+    this.metadata = await EsriCommon.fetchEsriLayerMetadata(this.geoviewContainer, this);
+    logger.logInfo(this.metadata);
   }
 }

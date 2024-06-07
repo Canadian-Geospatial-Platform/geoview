@@ -29,7 +29,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",
-            "geometryType": "point",
+            "geometryType": "Point",
             "layerName": {
               "en": "stations-Temporal",
               "fr": "stations-Temporal"

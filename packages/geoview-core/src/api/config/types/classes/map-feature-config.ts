@@ -5,6 +5,7 @@ import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config
 import { EsriDynamicLayerConfig } from '@config/types/classes/geoview-config/raster-config/esri-dynamic-config';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
 import { EsriFeatureLayerConfig } from '@config/types/classes/geoview-config/vector-config/esri-feature-config';
+import { MapConfigError } from '@config/types/classes/config-exceptions';
 import {
   CV_BASEMAP_ID,
   CV_BASEMAP_LABEL,
@@ -34,6 +35,7 @@ import {
   TypeValidMapProjectionCodes,
   TypeValidVersions,
 } from '@config/types/map-schema-types';
+
 import { logger } from '@/core//utils/logger';
 
 /**
@@ -49,8 +51,22 @@ export class MapFeatureConfig {
   /** Flag used to indicate that errors were detected in the config provided. */
   #errorDetected = false;
 
-  /** The service metadata. */
-  // #metadata: Promise<TypeJsonObject>;
+  // GV: The following 4 properties allow you to check that the metadata of all the layers making up the map have been read.
+  // GV: It's a kind of semaphore, waiting for the signal that all layer promises have been fulfilled.
+  /** Private function that is used to resolve the promiseAllLayersProcessed private property. */
+  #resolveMap!: (value: void | PromiseLike<void>) => void;
+
+  /** Private function that is used to reject the promiseAllLayersProcessed private property. */
+  #rejectMap!: (reason?: unknown) => void;
+
+  /** Private Promise that is used to wait for the metadata to be loaded. */
+  #promiseAllLayersProcessed = new Promise<void>((resolve, reject) => {
+    this.#resolveMap = resolve;
+    this.#rejectMap = reject;
+  });
+
+  /** The array of promises associated with the individual layers. */
+  #promiseLayersProcessed: Promise<void>[] = [];
 
   /** map configuration. */
   map: TypeMapConfig;
@@ -138,7 +154,45 @@ export class MapFeatureConfig {
     this.schemaVersionUsed = (clonedJsonConfig.schemaVersionUsed as TypeValidVersions) || CV_DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed;
     this.#errorDetected = this.#errorDetected || !isvalidComparedToSchema(CV_MAP_CONFIG_SCHEMA_PATH, this); // Internal schema validation.
     if (this.#errorDetected) this.#makeMapConfigValid(); // Tries to apply a patch to invalid properties
-    // this.#metadata = fetchServiceMetadata
+  }
+
+  getAllServiceMetadata(): void {
+    if (this.#promiseLayersProcessed.length) throw new MapConfigError('The getAllServiceMetadata cannot be called twice.');
+
+    this.map.listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
+      geoviewLayerConfig.getServiceMetadata();
+      this.#promiseLayersProcessed.push(geoviewLayerConfig.promiseLayerProcessed);
+      logger.logInfo(this.#promiseLayersProcessed.length, this.#promiseLayersProcessed);
+    });
+    logger.logInfo('passe');
+    Promise.allSettled(this.#promiseLayersProcessed)
+      .then((layerProcessResult) => {
+        logger.logInfo('layerProcessResult', layerProcessResult);
+        this.resolveMap();
+      })
+      .catch((error) => {
+        logger.logError('Errorin MapFeatureConfig.getAllServiceMetadata', error);
+        this.propagateError();
+      });
+  }
+
+  /**
+   * The getter method that returns the promiseAllLayersProcessed private property.
+   * The benifit of using a setter/getter with a private #promiseAllLayersProcessed is that it is invisible to the schema validation.
+   *
+   * @returns {Promise<void>} The promiseAllLayersProcessed instance.
+   * @protected
+   */
+  get promiseAllLayersProcessed(): Promise<void> {
+    return this.#promiseAllLayersProcessed;
+  }
+
+  protected resolveMap(): void {
+    this.#resolveMap();
+  }
+
+  protected rejectMap(reason?: unknown): void {
+    this.#rejectMap(reason);
   }
 
   /**

@@ -19,6 +19,9 @@ export abstract class ConfigBaseClass {
   /** Parent node (used to compute the layerPath). */
   #parentNode: ConfigBaseClass | undefined = undefined;
 
+  /** Flag used to indicate that errors were detected in the config provided. */
+  #errorDetected = false;
+
   /** Used to distinguish layer group nodes. */
   isLayerGroup: boolean;
 
@@ -102,6 +105,11 @@ export abstract class ConfigBaseClass {
     return this.#geoviewConfig.geoviewLayerType;
   }
 
+  /** The geoview layer that owns this sub-layer configuration. */
+  get geoviewContainer(): AbstractGeoviewLayerConfig {
+    return this.#geoviewConfig;
+  }
+
   /**
    * The getter method, which returns the layerPath of the sublayer configuration. The layer path is a unique identifier
    * associated with the sublayer configuration. It's made up of the Geoview layer identifier and the node identifiers you need
@@ -121,7 +129,17 @@ export abstract class ConfigBaseClass {
    * layer is no longer considered viable.
    */
   propagateError(): void {
+    this.#errorDetected = true;
     this.#geoviewConfig.propagateError();
+  }
+
+  /**
+   * The getter method that returns the isValid flag (true when the map feature config is valid).
+   *
+   * @returns {boolean} The isValid property associated to map feature config.
+   */
+  get isValid(): boolean {
+    return !this.#errorDetected;
   }
 
   /**

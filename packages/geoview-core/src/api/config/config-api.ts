@@ -13,6 +13,14 @@ import { logger } from '@/core//utils/logger';
  * @class DefaultConfig
  */
 export class ConfigApi {
+  // GV: The two following properties was created only for debugging purpose. They allow developers to inspect the
+  // GV: content or call the methods of the last instance created by the corresponding ConfigApi call.
+  /** Static property that contains the last object instanciated by the ConfigApi.getLayerConfig call */
+  static getLayerConfigInstance?: AbstractGeoviewLayerConfig;
+
+  /** Static property that contains the last object instanciated by the ConfigApi.getMapConfig call */
+  static getMapConfigInstance?: MapFeatureConfig;
+
   /**
    * Parse the parameters obtained from a url.
    *
@@ -284,6 +292,7 @@ export class ConfigApi {
         providedMapFeatureConfig.map.listOfGeoviewLayerConfig as TypeJsonArray,
         providedMapFeatureConfig?.serviceUrls?.geocoreUrl as string
       )) as TypeJsonObject;
+
       // Filter out the erroneous GeoCore layers and print a message to display the layer identifier in error.
       let errorDetected = false; // Variable to remember that an error occured.
       providedMapFeatureConfig.map.listOfGeoviewLayerConfig = (
@@ -296,19 +305,24 @@ export class ConfigApi {
         }
         return true; // Keep the layer
       }) as TypeJsonObject;
+
       // Instanciate the mapFeatureConfig.
       const mapFeatureConfig = new MapFeatureConfig(providedMapFeatureConfig!, language);
       if (errorDetected) mapFeatureConfig.propagateError(); // If an error was detected, signal it.
-      return mapFeatureConfig;
+      mapFeatureConfig.getAllServiceMetadata();
+
+      ConfigApi.getMapConfigInstance = mapFeatureConfig;
     } catch (error) {
       // If we get here, it is because the user provided a string config that cannot be translated to a json object,
       // or the config doesn't have the mandatory map property or the listOfGeoviewLayerConfig is defined but is not
       // an array.
-      logger.logError((error as MapConfigError).message);
+      if (error instanceof MapConfigError) logger.logError(error.message);
+      else logger.logError('ConfigApi.getMapConfig - An erroroccured', error);
       const defaultMapConfig = ConfigApi.getDefaultMapFeatureConfig(language);
       defaultMapConfig.propagateError();
-      return defaultMapConfig;
+      ConfigApi.getMapConfigInstance = defaultMapConfig;
     }
+    return ConfigApi.getMapConfigInstance;
   }
 
   /**
@@ -324,13 +338,14 @@ export class ConfigApi {
   // GV: favor of their GeoView equivalent as soon as possible.
   static async getLayerConfig(
     serviceAccessString: string,
-    layerType: TypeGeoviewLayerType | 'geoCore'
+    layerType: TypeGeoviewLayerType | 'geoCore',
+    language: TypeDisplayLanguage = 'en'
   ): Promise<AbstractGeoviewLayerConfig | undefined> {
     let geoviewLayerConfig: TypeJsonObject;
     if (layerType === 'geoCore') {
       try {
         const layerConfig = { geoviewLayerId: serviceAccessString, geoviewLayerType: layerType };
-        [geoviewLayerConfig] = await ConfigApi.#geocoreToGeoview('en', Cast<TypeJsonArray>([layerConfig]));
+        [geoviewLayerConfig] = await ConfigApi.#geocoreToGeoview(language, Cast<TypeJsonArray>([layerConfig]));
         if (geoviewLayerConfig.geoviewLayerType === 'geoCore') return undefined;
       } catch (error) {
         logger.logError(`Unable to convert GeoCore layer (Id=${serviceAccessString}).`);
@@ -345,6 +360,9 @@ export class ConfigApi {
         listOfLayerEntryConfig: [],
       });
     }
-    return MapFeatureConfig.nodeFactory(geoviewLayerConfig, 'en');
+
+    ConfigApi.getLayerConfigInstance = MapFeatureConfig.nodeFactory(geoviewLayerConfig, language);
+    ConfigApi.getLayerConfigInstance?.getServiceMetadata();
+    return ConfigApi.getLayerConfigInstance;
   }
 }

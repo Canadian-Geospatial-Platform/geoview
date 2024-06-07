@@ -24,7 +24,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "11",
-            "geometryType": "point",
+            "geometryType": "Point",
             "layerName": {
               "en": "2021 Combined sewer overflow : total volume discharged - Watewater"
             },

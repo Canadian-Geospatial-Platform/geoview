@@ -23,4 +23,61 @@ export class MapConfigError extends ConfigError {
   }
 }
 
+export class GeoviewLayerMandatoryError extends ConfigError {
+  messageList: Record<string, string> = {
+    LayerTypeMandatory: 'Property geoviewLayerType is mandatory for GeoView layer <=> of type <=>.',
+    LayerIdMandatory: 'Property geoviewLayerId is mandatory for GeoView layer of type <=>.',
+    LayerNameMandatory: 'Property geoviewLayerName is mandatory for GeoView layer',
+    MetadataAccessPathMandatory: 'Property metadataAccessPath is mandatory for GeoView layer',
+  };
+
+  messageKey: string;
+
+  messageVariables: string[];
+
+  constructor(messageKey: string, messageVariables: string[]) {
+    super();
+    this.messageKey = messageKey;
+    this.messageVariables = messageVariables;
+
+    // Override the message
+    const messageFragments = this.messageList[messageKey].split('<=>');
+    const message = messageFragments.reduce((accumulator, stringToAppend, i) => {
+      return i < messageVariables.length ? `${accumulator}${stringToAppend}${messageVariables[i]}` : `${accumulator}${stringToAppend}`;
+    }, '');
+    this.message = message;
+
+    // Set the prototype explicitly (as recommended by TypeScript doc)
+    // https://github.com/microsoft/TypeScript-wiki/blob/81fe7b91664de43c02ea209492ec1cea7f3661d0/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work)
+    Object.setPrototypeOf(this, MapConfigError.prototype);
+  }
+}
+
+export class GeoviewLayerInvalidParameterError extends ConfigError {
+  messageList: Record<string, string> = {
+    LayerIdInvalidType: 'The layerId of entry <=> must be an integer string.',
+  };
+
+  messageKey: string;
+
+  messageVariables: string[];
+
+  constructor(messageKey: string, messageVariables: string[]) {
+    super();
+    this.messageKey = messageKey;
+    this.messageVariables = messageVariables;
+
+    // Override the message
+    const messageFragments = this.messageList[messageKey].split('<=>');
+    const message = messageFragments.reduce((accumulator, stringToAppend, i) => {
+      return i < messageVariables.length ? `${accumulator}${stringToAppend}${messageVariables[i]}` : `${accumulator}${stringToAppend}`;
+    }, '');
+    this.message = message;
+
+    // Set the prototype explicitly (as recommended by TypeScript doc)
+    // https://github.com/microsoft/TypeScript-wiki/blob/81fe7b91664de43c02ea209492ec1cea7f3661d0/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work)
+    Object.setPrototypeOf(this, MapConfigError.prototype);
+  }
+}
+
 export {};

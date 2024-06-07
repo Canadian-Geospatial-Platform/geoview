@@ -8,12 +8,13 @@ import { EsriDynamicLayerEntryConfig } from '@config/types/classes/sub-layer-con
 import { CV_CONST_LAYER_TYPES } from '@config/types/config-constants';
 import { TypeJsonObject } from '@config/types/config-types';
 import {
+  AbstractBaseLayerEntryConfig,
   TypeBaseVectorGeometryConfig,
   TypeIconSymbolVectorConfig,
   TypeLineStringVectorConfig,
   TypePolygonVectorConfig,
   TypeSimpleSymbolVectorConfig,
-} from './map-schema-types';
+} from '@config/types/map-schema-types';
 
 /**
  * Type guard function that redefines a ConfigBaseClass as a GroupLayerEntryConfig if the entryType attribute of the verifyIfLayer
@@ -26,6 +27,21 @@ import {
  */
 export const layerEntryIsGroupLayer = (verifyIfLayer: ConfigBaseClass | TypeJsonObject): verifyIfLayer is GroupLayerEntryConfig => {
   return verifyIfLayer?.isLayerGroup as boolean;
+};
+
+/**
+ * Type guard function that redefines a ConfigBaseClass as an AbstractBaseLayerEntryConfig if the entryType attribute of the verifyIfLayer
+ * parameter is not CV_CONST_SUB_LAYER_TYPES.GROUP. The type assertion applies only to the true block of the if clause that use this
+ * function.
+ *
+ * @param {ConfigBaseClass} verifyIfLayer Polymorphic object to test in order to determine if the type assertion is valid.
+ *
+ * @returns {boolean} true if the type assertion is valid.
+ */
+export const layerEntryIsAbstractBaseLayerEntryConfig = (
+  verifyIfLayer: ConfigBaseClass | TypeJsonObject
+): verifyIfLayer is AbstractBaseLayerEntryConfig => {
+  return (verifyIfLayer?.isLayerGroup as boolean) === false;
 };
 
 /**

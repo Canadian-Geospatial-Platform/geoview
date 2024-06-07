@@ -297,7 +297,7 @@ export { EsriDynamicLayerEntryConfig } from '@config/types/classes/sub-layer-con
 export { EsriFeatureLayerEntryConfig } from '@config/types/classes/sub-layer-config/vector-leaf/esri-feature-layer-entry-config';
 
 /** Valid keys for the geometryType property. */
-export type TypeGeometryType = 'Point' | 'LineString' | 'Polygon';
+export type TypeStyleGeometry = 'Point' | 'LineString' | 'Polygon';
 
 /** Type of Style to apply to the GeoView vector layer source at creation time. */
 export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'raster-tile' | 'raster-image' | 'group';
