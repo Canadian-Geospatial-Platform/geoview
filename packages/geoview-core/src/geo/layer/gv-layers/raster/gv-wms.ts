@@ -238,6 +238,12 @@ export class GVWMS extends AbstractGVRaster {
   #getLegendUrlFromCapabilities(layerConfig: OgcWmsLayerEntryConfig, chosenStyle?: string): TypeJsonObject | null {
     const layerCapabilities = this.#getLayerMetadataEntry(layerConfig.layerId);
     if (Array.isArray(layerCapabilities?.Style)) {
+      // check if WMS as a default legend style
+      let isDefaultStyle = false;
+      layerCapabilities!.Style.forEach((style) => {
+        if (style.Name === 'default') isDefaultStyle = true;
+      });
+
       let legendStyle;
       if (chosenStyle) {
         [legendStyle] = layerCapabilities!.Style.filter((style) => {
@@ -246,7 +252,9 @@ export class GVWMS extends AbstractGVRaster {
       } else {
         legendStyle = layerCapabilities?.Style.find((style) => {
           if (layerConfig?.source?.style && !Array.isArray(layerConfig?.source?.style)) return layerConfig.source.style === style.Name;
-          return style.Name === 'default';
+
+          // no style found, if default apply, if not use the available style
+          return isDefaultStyle ? style.Name === 'default' : style.Name;
         });
       }
 
