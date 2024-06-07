@@ -39,7 +39,7 @@ export type TypePanelAppProps = {
  */
 export function Panel(props: TypePanelAppProps): JSX.Element {
   const { panel, button, onPanelOpened, onPanelClosed, onGeneralCloseClicked } = props;
-  const { status: open, panelStyles, panelGroupName } = panel;
+  const { status: open = false, panelStyles, panelGroupName } = panel;
 
   const { t } = useTranslation<string>();
 
