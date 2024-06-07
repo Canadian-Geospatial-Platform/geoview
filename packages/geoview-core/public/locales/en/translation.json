@@ -52,7 +52,8 @@
     "layers": "Layers",
     "share": "Share",
     "version": "About GeoView",
-    "repoLink": "GitHub"
+    "repoLink": "Github",
+    "removeAllNotifications": "Remove all"
   },
   "legend": {
     "title": "Legend",

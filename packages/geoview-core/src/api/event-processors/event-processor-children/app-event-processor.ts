@@ -81,6 +81,10 @@ export class AppEventProcessor extends AbstractEventProcessor {
     this.getAppState(mapId).setterActions.setNotifications(notifications);
   }
 
+  static removeAllNotifications(mapId: string): void {
+    this.getAppState(mapId).setterActions.setNotifications([]);
+  }
+
   static setAppIsCrosshairActive(mapId: string, isActive: boolean): void {
     this.getAppState(mapId).setterActions.setCrosshairActive(isActive);
   }

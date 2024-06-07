@@ -42,7 +42,7 @@ function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIconStackPr
             <BrowserNotSupportedIcon />
           ) : (
             <Box sx={sxClasses.legendIcon}>
-              <img alt="icon" src={iconImage} style={sxClasses.maxIconImg} />
+              <Box component="img" alt="icon" src={iconImage} sx={sxClasses.maxIconImg} />
             </Box>
           )}
         </IconButton>
@@ -53,11 +53,11 @@ function IconStack({ layerPath, onIconClick, onStackIconClick }: TypeIconStackPr
         <Box tabIndex={-1} onClick={onIconClick} sx={sxClasses.stackIconsBox} onKeyPress={(e) => onStackIconClick?.(e)} aria-hidden="true">
           <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1} aria-hidden="true">
             <Box sx={sxClasses.legendIconTransparent}>
-              {iconImageStacked && <img alt="icon" src={iconImageStacked} style={sxClasses.maxIconImg} />}
+              {iconImageStacked && <Box component="img" alt="icon" src={iconImageStacked} sx={sxClasses.maxIconImg} />}
             </Box>
           </IconButton>
           <IconButton sx={sxClasses.iconPreviewHoverable} color="primary" size="small" tabIndex={-1} aria-hidden="true">
-            <Box sx={sxClasses.legendIcon}>{iconImage && <img alt="icon" src={iconImage} style={sxClasses.maxIconImg} />}</Box>
+            <Box sx={sxClasses.legendIcon}>{iconImage && <Box component="img" alt="icon" src={iconImage} sx={sxClasses.maxIconImg} />}</Box>
           </IconButton>
         </Box>
       );
