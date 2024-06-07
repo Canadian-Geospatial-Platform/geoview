@@ -413,7 +413,8 @@
     <hr />
 
     <div class="map-title-holder">
-      <h4 id="HLYR4">4. Automatic group creation from metadata information</h4>
+      <h4 id="HLYR4">4. Automatic group creation from metadata information (NOT WORKING)</h4>
+      <p>Use a child layer for the moment</p>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <button class="collapsible active">Map Status Flags</button>
@@ -443,7 +444,15 @@
               'listOfLayerEntryConfig': [
                 {
                   'layerId': 'nhn:nhn',
-                  'layerName': { 'en': 'hydro_network' }
+                  'layerName': { 'en': 'National Hydro Network (NHN)' }
+                },
+                {
+                  'layerId': 'nhn:nhnda',
+                  'layerName': { 'en': 'Drainage Areas' }
+                },
+                {
+                  'layerId': 'nhn:toponyms',
+                  'layerName': { 'en': 'Toponyms' }
                 }
               ]
             }
