@@ -94,44 +94,45 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
   const isLayerVisible = layer.controls?.visibility ?? false;
 
   const getSecondaryText = (): JSX.Element => {
-    if (getLayerChildren().length || layer.items.length) {
-      let subTitle = '';
-      if (getLayerChildren().length) {
-        subTitle = t('legend.subLayersCount').replace('{count}', getLayerChildren().length.toString());
-      } else if (layer.items.length > 1) {
-        subTitle = t('legend.itemsCount')
-          .replace('{count}', layer.items.length.toString())
-          .replace('{totalCount}', layer.items.length.toString());
-      }
-      return (
-        <Stack direction="row" alignItems="center" sx={sxClasses.layerStackIcons}>
-          {!!subTitle.length && <Typography fontSize={14}>{subTitle}</Typography>}
-          <Box>
-            <IconButton
-              edge="end"
-              tooltip="layers.toggleVisibility"
-              className="buttonOutline"
-              onClick={(e) => handleToggleVisibility(e)}
-              disabled={!isLayerVisible}
-            >
-              {visibility ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
-            </IconButton>
-            <IconButton
-              tooltip="legend.highlightLayer"
-              sx={{ marginTop: '-0.3125rem' }}
-              className="buttonOutline"
-              onClick={(e) => handleHighlightLayer(e)}
-            >
-              {highlightedLayer === layer.layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
-            </IconButton>
-            <IconButton tooltip="legend.zoomTo" className="buttonOutline" onClick={(e) => handleZoomTo(e)}>
-              <ZoomInSearchIcon />
-            </IconButton>
-          </Box>
-        </Stack>
-      );
+    // dnt show icons when layer status is not loaded
+    if (!['processed', 'loaded'].includes(layer.layerStatus ?? '')) {
+      return <Box />;
     }
-    return <Box />;
+    let subTitle = '';
+    if (getLayerChildren().length) {
+      subTitle = t('legend.subLayersCount').replace('{count}', getLayerChildren().length.toString());
+    } else if (layer.items.length > 1) {
+      subTitle = t('legend.itemsCount')
+        .replace('{count}', layer.items.length.toString())
+        .replace('{totalCount}', layer.items.length.toString());
+    }
+    return (
+      <Stack direction="row" alignItems="center" sx={sxClasses.layerStackIcons}>
+        {!!subTitle.length && <Typography fontSize={14}>{subTitle}</Typography>}
+        <Box>
+          <IconButton
+            edge="end"
+            tooltip="layers.toggleVisibility"
+            className="buttonOutline"
+            onClick={(e) => handleToggleVisibility(e)}
+            disabled={!isLayerVisible}
+          >
+            {visibility ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
+          </IconButton>
+          <IconButton
+            tooltip="legend.highlightLayer"
+            sx={{ marginTop: '-0.3125rem' }}
+            className="buttonOutline"
+            onClick={(e) => handleHighlightLayer(e)}
+          >
+            {highlightedLayer === layer.layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
+          </IconButton>
+          <IconButton tooltip="legend.zoomTo" className="buttonOutline" onClick={(e) => handleZoomTo(e)}>
+            <ZoomInSearchIcon />
+          </IconButton>
+        </Box>
+      </Stack>
+    );
   };
 
   // renders the layers children, if any
