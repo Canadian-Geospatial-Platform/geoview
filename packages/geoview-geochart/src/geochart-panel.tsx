@@ -210,7 +210,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
         setSelectedLayerPath('');
       }
     }
-  }, [memoLayerSelectedItem, memoLayersList, setLayerDataArrayBatchLayerPathBypass]);
+  }, [memoLayerSelectedItem, memoLayersList, setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass]);
 
   // #region RENDERING ************************************************************************************************
 
