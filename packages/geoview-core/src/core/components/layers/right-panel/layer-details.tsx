@@ -275,9 +275,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       layerDetails.icons[0].iconImage !== 'no data'
     ) {
       return (
-        <Box sx={{ marginTop: '10px' }}>
-          <img alt="icon" src={layerDetails.icons[0].iconImage} style={sxClasses.wmsImage} />
-        </Box>
+        <Grid sx={sxClasses.itemsGrid}>
+          <Grid>
+            <Box component="img" alt="icon" src={layerDetails.icons[0].iconImage} style={sxClasses.wmsImage} />
+          </Grid>
+        </Grid>
       );
     }
 
