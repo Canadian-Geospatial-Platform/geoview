@@ -4,7 +4,7 @@ import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common'
 import { TypeLayerData } from 'geoview-core/src/geo/layer/layer-sets/abstract-layer-set';
 import { Typography } from 'geoview-core/src/ui/typography/typography';
 import { Box } from 'geoview-core/src/ui';
-import { useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
+import { useMapClickCoordinates, useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
 import {
   useGeochartConfigs,
   useGeochartStoreActions,
@@ -46,6 +46,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const selectedLayerPath = useGeochartSelectedLayerPath() as string;
   const { setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass } = useGeochartStoreActions();
   const displayLanguage = useAppDisplayLanguage();
+  const mapClickCoordinates = useMapClickCoordinates();
 
   // Create the validator shared for all the charts in the footer
   const [schemaValidator] = useState<SchemaValidator>(new SchemaValidator());
@@ -182,6 +183,10 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     if (memoLayerSelectedItem && !(memoLayerSelectedItem.queryStatus === 'processed' || memoLayerSelectedItem.queryStatus === 'error'))
       return;
 
+    if (selectedLayerPath === '') {
+      return;
+    }
+
     // Check if the layer we are one still have features
     if (memoLayerSelectedItem?.numOffeatures) {
       // Log
@@ -204,13 +209,33 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
         setSelectedLayerPath(anotherLayerEntry.layerPath);
       } else {
         // Log
-        // logger.logDebug('GEOCHART-PANEL', 'select none');
+        logger.logDebug('GEOCHART-PANEL', 'select none', memoLayerSelectedItem);
 
         // None found, select none
-        setSelectedLayerPath('');
+        //setSelectedLayerPath('');
       }
     }
-  }, [memoLayerSelectedItem, memoLayersList, setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memoLayerSelectedItem, memoLayersList]);
+
+  /**
+   * Select the layer after layer is selected from map.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('GEOCHART-PANEL- mapClickCoordinates', mapClickCoordinates);
+
+    if (mapClickCoordinates && memoLayersList?.length && !selectedLayerPath.length) {
+      const selectedLayer = memoLayersList.find((layer) => {
+        return memoLayersList.find((layer2) => layer.layerPath === layer2.layerPath && layer2.numOffeatures);
+      });
+
+      setSelectedLayerPath(selectedLayer?.layerPath ?? '');
+    } else {
+      setSelectedLayerPath('');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapClickCoordinates, memoLayersList]);
 
   // #region RENDERING ************************************************************************************************
 
@@ -235,8 +260,10 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   };
 
   const handleGuideIsOpen = useCallback(
-    (guideIsOpen: boolean): void => {
-      if (guideIsOpen) {
+    (guideIsOpenVal: boolean): void => {
+      // Log
+      logger.logTraceUseCallback('GEOCHART PANEL - handleGuideIsOpen');
+      if (guideIsOpenVal) {
         setSelectedLayerPath('');
       }
     },
