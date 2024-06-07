@@ -1,6 +1,11 @@
 import { defaultsDeep } from 'lodash';
+
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@config/types/config-constants';
 import { Cast, TypeJsonObject } from '@config/types/config-types';
+import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
+import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
+import { isvalidComparedToSchema } from '@config/utils';
+import { AbstractGeoviewEsriLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-esri-layer-config';
 import {
   TypeStyleConfig,
   TypeLayerEntryType,
@@ -8,10 +13,8 @@ import {
   TypeDisplayLanguage,
   TypeSourceEsriFeatureInitialConfig,
 } from '@config/types/map-schema-types';
-import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
-import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
-import { isvalidComparedToSchema } from '@config/utils';
+import { GeoviewLayerInvalidParameterError } from '@config/types/classes/config-exceptions';
+import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 
 /**
  * The ESRI feature geoview sublayer class.
@@ -29,7 +32,7 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited.
    * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
    * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The GeoView instance that owns the sublayer.
-   * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
+   * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
    * @constructor
    */
   constructor(
@@ -37,17 +40,18 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     initialSettings: TypeLayerInitialSettings,
     language: TypeDisplayLanguage,
     geoviewLayerConfig: AbstractGeoviewLayerConfig,
-    parentNode?: ConfigBaseClass
+    parentNode?: EntryConfigBaseClass
   ) {
     super(layerConfig, initialSettings, language, geoviewLayerConfig, parentNode);
     // Set default values.
     this.source = defaultsDeep(this.source, { maxRecordCount: 0, format: 'EsriJSON', featureInfo: { queryable: false } });
     this.style = layerConfig.style ? { ...Cast<TypeStyleConfig>(layerConfig.style) } : undefined;
     if (Number.isNaN(this.layerId)) {
-      throw new Error(`The layer entry with layerId equal to ${this.layerPath} must be an integer string`);
+      this.raiseErrorDetectedFlag();
+      throw new GeoviewLayerInvalidParameterError('LayerIdInvalidType', [this.layerPath]);
     }
-    if (!isvalidComparedToSchema(this.schemaPath, layerConfig)) this.propagateError(); // Input schema validation.
-    if (!isvalidComparedToSchema(this.schemaPath, this)) this.propagateError(); // Internal schema validation.
+    if (!isvalidComparedToSchema(this.schemaPath, layerConfig)) this.raiseErrorDetectedFlag(); // Input schema validation.
+    if (!isvalidComparedToSchema(this.schemaPath, this)) this.raiseErrorDetectedFlag(); // Internal schema validation.
   }
 
   /**
@@ -69,5 +73,14 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    */
   protected override getEntryType(): TypeLayerEntryType {
     return CV_CONST_SUB_LAYER_TYPES.VECTOR;
+  }
+
+  /**
+   * Get the sub-layer metadata from the metadataAccessPath and store it in a protected property of the sub-layer.
+   *
+   * @returns {Promise<void>} A Promise that will resolve when the execution will be completed.
+   */
+  override async getLayerMetadata(): Promise<void> {
+    this.metadata = await (this.geoviewLayerConfigInstance as AbstractGeoviewEsriLayerConfig).fetchEsriLayerMetadata(this);
   }
 }

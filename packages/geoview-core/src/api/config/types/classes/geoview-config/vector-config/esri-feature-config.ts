@@ -1,17 +1,18 @@
 import { CV_CONST_LAYER_TYPES, CV_GEOVIEW_SCHEMA_PATH } from '@config/types/config-constants';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { EsriFeatureLayerEntryConfig } from '@config/types/classes/sub-layer-config/vector-leaf/esri-feature-layer-entry-config';
-import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
 import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-layer-entry-config';
 import { TypeJsonObject } from '@config/types/config-types';
 import { TypeDisplayLanguage, TypeLayerInitialSettings } from '@config/types/map-schema-types';
 import { isvalidComparedToSchema } from '@config/utils';
 import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
+import { AbstractGeoviewEsriLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-esri-layer-config';
+import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 
 export type TypeEsriFeatureLayerNode = GroupLayerEntryConfig | EsriFeatureLayerEntryConfig;
 
 /** The ESRI feature geoview layer class. */
-export class EsriFeatureLayerConfig extends AbstractGeoviewLayerConfig {
+export class EsriFeatureLayerConfig extends AbstractGeoviewEsriLayerConfig {
   /** Type of GeoView layer. */
   geoviewLayerType = CV_CONST_LAYER_TYPES.ESRI_FEATURE;
 
@@ -27,8 +28,8 @@ export class EsriFeatureLayerConfig extends AbstractGeoviewLayerConfig {
    */
   constructor(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, mapFeatureConfig?: MapFeatureConfig) {
     super(layerConfig, language, mapFeatureConfig);
-    if (!isvalidComparedToSchema(this.geoviewLayerSchema, layerConfig)) this.propagateError(); // Input schema validation.
-    if (!isvalidComparedToSchema(this.geoviewLayerSchema, this)) this.propagateError(); // Internal schema validation.
+    if (!isvalidComparedToSchema(this.geoviewLayerSchema, layerConfig)) this.raiseErrorDetectedFlag(); // Input schema validation.
+    if (!isvalidComparedToSchema(this.geoviewLayerSchema, this)) this.raiseErrorDetectedFlag(); // Internal schema validation.
     this.validate();
   }
 
@@ -45,14 +46,6 @@ export class EsriFeatureLayerConfig extends AbstractGeoviewLayerConfig {
   }
 
   /**
-   * Get the service metadata from the metadataAccessPath and store it in a private variable of the geoview layer.
-   * @protected
-   */
-  // TODO: Implement this method
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  protected override getServiceMetadata(): void {}
-
-  /**
    * The method used to implement the class factory model that returns the instance of the class based on the sublayer
    * type needed.
    *
@@ -60,17 +53,17 @@ export class EsriFeatureLayerConfig extends AbstractGeoviewLayerConfig {
    * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited.
    * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
    * @param {AbstractGeoviewLayerConfig} geoviewConfig The GeoView instance that owns the sublayer.
-   * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
+   * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer..
    *
-   * @returns {ConfigBaseClass} The sublayer instance or undefined if there is an error.
+   * @returns {EntryConfigBaseClass} The sublayer instance or undefined if there is an error.
    */
   override createLeafNode(
     layerConfig: TypeJsonObject,
     initialSettings: TypeLayerInitialSettings,
     language: TypeDisplayLanguage,
     geoviewConfig: AbstractGeoviewLayerConfig,
-    parentNode: ConfigBaseClass
-  ): ConfigBaseClass {
+    parentNode?: EntryConfigBaseClass
+  ): EntryConfigBaseClass {
     return new EsriFeatureLayerEntryConfig(layerConfig, initialSettings, language, geoviewConfig, parentNode);
   }
 }
