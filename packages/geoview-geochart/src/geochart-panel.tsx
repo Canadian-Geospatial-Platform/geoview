@@ -189,6 +189,26 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
       // All good, keep selection
       // Reset the bypass for next time
       setLayerDataArrayBatchLayerPathBypass(memoLayerSelectedItem.layerPath);
+    } else {
+      // Find the first layer with features
+      const anotherLayerEntry = memoLayersList.find((layer) => {
+        return memoLayersList.find((layer2) => layer.layerPath === layer2.layerPath && layer2.numOffeatures);
+      });
+
+      // If found
+      if (anotherLayerEntry) {
+        // Log
+        // logger.logDebug('GEOCHART-PANEL', 'select another', anotherLayerEntry.layerPath);
+
+        // Select that one
+        setSelectedLayerPath(anotherLayerEntry.layerPath);
+      } else {
+        // Log
+        // logger.logDebug('GEOCHART-PANEL', 'select none');
+
+        // None found, select none
+        setSelectedLayerPath('');
+      }
     }
   }, [memoLayerSelectedItem, memoLayersList, setLayerDataArrayBatchLayerPathBypass]);
 
