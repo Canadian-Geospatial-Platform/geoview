@@ -35,6 +35,7 @@ import {
   TypeValidMapProjectionCodes,
   TypeValidVersions,
 } from '@config/types/map-schema-types';
+
 import { logger } from '@/core//utils/logger';
 
 /**
@@ -49,9 +50,6 @@ export class MapFeatureConfig {
 
   /** Flag used to indicate that errors were detected in the config provided. */
   #errorDetected = false;
-
-  /** The service metadata. */
-  // #metadata: Promise<TypeJsonObject>;
 
   /** map configuration. */
   map: TypeMapConfig;
@@ -105,7 +103,7 @@ export class MapFeatureConfig {
     // GV: One thing to know about default values: The way to determine whether a property has
     // GV: been supplied by the user rather than initialized using a default value is to look
     // GV: in the original configuration copy kept in the instance
-    const clonedJsonConfig = this.#originalgeoviewLayerConfig;
+    const clonedJsonConfig = cloneDeep(providedMapFeatureConfig); // To avoid leaks in the caller's object.
     this.#language = language;
     // Input schema validation.
     this.#errorDetected = this.#errorDetected || !isvalidComparedToSchema(CV_MAP_CONFIG_SCHEMA_PATH, clonedJsonConfig);
@@ -139,43 +137,49 @@ export class MapFeatureConfig {
     this.schemaVersionUsed = (clonedJsonConfig.schemaVersionUsed as TypeValidVersions) || CV_DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed;
     this.#errorDetected = this.#errorDetected || !isvalidComparedToSchema(CV_MAP_CONFIG_SCHEMA_PATH, this); // Internal schema validation.
     if (this.#errorDetected) this.#makeMapConfigValid(); // Tries to apply a patch to invalid properties
-    // this.#metadata = fetchServiceMetadata
   }
 
   /**
-   * The getter method that returns the isValid flag (true when the map feature config is valid).
-   *
-   * @returns {boolean} The isValid property associated to map feature config.
+   * This method reads the service metadata for geoview layers in the geoview layer list.
    */
-  get isValid(): boolean {
-    return !this.#errorDetected;
+  // TODO: This method will be deleted in the next PR because based on the implementation diagram it is done by the layerApi
+  async fetchAllServiceMetadata(): Promise<void> {
+    const promiseLayersProcessed: Promise<void>[] = [];
+
+    this.map.listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
+      promiseLayersProcessed.push(geoviewLayerConfig.fetchServiceMetadata());
+    });
+
+    const promiseSettledResult = await Promise.allSettled(promiseLayersProcessed);
+    promiseSettledResult.forEach((promise, i) => {
+      if (promise.status === 'rejected') this.map.listOfGeoviewLayerConfig[i].setErrorDetectedFlag();
+    });
   }
 
   /**
-   * This method returns the json string of the map feature's configuration. The output representation is not a multi-line indented
-   * string. Private variables and pseudo-properties are not serialized.
+   * The getter method that returns the errorDetected flag.
    *
-   * @returns {string} The json string corresponding to the map feature configuration.
+   * @returns {boolean} The errorDetected property associated to the map feature config.
    */
-  getJsonString(): string {
-    return this.getIndentedJsonString(null);
+  get errorDetected(): boolean {
+    return this.#errorDetected;
   }
 
   /**
    * This method returns the json string of the map feature's configuration. The output representation is a multi-line indented
    * string. Indentation can be controled using the ident parameter. Private variables and pseudo-properties are not serialized.
-   * @param {number | null} indent The number of space to indent the output string.
+   * @param {number} indent The number of space to indent the output string (default=2).
    *
    * @returns {string} The json string corresponding to the map feature configuration.
    */
-  getIndentedJsonString(indent: number | null = 2): string {
-    return JSON.stringify(this, undefined, indent || undefined);
+  serialize(indent: number = 2): string {
+    return JSON.stringify(this, undefined, indent);
   }
 
   /**
-   * Methode used to propagate the error flag to the MapFeatureConfig instance.
+   * Methode used to set the MapFeatureConfig error flag to true.
    */
-  propagateError(): void {
+  setErrorDetectedFlag(): void {
     this.#errorDetected = true;
   }
 
