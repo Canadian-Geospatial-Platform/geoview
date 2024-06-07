@@ -107,6 +107,7 @@ export const getSxClasses = (theme: Theme): any => ({
     },
   },
   layerStackIcons: {
+    flexWrap: 'wrap',
     '& button': {
       padding: '0.25rem',
       '& svg': {

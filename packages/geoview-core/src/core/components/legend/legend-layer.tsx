@@ -110,26 +110,28 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
           <Typography component="span" fontSize={14}>
             {itemsCountStr}
           </Typography>
-          <IconButton
-            edge="end"
-            tooltip="layers.toggleVisibility"
-            className="buttonOutline"
-            onClick={(e) => handleToggleVisibility(e)}
-            disabled={!isLayerVisible}
-          >
-            {visibility ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
-          </IconButton>
-          <IconButton
-            tooltip="legend.highlightLayer"
-            sx={{ marginTop: '-0.3125rem' }}
-            className="buttonOutline"
-            onClick={(e) => handleHighlightLayer(e)}
-          >
-            {highlightedLayer === layer.layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
-          </IconButton>
-          <IconButton tooltip="legend.zoomTo" className="buttonOutline" onClick={(e) => handleZoomTo(e)}>
-            <ZoomInSearchIcon />
-          </IconButton>
+          <Box>
+            <IconButton
+              edge="end"
+              tooltip="layers.toggleVisibility"
+              className="buttonOutline"
+              onClick={(e) => handleToggleVisibility(e)}
+              disabled={!isLayerVisible}
+            >
+              {visibility ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
+            </IconButton>
+            <IconButton
+              tooltip="legend.highlightLayer"
+              sx={{ marginTop: '-0.3125rem' }}
+              className="buttonOutline"
+              onClick={(e) => handleHighlightLayer(e)}
+            >
+              {highlightedLayer === layer.layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
+            </IconButton>
+            <IconButton tooltip="legend.zoomTo" className="buttonOutline" onClick={(e) => handleZoomTo(e)}>
+              <ZoomInSearchIcon />
+            </IconButton>
+          </Box>
         </Stack>
       );
     }
