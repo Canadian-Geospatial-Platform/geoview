@@ -6,7 +6,7 @@ export const getSxClasses = (theme: Theme): any => ({
   list: {
     color: 'text.primary',
     width: '100%',
-    padding: '8px',
+    paddingLeft: '8px',
     paddingRight: '14px !important',
     overflowY: 'auto',
     // layer title
