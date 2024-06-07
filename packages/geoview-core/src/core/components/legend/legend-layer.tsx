@@ -94,22 +94,18 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
   const isLayerVisible = layer.controls?.visibility ?? false;
 
   const getSecondaryText = (): JSX.Element => {
-    if (getLayerChildren().length) {
-      return <Typography component="p">{t('legend.subLayersCount').replace('{count}', getLayerChildren().length.toString())}</Typography>;
-    }
-    if (layer.items.length) {
-      let itemsCountStr = '';
-      if (layer.items.length > 1) {
-        itemsCountStr = t('legend.itemsCount')
+    if (getLayerChildren().length || layer.items.length) {
+      let subTitle = '';
+      if (getLayerChildren().length) {
+        subTitle = t('legend.subLayersCount').replace('{count}', getLayerChildren().length.toString());
+      } else if (layer.items.length > 1) {
+        subTitle = t('legend.itemsCount')
           .replace('{count}', layer.items.length.toString())
           .replace('{totalCount}', layer.items.length.toString());
       }
-
       return (
         <Stack direction="row" alignItems="center" sx={sxClasses.layerStackIcons}>
-          <Typography component="span" fontSize={14}>
-            {itemsCountStr}
-          </Typography>
+          {!!subTitle.length && <Typography fontSize={14}>{subTitle}</Typography>}
           <Box>
             <IconButton
               edge="end"
@@ -135,7 +131,6 @@ export function LegendLayer(props: LegendLayerProps): JSX.Element {
         </Stack>
       );
     }
-
     return <Box />;
   };
 
