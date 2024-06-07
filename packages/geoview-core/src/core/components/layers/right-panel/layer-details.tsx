@@ -276,7 +276,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     ) {
       return (
         <Grid sx={sxClasses.itemsGrid}>
-          <Grid>
+          <Grid container pt={6} pb={6}>
             <Box component="img" alt="icon" src={layerDetails.icons[0].iconImage} style={sxClasses.wmsImage} />
           </Grid>
         </Grid>
