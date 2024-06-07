@@ -16,13 +16,18 @@ export const getSxClasses = (theme: Theme): any => ({
     boxShadow: 2,
     padding: '10px',
   },
+  notificationsHeader: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '10px',
+    borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[300]}}`,
+  },
   notificationsTitle: {
     fontSize: theme.palette.geoViewFontSize.default,
     fontWeight: '700',
-    padding: '10px',
     color: theme.palette.geoViewColor.textColor.main,
-    borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[300]}}`,
-    marginBottom: '10px',
   },
   notificationsList: {
     overflowY: 'auto',

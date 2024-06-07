@@ -18,6 +18,7 @@ import {
   Typography,
   Popper,
   Paper,
+  Button,
 } from '@/ui';
 import { getSxClasses } from './notifications-style';
 import { useAppNotifications, useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -60,7 +61,7 @@ export default function Notifications(): JSX.Element {
   // get values from the store
   const notifications = useAppNotifications();
   const interaction = useMapInteraction();
-  const { removeNotification } = useAppStoreActions();
+  const { removeNotification, removeAllNotifications } = useAppStoreActions();
 
   useEffect(() => {
     logger.logTraceUseEffect('Notifications - notifications list changed', notificationsCount, notifications);
@@ -108,6 +109,10 @@ export default function Notifications(): JSX.Element {
    */
   const handleRemoveNotificationClick = (notification: NotificationDetailsType): void => {
     removeNotification(notification.key);
+  };
+
+  const handleRemoveAllNotificationsClick = (): void => {
+    removeAllNotifications();
   };
 
   const AnimatedBox = animated(Box);
@@ -171,9 +176,20 @@ export default function Notifications(): JSX.Element {
 
         <Popper open={open} anchorEl={anchorEl} placement="right-end" onClose={handleClickAway} container={mapElem}>
           <Paper sx={sxClasses.notificationPanel}>
-            <Typography component="h3" sx={sxClasses.notificationsTitle}>
-              {t('appbar.notifications')}
-            </Typography>
+            <Box sx={sxClasses.notificationsHeader}>
+              <Typography component="h3" sx={sxClasses.notificationsTitle}>
+                {t('appbar.notifications')}
+              </Typography>
+              <Button
+                type="text"
+                variant="contained"
+                disabled={notifications.length === 0}
+                size="small"
+                onClick={handleRemoveAllNotificationsClick}
+              >
+                {t('appbar.removeAllNotifications')}
+              </Button>
+            </Box>
             <Box sx={sxClasses.notificationsList}>
               {notifications.length > 0 ? (
                 notifications.map((notification, index) => renderNotification(notification, index))
