@@ -241,7 +241,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
           muiFilterDatePickerProps: {
             timezone: 'UTC',
             format: 'YYYY/MM/DD',
-            // NOTE: reason for type cast as undefined as x-mui-datepicker prop type saying Data cant be assigned to undefined.
+            // NOTE: reason for type cast as undefined as x-mui-datepicker prop type saying Date cant be assigned to undefined.
             minDate: DateMgt.getDayjsDate('1600/01/01') as unknown as undefined,
             slotProps: {
               textField: {
