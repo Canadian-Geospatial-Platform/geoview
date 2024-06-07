@@ -76,7 +76,7 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
 
     // Erase comments in the config file then process
     const configObjStr = removeCommentsFromJSON(configData!);
-    mapConfig = await api.configApi.getMapConfig(configObjStr, lang);
+    mapConfig = await api.configApi.createMapConfig(configObjStr, lang);
 
     // TODO: refactor - remove this injection once config is done, remove the casting to unknown
     let tempStr = removeCommentsFromJSON(configData!);
@@ -89,7 +89,7 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
     // configurations file url is provided, fetch then process
     const configUrl = mapElement.getAttribute('data-config-url');
     const configObject = await fetchConfigFile(configUrl!);
-    mapConfig = await api.configApi.getMapConfig(configObject, lang);
+    mapConfig = await api.configApi.createMapConfig(configObject, lang);
 
     // TODO: refactor - remove this injection once config is done, remove the casting to unknown
     mapConfig.map.listOfGeoviewLayerConfig = (configObject as unknown as MapFeatureConfig).map.listOfGeoviewLayerConfig

@@ -22,6 +22,8 @@ export const CV_CONFIG_GEOLOCATOR_URL = 'https://geolocator.api.geo.ca?keys=geon
 /** The default geolocator url */
 export const CV_CONFIG_PROXY_URL = 'https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy';
 
+export const CV_CONFIG_GEOCORE_TYPE = 'geoCore';
+
 // Constants for the layer config types
 export const CV_CONST_SUB_LAYER_TYPES: Record<LayerEntryTypesKey, TypeLayerEntryType> = {
   VECTOR: 'vector',

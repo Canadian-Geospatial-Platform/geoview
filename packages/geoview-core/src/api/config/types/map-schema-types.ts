@@ -290,7 +290,7 @@ export type TypeLayerStates = {
 };
 
 // #region SUB LAYERS
-export { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
+export { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 
 export { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
 /** Child classes derived from the AbstractBaseLayerEntryConfig. */
@@ -298,7 +298,7 @@ export { EsriDynamicLayerEntryConfig } from '@config/types/classes/sub-layer-con
 export { EsriFeatureLayerEntryConfig } from '@config/types/classes/sub-layer-config/vector-leaf/esri-feature-layer-entry-config';
 
 /** Valid keys for the geometryType property. */
-export type TypeGeometryType = 'Point' | 'LineString' | 'Polygon';
+export type TypeStyleGeometry = 'point' | 'linestring' | 'polygon';
 
 /** Type of Style to apply to the GeoView vector layer source at creation time. */
 export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'raster-tile' | 'raster-image' | 'group';
