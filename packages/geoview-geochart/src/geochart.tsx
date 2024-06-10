@@ -1,10 +1,10 @@
 import { GeoChart as GeoChartComponent, GeoChartConfig, ChartType, GeoChartDefaultColors, SchemaValidator, GeoChartAction } from 'geochart';
 import { useAppDisplayLanguageById, useAppStoreActions } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
+import { TypeGeochartResultSetEntry } from 'geoview-core/src/core/stores/store-interface-and-intial-values/geochart-state';
 import { MapEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/map-event-processor';
 import { TypeWindow } from 'geoview-core/src/core/types/global-types';
-import { TypeLayerEntryConfig } from 'geoview-core/src/geo/map/map-schema-types';
+import { TypeFeatureInfoEntry, TypeLayerEntryConfig } from 'geoview-core/src/geo/map/map-schema-types';
 import { logger } from 'geoview-core/src/core/utils/logger';
-import { TypeLayerData, TypeFeatureInfoEntry } from 'geoview-core/src/geo/layer/layer-sets/abstract-layer-set';
 import { findLayerDataAndConfigFromQueryResults, loadDatasources } from './geochart-parsing';
 import { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
 
@@ -15,7 +15,7 @@ interface GeoChartProps {
   mapId: string;
   config: PluginGeoChartConfig<ChartType>;
   schemaValidator: SchemaValidator;
-  layers: TypeLayerData[];
+  layers: TypeGeochartResultSetEntry[];
   // eslint-disable-next-line react/require-default-props
   sx?: React.CSSProperties;
   // eslint-disable-next-line react/require-default-props

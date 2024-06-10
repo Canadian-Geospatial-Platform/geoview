@@ -1,7 +1,6 @@
 import { TypeWindow } from 'geoview-core/src/core/types/global-types';
 import { ChartType, SchemaValidator } from 'geochart';
 import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common';
-import { TypeLayerData } from 'geoview-core/src/geo/layer/layer-sets/abstract-layer-set';
 import { Typography } from 'geoview-core/src/ui/typography/typography';
 import { Box } from 'geoview-core/src/ui';
 import { useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
@@ -10,6 +9,7 @@ import {
   useGeochartStoreActions,
   useGeochartLayerDataArrayBatch,
   useGeochartSelectedLayerPath,
+  TypeGeochartResultSetEntry,
 } from 'geoview-core/src/core/stores/store-interface-and-intial-values/geochart-state';
 import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
@@ -42,7 +42,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   // Get states and actions from store
   const configObj = useGeochartConfigs();
   const visibleLayers = useMapVisibleLayers() as string[];
-  const storeArrayOfLayerData = useGeochartLayerDataArrayBatch() as TypeLayerData[];
+  const storeArrayOfLayerData = useGeochartLayerDataArrayBatch() as TypeGeochartResultSetEntry[];
   const selectedLayerPath = useGeochartSelectedLayerPath() as string;
   const { setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass } = useGeochartStoreActions();
   const displayLanguage = useAppDisplayLanguage();
@@ -98,7 +98,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
    * @returns string
    */
   const getNumFeaturesLabel = useCallback(
-    (layer: TypeLayerData): string => {
+    (layer: TypeGeochartResultSetEntry): string => {
       // Log
       logger.logTraceUseCallback('GEOCHART-PANEL - getNumFeaturesLabel');
 

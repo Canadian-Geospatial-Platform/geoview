@@ -1,8 +1,8 @@
 import { TypeJsonObject } from 'geoview-core/src/core/types/global-types';
-import { TypeLayerEntryConfig } from 'geoview-core/src/geo/map/map-schema-types';
+import { TypeFeatureInfoEntry, TypeFeatureInfoEntryPartial, TypeLayerEntryConfig } from 'geoview-core/src/geo/map/map-schema-types';
 import { ChartType, GeoChartDatasource } from 'geochart';
 import { LayerApi } from 'geoview-core/src/geo/layer/layer';
-import { TypeLayerData, TypeFeatureInfoEntry, TypeFeatureInfoEntryPartial } from 'geoview-core/src/geo/layer/layer-sets/abstract-layer-set';
+import { TypeGeochartResultSetEntry } from 'geoview-core/src/core/stores/store-interface-and-intial-values/geochart-state';
 import { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
 
 /**
@@ -78,7 +78,7 @@ const simplifyTypeFeatureInfoEntries = (entries: TypeFeatureInfoEntryPartial[]):
 export const findLayerDataAndConfigFromQueryResults = (
   config: PluginGeoChartConfig<ChartType>,
   layerApi: LayerApi,
-  layerDataArray: TypeLayerData[]
+  layerDataArray: TypeGeochartResultSetEntry[]
 ): [
   GeoViewGeoChartConfig<ChartType> | undefined,
   GeoViewGeoChartConfigLayer | undefined,
@@ -90,7 +90,7 @@ export const findLayerDataAndConfigFromQueryResults = (
   let foundConfigChartLyr: GeoViewGeoChartConfigLayer | undefined;
   let foundLayerEntry: TypeLayerEntryConfig | undefined;
   let foundData: TypeFeatureInfoEntry[] | undefined;
-  layerDataArray.forEach((layerData: TypeLayerData) => {
+  layerDataArray.forEach((layerData) => {
     // If still not found data corresponding to a layer config
     if (!foundData) {
       // If found something
