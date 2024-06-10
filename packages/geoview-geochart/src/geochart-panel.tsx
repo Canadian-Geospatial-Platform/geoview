@@ -212,7 +212,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
         logger.logDebug('GEOCHART-PANEL', 'select none', memoLayerSelectedItem);
 
         // None found, select none
-        //setSelectedLayerPath('');
+        // setSelectedLayerPath('');
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
