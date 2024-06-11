@@ -653,4 +653,13 @@ export abstract class DateMgt {
     else if (dateFormat.length === 19) dateFormat = `${dateFormat}Z`;
     return dateFormat;
   }
+
+  /**
+   * Get dayjs date object for given date in number or string.
+   * @param {number | string} millseconds time in milliseconds or string
+   * @returns {Dayjs} dayjs date object
+   */
+  static getDayjsDate(date: number | string): Dayjs {
+    return dayjs(date);
+  }
 }
