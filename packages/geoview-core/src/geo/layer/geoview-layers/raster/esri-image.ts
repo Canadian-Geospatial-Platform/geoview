@@ -5,7 +5,6 @@ import { Image as ImageLayer } from 'ol/layer';
 import { Extent } from 'ol/extent';
 
 import { getLocalizedValue } from '@/core/utils/utilities';
-import { getExtentIntersection, getExtentUnionMaybe } from '@/geo/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
@@ -436,24 +435,12 @@ export class EsriImage extends AbstractGeoViewRaster {
    * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
    *
    * @param {string} layerPath The Layer path to the layer's configuration.
-   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
    * @returns {Extent | undefined} The new layer bounding box.
    */
   // GV Layers Refactoring - Obsolete (in layers)
-  protected override getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
-    // Get the layer config
-    const layerConfig = this.getLayerConfig(layerPath);
-
-    // Get the layer config bounds
-    let layerConfigBounds = layerConfig?.initialSettings?.bounds;
-
-    // If layer bounds were found, project
-    if (layerConfigBounds) {
-      // Make sure we're in the map projection. Always EPSG:4326 when coming from our configuration.
-      layerConfigBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerConfigBounds, 'EPSG:4326');
-    }
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  override getBounds(layerPath: string): Extent | undefined {
     // Get the metadata extent
     const metadataExtent = this.getMetadataExtent();
 
@@ -465,10 +452,7 @@ export class EsriImage extends AbstractGeoViewRaster {
       layerBounds = this.getMapViewer().convertExtentFromProjToMapProj(metadataExtent, metadataProjection);
     }
 
-    // If both layer config had bounds and layer has real bounds, take the intersection between them
-    if (layerConfigBounds && layerBounds) layerBounds = getExtentIntersection(layerBounds, layerConfigBounds);
-
-    // Return the layer bounds possibly unioned with 'bounds' received as param
-    return getExtentUnionMaybe(layerBounds, bounds);
+    // Return the calculated layer bounds
+    return layerBounds;
   }
 }

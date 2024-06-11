@@ -3,7 +3,6 @@ import BaseVectorLayer from 'ol/layer/BaseVector';
 import { Extent } from 'ol/extent';
 
 import { AbstractGVLayer } from '../abstract-gv-layer';
-import { getExtentUnionMaybe } from '@/geo/utils/utilities';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer vector tile type layer.
@@ -32,13 +31,12 @@ export abstract class AbstractGVVectorTile extends AbstractGVLayer {
   }
 
   /**
-   * Gets the bounds of the layer and returns updated bounds
-   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
-   * @returns {Extent | undefined} The new layer bounding box.
+   * Gets the bounds of the layer and returns updated bounds.
+   * @returns {Extent | undefined} The layer bounding box.
    */
-  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  override getBounds(layerPath: string): Extent | undefined {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
-
     // Get the source projection
     const sourceProjection = this.getOLSource().getProjection() || undefined;
 
@@ -49,7 +47,7 @@ export abstract class AbstractGVVectorTile extends AbstractGVLayer {
       sourceExtent = this.getMapViewer().convertExtentFromProjToMapProj(sourceExtent, sourceProjection);
     }
 
-    // Return the layer bounds possibly unioned with 'bounds' received as param
-    return getExtentUnionMaybe(sourceExtent, bounds);
+    // Return the calculated layer bounds
+    return sourceExtent;
   }
 }

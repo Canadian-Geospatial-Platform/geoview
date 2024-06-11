@@ -370,8 +370,8 @@ export function getExtentUnion(extentA: Extent, extentB?: Extent): Extent {
  * @returns {Extent | undefined} The union of the extents
  */
 export function getExtentUnionMaybe(extentA: Extent | undefined, extentB?: Extent): Extent | undefined {
-  // If no A, return undefined
-  if (!extentA) return undefined;
+  // If no A, return B which may be undefined too
+  if (!extentA) return extentB;
 
   // Redirect
   return getExtentUnion(extentA, extentB);
@@ -403,8 +403,8 @@ export function getExtentIntersection(extentA: Extent, extentB?: Extent): Extent
  * @returns {Extent | undefined} The intersection of the extents
  */
 export function getExtentIntersectionMaybe(extentA: Extent | undefined, extentB?: Extent): Extent | undefined {
-  // If no A, return undefined
-  if (!extentA) return undefined;
+  // If no A, return B which may be undefined too
+  if (!extentA) return extentB;
 
   // Redirect
   return getExtentIntersection(extentA, extentB);

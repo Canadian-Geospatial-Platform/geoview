@@ -353,6 +353,9 @@ export function commonProcessInitialSettings(
   // GV TODO: The solution implemented in the following two lines is not right. scale and zoom are not the same things.
   // GV if (layerConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerConfig.initialSettings.minZoom = minScale;
   // GV if (layerConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerConfig.initialSettings.maxZoom = maxScale;
+
+  // TODO: Check - Why are we converting to the map projection in the pre-processing? Wouldn't it be best to leave it untouched, as it's part of the initial configuration and handle it later?
+
   if (layerConfig.initialSettings?.extent)
     layerConfig.initialSettings.extent = Projection.transformExtent(
       layerConfig.initialSettings.extent,
@@ -360,6 +363,7 @@ export function commonProcessInitialSettings(
       `EPSG:${MapEventProcessor.getMapState(layer.mapId).currentProjection}`
     );
 
+  // TODO: Check - Here, we're *not* converting in the map projection in the pre-processing, but for some other layers we are (ogc-feature, wfs, ..?). Should be standardized.
   if (!layerConfig.initialSettings?.bounds) {
     const layerExtent = [
       layerMetadata.extent.xmin,
