@@ -198,8 +198,7 @@ export class GeoJSON extends AbstractGeoViewVector {
       }
 
       if (layerConfig.initialSettings?.extent)
-        // TODO: Check - Why are we converting to the map projection in the processing? Wouldn't it be best to leave it untouched, as it's part of the initial configuration?
-        // TO.DOCONT: We're already making sure to project the settings in the map projection when we getBounds(). Seems we're doing work twice?
+        // TODO: Check - Why are we converting to the map projection in the pre-processing? Wouldn't it be best to leave it untouched, as it's part of the initial configuration and handle it later?
         layerConfig.initialSettings.extent = this.getMapViewer().convertExtentLngLatToMapProj(layerConfig.initialSettings.extent);
     }
     return Promise.resolve(layerConfig);

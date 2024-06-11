@@ -10,7 +10,6 @@ import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-lay
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { getLocalizedValue } from '@/core/utils/utilities';
-import { getExtentUnionMaybe } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
@@ -306,12 +305,11 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
    *
    * @param {string} layerPath The Layer path to the layer's configuration.
-   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
-   * @returns {Extent} The new layer bounding box.
+   * @returns {Extent | undefined} The new layer bounding box.
    */
   // GV Layers Refactoring - Obsolete (in layers)
-  protected override getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+  override getBounds(layerPath: string): Extent | undefined {
     // Get the layer
     const layer = this.getOLLayer(layerPath) as ImageLayer<Static> | undefined;
 
@@ -325,7 +323,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
       sourceExtent = this.getMapViewer().convertExtentFromProjToMapProj(sourceExtent, sourceProjection);
     }
 
-    // Return the layer bounds possibly unioned with 'bounds' received as param
-    return getExtentUnionMaybe(sourceExtent, bounds);
+    // Return the calculated layer bounds
+    return sourceExtent;
   }
 }

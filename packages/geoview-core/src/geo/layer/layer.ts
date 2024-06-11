@@ -46,7 +46,7 @@ import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-
 import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
 import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
 import { GeoViewLayerCreatedTwiceError, GeoViewLayerNotCreatedError } from '@/geo/layer/exceptions/layer-exceptions';
-import { getMinOrMaxExtents } from '@/geo/utils/utilities';
+import { getExtentUnionMaybe, getMinOrMaxExtents } from '@/geo/utils/utilities';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -1266,8 +1266,8 @@ export class LayerApi {
 
       // Get max extents from all selected layers.
       subLayerPaths.forEach((layerPath) => {
-        // TODO: Refactor - Layers refactoring. There needs to be a calculateBounds somewhere (new layers, new config?) to complete the full layers migration.
-        const layerBounds = this.getGeoviewLayer(layerPath)?.calculateBounds(layerPath);
+        // Calculate the bounds for the layer path
+        const layerBounds = this.calculateBounds(layerPath);
         // If bounds has not yet been defined, set to this layers bounds.
         if (!bounds.length && layerBounds) bounds = layerBounds;
         else if (layerBounds) bounds = getMinOrMaxExtents(bounds, layerBounds);
@@ -1395,6 +1395,54 @@ export class LayerApi {
     else if (layerConfig.source?.featureInfo && layerConfig.source?.featureInfo.queryable !== false)
       layerConfig.source.featureInfo[fields] = createLocalizedString(fieldNames);
     else logger.logError(`${layerPath} is not queryable`);
+  }
+
+  /**
+   * Calculates an union of all the layer extents based on the given layerPath and its possible children.
+   * @param {string} layerPath - The layer path
+   * @returns {Extent | undefined} An extent representing an union of all layer extents associated with the layer path
+   */
+  calculateBounds(layerPath: string): Extent | undefined {
+    // Get the layer config at the layer path
+    const layerConfig = this.getLayerEntryConfig(layerPath);
+
+    // Current bounds
+    const boundsArray = [] as Extent[];
+
+    // If found
+    if (layerConfig) {
+      // Redirect
+      this.#gatherAllBoundsRec(layerConfig, boundsArray);
+    }
+
+    // For each bounds found
+    let boundsUnion: Extent | undefined;
+    boundsArray.forEach((bounds) => {
+      // Union the bounds with each other
+      boundsUnion = getExtentUnionMaybe(boundsUnion, bounds);
+    });
+
+    // Return the unioned bounds
+    return boundsUnion;
+  }
+
+  /**
+   * Recursively gathers all bounds on the layers associated with the given layer path and store them in the bounds parameter.
+   * @param {ConfigBaseClass} layerConfig - The layer config being processed
+   * @param {Extent[]} bounds - The currently gathered bounds during the recursion
+   */
+  #gatherAllBoundsRec(layerConfig: ConfigBaseClass, bounds: Extent[]): void {
+    // If a leaf
+    if (!layerEntryIsGroupLayer(layerConfig)) {
+      // Get the bounds of the layer
+      const calculatedBounds = this.getGeoviewLayerHybrid(layerConfig.layerPath)?.getBounds(layerConfig.layerPath);
+      if (calculatedBounds) bounds.push(calculatedBounds);
+    } else {
+      // Is a group
+      layerConfig.listOfLayerEntryConfig.forEach((subLayerConfig) => {
+        this.#gatherAllBoundsRec(subLayerConfig, bounds);
+      });
+    }
   }
 
   /**

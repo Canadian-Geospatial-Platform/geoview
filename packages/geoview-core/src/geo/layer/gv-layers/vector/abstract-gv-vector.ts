@@ -10,7 +10,6 @@ import { Pixel } from 'ol/pixel';
 import Feature, { FeatureLike } from 'ol/Feature';
 
 import { DateMgt } from '@/core/utils/date-mgt';
-import { getExtentUnion } from '@/geo/utils/utilities';
 import { FilterNodeArrayType, NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
@@ -243,16 +242,16 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   }
 
   /**
-   * Gets the bounds of the layer and returns updated bounds
-   * @param {Extent | undefined} bounds - The current bounding box to be adjusted.
-   * @returns {Extent | undefined} The new layer bounding box.
+   * Gets the bounds of the layer and returns updated bounds.
+   * @returns {Extent | undefined} The layer bounding box.
    */
-  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  override getBounds(layerPath: string): Extent | undefined {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     const sourceExtent = this.getOLSource().getExtent();
 
-    // Return the bounds possibly unioned with 'bounds' received as param
-    return getExtentUnion(sourceExtent, bounds);
+    // Return the calculated layer bounds
+    return sourceExtent;
   }
 
   /**

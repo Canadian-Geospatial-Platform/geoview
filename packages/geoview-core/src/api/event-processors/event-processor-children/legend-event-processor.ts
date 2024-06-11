@@ -265,10 +265,13 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         // eslint-disable-next-line no-param-reassign
         else existingEntries[entryIndex] = newLegendLayer;
 
-        // TODO: Refactor - Layers refactoring. There needs to be a calculateBounds somewhere (new layers, new config?) to complete the full layers migration.
-        const myLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPathNodes[0])!;
         // TODO: calculateBounds issue will be tackle ASAP in a next PR
-        newLegendLayer.bounds = myLayer.allLayerStatusAreGreaterThanOrEqualTo('loaded') ? myLayer.calculateBounds(layerPath) : undefined;
+        // If all layer status are loaded
+        if (
+          MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPathNodes[0])?.allLayerStatusAreGreaterThanOrEqualTo('loaded')
+        ) {
+          newLegendLayer.bounds = MapEventProcessor.getMapViewerLayerAPI(mapId).calculateBounds(layerPath);
+        }
       }
     };
 

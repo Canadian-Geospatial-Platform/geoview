@@ -1,9 +1,10 @@
 import BaseImageLayer from 'ol/layer/BaseImage';
 import ImageSource from 'ol/source/Image';
 import LayerRenderer from 'ol/renderer/Layer';
-import { Projection, get as projectionGet } from 'ol/proj';
 import { Extent } from 'ol/extent';
+import { Projection as OLProjection } from 'ol/proj';
 
+import { Projection } from '@/geo/utils/projection';
 import { AbstractGVLayer } from '../abstract-gv-layer';
 
 /**
@@ -23,10 +24,18 @@ export abstract class AbstractGVRaster extends AbstractGVLayer {
     return super.getOLLayer() as BaseImageLayer<ImageSource, LayerRenderer<any>>;
   }
 
-  getMetadataProjection(): Projection | undefined {
-    return projectionGet(`EPSG:${this.getLayerConfig().getMetadata()?.fullExtent?.spatialReference?.wkid}`) || undefined;
+  /**
+   * Gets the metadata extent projection, if any.
+   * @returns {OLProjection | undefined} The OpenLayer projection
+   */
+  getMetadataProjection(): OLProjection | undefined {
+    return Projection.getProjection(`EPSG:${this.getLayerConfig().getMetadata()?.fullExtent?.spatialReference?.wkid}`) || undefined;
   }
 
+  /**
+   * Gets the metadata extent, if any.
+   * @returns {Extent | undefined} The OpenLayer projection
+   */
   getMetadataExtent(): Extent | undefined {
     const metadata = this.getLayerConfig().getMetadata();
     if (metadata?.fullExtent) {

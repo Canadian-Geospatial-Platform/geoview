@@ -33,7 +33,7 @@ import {
 } from '@/geo/map/map-schema-types';
 import { xmlToJson, getLocalizedValue } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { getExtentIntersection, getExtentUnionMaybe } from '@/geo/utils/utilities';
+import { getExtentIntersection } from '@/geo/utils/utilities';
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
@@ -634,8 +634,7 @@ export class WMS extends AbstractGeoViewRaster {
         // if (layerConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
         //   layerConfig.initialSettings.maxZoom = layerCapabilities.MaxScaleDenominator as number;
         if (layerConfig.initialSettings?.extent)
-          // TODO: Check - Why are we converting to the map projection in the processing? Wouldn't it be best to leave it untouched, as it's part of the initial configuration?
-          // TO.DOCONT: We're already making sure to project the settings in the map projection when we getBounds(). Seems we're doing work twice?
+          // TODO: Check - Why are we converting to the map projection in the pre-processing? Wouldn't it be best to leave it untouched, as it's part of the initial configuration and handle it later?
           layerConfig.initialSettings.extent = this.getMapViewer().convertExtentLngLatToMapProj(layerConfig.initialSettings.extent);
 
         // TODO: Check - Here, we override the initialBounds with the metadata extent bounds, as part of the processing. Later on, in the wms class,
@@ -1168,12 +1167,11 @@ export class WMS extends AbstractGeoViewRaster {
    * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
    *
    * @param {string} layerPath The Layer path to the layer's configuration.
-   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
    * @returns {Extent | undefined} The new layer bounding box.
    */
   // GV Layers Refactoring - Obsolete (in layers)
-  protected override getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+  override getBounds(layerPath: string): Extent | undefined {
     // Get the layer config
     const layerConfig = this.getLayerConfig(layerPath);
 
@@ -1202,8 +1200,8 @@ export class WMS extends AbstractGeoViewRaster {
     // If both layer config had bounds and layer has real bounds, take the intersection between them
     if (layerConfigBounds && layerBounds) layerBounds = getExtentIntersection(layerBounds, layerConfigBounds);
 
-    // Return the layer bounds possibly unioned with 'bounds' received as param
-    return getExtentUnionMaybe(layerBounds, bounds);
+    // Return the calculated layer bounds
+    return layerBounds;
   }
 
   /**

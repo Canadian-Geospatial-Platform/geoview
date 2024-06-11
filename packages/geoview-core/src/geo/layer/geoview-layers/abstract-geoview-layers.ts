@@ -1407,48 +1407,10 @@ export abstract class AbstractGeoViewLayer {
    * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
    *
    * @param {string} layerPath The Layer path to the layer's configuration.
-   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
    * @returns {Extent} The new layer bounding box.
    */
-  protected abstract getBounds(layerPath: string, bounds?: Extent): Extent | undefined;
-
-  /** ***************************************************************************************************************************
-   * Compute the layer bounds or undefined if the result can not be obtained from the feature extents that compose the layer. If
-   * projectionCode is defined, returns the bounds in the specified projection otherwise use the map projection. The bounds are
-   * different from the extent. They are mainly used for display purposes to show the bounding box in which the data resides and
-   * to zoom in on the entire layer data. It is not used by openlayer to limit the display of data on the map.
-   *
-   * @param {string} layerPath The Layer path to the layer's configuration.
-   * @param {string | number | undefined} projectionCode Optional projection code to use for the returned bounds. Default to
-   * current projection.
-   *
-   * @returns {Extent | undefined} The layer bounding box.
-   */
-  calculateBounds(layerPath: string): Extent | undefined {
-    try {
-      let bounds: Extent | undefined;
-      const processGroupLayerBounds = (listOfLayerEntryConfig: ConfigBaseClass[]): void => {
-        listOfLayerEntryConfig.forEach((layerConfig) => {
-          if (layerEntryIsGroupLayer(layerConfig)) processGroupLayerBounds(layerConfig.listOfLayerEntryConfig);
-          else {
-            bounds = this.getBounds(layerConfig.layerPath, bounds);
-          }
-        });
-      };
-
-      const initialLayerConfig = this.getLayerConfig(layerPath);
-      if (initialLayerConfig) {
-        processGroupLayerBounds([initialLayerConfig]);
-      }
-
-      return bounds;
-    } catch (error) {
-      // Log
-      logger.logError(`Couldn't calculate bounds on layer ${layerPath}`, error);
-      return undefined;
-    }
-  }
+  abstract getBounds(layerPath: string): Extent | undefined;
 
   /** ***************************************************************************************************************************
    * Set the layerStatus code of all layers in the listOfLayerEntryConfig.

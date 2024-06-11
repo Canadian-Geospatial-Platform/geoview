@@ -3,6 +3,7 @@
 import { useStore } from 'zustand';
 
 import { FitOptions } from 'ol/View';
+import { Extent } from 'ol/extent';
 
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
@@ -83,14 +84,11 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         const curLayers = get().layerState.legendLayers;
         return LegendEventProcessor.findLayerByPath(curLayers, layerPath);
       },
-      getLayerBounds: (layerPath: string) => {
-        // TODO: Refactor - Layers refactoring. There needs to be a calculateBounds somewhere (new layers, new config?) to complete the full layers migration.
-        const layer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayer(layerPath);
-        if (layer) {
-          const bounds = layer.calculateBounds(layerPath);
-          if (bounds) return bounds;
-        }
-        return undefined;
+
+      getLayerBounds: (layerPath: string): Extent | undefined => {
+        // TODO: Check - There is a calculateBounds() call here in a state action which should probably just get the layer bounds from the store/state? not recalculate again?
+        // Redirect to processor.
+        return MapEventProcessor.getMapViewerLayerAPI(get().mapId).calculateBounds(layerPath);
       },
 
       /**
@@ -171,10 +169,8 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       zoomToLayerExtent: (layerPath: string): Promise<void> => {
         const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
 
-        // Get the layer and always calculate the bounds. This will prevent bounds undefined error
-        // TODO: Refactor - Layers refactoring. There needs to be a calculateBounds somewhere (new layers, new config?) to complete the full layers migration.
-        const myLayer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayer(layerPath.split('/')[0])!;
-        const bounds = myLayer.calculateBounds(layerPath);
+        // Calculate the bounds on the layer path.
+        const bounds = MapEventProcessor.getMapViewerLayerAPI(get().mapId).calculateBounds(layerPath);
         if (bounds) return MapEventProcessor.zoomToExtent(get().mapId, bounds, options);
         return Promise.resolve();
       },

@@ -22,7 +22,6 @@ import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-lay
 import { TypeBaseSourceVectorInitialConfig, TypeFeatureInfoEntry, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { getExtentUnionMaybe } from '@/geo/utils/utilities';
 import { NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { VECTOR_LAYER } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
@@ -382,17 +381,16 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
    *
    * @param {string} layerPath The Layer path to the layer's configuration.
-   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
    * @returns {Extent | undefined} The new layer bounding box.
    */
   // GV Layers Refactoring - Obsolete (in layers)
-  protected override getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+  override getBounds(layerPath: string): Extent | undefined {
     const layer = this.getOLLayer(layerPath) as VectorLayer<VectorSource> | undefined;
     const layerBounds = layer?.getSource()?.getExtent();
 
-    // Return the layer bounds possibly unioned with 'bounds' received as param
-    return getExtentUnionMaybe(layerBounds, bounds);
+    // Return the calculated layer bounds
+    return layerBounds;
   }
 
   /**

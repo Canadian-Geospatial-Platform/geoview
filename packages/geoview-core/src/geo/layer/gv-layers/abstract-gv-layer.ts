@@ -118,6 +118,13 @@ export abstract class AbstractGVLayer {
   }
 
   /**
+   * Gets the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds.
+   * @returns {Extent} The layer bounding box.
+   */
+  // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
+  abstract getBounds(layerPath: string): Extent | undefined;
+
+  /**
    * Initializes the GVLayer. This function checks if the source is ready and if so it calls onLoaded() to pursue initialization of the layer.
    * If the source isn't ready, it registers to the source ready event to pursue initialization of the layer once its source is ready.
    */

@@ -7,7 +7,6 @@ import axios from 'axios';
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { getLocalizedValue } from '@/core/utils/utilities';
-import { getExtentUnionMaybe } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
@@ -144,13 +143,12 @@ export class GVImageStatic extends AbstractGVRaster {
   }
 
   /**
-   * Gets the bounds of the layer and returns updated bounds
-   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
-   * @returns {Extent} The new layer bounding box.
+   * Gets the bounds of the layer and returns updated bounds.
+   * @returns {Extent | undefined} The layer bounding box.
    */
-  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  override getBounds(layerPath: string): Extent | undefined {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
-
     // Get the source projection code
     const sourceProjection = this.getOLSource().getProjection() || undefined;
 
@@ -161,7 +159,7 @@ export class GVImageStatic extends AbstractGVRaster {
       sourceExtent = this.getMapViewer().convertExtentFromProjToMapProj(sourceExtent, sourceProjection);
     }
 
-    // Return the layer bounds possibly unioned with 'bounds' received as param
-    return getExtentUnionMaybe(sourceExtent, bounds);
+    // Return the calculated layer bounds
+    return sourceExtent;
   }
 }

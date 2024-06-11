@@ -17,7 +17,6 @@ import {
   TypeGeoviewLayerConfig,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
-import { getExtentUnionMaybe } from '@/geo/utils/utilities';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { Cast, toJsonObject } from '@/core/types/global-types';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
@@ -266,8 +265,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
       layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, metadataLayerConfigFound!.initialSettings);
 
       if (layerConfig.initialSettings?.extent)
-        // TODO: Check - Why are we converting to the map projection in the processing? Wouldn't it be best to leave it untouched, as it's part of the initial configuration?
-        // TO.DOCONT: We're already making sure to project the settings in the map projection when we getBounds(). Seems we're doing work twice?
+        // TODO: Check - Why are we converting to the map projection in the pre-processing? Wouldn't it be best to leave it untouched, as it's part of the initial configuration and handle it later?
         // eslint-disable-next-line no-param-reassign
         layerConfig.initialSettings.extent = this.getMapViewer().convertExtentLngLatToMapProj(layerConfig.initialSettings.extent);
     }
@@ -278,12 +276,11 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
    *
    * @param {string} layerPath The Layer path to the layer's configuration.
-   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
    * @returns {Extent | undefined} The new layer bounding box.
    */
   // GV Layers Refactoring - Obsolete (in layers)
-  protected override getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+  override getBounds(layerPath: string): Extent | undefined {
     // Get the layer
     const layer = this.getOLLayer(layerPath) as TileLayer<XYZ> | undefined;
 
@@ -297,7 +294,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
       sourceExtent = this.getMapViewer().convertExtentFromProjToMapProj(sourceExtent, sourceProjection);
     }
 
-    // Return the layer bounds possibly unioned with 'bounds' received as param
-    return getExtentUnionMaybe(sourceExtent, bounds);
+    // Return the calculated layer bounds
+    return sourceExtent;
   }
 }

@@ -12,7 +12,7 @@ import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/core/types/
 import { CONST_LAYER_TYPES, TypeWmsLegend, TypeWmsLegendStyle } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { xmlToJson, getLocalizedValue } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { getExtentIntersection, getExtentUnionMaybe } from '@/geo/utils/utilities';
+import { getExtentIntersection } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
@@ -565,11 +565,11 @@ export class GVWMS extends AbstractGVRaster {
   }
 
   /**
-   * Gets the bounds of the layer and returns updated bounds
-   * @param {Extent | undefined} bounds - The current bounding box to be adjusted.
-   * @returns {Extent | undefined} The new layer bounding box.
+   * Gets the bounds of the layer and returns updated bounds.
+   * @returns {Extent | undefined} The layer bounding box.
    */
-  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  override getBounds(layerPath: string): Extent | undefined {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     const layerConfig = this.getLayerConfig();
 
@@ -598,8 +598,8 @@ export class GVWMS extends AbstractGVRaster {
     // If both layer config had bounds and layer has real bounds, take the intersection between them
     if (layerConfigBounds && layerBounds) layerBounds = getExtentIntersection(layerBounds, layerConfigBounds);
 
-    // Return the layer bounds possibly unioned with 'bounds' received as param
-    return getExtentUnionMaybe(layerBounds, bounds);
+    // Return the calculated bounds
+    return layerBounds;
   }
 
   /**
