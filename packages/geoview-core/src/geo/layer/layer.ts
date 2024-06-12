@@ -1403,7 +1403,7 @@ export class LayerApi {
   redefineFeatureFields(layerPath: string, fieldNames: string, fields: 'aliasFields' | 'outfields'): void {
     const layerConfig = this.#layerEntryConfigs[layerPath] as AbstractBaseLayerEntryConfig;
     if (!layerConfig) logger.logError(`Unable to find layer ${layerPath}`);
-    else if (layerConfig.source?.featureInfo && layerConfig.source?.featureInfo.queryable !== false)
+    else if (layerConfig.source?.featureInfo && layerConfig.source.featureInfo.queryable !== false)
       layerConfig.source.featureInfo[fields] = createLocalizedString(fieldNames);
     else logger.logError(`${layerPath} is not queryable`);
   }
