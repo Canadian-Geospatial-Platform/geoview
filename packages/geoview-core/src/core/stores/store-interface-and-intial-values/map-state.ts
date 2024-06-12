@@ -56,6 +56,7 @@ export interface IMapState {
     createBaseMapFromOptions: () => Promise<void>;
     getPixelFromCoordinate: (coord: Coordinate) => [number, number];
     getIndexFromOrderedLayerInfo: (layerPath: string) => number;
+    getLegendCollapsedFromOrderedLayerInfo: (layerPath: string) => boolean;
     getVisibilityFromOrderedLayerInfo: (layerPath: string) => boolean;
     showClickMarker: (marker: TypeClickMarker) => void;
     hideClickMarker: () => void;
@@ -63,6 +64,7 @@ export interface IMapState {
     addHighlightedFeature: (feature: TypeFeatureInfoEntry) => void;
     removeHighlightedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
     reorderLayer: (layerPath: string, move: number) => void;
+    setLegendCollapsed: (layerPath: string, newValue?: boolean) => void;
     setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean) => void;
     setMapKeyboardPanInteractions: (panDelta: number) => void;
     setZoom: (zoom: number, duration?: number) => void;
@@ -103,6 +105,7 @@ export interface IMapState {
     setVisibleLayers: (newOrder: string[]) => void;
     setOrderedLayerInfo: (newOrderedLayerInfo: TypeOrderedLayerInfo[]) => void;
     setHoverable: (layerPath: string, hoverable: boolean) => void;
+    setLegendCollapsed: (layerPath: string, newValue?: boolean) => void;
     setQueryable: (layerPath: string, queryable: boolean) => void;
     setClickMarker: (coord: number[] | undefined) => void;
     setHoverFeatureInfo: (hoverFeatureInfo: TypeHoverFeatureInfo) => void;
@@ -204,6 +207,16 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
        * @param {string} layerPath - The path of the layer.
        * @returns {boolean} The visibility of the layer.
        */
+      getLegendCollapsedFromOrderedLayerInfo: (layerPath: string): boolean => {
+        // Redirect to processor and return the result
+        return MapEventProcessor.getMapLegendCollapsedFromOrderedLayerInfo(get().mapId, layerPath);
+      },
+
+      /**
+       * Retrieves the visibility from ordered layer information.
+       * @param {string} layerPath - The path of the layer.
+       * @returns {boolean} The visibility of the layer.
+       */
       getVisibilityFromOrderedLayerInfo: (layerPath: string): boolean => {
         // Redirect to processor and return the result
         return MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(get().mapId, layerPath);
@@ -262,6 +275,16 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       reorderLayer: (layerPath: string, move: number): void => {
         // Redirect to processor
         MapEventProcessor.reorderLayer(get().mapId, layerPath, move);
+      },
+
+      /**
+       * Sets or toggles the legend of a layer.
+       * @param {string} layerPath - The path of the layer.
+       * @param {boolean} [newValue] - The new value of visibility.
+       */
+      setLegendCollapsed: (layerPath: string, newValue?: boolean): void => {
+        // Redirect to setter
+        get().mapState.setterActions.setLegendCollapsed(layerPath, newValue);
       },
 
       /**
@@ -661,6 +684,23 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       },
 
       /**
+       * Sets whether a layer is hoverable.
+       * @param {string} layerPath - The path of the layer.
+       * @param {boolean} collapsed - Flag indicating if the layer should be hoverable.
+       */
+      setLegendCollapsed: (layerPath: string, collapsed?: boolean): void => {
+        const curLayerInfo = get().mapState.orderedLayerInfo;
+        const layerInfo = curLayerInfo.find((info) => info.layerPath === layerPath);
+        if (layerInfo) {
+          const newCollapsed = collapsed || !layerInfo.legendCollapsed;
+          layerInfo.legendCollapsed = newCollapsed;
+
+          // Redirect
+          get().mapState.setterActions.setOrderedLayerInfo(curLayerInfo);
+        }
+      },
+
+      /**
        * Sets whether a layer is queryable.
        * @param {string} layerPath - The path of the layer.
        * @param {boolean} queryable - Flag indicating if the layer should be queryable.
@@ -719,6 +759,7 @@ export interface TypeOrderedLayerInfo {
   layerPath: string;
   queryable?: boolean;
   visible: boolean;
+  legendCollapsed: boolean;
 }
 
 // **********************************************************
