@@ -9,7 +9,6 @@ import { logger } from '@/core/utils/logger';
 import { Select, TypeMenuItemProps } from '@/ui/select/select';
 import { getSxClasses } from './tabs-style';
 import { TabPanel } from './tab-panel';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 /**
@@ -36,6 +35,7 @@ type FocusItemProps = {
  */
 /* eslint-disable react/require-default-props */
 export interface TypeTabsProps {
+  shellContainer?: HTMLElement;
   tabs: TypeTabs[];
   selectedTab?: number;
   boxProps?: BoxProps;
@@ -59,20 +59,21 @@ export interface TypeTabsProps {
  */
 export function Tabs(props: TypeTabsProps): JSX.Element {
   const {
+    // NOTE: need this shellContainer, so that mobile dropdown can be rendered on top fullscreen window.
+    shellContainer,
     tabs,
     rightButtons,
     selectedTab,
-    isCollapsed,
     activeTrap,
     onToggleCollapse,
     onSelectedTabChanged,
     onOpenKeyboard,
     onCloseKeyboard,
     TabContentVisibilty = 'inherit',
+    tabsProps = {},
+    tabProps = {},
   } = props;
-  // TODO: Refactor - No mapId inside a ui component in ui folder.
-  const mapId = useGeoViewMapId();
-  const mapElem = document.getElementById(`shell-${mapId}`);
+
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
@@ -96,6 +97,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     // handle no tab when mobile dropdown is displayed.
     if (typeof tabValue === 'string') {
       setValue(tabValue);
+      onToggleCollapse?.();
     } else {
       // We are adding the new tabs into the state of tabPanels at specific position
       // based on user selection of tabs, so that tabs id and values are in sync with index of tabPanels state.
@@ -124,7 +126,9 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    * If the panel is collapsed when tab is clicked, expand the panel
    */
   const handleClick = (index: number): void => {
-    if (value === index) onToggleCollapse?.();
+    // toggle on -1, so that when no tab is selected on fullscreen
+    // and tab is selected again to open the panel.
+    if (value === index || value === -1) onToggleCollapse?.();
 
     // WCAG - if keyboard navigation is on and the tabs gets expanded, set the trap store info to open, close otherwise
     if (activeTrap) onOpenKeyboard?.({ activeElementId: `panel-${index}`, callbackElementId: `tab-${index}` });
@@ -141,9 +145,6 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       setTabPanels(newPanels);
       // Make sure internal state follows
       setValue(selectedTab);
-
-      // Make sure it's visible
-      if (isCollapsed) onToggleCollapse?.();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTab, tabs]);
@@ -178,19 +179,13 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
         <Grid item xs={7} sm={10}>
           {!showMobileDropdown ? (
             <MaterialTabs
-              // eslint-disable-next-line react/destructuring-assignment
-              {...props.tabsProps}
               variant="scrollable"
               scrollButtons
               allowScrollButtonsMobile
               value={value}
               onChange={handleChange}
               aria-label="basic tabs"
-              sx={{
-                '& .MuiTabs-indicator': {
-                  backgroundColor: (bgTheme) => bgTheme.palette.secondary.main,
-                },
-              }}
+              {...tabsProps}
             >
               {tabs.map((tab, index) => {
                 return (
@@ -199,11 +194,10 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
                     key={`${t(tab.label)}`}
                     icon={tab.icon}
                     iconPosition="start"
-                    // eslint-disable-next-line react/destructuring-assignment
-                    {...props.tabProps}
                     id={`tab-${index}`}
                     onClick={() => handleClick(index)}
                     sx={sxClasses.tab}
+                    {...tabProps}
                   />
                 );
               })}
@@ -220,7 +214,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
                 menuItems={mobileTabsDropdownValues}
                 value={value}
                 onChange={(e: SelectChangeEvent<unknown>) => updateTabPanel(e.target.value as number)}
-                MenuProps={{ container: mapElem }}
+                {...(shellContainer ? { MenuProps: { container: shellContainer } } : {})}
               />
             </Box>
           )}
@@ -240,7 +234,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       >
         {tabPanels.map((tab, index) => {
           return tab ? (
-            <TabPanel value={value} index={index} key={tab.id} id={`${mapId}-${tab.id}`}>
+            <TabPanel value={value} index={index} key={tab.id} id={`${shellContainer ?? ''}-${tab.id}`}>
               {typeof tab?.content === 'string' ? <HtmlToReact htmlContent={(tab?.content as string) ?? ''} /> : tab.content}
             </TabPanel>
           ) : (

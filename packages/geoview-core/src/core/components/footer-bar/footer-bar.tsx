@@ -6,7 +6,7 @@ import { Box, IconButton, Tabs, TypeTabs, MoveDownRoundedIcon, MoveUpRoundedIcon
 import { Plugin } from '@/api/plugin/plugin';
 import { getSxClasses } from './footer-bar-style';
 import { ResizeFooterPanel } from '@/core/components/resize-footer-panel/resize-footer-panel';
-import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppFullscreenActive, useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useDetailsLayerDataArrayBatch } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import {
   useUIActiveFooterBarTabId,
@@ -70,6 +70,8 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const selectedTab = useUIActiveFooterBarTabId();
   const activeTrapGeoView = useUIActiveTrapGeoView();
   const isCollapsed = useUIFooterBarIsCollapsed();
+  const geoviewElement = useAppGeoviewHTMLElement();
+  const shellContainer = geoviewElement.querySelector(`[id^="shell-${mapId}"]`) as HTMLElement;
 
   const { setFooterPanelResizeValue, setActiveFooterBarTab, openModal, closeModal, setFooterBarIsCollapsed } = useUIStoreActions();
 
@@ -205,7 +207,11 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         lastChild.style.maxHeight = isCollapsed ? '0px' : '';
       }
     }
-  }, [isCollapsed]);
+    // unset footer tab id when footer bar panel is collapsed.
+    if (isCollapsed) {
+      setActiveFooterBarTab('');
+    }
+  }, [isCollapsed, setActiveFooterBarTab]);
 
   /**
    * Handle a collapse, expand event for the tabs component
@@ -220,6 +226,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
    */
   const handleSelectedTabChanged = (tab: TypeTabs): void => {
     setActiveFooterBarTab(tab.id);
+    setFooterBarIsCollapsed(false);
   };
 
   /**
@@ -358,6 +365,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       id={`${mapId}-tabsContainer`}
     >
       <Tabs
+        shellContainer={shellContainer}
         activeTrap={activeTrapGeoView}
         isCollapsed={isCollapsed}
         onToggleCollapse={handleToggleCollapse}
@@ -365,7 +373,24 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         onOpenKeyboard={openModal}
         onCloseKeyboard={closeModal}
         selectedTab={memoFooterBarTabs.findIndex((t) => t.id === selectedTab)}
-        tabsProps={{ variant: 'scrollable' }}
+        tabsProps={{
+          variant: 'scrollable',
+          sx: {
+            transition: 'all 500ms ease-in',
+            '& .MuiTabs-indicator': {
+              display: 'none',
+            },
+            '& .Mui-selected': {
+              color: `${theme.palette.geoViewColor.white} !important`,
+              padding: '0.5rem 1rem',
+              background: theme.palette.geoViewColor.primary.main,
+              borderRadius: '0.5rem',
+              margin: '1rem',
+              minHeight: 0,
+            },
+          },
+        }}
+        tabProps={{ disableRipple: true }}
         tabs={memoFooterBarTabs}
         TabContentVisibilty={!isCollapsed ? 'visible' : 'hidden'}
         rightButtons={
