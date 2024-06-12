@@ -220,7 +220,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
 
     // If no olLayer was obtained
     if (!olLayer) {
-      // Working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
+      // We're working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
       const tileLayerOptions: TileOptions<VectorTileSource> = { source };
       // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
       if (layerConfig.initialSettings?.className !== undefined) tileLayerOptions.className = layerConfig.initialSettings.className;

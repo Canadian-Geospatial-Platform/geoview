@@ -627,17 +627,6 @@ export abstract class AbstractGVLayer {
   async getLegend(): Promise<TypeLegend | null> {
     // TODO: Refactor - Layers refactoring. Rename this function to onFetchLegend() once the layers refactoring is done
     try {
-      // TODO: Check - Remove this dead code? 2024-06-04
-      // if (!layerConfig.style) {
-      //   const legend: TypeLegend = {
-      //     type: layerConfig.geoviewLayerConfig.geoviewLayerType,
-      //     layerName: layerConfig.layerName!,
-      //     styleConfig: layerConfig.style,
-      //     legend: null,
-      //   };
-      //   return legend;
-      // }
-
       const legend: TypeLegend = {
         type: this.getLayerConfig().geoviewLayerConfig.geoviewLayerType,
         styleConfig: this.getStyle(this.getLayerPath()),

@@ -289,7 +289,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
     // If no olLayer was obtained
     if (!olLayer) {
-      // Working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
+      // We're working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
       const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
         source,
         properties: { layerConfig },
@@ -707,7 +707,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         const fieldOfTheSameValue = EsriDynamic.#countFieldOfTheSameValue(styleSettings);
         const fieldOrder = EsriDynamic.#sortFieldOfTheSameValue(styleSettings, fieldOfTheSameValue);
         const queryTree = EsriDynamic.#getQueryTree(styleSettings, fieldOfTheSameValue, fieldOrder);
-        // TODO: Refactor - Layers refactoring. Use the source.featureInfo from the layer, not the layerConfig anymore, here and below
+        // TODO: Refactor - Layers refactoring. We should use the source.featureInfo from the layer, not the layerConfig anymore, here and below
         const query = this.#buildQuery(queryTree, 0, fieldOrder, styleSettings, layerConfig.source.featureInfo!);
         return `${query}${layerFilter ? ` and (${layerFilter})` : ''}`;
       }

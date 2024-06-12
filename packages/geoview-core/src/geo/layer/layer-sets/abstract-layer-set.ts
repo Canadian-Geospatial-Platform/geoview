@@ -111,6 +111,30 @@ export abstract class AbstractLayerSet {
         // If the layer status is 'loaded'
         if (layerConfig.layerStatus === 'loaded') {
           // The layer has become loaded
+
+          // GV Take this opportunity to verify if the layer had a parent (this code used to be inside ConfigBaseClass,
+          // GV but it turns out parentLayerConfig couldn't be trusted when navigating the object hierarchy - see note over there)
+          // GV cgpv.api.maps['sandboxMap'].layer.getLayerEntryConfig('uniqueValueId/uniqueValueId/4').layerStatus
+          // GV vs cgpv.api.maps['sandboxMap'].layer.getLayerEntryConfig('uniqueValueId/uniqueValueId/4').parentLayerConfig.listOfLayerEntryConfig[0].layerStatus
+          // If the config has a parent
+          if (layerConfig.parentLayerConfig) {
+            // Get all the siblings reusing the LayerApi which is more trustable than the parent hierarchy on the config themselves
+            const layerConfigSiblings = layerConfig.parentLayerConfig.listOfLayerEntryConfig
+              .map((layerConf) => {
+                return this.layerApi.getLayerEntryConfig(layerConf.layerPath);
+              })
+              .filter((layerConf) => layerConf) as ConfigBaseClass[];
+
+            // If all siblings of the layer config are loaded
+            if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('loaded', layerConfigSiblings)) {
+              // Get the parent, again using the LayerApi, can't trust the 'parentLayerConfig'
+              const parentConfig = this.layerApi.getLayerEntryConfig(layerConfig.parentLayerConfig.layerPath);
+              // If found, this parent can be flagged as loaded
+              if (parentConfig) parentConfig.layerStatus = 'loaded';
+            }
+          }
+
+          // Get the layer
           const layer = this.layerApi.getGeoviewLayerHybrid(layerConfig.layerPath);
 
           // If the layer could be found
@@ -282,7 +306,7 @@ export abstract class AbstractLayerSet {
       // Call the overridable function to process a layer status is changing
       this.onProcessLayerStatusChanged(layerConfig, layerStatusEvent.layerStatus);
 
-      // If still existing
+      // If still existing (it's possible a layer set might want to unregister a layer config depending on its status, so we check)
       if (this.resultSet[layerConfig.layerPath]) {
         // Propagate to the store
         this.onPropagateToStore(this.resultSet[layerConfig.layerPath], 'layerStatus');
@@ -303,17 +327,20 @@ export abstract class AbstractLayerSet {
    */
   #handleLayerNameChanged(layer: AbstractGeoViewLayer | AbstractGVLayer, layerNameEvent: LayerNameChangedEvent): void {
     try {
-      // Call the overridable function to process a layer name change
-      this.onProcessNameChanged(
-        layerNameEvent.layerPath,
-        getLocalizedValue(layerNameEvent.layerName, AppEventProcessor.getDisplayLanguage(this.getMapId()))!
-      );
+      // If the layer path exists for the layer name that changed
+      if (this.resultSet[layerNameEvent.layerPath]) {
+        // Call the overridable function to process a layer name change
+        this.onProcessNameChanged(
+          layerNameEvent.layerPath,
+          getLocalizedValue(layerNameEvent.layerName, AppEventProcessor.getDisplayLanguage(this.getMapId()))!
+        );
 
-      // Propagate to the store
-      this.onPropagateToStore(this.resultSet[layerNameEvent.layerPath], 'layerName');
+        // Propagate to the store
+        this.onPropagateToStore(this.resultSet[layerNameEvent.layerPath], 'layerName');
 
-      // Inform that the layer set has been updated
-      this.onLayerSetUpdatedProcess(layerNameEvent.layerPath);
+        // Inform that the layer set has been updated
+        this.onLayerSetUpdatedProcess(layerNameEvent.layerPath);
+      }
     } catch (error) {
       // Log
       logger.logError('CAUGHT in handleLayerStatusChanged', layerNameEvent.layerPath, error);
