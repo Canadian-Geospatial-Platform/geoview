@@ -18,6 +18,7 @@
 
       .selector-container {
         display: flex;
+        flex-direction: row;
         margin: 10px;
       }
 
@@ -64,6 +65,28 @@
         min-width: 500px;
         outline: none;
         resize: none;
+      }
+
+      select {
+        max-width: 96%;
+      }
+
+      @media screen and (max-width: 600px) {
+        .selector-container {
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+        }
+        .selector-container p {
+          margin-bottom: 0px;
+        }
+        .selector {
+          padding: 8px;
+        }
+        textarea {
+          min-width: 96%;
+          max-width: 96%;
+        }
       }
     </style>
   </head>

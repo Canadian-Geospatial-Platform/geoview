@@ -79,7 +79,7 @@ export default function Notifications(): JSX.Element {
       return () => clearTimeout(timeoutId);
     }
     return undefined;
-  }, [hasNewNotification]);
+  }, [hasNewNotification, notificationsCount]);
 
   // handle open/close
   const handleOpenPopover = (event: React.MouseEvent<HTMLButtonElement>): void => {
@@ -160,14 +160,15 @@ export default function Notifications(): JSX.Element {
             onClick={handleOpenPopover}
             className={`${interaction === 'dynamic' ? 'buttonFilled' : 'style4'} ${open ? 'active' : ''}`}
             color="primary"
+            sx={{ width: '2.375rem', height: '2.375rem' }}
           >
-            {!hasNewNotification && <NotificationsIcon />}
+            {!hasNewNotification && (
+              <Box sx={{ display: 'inline-flex', alignItems: 'center' }}>
+                <NotificationsIcon />
+              </Box>
+            )}
             {hasNewNotification && (
-              <AnimatedBox
-                style={{
-                  ...shakeAnimation,
-                }}
-              >
+              <AnimatedBox sx={{ display: 'inline-flex', alignItems: 'center' }} style={shakeAnimation}>
                 <NotificationsActiveIcon />
               </AnimatedBox>
             )}
