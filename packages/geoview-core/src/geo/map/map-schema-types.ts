@@ -163,7 +163,7 @@ export const convertLayerTypeToEntry = (layerType: TypeGeoviewLayerType): TypeLa
   }
 };
 
-// It seems sometimes this type guard is called with a TypeLayerEntryConfig and sometimes with a ConfigBaseClass
+// It seems sometimes this type guard is called with a TypeLayerEntryConfig and sometimes with a ConfigBaseClass, so I'm putting it explicit
 export const layerEntryIsGroupLayer = (verifyIfLayer: TypeLayerEntryConfig | ConfigBaseClass): verifyIfLayer is GroupLayerEntryConfig => {
   return verifyIfLayer?.entryType === CONST_LAYER_ENTRY_TYPES.GROUP;
 };

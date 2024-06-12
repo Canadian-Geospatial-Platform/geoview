@@ -249,7 +249,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     // If no olLayer was obtained
     if (!olLayer) {
-      // Working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
+      // We're working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
       // Create the vector layer options.
       const layerOptions: VectorLayerOptions<VectorSource> = {
         properties: { layerConfig },

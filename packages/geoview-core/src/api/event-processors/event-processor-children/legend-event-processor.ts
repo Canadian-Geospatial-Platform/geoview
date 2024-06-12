@@ -1,4 +1,4 @@
-import { AbstractBaseLayerEntryConfig, TypeLayerControls } from '@config/types/map-schema-types';
+import { TypeLayerControls } from '@config/types/map-schema-types';
 import { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import {
   CONST_LAYER_TYPES,
@@ -195,25 +195,41 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
       const suffix = layerPathNodes.slice(0, currentLevel);
       const entryLayerPath = suffix.join('/');
+
+      // Get the layer config
       const layerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(entryLayerPath);
 
       // If not found, skip
       if (!layerConfig) return;
 
+      // Get the layer
+      const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(entryLayerPath);
+
+      // Interpret the layer name the best we can
+      const layerName =
+        getLocalizedValue(layer?.getLayerName(entryLayerPath), AppEventProcessor.getDisplayLanguage(mapId)) ||
+        getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(mapId)) ||
+        getLocalizedValue(layerConfig.geoviewLayerConfig.geoviewLayerName, AppEventProcessor.getDisplayLanguage(mapId)) ||
+        layerConfig.layerPath;
+
       let entryIndex = existingEntries.findIndex((entry) => entry.layerPath === entryLayerPath);
       if (layerEntryIsGroupLayer(layerConfig)) {
+        // If all loaded
+        let bounds;
+        if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('loaded', layerConfig.listOfLayerEntryConfig)) {
+          // Calculate the bounds
+          bounds = MapEventProcessor.getMapViewerLayerAPI(mapId).calculateBounds(layerConfig.layerPath);
+        }
+
         const controls: TypeLayerControls = setLayerControls(layerConfig);
         if (entryIndex === -1) {
           const legendLayerEntry: TypeLegendLayer = {
-            bounds: undefined,
+            bounds,
             controls,
             layerId: layerConfig.layerId,
             layerPath: entryLayerPath,
+            layerName,
             layerStatus: legendResultSetEntry.layerStatus,
-            layerName:
-              getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(mapId)) ||
-              getLocalizedValue(layerConfig.geoviewLayerConfig.geoviewLayerName, AppEventProcessor.getDisplayLanguage(mapId)) ||
-              layerConfig.layerPath,
             legendQueryStatus: legendResultSetEntry.legendQueryStatus,
             type: layerConfig.entryType as TypeGeoviewLayerType,
             canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
@@ -224,30 +240,41 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           };
           existingEntries.push(legendLayerEntry);
           entryIndex = existingEntries.length - 1;
+        } else {
+          // TODO: Check - Is it missing group layer entry config properties in the store?
+          // TO.DOCONT: At the time of writing this, it was just updating the layerStatus on the group layer entry.
+          // TO.DOCONT: It seemed to me it should also at least update the name and the bounds (the bounds are tricky, as they get generated only when the children are loaded)
+          // TO.DOCONT: Is there any other group layer entry attributes we would like to propagate in the legends store? I'd think so?
+          // eslint-disable-next-line no-param-reassign
+          existingEntries[entryIndex].layerStatus = layerConfig.layerStatus;
+          // eslint-disable-next-line no-param-reassign
+          existingEntries[entryIndex].layerName = layerName;
+          // eslint-disable-next-line no-param-reassign
+          existingEntries[entryIndex].bounds = bounds;
         }
-        // eslint-disable-next-line no-param-reassign
-        else existingEntries[entryIndex].layerStatus = layerConfig.layerStatus;
+
+        // Continue recursively
         createNewLegendEntries(currentLevel + 1, existingEntries[entryIndex].children);
       } else {
+        // If loaded
+        let bounds;
+        if (layerConfig.layerStatus === 'loaded') {
+          // Calculate the bounds
+          bounds = MapEventProcessor.getMapViewerLayerAPI(mapId).calculateBounds(layerConfig.layerPath);
+        }
+
         const controls: TypeLayerControls = setLayerControls(layerConfig);
-        const newLegendLayer: TypeLegendLayer = {
-          bounds: undefined,
+        const legendLayerEntry: TypeLegendLayer = {
+          bounds,
           controls,
           layerId: layerPathNodes[currentLevel],
           layerPath: entryLayerPath,
-          layerAttribution:
-            MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(entryLayerPath)?.getAttributions() ||
-            (MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(entryLayerPath) as AbstractBaseLayerEntryConfig | undefined)
-              ?.attributions,
-          layerName:
-            legendResultSetEntry.layerName ||
-            getLocalizedValue(layerConfig.layerName, AppEventProcessor.getDisplayLanguage(mapId)) ||
-            getLocalizedValue(layerConfig.geoviewLayerConfig.geoviewLayerName, AppEventProcessor.getDisplayLanguage(mapId)) ||
-            layerConfig.layerPath,
+          layerAttribution: layer?.getAttributions(),
+          layerName,
           layerStatus: legendResultSetEntry.layerStatus,
           legendQueryStatus: legendResultSetEntry.legendQueryStatus,
           styleConfig: legendResultSetEntry.data?.styleConfig,
-          type: legendResultSetEntry.data?.type,
+          type: legendResultSetEntry.data?.type || (layerConfig.entryType as TypeGeoviewLayerType),
           canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
           opacity: layerConfig.initialSettings?.states?.opacity || 1,
           items: [] as TypeLegendItem[],
@@ -255,22 +282,22 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           icons: LegendEventProcessor.getLayerIconImage(legendResultSetEntry.data!) || [],
         };
 
-        newLegendLayer.icons.forEach((legendLayerItem) => {
+        // Add the icons as items on the layer entry
+        legendLayerEntry.icons.forEach((legendLayerItem) => {
           if (legendLayerItem.iconList)
             legendLayerItem.iconList.forEach((legendLayerListItem) => {
-              newLegendLayer.items.push(legendLayerListItem);
+              legendLayerEntry.items.push(legendLayerListItem);
             });
         });
-        if (entryIndex === -1) existingEntries.push(newLegendLayer);
-        // eslint-disable-next-line no-param-reassign
-        else existingEntries[entryIndex] = newLegendLayer;
 
-        // TODO: calculateBounds issue will be tackle ASAP in a next PR
-        // If all layer status are loaded
-        if (
-          MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPathNodes[0])?.allLayerStatusAreGreaterThanOrEqualTo('loaded')
-        ) {
-          newLegendLayer.bounds = MapEventProcessor.getMapViewerLayerAPI(mapId).calculateBounds(layerPath);
+        // If non existing in the store yet
+        if (entryIndex === -1) {
+          // Add it
+          existingEntries.push(legendLayerEntry);
+        } else {
+          // Replace it
+          // eslint-disable-next-line no-param-reassign
+          existingEntries[entryIndex] = legendLayerEntry;
         }
       }
     };

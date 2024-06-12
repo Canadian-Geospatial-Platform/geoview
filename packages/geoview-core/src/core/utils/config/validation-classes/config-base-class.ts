@@ -150,13 +150,21 @@ export abstract class ConfigBaseClass {
     }
     if (newLayerStatus === 'processed' && this.#waitForProcessedBeforeSendingLoaded) this.layerStatus = 'loaded';
 
-    if (
-      // eslint-disable-next-line no-underscore-dangle
-      this._layerStatus === 'loaded' &&
-      this.parentLayerConfig &&
-      ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('loaded', [this.parentLayerConfig as GroupLayerEntryConfig])
-    )
-      this.parentLayerConfig.layerStatus = 'loaded';
+    // TODO: Cleanup - Commenting this and leaving it here for now.. It turns out that the parentLayerConfig property can't be trusted
+    // GV due to a bug with different instances of entryconfigs stored in the objects and depending how you navigate the objects, you get
+    // GV different instances. Example below (where 'parentLayerConfig.listOfLayerEntryConfig[0]' is indeed going back to 'uniqueValueId/uniqueValueId/4')
+    // GV This: cgpv.api.maps['sandboxMap'].layer.getLayerEntryConfig('uniqueValueId/uniqueValueId/4').layerStatus
+    // GV Isn't the same as this: cgpv.api.maps['sandboxMap'].layer.getLayerEntryConfig('uniqueValueId/uniqueValueId/4').parentLayerConfig.listOfLayerEntryConfig[0].layerStatus
+    // Commenting this out until a fix is found..
+
+    // // eslint-disable-next-line no-underscore-dangle
+    // if (this._layerStatus === 'loaded' && this.parentLayerConfig) {
+    //   // If all children of the parent are loaded, set the parent as loaded
+    //   if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('loaded', this.parentLayerConfig.listOfLayerEntryConfig)) {
+    //     // Set the parent as loaded
+    //     this.parentLayerConfig.layerStatus = 'loaded';
+    //   }
+    // }
   }
 
   /**

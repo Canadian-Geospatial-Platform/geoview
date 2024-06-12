@@ -318,9 +318,17 @@ export class LayerApi {
    * Obsolete function to set the layer configuration in the registered layers.
    */
   setLayerEntryConfigObsolete(layerConfig: ConfigBaseClass): void {
-    // FIXME: Obsolete function that should be deleted once the Layers refactoring is done
-    // Keep it :( (get rid of this later)
-    this.#layerEntryConfigs[layerConfig.layerPath] = layerConfig;
+    // FIXME: This function should be deleted once the Layers refactoring is done. It unregisters and registers an updated layer entry config.
+    // FIX.MECONT: This is because of the EsriDynamic and EsriFeature entry config being generated on-the-fly when registration of layer entry config has already happened.
+    // Get the config already existing if any
+    const alreadyExisting = this.#layerEntryConfigs[layerConfig.layerPath];
+    if (alreadyExisting) {
+      // Unregister the old one
+      this.unregisterLayerConfig(alreadyExisting);
+    }
+
+    // Register this new one
+    this.registerLayerConfigInit(layerConfig);
   }
 
   /**
@@ -641,6 +649,7 @@ export class LayerApi {
         // this.registerLayerConfigInit(layerConfig);
       });
 
+      // Register hook when an OpenLayer source has been created
       layerBeingAdded.onLayerRequesting((geoviewLayer: AbstractGeoViewLayer, event: LayerRequestingEvent): BaseLayer | undefined => {
         // Log
         logger.logDebug(`Requesting layer for ${event.config.layerPath} on map ${this.getMapId()}`, event.config);
@@ -655,12 +664,13 @@ export class LayerApi {
         return undefined;
       });
 
-      // Register when OpenLayer layer has been created
+      // Register hook when an OpenLayer layer has been created
       layerBeingAdded.onLayerCreation((geoviewLayer: AbstractGeoViewLayer, event: LayerCreationEvent) => {
         // Log
         logger.logDebug(`OpenLayer created for ${event.config.layerPath} on map ${this.getMapId()}`, event.config);
 
-        // Keep a reference (this is tempting to put in the onLayerRequesting handler, but this one here also traps the LayerGroups - so more a catch all)
+        // Keep a reference
+        // This is tempting to put in the onLayerRequesting handler, but this one here also traps the LayerGroups
         this.#olLayers[event.config.layerPath] = event.layer;
       });
 
@@ -855,6 +865,7 @@ export class LayerApi {
 
       // If any time dimension to inject
       if (timeDimension) gvLayer.setTemporalDimension(timeDimension);
+
       // If any style to inject
       if (style) gvLayer.setStyle(config.layerPath, style);
 

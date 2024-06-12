@@ -569,7 +569,7 @@ export class WMS extends AbstractGeoViewRaster {
 
         // If no olLayer was obtained
         if (!olLayer) {
-          // Working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
+          // We're working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
           const imageLayerOptions: ImageOptions<ImageWMS> = {
             source,
             properties: { layerCapabilities, layerConfig },

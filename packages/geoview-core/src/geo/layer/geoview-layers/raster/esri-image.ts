@@ -182,7 +182,7 @@ export class EsriImage extends AbstractGeoViewRaster {
 
       // TODO: Refactor - Find a better place to set the style than in a getter or rename this function like another TODO suggests
       // TO.DOCONT: This setter is also dangerous, because it triggers a style changed event which is listened by the legends-layer-set.
-      // TO.DOCONT: Fortunately, we have a loop check barrier, but setting a style during a legend fetch could lead to be more problematic.
+      // TO.DOCONT: Fortunately, we have a loop check barrier, but setting a style during a legend fetch getter could lead to be more problematic.
       this.setStyle(layerPath, styleConfig);
 
       const legend: TypeLegend = {
@@ -334,7 +334,7 @@ export class EsriImage extends AbstractGeoViewRaster {
 
     // If no olLayer was obtained
     if (!olLayer) {
-      // Working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
+      // We're working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
       const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
         source,
         properties: { layerConfig },

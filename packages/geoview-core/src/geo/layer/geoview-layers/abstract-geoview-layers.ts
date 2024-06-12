@@ -30,6 +30,7 @@ import {
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   layerEntryIsGroupLayer,
+  TypeStyleConfig,
   TypeLayerInitialSettings,
   TypeLayerStatus,
   TypeStyleGeometry,
@@ -40,7 +41,6 @@ import {
   rangeDomainType,
   TypeLocation,
   QueryType,
-  TypeStyleConfig,
 } from '@/geo/map/map-schema-types';
 import { GeoViewLayerCreatedTwiceError } from '@/geo/layer/exceptions/layer-exceptions';
 import { Projection } from '@/geo/utils/projection';
@@ -538,7 +538,8 @@ export abstract class AbstractGeoViewLayer {
           // When we get here, we know that the metadata (if the service provide some) are processed.
 
           //
-          // TODO: Refactor - Layers refactoring. Make a super clear function when moving config information in the layer for real
+          // TODO: Refactor - Layers refactoring. Make it a super clear function when moving config information in the layer for real.
+          // TO.DOCONT: After this point(?) the layerConfig should be full static and the system should rely on the Layer class to do stuff.
           //
           // Save the style in the layer as we're done processing style found in metadata
           if (layerConfig instanceof AbstractBaseLayerEntryConfig) this.setStyle(layerConfig.layerPath, layerConfig.style!);
@@ -568,7 +569,8 @@ export abstract class AbstractGeoViewLayer {
    */
   async #processMetadataGroupLayer(layerConfig: GroupLayerEntryConfig): Promise<GroupLayerEntryConfig> {
     try {
-      // TODO: Check - Does this call makes sense for a metadata group layer? I'm not sure the "TypeScript" works here? Wrong type? Commenting line.. 2024-06-05
+      // TODO: Check - Does this call makes sense for a metadata group layer? I'm not sure the "TypeScript" works here?
+      // TO.DOCONT: Seems to be wrong type? I'm commenting line to see.. 2024-06-05
       // await this.processLayerMetadata(layerConfig);
       await this.processListOfLayerEntryMetadata(layerConfig.listOfLayerEntryConfig!);
       layerConfig.layerStatus = 'processed';

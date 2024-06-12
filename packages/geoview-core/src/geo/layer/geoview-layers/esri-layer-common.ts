@@ -169,7 +169,8 @@ export function commonValidateListOfLayerEntryConfig(
         newListOfLayerEntryConfig.push(subLayerEntryConfig);
 
         // FIXME: Temporary patch to keep the behavior until those layer classes don't exist
-        MapEventProcessor.getMapViewerLayerAPI(layer.mapId).registerLayerConfigInit(subLayerEntryConfig);
+        // TODO: Refactor: Do not do this on the fly here anymore with the new configs (quite unpredictable)... (standardizing this call with the other one above for now)
+        MapEventProcessor.getMapViewerLayerAPI(layer.mapId).setLayerEntryConfigObsolete(subLayerEntryConfig);
       });
 
       layer.validateListOfLayerEntryConfig(newListOfLayerEntryConfig);
