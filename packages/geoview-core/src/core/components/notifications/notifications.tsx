@@ -79,7 +79,7 @@ export default function Notifications(): JSX.Element {
       return () => clearTimeout(timeoutId);
     }
     return undefined;
-  }, [hasNewNotification]);
+  }, [hasNewNotification, notificationsCount]);
 
   // handle open/close
   const handleOpenPopover = (event: React.MouseEvent<HTMLButtonElement>): void => {
