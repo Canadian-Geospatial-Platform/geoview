@@ -1,5 +1,6 @@
 import { ImageArcGISRest } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
+import BaseLayer from 'ol/layer/Base';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Image as ImageLayer } from 'ol/layer';
 import { Extent } from 'ol/extent';
@@ -11,7 +12,7 @@ import { logger } from '@/core/utils/logger';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
+import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
@@ -285,27 +286,33 @@ export class EsriImage extends AbstractGeoViewRaster {
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
-   * @param {EsriImageLayerEntryConfig} layerConfig The layer entry configuration to process.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
-   * @returns {Promise<EsriImageLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
   // GV Layers Refactoring - Obsolete (in config?)
-  protected override processLayerMetadata(layerConfig: EsriImageLayerEntryConfig): Promise<EsriImageLayerEntryConfig> {
-    return commonProcessLayerMetadata(this, layerConfig);
+  protected override processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
+    // Instance check
+    if (!(layerConfig instanceof EsriImageLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+    return commonProcessLayerMetadata(this, layerConfig as EsriImageLayerEntryConfig);
   }
 
   /** ****************************************************************************************************************************
    * This method creates a GeoView Esri Image layer using the definition provided in the layerConfig parameter.
    *
-   * @param {EsriImageLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns { Promise<TypeBaseRasterLayer | undefined>} The GeoView raster layer that has been created.
+   * @returns { Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
    */
   // GV Layers Refactoring - Obsolete (in config?, in layers?)
-  protected override async processOneLayerEntry(layerConfig: EsriImageLayerEntryConfig): Promise<TypeBaseRasterLayer | undefined> {
+  protected override async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
     await super.processOneLayerEntry(layerConfig);
+
+    // Instance check
+    if (!(layerConfig instanceof EsriImageLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
     sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));

@@ -114,6 +114,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
     await super.processOneLayerEntry(layerConfig);
+
+    // Instance check
+    if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+
     const vectorSource = this.createVectorSource(layerConfig);
     const vectorLayer = this.createVectorLayer(layerConfig as VectorLayerEntryConfig, vectorSource);
     return Promise.resolve(vectorLayer);

@@ -595,4 +595,4 @@ export type BasemapChangedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type BasemapChangedDelegate = EventDelegateBase<Basemap, BasemapChangedEvent>;
+type BasemapChangedDelegate = EventDelegateBase<Basemap, BasemapChangedEvent, void>;

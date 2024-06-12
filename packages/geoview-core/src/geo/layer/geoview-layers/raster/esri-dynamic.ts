@@ -3,6 +3,7 @@
 import { ImageArcGISRest } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
+import BaseLayer from 'ol/layer/Base';
 import { Image as ImageLayer } from 'ol/layer';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
@@ -14,7 +15,7 @@ import Geometry from 'ol/geom/Geometry';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
+import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { Projection } from '@/geo/utils/projection';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
@@ -240,27 +241,33 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
-   * @param {EsriDynamicLayerEntryConfig} layerConfig The layer entry configuration to process.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
-   * @returns {Promise<EsriDynamicLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
   // GV Layers Refactoring - Obsolete (in config?)
-  protected override processLayerMetadata(layerConfig: EsriDynamicLayerEntryConfig): Promise<EsriDynamicLayerEntryConfig> {
-    return commonProcessLayerMetadata(this, layerConfig);
+  protected override processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
+    // Instance check
+    if (!(layerConfig instanceof EsriDynamicLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+    return commonProcessLayerMetadata(this, layerConfig as EsriDynamicLayerEntryConfig);
   }
 
   /** ****************************************************************************************************************************
    * This method creates a GeoView EsriDynamic layer using the definition provided in the layerConfig parameter.
    *
-   * @param {EsriDynamicLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns {Promise<TypeBaseRasterLayer | undefined>} The GeoView raster layer that has been created.
+   * @returns {Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
    */
   // GV Layers Refactoring - Obsolete (in config?, in layers?)
-  protected override async processOneLayerEntry(layerConfig: EsriDynamicLayerEntryConfig): Promise<TypeBaseRasterLayer | undefined> {
+  protected override async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
     await super.processOneLayerEntry(layerConfig);
+
+    // Instance check
+    if (!(layerConfig instanceof EsriDynamicLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata?.copyrightText ? this.metadata?.copyrightText : '') as string];
     sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));

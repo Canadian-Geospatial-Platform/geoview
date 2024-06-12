@@ -164,7 +164,7 @@ export class StateApi {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayersReorderedDelegate = EventDelegateBase<StateApi, LayersReorderedEvent>;
+type LayersReorderedDelegate = EventDelegateBase<StateApi, LayersReorderedEvent, void>;
 
 /**
  * Define an event for the delegate

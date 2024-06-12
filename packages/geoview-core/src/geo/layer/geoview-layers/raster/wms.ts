@@ -5,6 +5,7 @@ import axios from 'axios';
 import ImageLayer from 'ol/layer/Image';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
+import BaseLayer from 'ol/layer/Base';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { ImageWMS } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageWMS';
@@ -23,7 +24,7 @@ import {
   TypeWmsLegend,
   TypeWmsLegendStyle,
 } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
+import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
@@ -504,23 +505,21 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns {Promise<TypeBaseRasterLayer | undefined>} The GeoView raster layer that has been created.
+   * @returns {Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
    */
   // GV Layers Refactoring - Obsolete (in config?, in layers?)
-  protected override async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | undefined> {
+  protected override async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
     await super.processOneLayerEntry(layerConfig);
-    // Log
-    logger.logTraceCore('WMS - processOneLayerEntry', layerConfig.layerPath);
+
+    // Instance check
+    if (!(layerConfig instanceof OgcWmsLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 
     if (geoviewEntryIsWMS(layerConfig)) {
       const layerCapabilities = this.#getLayerMetadataEntry(layerConfig.layerId);
       if (layerCapabilities) {
-        const dataAccessPath = getLocalizedValue(
-          layerConfig.source.dataAccessPath as TypeLocalizedString,
-          AppEventProcessor.getDisplayLanguage(this.mapId)
-        )!;
+        const dataAccessPath = getLocalizedValue(layerConfig.source.dataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId))!;
 
         let styleToUse = '';
         if (Array.isArray(layerConfig.source?.style) && layerConfig.source?.style) {
@@ -610,12 +609,15 @@ export class WMS extends AbstractGeoViewRaster {
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
-   * @param {OgcWmsLayerEntryConfig} layerConfig The layer entry configuration to process.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
-   * @returns {Promise<OgcWmsLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
   // GV Layers Refactoring - Obsolete (in config?)
-  protected override processLayerMetadata(layerConfig: OgcWmsLayerEntryConfig): Promise<OgcWmsLayerEntryConfig> {
+  protected override processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
+    // Instance check
+    if (!(layerConfig instanceof OgcWmsLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+
     if (geoviewEntryIsWMS(layerConfig)) {
       const layerCapabilities = this.#getLayerMetadataEntry(layerConfig.layerId)!;
       this.setLayerMetadata(layerConfig.layerPath, layerCapabilities);
@@ -1175,7 +1177,7 @@ export class WMS extends AbstractGeoViewRaster {
     // Get the layer config
     const layerConfig = this.getLayerConfig(layerPath);
 
-    // Get the source projection code
+    // Get the source projection
     const sourceProjection = this.getSourceProjection(layerPath);
 
     // Get the layer config bounds

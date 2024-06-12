@@ -1,13 +1,14 @@
 import axios from 'axios';
 
-import ImageLayer from 'ol/layer/Image';
 import Static, { Options as SourceOptions } from 'ol/source/ImageStatic';
+import BaseLayer from 'ol/layer/Base';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
+import ImageLayer from 'ol/layer/Image';
 import { Extent } from 'ol/extent';
 
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
+import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
@@ -15,6 +16,7 @@ import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-clas
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.IMAGE_STATIC;
@@ -238,13 +240,16 @@ export class ImageStatic extends AbstractGeoViewRaster {
   /** ****************************************************************************************************************************
    * This method creates a GeoView Image Static layer using the definition provided in the layerConfig parameter.
    *
-   * @param {ImageStaticLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns {Promise<TypeBaseRasterLayer | undefined>} The GeoView raster layer that has been created.
+   * @returns {Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
    */
   // GV Layers Refactoring - Obsolete (in config?, in layers?)
-  protected override async processOneLayerEntry(layerConfig: ImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | undefined> {
+  protected override async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined> {
     await super.processOneLayerEntry(layerConfig);
+
+    // Instance check
+    if (!(layerConfig instanceof ImageStaticLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 
     if (!layerConfig?.source?.extent) throw new Error('Parameter extent is not defined in source element of layerConfig.');
     const sourceOptions: SourceOptions = {
@@ -313,7 +318,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
     // Get the layer
     const layer = this.getOLLayer(layerPath) as ImageLayer<Static> | undefined;
 
-    // Get the source projection code
+    // Get the source projection
     const sourceProjection = this.getSourceProjection(layerPath);
 
     // Get the layer bounds
