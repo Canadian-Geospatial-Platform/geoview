@@ -6,7 +6,7 @@ import { Box, IconButton, Tabs, TypeTabs, MoveDownRoundedIcon, MoveUpRoundedIcon
 import { Plugin } from '@/api/plugin/plugin';
 import { getSxClasses } from './footer-bar-style';
 import { ResizeFooterPanel } from '@/core/components/resize-footer-panel/resize-footer-panel';
-import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppFullscreenActive, useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useDetailsLayerDataArrayBatch } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import {
   useUIActiveFooterBarTabId,
@@ -70,6 +70,8 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const selectedTab = useUIActiveFooterBarTabId();
   const activeTrapGeoView = useUIActiveTrapGeoView();
   const isCollapsed = useUIFooterBarIsCollapsed();
+  const geoviewElement = useAppGeoviewHTMLElement();
+  const shellContainer = geoviewElement.querySelector(`[id^="shell-${mapId}"]`) as HTMLElement;
 
   const { setFooterPanelResizeValue, setActiveFooterBarTab, openModal, closeModal, setFooterBarIsCollapsed } = useUIStoreActions();
 
@@ -363,7 +365,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       id={`${mapId}-tabsContainer`}
     >
       <Tabs
-        mapId={mapId}
+        shellContainer={shellContainer}
         activeTrap={activeTrapGeoView}
         isCollapsed={isCollapsed}
         onToggleCollapse={handleToggleCollapse}
@@ -374,6 +376,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         tabsProps={{
           variant: 'scrollable',
           sx: {
+            transition: 'all 500ms ease-in',
             '& .MuiTabs-indicator': {
               display: 'none',
             },

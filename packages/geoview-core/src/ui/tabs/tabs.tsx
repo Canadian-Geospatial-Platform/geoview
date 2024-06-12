@@ -35,7 +35,7 @@ type FocusItemProps = {
  */
 /* eslint-disable react/require-default-props */
 export interface TypeTabsProps {
-  mapId: string;
+  shellContainer?: HTMLElement;
   tabs: TypeTabs[];
   selectedTab?: number;
   boxProps?: BoxProps;
@@ -59,7 +59,8 @@ export interface TypeTabsProps {
  */
 export function Tabs(props: TypeTabsProps): JSX.Element {
   const {
-    mapId,
+    // NOTE: need this shellContainer, so that mobile dropdown can be rendered on top fullscreen window.
+    shellContainer,
     tabs,
     rightButtons,
     selectedTab,
@@ -73,7 +74,6 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     tabProps = {},
   } = props;
 
-  const mapElem = document.getElementById(`shell-${mapId}`);
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
@@ -97,6 +97,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
     // handle no tab when mobile dropdown is displayed.
     if (typeof tabValue === 'string') {
       setValue(tabValue);
+      onToggleCollapse?.();
     } else {
       // We are adding the new tabs into the state of tabPanels at specific position
       // based on user selection of tabs, so that tabs id and values are in sync with index of tabPanels state.
@@ -213,7 +214,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
                 menuItems={mobileTabsDropdownValues}
                 value={value}
                 onChange={(e: SelectChangeEvent<unknown>) => updateTabPanel(e.target.value as number)}
-                MenuProps={{ container: mapElem }}
+                {...(shellContainer ? { MenuProps: { container: shellContainer } } : {})}
               />
             </Box>
           )}
@@ -233,7 +234,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       >
         {tabPanels.map((tab, index) => {
           return tab ? (
-            <TabPanel value={value} index={index} key={tab.id} id={`${mapId}-${tab.id}`}>
+            <TabPanel value={value} index={index} key={tab.id} id={`${shellContainer ?? ''}-${tab.id}`}>
               {typeof tab?.content === 'string' ? <HtmlToReact htmlContent={(tab?.content as string) ?? ''} /> : tab.content}
             </TabPanel>
           ) : (
