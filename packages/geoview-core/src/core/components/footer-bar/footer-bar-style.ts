@@ -14,5 +14,24 @@ export const getSxClasses = (theme: Theme): any => ({
     '&.MuiGrid-container': {
       background: theme.palette.geoViewColor.bgColor.dark[50],
     },
+    '& .MuiTabs-root': {
+      height: '56px',
+    },
+    '& .MuiTabs-flexContainer': {
+      alignItems: 'center',
+      height: '56px',
+      marginLeft: '0.75rem',
+    },
+    '& .MuiTabs-indicator': {
+      display: 'none',
+    },
+    '& .Mui-selected': {
+      color: `${theme.palette.geoViewColor.white} !important`,
+      padding: '0.5rem 1rem',
+      background: theme.palette.geoViewColor.primary.main,
+      borderRadius: '0.5rem',
+      margin: '0.5rem 1rem',
+      minHeight: 0,
+    },
   },
 });

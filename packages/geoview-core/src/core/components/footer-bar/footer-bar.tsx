@@ -373,23 +373,6 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         onOpenKeyboard={openModal}
         onCloseKeyboard={closeModal}
         selectedTab={memoFooterBarTabs.findIndex((t) => t.id === selectedTab)}
-        tabsProps={{
-          variant: 'scrollable',
-          sx: {
-            transition: 'all 500ms ease-in',
-            '& .MuiTabs-indicator': {
-              display: 'none',
-            },
-            '& .Mui-selected': {
-              color: `${theme.palette.geoViewColor.white} !important`,
-              padding: '0.5rem 1rem',
-              background: theme.palette.geoViewColor.primary.main,
-              borderRadius: '0.5rem',
-              margin: '1rem',
-              minHeight: 0,
-            },
-          },
-        }}
         tabProps={{ disableRipple: true }}
         tabs={memoFooterBarTabs}
         TabContentVisibilty={!isCollapsed ? 'visible' : 'hidden'}

@@ -19,7 +19,7 @@ export const getSxClasses = (theme: Theme): any => ({
     fontSize: theme.palette.geoViewFontSize.default,
     fontWeight: 'bold',
     minWidth: 'min(4vw, 24px)',
-    padding: '16px 2%',
+    padding: '8px 2%',
     textTransform: 'capitalize',
     '&.Mui-selected': {
       color: 'secondary.main',

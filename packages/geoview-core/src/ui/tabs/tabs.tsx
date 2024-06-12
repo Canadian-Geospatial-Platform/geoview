@@ -178,15 +178,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       <Grid container sx={{ backgroundColor: theme.palette.geoViewColor.bgColor.dark[100] }}>
         <Grid item xs={7} sm={10}>
           {!showMobileDropdown ? (
-            <MaterialTabs
-              variant="scrollable"
-              scrollButtons
-              allowScrollButtonsMobile
-              value={value}
-              onChange={handleChange}
-              aria-label="basic tabs"
-              {...tabsProps}
-            >
+            <MaterialTabs value={value} onChange={handleChange} aria-label="basic tabs" {...tabsProps}>
               {tabs.map((tab, index) => {
                 return (
                   <MaterialTab
