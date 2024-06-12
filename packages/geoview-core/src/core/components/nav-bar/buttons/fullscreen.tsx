@@ -4,6 +4,7 @@ import { IconButton, FullscreenIcon, FullscreenExitIcon } from '@/ui';
 import { TypeHTMLElement } from '@/core/types/global-types';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
 import { useAppStoreActions, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
@@ -24,7 +25,7 @@ export default function Fullscreen(): JSX.Element {
   // get the values from store
   const isFullScreen = useAppFullscreenActive();
   const { setFullScreenActive } = useAppStoreActions();
-
+  const { setFooterBarIsCollapsed } = useUIStoreActions();
   /**
    * Toggle between fullscreen and window mode
    */
@@ -32,6 +33,7 @@ export default function Fullscreen(): JSX.Element {
     const element = document.getElementById(`shell-${mapId}`);
     if (element) {
       setFullScreenActive(!isFullScreen, element as TypeHTMLElement);
+      setFooterBarIsCollapsed(true);
     }
   }
 

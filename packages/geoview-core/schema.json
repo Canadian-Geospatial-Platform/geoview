@@ -467,6 +467,10 @@
           "default": true,
           "description": "Initial visibility setting."
         },
+        "legendCollapsed": {
+          "type": "boolean",
+          "description": "Is the layer's legend initially collapsed."
+        },
         "opacity": {
           "type": "number",
           "minimum": 0,
@@ -483,7 +487,7 @@
           "description": "Is the layer queryable."
         }
       },
-      "description": "Which UI controls are available."
+      "description": "Initial layer states."
     },
     "TypeLayerInitialSettings": {
       "additionalProperties": false,
