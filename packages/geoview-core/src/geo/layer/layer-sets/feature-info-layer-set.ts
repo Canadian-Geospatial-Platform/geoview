@@ -2,7 +2,7 @@ import { Coordinate } from 'ol/coordinate';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { logger } from '@/core/utils/logger';
-import { TypeFeatureInfoEntry, TypeResultSet } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoEntry, TypeFeatureInfoLayerConfig, TypeLayerEntryConfig, TypeResultSet } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
 import { EventType, AbstractLayerSet, PropagationType } from './abstract-layer-set';
@@ -11,6 +11,7 @@ import {
   TypeFeatureInfoResultSet,
   TypeFeatureInfoResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { createLocalizedString } from '@/core/utils/utilities';
 
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
@@ -147,6 +148,38 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         // When the promise is done, propagate to store
         promiseResult
           .then((arrayOfRecords) => {
+            // Set up feature info for layers that did not include it in the metadata
+            const layerEntryConfig = this.layerApi.getLayerEntryConfig(layerPath) as TypeLayerEntryConfig;
+            if (!layerEntryConfig.source) layerEntryConfig.source = {};
+            if (!layerEntryConfig.source?.featureInfo) {
+              layerEntryConfig.source!.featureInfo = { queryable: true };
+            }
+            const sourceFeatureInfo = layerEntryConfig.source!.featureInfo as TypeFeatureInfoLayerConfig;
+
+            if (!sourceFeatureInfo.outfields && arrayOfRecords?.length) {
+              // If no outfields, use keys from field info
+              const fieldInfoKeys = Object.keys(arrayOfRecords[0].fieldInfo);
+              sourceFeatureInfo.outfields = createLocalizedString(fieldInfoKeys.join(','));
+
+              // Check field info for aliases
+              const aliases: string[] = [];
+              fieldInfoKeys.forEach((key) => {
+                if (arrayOfRecords[0].fieldInfo[key]?.alias) aliases.push(arrayOfRecords[0].fieldInfo[key]!.alias);
+              });
+
+              const aliasString = aliases.join(',');
+              if (aliasString.length === fieldInfoKeys.length) sourceFeatureInfo.aliasFields = createLocalizedString(aliasString);
+              // If no aliases or they did not match, use outfields
+              else sourceFeatureInfo.aliasFields = sourceFeatureInfo.outfields;
+
+              // Get data types if provided
+              const dataTypes: ('string' | 'number' | 'date' | undefined)[] = fieldInfoKeys.map((key: string) => {
+                if (arrayOfRecords[0].fieldInfo[key]?.dataType) return arrayOfRecords[0].fieldInfo[key]!.dataType;
+                return undefined;
+              });
+              sourceFeatureInfo.fieldTypes = dataTypes.join(',');
+            }
+
             // Keep the features retrieved
             this.resultSet[layerPath].features = arrayOfRecords;
 

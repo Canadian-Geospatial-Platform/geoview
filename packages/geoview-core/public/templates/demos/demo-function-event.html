@@ -113,8 +113,9 @@
         <li><button id="Polygon-to-extent">Convert a polygon to an extent (result in console)</button><br />
           cgpv.api.utilities.geo.polygonToExtent(polygon)
         </li>
-        <li><button id="Redefine-alias-fields">Redefine alias fields for polygons layer</button><br />
-          cgpv.api.maps.Map1.layer.redefineFeatureFields('geojsonLYR1/geojsonLYR1/polygons.json', 'Location Province,Date Created,Images', 'aliasFields')
+        <li><button id="Redefine-alias-fields">Redefine alias fields for Major Projects</button><br />
+          <p>Note: this will not work until a feature from this layer has been clicked on to populate the outfields/alias fields</p>
+          <p>cgpv.api.maps.Map1.layer.redefineFeatureFields('ea4c0bdb-a63f-49a4-b14a-09c1560aad0b/pub:WHSE_HUMAN_CULTURAL_ECONOMIC.MPI_ECON_MAJOR_PROJECTS_POINT', '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29', 'aliasFields')</p>
         </li>
         <li><button id="Open-details">Open details tab in footer</button><br />
           cgpv.api.maps.Map1.footerBarApi.selectTab('details')
@@ -385,7 +386,7 @@
 
       // add an event listener when a button is clicked
       redefineAliasFieldsButton.addEventListener('click', async () => {
-        cgpv.api.maps.Map1.layer.redefineFeatureFields('geojsonLYR1/geojsonLYR1/polygons.json', 'Location Province,Date Created,Images', 'aliasFields')
+        cgpv.api.maps.Map1.layer.redefineFeatureFields('ea4c0bdb-a63f-49a4-b14a-09c1560aad0b/pub:WHSE_HUMAN_CULTURAL_ECONOMIC.MPI_ECON_MAJOR_PROJECTS_POINT', '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29', 'aliasFields')
       });
 
       // Open details Button========================================================================================================
