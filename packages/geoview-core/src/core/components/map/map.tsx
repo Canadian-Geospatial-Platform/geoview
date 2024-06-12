@@ -46,6 +46,7 @@ export function Map(props: MapProps): JSX.Element {
   const northArrow = useMapNorthArrow();
   const mapLoaded = useMapLoaded();
   const mapStoreConfig = useGeoViewConfig();
+  // flag to check if map is initialized. we added to prevent double rendering in StrictMode
   const isMapInitialized = useRef<boolean>(false);
 
   const initCGPVMap = useCallback((): void => {

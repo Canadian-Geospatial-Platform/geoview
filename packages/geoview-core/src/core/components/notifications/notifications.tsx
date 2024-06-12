@@ -163,12 +163,12 @@ export default function Notifications(): JSX.Element {
             sx={{ width: '2.375rem', height: '2.375rem' }}
           >
             {!hasNewNotification && (
-              <Box sx={{display: 'inline-flex', alignItems: 'center' }} >
+              <Box sx={{ display: 'inline-flex', alignItems: 'center' }}>
                 <NotificationsIcon />
               </Box>
             )}
             {hasNewNotification && (
-              <AnimatedBox sx={{display: 'inline-flex', alignItems: 'center' }} style={shakeAnimation}>
+              <AnimatedBox sx={{ display: 'inline-flex', alignItems: 'center' }} style={shakeAnimation}>
                 <NotificationsActiveIcon />
               </AnimatedBox>
             )}
