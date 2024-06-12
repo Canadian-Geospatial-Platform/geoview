@@ -1,5 +1,6 @@
 import View from 'ol/View';
 import Map from 'ol/Map';
+import BaseLayer from 'ol/layer/Base';
 import TileLayer from 'ol/layer/Tile';
 import VectorTileLayer from 'ol/layer/VectorTile';
 import { Options as TileOptions } from 'ol/layer/BaseTile';
@@ -13,7 +14,7 @@ import Feature from 'ol/Feature';
 import { MVT } from 'ol/format';
 import { TypeLocalizedString } from '@config/types/map-schema-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
+import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
   TypeSourceTileInitialConfig,
@@ -162,17 +163,21 @@ export class VectorTiles extends AbstractGeoViewRaster {
   /** ****************************************************************************************************************************
    * This method creates a GeoView VectorTiles layer using the definition provided in the layerConfig parameter.
    *
-   * @param {VectorTilesLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns {Promise<TypeBaseRasterLayer | undefined>} The GeoView raster layer that has been created.
+   * @returns {Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
    */
   // GV Layers Refactoring - Obsolete (in config? in layers?)
-  protected override async processOneLayerEntry(layerConfig: VectorTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | undefined> {
+  protected override async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
     await super.processOneLayerEntry(layerConfig);
+
+    // Instance check
+    if (!(layerConfig instanceof VectorTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+
     const sourceOptions: SourceOptions<Feature> = {
-      url: getLocalizedValue(layerConfig.source.dataAccessPath as TypeLocalizedString, AppEventProcessor.getDisplayLanguage(this.mapId)),
+      url: getLocalizedValue(layerConfig.source.dataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId)),
     };
 
     if (
@@ -266,12 +271,15 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
-   * @param {VectorTilesLayerEntryConfig} layerConfig The layer entry configuration to process.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
-   * @returns {Promise<VectorTilesLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
   // GV Layers Refactoring - Obsolete (in config?)
-  protected override processLayerMetadata(layerConfig: VectorTilesLayerEntryConfig): Promise<VectorTilesLayerEntryConfig> {
+  protected override processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
+    // Instance check
+    if (!(layerConfig instanceof VectorTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+
     if (this.metadata) {
       const { tileInfo } = this.metadata;
       const extent = this.metadata.fullExtent;
@@ -304,7 +312,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     // Get the layer
     const layer = this.getOLLayer(layerPath) as TileLayer<VectorTileSource> | undefined;
 
-    // Get the source projection code
+    // Get the source projection
     const sourceProjection = this.getSourceProjection(layerPath);
 
     // Get the layer bounds

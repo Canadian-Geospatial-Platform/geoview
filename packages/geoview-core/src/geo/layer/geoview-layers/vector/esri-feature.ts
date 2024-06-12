@@ -203,13 +203,15 @@ export class EsriFeature extends AbstractGeoViewVector {
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
-   * @param {EsriFeatureLayerEntryConfig} layerConfig The layer entry configuration to process.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
-   * @returns {Promise<EsriFeatureLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
   // GV Layers Refactoring - Obsolete (in config?)
-  protected override processLayerMetadata(layerConfig: EsriFeatureLayerEntryConfig): Promise<EsriFeatureLayerEntryConfig> {
-    return commonProcessLayerMetadata(this, layerConfig);
+  protected override processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
+    // Instance check
+    if (!(layerConfig instanceof EsriFeatureLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+    return commonProcessLayerMetadata(this, layerConfig as EsriFeatureLayerEntryConfig);
   }
 
   /** ***************************************************************************************************************************

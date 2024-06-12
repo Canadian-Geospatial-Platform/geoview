@@ -81,7 +81,7 @@ export class GVXYZTiles extends AbstractGVTile {
     // Get the layer
     const layer = this.getOLLayer() as TileLayer<XYZ> | undefined;
 
-    // Get the source projection code
+    // Get the source projection
     const sourceProjection = this.getOLSource()?.getProjection() || undefined;
 
     // Get the layer bounds
