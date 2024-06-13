@@ -46,6 +46,8 @@ export function Map(props: MapProps): JSX.Element {
   const northArrow = useMapNorthArrow();
   const mapLoaded = useMapLoaded();
   const mapStoreConfig = useGeoViewConfig();
+  // flag to check if map is initialized. we added to prevent double rendering in StrictMode
+  const isMapInitialized = useRef<boolean>(false);
 
   const initCGPVMap = useCallback((): void => {
     // Log
@@ -80,10 +82,14 @@ export function Map(props: MapProps): JSX.Element {
     // Log
     logger.logTraceUseEffect('map.initMap');
 
-    // Init the map on first render
-    viewer.createMap(mapElement.current!);
+    // check if map is initialized and if not, initialize it
+    if (!isMapInitialized.current) {
+      // Init the map on first render
+      viewer.createMap(mapElement.current!);
 
-    initCGPVMap();
+      initCGPVMap();
+      isMapInitialized.current = true;
+    }
   }, [initCGPVMap, viewer]);
 
   return (
