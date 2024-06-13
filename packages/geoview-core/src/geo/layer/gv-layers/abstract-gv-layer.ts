@@ -155,9 +155,9 @@ export abstract class AbstractGVLayer {
     } else {
       // Activation of the load end listeners
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (this.#olSource as any).once(`${listenerName}loaderror`, this.onLoaded.bind(this));
+      (this.#olSource as any).once(`${listenerName}loadend`, this.onLoaded.bind(this));
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (this.#olSource as any).once(`${listenerName}loadend`, this.onError.bind(this));
+      (this.#olSource as any).once(`${listenerName}loaderror`, this.onError.bind(this));
     }
   }
 

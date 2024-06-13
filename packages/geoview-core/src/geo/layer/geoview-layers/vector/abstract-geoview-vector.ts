@@ -476,6 +476,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {Feature[]} The array of features.
    */
   static convertCsv(mapId: string, csvData: string, layerConfig: VectorLayerEntryConfig): Feature[] | null {
+    // GV: This function and the below private static ones used to be in the CSV class directly, but something wasn't working with a 'Private element not accessible' error.
+    // GV: After moving the code to the mother class, it worked. It'll remain here for now until the config refactoring can take care of it in its re-writing
+
     const inProjection: ProjectionLike = layerConfig.source!.dataProjection || Projection.PROJECTION_NAMES.LNGLAT;
     const outProjection: ProjectionLike = MapEventProcessor.getMapViewer(mapId).getProjection().getCode();
     const latList = ['latitude', 'lat', 'y', 'ycoord', 'latitude/latitude', 'latitude / latitude'];

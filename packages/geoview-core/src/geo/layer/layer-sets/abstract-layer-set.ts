@@ -116,6 +116,7 @@ export abstract class AbstractLayerSet {
           // GV but it turns out parentLayerConfig couldn't be trusted when navigating the object hierarchy - see note over there)
           // GV cgpv.api.maps['sandboxMap'].layer.getLayerEntryConfig('uniqueValueId/uniqueValueId/4').layerStatus
           // GV vs cgpv.api.maps['sandboxMap'].layer.getLayerEntryConfig('uniqueValueId/uniqueValueId/4').parentLayerConfig.listOfLayerEntryConfig[0].layerStatus
+
           // If the config has a parent
           if (layerConfig.parentLayerConfig) {
             // Get all the siblings reusing the LayerApi which is more trustable than the parent hierarchy on the config themselves
@@ -424,7 +425,7 @@ export abstract class AbstractLayerSet {
    */
   protected static isSourceQueryable(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): boolean {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
-    return !(layer.getLayerConfig(layerPath) as AbstractBaseLayerEntryConfig)?.source?.featureInfo?.queryable === false;
+    return !((layer.getLayerConfig(layerPath) as AbstractBaseLayerEntryConfig)?.source?.featureInfo?.queryable === false);
   }
 
   /**

@@ -208,7 +208,7 @@ export class WFS extends AbstractGeoViewVector {
         }
 
         if (layerConfig.initialSettings?.extent)
-          // TODO: Check - Why are we converting to the map projection in the pre-processing? Wouldn't it be best to leave it untouched, as it's part of the initial configuration and handle it later?
+          // TODO: Check - Why are we converting to the map projection in the pre-processing? It'd be better to standardize to 4326 here (or leave untouched), as it's part of the initial configuration and handle it later?
           layerConfig.initialSettings.extent = this.getMapViewer().convertExtentLngLatToMapProj(layerConfig.initialSettings.extent);
 
         if (!layerConfig.initialSettings?.bounds && foundMetadata['ows:WGS84BoundingBox']) {
@@ -218,7 +218,7 @@ export class WFS extends AbstractGeoViewVector {
           const upperCorner = (foundMetadata['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'] as string).split(' ');
           const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
 
-          // TODO: Check - Why are we converting to the map projection in the pre-processing? Wouldn't it be best to leave it untouched, as it's part of the initial configuration?
+          // TODO: Check - Why are we converting to the map projection in the pre-processing? It'd be better to standardize to 4326 here (or leave untouched), as it's part of the initial configuration?
           // TO.DOCONT: We're already making sure to project the settings in the map projection when we getBounds(). Seems we're doing work twice? Should be standardized so that the
           // TO.DOCONT: layer.getBounds() are coherent between children classes. And should probably *not* reproject in the map projection during layer metadata pre-processing if we want to
           // TO.DOCONT: be able to, possibly, fetch metadata information in a standalone manner, outside of a map.

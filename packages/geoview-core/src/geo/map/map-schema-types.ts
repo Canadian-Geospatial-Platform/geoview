@@ -823,6 +823,7 @@ export type TypeStyleSettings = TypeBaseStyleConfig | TypeSimpleStyleConfig | Ty
 /** ******************************************************************************************************************************
  * Valid keys for the TypeStyleConfig object.
  */
+// TODO: Refactor - Layers/Config refactoring. The values here have been renamed to lower case, make sure to lower here and adjust everywhere as part of config migration.
 export type TypeStyleGeometry = 'Point' | 'LineString' | 'Polygon';
 
 /** ******************************************************************************************************************************
