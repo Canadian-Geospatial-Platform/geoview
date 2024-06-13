@@ -378,6 +378,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
           allowScrollButtonsMobile: true,
           sx: {
             '& .MuiTabs-scrollButtons': {
+              // TODO: https://github.com/Canadian-Geospatial-Platform/geoview/issues/2258
               [theme.breakpoints.up('lg')]: {
                 visibility: 'hidden',
               },
