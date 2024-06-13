@@ -24,13 +24,5 @@ export const getSxClasses = (theme: Theme): any => ({
     '& .MuiTabs-indicator': {
       display: 'none',
     },
-    '& .Mui-selected': {
-      color: `${theme.palette.geoViewColor.white} !important`,
-      padding: '0.5rem 1rem',
-      background: theme.palette.geoViewColor.primary.main,
-      borderRadius: '0.5rem',
-      margin: '0.5rem',
-      minHeight: 0,
-    },
   },
 });
