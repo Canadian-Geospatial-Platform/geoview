@@ -175,18 +175,10 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
 
   return (
     <Grid container sx={{ width: '100%', height: '100%' }}>
-      <Grid container sx={{ backgroundColor: theme.palette.geoViewColor.bgColor.dark[100] }}>
+      <Grid container sx={{ backgroundColor: theme.palette.geoViewColor.bgColor.dark[100] }} justifyContent="space-between">
         <Grid item xs={7} sm={10}>
           {!showMobileDropdown ? (
-            <MaterialTabs
-              variant="scrollable"
-              scrollButtons
-              allowScrollButtonsMobile
-              value={value}
-              onChange={handleChange}
-              aria-label="basic tabs"
-              {...tabsProps}
-            >
+            <MaterialTabs value={value} onChange={handleChange} aria-label="basic tabs" {...tabsProps}>
               {tabs.map((tab, index) => {
                 return (
                   <MaterialTab
@@ -234,7 +226,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       >
         {tabPanels.map((tab, index) => {
           return tab ? (
-            <TabPanel value={value} index={index} key={tab.id} id={`${shellContainer ?? ''}-${tab.id}`}>
+            <TabPanel value={value} index={index} key={tab.id} id={`${shellContainer?.id ?? ''}-${tab.id}`}>
               {typeof tab?.content === 'string' ? <HtmlToReact htmlContent={(tab?.content as string) ?? ''} /> : tab.content}
             </TabPanel>
           ) : (

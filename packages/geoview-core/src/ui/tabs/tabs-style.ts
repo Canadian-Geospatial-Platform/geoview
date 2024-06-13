@@ -19,11 +19,9 @@ export const getSxClasses = (theme: Theme): any => ({
     fontSize: theme.palette.geoViewFontSize.default,
     fontWeight: 'bold',
     minWidth: 'min(4vw, 24px)',
-    padding: '16px 2%',
+    padding: '0.5rem 1rem',
+    margin: '0 0.5rem',
     textTransform: 'capitalize',
-    '&.Mui-selected': {
-      color: 'secondary.main',
-    },
     '.MuiTab-iconWrapper': {
       marginRight: '7px',
       maxWidth: '18px',

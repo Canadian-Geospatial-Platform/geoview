@@ -149,16 +149,16 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   /**
    * Add a tab
    */
-  const handleAddTab = useCallback(
-    (sender: FooterBarApi, event: FooterTabCreatedEvent) => {
-      // Log
-      logger.logTraceUseCallback('FOOTER-BAR - handleAddTab', event);
+  const handleAddTab = useCallback((sender: FooterBarApi, event: FooterTabCreatedEvent) => {
+    // Log
+    logger.logTraceUseCallback('FOOTER-BAR - handleAddTab', event);
+    const newTab = { [event.tab.id]: { icon: event.tab.icon, content: event.tab.content } } as Record<string, Tab>;
 
-      const newTab = { [event.tab.id]: { icon: event.tab.icon, content: event.tab.content } } as Record<string, Tab>;
-      setTabsList({ ...tabsList, ...newTab });
-    },
-    [tabsList]
-  );
+    // NOTE: we need prevState because of an async nature of adding plugins.
+    setTabsList((prevState: Record<string, Tab>) => {
+      return { ...prevState, ...newTab };
+    });
+  }, []);
 
   /**
    * Remove a tab
@@ -239,10 +239,9 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // If clicked on a tab with a plugin
     MapEventProcessor.getMapViewerPlugins(mapId)
       .then((plugins) => {
-        const selectedTabKey = 'selectedTab' as keyof TypeRecordOfPlugin;
-        if (plugins[selectedTabKey]) {
+        if (plugins[selectedTab as keyof TypeRecordOfPlugin]) {
           // Get the plugin
-          const theSelectedPlugin = plugins[selectedTabKey];
+          const theSelectedPlugin = plugins[selectedTab];
 
           // A bit hacky, but not much other choice for now...
           if (typeof theSelectedPlugin.onSelected === 'function') {
@@ -375,18 +374,14 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         selectedTab={memoFooterBarTabs.findIndex((t) => t.id === selectedTab)}
         tabsProps={{
           variant: 'scrollable',
+          scrollButtons: 'auto',
+          allowScrollButtonsMobile: true,
           sx: {
-            transition: 'all 500ms ease-in',
-            '& .MuiTabs-indicator': {
-              display: 'none',
-            },
-            '& .Mui-selected': {
-              color: `${theme.palette.geoViewColor.white} !important`,
-              padding: '0.5rem 1rem',
-              background: theme.palette.geoViewColor.primary.main,
-              borderRadius: '0.5rem',
-              margin: '1rem',
-              minHeight: 0,
+            '& .MuiTabs-scrollButtons': {
+              // TODO: https://github.com/Canadian-Geospatial-Platform/geoview/issues/2258
+              [theme.breakpoints.up('lg')]: {
+                visibility: 'hidden',
+              },
             },
           },
         }}
