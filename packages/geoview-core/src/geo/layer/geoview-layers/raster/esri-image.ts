@@ -294,7 +294,7 @@ export class EsriImage extends AbstractGeoViewRaster {
   protected override processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
     if (!(layerConfig instanceof EsriImageLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
-    return commonProcessLayerMetadata(this, layerConfig as EsriImageLayerEntryConfig);
+    return commonProcessLayerMetadata(this, layerConfig);
   }
 
   /** ****************************************************************************************************************************

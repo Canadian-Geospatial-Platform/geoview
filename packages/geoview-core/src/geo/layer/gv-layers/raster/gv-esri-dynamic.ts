@@ -124,6 +124,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       const layerConfig = this.getLayerConfig();
 
       // Guess the geometry type by taking the first style key
+      // TODO: Refactor - Layers migration. Johann: This will be modified with new schema, there is no more geometry on style
       const [geometryType] = layerConfig.getTypeGeometries();
 
       // Fetch the features
