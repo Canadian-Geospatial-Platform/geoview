@@ -377,11 +377,7 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
           root: {
             color: geoViewColors.textColor.light[100], // Text color for the tabs
             '&.Mui-selected': {
-              color: geoViewColors.white,
-              background: geoViewColors.primary.main,
-              borderRadius: '0.5rem',
-              margin: '0.5rem',
-              minHeight: 0,
+              color: `${geoViewColors.primary.light[200]}`, // Text color for the selected tab
             },
           },
         },
