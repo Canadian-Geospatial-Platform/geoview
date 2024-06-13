@@ -17,6 +17,7 @@ import { CV_DEFAULT_MAP_FEATURE_CONFIG } from '../../config-constants';
  */
 export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /** The geometry type of the leaf node. */
+  // TODO: Refactor - Layers/Config refactoring. This has been renamed to TypeStyleGeometry in the new configs. Make sure to adjust.
   geometryType: TypeGeometryType;
 
   /** Source settings to apply to the GeoView vector layer source at creation time. */

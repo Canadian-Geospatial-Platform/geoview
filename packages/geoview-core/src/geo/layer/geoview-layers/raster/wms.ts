@@ -636,7 +636,7 @@ export class WMS extends AbstractGeoViewRaster {
         // if (layerConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
         //   layerConfig.initialSettings.maxZoom = layerCapabilities.MaxScaleDenominator as number;
         if (layerConfig.initialSettings?.extent)
-          // TODO: Check - Why are we converting to the map projection in the pre-processing? Wouldn't it be best to leave it untouched, as it's part of the initial configuration and handle it later?
+          // TODO: Check - Why are we converting to the map projection in the pre-processing? It'd be better to standardize to 4326 here (or leave untouched), as it's part of the initial configuration and handle it later?
           layerConfig.initialSettings.extent = this.getMapViewer().convertExtentLngLatToMapProj(layerConfig.initialSettings.extent);
 
         // TODO: Check - Here, we override the initialBounds with the metadata extent bounds, as part of the processing. Later on, in the wms class,
@@ -1202,8 +1202,8 @@ export class WMS extends AbstractGeoViewRaster {
     // If both layer config had bounds and layer has real bounds, take the intersection between them
     if (layerConfigBounds && layerBounds) layerBounds = getExtentIntersection(layerBounds, layerConfigBounds);
 
-    // Return the calculated layer bounds
-    return layerBounds;
+    // Return the calculated layer bounds (favor metadataExtent, but if things are going bad, pick config bounds at least)
+    return layerBounds || layerConfigBounds;
   }
 
   /**
