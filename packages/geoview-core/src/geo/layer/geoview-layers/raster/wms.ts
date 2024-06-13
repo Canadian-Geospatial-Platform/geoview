@@ -1202,8 +1202,8 @@ export class WMS extends AbstractGeoViewRaster {
     // If both layer config had bounds and layer has real bounds, take the intersection between them
     if (layerConfigBounds && layerBounds) layerBounds = getExtentIntersection(layerBounds, layerConfigBounds);
 
-    // Return the calculated layer bounds
-    return layerBounds;
+    // Return the calculated layer bounds (favor metadataExtent, but if things are going bad, pick config bounds at least)
+    return layerBounds || layerConfigBounds;
   }
 
   /**

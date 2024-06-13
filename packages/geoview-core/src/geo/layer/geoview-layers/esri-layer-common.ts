@@ -5,8 +5,6 @@ import { Extent } from 'ol/extent';
 
 import cloneDeep from 'lodash/cloneDeep';
 
-// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
-
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { getLocalizedValue, getXMLHttpRequest } from '@/core/utils/utilities';
