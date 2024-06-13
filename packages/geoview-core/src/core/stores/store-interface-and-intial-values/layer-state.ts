@@ -76,7 +76,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       },
 
       /**
-       * Get legend layer for given layer path.
+       * Gets legend layer for given layer path.
        * @param {string} layerPath - The layer path to get info for.
        * @return {TypeLegendLayer | undefined}
        */
@@ -85,11 +85,14 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         return LegendEventProcessor.findLayerByPath(curLayers, layerPath);
       },
 
-      // TODO: Refactor - This 'get' shouldn't be an 'action'. This function should be removed and a state getter be created to access the bounds state from the store directly (for the UI to use)
+      /**
+       * Gets the layer bounds in the store which correspond to the layer path
+       * @param {string} layerPath - The layer path of the bounds to get
+       * @returns {Extent | undefined} The bounds or undefined
+       */
       getLayerBounds: (layerPath: string): Extent | undefined => {
-        // TODO: Check - There is a calculateBounds() call here in a state action which should probably just get the layer bounds from the store/state? not recalculate again?
-        // Redirect to processor.
-        return MapEventProcessor.getMapViewerLayerAPI(get().mapId).calculateBounds(layerPath);
+        // Redirect to processor
+        return LegendEventProcessor.getLayerBounds(get().mapId, layerPath);
       },
 
       /**
@@ -168,11 +171,18 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        * @param {string} layerPath - The path of the layer to zoom to.
        */
       zoomToLayerExtent: (layerPath: string): Promise<void> => {
+        // Define some zoom options
         const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
 
-        // Calculate the bounds on the layer path.
-        const bounds = MapEventProcessor.getMapViewerLayerAPI(get().mapId).calculateBounds(layerPath);
-        if (bounds) return MapEventProcessor.zoomToExtent(get().mapId, bounds, options);
+        // Get the layer bounds
+        const bounds = LegendEventProcessor.getLayerBounds(get().mapId, layerPath);
+
+        // If found
+        if (bounds) {
+          return MapEventProcessor.zoomToExtent(get().mapId, bounds, options);
+        }
+
+        // Failed
         return Promise.resolve();
       },
     },
