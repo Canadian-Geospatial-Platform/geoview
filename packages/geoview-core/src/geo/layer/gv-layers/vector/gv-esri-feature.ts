@@ -1,4 +1,3 @@
-import { VectorImage } from 'ol/layer';
 import VectorSource from 'ol/source/Vector';
 
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
@@ -21,15 +20,6 @@ export class GVEsriFeature extends AbstractGVVector {
    */
   public constructor(mapId: string, olSource: VectorSource, layerConfig: EsriFeatureLayerEntryConfig) {
     super(mapId, olSource, layerConfig);
-  }
-
-  /**
-   * Overrides the get of the OpenLayers Layer
-   * @returns {VectorImage<VectorSource>} The OpenLayers Layer
-   */
-  override getOLLayer(): VectorImage<VectorSource> {
-    // Call parent and cast
-    return super.getOLLayer() as VectorImage<VectorSource>;
   }
 
   /**
