@@ -1,9 +1,10 @@
-import { CV_DEFAULT_MAP_FEATURE_CONFIG } from '@config/types/config-constants';
+import { CV_DEFAULT_MAP_FEATURE_CONFIG, CV_CONFIG_GEOCORE_TYPE } from '@config/types/config-constants';
 import { Cast, TypeJsonValue, TypeJsonObject, toJsonObject, TypeJsonArray } from '@config/types/config-types';
 import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
 import { UUIDmapConfigReader } from '@config/uuid-config-reader';
 import { AbstractGeoviewLayerConfig, TypeDisplayLanguage, TypeGeoviewLayerType } from '@config/types/map-schema-types';
 import { MapConfigError } from '@config/types/classes/config-exceptions';
+
 import { generateId, isJsonString, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { logger } from '@/core//utils/logger';
 
@@ -13,6 +14,14 @@ import { logger } from '@/core//utils/logger';
  * @class DefaultConfig
  */
 export class ConfigApi {
+  // GV: The two following properties was created only for debugging purpose. They allow developers to inspect the
+  // GV: content or call the methods of the last instance created by the corresponding ConfigApi call.
+  /** Static property that contains the last object instanciated by the ConfigApi.getLayerConfig call */
+  static lastLayerConfigCreated?: AbstractGeoviewLayerConfig;
+
+  /** Static property that contains the last object instanciated by the ConfigApi.createMapConfig call */
+  static lastMapConfigCreated?: MapFeatureConfig;
+
   /**
    * Parse the parameters obtained from a url.
    *
@@ -219,7 +228,7 @@ export class ConfigApi {
 
     // Filter all geocore layers and convert the result into an array of geoviewLayerId.
     const geocoreArrayOfKeys = listOfGeoviewLayerConfig
-      .filter((layerConfig) => layerConfig.geoviewLayerType === 'geoCore')
+      .filter((layerConfig) => layerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE)
       .map<string>((geocoreLayer) => {
         return geocoreLayer.geoviewLayerId as string;
       });
@@ -232,7 +241,7 @@ export class ConfigApi {
 
         // replace the GeoCore layers by the GeoView layers returned by the server.
         return listOfGeoviewLayerConfig.map((layerConfig) => {
-          if (layerConfig.geoviewLayerType === 'geoCore') {
+          if (layerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE) {
             const jsonConfigFound = arrayOfJsonConfig.find(
               (jsonConfig) => jsonConfig.geoviewLayerId === `rcs.${layerConfig.geoviewLayerId}.${language}`
             );
@@ -254,8 +263,9 @@ export class ConfigApi {
     return listOfGeoviewLayerConfig;
   }
 
+  // TODO: Change the code below using the schema provided during our last meating. This change must be done in the next PR
   /**
-   * Get the map feature configuration instance using the json string or the json object provided by the user. When the user
+   * Create the map feature configuration instance using the json string or the json object provided by the user. When the user
    * doesn't provide a value for a field that is covered by a default value, the default is used.
    *
    * @param {string | TypeJsonObject} mapConfig The map feature configuration to instanciate.
@@ -267,7 +277,7 @@ export class ConfigApi {
   // GV: GeoCore layers are processed here, well before the schema validation. The aim is to get rid of these layers in
   // GV: favor of their GeoView equivalent as soon as possible. Processing is based on the JSON representation of the config,
   // GV: and requires a minimum of validation to ensure that the configuration of GeoCore layers is valid.
-  static async getMapConfig(mapConfig: string | TypeJsonObject, language: TypeDisplayLanguage): Promise<MapFeatureConfig> {
+  static async createMapConfig(mapConfig: string | TypeJsonObject, language: TypeDisplayLanguage): Promise<MapFeatureConfig> {
     // If the user provided a string config, translate it to a json object because the MapFeatureConfig constructor
     // doesn't accept string config. Note that getJsonObjectFromString returns undefined if the string config cannot
     // be translated to a json object.
@@ -284,54 +294,61 @@ export class ConfigApi {
         providedMapFeatureConfig.map.listOfGeoviewLayerConfig as TypeJsonArray,
         providedMapFeatureConfig?.serviceUrls?.geocoreUrl as string
       )) as TypeJsonObject;
+
       // Filter out the erroneous GeoCore layers and print a message to display the layer identifier in error.
-      let errorDetected = false; // Variable to remember that an error occured.
+      let geocoreErrorDetected = false; // Variable to remember that an error occured.
       providedMapFeatureConfig.map.listOfGeoviewLayerConfig = (
         providedMapFeatureConfig.map.listOfGeoviewLayerConfig as TypeJsonArray
       ).filter((layerConfig) => {
-        if (layerConfig.geoviewLayerType === 'geoCore') {
+        if (layerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE) {
           logger.logError(`Unable to convert GeoCore layer (Id=${layerConfig.geoviewLayerId}).`);
-          errorDetected = true;
+          geocoreErrorDetected = true;
           return false; // Delete the layer
         }
         return true; // Keep the layer
       }) as TypeJsonObject;
-      // Instanciate the mapFeatureConfig.
+
+      // Instanciate the mapFeatureConfig. If an error is detected, a workaround procedure
+      // will be executed to try to correct the problem in the best possible way.
       const mapFeatureConfig = new MapFeatureConfig(providedMapFeatureConfig!, language);
-      if (errorDetected) mapFeatureConfig.propagateError(); // If an error was detected, signal it.
-      return mapFeatureConfig;
+      if (geocoreErrorDetected) mapFeatureConfig.setErrorDetectedFlag(); // If a geocore error was detected, signal it.
+
+      ConfigApi.lastMapConfigCreated = mapFeatureConfig;
     } catch (error) {
       // If we get here, it is because the user provided a string config that cannot be translated to a json object,
       // or the config doesn't have the mandatory map property or the listOfGeoviewLayerConfig is defined but is not
       // an array.
-      logger.logError((error as MapConfigError).message);
+      if (error instanceof MapConfigError) logger.logError(error.message);
+      else logger.logError('ConfigApi.createMapConfig - An erroroccured', error);
       const defaultMapConfig = ConfigApi.getDefaultMapFeatureConfig(language);
-      defaultMapConfig.propagateError();
-      return defaultMapConfig;
+      defaultMapConfig.setErrorDetectedFlag();
+      ConfigApi.lastMapConfigCreated = defaultMapConfig;
     }
+    return ConfigApi.lastMapConfigCreated;
   }
 
   /**
-   * Get the layer configuration instance using the layer access string and layer type provided by the user.
+   * Create the layer configuration instance using the layer access string and layer type provided by the user.
    *
    * @param {string} serviceAccessString The service access string (a URL or a layer identifier).
-   * @param {TypeGeoviewLayerType | 'geoCore'} layerType The GeoView layer type or 'geoCore'.
+   * @param {TypeGeoviewLayerType | CV_CONFIG_GEOCORE_TYPE} layerType The GeoView layer type or 'geoCore'.
    *
    * @returns {AbstractGeoviewLayerConfig | undefined} The layer configuration or undefined if there is an error.
    * @static
    */
   // GV: GeoCore layers are processed here, well before the schema validation. The aim is to get rid of these layers in
   // GV: favor of their GeoView equivalent as soon as possible.
-  static async getLayerConfig(
+  static async createLayerConfig(
     serviceAccessString: string,
-    layerType: TypeGeoviewLayerType | 'geoCore'
+    layerType: TypeGeoviewLayerType | typeof CV_CONFIG_GEOCORE_TYPE,
+    language: TypeDisplayLanguage = 'en'
   ): Promise<AbstractGeoviewLayerConfig | undefined> {
     let geoviewLayerConfig: TypeJsonObject;
-    if (layerType === 'geoCore') {
+    if (layerType === CV_CONFIG_GEOCORE_TYPE) {
       try {
         const layerConfig = { geoviewLayerId: serviceAccessString, geoviewLayerType: layerType };
-        [geoviewLayerConfig] = await ConfigApi.#geocoreToGeoview('en', Cast<TypeJsonArray>([layerConfig]));
-        if (geoviewLayerConfig.geoviewLayerType === 'geoCore') return undefined;
+        [geoviewLayerConfig] = await ConfigApi.#geocoreToGeoview(language, Cast<TypeJsonArray>([layerConfig]));
+        if (geoviewLayerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE) return undefined;
       } catch (error) {
         logger.logError(`Unable to convert GeoCore layer (Id=${serviceAccessString}).`);
         return undefined;
@@ -345,6 +362,9 @@ export class ConfigApi {
         listOfLayerEntryConfig: [],
       });
     }
-    return MapFeatureConfig.nodeFactory(geoviewLayerConfig, 'en');
+
+    // Create a layer configuration instance and validate it against the schema.
+    ConfigApi.lastLayerConfigCreated = MapFeatureConfig.nodeFactory(geoviewLayerConfig, language);
+    return ConfigApi.lastLayerConfigCreated;
   }
 }

@@ -3,9 +3,9 @@ import Ajv from 'ajv';
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LAYER_TYPES } from '@config/types/config-constants';
 import { TypeGeoviewLayerType, TypeJsonObject } from '@config/types/config-types';
 import schema from '@config/types/config-validation-schema.json';
-import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
 import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
 import { TypeLayerEntryType, TypeLocalizedString } from '@config/types/map-schema-types';
+import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 import { logger } from '@/core/utils/logger';
 
 type NewType = TypeGeoviewLayerType;
@@ -72,13 +72,13 @@ export function isvalidComparedToSchema(schemaPath: string, targetObject: object
         }
         logger.logWarning('='.repeat(200), '\nSchema error: ', error, '\nObject affected: ', node);
       }
-      (targetObject as MapFeatureConfig | ConfigBaseClass)?.propagateError?.();
+      (targetObject as MapFeatureConfig | EntryConfigBaseClass)?.setErrorDetectedFlag?.();
       return false;
     }
     return true;
   }
   logger.logError(`Cannot find schema ${schemaPath}`);
-  (targetObject as MapFeatureConfig | ConfigBaseClass)?.propagateError?.();
+  (targetObject as MapFeatureConfig | EntryConfigBaseClass)?.setErrorDetectedFlag?.();
   return false;
 }
 
