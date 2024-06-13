@@ -372,6 +372,18 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         onOpenKeyboard={openModal}
         onCloseKeyboard={closeModal}
         selectedTab={memoFooterBarTabs.findIndex((t) => t.id === selectedTab)}
+        tabsProps={{
+          variant: 'scrollable',
+          scrollButtons: true,
+          allowScrollButtonsMobile: true,
+          sx: {
+            '& .MuiTabs-scrollButtons': {
+              [theme.breakpoints.up('md')]: {
+                visibility: 'hidden',
+              },
+            },
+          },
+        }}
         tabProps={{ disableRipple: true }}
         tabs={memoFooterBarTabs}
         TabContentVisibilty={!isCollapsed ? 'visible' : 'hidden'}

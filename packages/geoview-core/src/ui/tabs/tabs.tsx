@@ -175,8 +175,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
 
   return (
     <Grid container sx={{ width: '100%', height: '100%' }}>
-      <Grid container sx={{ backgroundColor: theme.palette.geoViewColor.bgColor.dark[100] }}>
-        <Grid item xs={7} sm={10}>
+      <Grid container sx={{ backgroundColor: theme.palette.geoViewColor.bgColor.dark[100] }} justifyContent="space-between">
+        <Box flexGrow="2">
           {!showMobileDropdown ? (
             <MaterialTabs value={value} onChange={handleChange} aria-label="basic tabs" {...tabsProps}>
               {tabs.map((tab, index) => {
@@ -210,10 +210,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
               />
             </Box>
           )}
-        </Grid>
-        <Grid item xs={5} sm={2} sx={sxClasses.rightIcons}>
-          {rightButtons as ReactNode}
-        </Grid>
+        </Box>
+        <Box sx={sxClasses.rightIcons}>{rightButtons as ReactNode}</Box>
       </Grid>
       <Grid
         id="tabPanel"

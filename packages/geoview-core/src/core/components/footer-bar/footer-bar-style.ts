@@ -20,7 +20,6 @@ export const getSxClasses = (theme: Theme): any => ({
     '& .MuiTabs-flexContainer': {
       alignItems: 'center',
       height: '56px',
-      marginLeft: '0.75rem',
     },
     '& .MuiTabs-indicator': {
       display: 'none',
@@ -30,7 +29,7 @@ export const getSxClasses = (theme: Theme): any => ({
       padding: '0.5rem 1rem',
       background: theme.palette.geoViewColor.primary.main,
       borderRadius: '0.5rem',
-      margin: '0.5rem 1rem',
+      margin: '0.5rem',
       minHeight: 0,
     },
   },
