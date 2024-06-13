@@ -85,6 +85,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         return LegendEventProcessor.findLayerByPath(curLayers, layerPath);
       },
 
+      // TODO: Refactor - This 'get' shouldn't be an 'action'. This function should be removed and a state getter be created to access the bounds state from the store directly (for the UI to use)
       getLayerBounds: (layerPath: string): Extent | undefined => {
         // TODO: Check - There is a calculateBounds() call here in a state action which should probably just get the layer bounds from the store/state? not recalculate again?
         // Redirect to processor.

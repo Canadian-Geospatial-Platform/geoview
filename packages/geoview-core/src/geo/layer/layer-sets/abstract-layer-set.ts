@@ -40,9 +40,6 @@ export abstract class AbstractLayerSet {
   /** Indicates the default when registering a layer config */
   #defaultRegisterLayerConfigCheck = false;
 
-  /** Indicates the default when registering a layer */
-  #defaultRegisterLayerCheck = true;
-
   // The registered layers
   // TODO: Refactor - Layers refactoring. Replace this array of string to array of GVLayer object instead (and rename attribute) once hybrid work is done
   #registeredLayerLayerPaths: string[] = [];
@@ -116,6 +113,7 @@ export abstract class AbstractLayerSet {
           // GV but it turns out parentLayerConfig couldn't be trusted when navigating the object hierarchy - see note over there)
           // GV cgpv.api.maps['sandboxMap'].layer.getLayerEntryConfig('uniqueValueId/uniqueValueId/4').layerStatus
           // GV vs cgpv.api.maps['sandboxMap'].layer.getLayerEntryConfig('uniqueValueId/uniqueValueId/4').parentLayerConfig.listOfLayerEntryConfig[0].layerStatus
+
           // If the config has a parent
           if (layerConfig.parentLayerConfig) {
             // Get all the siblings reusing the LayerApi which is more trustable than the parent hierarchy on the config themselves
@@ -162,7 +160,7 @@ export abstract class AbstractLayerSet {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected onRegisterLayerConfigCheck(layerConfig: ConfigBaseClass): boolean {
     // Override this function to perform registration condition logic in the inherited classes
-    // By default, a layer-set always registers layers
+    // By default, a layer-set doesn't register layer configs
     return this.#defaultRegisterLayerConfigCheck;
   }
 
@@ -212,16 +210,23 @@ export abstract class AbstractLayerSet {
 
   /**
    * An overridable registration condition function for a layer-set to check if the registration
-   * should happen for a specific geoview layer and layer path.
+   * should happen for a specific geoview layer and layer path. By default, a layer-set always registers layers except when they are group layers.
    * @param {AbstractGeoViewLayer | AbstractGVLayer} layer - The layer
    * @returns {boolean} True if the layer should be registered, false otherwise
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/class-methods-use-this
   protected onRegisterLayerCheck(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): boolean {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     // Override this function to perform registration condition logic in the inherited classes
-    // By default, a layer-set always registers layers
-    return this.#defaultRegisterLayerCheck;
+    // By default, a layer-set always registers layers except when they are group layers
+    if (this.layerApi.getGeoviewLayerHybrid(layerPath)?.getLayerConfig(layerPath)?.entryType === 'group') {
+      // Skip groups
+      return false;
+    }
+
+    // Default
+    return true;
   }
 
   /**
@@ -424,7 +429,7 @@ export abstract class AbstractLayerSet {
    */
   protected static isSourceQueryable(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): boolean {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
-    return !(layer.getLayerConfig(layerPath) as AbstractBaseLayerEntryConfig)?.source?.featureInfo?.queryable === false;
+    return !((layer.getLayerConfig(layerPath) as AbstractBaseLayerEntryConfig)?.source?.featureInfo?.queryable === false);
   }
 
   /**

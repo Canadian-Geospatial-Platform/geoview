@@ -211,7 +211,7 @@ export class EsriFeature extends AbstractGeoViewVector {
   protected override processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
     if (!(layerConfig instanceof EsriFeatureLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
-    return commonProcessLayerMetadata(this, layerConfig as EsriFeatureLayerEntryConfig);
+    return commonProcessLayerMetadata(this, layerConfig);
   }
 
   /** ***************************************************************************************************************************

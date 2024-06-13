@@ -636,12 +636,15 @@ export class WMS extends AbstractGeoViewRaster {
         // if (layerConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
         //   layerConfig.initialSettings.maxZoom = layerCapabilities.MaxScaleDenominator as number;
         if (layerConfig.initialSettings?.extent)
-          // TODO: Check - Why are we converting to the map projection in the pre-processing? Wouldn't it be best to leave it untouched, as it's part of the initial configuration and handle it later?
+          // TODO: Check - Why are we converting to the map projection in the pre-processing? It'd be better to standardize to 4326 here (or leave untouched), as it's part of the initial configuration and handle it later?
           layerConfig.initialSettings.extent = this.getMapViewer().convertExtentLngLatToMapProj(layerConfig.initialSettings.extent);
 
         // TODO: Check - Here, we override the initialBounds with the metadata extent bounds, as part of the processing. Later on, in the wms class,
         // TO.DOCONT: we have code in the getBounds() that check the initialSettings.bounds vs the metadata bounds. Are we shooting ourselves in the foot or doing work twice?
         if (!layerConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox) {
+          // TODO: Refactor - Configs refactoring. When gathering bounds from the XML data, we should validate if they are 'valid' coordinates for the projection in the XML
+          // TO.DOCONT: Because it's possible that some bound values are invalid as provided.. see this for an example, with -90.24 being an invalid value latitude in 4326:
+          // TO.DOCONT: https://geo.weather.gc.ca/geomet?service=WMS&version=1.3.0&request=GetCapabilities&Layers=GDPS.ETA_ICEC
           layerConfig.initialSettings!.bounds = layerCapabilities.EX_GeographicBoundingBox as Extent;
         }
 
@@ -1202,8 +1205,8 @@ export class WMS extends AbstractGeoViewRaster {
     // If both layer config had bounds and layer has real bounds, take the intersection between them
     if (layerConfigBounds && layerBounds) layerBounds = getExtentIntersection(layerBounds, layerConfigBounds);
 
-    // Return the calculated layer bounds
-    return layerBounds;
+    // Return the calculated layer bounds (favor metadataExtent, but if things are going bad, pick config bounds at least)
+    return layerBounds || layerConfigBounds;
   }
 
   /**
