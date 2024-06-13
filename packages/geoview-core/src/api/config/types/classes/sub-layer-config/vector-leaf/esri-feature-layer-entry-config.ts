@@ -1,6 +1,10 @@
 import { defaultsDeep } from 'lodash';
+
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@config/types/config-constants';
 import { Cast, TypeJsonObject } from '@config/types/config-types';
+import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
+import { AbstractBaseEsriLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-esri-layer-entry-config';
+import { isvalidComparedToSchema } from '@config/utils';
 import {
   TypeStyleConfig,
   TypeLayerEntryType,
@@ -8,15 +12,13 @@ import {
   TypeDisplayLanguage,
   TypeSourceEsriFeatureInitialConfig,
 } from '@config/types/map-schema-types';
-import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
-import { ConfigBaseClass } from '@config/types/classes/sub-layer-config/config-base-class';
-import { isvalidComparedToSchema } from '@config/utils';
+import { GeoviewLayerInvalidParameterError } from '@config/types/classes/config-exceptions';
+import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 
 /**
  * The ESRI feature geoview sublayer class.
  */
-export class EsriFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
+export class EsriFeatureLayerEntryConfig extends AbstractBaseEsriLayerEntryConfig {
   /** Source settings to apply to the GeoView feature layer source at creation time. */
   declare source: TypeSourceEsriFeatureInitialConfig;
 
@@ -29,7 +31,7 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited.
    * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
    * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The GeoView instance that owns the sublayer.
-   * @param {ConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
+   * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
    * @constructor
    */
   constructor(
@@ -37,17 +39,18 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     initialSettings: TypeLayerInitialSettings,
     language: TypeDisplayLanguage,
     geoviewLayerConfig: AbstractGeoviewLayerConfig,
-    parentNode?: ConfigBaseClass
+    parentNode?: EntryConfigBaseClass
   ) {
     super(layerConfig, initialSettings, language, geoviewLayerConfig, parentNode);
     // Set default values.
     this.source = defaultsDeep(this.source, { maxRecordCount: 0, format: 'EsriJSON', featureInfo: { queryable: false } });
     this.style = layerConfig.style ? { ...Cast<TypeStyleConfig>(layerConfig.style) } : undefined;
     if (Number.isNaN(this.layerId)) {
-      throw new Error(`The layer entry with layerId equal to ${this.layerPath} must be an integer string`);
+      this.setErrorDetectedFlag();
+      throw new GeoviewLayerInvalidParameterError('LayerIdInvalidType', [this.layerPath]);
     }
-    if (!isvalidComparedToSchema(this.schemaPath, layerConfig)) this.propagateError(); // Input schema validation.
-    if (!isvalidComparedToSchema(this.schemaPath, this)) this.propagateError(); // Internal schema validation.
+    if (!isvalidComparedToSchema(this.schemaPath, layerConfig)) this.setErrorDetectedFlag(); // Input schema validation.
+    if (!isvalidComparedToSchema(this.schemaPath, this)) this.setErrorDetectedFlag(); // Internal schema validation.
   }
 
   /**

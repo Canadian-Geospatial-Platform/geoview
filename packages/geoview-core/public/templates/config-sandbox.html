@@ -115,7 +115,7 @@
   <div>
   <div class="selector-container">
     <p>This section lets you select and edit a complete map configuration.<br />
-    The validate button calls the <b>ConfigApi.getMapConfig</b> method and displays the internal map configuration.</p>
+    The validate button calls the <b>ConfigApi.createMapConfig</b> method and displays the internal map configuration.</p>
     <div class="selector">
       Configuration to load:
       <select name="Config Loader" id="configLoader">
@@ -138,7 +138,7 @@
   <hr />
   <div class="selector">
     <p>This section lets you select and edit a GeoView service URL or a GeoCore identifier.<br />
-      The validate button calls the <b>ConfigApi.getLayerConfig</b> method and displays the resulting internal map configuration.</p>
+      The validate button calls the <b>ConfigApi.createLayerConfig</b> method and displays the resulting internal map configuration.</p>
       Service URL:
     <select name="Service Config" id="serviceConfig">
       <option value="">--select--</option>
@@ -249,17 +249,27 @@
         const configOutput = document.getElementById('configOutput');
 
         // get config and test if JSON is valid
-        cgpv.api.configApi.getMapConfig(configArea.value.replaceAll('"', "'").replaceAll("\\'", "\'"), langue).then((mapConfig) => {
-          configOutput.value = mapConfig.getIndentedJsonString();
+        cgpv.api.configApi.createMapConfig(configArea.value.replaceAll('"', "'").replaceAll("\\'", "\'"), langue).then((mapConfig) => {
+          configOutput.value = mapConfig.serialize();
 
           generateLineNumbers('configOutput', 'outputLineNumbers');
 
           // set class and message
           message.classList.add('config-json-valid');
           message.classList.remove('config-error');
-          if (mapConfig.isValid) {
-            message.innerHTML = 'File is valid, see console for details...';
-            document.getElementById('createMap').disabled = true;
+          if (!mapConfig.errorDetected) {
+            message.innerHTML = 'Config is valid, waiting for all service metadata to be read...';
+
+            // TODO: Change the code below using the schema provided during our last meating. This change must be done in the next PR
+            // Start reading the metadata
+            mapConfig.fetchAllServiceMetadata().then(() => {
+              configOutput.value = mapConfig?.serialize();
+              generateLineNumbers('configOutput', 'outputLineNumbers');
+              message.innerHTML = 'Config is valid, reading of all service metadata is complete';
+              document.getElementById('createMap').disabled = true;
+            }).catch((error) => {
+              throw new Error('Error while reading metadata.');
+            });
           } else {
             message.innerHTML = 'File is invalid, see console for details...';
           }
@@ -270,7 +280,7 @@
 
     const serviceUrlChoices = {
       geoCore: '12acd145-626a-49eb-b850-0a59c9bc7506',
-      esriDynamic: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/',
+      esriDynamic: 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/',
       esriFeature: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/',
     };
 
@@ -294,18 +304,25 @@
 
         configArea.value = serviceUrlArea.value;
         // get config and test if URL Config is valid
-        const returnedValue = cgpv.api.configApi.getLayerConfig(serviceUrlArea.value.trim(), document.getElementById('serviceConfig').value);
+        const returnedValue = cgpv.api.configApi.createLayerConfig(serviceUrlArea.value.trim(), document.getElementById('serviceConfig').value);
         returnedValue.then((mapConfig) => {
-          configOutput.value = mapConfig?.getIndentedJsonString();
+          configOutput.value = mapConfig?.serialize();
 
           generateLineNumbers('configOutput', 'outputLineNumbers');
 
           // set class and message
           message.classList.add('config-json-valid');
           message.classList.remove('config-error');
-          if (mapConfig) {
-            message.innerHTML = 'File is valid, see console for details...';
-            document.getElementById('createMap').disabled = true;
+          if (mapConfig && !mapConfig.errorDetected) {
+            message.innerHTML = 'URL is valid, waiting for service metadata to be read...';
+
+            mapConfig.fetchServiceMetadata().then(() => {
+              mapConfig.listOfLayerEntryConfig = mapConfig.metadataLayerTree;
+              configOutput.value = mapConfig?.serialize();
+              generateLineNumbers('configOutput', 'outputLineNumbers');
+              message.innerHTML = 'URL is valid, reading of service metadata is complete';
+              document.getElementById('createMap').disabled = true;
+            });
           } else {
             message.innerHTML = 'URL is invalid, see console for details...';
           }
@@ -327,14 +344,14 @@
         // get config and test if URL Config is valid
         const returnedValue = cgpv.api.configApi.getConfigFromUrl(configUrlArea.value.trim());
         returnedValue.then((mapConfig) => {
-          configOutput.value = mapConfig.getIndentedJsonString();
+          configOutput.value = mapConfig.serialize();
 
           generateLineNumbers('configOutput', 'outputLineNumbers');
 
           // set class and message
           message.classList.add('config-json-valid');
           message.classList.remove('config-error');
-          if (mapConfig.isValid) {
+          if (!mapConfig.errorDetected) {
             message.innerHTML = 'File is valid, see console for details...';
             document.getElementById('createMap').disabled = true;
           } else {

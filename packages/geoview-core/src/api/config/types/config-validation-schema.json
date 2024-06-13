@@ -737,7 +737,7 @@
         }
       ]
     },
-    "ConfigBaseClass": {
+    "EntryConfigBaseClass": {
       "description": "Base class from which we derive all the nodes (group and leaves) in the layer tree.",
       "type": "object",
       "properties": {
@@ -819,14 +819,14 @@
       "type": "object",
       "allOf": [
         {
-          "$ref": "#/definitions/ConfigBaseClass"
+          "$ref": "#/definitions/EntryConfigBaseClass"
         },
         {
           "type": "object",
           "properties": {
             "geometryType": {
               "description": "The geometry type of the leaf node.",
-              "$ref": "#/definitions/TypeGeometryType"
+              "$ref": "#/definitions/TypeStyleGeometry"
             },
             "source": {
               "$ref": "#/definitions/TypeBaseSourceInitialConfig"
@@ -878,7 +878,7 @@
         }
       ]
     },
-    "TypeGeometryType": {
+    "TypeStyleGeometry": {
       "description": "Valid keys for the geometryType property.",
       "enum": ["point", "linestring", "polygon"]
     },
