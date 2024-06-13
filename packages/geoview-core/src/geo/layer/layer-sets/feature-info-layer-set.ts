@@ -51,7 +51,11 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
 
     // Return if the layer is of queryable type and source is queryable
-    return AbstractLayerSet.isQueryableType(layer) && AbstractLayerSet.isSourceQueryable(layer, layerPath);
+    return (
+      super.onRegisterLayerCheck(layer, layerPath) &&
+      AbstractLayerSet.isQueryableType(layer) &&
+      AbstractLayerSet.isSourceQueryable(layer, layerPath)
+    );
   }
 
   /**

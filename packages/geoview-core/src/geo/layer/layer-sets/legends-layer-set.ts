@@ -42,6 +42,17 @@ export class LegendsLayerSet extends AbstractLayerSet {
   }
 
   /**
+   * Overrides the behavior to apply when an all-feature-info-layer-set wants to check for condition to register a layer in its set.
+   * @param {ConfigBaseClass} layerConfig - The layer config
+   * @returns {boolean} True when the layer should be registered to this all-feature-info-layer-set.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected override onRegisterLayerCheck(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): boolean {
+    // Always register layers for the legends-layer-set, because we want 'the box' in the UI to show the layer status progression
+    return true;
+  }
+
+  /**
    * Overrides the behavior to apply when a legends-layer-set wants to register a layer in its set.
    * @param {ConfigBaseClass} layerConfig - The layer config
    */

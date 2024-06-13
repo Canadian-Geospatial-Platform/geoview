@@ -46,6 +46,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     // Return if the layer is of queryable type and source is queryable
     return (
+      super.onRegisterLayerCheck(layer, layerPath) &&
       AbstractLayerSet.isQueryableType(layer) &&
       !(layer instanceof WMS) &&
       !(layer instanceof GVWMS) &&

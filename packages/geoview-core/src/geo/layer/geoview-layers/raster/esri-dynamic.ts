@@ -249,7 +249,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   protected override processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
     if (!(layerConfig instanceof EsriDynamicLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
-    return commonProcessLayerMetadata(this, layerConfig as EsriDynamicLayerEntryConfig);
+    return commonProcessLayerMetadata(this, layerConfig);
   }
 
   /** ****************************************************************************************************************************
@@ -337,6 +337,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       const layerConfig = this.getLayerConfig(layerPath)! as EsriDynamicLayerEntryConfig;
 
       // Guess the geometry type by taking the first style key
+      // TODO: Refactor - Layers migration. Johann: This will be modified with new schema, there is no more geometry on style
       const [geometryType] = layerConfig.getTypeGeometries();
 
       // Fetch the features
