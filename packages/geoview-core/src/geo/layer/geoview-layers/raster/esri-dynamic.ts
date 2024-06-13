@@ -249,7 +249,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   protected override processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
     // Instance check
     if (!(layerConfig instanceof EsriDynamicLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
-    return commonProcessLayerMetadata(this, layerConfig as EsriDynamicLayerEntryConfig);
+    return commonProcessLayerMetadata(this, layerConfig);
   }
 
   /** ****************************************************************************************************************************
