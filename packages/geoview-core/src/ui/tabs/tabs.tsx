@@ -226,7 +226,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       >
         {tabPanels.map((tab, index) => {
           return tab ? (
-            <TabPanel value={value} index={index} key={tab.id} id={`${shellContainer ?? ''}-${tab.id}`}>
+            <TabPanel value={value} index={index} key={tab.id} id={`${shellContainer?.id ?? ''}-${tab.id}`}>
               {typeof tab?.content === 'string' ? <HtmlToReact htmlContent={(tab?.content as string) ?? ''} /> : tab.content}
             </TabPanel>
           ) : (

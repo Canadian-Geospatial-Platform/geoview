@@ -126,6 +126,19 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     [setSelectedLayerPath]
   );
 
+  /**
+   * Render the right panel content based on selected Layer path of time slider.
+   * NOTE: Here we return null, so that in responsive grid layout, it can be used as flag to render the guide for time slider.
+   * @returns {JSX.Element | null} JSX.Element | null
+   */
+  const renderContent = (): JSX.Element | null => {
+    if (selectedLayerPath) {
+      return <TimeSlider mapId={mapId} config={configObj} layerPath={selectedLayerPath} key={selectedLayerPath} />;
+    }
+
+    return null;
+  };
+
   return (
     <Layout
       selectedLayerPath={selectedLayerPath}
@@ -134,7 +147,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       onGuideIsOpen={handleGuideIsOpen}
       guideContentIds={['timeSlider']}
     >
-      {selectedLayerPath && <TimeSlider mapId={mapId} config={configObj} layerPath={selectedLayerPath} key={selectedLayerPath} />}
+      {renderContent()}
     </Layout>
   );
 }
