@@ -374,11 +374,11 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         selectedTab={memoFooterBarTabs.findIndex((t) => t.id === selectedTab)}
         tabsProps={{
           variant: 'scrollable',
-          scrollButtons: true,
+          scrollButtons: 'auto',
           allowScrollButtonsMobile: true,
           sx: {
             '& .MuiTabs-scrollButtons': {
-              [theme.breakpoints.up('md')]: {
+              [theme.breakpoints.up('lg')]: {
                 visibility: 'hidden',
               },
             },
