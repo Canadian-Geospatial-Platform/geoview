@@ -63,7 +63,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     // If any
     if (timeSliderValues) {
       // Add the time slider in store
-      this.addTimeSliderLayerAndApplyFilters(mapId, layerConfig.layerPath, timeSliderValues);
+      this.#addTimeSliderLayerAndApplyFilters(mapId, layerConfig.layerPath, timeSliderValues);
     }
   }
 
@@ -73,7 +73,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath - The layer path of the layer to add to the state
    * @param {TypeTimeSliderValues} timeSliderValues - The time slider values to add and apply filters
    */
-  static addTimeSliderLayerAndApplyFilters(mapId: string, layerPath: string, timeSliderValues: TypeTimeSliderValues): void {
+  static #addTimeSliderLayerAndApplyFilters(mapId: string, layerPath: string, timeSliderValues: TypeTimeSliderValues): void {
     // If there is no TimeSlider
     if (!this.getTimesliderState(mapId)) return;
 
