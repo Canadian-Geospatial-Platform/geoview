@@ -23,7 +23,7 @@ import { logger } from '@/core/utils/logger';
 interface GeolocatorFiltersType {
   geoLocationData: GeoListItem[];
   searchValue: string;
-  error: Error | undefined;
+  error: Error | null;
 }
 
 /**

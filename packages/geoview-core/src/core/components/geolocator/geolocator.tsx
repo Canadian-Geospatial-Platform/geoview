@@ -31,7 +31,7 @@ export function Geolocator(): JSX.Element {
 
   // internal state
   const [data, setData] = useState<GeoListItem[]>();
-  const [error, setError] = useState<Error>();
+  const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>('');
 
@@ -104,6 +104,7 @@ export function Geolocator(): JSX.Element {
         throw new Error('Error');
       }
       const result = (await response.json()) as GeoListItem[];
+      setError(null);
       setIsLoading(false);
       const ddSupport = getDecimalDegreeItem(searchTerm);
       if (ddSupport) {
@@ -236,7 +237,7 @@ export function Geolocator(): JSX.Element {
           <ProgressBar />
         </Box>
       )}
-      {!!data && searchValue?.length >= MIN_SEARCH_LENGTH && (
+      {!!data && searchValue?.length >= MIN_SEARCH_LENGTH && !error && (
         <Box sx={sxClasses.searchResult}>
           <GeolocatorResult geoLocationData={data} searchValue={searchValue} error={error} />
         </Box>
