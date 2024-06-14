@@ -100,6 +100,7 @@ export class GeometryApi {
    * @param {Coordinate} points points of lng/lat to draw a polyline
    * @param options polyline options including styling
    * @param {string} id an optional id to be used to manage this geometry
+   * @param {string} groupId an optional group id in witch we want to add the geometry
    *
    * @returns {Feature} a geometry containing the id and the created geometry
    */
@@ -110,7 +111,8 @@ export class GeometryApi {
       geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
       style?: TypeFeatureStyle;
     },
-    id?: string
+    id?: string,
+    groupId?: string
   ): Feature {
     const polylineOptions = options || {};
 
@@ -155,7 +157,7 @@ export class GeometryApi {
     polyline.set('GeometryGroupIndex', this.activeGeometryGroupIndex);
 
     // add geometry to feature collection
-    this.geometryGroups[this.activeGeometryGroupIndex].vectorSource.addFeature(polyline);
+    this.addToGeometryGroup(polyline, groupId);
 
     // add the geometry to the geometries array
     this.geometries.push(polyline);
@@ -172,6 +174,7 @@ export class GeometryApi {
    * @param {Coordinate} points array of points to create the polygon
    * @param options polygon options including styling
    * @param {string} optionalFeatureId an optional id to be used to manage this geometry
+   * @param {string} groupId an optional group id in witch we want to add the geometry
    *
    * @returns {Feature} a geometry containing the id and the created geometry
    */
@@ -182,7 +185,8 @@ export class GeometryApi {
       geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
       style?: TypeFeatureStyle;
     },
-    optionalFeatureId?: string
+    optionalFeatureId?: string,
+    groupId?: string
   ): Feature {
     const polygonOptions = options || {};
 
@@ -227,7 +231,7 @@ export class GeometryApi {
     polygon.set('GeometryGroupIndex', this.activeGeometryGroupIndex);
 
     // add geometry to feature collection
-    this.geometryGroups[this.activeGeometryGroupIndex].vectorSource.addFeature(polygon);
+    this.addToGeometryGroup(polygon, groupId);
 
     // add the geometry to the geometries array
     this.geometries.push(polygon);
@@ -244,6 +248,7 @@ export class GeometryApi {
    * @param {Coordinate} coordinate long lat coordinate of the circle
    * @param options circle options including styling
    * @param {string} optionalFeatureId an optional id to be used to manage this geometry
+   * @param {string} groupId an optional group id in witch we want to add the geometry
    *
    * @returns {Feature} a geometry containing the id and the created geometry
    */
@@ -254,7 +259,8 @@ export class GeometryApi {
       geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
       style?: TypeFeatureCircleStyle;
     },
-    optionalFeatureId?: string
+    optionalFeatureId?: string,
+    groupId?: string
   ): Feature {
     const circleOptions = options || {};
 
@@ -305,7 +311,7 @@ export class GeometryApi {
     circle.set('GeometryGroupIndex', this.activeGeometryGroupIndex);
 
     // add geometry to feature collection
-    this.geometryGroups[this.activeGeometryGroupIndex].vectorSource.addFeature(circle);
+    this.addToGeometryGroup(circle, groupId);
 
     // add the geometry to the geometries array
     this.geometries.push(circle);
@@ -322,6 +328,7 @@ export class GeometryApi {
    * @param {Coordinate} coordinate the long lat position of the marker
    * @param options marker options including styling
    * @param {string} optionalFeatureId an optional id to be used to manage this geometry
+   * @param {string} groupId an optional group id in witch we want to add the geometry
    *
    * @returns {Feature} a geometry containing the id and the created geometry
    */
@@ -332,7 +339,8 @@ export class GeometryApi {
       geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
       style?: TypeIconStyle;
     },
-    optionalFeatureId?: string
+    optionalFeatureId?: string,
+    groupId?: string
   ): Feature {
     // Read the params and set defaults when needed
     const markerOptions = options || {
@@ -369,7 +377,7 @@ export class GeometryApi {
     marker.set('GeometryGroupIndex', this.activeGeometryGroupIndex);
 
     // add geometry to feature collection
-    this.geometryGroups[this.activeGeometryGroupIndex].vectorSource.addFeature(marker);
+    this.addToGeometryGroup(marker, groupId);
 
     // add the geometry to the geometries array
     this.geometries.push(marker);
