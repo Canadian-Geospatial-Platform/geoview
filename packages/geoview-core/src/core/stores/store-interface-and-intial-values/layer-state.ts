@@ -3,6 +3,7 @@
 import { useStore } from 'zustand';
 
 import { FitOptions } from 'ol/View';
+import { Extent } from 'ol/extent';
 
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
@@ -10,7 +11,6 @@ import { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import { TypeResultSet, TypeResultSetEntry, TypeStyleConfig } from '@/geo/map/map-schema-types';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { TypeLocalizedString } from '@/api/config/types/map-schema-types';
 import { TypeGeoviewLayerType, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 
@@ -84,14 +84,12 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         const curLayers = get().layerState.legendLayers;
         return LegendEventProcessor.findLayerByPath(curLayers, layerPath);
       },
-      getLayerBounds: (layerPath: string) => {
-        const layer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayer(layerPath);
-        if (layer) {
-          // TODO: Refactor - Layers refactoring. There needs to be a calculateBounds somewhere (new layers, new config?) to complete the full layers migration.
-          const bounds = layer.calculateBounds(layerPath);
-          if (bounds) return bounds;
-        }
-        return undefined;
+
+      // TODO: Refactor - This 'get' shouldn't be an 'action'. This function should be removed and a state getter be created to access the bounds state from the store directly (for the UI to use)
+      getLayerBounds: (layerPath: string): Extent | undefined => {
+        // TODO: Check - There is a calculateBounds() call here in a state action which should probably just get the layer bounds from the store/state? not recalculate again?
+        // Redirect to processor.
+        return MapEventProcessor.getMapViewerLayerAPI(get().mapId).calculateBounds(layerPath);
       },
 
       /**
@@ -172,9 +170,8 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       zoomToLayerExtent: (layerPath: string): Promise<void> => {
         const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
 
-        // Get the layer and always calculate the bounds. This will prevent bounds undefined error
-        const myLayer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayer(layerPath.split('/')[0])!;
-        const bounds = myLayer.calculateBounds(layerPath);
+        // Calculate the bounds on the layer path.
+        const bounds = MapEventProcessor.getMapViewerLayerAPI(get().mapId).calculateBounds(layerPath);
         if (bounds) return MapEventProcessor.zoomToExtent(get().mapId, bounds, options);
         return Promise.resolve();
       },
@@ -262,7 +259,6 @@ export type TypeLegendResultInfo = {
 export type LegendQueryStatus = 'init' | 'querying' | 'queried';
 
 export type TypeLegend = {
-  layerName?: TypeLocalizedString;
   type: TypeGeoviewLayerType;
   styleConfig?: TypeStyleConfig | null;
   // Layers other than vector layers use the HTMLCanvasElement type for their legend.

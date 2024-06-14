@@ -1,3 +1,4 @@
+import BaseLayer from 'ol/layer/Base';
 import TileLayer from 'ol/layer/Tile';
 import { Options as TileOptions } from 'ol/layer/BaseTile';
 import XYZ, { Options as SourceOptions } from 'ol/source/XYZ';
@@ -7,17 +8,15 @@ import { Extent } from 'ol/extent';
 import defaultsDeep from 'lodash/defaultsDeep';
 
 import { TypeLocalizedString } from '@config/types/map-schema-types';
-// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
+import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
   TypeSourceTileInitialConfig,
   TypeGeoviewLayerConfig,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
-import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { Cast, toJsonObject } from '@/core/types/global-types';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
@@ -177,15 +176,19 @@ export class XYZTiles extends AbstractGeoViewRaster {
   /** ****************************************************************************************************************************
    * This method creates a GeoView XYZTiles layer using the definition provided in the layerConfig parameter.
    *
-   * @param {XYZTilesLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns {Promise<TypeBaseRasterLayer | undefined>} The GeoView raster layer that has been created.
+   * @returns {Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
    */
   // GV Layers Refactoring - Obsolete (in config? in layers?)
-  protected override async processOneLayerEntry(layerConfig: XYZTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | undefined> {
+  protected override async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
     await super.processOneLayerEntry(layerConfig);
+
+    // Instance check
+    if (!(layerConfig instanceof XYZTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+
     const sourceOptions: SourceOptions = {
       url: getLocalizedValue(layerConfig.source.dataAccessPath as TypeLocalizedString, AppEventProcessor.getDisplayLanguage(this.mapId)),
     };
@@ -205,21 +208,41 @@ export class XYZTiles extends AbstractGeoViewRaster {
       sourceOptions.tileGrid = new TileGrid(tileGridOptions);
     }
 
-    const tileLayerOptions: TileOptions<XYZ> = { source: new XYZ(sourceOptions) };
-    // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-    if (layerConfig.initialSettings?.className !== undefined) tileLayerOptions.className = layerConfig.initialSettings.className;
-    if (layerConfig.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerConfig.initialSettings.extent;
-    if (layerConfig.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
-    if (layerConfig.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
-    if (layerConfig.initialSettings?.states?.opacity !== undefined) tileLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
-    // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
-    // GV            in the 'loading' state if the flag value is false.
+    // Create the source
+    const source = new XYZ(sourceOptions);
 
-    // Create the OpenLayer layer
-    const olLayer = new TileLayer(tileLayerOptions);
+    // GV Time to request an OpenLayers layer!
+    const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
 
-    // TODO: Refactor - Wire it up
-    this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'tile');
+    // If any response
+    let olLayer: TileLayer<XYZ> | undefined;
+    if (requestResult.length > 0) {
+      // Get the OpenLayer that was created
+      olLayer = requestResult[0] as TileLayer<XYZ>;
+    }
+
+    // If no olLayer was obtained
+    if (!olLayer) {
+      // We're working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
+      const tileLayerOptions: TileOptions<XYZ> = { source };
+      // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+      if (layerConfig.initialSettings?.className !== undefined) tileLayerOptions.className = layerConfig.initialSettings.className;
+      if (layerConfig.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerConfig.initialSettings.extent;
+      if (layerConfig.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
+      if (layerConfig.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
+      if (layerConfig.initialSettings?.states?.opacity !== undefined) tileLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
+      // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
+      // GV            in the 'loading' state if the flag value is false.
+
+      // Create the OpenLayer layer
+      olLayer = new TileLayer(tileLayerOptions);
+
+      // Hook the loaded event
+      this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'tile');
+    }
+
+    // GV Time to emit about the layer creation!
+    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
 
     return Promise.resolve(olLayer);
   }
@@ -228,12 +251,15 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
-   * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
-   * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
   // GV Layers Refactoring - Obsolete (in config?)
-  protected override processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected override processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
+    // Instance check
+    if (!(layerConfig instanceof XYZTilesLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+
     if (this.metadata) {
       const metadataLayerConfigFound = Cast<XYZTilesLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig).find(
         (metadataLayerConfig) => metadataLayerConfig.layerId === layerConfig.layerId
@@ -246,6 +272,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
       layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, metadataLayerConfigFound!.initialSettings);
 
       if (layerConfig.initialSettings?.extent)
+        // TODO: Check - Why are we converting to the map projection in the pre-processing? It'd be better to standardize to 4326 here (or leave untouched), as it's part of the initial configuration and handle it later?
         // eslint-disable-next-line no-param-reassign
         layerConfig.initialSettings.extent = this.getMapViewer().convertExtentLngLatToMapProj(layerConfig.initialSettings.extent);
     }
@@ -256,28 +283,25 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
    *
    * @param {string} layerPath The Layer path to the layer's configuration.
-   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
    * @returns {Extent | undefined} The new layer bounding box.
    */
   // GV Layers Refactoring - Obsolete (in layers)
-  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+  override getBounds(layerPath: string): Extent | undefined {
+    // Get the layer
     const layer = this.getOLLayer(layerPath) as TileLayer<XYZ> | undefined;
-    const projection = layer?.getSource()?.getProjection()?.getCode() || this.getMapViewer().getProjection().getCode();
 
-    const layerBounds = layer?.getSource()?.getTileGrid()?.getExtent();
-    if (layerBounds) {
-      let transformedBounds = layerBounds;
-      if (this.metadata?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')) {
-        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, projection);
-      }
+    // Get the source projection
+    const sourceProjection = this.getSourceProjection(layerPath);
 
-      // eslint-disable-next-line no-param-reassign
-      if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
-      // eslint-disable-next-line no-param-reassign
-      else bounds = getMinOrMaxExtents(bounds, transformedBounds);
+    // Get the layer bounds
+    let sourceExtent = layer?.getSource()?.getTileGrid()?.getExtent();
+    if (sourceExtent) {
+      // Make sure we're in the map projection
+      sourceExtent = this.getMapViewer().convertExtentFromProjToMapProj(sourceExtent, sourceProjection);
     }
 
-    return bounds;
+    // Return the calculated layer bounds
+    return sourceExtent;
   }
 }

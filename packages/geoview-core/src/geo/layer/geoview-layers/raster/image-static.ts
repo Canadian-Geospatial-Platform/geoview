@@ -1,23 +1,22 @@
 import axios from 'axios';
 
-import ImageLayer from 'ol/layer/Image';
 import Static, { Options as SourceOptions } from 'ol/source/ImageStatic';
+import BaseLayer from 'ol/layer/Base';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
+import ImageLayer from 'ol/layer/Image';
 import { Extent } from 'ol/extent';
-
-// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
 
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
+import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { getLocalizedValue } from '@/core/utils/utilities';
-import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { loadImage } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.IMAGE_STATIC;
@@ -155,8 +154,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
       const legendImage = await this.#getLegendImage(layerConfig!);
       if (!legendImage) {
         const legend: TypeLegend = {
-          type: this.type,
-          layerName: layerConfig!.layerName,
+          type: CONST_LAYER_TYPES.IMAGE_STATIC,
           legend: null,
         };
         return legend;
@@ -169,15 +167,13 @@ export class ImageStatic extends AbstractGeoViewRaster {
         const drawingContext = drawingCanvas.getContext('2d')!;
         drawingContext.drawImage(image, 0, 0);
         const legend: TypeLegend = {
-          type: this.type,
-          layerName: layerConfig!.layerName,
+          type: CONST_LAYER_TYPES.IMAGE_STATIC,
           legend: drawingCanvas,
         };
         return legend;
       }
       const legend: TypeLegend = {
-        type: this.type,
-        layerName: layerConfig!.layerName,
+        type: CONST_LAYER_TYPES.IMAGE_STATIC,
         legend: null,
       };
       return legend;
@@ -244,13 +240,16 @@ export class ImageStatic extends AbstractGeoViewRaster {
   /** ****************************************************************************************************************************
    * This method creates a GeoView Image Static layer using the definition provided in the layerConfig parameter.
    *
-   * @param {ImageStaticLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns {Promise<TypeBaseRasterLayer | undefined>} The GeoView raster layer that has been created.
+   * @returns {Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
    */
   // GV Layers Refactoring - Obsolete (in config?, in layers?)
-  protected override async processOneLayerEntry(layerConfig: ImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | undefined> {
+  protected override async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined> {
     await super.processOneLayerEntry(layerConfig);
+
+    // Instance check
+    if (!(layerConfig instanceof ImageStaticLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 
     if (!layerConfig?.source?.extent) throw new Error('Parameter extent is not defined in source element of layerConfig.');
     const sourceOptions: SourceOptions = {
@@ -268,20 +267,41 @@ export class ImageStatic extends AbstractGeoViewRaster {
       sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
     } else throw new Error('Parameter projection is not define in source element of layerConfig.');
 
-    const staticImageOptions: ImageOptions<Static> = { source: new Static(sourceOptions) };
-    // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-    if (layerConfig.initialSettings?.extent !== undefined) staticImageOptions.extent = layerConfig.initialSettings.extent;
-    if (layerConfig.initialSettings?.maxZoom !== undefined) staticImageOptions.maxZoom = layerConfig.initialSettings.maxZoom;
-    if (layerConfig.initialSettings?.minZoom !== undefined) staticImageOptions.minZoom = layerConfig.initialSettings.minZoom;
-    if (layerConfig.initialSettings?.states?.opacity !== undefined) staticImageOptions.opacity = layerConfig.initialSettings.states.opacity;
-    // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
-    // GV            in the 'loading' state if the flag value is false.
+    // Create the source
+    const source = new Static(sourceOptions);
 
-    // Create the OpenLayer layer
-    const olLayer = new ImageLayer(staticImageOptions);
+    // GV Time to request an OpenLayers layer!
+    const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
 
-    // TODO: Refactor - Wire it up
-    this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'image');
+    // If any response
+    let olLayer: ImageLayer<Static> | undefined;
+    if (requestResult.length > 0) {
+      // Get the OpenLayer that was created
+      olLayer = requestResult[0] as ImageLayer<Static>;
+    }
+
+    // If no olLayer was obtained
+    if (!olLayer) {
+      // We're working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
+      const staticImageOptions: ImageOptions<Static> = { source };
+      // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+      if (layerConfig.initialSettings?.extent !== undefined) staticImageOptions.extent = layerConfig.initialSettings.extent;
+      if (layerConfig.initialSettings?.maxZoom !== undefined) staticImageOptions.maxZoom = layerConfig.initialSettings.maxZoom;
+      if (layerConfig.initialSettings?.minZoom !== undefined) staticImageOptions.minZoom = layerConfig.initialSettings.minZoom;
+      if (layerConfig.initialSettings?.states?.opacity !== undefined)
+        staticImageOptions.opacity = layerConfig.initialSettings.states.opacity;
+      // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
+      // GV            in the 'loading' state if the flag value is false.
+
+      // Create the OpenLayer layer
+      olLayer = new ImageLayer(staticImageOptions);
+
+      // Hook the loaded event
+      this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'image');
+    }
+
+    // GV Time to emit about the layer creation!
+    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
 
     return Promise.resolve(olLayer);
   }
@@ -290,29 +310,25 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
    *
    * @param {string} layerPath The Layer path to the layer's configuration.
-   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
-   * @returns {Extent} The new layer bounding box.
+   * @returns {Extent | undefined} The new layer bounding box.
    */
   // GV Layers Refactoring - Obsolete (in layers)
-  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+  override getBounds(layerPath: string): Extent | undefined {
+    // Get the layer
     const layer = this.getOLLayer(layerPath) as ImageLayer<Static> | undefined;
 
-    const layerBounds = layer?.getSource()?.getImageExtent();
-    const projection = layer?.getSource()?.getProjection()?.getCode() || this.getMapViewer().getProjection().getCode();
+    // Get the source projection
+    const sourceProjection = this.getSourceProjection(layerPath);
 
-    if (layerBounds) {
-      let transformedBounds = layerBounds;
-      if (this.metadata?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')) {
-        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, projection);
-      }
-
-      // eslint-disable-next-line no-param-reassign
-      if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
-      // eslint-disable-next-line no-param-reassign
-      else bounds = getMinOrMaxExtents(bounds, transformedBounds);
+    // Get the layer bounds
+    let sourceExtent = layer?.getSource()?.getImageExtent();
+    if (sourceExtent) {
+      // Make sure we're in the map projection
+      sourceExtent = this.getMapViewer().convertExtentFromProjToMapProj(sourceExtent, sourceProjection);
     }
 
-    return bounds;
+    // Return the calculated layer bounds
+    return sourceExtent;
   }
 }

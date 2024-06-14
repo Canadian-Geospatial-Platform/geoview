@@ -196,9 +196,14 @@ export class OgcFeature extends AbstractGeoViewVector {
           };
 
         if (layerConfig.initialSettings?.extent)
+          // TODO: Check - Why are we converting to the map projection in the pre-processing? It'd be better to standardize to 4326 here (or leave untouched), as it's part of the initial configuration and handle it later?
           layerConfig.initialSettings.extent = this.getMapViewer().convertExtentLngLatToMapProj(layerConfig.initialSettings.extent);
 
         if (!layerConfig.initialSettings?.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
+          // TODO: Check - Why are we converting to the map projection in the pre-processing? It'd be better to standardize to 4326 here (or leave untouched), as it's part of the initial configuration?
+          // TO.DOCONT: We're already making sure to project the settings in the map projection when we getBounds(). Seems we're doing work twice? Should be standardized so that the
+          // TO.DOCONT: layer.getBounds() are coherent between children classes. And should probably *not* reproject in the map projection during layer metadata pre-processing if we want to
+          // TO.DOCONT: be able to, possibly, fetch metadata information in a standalone manner, outside of a map.
           // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
           layerConfig.initialSettings!.bounds = this.getMapViewer().convertExtentFromProjToMapProj(
             foundCollection.extent.spatial.bbox[0] as number[],
@@ -216,12 +221,15 @@ export class OgcFeature extends AbstractGeoViewVector {
    * This method is used to process the layer's metadata. It will fill the empty outfields and aliasFields properties of the
    * layer's configuration.
    *
-   * @param {VectorLayerEntryConfig} layerConfig The layer entry configuration to process.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
-   * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
    */
   // GV Layers Refactoring - Obsolete (in config?)
-  protected override async processLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected override async processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
+    // Instance check
+    if (!(layerConfig instanceof VectorLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+
     try {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
       if (metadataUrl) {

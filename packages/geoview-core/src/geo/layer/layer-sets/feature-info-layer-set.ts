@@ -49,8 +49,13 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    */
   protected override onRegisterLayerCheck(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): boolean {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
+
     // Return if the layer is of queryable type and source is queryable
-    return AbstractLayerSet.isQueryableType(layer) && AbstractLayerSet.isSourceQueryable(layer, layerPath);
+    return (
+      super.onRegisterLayerCheck(layer, layerPath) &&
+      AbstractLayerSet.isQueryableType(layer) &&
+      AbstractLayerSet.isSourceQueryable(layer, layerPath)
+    );
   }
 
   /**
@@ -59,6 +64,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    */
   protected override onRegisterLayer(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): void {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
+
     // Call parent
     super.onRegisterLayer(layer, layerPath);
 
@@ -268,7 +274,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 /**
  * Define a delegate for the event handler function signature
  */
-type QueryEndedDelegate = EventDelegateBase<FeatureInfoLayerSet, QueryEndedEvent>;
+type QueryEndedDelegate = EventDelegateBase<FeatureInfoLayerSet, QueryEndedEvent, void>;
 
 /**
  * Define an event for the delegate

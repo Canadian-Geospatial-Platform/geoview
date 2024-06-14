@@ -1,12 +1,9 @@
 import BaseLayer from 'ol/layer/Base';
 import { Extent } from 'ol/extent';
 import Collection from 'ol/Collection';
-import { Source } from 'ol/source';
-import VectorImageLayer from 'ol/layer/VectorImage';
-import ImageLayer from 'ol/layer/Image';
-import VectorTileLayer from 'ol/layer/VectorTile';
-import BaseVectorLayer from 'ol/layer/BaseVector';
-import TileLayer from 'ol/layer/Tile';
+import { ImageArcGISRest, ImageWMS, Source, VectorTile, XYZ } from 'ol/source';
+import Static from 'ol/source/ImageStatic';
+import VectorSource from 'ol/source/Vector';
 
 import { GeoCore } from '@/geo/layer/other/geocore';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
@@ -18,14 +15,14 @@ import { ConfigValidation } from '@/core/utils/config/config-validation';
 import { createLocalizedString, generateId, whenThisThen } from '@/core/utils/utilities';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
-import { AbstractGeoViewLayer, LayerCreationEvent } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer, LayerCreationEvent, LayerRequestingEvent } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import {
   MapConfigLayerEntry,
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   mapConfigLayerEntryIsGeoCore,
   layerEntryIsGroupLayer,
-  CONST_LAYER_ENTRY_TYPES,
   TypeLayerStatus,
   TypeClassBreakStyleConfig,
   TypeUniqueValueStyleConfig,
@@ -49,12 +46,12 @@ import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-
 import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
 import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
 import { GeoViewLayerCreatedTwiceError, GeoViewLayerNotCreatedError } from '@/geo/layer/exceptions/layer-exceptions';
-import { getMinOrMaxExtents } from '@/geo/utils/utilities';
+import { getExtentUnionMaybe, getMinOrMaxExtents } from '@/geo/utils/utilities';
 
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { AbstractGeoViewVector, api } from '@/app';
+import { api } from '@/app';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
 import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
@@ -69,6 +66,8 @@ import { GVEsriFeature } from './gv-layers/vector/gv-esri-feature';
 import { GVGeoJSON } from './gv-layers/vector/gv-geojson';
 import { GVOGCFeature } from './gv-layers/vector/gv-ogc-feature';
 import { GVVectorTiles } from './gv-layers/vector/gv-vector-tiles';
+import { GVWFS } from './gv-layers/vector/gv-wfs';
+import { GVCSV } from './gv-layers/vector/gv-csv';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
@@ -78,10 +77,11 @@ import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classe
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
+import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
 // import { LayerMockup } from './layer-mockup';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { TypeLegendItem } from '@/core/components/layers/types';
-import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 
 export type GeoViewLayerAddedResult = {
@@ -213,46 +213,6 @@ export class LayerApi {
   }
 
   /**
-   * Asynchronously gets a layer using its id and return the layer data.
-   * If the layer we're searching for has to be processed, set mustBeProcessed to true when awaiting on this method.
-   * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
-   * Note this function uses the 'Async' suffix to differentiate it from 'getGeoviewLayer()'.
-   * @param {string} geoviewLayerId - The geoview layer id to look for
-   * @param {boolean} mustBeProcessed - Indicate if the layer we're searching for must be found only once processed
-   * @param {number} timeout - Optionally indicate the timeout after which time to abandon the promise
-   * @param {number} checkFrequency - Optionally indicate the frequency at which to check for the condition on the layer
-   * @returns {Promise<AbstractGeoViewLayer>} A promise with the AbstractGeoViewLayer
-   * @throws An exception when the layer for the layer id couldn't be found, or waiting time expired
-   */
-  async getGeoviewLayerByIdAsync(
-    geoviewLayerId: string,
-    mustBeProcessed: boolean,
-    timeout?: number,
-    checkFrequency?: number
-  ): Promise<AbstractGeoViewLayer> {
-    // Redirects
-    const layer = this.getGeoviewLayer(geoviewLayerId);
-
-    // If layer was found
-    if (layer) {
-      // Check if not waiting and returning immediately
-      if (!mustBeProcessed) return Promise.resolve(layer);
-
-      try {
-        // Waiting for the processed phase, possibly throwing exception if that's not happening
-        await layer.waitForAllLayerStatusAreGreaterThanOrEqualTo(timeout, checkFrequency);
-        return layer;
-      } catch (error) {
-        // Throw
-        throw new Error(`Took too long for layer ${geoviewLayerId} to get in 'processed' phase`);
-      }
-    }
-
-    // Throw
-    throw new Error(`Layer ${geoviewLayerId} not found.`);
-  }
-
-  /**
    * Temporary new function for migration purposes, replacing getGeoviewLayerIds
    * @returns The ids of the new Geoview Layers
    */
@@ -358,9 +318,17 @@ export class LayerApi {
    * Obsolete function to set the layer configuration in the registered layers.
    */
   setLayerEntryConfigObsolete(layerConfig: ConfigBaseClass): void {
-    // FIXME: Obsolete function that should be deleted once the Layers refactoring is done
-    // Keep it :( (get rid of this later)
-    this.#layerEntryConfigs[layerConfig.layerPath] = layerConfig;
+    // FIXME: This function should be deleted once the Layers refactoring is done. It unregisters and registers an updated layer entry config.
+    // FIX.MECONT: This is because of the EsriDynamic and EsriFeature entry config being generated on-the-fly when registration of layer entry config has already happened.
+    // Get the config already existing if any
+    const alreadyExisting = this.#layerEntryConfigs[layerConfig.layerPath];
+    if (alreadyExisting) {
+      // Unregister the old one
+      this.unregisterLayerConfig(alreadyExisting);
+    }
+
+    // Register this new one
+    this.registerLayerConfigInit(layerConfig);
   }
 
   /**
@@ -681,19 +649,29 @@ export class LayerApi {
         // this.registerLayerConfigInit(layerConfig);
       });
 
-      // Register when OpenLayer layer has been created
+      // Register hook when an OpenLayer source has been created
+      layerBeingAdded.onLayerRequesting((geoviewLayer: AbstractGeoViewLayer, event: LayerRequestingEvent): BaseLayer | undefined => {
+        // Log
+        logger.logDebug(`Requesting layer for ${event.config.layerPath} on map ${this.getMapId()}`, event.config);
+
+        // If new layers mode, create the corresponding GVLayer
+        if (LayerApi.LAYERS_HYBRID_MODE) {
+          const gvLayer = this.#createGVLayer(this.getMapId(), geoviewLayer, event.source, event.config, event.extraConfig);
+          if (gvLayer) return gvLayer.getOLLayer();
+        }
+
+        // Don't provie any layer, working in old mode
+        return undefined;
+      });
+
+      // Register hook when an OpenLayer layer has been created
       layerBeingAdded.onLayerCreation((geoviewLayer: AbstractGeoViewLayer, event: LayerCreationEvent) => {
         // Log
         logger.logDebug(`OpenLayer created for ${event.config.layerPath} on map ${this.getMapId()}`, event.config);
 
         // Keep a reference
+        // This is tempting to put in the onLayerRequesting handler, but this one here also traps the LayerGroups
         this.#olLayers[event.config.layerPath] = event.layer;
-
-        // If new layers mode, create the corresponding GVLayer
-        if (LayerApi.LAYERS_HYBRID_MODE) {
-          // Create the right type of GVLayer
-          this.#createGVLayer(this.getMapId(), geoviewLayer, event.layer, event.config);
-        }
       });
 
       // Create a promise about the layer will be on the map
@@ -736,38 +714,28 @@ export class LayerApi {
     // Keep it
     this.#layerEntryConfigs[layerConfig.layerPath] = layerConfig;
 
-    // If not a group
-    if (layerConfig.entryType !== CONST_LAYER_ENTRY_TYPES.GROUP) {
-      // Register the layer entry config
-      this.registerLayerConfigInLayerSets(layerConfig as AbstractBaseLayerEntryConfig);
-    }
+    // Register the layer entry config
+    this.registerLayerConfigInLayerSets(layerConfig);
   }
 
   /**
    * Registers the layer config in the LayerApi to start managing it.
    * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry config to register
    */
-  registerLayerConfigInLayerSets(layerConfig: AbstractBaseLayerEntryConfig): void {
+  registerLayerConfigInLayerSets(layerConfig: ConfigBaseClass): void {
     // TODO: Refactor - Keeping this function separate from registerLayerConfigInit for now, because this registerLayerConfigUpdate was
     // TO.DOCONT: called in 'processListOfLayerEntryConfig' processes happening externally. I've since commented those calls to try
     // TO.DOCONT: things out. If things are stable, we can remove the dead code in the processListOfLayerEntryConfig and merge
     // TO.DOCONT: registerLayerConfigInit with registerLayerConfigUpdate
 
     // Register for ordered layer information
-    this.#registerForOrderedLayerInfo(layerConfig);
+    this.#registerForOrderedLayerInfo(layerConfig as TypeLayerEntryConfig);
 
     // Register for TimeSlider
-    this.#registerForTimeSlider(layerConfig).catch((error) => {
+    this.#registerForTimeSlider(layerConfig as TypeLayerEntryConfig).catch((error) => {
       // Log
       logger.logPromiseFailed('in registration of layer for the time slider', error);
     });
-
-    // TODO: Uncomment this when visibility logic handle within orchestrator rather than too close to the store
-    // Register an event on the layer visible changed
-    // geoviewLayer.onVisibleChanged((layer, event) => {
-    //   // Propagate in the store
-    //   MapEventProcessor.setOrToggleMapLayerVisibility(this.getMapId(), registrationEvent.layerPath, event.visible);
-    // });
 
     // Tell the layer sets about it
     this.#allLayerSets.forEach((layerSet) => {
@@ -807,16 +775,20 @@ export class LayerApi {
   #createGVLayer(
     mapId: string,
     geoviewLayer: AbstractGeoViewLayer,
-    olLayer: BaseLayer,
-    config: ConfigBaseClass
+    olSource: Source,
+    config: ConfigBaseClass,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    extraConfig?: any
   ): AbstractGVLayer | undefined {
     // If new mode
     let metadata;
     let timeDimension;
+    let style;
     if (LayerApi.LAYERS_HYBRID_MODE) {
       // Get the metadata and the time dimension information as processed
       metadata = geoviewLayer.getLayerMetadata(config.layerPath);
       timeDimension = geoviewLayer.getTemporalDimension(config.layerPath);
+      style = geoviewLayer.getStyle(config.layerPath);
 
       // HACK: INJECT CONFIGURATION STUFF PRETENDNG THEY WERE PROCESSED
       // GV Keep this code commented in the source base for now
@@ -857,28 +829,34 @@ export class LayerApi {
       //   timeDimension = LayerMockup.configMSITemporalDimension();
       // }
 
-      // If any metadata
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-param-reassign
-      if (metadata && config instanceof AbstractBaseLayerEntryConfig) config.setMetadata(metadata);
+      // If good config
+      if (config instanceof AbstractBaseLayerEntryConfig) {
+        // If any metadata
+        if (metadata) config.setMetadata(metadata);
+      }
     }
 
     // Create the right GV Layer based on the OLLayer and config type
     let gvLayer;
-    if (olLayer instanceof ImageLayer && config instanceof EsriDynamicLayerEntryConfig) gvLayer = new GVEsriDynamic(mapId, olLayer, config);
-    else if (olLayer instanceof ImageLayer && config instanceof EsriImageLayerEntryConfig)
-      gvLayer = new GVEsriImage(mapId, olLayer, config);
-    else if (olLayer instanceof ImageLayer && config instanceof ImageStaticLayerEntryConfig)
-      gvLayer = new GVImageStatic(mapId, olLayer, config);
-    else if (olLayer instanceof ImageLayer && config instanceof OgcWmsLayerEntryConfig) gvLayer = new GVWMS(mapId, olLayer, config);
-    else if (olLayer instanceof TileLayer && config instanceof XYZTilesLayerEntryConfig) gvLayer = new GVXYZTiles(mapId, olLayer, config);
-    else if (olLayer instanceof VectorImageLayer && config instanceof EsriFeatureLayerEntryConfig)
-      gvLayer = new GVEsriFeature(mapId, olLayer, config);
-    else if (olLayer instanceof BaseVectorLayer && config instanceof GeoJSONLayerEntryConfig)
-      gvLayer = new GVGeoJSON(mapId, olLayer, config);
-    else if (olLayer instanceof BaseVectorLayer && config instanceof OgcFeatureLayerEntryConfig)
-      gvLayer = new GVOGCFeature(mapId, olLayer, config);
-    else if (olLayer instanceof VectorTileLayer && config instanceof VectorTilesLayerEntryConfig)
-      gvLayer = new GVVectorTiles(mapId, olLayer, config);
+    if (olSource instanceof ImageArcGISRest && config instanceof EsriDynamicLayerEntryConfig)
+      gvLayer = new GVEsriDynamic(mapId, olSource, config);
+    else if (olSource instanceof ImageArcGISRest && config instanceof EsriImageLayerEntryConfig)
+      gvLayer = new GVEsriImage(mapId, olSource, config);
+    else if (olSource instanceof Static && config instanceof ImageStaticLayerEntryConfig)
+      gvLayer = new GVImageStatic(mapId, olSource, config);
+    else if (olSource instanceof ImageWMS && config instanceof OgcWmsLayerEntryConfig)
+      gvLayer = new GVWMS(mapId, olSource, config, extraConfig.layerCapabilities);
+    else if (olSource instanceof VectorSource && config instanceof EsriFeatureLayerEntryConfig)
+      gvLayer = new GVEsriFeature(mapId, olSource, config);
+    else if (olSource instanceof VectorSource && config instanceof GeoJSONLayerEntryConfig)
+      gvLayer = new GVGeoJSON(mapId, olSource, config);
+    else if (olSource instanceof VectorSource && config instanceof OgcFeatureLayerEntryConfig)
+      gvLayer = new GVOGCFeature(mapId, olSource, config);
+    else if (olSource instanceof VectorSource && config instanceof WfsLayerEntryConfig) gvLayer = new GVWFS(mapId, olSource, config);
+    else if (olSource instanceof VectorSource && config instanceof CsvLayerEntryConfig) gvLayer = new GVCSV(mapId, olSource, config);
+    else if (olSource instanceof VectorTile && config instanceof VectorTilesLayerEntryConfig)
+      gvLayer = new GVVectorTiles(mapId, olSource, config);
+    else if (olSource instanceof XYZ && config instanceof XYZTilesLayerEntryConfig) gvLayer = new GVXYZTiles(mapId, olSource, config);
 
     // If created
     if (gvLayer) {
@@ -887,6 +865,9 @@ export class LayerApi {
 
       // If any time dimension to inject
       if (timeDimension) gvLayer.setTemporalDimension(timeDimension);
+
+      // If any style to inject
+      if (style) gvLayer.setStyle(config.layerPath, style);
 
       // Initialize the layer, triggering the loaded/error status
       gvLayer.init();
@@ -1100,12 +1081,14 @@ export class LayerApi {
   /**
    * Checks if the layer results sets are all ready using the resultSet from the FeatureInfo LayerSet
    */
-  checkFeatureInfoLayerResultSetsReady(callbackNotReady?: (layerEntryConfig: ConfigBaseClass) => void): boolean {
+  checkFeatureInfoLayerResultSetsReady(callbackNotReady?: (layerEntryConfig: AbstractBaseLayerEntryConfig) => void): boolean {
     // For each registered layer entry
     let allGood = true;
     this.getLayerEntryConfigs().forEach((layerConfig) => {
+      // If not instance of AbstractBaseLayerEntryConfig, don't expect a result set
+      if (!(layerConfig instanceof AbstractBaseLayerEntryConfig)) return;
       // If not queryable, don't expect a result set
-      if (!(layerConfig as AbstractBaseLayerEntryConfig).source?.featureInfo?.queryable) return;
+      if (!layerConfig.source?.featureInfo?.queryable) return;
 
       const { resultSet } = this.featureInfoLayerSet;
       const layerResultSetReady = Object.keys(resultSet).includes(layerConfig.layerPath);
@@ -1227,13 +1210,10 @@ export class LayerApi {
     theLayerMain?.setOpacity(1, layerPath);
 
     // If it is a group layer, highlight sublayers
-    if (layerEntryIsGroupLayer(this.#layerEntryConfigs[layerPath] as TypeLayerEntryConfig)) {
+    if (layerEntryIsGroupLayer(this.#layerEntryConfigs[layerPath])) {
       Object.keys(this.#layerEntryConfigs).forEach((registeredLayerPath) => {
         const theLayer = this.getGeoviewLayerHybrid(registeredLayerPath)!;
-        if (
-          !registeredLayerPath.startsWith(layerPath) &&
-          !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath] as TypeLayerEntryConfig)
-        ) {
+        if (!registeredLayerPath.startsWith(layerPath) && !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])) {
           const otherOpacity = theLayer.getOpacity(registeredLayerPath);
           theLayer.setOpacity((otherOpacity || 1) * 0.25, registeredLayerPath);
         } else this.getOLLayer(registeredLayerPath)!.setZIndex(999);
@@ -1242,10 +1222,7 @@ export class LayerApi {
       Object.keys(this.#layerEntryConfigs).forEach((registeredLayerPath) => {
         const theLayer = this.getGeoviewLayerHybrid(registeredLayerPath)!;
         // check for otherOlLayer is undefined. It would be undefined if a layer status is error
-        if (
-          registeredLayerPath !== layerPath &&
-          !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath] as TypeLayerEntryConfig)
-        ) {
+        if (registeredLayerPath !== layerPath && !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])) {
           const otherOpacity = theLayer.getOpacity(registeredLayerPath);
           theLayer.setOpacity((otherOpacity || 1) * 0.25, registeredLayerPath);
         }
@@ -1261,13 +1238,10 @@ export class LayerApi {
     this.featureHighlight.removeBBoxHighlight();
     if (this.#highlightedLayer.layerPath !== undefined) {
       const { layerPath, originalOpacity } = this.#highlightedLayer;
-      if (layerEntryIsGroupLayer(this.#layerEntryConfigs[layerPath] as TypeLayerEntryConfig)) {
+      if (layerEntryIsGroupLayer(this.#layerEntryConfigs[layerPath])) {
         Object.keys(this.#layerEntryConfigs).forEach((registeredLayerPath) => {
           const theLayer = this.getGeoviewLayerHybrid(registeredLayerPath)!;
-          if (
-            !registeredLayerPath.startsWith(layerPath) &&
-            !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath] as TypeLayerEntryConfig)
-          ) {
+          if (!registeredLayerPath.startsWith(layerPath) && !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])) {
             const otherOpacity = theLayer.getOpacity(registeredLayerPath);
             theLayer.setOpacity(otherOpacity ? otherOpacity * 4 : 1, registeredLayerPath);
           } else theLayer.setOpacity(originalOpacity || 1, registeredLayerPath);
@@ -1276,10 +1250,7 @@ export class LayerApi {
         Object.keys(this.#layerEntryConfigs).forEach((registeredLayerPath) => {
           // check for otherOlLayer is undefined. It would be undefined if a layer status is error
           const theLayer = this.getGeoviewLayerHybrid(registeredLayerPath)!;
-          if (
-            registeredLayerPath !== layerPath &&
-            !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath] as TypeLayerEntryConfig)
-          ) {
+          if (registeredLayerPath !== layerPath && !layerEntryIsGroupLayer(this.#layerEntryConfigs[registeredLayerPath])) {
             const otherOpacity = theLayer.getOpacity(registeredLayerPath);
             theLayer.setOpacity(otherOpacity ? otherOpacity * 4 : 1, registeredLayerPath);
           } else theLayer.setOpacity(originalOpacity || 1, registeredLayerPath);
@@ -1306,8 +1277,8 @@ export class LayerApi {
 
       // Get max extents from all selected layers.
       subLayerPaths.forEach((layerPath) => {
-        // TODO: Refactor - Layers refactoring. There needs to be a calculateBounds somewhere (new layers, new config?) to complete the full layers migration.
-        const layerBounds = this.getGeoviewLayer(layerPath)?.calculateBounds(layerPath);
+        // Calculate the bounds for the layer path
+        const layerBounds = this.calculateBounds(layerPath);
         // If bounds has not yet been defined, set to this layers bounds.
         if (!bounds.length && layerBounds) bounds = layerBounds;
         else if (layerBounds) bounds = getMinOrMaxExtents(bounds, layerBounds);
@@ -1350,7 +1321,7 @@ export class LayerApi {
    */
   setItemVisibility(layerPath: string, item: TypeLegendItem, visibility: boolean, updateLegendLayers: boolean = true): void {
     // Get registered layer config
-    const registeredLayer = this.#layerEntryConfigs[layerPath] as VectorLayerEntryConfig;
+    const layer = this.getGeoviewLayerHybrid(layerPath);
 
     if (visibility && !MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(this.getMapId(), layerPath)) {
       MapEventProcessor.setOrToggleMapLayerVisibility(this.getMapId(), layerPath, true);
@@ -1359,13 +1330,13 @@ export class LayerApi {
     // Assign value to registered layer. This is use by applyFilter function to set visibility
     // TODO: check if we need to refactor to centralize attribute setting....
     // TODO: know issue when we toggle a default visibility item https://github.com/Canadian-Geospatial-Platform/geoview/issues/1564
-    if (registeredLayer.style![item.geometryType]?.styleType === 'classBreaks') {
-      const geometryStyleConfig = registeredLayer.style![item.geometryType]! as TypeClassBreakStyleConfig;
+    if (layer?.getStyle(layerPath)?.[item.geometryType]?.styleType === 'classBreaks') {
+      const geometryStyleConfig = layer.getStyle(layerPath)![item.geometryType] as TypeClassBreakStyleConfig;
       const classBreakStyleInfo = geometryStyleConfig.classBreakStyleInfo.find((styleInfo) => styleInfo.label === item.name);
       if (classBreakStyleInfo) classBreakStyleInfo.visible = visibility;
       else geometryStyleConfig.defaultVisible = visibility;
-    } else if (registeredLayer.style![item.geometryType]?.styleType === 'uniqueValue') {
-      const geometryStyleConfig = registeredLayer.style![item.geometryType]! as TypeUniqueValueStyleConfig;
+    } else if (layer?.getStyle(layerPath)?.[item.geometryType]?.styleType === 'uniqueValue') {
+      const geometryStyleConfig = layer.getStyle(layerPath)![item.geometryType] as TypeUniqueValueStyleConfig;
       const uniqueStyleInfo = geometryStyleConfig.uniqueValueStyleInfo.find((styleInfo) => styleInfo.label === item.name);
       if (uniqueStyleInfo) uniqueStyleInfo.visible = visibility;
       else geometryStyleConfig.defaultVisible = visibility;
@@ -1374,8 +1345,8 @@ export class LayerApi {
     // Update the legend layers if necessary
     if (updateLegendLayers) LegendEventProcessor.setItemVisibility(this.getMapId(), item, visibility);
 
-    // Apply filter to layer
-    (this.getGeoviewLayer(layerPath) as AbstractGeoViewVector).applyViewFilter(layerPath, '');
+    // Apply filter to layer (lazy casting here to access the function)
+    (this.getGeoviewLayerHybrid(layerPath) as AbstractGeoViewVector).applyViewFilter?.(layerPath, '');
 
     // Emit event
     this.#emitLayerItemVisibilityToggled({ layerPath, itemName: item.name, visibility });
@@ -1435,6 +1406,54 @@ export class LayerApi {
     else if (layerConfig.source?.featureInfo && layerConfig.source?.featureInfo.queryable !== false)
       layerConfig.source.featureInfo[fields] = createLocalizedString(fieldNames);
     else logger.logError(`${layerPath} is not queryable`);
+  }
+
+  /**
+   * Calculates an union of all the layer extents based on the given layerPath and its possible children.
+   * @param {string} layerPath - The layer path
+   * @returns {Extent | undefined} An extent representing an union of all layer extents associated with the layer path
+   */
+  calculateBounds(layerPath: string): Extent | undefined {
+    // Get the layer config at the layer path
+    const layerConfig = this.getLayerEntryConfig(layerPath);
+
+    // Current bounds
+    const boundsArray = [] as Extent[];
+
+    // If found
+    if (layerConfig) {
+      // Redirect
+      this.#gatherAllBoundsRec(layerConfig, boundsArray);
+    }
+
+    // For each bounds found
+    let boundsUnion: Extent | undefined;
+    boundsArray.forEach((bounds) => {
+      // Union the bounds with each other
+      boundsUnion = getExtentUnionMaybe(boundsUnion, bounds);
+    });
+
+    // Return the unioned bounds
+    return boundsUnion;
+  }
+
+  /**
+   * Recursively gathers all bounds on the layers associated with the given layer path and store them in the bounds parameter.
+   * @param {ConfigBaseClass} layerConfig - The layer config being processed
+   * @param {Extent[]} bounds - The currently gathered bounds during the recursion
+   */
+  #gatherAllBoundsRec(layerConfig: ConfigBaseClass, bounds: Extent[]): void {
+    // If a leaf
+    if (!layerEntryIsGroupLayer(layerConfig)) {
+      // Get the bounds of the layer
+      const calculatedBounds = this.getGeoviewLayerHybrid(layerConfig.layerPath)?.getBounds(layerConfig.layerPath);
+      if (calculatedBounds) bounds.push(calculatedBounds);
+    } else {
+      // Is a group
+      layerConfig.listOfLayerEntryConfig.forEach((subLayerConfig) => {
+        this.#gatherAllBoundsRec(subLayerConfig, bounds);
+      });
+    }
   }
 
   /**
@@ -1524,7 +1543,7 @@ export class LayerApi {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerAddedDelegate = EventDelegateBase<LayerApi, LayerAddedEvent>;
+type LayerAddedDelegate = EventDelegateBase<LayerApi, LayerAddedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1537,7 +1556,7 @@ export type LayerAddedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerRemovedDelegate = EventDelegateBase<LayerApi, LayerRemovedEvent>;
+type LayerRemovedDelegate = EventDelegateBase<LayerApi, LayerRemovedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1550,7 +1569,7 @@ export type LayerRemovedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerItemVisibilityToggledDelegate = EventDelegateBase<LayerApi, LayerItemVisibilityToggledEvent>;
+type LayerItemVisibilityToggledDelegate = EventDelegateBase<LayerApi, LayerItemVisibilityToggledEvent, void>;
 
 /**
  * Define an event for the delegate

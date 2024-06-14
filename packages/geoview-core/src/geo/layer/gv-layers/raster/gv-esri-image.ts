@@ -1,13 +1,12 @@
 import { ImageArcGISRest } from 'ol/source';
+import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Image as ImageLayer } from 'ol/layer';
 import { Extent } from 'ol/extent';
 
 import { getLocalizedValue } from '@/core/utils/utilities';
-import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
   TypeUniqueValueStyleConfig,
@@ -32,11 +31,23 @@ export class GVEsriImage extends AbstractGVRaster {
   /**
    * Constructs a GVEsriImage layer to manage an OpenLayer layer.
    * @param {string} mapId - The map id
-   * @param {ImageLayer<ImageArcGISRest>} olLayer - The OpenLayer layer.
+   * @param {ImageArcGISRest} olSource - The OpenLayer source.
    * @param {EsriImageLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(mapId: string, olLayer: ImageLayer<ImageArcGISRest>, layerConfig: EsriImageLayerEntryConfig) {
-    super(mapId, olLayer, layerConfig);
+  public constructor(mapId: string, olSource: ImageArcGISRest, layerConfig: EsriImageLayerEntryConfig) {
+    super(mapId, olSource, layerConfig);
+
+    // Create the image layer options.
+    const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
+      source: olSource,
+      properties: { layerConfig },
+    };
+
+    // Init the layer options with initial settings
+    AbstractGVRaster.initOptionsWithInitialSettings(imageLayerOptions, layerConfig);
+
+    // Create and set the OpenLayer layer
+    this.olLayer = new ImageLayer(imageLayerOptions);
   }
 
   /**
@@ -52,9 +63,9 @@ export class GVEsriImage extends AbstractGVRaster {
    * Overrides the get of the OpenLayers Layer Source
    * @returns {ImageArcGISRest} The OpenLayers Layer Source
    */
-  override getOLSource(): ImageArcGISRest | undefined {
+  override getOLSource(): ImageArcGISRest {
     // Get source from OL
-    return this.getOLLayer().getSource() || undefined;
+    return super.getOLSource() as ImageArcGISRest;
   }
 
   /**
@@ -111,8 +122,7 @@ export class GVEsriImage extends AbstractGVRaster {
       if (!legendInfo) {
         const legend: TypeLegend = {
           type: CONST_LAYER_TYPES.ESRI_IMAGE,
-          layerName: layerConfig.layerName!,
-          styleConfig: layerConfig.style,
+          styleConfig: this.getStyle(layerConfig.layerPath),
           legend: null,
         };
         return legend;
@@ -140,16 +150,15 @@ export class GVEsriImage extends AbstractGVRaster {
       const styleConfig: TypeStyleConfig = {
         Point: styleSettings,
       };
-      layerConfig.style = styleConfig;
+
+      // TODO: Refactor - Find a better place to set the style than in a getter or rename this function like another TODO suggests
+      // Set the style
+      this.setStyle(layerConfig.layerPath, styleConfig);
+
       const legend: TypeLegend = {
         type: CONST_LAYER_TYPES.ESRI_IMAGE,
-        layerName: layerConfig?.layerName,
         styleConfig,
-        legend: await getLegendStyles(
-          layerConfig as AbstractBaseLayerEntryConfig & {
-            style: TypeStyleConfig;
-          }
-        ),
+        legend: await getLegendStyles(this.getStyle(layerConfig.layerPath)),
       };
       return legend;
     } catch (error) {
@@ -224,40 +233,25 @@ export class GVEsriImage extends AbstractGVRaster {
   }
 
   /**
-   * Gets the bounds of the layer and returns updated bounds
-   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
-   * @returns {Extent | undefined} The new layer bounding box.
+   * Gets the bounds of the layer and returns updated bounds.
+   * @returns {Extent | undefined} The layer bounding box.
    */
-  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  override getBounds(layerPath: string): Extent | undefined {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
-    const layerConfig = this.getLayerConfig();
-    const layerBounds = layerConfig?.initialSettings?.bounds || [];
+    // Get the metadata extent
+    const metadataExtent = this.getMetadataExtent();
 
-    const projection =
-      layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid || this.getMapViewer().getProjection().getCode().replace('EPSG:', '');
-
-    if (layerConfig.getMetadata()?.fullExtent) {
-      layerBounds[0] = layerConfig.getMetadata()?.fullExtent.xmin as number;
-      layerBounds[1] = layerConfig.getMetadata()?.fullExtent.ymin as number;
-      layerBounds[2] = layerConfig.getMetadata()?.fullExtent.xmax as number;
-      layerBounds[3] = layerConfig.getMetadata()?.fullExtent.ymax as number;
+    // If found
+    let layerBounds;
+    if (metadataExtent) {
+      // Get the metadata projection
+      const metadataProjection = this.getMetadataProjection();
+      layerBounds = this.getMapViewer().convertExtentFromProjToMapProj(metadataExtent, metadataProjection);
     }
 
-    if (layerBounds) {
-      let transformedBounds = layerBounds;
-      if (
-        layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')
-      ) {
-        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, `EPSG:${projection}`);
-      }
-
-      // eslint-disable-next-line no-param-reassign
-      if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
-      // eslint-disable-next-line no-param-reassign
-      else bounds = getMinOrMaxExtents(bounds, transformedBounds);
-    }
-
-    return bounds;
+    // Return the calculated layer bounds
+    return layerBounds;
   }
 }
 

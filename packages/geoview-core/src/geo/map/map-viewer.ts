@@ -1415,9 +1415,13 @@ export class MapViewer {
    * @returns {Coordinate} The coordinate in the map projection
    */
   convertCoordinateFromProjToMapProj(coordinate: Coordinate, fromProj: ProjectionLike): Coordinate {
-    // TODO: In this function and equivalent 3 others below, make it so that if the given projection is the same as the map projection
-    // TO.DOCONT: it just skips and returns the same geometry. It'd save many 'if' like 'if projA <> projB then call this' in the code base
-    return Projection.transform(coordinate, fromProj, this.getProjection());
+    // If different projections
+    if (fromProj !== this.getProjection().getCode()) {
+      return Projection.transform(coordinate, fromProj, this.getProjection());
+    }
+
+    // Same projection
+    return coordinate;
   }
 
   /**
@@ -1427,7 +1431,13 @@ export class MapViewer {
    * @returns {Coordinate} The coordinate in the map projection
    */
   convertCoordinateFromMapProjToProj(coordinate: Coordinate, toProj: ProjectionLike): Coordinate {
-    return Projection.transform(coordinate, this.getProjection(), toProj);
+    // If different projections
+    if (toProj !== this.getProjection().getCode()) {
+      return Projection.transform(coordinate, this.getProjection(), toProj);
+    }
+
+    // Same projection
+    return coordinate;
   }
 
   /**
@@ -1437,17 +1447,29 @@ export class MapViewer {
    * @returns {Extent} The extent in the map projection
    */
   convertExtentFromProjToMapProj(extent: Extent, fromProj: ProjectionLike): Extent {
-    return Projection.transformExtent(extent, fromProj, this.getProjection());
+    // If different projections
+    if (fromProj !== this.getProjection().getCode()) {
+      return Projection.transformExtent(extent, fromProj, this.getProjection());
+    }
+
+    // Same projection
+    return extent;
   }
 
   /**
-   * Transforms extent from map projection to given projection.
+   * Transforms extent from map projection to given projection. If the projects are the same, the extent is simply returned.
    * @param {Extent} extent - The given extent
    * @param {ProjectionLike} toProj - The projection that should be output
    * @returns {Extent} The extent in the map projection
    */
   convertExtentFromMapProjToProj(extent: Extent, toProj: ProjectionLike): Extent {
-    return Projection.transformExtent(extent, this.getProjection(), toProj);
+    // If different projections
+    if (toProj !== this.getProjection().getCode()) {
+      return Projection.transformExtent(extent, this.getProjection(), toProj);
+    }
+
+    // Same projection
+    return extent;
   }
 
   // #region EVENTS
@@ -1830,22 +1852,22 @@ export type TypeMapMouseInfo = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapInitDelegate = EventDelegateBase<MapViewer, undefined>;
+type MapInitDelegate = EventDelegateBase<MapViewer, undefined, void>;
 
 /**
  * Define a delegate for the event handler function signature
  */
-type MapReadyDelegate = EventDelegateBase<MapViewer, undefined>;
+type MapReadyDelegate = EventDelegateBase<MapViewer, undefined, void>;
 
 /**
  * Define a delegate for the event handler function signature
  */
-type MapLayersProcessedDelegate = EventDelegateBase<MapViewer, undefined>;
+type MapLayersProcessedDelegate = EventDelegateBase<MapViewer, undefined, void>;
 
 /**
  * Define a delegate for the event handler function signature
  */
-type MapLayersLoadedDelegate = EventDelegateBase<MapViewer, undefined>;
+type MapLayersLoadedDelegate = EventDelegateBase<MapViewer, undefined, void>;
 
 /**
  * Define an event for the delegate
@@ -1857,7 +1879,7 @@ export type MapMoveEndEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapMoveEndDelegate = EventDelegateBase<MapViewer, MapMoveEndEvent>;
+type MapMoveEndDelegate = EventDelegateBase<MapViewer, MapMoveEndEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1867,7 +1889,7 @@ export type MapPointerMoveEvent = TypeMapMouseInfo;
 /**
  * Define a delegate for the event handler function signature
  */
-type MapPointerMoveDelegate = EventDelegateBase<MapViewer, MapPointerMoveEvent>;
+type MapPointerMoveDelegate = EventDelegateBase<MapViewer, MapPointerMoveEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1877,7 +1899,7 @@ export type MapSingleClickEvent = TypeMapMouseInfo;
 /**
  * Define a delegate for the event handler function signature
  */
-type MapSingleClickDelegate = EventDelegateBase<MapViewer, MapSingleClickEvent>;
+type MapSingleClickDelegate = EventDelegateBase<MapViewer, MapSingleClickEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1889,7 +1911,7 @@ export type MapZoomEndEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapZoomEndDelegate = EventDelegateBase<MapViewer, MapZoomEndEvent>;
+type MapZoomEndDelegate = EventDelegateBase<MapViewer, MapZoomEndEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1901,7 +1923,7 @@ export type MapRotationEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapRotationDelegate = EventDelegateBase<MapViewer, MapRotationEvent>;
+type MapRotationDelegate = EventDelegateBase<MapViewer, MapRotationEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1913,7 +1935,7 @@ export type MapChangeSizeEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapChangeSizeDelegate = EventDelegateBase<MapViewer, MapChangeSizeEvent>;
+type MapChangeSizeDelegate = EventDelegateBase<MapViewer, MapChangeSizeEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1926,7 +1948,7 @@ export type MapComponentAddedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapComponentAddedDelegate = EventDelegateBase<MapViewer, MapComponentAddedEvent>;
+type MapComponentAddedDelegate = EventDelegateBase<MapViewer, MapComponentAddedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1938,7 +1960,7 @@ export type MapComponentRemovedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapComponentRemovedDelegate = EventDelegateBase<MapViewer, MapComponentRemovedEvent>;
+type MapComponentRemovedDelegate = EventDelegateBase<MapViewer, MapComponentRemovedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -1950,4 +1972,4 @@ export type MapLanguageChangedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-type MapLanguageChangedDelegate = EventDelegateBase<MapViewer, MapLanguageChangedEvent>;
+type MapLanguageChangedDelegate = EventDelegateBase<MapViewer, MapLanguageChangedEvent, void>;

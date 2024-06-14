@@ -163,7 +163,8 @@ export const convertLayerTypeToEntry = (layerType: TypeGeoviewLayerType): TypeLa
   }
 };
 
-export const layerEntryIsGroupLayer = (verifyIfLayer: ConfigBaseClass): verifyIfLayer is GroupLayerEntryConfig => {
+// It seems sometimes this type guard is called with a TypeLayerEntryConfig and sometimes with a ConfigBaseClass, so I'm putting it explicit
+export const layerEntryIsGroupLayer = (verifyIfLayer: TypeLayerEntryConfig | ConfigBaseClass): verifyIfLayer is GroupLayerEntryConfig => {
   return verifyIfLayer?.entryType === CONST_LAYER_ENTRY_TYPES.GROUP;
 };
 
@@ -822,6 +823,7 @@ export type TypeStyleSettings = TypeBaseStyleConfig | TypeSimpleStyleConfig | Ty
 /** ******************************************************************************************************************************
  * Valid keys for the TypeStyleConfig object.
  */
+// TODO: Refactor - Layers/Config refactoring. The values here have been renamed to lower case, make sure to lower here and adjust everywhere as part of config migration.
 export type TypeStyleGeometry = 'Point' | 'LineString' | 'Polygon';
 
 /** ******************************************************************************************************************************

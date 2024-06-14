@@ -3,6 +3,7 @@
 import { ImageArcGISRest } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
+import BaseLayer from 'ol/layer/Base';
 import { Image as ImageLayer } from 'ol/layer';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
@@ -14,9 +15,8 @@ import Geometry from 'ol/geom/Geometry';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
+import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { Projection } from '@/geo/utils/projection';
-import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -241,29 +241,35 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
-   * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
-   * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
   // GV Layers Refactoring - Obsolete (in config?)
-  protected override processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected override processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
+    // Instance check
+    if (!(layerConfig instanceof EsriDynamicLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
     return commonProcessLayerMetadata(this, layerConfig);
   }
 
   /** ****************************************************************************************************************************
    * This method creates a GeoView EsriDynamic layer using the definition provided in the layerConfig parameter.
    *
-   * @param {EsriDynamicLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns {Promise<TypeBaseRasterLayer | undefined>} The GeoView raster layer that has been created.
+   * @returns {Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
    */
   // GV Layers Refactoring - Obsolete (in config?, in layers?)
-  protected override async processOneLayerEntry(layerConfig: EsriDynamicLayerEntryConfig): Promise<TypeBaseRasterLayer | undefined> {
+  protected override async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
     await super.processOneLayerEntry(layerConfig);
+
+    // Instance check
+    if (!(layerConfig instanceof EsriDynamicLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+
     const sourceOptions: SourceOptions = {};
-    sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
+    sourceOptions.attributions = [(this.metadata?.copyrightText ? this.metadata?.copyrightText : '') as string];
     sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
     sourceOptions.params = { LAYERS: `show:${layerConfig.layerId}` };
     if (layerConfig.source.transparent) Object.defineProperty(sourceOptions.params, 'transparent', layerConfig.source.transparent!);
@@ -275,25 +281,46 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     }
     if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
 
-    const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
-      source: new ImageArcGISRest(sourceOptions),
-      properties: { layerConfig },
-    };
-    // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-    if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings.className;
-    if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings.extent;
-    if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
-    if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
-    if (layerConfig.initialSettings?.states?.opacity !== undefined) imageLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
-    // If a layer on the map has an initialSettings.visible set to false, its status will never reach the status 'loaded' because
-    // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
-    // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
+    // Create the source
+    const source = new ImageArcGISRest(sourceOptions);
 
-    // Create the OpenLayer layer
-    const olLayer = new ImageLayer(imageLayerOptions);
+    // GV Time to request an OpenLayers layer!
+    const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
 
-    // TODO: Refactor - Wire it up
-    this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'image');
+    // If any response
+    let olLayer: ImageLayer<ImageArcGISRest> | undefined;
+    if (requestResult.length > 0) {
+      // Get the OpenLayer that was created
+      olLayer = requestResult[0] as ImageLayer<ImageArcGISRest>;
+    }
+
+    // If no olLayer was obtained
+    if (!olLayer) {
+      // We're working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
+      const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
+        source,
+        properties: { layerConfig },
+      };
+      // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+      if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings.className;
+      if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings.extent;
+      if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
+      if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
+      if (layerConfig.initialSettings?.states?.opacity !== undefined)
+        imageLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
+      // If a layer on the map has an initialSettings.visible set to false, its status will never reach the status 'loaded' because
+      // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
+      // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
+
+      // Create the OpenLayer layer
+      olLayer = new ImageLayer(imageLayerOptions);
+
+      // Hook the loaded event
+      this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'image');
+    }
+
+    // GV Time to emit about the layer creation!
+    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
 
     return Promise.resolve(olLayer);
   }
@@ -309,8 +336,9 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig(layerPath)! as EsriDynamicLayerEntryConfig;
 
-      // Guess the geometry type
-      const geometryType = layerConfig.getTypeGeometry();
+      // Guess the geometry type by taking the first style key
+      // TODO: Refactor - Layers migration. Johann: This will be modified with new schema, there is no more geometry on style
+      const [geometryType] = layerConfig.getTypeGeometries();
 
       // Fetch the features
       let urlRoot = layerConfig.geoviewLayerConfig.metadataAccessPath![AppEventProcessor.getDisplayLanguage(this.mapId)]!;
@@ -653,7 +681,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     const layerConfig = this.getLayerConfig(layerPath) as EsriDynamicLayerEntryConfig;
     const { layerFilter } = layerConfig;
 
-    if (layerConfig?.style) {
+    // Get the style
+    const style = this.getStyle(layerConfig.layerPath);
+
+    if (style) {
       const setAllUndefinedVisibilityFlagsToYes = (styleConfig: TypeUniqueValueStyleConfig | TypeClassBreakStyleConfig): void => {
         // default value is true for all undefined visibility flags
         if (styleConfig.defaultVisible === undefined) styleConfig.defaultVisible = true;
@@ -669,7 +700,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         return allVisible;
       };
 
-      const styleSettings = layerConfig.getStyleSettings()!;
+      // Get the first style settings
+      const styleSettings = layerConfig.getFirstStyleSettings()!;
 
       if (isSimpleStyleConfig(styleSettings)) {
         return layerFilter || '(1=1)';
@@ -683,6 +715,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         const fieldOfTheSameValue = EsriDynamic.#countFieldOfTheSameValue(styleSettings);
         const fieldOrder = EsriDynamic.#sortFieldOfTheSameValue(styleSettings, fieldOfTheSameValue);
         const queryTree = EsriDynamic.#getQueryTree(styleSettings, fieldOfTheSameValue, fieldOrder);
+        // TODO: Refactor - Layers refactoring. We should use the source.featureInfo from the layer, not the layerConfig anymore, here and below
         const query = this.#buildQuery(queryTree, 0, fieldOrder, styleSettings, layerConfig.source.featureInfo!);
         return `${query}${layerFilter ? ` and (${layerFilter})` : ''}`;
       }
@@ -873,34 +906,24 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
    *
    * @param {string} layerPath The Layer path to the layer's configuration.
-   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
    * @returns {Extent | undefined} The new layer bounding box.
    */
   // GV Layers Refactoring - Obsolete (in layers)
-  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
-    const layerConfig = this.getLayerConfig(layerPath);
-    const layerBounds = layerConfig?.initialSettings?.bounds || [];
-    const projection =
-      this.metadata?.fullExtent?.spatialReference?.wkid || this.getMapViewer().getProjection().getCode().replace('EPSG:', '');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  override getBounds(layerPath: string): Extent | undefined {
+    // Get the metadata extent
+    const metadataExtent = this.getMetadataExtent();
 
-    if (this.metadata?.fullExtent) {
-      layerBounds[0] = this.metadata?.fullExtent.xmin as number;
-      layerBounds[1] = this.metadata?.fullExtent.ymin as number;
-      layerBounds[2] = this.metadata?.fullExtent.xmax as number;
-      layerBounds[3] = this.metadata?.fullExtent.ymax as number;
+    // If found
+    let layerBounds;
+    if (metadataExtent) {
+      // Get the metadata projection
+      const metadataProjection = this.getMetadataProjection();
+      layerBounds = this.getMapViewer().convertExtentFromProjToMapProj(metadataExtent, metadataProjection);
     }
 
-    if (layerBounds) {
-      let transformedBounds = layerBounds;
-      if (this.metadata?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')) {
-        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, `EPSG:${projection}`);
-      }
-
-      if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
-      else bounds = getMinOrMaxExtents(bounds, transformedBounds);
-    }
-
-    return bounds;
+    // Return the calculated layer bounds
+    return layerBounds;
   }
 }

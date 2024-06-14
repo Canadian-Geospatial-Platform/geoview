@@ -1,5 +1,6 @@
 import { ImageArcGISRest } from 'ol/source';
 import { Image as ImageLayer } from 'ol/layer';
+import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
 import { EsriJSON } from 'ol/format';
@@ -9,7 +10,6 @@ import Geometry from 'ol/geom/Geometry';
 
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { getLocalizedValue } from '@/core/utils/utilities';
-import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
@@ -48,11 +48,23 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Constructs a GVEsriDynamic layer to manage an OpenLayer layer.
    * @param {string} mapId - The map id
-   * @param {ImageLayer<ImageArcGISRest>} olLayer - The OpenLayer layer.
+   * @param {ImageArcGISRest} olSource - The OpenLayer source.
    * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(mapId: string, olLayer: ImageLayer<ImageArcGISRest>, layerConfig: EsriDynamicLayerEntryConfig) {
-    super(mapId, olLayer, layerConfig);
+  public constructor(mapId: string, olSource: ImageArcGISRest, layerConfig: EsriDynamicLayerEntryConfig) {
+    super(mapId, olSource, layerConfig);
+
+    // Create the image layer options.
+    const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
+      source: olSource,
+      properties: { layerConfig },
+    };
+
+    // Init the layer options with initial settings
+    AbstractGVRaster.initOptionsWithInitialSettings(imageLayerOptions, layerConfig);
+
+    // Create and set the OpenLayer layer
+    this.olLayer = new ImageLayer(imageLayerOptions);
   }
 
   /**
@@ -68,9 +80,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * Overrides the get of the OpenLayers Layer Source
    * @returns {ImageArcGISRest} The OpenLayers Layer Source
    */
-  override getOLSource(): ImageArcGISRest | undefined {
+  override getOLSource(): ImageArcGISRest {
     // Get source from OL
-    return this.getOLLayer().getSource() || undefined;
+    return super.getOLSource() as ImageArcGISRest;
   }
 
   /**
@@ -111,8 +123,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig();
 
-      // Guess the geometry type
-      const geometryType = layerConfig.getTypeGeometry();
+      // Guess the geometry type by taking the first style key
+      // TODO: Refactor - Layers migration. Johann: This will be modified with new schema, there is no more geometry on style
+      const [geometryType] = layerConfig.getTypeGeometries();
 
       // Fetch the features
       let urlRoot = layerConfig.geoviewLayerConfig.metadataAccessPath![AppEventProcessor.getDisplayLanguage(this.getMapId())]!;
@@ -270,7 +283,10 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const layerConfig = this.getLayerConfig();
     const { layerFilter } = layerConfig;
 
-    if (layerConfig?.style) {
+    // Get the style
+    const style = this.getStyle(layerConfig.layerPath);
+
+    if (style) {
       const setAllUndefinedVisibilityFlagsToYes = (styleConfig: TypeUniqueValueStyleConfig | TypeClassBreakStyleConfig): void => {
         // default value is true for all undefined visibility flags
         // eslint-disable-next-line no-param-reassign
@@ -287,7 +303,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
         return allVisible;
       };
 
-      const styleSettings = layerConfig.getStyleSettings()!;
+      // Get the first style settings.
+      const styleSettings = layerConfig.getFirstStyleSettings()!;
 
       if (isSimpleStyleConfig(styleSettings)) {
         return layerFilter || '(1=1)';
@@ -301,6 +318,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         const fieldOfTheSameValue = GVEsriDynamic.#countFieldOfTheSameValue(styleSettings);
         const fieldOrder = GVEsriDynamic.#sortFieldOfTheSameValue(styleSettings, fieldOfTheSameValue);
         const queryTree = GVEsriDynamic.#getQueryTree(styleSettings, fieldOfTheSameValue, fieldOrder);
+        // TODO: Refactor - Layers refactoring. Use the source.featureInfo from the layer, not the layerConfig anymore, here and below
         const query = this.#buildQuery(queryTree, 0, fieldOrder, styleSettings, layerConfig.source.featureInfo!);
         return `${query}${layerFilter ? ` and (${layerFilter})` : ''}`;
       }
@@ -631,38 +649,24 @@ export class GVEsriDynamic extends AbstractGVRaster {
   }
 
   /**
-   * Gets the bounds of the layer and returns updated bounds
-   * @param {Extent | undefined} bounds - The current bounding box to be adjusted.
-   * @returns {Extent | undefined} The new layer bounding box.
+   * Gets the bounds of the layer and returns updated bounds.
+   * @returns {Extent | undefined} The layer bounding box.
    */
-  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  override getBounds(layerPath: string): Extent | undefined {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
-    const layerConfig = this.getLayerConfig();
-    const layerBounds = layerConfig?.initialSettings?.bounds || [];
-    const projection =
-      layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid || this.getMapViewer().getProjection().getCode().replace('EPSG:', '');
+    // Get the metadata extent
+    const metadataExtent = this.getMetadataExtent();
 
-    if (layerConfig.getMetadata()?.fullExtent) {
-      layerBounds[0] = layerConfig.getMetadata()?.fullExtent.xmin as number;
-      layerBounds[1] = layerConfig.getMetadata()?.fullExtent.ymin as number;
-      layerBounds[2] = layerConfig.getMetadata()?.fullExtent.xmax as number;
-      layerBounds[3] = layerConfig.getMetadata()?.fullExtent.ymax as number;
+    // If found
+    let layerBounds;
+    if (metadataExtent) {
+      // Get the metadata projection
+      const metadataProjection = this.getMetadataProjection();
+      layerBounds = this.getMapViewer().convertExtentFromProjToMapProj(metadataExtent, metadataProjection);
     }
 
-    if (layerBounds) {
-      let transformedBounds = layerBounds;
-      if (
-        layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')
-      ) {
-        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, `EPSG:${projection}`);
-      }
-
-      // eslint-disable-next-line no-param-reassign
-      if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
-      // eslint-disable-next-line no-param-reassign
-      else bounds = getMinOrMaxExtents(bounds, transformedBounds);
-    }
-
-    return bounds;
+    // Return the calculated layer bounds
+    return layerBounds;
   }
 }

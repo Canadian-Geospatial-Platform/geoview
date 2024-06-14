@@ -678,7 +678,7 @@ export class GeometryApi {
 /**
  * Define a delegate for the event handler function signature
  */
-type GeometryAddedDelegate = EventDelegateBase<GeometryApi, GeometryAddedEvent>;
+type GeometryAddedDelegate = EventDelegateBase<GeometryApi, GeometryAddedEvent, void>;
 
 /**
  * Event interface for GeometryAdded

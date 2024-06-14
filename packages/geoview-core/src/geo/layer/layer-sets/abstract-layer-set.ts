@@ -40,11 +40,9 @@ export abstract class AbstractLayerSet {
   /** Indicates the default when registering a layer config */
   #defaultRegisterLayerConfigCheck = false;
 
-  /** Indicates the default when registering a layer */
-  #defaultRegisterLayerCheck = true;
-
   // The registered layers
-  #registeredLayers: (AbstractGeoViewLayer | AbstractGVLayer)[] = [];
+  // TODO: Refactor - Layers refactoring. Replace this array of string to array of GVLayer object instead (and rename attribute) once hybrid work is done
+  #registeredLayerLayerPaths: string[] = [];
 
   // Keep all callback delegates references
   #onLayerSetUpdatedHandlers: LayerSetUpdatedDelegate[] = [];
@@ -110,6 +108,31 @@ export abstract class AbstractLayerSet {
         // If the layer status is 'loaded'
         if (layerConfig.layerStatus === 'loaded') {
           // The layer has become loaded
+
+          // GV Take this opportunity to verify if the layer had a parent (this code used to be inside ConfigBaseClass,
+          // GV but it turns out parentLayerConfig couldn't be trusted when navigating the object hierarchy - see note over there)
+          // GV cgpv.api.maps['sandboxMap'].layer.getLayerEntryConfig('uniqueValueId/uniqueValueId/4').layerStatus
+          // GV vs cgpv.api.maps['sandboxMap'].layer.getLayerEntryConfig('uniqueValueId/uniqueValueId/4').parentLayerConfig.listOfLayerEntryConfig[0].layerStatus
+
+          // If the config has a parent
+          if (layerConfig.parentLayerConfig) {
+            // Get all the siblings reusing the LayerApi which is more trustable than the parent hierarchy on the config themselves
+            const layerConfigSiblings = layerConfig.parentLayerConfig.listOfLayerEntryConfig
+              .map((layerConf) => {
+                return this.layerApi.getLayerEntryConfig(layerConf.layerPath);
+              })
+              .filter((layerConf) => layerConf) as ConfigBaseClass[];
+
+            // If all siblings of the layer config are loaded
+            if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('loaded', layerConfigSiblings)) {
+              // Get the parent, again using the LayerApi, can't trust the 'parentLayerConfig'
+              const parentConfig = this.layerApi.getLayerEntryConfig(layerConfig.parentLayerConfig.layerPath);
+              // If found, this parent can be flagged as loaded
+              if (parentConfig) parentConfig.layerStatus = 'loaded';
+            }
+          }
+
+          // Get the layer
           const layer = this.layerApi.getGeoviewLayerHybrid(layerConfig.layerPath);
 
           // If the layer could be found
@@ -137,7 +160,7 @@ export abstract class AbstractLayerSet {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected onRegisterLayerConfigCheck(layerConfig: ConfigBaseClass): boolean {
     // Override this function to perform registration condition logic in the inherited classes
-    // By default, a layer-set always registers layers
+    // By default, a layer-set doesn't register layer configs
     return this.#defaultRegisterLayerConfigCheck;
   }
 
@@ -165,12 +188,12 @@ export abstract class AbstractLayerSet {
   async registerLayer(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): Promise<void> {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
 
-    // If the layer is already registered, skip it, we don't register twice
-    if (this.#registeredLayers.includes(layer)) return;
-
     // Wait a maximum of 20 seconds for the layer to get to loaded state so that it can get registered, otherwise another attempt will have to be made
     // This await is important when devs call this method directly to register ad-hoc layers.
     await whenThisThen(() => layer.getLayerConfig(layerPath)?.layerStatus === 'loaded', 20000);
+
+    // If the layer is already registered, skip it, we don't register twice
+    if (this.#registeredLayerLayerPaths.includes(layerPath)) return;
 
     // Update the registration of all layer sets
     if (this.onRegisterLayerCheck(layer, layerPath)) {
@@ -187,16 +210,23 @@ export abstract class AbstractLayerSet {
 
   /**
    * An overridable registration condition function for a layer-set to check if the registration
-   * should happen for a specific geoview layer and layer path.
+   * should happen for a specific geoview layer and layer path. By default, a layer-set always registers layers except when they are group layers.
    * @param {AbstractGeoViewLayer | AbstractGVLayer} layer - The layer
    * @returns {boolean} True if the layer should be registered, false otherwise
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/class-methods-use-this
   protected onRegisterLayerCheck(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): boolean {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     // Override this function to perform registration condition logic in the inherited classes
-    // By default, a layer-set always registers layers
-    return this.#defaultRegisterLayerCheck;
+    // By default, a layer-set always registers layers except when they are group layers
+    if (this.layerApi.getGeoviewLayerHybrid(layerPath)?.getLayerConfig(layerPath)?.entryType === 'group') {
+      // Skip groups
+      return false;
+    }
+
+    // Default
+    return true;
   }
 
   /**
@@ -224,7 +254,7 @@ export abstract class AbstractLayerSet {
     }
 
     // Add to the registered layers array
-    this.#registeredLayers.push(layer);
+    this.#registeredLayerLayerPaths.push(layerPath);
 
     // Register the layer name changed handler
     layer.onLayerNameChanged(this.#boundHandleLayerNameChanged);
@@ -281,7 +311,7 @@ export abstract class AbstractLayerSet {
       // Call the overridable function to process a layer status is changing
       this.onProcessLayerStatusChanged(layerConfig, layerStatusEvent.layerStatus);
 
-      // If still existing
+      // If still existing (it's possible a layer set might want to unregister a layer config depending on its status, so we check)
       if (this.resultSet[layerConfig.layerPath]) {
         // Propagate to the store
         this.onPropagateToStore(this.resultSet[layerConfig.layerPath], 'layerStatus');
@@ -302,17 +332,20 @@ export abstract class AbstractLayerSet {
    */
   #handleLayerNameChanged(layer: AbstractGeoViewLayer | AbstractGVLayer, layerNameEvent: LayerNameChangedEvent): void {
     try {
-      // Call the overridable function to process a layer name change
-      this.onProcessNameChanged(
-        layerNameEvent.layerPath,
-        getLocalizedValue(layerNameEvent.layerName, AppEventProcessor.getDisplayLanguage(this.getMapId()))!
-      );
+      // If the layer path exists for the layer name that changed
+      if (this.resultSet[layerNameEvent.layerPath]) {
+        // Call the overridable function to process a layer name change
+        this.onProcessNameChanged(
+          layerNameEvent.layerPath,
+          getLocalizedValue(layerNameEvent.layerName, AppEventProcessor.getDisplayLanguage(this.getMapId()))!
+        );
 
-      // Propagate to the store
-      this.onPropagateToStore(this.resultSet[layerNameEvent.layerPath], 'layerName');
+        // Propagate to the store
+        this.onPropagateToStore(this.resultSet[layerNameEvent.layerPath], 'layerName');
 
-      // Inform that the layer set has been updated
-      this.onLayerSetUpdatedProcess(layerNameEvent.layerPath);
+        // Inform that the layer set has been updated
+        this.onLayerSetUpdatedProcess(layerNameEvent.layerPath);
+      }
     } catch (error) {
       // Log
       logger.logError('CAUGHT in handleLayerStatusChanged', layerNameEvent.layerPath, error);
@@ -396,7 +429,7 @@ export abstract class AbstractLayerSet {
    */
   protected static isSourceQueryable(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): boolean {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
-    return !(layer.getLayerConfig(layerPath) as AbstractBaseLayerEntryConfig)?.source?.featureInfo?.queryable === false;
+    return !((layer.getLayerConfig(layerPath) as AbstractBaseLayerEntryConfig)?.source?.featureInfo?.queryable === false);
   }
 
   /**
@@ -453,7 +486,7 @@ export type PropagationType = 'config-registration' | 'layer-registration' | 'la
 /**
  * Define a delegate for the event handler function signature
  */
-type LayerSetUpdatedDelegate = EventDelegateBase<AbstractLayerSet, LayerSetUpdatedEvent>;
+type LayerSetUpdatedDelegate = EventDelegateBase<AbstractLayerSet, LayerSetUpdatedEvent, void>;
 
 /**
  * Define an event for the delegate

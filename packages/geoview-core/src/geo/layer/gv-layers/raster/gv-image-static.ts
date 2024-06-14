@@ -1,12 +1,12 @@
 import ImageLayer from 'ol/layer/Image';
 import Static from 'ol/source/ImageStatic';
+import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Extent } from 'ol/extent';
 import axios from 'axios';
 
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { getLocalizedValue } from '@/core/utils/utilities';
-import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
@@ -24,11 +24,20 @@ export class GVImageStatic extends AbstractGVRaster {
   /**
    * Constructs a GVImageStatic layer to manage an OpenLayer layer.
    * @param {string} mapId - The map id
-   * @param {ImageLayer<Static>} olLayer - The OpenLayer layer.
+   * @param {Static} olSource - The OpenLayer source.
    * @param {ImageStaticLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(mapId: string, olLayer: ImageLayer<Static>, layerConfig: ImageStaticLayerEntryConfig) {
-    super(mapId, olLayer, layerConfig);
+  public constructor(mapId: string, olSource: Static, layerConfig: ImageStaticLayerEntryConfig) {
+    super(mapId, olSource, layerConfig);
+
+    // Create the image layer options.
+    const staticImageOptions: ImageOptions<Static> = { source: olSource };
+
+    // Init the layer options with initial settings
+    AbstractGVRaster.initOptionsWithInitialSettings(staticImageOptions, layerConfig);
+
+    // Create and set the OpenLayer layer
+    this.olLayer = new ImageLayer(staticImageOptions);
   }
 
   /**
@@ -44,9 +53,9 @@ export class GVImageStatic extends AbstractGVRaster {
    * Overrides the get of the OpenLayers Layer Source
    * @returns {Static} The OpenLayers Layer Source
    */
-  override getOLSource(): Static | undefined {
+  override getOLSource(): Static {
     // Get source from OL
-    return this.getOLLayer().getSource() || undefined;
+    return super.getOLSource() as Static;
   }
 
   /**
@@ -105,7 +114,6 @@ export class GVImageStatic extends AbstractGVRaster {
       if (!legendImage) {
         const legend: TypeLegend = {
           type: CONST_LAYER_TYPES.IMAGE_STATIC,
-          layerName: layerConfig!.layerName,
           legend: null,
         };
         return legend;
@@ -119,14 +127,12 @@ export class GVImageStatic extends AbstractGVRaster {
         drawingContext.drawImage(image, 0, 0);
         const legend: TypeLegend = {
           type: CONST_LAYER_TYPES.IMAGE_STATIC,
-          layerName: layerConfig!.layerName,
           legend: drawingCanvas,
         };
         return legend;
       }
       const legend: TypeLegend = {
         type: CONST_LAYER_TYPES.IMAGE_STATIC,
-        layerName: layerConfig!.layerName,
         legend: null,
       };
       return legend;
@@ -137,30 +143,23 @@ export class GVImageStatic extends AbstractGVRaster {
   }
 
   /**
-   * Gets the bounds of the layer and returns updated bounds
-   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
-   * @returns {Extent} The new layer bounding box.
+   * Gets the bounds of the layer and returns updated bounds.
+   * @returns {Extent | undefined} The layer bounding box.
    */
-  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  override getBounds(layerPath: string): Extent | undefined {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
-    const layerConfig = this.getLayerConfig();
-    const projection = this.getOLSource()?.getProjection()?.getCode() || this.getMapViewer().getProjection().getCode();
+    // Get the source projection
+    const sourceProjection = this.getOLSource().getProjection() || undefined;
 
-    const layerBounds = this.getOLSource()?.getImageExtent();
-    if (layerBounds) {
-      let transformedBounds = layerBounds;
-      if (
-        layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')
-      ) {
-        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, projection);
-      }
-
-      // eslint-disable-next-line no-param-reassign
-      if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
-      // eslint-disable-next-line no-param-reassign
-      else bounds = getMinOrMaxExtents(bounds, transformedBounds);
+    // Get the layer bounds
+    let sourceExtent = this.getOLSource()?.getImageExtent();
+    if (sourceExtent) {
+      // Make sure we're in the map projection
+      sourceExtent = this.getMapViewer().convertExtentFromProjToMapProj(sourceExtent, sourceProjection);
     }
 
-    return bounds;
+    // Return the calculated layer bounds
+    return sourceExtent;
   }
 }

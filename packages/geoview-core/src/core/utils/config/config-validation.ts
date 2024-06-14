@@ -48,7 +48,6 @@ import { ImageStaticLayerEntryConfig } from './validation-classes/raster-validat
 import { EsriDynamicLayerEntryConfig } from './validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from './validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { GroupLayerEntryConfig } from './validation-classes/group-layer-entry-config';
-import { ConfigBaseClass } from './validation-classes/config-base-class';
 import { api } from '@/app';
 
 // ******************************************************************************************************************************
@@ -126,7 +125,7 @@ export class ConfigValidation {
     const groupSchemaPath = `https://cgpv/schema#/definitions/TypeLayerGroupEntryConfig`;
 
     for (let i = 0; i < listOfLayerEntryConfig.length; i++) {
-      const schemaPath = layerEntryIsGroupLayer(listOfLayerEntryConfig[i] as ConfigBaseClass) ? groupSchemaPath : layerSchemaPath;
+      const schemaPath = layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) ? groupSchemaPath : layerSchemaPath;
       const validate = validator.getSchema(schemaPath);
 
       if (!validate) {
@@ -150,7 +149,7 @@ export class ConfigValidation {
 
     for (let i = 0; i < listOfLayerEntryConfig.length; i++) {
       if (
-        layerEntryIsGroupLayer(listOfLayerEntryConfig[i] as ConfigBaseClass) &&
+        layerEntryIsGroupLayer(listOfLayerEntryConfig[i]) &&
         !this.#isValidTypeListOfLayerEntryConfig(geoviewLayerType, listOfLayerEntryConfig[i].listOfLayerEntryConfig!, validator)
       )
         return false;
@@ -294,7 +293,7 @@ export class ConfigValidation {
         layerConfig.parentLayerConfig?.initialSettings || layerConfig.geoviewLayerConfig?.initialSettings
       );
 
-      if (layerEntryIsGroupLayer(layerConfig as ConfigBaseClass)) {
+      if (layerEntryIsGroupLayer(layerConfig)) {
         // We must set the parents of all elements in the group.
         ConfigValidation.#recursivelySetChildParent(geoviewLayerConfig, [layerConfig], parentLayerConfig);
         const parent = new GroupLayerEntryConfig(layerConfig as GroupLayerEntryConfig);

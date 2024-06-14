@@ -5,6 +5,7 @@ import axios from 'axios';
 import ImageLayer from 'ol/layer/Image';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
+import BaseLayer from 'ol/layer/Base';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { ImageWMS } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageWMS';
@@ -13,8 +14,6 @@ import { Layer as OlLayer } from 'ol/layer';
 import { Extent } from 'ol/extent';
 
 import cloneDeep from 'lodash/cloneDeep';
-
-import Static from 'ol/source/ImageStatic';
 
 import { TypeLocalizedString } from '@config/types/map-schema-types';
 
@@ -25,7 +24,7 @@ import {
   TypeWmsLegend,
   TypeWmsLegendStyle,
 } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
+import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
@@ -35,7 +34,7 @@ import {
 } from '@/geo/map/map-schema-types';
 import { xmlToJson, getLocalizedValue } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { getMinOrMaxExtents } from '@/geo/utils/utilities';
+import { getExtentIntersection } from '@/geo/utils/utilities';
 import { api } from '@/app';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
@@ -227,10 +226,10 @@ export class WMS extends AbstractGeoViewRaster {
       this.metadata = parser.read(capabilitiesString);
       if (this.metadata) {
         this.#processMetadataInheritance();
-        const metadataAccessPath = this.metadata.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
+        const metadataAccessPath = this.metadata?.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
         this.metadataAccessPath.en = metadataAccessPath;
         this.metadataAccessPath.fr = metadataAccessPath;
-        const dataAccessPath = this.metadata.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
+        const dataAccessPath = this.metadata?.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
         const setDataAccessPath = (listOfLayerEntryConfig: TypeLayerEntryConfig[]): void => {
           listOfLayerEntryConfig.forEach((layerConfig) => {
             if (layerEntryIsGroupLayer(layerConfig)) setDataAccessPath(layerConfig.listOfLayerEntryConfig);
@@ -506,23 +505,21 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns {Promise<TypeBaseRasterLayer | undefined>} The GeoView raster layer that has been created.
+   * @returns {Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
    */
   // GV Layers Refactoring - Obsolete (in config?, in layers?)
-  protected override async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<TypeBaseRasterLayer | undefined> {
+  protected override async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
     await super.processOneLayerEntry(layerConfig);
-    // Log
-    logger.logTraceCore('WMS - processOneLayerEntry', layerConfig.layerPath);
+
+    // Instance check
+    if (!(layerConfig instanceof OgcWmsLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
 
     if (geoviewEntryIsWMS(layerConfig)) {
       const layerCapabilities = this.#getLayerMetadataEntry(layerConfig.layerId);
       if (layerCapabilities) {
-        const dataAccessPath = getLocalizedValue(
-          layerConfig.source.dataAccessPath as TypeLocalizedString,
-          AppEventProcessor.getDisplayLanguage(this.mapId)
-        )!;
+        const dataAccessPath = getLocalizedValue(layerConfig.source.dataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId))!;
 
         let styleToUse = '';
         if (Array.isArray(layerConfig.source?.style) && layerConfig.source?.style) {
@@ -547,7 +544,7 @@ export class WMS extends AbstractGeoViewRaster {
           params: { LAYERS: layerConfig.layerId, STYLES: styleToUse },
         };
 
-        sourceOptions.attributions = this.attributions;
+        sourceOptions.attributions = this.getAttributions();
         sourceOptions.serverType = layerConfig.source.serverType;
         if (layerConfig.source.crossOrigin) {
           sourceOptions.crossOrigin = layerConfig.source.crossOrigin;
@@ -556,25 +553,45 @@ export class WMS extends AbstractGeoViewRaster {
         }
         if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
 
-        const imageLayerOptions: ImageOptions<ImageWMS> = {
-          source: new ImageWMS(sourceOptions),
-          properties: { layerCapabilities, layerConfig },
-        };
-        // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-        if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings.className;
-        if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings.extent;
-        if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
-        if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
-        if (layerConfig.initialSettings?.states?.opacity !== undefined)
-          imageLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
-        // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
-        // GV            in the 'loading' state if the flag value is false.
+        // Create the source
+        const source = new ImageWMS(sourceOptions);
 
-        // Create the OpenLayer layer
-        const olLayer = new ImageLayer(imageLayerOptions);
+        // GV Time to request an OpenLayers layer!
+        const requestResult = this.emitLayerRequesting({ config: layerConfig, source, extraConfig: { layerCapabilities } });
 
-        // TODO: Refactor - Wire it up
-        this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'image');
+        // If any response
+        let olLayer: ImageLayer<ImageWMS> | undefined;
+        if (requestResult.length > 0) {
+          // Get the OpenLayer that was created
+          olLayer = requestResult[0] as ImageLayer<ImageWMS>;
+        }
+
+        // If no olLayer was obtained
+        if (!olLayer) {
+          // We're working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
+          const imageLayerOptions: ImageOptions<ImageWMS> = {
+            source,
+            properties: { layerCapabilities, layerConfig },
+          };
+          // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+          if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings.className;
+          if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings.extent;
+          if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
+          if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
+          if (layerConfig.initialSettings?.states?.opacity !== undefined)
+            imageLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
+          // GV IMPORTANT: The initialSettings.visible flag must be set in the layerConfig.loadedFunction otherwise the layer will stall
+          // GV            in the 'loading' state if the flag value is false.
+
+          // Create the OpenLayer layer
+          olLayer = new ImageLayer(imageLayerOptions);
+
+          // Hook the loaded event
+          this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'image');
+        }
+
+        // GV Time to emit about the layer creation!
+        this.emitLayerCreation({ config: layerConfig, layer: olLayer });
 
         return Promise.resolve(olLayer);
       }
@@ -592,27 +609,42 @@ export class WMS extends AbstractGeoViewRaster {
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
-   * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
+   *
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
   // GV Layers Refactoring - Obsolete (in config?)
-  protected override processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected override processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
+    // Instance check
+    if (!(layerConfig instanceof OgcWmsLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+
     if (geoviewEntryIsWMS(layerConfig)) {
       const layerCapabilities = this.#getLayerMetadataEntry(layerConfig.layerId)!;
       this.setLayerMetadata(layerConfig.layerPath, layerCapabilities);
       if (layerCapabilities) {
-        if (layerCapabilities.Attribution && !this.attributions.includes(layerCapabilities.Attribution.Title as string))
-          this.attributions.push(layerCapabilities.Attribution.Title as string);
+        const attributions = this.getAttributions();
+        if (layerCapabilities.Attribution && !attributions.includes(layerCapabilities.Attribution?.Title as string)) {
+          // Add it
+          attributions.push(layerCapabilities.Attribution.Title as string);
+          this.setAttributions(attributions);
+        }
         if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
         MapEventProcessor.setMapLayerQueryable(this.mapId, layerConfig.layerPath, layerConfig.source.featureInfo.queryable);
-        // GV TODO: The solution implemented in the following lines is not right. scale and zoom are not the same things.
+        // TODO: The solution implemented in the following lines is not right. scale and zoom are not the same things.
         // if (layerConfig.initialSettings?.minZoom === undefined && layerCapabilities.MinScaleDenominator !== undefined)
         //   layerConfig.initialSettings.minZoom = layerCapabilities.MinScaleDenominator as number;
         // if (layerConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
         //   layerConfig.initialSettings.maxZoom = layerCapabilities.MaxScaleDenominator as number;
         if (layerConfig.initialSettings?.extent)
+          // TODO: Check - Why are we converting to the map projection in the pre-processing? It'd be better to standardize to 4326 here (or leave untouched), as it's part of the initial configuration and handle it later?
           layerConfig.initialSettings.extent = this.getMapViewer().convertExtentLngLatToMapProj(layerConfig.initialSettings.extent);
 
+        // TODO: Check - Here, we override the initialBounds with the metadata extent bounds, as part of the processing. Later on, in the wms class,
+        // TO.DOCONT: we have code in the getBounds() that check the initialSettings.bounds vs the metadata bounds. Are we shooting ourselves in the foot or doing work twice?
         if (!layerConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox) {
+          // TODO: Refactor - Configs refactoring. When gathering bounds from the XML data, we should validate if they are 'valid' coordinates for the projection in the XML
+          // TO.DOCONT: Because it's possible that some bound values are invalid as provided.. see this for an example, with -90.24 being an invalid value latitude in 4326:
+          // TO.DOCONT: https://geo.weather.gc.ca/geomet?service=WMS&version=1.3.0&request=GetCapabilities&Layers=GDPS.ETA_ICEC
           layerConfig.initialSettings!.bounds = layerCapabilities.EX_GeographicBoundingBox as Extent;
         }
 
@@ -822,7 +854,7 @@ export class WMS extends AbstractGeoViewRaster {
       let queryUrl: string | undefined;
       const legendUrlFromCapabilities = this.#getLegendUrlFromCapabilities(layerConfig, chosenStyle);
       if (legendUrlFromCapabilities) queryUrl = legendUrlFromCapabilities.OnlineResource as string;
-      else if (Object.keys(this.metadata!.Capability.Request).includes('GetLegendGraphic'))
+      else if (Object.keys(this.metadata?.Capability.Request || {}).includes('GetLegendGraphic'))
         queryUrl = `${getLocalizedValue(
           this.metadataAccessPath,
           AppEventProcessor.getDisplayLanguage(this.mapId)
@@ -935,8 +967,7 @@ export class WMS extends AbstractGeoViewRaster {
           const drawingContext = drawingCanvas.getContext('2d')!;
           drawingContext.drawImage(image, 0, 0);
           legend = {
-            type: this.type,
-            layerName: layerConfig!.layerName,
+            type: CONST_LAYER_TYPES.WMS,
             legend: drawingCanvas,
             styles: styleLegends.length ? styleLegends : undefined,
           };
@@ -945,8 +976,7 @@ export class WMS extends AbstractGeoViewRaster {
       }
 
       legend = {
-        type: this.type,
-        layerName: layerConfig!.layerName,
+        type: CONST_LAYER_TYPES.WMS,
         legend: null,
         styles: styleLegends.length > 1 ? styleLegends : undefined,
       };
@@ -1142,42 +1172,76 @@ export class WMS extends AbstractGeoViewRaster {
    * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
    *
    * @param {string} layerPath The Layer path to the layer's configuration.
-   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
    * @returns {Extent | undefined} The new layer bounding box.
    */
   // GV Layers Refactoring - Obsolete (in layers)
-  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+  override getBounds(layerPath: string): Extent | undefined {
+    // Get the layer config
     const layerConfig = this.getLayerConfig(layerPath);
-    const layer = this.getOLLayer(layerPath) as ImageLayer<Static> | undefined;
-    const projection = layer?.getSource()?.getProjection()?.getCode() || this.getMapViewer().getProjection().getCode();
 
-    let layerBounds = layerConfig?.initialSettings?.bounds || [];
-    // TODO: Check - Are we sure this is 4326, always?
-    layerBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, 'EPSG:4326');
+    // Get the source projection
+    const sourceProjection = this.getSourceProjection(layerPath);
 
-    const boundingBoxes = this.metadata?.Capability.Layer.BoundingBox;
-    let bbExtent: Extent | undefined;
+    // Get the layer config bounds
+    let layerConfigBounds = layerConfig?.initialSettings?.bounds;
 
+    // If layer bounds were found, project
+    if (layerConfigBounds) {
+      // Make sure we're in the map projection. Always EPSG:4326 when coming from our configuration.
+      layerConfigBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerConfigBounds, 'EPSG:4326');
+    }
+
+    // Get the layer bounds from metadata
+    const metadataExtent = this.#getBoundsExtentFromMetadata(sourceProjection?.getCode() || '');
+
+    // If any
+    let layerBounds;
+    if (metadataExtent) {
+      const [metadataProj, metadataBounds] = metadataExtent;
+      layerBounds = this.getMapViewer().convertExtentFromProjToMapProj(metadataBounds, metadataProj);
+    }
+
+    // If both layer config had bounds and layer has real bounds, take the intersection between them
+    if (layerConfigBounds && layerBounds) layerBounds = getExtentIntersection(layerBounds, layerConfigBounds);
+
+    // Return the calculated layer bounds (favor metadataExtent, but if things are going bad, pick config bounds at least)
+    return layerBounds || layerConfigBounds;
+  }
+
+  /**
+   * Gets the bounds as defined in the metadata, favoring the ones in the given projection or returning the first one found
+   * @param {string} projection - The projection to favor when looking for the bounds inside the metadata
+   * @returns {[string, Extent]} The projection and its extent as provided by the metadata
+   */
+  #getBoundsExtentFromMetadata(projection: string): [string, Extent] | undefined {
+    // Get the bounding boxes in the metadata
+    const boundingBoxes = this.metadata?.Capability.Layer.BoundingBox as TypeJsonArray;
+
+    // If found any
     if (boundingBoxes) {
+      // Find the one with the right projection
       for (let i = 0; i < (boundingBoxes.length as number); i++) {
         if (boundingBoxes[i].crs === projection)
-          bbExtent = [
-            boundingBoxes[i].extent[1],
-            boundingBoxes[i].extent[0],
-            boundingBoxes[i].extent[3],
-            boundingBoxes[i].extent[2],
-          ] as Extent;
+          return [
+            boundingBoxes[i].crs as string,
+            // TODO: Check - Is it always in that order, 1, 0, 3, 2 or does that depend on the projection?
+            [boundingBoxes[i].extent[1], boundingBoxes[i].extent[0], boundingBoxes[i].extent[3], boundingBoxes[i].extent[2]] as Extent,
+          ];
+      }
+
+      // Not found. If any
+      if (boundingBoxes.length > 0) {
+        // Take the first one and return the bounds and projection
+        return [
+          boundingBoxes[0].crs as string,
+          // TODO: Check - Is it always in that order, 1, 0, 3, 2 or does that depend on the projection?
+          [boundingBoxes[0].extent[1], boundingBoxes[0].extent[0], boundingBoxes[0].extent[3], boundingBoxes[0].extent[2]] as Extent,
+        ];
       }
     }
 
-    if (layerBounds && bbExtent) layerBounds = getMinOrMaxExtents(layerBounds, bbExtent, 'min');
-
-    if (layerBounds) {
-      if (!bounds) bounds = [layerBounds[0], layerBounds[1], layerBounds[2], layerBounds[3]];
-      else bounds = getMinOrMaxExtents(bounds, layerBounds);
-    }
-
-    return bounds;
+    // Really not found
+    return undefined;
   }
 }

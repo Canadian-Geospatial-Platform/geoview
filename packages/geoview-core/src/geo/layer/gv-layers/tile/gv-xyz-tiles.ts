@@ -1,8 +1,8 @@
 import TileLayer from 'ol/layer/Tile';
+import { Options as TileOptions } from 'ol/layer/BaseTile';
 import XYZ from 'ol/source/XYZ';
 import { Extent } from 'ol/extent';
 
-import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { AbstractGVTile } from './abstract-gv-tile';
@@ -18,11 +18,20 @@ export class GVXYZTiles extends AbstractGVTile {
   /**
    * Constructs a GVXYZTiles layer to manage an OpenLayer layer.
    * @param {string} mapId - The map id
-   * @param {TileLayer<XYZ>} olLayer - The OpenLayer layer.
+   * @param {XYZ} olSource - The OpenLayer source.
    * @param {XYZTilesLayerEntryConfig} layerConfig - The layer configuration.
    */
-  public constructor(mapId: string, olLayer: TileLayer<XYZ>, layerConfig: XYZTilesLayerEntryConfig) {
-    super(mapId, olLayer, layerConfig);
+  public constructor(mapId: string, olSource: XYZ, layerConfig: XYZTilesLayerEntryConfig) {
+    super(mapId, olSource, layerConfig);
+
+    // Create the tile layer options.
+    const tileLayerOptions: TileOptions<XYZ> = { source: olSource };
+
+    // Init the layer options with initial settings
+    AbstractGVTile.initOptionsWithInitialSettings(tileLayerOptions, layerConfig);
+
+    // Create and set the OpenLayer layer
+    this.olLayer = new TileLayer(tileLayerOptions);
   }
 
   /**
@@ -38,9 +47,9 @@ export class GVXYZTiles extends AbstractGVTile {
    * Overrides the get of the OpenLayers Layer Source
    * @returns {XYZ} The OpenLayers Layer Source
    */
-  override getOLSource(): XYZ | undefined {
+  override getOLSource(): XYZ {
     // Get source from OL
-    return this.getOLLayer().getSource() || undefined;
+    return super.getOLSource() as XYZ;
   }
 
   /**
@@ -63,30 +72,26 @@ export class GVXYZTiles extends AbstractGVTile {
   }
 
   /**
-   * Gets the bounds of the layer and returns updated bounds
-   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
-   * @returns {Extent | undefined} The new layer bounding box.
+   * Gets the bounds of the layer and returns updated bounds.
+   * @returns {Extent | undefined} The layer bounding box.
    */
-  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  override getBounds(layerPath: string): Extent | undefined {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
-    const layerConfig = this.getLayerConfig();
-    const projection = this.getOLSource()?.getProjection()?.getCode() || this.getMapViewer().getProjection().getCode();
+    // Get the layer
+    const layer = this.getOLLayer() as TileLayer<XYZ> | undefined;
 
-    const layerBounds = this.getOLSource()?.getTileGrid()?.getExtent();
-    if (layerBounds) {
-      let transformedBounds = layerBounds;
-      if (
-        layerConfig.getMetadata()?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')
-      ) {
-        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, projection);
-      }
+    // Get the source projection
+    const sourceProjection = this.getOLSource()?.getProjection() || undefined;
 
-      // eslint-disable-next-line no-param-reassign
-      if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
-      // eslint-disable-next-line no-param-reassign
-      else bounds = getMinOrMaxExtents(bounds, transformedBounds);
+    // Get the layer bounds
+    let sourceExtent = layer?.getSource()?.getTileGrid()?.getExtent();
+    if (sourceExtent) {
+      // Make sure we're in the map projection
+      sourceExtent = this.getMapViewer().convertExtentFromProjToMapProj(sourceExtent, sourceProjection);
     }
 
-    return bounds;
+    // Return the calculated layer bounds
+    return sourceExtent;
   }
 }

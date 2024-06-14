@@ -1,20 +1,18 @@
 import { ImageArcGISRest } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
+import BaseLayer from 'ol/layer/Base';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Image as ImageLayer } from 'ol/layer';
 import { Extent } from 'ol/extent';
 
-// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
-
 import { getLocalizedValue } from '@/core/utils/utilities';
-import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
+import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
   TypeGeoviewLayerConfig,
@@ -153,9 +151,8 @@ export class EsriImage extends AbstractGeoViewRaster {
       }
       if (!legendInfo) {
         const legend: TypeLegend = {
-          type: this.type,
-          layerName: layerConfig.layerName!,
-          styleConfig: layerConfig.style,
+          type: CONST_LAYER_TYPES.ESRI_IMAGE,
+          styleConfig: this.getStyle(layerPath),
           legend: null,
         };
         return legend;
@@ -183,16 +180,16 @@ export class EsriImage extends AbstractGeoViewRaster {
       const styleConfig: TypeStyleConfig = {
         Point: styleSettings,
       };
-      layerConfig.style = styleConfig;
+
+      // TODO: Refactor - Find a better place to set the style than in a getter or rename this function like another TODO suggests
+      // TO.DOCONT: This setter is also dangerous, because it triggers a style changed event which is listened by the legends-layer-set.
+      // TO.DOCONT: Fortunately, we have a loop check barrier, but setting a style during a legend fetch getter could lead to be more problematic.
+      this.setStyle(layerPath, styleConfig);
+
       const legend: TypeLegend = {
-        type: this.type,
-        layerName: layerConfig?.layerName,
+        type: CONST_LAYER_TYPES.ESRI_IMAGE,
         styleConfig,
-        legend: await getLegendStyles(
-          layerConfig as AbstractBaseLayerEntryConfig & {
-            style: TypeStyleConfig;
-          }
-        ),
+        legend: await getLegendStyles(this.getStyle(layerPath)),
       };
       return legend;
     } catch (error) {
@@ -289,27 +286,33 @@ export class EsriImage extends AbstractGeoViewRaster {
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
-   * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
    *
-   * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
+   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    */
   // GV Layers Refactoring - Obsolete (in config?)
-  protected override processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig> {
+  protected override processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig> {
+    // Instance check
+    if (!(layerConfig instanceof EsriImageLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
     return commonProcessLayerMetadata(this, layerConfig);
   }
 
   /** ****************************************************************************************************************************
    * This method creates a GeoView Esri Image layer using the definition provided in the layerConfig parameter.
    *
-   * @param {EsriImageLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
    *
-   * @returns { Promise<TypeBaseRasterLayer | undefined>} The GeoView raster layer that has been created.
+   * @returns { Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
    */
   // GV Layers Refactoring - Obsolete (in config?, in layers?)
-  protected override async processOneLayerEntry(layerConfig: EsriImageLayerEntryConfig): Promise<TypeBaseRasterLayer | undefined> {
+  protected override async processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined> {
     // GV IMPORTANT: The processOneLayerEntry method must call the corresponding method of its parent to ensure that the flow of
     // GV            layerStatus values is correctly sequenced.
     await super.processOneLayerEntry(layerConfig);
+
+    // Instance check
+    if (!(layerConfig instanceof EsriImageLayerEntryConfig)) throw new Error('Invalid layer configuration type provided');
+
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata!.copyrightText ? this.metadata!.copyrightText : '') as string];
     sourceOptions.url = getLocalizedValue(layerConfig.source.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
@@ -323,25 +326,46 @@ export class EsriImage extends AbstractGeoViewRaster {
     }
     if (layerConfig.source.projection) sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
 
-    const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
-      source: new ImageArcGISRest(sourceOptions),
-      properties: { layerConfig },
-    };
-    // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-    if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings.className;
-    if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings.extent;
-    if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
-    if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
-    if (layerConfig.initialSettings?.states?.opacity !== undefined) imageLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
-    // If a layer on the map has an initialSettings.visible set to false, its status will never reach the status 'loaded' because
-    // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
-    // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
+    // Create the source
+    const source = new ImageArcGISRest(sourceOptions);
 
-    // Create the OpenLayer layer
-    const olLayer = new ImageLayer(imageLayerOptions);
+    // GV Time to request an OpenLayers layer!
+    const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
 
-    // TODO: Refactor - Wire it up
-    this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'image');
+    // If any response
+    let olLayer: ImageLayer<ImageArcGISRest> | undefined;
+    if (requestResult.length > 0) {
+      // Get the OpenLayer that was created
+      olLayer = requestResult[0] as ImageLayer<ImageArcGISRest>;
+    }
+
+    // If no olLayer was obtained
+    if (!olLayer) {
+      // We're working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
+      const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
+        source,
+        properties: { layerConfig },
+      };
+      // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+      if (layerConfig.initialSettings?.className !== undefined) imageLayerOptions.className = layerConfig.initialSettings.className;
+      if (layerConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerConfig.initialSettings.extent;
+      if (layerConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerConfig.initialSettings.maxZoom;
+      if (layerConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerConfig.initialSettings.minZoom;
+      if (layerConfig.initialSettings?.states?.opacity !== undefined)
+        imageLayerOptions.opacity = layerConfig.initialSettings.states.opacity;
+      // If a layer on the map has an initialSettings.visible set to false, its status will never reach the status 'loaded' because
+      // nothing is drawn on the map. We must wait until the 'loaded' status is reached to set the visibility to false. The call
+      // will be done in the layerConfig.loadedFunction() which is called right after the 'loaded' signal.
+
+      // Create the OpenLayer layer
+      olLayer = new ImageLayer(imageLayerOptions);
+
+      // Hook the loaded event
+      this.setLayerAndLoadEndListeners(layerConfig, olLayer, 'image');
+    }
+
+    // GV Time to emit about the layer creation!
+    this.emitLayerCreation({ config: layerConfig, layer: olLayer });
 
     return Promise.resolve(olLayer);
   }
@@ -418,36 +442,24 @@ export class EsriImage extends AbstractGeoViewRaster {
    * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
    *
    * @param {string} layerPath The Layer path to the layer's configuration.
-   * @param {Extent | undefined} bounds The current bounding box to be adjusted.
    *
    * @returns {Extent | undefined} The new layer bounding box.
    */
   // GV Layers Refactoring - Obsolete (in layers)
-  protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined {
-    const layerConfig = this.getLayerConfig(layerPath);
-    const projection =
-      this.metadata?.fullExtent?.spatialReference?.wkid || this.getMapViewer().getProjection().getCode().replace('EPSG:', '');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  override getBounds(layerPath: string): Extent | undefined {
+    // Get the metadata extent
+    const metadataExtent = this.getMetadataExtent();
 
-    const layerBounds = layerConfig?.initialSettings?.bounds || [];
-    if (this.metadata?.fullExtent) {
-      layerBounds[0] = this.metadata?.fullExtent.xmin as number;
-      layerBounds[1] = this.metadata?.fullExtent.ymin as number;
-      layerBounds[2] = this.metadata?.fullExtent.xmax as number;
-      layerBounds[3] = this.metadata?.fullExtent.ymax as number;
+    // If found
+    let layerBounds;
+    if (metadataExtent) {
+      // Get the metadata projection
+      const metadataProjection = this.getMetadataProjection();
+      layerBounds = this.getMapViewer().convertExtentFromProjToMapProj(metadataExtent, metadataProjection);
     }
 
-    if (layerBounds) {
-      let transformedBounds = layerBounds;
-      if (this.metadata?.fullExtent?.spatialReference?.wkid !== this.getMapViewer().getProjection().getCode().replace('EPSG:', '')) {
-        transformedBounds = this.getMapViewer().convertExtentFromProjToMapProj(layerBounds, `EPSG:${projection}`);
-      }
-
-      // eslint-disable-next-line no-param-reassign
-      if (!bounds) bounds = [transformedBounds[0], transformedBounds[1], transformedBounds[2], transformedBounds[3]];
-      // eslint-disable-next-line no-param-reassign
-      else bounds = getMinOrMaxExtents(bounds, transformedBounds);
-    }
-
-    return bounds;
+    // Return the calculated layer bounds
+    return layerBounds;
   }
 }

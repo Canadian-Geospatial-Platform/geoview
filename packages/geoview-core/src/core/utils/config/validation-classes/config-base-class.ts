@@ -2,20 +2,15 @@ import { TypeLocalizedString } from '@config/types/map-schema-types';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import {
-  TypeBaseStyleConfig,
   TypeGeoviewLayerConfig,
-  TypeLayerEntryConfig,
   TypeLayerEntryType,
   TypeLayerInitialSettings,
   TypeLayerStatus,
-  TypeStyleGeometry,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
 import { logger } from '@/core/utils/logger';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { GroupLayerEntryConfig } from './group-layer-entry-config';
-import { VectorTilesLayerEntryConfig } from './raster-validation-classes/vector-tiles-layer-entry-config';
-import { VectorLayerEntryConfig } from './vector-layer-entry-config';
 
 /** ******************************************************************************************************************************
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
@@ -69,10 +64,6 @@ export abstract class ConfigBaseClass {
 
   // Keep all callback delegates references
   #onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
-
-  // TODO: Refactor - Layers refactoring. When layers refactoring is done, move this to the layer class
-  // Keep all callback delegates references
-  #onLayerStyleChangedHandlers: LayerStyleChangedDelegate[] = [];
 
   // TODO: Review - The status. I think we should have: newInstance, processsing, loading, - loaded : error
   static #layerStatusWeight = {
@@ -159,13 +150,21 @@ export abstract class ConfigBaseClass {
     }
     if (newLayerStatus === 'processed' && this.#waitForProcessedBeforeSendingLoaded) this.layerStatus = 'loaded';
 
-    if (
-      // eslint-disable-next-line no-underscore-dangle
-      this._layerStatus === 'loaded' &&
-      this.parentLayerConfig &&
-      ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('loaded', [this.parentLayerConfig as GroupLayerEntryConfig])
-    )
-      this.parentLayerConfig.layerStatus = 'loaded';
+    // TODO: Cleanup - Commenting this and leaving it here for now.. It turns out that the parentLayerConfig property can't be trusted
+    // GV due to a bug with different instances of entryconfigs stored in the objects and depending how you navigate the objects, you get
+    // GV different instances. Example below (where 'parentLayerConfig.listOfLayerEntryConfig[0]' is indeed going back to 'uniqueValueId/uniqueValueId/4')
+    // GV This: cgpv.api.maps['sandboxMap'].layer.getLayerEntryConfig('uniqueValueId/uniqueValueId/4').layerStatus
+    // GV Isn't the same as this: cgpv.api.maps['sandboxMap'].layer.getLayerEntryConfig('uniqueValueId/uniqueValueId/4').parentLayerConfig.listOfLayerEntryConfig[0].layerStatus
+    // Commenting this out until a fix is found..
+
+    // // eslint-disable-next-line no-underscore-dangle
+    // if (this._layerStatus === 'loaded' && this.parentLayerConfig) {
+    //   // If all children of the parent are loaded, set the parent as loaded
+    //   if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('loaded', this.parentLayerConfig.listOfLayerEntryConfig)) {
+    //     // Set the parent as loaded
+    //     this.parentLayerConfig.layerStatus = 'loaded';
+    //   }
+    // }
   }
 
   /**
@@ -226,33 +225,17 @@ export abstract class ConfigBaseClass {
    * Recursively checks the list of layer entries to see if all of them are greater than or equal to the provided layer status.
    *
    * @param {TypeLayerStatus} layerStatus - The layer status to compare with the internal value of the config.
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer's configuration
-   *                                                            (default: this.listOfLayerEntryConfig).
+   * @param {ConfigBaseClass[]} listOfLayerEntryConfig - The list of layer's configuration (default: this.listOfLayerEntryConfig).
    *
    * @returns {boolean} true when all layers are greater than or equal to the layerStatus parameter.
    */
-  static allLayerStatusAreGreaterThanOrEqualTo(layerStatus: TypeLayerStatus, listOfLayerEntryConfig: TypeLayerEntryConfig[]): boolean {
+  static allLayerStatusAreGreaterThanOrEqualTo(layerStatus: TypeLayerStatus, listOfLayerEntryConfig: ConfigBaseClass[]): boolean {
     // Try to find a layer that is not greater than or equal to the layerStatus parameter. If you can, return false
-    return !listOfLayerEntryConfig.find((layerConfig: TypeLayerEntryConfig) => {
+    return !listOfLayerEntryConfig.find((layerConfig) => {
       if (layerEntryIsGroupLayer(layerConfig))
         return !this.allLayerStatusAreGreaterThanOrEqualTo(layerStatus, layerConfig.listOfLayerEntryConfig);
       return !layerConfig.isGreaterThanOrEqualTo(layerStatus || 'newInstance');
     });
-  }
-
-  /**
-   * Adds a default style in the configuration
-   * @param geometryType - The geometry type associated with the style to add
-   * @param style - The style to add
-   */
-  addDefaultStyle(geometryType: TypeStyleGeometry, style: TypeBaseStyleConfig): void {
-    // Cast (instead of duplicating code in 2 child class for now)
-    const thisConfig = this as unknown as VectorLayerEntryConfig | VectorTilesLayerEntryConfig;
-    if (!thisConfig.style) thisConfig.style = {};
-    thisConfig.style![geometryType] = style;
-
-    // Emit about the style change
-    this.#emitLayerStyleChanged({ geometryType, style });
   }
 
   /**
@@ -282,39 +265,12 @@ export abstract class ConfigBaseClass {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerStatusChangedHandlers, callback);
   }
-
-  /**
-   * Emits an event to all handlers.
-   * @param {LayerStyleChangedEvent} event - The event to emit
-   */
-  #emitLayerStyleChanged(event: LayerStyleChangedEvent): void {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerStyleChangedHandlers, event);
-  }
-
-  /**
-   * Registers a layer style changed event handler.
-   * @param {LayerStyleChangedDelegate} callback - The callback to be executed whenever the event is emitted
-   */
-  onLayerStyleChanged(callback: LayerStyleChangedDelegate): void {
-    // Register the event handler
-    EventHelper.onEvent(this.#onLayerStyleChangedHandlers, callback);
-  }
-
-  /**
-   * Unregisters a layer style changed event handler.
-   * @param {LayerStyleChangedDelegate} callback - The callback to stop being called whenever the event is emitted
-   */
-  offLayerStyleChanged(callback: LayerStyleChangedDelegate): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onLayerStyleChangedHandlers, callback);
-  }
 }
 
 /**
  * Define a delegate for the event handler function signature.
  */
-type LayerStatusChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStatusChangedEvent>;
+type LayerStatusChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStatusChangedEvent, void>;
 
 /**
  * Define an event for the delegate.
@@ -322,20 +278,4 @@ type LayerStatusChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStatus
 export type LayerStatusChangedEvent = {
   // The new layer status.
   layerStatus: TypeLayerStatus;
-};
-
-/**
- * Define a delegate for the event handler function signature
- */
-type LayerStyleChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStyleChangedEvent>;
-
-/**
- * Define an event for the delegate
- */
-export type LayerStyleChangedEvent = {
-  // The style gometry
-  geometryType: TypeStyleGeometry;
-
-  // The style
-  style: TypeBaseStyleConfig;
 };

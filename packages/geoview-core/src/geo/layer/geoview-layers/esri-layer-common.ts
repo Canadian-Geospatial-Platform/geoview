@@ -5,8 +5,6 @@ import { Extent } from 'ol/extent';
 
 import cloneDeep from 'lodash/cloneDeep';
 
-// import { layerEntryIsGroupLayer } from '@config/types/type-guards';
-
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { getLocalizedValue, getXMLHttpRequest } from '@/core/utils/utilities';
@@ -51,8 +49,13 @@ export async function commonfetchServiceMetadata(layer: EsriDynamic | EsriFeatur
       else {
         layer.metadata = JSON.parse(metadataString) as TypeJsonObject;
         if ('error' in layer.metadata) throw new Error(`Error code = ${layer.metadata.error.code}, ${layer.metadata.error.message}`);
-        const { copyrightText } = layer.metadata;
-        if (copyrightText && !layer.attributions.includes(copyrightText as string)) layer.attributions.push(copyrightText as string);
+        const copyrightText = layer.metadata.copyrightText as string;
+        const attributions = layer.getAttributions();
+        if (copyrightText && !attributions.includes(copyrightText)) {
+          // Add it
+          attributions.push(copyrightText);
+          layer.setAttributions(attributions);
+        }
       }
     } catch (error) {
       logger.logInfo('Unable to read metadata', error);
@@ -164,7 +167,8 @@ export function commonValidateListOfLayerEntryConfig(
         newListOfLayerEntryConfig.push(subLayerEntryConfig);
 
         // FIXME: Temporary patch to keep the behavior until those layer classes don't exist
-        MapEventProcessor.getMapViewerLayerAPI(layer.mapId).registerLayerConfigInit(subLayerEntryConfig);
+        // TODO: Refactor: Do not do this on the fly here anymore with the new configs (quite unpredictable)... (standardizing this call with the other one above for now)
+        MapEventProcessor.getMapViewerLayerAPI(layer.mapId).setLayerEntryConfigObsolete(subLayerEntryConfig);
       });
 
       layer.validateListOfLayerEntryConfig(newListOfLayerEntryConfig);
@@ -348,6 +352,9 @@ export function commonProcessInitialSettings(
   // GV TODO: The solution implemented in the following two lines is not right. scale and zoom are not the same things.
   // GV if (layerConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerConfig.initialSettings.minZoom = minScale;
   // GV if (layerConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerConfig.initialSettings.maxZoom = maxScale;
+
+  // TODO: Check - Why are we converting to the map projection in the pre-processing? It'd be better to standardize to 4326 here (or leave untouched), as it's part of the initial configuration and handle it later?
+
   if (layerConfig.initialSettings?.extent)
     layerConfig.initialSettings.extent = Projection.transformExtent(
       layerConfig.initialSettings.extent,
@@ -355,6 +362,7 @@ export function commonProcessInitialSettings(
       `EPSG:${MapEventProcessor.getMapState(layer.mapId).currentProjection}`
     );
 
+  // TODO: Check - Here, we're *not* converting in the map projection in the pre-processing, but for some other layers we are (ogc-feature, wfs, ..?). Should be standardized.
   if (!layerConfig.initialSettings?.bounds) {
     const layerExtent = [
       layerMetadata.extent.xmin,
@@ -375,10 +383,9 @@ export function commonProcessInitialSettings(
  *
  * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
  */
-export async function commonProcessLayerMetadata(
-  layer: EsriDynamic | EsriFeature | EsriImage,
-  layerConfig: TypeLayerEntryConfig
-): Promise<TypeLayerEntryConfig> {
+export async function commonProcessLayerMetadata<
+  T extends EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig
+>(layer: EsriDynamic | EsriFeature | EsriImage, layerConfig: T): Promise<T> {
   // User-defined groups do not have metadata provided by the service endpoint.
   if (layerEntryIsGroupLayer(layerConfig) && !layerConfig.isMetadataLayerGroup) return layerConfig;
   const { layerPath } = layerConfig;

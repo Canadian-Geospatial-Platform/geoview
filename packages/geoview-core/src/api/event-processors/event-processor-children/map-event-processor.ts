@@ -519,8 +519,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // Redirect to layer to highlight
     MapEventProcessor.getMapViewerLayerAPI(mapId).highlightLayer(layerPath);
+
     // Get bounds and highlight a bounding box for the layer
-    const bounds = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath)?.calculateBounds(layerPath);
+    const bounds = MapEventProcessor.getMapViewerLayerAPI(mapId).calculateBounds(layerPath);
     if (bounds && bounds[0] !== Infinity) this.getMapStateProtected(mapId).actions.highlightBBox(bounds, true);
 
     return layerPath;
@@ -852,12 +853,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @return {Extent | undefined}
    */
   static getLayerBounds(mapId: string, layerPath: string): Extent | undefined {
-    const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
-    if (layer) {
-      const bounds = layer.calculateBounds(layerPath);
-      if (bounds) return bounds;
-    }
-    return undefined;
+    // Redirect to layer api calculate bounds
+    return MapEventProcessor.getMapViewerLayerAPI(mapId).calculateBounds(layerPath);
   }
 
   // #endregion

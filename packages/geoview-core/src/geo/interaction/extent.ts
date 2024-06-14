@@ -98,4 +98,4 @@ export class Extent extends Interaction {
 /**
  * Define a delegate for the event handler function signature
  */
-type ExtentDelegate = EventDelegateBase<Extent, OLExtentEvent>;
+type ExtentDelegate = EventDelegateBase<Extent, OLExtentEvent, void>;

@@ -143,4 +143,4 @@ export class Modify extends Interaction {
 /**
  * Define a delegate for the event handler function signature
  */
-type ModifyDelegate = EventDelegateBase<Modify, OLModifyEvent>;
+type ModifyDelegate = EventDelegateBase<Modify, OLModifyEvent, void>;

@@ -17,7 +17,6 @@ import { xmlToJson } from '@/core/utils/utilities';
 
 import { CONST_LAYER_TYPES, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
-import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { TypeStyleConfig } from '@/geo/map/map-schema-types';
 
 import { TypeBasemapLayer } from '../layer/basemap/basemap-types';
@@ -234,16 +233,12 @@ export function createEmptyBasemap(): TileLayer<XYZ> {
 /** ***************************************************************************************************************************
  * This method gets the legend styles used by the the layer as specified by the style configuration.
  *
- * @param {AbstractBaseLayerEntryConfig & {style: TypeStyleConfig;}} layerConfig - Layer configuration.
+ * @param {TypeStyleConfig} styleConfig - Layer style configuration.
  *
  * @returns {Promise<TypeVectorLayerStyles>} A promise that the layer styles are processed.
  */
-export function getLegendStylesFromConfig(
-  layerConfig: AbstractBaseLayerEntryConfig & {
-    style: TypeStyleConfig;
-  }
-): Promise<TypeVectorLayerStyles> {
-  return getLegendStyles(layerConfig);
+export function getLegendStylesFromConfig(styleConfig: TypeStyleConfig): Promise<TypeVectorLayerStyles> {
+  return getLegendStyles(styleConfig);
 }
 
 /**
@@ -330,6 +325,7 @@ export function convertTypeFeatureStyleToOpenLayersStyle(style?: TypeFeatureStyl
  * @returns {Extent} the smallest or largest set from the extents
  */
 export function getMinOrMaxExtents(extentsA: Extent, extentsB: Extent, minmax = 'max'): Extent {
+  // TODO: Check - Obsolete function? Use getExtentUnion or getExtentIntersection
   let bounds: Extent = [];
   if (minmax === 'max')
     bounds = [
@@ -346,6 +342,72 @@ export function getMinOrMaxExtents(extentsA: Extent, extentsB: Extent, minmax = 
       Math.min(extentsA[3], extentsB[3]),
     ];
   return bounds;
+}
+
+/**
+ * Returns the union of 2 extents.
+ * @param {Extent} extentA First extent
+ * @param {Extent} extentB Optional second extent
+ * @returns {Extent} The union of the extents
+ */
+export function getExtentUnion(extentA: Extent, extentB?: Extent): Extent {
+  // If no B, return A
+  if (!extentB) return extentA;
+
+  // Return the union of A and B
+  return [
+    Math.min(extentA[0], extentB[0]),
+    Math.min(extentA[1], extentB[1]),
+    Math.max(extentA[2], extentB[2]),
+    Math.max(extentA[3], extentB[3]),
+  ];
+}
+
+/**
+ * Returns the union of 2 extents supporting the case where extentA might be undefined.
+ * @param {Extent | undefined} extentA First extent or undefined
+ * @param {Extent | undefined} extentB Optional second extent
+ * @returns {Extent | undefined} The union of the extents
+ */
+export function getExtentUnionMaybe(extentA: Extent | undefined, extentB?: Extent): Extent | undefined {
+  // If no A, return B which may be undefined too
+  if (!extentA) return extentB;
+
+  // Redirect
+  return getExtentUnion(extentA, extentB);
+}
+
+/**
+ * Returns the intersection of 2 extents.
+ * @param {Extent} extentA First extent
+ * @param {Extent} extentB Optional second extent
+ * @returns {Extent} The intersection of the extents
+ */
+export function getExtentIntersection(extentA: Extent, extentB?: Extent): Extent {
+  // If no B, return A
+  if (!extentB) return extentA;
+
+  // Return the intersection of A and B
+  return [
+    Math.max(extentA[0], extentB[0]),
+    Math.max(extentA[1], extentB[1]),
+    Math.min(extentA[2], extentB[2]),
+    Math.min(extentA[3], extentB[3]),
+  ];
+}
+
+/**
+ * Returns the intersection of 2 extents supporting the case where extentA might be undefined.
+ * @param {Extent | undefined} extentA First extent or undefined
+ * @param {Extent | undefined} extentB Optional second extent
+ * @returns {Extent | undefined} The intersection of the extents
+ */
+export function getExtentIntersectionMaybe(extentA: Extent | undefined, extentB?: Extent): Extent | undefined {
+  // If no A, return B which may be undefined too
+  if (!extentA) return extentB;
+
+  // Redirect
+  return getExtentIntersection(extentA, extentB);
 }
 
 /**

@@ -216,7 +216,7 @@
         });
 
         // listen to layer filter applied event
-        cgpv.api.maps.Map1.layer.getGeoviewLayer('uniqueValueId/1').onLayerFilterApplied((sender, payload) => {
+        cgpv.api.maps.Map1.layer.getGeoviewLayerHybrid('uniqueValueId/1').onLayerFilterApplied((sender, payload) => {
           cgpv.api.maps.Map1.notifications.addNotificationSuccess(`Filter ${payload.filter} applied to ${payload.layerPath}`);
         });
 
