@@ -1269,13 +1269,11 @@ export class LayerApi {
    * @returns {Extent} The overall extent.
    */
   getExtentOfMultipleLayers(layerIds: string[] = Object.keys(this.#layerEntryConfigs)): Extent {
-    // TODO: Check - Is this function still useful now that the bounds in the store are theoretically fixed?
-    // TO.DOCONT: Maybe this is the same as bounds on the geoview layer root level?
     let bounds: Extent = [];
 
     layerIds.forEach((layerId) => {
       // Get sublayerpaths and layerpaths from layer IDs.
-      const subLayerPaths = Object.keys(this.#layerEntryConfigs).filter((layerPath) => layerPath.includes(layerId));
+      const subLayerPaths = Object.keys(this.#layerEntryConfigs).filter((layerPath) => layerPath.startsWith(layerId));
 
       // Get max extents from all selected layers.
       subLayerPaths.forEach((layerPath) => {
