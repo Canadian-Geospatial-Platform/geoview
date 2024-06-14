@@ -53,9 +53,6 @@ export default function GeoList({ geoListItems, searchValue }: GeoListProps): JS
    * @returns {JSX.Element}
    */
   const transformListTitle = useCallback((_title: string, _searchValue: string, province: string): JSX.Element | string => {
-    // Log
-    logger.logTraceUseCallback('GEOLOCATOR - geolist - transformListTitle', _title, _searchValue, province);
-
     const title = _title.toUpperCase();
     const searchItem = _searchValue.toUpperCase();
     const idx = title.indexOf(searchItem);
