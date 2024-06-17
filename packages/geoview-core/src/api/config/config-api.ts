@@ -93,7 +93,7 @@ export class ConfigApi {
    * @returns {TypeJsonObject} A JSON map feature configuration object.
    * @private
    */
-  static #getJsonObjectFromString(stringMapFeatureConfig: string): TypeJsonObject | undefined {
+  static #convertStringToJson(stringMapFeatureConfig: string): TypeJsonObject | undefined {
     // Erase comments in the config file.
     let newStringMapFeatureConfig = removeCommentsFromJSON(stringMapFeatureConfig as string);
 
@@ -204,24 +204,26 @@ export class ConfigApi {
   }
 
   /**
-   * Convert all the GeoCore entries to their GeoView equivalents.
+   * Convert one layer config or an array of GeoCore layer config to their GeoView equivalents. The method returns undefined
+   * and log an error in the console if a GeoCore layer cannot be converted. When the input/output type is an array, it is
+   * possible to filter out the undefined values.
    *
    * @param {TypeDisplayLanguage} language The language language to use for the conversion.
-   * @param {TypeJsonArray} listOfGeoviewLayerConfig The list of layers to process.
+   * @param {TypeJsonArray | TypeJsonObject} config Configuration to process.
    * @param {string} geocoreUrl Optional GeoCore server URL.
+   * @param {boolean} filterUndefinedValues Flag indicating that we want to filter undefined values when the return type is an array..
    *
-   * @returns {Promise<TypeJsonArray>} The resulting list of layer configurations.
+   * @returns {Promise<TypeJsonArray>} The resulting configurations or undefined if there is an error.
    * @static @private
    */
-  static async #geocoreToGeoview(
+  static async convertGeocoreToGeoview(
     language: TypeDisplayLanguage,
-    listOfGeoviewLayerConfig?: TypeJsonArray,
-    geocoreUrl?: string
-  ): Promise<TypeJsonArray> {
-    // return an empty array if listOfGeoviewLayerConfig is undefined.
-    if (!listOfGeoviewLayerConfig) return [];
-    // The listOfGeoviewLayerConfig must be an array, otherwise there is an error.
-    if (!Array.isArray(listOfGeoviewLayerConfig)) throw new MapConfigError('The property listOfGeoviewLayerConfig must be an array');
+    config: TypeJsonArray | TypeJsonObject,
+    geocoreUrl?: string,
+    filterUndefinedValues = true
+  ): Promise<TypeJsonArray | TypeJsonObject | undefined> {
+    // convert the JSON object to a JSON array. We want to process a single type.
+    const listOfGeoviewLayerConfig = Array.isArray(config) ? config : [config];
 
     // Get the geocore URL from the config, otherwise use the default URL.
     const geocoreServerUrl = geocoreUrl || CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls.geocoreUrl;
@@ -240,30 +242,87 @@ export class ConfigApi {
         const arrayOfJsonConfig = await UUIDmapConfigReader.getGVConfigFromUUIDs(geocoreServerUrl, language, geocoreArrayOfKeys);
 
         // replace the GeoCore layers by the GeoView layers returned by the server.
-        return listOfGeoviewLayerConfig.map((layerConfig) => {
+        // If a geocore layer cannot be found in the array of layers returned by the server, we leave it as is in
+        // the listOfGeoviewLayerConfig.
+        let newListOfGeoviewLayerConfig = listOfGeoviewLayerConfig.map((layerConfig) => {
           if (layerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE) {
             const jsonConfigFound = arrayOfJsonConfig.find(
               (jsonConfig) => jsonConfig.geoviewLayerId === `rcs.${layerConfig.geoviewLayerId}.${language}`
             );
             if (jsonConfigFound) {
               jsonConfigFound.geoviewLayerId = layerConfig.geoviewLayerId;
-              jsonConfigFound.isGeocore = true as TypeJsonObject;
+              jsonConfigFound.isGeocore = true as TypeJsonObject; // We want to remember that the origin is GeoCore.
               return jsonConfigFound;
             }
-            // If a geocore layer cannot be found in the array of layers returned by the server, we leave it as is in
-            // the listOfGeoviewLayerConfig. It will be deleted in the post processing phase lower.
           }
           return layerConfig;
         }) as TypeJsonArray;
+
+        // Print a message to display the layer identifier in error and if the input config is an array and the
+        // filterUndefinedValues flag is true, filter out the erroneous GeoCore layers.
+        newListOfGeoviewLayerConfig = newListOfGeoviewLayerConfig.filter((layerConfig) => {
+          if (layerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE) {
+            logger.logError(`Unable to convert GeoCore layer (Id=${layerConfig.geoviewLayerId}).`);
+            // if the config input type is an array and the filterUndefinedValues is on
+            return !(Array.isArray(config) && filterUndefinedValues); // Delete the layer entry
+          }
+          return true; // Keep the layer
+        });
+
+        // return the result according to the config type
+        return Array.isArray(config) ? newListOfGeoviewLayerConfig : newListOfGeoviewLayerConfig[0];
       } catch (error) {
-        // Log
         logger.logError('Failed to process the array of GeoCore layers', geocoreArrayOfKeys, geocoreUrl, error);
       }
-    }
-    return listOfGeoviewLayerConfig;
+    } else return config;
+    return undefined;
   }
 
-  // TODO: Change the code below using the schema provided during our last meating. This change must be done in the next PR
+  /**
+   * This method validates the configuration of map elements using the json string or json object supplied by the user.
+   * The returned value is a configuration object initialized only from the configuration passed as a parameter.
+   * Validation of the configuration based on metadata and application of default values is not performed here,
+   * but will be done later using another method.
+   *
+   * If the configuration is unreadable or generates a fatal error, the default configuration will be returned with
+   * the error flag raised and an error message logged in the console. When configuration processing is possible, if
+   * errors are detected, the configuration will be corrected to the best of our ability to avoid crashing the viewer,
+   * and all changes made will be logged in the console.
+   *
+   * @param {string | TypeJsonObject} mapConfig The map feature configuration to validate.
+   * @param {TypeDisplayLanguage} language The language of the map feature config we want to produce.
+   *
+   * @returns {MapFeatureConfig} The validated map feature configuration.
+   * @static
+   */
+  static validateLayerConfig(mapConfig: string | TypeJsonObject, language: TypeDisplayLanguage): MapFeatureConfig {
+    // If the user provided a string config, translate it to a json object because the MapFeatureConfig constructor
+    // doesn't accept string config. Note that convertStringToJson returns undefined if the string config cannot
+    // be translated to a json object.
+    const providedMapFeatureConfig: TypeJsonObject | undefined =
+      typeof mapConfig === 'string' ? ConfigApi.#convertStringToJson(mapConfig as string) : (mapConfig as TypeJsonObject);
+
+    try {
+      // If the user provided a valid string config with the mandatory map property, process geocore layers to translate them to their GeoView layers
+      if (!providedMapFeatureConfig) throw new MapConfigError('The string configuration provided cannot be translated to a json object');
+      if (!providedMapFeatureConfig.map) throw new MapConfigError('The map property is mandatory');
+
+      // Instanciate the mapFeatureConfig. If an error is detected, a workaround procedure
+      // will be executed to try to correct the problem in the best possible way.
+      ConfigApi.lastMapConfigCreated = new MapFeatureConfig(providedMapFeatureConfig!, language);
+    } catch (error) {
+      // If we get here, it is because the user provided a string config that cannot be translated to a json object,
+      // or the config doesn't have the mandatory map property or the listOfGeoviewLayerConfig is defined but is not
+      // an array.
+      if (error instanceof MapConfigError) logger.logError(error.message);
+      else logger.logError('ConfigApi.validateMapConfig - An error occured', error);
+      const defaultMapConfig = ConfigApi.getDefaultMapFeatureConfig(language);
+      defaultMapConfig.setErrorDetectedFlag();
+      ConfigApi.lastMapConfigCreated = defaultMapConfig;
+    }
+    return ConfigApi.lastMapConfigCreated;
+  }
+
   /**
    * Create the map feature configuration instance using the json string or the json object provided by the user. When the user
    * doesn't provide a value for a field that is covered by a default value, the default is used.
@@ -279,47 +338,35 @@ export class ConfigApi {
   // GV: and requires a minimum of validation to ensure that the configuration of GeoCore layers is valid.
   static async createMapConfig(mapConfig: string | TypeJsonObject, language: TypeDisplayLanguage): Promise<MapFeatureConfig> {
     // If the user provided a string config, translate it to a json object because the MapFeatureConfig constructor
-    // doesn't accept string config. Note that getJsonObjectFromString returns undefined if the string config cannot
+    // doesn't accept string config. Note that convertStringToJson returns undefined if the string config cannot
     // be translated to a json object.
     const providedMapFeatureConfig: TypeJsonObject | undefined =
-      typeof mapConfig === 'string' ? ConfigApi.#getJsonObjectFromString(mapConfig as string) : (mapConfig as TypeJsonObject);
+      typeof mapConfig === 'string' ? ConfigApi.#convertStringToJson(mapConfig as string) : (mapConfig as TypeJsonObject);
 
     try {
       // If the user provided a valid string config with the mandatory map property, process geocore layers to translate them to their GeoView layers
       if (!providedMapFeatureConfig) throw new MapConfigError('The string configuration provided cannot be translated to a json object');
       if (!providedMapFeatureConfig.map) throw new MapConfigError('The map property is mandatory');
 
-      providedMapFeatureConfig.map.listOfGeoviewLayerConfig = (await ConfigApi.#geocoreToGeoview(
+      providedMapFeatureConfig.map.listOfGeoviewLayerConfig = (await ConfigApi.convertGeocoreToGeoview(
         language,
         providedMapFeatureConfig.map.listOfGeoviewLayerConfig as TypeJsonArray,
         providedMapFeatureConfig?.serviceUrls?.geocoreUrl as string
       )) as TypeJsonObject;
 
-      // Filter out the erroneous GeoCore layers and print a message to display the layer identifier in error.
-      let geocoreErrorDetected = false; // Variable to remember that an error occured.
-      providedMapFeatureConfig.map.listOfGeoviewLayerConfig = (
-        providedMapFeatureConfig.map.listOfGeoviewLayerConfig as TypeJsonArray
-      ).filter((layerConfig) => {
-        if (layerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE) {
-          logger.logError(`Unable to convert GeoCore layer (Id=${layerConfig.geoviewLayerId}).`);
-          geocoreErrorDetected = true;
-          return false; // Delete the layer
-        }
-        return true; // Keep the layer
-      }) as TypeJsonObject;
-
       // Instanciate the mapFeatureConfig. If an error is detected, a workaround procedure
       // will be executed to try to correct the problem in the best possible way.
-      const mapFeatureConfig = new MapFeatureConfig(providedMapFeatureConfig!, language);
-      if (geocoreErrorDetected) mapFeatureConfig.setErrorDetectedFlag(); // If a geocore error was detected, signal it.
-
-      ConfigApi.lastMapConfigCreated = mapFeatureConfig;
+      ConfigApi.lastMapConfigCreated = new MapFeatureConfig(providedMapFeatureConfig!, language);
+      if (
+        providedMapFeatureConfig.map.listOfGeoviewLayerConfig.length !== ConfigApi.lastMapConfigCreated.map.listOfGeoviewLayerConfig.length
+      )
+        ConfigApi.lastMapConfigCreated.setErrorDetectedFlag();
     } catch (error) {
       // If we get here, it is because the user provided a string config that cannot be translated to a json object,
       // or the config doesn't have the mandatory map property or the listOfGeoviewLayerConfig is defined but is not
       // an array.
       if (error instanceof MapConfigError) logger.logError(error.message);
-      else logger.logError('ConfigApi.createMapConfig - An erroroccured', error);
+      else logger.logError('ConfigApi.validateMapConfig - An error occured', error);
       const defaultMapConfig = ConfigApi.getDefaultMapFeatureConfig(language);
       defaultMapConfig.setErrorDetectedFlag();
       ConfigApi.lastMapConfigCreated = defaultMapConfig;
@@ -343,12 +390,11 @@ export class ConfigApi {
     layerType: TypeGeoviewLayerType | typeof CV_CONFIG_GEOCORE_TYPE,
     language: TypeDisplayLanguage = 'en'
   ): Promise<AbstractGeoviewLayerConfig | undefined> {
-    let geoviewLayerConfig: TypeJsonObject;
+    let geoviewLayerConfig: TypeJsonObject | undefined;
     if (layerType === CV_CONFIG_GEOCORE_TYPE) {
       try {
         const layerConfig = { geoviewLayerId: serviceAccessString, geoviewLayerType: layerType };
-        [geoviewLayerConfig] = await ConfigApi.#geocoreToGeoview(language, Cast<TypeJsonArray>([layerConfig]));
-        if (geoviewLayerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE) return undefined;
+        geoviewLayerConfig = (await ConfigApi.convertGeocoreToGeoview(language, Cast<TypeJsonObject>(layerConfig))) as TypeJsonObject;
       } catch (error) {
         logger.logError(`Unable to convert GeoCore layer (Id=${serviceAccessString}).`);
         return undefined;

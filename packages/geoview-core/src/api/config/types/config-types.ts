@@ -53,26 +53,8 @@ export type LayerTypesKey =
   | 'ESRI_IMAGE'
   | 'IMAGE_STATIC'
   | 'GEOJSON'
-  | 'GEOPACKAGE'
   | 'XYZ_TILES'
   | 'VECTOR_TILES'
   | 'OGC_FEATURE'
   | 'WFS'
   | 'WMS';
-
-/**
- * Type of GeoView layers
- */
-export type TypeGeoviewLayerType =
-  | 'CSV'
-  | 'esriDynamic'
-  | 'esriFeature'
-  | 'esriImage'
-  | 'GeoJSON'
-  | 'GeoPackage'
-  | 'imageStatic'
-  | 'ogcFeature'
-  | 'ogcWfs'
-  | 'ogcWms'
-  | 'vectorTiles'
-  | 'xyzTiles';

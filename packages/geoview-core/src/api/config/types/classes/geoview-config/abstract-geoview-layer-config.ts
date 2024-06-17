@@ -2,8 +2,8 @@ import defaultsDeep from 'lodash/defaultsDeep';
 import cloneDeep from 'lodash/cloneDeep';
 
 import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
-import { Cast, TypeGeoviewLayerType, TypeJsonObject, TypeJsonArray } from '@config/types/config-types';
-import { TypeDisplayLanguage, TypeLayerInitialSettings } from '@config/types/map-schema-types';
+import { Cast, TypeJsonObject, TypeJsonArray } from '@config/types/config-types';
+import { TypeGeoviewLayerType, TypeDisplayLanguage, TypeLayerInitialSettings } from '@config/types/map-schema-types';
 import { normalizeLocalizedString } from '@config/utils';
 import { CV_DEFAULT_LAYER_INITIAL_SETTINGS } from '@config/types/config-constants';
 import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-layer-entry-config';
@@ -82,16 +82,13 @@ export abstract class AbstractGeoviewLayerConfig {
     delete geoviewLayerConfig.isGeocore;
 
     this.#originalgeoviewLayerConfig = cloneDeep(geoviewLayerConfig);
-    // GV: One thing to know about default values: The way to determine whether a property has
-    // GV: been supplied by the user rather than initialized using a default value is to look
-    // GV: in the original configuration copy kept in the instance
     this.#mapFeatureConfig = mapFeatureConfig;
     this.#language = language;
 
     this.initialSettings = Cast<TypeLayerInitialSettings>(
       defaultsDeep(this.#originalgeoviewLayerConfig.initialSettings, CV_DEFAULT_LAYER_INITIAL_SETTINGS)
     );
-    // The top layer must be a layer group or a leaf node.
+    // The top layer must be a layer group or a single leaf node.
     if ((this.#originalgeoviewLayerConfig?.listOfLayerEntryConfig as TypeJsonArray)?.length > 1)
       (this.#originalgeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray) = [
         {
@@ -116,6 +113,7 @@ export abstract class AbstractGeoviewLayerConfig {
         if (layerEntryIsGroupLayer(subLayerConfig)) return new GroupLayerEntryConfig(subLayerConfig, this.initialSettings, language, this);
         return this.createLeafNode(subLayerConfig, this.initialSettings, language, this);
       })
+      // When a sublayer cannot be created, the value returned is undefined. These values will be filtered.
       ?.filter((subLayerConfig) => {
         return subLayerConfig;
       }) as EntryConfigBaseClass[];
