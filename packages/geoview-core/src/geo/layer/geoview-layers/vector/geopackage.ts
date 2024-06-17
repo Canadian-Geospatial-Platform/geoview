@@ -11,8 +11,6 @@ import { Feature } from 'ol';
 import initSqlJs, { SqlValue } from 'sql.js';
 import * as SLDReader from '@nieuwlandgeo/sldreader';
 
-import { cloneDeep } from 'lodash';
-
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
@@ -605,9 +603,8 @@ export class GeoPackage extends AbstractGeoViewVector {
             (layerConfig as TypeLayerEntryConfig).listOfLayerEntryConfig = [];
             const newLayerGroup = this.createLayerGroup(layerConfig, layerConfig.initialSettings!);
             for (let i = 0; i < layers.length; i++) {
-              // FIXME: This attempts to clone an object instead of a type. This should be changed to clone an actual object instead.
-              // FIX.MECONT: Otherwise, we're losing the methods on the class instance and it causes a "Private element is not present on this object" error
-              const newLayerEntryConfig = cloneDeep(layerConfig);
+              // "Clone" the config, patch until that layer type logic is rebuilt
+              const newLayerEntryConfig = new GeoPackageLayerEntryConfig(layerConfig as GeoPackageLayerEntryConfig);
               newLayerEntryConfig.layerId = layers[i].name;
               newLayerEntryConfig.layerName = createLocalizedString(layers[i].name);
               newLayerEntryConfig.entryType = CONST_LAYER_ENTRY_TYPES.VECTOR;
@@ -625,12 +622,18 @@ export class GeoPackage extends AbstractGeoViewVector {
                       loggerMessage: `Unable to create layer ${layerConfig.layerPath} on map ${this.mapId}`,
                     });
                     layerConfig.layerStatus = 'error';
+                    // FIXME: This resolve of the promise seems wrong as it's in a loop here, resolving a single promise multiple times?
+                    // FIX.MECONT: Should probably reject instead of resolve too?
                     resolve(undefined);
                   }
                 })
                 .catch((error) => {
                   // Log
                   logger.logPromiseFailed('processOneGeopackageLayer (2) in processOneLayerEntry in GeoPackage', error);
+                  layerConfig.layerStatus = 'error';
+                  // FIXME: This resolve of the promise seems wrong as it's in a loop here, resolving a single promise multiple times?
+                  // FIX.MECONT: Should probably reject instead of resolve too?
+                  resolve(undefined);
                 });
             }
             resolve(newLayerGroup);
@@ -639,6 +642,8 @@ export class GeoPackage extends AbstractGeoViewVector {
         .catch((error) => {
           // Log
           logger.logPromiseFailed('extractGeopackageData in processOneLayerEntry in GeoPackage', error);
+          layerConfig.layerStatus = 'error';
+          resolve(undefined);
         });
     });
 
