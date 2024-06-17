@@ -31,7 +31,7 @@ export function Geolocator(): JSX.Element {
 
   // internal state
   const [data, setData] = useState<GeoListItem[]>();
-  const [error, setError] = useState<Error>();
+  const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>('');
 
@@ -104,15 +104,17 @@ export function Geolocator(): JSX.Element {
         throw new Error('Error');
       }
       const result = (await response.json()) as GeoListItem[];
-      setIsLoading(false);
       const ddSupport = getDecimalDegreeItem(searchTerm);
+
       if (ddSupport) {
         // insert at the top of array.
         result.unshift(ddSupport);
       }
+
       setData(result);
-    } catch (err) {
+      setError(null);
       setIsLoading(false);
+    } catch (err) {
       setError(err as Error);
     }
   }, []);
@@ -207,7 +209,9 @@ export function Geolocator(): JSX.Element {
               onSubmit={(e) => {
                 // NOTE: so that when enter is pressed, page is not reloaded.
                 e.preventDefault();
-                handleGetGeolocations();
+                if (!isLoading) {
+                  handleGetGeolocations();
+                }
               }}
             >
               <StyledInputField placeholder={t('geolocator.search')!} autoFocus onChange={onChange} value={searchValue} />
@@ -236,7 +240,7 @@ export function Geolocator(): JSX.Element {
           <ProgressBar />
         </Box>
       )}
-      {!!data && searchValue?.length >= MIN_SEARCH_LENGTH && (
+      {!!data && searchValue?.length >= MIN_SEARCH_LENGTH && !error && (
         <Box sx={sxClasses.searchResult}>
           <GeolocatorResult geoLocationData={data} searchValue={searchValue} error={error} />
         </Box>
