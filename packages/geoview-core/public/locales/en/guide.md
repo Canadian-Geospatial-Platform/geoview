@@ -85,7 +85,7 @@ The Side Bar to the left of the map shows the available tools.
 
 _The tools shown in the Side Bar vary depending on the map._
 
-_Note: Some tools in the Side Bar are also available as tabs in the Footer Bar, such as Legend or Details. Tools opened from the Side Bar are displayed on the map, in a condensed 'mobile' view (single column). The same tool opened from a tab in the Footer Bar is displayed below the map in a fully expanded view._
+_Note: Some tools in the Side Bar are also available as tabs in the Footer Bar, such as Legend, Layers, Data Table or Details. Tools opened from the Side Bar are displayed on the map, in a condensed 'mobile' view (single column). The same tool opened from a tab in the Footer Bar is displayed below the map in a fully expanded view._
 
 | Symbol                                                      | Name          | Description                                                                                        |
 | ----------------------------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------- |
@@ -178,7 +178,7 @@ The _Footer Bar_ menu bar has the following tabs:
 
 _Depending on viewer configuration some tabs may not be available_
 
-_Note: Some tabs in the Footer Bar are also available as tools in the Side Bar, such as Legend or Details. A tool opened from the Side Bar is displayed on the map, in a condensed 'mobile' view (single column). The same tab opened in the Footer Bar is displayed below the map in a fully expanded view._
+_Note: Some tabs in the Footer Bar are also available as tools in the Side Bar, such as Legend, Layers, Data Table or Details. A tool opened from the Side Bar is displayed on the map, in a condensed 'mobile' view (single column). The same tab opened in the Footer Bar is displayed below the map in a fully expanded view._
 
 <br>
 =2!legend=
@@ -285,8 +285,6 @@ The viewer will automatically switch to the view function.
 #### ![]({{assetsURL}}/img/guide/layers/sort_25.svg) Sort
 
 To sort the layers you can simply click the up or down arrows on each layer panel.
-
-If you using the keyboard for sorting layers, note the following;
 
 =3!remove=
 
