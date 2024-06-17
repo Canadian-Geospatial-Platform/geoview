@@ -129,7 +129,7 @@ export class GVWMS extends AbstractGVRaster {
         return [];
 
       let infoFormat = '';
-      const featureInfoFormat = this.getLayerConfig().getMetadata()?.Capability?.Request?.GetFeatureInfo?.Format as TypeJsonArray;
+      const featureInfoFormat = this.getLayerConfig().getServiceMetadata()?.Capability?.Request?.GetFeatureInfo?.Format as TypeJsonArray;
       if (featureInfoFormat)
         if (featureInfoFormat.includes('text/xml' as TypeJsonObject)) infoFormat = 'text/xml';
         else if (featureInfoFormat.includes('text/plain' as TypeJsonObject)) infoFormat = 'text/plain';
@@ -290,7 +290,7 @@ export class GVWMS extends AbstractGVRaster {
    */
   #getLayerMetadataEntry(
     layerId: string,
-    layer: TypeJsonObject | undefined = this.getLayerConfig().getMetadata()?.Capability?.Layer
+    layer: TypeJsonObject | undefined = this.getLayerConfig().getServiceMetadata()?.Capability?.Layer
   ): TypeJsonObject | null {
     if (!layer) return null;
     if ('Name' in layer && (layer.Name as string) === layerId) return layer;
@@ -327,7 +327,7 @@ export class GVWMS extends AbstractGVRaster {
       let queryUrl: string | undefined;
       const legendUrlFromCapabilities = this.#getLegendUrlFromCapabilities(layerConfig, chosenStyle);
       if (legendUrlFromCapabilities) queryUrl = legendUrlFromCapabilities.OnlineResource as string;
-      else if (Object.keys(this.getLayerConfig().getMetadata()?.Capability?.Request || {}).includes('GetLegendGraphic'))
+      else if (Object.keys(this.getLayerConfig().getServiceMetadata()?.Capability?.Request || {}).includes('GetLegendGraphic'))
         queryUrl = `${getLocalizedValue(
           this.getLayerConfig().geoviewLayerConfig.metadataAccessPath,
           AppEventProcessor.getDisplayLanguage(this.getMapId())
@@ -619,7 +619,7 @@ export class GVWMS extends AbstractGVRaster {
    */
   #getBoundsExtentFromMetadata(projection: string): [string, Extent] | undefined {
     // Get the bounding boxes in the metadata
-    const boundingBoxes = this.getLayerConfig().getMetadata()?.Capability.Layer.BoundingBox as TypeJsonArray;
+    const boundingBoxes = this.getLayerConfig().getServiceMetadata()?.Capability.Layer.BoundingBox as TypeJsonArray;
 
     // If found any
     if (boundingBoxes) {

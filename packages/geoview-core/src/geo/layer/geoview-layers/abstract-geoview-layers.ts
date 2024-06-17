@@ -109,20 +109,16 @@ export abstract class AbstractGeoViewLayer {
    */
   listOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
 
-  /**
-   * Initial settings to apply to the GeoView layer at creation time. This attribute is allowed only if listOfLayerEntryConfig.length > 1.
-   */
+  /** Initial settings to apply to the GeoView layer at creation time. This attribute is allowed only if listOfLayerEntryConfig.length > 1. */
   initialSettings?: TypeLayerInitialSettings;
 
   /** layers of listOfLayerEntryConfig that did not load. */
   layerLoadError: { layer: string; loggerMessage: string }[] = [];
 
-  /**
-   * The OpenLayer root layer representing this GeoView Layer.
-   */
+  /** The OpenLayer root layer representing this GeoView Layer. */
   olRootLayer?: BaseLayer;
 
-  // The service metadata.
+  /** The service metadata. */
   metadata: TypeJsonObject | null = null;
 
   /** Layer name */
@@ -1559,7 +1555,7 @@ export abstract class AbstractGeoViewLayer {
           this.onLoaded(layerConfig);
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (olLayer! as any).get('source').un(`${listenerType}loaderror`, loadErrorListener);
+          (olLayer.get('source') as any).un(`${listenerType}loaderror`, loadErrorListener);
         };
 
         loadErrorListener = (): void => {
@@ -1567,14 +1563,14 @@ export abstract class AbstractGeoViewLayer {
           this.onError(layerConfig);
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (olLayer! as any).get('source').un(`${listenerType}loadend`, loadEndListener);
+          (olLayer.get('source') as any).un(`${listenerType}loadend`, loadEndListener);
         };
 
         // Activation of the load end listeners
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (olLayer! as any).get('source').once(`${listenerType}loaderror`, loadErrorListener);
+        (olLayer.get('source') as any).once(`${listenerType}loaderror`, loadErrorListener);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (olLayer! as any).get('source').once(`${listenerType}loadend`, loadEndListener);
+        (olLayer.get('source') as any).once(`${listenerType}loadend`, loadEndListener);
       }
     }
   }

@@ -8,14 +8,15 @@ import {
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
-import { TypeFeatureInfoLayerConfig, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoLayerConfig, TypeLayerEntryConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { AppEventProcessor } from './app-event-processor';
 import { MapEventProcessor } from './map-event-processor';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
-import { UIEventProcessor } from './ui-event-processor';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -116,7 +117,17 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     // Get the layer using the map event processor, If no temporal dimension OR layerPath, return undefined
     if (!layerConfig.layerPath) return undefined;
     const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layerConfig.layerPath)!;
-    const temporalDimensionInfo = geoviewLayer.getTemporalDimension(layerConfig.layerPath);
+
+    // If a group
+    if (layerEntryIsGroupLayer(layerConfig)) return undefined;
+
+    // Cast the layer
+    const geoviewLayerCasted = geoviewLayer as AbstractGeoViewLayer | AbstractGVLayer;
+
+    // Get the temporal dimension information
+    const temporalDimensionInfo = geoviewLayerCasted.getTemporalDimension(layerConfig.layerPath);
+
+    // If no temporal dimension information
     if (!temporalDimensionInfo || !temporalDimensionInfo.range) return undefined;
 
     // Set defaults values from temporal dimension

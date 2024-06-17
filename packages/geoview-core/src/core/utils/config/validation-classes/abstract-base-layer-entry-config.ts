@@ -24,8 +24,11 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /** The ending element of the layer configuration path. */
   override layerIdExtension?: string | undefined = undefined;
 
+  /** The metadata associated with the service */
+  #serviceMetadata?: TypeJsonObject;
+
   /** The metadata associated with the layer */
-  #metadata?: TypeJsonObject;
+  #layerMetadata?: TypeJsonObject;
 
   /** The calculated filter equation */
   filterEquation?: FilterNodeArrayType;
@@ -52,9 +55,9 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * The class constructor.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
+   * @param {TypeJsonObject} layerConfig - The layer configuration we want to instanciate.
    */
-  protected constructor(layerConfig: AbstractBaseLayerEntryConfig) {
+  protected constructor(layerConfig: TypeJsonObject) {
     super(layerConfig);
     // Attribute 'style' must exist in layerConfig even if it is undefined
     if (!('style' in this)) this.style = undefined;
@@ -62,20 +65,37 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
+   * Gets the service metadata that is associated to the service.
+   * @returns {TypeJsonObject} The service metadata.
+   */
+  getServiceMetadata(): TypeJsonObject | undefined {
+    return this.#serviceMetadata;
+  }
+
+  /**
+   * Sets the service metadata for the layer.
+   * @param {TypeJsonObject} metadata - The service metadata to set
+   */
+  setServiceMetadata(metadata: TypeJsonObject): void {
+    // TODO: Refactor - Layers refactoring. Reminder: turn this function private eventually?
+    this.#serviceMetadata = metadata;
+  }
+
+  /**
    * Gets the metadata that is associated to the layer.
    * @returns {TypeJsonObject} The layer metadata.
    */
-  getMetadata(): TypeJsonObject | undefined {
-    return this.#metadata;
+  getLayerMetadata(): TypeJsonObject | undefined {
+    return this.#layerMetadata;
   }
 
   /**
    * Sets the layer metadata for the layer.
    * @param {TypeJsonObject} layerMetadata - The layer metadata to set
    */
-  setMetadata(layerMetadata: TypeJsonObject): void {
+  setLayerMetadata(layerMetadata: TypeJsonObject): void {
     // TODO: Refactor - Layers refactoring. Reminder: turn this function private eventually?
-    this.#metadata = layerMetadata;
+    this.#layerMetadata = layerMetadata;
   }
 
   /**

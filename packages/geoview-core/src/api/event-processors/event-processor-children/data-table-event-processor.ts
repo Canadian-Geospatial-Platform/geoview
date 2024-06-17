@@ -1,5 +1,4 @@
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import {
   IDataTableState,
@@ -46,7 +45,6 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
     const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layerPath) as
       | AbstractGeoViewVector
       | AbstractGVVector
-      | EsriDynamic
       | undefined;
     const filterLayerConfig = layer?.getLayerConfig(layerPath);
 
