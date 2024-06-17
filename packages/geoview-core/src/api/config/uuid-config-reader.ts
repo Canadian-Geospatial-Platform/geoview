@@ -107,6 +107,22 @@ export class UUIDmapConfigReader {
               }
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
+          } else if (layerType === CV_CONST_LAYER_TYPES.WMS) {
+            const geoviewLayerConfig = Cast<TypeJsonObject>({
+              geoviewLayerId: `${id}`,
+              geoviewLayerName: createLocalizedString(name as string),
+              metadataAccessPath: createLocalizedString(url as string),
+              geoviewLayerType: CV_CONST_LAYER_TYPES.WMS,
+            });
+            (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
+              (item): TypeJsonObject => {
+                return Cast<TypeJsonObject>({
+                  entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR,
+                  layerId: `${item.id}`,
+                });
+              }
+            );
+            listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else {
             // Log
             logger.logWarning(`Layer type ${layerType} not supported`);
