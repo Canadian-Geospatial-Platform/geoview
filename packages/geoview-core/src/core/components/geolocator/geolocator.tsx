@@ -115,7 +115,6 @@ export function Geolocator(): JSX.Element {
       setError(null);
       setIsLoading(false);
     } catch (err) {
-      setIsLoading(false);
       setError(err as Error);
     }
   }, []);
