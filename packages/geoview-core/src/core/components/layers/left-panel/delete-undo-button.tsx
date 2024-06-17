@@ -4,6 +4,7 @@ import { TypeLegendLayer } from '@/core/components/layers/types';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
+import { LAYER_STATUS } from '@/core/utils/constant';
 
 interface DeleteUndoButtonProps {
   layer: TypeLegendLayer;
@@ -89,6 +90,10 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     return undefined;
   }, [inUndoState]);
 
+  // Hide remove layer icon when layer status is loading or processing.
+  if (layer.layerStatus === LAYER_STATUS.LOADING || layer.layerStatus === LAYER_STATUS.PROCESSING) {
+    return <Box />;
+  }
   if (!inUndoState && layer.controls?.remove !== false && !getLayerDeleteInProgress()) {
     return (
       <IconButton onClick={handleDeleteClick} edge="end" size="small">
