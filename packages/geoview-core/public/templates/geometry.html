@@ -36,6 +36,7 @@
         <tbody>
           <tr>
             <td>This page is used to showcase how the viewer may implement different geometry functions</td>
+            <hr />
           </tr>
         </tbody>
       </table>
@@ -77,13 +78,39 @@
         'theme': 'geo.ca'
       }"></div>
   <p></p>
-
+  <hr />
+  <label>
+    Theses buttons creates a geometry in a group named static which is not the active group.</label>
+  <div>
+  <button class="create-polyline-in-static-group-btn">Add Polyline To Static Group</button>
+  <button class="create-polygon-in-static-group-btn">Add Polygon To Static Group</button>
+  <button class="create-circle-in-static-group-btn">Add Circle To Static Group</button>
+  <button class="create-marker-in-static-group-btn">Add Marker To Static Group</button>
+  </div>
+  <hr />
     <button type="button" class="collapsible">Code Snippet</button>
     <pre id="codeSnippet" class="panel"></pre>
 
     <script src="codedoc.js"></script>
     <script>
       // TODO: for layer.graphic.add* add a optional param to specify the geometry group - UPDATE CODE AND SAMPLE
+      function addPolylineInStaticGroup(map) {
+        // call an api function to draw a polyline with default styles
+        const polyline1 = cgpv.api.maps[map].layer.geometry.addPolyline(
+          [
+            [-120, 60],
+            [-125, 65],
+          ],
+          {
+            style: {
+              strokeColor: 'magenta',
+            },
+          },
+          undefined,
+          'static'
+        );
+      }
+
       function addPolyline(map) {
         // call an api function to draw a polyline with default styles
         const polyline1 = cgpv.api.maps[map].layer.geometry.addPolyline(
@@ -120,6 +147,27 @@
               strokeOpacity: 0.5,
             },
           }
+        );
+      }
+
+      function addPolygonInStaticGroup(map) {
+        // call an api function to draw a polygon with default styles
+        const polygon1 = cgpv.api.maps[map].layer.geometry.addPolygon(
+          [
+            [
+              [-119.05, 55],
+              [-119.03, 59],
+              [-112.05, 59],
+              [-112.04, 55],
+            ],
+          ],
+          {
+            style: {
+              strokeColor: 'magenta',
+            },
+          },
+          undefined,
+          'static'
         );
       }
 
@@ -174,6 +222,19 @@
         );
       }
 
+      function addCircleInStaticGroup(map) {
+        // call an api function to draw a circle with default style
+        const circle1 = cgpv.api.maps[map].layer.geometry.addCircle([-90, 55], {
+        style: {
+            fillColor: 'magenta',
+            fillOpacity: 0.5,
+            radius: 10,
+          }
+        },
+        undefined,
+        'static'
+        );
+      }
       function addCircle(map) {
         // call an api function to draw a circle with default style
         const circle1 = cgpv.api.maps[map].layer.geometry.addCircle([-100, 50], undefined);
@@ -205,6 +266,14 @@
         });
       }
 
+      function addMarkerInStaticGroup(map) {
+        // call an api function to draw a marker icon with default styles
+        const markerIcon1 = cgpv.api.maps[map].layer.geometry.addMarkerIcon([-100, 55], 
+        undefined,
+        undefined,
+        'static'
+        );
+      }
       function addMarkerIcon(map) {
         // call an api function to draw a marker icon with default styles
         const markerIcon1 = cgpv.api.maps[map].layer.geometry.addMarkerIcon([-100, 60], undefined);
@@ -235,6 +304,7 @@
           // get addPolyline button element and add event handler
           var addPolylineBtn = document.getElementsByClassName('add-polyline-btn')[0];
           addPolylineBtn.addEventListener('click', function (e) {
+            let groupName = document.getElementById('selectGroupsName').value
             addPolyline('mapWM');
           });
 
@@ -290,6 +360,38 @@
               optionList.add(new Option(name, name));
             }
           });
+
+          // get create GeomtryFromGroup button element and add event handler
+          const createPolylineInStaticGroup = document.getElementsByClassName('create-polyline-in-static-group-btn')[0];
+          createPolylineInStaticGroup.addEventListener('click', function (e) {
+            // create geometry in static group
+            addPolylineInStaticGroup('mapWM');
+            }
+          );
+
+          // get create GeomtryFromGroup button element and add event handler
+          const createPolygonInStaticGroup = document.getElementsByClassName('create-polygon-in-static-group-btn')[0];
+          createPolygonInStaticGroup.addEventListener('click', function (e) {
+            // create geometry in static group
+            addPolygonInStaticGroup('mapWM');
+            }
+          );
+
+          // get create GeomtryFromGroup button element and add event handler
+          const createCircleInStaticGroup = document.getElementsByClassName('create-circle-in-static-group-btn')[0];
+          createCircleInStaticGroup.addEventListener('click', function (e) {
+            // create geometry in static group
+            addCircleInStaticGroup('mapWM');
+            }
+          );
+
+          // get create GeomtryFromGroup button element and add event handler
+          const createMarkerInStaticGroup = document.getElementsByClassName('create-marker-in-static-group-btn')[0];
+          createMarkerInStaticGroup.addEventListener('click', function (e) {
+            // create geometry in static group
+            addMarkerInStaticGroup('mapWM');
+            }
+          );
 
           // listen to geometry added event
           cgpv.api.maps['mapWM'].layer.geometry.onGeometryAdded((sender, payload) => {
