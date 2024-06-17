@@ -205,7 +205,7 @@
           const configArea = document.getElementById('configGeoview');
           const configJSON = JSON.parse(configArea.value.replaceAll(`'`, `"`));
 
-          const validConfig = cgpv.api.configApi.getMapConfig(document.getElementById('configGeoview').value.replaceAll("'", '"'), 'en');
+          const validConfig = cgpv.api.configApi.createMapConfig(document.getElementById('configGeoview').value.replaceAll("'", '"'), 'en');
 
           // set class and message
           message.classList.add('config-json-valid');
