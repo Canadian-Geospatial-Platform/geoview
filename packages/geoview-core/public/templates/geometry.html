@@ -305,7 +305,7 @@
           var addPolylineBtn = document.getElementsByClassName('add-polyline-btn')[0];
           addPolylineBtn.addEventListener('click', function (e) {
             let groupName = document.getElementById('selectGroupsName').value
-            addPolyline('mapWM', groupName);
+            addPolyline('mapWM');
           });
 
           // get addPolygon button element and add event handler
@@ -362,32 +362,32 @@
           });
 
           // get create GeomtryFromGroup button element and add event handler
-          var createInStaticGroup = document.getElementsByClassName('create-polyline-in-static-group-btn')[0];
-          createInStaticGroup.addEventListener('click', function (e) {
+          const createPolylineInStaticGroup = document.getElementsByClassName('create-polyline-in-static-group-btn')[0];
+          createPolylineInStaticGroup.addEventListener('click', function (e) {
             // create geometry in static group
             addPolylineInStaticGroup('mapWM');
             }
           );
 
           // get create GeomtryFromGroup button element and add event handler
-          var createInStaticGroup = document.getElementsByClassName('create-polygon-in-static-group-btn')[0];
-          createInStaticGroup.addEventListener('click', function (e) {
+          const createPolygonInStaticGroup = document.getElementsByClassName('create-polygon-in-static-group-btn')[0];
+          createPolygonInStaticGroup.addEventListener('click', function (e) {
             // create geometry in static group
             addPolygonInStaticGroup('mapWM');
             }
           );
 
           // get create GeomtryFromGroup button element and add event handler
-          var createInStaticGroup = document.getElementsByClassName('create-circle-in-static-group-btn')[0];
-          createInStaticGroup.addEventListener('click', function (e) {
+          const createCircleInStaticGroup = document.getElementsByClassName('create-circle-in-static-group-btn')[0];
+          createCircleInStaticGroup.addEventListener('click', function (e) {
             // create geometry in static group
             addCircleInStaticGroup('mapWM');
             }
           );
 
           // get create GeomtryFromGroup button element and add event handler
-          var createInStaticGroup = document.getElementsByClassName('create-marker-in-static-group-btn')[0];
-          createInStaticGroup.addEventListener('click', function (e) {
+          const createMarkerInStaticGroup = document.getElementsByClassName('create-marker-in-static-group-btn')[0];
+          createMarkerInStaticGroup.addEventListener('click', function (e) {
             // create geometry in static group
             addMarkerInStaticGroup('mapWM');
             }
