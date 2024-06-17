@@ -1273,12 +1273,12 @@ export class LayerApi {
 
     layerIds.forEach((layerId) => {
       // Get sublayerpaths and layerpaths from layer IDs.
-      const subLayerPaths = Object.keys(this.#layerEntryConfigs).filter((layerPath) => layerPath.includes(layerId));
+      const subLayerPaths = Object.keys(this.#layerEntryConfigs).filter((layerPath) => layerPath.startsWith(layerId));
 
       // Get max extents from all selected layers.
       subLayerPaths.forEach((layerPath) => {
-        // Calculate the bounds for the layer path
-        const layerBounds = this.calculateBounds(layerPath);
+        // Get the bounds for the layer path
+        const layerBounds = LegendEventProcessor.getLayerBounds(this.getMapId(), layerPath);
         // If bounds has not yet been defined, set to this layers bounds.
         if (!bounds.length && layerBounds) bounds = layerBounds;
         else if (layerBounds) bounds = getMinOrMaxExtents(bounds, layerBounds);

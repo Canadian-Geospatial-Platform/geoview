@@ -28,6 +28,7 @@ import { TypeClickMarker } from '@/core/components';
 import { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { TypeFeatureInfoResultSet, TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
+import { LegendEventProcessor } from './legend-event-processor';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.
@@ -521,7 +522,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     MapEventProcessor.getMapViewerLayerAPI(mapId).highlightLayer(layerPath);
 
     // Get bounds and highlight a bounding box for the layer
-    const bounds = MapEventProcessor.getMapViewerLayerAPI(mapId).calculateBounds(layerPath);
+    const bounds = LegendEventProcessor.getLayerBounds(mapId, layerPath);
     if (bounds && bounds[0] !== Infinity) this.getMapStateProtected(mapId).actions.highlightBBox(bounds, true);
 
     return layerPath;
@@ -845,17 +846,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static setClickMarkerOnPosition = (mapId: string, position: number[]): void => {
     this.getMapViewer(mapId).map.getOverlayById(`${mapId}-clickmarker`)!.setPosition(position);
   };
-
-  /**
-   * Get layer bounds for given layer path.
-   * @param {string} mapId - ID of map.
-   * @param {string} layerPath - The layer path to get bounds for.
-   * @return {Extent | undefined}
-   */
-  static getLayerBounds(mapId: string, layerPath: string): Extent | undefined {
-    // Redirect to layer api calculate bounds
-    return MapEventProcessor.getMapViewerLayerAPI(mapId).calculateBounds(layerPath);
-  }
 
   // #endregion
 }
