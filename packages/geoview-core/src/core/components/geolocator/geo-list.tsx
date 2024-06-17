@@ -31,7 +31,8 @@ export default function GeoList({ geoListItems, searchValue }: GeoListProps): JS
    */
   const getTooltipTitle = useCallback(({ name, province, category }: tooltipProp): string => {
     // Log
-    logger.logTraceUseCallback('GEOLOCATOR - geolist - getTooltipTitle', name, province, category);
+    // NOTE: Commenting out because it fires too often and leads console pollution.
+    // logger.logTraceUseCallback('GEOLOCATOR - geolist - getTooltipTitle', name, province, category);
 
     let title = name;
     if (category && category !== 'null') {
@@ -53,6 +54,10 @@ export default function GeoList({ geoListItems, searchValue }: GeoListProps): JS
    * @returns {JSX.Element}
    */
   const transformListTitle = useCallback((_title: string, _searchValue: string, province: string): JSX.Element | string => {
+    // Log
+    // NOTE: Commenting out because it fires too often and leads console pollution.
+    // logger.logTraceUseCallback('GEOLOCATOR - geolist - transformListTitle', _title, _searchValue, province);
+
     const title = _title.toUpperCase();
     const searchItem = _searchValue.toUpperCase();
     const idx = title.indexOf(searchItem);
