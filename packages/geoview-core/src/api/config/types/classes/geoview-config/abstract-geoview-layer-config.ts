@@ -20,9 +20,6 @@ export abstract class AbstractGeoviewLayerConfig {
   /** The language used when interacting with this instance of MapFeatureConfig. */
   #language: TypeDisplayLanguage;
 
-  /** Original copy of the geoview layer configuration provided by the user. */
-  #originalgeoviewLayerConfig: TypeJsonObject;
-
   /** If the geoview layer is linked to a map config, we keep a reference to the map for message propagation */
   #mapFeatureConfig?: MapFeatureConfig;
 
@@ -75,40 +72,34 @@ export abstract class AbstractGeoviewLayerConfig {
    * @param {MapFeatureConfig} mapFeatureConfig An optional mapFeatureConfig instance if the layer is part of it.
    */
   constructor(geoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage, mapFeatureConfig?: MapFeatureConfig) {
-    this.isGeocore = (geoviewLayerConfig.isGeocore as boolean) || false;
-    // The isGeocore property is not part of the input schema. Now that it has been transferd to the internal representation,
-    // It must be removed from the input config to make the input validation successful.
-    // eslint-disable-next-line no-param-reassign
-    delete geoviewLayerConfig.isGeocore;
-
-    this.#originalgeoviewLayerConfig = cloneDeep(geoviewLayerConfig);
     this.#mapFeatureConfig = mapFeatureConfig;
     this.#language = language;
 
+    this.isGeocore = (geoviewLayerConfig.isGeocore as boolean) || false;
     this.initialSettings = Cast<TypeLayerInitialSettings>(
-      defaultsDeep(this.#originalgeoviewLayerConfig.initialSettings, CV_DEFAULT_LAYER_INITIAL_SETTINGS)
+      defaultsDeep(geoviewLayerConfig.initialSettings, CV_DEFAULT_LAYER_INITIAL_SETTINGS)
     );
+    this.geoviewLayerId = (geoviewLayerConfig.geoviewLayerId || generateId()) as string;
+    this.geoviewLayerName = normalizeLocalizedString(geoviewLayerConfig?.geoviewLayerName)![this.#language]!;
+    this.metadataAccessPath = normalizeLocalizedString(geoviewLayerConfig.metadataAccessPath)![this.#language]!;
+    this.serviceDateFormat = (geoviewLayerConfig.serviceDateFormat || 'DD/MM/YYYY HH:MM:SSZ') as string;
+    this.externalDateFormat = (geoviewLayerConfig.externalDateFormat || 'DD/MM/YYYY HH:MM:SSZ') as string;
     // The top layer must be a layer group or a single leaf node.
-    if ((this.#originalgeoviewLayerConfig?.listOfLayerEntryConfig as TypeJsonArray)?.length > 1)
-      (this.#originalgeoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray) = [
-        {
-          layerId: this.#originalgeoviewLayerConfig.geoviewLayerId,
-          initialSettings: this.initialSettings as TypeJsonObject,
-          layerName: { ...(this.#originalgeoviewLayerConfig.geoviewLayerName as object) },
-          isLayerGroup: true as TypeJsonObject,
-          listOfLayerEntryConfig: this.#originalgeoviewLayerConfig.listOfLayerEntryConfig,
-        },
-      ];
+    const listOfLayerEntryConfig =
+      (geoviewLayerConfig?.listOfLayerEntryConfig as TypeJsonArray)?.length > 1
+        ? (this.listOfLayerEntryConfig = [
+            Cast<EntryConfigBaseClass>({
+              layerId: geoviewLayerConfig.geoviewLayerId,
+              initialSettings: this.initialSettings,
+              layerName: { ...(geoviewLayerConfig.geoviewLayerName as object) },
+              isLayerGroup: true,
+              listOfLayerEntryConfig: cloneDeep(geoviewLayerConfig.listOfLayerEntryConfig),
+            }),
+          ])
+        : cloneDeep(geoviewLayerConfig.listOfLayerEntryConfig);
 
-    this.geoviewLayerId = (this.#originalgeoviewLayerConfig.geoviewLayerId || generateId()) as string;
-    this.geoviewLayerName = normalizeLocalizedString(this.#originalgeoviewLayerConfig?.geoviewLayerName)![this.#language]!;
-    this.metadataAccessPath = normalizeLocalizedString(this.#originalgeoviewLayerConfig.metadataAccessPath)![this.#language]!;
-    this.serviceDateFormat = (this.#originalgeoviewLayerConfig.serviceDateFormat || 'DD/MM/YYYY HH:MM:SSZ') as string;
-    this.externalDateFormat = (this.#originalgeoviewLayerConfig.externalDateFormat || 'DD/MM/YYYY HH:MM:SSZ') as string;
-    this.isTimeAware = (
-      this.#originalgeoviewLayerConfig.isTimeAware === undefined ? true : this.#originalgeoviewLayerConfig.isTimeAware
-    ) as boolean;
-    this.listOfLayerEntryConfig = (this.#originalgeoviewLayerConfig?.listOfLayerEntryConfig as TypeJsonArray)
+    this.isTimeAware = (geoviewLayerConfig.isTimeAware === undefined ? true : geoviewLayerConfig.isTimeAware) as boolean;
+    this.listOfLayerEntryConfig = (listOfLayerEntryConfig as TypeJsonArray)
       ?.map((subLayerConfig) => {
         if (layerEntryIsGroupLayer(subLayerConfig)) return new GroupLayerEntryConfig(subLayerConfig, this.initialSettings, language, this);
         return this.createLeafNode(subLayerConfig, this.initialSettings, language, this);

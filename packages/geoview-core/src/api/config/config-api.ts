@@ -295,7 +295,7 @@ export class ConfigApi {
    * @returns {MapFeatureConfig} The validated map feature configuration.
    * @static
    */
-  static validateLayerConfig(mapConfig: string | TypeJsonObject, language: TypeDisplayLanguage): MapFeatureConfig {
+  static validateMapConfig(mapConfig: string | TypeJsonObject, language: TypeDisplayLanguage): MapFeatureConfig {
     // If the user provided a string config, translate it to a json object because the MapFeatureConfig constructor
     // doesn't accept string config. Note that convertStringToJson returns undefined if the string config cannot
     // be translated to a json object.
@@ -330,7 +330,7 @@ export class ConfigApi {
    * @param {string | TypeJsonObject} mapConfig The map feature configuration to instanciate.
    * @param {TypeDisplayLanguage} language The language of the map feature config we want to produce.
    *
-   * @returns {MapFeatureConfig} The map feature configuration.
+   * @returns {Promise<MapFeatureConfig>} The map feature configuration Promise.
    * @static
    */
   // GV: GeoCore layers are processed here, well before the schema validation. The aim is to get rid of these layers in
@@ -348,19 +348,18 @@ export class ConfigApi {
       if (!providedMapFeatureConfig) throw new MapConfigError('The string configuration provided cannot be translated to a json object');
       if (!providedMapFeatureConfig.map) throw new MapConfigError('The map property is mandatory');
 
+      const inputLength = providedMapFeatureConfig.map.listOfGeoviewLayerConfig.length;
       providedMapFeatureConfig.map.listOfGeoviewLayerConfig = (await ConfigApi.convertGeocoreToGeoview(
         language,
         providedMapFeatureConfig.map.listOfGeoviewLayerConfig as TypeJsonArray,
         providedMapFeatureConfig?.serviceUrls?.geocoreUrl as string
       )) as TypeJsonObject;
+      const errorDetected = inputLength !== providedMapFeatureConfig.map.listOfGeoviewLayerConfig.length;
 
       // Instanciate the mapFeatureConfig. If an error is detected, a workaround procedure
       // will be executed to try to correct the problem in the best possible way.
       ConfigApi.lastMapConfigCreated = new MapFeatureConfig(providedMapFeatureConfig!, language);
-      if (
-        providedMapFeatureConfig.map.listOfGeoviewLayerConfig.length !== ConfigApi.lastMapConfigCreated.map.listOfGeoviewLayerConfig.length
-      )
-        ConfigApi.lastMapConfigCreated.setErrorDetectedFlag();
+      if (errorDetected) ConfigApi.lastMapConfigCreated.setErrorDetectedFlag();
     } catch (error) {
       // If we get here, it is because the user provided a string config that cannot be translated to a json object,
       // or the config doesn't have the mandatory map property or the listOfGeoviewLayerConfig is defined but is not

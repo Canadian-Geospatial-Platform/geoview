@@ -53,6 +53,7 @@ export type LayerTypesKey =
   | 'ESRI_IMAGE'
   | 'IMAGE_STATIC'
   | 'GEOJSON'
+  | 'GEOPACKAGE'
   | 'XYZ_TILES'
   | 'VECTOR_TILES'
   | 'OGC_FEATURE'

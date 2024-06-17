@@ -1,10 +1,10 @@
 import Ajv from 'ajv';
 
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LAYER_TYPES } from '@config/types/config-constants';
-import { TypeGeoviewLayerType, TypeJsonObject } from '@config/types/config-types';
+import { TypeJsonObject } from '@config/types/config-types';
 import schema from '@config/types/config-validation-schema.json';
 import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
-import { TypeLayerEntryType, TypeLocalizedString } from '@config/types/map-schema-types';
+import { TypeGeoviewLayerType, TypeLayerEntryType, TypeLocalizedString } from '@config/types/map-schema-types';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 import { logger } from '@/core/utils/logger';
 
@@ -39,6 +39,11 @@ export const convertLayerTypeToEntry = (layerType: NewType): TypeLayerEntryType 
 
 /**
  * Validate a section of the configuration against the schema identified by the schema path.
+ * 
+ * Since the useInternalSchema is never provided by the users and set internally before the
+ * call to this method, we use it as a flag to indicate the schema type (input/internal) to
+ * use for the schema validation.
+
  * @param {string} schemaPath The path to the schema section to use for the validation.
  * @param {object} targetObject The map feature configuration to validate.
  *

@@ -28,8 +28,8 @@ export class EsriFeatureLayerConfig extends AbstractGeoviewEsriLayerConfig {
    */
   constructor(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, mapFeatureConfig?: MapFeatureConfig) {
     super(layerConfig, language, mapFeatureConfig);
-    if (!isvalidComparedToSchema(this.geoviewLayerSchema, layerConfig)) this.setErrorDetectedFlag(); // Input schema validation.
-    if (!isvalidComparedToSchema(this.geoviewLayerSchema, this)) this.setErrorDetectedFlag(); // Internal schema validation.
+    // Input schema validation.
+    if (!isvalidComparedToSchema(this.geoviewLayerSchema, layerConfig)) this.setErrorDetectedFlag();
     this.validate();
   }
 
