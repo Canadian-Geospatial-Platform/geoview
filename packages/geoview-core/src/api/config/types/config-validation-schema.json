@@ -708,6 +708,7 @@
       "type": "object",
       "allOf": [
         {
+          "description": "The parent class.",
           "$ref": "#/definitions/AbstractGeoviewLayerConfig"
         },
         {
@@ -725,6 +726,7 @@
       "type": "object",
       "allOf": [
         {
+          "description": "The parent class.",
           "$ref": "#/definitions/AbstractGeoviewLayerConfig"
         },
         {
@@ -819,6 +821,7 @@
       "type": "object",
       "allOf": [
         {
+          "description": "The parent class.",
           "$ref": "#/definitions/EntryConfigBaseClass"
         },
         {
@@ -843,6 +846,7 @@
       "type": "object",
       "allOf": [
         {
+          "description": "The actual parent class is AbstractBaseEsriLayerEntryConfig, whose parent class is AbstractBaseLayerEntryConfig. Both classes have the same properties.",
           "$ref": "#/definitions/AbstractBaseLayerEntryConfig"
         },
         {
@@ -863,6 +867,7 @@
       "type": "object",
       "allOf": [
         {
+          "description": "The actual parent class is AbstractBaseEsriLayerEntryConfig, whose parent class is AbstractBaseLayerEntryConfig. Both classes have the same properties.",
           "$ref": "#/definitions/AbstractBaseLayerEntryConfig"
         },
         {

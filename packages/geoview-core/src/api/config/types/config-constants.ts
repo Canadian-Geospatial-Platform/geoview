@@ -1,7 +1,7 @@
 // TODO: When we are done with the config extraction, do a review of all the constants, types and utilities to
 // TO.DOCONT: remove code duplication.
 
-import { Cast, LayerEntryTypesKey, LayerTypesKey, TypeGeoviewLayerType } from '@config/types/config-types';
+import { Cast, LayerEntryTypesKey, LayerTypesKey } from '@config/types/config-types';
 import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
 import {
   TypeBasemapId,
@@ -11,6 +11,7 @@ import {
   TypeLayerEntryType,
   TypeValidMapProjectionCodes,
   TypeValidVersions,
+  TypeGeoviewLayerType,
 } from '@config/types/map-schema-types';
 
 /** The default geocore url */
@@ -43,7 +44,6 @@ export const CV_CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> =
   ESRI_IMAGE: 'esriImage',
   IMAGE_STATIC: 'imageStatic',
   GEOJSON: 'GeoJSON',
-  GEOPACKAGE: 'GeoPackage',
   XYZ_TILES: 'xyzTiles',
   VECTOR_TILES: 'vectorTiles',
   OGC_FEATURE: 'ogcFeature',
@@ -61,7 +61,6 @@ export const CV_CONST_LEAF_LAYER_SCHEMA_PATH: Record<LayerTypesKey, string> = {
   ESRI_IMAGE: 'https://cgpv/schema#/definitions/EsriImageLayerEntryConfig',
   IMAGE_STATIC: 'https://cgpv/schema#/definitions/ImageStaticLayerEntryConfig',
   GEOJSON: 'https://cgpv/schema#/definitions/VectorLayerEntryConfig',
-  GEOPACKAGE: 'https://cgpv/schema#/definitions/VectorLayerEntryConfig',
   XYZ_TILES: 'https://cgpv/schema#/definitions/TileLayerEntryConfig',
   VECTOR_TILES: 'Thttps://cgpv/schema#/definitions/TileLayerEntryConfig',
   OGC_FEATURE: 'https://cgpv/schema#/definitions/VectorLayerEntryConfig',
@@ -76,7 +75,6 @@ export const CV_GEOVIEW_SCHEMA_PATH: Record<LayerTypesKey, string> = {
   ESRI_IMAGE: '',
   IMAGE_STATIC: '',
   GEOJSON: '',
-  GEOPACKAGE: '',
   XYZ_TILES: '',
   VECTOR_TILES: '',
   OGC_FEATURE: '',
