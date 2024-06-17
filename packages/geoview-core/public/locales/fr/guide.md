@@ -1,460 +1,446 @@
 =1!navigationControls=
 
-# Navigation Controls
+# Commandes de navigation
 
-Navigation controls are used for changing the viewing extent of the map.
+Les commandes de navigation servent à changer la vue sur la carte.
 
-The following navigation controls can be found in the bottom right corner of the map:
+On trouve les commandes suivantes dans le coin inférieur droit de la carte&nbsp;:
 
-| Symbol                                                       | Name           | Description                                                                                                                          |
-| ------------------------------------------------------------ | -------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| <img src="{{assetsURL}}/img/guide/navigation/fullscreen.svg" width="30"/>  | Fullscreen     | Full screen presents map content using the entire page. Full screen toggles between the entire page and the initial size of the map. |
-| <img src="{{assetsURL}}/img/guide/navigation/plus.svg" width="30"/>        | Zoom in        | Zoom in one level on the map to see more detailed content - bound to Plus key (+)                                                    |
-| <img src="{{assetsURL}}/img/guide/navigation/minus.svg" width="30"/>       | Zoom out       | Zoom out one level on the map to see less detailed content - bound to Minus key (-)                                                  |
-| <img src="{{assetsURL}}/img/guide/navigation/geolocation.svg" width="30"/> | Geolocation    | Zoom and pan to your current geographical location                                                                                   |
-| <img src="{{assetsURL}}/img/guide/navigation/home.svg" width="30"/>        | Initial extent | Zoom and pan map such that initial extent is visible                                                                                 |
+| Symbole| Nom| Description|
+|----------|----------|----------|
+| <img src="{{assetsURL}}/img/guide/navigation/fullscreen.svg" width="30"/>| Plein écran| Permet de voir la carte sur toute la page en passant de la taille originale au plein écran.|
+| <img src="{{assetsURL}}/img/guide/navigation/plus.svg" width="30"/>| Zoom avant| Permet de faire un zoom avant d’un niveau à la fois pour voir le contenu plus en détail; fonctionne aussi avec la touche d’addition du clavier (+).|
+| <img src="{{assetsURL}}/img/guide/navigation/minus.svg" width="30"/>| Zoom arrière| Permet de faire un zoom arrière d’un niveau à la fois pour voir le contenu moins en détail; fonctionne aussi avec la touche de soustraction du clavier (-).|
+| <img src="{{assetsURL}}/img/guide/navigation/geolocation.svg" width="30"/>| Géolocalisation| Permet de zoomer et de déplacer la carte sur votre position géographique.|
+| <img src="{{assetsURL}}/img/guide/navigation/home.svg" width="30"/>| Vue initiale| Permet de zoomer et de déplacer la carte pour retourner à la vue initiale.|
 
-You can also pan the map by using your left, right, up and down arrow keys, or by click-holding on the map and dragging. Using the mouse scroll wheel while hovering over the map will zoom the map in/out.
+Vous pouvez aussi déplacer la carte avec les touches fléchées vers la gauche, la droite, le haut et le bas, ou en cliquant sur la carte, puis en la glissant. Lorsque le pointeur est sur la carte, la molette de la souris permet de faire un zoom avant et arrière.
 
-Press the **Shift** key while click-holding and dragging the mouse to define a map extent region. When the mouse button is released, the view will zoom to the chosen area.
+Appuyez sur la touche **Maj.** tout en cliquant et en déplaçant la souris pour définir une zone sur la carte. Relâchez la souris; le zoom se fait sur la zone sélectionnée.
 
-Press **Shift** and **Alt** keys while click-holding and dragging the mouse to rotate the map.
-To reset the map orientation, click the reset rotation arrow located at the right side of the Map Information Bar at the bottom of the map.
+Appuyez sur les touches **Maj.** et **Alt.** tout en cliquant et en déplaçant la souris pour faire tourner la carte. Pour réinitialiser l’orientation de la carte, cliquez sur la flèche Réinitialiser la rotation à droite de la barre d’information au bas de la carte.
 
-_Note: The map must be focused for key binding to work._
+_N.B.&nbsp;: La carte doit être focalisée pour que les combinaisons de touches fonctionnent._
 
 <br>
 =2!overviewMap=
+### Carte d’aperçu
 
-### Overview Map
-
-Some maps display an overview map, a generalised view of the main map at a smaller scale. It can be found in the top right corner of the map.
+Sur certaines cartes, on voit aussi une carte d’aperçu, soit une vue globale de la carte à petite échelle. Elle se trouve dans le coin supérieur droit de la carte.
 
 ![]({{assetsURL}}/img/guide/navigation/overview.png)
 
-Click-hold on the box in the overview map and drag it to change the extent of the main map. Clicking on the toggle icon ![]({{assetsURL}}/img/guide/navigation/chevron_overview.png) in the top right corner of the overview map will expand or contract it.
+Cliquez sur l’encadré dans la carte d’aperçu et déplacez-le pour modifier la vue sur la carte principale. Cliquez sur l’icône de basculement ![]({{assetsURL}}/img/guide/navigation/chevron_overview.png) dans le coin supérieur droit pour afficher ou masquer la carte d’aperçu.
 
 <br>
 =2!keyboardNavigation=
+### Navigation avec le clavier
 
-### Keyboard Navigation
+Les personnes qui ne peuvent pas utiliser de souris peuvent choisir de naviguer avec le clavier. Utilisez la touche de **tabulation** pour atteindre les liens et les commandes sur la page. Appuyez sur **Maj.** et la touche de **tabulation** pour revenir à l’élément précédent. Utilisez la touche **Entrée** ou la **barre d’espace** pour activer les liens et les commandes.
 
-Keyboard functionality is provided as an alternative for users who are unable to use a mouse. Use the **Tab** key to navigate forward to links and controls on the page. Press **Shift** and **Tab** keys to go back one step. Use the **Enter** or **Spacebar** keys to activate links and controls.
+Si vous utilisez la touche de **tabulation** pour naviguer dans la carte, la fenêtre contextuelle **Navigation clavier** s’affichera. Sélectionnez le bouton **Activer** et appuyez sur **Entrée** pour utiliser la navigation avec le clavier.
 
-Using the **Tab** key to navigate to the map and the **Keyboard Navigation** prompt will appears. Select Enable and press Enter to use keyboard navigation.
-
-When the map gains focus, a crosshair is displayed in the center of the map:
+Lorsque la carte est focalisée, un pointeur en croix s’affiche en son centre&nbsp;:
 
 ![]({{assetsURL}}/img/guide/navigation/crosshair.svg)
 
-Use the **arrow** keys to move the map and **+** / **-** keys to zoom in and out. Press **Enter** to select a feature under the crosshairs and display associated data in the Details panel.
+Utilisez les touches **fléchées** pour déplacer la carte et les touches **+** et **-** pour faire un zoom avant ou arrière. Appuyez sur **Entrée** pour sélectionner un élément sous le pointeur en croix et en voir les données dans le panneau **Détails**.
 
-Information will be shown for supported features when the crosshair is positioned over them.
+Pour les éléments pris en charge, l’information s’affiche lorsque le pointeur en croix les survole.
 
-Press **CTRL** and **Q** to exit keyboard navigation.
+Appuyez sur **Ctrl** et **Q** pour quitter la navigation avec le clavier.
 
-_Note: The map must be focused for key binding to work. The map has focus when the crosshairs marker is present._
+_N.B.&nbsp;: La carte doit être focalisée pour que les combinaisons de touches fonctionnent. La carte est focalisée lorsque le pointeur en croix s’affiche._
 
-**Accessibility**
+**Accessibilité**
 
-This map is not fully WCAG 2.0 AA compliant.
+La carte n’est pas pleinement conforme au niveau&nbsp;AA des Règles pour l’accessibilité des contenus Web (WCAG)&nbsp;2.0.
 
 =1!mapInformationBar=
 
-# Map Information Bar
+# Barre d’information sur la carte
 
-Click the up chevron icon ![]({{assetsURL}}/img/guide/navigation/chevron_up.svg) on the left to expand/collapse the bar.
+Cliquez sur le chevron vers le haut ![]({{assetsURL}}/img/guide/navigation/chevron_up.svg) à gauche pour développer ou réduire la barre.
 
 ![]({{assetsURL}}/img/guide/navigation/map_info.png)
 
-The following navigation information can be found in the Map Information Bar (may need to expand the bar to view all options):
+Voici l’information qui se trouve dans la barre (il faut développer la barre pour voir toutes les options)&nbsp;:
 
-| Symbol                                                     | Name                    | Description                                                                                                                                                              |
-| ---------------------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| <img src="{{assetsURL}}/img/guide/navigation/attribute.svg" width="30"/> | Attributes              | Copyright and other map attributes.                                                                                                                                      |
-|                                                            | Positioning coordinates | Click on the positioning coordinates to toggle between degrees minutes seconds (DMS), decimal degrees or projected coordinates.                                          |
-|                                                            | Map scale               | Click on the map scale to toggle between scale and resolution.                                                                                                           |
-| <img src="{{assetsURL}}/img/guide/navigation/up_arrow.svg" width="30"/>  | Reset rotation          | Click on the arrow to return map to the initial orientation. _Note: Fix North must be Off._                                                                           |
-| <img src="{{assetsURL}}/img/guide/navigation/fix_north.png" width="30"/> | Fix North               | On or Off. Set to On to keep map oriented with North to the top. Only available with some projections (eg. LCC). _Note: Reset rotation will not work when Fix North is On._ |
+| Symbole| Nom| Description|
+|----------|----------|----------|
+| <img src="{{assetsURL}}/img/guide/navigation/attribute.svg" width="30"/>| Attributs| Droits d’auteur et autres attributs de la carte.|
+| | Coordonnées géographiques| Cliquez sur les coordonnées pour passer d’un format de coordonnées à l’autre&nbsp;: degrés, minutes et secondes (DMS), degrés décimaux ou coordonnées projetées.|
+| | Échelle de la carte| Cliquez sur l’échelle de la carte pour basculer entre l’échelle et la résolution.|
+| <img src="{{assetsURL}}/img/guide/navigation/up_arrow.svg" width="30"/>| Réinitialiser la rotation| Cliquez sur cette flèche pour rétablir l’orientation initiale de la carte. _N.B.&nbsp;: L’option Nord fixe doit être désactivée._|
+| <img src="{{assetsURL}}/img/guide/navigation/fix_north.png" width="30"/>| Nord fixe| Option qui s’active et se désactive. Activez-la pour garder la carte orientée le nord au haut. Accessible seulement sur certaines projections (p.&nbsp;ex. LCC). _N.B.&nbsp;: Il n’est pas possible de réinitialiser la rotation lorsque l’option **Nord fixe** est activée._|
 
 =1!sidebar=
 
-# Side Bar
+# Barre latérale
 
-The Side Bar to the left of the map shows the available tools.
+La barre latérale à gauche de la carte montre les outils accessibles.
 
-_The tools shown in the Side Bar vary depending on the map._
+_Les outils varient d’une carte à l’autre._
 
-_Note: Some tools in the Side Bar are also available as tabs in the Footer Bar, such as Legend or Details. Tools opened from the Side Bar are displayed on the map, in a condensed 'mobile' view (single column). The same tool opened from a tab in the Footer Bar is displayed below the map in a fully expanded view._
+_N.B.&nbsp;: Certains outils dans la barre latérale se trouvent aussi sous forme d’onglet dans le pied de page, comme **Légende**, **Couches**, **Données** et **Détails**. Lorsqu’ouverts à partir de la barre latérale, les outils s’affichent sur la carte dans un format «&nbsp;mobile&nbsp;» condensé (une seule colonne). Ouverts à partir du pied de page, ils s’affichent comme onglets au bas de la carte dans un format détaillé complet._
 
-| Symbol                                                      | Name          | Description                                                                                        |
-| ----------------------------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------- |
-| <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" width="30"/>  | Geolocator    | Click the geolocator icon and an input field for search keywords will appear on the map            |
-| <img src="{{assetsURL}}/img/guide/sidebar/basemap.svg" width="30"/>       | Basemap       | Basemap selector modifies the underlying basemap to provide a variety of geographical contexts     |
-| <img src="{{assetsURL}}/img/guide/sidebar/legend.svg" width="30"/>        | Legend        | Legend of map icons (_see Footer Bar section for help_)                                                                                |
-| <img src="{{assetsURL}}/img/guide/sidebar/details.svg" width="30"/>       | Details       | Details for selected features (_see Footer Bar section for help_)                                                                      |
-| <img src="{{assetsURL}}/img/guide/sidebar/guide.svg" width="30"/>         | Guide         | Help guide                                                                                         |
-| <img src="{{assetsURL}}/img/guide/sidebar/export.svg" width="30"/>        | Export        | Download a PNG file of the map                                                                     |
-| <img src="{{assetsURL}}/img/guide/sidebar/notifications.svg" width="30"/> | Notifications | Display messages and notifications for the map                                                     |
-| <img src="{{assetsURL}}/img/guide/sidebar/about.svg" width="30"/>         | About Geoview | Display information about Geoview viewer                                                           |
+| Symbole| Nom| Description|
+|----------|----------|----------|
+| <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" width="30"/>| Géolocalisation| Cliquez sur l’icône de géolocalisation; un champ de recherche s’affiche sur la carte.|
+| <img src="{{assetsURL}}/img/guide/sidebar/basemap.svg" width="30"/>| Carte de base| Le sélecteur permet de modifier la carte de base pour obtenir différents contextes géographiques.|
+| <img src="{{assetsURL}}/img/guide/sidebar/legend.svg" width="30"/>| Légende| Légende des icônes de la carte (_voir la section sur le pied de page pour en savoir plus_).|
+| <img src="{{assetsURL}}/img/guide/sidebar/details.svg" width="30"/>| Détails| Information détaillée des éléments sélectionnés (_voir la section sur le pied de page pour en savoir plus_).|
+| <img src="{{assetsURL}}/img/guide/sidebar/guide.svg" width="30"/>| Guide| Guide d’aide|
+| <img src="{{assetsURL}}/img/guide/sidebar/export.svg" width="30"/>| Exporter| Pour télécharger la carte en fichier PNG.|
+| <img src="{{assetsURL}}/img/guide/sidebar/notifications.svg" width="30"/>| Notification| Présente les messages et les notifications pour la carte.|
+| <img src="{{assetsURL}}/img/guide/sidebar/about.svg" width="30"/>| À propos de GéoView| Affiche les renseignements sur le visualiseur GéoView.|
 
 <br>
 =2!geolocator=
+### <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" width="30"/> Géolocalisation
 
-### <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" width="30"/> Geolocator
-
-The geolocator component functions to allow users to search for places in Canada. When the geolocator icon ![]({{assetsURL}}/img/guide/geosearch/geolocator_20.svg) in the Side Bar is clicked, an input field for search keywords will appear on the map:
+Permet de rechercher des endroits au Canada. Si vous cliquez sur l’icône de géolocalisation ![]({{assetsURL}}/img/guide/geosearch/geolocator_20.svg) dans la barre latérale, un champ de recherche s’affichera sur la carte&nbsp;:
 
 ![]({{assetsURL}}/img/guide/geosearch/searchbar_en.png)
 
 =3!supportedSearchTypes=
 
-#### Supported Search Types
+#### Types de recherches possibles
 
-**Keyword search**: Type any keyword into geolocator search bar to display a list of results that contains the keyword (minimum 3 characters).
+**Recherche par mot clé&nbsp;:** Entrez le mot clé de votre choix dans la barre de recherche par géolocalisation; vous obtenez une liste de résultats contenant le mot clé (au moins trois&nbsp;caractères).
 
-- each search result consists of: location name (with keyword highlighted), location province, and location category (lake, city, town, etc.)
-- click on any individual result to mark its coordinates and zoom the map to center around this location
+- Pour chaque résultat, vous voyez le nom (mot clé en gras), la province et la catégorie (lac, ville, village, etc.) de l’emplacement.
+- Si vous cliquez sur un résultat, ses coordonnées s’afficheront, et un zoom sera fait sur la carte à cet endroit.
 
-**FSA search**: A **forward sortation area (FSA)** is a way to designate a geographical area based on the first three characters in a Canadian postal code. All postal codes that start with the same three characters are considered an **FSA**.
+**Recherche par RTA&nbsp;:** La **région de tri d’acheminement (RTA)** est un moyen de désigner une zone géographique avec les trois premiers caractères du code postal canadien. Tous les codes postaux ayant les trois mêmes premiers caractères constituent une **RTA**.
 
-- click to zoom and center the map on the FSA
-- example: type in **M3H**
+- Cliquez pour faire un zoom et centrer la carte sur la RTA.
+- Exemple&nbsp;: Entrez **M3H**.
 
-**Latitude/Longitude search**: Search using lat/long coordinates to display a list of results in the vicinity of that map point.
+**Recherche par latitude et longitude&nbsp;:** Vous pouvez entrer la latitude et la longitude d’un point pour obtenir une liste de résultats à proximité sur la carte.
 
-- similarly to FSA search, the first result will be a location of those coordinates entered, click this to zoom and center the map on the map point
-- lat/long search recognizes spaces, commas, semicolons, or vertical bars (|) to separate the co-ordinates
-- example: type in **54.3733,-91.7417**
+- Comme pour la recherche par RTA, le premier résultat sera l’emplacement correspondant aux coordonnées entrées; cliquez-le pour faire un zoom et centrer la carte sur ce point.
+- Vous pouvez utiliser les espaces, les virgules, les points-virgules ou les barres verticales (|) pour séparer les coordonnées dans ce type de recherche.
+- Exemple&nbsp;: Entrez **54.3733,-91.7417**.
 
-**NTS search**: **National Topographic System (NTS)** is a system used for providing general topographic maps of the country, producing details on landforms, lakes/rivers, forests, roads and railways, etc.
+**Recherche avec le SNRC&nbsp;:** Le **Système national de référence cartographique (SNRC)** fournit des cartes topographiques générales du pays présentant en détail la topographie, les lacs et les rivières, les forêts, les routes et les chemins de fer, etc.
 
-- the NTS is split into three major zones: "Southern zone" - latitudes between 40°N and 68°N, "Arctic zone" - latitudes between 68°N and 80°N, and the "High Arctic zone" - latitudes between 80°N and 88°N
-- an NTS map number consists of a string containing a number identifying a map sheet, a letter identifying a map area, and a number identifying the scale map sheet
-- likewise, the first result will be a location of the NTS map number, click to center map on this area
-- example: type in **030M13**
+- Le SNRC est organisé en trois grandes zones&nbsp;: le Sud (latitudes entre 40°&nbsp;N et 68°&nbsp;N), l’Arctique (latitudes entre 68°&nbsp;N et 80°&nbsp;N) et l’Extrême-Arctique (latitudes entre 80°&nbsp;N et 88°&nbsp;N).
+- Un numéro de carte du SNRC se compose d’une chaîne de caractères&nbsp;: un nombre indiquant la feuille de carte, une lettre indiquant la zone sur la carte et un nombre indiquant l’échelle de la feuille de carte.
+- Comme pour les types de recherches précédents, le premier résultat sera un emplacement pour le numéro de carte du SNRC; cliquez-le pour centrer la carte sur ce point.
+- Exemple&nbsp;: Entrez **030M13**.
 
-**Street address**: Search using direct street addresses should return results
+**Adresse municipale&nbsp;:** Si vous entrez directement une adresse municipale, vous devriez obtenir des résultats.
 
 =3!geosearchFiltering=
 
-#### Geosearch Filtering
+#### Filtres de recherche géographique
 
-When searching for a location, a results panel will appear below the search box. This results panel contains two dropdown boxes that allow you to filter the search results by their **province** and by their **category** (lake, town, river, etc.). To the right of these two boxes is a **Clear Filters** ![]({{assetsURL}}/img/guide/geosearch/clear.svg) button, which when clicked clears the selected filter options.
+Les résultats d’une recherche d’emplacement s’affichent dans un panneau sous le champ de recherche. Le panneau de résultats comprend deux menus déroulants permettant de filtrer les résultats par **province** et par **catégorie** (lac, village, rivière, etc.). Un bouton **Effacer les filtres** ![]({{assetsURL}}/img/guide/geosearch/clear.svg) se trouve à droite des menus.
 
 <br>
 =2!basemapSelector=
+### ![]({{assetsURL}}/img/guide/sidebar/basemap_30.svg) Sélecteur de carte de base
 
-### ![]({{assetsURL}}/img/guide/sidebar/basemap_30.svg) Basemap Selector
-
-The basemap selector modifies the underlying basemap to provide a variety of geographical contexts. Click on the basemap selector icon and you will be presented with one or more basemaps to choose from.
+Le sélecteur permet de modifier la carte de base pour obtenir différents contextes géographiques. Si vous cliquez sur l’icône du sélecteur, vous aurez le choix d’une ou plusieurs cartes de base.
 
 <br>
 =2!export=
+### ![]({{assetsURL}}/img/guide/sidebar/export_30.svg) Exporter
 
-### ![]({{assetsURL}}/img/guide/sidebar/export_30.svg) Export
+Vous pouvez exporter une image de la carte avec ses couches visibles, la légende, le titre, la flèche du nord, la barre d’échelle et un horodatage.
 
-You can export an image of the map and its visible layers along with a legend, title, north arrow, scalebar, and a timestamp.
+Lorsque vous cliquez sur le bouton **Exporter**, une fenêtre de dialogue s’ouvre contenant l’image de la carte et un champ où vous pouvez entrer un titre.
 
-Once **Export** button is clicked, a dialog will appear with an image of the map, and an option to enter a map title if desired.
-
-Click on the Export button at the bottom to get the final generated map image.
+Cliquez sur le bouton **Exporter** au bas de la fenêtre pour générer l’image finale de la carte.
 
 =1!footerPanel=
 
-# Footer Bar
+# Pied de page
 
-The _Footer Bar_ appears below the map. The _Footer Bar_ can be expanded or collapsed by clicking on a tab in the _Footer Bar_ menu bar. To collapse the panel, simply click again on the active tab.
+Le _pied de page_ se trouve sous la carte. Vous pouvez le développer en cliquant sur un des onglets de son menu. Pour le réduire, vous n’avez qu’à recliquer sur l’onglet actif.
 
-The _Footer Bar_ menu bar has the following tabs:
+Le menu du _pied de page_ se compose des onglets suivants&nbsp;:
 
-- Legend
-- Layers
-- Details
-- Data Table
-- Time Slider
-- Chart
+- Légende
+- Couches
+- Détails
+- Données
+- Curseur temporel
+- Graphique
 - Guide
 
-_Depending on viewer configuration some tabs may not be available_
+_Selon la configuration du visualiseur, il se pourrait que certains onglets ne s’affichent pas._
 
-_Note: Some tabs in the Footer Bar are also available as tools in the Side Bar, such as Legend or Details. A tool opened from the Side Bar is displayed on the map, in a condensed 'mobile' view (single column). The same tab opened in the Footer Bar is displayed below the map in a fully expanded view._
+_N.B.&nbsp;: Certains onglets du pied de page sont aussi accessibles comme outils dans la barre latérale, comme **Légende**, **Couches**, **Données**  et **Détails**. Lorsqu’ouverts à partir de la barre latérale, les outils s’affichent sur la carte dans un format «&nbsp;mobile&nbsp;» condensé (une seule colonne). Ouverts à partir du pied de page, ils s’affichent comme onglets au bas de la carte dans un format détaillé complet._
 
 <br>
 =2!legend=
+### ![]({{assetsURL}}/img/guide/sidebar/legend_25.svg) Légende
 
-### ![]({{assetsURL}}/img/guide/sidebar/legend_25.svg) Legend
+L’onglet **Légende** présente les symboles des couches affichées sur la carte.
 
-The _Legend_ tab displays the symbology associated with the layers displayed on the map.
+Chaque couche a ses symboles. Pour les couches à éléments simples, il n’y a qu’une seule icône ![]({{assetsURL}}/img/guide/footer/icon_single.png) à côté du nom de la couche.
 
-Each layer has some symbology associated with it. For simple feature layers a single icon ![]({{assetsURL}}/img/guide/footer/icon_single.png) will be present next to the layer name.
+Pour celles à éléments complexes (plusieurs symboles par couche), les icônes prennent la forme d’une pile ![]({{assetsURL}}/img/guide/footer/icon_multiple.png) (placez votre pointeur sur la pile pour voir les icônes).
 
-For complex feature layers (i.e. those with multiple symbols used per layer) the icon will show as a stack ![]({{assetsURL}}/img/guide/footer/icon_multiple.png) (hover to reveal more than one icon).
-
-The symbology for the layer can be toggled open and closed which is expanded beneath the layer name. WMS layers may optionally have a graphical legend defined, if one is present it will be displayed in the same drop down manner.
+Vous pouvez développer ou réduire la liste des symboles d’une couche sous son nom. Les couches WMS ont parfois une légende graphique; le cas échéant, elle sera dans le même format de liste déroulante.
 
 <br>
 =2!layers=
+### ![]({{assetsURL}}/img/guide/footer/layers_30.svg) Couches
 
-### ![]({{assetsURL}}/img/guide/footer/layers_30.svg) Layers
+L’onglet **Couches** comprend les sous-menus suivants&nbsp;:
 
-The _Layers_ tab has the following submenu options:
-
-- View
-- Add
-- Sort
-- Remove
+- Vue
+- Ajouter
+- Trier
+- Retirer
 
 =3!view=
 
-#### ![]({{assetsURL}}/img/guide/footer/view_25.svg) View
+#### ![]({{assetsURL}}/img/guide/footer/view_25.svg) Vue
 
-The _View_ submenu option under the _Layers_ tab consists of two sections. The left section lists all the layers displayed on the map. Click on a layer and the right section lists will show the layer settings (available options for that layer).
+Le sous-menu **Vue** de l’onglet **Couches** se divise en deux sections. La section de gauche présente les couches affichées sur la carte. Si vous cliquez sur une couche, ses paramètres (options accessibles pour la couche) s’afficheront dans la section de droite.
 
-**Layer Icons**
+**Icônes de couche**
 
-Each layer has some symbology associated with it. For simple feature layers a single icon ![]({{assetsURL}}/img/guide/footer/icon_single.png) will be present next to the layer name. For complex feature layers (i.e. those with multiple symbols used per layer) the icon will show as a stack (hover to reveal more than one icon ![]({{assetsURL}}/img/guide/footer/icon_multiple.png)).
+Chaque couche a ses symboles. Pour les couches à éléments simples, il n’y a qu’une seule icône ![]({{assetsURL}}/img/guide/footer/icon_single.png) à côté du nom de la couche. Pour celles à éléments complexes (plusieurs symboles par couche), les icônes prennent la forme d’une pile (placez votre pointeur sur la pile pour voir les icônes ![]({{assetsURL}}/img/guide/footer/icon_multiple.png)).
 
-**Group Layers**
+**Groupe de couches**
 
-The group layer icon ![]({{assetsURL}}/img/guide/layers/group.svg) denotes a group of layers. Click on the group layer to expand the list of sublayers. Sublayers may also be group layers.
+L’icône de groupe ![]({{assetsURL}}/img/guide/layers/group.svg) indique un groupe de couches. Cliquez sur le groupe pour voir la liste des sous-couches. Les sous-couches peuvent elles aussi être des groupes de couches.
 
-**Layer Visibility**
+**Affichage des couches**
 
-Select the eye icon, next to each layer, to toggle visibililty on ![]({{assetsURL}}/img/guide/footer/eye.png) or off ![]({{assetsURL}}/img/guide/footer/eye_not_visible.png).
+Cliquez sur l’icône d’œil à côté de chaque couche pour afficher ![]({{assetsURL}}/img/guide/footer/eye.png) ou masquer ![]({{assetsURL}}/img/guide/footer/eye_not_visible.png) la couche sur la carte.
 
-For layers that are always displayed, the visibility (eye) icon is disabled (greyed out) ![]({{assetsURL}}/img/guide/footer/eye_disabled.png).
+Si une couche est toujours visible, l’icône d’affichage (œil) est désactivée (grisée) ![]({{assetsURL}}/img/guide/footer/eye_disabled.png).
 
-**Supported Layer Types**
+**Types de couches pris en charge**
 
-Layers can either be in raster format or vector format. The following layer types are supported.
+Les couches peuvent être en format de trame ou vectoriel. Voici les types de couches pris en charge&nbsp;:
 
-| Raster Layers      | Vector Layers         |
-| ------------------ | --------------------- |
-| ESRI Dynamic       | ESRI Feature          |
-| ESRI Image         | GeoJSON               |
-| XYZ Tile           | OGC Feature API Layer |
-| WMS                | GeoPackage            |
-| Static Image       | CSV                   |
-| Vector tiles layer | WFS                   |
+| Couches en format de trame| Couches en format vectoriel|
+|----------|----------|
+| Dynamique ESRI| Entités ESRI|
+| Imagerie ESRI| GeoJSON|
+| Tuile XYZ| Couche d’entités OGC API|
+| WMS| GeoPackage|
+| Image statique| CSV|
+| Couche de tuiles vectorielles| WFS|
 
-_Note: If a layer fails to load correctly it will be identified by an error notice in the notifications tool on the Side Bar. Instead of the standard layer actions you can select to either reload the layer (this is particularly helpful if there is a temporary network connectivity issue) or remove the layer. If a layer is removed it will be taken out of the layer selector completely._
+_N.B.&nbsp;: Si une couche ne se charge pas correctement, un message d’erreur s’affichera dans l’outil de *notification* de la barre latérale. Au lieu d’utiliser les actions standard pour les couches, vous pouvez soit recharger la couche (surtout utile s’il y a un problème temporaire de connexion réseau), soit la retirer. Si vous retirez la couche, elle sera retirée complètement du sélecteur de couches._
 
 =3!layerSettings=
 
-#### Layer Settings
+#### Paramètres des couches
 
-Click a layer in the left section of the layers view tab, and the layer settings are displayed in right section.
+Dans l’onglet **Vue**, si vous cliquez sur une couche dans la section de gauche, ses paramètres s’afficheront dans celle de droite.
 
-_Note: Some settings may not be available depending on various factors such as layer type or configuration._
+_N.B.&nbsp;: Les paramètres accessibles dépendent de plusieurs facteurs, comme le type de couche et la configuration._
 
-|                           Symbol                           | Name                   | Description                                                                             |
-| :--------------------------------------------------------: | ---------------------- | --------------------------------------------------------------------------------------- |
-| <img src="{{assetsURL}}/img/guide/layers/table_view_60.svg" width="30"/> | Table details          | Opens simplified view of Data Table.                                                    |
-|  <img src="{{assetsURL}}/img/guide/layers/refresh_60.svg" width="30"/>   | Refresh                | Reloads the layer                                                                       |
-| <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" width="30"/>  | Highlight              | Brings layer to the top, decreases opacity of other layers and displays layer boundary. |
-|    <img src="{{assetsURL}}/img/guide/layers/zoom_60.svg" width="30"/>    | Zoom to layer boundary | Pans and zooms the map so that the layer boundary is in view                            |
-|    <img src="{{assetsURL}}/img/guide/layers/opacity.png" width="80"/>    | Opacity                | Slider to increase/decrease layer opacity                                               |
+| Symbole| Nom| Description|
+|:----------:|----------|----------|
+| <img src="{{assetsURL}}/img/guide/layers/table_view_60.svg" width="30"/>| Table détaillée| Ouvre une vue simplifiée du tableau des données.|
+| <img src="{{assetsURL}}/img/guide/layers/refresh_60.svg" width="30"/>| Rafraîchir la couche| Actualise la couche.|
+| <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" width="30"/>| Couche mise en évidence| Place la couche au premier plan, diminue l’opacité des autres couches et affiche le périmètre de la couche.|
+| <img src="{{assetsURL}}/img/guide/layers/zoom_60.svg" width="30"/>| Zoom sur le périmètre de la couche| Déplace la carte et fait un zoom pour que le périmètre de la couche soit visible.|
+| <img src="{{assetsURL}}/img/guide/layers/opacity.png" width="80"/>| Opacité| Curseur permettant d’augmenter ou de diminuer l’opacité de la couche.|
 
-**Layer Classes**
+**Classes de couches**
 
-Classes for the layer are listed in the layer settings if available. Select the checkbox ![]({{assetsURL}}/img/guide/layers/check.png) next to the class to toggle visibiity for this particular class.
+Si la couche possède des classes, elles seront indiquées dans ses paramètres. Cochez ou décochez la case ![]({{assetsURL}}/img/guide/layers/check.png) à côté de la classe pour afficher ou masquer celle-ci.
 
-The number of classes visible is displayed under the layer name.
+On voit le nombre de classes visibles sous le nom de la couche.
 
 =3!add=
 
-#### ![]({{assetsURL}}/img/guide/layers/add_25.svg) Add
+#### ![]({{assetsURL}}/img/guide/layers/add_25.svg) Ajouter
 
-Additional layers can be added to the map viewer through the _Add_ submenu in the **Layers** tab.
+Vous pouvez ajouter des couches au visualiseur de cartes dans le sous-menu **Ajouter** de l’onglet **Couches**.
 
-Usage:
+Marche à suivre&nbsp;:
 
-- If you wish to add a file, you can do so by dragging the file over the import wizard, by clicking on the 'Choose a File' button and selecting the file, or by providing the URL to the file.
-- If you wish to add a service, you can do so by entering the service URL into the text box.
-- Click the 'Continue' button to proceed.
-- Ensure the the correct file or service type is selected from the dropdown menu. If the wrong type is selected, an error will be displayed prompting you to try a different type.
-- Click the 'Continue' button to proceed. The file type (eg. CSV) may be displayed.
-- Depending on the type of dataset being loaded, various parameters can be set in this final phase.
-- Click the 'Continue' button to insert the layer into the map.
+- Pour ajouter un fichier, vous pouvez soit glisser le fichier dans l’assistant d’importation, soit cliquer sur le bouton **Choisir un fichier**, soit entrer l’URL du fichier.
+- Pour ajouter un service, entrez l’URL du service dans le champ de texte.
+- Cliquez sur le bouton **Continuer** pour passer à la prochaine étape.
+- Vérifiez que le bon format de fichier ou de service est sélectionné dans le menu déroulant. S’il est erroné, vous recevrez un message d’erreur vous demandant de choisir un autre format.
+- Cliquez sur le bouton **Continuer** pour passer à la prochaine étape. Le format de fichier (p.&nbsp;ex. CSV) devrait s’afficher.
+- Selon le type d’ensemble de données ajouté, vous pourrez configurer différents paramètres à l’étape finale.
+- Cliquez sur le bouton **Continuer** pour insérer la couche dans la carte.
 
-The viewer will automatically switch to the view function.
+Le visualiseur passe automatiquement à la fonction **Vue**.
 
 =3!sort=
 
-#### ![]({{assetsURL}}/img/guide/layers/sort_25.svg) Sort
+#### ![]({{assetsURL}}/img/guide/layers/sort_25.svg) Trier
 
-To sort the layers you can simply click the up or down arrows on each layer panel.
-
-If you using the keyboard for sorting layers, note the following;
+Pour trier les couches, vous n’avez qu’à utiliser les flèches vers le haut et le bas dans l’encadré de chaque couche.
 
 =3!remove=
 
-#### ![]({{assetsURL}}/img/guide/layers/remove_25.svg) Remove
+#### ![]({{assetsURL}}/img/guide/layers/remove_25.svg) Retirer
 
-To remove a layer, click on the delete icon ![]({{assetsURL}}/img/guide/layers/remove_25.svg) to the right of the layer after selecting the 'Remove' submenu.
+Pour retirer une couche, cliquez sur l’icône de suppression ![]({{assetsURL}}/img/guide/layers/remove_25.svg) à droite de celle-ci dans le sous-menu **Retirer**.
 
 <br>
 =2!details=
+### ![]({{assetsURL}}/img/guide/sidebar/details_30.svg) Détails
 
-### ![]({{assetsURL}}/img/guide/sidebar/details_30.svg) Details
+L’onglet **Détails** se divise en deux sections. La section de gauche dresse la liste des couches accessibles, tandis que celle de droite affiche le détail des éléments pour chaque couche.
 
-The **Details** tab has two sections. The available layers for the map are listed in the left section, and the feature details for each layer are displayed in the right section.
+_**N.B.&nbsp;: Il faut sélectionner un élément sur la carte pour que la couche devienne cliquable dans la liste, sans quoi elle sera désactivée (grisée).**_
 
-_**Note: A feature on the map must be selected to enable the layer in the list. Otherwise layers are disabled (greyed out).**_
+Cliquez sur une couche pour afficher ses éléments en détail.
 
-Click on a layer to see its feature details.
+Le nombre d’éléments pour la couche sélectionnée est indiqué en haut à gauche de la section détaillée.
 
-The number of features for the selected layer is shown in the upper left of the details section.
+Utilisez les flèches vers la droite et la gauche, en haut à droite de la section, pour passer d’un élément à l’autre de la couche sélectionnée.
 
-Use the left and right arrows in the upper right of the details section to browse through the features for the selected layer.
+L’icône de loupe ![]({{assetsURL}}/img/guide/datatable/zoom.svg) permet de faire un zoom sur l’élément sélectionné sur la carte.
 
-The zoom icon ![]({{assetsURL}}/img/guide/datatable/zoom.svg) will zoom the map to the selected feature.
-
-Check the highlight box ![]({{assetsURL}}/img/guide/layers/check.png) to keep the feature highlighted on the map.
+Cochez la case ![]({{assetsURL}}/img/guide/layers/check.png) pour garder l’élément sélectionné sur la carte.
 
 <br>
 =2!dataTable=
+### ![]({{assetsURL}}/img/guide/footer/data_table.svg) Données
 
-### ![]({{assetsURL}}/img/guide/footer/data_table.svg) Data Table
+L’onglet **Données** se divise en deux sections. La liste des couches se trouve à gauche, et les données des couches, à droite. Cliquez sur une couche pour en voir les données dans le tableau de droite.
 
-The **Data Table** tab has two sections. The layers are listed on the left and the layer data on the right. Click on a layer to show the layer data in the table on the right.
+**Commandes de l’onglet Données**
 
-**Data Table Controls**
+Les commandes de l’onglet **Données** se trouvent dans le coin supérieur droit du panneau des données de couche.
 
-The **Data Table** controls are shown in the upper right section of the layer data panel.
+_N.B.&nbsp;: Selon différents facteurs, certaines options sont désactivées ou présélectionnées._
 
-_Note: Some options may not be available or are preselected depending on various factors._
+| Symbole| Nom| Description|
+|----------|----------|----------|
+| <img src="{{assetsURL}}/img/guide/datatable/filter_toggle.svg" width="30"/>| Afficher/masquer les filtres| Basculer entre l’affichage et le masquage des filtres.|
+| <img src="{{assetsURL}}/img/guide/datatable/filter.png" width="30"/>| Interrupteur de filtres| Appliquer les filtres à la carte.|
+| <img src="{{assetsURL}}/img/guide/datatable/column_show.svg" width="30"/>| Afficher/masquer les colonnes| Choisir les colonnes visibles et épingler des colonnes à gauche ou à droite du tableau.|
+| <img src="{{assetsURL}}/img/guide/datatable/density.svg" width="30"/>| Densité| Modifier la hauteur des lignes du tableau de données.|
+| <img src="{{assetsURL}}/img/guide/datatable/export.svg" width="30"/>| Exporter| Exporter le tableau en format CSV ou GeoJSON. Pourrait échouer sur un appareil mobile en raison des restrictions de téléchargement de fichiers.|
 
-| Symbol                                                        | Name            | Description                                                                                                                               |
-| ------------------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="{{assetsURL}}/img/guide/datatable/filter_toggle.svg" width="30"/> | Display Filters | Toggle to show or hide filters                                                                                                            |
-| <img src="{{assetsURL}}/img/guide/datatable/filter.png" width="30"/>        | Filter switch   | Apply filters to the map                                                                                                                  |
-| <img src="{{assetsURL}}/img/guide/datatable/column_show.svg" width="30"/>   | Display Columns | Allows you to choose which columns you want visible and to pin columns to the left or right of the table                                  |
-| <img src="{{assetsURL}}/img/guide/datatable/density.svg" width="30"/>       | Density         | Toggle the height of the rows in the data table                                                                                           |
-| <img src="{{assetsURL}}/img/guide/datatable/export.svg" width="30"/>        | Export          | Export data table as CSV or GeoJSON. May not work as intended on mobile due to limitations with downloading files                         |
+Les trois premières colonnes du tableau de données sont **Icône**, **Zoom** et **Détails**. Les autres colonnes varient selon la couche sélectionnée.
 
-The first three columns of the data table are Icon, Zoom and Details. The remaining columns vary depending on the layer selected.
+En plus de parcourir les données, vous pouvez&nbsp;:
 
-In addition to scrolling data, it is possible to:
+- trier les données en cliquant sur l’icône de tri ![]({{assetsURL}}/img/guide/footer/swap_vert_FILL0_wght400_GRAD0_opsz24.svg) dans le titre de colonne;
+- afficher sur la carte l’emplacement de l’élément associé à une ligne donnée en cliquant sur l’icône de zoom ![]({{assetsURL}}/img/guide/datatable/zoom.svg).
 
-- Sort the data by clicking the header of a column with the sort icon ![]({{assetsURL}}/img/guide/footer/swap_vert_FILL0_wght400_GRAD0_opsz24.svg).
-- Position the map view to the location of the feature corresponding to a given row by selecting the zoom icon ![]({{assetsURL}}/img/guide/datatable/zoom.svg)
+Cliquez sur l’icône d’actions ![]({{assetsURL}}/img/guide/datatable/column_action.svg) à côté du titre de colonne pour voir le menu déroulant des actions de colonne&nbsp;:
 
-Click the action icon ![]({{assetsURL}}/img/guide/datatable/column_action.svg) beside the column header to show the column action dropdown:
+- Épingler des colonnes à gauche ![]({{assetsURL}}/img/guide/datatable/pin_left_25.svg) ou à droite ![]({{assetsURL}}/img/guide/datatable/pin_right_25.svg) du tableau.
+- Filtrer les colonnes par numéro, texte ou date (si la configuration le permet). Pour reporter ou non les changements apportés au tableau, il faut appliquer ou effacer les filtres sur la carte (_appliquer_: ![]({{assetsURL}}/img/guide/datatable/filter_toggle_25.svg), _masquer_: ![]({{assetsURL}}/img/guide/datatable/filter_clear_25.svg)).
+- Afficher ou masquer des colonnes en cliquant sur l’icône *Cacher colonne* ![]({{assetsURL}}/img/guide/datatable/column_hide_25.svg).
+- Parcourir le tableau avec le clavier.
 
-- Pin columns to the left ![]({{assetsURL}}/img/guide/datatable/pin_left_25.svg) or right ![]({{assetsURL}}/img/guide/datatable/pin_right_25.svg) of the table
-- Filter the columns by numerical range, text or date (if the configuration allows it). Changes in the table can also be made to reflect on the map by applying or clearing filters from the map (_apply_: ![]({{assetsURL}}/img/guide/datatable/filter_toggle_25.svg), _clear_: ![]({{assetsURL}}/img/guide/datatable/filter_clear_25.svg))
-- Show and/or hide columns by clicking on the _Hide Columns_ icon ![]({{assetsURL}}/img/guide/datatable/column_hide_25.svg)
-- Navigate the table using a keyboard
-
-Click on a layer and the number of available features is displayed below the layer title.
+Si vous cliquez sur une couche, le nombre d’éléments accessibles s’affichera sous le titre de la couche.
 
 =3!sortingAndReordering=
 
-#### Sorting and Reordering
+#### Tri et réorganisation
 
-For each column in the data table, there may be a set of arrows associated with that column which represents how it can be sorted and reordered.
+Les colonnes du tableau de données peuvent être accompagnées de deux flèches qui montrent la façon dont les données peuvent être triées et réorganisées.
 
-**Column Sort**: Click on the column title to sort the columns.
+**Trier une colonne&nbsp;:** Cliquez sur le titre d’une colonne pour trier les données qu’elle contient.
 
-- an upward arrow ![]({{assetsURL}}/img/guide/navigation/up_arrow_20.svg) next to the column title indicates that the column data is being sorted in ascending order or alphabetical order
-- a downward arrow ![]({{assetsURL}}/img/guide/navigation/down_arrow_20.svg) next to the column title indicates that the column data is being sorted in descending order or reverse alphabetical order
-- no arrow next to the column title means that there is no sort applied to current column
+- Une flèche vers le haut ![]({{assetsURL}}/img/guide/navigation/up_arrow_20.svg) à côté du titre de colonne indique que les données sont triées par ordre croissant ou alphabétique.
+- Une flèche vers le bas ![]({{assetsURL}}/img/guide/navigation/down_arrow_20.svg) à côté du titre de colonne indique que les données sont triées par ordre décroissant ou alphabétique inverse.
+- L’absence de flèche à côté du titre de colonne signifie qu’aucun tri n’est appliqué à la colonne.
 
-Columns can be sorted in ascending/descending order (for numerical data) and alphabetical order (for text data).
+Les colonnes peuvent être triées en ordre croissant ou décroissant (pour les données numériques) et en ordre alphabétique (pour les données textuelles).
 
 =3!filterData=
 
-#### Filter Data
+#### Filtrer les données
 
-Data can be filtered by column. To show filters, click on the open filters icon ![]({{assetsURL}}/img/guide/datatable/filter_toggle_25.svg). A column is filterable if there is an input field under the title of the header:
+Les données peuvent être filtrées par colonne. Pour voir les filtres, cliquez sur l’icône pour afficher les filtres ![]({{assetsURL}}/img/guide/datatable/filter_toggle_25.svg). S’il y a un champ de saisie en dessous du titre de colonne, c’est que les données de celle-ci peuvent être filtrées.
 
-There are 3 types of filters:
+Il y a trois types de filtres&nbsp;:
 
-- **Text**: Character input field.
-- **Number**: Input fields that accept only numbers
-  - If a minimum and a maximum are defined the filter will search for a range
-  - If, for example, only a minimum is defined, it will perform the operation _greater than_
-- **Date**: Similar to the numeric field but uses dates
+- **Texte&nbsp;:** ****Champ de saisie de caractères.
+- **Chiffre&nbsp;:** Champs de saisie n’acceptant que les chiffres.
+  - Si un minimum et un maximum sont définis, le tri se fera selon une plage.
+  - Si seulement un minimum est défini, le tri se fera selon l’opération _plus grand que_.
+- **Date&nbsp;:** Semblable au champ pour les chiffres, mais pour les dates.
 
-Additional filters (varying by column data type) may be found by clicking the action icon ![]({{assetsURL}}/img/guide/datatable/column_action.svg) beside the column heading, and clicking on **Filter by ...**
+Pour accéder à d’autres filtres (en fonction du type de données dans la colonne), cliquez sur l’icône d’actions ![]({{assetsURL}}/img/guide/datatable/column_action.svg) à côté du titre de la colonne, puis sur **Filtrer par**.
 
 =3!keyboardNavigation=
 
-#### Keyboard Navigation
+#### Navigation avec le clavier
 
-Use **Tab** to go through each of the table controls, and to navigate between the three major table groups:
+Utilisez la touche de **tabulation** pour parcourir les commandes et les trois grands groupes du tableau&nbsp;:
 
-- Column Headers
-- Column Filters
-- Table Body
+- Titres de colonne
+- Filtres de colonne
+- Corps du tableau
 
-Once any major group is focused on, you can use the arrow keys to navigate through the table cells for that component. Doing this will highlight the currently focused table cell.
+Lorsque vous avez sélectionné l’un des grands groupes, vous pouvez utiliser les touches fléchées pour parcourir les cellules du tableau pour ce groupe. La cellule sélectionnée sera mise en évidence.
 
-To access the buttons and/or input fields within a cell, make sure the cell is highlighted (by using arrow keys as above) and use **Tab** to navigate between its children.
+Pour accéder aux boutons ou aux champs de saisie d’une cellule, assurez-vous de bien sélectionner celle-ci (en utilisant les flèches, comme susmentionné), puis utilisez la touche de **tabulation** pour parcourir les sous-options.
 
 <br>
 =2!timeSlider=
+### ![]({{assetsURL}}/img/guide/footer/time_slider_30.svg) Curseur temporel
 
-### ![]({{assetsURL}}/img/guide/footer/time_slider_30.svg) Time Slider
+L’onglet **Curseur temporel** dans le pied de page se divise en deux sections. La liste des couches ayant un facteur temporel se trouve dans la section de gauche. Cliquez sur une couche pour afficher son curseur temporel dans la section de droite&nbsp;:
 
-The Time Slider tab on the Footer Bar has two sections. Layers with a time dimension are listed in the left section. Click on a layer to display its Time Slider in the right section:
+Une barre de curseur s’affiche avec un ou deux points déplaçables. Pour les couches à facteur temporel ponctuel, il n’y a qu’un point déplaçable. Pour les couches à plage temporelle, il y a deux points déplaçables permettant de régler le début et la fin de la plage.
 
-The Time Slider section displays a slider bar with one or two draggable handles. A point in time layer will show one handle. A time period layer will show two handles, to adjust the start and end time of the period.
+Cliquez sur le point et déplacez-le sur la barre pour sélectionner les valeurs de filtre souhaitées ou un moment donné dans le temps. Pour une couche à plage temporelle, cliquez sur l’icône de cadenas ![]({{assetsURL}}/img/guide/footer/lock_30.svg) afin de verrouiller le point de début.
 
-Click hold and drag the handle on the slider bar to set the desired filter values or select a point in time. For a time period layer, click the lock icon ![]({{assetsURL}}/img/guide/footer/lock_30.svg) to lock the start time handle in place.
+Cochez ou décochez la case de filtre ![]({{assetsURL}}/img/guide/layers/check.png) pour activer ou désactiver le filtrage.
 
-Select the filter checkbox ![]({{assetsURL}}/img/guide/layers/check.png) to toggle the filtering on and off.
+Appuyez sur l’icône de lecture ![]({{assetsURL}}/img/guide/footer/play_arrow_30.svg) pour voir les résultats dans le temps. Cliquez sur l’icône de changement de direction ![]({{assetsURL}}/img/guide/footer/direction_arrow_30.svg) pour avancer ou reculer dans le temps.
 
-Click the play icon ![]({{assetsURL}}/img/guide/footer/play_arrow_30.svg) to animate the filter results through time. Click the change direction icon ![]({{assetsURL}}/img/guide/footer/direction_arrow_30.svg) to toggle forward or backward in time.
+Cliquez sur l’icône de marche arrière ![]({{assetsURL}}/img/guide/footer/back_arrow_30.svg) ou avant ![]({{assetsURL}}/img/guide/footer/forward_arrow_30.svg) pour reculer ou avancer d’une étape dans le temps.
 
-Click the back icon![]({{assetsURL}}/img/guide/footer/back_arrow_30.svg) or forward icon ![]({{assetsURL}}/img/guide/footer/forward_arrow_30.svg) to progress one step back or forward in time.
+Ouvrez le menu déroulant du délai pour choisir le délai d’animation du curseur. Certaines couches peuvent avoir besoin d’un délai plus important pour s’afficher correctement sur la carte.
 
-Click the time delay dropdown to choose the slider animation time delay. Some layers may require a longer delay time to properly display on the map.
-
-The field being filtered on is displayed in the lower left of the Time Slider section. Custom descriptions may also be displayed in this area.
+Le champ visé par le filtre s’affiche en bas à gauche de la section du curseur temporel. Des descriptions personnalisées peuvent aussi s’afficher au même endroit.
 
 <br>
 =2!chart=
+### ![]({{assetsURL}}/img/guide/footer/chart_30.svg) Graphique
 
-### ![]({{assetsURL}}/img/guide/footer/chart_30.svg) Chart
+L’onglet **Graphique** dans le pied de page se divise en deux sections. La liste des couches comportant un graphique se trouve dans la section de gauche. Sélectionnez un élément sur la carte pour en voir le graphique dans la section de droite.
 
-The Chart tab on the Footer Bar has two sections. Layers with a chart are listed in the left section. Select a feature on the map to display its chart in the right section.
+_**N.B.&nbsp;: Il faut sélectionner un élément sur la carte pour que la couche devienne cliquable dans la liste, sans quoi elle sera désactivée (grisée).**_
 
-_**Note: A feature on the map must be selected to enable the layer in the list. Otherwise layers are disabled (greyed out).**_
+Le menu déroulant **Élément** (en haut à gauche de la section du graphique) permet également de sélectionner un élément. Il s’agit d’une fonction pratique lorsque plusieurs éléments sont rapprochés sur la carte et qu’il est difficile de sélectionner celui voulu.
 
-The Feature dropdown (upper left of the chart section), can be used to select a feature. This is useful when features are close together on the map, making it difficult to click on the desired one.
-
-The visibility of data displayed on the chart can be toggled by clicking the checkbox ![]({{assetsURL}}/img/guide/layers/check.png) next to the data name shown above the chart (only for layers with multiple data items):
+Vous pouvez cocher ou décocher les cases ![]({{assetsURL}}/img/guide/layers/check.png) des données au-dessus du graphique pour déterminer le contenu de celui-ci (seulement pour les couches comportant plusieurs éléments de données).
 
 ![]({{assetsURL}}/img/guide/footer/checkbox.png)
 
-Select from the Download dropdown (upper right of chart section) to download chart data in JSON format. Select Download All for all data and Download Visible for only data currently visible on the chart.
+Ouvrez le menu déroulant de **téléchargement** (en haut à droite de la section du graphique) pour télécharger les données du graphique en format JSON. Cliquez sur **Télécharger tout** ou **Télécharger visible** selon que vous voulez télécharger toutes les données ou seulement celles actuellement visibles sur le graphique.
 
 =3!chartTypes=
 
-#### Available Chart Types:
+#### Types de graphiques possibles&nbsp;:
 
-- Line Chart
-- Bar Charts
-- Pie Charts
+- Graphiques linéaires
+- Graphiques à barres
+- Graphiques circulaires
 
-Points on line charts can be changed to steps, by selecting from the Steps dropdown in the upper left of the chart section.
+Les points d’un graphique linéaire peuvent être transformés en étapes&nbsp;: sélectionnez l’option voulue dans le menu déroulant **Étapes** en haut à gauche de la section du graphique.
 
-Click hold and drag the handles on the the line chart slider bars to change the X or Y axis values displayed for the chart.
+Cliquez et déplacez les points sur la barre de curseur du graphique linéaire pour modifier les valeurs des axes X ou Y.
 
 =1!issues=
 
-# Load Times / Unanticipated Behaviour
+# Temps de chargement / comportement imprévu
 
-Load times may vary based on:
+Le temps de chargement dépend&nbsp;:
 
-- network location
-- bandwidth availability
-- number of layers being loaded
-- layer types and their sizes
+- de l’emplacement du réseau;
+- de la bande passante disponible;
+- du nombre de couches en chargement;
+- du type de couche et de sa taille.
 
-Unanticipated behaviour may occur if any map interactions occur before data is fully loaded. Please allow the map to load completely before triggering any map functions.
+Vous pourriez observer un comportement imprévu de la carte si vous interagissez avec celle-ci avant que les données ne soient complètement chargées. Veuillez laisser la carte se charger entièrement avant d’en utiliser les fonctions.
 
-_Note: If the loading spinner is visible for a layer, please wait for it to disappear before triggering any function on the map._
+_N.B.&nbsp;: Si l’indicateur de chargement tourne pour une couche, veuillez attendre qu’il disparaisse avant de lancer une quelconque fonction sur la carte._
