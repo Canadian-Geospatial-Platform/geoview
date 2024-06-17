@@ -117,6 +117,9 @@ export class MapViewer {
   // modals creation
   modal: ModalApi;
 
+  // max number of icons cached
+  iconImageCacheSize: number;
+
   // i18n instance
   #i18nInstance: i18n;
 
@@ -210,6 +213,8 @@ export class MapViewer {
     this.mapFeaturesConfig = mapFeaturesConfig;
 
     this.#i18nInstance = i18instance;
+
+    this.iconImageCacheSize = 1;
 
     this.appBarApi = new AppBarApi(this.mapId);
     this.navBarApi = new NavBarApi(this.mapId);

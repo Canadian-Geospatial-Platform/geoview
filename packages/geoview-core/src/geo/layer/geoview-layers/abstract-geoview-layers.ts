@@ -9,6 +9,7 @@ import { Extent } from 'ol/extent';
 import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
 import Feature from 'ol/Feature';
 import Source from 'ol/source/Source';
+import { shared as iconImageCache } from 'ol/style/IconImageCache';
 
 import { TypeLocalizedString } from '@config/types/map-schema-types';
 
@@ -41,6 +42,8 @@ import {
   rangeDomainType,
   TypeLocation,
   QueryType,
+  TypeUniqueValueStyleConfig,
+  TypeClassBreakStyleConfig,
 } from '@/geo/map/map-schema-types';
 import { GeoViewLayerCreatedTwiceError } from '@/geo/layer/exceptions/layer-exceptions';
 import { Projection } from '@/geo/utils/projection';
@@ -919,6 +922,8 @@ export abstract class AbstractGeoViewLayer {
       .then((legend) => {
         // If legend was received
         if (legend) {
+          // Check for possible number of icons and set icon cache size
+          this.updateIconImageCache(legend);
           // Emit legend information once retrieved
           this.#emitLegendQueried({ layerPath, legend });
         }
@@ -930,6 +935,32 @@ export abstract class AbstractGeoViewLayer {
 
     // Return the promise
     return promiseLegend;
+  }
+
+  /**
+   * Update the size of the icon image list based on styles.
+   * @param {TypeLegend} legend - The legend to check.
+   */
+  updateIconImageCache(legend: TypeLegend): void {
+    // GV This will need to be revised if functionality to add additional icons to a layer is added
+    let styleCount = this.getMapViewer().iconImageCacheSize;
+    if (legend.styleConfig)
+      Object.keys(legend.styleConfig).forEach((geometry) => {
+        if (
+          legend.styleConfig &&
+          (legend.styleConfig[geometry as TypeStyleGeometry]?.styleType === 'uniqueValue' ||
+            legend.styleConfig[geometry as TypeStyleGeometry]?.styleType === 'classBreaks')
+        ) {
+          if ((legend.styleConfig[geometry as TypeStyleGeometry] as TypeUniqueValueStyleConfig)!.uniqueValueStyleInfo?.length)
+            styleCount += (legend.styleConfig[geometry as TypeStyleGeometry] as TypeUniqueValueStyleConfig)!.uniqueValueStyleInfo.length;
+          if ((legend.styleConfig[geometry as TypeStyleGeometry] as TypeClassBreakStyleConfig)!.classBreakStyleInfo?.length)
+            styleCount += (legend.styleConfig[geometry as TypeStyleGeometry] as TypeClassBreakStyleConfig)!.classBreakStyleInfo.length;
+        }
+      });
+    // Set the openlayers icon image cache
+    iconImageCache.setSize(styleCount);
+    // Update the cache size for the map viewer
+    this.getMapViewer().iconImageCacheSize = styleCount;
   }
 
   /** ***************************************************************************************************************************

@@ -132,6 +132,24 @@
               ]
             },
             {
+              'geoviewLayerId': 'Canadian Disasters, by Event Type***38633a35',
+              'geoviewLayerName': { 'en': 'Canadian Disasters, by Event Type' },
+              'metadataAccessPath': {
+                'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/PS/canadian_disasters_en/MapServer'
+              },
+              'geoviewLayerType': 'esriFeature',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0',
+                  'initialSettings': {
+                    'states': {
+                      'visible': false
+                    }
+                  }
+                }
+              ]
+            },
+            {
               'geoviewLayerId': 'HRDEM-dsm-hillshade',
               'geoviewLayerName': { 'en': 'DSM Hillshade' },
               'metadataAccessPath': { 'en': 'https://datacube.services.geo.ca/ows/elevation' },
@@ -280,6 +298,9 @@
         </li>
         <li>
           Flood susceptibility index - no default style, so no image legend - Issue #2220
+        </li>
+        <li>
+          Canadian Disasters, by Event Type - 45 icons, exceeds openlayers cache size - Issue #2112
         </li>
       </ul>
     </div>
