@@ -1,4 +1,4 @@
-import { TypeLayerControls } from '@config/types/map-schema-types';
+import { Extent, TypeLayerControls } from '@config/types/map-schema-types';
 import { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import {
   CONST_LAYER_TYPES,
@@ -72,6 +72,26 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   static getLegendLayerInfo(mapId: string, layerPath: string): TypeLegendLayer | undefined {
     const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
     return this.findLayerByPath(layers, layerPath);
+  }
+
+  /**
+   * Gets the layer bounds for a layer path
+   * @param mapId - The map id
+   * @param layerPath - The layer path
+   * @returns {Extent | undefined} The extent of the layer at the given path
+   */
+  static getLayerBounds(mapId: string, layerPath: string): Extent | undefined {
+    // Find the layer for the given layer path
+    const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
+    const layer = this.findLayerByPath(layers, layerPath);
+
+    // If found and bounds found
+    if (layer && layer.bounds) {
+      return layer.bounds;
+    }
+
+    // No bounds founds
+    return undefined;
   }
 
   static getLayerIconImage(layerLegend: TypeLegend | null): TypeLegendLayerItem[] | undefined {
