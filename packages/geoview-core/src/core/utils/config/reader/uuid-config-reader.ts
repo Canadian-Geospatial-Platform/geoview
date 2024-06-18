@@ -78,7 +78,7 @@ export class UUIDmapConfigReader {
         const layer = data.layers[0];
 
         if (layer) {
-          const { layerType, layerEntries, name, url, id, serverType } = layer;
+          const { layerType, layerEntries, name, url, id, serverType, isTimeAware } = layer;
 
           const isFeature = (url as string).indexOf('FeatureServer') > -1;
 
@@ -88,6 +88,7 @@ export class UUIDmapConfigReader {
               geoviewLayerName: createLocalizedString(name as string),
               metadataAccessPath: createLocalizedString(url as string),
               geoviewLayerType: CONST_LAYER_TYPES.ESRI_DYNAMIC,
+              isTimeAware: isTimeAware as boolean,
               listOfLayerEntryConfig: [],
             };
             geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): EsriDynamicLayerEntryConfig => {
@@ -111,6 +112,7 @@ export class UUIDmapConfigReader {
                 geoviewLayerName: createLocalizedString(name as string),
                 metadataAccessPath: createLocalizedString(featureUrl),
                 geoviewLayerType: CONST_LAYER_TYPES.ESRI_FEATURE,
+                isTimeAware: isTimeAware as boolean,
                 listOfLayerEntryConfig: [],
               };
               geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): EsriFeatureLayerEntryConfig => {
@@ -134,6 +136,7 @@ export class UUIDmapConfigReader {
               geoviewLayerName: createLocalizedString(name as string),
               metadataAccessPath: createLocalizedString(url as string),
               geoviewLayerType: CONST_LAYER_TYPES.ESRI_FEATURE,
+              isTimeAware: isTimeAware as boolean,
               listOfLayerEntryConfig: [],
             };
             geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): EsriFeatureLayerEntryConfig => {
@@ -156,6 +159,7 @@ export class UUIDmapConfigReader {
               geoviewLayerName: createLocalizedString(name as string),
               metadataAccessPath: createLocalizedString(url as string),
               geoviewLayerType: CONST_LAYER_TYPES.WMS,
+              isTimeAware: isTimeAware as boolean,
               listOfLayerEntryConfig: [],
             };
             geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): OgcWmsLayerEntryConfig => {
@@ -178,6 +182,7 @@ export class UUIDmapConfigReader {
               geoviewLayerName: createLocalizedString(name as string),
               metadataAccessPath: createLocalizedString(url as string),
               geoviewLayerType: CONST_LAYER_TYPES.WFS,
+              isTimeAware: isTimeAware as boolean,
               listOfLayerEntryConfig: [],
             };
             geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): WfsLayerEntryConfig => {
@@ -201,6 +206,7 @@ export class UUIDmapConfigReader {
               geoviewLayerName: createLocalizedString(name as string),
               metadataAccessPath: createLocalizedString(url as string),
               geoviewLayerType: CONST_LAYER_TYPES.OGC_FEATURE,
+              isTimeAware: isTimeAware as boolean,
               listOfLayerEntryConfig: [],
             };
             geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): OgcFeatureLayerEntryConfig => {
@@ -223,6 +229,7 @@ export class UUIDmapConfigReader {
               geoviewLayerName: createLocalizedString(name as string),
               metadataAccessPath: createLocalizedString(url as string),
               geoviewLayerType: CONST_LAYER_TYPES.GEOJSON,
+              isTimeAware: isTimeAware as boolean,
               listOfLayerEntryConfig: [],
             };
             geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): GeoJSONLayerEntryConfig => {
@@ -245,6 +252,7 @@ export class UUIDmapConfigReader {
               geoviewLayerName: createLocalizedString(name as string),
               metadataAccessPath: createLocalizedString(url as string),
               geoviewLayerType: CONST_LAYER_TYPES.XYZ_TILES,
+              isTimeAware: isTimeAware as boolean,
               listOfLayerEntryConfig: [],
             };
             geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): XYZTilesLayerEntryConfig => {
@@ -266,6 +274,7 @@ export class UUIDmapConfigReader {
               geoviewLayerName: createLocalizedString(name as string),
               metadataAccessPath: createLocalizedString(url as string),
               geoviewLayerType: CONST_LAYER_TYPES.VECTOR_TILES,
+              isTimeAware: isTimeAware as boolean,
               listOfLayerEntryConfig: [],
             };
             geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): VectorTilesLayerEntryConfig => {
@@ -287,6 +296,7 @@ export class UUIDmapConfigReader {
               geoviewLayerName: createLocalizedString(name as string),
               metadataAccessPath: createLocalizedString(url as string),
               geoviewLayerType: CONST_LAYER_TYPES.GEOPACKAGE,
+              isTimeAware: isTimeAware as boolean,
               listOfLayerEntryConfig: [],
             };
             geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): GeoPackageLayerEntryConfig => {
@@ -309,6 +319,7 @@ export class UUIDmapConfigReader {
               geoviewLayerName: createLocalizedString(name as string),
               metadataAccessPath: createLocalizedString(url as string),
               geoviewLayerType: CONST_LAYER_TYPES.IMAGE_STATIC,
+              isTimeAware: isTimeAware as boolean,
               listOfLayerEntryConfig: [],
             };
             geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): ImageStaticLayerEntryConfig => {

@@ -978,7 +978,7 @@ export class LayerApi {
       const geoviewLayer = this.getGeoviewLayerHybrid(layerConfig.layerPath);
 
       // If the layer is loaded, continue
-      if (geoviewLayer) {
+      if (geoviewLayer && geoviewLayer.getIsTimeAware()) {
         // Check and add time slider layer when needed
         TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.getMapId(), layerConfig);
       }

@@ -620,15 +620,17 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
     // Convert date constants using the externalFragmentsOrder derived from the externalDateFormat
     const searchDateEntry = [
-      ...filterValueToUse.matchAll(/(?<=^date\b\s')[\d/\-T\s:+Z]{4,25}(?=')|(?<=[(\s]date\b\s')[\d/\-T\s:+Z]{4,25}(?=')/gi),
+      ...filterValueToUse.matchAll(
+        /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/gi
+      ),
     ];
     searchDateEntry.reverse();
     searchDateEntry.forEach((dateFound) => {
       // If the date has a time zone, keep it as is, otherwise reverse its time zone by changing its sign
       const reverseTimeZone = ![20, 25].includes(dateFound[0].length);
       let reformattedDate = DateMgt.applyInputDateFormat(dateFound[0], this.getExternalFragmentsOrder(), reverseTimeZone);
-      // ESRI Dynamic layers doesn't accept the ISO date format. The time zone must be removed. The 'T' separator
-      // normally placed between the date and the time must be replaced by a space.
+      // GV ESRI Dynamic layers doesn't accept the ISO date format. The time zone must be removed. The 'T' separator
+      // GV normally placed between the date and the time must be replaced by a space.
       reformattedDate = reformattedDate.slice(0, reformattedDate.length === 20 ? -1 : -6); // drop time zone.
       reformattedDate = reformattedDate.replace('T', ' ');
       filterValueToUse = `${filterValueToUse!.slice(0, dateFound.index)}${reformattedDate}${filterValueToUse!.slice(
@@ -636,10 +638,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
       )}`;
     });
 
-    // TODO: Bug - The layerDefs filter being generated here fails when the filterValueToUse is for example for the historical_flood:
-    // TO.DOCONT: flood_cause in ('freshet', 'heavy rain', 'coastal storm', 'beaver dam failure', 'frazil', 'dam failure', 'municipal water main break', 'unknown') and (time_slider_date >= date '1696-01-01T05:00:00.000Z' and time_slider_date <= date '2023-01-01T05:00:00.000Z')
-    olLayer.getSource()!.updateParams({ layerDefs: `{"${layerConfig.layerId}": "${filterValueToUse}"}` });
-    olLayer.changed();
+    olLayer?.getSource()!.updateParams({ layerDefs: `{"${layerConfig.layerId}": "${filterValueToUse}"}` });
+    olLayer?.changed();
 
     // Emit event
     this.emitLayerFilterApplied({
