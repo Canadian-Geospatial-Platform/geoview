@@ -86,7 +86,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   const mapSize = useMapSize();
 
   // show/hide dropdown based on map size
-  const [showMobileDropdown, setShowMobileDropdown] = useState(mapSize[0] < theme.breakpoints.values.sm);
+  const initMobileDropdown = mapSize[0] !== 0 ? mapSize[0] < theme.breakpoints.values.sm : false;
+  const [showMobileDropdown, setShowMobileDropdown] = useState(initMobileDropdown);
 
   /**
    * Update Tab panel when value change from tabs and dropdown.
@@ -175,10 +176,18 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
 
   return (
     <Grid container sx={{ width: '100%', height: '100%' }}>
-      <Grid container sx={{ backgroundColor: theme.palette.geoViewColor.bgColor.dark[100] }} justifyContent="space-between">
+      <Grid container sx={{ backgroundColor: theme.palette.geoViewColor.bgColor.dark[100] }}>
         <Grid item xs={7} sm={10}>
           {!showMobileDropdown ? (
-            <MaterialTabs value={value} onChange={handleChange} aria-label="basic tabs" {...tabsProps}>
+            <MaterialTabs
+              variant="scrollable"
+              scrollButtons
+              allowScrollButtonsMobile
+              value={value}
+              onChange={handleChange}
+              aria-label="basic tabs"
+              {...tabsProps}
+            >
               {tabs.map((tab, index) => {
                 return (
                   <MaterialTab
