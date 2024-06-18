@@ -14,6 +14,42 @@ export const useFadeIn = (config?: SpringConfig): SpringValues => {
   });
 };
 
+// Fade In Left animation
+export const useFadeInLeft = (config?: SpringConfig): SpringValues => {
+  return useSpring({
+    config: { ...commonConfig, ...config },
+    from: { opacity: 0, transform: 'translateX(-100%)' },
+    to: { opacity: 1, transform: 'translateX(0)' },
+  });
+};
+
+// Fade In Right animation
+export const useFadeInRight = (config?: SpringConfig): SpringValues => {
+  return useSpring({
+    config: { ...commonConfig, ...config },
+    from: { opacity: 0, transform: 'translateX(100%)' },
+    to: { opacity: 1, transform: 'translateX(0)' },
+  });
+};
+
+// Fade In Up animation
+export const useFadeInUp = (config?: SpringConfig): SpringValues => {
+  return useSpring({
+    config: { ...commonConfig, ...config },
+    from: { opacity: 0, transform: 'translateY(100%)' },
+    to: { opacity: 1, transform: 'translateY(0)' },
+  });
+};
+
+// Fade In Down animation
+export const useFadeInDown = (config?: SpringConfig): SpringValues => {
+  return useSpring({
+    config: { ...commonConfig, ...config },
+    from: { opacity: 0, transform: 'translateY(-100%)' },
+    to: { opacity: 1, transform: 'translateY(0)' },
+  });
+};
+
 // Slide In animation
 export const useSlideIn = (config?: SpringConfig): SpringValues => {
   return useSpring({
@@ -32,11 +68,17 @@ export const useScaleIn = (config?: SpringConfig): SpringValues => {
   });
 };
 
-// Rotate animation
-export const useRotate = (config?: SpringConfig): SpringValues => {
+
+
+export const useShake = (config?: SpringConfig): SpringValues => {
   return useSpring({
-    config: { ...commonConfig, ...config },
-    from: { transform: 'rotate(0deg)' },
-    to: { transform: 'rotate(360deg)' },
+    from: { x: 0, scale: 1 },
+    to: async (next) => {
+      await next({ x: 2 }); // Move 10px right and scale up 10%
+      await next({ x: -2 }); // Move 10px left and scale down 10%
+      await next({ x: 0 }); // Reset position and scale
+    },
+    config: { ...commonConfig, ...config, duration: 50 }, // Adjust duration for faster shake
+    loop: true,
   });
 };

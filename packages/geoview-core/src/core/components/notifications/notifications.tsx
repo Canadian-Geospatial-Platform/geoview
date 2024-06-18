@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import _ from 'lodash';
 import { ClickAwayListener } from '@mui/material';
-import { animated, useSpring } from '@react-spring/web';
+import { animated } from '@react-spring/web';
 import {
   Box,
   InfoIcon,
@@ -25,6 +25,7 @@ import { useAppNotifications, useAppStoreActions } from '@/core/stores/store-int
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useShake } from '@/core/utils/useSpringAnimations';
 
 export type NotificationDetailsType = {
   key: string;
@@ -93,16 +94,7 @@ export default function Notifications(): JSX.Element {
     }
   };
 
-  const shakeAnimation = useSpring({
-    from: { x: 0, scale: 1 },
-    to: async (next) => {
-      await next({ x: 2 }); // Move 10px right and scale up 10%
-      await next({ x: -2 }); // Move 10px left and scale down 10%
-      await next({ x: 0 }); // Reset position and scale
-    },
-    config: { duration: 50 }, // Adjust duration for faster shake
-    loop: true,
-  });
+  const shakeAnimation = useShake();
 
   /**
    * Remove a notification
