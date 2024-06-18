@@ -24,7 +24,6 @@ export const getSxClasses = (theme: Theme): any => ({
       color: `${theme.palette.geoViewColor.white} !important`,
       background: theme.palette.geoViewColor.primary.main,
       borderRadius: '0.5rem',
-      margin: '0.5rem',
       minHeight: 0,
     },
   },
