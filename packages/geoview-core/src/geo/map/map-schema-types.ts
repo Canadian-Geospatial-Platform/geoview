@@ -396,6 +396,8 @@ export type TypeGeoviewLayerConfig = {
 
   /** The layer entries to use from the GeoView layer. */
   listOfLayerEntryConfig: TypeLayerEntryConfig[];
+
+  isTimeAware: boolean;
 };
 
 export type GeoCoreLayerConfig = {
@@ -463,6 +465,7 @@ export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLay
     serviceDateFormat: geoviewLayerConfigCasted.serviceDateFormat,
     externalDateFormat: geoviewLayerConfigCasted.externalDateFormat,
     initialSettings: geoviewLayerConfigCasted.initialSettings,
+    isTimeAware: geoviewLayerConfigCasted.isTimeAware,
     listOfLayerEntryConfig: [],
   } as TypeGeoviewLayerConfig;
 

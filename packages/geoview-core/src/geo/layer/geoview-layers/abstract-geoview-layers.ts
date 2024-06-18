@@ -175,6 +175,8 @@ export abstract class AbstractGeoViewLayer {
   // Keep all callback delegate references
   #onLayerOpacityChangedHandlers: LayerOpacityChangedDelegate[] = [];
 
+  #isTimeAware: boolean = true;
+
   /** ***************************************************************************************************************************
    * The class constructor saves parameters and common configuration parameters in attributes.
    *
@@ -199,6 +201,7 @@ export abstract class AbstractGeoViewLayer {
       ? DateMgt.getDateFragmentsOrder(geoviewLayerConfig.serviceDateFormat)
       : undefined;
     this.externalFragmentsOrder = DateMgt.getDateFragmentsOrder(geoviewLayerConfig.externalDateFormat);
+    this.#isTimeAware = !geoviewLayerConfig.isTimeAware === undefined ? true : geoviewLayerConfig.isTimeAware;
     this.#setListOfLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
   }
 
@@ -384,6 +387,14 @@ export abstract class AbstractGeoViewLayer {
    */
   setTemporalDimension(layerPath: string, temporalDimension: TimeDimension): void {
     this.#layerTemporalDimension[layerPath] = temporalDimension;
+  }
+
+  /**
+   * Gets the flag if layer use its time dimension, this can be use to exclude layers from time function like time slider
+   * @returns {boolean} The flag to know if we use time dimension.
+   */
+  getIsTimeAware(): boolean {
+    return this.#isTimeAware;
   }
 
   /** ***************************************************************************************************************************
