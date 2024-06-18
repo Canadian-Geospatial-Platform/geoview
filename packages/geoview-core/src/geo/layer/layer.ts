@@ -977,7 +977,7 @@ export class LayerApi {
       await whenThisThen(() => layerConfig.isGreaterThanOrEqualTo('processed'), LayerApi.#MAX_WAIT_TIME_SLIDER_REGISTRATION);
       const geoviewLayer = this.getGeoviewLayerHybrid(layerConfig.layerPath);
 
-      // If the layer is loaded, continue
+      // If the layer is loaded AND flag is true to use time dimension, continue
       if (geoviewLayer && geoviewLayer.getIsTimeAware()) {
         // Check and add time slider layer when needed
         TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.getMapId(), layerConfig);
