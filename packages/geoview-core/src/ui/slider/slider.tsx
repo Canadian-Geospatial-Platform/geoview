@@ -55,7 +55,7 @@ export function Slider(props: SliderProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const containerId = `${properties.mapId}-${properties.sliderId}` || '';
+  const containerId = `${properties.mapId}-${properties?.sliderId ?? generateId()}` || '';
 
   // internal state
   const [value, setValue] = useState<number[] | number>(parentValue);
@@ -207,29 +207,3 @@ export function Slider(props: SliderProps): JSX.Element {
     />
   );
 }
-
-/**
- * The default props
- */
-// TODO: Refactor - Remove defaultProps as it's no longer a good practice
-Slider.defaultProps = {
-  sliderId: generateId(),
-  className: undefined,
-  style: undefined,
-
-  disabled: false,
-  marks: undefined,
-  orientation: undefined,
-  step: undefined,
-  size: undefined,
-  track: undefined,
-  ariaLabelledby: undefined,
-  valueLabelFormat: undefined,
-
-  onChange: undefined,
-  onChangeCommitted: undefined,
-  onValueDisplay: undefined,
-  onValueDisplayAriaLabel: undefined,
-
-  mapId: undefined,
-};
