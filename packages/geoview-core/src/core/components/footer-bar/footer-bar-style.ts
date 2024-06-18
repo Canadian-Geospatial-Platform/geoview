@@ -14,12 +14,8 @@ export const getSxClasses = (theme: Theme): any => ({
     '&.MuiGrid-container': {
       background: theme.palette.geoViewColor.bgColor.dark[50],
     },
-    '& .MuiTabs-root': {
-      height: '56px',
-    },
-    '& .MuiTabs-flexContainer': {
-      alignItems: 'center',
-      height: '56px',
+    '& .MuiButtonBase-root': {
+      minHeight: '56px',
     },
     '& .MuiTabs-indicator': {
       display: 'none',
