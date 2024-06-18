@@ -1,0 +1,46 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "initialView": {
+        "zoomAndCenter": [4, [-100, 60]]
+      },
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "advanced-polling-district-boundaries-2019",
+        "geoviewLayerName": {
+          "en": "Advance Polling District Boundaries of 2019"
+        },
+        "geoviewLayerType": "esriFeature",
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/ELECTIONS/elections_canada_2019_en/mapserver"
+        },
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1"
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["north-arrow", "overview-map"],
+  "navBar": ["zoom", "fullscreen", "location", "home"],
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "legend", "export"]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": ["legend", "layers", "details", "data-table"]
+    }
+  },
+  "theme": "geo.ca"
+}
