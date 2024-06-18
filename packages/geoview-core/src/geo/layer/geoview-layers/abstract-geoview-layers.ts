@@ -145,6 +145,8 @@ export abstract class AbstractGeoViewLayer {
   /** Date format object used to translate internal UTC ISO format to the external format, the one used by the user */
   externalFragmentsOrder: TypeDateFragments;
 
+  #isTimeAware: boolean = true;
+
   // Keep all callback delegates references
   #onLayerNameChangedHandlers: LayerNameChangedDelegate[] = [];
 
@@ -175,8 +177,6 @@ export abstract class AbstractGeoViewLayer {
   // Keep all callback delegate references
   #onLayerOpacityChangedHandlers: LayerOpacityChangedDelegate[] = [];
 
-  #isTimeAware: boolean = true;
-
   /** ***************************************************************************************************************************
    * The class constructor saves parameters and common configuration parameters in attributes.
    *
@@ -201,7 +201,7 @@ export abstract class AbstractGeoViewLayer {
       ? DateMgt.getDateFragmentsOrder(geoviewLayerConfig.serviceDateFormat)
       : undefined;
     this.externalFragmentsOrder = DateMgt.getDateFragmentsOrder(geoviewLayerConfig.externalDateFormat);
-    this.#isTimeAware = !geoviewLayerConfig.isTimeAware === undefined ? true : geoviewLayerConfig.isTimeAware;
+    this.#isTimeAware = geoviewLayerConfig.isTimeAware === undefined ? true : geoviewLayerConfig.isTimeAware;
     this.#setListOfLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
   }
 

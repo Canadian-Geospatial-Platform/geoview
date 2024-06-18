@@ -124,7 +124,7 @@ export abstract class AbstractGVLayer {
     this.#externalFragmentsOrder = DateMgt.getDateFragmentsOrder(layerConfig.geoviewLayerConfig.externalDateFormat);
 
     // Boolean flag set to false if the layer, even if time enable, will be added to time function like teime slider
-    this.#isTimeAware = !layerConfig.geoviewLayerConfig.isTimeAware === undefined ? true : layerConfig.geoviewLayerConfig.isTimeAware;
+    this.#isTimeAware = layerConfig.geoviewLayerConfig.isTimeAware === undefined ? true : layerConfig.geoviewLayerConfig.isTimeAware;
   }
 
   /**
