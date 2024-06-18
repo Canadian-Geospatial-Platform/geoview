@@ -20,10 +20,11 @@ export const getSxClasses = (theme: Theme): any => ({
     '& .MuiTabs-indicator': {
       display: 'none',
     },
-    '& .Mui-selected': {
+    '& .MuiTab-root.Mui-selected': {
       color: `${theme.palette.geoViewColor.white} !important`,
       background: theme.palette.geoViewColor.primary.main,
       borderRadius: '0.5rem',
+      margin: '0.5rem',
       minHeight: 0,
     },
   },
