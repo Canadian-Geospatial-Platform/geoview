@@ -456,7 +456,7 @@ export function parseFeatureInfoEntries(records: TypeJsonObject[]): TypeFeatureI
 
 /**
  * Asynchronously queries an Esri feature layer given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
- * @param {url} string An Esri url indicating a feature layer to query
+ * @param {string} url An Esri url indicating a feature layer to query
  * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
  */
 export async function queryRecordsByUrl(url: string): Promise<TypeFeatureInfoEntryPartial[]> {

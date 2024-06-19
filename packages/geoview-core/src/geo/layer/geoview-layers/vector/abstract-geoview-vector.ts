@@ -132,7 +132,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
-  // GV Layers Refactoring - Obsolete (in config? in layers?)
+  // TODO: createVectorSource should be eventually moved to new layers as well,
+  // TODO: so that the new GV Layers receive something else than a OLSource in their constructor
   protected createVectorSource(
     layerConfig: AbstractBaseLayerEntryConfig,
     sourceOptions: SourceOptions<Feature> = {},
@@ -150,7 +151,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       if (typeof url === 'function') url = url(extent, resolution, projection);
 
       const xhr = new XMLHttpRequest();
-      if ((layerConfig?.source as TypeBaseSourceVectorInitialConfig)?.postSettings) {
+      if ((layerConfig.source as TypeBaseSourceVectorInitialConfig)?.postSettings) {
         const { postSettings } = layerConfig.source as TypeBaseSourceVectorInitialConfig;
         xhr.open('POST', url as string);
         if (postSettings!.header)
@@ -163,7 +164,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         if (failure) failure();
       };
       xhr.onerror = onError;
-      xhr.onload = () => {
+      xhr.onload = async () => {
         if (xhr.status === 200) {
           let features: Feature[] | null;
           if (layerConfig.schemaTag === CONST_LAYER_TYPES.CSV) {
@@ -175,6 +176,21 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
               featureProjection: projection,
               extent,
             }) as Feature[];
+            // ESRI Feature layer response will have exceededTransferLimit property set to true if there are more features
+            if (JSON.parse(xhr.responseText).exceededTransferLimit) {
+              // Get response text for additional features
+              const getAdditionalFeaturesArray = await this.#getAdditionalFeatures(layerConfig, url! as string, features.length);
+              // Add them to features
+              getAdditionalFeaturesArray.forEach((responseText: string) => {
+                features!.push(
+                  ...(vectorSource.getFormat()!.readFeatures(responseText, {
+                    ...readOptions,
+                    featureProjection: projection,
+                    extent,
+                  }) as Feature[])
+                );
+              });
+            }
           }
           /* For vector layers, all fields of type date must be specified in milliseconds (number) that has elapsed since the epoch,
              which is defined as the midnight at the beginning of January 1, 1970, UTC (equivalent to the UNIX epoch). If the date type
@@ -222,6 +238,47 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     vectorSource = new VectorSource(sourceOptions);
 
     return vectorSource;
+  }
+
+  /** ***************************************************************************************************************************
+   * Fetch additional features from ESRI Feature services with a max record count.
+   *
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @param {string} url - The base url for the service.
+   * @param {number} maxRecordCount - The max record count from the service.
+   * @param {number} resultOffset - The current offset to use for the features.
+   * @returns {Promise<string[]>} An array of the response text for the features.
+   * @private
+   */
+  // TODO: Will need to move with createVectorSource
+  async #getAdditionalFeatures(
+    layerConfig: AbstractBaseLayerEntryConfig,
+    url: string,
+    maxRecordCount: number,
+    resultOffset?: number
+  ): Promise<string[]> {
+    const responseTextArray: string[] = [];
+    // Add resultOffset to layer query
+    const nextUrl = `${url}&resultOffset=${resultOffset || maxRecordCount}`;
+    try {
+      // Fetch response text and push to array
+      const response = await fetch(nextUrl);
+      const responseText = await response.text();
+      responseTextArray.push(responseText);
+      // Check if there are additional features to fetch
+      if (JSON.parse(responseText).exceededTransferLimit)
+        responseTextArray.push(
+          ...(await this.#getAdditionalFeatures(
+            layerConfig,
+            url,
+            maxRecordCount,
+            resultOffset ? resultOffset + maxRecordCount : 2 * maxRecordCount
+          ))
+        );
+    } catch (error) {
+      logger.logError(`Error loading additional features for ${layerConfig.layerPath} from ${nextUrl}`, error);
+    }
+    return responseTextArray;
   }
 
   /** ***************************************************************************************************************************
