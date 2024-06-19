@@ -410,13 +410,13 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   }, [mapClickCoordinates, memoLayersList]);
 
   /**
-   * Check if layer sttaus is processing while querying
+   * Check all layers sttaus is processing while querying
    */
-  const memoIsLayerQueryStatusProcessing = useMemo(() => {
+  const memoIsAllLayersQueryStatusProcessing = useMemo(() => {
     // Log
     logger.logTraceUseMemo('DETAILS-PANEL - order layer status processing.');
 
-    return () => !!arrayOfLayerDataBatch?.find((layer) => layer.queryStatus === LAYER_STATUS.PROCESSING);
+    return () => !!arrayOfLayerDataBatch?.every((layer) => layer.queryStatus === LAYER_STATUS.PROCESSING);
   }, [arrayOfLayerDataBatch]);
 
   // #endregion
@@ -429,7 +429,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
    * @returns {JSX.Element | null} JSX.Element | null
    */
   const renderContent = (): JSX.Element | null => {
-    if (memoIsLayerQueryStatusProcessing()) {
+    if (memoIsAllLayersQueryStatusProcessing()) {
       return <Skeleton variant="rounded" width="100%" height={500} sx={{ bgcolor: theme.palette.grey[400] }} />;
     }
     if (memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length > 0) {
