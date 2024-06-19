@@ -873,7 +873,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     if (combineLegendFilter) filterValueToUse = this.getViewFilter(layerPath);
 
     // Convert date constants using the externalFragmentsOrder derived from the externalDateFormat
-    // GV this regex is deifferent then the other layers because if not we have this error: The source image cannot be decoded.
+    // GV this regex is different then the other layers because if not we have this error: The source image cannot be decoded.
     // TODO: Standardize the regex across all layer types
     const searchDateEntry = [
       ...filterValueToUse.matchAll(

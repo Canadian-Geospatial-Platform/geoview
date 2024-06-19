@@ -1433,7 +1433,7 @@
         },
         "isTimeAware": {
           "type": "boolean",
-          "description": "Flag to mention if layer will use is time dimension if provided. Use to remove a layer from time enable function like time slider."
+          "description": "Flag to mention if layer will use its time dimension if provided. Used to remove a layer from time enabled functions like time slider."
         },
         "initialSettings": {
           "$ref": "#/definitions/TypeLayerInitialSettings",
