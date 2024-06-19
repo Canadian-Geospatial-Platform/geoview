@@ -369,6 +369,10 @@
           "description": "Date format used by the getFeatureInfo to output date variable (default 'DD/MM/YYYY HH:MM:SSZ').",
           "type": "string"
         },
+        "isTimeAware": {
+          "type": "boolean",
+          "description": "Flag to mention if layer will use its time dimension if provided. Used to remove a layer from time enabled functions like time slider."
+        },
         "initialSettings": {
           "description": "Initial settings to apply to the GeoView layer at creation time.",
           "$ref": "#/definitions/TypeLayerInitialSettings"

@@ -388,6 +388,8 @@ export type TypeGeoviewLayerConfig = {
   serviceDateFormat?: string;
   /** Date format used by the getFeatureInfo to output date variable. */
   externalDateFormat?: string;
+  /** Flag to exclude layer from time anble function like time slider */
+  isTimeAware?: boolean;
   /**
    * Initial settings to apply to the GeoView layer at creation time.
    * This attribute is allowed only if listOfLayerEntryConfig.length > 1.
@@ -463,6 +465,7 @@ export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLay
     serviceDateFormat: geoviewLayerConfigCasted.serviceDateFormat,
     externalDateFormat: geoviewLayerConfigCasted.externalDateFormat,
     initialSettings: geoviewLayerConfigCasted.initialSettings,
+    isTimeAware: geoviewLayerConfigCasted.isTimeAware,
     listOfLayerEntryConfig: [],
   } as TypeGeoviewLayerConfig;
 

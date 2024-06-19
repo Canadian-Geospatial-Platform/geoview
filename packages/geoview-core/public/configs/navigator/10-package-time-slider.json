@@ -11,6 +11,18 @@
     },
     "listOfGeoviewLayerConfig": [
       {
+        "geoviewLayerId": "napl",
+        "geoviewLayerName": { "en": "NAPL" },
+        "metadataAccessPath": { "en": "https://datacube.services.geo.ca/web/napl-ontario-ring-of-fire.xml" },
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "ontario-ring-of-fire",
+            "layerName": { "en": "Ontario ring of fire" }
+          }
+        ]
+      },
+      {
         "geoviewLayerId": "historical-flood",
         "serviceDateFormat": "yyyy/mm/ddThh:mm:ssz",
         "geoviewLayerName": {

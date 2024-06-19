@@ -80,6 +80,9 @@ export abstract class AbstractGVLayer {
   /** Date format object used to translate internal UTC ISO format to the external format, the one used by the user */
   #externalFragmentsOrder?: TypeDateFragments;
 
+  /** Boolean indicating if the layer should be included in time awareness functions such as the Time Slider. True by default. */
+  #isTimeAware: boolean = true;
+
   // Keep all callback delegates references
   #onLayerNameChangedHandlers: LayerNameChangedDelegate[] = [];
 
@@ -119,6 +122,9 @@ export abstract class AbstractGVLayer {
       ? DateMgt.getDateFragmentsOrder(layerConfig.geoviewLayerConfig.serviceDateFormat)
       : undefined;
     this.#externalFragmentsOrder = DateMgt.getDateFragmentsOrder(layerConfig.geoviewLayerConfig.externalDateFormat);
+
+    // Boolean indicating if the layer should be included in time awareness functions such as the Time Slider. True by default.
+    this.#isTimeAware = layerConfig.geoviewLayerConfig.isTimeAware === undefined ? true : layerConfig.geoviewLayerConfig.isTimeAware;
   }
 
   /**
@@ -315,6 +321,14 @@ export abstract class AbstractGVLayer {
    */
   setTemporalDimension(temporalDimension: TimeDimension): void {
     this.#layerTemporalDimension = temporalDimension;
+  }
+
+  /**
+   * Gets the flag if layer use its time dimension, this can be use to exclude layers from time function like time slider
+   * @returns {boolean} The flag indicating if the layer should be included in time awareness functions such as the Time Slider. True by default.
+   */
+  getIsTimeAware(): boolean {
+    return this.#isTimeAware;
   }
 
   /**

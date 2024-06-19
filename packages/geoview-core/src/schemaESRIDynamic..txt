@@ -4,6 +4,7 @@ const layer = {
   "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/",
   "serviceDateFormat": "DD/MM/YYYY HH:MM:SSZ",
   "externalDateFormat": "DD/MM/YYYY HH:MM:SSZ",
+  "isTimeAware: true,
   "initialSettings": {
     "controls": {
       "highlight": true,
