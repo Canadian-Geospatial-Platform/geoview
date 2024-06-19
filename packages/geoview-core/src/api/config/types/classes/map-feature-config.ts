@@ -45,9 +45,6 @@ export class MapFeatureConfig {
   /** The language used when interacting with this instance of MapFeatureConfig. */
   #language;
 
-  /** Original copy of the geoview layer configuration provided by the user. */
-  #originalgeoviewLayerConfig: TypeJsonObject = {};
-
   /** Flag used to indicate that errors were detected in the config provided. */
   #errorDetected = false;
 
@@ -93,23 +90,17 @@ export class MapFeatureConfig {
    * A copy of the original configuration is kept to identify which fields were left empty by the user. This information will be
    * useful after reading the metadata to determine whether a default value should be applied.
    *
-   * @param {string | TypeJsonObject} providedMapConfig The map feature configuration to instantiate.
+   * @param {TypeJsonObject} providedMapConfig The map feature configuration to instantiate.
    * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
    * @constructor
    */
   constructor(providedMapFeatureConfig: TypeJsonObject, language: TypeDisplayLanguage) {
-    // Convert string to JSON object and clone the config.
-    this.#originalgeoviewLayerConfig = cloneDeep(providedMapFeatureConfig);
-    // GV: One thing to know about default values: The way to determine whether a property has
-    // GV: been supplied by the user rather than initialized using a default value is to look
-    // GV: in the original configuration copy kept in the instance
-    const clonedJsonConfig = cloneDeep(providedMapFeatureConfig); // To avoid leaks in the caller's object.
-    this.#language = language;
     // Input schema validation.
-    this.#errorDetected = this.#errorDetected || !isvalidComparedToSchema(CV_MAP_CONFIG_SCHEMA_PATH, clonedJsonConfig);
+    this.#errorDetected = !isvalidComparedToSchema(CV_MAP_CONFIG_SCHEMA_PATH, providedMapFeatureConfig);
 
+    this.#language = language;
     // set map configuration
-    const gvMap = clonedJsonConfig.map as TypeJsonObject;
+    const gvMap = cloneDeep(providedMapFeatureConfig.map) as TypeJsonObject;
     if (gvMap) (gvMap.listOfGeoviewLayerConfig as TypeJsonArray) = (gvMap.listOfGeoviewLayerConfig || []) as TypeJsonArray;
     this.map = Cast<TypeMapConfig>(
       defaultsDeep(gvMap, MapFeatureConfig.#getDefaultMapConfig(gvMap?.viewSettings?.projection as TypeValidMapProjectionCodes))
@@ -123,26 +114,27 @@ export class MapFeatureConfig {
       .filter((layerConfig) => {
         return layerConfig;
       }) as AbstractGeoviewLayerConfig[];
-    this.serviceUrls = Cast<TypeServiceUrls>(defaultsDeep(clonedJsonConfig.serviceUrls, CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls));
-    this.theme = (clonedJsonConfig.theme || CV_DEFAULT_MAP_FEATURE_CONFIG.theme) as TypeDisplayTheme;
-    this.navBar = [...((clonedJsonConfig.navBar || CV_DEFAULT_MAP_FEATURE_CONFIG.navBar) as TypeNavBarProps)];
-    this.appBar = Cast<TypeAppBarProps>(defaultsDeep(clonedJsonConfig.appBar, CV_DEFAULT_MAP_FEATURE_CONFIG.appBar));
-    this.footerBar = Cast<TypeFooterBarProps>(clonedJsonConfig.footerBar);
-    this.overviewMap = Cast<TypeOverviewMapProps>(defaultsDeep(clonedJsonConfig.overviewMap, CV_DEFAULT_MAP_FEATURE_CONFIG.overviewMap));
-    this.components = [...((clonedJsonConfig.components || CV_DEFAULT_MAP_FEATURE_CONFIG.components) as TypeMapComponents)];
-    this.corePackages = [...((clonedJsonConfig.corePackages || CV_DEFAULT_MAP_FEATURE_CONFIG.corePackages) as TypeMapCorePackages)];
+    this.serviceUrls = Cast<TypeServiceUrls>(defaultsDeep(providedMapFeatureConfig.serviceUrls, CV_DEFAULT_MAP_FEATURE_CONFIG.serviceUrls));
+    this.theme = (providedMapFeatureConfig.theme || CV_DEFAULT_MAP_FEATURE_CONFIG.theme) as TypeDisplayTheme;
+    this.navBar = [...((providedMapFeatureConfig.navBar || CV_DEFAULT_MAP_FEATURE_CONFIG.navBar) as TypeNavBarProps)];
+    this.appBar = Cast<TypeAppBarProps>(defaultsDeep(providedMapFeatureConfig.appBar, CV_DEFAULT_MAP_FEATURE_CONFIG.appBar));
+    this.footerBar = Cast<TypeFooterBarProps>(providedMapFeatureConfig.footerBar);
+    this.overviewMap = Cast<TypeOverviewMapProps>(
+      defaultsDeep(providedMapFeatureConfig.overviewMap, CV_DEFAULT_MAP_FEATURE_CONFIG.overviewMap)
+    );
+    this.components = [...((providedMapFeatureConfig.components || CV_DEFAULT_MAP_FEATURE_CONFIG.components) as TypeMapComponents)];
+    this.corePackages = [...((providedMapFeatureConfig.corePackages || CV_DEFAULT_MAP_FEATURE_CONFIG.corePackages) as TypeMapCorePackages)];
     this.externalPackages = [
-      ...((clonedJsonConfig.externalPackages || CV_DEFAULT_MAP_FEATURE_CONFIG.externalPackages) as TypeExternalPackages),
+      ...((providedMapFeatureConfig.externalPackages || CV_DEFAULT_MAP_FEATURE_CONFIG.externalPackages) as TypeExternalPackages),
     ];
-    this.schemaVersionUsed = (clonedJsonConfig.schemaVersionUsed as TypeValidVersions) || CV_DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed;
-    this.#errorDetected = this.#errorDetected || !isvalidComparedToSchema(CV_MAP_CONFIG_SCHEMA_PATH, this); // Internal schema validation.
-    if (this.#errorDetected) this.#makeMapConfigValid(); // Tries to apply a patch to invalid properties
+    this.schemaVersionUsed =
+      (providedMapFeatureConfig.schemaVersionUsed as TypeValidVersions) || CV_DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed;
+    if (this.#errorDetected) this.#makeMapConfigValid(providedMapFeatureConfig); // Tries to apply a correction to invalid properties
   }
 
   /**
    * This method reads the service metadata for geoview layers in the geoview layer list.
    */
-  // TODO: This method will be deleted in the next PR because based on the implementation diagram it is done by the layerApi
   async fetchAllServiceMetadata(): Promise<void> {
     const promiseLayersProcessed: Promise<void>[] = [];
 
@@ -242,8 +234,7 @@ export class MapFeatureConfig {
 
     // Set values specific to projection
     mapConfig.viewSettings.maxExtent = [...CV_MAP_EXTENTS[proj]];
-    if (!mapConfig.viewSettings.initialView)
-      mapConfig.viewSettings.initialView = { zoomAndCenter: [3.5, CV_MAP_CENTER[proj] as [number, number]] };
+    mapConfig.viewSettings.initialView = { zoomAndCenter: [3.5, CV_MAP_CENTER[proj] as [number, number]] };
 
     return mapConfig;
   }
@@ -252,9 +243,12 @@ export class MapFeatureConfig {
    * This method attempts to recover a valid configuration following the detection of an error. It will attempt to replace the
    * erroneous values with the default values associated with the properties in error. There is a limit to this recovery
    * capability, however, and the resulting configuration may not be viable despite this attempt.
+   *
+   * @param {TypeJsonObject} providedMapConfig The map feature configuration to instantiate.
+   *
    * @private
    */
-  #makeMapConfigValid(): void {
+  #makeMapConfigValid(providedMapConfig: TypeJsonObject): void {
     // Do validation for all pieces
     this.map.viewSettings.projection =
       this.map.viewSettings.projection && VALID_PROJECTION_CODES.includes(this.map.viewSettings.projection)
@@ -282,7 +276,7 @@ export class MapFeatureConfig {
       !Number.isNaN(maxZoom) && maxZoom >= 0 && maxZoom <= 50 ? maxZoom : CV_DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.maxZoom;
 
     this.#validateMaxExtent();
-    this.#logModifs();
+    this.#logModifs(providedMapConfig);
   }
 
   /**
@@ -349,36 +343,39 @@ export class MapFeatureConfig {
   /**
    * Log modifications made to configuration by the validator. This method compares the values provided by the user to the
    * final values of the configuration and log all modifications made to the config.
+   *
+   * @param {TypeJsonObject} providedMapConfig The map feature configuration to instantiate.
+   *
    * @private
    */
-  #logModifs(): void {
-    Object.keys(this.#originalgeoviewLayerConfig).forEach((key) => {
+  #logModifs(providedMapConfig: TypeJsonObject): void {
+    Object.keys(providedMapConfig).forEach((key) => {
       if (!(key in this)) {
         logger.logWarning(`- Key '${key}' is invalid -`);
       }
     });
 
-    if ((this.#originalgeoviewLayerConfig?.map as TypeJsonObject)?.viewSettings?.projection !== this.map.viewSettings.projection) {
+    if ((providedMapConfig?.map as TypeJsonObject)?.viewSettings?.projection !== this.map.viewSettings.projection) {
       logger.logWarning(
-        `- Invalid projection code ${(this.#originalgeoviewLayerConfig?.map as TypeJsonObject)?.viewSettings?.projection} replaced by ${
+        `- Invalid projection code ${(providedMapConfig?.map as TypeJsonObject)?.viewSettings?.projection} replaced by ${
           this.map.viewSettings.projection
         } -`
       );
     }
 
     if (
-      (this.#originalgeoviewLayerConfig?.map as TypeJsonObject)?.viewSettings?.initialView?.zoomAndCenter &&
+      (providedMapConfig?.map as TypeJsonObject)?.viewSettings?.initialView?.zoomAndCenter &&
       this.map.viewSettings.initialView?.zoomAndCenter &&
-      (this.#originalgeoviewLayerConfig?.map as TypeJsonObject)?.viewSettings?.initialView?.zoomAndCenter[0] !==
+      (providedMapConfig?.map as TypeJsonObject)?.viewSettings?.initialView?.zoomAndCenter[0] !==
         this.map.viewSettings.initialView?.zoomAndCenter[0]
     ) {
       logger.logWarning(
-        `- Invalid zoom level ${(this.#originalgeoviewLayerConfig?.map as TypeJsonObject)?.viewSettings?.initialView?.zoomAndCenter[0]}
+        `- Invalid zoom level ${(providedMapConfig?.map as TypeJsonObject)?.viewSettings?.initialView?.zoomAndCenter[0]}
         replaced by ${this.map.viewSettings.initialView?.zoomAndCenter[0]} -`
       );
     }
 
-    const originalZoomAndCenter = (this.#originalgeoviewLayerConfig?.map as TypeJsonObject)?.viewSettings?.initialView?.zoomAndCenter;
+    const originalZoomAndCenter = (providedMapConfig?.map as TypeJsonObject)?.viewSettings?.initialView?.zoomAndCenter;
     if (
       originalZoomAndCenter &&
       Array.isArray(originalZoomAndCenter) &&
@@ -393,12 +390,10 @@ export class MapFeatureConfig {
       );
     }
 
-    if (
-      JSON.stringify((this.#originalgeoviewLayerConfig?.map as TypeJsonObject)?.basemapOptions) !== JSON.stringify(this.map.basemapOptions)
-    ) {
+    if (JSON.stringify((providedMapConfig?.map as TypeJsonObject)?.basemapOptions) !== JSON.stringify(this.map.basemapOptions)) {
       logger.logWarning(
         `- Invalid basemap options ${JSON.stringify(
-          (this.#originalgeoviewLayerConfig?.map as TypeJsonObject)?.basemapOptions
+          (providedMapConfig?.map as TypeJsonObject)?.basemapOptions
         )} replaced by ${JSON.stringify(this.map.basemapOptions)} -`
       );
     }

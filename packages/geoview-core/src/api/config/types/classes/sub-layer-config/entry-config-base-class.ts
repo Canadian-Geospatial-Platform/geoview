@@ -1,9 +1,15 @@
 import defaultsDeep from 'lodash/defaultsDeep';
 
-import { TypeGeoviewLayerType, TypeJsonObject } from '@config/types/config-types';
+import { TypeJsonObject } from '@config/types/config-types';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { normalizeLocalizedString } from '@config/utils';
-import { TypeLayerEntryType, TypeLayerInitialSettings, TypeDisplayLanguage, Extent } from '@config/types/map-schema-types';
+import {
+  TypeGeoviewLayerType,
+  TypeLayerEntryType,
+  TypeLayerInitialSettings,
+  TypeDisplayLanguage,
+  Extent,
+} from '@config/types/map-schema-types';
 
 /**
  * Base type used to define a GeoView sublayer to display on the map. The sublayer can be a group or an abstract sublayer.
