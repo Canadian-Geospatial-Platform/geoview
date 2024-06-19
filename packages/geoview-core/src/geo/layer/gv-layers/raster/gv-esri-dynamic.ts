@@ -619,6 +619,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
     if (combineLegendFilter) filterValueToUse = this.getViewFilter();
 
     // Convert date constants using the externalFragmentsOrder derived from the externalDateFormat
+    // GV this regex is different then the other layers because if not we have this error: The source image cannot be decoded.
+    // TODO: Standardize the regex across all layer types
     const searchDateEntry = [
       ...filterValueToUse.matchAll(
         /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/gi
