@@ -203,13 +203,13 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
   }, [tabGroup, isOpen, setSelectedLayerPath, appBarComponents]);
 
   /**
-   * Check all layers status is processing while querying
+   * Check if layer sttaus is processing while querying
    */
-  const memoIsAllLayersQueryStatusProcessing = useMemo(() => {
+  const memoIsLayerQueryStatusProcessing = useMemo(() => {
     // Log
     logger.logTraceUseMemo('DATA-PANEL - order layer status processing.');
 
-    return () => !!orderedLayerData.every((layer) => layer.queryStatus === LAYER_STATUS.PROCESSING);
+    return () => !!orderedLayerData.find((layer) => layer.queryStatus === LAYER_STATUS.PROCESSING);
   }, [orderedLayerData]);
 
   /**
@@ -218,7 +218,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
    * @returns {JSX.Element | null} JSX.Element | null
    */
   const renderContent = (): JSX.Element | null => {
-    if (isLoading || memoIsAllLayersQueryStatusProcessing()) {
+    if (isLoading || memoIsLayerQueryStatusProcessing()) {
       return <Skeleton variant="rounded" width="100%" height={400} sx={{ bgcolor: theme.palette.grey[400] }} />;
     }
     if (!isLayerDisabled() && isSelectedLayerHasFeatures()) {
