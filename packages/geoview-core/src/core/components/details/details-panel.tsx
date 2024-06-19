@@ -410,7 +410,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
   }, [mapClickCoordinates, memoLayersList]);
 
   /**
-   * Check all layers sttaus is processing while querying
+   * Check all layers status is processing while querying
    */
   const memoIsAllLayersQueryStatusProcessing = useMemo(() => {
     // Log
