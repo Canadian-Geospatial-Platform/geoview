@@ -32,6 +32,7 @@
   "isGeocore": false,
   "serviceDateFormat": "DD/MM/YYYY HH:MM:SSZ",
   "externalDateFormat": "DD/MM/YYYY HH:MM:SSZ",
+  "isTimeAware": true,
   "metadata": {"currentVersion":10.81,"serviceDescription":"","mapName":"Historical Flood Events (HFE)","description":"","copyrightText":"","supportsDynamicLayers":true,"layers":[{"id":0,"name":"Historical Flood Events","parentLayerId":-1,"defaultVisibility":true,"subLayerIds":null,"minScale":0,"maxScale":0,"type":"Feature Layer","geometryType":"esriGeometryMultipoint"}],"tables":[],"spatialReference":{"wkid":3978,"latestWkid":3978},"singleFusedMapCache":false,"initialExtent":{"xmin":-209886.82935798308,"ymin":-3444772.2653888958,"xmax":5549110.218031175,"ymax":3439986.172912771,"spatialReference":{"wkid":3978,"latestWkid":3978}},"fullExtent":{"xmin":-2299396.777505842,"ymin":-693964.2490450842,"xmax":3010572.608746673,"ymax":2649921.147800939,"spatialReference":{"wkid":3978,"latestWkid":3978}},"timeInfo":{"timeExtent":[-8646566400000,1672531200000],"timeReference":null,"timeRelation":"esriTimeRelationOverlaps","defaultTimeInterval":1,"defaultTimeIntervalUnits":"esriTimeUnitsYears","defaultTimeWindow":0,"hasLiveData":false},"minScale":0,"maxScale":0,"units":"esriMeters","supportedImageFormatTypes":"PNG32,PNG24,PNG,JPG,DIB,TIFF,EMF,PS,PDF,GIF,SVG,SVGZ,BMP","documentInfo":{"Title":"Historical Flood Events (HFE)","Author":"Government of Canada; Natural Resources Canada; Strategic Policy and Results Sector","Comments":"Representation of the causes of flooding events as multiple points. The point groupings correspond to the set location that were affected by the same event. The inventory of past flooding has been compiled from various public sources and standardized into a common data model. A link to the source used is included for more information. \\n\\nThe event locations have been largely revised to have one location per place reported to have been affected by the flooding. Flooding events for which no location was included in the sources are positioned on the place name of the location affected by the flooding.  The event positions do not indicate where the flooding occurred. Flood events that affected more than one locality are represented by a multipoint.\\n\\nIt should be noted that no consultation was conducted with the various providers and stakeholders of historical flood data. Disparities in content between the various sources result in an inconsistent product. No warranty is given as to the accuracy or completeness of the information provided. The absence of information does not mean that no flooding has occurred.","Subject":"Representation of the causes of flooding events as multiple points. The point grouping correspond to the set location that were affected by the same event.","Category":"","AntialiasingMode":"None","TextAntialiasingMode":"Force","Keywords":"Historical, Flood, Event, Hydrographic Data, Canada, Inundation, HFE, EHI, Inland waters, Meteorology, Agriculture, Environment, Ocean, Transport, Communication, Climatology, Geoscience"},"capabilities":"Map,Data,Query","supportedQueryFormats":"JSON, geoJSON","exportTilesAllowed":false,"referenceScale":0,"supportsDatumTransformation":true,"maxRecordCount":50000,"maxImageHeight":4096,"maxImageWidth":4096,"supportedExtensions":"WMSServer","serviceItemId":"a9e476e73179438fb1bb78cd875a9ce2"},
   "listOfLayerEntryConfig": [
     {
@@ -131,6 +132,7 @@
   "isGeocore": false,
   "serviceDateFormat": "DD/MM/YYYY HH:MM:SSZ",
   "externalDateFormat": "DD/MM/YYYY HH:MM:SSZ",
+  "isTimeAware": true,
   "listOfLayerEntryConfig": [
     {
       "id": "0",
@@ -376,6 +378,7 @@
   "isGeocore": false,
   "serviceDateFormat": "DD/MM/YYYY HH:MM:SSZ",
   "externalDateFormat": "DD/MM/YYYY HH:MM:SSZ",
+  "isTimeAware": true,
   "listOfLayerEntryConfig": [
     {
       "id": "myCustomGroup",
