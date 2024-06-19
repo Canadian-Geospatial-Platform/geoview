@@ -56,6 +56,9 @@ export abstract class AbstractGeoviewLayerConfig {
   /** Date format used by the getFeatureInfo to output date variable. */
   externalDateFormat: string | undefined;
 
+  /** Boolean indicating if the layer should be included in time awareness functions such as the Time Slider. True by default. */
+  isTimeAware: boolean | undefined;
+
   /**
    * Initial settings to apply to the GeoView layer at creation time.
    * This attribute is allowed only if listOfLayerEntryConfig.length > 1.
@@ -105,6 +108,9 @@ export abstract class AbstractGeoviewLayerConfig {
     this.metadataAccessPath = normalizeLocalizedString(this.#originalgeoviewLayerConfig.metadataAccessPath)![this.#language]!;
     this.serviceDateFormat = (this.#originalgeoviewLayerConfig.serviceDateFormat || 'DD/MM/YYYY HH:MM:SSZ') as string;
     this.externalDateFormat = (this.#originalgeoviewLayerConfig.externalDateFormat || 'DD/MM/YYYY HH:MM:SSZ') as string;
+    this.isTimeAware = (
+      this.#originalgeoviewLayerConfig.isTimeAware === undefined ? true : this.#originalgeoviewLayerConfig.isTimeAware
+    ) as boolean;
     this.listOfLayerEntryConfig = (this.#originalgeoviewLayerConfig?.listOfLayerEntryConfig as TypeJsonArray)
       ?.map((subLayerConfig) => {
         if (layerEntryIsGroupLayer(subLayerConfig)) return new GroupLayerEntryConfig(subLayerConfig, this.initialSettings, language, this);
