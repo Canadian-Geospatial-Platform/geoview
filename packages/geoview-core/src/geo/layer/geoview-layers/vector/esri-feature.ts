@@ -235,7 +235,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     // eslint-disable-next-line no-param-reassign
     sourceOptions.url = getLocalizedValue(layerConfig.source!.dataAccessPath!, AppEventProcessor.getDisplayLanguage(this.mapId));
     // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = `${sourceOptions.url}/${layerConfig.layerId}/query?f=pjson&outfields=*&where=1%3D1`;
+    sourceOptions.url = `${sourceOptions.url}/${layerConfig.layerId}/query?f=json&outfields=*&where=1%3D1`;
     // eslint-disable-next-line no-param-reassign
     sourceOptions.format = new EsriJSON();
 

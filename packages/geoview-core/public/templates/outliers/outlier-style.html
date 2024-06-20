@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Unusual Layers - Canadian Geospatial Platform Viewer</title>
+    <title>Outlier Style Layers - Canadian Geospatial Platform Viewer</title>
     <link rel="shortcut icon" href="./favicon.ico" />
     <meta name="msapplication-TileColor" content="#da532c" />
     <meta name="msapplication-config" content="./img/browserconfig.xml" />
@@ -22,7 +22,7 @@
           <tr>
             <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
             <td class="header-title">
-              <h1><strong>Unusual Layers</strong></h1>
+              <h1><strong>Outlier layers with style issues</strong></h1>
             </td>
           </tr>
         </tbody>
@@ -32,6 +32,7 @@
           <tr>
             <td>
               <a href="./index.html">Main</a><br />
+              <a href="./outliers.html">Outlier Layers</a><br />
             </td>
           </tr>
           <tr>
@@ -40,8 +41,7 @@
           </tr>
           <tr>
             <td>
-              <a href="#HMap1">1. Unusual Layers</a><br />
-              <a href="#HMap2">2. More Unusual Layers</a><br />
+              <a href="#HMap1">1. Style Issue Layers</a><br />
             </td>
           </tr>
         </tbody>
@@ -49,7 +49,7 @@
     </div>
 
     <div class="map-title-holder">
-      <h4 id="HMap1">1. Unusual Layers</h4>
+      <h4 id="HMap1">1. Style Issue Layers</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
     <button class="collapsible active">Map Status Flags</button>
@@ -72,46 +72,6 @@
           },
           'listOfGeoviewLayerConfig': [
             {
-              'geoviewLayerId': 'EPSG:4617',
-              'geoviewLayerName': { 'en': 'CSRS Layer (EPSG: 4617)' },
-              'metadataAccessPath': {
-                'en': 'https://data.sac-isc.gc.ca/geomatics/rest/services/Donnees_Ouvertes-Open_Data/Communaute_inuite_Inuit_Community/MapServer'
-              },
-              'geoviewLayerType': 'esriDynamic',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': '0',
-                  'layerName': { 'en': 'CSRS Layer' },
-                  'initialSettings': {
-                    'states': {
-                      'visible': false
-                    }
-                  }
-                }
-              ]
-            },
-            {
-              'geoviewLayerId': 'geojsonlyr1',
-              'geoviewLayerName': { 'en': 'Multi Polygon Layer' },
-              'geoviewLayerType': 'GeoJSON',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': 'multipolygon',
-                  'layerName': { 'en': 'Multi Polygon Layer' },
-                  'initialSettings': {
-                    'states': {
-                      'visible': false
-                    }
-                  },
-                  'source': {
-                    'dataAccessPath': {
-                      'en': './datasets/geojson/multipolygons.geojson'
-                    }
-                  }
-                }
-              ]
-            },
-            {
               'geoviewLayerId': 'geojsonlyr2',
               'geoviewLayerName': { 'en': 'Point and Polygon Layer' },
               'geoviewLayerType': 'GeoJSON',
@@ -133,24 +93,6 @@
               ]
             },
             {
-              'geoviewLayerId': 'Canadian Disasters, by Event Type***38633a35',
-              'geoviewLayerName': { 'en': 'Canadian Disasters, by Event Type' },
-              'metadataAccessPath': {
-                'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/PS/canadian_disasters_en/MapServer'
-              },
-              'geoviewLayerType': 'esriFeature',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': '0',
-                  'initialSettings': {
-                    'states': {
-                      'visible': false
-                    }
-                  }
-                }
-              ]
-            },
-            {
               'geoviewLayerId': 'HRDEM-dsm-hillshade',
               'geoviewLayerName': { 'en': 'DSM Hillshade' },
               'metadataAccessPath': { 'en': 'https://datacube.services.geo.ca/ows/elevation' },
@@ -159,25 +101,6 @@
                 {
                   'layerId': 'dsm-hillshade',
                   'layerName': { 'en': 'DSM-Hillshade' },
-                  'initialSettings': {
-                    'states': {
-                      'visible': false
-                    }
-                  }
-                }
-              ]
-            },
-            {
-              'geoviewLayerId': 'featureInfo',
-              'geoviewLayerName': { 'en': 'Coral Sponge 2016' },
-              'metadataAccessPath': {
-                'en': 'https://gisp.dfo-mpo.gc.ca/arcgis/rest/services/FGP/KDE_Analyses_Coral_Sponge_2016_EN/MapServer'
-              },
-              'geoviewLayerType': 'esriDynamic',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': '0',
-                  'layerName': { 'en': 'Coral Sponge 2016' },
                   'initialSettings': {
                     'states': {
                       'visible': false
@@ -206,44 +129,6 @@
               ]
             },
             {
-              'geoviewLayerId': 'mpmo',
-              'geoviewLayerName': { 'en': 'MPMO - Major Project' },
-              'metadataAccessPath': {
-                'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/MPMO_Major_Projects/MapServer/'
-              },
-              'geoviewLayerType': 'esriFeature',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': '0',
-                  'layerName': { 'en': 'MPMO - Major Project' },
-                  'initialSettings': {
-                    'states': {
-                      'visible': false
-                    }
-                  }
-                }
-              ]
-            },
-            {
-              'geoviewLayerId': 'cpcad',
-              'geoviewLayerName': { 'en': 'Protected and conserved area' },
-              'metadataAccessPath': {
-                'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CWS_SCF/CPCAD/MapServer/'
-              },
-              'geoviewLayerType': 'esriDynamic',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': '0',
-                  'layerName': { 'en': 'Protected and conserved area' },
-                  'initialSettings': {
-                    'states': {
-                      'visible': false
-                    }
-                  }
-                }
-              ]
-            },
-            {
               'geoviewLayerId': 'FSI',
               'geoviewLayerName': { 'en': 'Flood susceptibility index' },
               'metadataAccessPath': {
@@ -254,6 +139,24 @@
                 {
                   'layerId': 'FS-national-2015-index',
                   'layerName': { 'en': 'Flood susceptibility index' }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'Canadian Disasters, by Event Type***38633a35',
+              'geoviewLayerName': { 'en': 'Canadian Disasters, by Event Type' },
+              'metadataAccessPath': {
+                'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/PS/canadian_disasters_en/MapServer'
+              },
+              'geoviewLayerType': 'esriFeature',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0',
+                  'initialSettings': {
+                    'states': {
+                      'visible': false
+                    }
+                  }
                 }
               ]
             }
@@ -274,28 +177,13 @@
       Outlier Layers:
       <ul>
         <li>
-          CSRS Layer - EPSG: 4617 - Issue #1798
-        </li>
-        <li>
-          Multi Polygon Layer - Ensure multi polygon is working - Issue #550
-        </li>
-        <li>
           Point and Polygon Layer - Style for only one geometry was used - Issue #2017
         </li>
         <li>
           DSM Hillshade - Error from service not providing style - Issue #1891
         </li>
         <li>
-          Coral Sponge - had issues with get feature info - Issue #1996
-        </li>
-        <li>
           CESI - conserved areas layer was not showing in legend (layer moved - now appears as empty layer) - Issue #1816
-        </li>
-        <li>
-          Major Project - esri feature layer does not load because of null field value - Issue #2208
-        </li>
-        <li>
-          Protected and conserved area - esri dynamic data table not featching because of geometry in url - Issue #2200
         </li>
         <li>
           Flood susceptibility index - no default style, so no image legend - Issue #2220
@@ -306,35 +194,12 @@
       </ul>
     </div>
 
-    <div class="map-title-holder">
-      <h4 id="HMap2">2. More Unusual Layers</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
-    <button class="collapsible active">Map Status Flags</button>
-    <pre id="HMap2-state" class="panel map-title-holder"></pre>
-    <hr />
-    <div
-      id="Map2"
-      class="geoview-map"
-      data-lang="en"
-      data-config-url="./configs/max-record-count.json"
-    ></div>
-    <div>
-      More Outlier Layers:
-      <ul>
-        <li>
-          Advance Polling District - maxRecordCount of 1000, with 6172 features - Issue #2199
-        </li>
-      </ul>
-    </div>
-
     <script src="codedoc.js"></script>
     <script src="layerlib.js"></script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init((mapId) => {
           listenToLegendLayerSetChanges('HMap1-state', 'Map1');
-          listenToLegendLayerSetChanges('HMap2-state', 'Map2');
       });
 
       // create snippets

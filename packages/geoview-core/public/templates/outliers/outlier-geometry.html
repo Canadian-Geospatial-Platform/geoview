@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Outlier Geometry Layers - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div class="header-table">
+      <table>
+        <tbody>
+          <tr>
+            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
+            <td class="header-title">
+              <h1><strong>Outlier Geometry Layers</strong></h1>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <a href="./index.html">Main</a><br />
+              <a href="./outliers.html">Outlier Layers</a><br />
+            </td>
+          </tr>
+          <tr>
+            <td><p>This page is used to showcase layers with unusual geometries or features</p></td>
+          </tr>
+          </tr>
+          <tr>
+            <td>
+              <a href="#HMap1">1. Outlier Geometry Layers</a><br />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="map-title-holder">
+      <h4 id="HMap1">1. Outlier Geometry Layers</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <button class="collapsible active">Map Status Flags</button>
+    <pre id="HMap1-state" class="panel map-title-holder"></pre>
+    <hr />
+    <div
+      id="Map1"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3978
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'EPSG:4617',
+              'geoviewLayerName': { 'en': 'CSRS Layer (EPSG: 4617)' },
+              'metadataAccessPath': {
+                'en': 'https://data.sac-isc.gc.ca/geomatics/rest/services/Donnees_Ouvertes-Open_Data/Communaute_inuite_Inuit_Community/MapServer'
+              },
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0',
+                  'layerName': { 'en': 'CSRS Layer' },
+                  'initialSettings': {
+                    'states': {
+                      'visible': true
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'geojsonlyr1',
+              'geoviewLayerName': { 'en': 'Multi Polygon Layer' },
+              'geoviewLayerType': 'GeoJSON',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'multipolygon',
+                  'layerName': { 'en': 'Multi Polygon Layer' },
+                  'initialSettings': {
+                    'states': {
+                      'visible': false
+                    }
+                  },
+                  'source': {
+                    'dataAccessPath': {
+                      'en': './datasets/geojson/multipolygons.geojson'
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'featureInfo',
+              'geoviewLayerName': { 'en': 'Coral Sponge 2016' },
+              'metadataAccessPath': {
+                'en': 'https://gisp.dfo-mpo.gc.ca/arcgis/rest/services/FGP/KDE_Analyses_Coral_Sponge_2016_EN/MapServer'
+              },
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0',
+                  'layerName': { 'en': 'Coral Sponge 2016' },
+                  'initialSettings': {
+                    'states': {
+                      'visible': false
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'cpcad',
+              'geoviewLayerName': { 'en': 'Protected and conserved area' },
+              'metadataAccessPath': {
+                'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CWS_SCF/CPCAD/MapServer/'
+              },
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0',
+                  'layerName': { 'en': 'Protected and conserved area' },
+                  'initialSettings': {
+                    'states': {
+                      'visible': false
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map'],
+        'footerBar': {
+          'tabs': {
+            'core': ['legend', 'layers', 'details', 'data-table']
+          }
+        },
+        'corePackages': [],
+        'theme': 'geo.ca'
+      }"
+    ></div>
+    <hr />
+    <div>
+      Outlier Geometry Layers:
+      <ul>
+        <li>
+          CSRS Layer - EPSG: 4617 - Issue #1798
+        </li>
+        <li>
+          Multi Polygon Layer - Ensure multi polygon is working - Issue #550
+        </li>
+        <li>
+          Coral Sponge - had issues with get feature info - Issue #1996
+        </li>
+        <li>
+          Protected and conserved area - esri dynamic data table not fetching because of geometry in url - Issue #2200
+        </li>
+      </ul>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script src="layerlib.js"></script>
+    <script>
+      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init((mapId) => {
+          listenToLegendLayerSetChanges('HMap1-state', 'Map1');
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });
+    </script>
+  </body>
+</html>
