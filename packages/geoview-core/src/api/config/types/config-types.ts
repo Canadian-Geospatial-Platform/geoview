@@ -59,20 +59,3 @@ export type LayerTypesKey =
   | 'OGC_FEATURE'
   | 'WFS'
   | 'WMS';
-
-/**
- * Type of GeoView layers
- */
-export type TypeGeoviewLayerType =
-  | 'CSV'
-  | 'esriDynamic'
-  | 'esriFeature'
-  | 'esriImage'
-  | 'GeoJSON'
-  | 'GeoPackage'
-  | 'imageStatic'
-  | 'ogcFeature'
-  | 'ogcWfs'
-  | 'ogcWms'
-  | 'vectorTiles'
-  | 'xyzTiles';

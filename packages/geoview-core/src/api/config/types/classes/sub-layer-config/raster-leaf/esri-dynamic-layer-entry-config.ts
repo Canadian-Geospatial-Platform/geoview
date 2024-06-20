@@ -10,7 +10,6 @@ import {
   TypeLayerEntryType,
   TypeLayerInitialSettings,
   TypeDisplayLanguage,
-  TypeEsriFormatParameter,
   TypeSourceEsriDynamicInitialConfig,
 } from '@config/types/map-schema-types';
 import { GeoviewLayerInvalidParameterError } from '@config/types/classes/config-exceptions';
@@ -43,16 +42,25 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
     parentNode?: EntryConfigBaseClass
   ) {
     super(layerConfig, initialSettings, language, geoviewLayerConfig, parentNode);
-    // Set default values.
-    this.source = defaultsDeep(this.source, { maxRecordCount: 0, format: 'png', featureInfo: { queryable: false } });
+    // Apply user config to the instance variables.
     this.style = layerConfig.style ? { ...Cast<TypeStyleConfig>(layerConfig.style) } : undefined;
     if (Number.isNaN(this.layerId)) {
       this.setErrorDetectedFlag();
       throw new GeoviewLayerInvalidParameterError('LayerIdInvalidType', [this.layerPath]);
     }
-    this.source.format = (layerConfig?.source?.format || 'png') as TypeEsriFormatParameter; // Set the source.format property
-    if (!isvalidComparedToSchema(this.schemaPath, layerConfig)) this.setErrorDetectedFlag(); // Input schema validation.
-    if (!isvalidComparedToSchema(this.schemaPath, this)) this.setErrorDetectedFlag(); // Internal schema validation.
+    // Input schema validation. When the entryType property is undefined, isvalidComparedToSchema uses the input schema.
+    if (!isvalidComparedToSchema(this.schemaPath, layerConfig)) this.setErrorDetectedFlag();
+  }
+
+  /**
+   * This method is the last to be called in the sequence of configuration parameter assignment according to the preceding rules,
+   * the first being the assignment of user parameters and the second the assignment of metadata. Configuration parameters that
+   * already have a value are not changed when a subsequent assignment phase takes place. In other words, default value assignment
+   * does not change an already initialized metadata parameter, and metadata assignment does not change the value of a user-supplied
+   * parameter.
+   */
+  protected applyDefaultsValues(): void {
+    this.source = defaultsDeep(this.source, { maxRecordCount: 0, format: 'png', featureInfo: { queryable: false } });
   }
 
   /**
