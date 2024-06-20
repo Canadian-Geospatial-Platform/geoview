@@ -68,8 +68,6 @@ export const useScaleIn = (config?: SpringConfig): SpringValues => {
   });
 };
 
-
-
 export const useShake = (config?: SpringConfig): SpringValues => {
   return useSpring({
     from: { x: 0, scale: 1 },

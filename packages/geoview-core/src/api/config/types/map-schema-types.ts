@@ -232,6 +232,7 @@ export type TypeGeoviewLayerType =
   | 'esriFeature'
   | 'esriImage'
   | 'GeoJSON'
+  | 'GeoPackage'
   | 'imageStatic'
   | 'ogcFeature'
   | 'ogcWfs'

@@ -384,12 +384,12 @@
       },
       "if": {
         "properties": {
-          "isGeocore": {
-            "description": "The isGeocore property is not defined by the user but by the viewer according to the geoview layer type. It is used as a flag indicating the type of schema used (input/internal).",
-            "enum": [true, false]
+          "useInternalSchema": {
+            "description": "The useInternalSchema property is not defined by the user but by the viewer when we want to use the internal schema.",
+            "const": true
           }
         },
-        "required": ["isGeocore"]
+        "required": ["useInternalSchema"]
       },
       "then": {
         "description": "Use Internal Schema",
@@ -519,6 +519,7 @@
         "esriFeature",
         "esriImage",
         "GeoJSON",
+        "GeoPackage",
         "imageStatic",
         "ogcFeature",
         "ogcWfs",
@@ -712,6 +713,7 @@
       "type": "object",
       "allOf": [
         {
+          "description": "The parent class.",
           "$ref": "#/definitions/AbstractGeoviewLayerConfig"
         },
         {
@@ -729,6 +731,7 @@
       "type": "object",
       "allOf": [
         {
+          "description": "The parent class.",
           "$ref": "#/definitions/AbstractGeoviewLayerConfig"
         },
         {
@@ -793,12 +796,12 @@
       },
       "if": {
         "properties": {
-          "entryType": {
-            "description": "The entryType property is not defined by the user but by the viewer according to the geoview layer type. It is used as a flag indicating the type of schema used (input/internal).",
-            "enum": ["vector", "raster-image", "group"]
+          "useInternalSchema": {
+            "description": "The useInternalSchema property is not defined by the user but by the viewer when we want to use the internal schema.",
+            "const": true
           }
         },
-        "required": ["entryType"]
+        "required": ["useInternalSchema"]
       },
       "then": {
         "properties": {
@@ -823,6 +826,7 @@
       "type": "object",
       "allOf": [
         {
+          "description": "The parent class.",
           "$ref": "#/definitions/EntryConfigBaseClass"
         },
         {
@@ -847,6 +851,7 @@
       "type": "object",
       "allOf": [
         {
+          "description": "The actual parent class is AbstractBaseEsriLayerEntryConfig, whose parent class is AbstractBaseLayerEntryConfig. Both classes have the same properties.",
           "$ref": "#/definitions/AbstractBaseLayerEntryConfig"
         },
         {
@@ -867,6 +872,7 @@
       "type": "object",
       "allOf": [
         {
+          "description": "The actual parent class is AbstractBaseEsriLayerEntryConfig, whose parent class is AbstractBaseLayerEntryConfig. Both classes have the same properties.",
           "$ref": "#/definitions/AbstractBaseLayerEntryConfig"
         },
         {
