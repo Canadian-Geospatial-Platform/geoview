@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { getSxClasses } from './select-style';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 /**
  * Custom MUI Select properties
@@ -44,6 +45,9 @@ export function Select(props: TypeSelectProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
+  const mapId = useGeoViewMapId();
+  const mapElem = document.getElementById(`shell-${mapId}`);
+
   return (
     <FormControl fullWidth={fullWidth} {...formControlProps}>
       {!!selectProps.label && (
@@ -51,7 +55,7 @@ export function Select(props: TypeSelectProps): JSX.Element {
           {selectProps.label}
         </InputLabel>
       )}
-      <MaterialSelect sx={sxClasses.formControl} {...selectProps}>
+      <MaterialSelect sx={sxClasses.formControl} {...selectProps} MenuProps={{ container: mapElem }} >
         {menuItems.map((menuItem: TypeMenuItemProps, index) => {
           if (menuItem) {
             if (menuItem.type === 'header') {
