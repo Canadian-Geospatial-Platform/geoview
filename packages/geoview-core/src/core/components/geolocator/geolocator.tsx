@@ -85,7 +85,7 @@ export function Geolocator(): JSX.Element {
    * @param {string} searchTerm the search term entered by the user
    * @returns {Promise<void>}
    */
-  const getGeolocations = useCallback(async (searchTerm: string): Promise<void> => {
+  const getGeolocations = async (searchTerm: string): Promise<void> => {
     try {
       setIsLoading(true);
       // Abort any pending requests
@@ -117,7 +117,7 @@ export function Geolocator(): JSX.Element {
     } catch (err) {
       setError(err as Error);
     }
-  }, []);
+  };
 
   /**
    * Reset search component values when close icon is clicked.
@@ -178,14 +178,13 @@ export function Geolocator(): JSX.Element {
    */
   const handleGetGeolocations = useCallback(() => {
     if (searchValue.length >= MIN_SEARCH_LENGTH) {
-      // cancel previous in queue request and fetch geo locations with new search value.
-      doRequest.cancel();
       getGeolocations(searchValue).catch((errorInside) => {
         // Log
         logger.logPromiseFailed('getGeolocations in Geolocator', errorInside);
       });
     }
-  }, [doRequest, getGeolocations, searchValue]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchValue]);
 
   useEffect(() => {
     return () => {
