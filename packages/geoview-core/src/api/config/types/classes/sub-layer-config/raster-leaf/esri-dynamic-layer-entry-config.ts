@@ -4,7 +4,7 @@ import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@conf
 import { Cast, TypeJsonObject } from '@config/types/config-types';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { AbstractBaseEsriLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-esri-layer-entry-config';
-import { isvalidComparedToSchema } from '@config/utils';
+import { isvalidComparedToInputSchema, isvalidComparedToInternalSchema } from '@config/utils';
 import {
   TypeStyleConfig,
   TypeLayerEntryType,
@@ -48,8 +48,9 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
       this.setErrorDetectedFlag();
       throw new GeoviewLayerInvalidParameterError('LayerIdInvalidType', [this.layerPath]);
     }
-    // Input schema validation. When the entryType property is undefined, isvalidComparedToSchema uses the input schema.
-    if (!isvalidComparedToSchema(this.schemaPath, layerConfig)) this.setErrorDetectedFlag();
+    // Validate the structure
+    if (!isvalidComparedToInputSchema(this.schemaPath, layerConfig)) this.setErrorDetectedFlag();
+    if (!isvalidComparedToInternalSchema(this.schemaPath, this, true)) this.setErrorDetectedFlag();
   }
 
   /**
