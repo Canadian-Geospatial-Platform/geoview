@@ -347,6 +347,8 @@ export class ConfigApi {
       // If the user provided a valid string config with the mandatory map property, process geocore layers to translate them to their GeoView layers
       if (!providedMapFeatureConfig) throw new MapConfigError('The string configuration provided cannot be translated to a json object');
       if (!providedMapFeatureConfig.map) throw new MapConfigError('The map property is mandatory');
+      providedMapFeatureConfig.map.listOfGeoviewLayerConfig = (providedMapFeatureConfig.map.listOfGeoviewLayerConfig ||
+        []) as TypeJsonObject;
 
       const inputLength = providedMapFeatureConfig.map.listOfGeoviewLayerConfig.length;
       providedMapFeatureConfig.map.listOfGeoviewLayerConfig = (await ConfigApi.convertGeocoreToGeoview(
