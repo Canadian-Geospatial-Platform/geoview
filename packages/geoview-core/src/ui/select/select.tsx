@@ -22,6 +22,7 @@ type TypeSelectProps = SelectProps & {
   menuItems: TypeMenuItemProps[];
   inputLabel: InputLabelProps;
   formControlProps?: FormControlProps;
+  container?: HTMLElement | null;
 };
 
 /**
@@ -39,7 +40,7 @@ export interface TypeMenuItemProps {
  * @returns {JSX.Element} the auto complete ui component
  */
 export function Select(props: TypeSelectProps): JSX.Element {
-  const { fullWidth, inputLabel, menuItems, formControlProps = {}, ...selectProps } = props;
+  const { fullWidth, inputLabel, menuItems, formControlProps = {}, container, ...selectProps } = props;
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
@@ -51,7 +52,7 @@ export function Select(props: TypeSelectProps): JSX.Element {
           {selectProps.label}
         </InputLabel>
       )}
-      <MaterialSelect sx={sxClasses.formControl} {...selectProps}>
+      <MaterialSelect sx={sxClasses.formControl} {...selectProps} MenuProps={{ container }}>
         {menuItems.map((menuItem: TypeMenuItemProps, index) => {
           if (menuItem) {
             if (menuItem.type === 'header') {
