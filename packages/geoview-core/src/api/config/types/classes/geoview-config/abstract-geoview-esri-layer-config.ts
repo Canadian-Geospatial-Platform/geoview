@@ -175,7 +175,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
     const queryUrl = serviceUrl.endsWith('/') ? `${serviceUrl}${subLayerConfig.layerId}` : `${serviceUrl}/${subLayerConfig.layerId}`;
 
     try {
-      const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=pjson`);
+      const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=json`);
       if ('error' in data) logger.logError('Error detected while reading layer metadata.', data.error);
       else return data;
     } catch (error) {

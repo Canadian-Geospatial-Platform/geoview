@@ -251,7 +251,7 @@ export function commonProcessTemporalDimension(
   layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig,
   singleHandle?: boolean
 ): void {
-  if (esriTimeDimension !== undefined) {
+  if (esriTimeDimension !== undefined && esriTimeDimension.timeExtent) {
     layer.setTemporalDimension(
       layerConfig.layerPath,
       DateMgt.createDimensionFromESRI(Cast<TimeDimensionESRI>(esriTimeDimension), singleHandle)
@@ -300,7 +300,7 @@ export function commonProcessFeatureInfoConfig(
       }
       if (processAliasFields) layerConfig.source.featureInfo.aliasFields = { en: '' };
       (layerMetadata.fields as TypeJsonArray).forEach((fieldEntry) => {
-        if (fieldEntry?.name === layerMetadata.geometryField.name) return;
+        if (layerMetadata.geometryField && fieldEntry?.name === layerMetadata.geometryField.name) return;
         if (processOutField) {
           layerConfig.source.featureInfo!.outfields!.en = `${layerConfig.source.featureInfo!.outfields!.en}${fieldEntry.name},`;
           const fieldType = commonGetFieldType(layer, fieldEntry.name as string, layerConfig);
@@ -395,7 +395,7 @@ export async function commonProcessLayerMetadata<
     if (layerConfig.geoviewLayerConfig.geoviewLayerType !== CONST_LAYER_TYPES.ESRI_IMAGE)
       queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
     try {
-      const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=pjson`);
+      const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=json`);
       if (data?.error) {
         layerConfig.layerStatus = 'error';
         throw new Error(`Error code = ${data.error.code}, ${data.error.message}`);
