@@ -128,7 +128,7 @@ export default function ExportModal(): JSX.Element {
           legendContainer.removeAttribute('style');
           setIsLegendLoading(true);
           // remove hidden attribute from document legend, so that html-to-image can copy the legend container.
-          const legendTab = document.getElementById(`${mapId}-legend`) as HTMLElement;
+          const legendTab = document.getElementById(`shell-${mapId}-legend`) as HTMLElement;
           const hasHiddenAttr = legendTab?.hasAttribute('hidden') ?? null;
           if (hasHiddenAttr) legendTab.removeAttribute('hidden');
           htmlToImage
@@ -240,7 +240,7 @@ export default function ExportModal(): JSX.Element {
             fontSize: theme.palette.geoViewFontSize.sm,
             padding: '0.7rem 1rem',
             backgroundColor: theme.palette.geoViewColor.primary.main,
-            height: '50px',
+            height: '47px',
           }}
           disabled={isLegendLoading || isMapLoading}
         >
