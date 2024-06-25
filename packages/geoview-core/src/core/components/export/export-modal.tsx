@@ -41,7 +41,6 @@ export default function ExportModal(): JSX.Element {
   const legendContainerRef = useRef(null) as RefObject<HTMLDivElement>;
   const textFieldRef = useRef(null) as RefObject<HTMLInputElement>;
   const exportTitleRef = useRef(null) as RefObject<HTMLDivElement>;
-  const embedFontFaces = useRef<string>();
 
   const northArrow = useMapNorthArrow();
   const scale = useMapScale();
@@ -62,7 +61,7 @@ export default function ExportModal(): JSX.Element {
       setIsMapExporting(true);
 
       htmlToImage
-        .toPng(exportContainerRef.current, { backgroundColor: theme.palette.common.white })
+        .toPng(exportContainerRef.current, { backgroundColor: theme.palette.common.white, fontEmbedCSS: '' })
         .then((dataUrl) => {
           setIsMapExporting(false);
           exportPNG(dataUrl, mapId);
@@ -110,7 +109,7 @@ export default function ExportModal(): JSX.Element {
       timer = setTimeout(() => {
         setIsMapLoading(true);
         htmlToImage
-          .toPng(mapViewport as HTMLElement, { fontEmbedCSS: embedFontFaces.current })
+          .toPng(mapViewport as HTMLElement, { fontEmbedCSS: '' })
           .then((dataUrl) => {
             setIsMapLoading(false);
             const img = new Image();
@@ -133,7 +132,7 @@ export default function ExportModal(): JSX.Element {
           const hasHiddenAttr = legendTab?.hasAttribute('hidden') ?? null;
           if (hasHiddenAttr) legendTab.removeAttribute('hidden');
           htmlToImage
-            .toPng(legendContainer, { fontEmbedCSS: embedFontFaces.current })
+            .toPng(legendContainer, { fontEmbedCSS: '' })
             .then((dataUrl) => {
               setIsLegendLoading(false);
               const img = new Image();
@@ -155,18 +154,6 @@ export default function ExportModal(): JSX.Element {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeModalId, isOpen]);
-
-  // Fetch the embed font from map dom element, when modal is opened.
-  useEffect(() => {
-    const getFontEmbedCss = async (): Promise<void> => {
-      const fontEmbedCss = await htmlToImage.getFontEmbedCSS(mapElement);
-      embedFontFaces.current = fontEmbedCss;
-    };
-    getFontEmbedCss().catch((error) => {
-      // Log
-      logger.logPromiseFailed('Failed to getFontEmbedCss in htmlToImage.fontEmbedCss', error);
-    });
-  }, [mapElement]);
 
   return (
     <Dialog open={activeModalId === 'export'} onClose={closeModal} fullWidth maxWidth="xl" disablePortal>
@@ -237,6 +224,9 @@ export default function ExportModal(): JSX.Element {
             color: theme.palette.common.white,
             padding: '0.7rem 1rem',
             backgroundColor: theme.palette.geoViewColor.primary.main,
+            '&:hover': {
+              backgroundColor: theme.palette.geoViewColor.primary.dark[200],
+            },
           }}
         >
           {t('exportModal.cancelBtn')}
