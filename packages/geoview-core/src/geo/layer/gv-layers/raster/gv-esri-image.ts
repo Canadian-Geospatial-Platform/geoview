@@ -109,7 +109,7 @@ export class GVEsriImage extends AbstractGVRaster {
       const legendUrl = `${getLocalizedValue(
         layerConfig.geoviewLayerConfig.metadataAccessPath,
         AppEventProcessor.getDisplayLanguage(this.getMapId())
-      )}/legend?f=pjson`;
+      )}/legend?f=json`;
       const response = await fetch(legendUrl);
       const legendJson: TypeEsriImageLayerLegend = await response.json();
       let legendInfo;
