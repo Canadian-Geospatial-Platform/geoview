@@ -22,7 +22,7 @@ export abstract class AbstractBaseEsriLayerEntryConfig extends AbstractBaseLayer
     const queryUrl = serviceUrl.endsWith('/') ? `${serviceUrl}${this.layerId}` : `${serviceUrl}/${this.layerId}`;
 
     try {
-      const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=pjson`);
+      const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=json`);
       if ('error' in data) logger.logError('Error detected while reading layer metadata.', data.error);
       else this.metadata = data;
     } catch (error) {

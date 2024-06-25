@@ -159,7 +159,7 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
     return (
       <List sx={sxClasses.subList}>
         {layer.items.map((item) => (
-          <ListItem key={`${item.icon}/${item.name}`} className={!item.isVisible ? 'unchecked' : ''}>
+          <ListItem key={`${item.icon}/${item.name}/${layer.items.indexOf(item)}`} className={!item.isVisible ? 'unchecked' : ''}>
             <ListItemIcon>{item.icon ? <Box component="img" alt={item.name} src={item.icon} /> : <BrowserNotSupportedIcon />}</ListItemIcon>
             <Tooltip title={item.name} placement="top" enterDelay={1000}>
               <ListItemText primary={item.name} />

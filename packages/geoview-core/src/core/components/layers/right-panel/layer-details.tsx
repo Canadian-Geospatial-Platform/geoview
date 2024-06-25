@@ -161,7 +161,13 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           </Grid>
         )}
         {layerDetails.items.map((item) => (
-          <Grid container direction="row" key={item.name} justifyContent="center" alignItems="stretch">
+          <Grid
+            container
+            direction="row"
+            key={`${item.name}/${layerDetails.items.indexOf(item)}`}
+            justifyContent="center"
+            alignItems="stretch"
+          >
             <Grid item xs="auto">
               {renderItemCheckbox(item)}
             </Grid>
