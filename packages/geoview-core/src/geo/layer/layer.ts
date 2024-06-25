@@ -1295,21 +1295,26 @@ export class LayerApi {
   refreshLayers(): void {
     // For each geoview layer
     this.getGeoviewLayers().forEach((geoviewLayer) => {
-      const refreshBaseLayerRec = (baseLayer: BaseLayer | undefined): void => {
-        if (baseLayer) {
-          const layerGroup: Array<BaseLayer> | Collection<BaseLayer> | undefined = baseLayer.get('layers');
-          if (layerGroup) {
-            layerGroup.forEach((baseLayerEntry) => {
-              refreshBaseLayerRec(baseLayerEntry);
-            });
-          } else {
-            const layerSource: Source = baseLayer.get('source');
-            layerSource.refresh();
-          }
-        }
-      };
-      refreshBaseLayerRec(geoviewLayer.olRootLayer);
+      if (geoviewLayer.olRootLayer) this.refreshBaseLayer(geoviewLayer.olRootLayer);
     });
+  }
+
+  /**
+   * Refresh geoview layer source.
+   * @param {BaseLayer} baseLayer - The layer to refresh.
+   */
+  refreshBaseLayer(baseLayer: BaseLayer): void {
+    // Check if the passed layer is a group
+    const layerGroup: Array<BaseLayer> | Collection<BaseLayer> | undefined = baseLayer.get('layers');
+    // Update all layers in group, or update source of layer
+    if (layerGroup) {
+      layerGroup.forEach((baseLayerEntry) => {
+        this.refreshBaseLayer(baseLayerEntry);
+      });
+    } else {
+      const layerSource: Source = baseLayer.get('source');
+      layerSource.refresh();
+    }
   }
 
   /**

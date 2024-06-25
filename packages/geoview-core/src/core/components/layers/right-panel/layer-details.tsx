@@ -50,7 +50,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   // get store actions
   const highlightedLayer = useLayerHighlightedLayer();
-  const { setAllItemsVisibility, toggleItemVisibility, setHighlightLayer, zoomToLayerExtent, getLayerBounds } = useLayerStoreActions();
+  const { setAllItemsVisibility, toggleItemVisibility, setHighlightLayer, refreshLayer, zoomToLayerExtent, getLayerBounds } =
+    useLayerStoreActions();
   const { openModal } = useUIStoreActions();
   const layersData = useDataTableAllFeaturesDataArray();
   const selectedLayer = layersData.find((_layer) => _layer.layerPath === layerDetails?.layerPath);
@@ -93,8 +94,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   }
 
   const handleRefreshLayer = (): void => {
-    // TODO: Refresh the layer symbology on the map based on the selected symbology in the UI?
-    logger.logDebug('Refresh is not implemented');
+    refreshLayer(layerDetails.layerPath);
   };
 
   const handleHighlightLayer = (): void => {
