@@ -52,7 +52,7 @@ export function Select(props: TypeSelectProps): JSX.Element {
           {selectProps.label}
         </InputLabel>
       )}
-      <MaterialSelect sx={sxClasses.formControl} {...selectProps} MenuProps={{ container: container }}>
+      <MaterialSelect sx={sxClasses.formControl} {...selectProps} MenuProps={{ container }}>
         {menuItems.map((menuItem: TypeMenuItemProps, index) => {
           if (menuItem) {
             if (menuItem.type === 'header') {
