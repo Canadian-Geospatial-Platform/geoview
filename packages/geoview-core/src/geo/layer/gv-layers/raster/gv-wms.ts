@@ -8,7 +8,7 @@ import { ImageWMS } from 'ol/source';
 import { Extent } from 'ol/extent';
 
 import { TypeLocalizedString } from '@config/types/map-schema-types';
-import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
+import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { CONST_LAYER_TYPES, TypeWmsLegend, TypeWmsLegendStyle } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { xmlToJson, getLocalizedValue } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -151,22 +151,20 @@ export class GVWMS extends AbstractGVRaster {
           const featureCollection = GVWMS.#getAttribute(jsonResponse, 'FeatureCollection');
           if (featureCollection) featureMember = GVWMS.#getAttribute(featureCollection, 'featureMember');
           else {
-            const featureInfoResponse = GVWMS.#getAttribute(jsonResponse, 'GetFeatureInfoResponse');
-            if (featureInfoResponse?.Layer) {
-              featureMember = {};
-              const layerName =
-                featureInfoResponse.Layer['@attributes'] && featureInfoResponse.Layer['@attributes'].name
-                  ? (featureInfoResponse.Layer['@attributes'].name as string)
-                  : 'undefined';
-              featureMember['Layer name'] = toJsonObject({ '#text': layerName });
-              if (featureInfoResponse.Layer.Attribute && featureInfoResponse.Layer.Attribute['@attributes']) {
-                const fieldName = featureInfoResponse.Layer.Attribute['@attributes'].name
-                  ? (featureInfoResponse.Layer.Attribute['@attributes'].name as string)
-                  : 'undefined';
-                const fieldValue = featureInfoResponse.Layer.Attribute['@attributes'].value
-                  ? (featureInfoResponse.Layer.Attribute['@attributes'].value as string)
-                  : 'undefined';
-                featureMember[fieldName] = toJsonObject({ '#text': fieldValue });
+            const featureInfoResponse = GVWMS.#getAttribute(jsonResponse, 'FeatureInfoResponse');
+            if (featureInfoResponse) {
+              featureMember = GVWMS.#getAttribute(featureInfoResponse, 'FIELDS');
+              if (featureMember) featureMember = GVWMS.#getAttribute(featureMember, '@attributes');
+            } else {
+              const getFeatureInfoResponse = GVWMS.#getAttribute(jsonResponse, 'GetFeatureInfoResponse');
+              if (getFeatureInfoResponse?.Layer) {
+                featureMember = {};
+                featureMember['Layer name'] = getFeatureInfoResponse?.Layer?.['@attributes']?.name;
+                if (getFeatureInfoResponse?.Layer?.Attribute?.['@attributes']) {
+                  const fieldName = getFeatureInfoResponse.Layer.Attribute['@attributes'].name as string;
+                  const fieldValue = getFeatureInfoResponse.Layer.Attribute['@attributes'].value;
+                  featureMember[fieldName] = fieldValue;
+                }
               }
             }
           }
@@ -440,15 +438,24 @@ export class GVWMS extends AbstractGVRaster {
         if (!key.endsWith('Geometry') && !key.startsWith('@')) {
           const splitedKey = key.split(':');
           const fieldName = splitedKey.slice(-1)[0];
-          if ('#text' in entry[key])
+          if (typeof entry[key] === 'object') {
+            if ('#text' in entry[key])
+              featureInfoEntry.fieldInfo[`${prefix}${prefix ? '.' : ''}${fieldName}`] = {
+                fieldKey: fieldKeyCounter++,
+                value: entry[key]['#text'] as string,
+                dataType: 'string',
+                alias: `${prefix}${prefix ? '.' : ''}${fieldName}`,
+                domain: null,
+              };
+            else createFieldEntries(entry[key], fieldName);
+          } else
             featureInfoEntry.fieldInfo[`${prefix}${prefix ? '.' : ''}${fieldName}`] = {
               fieldKey: fieldKeyCounter++,
-              value: entry[key]['#text'] as string,
+              value: entry[key] as string,
               dataType: 'string',
               alias: `${prefix}${prefix ? '.' : ''}${fieldName}`,
               domain: null,
             };
-          else createFieldEntries(entry[key], fieldName);
         }
       });
     };

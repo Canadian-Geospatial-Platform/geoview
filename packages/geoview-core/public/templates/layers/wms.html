@@ -88,11 +88,7 @@
                           'layerId': 'CURRENT_CONDITIONS',
                           'source': {
                             'featureInfo': {
-                              'queryable': true,
-                              'nameField': { 'en': 'plain_text', 'fr': 'plain_texte' },
-                              'fieldTypes': 'string',
-                              'outfields': { 'en': 'plain_text', 'fr': 'plain_texte' },
-                              'aliasFields':  { 'en': 'Forcast', 'fr': 'Prévision' }
+                              'queryable': true
                             }
                           }
                         },
@@ -142,6 +138,19 @@
                       'source': {
                         'style': 'Radar-Snow_14colors'
                       }
+                    }
+                  ]
+                },
+                {
+                  'geoviewLayerId': 'LYR1',
+                  'geoviewLayerName': { 'en': 'Canada Energy Regulator' },
+                  'metadataAccessPath': {
+                    'en': 'https://maps-cartes.services.geo.ca/server_serveur/services/NRCan/CER_Assessments_EN/MapServer/WMSServer'
+                  },
+                  'geoviewLayerType': 'ogcWms',
+                  'listOfLayerEntryConfig': [
+                    {
+                      'layerId': '0'
                     }
                   ]
                 }
