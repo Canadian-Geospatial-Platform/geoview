@@ -31,6 +31,7 @@ export interface ILayerState {
     getLayer: (layerPath: string) => TypeLegendLayer | undefined;
     getLayerBounds: (layerPath: string) => number[] | undefined;
     getLayerDeleteInProgress: () => boolean;
+    refreshLayer: (layerPath: string) => void;
     setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
     setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
     setHighlightLayer: (layerPath: string) => void;
@@ -99,6 +100,15 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        * Get the LayerDeleteInProgress state.
        */
       getLayerDeleteInProgress: () => get().layerState.layerDeleteInProgress,
+
+      /**
+       * Refresh layer and set states to original values.
+       * @param {string} layerPath - The layer path of the layer to change.
+       */
+      refreshLayer: (layerPath: string): void => {
+        // Redirect to processor.
+        LegendEventProcessor.refreshLayer(get().mapId, layerPath);
+      },
 
       /**
        * Sets the visibility of all items in the layer.
