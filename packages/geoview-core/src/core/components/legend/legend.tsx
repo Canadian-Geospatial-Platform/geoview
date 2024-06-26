@@ -11,6 +11,7 @@ import { getSxClasses } from './legend-styles';
 import { LegendLayer } from './legend-layer';
 import { TypeLegendLayer } from '@/core/components/layers/types';
 import { useFooterPanelHeight } from '@/core/components/common';
+import { CONTAINER_TYPE } from '@/core/utils/constant';
 
 interface LegendType {
   fullWidth?: boolean;
@@ -44,6 +45,8 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
   const getLegendLayerListSize = useMemo(() => {
     return () => {
       let size = 4;
+      // when legend is loaded in appbar size will always be 1.
+      if (containerType === CONTAINER_TYPE.APP_BAR) return 1;
       if (window.innerWidth < theme.breakpoints.values.sm) {
         size = 1;
       } else if (window.innerWidth < theme.breakpoints.values.md) {
@@ -53,7 +56,7 @@ export function Legend({ fullWidth, containerType = 'footerBar' }: LegendType): 
       }
       return size;
     };
-  }, [theme.breakpoints.values.lg, theme.breakpoints.values.md, theme.breakpoints.values.sm]);
+  }, [theme.breakpoints.values.lg, theme.breakpoints.values.md, theme.breakpoints.values.sm, containerType]);
 
   /**
    * Transform the list of the legends into subsets of lists.
