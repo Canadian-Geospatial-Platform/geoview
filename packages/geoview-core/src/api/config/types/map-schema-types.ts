@@ -206,7 +206,7 @@ export type TypeMapViewSettings = {
    * Option to set initial view by extent.
    * Called with [minX, minY, maxX, maxY] extent coordinates. */
   extent?: Extent;
-  /** IDs of layers to use for initial map extent. */
+  /** Geoview layer ID(s) or layer path(s) of layer(s) to use as initial map focus. */
   layerIds?: string[];
 };
 

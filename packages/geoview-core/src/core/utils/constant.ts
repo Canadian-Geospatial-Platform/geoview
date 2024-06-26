@@ -10,6 +10,8 @@ export const GEO_URL_TEXT = {
 // OpenLayer constants
 export const OL_ZOOM_DURATION = 500;
 
+export const OL_ZOOM_MAXZOOM = 11;
+
 // The north pole position use for north arrow marker and get north arrow rotation angle
 // north value (set longitude to be half of Canada extent (142° W, 52° W)) - projection central meridian is -95
 export const NORTH_POLE_POSITION: [number, number] = [90, -95];

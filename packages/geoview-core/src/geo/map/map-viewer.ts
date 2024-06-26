@@ -601,21 +601,6 @@ export class MapViewer {
           logger.logInfo(`Map is ready with ${layersCount} processed layers`, this.mapId);
           logger.logMarkerCheck(`mapReady-${this.mapId}`, `for all ${layersCount} layers to be processed`);
 
-          // Zoom to extents of layers selected in config, if provided.
-          if (this.mapFeaturesConfig.map.viewSettings.initialView?.layerIds) {
-            let layerExtents = this.layer.getExtentOfMultipleLayers(this.mapFeaturesConfig.map.viewSettings.initialView.layerIds);
-            if (layerExtents.includes(Infinity))
-              layerExtents = Projection.transformExtent(
-                CV_MAP_EXTENTS[this.mapFeaturesConfig.map.viewSettings.projection],
-                Projection.PROJECTION_NAMES.LNGLAT,
-                `EPSG:${this.mapFeaturesConfig.map.viewSettings.projection}`
-              );
-            if (layerExtents.length)
-              this.zoomToExtent(layerExtents).catch((error) =>
-                logger.logPromiseFailed('promiseMapLayers in #checkMapLayersProcessed in map-viewer', error)
-              );
-          }
-
           // Is ready
           this.#mapLayersProcessed = true;
           this.#emitMapLayersProcessed();
@@ -652,6 +637,22 @@ export class MapViewer {
           // Log
           logger.logInfo(`Map is ready with ${layersCount} loaded layers`, this.mapId);
           logger.logMarkerCheck(`mapReady-${this.mapId}`, `for all ${layersCount} layers to be loaded`);
+
+          // Zoom to extents of layers selected in config, if provided.
+          if (this.mapFeaturesConfig.map.viewSettings.initialView?.layerIds) {
+            let layerExtents = this.layer.getExtentOfMultipleLayers(this.mapFeaturesConfig.map.viewSettings.initialView.layerIds);
+
+            // If extents have infinity, use default instead
+            if (layerExtents.includes(Infinity))
+              layerExtents = this.convertExtentLngLatToMapProj(CV_MAP_EXTENTS[this.mapFeaturesConfig.map.viewSettings.projection]);
+
+            // Zoom to calculated extent
+            // TODO: Top and bottom padding are not properly applied as this happens while map height is not yet set
+            if (layerExtents.length)
+              this.zoomToExtent(layerExtents).catch((error) =>
+                logger.logPromiseFailed('promiseMapLayers in #checkMapLayersProcessed in map-viewer', error)
+              );
+          }
 
           // Is ready
           this.#mapLayersLoaded = true;

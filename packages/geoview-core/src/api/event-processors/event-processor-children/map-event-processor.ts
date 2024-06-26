@@ -17,7 +17,7 @@ import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-l
 import { Projection } from '@/geo/utils/projection';
 import { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
-import { NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
+import { NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_MAXZOOM, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { whenThisThen } from '@/core/utils/utilities';
 
@@ -699,12 +699,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
    *
    * @param {string} mapId The map id.
    * @param {Extent} extent The extent to zoom to.
-   * @param {FitOptions} options The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
+   * @param {FitOptions} options The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11, duration: 500 }).
    */
   static zoomToExtent(
     mapId: string,
     extent: Extent,
-    options: FitOptions = { padding: [100, 100, 100, 100], maxZoom: 11, duration: 1000 }
+    options: FitOptions = { padding: OL_ZOOM_PADDING, maxZoom: OL_ZOOM_MAXZOOM, duration: OL_ZOOM_DURATION }
   ): Promise<void> {
     // store state will be updated by map event
     this.getMapViewer(mapId).getView().fit(extent, options);
@@ -713,7 +713,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve();
-      }, (options.duration || 1000) + 150);
+      }, (options.duration || OL_ZOOM_DURATION) + 150);
     });
     // The +150 is to make sure the logic before turning these function async remains
     // TODO: Refactor - Check the +150 relevancy and try to remove it by clarifying the reason for its existance
