@@ -176,11 +176,12 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       let [leftHandle, rightHandle] = values;
 
       // If there is no interval set, use 1/10 of min max interval so when user use buttons it will work.
-      if (rightHandle - leftHandle === (minAndMax[1] - minAndMax[0])) {
+      if (rightHandle - leftHandle === minAndMax[1] - minAndMax[0]) {
         sliderDeltaRef.current = (minAndMax[1] - minAndMax[0]) / 10;
         setValues(layerPath, [rightHandle - sliderDeltaRef.current, rightHandle]);
         return;
-      } else if (!sliderDeltaRef.current) {
+      }
+      if (!sliderDeltaRef.current) {
         sliderDeltaRef.current = rightHandle - leftHandle;
       }
 
@@ -224,11 +225,12 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       let [leftHandle, rightHandle] = values;
 
       // If there is no interval set, use 1/10 of min max interval so when user use buttons it will work.
-      if (rightHandle - leftHandle === (minAndMax[1] - minAndMax[0])) {
+      if (rightHandle - leftHandle === minAndMax[1] - minAndMax[0]) {
         sliderDeltaRef.current = (minAndMax[1] - minAndMax[0]) / 10;
         setValues(layerPath, [leftHandle, leftHandle + sliderDeltaRef.current]);
         return;
-      } else if (!sliderDeltaRef.current) {
+      }
+      if (!sliderDeltaRef.current) {
         sliderDeltaRef.current = rightHandle - leftHandle;
       }
 
