@@ -43,6 +43,11 @@ export type TypeVectorLayerGroup = LayerGroup;
 export type TypeVectorLayer = VectorSource<Feature>;
 export type TypeBaseVectorLayer = BaseLayer | TypeVectorLayerGroup | TypeVectorLayer;
 
+const EXCLUDED_HEADERS_LAT = ['latitude', 'lat', 'y', 'ycoord', 'latitude/latitude', 'latitude / latitude'];
+const EXCLUDED_HEADERS_LNG = ['longitude', 'lon', 'x', 'xcoord', 'longitude/longitude', 'longitude / longitude'];
+const EXCLUDED_HEADERS_GEN = ['geometry', 'geom'];
+const EXCLUDED_HEADERS = EXCLUDED_HEADERS_LAT.concat(EXCLUDED_HEADERS_LNG).concat(EXCLUDED_HEADERS_GEN);
+
 /**
  * Determine if layer instance is a vector layer
  *
@@ -166,7 +171,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       xhr.onerror = onError;
       xhr.onload = async () => {
         if (xhr.status === 200) {
-          let features: Feature[] | null;
+          let features: Feature[] | undefined;
           if (layerConfig.schemaTag === CONST_LAYER_TYPES.CSV) {
             // Convert the CSV to features
             features = AbstractGeoViewVector.convertCsv(this.mapId, xhr.responseText, layerConfig as VectorLayerEntryConfig);
@@ -176,6 +181,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
               featureProjection: projection,
               extent,
             }) as Feature[];
+
             // ESRI Feature layer response will have exceededTransferLimit property set to true if there are more features
             if (JSON.parse(xhr.responseText).exceededTransferLimit) {
               // Get response text for additional features
@@ -196,38 +202,52 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
              which is defined as the midnight at the beginning of January 1, 1970, UTC (equivalent to the UNIX epoch). If the date type
              is not a number, we assume it is provided as an ISO UTC string. If not, the result is unpredictable.
           */
-          if (layerConfig.source?.featureInfo?.queryable && features) {
-            const featureInfo = (layerConfig.source as TypeBaseSourceVectorInitialConfig).featureInfo!;
-            const fieldTypes = featureInfo.fieldTypes?.split(',');
-            const fieldNames = getLocalizedValue(featureInfo.outfields, AppEventProcessor.getDisplayLanguage(this.mapId))!.split(',');
-            const dateFields = fieldTypes?.reduce<string[]>((accumulator, entryFieldType, i) => {
-              if (entryFieldType === 'date') accumulator.push(fieldNames![i]);
-              return accumulator;
-            }, []);
-            if (dateFields?.length) {
-              features.forEach((feature) => {
-                dateFields.forEach((fieldName) => {
-                  let fieldValue = feature.get(fieldName);
-                  if (typeof fieldValue === 'number') {
-                    let dateString = DateMgt.convertMilisecondsToDate(fieldValue);
-                    dateString = DateMgt.applyInputDateFormat(dateString, this.serverDateFragmentsOrder);
-                    (feature as Feature).set(fieldName, DateMgt.convertToMilliseconds(dateString), true);
-                  } else {
-                    if (!this.serverDateFragmentsOrder)
-                      this.serverDateFragmentsOrder = DateMgt.getDateFragmentsOrder(DateMgt.deduceDateFormat(fieldValue));
-                    fieldValue = DateMgt.applyInputDateFormat(fieldValue, this.serverDateFragmentsOrder);
-                    (feature as Feature).set(fieldName, DateMgt.convertToMilliseconds(fieldValue), true);
-                  }
-                });
-              });
-            }
-          }
           if (features) {
+            // If there's no feature info, build it from features
+            if (!layerConfig.source?.featureInfo && features.length > 0) {
+              // Grab first feature as example
+              const feature = features[0];
+              const headers = Object.keys(feature.getProperties());
+              const values = Object.values(feature.getProperties());
+              AbstractGeoViewVector.#processFeatureInfoConfig(headers, values, EXCLUDED_HEADERS, layerConfig as VectorLayerEntryConfig);
+            }
+
+            // If feature info is queryable
+            if (layerConfig.source?.featureInfo?.queryable) {
+              const featureInfo = (layerConfig.source as TypeBaseSourceVectorInitialConfig).featureInfo!;
+              const fieldTypes = featureInfo.fieldTypes?.split(',');
+              const fieldNames = getLocalizedValue(featureInfo.outfields, AppEventProcessor.getDisplayLanguage(this.mapId));
+              const theFieldNames = fieldNames?.split(',');
+              const dateFields = fieldTypes?.reduce<string[]>((accumulator, entryFieldType, i) => {
+                if (entryFieldType === 'date') accumulator.push(theFieldNames![i]);
+                return accumulator;
+              }, []);
+              if (dateFields?.length) {
+                features.forEach((feature) => {
+                  dateFields.forEach((fieldName) => {
+                    let fieldValue = feature.get(fieldName);
+                    if (typeof fieldValue === 'number') {
+                      let dateString = DateMgt.convertMilisecondsToDate(fieldValue);
+                      dateString = DateMgt.applyInputDateFormat(dateString, this.serverDateFragmentsOrder);
+                      (feature as Feature).set(fieldName, DateMgt.convertToMilliseconds(dateString), true);
+                    } else {
+                      if (!this.serverDateFragmentsOrder)
+                        this.serverDateFragmentsOrder = DateMgt.getDateFragmentsOrder(DateMgt.deduceDateFormat(fieldValue));
+                      fieldValue = DateMgt.applyInputDateFormat(fieldValue, this.serverDateFragmentsOrder);
+                      (feature as Feature).set(fieldName, DateMgt.convertToMilliseconds(fieldValue), true);
+                    }
+                  });
+                });
+              }
+            }
+
+            // Add the features to the source
             vectorSource.addFeatures(features);
-            if (success) success(features as Feature[]);
-            const layer = this.getOLLayer(layerConfig.layerPath);
-            layer?.changed();
           }
+
+          if (success) success(features as Feature[]);
+          const layer = this.getOLLayer(layerConfig.layerPath);
+          layer?.changed();
         } else {
           onError();
         }
@@ -532,14 +552,12 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {Feature[]} The array of features.
    */
-  static convertCsv(mapId: string, csvData: string, layerConfig: VectorLayerEntryConfig): Feature[] | null {
+  static convertCsv(mapId: string, csvData: string, layerConfig: VectorLayerEntryConfig): Feature[] | undefined {
     // GV: This function and the below private static ones used to be in the CSV class directly, but something wasn't working with a 'Private element not accessible' error.
     // GV: After moving the code to the mother class, it worked. It'll remain here for now until the config refactoring can take care of it in its re-writing
 
     const inProjection: ProjectionLike = layerConfig.source!.dataProjection || Projection.PROJECTION_NAMES.LNGLAT;
     const outProjection: ProjectionLike = MapEventProcessor.getMapViewer(mapId).getProjection().getCode();
-    const latList = ['latitude', 'lat', 'y', 'ycoord', 'latitude/latitude', 'latitude / latitude'];
-    const lonList = ['longitude', 'lon', 'x', 'xcoord', 'longitude/longitude', 'longitude / longitude'];
 
     const features: Feature[] = [];
     let latIndex: number | undefined;
@@ -547,8 +565,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     const csvRows = AbstractGeoViewVector.#csvStringToArray(csvData, layerConfig.source!.separator || ',');
     const headers: string[] = csvRows[0];
     for (let i = 0; i < headers.length; i++) {
-      if (latList.includes(headers[i].toLowerCase())) latIndex = i;
-      if (lonList.includes(headers[i].toLowerCase())) lonIndex = i;
+      if (EXCLUDED_HEADERS_LAT.includes(headers[i].toLowerCase())) latIndex = i;
+      if (EXCLUDED_HEADERS_LNG.includes(headers[i].toLowerCase())) lonIndex = i;
     }
 
     if (latIndex === undefined || lonIndex === undefined) {
@@ -557,10 +575,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       // TODO: find a more centralized way to trap error and display message
       api.maps[mapId].notifications.showError(errorMsg);
       layerConfig.layerStatus = 'error';
-      return null;
+      return undefined;
     }
 
-    AbstractGeoViewVector.#processFeatureInfoConfig(headers, csvRows[1], [latIndex, lonIndex], layerConfig);
+    AbstractGeoViewVector.#processFeatureInfoConfig(headers, csvRows[1], EXCLUDED_HEADERS, layerConfig);
 
     for (let i = 1; i < csvRows.length; i++) {
       const currentRow = csvRows[i];
@@ -619,7 +637,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   static #processFeatureInfoConfig(
     headers: string[],
     firstRow: string[],
-    lonLatIndices: number[],
+    excludedHeaders: string[],
     layerConfig: VectorLayerEntryConfig
   ): void {
     if (!layerConfig.source) layerConfig.source = {};
@@ -634,9 +652,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         layerConfig.source.featureInfo.fieldTypes = '';
       }
       if (processAliasFields) layerConfig.source.featureInfo.aliasFields = { en: '' };
-      headers.forEach((header) => {
-        const index = headers.indexOf(header);
-        if (index !== lonLatIndices[0] && index !== lonLatIndices[1]) {
+      headers.forEach((header, index) => {
+        // If not excluded
+        if (!excludedHeaders.includes(header)) {
           let type = 'string';
           if (firstRow[index] && firstRow[index] !== '' && Number(firstRow[index])) type = 'number';
           if (processOutField) {
