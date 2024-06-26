@@ -1,34 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sandbox - Canadian Geospatial Platform Viewer</title>
-  <link rel="shortcut icon" href="./favicon.ico" />
-  <meta name="msapplication-TileColor" content="#da532c" />
-  <meta name="msapplication-config" content="./img/browserconfig.xml" />
-  <meta name="theme-color" content="#ffffff" />
-  <meta name="msapplication-TileColor" content="#da532c" />
-  <meta name="theme-color" content="#ffffff" />
-  <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"
-    type="text/css" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-  <link rel="stylesheet" href="css/style.css" />
-
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>
-      <%= htmlWebpackPlugin.options.title %>
-    </title>
+    <title>Sandbox - Canadian Geospatial Platform Viewer</title>
     <link rel="shortcut icon" href="./favicon.ico" />
     <meta name="msapplication-TileColor" content="#da532c" />
     <meta name="msapplication-config" content="./img/browserconfig.xml" />
     <meta name="theme-color" content="#ffffff" />
     <meta name="msapplication-TileColor" content="#da532c" />
     <meta name="theme-color" content="#ffffff" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     <link rel="stylesheet" href="css/style.css" />
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>
+    <%= htmlWebpackPlugin.options.title %>
+  </title>
+  <link rel="shortcut icon" href="./favicon.ico" />
+  <meta name="msapplication-TileColor" content="#da532c" />
+  <meta name="msapplication-config" content="./img/browserconfig.xml" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="msapplication-TileColor" content="#da532c" />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="stylesheet" href="css/style.css" />
     <style>
       .editor {
         display: inline-flex;
@@ -82,38 +80,38 @@
     </style>
   </head>
 
-<body>
-  <div class="header-table">
-    <table>
-      <tbody>
-        <tr>
-          <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-          <td class="header-title">
-            <h1><strong>Sandbox</strong></h1>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <table>
-      <tbody>
-        <tr>
-          <td><a href="./index.html">Main</a><br /></td>
-        </tr>
-      </tbody>
-    </table>
-    <table>
-      <tbody>
-        <tr>
-          <td>This page is used to test map configuration.</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="editor">
-    <div class="line-numbers">
-      <span></span>
+  <body>
+    <div class="header-table">
+      <table>
+        <tbody>
+          <tr>
+            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
+            <td class="header-title">
+              <h1><strong>Sandbox</strong></h1>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <table>
+        <tbody>
+          <tr>
+            <td><a href="./index.html">Main</a><br /></td>
+          </tr>
+        </tbody>
+      </table>
+      <table>
+        <tbody>
+          <tr>
+            <td>This page is used to test map configuration.</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-    <textarea id="configGeoview" name="configuration" rows="30" cols="150">
+    <div class="editor">
+      <div class="line-numbers">
+        <span></span>
+      </div>
+      <textarea id="configGeoview" name="configuration" rows="30" cols="150">
 {
   'map': {
     'interaction': 'dynamic',
@@ -153,182 +151,182 @@
   'theme': 'geo.ca'
 }
       </textarea>
-  </div>
-  <div>
-    <button id="validateConfig" style="margin: 10px">Validate</button>
-    <button id="createMap" style="margin: 10px">Create Map</button>
-    <button id="deleteMap" style="margin: 10px">Delete map</button>
-    <span id="validationMessage" style="margin: 10px">File not validate...</span>
-  </div>
-
-  <div>Create Map with custom size</div>
-  <div class="selector-container">
-    <p>Map Width:</p>
-    <div class="selector">
-      <input type="text" placeholder="Width of the map" id="mapWidth" />
     </div>
-    <p>Map height:</p>
-    <div class="selector">
-      <input type="text" placeholder="Height of the map" id="mapHeight" />
+    <div>
+      <button id="validateConfig" style="margin: 10px">Validate</button>
+      <button id="createMap" style="margin: 10px">Create Map</button>
+      <button id="deleteMap" style="margin: 10px">Delete map</button>
+      <span id="validationMessage" style="margin: 10px">File not validate...</span>
     </div>
 
-    <div class="selector">
-      <button type="button" id="applyMapSize" disabled>Apply Size</button>
+    <div>Create Map with custom size</div>
+    <div class="selector-container">
+      <p>Map Width:</p>
+      <div class="selector">
+        <input type="text" placeholder="Width of the map" id="mapWidth" />
+      </div>
+      <p>Map height:</p>
+      <div class="selector">
+        <input type="text" placeholder="Height of the map" id="mapHeight" />
+      </div>
+
+      <div class="selector">
+        <button type="button" id="applyMapSize" disabled>Apply Size</button>
+      </div>
     </div>
-  </div>
-  <div class="map-title-holder">
-    <h4 id="HLCONF1">Sanbox Map</h4>
-    <a class="ref-link" href="#top">Top</a>
-  </div>
-  <div id="mapSection">
-    <div id="sandboxMap"></div>
-  </div>
-  <p>This map loads it's configurations from the text area.</p>
-  <hr />
+    <div class="map-title-holder">
+      <h4 id="HLCONF1">Sanbox Map</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div id="mapSection">
+      <div id="sandboxMap"></div>
+    </div>
+    <p>This map loads it's configurations from the text area.</p>
+    <hr />
 
-  <button type="button" class="collapsible">Code Snippet</button>
-  <pre id="codeSnippet" class="panel"></pre>
+    <button type="button" class="collapsible">Code Snippet</button>
+    <pre id="codeSnippet" class="panel"></pre>
 
-  <script src="codedoc.js"></script>
+    <script src="codedoc.js"></script>
 
-  <script>
-    const isValid = false;
+    <script>
+      const isValid = false;
 
-    // Validate Button============================================================================================================
-    const validateJSONButton = document.getElementById('validateConfig');
+      // Validate Button============================================================================================================
+      const validateJSONButton = document.getElementById('validateConfig');
 
-    // add an event listener when a button is clicked
-    validateJSONButton.addEventListener('click', function (e) {
-      // get message element
-      const message = document.getElementById('validationMessage');
+      // add an event listener when a button is clicked
+      validateJSONButton.addEventListener('click', function (e) {
+        // get message element
+        const message = document.getElementById('validationMessage');
 
-      try {
-        // get config and test if JSON is valid
-        const configArea = document.getElementById('configGeoview');
-        const configJSON = JSON.parse(configArea.value.replaceAll(`'`, `"`));
+        try {
+          // get config and test if JSON is valid
+          const configArea = document.getElementById('configGeoview');
+          const configJSON = JSON.parse(configArea.value.replaceAll(`'`, `"`));
 
-        const validConfig = cgpv.api.configApi.createMapConfig(document.getElementById('configGeoview').value.replaceAll("'", '"'), 'en');
+          const validConfig = cgpv.api.configApi.createMapConfig(document.getElementById('configGeoview').value.replaceAll("'", '"'), 'en');
 
-        // set class and message
-        message.classList.add('config-json-valid');
-        message.classList.remove('config-error');
-        message.innerHTML = 'File seems valid, see console for details...';
-        document.getElementById('createMap').disabled = 0;
-      } catch (e) {
-        // set class and message
-        message.classList.add('config-error');
-        message.classList.remove('config-json-valid');
-        message.innerHTML = cgpv.api.utilities.core.escapeRegExp(e.message);
-        document.getElementById('createMap').disabled = true;
+          // set class and message
+          message.classList.add('config-json-valid');
+          message.classList.remove('config-error');
+          message.innerHTML = 'File seems valid, see console for details...';
+          document.getElementById('createMap').disabled = 0;
+        } catch (e) {
+          // set class and message
+          message.classList.add('config-error');
+          message.classList.remove('config-json-valid');
+          message.innerHTML = cgpv.api.utilities.core.escapeRegExp(e.message);
+          document.getElementById('createMap').disabled = true;
+        }
+      });
+
+      // Create Button============================================================================================================
+      const createMapButton = document.getElementById('createMap');
+
+      // add an event listener when a button is clicked
+      createMapButton.addEventListener('click', function (e) {
+        // delete old map
+        cgpv.api.maps['sandboxMap']?.remove(true);
+
+        // create new map in a new dom node
+        const newDiv = document.createElement('div');
+        const a = document.createAttribute('id');
+        a.value = 'sandboxMap';
+        newDiv.setAttributeNode(a);
+
+        const mapWidth = `${document.getElementById('mapWidth')?.value}px`;
+        const mapHeight = `${document.getElementById('mapHeight')?.value}px`;
+
+        newDiv.style.width = mapWidth;
+        newDiv.style.minHeight = mapHeight;
+
+        newDiv.dataset.height = mapHeight;
+
+        document.getElementById('mapSection').appendChild(newDiv);
+
+        // create map
+        // TODO: the delete has a timeout so we need to wait before trying to recreate the map...
+        // TO.DOCONT: this should be cleaner
+        setTimeout(() => {
+          cgpv.api.createMapFromConfig('sandboxMap', document.getElementById('configGeoview').value);
+        }, 1500);
+      });
+
+      // Map Size=====================Start==================================
+      const applyMapSizeBtn = document.getElementById('applyMapSize');
+      const mapWidthInput = document.getElementById('mapWidth');
+      const mapHeightInput = document.getElementById('mapHeight');
+
+      applyMapSizeBtn.addEventListener('click', () => {
+        const mapWidth = document.getElementById('mapWidth')?.value;
+        const mapHeight = document.getElementById('mapHeight')?.value;
+
+        /**
+         * ===========================================================================
+         *  MIN WIDTH and MIN HEIGHT should be greater than 0
+         * ===========================================================================
+         */
+        if (parseInt(mapWidth) > 0 && parseInt(mapHeight) > 0) {
+          createMapButton.dispatchEvent(new Event('click'));
+        }
+      });
+
+      mapWidthInput.addEventListener('input', () => {
+        applyMapSizeBtn.removeAttribute('disabled');
+      });
+
+      mapHeightInput.addEventListener('input', () => {
+        applyMapSizeBtn.removeAttribute('disabled');
+      });
+
+      const widthInput = document.getElementById('mapWidth');
+      const heightInput = document.getElementById('mapHeight');
+
+      // Set the map width input value based on map section width.
+      if (widthInput) {
+        const mapSection = document.getElementById('mapSection');
+        widthInput.value = mapSection.clientWidth;
       }
-    });
 
-    // Create Button============================================================================================================
-    const createMapButton = document.getElementById('createMap');
+      document.getElementById('mapHeight').value = '900';
 
-    // add an event listener when a button is clicked
-    createMapButton.addEventListener('click', function (e) {
-      // delete old map
-      cgpv.api.maps['sandboxMap']?.remove(true);
-
-      // create new map in a new dom node
-      const newDiv = document.createElement('div');
-      const a = document.createAttribute('id');
-      a.value = 'sandboxMap';
-      newDiv.setAttributeNode(a);
-
-      const mapWidth = `${document.getElementById('mapWidth')?.value}px`;
-      const mapHeight = `${document.getElementById('mapHeight')?.value}px`;
-
-      newDiv.style.width = mapWidth;
-      newDiv.style.minHeight = mapHeight;
-
-      newDiv.dataset.height = mapHeight;
-
-      document.getElementById('mapSection').appendChild(newDiv);
-
-      // create map
-      // TODO: the delete has a timeout so we need to wait before trying to recreate the map...
-      // TO.DOCONT: this should be cleaner
-      setTimeout(() => {
-        cgpv.api.createMapFromConfig('sandboxMap', document.getElementById('configGeoview').value);
-      }, 1500);
-    });
-
-    // Map Size=====================Start==================================
-    const applyMapSizeBtn = document.getElementById('applyMapSize');
-    const mapWidthInput = document.getElementById('mapWidth');
-    const mapHeightInput = document.getElementById('mapHeight');
-
-    applyMapSizeBtn.addEventListener('click', () => {
-      const mapWidth = document.getElementById('mapWidth')?.value;
-      const mapHeight = document.getElementById('mapHeight')?.value;
-
-      /**
-       * ===========================================================================
-       *  MIN WIDTH and MIN HEIGHT should be greater than 0
-       * ===========================================================================
-       */
-      if (parseInt(mapWidth) > 0 && parseInt(mapHeight) > 0) {
-        createMapButton.dispatchEvent(new Event('click'));
+      const sandboxMap = document.getElementById('sandboxMap');
+      if (sandboxMap) {
+        sandboxMap.dataset.height = '900px';
       }
-    });
 
-    mapWidthInput.addEventListener('input', () => {
-      applyMapSizeBtn.removeAttribute('disabled');
-    });
+      // Map Size=====================End==================================
 
-    mapHeightInput.addEventListener('input', () => {
-      applyMapSizeBtn.removeAttribute('disabled');
-    });
+      const deleteMapButton = document.getElementById('deleteMap');
 
-    const widthInput = document.getElementById('mapWidth');
-    const heightInput = document.getElementById('mapHeight');
+      // add an event listener when a button is clicked
+      deleteMapButton.addEventListener('click', function (e) {
+        // Delete the map
+        cgpv.api.maps['sandboxMap'].remove(true);
+      });
 
-    // Set the map width input value based on map section width.
-    if (widthInput) {
-      const mapSection = document.getElementById('mapSection');
-      widthInput.value = mapSection.clientWidth;
-    }
+      // Editor script section===================================================================================================
+      const textarea = document.querySelector('textarea');
+      const lineNumbers = document.querySelector('.line-numbers');
 
-    document.getElementById('mapHeight').value = '900';
-
-    const sandboxMap = document.getElementById('sandboxMap');
-    if (sandboxMap) {
-      sandboxMap.dataset.height = '900px';
-    }
-
-    // Map Size=====================End==================================
-
-    const deleteMapButton = document.getElementById('deleteMap');
-
-    // add an event listener when a button is clicked
-    deleteMapButton.addEventListener('click', function (e) {
-      // Delete the map
-      cgpv.api.maps['sandboxMap'].remove(true);
-    });
-
-    // Editor script section===================================================================================================
-    const textarea = document.querySelector('textarea');
-    const lineNumbers = document.querySelector('.line-numbers');
-
-    // set default number of lines
-    const numberOfLines = textarea.value.split('\n').length;
-    lineNumbers.innerHTML = Array(numberOfLines).fill('<span></span>').join('');
-
-    textarea.addEventListener('keyup', (event) => {
-      const numberOfLines = event.target.value.split('\n').length;
+      // set default number of lines
+      const numberOfLines = textarea.value.split('\n').length;
       lineNumbers.innerHTML = Array(numberOfLines).fill('<span></span>').join('');
-    });
 
-    textarea.addEventListener('input', (event) => {
-      document.getElementById('createMap').disabled = true;
-    });
+      textarea.addEventListener('keyup', (event) => {
+        const numberOfLines = event.target.value.split('\n').length;
+        lineNumbers.innerHTML = Array(numberOfLines).fill('<span></span>').join('');
+      });
 
-    // Create default map==========================================================================================================
-    cgpv.api.createMapFromConfig(
-      'sandboxMap',
-      `{
+      textarea.addEventListener('input', (event) => {
+        document.getElementById('createMap').disabled = true;
+      });
+
+      // Create default map==========================================================================================================
+      cgpv.api.createMapFromConfig(
+        'sandboxMap',
+        `{
               'map': {
                 'interaction': 'dynamic',
                 'viewSettings': {
@@ -357,33 +355,27 @@
                   ]
                 }]
               },
-              'appBar': {
-'tabs': {
-'core': ['export']
-}
-},
               'components': ['overview-map'],
               'footerBar': {
                 'tabs': {
-                  'core': [ 'layers', 'details', 'data-table']
+                  'core': ['legend', 'layers', 'details', 'data-table']
                 }
               },
               'corePackages': [],
               'theme': 'geo.ca'
             }`
-    );
+      );
 
-    // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-    cgpv.init((mapId) => {
-      // write some code ...
-    });
+      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init((mapId) => {
+        // write some code ...
+      });
 
-    // create snippets
-    window.addEventListener('load', () => {
-      createCodeSnippet();
-      createConfigSnippet();
-    });
-  </script>
-</body>
-
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });
+    </script>
+  </body>
 </html>
