@@ -48,6 +48,11 @@ export const getSxClasses = (theme: Theme): any => ({
       fontSize: theme.palette.geoViewFontSize.md,
       fontWeight: 'bold',
       borderBottom: '2px solid',
+
+      '&.hasScaleLine::before, &.hasScaleLine::after': {
+        backgroundColor: `${theme.palette.geoViewColor.grey.dark[900]} !important`,
+        width: '2px !important',
+      }
     },
 
     '&.hasScaleLine::before, &.hasScaleLine::after': {
