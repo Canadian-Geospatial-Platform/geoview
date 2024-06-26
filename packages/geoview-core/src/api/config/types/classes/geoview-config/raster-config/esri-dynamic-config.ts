@@ -4,7 +4,7 @@ import { EsriDynamicLayerEntryConfig } from '@config/types/classes/sub-layer-con
 import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-layer-entry-config';
 import { TypeJsonObject } from '@config/types/config-types';
 import { TypeDisplayLanguage, TypeLayerInitialSettings } from '@config/types/map-schema-types';
-import { isvalidComparedToSchema } from '@config/utils';
+import { isvalidComparedToInputSchema, isvalidComparedToInternalSchema } from '@config/utils';
 import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
 import { AbstractGeoviewEsriLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-esri-layer-config';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
@@ -28,8 +28,11 @@ export class EsriDynamicLayerConfig extends AbstractGeoviewEsriLayerConfig {
    */
   constructor(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, mapFeatureConfig?: MapFeatureConfig) {
     super(layerConfig, language, mapFeatureConfig);
-    // Input schema validation.
-    if (!isvalidComparedToSchema(this.geoviewLayerSchema, layerConfig)) this.setErrorDetectedFlag();
+
+    // validate the structure
+    if (!isvalidComparedToInputSchema(this.geoviewLayerSchema, layerConfig)) this.setErrorDetectedFlag();
+    if (!isvalidComparedToInternalSchema(this.geoviewLayerSchema, this, true)) this.setErrorDetectedFlag();
+    // validate the values.
     this.validate();
   }
 
