@@ -55,9 +55,9 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * The class constructor.
-   * @param {TypeJsonObject} layerConfig - The layer configuration we want to instanciate.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
    */
-  protected constructor(layerConfig: TypeJsonObject) {
+  protected constructor(layerConfig: AbstractBaseLayerEntryConfig) {
     super(layerConfig);
     // Attribute 'style' must exist in layerConfig even if it is undefined
     if (!('style' in this)) this.style = undefined;

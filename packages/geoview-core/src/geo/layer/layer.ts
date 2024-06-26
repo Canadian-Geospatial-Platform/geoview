@@ -1034,7 +1034,7 @@ export class LayerApi {
       const geoviewLayer = this.getGeoviewLayerHybrid(layerConfig.layerPath);
 
       // If the layer is loaded AND flag is true to use time dimension, continue
-      if (geoviewLayer && geoviewLayer.getIsTimeAware()) {
+      if ((geoviewLayer instanceof AbstractGeoViewLayer || geoviewLayer instanceof AbstractGVLayer) && geoviewLayer.getIsTimeAware()) {
         // Check and add time slider layer when needed
         TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.getMapId(), layerConfig);
       }

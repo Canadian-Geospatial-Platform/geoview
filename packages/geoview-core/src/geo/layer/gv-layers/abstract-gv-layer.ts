@@ -124,7 +124,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * If the source isn't ready, it registers to the source ready event to pursue initialization of the layer once its source is ready.
    */
   init(): void {
-    // Activation of the load end listeners
+    // Activation of the load end/error listeners
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (this.#olSource as any).once(['featuresloadend', 'imageloadend', 'tileloadend'], this.onLoaded.bind(this));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

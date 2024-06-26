@@ -353,7 +353,7 @@ export class MapViewer {
       const degreeRotation = this.getNorthArrowAngle();
 
       // Get the north visibility
-      const isNorthVisible = this.checkNorth();
+      const isNorthVisible = this.getNorthVisibility();
 
       // Get the scale information
       const scale = await MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
@@ -1375,11 +1375,11 @@ export class MapViewer {
   // #endregion
 
   /**
-   * Check if north is visible. This is not a perfect solution and is more a work around
+   * Gets if north is visible. This is not a perfect solution and is more a work around
    *
    * @returns {boolean} true if visible, false otherwise
    */
-  checkNorth(): boolean {
+  getNorthVisibility(): boolean {
     // Check the container value for top middle of the screen
     // Convert this value to a lat long coordinate
     const pointXY = [this.map.getSize()![0] / 2, 1];
