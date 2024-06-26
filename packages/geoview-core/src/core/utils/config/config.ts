@@ -13,6 +13,7 @@ import { logger } from '@/core/utils/logger';
 
 import { ConfigValidation } from '@/core/utils/config/config-validation';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
+import { TypeDisplayLanguage } from '@/api/config/types/map-schema-types';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -37,9 +38,9 @@ export class Config {
    *
    * @returns {Config} An instance of the Config class.
    */
-  constructor() {
+  constructor(language: TypeDisplayLanguage) {
     // Instanciate the configuration validator.
-    this.configValidation = new ConfigValidation();
+    this.configValidation = new ConfigValidation(language);
   }
 
   /** ***************************************************************************************************************************
