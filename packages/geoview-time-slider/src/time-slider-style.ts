@@ -13,12 +13,4 @@ export const getSxClasses = (theme: Theme): any => ({
     marginBottom: '9px',
     boxShadow: '0px 12px 9px -13px #E0E0E0',
   },
-  timeSliderInstructionsTitle: {
-    fontSize: theme.palette.geoViewFontSize.lg,
-    fontWeight: '600',
-    lineHeight: '1.5em',
-  },
-  timeSliderInstructionsBody: {
-    fontSize: '1rem',
-  },
 });
