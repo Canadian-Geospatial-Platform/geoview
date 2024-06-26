@@ -144,6 +144,8 @@ export default function ExportModal(): JSX.Element {
             .catch((error: Error) => {
               logger.logError('Error occured while converting legend to image', error);
             });
+        } else {
+          setIsLegendLoading(false);
         }
       }, 500);
     }
