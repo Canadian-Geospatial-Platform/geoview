@@ -17,7 +17,7 @@ import cloneDeep from 'lodash/cloneDeep';
 
 import { TypeLocalizedString } from '@config/types/map-schema-types';
 
-import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
+import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import {
   AbstractGeoViewLayer,
   CONST_LAYER_TYPES,
@@ -736,6 +736,7 @@ export class WMS extends AbstractGeoViewRaster {
       const featureInfoFormat = this.metadata?.Capability?.Request?.GetFeatureInfo?.Format as TypeJsonArray;
       if (featureInfoFormat)
         if (featureInfoFormat.includes('text/xml' as TypeJsonObject)) infoFormat = 'text/xml';
+        else if (featureInfoFormat.includes('application/json' as TypeJsonObject)) infoFormat = 'application/json';
         else if (featureInfoFormat.includes('text/plain' as TypeJsonObject)) infoFormat = 'text/plain';
         else throw new Error('Parameter info_format of GetFeatureInfo only support text/xml and text/plain for WMS services.');
 
@@ -754,26 +755,31 @@ export class WMS extends AbstractGeoViewRaster {
           const featureCollection = WMS.#getAttribute(jsonResponse, 'FeatureCollection');
           if (featureCollection) featureMember = WMS.#getAttribute(featureCollection, 'featureMember');
           else {
-            const featureInfoResponse = WMS.#getAttribute(jsonResponse, 'GetFeatureInfoResponse');
-            if (featureInfoResponse?.Layer) {
-              featureMember = {};
-              const layerName =
-                featureInfoResponse.Layer['@attributes'] && featureInfoResponse.Layer['@attributes'].name
-                  ? (featureInfoResponse.Layer['@attributes'].name as string)
-                  : 'undefined';
-              featureMember['Layer name'] = toJsonObject({ '#text': layerName });
-              if (featureInfoResponse.Layer.Attribute && featureInfoResponse.Layer.Attribute['@attributes']) {
-                const fieldName = featureInfoResponse.Layer.Attribute['@attributes'].name
-                  ? (featureInfoResponse.Layer.Attribute['@attributes'].name as string)
-                  : 'undefined';
-                const fieldValue = featureInfoResponse.Layer.Attribute['@attributes'].value
-                  ? (featureInfoResponse.Layer.Attribute['@attributes'].value as string)
-                  : 'undefined';
-                featureMember[fieldName] = toJsonObject({ '#text': fieldValue });
+            const featureInfoResponse = WMS.#getAttribute(jsonResponse, 'FeatureInfoResponse');
+            if (featureInfoResponse) {
+              featureMember = WMS.#getAttribute(featureInfoResponse, 'FIELDS');
+              if (featureMember) featureMember = WMS.#getAttribute(featureMember, '@attributes');
+            } else {
+              const getFeatureInfoResponse = WMS.#getAttribute(jsonResponse, 'GetFeatureInfoResponse');
+              if (getFeatureInfoResponse?.Layer) {
+                featureMember = {};
+                featureMember['Layer name'] = getFeatureInfoResponse?.Layer?.['@attributes']?.name;
+                if (getFeatureInfoResponse?.Layer?.Attribute?.['@attributes']) {
+                  const fieldName = getFeatureInfoResponse.Layer.Attribute['@attributes'].name as string;
+                  const fieldValue = getFeatureInfoResponse.Layer.Attribute['@attributes'].value;
+                  featureMember[fieldName] = fieldValue;
+                }
               }
             }
           }
-        } else featureMember = { plain_text: { '#text': response.data } };
+        } else if (infoFormat === 'application/json') {
+          if (response.data.type === 'FeatureCollection') {
+            const { features } = response.data as { features: TypeJsonArray };
+            featureMember = features[0]?.properties;
+          }
+        } else {
+          featureMember = { plain_text: { '#text': response.data } };
+        }
         if (featureMember) {
           const featureInfoResult = this.#formatWmsFeatureInfoResult(featureMember, layerConfig, clickCoordinate);
           return featureInfoResult;
@@ -1034,15 +1040,24 @@ export class WMS extends AbstractGeoViewRaster {
         if (!key.endsWith('Geometry') && !key.startsWith('@')) {
           const splitedKey = key.split(':');
           const fieldName = splitedKey.slice(-1)[0];
-          if ('#text' in entry[key])
+          if (typeof entry[key] === 'object') {
+            if ('#text' in entry[key])
+              featureInfoEntry.fieldInfo[`${prefix}${prefix ? '.' : ''}${fieldName}`] = {
+                fieldKey: fieldKeyCounter++,
+                value: entry[key]['#text'] as string,
+                dataType: 'string',
+                alias: `${prefix}${prefix ? '.' : ''}${fieldName}`,
+                domain: null,
+              };
+            else createFieldEntries(entry[key], fieldName);
+          } else
             featureInfoEntry.fieldInfo[`${prefix}${prefix ? '.' : ''}${fieldName}`] = {
               fieldKey: fieldKeyCounter++,
-              value: entry[key]['#text'] as string,
+              value: entry[key] as string,
               dataType: 'string',
               alias: `${prefix}${prefix ? '.' : ''}${fieldName}`,
               domain: null,
             };
-          else createFieldEntries(entry[key], fieldName);
         }
       });
     };
