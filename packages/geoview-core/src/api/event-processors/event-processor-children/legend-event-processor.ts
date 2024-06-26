@@ -422,6 +422,34 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Refresh layer and reset states.
+   * @param {string} mapId - The ID of the map.
+   * @param {string} layerPath - The layer path of the layer to refresh.
+   */
+  static refreshLayer(mapId: string, layerPath: string): void {
+    // Get base layer through layer API
+    const baseLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getOLLayer(layerPath);
+
+    // Refresh layer through layer API
+    if (baseLayer) MapEventProcessor.getMapViewerLayerAPI(mapId).refreshBaseLayer(baseLayer);
+
+    // TODO Update after refactor, layerEntryConfig will not know initial settings
+    const layerEntryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath);
+
+    // If layer is group, refresh child layers
+    if (layerEntryConfig && layerEntryIsGroupLayer(layerEntryConfig))
+      layerEntryConfig.listOfLayerEntryConfig.forEach((entryConfig) => this.refreshLayer(mapId, entryConfig.layerPath));
+
+    // Reset layer states to original values
+    const opacity = layerEntryConfig?.initialSettings.states?.opacity || 1;
+    const visibility = layerEntryConfig?.initialSettings.states?.visible || true;
+    LegendEventProcessor.setLayerOpacity(mapId, layerPath, opacity);
+    MapEventProcessor.setOrToggleMapLayerVisibility(mapId, layerPath, visibility);
+
+    if (visibility) LegendEventProcessor.setAllItemsVisibility(mapId, layerPath, visibility);
+  }
+
+  /**
    * Set visibility of an item in legend layers.
    * @param {string} mapId - The ID of the map.
    * @param {TypeLegendItem} item - The item to change.
