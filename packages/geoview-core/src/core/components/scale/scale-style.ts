@@ -52,7 +52,7 @@ export const getSxClasses = (theme: Theme): any => ({
       '&.hasScaleLine::before, &.hasScaleLine::after': {
         backgroundColor: `${theme.palette.geoViewColor.grey.dark[900]} !important`,
         width: '2px !important',
-      }
+      },
     },
 
     '&.hasScaleLine::before, &.hasScaleLine::after': {
