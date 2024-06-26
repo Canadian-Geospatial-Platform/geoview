@@ -89,13 +89,8 @@
         ]
       },
       {
-        "geoviewLayerId": "swipe7",
-        "geoviewLayerType": "geoCore",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "ccc75c12-5acc-4a6a-959f-ef6f621147b9"
-          }
-        ]
+        "geoviewLayerId": "ccc75c12-5acc-4a6a-959f-ef6f621147b9",
+        "geoviewLayerType": "geoCore"
       },
       {
         "geoviewLayerId": "swipe0",
