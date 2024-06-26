@@ -58,6 +58,7 @@ export const getShellSxClasses = (theme: Theme): any => ({
 
     '& *::-webkit-scrollbar': {
       width: '8px',
+      height: '8px',
     },
     '& *::-webkit-scrollbar-track': {
       background: theme.palette.geoViewColor.bgColor.darken(0.5, 0.5),
