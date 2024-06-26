@@ -178,7 +178,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
             }) as Feature[];
             // ESRI Feature layer response will have exceededTransferLimit property set to true if there are more features
             // GV Some layers will return XML, skip
-            if (xhr.responseText.search("<?xml version='1.0'") === -1 && JSON.parse(xhr.responseText).exceededTransferLimit) {
+            if (xhr.responseText.search('<?xml ') === -1 && JSON.parse(xhr.responseText).exceededTransferLimit) {
               // Get response text for additional features
               const getAdditionalFeaturesArray = await this.#getAdditionalFeatures(layerConfig, url! as string, features.length);
               // Add them to features
