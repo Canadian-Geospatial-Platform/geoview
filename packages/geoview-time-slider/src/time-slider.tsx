@@ -122,6 +122,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   }, [config, layerPath, range, setFiltering, setValues]);
 
   const timeStampRange = range.map((entry: string | number | Date) => new Date(entry).getTime());
+
   // Check if range occurs in a single day or year
   const timeDelta = minAndMax[1] - minAndMax[0];
   const dayDelta = new Date(minAndMax[1]).getDate() - new Date(minAndMax[0]).getDate();
@@ -159,6 +160,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   /**
    * Moves the slider handle(s) back one increment
    */
+  // TODO: move forward and move back share common behaviour, see how we can minimize code duplication
   function moveBack(): void {
     if (singleHandle && !discreteValues) {
       const currentIndex = timeStampRange.indexOf(values[0]);
@@ -172,15 +174,17 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       setValues(layerPath, [newPosition]);
     } else {
       let [leftHandle, rightHandle] = values;
-      // If the current distance between slider handles is more than 1/5th of the range, reduce the difference to 1/5th range
+
+      // If there is no interval set, use 1/10 of min max interval so when user use buttons it will work.
+      if (rightHandle - leftHandle === minAndMax[1] - minAndMax[0]) {
+        sliderDeltaRef.current = (minAndMax[1] - minAndMax[0]) / 10;
+        setValues(layerPath, [rightHandle - sliderDeltaRef.current, rightHandle]);
+        return;
+      }
       if (!sliderDeltaRef.current) {
-        if (rightHandle - leftHandle > (minAndMax[1] - minAndMax[0]) / 5) {
-          sliderDeltaRef.current = (minAndMax[1] - minAndMax[0]) / 5;
-          setValues(layerPath, [rightHandle - sliderDeltaRef.current, rightHandle]);
-          return;
-        }
         sliderDeltaRef.current = rightHandle - leftHandle;
       }
+
       // Check for edge cases and then set new slider values
       if (locked && reversed) {
         if (leftHandle === minAndMax[0]) leftHandle = rightHandle;
@@ -205,6 +209,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   /**
    * Moves the slider handle(s) forward one increment
    */
+  // TODO: move forward and move back share common behaviour, see how we can minimize code duplication
   function moveForward(): void {
     if (singleHandle && !discreteValues) {
       const currentIndex = timeStampRange.indexOf(values[0]);
@@ -218,15 +223,17 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       setValues(layerPath, [newPosition]);
     } else {
       let [leftHandle, rightHandle] = values;
-      // If the current distance between slider handles is more than 1/5th of the range, reduce the difference to 1/5th range
+
+      // If there is no interval set, use 1/10 of min max interval so when user use buttons it will work.
+      if (rightHandle - leftHandle === minAndMax[1] - minAndMax[0]) {
+        sliderDeltaRef.current = (minAndMax[1] - minAndMax[0]) / 10;
+        setValues(layerPath, [leftHandle, leftHandle + sliderDeltaRef.current]);
+        return;
+      }
       if (!sliderDeltaRef.current) {
-        if (rightHandle - leftHandle > (minAndMax[1] - minAndMax[0]) / 5) {
-          sliderDeltaRef.current = (minAndMax[1] - minAndMax[0]) / 5;
-          setValues(layerPath, [leftHandle, leftHandle + sliderDeltaRef.current]);
-          return;
-        }
         sliderDeltaRef.current = rightHandle - leftHandle;
       }
+
       // Check for edge cases and then set new slider values
       if (locked && reversed) {
         leftHandle += sliderDeltaRef.current!;
