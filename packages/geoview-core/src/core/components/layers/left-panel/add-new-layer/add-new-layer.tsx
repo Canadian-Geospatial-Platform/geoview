@@ -25,7 +25,7 @@ import { TypeCSVLayerConfig, CSV as CsvGeoviewClass } from '@/geo/layer/geoview-
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { createLocalizedString } from '@/core/utils/utilities';
-import { useLayerStoreActions, useLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { api } from '@/app';
 import { logger } from '@/core/utils/logger';
 import { EsriImage, TypeEsriImageLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-image';
@@ -87,7 +87,6 @@ export function AddNewLayer(): JSX.Element {
 
   // get values from store
   const mapId = useGeoViewMapId();
-  const layersList = useLayerLegendLayers();
   const { setDisplayState } = useLayerStoreActions();
 
   const isMultiple = (): boolean =>
@@ -110,42 +109,12 @@ export function AddNewLayer(): JSX.Element {
     [GEOCORE, 'GeoCore'],
   ];
 
-  // const acceptedFiles = ["*.json"];
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('layersList ', layersList);
-
-    // setIsLoading(false);
-  }, [layersList]);
-
   const sxClasses = {
     buttonGroup: {
       paddingTop: 12,
       gap: 6,
     },
   };
-
-  /*
-  const onDrop = useCallback((acceptedFiles: any) => {
-    // Do something with the files
-    console.log('acceptedFiles ', acceptedFiles);
-  }, []);
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
-
-  const dropAreaSx = {
-    boxShadow: 'inset 0px 3px 6px #00000029',
-    width: '100%',
-    background: '#F1F2F5 0% 0% no-repeat padding-box',
-    minHeight: '100px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: '20px',
-    cursor: 'pointer',
-    marginBottom: '20px',
-    textAlign: 'center',
-  }; */
 
   /**
    * Returns the appropriate error config for ESRI layer types

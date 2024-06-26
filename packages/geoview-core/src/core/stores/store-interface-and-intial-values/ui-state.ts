@@ -64,7 +64,7 @@ export interface IUIState {
 export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIState {
   const init = {
     appBarComponents: ['geolocator'],
-    activeFooterBarTabId: 'legend',
+    activeFooterBarTabId: '',
     activeAppBarTab: { tabId: '', tabGroup: '', isOpen: false },
     activeTrapGeoView: false,
     corePackagesComponents: [],

@@ -5,6 +5,7 @@ import {
   useLayerStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useMapOrderedLayerInfo, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useGeoViewConfig } from '@/core/stores/geoview-store';
 import { LayersList } from './layers-list';
 import { AddNewLayer } from './add-new-layer/add-new-layer';
 import { logger } from '@/core/utils/logger';
@@ -23,6 +24,8 @@ export function LeftPanel({ setIsLayersListPanelVisible, isLayoutEnlarged }: Lef
   const legendLayers = useLayerLegendLayers();
   const displayState = useLayerDisplayState();
   const orderedLayerInfo = useMapOrderedLayerInfo();
+  const mapConfig = useGeoViewConfig();
+
   const { getIndexFromOrderedLayerInfo } = useMapStoreActions();
   const { setDisplayState } = useLayerStoreActions();
   const [orderedLegendLayers, setOrderedLegendLayers] = useState<TypeLegendLayer[]>([]);
@@ -35,10 +38,10 @@ export function LeftPanel({ setIsLayersListPanelVisible, isLayoutEnlarged }: Lef
   }, [orderedLayerInfo, legendLayers, getIndexFromOrderedLayerInfo]);
 
   useEffect(() => {
-    if (displayState !== 'add' && !legendLayers.length) {
+    if (displayState !== 'add' && !legendLayers.length && mapConfig?.footerBar?.tabs.core.includes('legend')) {
       setDisplayState('add');
     }
-  }, [displayState, legendLayers, setDisplayState]);
+  }, [displayState, legendLayers, setDisplayState, mapConfig]);
 
   if (displayState === 'add') {
     return <AddNewLayer />;
