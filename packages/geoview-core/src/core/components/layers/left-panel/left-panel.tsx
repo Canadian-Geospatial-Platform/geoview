@@ -38,6 +38,11 @@ export function LeftPanel({ setIsLayersListPanelVisible, isLayoutEnlarged }: Lef
   }, [orderedLayerInfo, legendLayers, getIndexFromOrderedLayerInfo]);
 
   useEffect(() => {
+    /**
+     * NOTE: 2 Scenarios exist now, when no layers exist on map and
+     * when layers exist but legend doesn't exist in map configuration.
+     * then only we need to show `add` layer component.
+     */
     if (displayState !== 'add' && !legendLayers.length && mapConfig?.footerBar?.tabs.core.includes('legend')) {
       setDisplayState('add');
     }
