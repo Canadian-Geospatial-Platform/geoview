@@ -18,7 +18,7 @@ import {
   VALID_PROJECTION_CODES,
   CV_MAP_CENTER,
 } from '@config/types/config-constants';
-import { isvalidComparedToSchema } from '@config/utils';
+import { isvalidComparedToInputSchema, isvalidComparedToInternalSchema } from '@config/utils';
 import {
   Extent,
   TypeAppBarProps,
@@ -96,7 +96,7 @@ export class MapFeatureConfig {
    */
   constructor(providedMapFeatureConfig: TypeJsonObject, language: TypeDisplayLanguage) {
     // Input schema validation.
-    this.#errorDetected = !isvalidComparedToSchema(CV_MAP_CONFIG_SCHEMA_PATH, providedMapFeatureConfig);
+    this.#errorDetected = !isvalidComparedToInputSchema(CV_MAP_CONFIG_SCHEMA_PATH, providedMapFeatureConfig);
 
     this.#language = language;
     // set map configuration
@@ -130,6 +130,7 @@ export class MapFeatureConfig {
     this.schemaVersionUsed =
       (providedMapFeatureConfig.schemaVersionUsed as TypeValidVersions) || CV_DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed;
     if (this.#errorDetected) this.#makeMapConfigValid(providedMapFeatureConfig); // Tries to apply a correction to invalid properties
+    if (!isvalidComparedToInternalSchema(CV_MAP_CONFIG_SCHEMA_PATH, this)) this.setErrorDetectedFlag();
   }
 
   /**

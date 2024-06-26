@@ -1,3 +1,5 @@
+import cloneDeep from 'lodash/cloneDeep';
+
 import { CV_DEFAULT_MAP_FEATURE_CONFIG, CV_CONFIG_GEOCORE_TYPE } from '@config/types/config-constants';
 import { Cast, TypeJsonValue, TypeJsonObject, toJsonObject, TypeJsonArray } from '@config/types/config-types';
 import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
@@ -341,12 +343,15 @@ export class ConfigApi {
     // doesn't accept string config. Note that convertStringToJson returns undefined if the string config cannot
     // be translated to a json object.
     const providedMapFeatureConfig: TypeJsonObject | undefined =
-      typeof mapConfig === 'string' ? ConfigApi.#convertStringToJson(mapConfig as string) : (mapConfig as TypeJsonObject);
+      //                                                                     We clone to prevent modifications from leaking back to the user object.
+      typeof mapConfig === 'string' ? ConfigApi.#convertStringToJson(mapConfig as string) : (cloneDeep(mapConfig) as TypeJsonObject);
 
     try {
       // If the user provided a valid string config with the mandatory map property, process geocore layers to translate them to their GeoView layers
       if (!providedMapFeatureConfig) throw new MapConfigError('The string configuration provided cannot be translated to a json object');
       if (!providedMapFeatureConfig.map) throw new MapConfigError('The map property is mandatory');
+      providedMapFeatureConfig.map.listOfGeoviewLayerConfig = (providedMapFeatureConfig.map.listOfGeoviewLayerConfig ||
+        []) as TypeJsonObject;
 
       const inputLength = providedMapFeatureConfig.map.listOfGeoviewLayerConfig.length;
       providedMapFeatureConfig.map.listOfGeoviewLayerConfig = (await ConfigApi.convertGeocoreToGeoview(
