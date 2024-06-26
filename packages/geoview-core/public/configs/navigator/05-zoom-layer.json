@@ -3,7 +3,7 @@
     "interaction": "dynamic",
     "viewSettings": {
       "initialView": {
-        "layerIds": ["polygons.json", "lines.json"]
+        "layerIds": ["geojsonLYR1/geojsonLYR1/polygons.json", "geojsonLYR1/geojsonLYR1/lines.json"]
       },
       "projection": 3978
     },
