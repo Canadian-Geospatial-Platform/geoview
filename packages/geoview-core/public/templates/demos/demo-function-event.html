@@ -158,6 +158,8 @@
       <ul>
         <li>onLayerAdded</li>
         <li>onLayerRemoved</li>
+        <li>onLayersLoaded</li>
+        <li>onLayerLoaded for Nonmetal mines</li>
         <li>onVisibleChanged for Water Quantity</li>
         <li>onLayerItemVisibilityToggled</li>
         <li>onMapZoomEnd</li>
@@ -183,6 +185,16 @@
         // listen to layer added event
         cgpv.api.maps.Map1.layer.onLayerAdded((sender, payload) => {
           cgpv.api.maps.Map1.notifications.addNotificationSuccess(payload.layer.geoviewLayerId + ' added');
+        });
+
+        // listen to layer loaded event
+        cgpv.api.maps.Map1.layer.onLayersLoaded((sender, payload) => {
+          cgpv.api.maps.Map1.notifications.addNotificationSuccess(payload.layerPath + ' loaded');
+        });
+
+        // listen to layer visibility changed event
+        cgpv.api.maps.Map1.layer.getGeoviewLayer('nonmetalmines/5').onLayerLoaded((sender, payload) => {
+          cgpv.api.maps.Map1.notifications.addNotificationSuccess('Nonmetal mines has finished loading');
         });
 
         // listen to layer removed event
