@@ -137,18 +137,15 @@ export default function DataTableModal(): JSX.Element {
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('DATA-TABLE-MODAL - isLoading', isLoading, selectedLayer);
+    logger.logTraceUseEffect('DATA-TABLE-MODAL - query status');
 
-    const clearLoading = setTimeout(
-      () => {
-        setIsLoading(false);
-      },
-      // set timeout delay 1 sec when layer has more than 100 features.
-      (layer?.features?.length ?? 0) > 100 ? 1000 : 0
-    );
-    return () => clearTimeout(clearLoading);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, selectedLayer]);
+    // Get feature info result for selected layer to check if it is loading
+    const selectedLayerData = layersData.find((_layer) => _layer.layerPath === selectedLayer);
+
+    if (selectedLayerData?.queryStatus !== 'error' && selectedLayerData?.queryStatus !== 'processed') {
+      setIsLoading(true);
+    } else setIsLoading(false);
+  }, [layersData, selectedLayer]);
 
   return (
     <Dialog open={activeModalId === 'layerDataTable'} onClose={closeModal} maxWidth="xl">
