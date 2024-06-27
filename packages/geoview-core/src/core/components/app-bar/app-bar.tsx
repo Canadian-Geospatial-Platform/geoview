@@ -102,6 +102,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   // get store config for app bar to add (similar logic as in footer-bar)
   const appBarConfig = useGeoViewConfig()?.appBar;
+  const footerBarConfig = useGeoViewConfig()?.footerBar;
 
   // #region REACT HOOKS
 
@@ -110,6 +111,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
     logger.logTraceUseMemo('APP-BAR - panels');
 
     // TODO: Refactor - We should find a way to make this 'dictionary of supported components' dynamic.
+    if (interaction === 'static') {
+      return {};
+    }
     return {
       geolocator: { icon: <SearchIcon />, content: <Geolocator key="geolocator" /> },
       guide: { icon: <QuestionMarkIcon />, content: <GuidePanel fullWidth /> },
@@ -292,8 +296,13 @@ export function AppBar(props: AppBarProps): JSX.Element {
     logger.logTraceUseEffect('APP-BAR - create group of AppBar buttons');
 
     // render footer bar tabs
-    (appBarConfig?.tabs.core ?? [])
-      .filter((tab) => CV_DEFAULT_APPBAR_TABS_ORDER.includes(tab))
+    const appBarConfigTabs = appBarConfig?.tabs.core ?? [];
+    if (footerBarConfig?.tabs.core === undefined && !appBarConfigTabs.includes('guide')) {
+      // inject guide tab if no footer bar config
+      appBarConfigTabs.push('guide');
+    }
+    appBarConfigTabs
+      .filter((tab) => CV_DEFAULT_APPBAR_TABS_ORDER.includes(tab) && memoPanels[tab])
       .map((tab): [TypeIconButtonProps, TypePanelProps, string] => {
         const button: TypeIconButtonProps = {
           id: `AppbarPanelButton${capitalize(tab)}`,
