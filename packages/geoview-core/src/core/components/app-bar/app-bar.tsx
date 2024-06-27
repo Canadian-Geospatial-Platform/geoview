@@ -296,12 +296,12 @@ export function AppBar(props: AppBarProps): JSX.Element {
     logger.logTraceUseEffect('APP-BAR - create group of AppBar buttons');
 
     // render footer bar tabs
-    let appBarConfigTabs = appBarConfig?.tabs.core ?? [];
-    if(footerBarConfig?.tabs.core === undefined && !appBarConfigTabs.includes('guide')) {
+    const appBarConfigTabs = appBarConfig?.tabs.core ?? [];
+    if (footerBarConfig?.tabs.core === undefined && !appBarConfigTabs.includes('guide')) {
       // inject guide tab if no footer bar config
       appBarConfigTabs.push('guide');
     }
-    (appBarConfigTabs)
+    appBarConfigTabs
       .filter((tab) => CV_DEFAULT_APPBAR_TABS_ORDER.includes(tab) && memoPanels[tab])
       .map((tab): [TypeIconButtonProps, TypePanelProps, string] => {
         const button: TypeIconButtonProps = {
