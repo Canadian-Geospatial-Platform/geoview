@@ -50,6 +50,7 @@ import { TypeJsonObject, TypeJsonValue, toJsonObject } from '@/core/types/global
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { CV_DEFAULT_APPBAR_CORE, CV_DEFAULT_APPBAR_TABS_ORDER } from '@/api/config/types/config-constants';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
+import { TypeValidAppBarCoreProps } from '@/api/config/types/map-schema-types';
 
 interface GroupPanelType {
   icon: ReactNode;
@@ -263,28 +264,32 @@ export function AppBar(props: AppBarProps): JSX.Element {
     // Log
     logger.logTraceUseEffect('APP-BAR - appBarConfig');
 
-    // Packages tab
-    if (appBarConfig && appBarConfig.tabs.core.includes('basemap-panel')) {
-      // create a new tab by loading the plugin
-      Plugin.loadScript('basemap-panel')
-        .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
-          Plugin.addPlugin(
-            'basemap-panel',
-            mapId,
-            constructor,
-            toJsonObject({
+    const processPlugin = (pluginName: string): void => {
+      // Packages tab
+      if (appBarConfig && appBarConfig.tabs.core.includes(pluginName as TypeValidAppBarCoreProps)) {
+        // create a new tab by loading the plugin
+        Plugin.loadScript(pluginName)
+          .then((constructor: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue)) => {
+            Plugin.addPlugin(
+              pluginName,
               mapId,
-            })
-          ).catch((error) => {
+              constructor,
+              toJsonObject({
+                mapId,
+              })
+            ).catch((error) => {
+              // Log
+              logger.logPromiseFailed(`api.plugin.addPlugin in useEffect in ${pluginName}`, error);
+            });
+          })
+          .catch((error) => {
             // Log
-            logger.logPromiseFailed('api.plugin.addPlugin in useEffect in app-bar', error);
+            logger.logPromiseFailed('api.plugin.loadScript in useEffect in app-bar', error);
           });
-        })
-        .catch((error) => {
-          // Log
-          logger.logPromiseFailed('api.plugin.loadScript in useEffect in app-bar', error);
-        });
-    }
+      }
+    };
+    processPlugin('basemap-panel');
+    processPlugin('aoi-panel');
   }, [appBarConfig, mapId]);
 
   useEffect(() => {

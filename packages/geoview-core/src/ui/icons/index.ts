@@ -22,6 +22,7 @@ export {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
   Close as CloseIcon,
+  CropOriginal as AoiIcon,
   Delete as DeleteIcon,
   DeleteOutline as DeleteOutlineIcon,
   Details as DetailsIcon,

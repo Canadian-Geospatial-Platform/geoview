@@ -65,7 +65,8 @@ export type TypeValidAppBarCoreProps =
   | 'legend'
   | 'details'
   | 'data-table'
-  | 'layers';
+  | 'layers'
+  | 'aoi-panel';
 
 /** Configuration available on the application bar. Default = ['geolocator']. The about GeoView and notification are always there. */
 export type TypeAppBarProps = {
