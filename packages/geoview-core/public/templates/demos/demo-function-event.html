@@ -158,6 +158,7 @@
       <ul>
         <li>onLayerAdded</li>
         <li>onLayerRemoved</li>
+        <li>onLayerLoaded</li>
         <li>onVisibleChanged for Water Quantity</li>
         <li>onLayerItemVisibilityToggled</li>
         <li>onMapZoomEnd</li>
@@ -183,6 +184,11 @@
         // listen to layer added event
         cgpv.api.maps.Map1.layer.onLayerAdded((sender, payload) => {
           cgpv.api.maps.Map1.notifications.addNotificationSuccess(payload.layer.geoviewLayerId + ' added');
+        });
+
+        // listen to layer loaded event
+        cgpv.api.maps.Map1.layer.onLayerLoaded((sender, payload) => {
+          cgpv.api.maps.Map1.notifications.addNotificationSuccess(payload.layerPath + ' loaded');
         });
 
         // listen to layer removed event
