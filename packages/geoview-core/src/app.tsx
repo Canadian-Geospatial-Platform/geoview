@@ -130,7 +130,8 @@ async function renderMap(mapElement: Element): Promise<void> {
 
   // TODO: refactor - remove this config once we get layers from the new one
   // create a new config for this map element
-  const config = new Config();
+  const lang = mapElement.hasAttribute('data-lang') ? (mapElement.getAttribute('data-lang')! as TypeDisplayLanguage) : 'en';
+  const config = new Config(lang);
   const configObj = config.initializeMapConfig(configuration.mapId, configuration!.map!.listOfGeoviewLayerConfig!);
   configuration.map.listOfGeoviewLayerConfig = configObj!;
 

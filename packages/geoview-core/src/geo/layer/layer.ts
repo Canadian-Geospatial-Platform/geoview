@@ -575,7 +575,7 @@ export class LayerApi {
     geoviewLayerConfig.geoviewLayerId = generateId(geoviewLayerConfig.geoviewLayerId);
 
     // TODO: Refactor - This should be dealt with the config classes and this line commented out
-    ConfigValidation.validateListOfGeoviewLayerConfig([geoviewLayerConfig]);
+    ConfigValidation.validateListOfGeoviewLayerConfig(this.mapViewer.getDisplayLanguage(), [geoviewLayerConfig]);
 
     // TODO: Refactor - This should be dealt with the config classes and this line commented out, therefore, content of addGeoviewLayerStep2 becomes this addGeoviewLayer function.
     if (geoviewLayerConfig.geoviewLayerId in this.#geoviewLayers) this.#printDuplicateGeoviewLayerConfigError(geoviewLayerConfig);

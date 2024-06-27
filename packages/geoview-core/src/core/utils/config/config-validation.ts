@@ -62,13 +62,17 @@ export class ConfigValidation {
   /** The map ID associated to the configuration. If it is undefined, a unique value will be generated and assign to it. */
   #mapId: string;
 
+  // The map language
+  displayLanguage: TypeDisplayLanguage;
+
   /** ***************************************************************************************************************************
    * The ConfigValidation class constructor used to instanciate an object of this type.
    *
    * @returns {ConfigValidation} A ConfigValidation instance.
    */
-  constructor() {
+  constructor(language: TypeDisplayLanguage) {
     this.#mapId = generateId();
+    this.displayLanguage = language;
   }
 
   /** ***************************************************************************************************************************
@@ -187,7 +191,7 @@ export class ConfigValidation {
       }
     }
 
-    ConfigValidation.#processLocalizedString(['en'], listOfGeoviewLayerConfig);
+    ConfigValidation.#processLocalizedString([this.displayLanguage], listOfGeoviewLayerConfig);
     ConfigValidation.#doExtraValidation(listOfGeoviewLayerConfig);
 
     return listOfGeoviewLayerConfig;
@@ -198,9 +202,10 @@ export class ConfigValidation {
    * @param {TypeGeoviewLayerConfig[]} listOfGeoviewLayerConfig - The list of GeoView layer configuration to adjust and
    * validate.
    */
-  static validateListOfGeoviewLayerConfig(listOfGeoviewLayerConfig?: TypeGeoviewLayerConfig[]): void {
-    // TODO: we support only unilingual fields for now. When refactor to new config bilinagual will be supported for geoviewLayerName, metadataAccessPath and layerName
-    ConfigValidation.#processLocalizedString(['en'], listOfGeoviewLayerConfig);
+  static validateListOfGeoviewLayerConfig(language: TypeDisplayLanguage, listOfGeoviewLayerConfig?: TypeGeoviewLayerConfig[]): void {
+    // TODO: refactor - We will only support these 3 bilingual fields: geoviewLayerName, metadataAccessPath and layerName after the refactor.
+    // TODO: New config validation classes should already support this.
+    ConfigValidation.#processLocalizedString([language], listOfGeoviewLayerConfig);
     ConfigValidation.#doExtraValidation(listOfGeoviewLayerConfig);
   }
 
