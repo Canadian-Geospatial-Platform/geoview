@@ -1,0 +1,215 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GeoView Basemap Panel Schema",
+  "type": "object",
+  "version": 1.0,
+  "comments": "Configuration for GeoView basemap panel package.",
+  "additionalProperties": false,
+  "definitions": {
+    "basemapNameNode": {
+      "type": "object",
+      "properties": {
+        "en": {
+          "type": "string"
+        },
+        "fr": {
+          "type": "string"
+        }
+      },
+      "description": "The display name of the layer."
+    },
+    "basemapDescriptionNode": {
+      "type": "object",
+      "properties": {
+        "en": {
+          "type": "string"
+        },
+        "fr": {
+          "type": "string"
+        }
+      },
+      "description": "Basemap description."
+    },
+    "thumbnailUrlNode": {
+      "type": "object",
+      "properties": {
+        "en": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string" }
+        },
+        "fr": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string" }
+        }
+      },
+      "description": "Basemap thumbnail urls."
+    },
+    "basemapLayerUrlNode": {
+      "type": "object",
+      "properties": {
+        "en": {
+          "type": "string"
+        },
+        "fr": {
+          "type": "string"
+        }
+      },
+      "description": "The service endpoint of the basemap layer."
+    },
+    "basemapAttributionNode": {
+      "type": "object",
+      "properties": {
+        "en": {
+          "type": "string"
+        },
+        "fr": {
+          "type": "string"
+        }
+      },
+      "description": "Basemap attribution text."
+    },
+    "basemapLayersNode": {
+      "type": "object",
+      "properties": {
+        "basemapId": {
+          "type": "string",
+          "description": "the id of the basmap layer."
+        },
+        "url": {
+          "$ref": "#/definitions/basemapLayerUrlNode"
+        },
+        "opacity": {
+          "type": "number",
+          "description": "the opacity of this layer.",
+          "default": 0
+        }
+      },
+      "additionalItems": false,
+      "required": ["basemapId", "url"]
+    },
+    "basemap": {
+      "type": "object",
+      "properties": {
+        "basemapId": {
+          "type": "string",
+          "description": "the basemap id",
+          "enum": ["transport", "simple", "shaded", "osm", "nogeom"]
+        },
+        "shaded": {
+          "type": "boolean",
+          "description": "if a shaded layer should be included with this basemap.",
+          "default": false
+        },
+        "labeled": {
+          "type": "boolean",
+          "description": "if labels should be enabled in this basemap.",
+          "default": false
+        }
+      },
+      "additionalProperties": false,
+      "required": ["basemapId", "shaded", "labeled"]
+    },
+    "customBasemap": {
+      "type": "object",
+      "properties": {
+        "basemapId": {
+          "type": "string",
+          "description": "the basemap id."
+        },
+        "name": {
+          "$ref": "#/definitions/basemapNameNode"
+        },
+        "description": {
+          "$ref": "#/definitions/basemapDescriptionNode"
+        },
+        "thumbnailUrl": {
+          "$ref": "#/definitions/thumbnailUrlNode"
+        },
+        "layers": {
+          "type": "array",
+          "description": "a list of basemap layers",
+          "items": {
+            "$ref": "#/definitions/basemapLayersNode"
+          },
+          "minItems": 1
+        },
+        "attribution": {
+          "$ref": "#/definitions/basemapAttributionNode"
+        },
+        "zoomLevels": {
+          "type": "object",
+          "description": "Zoom levels for the basemap",
+          "properties": {
+            "min": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 24,
+              "default": 0
+            },
+            "max": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 24,
+              "default": 24
+            }
+          },
+          "additionalProperties": false,
+          "required": ["min", "max"]
+        }
+      },
+      "additionalProperties": false,
+      "required": ["basemapId", "name", "description", "layers"]
+    }
+  },
+  "properties": {
+    "isOpen": {
+      "type": "boolean",
+      "description": "Specifies whether the basemap panel is initially open or closed",
+      "default": false
+    },
+    "canSwichProjection": {
+      "type": "boolean",
+      "description": "Allow the user to switch projection from the basemap panel.",
+      "default": true
+    },
+    "supportedProjections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "projectionCode": {
+            "type": "integer",
+            "enum": [3978, 3857],
+            "description": "Default projection to load on start."
+          },
+          "customBasemaps": {
+            "type": "array",
+            "description": "A list of custom basemaps.",
+            "items": {
+              "$ref": "#/definitions/customBasemap"
+            },
+            "minItems": 0
+          },
+          "coreBasemaps": {
+            "type": "array",
+            "description": "A list of basemaps available in the core to show in the panel.",
+            "items": {
+              "$ref": "#/definitions/basemap"
+            },
+            "minItems": 1
+          }
+        }
+      },
+      "minItems": 1,
+      "required": ["coreBasemaps", "customBasemaps"]
+    },
+    "version": {
+      "type": "string",
+      "enum": ["1.0"],
+      "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
+    }
+  },
+  "required": ["canSwichProjection", "supportedProjections"]
+}

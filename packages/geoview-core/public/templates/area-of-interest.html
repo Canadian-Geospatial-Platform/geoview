@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>
+    Area of interest - Canadian Geospatial Platform Viewer
+  </title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="shortcut icon" href="./favicon.ico" />
+  <meta name="msapplication-TileColor" content="#da532c" />
+  <meta name="msapplication-config" content="./img/browserconfig.xml" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="msapplication-TileColor" content="#da532c" />
+  <meta name="theme-color" content="#ffffff" />
+  <style>
+    .panel {
+      display: inline-block;
+      background: #ffffff;
+      box-shadow: 0px 0px 5px 5px #666666;
+      -webkit-box-shadow: 2px 2px 5px 5x #666666;
+      -moz-box-shadow: 2px 2px 5px 5px #666666;
+      margin: 10px;
+      padding: 10px;
+      font-size: 12px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      width: 100%;
+      margin: 10px;
+    }
+
+    button {
+      margin: 10px;
+    }
+
+    body {
+      padding: 50px;
+    }
+
+    .titleheader {
+      width: 979px;
+      text-align: center;
+    }
+
+    .header-table {
+      width: 1180px;
+      text-align: left;
+      margin: 0 auto;
+    }
+
+    .logo {
+      height: 120px;
+      width: 120px;
+      text-align: left;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header-table">
+    <table>
+      <tbody>
+        <tr>
+          <td><img class="logo" alt="logo" src="./img/Logo.png" /></td>
+          <td class="header-title">
+            <h1><strong>Area of interest</strong></h1>
+          </td>
+        </tr>
+        <tr>
+          <td><a href="./index.html">Main</a><br /></td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <tbody>
+        <tr>
+          <td>This page is used to showcase the area of interest package at run time.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div id="mapWM" class="geoview-map" data-lang="en" data-config-url="./configs/area-of-interest-config.json"></div>
+  <p></p>
+  <hr />
+
+  <button type="button" class="collapsible">Code Snippet</button>
+  <pre id="codeSnippet" class="panel"></pre>
+
+  <script src="codedoc.js"></script>
+  <script>
+    // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+    cgpv.init((mapId) => {
+      if (mapId === 'mapWM') {
+      }
+    });
+
+    // create snippets
+    window.addEventListener('load', () => {
+      createCodeSnippet();
+      createConfigSnippet();
+    });
+  </script>
+</body>
+
+</html>
