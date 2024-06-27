@@ -111,13 +111,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
     // TODO: Refactor - We should find a way to make this 'dictionary of supported components' dynamic.
     if (interaction === 'static') {
-      return {
-        guide: { icon: <QuestionMarkIcon />, content: <GuidePanel fullWidth /> },
-        details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel fullWidth /> },
-        legend: { icon: <HubOutlinedIcon />, content: <Legend fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
-        layers: { icon: <LayersOutlinedIcon />, content: <LayersPanel containerType={CONTAINER_TYPE.APP_BAR} /> },
-        'data-table': { icon: <StorageIcon />, content: <Datapanel containerType={CONTAINER_TYPE.APP_BAR} /> },
-      } as unknown as Record<string, GroupPanelType>;
+      return {};
     }
     return {
       geolocator: { icon: <SearchIcon />, content: <Geolocator key="geolocator" /> },
@@ -299,8 +293,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('APP-BAR - create group of AppBar buttons');
-
-    console.log(memoPanels, appBarConfig?.tabs.core, CV_DEFAULT_APPBAR_TABS_ORDER);
 
     // render footer bar tabs
     (appBarConfig?.tabs.core ?? [])
