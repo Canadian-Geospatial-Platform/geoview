@@ -58,7 +58,7 @@
     <div
       id="Map1"
       class="geoview-map"
-      data-lang="en"
+      data-lang="fr"
       data-config="{
         'map': {
           'interaction': 'dynamic',
@@ -73,15 +73,22 @@
           'listOfGeoviewLayerConfig': [
             {
               'geoviewLayerId': 'EPSG:4617',
-              'geoviewLayerName': { 'en': 'CSRS Layer (EPSG: 4617)' },
+              'geoviewLayerName': {
+                'en': 'CSRS Layer (EPSG: 4617)',
+                'fr': 'Couche CSRS (EPSG: 4617)'
+              },
               'metadataAccessPath': {
-                'en': 'https://data.sac-isc.gc.ca/geomatics/rest/services/Donnees_Ouvertes-Open_Data/Communaute_inuite_Inuit_Community/MapServer'
+                'en': 'https://data.sac-isc.gc.ca/geomatics/rest/services/Donnees_Ouvertes-Open_Data/Communaute_inuite_Inuit_Community/MapServer',
+                'fr': 'https://data.sac-isc.gc.ca/geomatics/rest/services/Donnees_Ouvertes-Open_Data/Communaute_inuite_Inuit_Community/MapServer'
               },
               'geoviewLayerType': 'esriDynamic',
               'listOfLayerEntryConfig': [
                 {
                   'layerId': '0',
-                  'layerName': { 'en': 'CSRS Layer' },
+                  'layerName': { 
+                    'en': 'CSRS Layer',
+                    'fr': 'Couche CSRS ' 
+                  },
                   'initialSettings': {
                     'states': {
                       'visible': true
@@ -92,12 +99,18 @@
             },
             {
               'geoviewLayerId': 'geojsonlyr1',
-              'geoviewLayerName': { 'en': 'Multi Polygon Layer' },
+              'geoviewLayerName': { 
+                'en': 'Multi Polygon Layer',
+                'fr': 'Couche multi-polygones' 
+              },
               'geoviewLayerType': 'GeoJSON',
               'listOfLayerEntryConfig': [
                 {
                   'layerId': 'multipolygon',
-                  'layerName': { 'en': 'Multi Polygon Layer' },
+                  'layerName': { 
+                    'en': 'Multi Polygon Layer',
+                    'fr': 'Couche multi-polygones'
+                  },
                   'initialSettings': {
                     'states': {
                       'visible': false
@@ -105,7 +118,8 @@
                   },
                   'source': {
                     'dataAccessPath': {
-                      'en': './datasets/geojson/multipolygons.geojson'
+                      'en': './datasets/geojson/multipolygons.geojson',
+                      'fr': './datasets/geojson/multipolygons.geojson'
                     }
                   }
                 }
@@ -113,15 +127,22 @@
             },
             {
               'geoviewLayerId': 'featureInfo',
-              'geoviewLayerName': { 'en': 'Coral Sponge 2016' },
+              'geoviewLayerName': {
+                'en': 'Coral Sponge 2016',
+                'fr': 'Éponge Coraile 2016'
+              },
               'metadataAccessPath': {
-                'en': 'https://gisp.dfo-mpo.gc.ca/arcgis/rest/services/FGP/KDE_Analyses_Coral_Sponge_2016_EN/MapServer'
+                'en': 'https://gisp.dfo-mpo.gc.ca/arcgis/rest/services/FGP/KDE_Analyses_Coral_Sponge_2016_EN/MapServer',
+                'fr': 'https://gisp.dfo-mpo.gc.ca/arcgis/rest/services/FGP/KDE_Analyses_Coral_Sponge_2016_FR/MapServer'
               },
               'geoviewLayerType': 'esriDynamic',
               'listOfLayerEntryConfig': [
                 {
                   'layerId': '0',
-                  'layerName': { 'en': 'Coral Sponge 2016' },
+                  'layerName': {
+                    'en': 'Coral Sponge 2016',
+                    'fr': 'Éponge Coraile 20166'
+                  },
                   'initialSettings': {
                     'states': {
                       'visible': false
@@ -132,15 +153,22 @@
             },
             {
               'geoviewLayerId': 'cpcad',
-              'geoviewLayerName': { 'en': 'Protected and conserved area' },
+              'geoviewLayerName': {
+                'en': 'Protected and conserved area',
+                'fr': 'Zone protégée et conservée'
+              },
               'metadataAccessPath': {
-                'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CWS_SCF/CPCAD/MapServer/'
+                'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CWS_SCF/CPCAD/MapServer/',
+                'fr': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CWS_SCF/CPCAD/MapServer/'
               },
               'geoviewLayerType': 'esriDynamic',
               'listOfLayerEntryConfig': [
                 {
                   'layerId': '0',
-                  'layerName': { 'en': 'Protected and conserved area' },
+                  'layerName': {
+                    'en': 'Protected and conserved area',
+                    'fr': 'Zone protégée et conservée'
+                  },
                   'initialSettings': {
                     'states': {
                       'visible': false
