@@ -57,6 +57,11 @@ const multipleHtmlPluginsDemos = glob.sync('./public/templates/demos/*.html').ma
 const config = {
   entry: {
     'cgpv-main': './src/app.tsx',
+    'geoview-aoi-panel': {
+      import: '../geoview-aoi-panel/src/index.tsx',
+      dependOn: 'cgpv-main',
+      filename: 'corePackages/[name].js',
+    },
     'geoview-basemap-panel': {
       import: '../geoview-basemap-panel/src/index.tsx',
       dependOn: 'cgpv-main',
