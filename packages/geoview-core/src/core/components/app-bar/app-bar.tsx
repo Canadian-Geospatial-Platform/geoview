@@ -102,6 +102,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   // get store config for app bar to add (similar logic as in footer-bar)
   const appBarConfig = useGeoViewConfig()?.appBar;
+  const footerBarConfig = useGeoViewConfig()?.footerBar;
 
   // #region REACT HOOKS
 
@@ -295,7 +296,12 @@ export function AppBar(props: AppBarProps): JSX.Element {
     logger.logTraceUseEffect('APP-BAR - create group of AppBar buttons');
 
     // render footer bar tabs
-    (appBarConfig?.tabs.core ?? [])
+    let appBarConfigTabs = appBarConfig?.tabs.core ?? [];
+    if(footerBarConfig?.tabs.core === undefined && !appBarConfigTabs.includes('guide')) {
+      // inject guide tab if no footer bar config
+      appBarConfigTabs.push('guide');
+    }
+    (appBarConfigTabs)
       .filter((tab) => CV_DEFAULT_APPBAR_TABS_ORDER.includes(tab) && memoPanels[tab])
       .map((tab): [TypeIconButtonProps, TypePanelProps, string] => {
         const button: TypeIconButtonProps = {
