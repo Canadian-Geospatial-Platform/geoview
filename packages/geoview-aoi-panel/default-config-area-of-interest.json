@@ -1,4 +1,16 @@
 {
-  "isOpen": false
+  "isOpen": false,
+  "aoiList": [
+    {
+      "aoiDescription": "Desciption de l'aoi 1",
+      "extent": [-89, 54, -85, 55]
+    },
+    {
+      "imageUrl": "https://test.de.url2",
+      "aoiDescription": "Desciption de l'aoi 2",
+      "extent": [-88, 54, -86, 55]
+    }
+  ],
+  "version": "1.0"
 }
 

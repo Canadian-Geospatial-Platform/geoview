@@ -48,7 +48,7 @@ class AoiPanelPlugin extends AppBarPlugin {
   override onCreateButtonProps(): TypeIconButtonProps {
     // Button props
     return {
-      id: `aoi-panel`,
+      id: `${this.pluginProps.mapId}-AoiPanelButton`,
       tooltip: 'AoiPanel.title',
       tooltipPlacement: 'right',
       children: <AoiIcon />,
@@ -67,7 +67,7 @@ class AoiPanelPlugin extends AppBarPlugin {
   }
 
   override onCreateContent = (): JSX.Element => {
-    return <AoiPanel /* mapId={this.pluginProps.mapId} config={this.configObj || {}} */ />;
+    return <AoiPanel mapId={this.pluginProps.mapId} config={this.configObj || {}} />;
   };
 
   /**

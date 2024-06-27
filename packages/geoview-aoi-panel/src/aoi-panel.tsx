@@ -15,6 +15,7 @@ interface AoiPanelProps {
 */
 
 export function AoiPanel(/* props: AoiPanelProps */): JSX.Element {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   // const { mapId, config } = props;
 
   // const { cgpv } = window;
