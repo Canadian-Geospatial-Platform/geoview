@@ -25,11 +25,16 @@ import {
 } from '@/ui';
 import { useLayerHighlightedLayer, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useDataTableAllFeaturesDataArray } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import {
+  useDataTableAllFeaturesDataArray,
+  useDataTableLayerSettings,
+  useDataTableStoreActions,
+} from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { generateId } from '@/core/utils/utilities';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-control';
 import { logger } from '@/core/utils/logger';
+import { LAYER_STATUS } from '@/core/utils/constant';
 
 interface LayerDetailsProps {
   layerDetails: TypeLegendLayer;
@@ -53,6 +58,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const { setAllItemsVisibility, toggleItemVisibility, setHighlightLayer, refreshLayer, zoomToLayerExtent, getLayerBounds } =
     useLayerStoreActions();
   const { openModal } = useUIStoreActions();
+  const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
+  const datatableSettings = useDataTableLayerSettings();
   const layersData = useDataTableAllFeaturesDataArray();
   const selectedLayer = layersData.find((_layer) => _layer.layerPath === layerDetails?.layerPath);
 
@@ -85,6 +92,16 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   };
 
   const handleOpenTable = (): void => {
+    // trigger the fetching of the features when not available OR when layer status is in error
+    if (
+      !layersData.filter((layers) => layers.layerPath === layerDetails.layerPath && !!layers?.features?.length).length ||
+      layerDetails.layerStatus === LAYER_STATUS.ERROR
+    ) {
+      triggerGetAllFeatureInfo(layerDetails.layerPath).catch((error) => {
+        // Log
+        logger.logPromiseFailed('Failed to triggerGetAllFeatureInfo in single-layer.handleLayerClick', error);
+      });
+    }
     openModal({ activeElementId: 'layerDataTable', callbackElementId: `table-details` });
   };
 
@@ -250,7 +267,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   function renderLayerButtons(): JSX.Element {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px' }}>
-        {isDataTableVisible && selectedLayer?.features?.length && renderDetailsButton()}
+        {isDataTableVisible && datatableSettings[layerDetails.layerPath] && renderDetailsButton()}
         <IconButton tooltip="legend.refreshLayer" className="buttonOutline" onClick={handleRefreshLayer}>
           <RestartAltIcon />
         </IconButton>

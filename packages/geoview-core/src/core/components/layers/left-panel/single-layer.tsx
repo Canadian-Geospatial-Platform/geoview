@@ -29,12 +29,7 @@ import { DeleteUndoButton } from './delete-undo-button';
 import { LayersList } from './layers-list';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { logger } from '@/core/utils/logger';
-import {
-  useDataTableLayerSettings,
-  useDataTableStoreActions,
-  useDataTableAllFeaturesDataArray,
-} from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { LAYER_STATUS } from '@/core/utils/constant';
+import { useDataTableLayerSettings, useDataTableStoreActions } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { ArrowDownwardIcon, ArrowUpIcon, TableViewIcon } from '@/ui/icons';
 import { Divider } from '@/ui/divider/divider';
 
@@ -75,9 +70,7 @@ export function SingleLayer({
   const displayState = useLayerDisplayState();
   const datatableSettings = useDataTableLayerSettings();
 
-  const layerData = useDataTableAllFeaturesDataArray();
-
-  const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
+  useDataTableStoreActions();
 
   const legendExpanded = !getLegendCollapsedFromOrderedLayerInfo(layer.layerPath);
 
@@ -163,16 +156,6 @@ export function SingleLayer({
     setSelectedLayerPath(layer.layerPath);
     if (setIsLayersListPanelVisible) {
       setIsLayersListPanelVisible(true);
-      // trigger the fetching of the features when not available OR when layer status is in error
-      if (
-        !layerData.filter((layers) => layers.layerPath === layer.layerPath && !!layers?.features?.length).length ||
-        layer.layerStatus === LAYER_STATUS.ERROR
-      ) {
-        triggerGetAllFeatureInfo(layer.layerPath).catch((error) => {
-          // Log
-          logger.logPromiseFailed('Failed to triggerGetAllFeatureInfo in single-layer.handleLayerClick', error);
-        });
-      }
     }
   };
 
