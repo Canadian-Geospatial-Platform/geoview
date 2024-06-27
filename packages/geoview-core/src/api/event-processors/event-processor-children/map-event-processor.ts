@@ -706,17 +706,27 @@ export class MapEventProcessor extends AbstractEventProcessor {
     extent: Extent,
     options: FitOptions = { padding: [100, 100, 100, 100], maxZoom: 11, duration: 1000 }
   ): Promise<void> {
-    // store state will be updated by map event
-    this.getMapViewer(mapId).getView().fit(extent, options);
+    // Validate the extent coordinates
+    if (
+      !extent.some((number) => {
+        return !number || Number.isNaN(number);
+      })
+    ) {
+      // store state will be updated by map event
+      this.getMapViewer(mapId).getView().fit(extent, options);
 
-    // Use a Promise and resolve it when the duration expired
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, (options.duration || 1000) + 150);
-    });
-    // The +150 is to make sure the logic before turning these function async remains
-    // TODO: Refactor - Check the +150 relevancy and try to remove it by clarifying the reason for its existance
+      // Use a Promise and resolve it when the duration expired
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve();
+        }, (options.duration || 1000) + 150);
+      });
+      // The +150 is to make sure the logic before turning these function async remains
+      // TODO: Refactor - Check the +150 relevancy and try to remove it by clarifying the reason for its existance
+    }
+
+    // Invalid extent
+    throw new Error(`Couldn't zoom to extent, invalid extent: ${extent}`);
   }
 
   static async zoomToGeoLocatorLocation(mapId: string, coords: Coordinate, bbox?: Extent): Promise<void> {
