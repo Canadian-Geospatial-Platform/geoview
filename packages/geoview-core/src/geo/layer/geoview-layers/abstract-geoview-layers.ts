@@ -178,6 +178,9 @@ export abstract class AbstractGeoViewLayer {
   // Keep all callback delegate references
   #onLayerOpacityChangedHandlers: LayerOpacityChangedDelegate[] = [];
 
+  // Keep all callback delegates references
+  #onIndividualLayerLoadedHandlers: IndividualLayerLoadedDelegate[] = [];
+
   /** ***************************************************************************************************************************
    * The class constructor saves parameters and common configuration parameters in attributes.
    *
@@ -1432,6 +1435,9 @@ export abstract class AbstractGeoViewLayer {
     // Set loaded
     layerConfig.layerStatus = 'loaded';
 
+    // Emit event
+    this.#emitIndividualLayerLoaded({ layerPath: layerConfig.layerPath });
+
     // Set visibility
     this.setVisible(layerConfig.initialSettings?.states?.visible !== false, layerConfig.layerPath);
   }
@@ -1871,6 +1877,34 @@ export abstract class AbstractGeoViewLayer {
     EventHelper.offEvent(this.#onLayerOpacityChangedHandlers, callback);
   }
 
+  /**
+   * Emits an event to all handlers when the layer's features have been loaded on the map.
+   * @param {IndividualLayerLoadedEvent} event - The event to emit
+   * @private
+   */
+  #emitIndividualLayerLoaded(event: IndividualLayerLoadedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onIndividualLayerLoadedHandlers, event);
+  }
+
+  /**
+   * Registers an individual layer loaded event handler.
+   * @param {IndividualLayerLoadedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onIndividualLayerLoaded(callback: IndividualLayerLoadedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onIndividualLayerLoadedHandlers, callback);
+  }
+
+  /**
+   * Unregisters an individual layer loaded event handler.
+   * @param {IndividualLayerLoadedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offIndividualLayerLoaded(callback: IndividualLayerLoadedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onIndividualLayerLoadedHandlers, callback);
+  }
+
   // #endregion
 }
 
@@ -2019,6 +2053,19 @@ export type LayerStyleChangedEvent = {
   style: TypeStyleConfig;
 
   // TODO: Refactor - After layers refactoring, remove the layerPath parameter here
+  layerPath: string;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type IndividualLayerLoadedDelegate = EventDelegateBase<AbstractGeoViewLayer, IndividualLayerLoadedEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type IndividualLayerLoadedEvent = {
+  // The loaded layer
   layerPath: string;
 };
 

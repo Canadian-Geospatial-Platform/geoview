@@ -104,6 +104,9 @@ export abstract class AbstractGVLayer {
   // Keep all callback delegate references
   #onLayerOpacityChangedHandlers: LayerOpacityChangedDelegate[] = [];
 
+  // Keep all callback delegates references
+  #onIndividualLayerLoadedHandlers: IndividualLayerLoadedDelegate[] = [];
+
   /**
    * Constructs a GeoView layer to manage an OpenLayer layer.
    * @param {string} mapId - The map id
@@ -348,6 +351,9 @@ export abstract class AbstractGVLayer {
 
     // Set the layer status to loaded for the layer
     this.#layerStatus = 'loaded';
+
+    // Emit event
+    this.#emitIndividualLayerLoaded({ layerPath: this.#layerConfig.layerPath });
 
     // Now that the layer is loaded, set its visibility correctly (had to be done in the loaded event, not before, per prior note in pre-refactor)
     this.setVisible(this.#layerConfig.initialSettings?.states?.visible !== false);
@@ -1080,6 +1086,34 @@ export abstract class AbstractGVLayer {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerStyleChangedHandlers, callback);
   }
+
+  /**
+   * Emits an event to all handlers when the layer's features have been loaded on the map.
+   * @param {IndividualLayerLoadedEvent} event - The event to emit
+   * @private
+   */
+  #emitIndividualLayerLoaded(event: IndividualLayerLoadedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onIndividualLayerLoadedHandlers, event);
+  }
+
+  /**
+   * Registers an individual layer loaded event handler.
+   * @param {IndividualLayerLoadedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onIndividualLayerLoaded(callback: IndividualLayerLoadedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onIndividualLayerLoadedHandlers, callback);
+  }
+
+  /**
+   * Unregisters an individual layer loaded event handler.
+   * @param {IndividualLayerLoadedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offIndividualLayerLoaded(callback: IndividualLayerLoadedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onIndividualLayerLoadedHandlers, callback);
+  }
 }
 
 /**
@@ -1176,4 +1210,17 @@ export type LayerOpacityChangedEvent = {
   layerPath: string;
   // The filter
   opacity: number;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type IndividualLayerLoadedDelegate = EventDelegateBase<AbstractGVLayer, IndividualLayerLoadedEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type IndividualLayerLoadedEvent = {
+  // The loaded layer
+  layerPath: string;
 };
