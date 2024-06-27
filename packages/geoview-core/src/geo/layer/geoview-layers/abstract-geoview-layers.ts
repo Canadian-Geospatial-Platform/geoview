@@ -46,7 +46,6 @@ import {
   TypeClassBreakStyleConfig,
 } from '@/geo/map/map-schema-types';
 import { GeoViewLayerCreatedTwiceError } from '@/geo/layer/exceptions/layer-exceptions';
-import { validateExtent } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { getLegendStyles, getFeatureCanvas } from '@/geo/utils/renderer/geoview-renderer';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
@@ -1001,57 +1000,58 @@ export abstract class AbstractGeoViewLayer {
     return layerGroup;
   }
 
-  /** ***************************************************************************************************************************
-   * Returns the layer bounds or undefined if not defined in the layer configuration or the metadata. If projectionCode is
-   * defined, returns the bounds in the specified projection otherwise use the map projection. The bounds are different from the
-   * extent. They are mainly used for display purposes to show the bounding box in which the data resides and to zoom in on the
-   * entire layer data. It is not used by openlayer to limit the display of data on the map.
-   *
-   * @param {string} layerPath The layer path to the layer's configuration.
-   * @param {string | number | undefined} projectionCode Optional projection code to use for the returned bounds.
-   *
-   * @returns {Extent} The layer bounding box.
-   */
-  getMetadataBounds(layerPath: string, projectionCode: string | number | undefined = undefined): Extent | undefined {
-    let bounds: Extent | undefined;
-    const processGroupLayerBounds = (listOfLayerEntryConfig: ConfigBaseClass[]): void => {
-      listOfLayerEntryConfig.forEach((layerConfig) => {
-        if (layerEntryIsGroupLayer(layerConfig)) processGroupLayerBounds(layerConfig.listOfLayerEntryConfig);
-        else if (layerConfig.initialSettings?.bounds) {
-          if (!bounds)
-            bounds = [
-              layerConfig.initialSettings.bounds[0],
-              layerConfig.initialSettings.bounds[1],
-              layerConfig.initialSettings.bounds[2],
-              layerConfig.initialSettings.bounds[3],
-            ];
-          else
-            bounds = [
-              Math.min(layerConfig.initialSettings.bounds[0], bounds[0]),
-              Math.min(layerConfig.initialSettings.bounds[1], bounds[1]),
-              Math.max(layerConfig.initialSettings.bounds[2], bounds[2]),
-              Math.max(layerConfig.initialSettings.bounds[3], bounds[3]),
-            ];
-        }
-      });
-    };
-    // GV The following code will need to be modified when the topmost layer of a GeoView
-    // GV layer creates dynamicaly a group out of a list of layers.
-    const layerConfig: ConfigBaseClass | ConfigBaseClass[] | undefined = layerPath.includes('/')
-      ? this.getLayerConfig(layerPath)
-      : this.listOfLayerEntryConfig;
-    if (layerConfig) {
-      if (Array.isArray(layerConfig)) processGroupLayerBounds(layerConfig);
-      else processGroupLayerBounds([layerConfig]);
+  // TODO: Obsolete - Delete? Commenting out for now
+  // /** ***************************************************************************************************************************
+  //  * Returns the layer bounds or undefined if not defined in the layer configuration or the metadata. If projectionCode is
+  //  * defined, returns the bounds in the specified projection otherwise use the map projection. The bounds are different from the
+  //  * extent. They are mainly used for display purposes to show the bounding box in which the data resides and to zoom in on the
+  //  * entire layer data. It is not used by openlayer to limit the display of data on the map.
+  //  *
+  //  * @param {string} layerPath The layer path to the layer's configuration.
+  //  * @param {string | number | undefined} projectionCode Optional projection code to use for the returned bounds.
+  //  *
+  //  * @returns {Extent} The layer bounding box.
+  //  */
+  // getMetadataBounds(layerPath: string, projectionCode: string | number | undefined = undefined): Extent | undefined {
+  //   let bounds: Extent | undefined;
+  //   const processGroupLayerBounds = (listOfLayerEntryConfig: ConfigBaseClass[]): void => {
+  //     listOfLayerEntryConfig.forEach((layerConfig) => {
+  //       if (layerEntryIsGroupLayer(layerConfig)) processGroupLayerBounds(layerConfig.listOfLayerEntryConfig);
+  //       else if (layerConfig.initialSettings?.bounds) {
+  //         if (!bounds)
+  //           bounds = [
+  //             layerConfig.initialSettings.bounds[0],
+  //             layerConfig.initialSettings.bounds[1],
+  //             layerConfig.initialSettings.bounds[2],
+  //             layerConfig.initialSettings.bounds[3],
+  //           ];
+  //         else
+  //           bounds = [
+  //             Math.min(layerConfig.initialSettings.bounds[0], bounds[0]),
+  //             Math.min(layerConfig.initialSettings.bounds[1], bounds[1]),
+  //             Math.max(layerConfig.initialSettings.bounds[2], bounds[2]),
+  //             Math.max(layerConfig.initialSettings.bounds[3], bounds[3]),
+  //           ];
+  //       }
+  //     });
+  //   };
+  //   // GV The following code will need to be modified when the topmost layer of a GeoView
+  //   // GV layer creates dynamicaly a group out of a list of layers.
+  //   const layerConfig: ConfigBaseClass | ConfigBaseClass[] | undefined = layerPath.includes('/')
+  //     ? this.getLayerConfig(layerPath)
+  //     : this.listOfLayerEntryConfig;
+  //   if (layerConfig) {
+  //     if (Array.isArray(layerConfig)) processGroupLayerBounds(layerConfig);
+  //     else processGroupLayerBounds([layerConfig]);
 
-      // TODO: Check - Are the bounds initially always 4326?
-      if (projectionCode && bounds) {
-        bounds = validateExtent(bounds);
-        return Projection.transformExtent(bounds, Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${projectionCode}`);
-      }
-    }
-    return bounds;
-  }
+  //     // TODO: Check - Are the bounds initially always 4326?
+  //     if (projectionCode && bounds) {
+  //       bounds = validateExtent(bounds);
+  //       return Projection.transformExtent(bounds, `EPSG:4326`, `EPSG:${projectionCode}`);
+  //     }
+  //   }
+  //   return bounds;
+  // }
 
   /** ***************************************************************************************************************************
    * Returns the domain of the specified field or null if the field has no domain.
