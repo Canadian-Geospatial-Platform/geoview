@@ -349,6 +349,9 @@ export abstract class AbstractGVLayer {
     // Set the layer status to loaded for the layer
     this.#layerStatus = 'loaded';
 
+    // Emit event from layer API
+    this.getMapViewer().layer.layerLoaded(this.#layerConfig.layerPath);
+
     // Now that the layer is loaded, set its visibility correctly (had to be done in the loaded event, not before, per prior note in pre-refactor)
     this.setVisible(this.#layerConfig.initialSettings?.states?.visible !== false);
   }

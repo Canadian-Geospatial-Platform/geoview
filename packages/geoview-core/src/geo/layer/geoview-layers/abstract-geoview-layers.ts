@@ -1432,6 +1432,9 @@ export abstract class AbstractGeoViewLayer {
     // Set loaded
     layerConfig.layerStatus = 'loaded';
 
+    // Emit event from layer API
+    this.getMapViewer().layer.layerLoaded(layerConfig.layerPath);
+
     // Set visibility
     this.setVisible(layerConfig.initialSettings?.states?.visible !== false, layerConfig.layerPath);
   }

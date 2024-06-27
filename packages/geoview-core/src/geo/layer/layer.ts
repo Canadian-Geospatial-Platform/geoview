@@ -145,6 +145,9 @@ export class LayerApi {
   #onLayerAddedHandlers: LayerAddedDelegate[] = [];
 
   // Keep all callback delegates references
+  #onLayerLoadedHandlers: LayerLoadedDelegate[] = [];
+
+  // Keep all callback delegates references
   #onLayerRemovedHandlers: LayerRemovedDelegate[] = [];
 
   // Keep all callback delegates references
@@ -1198,6 +1201,14 @@ export class LayerApi {
   }
 
   /**
+   * Emits layer loaded event
+   * @param {string} layerPath - Path of loaded layer
+   */
+  layerLoaded(layerPath: string): void {
+    this.#emitLayerLoaded({ layerPath });
+  }
+
+  /**
    * Highlights layer or sublayer on map
    *
    * @param {string} layerPath - ID of layer to highlight
@@ -1492,6 +1503,34 @@ export class LayerApi {
 
   /**
    * Emits an event to all handlers.
+   * @param {LayerLoadedEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerLoaded(event: LayerLoadedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerLoadedHandlers, event);
+  }
+
+  /**
+   * Registers a layer loaded event handler.
+   * @param {LayerLoadedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerLoaded(callback: LayerLoadedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerLoadedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer loaded event handler.
+   * @param {LayerLoadedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerLoaded(callback: LayerLoadedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerLoadedHandlers, callback);
+  }
+
+  /**
+   * Emits an event to all handlers.
    * @param {LayerRemovedEvent} event - The event to emit
    * @private
    */
@@ -1557,6 +1596,19 @@ type LayerAddedDelegate = EventDelegateBase<LayerApi, LayerAddedEvent, void>;
 export type LayerAddedEvent = {
   // The added layer
   layer: AbstractGeoViewLayer;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerLoadedDelegate = EventDelegateBase<LayerApi, LayerLoadedEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerLoadedEvent = {
+  // The loaded layer
+  layerPath: string;
 };
 
 /**
