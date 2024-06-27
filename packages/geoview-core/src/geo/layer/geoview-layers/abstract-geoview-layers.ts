@@ -178,6 +178,9 @@ export abstract class AbstractGeoViewLayer {
   // Keep all callback delegate references
   #onLayerOpacityChangedHandlers: LayerOpacityChangedDelegate[] = [];
 
+  // Keep all callback delegates references
+  #onLayerLoadedHandlers: LayerLoadedDelegate[] = [];
+
   /** ***************************************************************************************************************************
    * The class constructor saves parameters and common configuration parameters in attributes.
    *
@@ -1432,6 +1435,9 @@ export abstract class AbstractGeoViewLayer {
     // Set loaded
     layerConfig.layerStatus = 'loaded';
 
+    // Emit event
+    this.#emitLayerLoaded({ layerPath: layerConfig.layerPath });
+
     // Set visibility
     this.setVisible(layerConfig.initialSettings?.states?.visible !== false, layerConfig.layerPath);
   }
@@ -1871,6 +1877,34 @@ export abstract class AbstractGeoViewLayer {
     EventHelper.offEvent(this.#onLayerOpacityChangedHandlers, callback);
   }
 
+  /**
+   * Emits an event to all handlers when the layer's features have been loaded on the map.
+   * @param {LayerLoadedEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerLoaded(event: LayerLoadedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerLoadedHandlers, event);
+  }
+
+  /**
+   * Registers a layer loaded event handler.
+   * @param {LayerLoadedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerLoaded(callback: LayerLoadedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerLoadedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer loaded event handler.
+   * @param {LayerLoadedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerLoaded(callback: LayerLoadedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerLoadedHandlers, callback);
+  }
+
   // #endregion
 }
 
@@ -2019,6 +2053,19 @@ export type LayerStyleChangedEvent = {
   style: TypeStyleConfig;
 
   // TODO: Refactor - After layers refactoring, remove the layerPath parameter here
+  layerPath: string;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerLoadedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerLoadedEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerLoadedEvent = {
+  // The loaded layer
   layerPath: string;
 };
 
