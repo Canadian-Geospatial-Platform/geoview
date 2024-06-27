@@ -2,25 +2,61 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "GeoView Area of Interest Panel Schema",
   "type": "object",
-  "version": 1.0,
+  "version": "1.0",
   "comments": "Configuration for GeoView Area of interest package.",
   "additionalProperties": false,
   "properties": {
     "isOpen": {
-      "type": "boolean",
       "description": "Specifies whether the area of interest panel is initially open or closed",
+      "type": "boolean",
       "default": false
+    },
+    "aoiList": {
+      "description": "Area of Interest list from which we can select.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "imageUrl": {
+            "type": "string"
+          },
+          "aoiTitle": {
+            "type": "string"
+          },
+          "extent": {
+            "type": "array",
+            "items": [
+              {
+                "type": "number",
+                "minimum": -180,
+                "maximum": 180
+              },
+              {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90
+              },
+              {
+                "type": "number",
+                "minimum": -180,
+                "maximum": 180
+              },
+              {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90
+              }
+            ]
+          }
+        },
+        "required": ["aoiTitle", "extent"]
+      }
     },
     "version": {
       "type": "string",
-      "enum": [
-        "1.0"
-      ],
+      "enum": ["1.0"],
       "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
     }
-  },
-  "required": [
-    "isOpen"
-  ]
+  }
 }
-
