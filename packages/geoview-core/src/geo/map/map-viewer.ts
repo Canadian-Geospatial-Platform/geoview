@@ -334,34 +334,39 @@ export class MapViewer {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async #handleMapMoveEnd(event: MapEvent): Promise<void> {
-    // Get the center coordinates
-    const centerCoordinates = this.getView().getCenter()!;
+    try {
+      // Get the center coordinates
+      const centerCoordinates = this.getView().getCenter()!;
 
-    // Get the projection code
-    const projCode = this.getView().getProjection().getCode();
+      // Get the projection code
+      const projCode = this.getView().getProjection().getCode();
 
-    // Get the pointer position
-    const pointerPosition = {
-      projected: centerCoordinates,
-      pixel: this.map.getPixelFromCoordinate(centerCoordinates),
-      lnglat: Projection.transformPoints([centerCoordinates], projCode, Projection.PROJECTION_NAMES.LNGLAT)[0],
-      dragging: false,
-    };
+      // Get the pointer position
+      const pointerPosition = {
+        projected: centerCoordinates,
+        pixel: this.map.getPixelFromCoordinate(centerCoordinates),
+        lnglat: Projection.transformPoints([centerCoordinates], projCode, Projection.PROJECTION_NAMES.LNGLAT)[0],
+        dragging: false,
+      };
 
-    // Get the degree rotation
-    const degreeRotation = this.getNorthArrowAngle();
+      // Get the degree rotation
+      const degreeRotation = this.getNorthArrowAngle();
 
-    // Get the north visibility
-    const isNorthVisible = this.checkNorth();
+      // Get the north visibility
+      const isNorthVisible = this.checkNorth();
 
-    // Get the scale information
-    const scale = await MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
+      // Get the scale information
+      const scale = await MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
 
-    // Save in the store
-    MapEventProcessor.setMapMoveEnd(this.mapId, centerCoordinates, pointerPosition, degreeRotation, isNorthVisible, scale);
+      // Save in the store
+      MapEventProcessor.setMapMoveEnd(this.mapId, centerCoordinates, pointerPosition, degreeRotation, isNorthVisible, scale);
 
-    // Emit to the outside
-    this.#emitMapMoveEnd({ lnglat: centerCoordinates });
+      // Emit to the outside
+      this.#emitMapMoveEnd({ lnglat: centerCoordinates });
+    } catch (error) {
+      // Log
+      logger.logError('Failed in MapViewer.#handleMapMoveEnd', error);
+    }
   }
 
   /**
@@ -370,22 +375,31 @@ export class MapViewer {
    * @private
    */
   #handleMapPointerMove(event: MapEvent): void {
-    // Get the projection code
-    const projCode = this.getView().getProjection().getCode();
+    try {
+      // Get the projection code
+      const projCode = this.getView().getProjection().getCode();
 
-    // Get the pointer position info
-    const pointerPosition = {
-      projected: (event as MapBrowserEvent<UIEvent>).coordinate,
-      pixel: (event as MapBrowserEvent<UIEvent>).pixel,
-      lnglat: Projection.transformPoints([(event as MapBrowserEvent<UIEvent>).coordinate], projCode, Projection.PROJECTION_NAMES.LNGLAT)[0],
-      dragging: (event as MapBrowserEvent<UIEvent>).dragging,
-    };
+      // Get the pointer position info
+      const pointerPosition = {
+        projected: (event as MapBrowserEvent<UIEvent>).coordinate,
+        pixel: (event as MapBrowserEvent<UIEvent>).pixel,
+        lnglat: Projection.transformPoints(
+          [(event as MapBrowserEvent<UIEvent>).coordinate],
+          projCode,
+          Projection.PROJECTION_NAMES.LNGLAT
+        )[0],
+        dragging: (event as MapBrowserEvent<UIEvent>).dragging,
+      };
 
-    // Save in the store
-    MapEventProcessor.setMapPointerPosition(this.mapId, pointerPosition);
+      // Save in the store
+      MapEventProcessor.setMapPointerPosition(this.mapId, pointerPosition);
 
-    // Emit to the outside
-    this.#emitMapPointerMove(pointerPosition);
+      // Emit to the outside
+      this.#emitMapPointerMove(pointerPosition);
+    } catch (error) {
+      // Log
+      logger.logError('Failed in MapViewer.#handleMapPointerMove', error);
+    }
   }
 
   /**
@@ -394,25 +408,34 @@ export class MapViewer {
    * @private
    */
   #handleMapSingleClick(event: MapEvent): void {
-    // Get the projection code
-    const projCode = this.getView().getProjection().getCode();
+    try {
+      // Get the projection code
+      const projCode = this.getView().getProjection().getCode();
 
-    // Get the click coordinates
-    const clickCoordinates = {
-      projected: (event as MapBrowserEvent<UIEvent>).coordinate,
-      pixel: (event as MapBrowserEvent<UIEvent>).pixel,
-      lnglat: Projection.transformPoints([(event as MapBrowserEvent<UIEvent>).coordinate], projCode, Projection.PROJECTION_NAMES.LNGLAT)[0],
-      dragging: (event as MapBrowserEvent<UIEvent>).dragging,
-    };
+      // Get the click coordinates
+      const clickCoordinates = {
+        projected: (event as MapBrowserEvent<UIEvent>).coordinate,
+        pixel: (event as MapBrowserEvent<UIEvent>).pixel,
+        lnglat: Projection.transformPoints(
+          [(event as MapBrowserEvent<UIEvent>).coordinate],
+          projCode,
+          Projection.PROJECTION_NAMES.LNGLAT
+        )[0],
+        dragging: (event as MapBrowserEvent<UIEvent>).dragging,
+      };
 
-    // Save in the store
-    MapEventProcessor.setClickCoordinates(this.mapId, clickCoordinates).catch((error) => {
+      // Save in the store
+      MapEventProcessor.setClickCoordinates(this.mapId, clickCoordinates).catch((error) => {
+        // Log
+        logger.logPromiseFailed('setClickCoordinates in #handleMapSingleClick in MapViewer', error);
+      });
+
+      // Emit to the outside
+      this.#emitMapSingleClick(clickCoordinates);
+    } catch (error) {
       // Log
-      logger.logPromiseFailed('setClickCoordinates in #handleMapSingleClick in MapViewer', error);
-    });
-
-    // Emit to the outside
-    this.#emitMapSingleClick(clickCoordinates);
+      logger.logError('Failed in MapViewer.#handleMapSingleClick', error);
+    }
   }
 
   /**
@@ -422,14 +445,19 @@ export class MapViewer {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   #handleMapZoomEnd(event: ObjectEvent): void {
-    // Read the zoom value
-    const zoom = this.getView().getZoom()!;
+    try {
+      // Read the zoom value
+      const zoom = this.getView().getZoom()!;
 
-    // Save in the store
-    MapEventProcessor.setZoom(this.mapId, zoom);
+      // Save in the store
+      MapEventProcessor.setZoom(this.mapId, zoom);
 
-    // Emit to the outside
-    this.#emitMapZoomEnd({ zoom });
+      // Emit to the outside
+      this.#emitMapZoomEnd({ zoom });
+    } catch (error) {
+      // Log
+      logger.logError('Failed in MapViewer.#handleMapZoomEnd', error);
+    }
   }
 
   /**
@@ -439,14 +467,19 @@ export class MapViewer {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   #handleMapRotation(event: ObjectEvent): void {
-    // Get the map rotation
-    const rotation = this.getView().getRotation();
+    try {
+      // Get the map rotation
+      const rotation = this.getView().getRotation();
 
-    // Save in the store
-    MapEventProcessor.setRotation(this.mapId, rotation);
+      // Save in the store
+      MapEventProcessor.setRotation(this.mapId, rotation);
 
-    // Emit to the outside
-    this.#emitMapRotation({ rotation });
+      // Emit to the outside
+      this.#emitMapRotation({ rotation });
+    } catch (error) {
+      // Log
+      logger.logError('Failed in MapViewer.#handleMapRotation', error);
+    }
   }
 
   /**
@@ -457,17 +490,22 @@ export class MapViewer {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async #handleMapChangeSize(event: ObjectEvent): Promise<void> {
-    // Get the scale information
-    const scale = await MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
+    try {
+      // Get the scale information
+      const scale = await MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
 
-    // Get the size as [number, number]
-    const size = this.map.getSize() as unknown as [number, number];
+      // Get the size as [number, number]
+      const size = this.map.getSize() as unknown as [number, number];
 
-    // Save in the store
-    MapEventProcessor.setMapChangeSize(this.mapId, size, scale);
+      // Save in the store
+      MapEventProcessor.setMapChangeSize(this.mapId, size, scale);
 
-    // Emit to the outside
-    this.#emitMapChangeSize({ size });
+      // Emit to the outside
+      this.#emitMapChangeSize({ size });
+    } catch (error) {
+      // Log
+      logger.logError('Failed in MapViewer.#handleMapChangeSize', error);
+    }
   }
 
   /**
