@@ -589,16 +589,6 @@ export class MapViewer {
       logger.logError('Failed in #checkLayerResultSetReady', error);
     });
 
-    // Zoom to extent provided in config, it present
-    if (this.mapFeaturesConfig.map.viewSettings.initialView?.extent)
-      await this.zoomToExtent(
-        Projection.transformExtent(
-          this.mapFeaturesConfig.map.viewSettings.initialView?.extent,
-          Projection.PROJECTION_NAMES.LNGLAT,
-          `EPSG:${this.mapFeaturesConfig.map.viewSettings.projection}`
-        )
-      );
-
     // Start checking for map layers processed
     this.#checkMapLayersProcessed();
 
@@ -611,6 +601,37 @@ export class MapViewer {
     // Save in the store that the map is loaded
     // GV This removes the spinning circle overlay
     MapEventProcessor.setMapLoaded(this.mapId, true);
+
+    // Zoom to extent provided in config, it present
+    if (this.mapFeaturesConfig.map.viewSettings.initialView?.extent)
+      await this.zoomToExtent(
+        Projection.transformExtent(
+          this.mapFeaturesConfig.map.viewSettings.initialView?.extent,
+          Projection.PROJECTION_NAMES.LNGLAT,
+          `EPSG:${this.mapFeaturesConfig.map.viewSettings.projection}`
+        )
+      );
+
+    // Zoom to extents of layers selected in config, if provided.
+    if (this.mapFeaturesConfig.map.viewSettings.initialView?.layerIds) {
+      let layerExtents = this.layer.getExtentOfMultipleLayers(this.mapFeaturesConfig.map.viewSettings.initialView.layerIds);
+
+      // If extents have infinity, use default instead
+      if (layerExtents.includes(Infinity))
+        layerExtents = this.convertExtentLngLatToMapProj(CV_MAP_EXTENTS[this.mapFeaturesConfig.map.viewSettings.projection]);
+
+      // Zoom to calculated extent
+      if (layerExtents.length)
+        // TODO: Timeout allows for map height to be set before zoom happens, so padding is applied properly
+        setTimeout(
+          // eslint-disable-next-line @typescript-eslint/no-misused-promises
+          () =>
+            this.zoomToExtent(layerExtents).catch((error) =>
+              logger.logPromiseFailed('promiseMapLayers in #checkMapLayersProcessed in map-viewer', error)
+            ),
+          200
+        );
+    }
   }
 
   /**
@@ -638,21 +659,6 @@ export class MapViewer {
           // Log
           logger.logInfo(`Map is ready with ${layersCount} processed layers`, this.mapId);
           logger.logMarkerCheck(`mapReady-${this.mapId}`, `for all ${layersCount} layers to be processed`);
-
-          // Zoom to extents of layers selected in config, if provided.
-          if (this.mapFeaturesConfig.map.viewSettings.initialView?.layerIds) {
-            let layerExtents = this.layer.getExtentOfMultipleLayers(this.mapFeaturesConfig.map.viewSettings.initialView.layerIds);
-            if (layerExtents.includes(Infinity))
-              layerExtents = Projection.transformExtent(
-                CV_MAP_EXTENTS[this.mapFeaturesConfig.map.viewSettings.projection],
-                Projection.PROJECTION_NAMES.LNGLAT,
-                `EPSG:${this.mapFeaturesConfig.map.viewSettings.projection}`
-              );
-            if (layerExtents.length)
-              this.zoomToExtent(layerExtents).catch((error) =>
-                logger.logPromiseFailed('promiseMapLayers in #checkMapLayersProcessed in map-viewer', error)
-              );
-          }
 
           // Is ready
           this.#mapLayersProcessed = true;

@@ -85,12 +85,24 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
     const layer = this.findLayerByPath(layers, layerPath);
 
+    // If layer bounds are not set, or have infinity (can be due to setting before features load), recalculate
+    if (layer && (!layer.bounds || layer.bounds?.includes(Infinity))) {
+      const newBounds = MapEventProcessor.getMapViewerLayerAPI(mapId).calculateBounds(layerPath);
+      if (newBounds) {
+        // Set layer bounds
+        layer.bounds = newBounds;
+
+        // Set updated legend layers
+        this.getLayerState(mapId).setterActions.setLegendLayers(layers);
+      }
+    }
+
     // If found and bounds found
     if (layer && layer.bounds) {
       return layer.bounds;
     }
 
-    // No bounds founds
+    // No bounds found
     return undefined;
   }
 
