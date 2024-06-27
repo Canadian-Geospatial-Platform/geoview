@@ -145,6 +145,9 @@ export class LayerApi {
   #onLayerAddedHandlers: LayerAddedDelegate[] = [];
 
   // Keep all callback delegates references
+  #onLayersLoadedHandlers: LayersLoadedDelegate[] = [];
+
+  // Keep all callback delegates references
   #onLayerRemovedHandlers: LayerRemovedDelegate[] = [];
 
   // Keep all callback delegates references
@@ -680,6 +683,13 @@ export class LayerApi {
         layerBeingAdded!
           .createGeoViewLayers()
           .then(() => {
+            // Register a hook when a layer is loaded on the map
+            layerBeingAdded!.onLayerLoaded((sender, payload) => {
+              // Log
+              logger.logDebug(`${payload.layerPath} loaded on map ${this.getMapId()}`);
+              this.#emitLayersLoaded({ layer: sender, layerPath: payload.layerPath });
+            });
+
             // Add the layer on the map
             this.#addToMap(layerBeingAdded!);
 
@@ -1491,6 +1501,34 @@ export class LayerApi {
   }
 
   /**
+   * Emits an event to all handlers when the layer's features have been loaded on the map.
+   * @param {LayersLoadedEvent} event - The event to emit
+   * @private
+   */
+  #emitLayersLoaded(event: LayersLoadedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayersLoadedHandlers, event);
+  }
+
+  /**
+   * Registers a layer loaded event handler.
+   * @param {LayersLoadedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayersLoaded(callback: LayersLoadedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayersLoadedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer loaded event handler.
+   * @param {LayersLoadedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayersLoaded(callback: LayersLoadedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayersLoadedHandlers, callback);
+  }
+
+  /**
    * Emits an event to all handlers.
    * @param {LayerRemovedEvent} event - The event to emit
    * @private
@@ -1557,6 +1595,21 @@ type LayerAddedDelegate = EventDelegateBase<LayerApi, LayerAddedEvent, void>;
 export type LayerAddedEvent = {
   // The added layer
   layer: AbstractGeoViewLayer;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayersLoadedDelegate = EventDelegateBase<LayerApi, LayersLoadedEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayersLoadedEvent = {
+  // The loaded layer
+  layer: AbstractGeoViewLayer;
+
+  layerPath: string;
 };
 
 /**

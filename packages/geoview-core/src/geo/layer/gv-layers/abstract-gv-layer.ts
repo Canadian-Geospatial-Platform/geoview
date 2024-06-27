@@ -104,6 +104,9 @@ export abstract class AbstractGVLayer {
   // Keep all callback delegate references
   #onLayerOpacityChangedHandlers: LayerOpacityChangedDelegate[] = [];
 
+  // Keep all callback delegates references
+  #onLayerLoadedHandlers: LayerLoadedDelegate[] = [];
+
   /**
    * Constructs a GeoView layer to manage an OpenLayer layer.
    * @param {string} mapId - The map id
@@ -348,6 +351,9 @@ export abstract class AbstractGVLayer {
 
     // Set the layer status to loaded for the layer
     this.#layerStatus = 'loaded';
+
+    // Emit event
+    this.#emitLayerLoaded({ layerPath: this.#layerConfig.layerPath });
 
     // Now that the layer is loaded, set its visibility correctly (had to be done in the loaded event, not before, per prior note in pre-refactor)
     this.setVisible(this.#layerConfig.initialSettings?.states?.visible !== false);
@@ -1080,6 +1086,34 @@ export abstract class AbstractGVLayer {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerStyleChangedHandlers, callback);
   }
+
+  /**
+   * Emits an event to all handlers when the layer's features have been loaded on the map.
+   * @param {LayerLoadedEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerLoaded(event: LayerLoadedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerLoadedHandlers, event);
+  }
+
+  /**
+   * Registers a layer loaded event handler.
+   * @param {LayerLoadedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerLoaded(callback: LayerLoadedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerLoadedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer loaded event handler.
+   * @param {LayerLoadedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerLoaded(callback: LayerLoadedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerLoadedHandlers, callback);
+  }
 }
 
 /**
@@ -1176,4 +1210,17 @@ export type LayerOpacityChangedEvent = {
   layerPath: string;
   // The filter
   opacity: number;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerLoadedDelegate = EventDelegateBase<AbstractGVLayer, LayerLoadedEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerLoadedEvent = {
+  // The loaded layer
+  layerPath: string;
 };
