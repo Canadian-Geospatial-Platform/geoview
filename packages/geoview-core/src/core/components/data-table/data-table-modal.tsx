@@ -7,7 +7,7 @@ import {
   DialogActions,
   DialogTitle,
   DialogContent,
-  Table,
+  MRTTable as Table,
   type MRT_ColumnDef as MRTColumnDef,
   Box,
   CircularProgress,

@@ -5,7 +5,7 @@ import { MaterialReactTable, MRT_TableOptions as MRTTableOptions, type MRT_RowDa
  * @param {MRTTableOptions} props props defined by material react table library.
  * @returns {JSX.Element}
  */
-export function Table<TData extends MRTRowData>(tableOptions: MRTTableOptions<TData>): JSX.Element {
+export function MRTTable<TData extends MRTRowData>(tableOptions: MRTTableOptions<TData>): JSX.Element {
   return <MaterialReactTable {...tableOptions} />;
 }
 

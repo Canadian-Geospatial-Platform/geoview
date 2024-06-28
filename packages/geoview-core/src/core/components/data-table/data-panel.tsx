@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { delay } from 'lodash';
-import { Box, FilterAltIcon, Skeleton } from '@/ui';
+import { Box, FilterAltIcon } from '@/ui';
 import DataTable from './data-table';
 import {
   useDataTableSelectedLayerPath,
@@ -24,6 +24,7 @@ import { CONTAINER_TYPE, LAYER_STATUS, TABS } from '@/core/utils/constant';
 import { MappedLayerDataType } from './data-table-types';
 import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
 import { TypeContainerBox } from '@/core/types/global-types';
+import DataSkeleton from './data-skeleton';
 
 interface DataPanelType {
   fullWidth?: boolean;
@@ -219,7 +220,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
    */
   const renderContent = (): JSX.Element | null => {
     if (isLoading || memoIsLayerQueryStatusProcessing()) {
-      return <Skeleton variant="rounded" width="100%" height={400} sx={{ bgcolor: theme.palette.grey[400] }} />;
+      return <DataSkeleton />;
     }
     if (!isLayerDisabled() && isSelectedLayerHasFeatures()) {
       return (
