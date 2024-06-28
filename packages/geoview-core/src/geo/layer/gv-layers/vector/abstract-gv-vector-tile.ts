@@ -1,5 +1,6 @@
 import VectorTile from 'ol/source/VectorTile';
-import BaseVectorLayer from 'ol/layer/BaseVector';
+import VectorTileLayer from 'ol/layer/VectorTile';
+import Feature from 'ol/Feature';
 import { Extent } from 'ol/extent';
 
 import { AbstractGVLayer } from '../abstract-gv-layer';
@@ -10,15 +11,15 @@ import { AbstractGVLayer } from '../abstract-gv-layer';
 export abstract class AbstractGVVectorTile extends AbstractGVLayer {
   /**
    * Overrides the get of the OpenLayers Layer
-   * @returns {BaseVectorLayer} The OpenLayers Layer
+   * @returns {VectorTileLayer<Feature>} The OpenLayers Layer
    */
   // Disabling 'any', because too many renderer types in OpenLayers
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  override getOLLayer(): BaseVectorLayer<VectorTile, any> {
+  override getOLLayer(): VectorTileLayer<Feature> {
     // Call parent and cast
     // Disabling 'any', because too many renderer types in OpenLayers
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return super.getOLLayer() as BaseVectorLayer<VectorTile, any>;
+    return super.getOLLayer() as VectorTileLayer<Feature>;
   }
 
   /**
