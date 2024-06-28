@@ -34,15 +34,6 @@ export class GVVectorTiles extends AbstractGVVectorTile {
   }
 
   /**
-   * Overrides the get of the OpenLayers Layer
-   * @returns {VectorTileLayer} The OpenLayers Layer
-   */
-  override getOLLayer(): VectorTileLayer {
-    // Call parent and cast
-    return super.getOLLayer() as VectorTileLayer;
-  }
-
-  /**
    * Overrides the get of the layer configuration associated with the layer.
    * @returns {VectorTilesLayerEntryConfig} The layer configuration or undefined if not found.
    */

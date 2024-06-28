@@ -1,5 +1,4 @@
 import BaseLayer from 'ol/layer/Base';
-import BaseVectorLayer from 'ol/layer/BaseVector';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
@@ -29,7 +28,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * Constructs a GeoView Vector layer to manage an OpenLayer layer.
    * @param {string} mapId - The map id
    * @param {VectorSource} olSource - The OpenLayer source.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration.
+   * @param {VectorLayerEntryConfig} layerConfig - The layer configuration.
    */
   protected constructor(mapId: string, olSource: VectorSource, layerConfig: VectorLayerEntryConfig) {
     super(mapId, olSource, layerConfig);
@@ -65,15 +64,15 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Overrides the get of the OpenLayers Layer
-   * @returns {BaseVectorLayer<VectorSource, any>} The OpenLayers Layer
+   * @returns {VectorLayer<Feature>} The OpenLayers Layer
    */
   // Disabling 'any', because too many renderer types in OpenLayers
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  override getOLLayer(): BaseVectorLayer<VectorSource, any> {
+  override getOLLayer(): VectorLayer<Feature> {
     // Call parent and cast
     // Disabling 'any', because too many renderer types in OpenLayers
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return super.getOLLayer() as BaseVectorLayer<VectorSource, any>;
+    return super.getOLLayer() as VectorLayer<Feature>;
   }
 
   /**

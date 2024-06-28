@@ -306,12 +306,12 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * The layer entry configuration keeps a reference to the layer in the olLayer attribute.
    *
    * @param {VectorLayerEntryConfig} layerConfig The layer entry configuration used by the source.
-   * @param {VectorSource<Feature>} vectorSource The source configuration for the vector layer.
+   * @param {VectorSource} vectorSource The source configuration for the vector layer.
    *
-   * @returns {VectorLayer<VectorSource>} The vector layer created.
+   * @returns {VectorLayer<Feature>} The vector layer created.
    */
   // GV Layers Refactoring - Obsolete (this is bridging between config and layers, okay)
-  protected createVectorLayer(layerConfig: VectorLayerEntryConfig, vectorSource: VectorSource<Feature>): VectorLayer<VectorSource> {
+  protected createVectorLayer(layerConfig: VectorLayerEntryConfig, vectorSource: VectorSource): VectorLayer<Feature> {
     // TODO: remove link to language, layer should be created in one language and recreated if needed to change
     const language = AppEventProcessor.getDisplayLanguage(this.mapId);
 
@@ -322,10 +322,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     const requestResult = this.emitLayerRequesting({ config: layerConfig, source: vectorSource });
 
     // If any response
-    let olLayer: VectorLayer<VectorSource> | undefined;
+    let olLayer: VectorLayer<Feature> | undefined;
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
-      olLayer = requestResult[0] as VectorLayer<VectorSource>;
+      olLayer = requestResult[0] as VectorLayer<Feature>;
     }
 
     // If no olLayer was obtained
@@ -380,7 +380,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     try {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig(layerPath) as VectorLayerEntryConfig;
-      const layer = this.getOLLayer(layerPath) as VectorLayer<VectorSource>;
+      const layer = this.getOLLayer(layerPath) as VectorLayer<Feature>;
       const features = layer.getSource()!.getFeatures();
       const arrayOfFeatureInfoEntries = await this.formatFeatureInfoResult(features, layerConfig);
       return arrayOfFeatureInfoEntries;
@@ -467,7 +467,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   // GV Layers Refactoring - Obsolete (in layers)
   override getBounds(layerPath: string): Extent | undefined {
-    const layer = this.getOLLayer(layerPath) as VectorLayer<VectorSource> | undefined;
+    const layer = this.getOLLayer(layerPath) as VectorLayer<Feature> | undefined;
     const layerBounds = layer?.getSource()?.getExtent();
 
     // Return the calculated layer bounds

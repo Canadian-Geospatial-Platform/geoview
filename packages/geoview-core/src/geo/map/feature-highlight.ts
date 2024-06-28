@@ -26,7 +26,7 @@ export class FeatureHighlight {
 
   /** The hidden layer to display animations. */
   // GV It's public, to save an eslint warning, because even if it's not read in this class, it's actually important to instanciate per OpenLayer design.
-  overlayLayer: VectorLayer<VectorSource>;
+  overlayLayer: VectorLayer<Feature>;
 
   /** The fill for the highlight */
   #highlightColor = 'black';

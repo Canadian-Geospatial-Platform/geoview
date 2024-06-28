@@ -217,16 +217,16 @@ export class VectorTiles extends AbstractGeoViewRaster {
     const requestResult = this.emitLayerRequesting({ config: layerConfig, source });
 
     // If any response
-    let olLayer: VectorTileLayer | undefined;
+    let olLayer: VectorTileLayer<Feature> | undefined;
     if (requestResult.length > 0) {
       // Get the OpenLayer that was created
-      olLayer = requestResult[0] as VectorTileLayer;
+      olLayer = requestResult[0] as VectorTileLayer<Feature>;
     }
 
     // If no olLayer was obtained
     if (!olLayer) {
       // We're working in old LAYERS_HYBRID_MODE (in the new mode the code below is handled in the new classes)
-      const tileLayerOptions: TileOptions<VectorTileSource> = { source };
+      const tileLayerOptions: TileOptions<VectorTileSource<Feature>> = { source };
       // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
       if (layerConfig.initialSettings?.className !== undefined) tileLayerOptions.className = layerConfig.initialSettings.className;
       if (layerConfig.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerConfig.initialSettings.extent;
@@ -356,6 +356,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
   // GV Layers Refactoring - Obsolete (just should be removed?)
   setVectorTileStyle(layerPath: string, styleUrl: string): Promise<unknown> {
     // FIXME: Check if this should be removed or done somewhere else?
-    return applyStyle(this.getMapViewer().layer.getOLLayer(layerPath) as VectorTileLayer, styleUrl);
+    return applyStyle(this.getMapViewer().layer.getOLLayer(layerPath) as VectorTileLayer<Feature>, styleUrl);
   }
 }
