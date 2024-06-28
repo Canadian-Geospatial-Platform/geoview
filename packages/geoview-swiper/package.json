@@ -10,7 +10,7 @@
   "author": "Saleh Yassin",
   "license": "MIT",
   "dependencies": {
-    "geoview-core": "workspace:~0.1.0",
+    "geoview-core": "workspace:~1.0.0",
     "lodash": "^4.17.21",
     "ol": "9.1.0",
     "react-draggable": "^4.4.5"

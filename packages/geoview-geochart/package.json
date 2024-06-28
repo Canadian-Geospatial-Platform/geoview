@@ -14,7 +14,7 @@
   "license": "MIT",
   "dependencies": {
     "lodash": "^4.17.21",
-    "geoview-core": "workspace:~0.1.0",
+    "geoview-core": "workspace:~1.0.0",
     "geochart": "Canadian-Geospatial-Platform/geochart#develop",
     "@mui/material": "^5.15.11"
   },

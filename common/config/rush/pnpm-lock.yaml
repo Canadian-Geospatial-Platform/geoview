@@ -59,7 +59,7 @@ importers:
   ../../packages/geoview-basemap-panel:
     dependencies:
       geoview-core:
-        specifier: workspace:~0.1.0
+        specifier: workspace:~1.0.0
         version: link:../geoview-core
     devDependencies:
       '@babel/core':
@@ -496,7 +496,7 @@ importers:
         specifier: Canadian-Geospatial-Platform/geochart#develop
         version: github.com/Canadian-Geospatial-Platform/geochart/a3f626faf274e58b2683f6ac9bcbe7387c27d89a(@types/react@18.3.3)
       geoview-core:
-        specifier: workspace:~0.1.0
+        specifier: workspace:~1.0.0
         version: link:../geoview-core
       lodash:
         specifier: ^4.17.21
@@ -572,7 +572,7 @@ importers:
   ../../packages/geoview-swiper:
     dependencies:
       geoview-core:
-        specifier: workspace:~0.1.0
+        specifier: workspace:~1.0.0
         version: link:../geoview-core
       lodash:
         specifier: ^4.17.21
@@ -648,7 +648,7 @@ importers:
         specifier: ^5.15.11
         version: 5.15.20(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
       geoview-core:
-        specifier: workspace:~0.1.0
+        specifier: workspace:~1.0.0
         version: link:../geoview-core
     devDependencies:
       '@babel/core':
