@@ -10,7 +10,7 @@
   "author": "Damon Ulmi",
   "license": "MIT",
   "dependencies": {
-    "geoview-core": "workspace:~0.1.0",
+    "geoview-core": "workspace:~1.0.0",
     "@mui/material": "^5.15.11"
   },
   "devDependencies": {
