@@ -75,5 +75,6 @@
       "bold": false,
       "italic": false
     }
-  ]
+  ],
+  "editor.guides.indentation": false
 }

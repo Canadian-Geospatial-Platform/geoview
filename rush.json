@@ -20,6 +20,10 @@
   },
   "projects": [
     {
+      "packageName": "geoview-aoi-panel",
+      "projectFolder": "packages/geoview-aoi-panel"
+    },
+    {
       "packageName": "geoview-basemap-panel",
       "projectFolder": "packages/geoview-basemap-panel"
     },
