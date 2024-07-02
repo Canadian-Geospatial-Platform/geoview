@@ -1,0 +1,212 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>CGDI Water Resources Demo - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>CGDI Water Resources Demo</strong></h1></td></tr><tr><td><a href="./demos.html">Main</a><br/></td></tr></tbody></table><table><tbody><tr><td><p>Demonstration of National Spatial Data Catalogue - Water Resources Starter Kit in GeoView</p></td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HMapWR1">Water Resources</h4></div><button class="collapsible active">Map Status Flags</button><pre id="HMapWR1-state" class="panel map-title-holder"></pre><div id="MapWR1" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3978
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': true,
+            'labeled': false
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'HMS',
+              'geoviewLayerName': { 'en': 'Hydrometric Monitoring Stations' },
+              'geoviewLayerType': 'GeoJSON',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'hydrometric-stations',
+                  'layerName': { 'en': 'Hydrometric Stations' },
+                  'source': {
+                    'dataAccessPath': {
+                      'en': 'https://api.weather.gc.ca/collections/hydrometric-stations/items?f=json'
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'geomet',
+              'geoviewLayerName': { 'en': 'GeoMet' },
+              'metadataAccessPath': { 'en': 'https://geo.weather.gc.ca/geomet' },
+              'geoviewLayerType': 'ogcWms',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'HRDPA.06F_WATERSHED',
+                  'source': {
+                    'style': 'PRECIPMM_WATERSHED'
+                  }
+                },
+                {
+                  'layerId': 'HRDPA.06P_WATERSHED',
+                  'source': {
+                    'style': 'PRECIPMM_WATERSHED'
+                  }
+                },
+                {
+                  'layerId': 'HRDPA.6F_PR',
+                  'source': {
+                    'style': 'CAPA24-LINEAR'
+                  }
+                },
+                {
+                  'layerId': 'HRDPA.6P_PR',
+                  'source': {
+                    'style': 'CAPA24-LINEAR'
+                  }
+                },
+                {
+                  'layerId': 'HRDPA.24F_WATERSHED',
+                  'source': {
+                    'style': 'PRECIPMM_WATERSHED'
+                  }
+                },
+                { 
+                 'layerId': 'HRDPA.24P_WATERSHED',
+                  'source': {
+                    'style': 'PRECIPMM_WATERSHED'
+                  }
+                },
+                {
+                  'layerId': 'HRDPA.24F_PR',
+                  'source': {
+                    'style': 'CAPA24-LINEAR'
+                  }
+                },
+                {
+                  'layerId': 'HRDPA.24P_PR',
+                  'source': {
+                    'style': 'CAPA24-LINEAR'
+                  }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'groundwater',
+              'geoviewLayerName': { 'en': 'Groundwater Information Network' },
+              'metadataAccessPath': { 'en': 'https://gin.gw-info.net/service/gin/wms/mediator/gin_en' },
+              'geoviewLayerType': 'ogcWms',
+              'listOfLayerEntryConfig': [
+                { 'layerId': '3dmodel' },
+                { 'layerId': 'bedrockgeology' }
+                /*===========================================================================
+                { 'layerId': 'gw_confinement' },
+                { 'layerId': 'gw_vulnerability' },
+                { 'layerId': 'HydrogeologicUnit' },
+                { 'layerId': 'composition' },
+                { 'layerId': 'gw_flow' },
+                { 'layerId': 'gw_level' },
+                { 'layerId': 'MonitoringStations' },
+                { 'layerId': 'gw_recharge' },
+                { 'layerId': 'samples' },
+                { 'layerId': 'gw_usage' },
+                { 'layerId': 'hy_cond' },
+                { 'layerId': 'HydroRegion' },
+                { 'layerId': 'gw_piezometry' },
+                { 'layerId': 'surficialgeology' },
+                { 'layerId': 'WaterWells' }
+                /*===========================================================================*/
+              ]
+            },
+            {
+              'geoviewLayerId': 'CanVec',
+              'geoviewLayerName': { 'en': 'CanVec' },
+              'metadataAccessPath': { 'en': 'https://maps.geogratis.gc.ca/wms/canvec_en' },
+              'geoviewLayerType': 'ogcWms',
+              'listOfLayerEntryConfig': [
+                { 'layerId': 'dam_polygon_50k' },
+                { 'layerId': 'dam_polygon_250k' }
+              ]
+            },
+            {
+              'geoviewLayerId': 'Active_Inactive_Disposal_at_Sea_Sites',
+              'geoviewLayerName': { 'en': 'Active Inactive Disposal at Sea Sites' },
+              'metadataAccessPath': { 'en': 'https://maps-cartes.ec.gc.ca/arcgis/services/Active_Inactive_Disposal_at_Sea_Sites/MapServer/WMSServer' },
+              'geoviewLayerType': 'ogcWms',
+              'listOfLayerEntryConfig': [
+                { 'layerId': '0' }
+              ]
+            },
+            {
+              'geoviewLayerId': 'ShorelineSegmentationWithSCATClassification',
+              'geoviewLayerName': { 'en': 'Shoreline Segmentation With SCAT Classification' },
+              'metadataAccessPath': { 'en': 'https://maps-cartes.ec.gc.ca/arcgis/services/EPB_EPO/ShorelineSegmentationWithSCATClassification/MapServer/WMSServer' },
+              'geoviewLayerType': 'ogcWms',
+              'listOfLayerEntryConfig': [
+                { 'layerId': '0' },
+                { 'layerId': '1' },
+                { 'layerId': '2' },
+                { 'layerId': '3' },
+                { 'layerId': '4' }
+              ]
+            },
+            {
+              'geoviewLayerId': 'geomet2',
+              'geoviewLayerName': { 'en': 'GeoMet 2' },
+              'metadataAccessPath': { 'en': 'https://geo.weather.gc.ca/geomet' },
+              'geoviewLayerType': 'ogcWms',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'CaLDAS-NSRPS_2.5km_SnowDepth',
+                  'source': {
+                    'style': 'SNOWDEPTH'
+                  }
+                },
+                {
+                  'layerId': 'CaLDAS-NSRPS_2.5km_SnowWaterEquiv',
+                  'source': {
+                    'style': 'SNOWMASS'
+                  }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'abds',
+              'geoviewLayerName': { 'en': 'Arctic Marine Biodiversity' },
+              'metadataAccessPath': { 'en': 'https://geo.abds.is/geoserver/sambr/wms' },
+              'geoviewLayerType': 'ogcWms',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'C2f1_cold_currents',
+                  'source': {
+                    'style': 'BlueEndArrow'
+                  }
+                },
+                {
+                  'layerId': 'C2f1_riverine_inflow',
+                  'source': {
+                    'style': 'sambr_c2_f1_riverine'
+                  }
+                },
+                {
+                  'layerId': 'C2f1_warm_currents',
+                  'source': {
+                    'style': 'sambr_c2_f1_warm'
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map'],
+        'overviewMap': {'hideOnZoom': 7},
+        'footerBar': {
+          'tabs': {
+            'core': ['legend', 'layers', 'details', 'data-table']
+          }
+        },
+        'corePackages': [],
+        'theme': 'geo.ca'
+        }"></div><script src="codedoc.js"></script><script src="layerlib.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init((mapId) => {
+        if (mapId === 'MapWR1') {
+          listenToLegendLayerSetChanges('HMapWR1-state', 'MapWR1');
+        }
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

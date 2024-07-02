@@ -1,0 +1,53 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Package - Layers Panel</strong></h1></td></tr><tr><td><a href="./index.html">Main</a><br/><a href="#HUC1">Default Configuration</a><br/><a href="#HUC2">With Layers in Config</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page is used to showcase loading "Layers Panel" with the ability to add various layer types.</td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HUC1">1. Default Configuration</h4><a class="ref-link" href="#top">Top</a></div><select name="projections" id="projections"><option value="3857">Web Mercator (3857)</option><option value="3978">LCC (3978)</option></select> <button type="button" onclick="reloadMap()">Set Projection</button><div id="mapWM" class="llwp-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'zoom': 4,
+            'center': [-100, 60],
+            'projection': 3857
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': true,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+          ]
+        },
+        'theme': 'dark',
+        'components': [],
+        'corePackages': ['layers-panel', 'details-panel'],
+        'appBar': ['export'],
+        'suportedLanguages': ['en']
+      }"></div><h4>Add Layer Examples</h4><div style="font-size: smaller"><div>ESRI Feature Service Layer<ul><li>https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer/8</li></ul></div><div>ESRI Dynamic Service Layer<ul><li>https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer</li><li>https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/forest_industry_hotspots_en/MapServer</li></ul></div><div>WMS Layer<ul><li>https://ows.mundialis.de/services/service</li></ul></div><div>WFS Layer<ul><li>https://giswebservices.massgis.state.ma.us/geoserver/wfs</li><li>Select 'Aiports' layer</li></ul></div><div>XYZ Layer<ul><li>https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png</li></ul></div><div>GeoJson Layer<ul><li>https://canadian-geospatial-platform.github.io/geoview/public/geojson/polygons.json</li><li>https://canadian-geospatial-platform.github.io/geoview/public/geojson/lines.json</li><li>https://canadian-geospatial-platform.github.io/geoview/public/geojson/points.json</li></ul></div><div>OGC API Feature Layer<ul><li>https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev</li><li>https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev/collections/lakes</li></ul></div><div>GeoCore UUID Layer<ul><li>ccc75c12-5acc-4a6a-959f-ef6f621147b9</li></ul></div><div>GeoPackage Layer<ul><li>https://canadian-geospatial-platform.github.io/geoview/public/geojson/rivers.gpkg</li></ul></div></div><hr/><button type="button" class="collapsible">Configuration Snippet</button><pre id="mapWMCS" class="panel"></pre><hr/><div class="map-title-holder"><h4 id="HUC2">2. Layer Panel with layers in config</h4><a class="ref-link" href="#top">Top</a></div><div id="mapWM2" class="llwp-map" data-lang="en" data-config-url="./configs/layer-panel-zoom-config.json"></div><pre id="mapWM2CS" class="panel"></pre><script src="codedoc.js"></script><script>function reloadMap() {
+        cgpv.api.maps['mapWM'].loadMapFromJsonStringConfig (`{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': ${Number(document.getElementById('projections').value)}
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+            ]
+          },
+          'theme': 'dark',
+          'components': [],
+          'corePackages': ['layers-panel', 'details-panel'],
+          'appBar': ['export'],
+          'suportedLanguages': ['en']
+        }`);
+      }
+      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function () {
+        console.log('api is ready');
+
+        //create snippets
+        createConfigSnippet();
+        createCodeSnippet();
+      });</script></body></html>

@@ -1,0 +1,215 @@
+{
+  "general": {
+    "add": "Ajouter",
+    "close": "Fermer",
+    "layers": "Couches",
+    "name": "Nom",
+    "exit": "Sortir",
+    "open": "Ouvrir",
+    "remove": "Retirer",
+    "view": "Vue",
+    "openFullscreen": "Ouvrir en plein écran",
+    "closeFullscreen": "Fermer le plein écran",
+    "openGuide": "Ouvrir le guide",
+    "guide": "Guide",
+    "fullScreen": "Plein écran"
+  },
+  "mapnav": {
+    "arianavbar": "Groupe de buttons vertical pour navigation sur la carte",
+    "fullscreen": "Plein écran",
+    "home": "Retour à la vue initiale",
+    "zoomIn": "Zoom avant",
+    "zoomOut": "Zoom arrière",
+    "coordinates": "Basculer le format des coordonnées",
+    "scale": "Basculer entre l'échelle et la résolution",
+    "location": "Zoom sur ma position"
+  },
+  "mapctrl": {
+    "rotation": {
+      "resetRotation": "Réinitialiser la rotation",
+      "fixedNorth": "Nord fixe"
+    },
+    "mouseposition": {
+      "east": "E",
+      "west": "O",
+      "north": "N",
+      "south": "S"
+    },
+    "overviewmap": {
+      "toggle": "Basculer la carte d'aperçu",
+      "error": "Erreur lors du chargement de la carte d'aperçu"
+    },
+    "attribution": {
+      "defaultnrcan": "© Sa Majesté le Roi du Chef du Canada, représentée par le ministre des Ressources naturelle",
+      "tooltip": "Attribution"
+    },
+    "crosshair": "Utiliser les touches <strong>fléchées</strong>, <strong>+</strong> et <strong>-</strong> pour naviguer sur la carte, <strong>Entrée</strong> pour sélectionner et <strong>Shift+fléchées</strong> <strong>Haut</strong> et <strong>Bas</strong> pour modfier le déplacement."
+  },
+  "appbar": {
+    "export": "Exporter",
+    "notifications": "Notification",
+    "no_notifications_available": "Aucune notification disponible",
+    "layers": "Couches",
+    "share": "Partager",
+    "version": "À propos de GéoView",
+    "repoLink": "Github",
+    "removeAllNotifications": "Effacer tout"
+  },
+  "legend": {
+    "title": "Légende",
+    "removeLayer": "Retirer la couche",
+    "zoomTo": "Zoom sur la couche",
+    "addLayer": "Ajouter une couche",
+    "sortLayers": "Trier les couches",
+    "sort": "Trier",
+    "layerError": "La couche a une erreur...",
+    "layerLoading": "La couche se charge...",
+    "tableDetails": "Table détaillée",
+    "refreshLayer": "Rafraîchir la couche",
+    "highlightLayer": "Couche mise en évidence",
+    "subLayersCount": "{count} sous-couches",
+    "itemsCount": "{count} sur {totalCount} classes",
+    "legendInstructions": "Legend Instructions",
+    "noLayersAdded": "Aucune couche ajoutée",
+    "noLayersAddedDescription": "Ajoutez des couches à la carte en cliquant sur le bouton 'Couches' et en sélectionnant les couches que vous souhaitez afficher."
+  },
+  "layers": {
+    "title": "Couches",
+    "subLayersList": "Liste des sous-couches",
+    "finish": "Terminer",
+    "continue": "Continuer",
+    "back": "Retour",
+    "or": "ou",
+    "dropzone": "Déposer ici",
+    "upload": "Choisir un fichier",
+    "drop": "Déposer le fichier à télécharger",
+    "url": "Entrer l'URL ou l'identifiant Geocore",
+    "layer": "Couche",
+    "stepOne": "Ajouter un fichier ou entrer l'URL/ l'identifiant Geocore",
+    "stepTwo": "Sélectionner le format",
+    "stepThree": "Configurer la couche",
+    "stepFour": "Entrer le nom",
+    "service": "Type de service",
+    "name": "Nom",
+    "layerSelect": "Sélectionner couche(s)",
+    "errorEmpty": "ne peut être vide",
+    "errorNone": "Pas de fichier ou de source ajouté",
+    "errorFile": "Seuls les fichiers geoJSON, CSV et GeoPackage peuvent être utilisés",
+    "errorServer": "source n'est pas valide",
+    "errorNotLoaded": "Une erreur s'est produite lors du chargement de la couche",
+    "errorProj": "ne prend pas en charge la projection cartographique actuelle",
+    "only": "seulement",
+    "opacity": "Opacité",
+    "opacityMax": "Maximum du parent",
+    "reloadLayer": "Recharger la couche",
+    "visibilityIsAlways": "La visibilité est toujours activée",
+    "toggleVisibility": "Basculer la visibilité",
+    "toggleCollapse": "Basculer la fermeture",
+    "querying": "Requête en cours",
+    "layerAdded": "Couche __param__  ajoutée",
+    "instructionsNoLayersTitle": "Aucune couche visible",
+    "instructionsNoLayersBody": "Ajoutez des couches visibles sur la carte."
+  },
+  "details": {
+    "title": "Détails",
+    "zoomTo": "Zoom à l'élément",
+    "select": "Sélectionner l'élément sur la carte",
+    "externalLink": "Lien externe",
+    "feature": "élément",
+    "clickOnMap": "Cliquer sur la carte",
+    "nextFeatureBtn": "Élément suivant",
+    "previousFeatureBtn": "Élément précédent",
+    "clearAllfeatures": "Déselctionner tout les Élément",
+    "keepFeatureSelected": "Garder l'élément sélectionné",
+    "featureDetailsTitle": "Élément {count} sur {total}",
+    "featureDetailModalTitle": "Détails de l'élément"
+  },
+  "lightbox": {
+    "next": "Prochaine",
+    "previous": "Précédente",
+    "close": "Fermer",
+    "download": "Télécharger"
+  },
+  "keyboardnav": {
+    "start": "Aller après l'élément carte",
+    "end": "Aller avant l'élément carte",
+    "focusdialog": {
+      "title": "Navigation clavier",
+      "main": "Si activé, le focus sera verrouillé sur le visualiseur. \nPour sortir, appuyez sur <strong>CTRL + Q</strong>.",
+      "button": {
+        "enable": "Activer",
+        "skip": "Sauter"
+      }
+    }
+  },
+  "validation": {
+    "layer": {
+      "loadfailed": "Le chargement de la couche [__param__] a échoué sur la carte __param__.",
+      "notfound": "La sous couche __param__ de la couche __param__ n'existe pas sur le sereur",
+      "createtwice": "On ne peut exécuter deux fois la méthode createGeoViewRasterLayers pour la couche __param__ sur la carte __param__",
+      "usedtwice": "Utilisation en double de l'identifiant de couche [__param__] sur la carte __param__",
+      "multipleUUID": "Les couches GeoCore ne peuvent avoir qu'un seul identifiant par couche."
+    },
+    "schema": {
+      "notFound": "Une erreur de schéma a été trouvée, vérifiez la console pour voir ce qui ne va pas.",
+      "wrongPath": "Impossible de trouver le schéma ([__param__])"
+    },
+    "changeDisplayLanguageLayers": "Les couches ne peuvent être chargée(s) de nouveau car la configuration ne supporte pas ce langage",
+    "changeDisplayLanguage": "Seulement 'en' et 'fr' sont supporées",
+    "changeDisplayTheme": "Theme non supporté",
+    "changeDisplayProjection": "Projection non supportée",
+    "invalidConfig": "Configuration JSON non valide, configuration par défaut appliquée."
+  },
+  "exportModal": {
+    "title": "Exporter la carte en PNG",
+    "cancelBtn": "Annuler",
+    "exportBtn": "Exporter",
+    "exportTitle": "Titre",
+    "approx": "approx"
+  },
+  "geolocator": {
+    "title": "Géolocalisation",
+    "search": "Texte à rechercher",
+    "errorMessage": "Aucun résultat correspondant à",
+    "province": "Province",
+    "category": "Catégorie",
+    "clearFilters": "Effacer les filtres",
+    "noFilter": "Aucun Filtre"
+  },
+  "hovertooltip": {
+    "alticon": "Symbol de l'élément sélectionné"
+  },
+  "dataTable": {
+    "title": "Données",
+    "icon": "ICÔNE",
+    "zoom": "ZOOM",
+    "details": "DÉTAILS",
+    "exportBtn": "Exporter",
+    "jsonExportBtn": "Télécharger GeoJSON",
+    "downloadAsCSV": "Télécharger CSV",
+    "filterMap": "Filtrer la carte",
+    "stopFilterMap": "Arrêt des filtres",
+    "rowsSelected": "{rowsSelected} sur {totalRows} ligne(s) sélectionnée(s)",
+    "rowsFiltered": "{rowsFiltered} sur {totalRows} ligne(s) filtrée(s)",
+    "enlargeBtn": "Agrandir",
+    "reduceBtn": "Réduire",
+    "features": "Élément(s)",
+    "featureFiltered": "élément filtré(s)",
+    "images": "Images",
+    "close": "Fermer",
+    "noFeatures": "inconnue..."
+  },
+  "geochart": {
+    "noChartAvailable": "Cliquer sur une couche de la carte qui contient un graphique"
+  },
+  "guide": {
+    "title": "Guide",
+    "errorMessage": "Désolé, impossible de trouver le document d'aide!"
+  },
+  "footerBar": {
+    "focusToMap": "Aller à la carte",
+    "focusToFooter": "Aller au pied de page",
+    "resizeTooltip": "Redimensionner",
+    "noTab": "Pas d'onglet"
+  }
+}

@@ -1,0 +1,10 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Outlier Large Layer - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Outlier layer with large number of features</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/><a href="./outliers.html">Outlier Layers</a><br/></td></tr><tr><td><p>This page is used to showcase a layer with many features</p></td></tr><tr><td><a href="#HMap1">1. Many Features Layer</a><br/></td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HMap1">1. Many Features Layer</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible active">Map Status Flags</button><pre id="HMap1-state" class="panel map-title-holder"></pre><hr/><div id="Map1" class="geoview-map" data-lang="en" data-config-url="./configs/elections-canada-2019.json"></div><hr/><script src="codedoc.js"></script><script src="layerlib.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init((mapId) => {
+          listenToLegendLayerSetChanges('HMap1-state', 'Map1');
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

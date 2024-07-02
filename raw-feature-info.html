@@ -1,0 +1,283 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Panel - Feature Info</strong></h1></td></tr><tr><td><a href="./index.html">Main</a><br/><a href="#HUC1">1. Basic map</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page is used to test the creation and integration of the Feature Info component in a responsive design.</td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HUC1">1. Basic Map</h4><a class="ref-link" href="#top">Top</a></div><div id="mapWM1" class="llwp-map" data-lang="en"></div><hr/><div style="display: flex"><div id="smallList" style="width: 400px; border: black solid 1px;"></div><div id="bigList" style="width: 400px; height: 600px; overflow: scroll; border: black solid 1px;"><button onclick="createBigList()">Create List</button></div><div id="accordionList" style="width: 400px; border: black solid 1px;"><button onclick="createAccordionList()">Create List</button></div></div><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function () {
+        console.log('api is ready');
+
+        // import react and api from the core
+        const { react, createRoot, api, ui } = cgpv;
+
+        // create fake canvas element
+        const canvas = document.createElement('canvas');
+        canvas.width = 50;
+        canvas.height = 50;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'rgb(200,0,0)';
+        ctx.fillRect (10, 10, 55, 50);
+
+        // create array of fake Feature Info objects following FeatureInfoLayerSet structure
+        const featureInfoArray = [
+          {
+            "featureKey": 0,
+            "geoviewLayerType": "GeoJSON",
+            "extent": [
+                339419.19836761174,
+                125038.02663518023,
+                781781.4590522015,
+                504663.0970258885
+            ],
+            "featureIcon": canvas,
+            "fieldInfo": {
+                "Province": {
+                    "fieldKey": 0,
+                    "value": "Ontario",
+                    "dataType": "string",
+                    "alias": "Province",
+                    "domain": null
+                },
+                "creationDate": {
+                    "fieldKey": 1,
+                    "value": "2020-05-23T17:00:00",
+                    "dataType": "date",
+                    "alias": "Creation Date",
+                    "domain": null
+                },
+                "myImages": {
+                    "fieldKey": 2,
+                    "value": "https://cdn.photoswipe.com/photoswipe-demo-images/photos/1/img-2500.jpg;https://cdn.photoswipe.com/photoswipe-demo-images/photos/2/img-2500.jpg;https://cdn.photoswipe.com/photoswipe-demo-images/photos/3/img-2500.jpg",
+                    "alias": "My Images",
+                    "domain": null
+                },
+                "myLink": {
+                  "fieldKey": 3,
+                  "value": "This is a JSON file https://ftp.maps.canada.ca/pub/nrcan_rncan/Floods_Inondation/HFE/event/f5ecba77-4f17-45c9-991a-06ce11078047/event_precipitation_data_en_f5ecba77-4f17-45c9-991a-06ce11078047.json",
+                  "alias": "My Link 1",
+                  "domain": null
+                },
+                "myScript": {
+                  "fieldKey": 4,
+                  "value": "This is an attemp to inject script: <script>console.log('oups')<\/script>",
+                  "alias": "My Script",
+                  "domain": null
+                },
+                "myLink2": {
+                  "fieldKey": 5,
+                  "value": "This is a PDF file https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+                  "alias": "My Link 2",
+                  "domain": null
+                },
+                "myLink3": {
+                  "fieldKey": 6,
+                  "value": "This is a Website https://github.com/Canadian-Geospatial-Platform/geoview and the demo site https://canadian-geospatial-platform.github.io/geoview/public/index.html",
+                  "alias": "My Link 3",
+                  "domain": null
+                }
+            },
+            "nameField": "Province"
+          },
+          {
+            "featureKey": 1,
+            "geoviewLayerType": "GeoJSON",
+            "extent": [
+                339419.19836761174,
+                125038.02663518023,
+                781781.4590522015,
+                504663.0970258885
+            ],
+            "featureIcon": canvas,
+            "fieldInfo": {
+                "Province": {
+                    "fieldKey": 0,
+                    "value": "Ontario",
+                    "dataType": "string",
+                    "alias": "Province",
+                    "domain": null
+                },
+                "creationDate": {
+                    "fieldKey": 1,
+                    "value": "2020-05-23T17:00:00",
+                    "dataType": "date",
+                    "alias": "Creation Date",
+                    "domain": null
+                },
+                "myImages": {
+                    "fieldKey": 2,
+                    "value": "https://cdn.photoswipe.com/photoswipe-demo-images/photos/1/img-2500.jpg;https://cdn.photoswipe.com/photoswipe-demo-images/photos/2/img-2500.jpg;https://cdn.photoswipe.com/photoswipe-demo-images/photos/3/img-2500.jpg",
+                    "alias": "My Images",
+                    "domain": null
+                }
+            },
+            "nameField": "Province"
+          }
+        ]
+        const longFeatureInfoArray = [
+          {
+            "featureKey": 0,
+            "geoviewLayerType": "GeoJSON",
+            "extent": [
+                339419.19836761174,
+                125038.02663518023,
+                781781.4590522015,
+                504663.0970258885
+            ],
+            "featureIcon": canvas,
+            "fieldInfo": {
+                "Info 1": {
+                    "fieldKey": 0,
+                    "value": "Lorem Ipsum 1Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
+                    "dataType": "string",
+                    "alias": "Lorem Ipsum 1",
+                    "domain": null
+                },
+                "Info 2": {
+                    "fieldKey": 1,
+                    "value": "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?",
+                    "dataType": "string",
+                    "alias": "Lorem Ipsum 2",
+                    "domain": null
+                },
+                "Info 3": {
+                    "fieldKey": 2,
+                    "value": "Suspendisse potenti. Sed vestibulum enim magna, sed tempus velit aliquam sit amet. Quisque congue in est sed scelerisque. Curabitur nec tortor sollicitudin, consectetur nisi quis, auctor metus. Cras vel aliquam lorem, eu malesuada justo. Etiam id consectetur arcu. Nulla lectus augue, gravida a ultrices vel, eleifend ut augue. Mauris sollicitudin erat in ligula sagittis, congue lacinia urna bibendum. Mauris nec ligula tempor, imperdiet massa nec, auctor quam. Proin posuere, tortor et viverra placerat, sapien leo mollis tortor, vel sodales lacus nisi eget felis. Praesent eget massa hendrerit, egestas felis nec, molestie nibh. Sed hendrerit nibh ut consectetur tempor.",
+                    "dataType": "string",
+                    "alias": "Lorem Ipsum 3",
+                    "domain": null
+                },
+                "Info 4": {
+                    "fieldKey": 3,
+                    "value": "At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat",
+                    "dataType": "string",
+                    "alias": "Lorem Ipsum 4",
+                    "domain": null
+                },
+                "Info 5": {
+                    "fieldKey": 4,
+                    "value": "Ut aliquam tellus diam, eget porttitor lectus hendrerit sed. Integer finibus, sem vitae mollis tempor, ante sem pharetra lectus, quis pellentesque lacus mauris quis leo. Maecenas nisi quam, ultrices vitae lorem ut, pretium suscipit tellus. Ut pretium orci non mi blandit laoreet. Curabitur lacinia lectus vitae ornare cursus. Sed in ligula in augue ultrices sodales. Integer justo arcu, vestibulum ac orci et, tincidunt dignissim tellus. Vestibulum semper ante ac commodo pulvinar. Integer id leo augue. Nulla vulputate tempus malesuada.",
+                    "dataType": "string",
+                    "alias": "Lorem Ipsum 5",
+                    "domain": null
+                },
+                "Info 6": {
+                    "fieldKey": 5,
+                    "value": "Aliquam erat volutpat. Aenean vel feugiat dolor. Sed sodales efficitur ipsum, sit amet dictum sem elementum id. Nullam auctor augue libero. Ut sapien eros, accumsan quis ultrices vitae, ullamcorper sed nulla. Nam aliquet efficitur eleifend. Nullam augue metus, convallis in elit at, gravida maximus metus. Suspendisse et commodo dolor, a pretium dolor. Curabitur id eros lacus. Quisque elit velit, vulputate at vehicula at, posuere non leo. Vestibulum quis ultricies augue. Pellentesque gravida dolor ac ligula placerat euismod. Quisque tristique consectetur arcu sit amet tempor. Aliquam eget ante erat. Nullam cursus magna tellus, a varius turpis ultricies id.",
+                    "dataType": "string",
+                    "alias": "Lorem Ipsum 6",
+                    "domain": null
+                },
+                "Info 7": {
+                    "fieldKey": 6,
+                    "value": "Praesent dictum consequat lectus quis lacinia. Proin blandit velit nec ante mollis, eget commodo dolor volutpat. Quisque blandit auctor est at imperdiet. Nullam non libero et nulla mattis suscipit. Proin pellentesque ante vel tempus efficitur. Fusce pulvinar odio sed malesuada consequat. Vivamus placerat erat sem, ut hendrerit sem volutpat sed. Vivamus scelerisque tristique hendrerit.",
+                    "dataType": "string",
+                    "alias": "Lorem Ipsum 7",
+                    "domain": null
+                },
+                "Info 8": {
+                    "fieldKey": 7,
+                    "value": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nec risus mauris. Nullam iaculis mi sit amet purus venenatis, a ultricies ligula luctus. Nulla malesuada lobortis luctus. In diam ligula, imperdiet ut ligula vitae, laoreet rutrum purus. Fusce quis pellentesque est. Nulla blandit interdum porta. Nullam ac accumsan lacus.",
+                    "dataType": "string",
+                    "alias": "Lorem Ipsum 8",
+                    "domain": null
+                },
+                "Info 9": {
+                    "fieldKey": 8,
+                    "value": "Vestibulum id consectetur libero. Curabitur non faucibus ex. Aenean nec sapien malesuada, laoreet orci sit amet, sollicitudin enim. Morbi varius in felis ac elementum. Nullam ut placerat lectus, sit amet pretium dui. Vestibulum cursus sem justo, eget iaculis risus rutrum in. Donec ut volutpat nibh. Suspendisse blandit ex a nunc pharetra sodales. Interdum et malesuada fames ac ante ipsum primis in faucibus. Donec vel tincidunt nunc, quis iaculis nisl. Morbi egestas placerat tellus, aliquam laoreet tortor efficitur non. Duis tristique mauris lobortis nisi interdum, nec vestibulum sapien egestas. Sed fermentum sem feugiat, efficitur mi eu, elementum magna. Vestibulum interdum diam nec quam elementum, eu maximus erat tristique. Phasellus at metus vel ex venenatis mollis.",
+                    "dataType": "string",
+                    "alias": "Lorem Ipsum 9",
+                    "domain": null
+                },
+                "Info 10": {
+                    "fieldKey": 9,
+                    "value": "Praesent gravida ipsum congue blandit pulvinar. Vivamus nunc risus, ornare ac maximus eget, malesuada eu erat. Mauris commodo lectus odio, id facilisis velit lobortis non. In sed tellus eget neque pellentesque lacinia. Integer tortor magna, posuere id sagittis id, consectetur non odio. Donec quis tincidunt felis, a blandit nulla. Maecenas et justo porttitor, feugiat mi in, convallis ante. Pellentesque luctus at mauris in vestibulum. Duis faucibus, nisl at facilisis porta, augue nisi tincidunt massa, vitae sodales tortor nisl vitae leo. Nunc mollis est ut nisi vulputate, ac cursus lacus commodo. Nullam ornare a ligula sit amet consequat.",
+                    "dataType": "string",
+                    "alias": "Lorem Ipsum 10",
+                    "domain": null
+                },
+                "creationDate": {
+                    "fieldKey": 10,
+                    "value": "2020-05-23T17:00:00",
+                    "dataType": "date",
+                    "alias": "Creation Date",
+                    "domain": null
+                },
+                "myImages 1": {
+                    "fieldKey": 11,
+                    "value": "https://cdn.photoswipe.com/photoswipe-demo-images/photos/1/img-2500.jpg;https://cdn.photoswipe.com/photoswipe-demo-images/photos/2/img-2500.jpg;https://cdn.photoswipe.com/photoswipe-demo-images/photos/3/img-2500.jpg",
+                    "alias": "My Images 1",
+                    "domain": null
+                },
+                "myImages 2": {
+                    "fieldKey": 12,
+                    "value": "https://cdn.photoswipe.com/photoswipe-demo-images/photos/1/img-2500.jpg;https://cdn.photoswipe.com/photoswipe-demo-images/photos/2/img-2500.jpg;https://cdn.photoswipe.com/photoswipe-demo-images/photos/3/img-2500.jpg",
+                    "alias": "My Images 2",
+                    "domain": null
+                },
+                "myImages 3": {
+                    "fieldKey": 13,
+                    "value": "https://cdn.photoswipe.com/photoswipe-demo-images/photos/1/img-2500.jpg;https://cdn.photoswipe.com/photoswipe-demo-images/photos/2/img-2500.jpg;https://cdn.photoswipe.com/photoswipe-demo-images/photos/3/img-2500.jpg",
+                    "alias": "My Images 3",
+                    "domain": null
+                },
+                "myImages 4": {
+                    "fieldKey": 14,
+                    "value": "https://cdn.photoswipe.com/photoswipe-demo-images/photos/1/img-2500.jpg;https://cdn.photoswipe.com/photoswipe-demo-images/photos/2/img-2500.jpg;https://cdn.photoswipe.com/photoswipe-demo-images/photos/3/img-2500.jpg",
+                    "alias": "My Images 4",
+                    "domain": null
+                },
+                "myImages 5": {
+                    "fieldKey": 15,
+                    "value": "https://cdn.photoswipe.com/photoswipe-demo-images/photos/1/img-2500.jpg;https://cdn.photoswipe.com/photoswipe-demo-images/photos/2/img-2500.jpg;https://cdn.photoswipe.com/photoswipe-demo-images/photos/3/img-2500.jpg",
+                    "alias": "My Images 5",
+                    "domain": null
+                }
+            },
+            "nameField": "Info 1"
+          },
+        ]
+
+        /********* SMALL LIST START **********************************************************************************/
+        const smallDiv = document.getElementById('smallList');
+        const item = cgpv.api.maps['mapWM1'].featureInfo.createFeatureInfoItem(featureInfoArray);
+        const root = createRoot(smallDiv);
+        root.render(item);
+        /********* SMALL LIST END **********************************************************************************/
+
+        /********* BIG LIST START **********************************************************************************/
+        createBigList = () => {
+          console.log('create')
+          const bigDiv = document.getElementById('bigList');
+          const lotItems = [];
+          let len = 100;
+          const start = Date.now();
+          while (len--) {
+            lotItems.push(cgpv.api.maps['mapWM1'].featureInfo.createFeatureInfoItem([featureInfoArray[0]]));
+          }
+          console.log(`Created ${Date.now() - start}`);
+          const root = createRoot(bigDiv);
+          root.render(lotItems);
+          console.log(`Rendered ${Date.now() - start}`);
+        }
+        /********* BIG LIST END **********************************************************************************/
+
+        /********* ACCORDION LIST START **********************************************************************************/
+        createAccordionList = () => {
+          const lotItemsAcc = [];
+          let lenAcc = 100;
+          const startAcc = Date.now();
+          while (lenAcc--) {
+            lotItemsAcc.push(cgpv.api.maps['mapWM1'].featureInfo.createFeatureInfoItem([longFeatureInfoArray[0]]));
+          }
+          console.log(`Created Accordion ${Date.now() - startAcc}`);
+          const itemAcc = {
+            title: 'Details Accordion',
+            content: lotItemsAcc,
+          }
+          cgpv.api.addUiComponent(
+            'accordionList',
+            cgpv.react.createElement(cgpv.ui.elements.Accordion, { items: [itemAcc], showLoadingIcon: true })
+          );
+          console.log(`Rendered Accordion ${Date.now() - startAcc}`);
+        }
+        /********* ACCORDION LIST END **********************************************************************************/
+
+        //create snippets
+        createConfigSnippet();
+        createCodeSnippet();
+      });</script></body></html>

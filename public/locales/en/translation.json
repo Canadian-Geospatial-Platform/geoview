@@ -1,0 +1,215 @@
+{
+  "general": {
+    "add": "Add",
+    "close": "Close",
+    "exit": "Exit",
+    "layers": "Layers",
+    "name": "Name",
+    "open": "Open",
+    "remove": "Remove",
+    "view": "View",
+    "openFullscreen": "Open in fullscreen",
+    "closeFullscreen": "Close fullscreen",
+    "openGuide": "Open guide",
+    "guide": "Guide",
+    "fullScreen": "Full screen"
+  },
+  "mapnav": {
+    "arianavbar": "Vertical button group for map navigation",
+    "fullscreen": "Full screen",
+    "home": "Reset to initial view",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "coordinates": "Toggle coordinates format",
+    "scale": "Toggle between scale and resolution",
+    "location": "Zoom to my location"
+  },
+  "mapctrl": {
+    "rotation": {
+      "resetRotation": "Reset Rotation",
+      "fixedNorth": "Fix North"
+    },
+    "mouseposition": {
+      "east": "E",
+      "west": "W",
+      "north": "N",
+      "south": "S"
+    },
+    "overviewmap": {
+      "toggle": "Toggle overview map",
+      "error": "Error loading overview map"
+    },
+    "attribution": {
+      "defaultnrcan": "© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources",
+      "tooltip": "Attribution"
+    },
+    "crosshair": "Use <strong>Arrows</strong>, <strong>+</strong> and <strong>-</strong> keys to navigate the map, <strong>Enter</strong> to select and <strong>Shift+Arrow</strong> <strong>Up</strong> or <strong>Down</strong> to modify the pan value."
+  },
+  "appbar": {
+    "export": "Export",
+    "notifications": "Notification",
+    "no_notifications_available": "No notifications available",
+    "layers": "Layers",
+    "share": "Share",
+    "version": "About GeoView",
+    "repoLink": "Github",
+    "removeAllNotifications": "Remove all"
+  },
+  "legend": {
+    "title": "Legend",
+    "removeLayer": "Remove layer",
+    "zoomTo": "Zoom to layer",
+    "addLayer": "Add layer",
+    "sortLayers": "Sort layers",
+    "sort": "Sort",
+    "layerError": "Layer has an error...",
+    "layerLoading": "Layer is loading...",
+    "tableDetails": "Table details",
+    "refreshLayer": "Refresh layer",
+    "highlightLayer": "Highlight layer",
+    "subLayersCount": "{count} sublayers",
+    "itemsCount": "{count} of {totalCount} classes",
+    "legendInstructions": "Legend Instructions",
+    "noLayersAdded": "No layers added to the map",
+    "noLayersAddedDescription": "Add layers to the map by clicking on the 'Layers' button and adding the layers you want to display."
+  },
+  "layers": {
+    "title": "Layers",
+    "subLayersList": "Sublayers list",
+    "finish": "Finish",
+    "continue": "Continue",
+    "back": "Back",
+    "or": "or",
+    "dropzone": "Drop here",
+    "upload": "Choose a file",
+    "drop": "Drop the file to upload",
+    "url": "Enter URL or Geocore id",
+    "layer": "Layer",
+    "stepOne": "Upload a file or enter URL/Geocore id",
+    "stepTwo": "Select format",
+    "stepThree": "Configure layer",
+    "stepFour": "Enter name",
+    "service": "Service type",
+    "name": "Name",
+    "layerSelect": "Select layer(s)",
+    "errorEmpty": "cannot be empty",
+    "errorNone": "No file or source added",
+    "errorFile": "Only geoJSON, CSV and GeoPackage files can be used",
+    "errorServer": "source is not valid",
+    "errorNotLoaded": "An error occured when loading the layer",
+    "errorProj": "does not support current map projection",
+    "only": "only",
+    "opacity": "Opacity",
+    "opacityMax": "Maximum from parent",
+    "reloadLayer": "Reload layer",
+    "visibilityIsAlways": "Visibility is always enabled",
+    "toggleVisibility": "Toggle visibility",
+    "toggleCollapse": "Toggle collapse",
+    "querying": "Querying",
+    "layerAdded": "Layer __param__ added",
+    "instructionsNoLayersTitle": "No layers visible",
+    "instructionsNoLayersBody": "Add visible layers on the map."
+  },
+  "details": {
+    "title": "Details",
+    "zoomTo": "Zoom to feature",
+    "select": "Highlight feature on map",
+    "externalLink": "External Link",
+    "feature": "feature",
+    "clickOnMap": "Click on map",
+    "nextFeatureBtn": "Next feature",
+    "previousFeatureBtn": "Previous feature",
+    "clearAllfeatures": "Clear all feature highlights",
+    "keepFeatureSelected": "Keep feature highlighted",
+    "featureDetailsTitle": "Feature {count} of {total}",
+    "featureDetailModalTitle": "Feature Detail"
+  },
+  "lightbox": {
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "download": "Download"
+  },
+  "keyboardnav": {
+    "start": "Skip after map element",
+    "end": "Skip before map element",
+    "focusdialog": {
+      "title": "Keyboard navigation",
+      "main": "If enable, we will keep focus locked on the viewer.\nTo exit, press <strong>CTRL + Q</strong>",
+      "button": {
+        "enable": "Enable",
+        "skip": "Skip"
+      }
+    }
+  },
+  "validation": {
+    "layer": {
+      "loadfailed": "Layer [__param__] failed to load on map __param__.",
+      "notfound": "The sublayer __param__ of the  layer __param__ does not exist on the server",
+      "createtwice": "Can not execute the createGeoViewRasterLayers method twice for the layer __param__ on map __param__",
+      "usedtwice": "Duplicate use of layer identifier [__param__] on map __param__",
+      "multipleUUID": "GeoCore layers may only have one GeoCore id per layer"
+    },
+    "schema": {
+      "notFound": "A schema error was found, check the console to see what is wrong.",
+      "wrongPath": "Cannot find schema ([__param__])"
+    },
+    "changeDisplayLanguageLayers": "Layers can not be relaoded because the configuration does not support this language",
+    "changeDisplayLanguage": "Only 'en' and 'fr' are supported",
+    "changeDisplayTheme": "Theme unsupported",
+    "changeDisplayProjection": "Projection unsupported",
+    "invalidConfig": "Invalid JSON config, default configuration applied."
+  },
+  "exportModal": {
+    "title": "Export map as PNG",
+    "cancelBtn": "Cancel",
+    "exportBtn": "Export",
+    "exportTitle": "Title",
+    "approx": "approx"
+  },
+  "geolocator": {
+    "title": "Geolocator",
+    "search": "Search",
+    "errorMessage": "No matches found for",
+    "province": "Province",
+    "category": "Category",
+    "clearFilters": "Clear filters",
+    "noFilter": "No filter"
+  },
+  "hovertooltip": {
+    "alticon": "Selected feature icon"
+  },
+  "dataTable": {
+    "title": "Data Table",
+    "icon": "ICON",
+    "zoom": "ZOOM",
+    "details": "DETAILS",
+    "exportBtn": "Export",
+    "jsonExportBtn": "Download GeoJSON",
+    "downloadAsCSV": "Download CSV",
+    "filterMap": "Filter map",
+    "stopFilterMap": "Stop filter map",
+    "rowsSelected": "{rowsSelected} of {totalRows} row(s) selected",
+    "rowsFiltered": "{rowsFiltered} of {totalRows} row(s) filtered",
+    "enlargeBtn": "Enlarge",
+    "reduceBtn": "Reduce",
+    "features": "feature(s)",
+    "featureFiltered": "features filtered",
+    "images": "Images",
+    "close": "Close",
+    "noFeatures": "unknown..."
+  },
+  "geoChart": {
+    "noChartAvailable": "Click on the map on a layer with chart"
+  },
+  "guide": {
+    "title": "Guide",
+    "errorMessage": "Sorry, unable to find the help document!"
+  },
+  "footerBar": {
+    "focusToMap": "Focus to map",
+    "focusToFooter": "Focus to footer",
+    "resizeTooltip": "Resize",
+    "noTab": "No tab"
+  }
+}

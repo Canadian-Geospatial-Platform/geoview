@@ -1,0 +1,38 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="codedoc.js"></script><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>UI Charts</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/><a href="#CHARTLINE">1. Chart MUI Component</a><br/></td></tr></tbody></table></div><div class="" style="text-align: center;margin: 20px auto;"><div style="background-color: bisque;"><div style="text-align: left;">GEOVIEW-GEOCHART PLUGIN CONFIG</div><div><div style="display:inline-block;width:99%;"><div><button onclick="importConfig()">Import Config 1</button> <button onclick="importConfig('-2')">Import Config 2</button> <button onclick="importConfig('-3')">Import Config 3</button></div><div><textarea id="CHARTPLUGINCONFIG" rows="20" style="width: 100%;"></textarea></div></div></div><div><button onclick="loadConfig()" style="padding:5px;"><strong>RELOAD CHART CONFIG</strong></button></div></div></div><hr/><script id="SCRIPTCOMMON">function loadConfig() {
+        let config = null;
+
+        try {
+          if (document.getElementById('CHARTPLUGINCONFIG').value)
+          config = JSON.parse(document.getElementById('CHARTPLUGINCONFIG').value);
+        }
+        catch (ex) {
+          cgpv.api.utilities.showError(mapId, 'Failed to create JSON from input data text area.');
+          console.error(ex);
+        }
+
+        // Load the config for the GeoChart
+        cgpv.api.plugins["UIM10"]['geochart'].loadConfig(config);
+        cgpv.api.plugins["UIM11"]['geochart'].loadConfig(config);
+      }</script><div id="UIM10" class="llwp-map" data-lang="en" data-config-url="./configs/package-geochart-map1-config.json"></div><button type="button" class="collapsible">Configuration Snippet</button><pre id="UIM10CS" class="panel"></pre><hr/><button type="button" class="collapsible">Code Snippet</button><pre class="panel">
+      <div id-script="SCRIPTCOMMON"></div>
+    </pre><hr style="height: 12px; background-color: lightsalmon;"/><div id="UIM11" class="llwp-map" data-lang="fr" data-config-url="./configs/package-geochart-map2-config.json"></div><button type="button" class="collapsible">Configuration Snippet</button><pre id="UIM11CS" class="panel"></pre><hr/><button type="button" class="collapsible">Code Snippet</button><pre class="panel">
+      <div id-script="SCRIPTCOMMON"></div>
+    </pre><script>async function importConfig(suffix = '') {
+        let response = await fetch(`configs/package-geochart-map1-config-geochart${suffix}.json`);
+        let json = await response.json();
+
+        // Load UI
+        document.getElementById('CHARTPLUGINCONFIG').value = JSON.stringify(json, null, 2);
+      }
+
+      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(async function () {
+        console.log('api is ready');
+
+        // Load config
+        await importConfig();
+
+        //create snippets
+        createConfigSnippet();
+        createCodeSnippetUsingIDs();
+      });</script></body></html>

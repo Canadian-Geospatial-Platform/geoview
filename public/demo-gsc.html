@@ -1,0 +1,54 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>GSC Demo - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>GSC Demo</strong></h1></td></tr><tr><td><a href="./demos.html">Main</a><br/></td></tr></tbody></table><table><tbody><tr><td><p>Demonstration of Open Science Data Portal - Air Quality in GeoView</p></td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HMap1">GSC Demo</h4></div><button class="collapsible active">Map Status Flags</button><pre id="HMap1-state" class="panel map-title-holder"></pre><div id="Map1" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3978,
+            'initialView': { 'zoomAndCenter': [10, [-87, 65.7]]}
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': true,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'geoJsonSample',
+              'geoviewLayerName': {
+                'en': 'JSON Layer'
+              },
+              'geoviewLayerType': 'GeoJSON',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '46E.JSON',
+                  'layerName': { 'en': '46E' },
+                  'source': {
+                    'dataAccessPath': {
+                      'en': './datasets/geojson/'
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['north-arrow', 'overview-map'],
+        'overviewMap': {'hideOnZoom': 6},
+        'footerBar': {
+          'tabs': {
+            'core': ['legend', 'layers', 'details', 'data-table']
+          }
+        },
+        'corePackages': [],
+        'theme': 'geo.ca'
+        }"></div><script src="codedoc.js"></script><script src="layerlib.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init((mapId) => {
+        if (mapId === 'Map1') {
+          listenToLegendLayerSetChanges('HMap1-state', 'Map1');
+        }
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

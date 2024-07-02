@@ -1,0 +1,104 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>API Functions Test</strong></h1></td></tr><tr><td><a href="./index.html">Main</a><br/><a href="#HLNG1">1. Test get service metadata</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page is used to showcase how we can get service metadata from an API call.</td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HLNG1">1. Test get service metadata</h4><a class="ref-link" href="#top">Top</a></div><div id="LNG1" class="llwp-map" data-lang="en" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': false,
+              'labeled': true
+            }
+          },
+          'components': ['overview-map'],
+          'corePackages': [],
+          'theme': 'dark',
+          'suportedLanguages': ['en']
+          }"></div><p>These text areas show the metadata value for a ESRI and a WMS layer.</p><button type="button" class="collapsible">ESRI Metadata</button><pre id="esriMetadata" class="panel"></pre><hr/><button type="button" class="collapsible">WMS GetCapabilities</button><pre id="wmsMetadata" class="panel"></pre><hr/><button type="button" class="collapsible">Configuration Snippet</button><pre id="LNG1CS" class="panel"></pre><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><hr/><button type="button" class="collapsible">Time dimension</button><div id="timeDimension" class="panel" style="margin-top: 10px"><span>URL:</span><input id="time-wms-url" value="https://geo.weather.gc.ca/geomet" style="width: 35%; margin: 10px"/><span>Layer:</span><input id="layer-wms-id" value="RADAR_1KM_RSNO" style="width: 25%; margin: 10px"/> <button id="btn-wms-time" style="margin: 10px">Get WMS dimension</button> <span><ul><li>https://datacube.services.geo.ca/web/aerial.xml halifax, victoria, top-layer</li><li>https://geo.weather.gc.ca/geomet RADAR_1KM_RSNO</li></ul></span><span>URL:</span><input id="time-esri-url" value="https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer/" style="width: 35%; margin: 10px"/><span>Layer:</span><input id="layer-esri-id" value="0" style="width: 25%; margin: 10px"/> <button id="btn-esri-time" style="margin: 10px">Get ESRI dimension</button> <span><ul><li>https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer/0</li><li>https://gisp.dfo-mpo.gc.ca/arcgis/rest/services/FGP/MSDI_Dynamic_Current_Layer/MapServer/0</li><li>https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/U2/FeatureServer/0</li><li>https://www5.agr.gc.ca/atlas/rest/services/app_agclimate_agclimat/agclimate_tx/ImageServer - no layer, image server</li></ul></span><span>OGC Dimension</span><input id="ogc-dimension" value='{"name":"time","units":"ISO8601","unitSymbol":null,"default":"2022-12-06T12:40:00Z","nearestValue":false,"values":"2022-12-06T09:40:00Z/2022-12-06T12:40:00Z/PT10M"}' style="width: 75%; margin: 10px;"/><button id="btn-dim-time" style="margin: 10px">Get dimension</button> <span><ul><li>{"name":"time","units":"ISO8601","unitSymbol":null,"default":"2022-12-06T12:40:00Z","nearestValue":false,"values":"2022-12-06T09:40:00Z/2022-12-06T12:40:00Z/PT10M"}</li><li>{"name":"time","units":"ISO8601","unitSymbol":null,"default":"1932-07-01T12:00:00Z","nearestValue":false,"values":"1932-07-01T12:00:00Z, 1950-07-01T12:00:00Z"}</li><li>{"name":"time","units":"ISO8601","unitSymbol":null,"default":"1932-07-01T12:00:00Z","nearestValue":false,"values":"1932-07-01T12:00:00Z/1950-07-01T12:00:00Z"}</li><li>{"name":"time","units":"ISO8601","unitSymbol":null,"default":"1932-07-01T12:00:00Z","nearestValue":false,"values":"1932-07-01T12:00:00Z/P80Y"}</li><li>{"name":"time","units":"ISO8601","unitSymbol":null,"default":"1932-07-01T12:00:00Z","nearestValue":false,"values":"1932/1950/P1Y"}</li></ul></span><button id="btn-clear" style="margin: 10px">Clear</button><pre id="time-console"></pre></div><hr/><script src="codedoc.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(() => {
+        console.log('api is ready');
+
+        // create snippets
+        createCodeSnippet();
+        createConfigSnippet();
+
+        cgpv.api.geoUtilities.getESRIServiceMetadata('https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/1').then((data) => {
+          console.log(data);
+          document.getElementById('esriMetadata').textContent = JSON.stringify(data, undefined, 2);
+        });
+
+        cgpv.api.geoUtilities.getWMSServiceMetadata('https://geo.weather.gc.ca/geomet', 'RAQDPS-FW.CE_PM2.5-DIFF-YAvg').then((data) => {
+          console.log(data);
+          document.getElementById('wmsMetadata').textContent = JSON.stringify(data, undefined, 2);
+        });
+
+        function find(searchKey, searchData, target, accum = []) {
+          for (const [key, value] of Object.entries(target)) {
+            if (key === searchKey && value === searchData) {
+              console.log(`${key}: ${value}`);
+              accum.push(target);
+            } else if (target[key] instanceof Array) {
+              target[key].forEach((f) => {
+                if (typeof f === 'object') {
+                  find(searchKey, searchData, f, accum);
+                }
+              });
+            }
+          }
+          return accum;
+        }
+
+        // ==========================================================================================================================
+        // ESRI
+        var esriTime = document.getElementById('btn-esri-time');
+        esriTime.addEventListener('click', function (e) {
+          var url = document.getElementById('time-esri-url').value;
+          var layerName = document.getElementById('layer-esri-id').value;
+          var timeConsole = document.getElementById('time-console');
+          cgpv.api.geoUtilities.getESRIServiceMetadata(`${url.trim()}${layerName.trim()}`).then((data) => {
+            console.log(data);
+            var dimension = data.timeInfo !== undefined ? data.timeInfo : {};
+            var calcDimension = cgpv.api.dateUtilities.createDimensionFromESRI(dimension);
+            timeConsole.textContent = JSON.stringify(calcDimension, undefined, 2);
+          });
+        });
+        // ==========================================================================================================================
+
+        // ==========================================================================================================================
+        // WMS
+        var wmsTime = document.getElementById('btn-wms-time');
+        wmsTime.addEventListener('click', function (e) {
+          var url = document.getElementById('time-wms-url').value;
+          var layerName = document.getElementById('layer-wms-id').value;
+          var timeConsole = document.getElementById('time-console');
+          cgpv.api.geoUtilities.getWMSServiceMetadata(url.trim(), layerName.trim()).then((data) => {
+            console.log(data);
+            var layer = data.Capability.Layer;
+            var layerObject = find('Name', layerName, layer);
+            var dimension = layerObject.length > 0 && layerObject[0].Dimension !== undefined ? layerObject[0].Dimension[0] : {};
+
+            var calcDimension = cgpv.api.dateUtilities.createDimensionFromOGC(dimension);
+            timeConsole.textContent = JSON.stringify(calcDimension, undefined, 2);
+          });
+        });
+        // ==========================================================================================================================
+
+        // ==========================================================================================================================
+        // OGC Dimension
+        var ogcDimension = document.getElementById('btn-dim-time');
+        ogcDimension.addEventListener('click', function (e) {
+          var dim = document.getElementById('ogc-dimension').value;
+          var timeConsole = document.getElementById('time-console');
+          var calcDimension = cgpv.api.dateUtilities.createDimensionFromOGC(JSON.parse(dim));
+          timeConsole.textContent = JSON.stringify(calcDimension, undefined, 2);
+        });
+        // ==========================================================================================================================
+
+        var clear = document.getElementById('btn-clear');
+        clear.addEventListener('click', function (e) {
+          var timeConsole = document.getElementById('time-console');
+          timeConsole.textContent = '';
+        });
+      });</script></body></html>

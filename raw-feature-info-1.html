@@ -1,0 +1,137 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Panel - Feature Info</strong></h1></td></tr><tr><td><a href="./index.html">Main</a><br/><a href="#HUC1">1. Basic map</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page is used to test the creation and integration of the Feature Info component in a responsive design.</td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HUC1">1. Basic Map</h4><a class="ref-link" href="#top">Top</a></div><div id="mapWM1" class="llwp-map" data-lang="en" data-config="{
+      'map': {
+        'interaction': 'dynamic',
+        'viewSettings': {
+          'zoom': 3,
+          'center': [-100, 50],
+          'projection': 3978
+        },
+        'basemapOptions': {
+          'basemapId': 'osm',
+          'shaded': false,
+          'labeled': false
+        },
+        'listOfGeoviewLayerConfig': [
+          {
+            'geoviewLayerId': 'esriFeatureLYR4',
+            'geoviewLayerName': {
+              'en': 'Water quality at monitoring sites'
+            },
+            'metadataAccessPath': {
+              'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer'
+            },
+            'geoviewLayerType': 'esriFeature',
+            'initialSettings': { 'visible': 'always' },
+            'listOfLayerEntryConfig': [
+              {
+                'layerId': '8'
+              }
+            ]
+          },
+          {
+            'geoviewLayerId': 'uniqueValueId',
+            'geoviewLayerName': { 'en': 'uniqueValue' },
+            'metadataAccessPath': { 'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/' },
+            'geoviewLayerType': 'esriFeature',
+            'listOfLayerEntryConfig': [
+              {
+                'layerId': '1',
+                'layerFilter': 'E_Province = \'Alberta\' or E_Province = \'Manitoba\''
+              }
+            ]
+          },
+          {
+            'geoviewLayerId': 'esriFeatureLYR5',
+            'geoviewLayerName': {
+              'en': 'Top Projects'
+            },
+            'metadataAccessPath': {
+              'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer/'
+            },
+            'geoviewLayerType': 'esriFeature',
+            'listOfLayerEntryConfig': [
+              {
+                'layerId': '0'
+              }
+            ]
+          },
+          {
+            'geoviewLayerId': 'geojsonLYR1',
+            'geoviewLayerName': { 'en': 'GeoJSON Sample' },
+            'metadataAccessPath': { 'en': './geojson/metadata.json' },
+            'geoviewLayerType': 'GeoJSON',
+            'listOfLayerEntryConfig': [
+              {
+                'layerId': 'polygons.json',
+                'layerName': { 'en': 'Polygons' },
+                'layerFilter': 'creationDate >= date \'2020/02/15\''
+              },
+              {
+                'layerId': 'lines.json',
+                'layerName': { 'en': 'Lines' },
+                'layerFilter': 'creationDate >= date \'2020-05-28T12:00:00-05:00\''
+              },
+              {
+                'entryType': 'group',
+                'layerId': 'point-feature-group',
+                'layerName': { 'en': 'point-feature-group' },
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'icon_points.json',
+                    'layerName': { 'en': 'Icons' },
+                    'initialSettings': { 'visible': 'yes' },
+                    'layerFilter': 'creationDate >= date \'2020-01-14T12:00:01-05:00\''
+                  },
+                  {
+                    'layerId': 'points.json',
+                    'layerName': { 'en': 'Points' },
+                    'layerFilter': 'creationDate >= date \'2019-02-15T22:00:00Z\''
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      'theme': 'royal',
+      'navBar': ['zoom', 'fullscreen', 'home', 'location', 'export', 'focus'],
+      'components': ['north-arrow'],
+      'corePackages': ['footer-panel'],
+      'externalPackages': [],
+      'suportedLanguages': ['en']
+    }"></div><hr/><div id="resultMap" style="margin-top: 20px; margin-left: 15px;">Click on a layer on the map</div><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function () {
+        console.log('api is ready');
+
+        // import react and api from the core
+        
+        // const { createRoot, api } = cgpv;
+
+        // cgpv.api.event.on(
+        //   cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+        //     (payload) => {
+        //         const { resultSets } = payload;
+        //         const newDetails = [];
+
+        //         Object.keys(resultSets).forEach((layerPath) => {
+        //           const layerName = cgpv.api.utilities.getLocalizedValue(api.maps['LYR2'].layer.registeredLayers[layerPath].layerName, 'LYR2');
+        //           const features = resultSets[layerPath]?.data;
+        //           if (features?.length && features?.length > 0) {
+        //             newDetails.push({ layerPath, layerName, features });
+        //           }
+        //        });
+
+        //        // detailsResult has React Element type
+        //        const detailsResult = api.maps['LYR2'].detailsFooter.createDetailsFooter('LYR2', newDetails);
+
+        //        const root = createRoot(document.getElementById("resultMap"));
+        //        root.render(detailsResult);
+
+        //       },
+        //       'LYR2/FeatureInfoLayerSet'
+        //     );
+
+        //create snippets
+        createConfigSnippet();
+        createCodeSnippet();
+      });</script></body></html>

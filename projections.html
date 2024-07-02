@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Projections</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/><a href="#HPRJ1">1. Web Mercator Projection</a><br/><a href="#HPRJ2">2. LCC Projection</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page is used to showcase how the viewer may show different map Projections</td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HPRJ1">1. Web Mercator Projection</h4><a class="ref-link" href="#top">Top</a></div><div id="PRJ1" class="llwp-map" data-lang="en" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': false,
+              'labeled': true
+            }
+          },
+          'components': ['overview-map', 'north-arrow'],
+          'corePackages': [],
+          'theme': 'dark',
+          'suportedLanguages': ['en']
+        }"></div><p>This map is in Web Mercator projection with Transport basemap, with labeling.</p><button type="button" class="collapsible">Configuration Snippet</button><pre id="PRJ1CS" class="panel"></pre><hr/><div class="map-title-holder"><h4 id="HPRJ2">2. LCC Projection</h4><a class="ref-link" href="#top">Top</a></div><div id="PRJ2" class="llwp-map" data-lang="en" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'minZoom': 4,
+              'maxZoom': 8,
+              'center': [-100, 60],
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            }
+          },
+          'components': ['overview-map', 'north-arrow'],
+          'corePackages': [],
+          'theme': 'dark',
+          'suportedLanguages': ['en']
+        }"></div><p>This map is in LLC projection with Trasnport basemap with shaded background and labeling. When in LCC, the map will show a north arrow to help user knows where the north is when zoomed in. This maps has also a maxZoom properties to restrict zooming past level 8.</p><button type="button" class="collapsible">Configuration Snippet</button><pre id="PRJ2CS" class="panel"></pre><hr/><script src="codedoc.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function () {
+        console.log('api is ready');
+
+        //create snippets
+        createConfigSnippet();
+      });</script></body></html>
