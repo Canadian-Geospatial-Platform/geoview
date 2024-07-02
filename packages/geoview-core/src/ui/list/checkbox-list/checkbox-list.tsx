@@ -36,7 +36,7 @@ export type CheckboxListItem = {
  * @returns JSX.Element The Component
  */
 export function CheckboxList(props: CheckboxListProps): JSX.Element {
-  const { listItems, checkedValues, multiselect, onChecked } = props;
+  const { listItems, checkedValues, multiselect, onChecked = null } = props;
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
@@ -111,11 +111,3 @@ export function CheckboxList(props: CheckboxListProps): JSX.Element {
     </List>
   );
 }
-
-/**
- * React's default properties for the CheckboxList
- */
-// TODO: Refactor - Remove defaultProps as it's no longer a good practice
-CheckboxList.defaultProps = {
-  onChecked: null,
-};

@@ -24,7 +24,7 @@ export type ButtonDropDownProps = ButtonGroupProps & {
 export function ButtonDropDown(props: ButtonDropDownProps): JSX.Element {
   // #region PROPS ****************************************************************************************************
 
-  const { options, onButtonClick, ...otherProps } = props;
+  const { options, onButtonClick = null, ...otherProps } = props;
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
@@ -126,8 +126,3 @@ export function ButtonDropDown(props: ButtonDropDownProps): JSX.Element {
 
   // #endregion
 }
-
-// TODO: Refactor - Remove defaultProps as it's no longer a good practice
-ButtonDropDown.defaultProps = {
-  onButtonClick: null,
-};

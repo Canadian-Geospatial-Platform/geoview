@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { IconButton, Grid, ArrowForwardIosOutlinedIcon, ArrowBackIosOutlinedIcon, LayersClearOutlinedIcon, Box, Skeleton } from '@/ui';
+import { IconButton, Grid, ArrowForwardIosOutlinedIcon, ArrowBackIosOutlinedIcon, LayersClearOutlinedIcon, Box } from '@/ui';
 import {
   useDetailsStoreActions,
   useDetailsCheckedFeatures,
@@ -16,6 +16,7 @@ import { LayerListEntry, Layout } from '@/core/components/common';
 import { getSxClasses } from './details-style';
 import { FeatureInfo } from './feature-info-new';
 import { LAYER_STATUS } from '@/core/utils/constant';
+import DetailsSkeleton from './details-skeleton';
 
 interface DetailsPanelType {
   fullWidth?: boolean;
@@ -430,7 +431,7 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
    */
   const renderContent = (): JSX.Element | null => {
     if (memoIsAllLayersQueryStatusProcessing()) {
-      return <Skeleton variant="rounded" width="100%" height={500} sx={{ bgcolor: theme.palette.grey[400] }} />;
+      return <DetailsSkeleton />;
     }
     if (memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length > 0) {
       return (
