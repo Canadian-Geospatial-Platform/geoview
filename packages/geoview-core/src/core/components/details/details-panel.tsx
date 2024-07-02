@@ -431,7 +431,6 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
    */
   const renderContent = (): JSX.Element | null => {
     if (memoIsAllLayersQueryStatusProcessing()) {
-      // return <Skeleton variant="rounded" width="100%" height={500} sx={{ bgcolor: theme.palette.grey[400] }} />;
       return <DetailsSkeleton />;
     }
     if (memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length > 0) {
