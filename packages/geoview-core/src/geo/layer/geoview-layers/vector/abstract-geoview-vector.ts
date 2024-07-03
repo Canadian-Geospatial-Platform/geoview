@@ -14,10 +14,11 @@ import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
 import { ProjectionLike } from 'ol/proj';
 import { Point } from 'ol/geom';
+import { getUid } from 'ol/util';
 
 import { TypeLocalizedString } from '@config/types/map-schema-types';
 
-import { api } from '@/app';
+import { api, getMinOrMaxExtents } from '@/app';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeBaseSourceVectorInitialConfig, TypeFeatureInfoEntry, TypeLayerEntryConfig } from '@/geo/map/map-schema-types';
 import { getLocalizedValue } from '@/core/utils/utilities';
@@ -472,6 +473,36 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     // Return the calculated layer bounds
     return layerBounds;
+  }
+
+  /**
+   * Gets the extent of an array of features.
+   * @param {string} layerPath - The layer path.
+   * @param {string[]} objectIds - The uids of the features to calculate the extent from.
+   * @returns {Promise<Extent | undefined>} The extent of the features, if available.
+   */
+  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  override getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined> {
+    const features = (this.getOLLayer(layerPath) as VectorLayer<Feature>).getSource()?.getFeatures();
+    const filteredFeatures = features?.filter((feature) => objectIds.includes(getUid(feature)));
+
+    if (filteredFeatures) {
+      // Determine max extent from features
+      let calculatedExtent: Extent | undefined;
+      filteredFeatures.forEach((feature) => {
+        const extent = feature.getGeometry()?.getExtent();
+
+        if (extent) {
+          // If extent has not been defined, set it to extent
+          if (!calculatedExtent) calculatedExtent = extent;
+          else getMinOrMaxExtents(calculatedExtent, extent);
+        }
+      });
+
+      return Promise.resolve(calculatedExtent);
+    }
+    return Promise.resolve(undefined);
   }
 
   /**
