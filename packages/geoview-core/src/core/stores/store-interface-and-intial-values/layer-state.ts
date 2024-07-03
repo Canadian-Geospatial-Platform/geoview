@@ -28,6 +28,7 @@ export interface ILayerState {
 
   actions: {
     deleteLayer: (layerPath: string) => void;
+    getExtentFromFeatures: (layerPath: string, featureIds: string[]) => Promise<Extent | undefined>;
     getLayer: (layerPath: string) => TypeLegendLayer | undefined;
     getLayerBounds: (layerPath: string) => number[] | undefined;
     getLayerDeleteInProgress: () => boolean;
@@ -74,6 +75,11 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       deleteLayer: (layerPath: string): void => {
         LegendEventProcessor.deleteLayer(get().mapId, layerPath);
         get().layerState.setterActions.setLayerDeleteInProgress(false);
+      },
+
+      getExtentFromFeatures: (layerPath: string, featureIds: string[]) => {
+        // Redirect to event processor
+        return LegendEventProcessor.getExtentFromFeatures(get().mapId, layerPath, featureIds);
       },
 
       /**
