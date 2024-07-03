@@ -51,6 +51,7 @@ import { useLightBox } from '../common';
 import { NUMBER_FILTER, DATE_FILTER, STRING_FILTER } from '@/core/utils/constant';
 import { DataTableProps, ColumnsType } from './data-table-types';
 import { VALID_DISPLAY_LANGUAGE } from '@/api/config/types/config-constants';
+import { CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 
 /**
  * Build Data table from map.
@@ -75,7 +76,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
   // get store actions and values
   const { zoomToExtent, highlightBBox, transformPoints, showClickMarker, addHighlightedFeature, removeHighlightedFeature } =
     useMapStoreActions();
-  const { applyMapFilters, setSelectedFeature } = useDataTableStoreActions();
+  const { applyMapFilters, getExtentFromFeatures, setSelectedFeature } = useDataTableStoreActions();
   const language = useAppDisplayLanguage();
   const datatableSettings = useDataTableLayerSettings();
 
@@ -277,22 +278,26 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
   }, [density]);
 
   /**
-   * featureinfo data table Zoom in/out handling
+   * Handles zoom to feature.
    *
-   * @param {React.MouseEvent<HTMLButtonElement, MouseEvent>} e mouse clicking event
-   * @param {Extent} extent feature exten
-   *
+   * @param {TypeFeatureInfoEntry} feature - The feature to zoom to.
    */
   const handleZoomIn = useCallback(
-    (feature: TypeFeatureInfoEntry) => {
-      if (feature.extent) {
+    async (feature: TypeFeatureInfoEntry) => {
+      let { extent } = feature;
+
+      // TODO This will require updating after the query optimization
+      // If there is no extent, the layer is ESRI Dynamic, get the feature extent using its OBJECTID
+      if (!extent) extent = await getExtentFromFeatures(layerPath, [feature.fieldInfo.OBJECTID!.value as string]);
+
+      if (extent) {
         // Project
-        const center = getCenter(feature.extent);
+        const center = getCenter(extent);
         const newCenter = transformPoints([center], 4326)[0];
 
         // Zoom to extent and wait for it to finish
-        // TODO: We have the same patch in details, see if we should create a reusable custom patch / or cahnge desing
-        zoomToExtent(feature.extent)
+        // TODO: We have the same patch in details, see if we should create a reusable custom patch / or change design
+        zoomToExtent(extent)
           .then(async () => {
             // Typically, the click marker is removed after a zoom, so wait a bit here and re-add it...
             // TODO: Refactor - Zoom ClickMarker - Improve the logic in general of when/if a click marker should be removed after a zoom
@@ -300,7 +305,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
 
             // Add (back?) a click marker, a bbox extent who will disapear and remove/add higlight the zoomed feature
             showClickMarker({ lnglat: newCenter });
-            highlightBBox(feature.extent!, false);
+            highlightBBox(extent!, false);
             removeHighlightedFeature('all');
             addHighlightedFeature(feature);
           })
@@ -310,7 +315,16 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
           });
       }
     },
-    [zoomToExtent, transformPoints, showClickMarker, highlightBBox, addHighlightedFeature, removeHighlightedFeature]
+    [
+      getExtentFromFeatures,
+      layerPath,
+      transformPoints,
+      zoomToExtent,
+      showClickMarker,
+      highlightBBox,
+      removeHighlightedFeature,
+      addHighlightedFeature,
+    ]
   );
 
   /**
@@ -333,7 +347,13 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
           />
         ),
         ZOOM: (
-          <IconButton color="primary" onClick={() => handleZoomIn(feature)} disabled={!feature.extent}>
+          <IconButton
+            color="primary"
+            // Function returns void promise instead of void, other work arounds led to more eslint issues
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            onClick={() => handleZoomIn(feature)}
+            disabled={!feature.extent && feature.geoviewLayerType !== CONST_LAYER_TYPES.ESRI_DYNAMIC}
+          >
             <ZoomInSearchIcon />
           </IconButton>
         ),

@@ -138,6 +138,19 @@ export abstract class AbstractGVLayer {
   abstract getBounds(layerPath: string): Extent | undefined;
 
   /**
+   * Overridable function that gets the extent of an array of features.
+   * @param {string} layerPath - The layer path
+   * @param {string[]} objectIds - The features to calculate the extent from.
+   * @returns {Promise<Extent | undefined>} The extent of the features, if available
+   */
+  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined> {
+    logger.logError(`Feature geometry for ${objectIds} is unavailable from ${layerPath}`);
+    return Promise.resolve(undefined);
+  }
+
+  /**
    * Initializes the GVLayer. This function checks if the source is ready and if so it calls onLoaded() to pursue initialization of the layer.
    * If the source isn't ready, it registers to the source ready event to pursue initialization of the layer once its source is ready.
    */

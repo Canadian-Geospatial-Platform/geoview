@@ -1,3 +1,4 @@
+import { Extent } from 'ol/extent';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
@@ -111,6 +112,20 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
       // Log
       logger.logInfo('Removed Data Table Info in stores for layer path:', layerPath);
     });
+  }
+
+  /**
+   * Send a query to get ESRI Dynamic feature geometry
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The layer path
+   * @param {TypeFeatureInfoEntry} feature - The feature to get geometry for.
+   * @returns {Promise<Extent | undefined>} The extent of the feature, if available
+   */
+  static async getExtentFromFeatures(mapId: string, layerPath: string, objectIds: string[]): Promise<Extent | undefined> {
+    const extent = await MapEventProcessor.getMapViewerLayerAPI(mapId)
+      .getGeoviewLayerHybrid(layerPath)
+      ?.getExtentFromFeatures(layerPath, objectIds);
+    return extent;
   }
 
   /**
