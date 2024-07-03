@@ -1,4 +1,5 @@
 import { useStore } from 'zustand';
+import { Extent } from 'ol/extent';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
@@ -20,6 +21,7 @@ export interface IDataTableState {
 
   actions: {
     applyMapFilters: (filterStrings: string) => void;
+    getESRIDynamicFeatureExtent: (layerPath: string, feature: TypeFeatureInfoEntry) => Promise<Extent | undefined>;
     setActiveLayersData: (layers: TypeLayerData[]) => void;
     setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
     setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
@@ -75,6 +77,10 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
           filterStrings,
           !!get().dataTableState.layersDataTableSetting[layerPath].mapFilteredRecord
         );
+      },
+      getESRIDynamicFeatureExtent: (layerPath: string, feature: TypeFeatureInfoEntry) => {
+        // Redirect to event processor
+        return DataTableEventProcessor.getESRIDynamicFeatureExtent(get().mapId, layerPath, feature);
       },
       setActiveLayersData: (activeLayerData: TypeLayerData[]) => {
         // Redirect to setter

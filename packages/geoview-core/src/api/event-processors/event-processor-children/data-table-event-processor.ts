@@ -1,3 +1,5 @@
+import { Extent } from 'ol/extent';
+import { EsriJSON } from 'ol/format';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
@@ -9,7 +11,10 @@ import {
 import { logger } from '@/core/utils/logger';
 import { MapEventProcessor } from './map-event-processor';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
-import { TypeResultSetEntry } from '@/geo/map/map-schema-types';
+import { TypeFeatureInfoEntry, TypeResultSetEntry } from '@/geo/map/map-schema-types';
+import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import { AppEventProcessor } from './app-event-processor';
+import { getLocalizedValue } from '@/core/utils/utilities';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -111,6 +116,47 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
       // Log
       logger.logInfo('Removed Data Table Info in stores for layer path:', layerPath);
     });
+  }
+
+  /**
+   * Send a query to get ESRI Dynamic feature geometry
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The layer path
+   * @param {TypeFeatureInfoEntry} feature - The feature to get geometry for.
+   * @returns {Promise<Extent | undefined>} The extent of the feature, if available
+   */
+  static async getESRIDynamicFeatureExtent(mapId: string, layerPath: string, feature: TypeFeatureInfoEntry): Promise<Extent | undefined> {
+    // Get url for service from layer entry config
+    const layerEntryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath) as EsriDynamicLayerEntryConfig;
+    let baseUrl = getLocalizedValue(layerEntryConfig.source.dataAccessPath, AppEventProcessor.getDisplayLanguage(mapId));
+
+    // Get the feature ID
+    const featureId = feature.fieldInfo.OBJECTID?.value;
+
+    if (baseUrl && featureId) {
+      // Construct query
+      if (!baseUrl.endsWith('/')) baseUrl += '/';
+      const queryUrl = `${baseUrl}${layerEntryConfig.layerId}/query?&f=json&where=OBJECTID%3D${featureId}&outFields=`;
+
+      try {
+        const response = await fetch(queryUrl);
+        const responseJson = await response.json();
+
+        // Convert response json to OL feature
+        const responseFeature = new EsriJSON().readFeatures(
+          { features: responseJson.features },
+          {
+            dataProjection: `EPSG:${responseJson.spatialReference.wkid}`,
+            featureProjection: MapEventProcessor.getMapViewer(mapId).getProjection().getCode(),
+          }
+        )[0];
+
+        return responseFeature.getGeometry()?.getExtent();
+      } catch (error) {
+        logger.logError(`Error fetching geometry from ${queryUrl}`, error);
+      }
+    }
+    return undefined;
   }
 
   /**
