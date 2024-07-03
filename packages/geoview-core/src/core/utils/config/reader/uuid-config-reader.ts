@@ -105,17 +105,23 @@ export class UUIDmapConfigReader {
             });
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (isFeature) {
-            for (let j = 0; j < (layerEntries as TypeJsonArray).length; j++) {
-              const featureUrl = `${url}/${layerEntries[j].index}`;
+            let layerEntriesToUse = layerEntries as TypeJsonArray;
+            let urlToUse = url as string;
+            if (!layerEntries) {
+              layerEntriesToUse = [{ index: (url as string).split('/').pop()! as TypeJsonObject }];
+              urlToUse = (url as string).split('/').slice(0, -1).join('/');
+            }
+
+            for (let j = 0; j < (layerEntriesToUse as TypeJsonArray).length; j++) {
               const geoviewLayerConfig: TypeEsriFeatureLayerConfig = {
                 geoviewLayerId: `${id}`,
                 geoviewLayerName: createLocalizedString(name as string),
-                metadataAccessPath: createLocalizedString(featureUrl),
+                metadataAccessPath: createLocalizedString(urlToUse),
                 geoviewLayerType: CONST_LAYER_TYPES.ESRI_FEATURE,
                 isTimeAware: isTimeAware as boolean,
                 listOfLayerEntryConfig: [],
               };
-              geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): EsriFeatureLayerEntryConfig => {
+              geoviewLayerConfig.listOfLayerEntryConfig = (layerEntriesToUse as TypeJsonArray).map((item): EsriFeatureLayerEntryConfig => {
                 const esriFeatureLayerEntryConfig = new EsriFeatureLayerEntryConfig({
                   geoviewLayerConfig,
                   schemaTag: CONST_LAYER_TYPES.ESRI_FEATURE,

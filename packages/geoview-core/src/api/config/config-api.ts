@@ -266,7 +266,7 @@ export class ConfigApi {
           if (layerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE) {
             logger.logError(`Unable to convert GeoCore layer (Id=${layerConfig.geoviewLayerId}).`);
             // if the config input type is an array and the filterUndefinedValues is on
-            return !(Array.isArray(config) && filterUndefinedValues); // Delete the layer entry
+            return !(filterUndefinedValues || !Array.isArray(config)); // Delete the layer entry
           }
           return true; // Keep the layer
         });

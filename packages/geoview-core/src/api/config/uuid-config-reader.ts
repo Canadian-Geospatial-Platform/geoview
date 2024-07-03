@@ -72,15 +72,22 @@ export class UUIDmapConfigReader {
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (isFeature) {
-            for (let j = 0; j < (layerEntries as TypeJsonArray).length; j++) {
+            let layerEntriesToUse = layerEntries as TypeJsonArray;
+            let urlToUse = url as string;
+            if (!layerEntries) {
+              layerEntriesToUse = [{ index: (url as string).split('/').pop()! as TypeJsonObject }];
+              urlToUse = (url as string).split('/').slice(0, -1).join('/');
+            }
+
+            for (let j = 0; j < (layerEntriesToUse as TypeJsonArray).length; j++) {
               const geoviewLayerConfig = Cast<TypeJsonObject>({
                 geoviewLayerId: `${id}`,
                 geoviewLayerName: createLocalizedString(name as string),
                 isGeocore: true,
-                metadataAccessPath: createLocalizedString(url as string),
+                metadataAccessPath: createLocalizedString(urlToUse as string),
                 geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_FEATURE,
               });
-              (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
+              (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntriesToUse as TypeJsonArray).map(
                 (item): TypeJsonObject => {
                   return Cast<TypeJsonObject>({
                     entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR,
