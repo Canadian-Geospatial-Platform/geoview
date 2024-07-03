@@ -60,6 +60,7 @@ export type TypeValidAppBarCoreProps =
   | 'geolocator'
   | 'export'
   | 'basemap-panel'
+  | 'aoi-panel'
   | 'geochart'
   | 'guide'
   | 'legend'
