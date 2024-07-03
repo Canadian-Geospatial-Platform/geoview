@@ -33,7 +33,7 @@ export type GeoChartGeoCoreConfig = TypeJsonObject & {
   };
 }; // TypeJsonObject, because the definition is in the external package
 
-// #region GeoChart Config types
+// #region GeoChart type
 
 // The GeoChart Json object expected by GeoView
 export type GeoChartConfig = TypeJsonObject & {
@@ -60,7 +60,10 @@ export type UUIDmapConfigReaderResponse = {
 export class UUIDmapConfigReader {
   /**
    * Reads and parses Layers configs from uuid request result
-   * @param {TypeJsonObject} result the uuid request result
+   *
+   * @param {AxiosResponse<TypeJsonObject>} result the uuid request result
+   * @param {string} lang the language to use
+   *
    * @returns {TypeGeoviewLayerConfig[]} layers parsed from uuid result
    * @private
    */
@@ -105,31 +108,33 @@ export class UUIDmapConfigReader {
             });
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (isFeature) {
-            for (let j = 0; j < (layerEntries as TypeJsonArray).length; j++) {
-              const featureUrl = `${url}/${layerEntries[j].index}`;
-              const geoviewLayerConfig: TypeEsriFeatureLayerConfig = {
-                geoviewLayerId: `${id}`,
-                geoviewLayerName: createLocalizedString(name as string),
-                metadataAccessPath: createLocalizedString(featureUrl),
-                geoviewLayerType: CONST_LAYER_TYPES.ESRI_FEATURE,
-                isTimeAware: isTimeAware as boolean,
-                listOfLayerEntryConfig: [],
-              };
-              geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): EsriFeatureLayerEntryConfig => {
-                const esriFeatureLayerEntryConfig = new EsriFeatureLayerEntryConfig({
-                  geoviewLayerConfig,
-                  schemaTag: CONST_LAYER_TYPES.ESRI_FEATURE,
-                  entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
-                  layerId: `${item.index}`,
-                  source: {
-                    format: 'EsriJSON',
-                    dataAccessPath: createLocalizedString(url as string),
-                  },
-                } as EsriFeatureLayerEntryConfig);
-                return esriFeatureLayerEntryConfig;
-              });
-              listOfGeoviewLayerConfig.push(geoviewLayerConfig);
-            }
+            // GV: esriFeature layers as they are returned by RCS don't have a layerEntries property. It is undefined.
+            // GV: Everything needed to create the geoview layer is in the URL.
+            // GV: The geoview layer created contains only one layer entry config in the list.
+            const serviceUrl = (url as string).split('/').slice(0, -1).join('/');
+            const layerId = (url as string).split('/').pop();
+
+            const geoviewLayerConfig: TypeEsriFeatureLayerConfig = {
+              geoviewLayerId: `${id}`,
+              geoviewLayerName: createLocalizedString(name as string),
+              metadataAccessPath: createLocalizedString(serviceUrl),
+              geoviewLayerType: CONST_LAYER_TYPES.ESRI_FEATURE,
+              isTimeAware: isTimeAware as boolean,
+              listOfLayerEntryConfig: [],
+            };
+            geoviewLayerConfig.listOfLayerEntryConfig = [
+              new EsriFeatureLayerEntryConfig({
+                geoviewLayerConfig,
+                schemaTag: CONST_LAYER_TYPES.ESRI_FEATURE,
+                entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
+                layerId,
+                source: {
+                  format: 'EsriJSON',
+                  dataAccessPath: createLocalizedString(serviceUrl),
+                },
+              } as EsriFeatureLayerEntryConfig),
+            ];
+            listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CONST_LAYER_TYPES.ESRI_FEATURE) {
             const geoviewLayerConfig: TypeEsriFeatureLayerConfig = {
               geoviewLayerId: `${id}`,
