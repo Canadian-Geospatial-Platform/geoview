@@ -33,8 +33,12 @@ export type GeoChartConfig = TypeJsonObject & {
 export class UUIDmapConfigReader {
   /**
    * Reads and parses Layers configs from uuid request result
-   * @param {TypeJsonObject} result the uuid request result
+   *
+   * @param {AxiosResponse<TypeJsonObject>} result the uuid request result
+   * @param {string} lang the language to use
+   *
    * @returns {TypeJsonObject[]} layers parsed from uuid result
+   * @private
    */
   static #getLayerConfigFromResponse(result: AxiosResponse<TypeJsonObject>, lang: string): TypeJsonObject[] {
     // If invalid response
@@ -72,15 +76,24 @@ export class UUIDmapConfigReader {
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (isFeature) {
-            for (let j = 0; j < (layerEntries as TypeJsonArray).length; j++) {
+            // TODO:  Find the rcs specifications for esri feature layers. It seems not to have the same structure as esri dynamic
+            // TO.DO: For the moment, we inserted the following 6 lines as a work around to allow both structure to be supported.
+            let layerEntriesToUse = layerEntries as TypeJsonArray;
+            let urlToUse = url as string;
+            if (!layerEntries) {
+              layerEntriesToUse = [{ index: (url as string).split('/').pop()! as TypeJsonObject }];
+              urlToUse = (url as string).split('/').slice(0, -1).join('/');
+            }
+
+            for (let j = 0; j < (layerEntriesToUse as TypeJsonArray).length; j++) {
               const geoviewLayerConfig = Cast<TypeJsonObject>({
                 geoviewLayerId: `${id}`,
                 geoviewLayerName: createLocalizedString(name as string),
                 isGeocore: true,
-                metadataAccessPath: createLocalizedString(url as string),
+                metadataAccessPath: createLocalizedString(urlToUse as string),
                 geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_FEATURE,
               });
-              (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
+              (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntriesToUse as TypeJsonArray).map(
                 (item): TypeJsonObject => {
                   return Cast<TypeJsonObject>({
                     entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR,

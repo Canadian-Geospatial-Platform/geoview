@@ -60,7 +60,10 @@ export type UUIDmapConfigReaderResponse = {
 export class UUIDmapConfigReader {
   /**
    * Reads and parses Layers configs from uuid request result
-   * @param {TypeJsonObject} result the uuid request result
+   *
+   * @param {AxiosResponse<TypeJsonObject>} result the uuid request result
+   * @param {string} lang the language to use
+   *
    * @returns {TypeGeoviewLayerConfig[]} layers parsed from uuid result
    * @private
    */
@@ -105,17 +108,25 @@ export class UUIDmapConfigReader {
             });
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (isFeature) {
-            for (let j = 0; j < (layerEntries as TypeJsonArray).length; j++) {
-              const featureUrl = `${url}/${layerEntries[j].index}`;
+            // TODO:  Find the rcs specifications for esri feature layers. It seems not to have the same structure as esri dynamic
+            // TO.DO: For the moment, we inserted the following 6 lines as a work around to allow both structure to be supported.
+            let layerEntriesToUse = layerEntries as TypeJsonArray;
+            let urlToUse = url as string;
+            if (!layerEntries) {
+              layerEntriesToUse = [{ index: (url as string).split('/').pop()! as TypeJsonObject }];
+              urlToUse = (url as string).split('/').slice(0, -1).join('/');
+            }
+
+            for (let j = 0; j < (layerEntriesToUse as TypeJsonArray).length; j++) {
               const geoviewLayerConfig: TypeEsriFeatureLayerConfig = {
                 geoviewLayerId: `${id}`,
                 geoviewLayerName: createLocalizedString(name as string),
-                metadataAccessPath: createLocalizedString(featureUrl),
+                metadataAccessPath: createLocalizedString(urlToUse),
                 geoviewLayerType: CONST_LAYER_TYPES.ESRI_FEATURE,
                 isTimeAware: isTimeAware as boolean,
                 listOfLayerEntryConfig: [],
               };
-              geoviewLayerConfig.listOfLayerEntryConfig = (layerEntries as TypeJsonArray).map((item): EsriFeatureLayerEntryConfig => {
+              geoviewLayerConfig.listOfLayerEntryConfig = (layerEntriesToUse as TypeJsonArray).map((item): EsriFeatureLayerEntryConfig => {
                 const esriFeatureLayerEntryConfig = new EsriFeatureLayerEntryConfig({
                   geoviewLayerConfig,
                   schemaTag: CONST_LAYER_TYPES.ESRI_FEATURE,
@@ -123,7 +134,7 @@ export class UUIDmapConfigReader {
                   layerId: `${item.index}`,
                   source: {
                     format: 'EsriJSON',
-                    dataAccessPath: createLocalizedString(url as string),
+                    dataAccessPath: createLocalizedString(urlToUse as string),
                   },
                 } as EsriFeatureLayerEntryConfig);
                 return esriFeatureLayerEntryConfig;

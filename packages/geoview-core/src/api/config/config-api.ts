@@ -25,6 +25,19 @@ export class ConfigApi {
   static lastMapConfigCreated?: MapFeatureConfig;
 
   /**
+   * Function used to validate the GeoCore UUIDs.
+   *
+   * @param {string} uuid The UUID to validate.
+   *
+   * @returns {boolean} Returns true if the UUID respect the format.
+   * @static
+   */
+  static isValidUUID(uuid: string) {
+    const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return regex.test(uuid);
+  }
+
+  /**
    * Parse the parameters obtained from a url.
    *
    * @param {string} urlParams The parameters found on the url after the ?.
@@ -266,7 +279,7 @@ export class ConfigApi {
           if (layerConfig.geoviewLayerType === CV_CONFIG_GEOCORE_TYPE) {
             logger.logError(`Unable to convert GeoCore layer (Id=${layerConfig.geoviewLayerId}).`);
             // if the config input type is an array and the filterUndefinedValues is on
-            return !(Array.isArray(config) && filterUndefinedValues); // Delete the layer entry
+            return !(filterUndefinedValues || !Array.isArray(config)); // Delete the layer entry
           }
           return true; // Keep the layer
         });
