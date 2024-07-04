@@ -19,6 +19,7 @@ import {
   layerEntryIsGroupLayer,
   TypeBaseSourceVectorInitialConfig,
 } from '@/geo/map/map-schema-types';
+import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
@@ -199,9 +200,7 @@ export class GeoJSON extends AbstractGeoViewVector {
         }
       }
 
-      if (layerConfig.initialSettings?.extent)
-        // TODO: Check - Why are we converting to the map projection in the pre-processing? It'd be better to standardize to 4326 here (or leave untouched), as it's part of the initial configuration and handle it later?
-        layerConfig.initialSettings.extent = this.getMapViewer().convertExtentLngLatToMapProj(layerConfig.initialSettings.extent);
+      layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
     }
 
     // Setting the layer metadata now with the updated config values. Setting the layer metadata with the config, directly, like it's done in CSV
