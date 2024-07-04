@@ -292,7 +292,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
       }
     };
     processPlugin('basemap-panel');
-    setTimeout(() => processPlugin('aoi-panel'), 100);
+    processPlugin('aoi-panel');
   }, [appBarConfig, mapId]);
 
   useEffect(() => {
@@ -338,7 +338,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
    */
   const { topGroupNames, bottomGroupNames } = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('APP-BAR - panels');
+    logger.logTraceUseMemo('APP-BAR - panels re oeder buttons');
 
     let buttonPanelGroupNames = Object.keys(buttonPanelGroups);
     buttonPanelGroupNames = enforceArrayOrder(buttonPanelGroupNames, CV_DEFAULT_APPBAR_TABS_ORDER);
