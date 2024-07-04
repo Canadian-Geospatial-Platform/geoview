@@ -17,6 +17,7 @@ import { getLocalizedValue } from '@/core/utils/utilities';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { Projection } from '@/geo/utils/projection';
+import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -928,5 +929,55 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
     // Return the calculated layer bounds
     return layerBounds;
+  }
+
+  /**
+   * Sends a query to get ESRI Dynamic feature geometries and calculates an extent from them.
+   * @param {string} layerPath - The layer path.
+   * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
+   * @returns {Promise<Extent | undefined>} The extent of the features, if available.
+   */
+  override async getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined> {
+    // Get url for service from layer entry config
+    const layerEntryConfig = this.getLayerConfig(layerPath)! as EsriDynamicLayerEntryConfig;
+    let baseUrl = getLocalizedValue(layerEntryConfig.source.dataAccessPath, AppEventProcessor.getDisplayLanguage(this.mapId));
+
+    const idString = objectIds.join('%2C');
+    if (baseUrl) {
+      // Construct query
+      if (!baseUrl.endsWith('/')) baseUrl += '/';
+      const queryUrl = `${baseUrl}${layerEntryConfig.layerId}/query?&f=json&where=&objectIds=${idString}&returnGeometry=true`;
+
+      try {
+        const response = await fetch(queryUrl);
+        const responseJson = await response.json();
+
+        // Convert response json to OL features
+        const responseFeatures = new EsriJSON().readFeatures(
+          { features: responseJson.features },
+          {
+            dataProjection: `EPSG:${responseJson.spatialReference.wkid}`,
+            featureProjection: this.getMapViewer().getProjection().getCode(),
+          }
+        );
+
+        // Determine max extent from features
+        let calculatedExtent: Extent | undefined;
+        responseFeatures.forEach((feature) => {
+          const extent = feature.getGeometry()?.getExtent();
+
+          if (extent) {
+            // If extent has not been defined, set it to extent
+            if (!calculatedExtent) calculatedExtent = extent;
+            else getMinOrMaxExtents(calculatedExtent, extent);
+          }
+        });
+
+        return calculatedExtent;
+      } catch (error) {
+        logger.logError(`Error fetching geometry from ${queryUrl}`, error);
+      }
+    }
+    return undefined;
   }
 }
