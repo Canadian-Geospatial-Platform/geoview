@@ -25,7 +25,7 @@ export abstract class AbstractPlugin {
   // Plugin properties
   pluginProps: TypePluginOptions;
 
-  // #region NOTE START
+  // NOTE START !! ****************************************************************************************************
   // The following attributes are attached, after instantiation, by the plugin loader addPlugin function ref 'Object.defineProperties'(!)
   // In this refactoring at the time of coding, I'm, simply, explicitely, writing them here so it's clear that this AbstractPlugin class has (and expects) those attributes.
   // See plugin.addPlugin function for more details.
@@ -47,7 +47,7 @@ export abstract class AbstractPlugin {
   // TODO: Refactor - Plugin - Maybe useTheme is not necessary here.. This might get removed eventually. Don't forget to remove in plugin class too in 'Object.defineProperties'(!)
   useTheme?: typeof useTheme;
 
-  // #region NOTE END
+  // NOTE END !! ******************************************************************************************************
 
   /**
    * Constructs a Plugin
