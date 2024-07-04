@@ -185,7 +185,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
       setButtonPanelGroups((prevState) => {
         return {
           ...prevState,
-          ...buttonPanelGroups,
           [event.group]: {
             ...buttonPanelGroups[event.group],
             [event.buttonPanelId]: event.buttonPanel,
@@ -293,7 +292,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
       }
     };
     processPlugin('basemap-panel');
-    processPlugin('aoi-panel');
+    setTimeout(() => processPlugin('aoi-panel'), 100);
   }, [appBarConfig, mapId]);
 
   useEffect(() => {
