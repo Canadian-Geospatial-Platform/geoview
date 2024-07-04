@@ -38,7 +38,7 @@ export class UUIDmapConfigReader {
    * @param {string} lang the language to use
    *
    * @returns {TypeJsonObject[]} layers parsed from uuid result
-   * @private
+   * @static @private
    */
   static #getLayerConfigFromResponse(result: AxiosResponse<TypeJsonObject>, lang: string): TypeJsonObject[] {
     // If invalid response
@@ -61,11 +61,11 @@ export class UUIDmapConfigReader {
           if (layerType === CV_CONST_LAYER_TYPES.ESRI_DYNAMIC && !isFeature) {
             const geoviewLayerConfig = Cast<TypeJsonObject>({
               geoviewLayerId: `${id}`,
-              geoviewLayerName: createLocalizedString(name as string),
-              isGeocore: true,
-              metadataAccessPath: createLocalizedString(url as string),
+              geoviewLayerName: createLocalizedString(name),
+              metadataAccessPath: createLocalizedString(url),
               geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_DYNAMIC,
-              isTimeAware: isTimeAware as boolean,
+              isGeocore: true,
+              isTimeAware,
             });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
@@ -85,11 +85,11 @@ export class UUIDmapConfigReader {
 
             const geoviewLayerConfig = Cast<TypeJsonObject>({
               geoviewLayerId: `${id}`,
-              geoviewLayerName: createLocalizedString(name as string),
-              isGeocore: true,
-              metadataAccessPath: createLocalizedString(serviceUrl as string),
+              geoviewLayerName: createLocalizedString(name),
+              metadataAccessPath: createLocalizedString(serviceUrl),
               geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_FEATURE,
-              isTimeAware: isTimeAware as boolean,
+              isGeocore: true,
+              isTimeAware,
             });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = [
               Cast<TypeJsonObject>({
@@ -101,11 +101,11 @@ export class UUIDmapConfigReader {
           } else if (layerType === CV_CONST_LAYER_TYPES.ESRI_FEATURE) {
             const geoviewLayerConfig = Cast<TypeJsonObject>({
               geoviewLayerId: `${id}`,
-              geoviewLayerName: createLocalizedString(name as string),
-              isGeocore: true,
-              metadataAccessPath: createLocalizedString(url as string),
+              geoviewLayerName: createLocalizedString(name),
+              metadataAccessPath: createLocalizedString(url),
               geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_FEATURE,
-              isTimeAware: isTimeAware as boolean,
+              isGeocore: true,
+              isTimeAware,
             });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
@@ -119,15 +119,16 @@ export class UUIDmapConfigReader {
           } else if (layerType === CV_CONST_LAYER_TYPES.WMS) {
             const geoviewLayerConfig = Cast<TypeJsonObject>({
               geoviewLayerId: `${id}`,
-              geoviewLayerName: createLocalizedString(name as string),
-              metadataAccessPath: createLocalizedString(url as string),
+              geoviewLayerName: createLocalizedString(name),
+              metadataAccessPath: createLocalizedString(url),
               geoviewLayerType: CV_CONST_LAYER_TYPES.WMS,
-              isTimeAware: isTimeAware as boolean,
+              isGeocore: true,
+              isTimeAware,
             });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
                 return Cast<TypeJsonObject>({
-                  entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR,
+                  entryType: CV_CONST_SUB_LAYER_TYPES.RASTER_IMAGE,
                   layerId: `${item.id}`,
                   source: {
                     serverType: serverType === undefined ? 'mapserver' : serverType,
@@ -135,6 +136,167 @@ export class UUIDmapConfigReader {
                 });
               }
             );
+            listOfGeoviewLayerConfig.push(geoviewLayerConfig);
+          } else if (layerType === CV_CONST_LAYER_TYPES.WFS) {
+            const geoviewLayerConfig = Cast<TypeJsonObject>({
+              geoviewLayerId: `${id}`,
+              geoviewLayerName: createLocalizedString(name),
+              metadataAccessPath: createLocalizedString(url),
+              geoviewLayerType: CV_CONST_LAYER_TYPES.WFS,
+              isGeocore: true,
+              isTimeAware,
+            });
+            (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
+              (item): TypeJsonObject => {
+                return Cast<TypeJsonObject>({
+                  entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR,
+                  layerId: `${item.id}`,
+                  source: {
+                    format: 'WFS',
+                    strategy: 'all',
+                  },
+                });
+              }
+            );
+            listOfGeoviewLayerConfig.push(geoviewLayerConfig);
+          } else if (layerType === CV_CONST_LAYER_TYPES.OGC_FEATURE) {
+            const geoviewLayerConfig = Cast<TypeJsonObject>({
+              geoviewLayerId: `${id}`,
+              geoviewLayerName: createLocalizedString(name),
+              metadataAccessPath: createLocalizedString(url),
+              geoviewLayerType: CV_CONST_LAYER_TYPES.OGC_FEATURE,
+              isGeocore: true,
+              isTimeAware,
+            });
+            (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
+              (item): TypeJsonObject => {
+                return Cast<TypeJsonObject>({
+                  entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR,
+                  layerId: `${item.id}`,
+                  source: {
+                    format: 'featureAPI',
+                  },
+                });
+              }
+            );
+            listOfGeoviewLayerConfig.push(geoviewLayerConfig);
+          } else if (layerType === CV_CONST_LAYER_TYPES.GEOJSON) {
+            const geoviewLayerConfig = Cast<TypeJsonObject>({
+              geoviewLayerId: `${id}`,
+              geoviewLayerName: createLocalizedString(name),
+              metadataAccessPath: createLocalizedString(url),
+              geoviewLayerType: CV_CONST_LAYER_TYPES.GEOJSON,
+              isGeocore: true,
+              isTimeAware,
+            });
+            (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
+              (item): TypeJsonObject => {
+                return Cast<TypeJsonObject>({
+                  entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR,
+                  layerId: `${item.id}`,
+                  source: {
+                    format: 'GeoJSON',
+                  },
+                });
+              }
+            );
+            listOfGeoviewLayerConfig.push(geoviewLayerConfig);
+          } else if (layerType === CV_CONST_LAYER_TYPES.XYZ_TILES) {
+            const geoviewLayerConfig = Cast<TypeJsonObject>({
+              geoviewLayerId: `${id}`,
+              geoviewLayerName: createLocalizedString(name),
+              metadataAccessPath: createLocalizedString(url),
+              geoviewLayerType: CV_CONST_LAYER_TYPES.XYZ_TILES,
+              isGeocore: true,
+              isTimeAware,
+            });
+            (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
+              (item): TypeJsonObject => {
+                return Cast<TypeJsonObject>({
+                  entryType: CV_CONST_SUB_LAYER_TYPES.RASTER_TILE,
+                  layerId: `${item.id}`,
+                });
+              }
+            );
+            listOfGeoviewLayerConfig.push(geoviewLayerConfig);
+          } else if (layerType === CV_CONST_LAYER_TYPES.VECTOR_TILES) {
+            const geoviewLayerConfig = Cast<TypeJsonObject>({
+              geoviewLayerId: `${id}`,
+              geoviewLayerName: createLocalizedString(name),
+              metadataAccessPath: createLocalizedString(url),
+              geoviewLayerType: CV_CONST_LAYER_TYPES.VECTOR_TILES,
+              isGeocore: true,
+              isTimeAware,
+            });
+            (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
+              (item): TypeJsonObject => {
+                return Cast<TypeJsonObject>({
+                  entryType: CV_CONST_SUB_LAYER_TYPES.RASTER_TILE,
+                  layerId: `${item.id}`,
+                  tileGrid: item.tileGrid,
+                  source: {
+                    dataAccessPath: createLocalizedString(url),
+                  },
+                });
+              }
+            );
+            listOfGeoviewLayerConfig.push(geoviewLayerConfig);
+          } else if (layerType === CV_CONST_LAYER_TYPES.GEOPACKAGE) {
+            const geoviewLayerConfig = Cast<TypeJsonObject>({
+              geoviewLayerId: `${id}`,
+              geoviewLayerName: createLocalizedString(name),
+              metadataAccessPath: createLocalizedString(url),
+              geoviewLayerType: CV_CONST_LAYER_TYPES.GEOPACKAGE,
+              isGeocore: true,
+              isTimeAware,
+            });
+            (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
+              (item): TypeJsonObject => {
+                return Cast<TypeJsonObject>({
+                  entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR,
+                  layerId: `${item.id}`,
+                  source: {
+                    format: 'GeoPackage',
+                  },
+                });
+              }
+            );
+            listOfGeoviewLayerConfig.push(geoviewLayerConfig);
+          } else if (layerType === CV_CONST_LAYER_TYPES.IMAGE_STATIC) {
+            const geoviewLayerConfig = Cast<TypeJsonObject>({
+              geoviewLayerId: `${id}`,
+              geoviewLayerName: createLocalizedString(name),
+              metadataAccessPath: createLocalizedString(url),
+              geoviewLayerType: CV_CONST_LAYER_TYPES.IMAGE_STATIC,
+              isTimeAware,
+            });
+            (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
+              (item): TypeJsonObject => {
+                return Cast<TypeJsonObject>({
+                  entryType: CV_CONST_SUB_LAYER_TYPES.RASTER_IMAGE,
+                  layerId: `${item.id}`,
+                });
+              }
+            );
+            listOfGeoviewLayerConfig.push(geoviewLayerConfig);
+          } else if (layerType === CV_CONST_LAYER_TYPES.ESRI_IMAGE) {
+            // GV: ESRI Image layers as they are returned by RCS don't have a layerEntries property. It is undefined.
+            // GV: Everything needed to create the geoview layer is in the URL. The layerId of the layerEntryConfig is not used,
+            // GV: but we need to create a layerEntryConfig in the list for the layer to be displayed.
+            const geoviewLayerConfig = Cast<TypeJsonObject>({
+              geoviewLayerId: `${id}`,
+              geoviewLayerName: createLocalizedString(name),
+              metadataAccessPath: createLocalizedString(url),
+              geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_IMAGE,
+              isGeocore: true,
+              isTimeAware,
+            });
+            (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = [
+              Cast<TypeJsonObject>({
+                entryType: CV_CONST_SUB_LAYER_TYPES.RASTER_IMAGE,
+                layerId: (url as string).split('/').slice(-2, -1)[0],
+              }),
+            ];
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else {
             // Log
