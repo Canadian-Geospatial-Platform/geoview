@@ -1,0 +1,351 @@
+{
+  "OSDP": {
+    "Learn": [
+      {
+        "optionDisplayValue": "AIR 1",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "881a606b-69e0-473f-841d-aec9e2815e58"
+      },
+      {
+        "optionDisplayValue": "AIR 2",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "f6660f68-5e78-47b3-9306-9805e1d3d6e9"
+      },
+      {
+        "optionDisplayValue": "WATER 1",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "b6b6d5a6-bded-4b6e-9e8a-17f6e1b538dc"
+      },
+      {
+        "optionDisplayValue": "WATER 2",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "94a51051-ad11-499a-b5f1-8c97b29f695c"
+      },
+      {
+        "optionDisplayValue": "CLIMATE  1",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "4221c508-00c9-4011-aca6-b0a017fc90dc"
+      },
+      {
+        "optionDisplayValue": "CLIMATE 2",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "3e9cc0c9-7e59-478b-befb-a584674baa75"
+      },
+      {
+        "optionDisplayValue": "BIODIVERSITY 1",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "6c343726-1e92-451a-876a-76e17d398a1c"
+      },
+      {
+        "optionDisplayValue": "BIODIVERSITY 2",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "91219d24-e877-4c8a-8bd2-b2b662e573e0"
+      },
+      {
+        "optionDisplayValue": "LAND 1",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "0a309f2c-4f11-4ddb-bce1-e7ba6f8c20cf"
+      },
+      {
+        "optionDisplayValue": "LAND 2",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "4e615eae-b90c-420b-adee-2ca35896caf6"
+      },
+      {
+        "optionDisplayValue": "LAND 3",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "c688b87f-e85f-4842-b0e1-a8f79ebf1133"
+      },
+      {
+        "optionDisplayValue": "SOCIETY 1",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "0a309f2c-4f11-4ddb-bce1-e7ba6f8c20cf"
+      },
+      {
+        "optionDisplayValue": "SOCIETY 2",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "44cebdbe-a3a5-4f02-9f1d-66af8dbf76f1"
+      },
+      {
+        "optionDisplayValue": "SOCIETY 3",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "66909604-f685-4f1b-a3d8-447996e6b41b"
+      },
+      {
+        "optionDisplayValue": "ECONOMY 1",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "f5f2db55-31e4-42fb-8c73-23e1c44de9b2"
+      },
+      {
+        "optionDisplayValue": "ECONOMY 2",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "65d3db23-b83c-4f49-ab93-65c59ee0e6aa"
+      },
+      {
+        "optionDisplayValue": "HEALTH 1",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "d256b422-2834-40a2-9f0c-bd5fc32781b2"
+      },
+      {
+        "optionDisplayValue": "HEALTH 2",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "21b821cf-0f1c-40ee-8925-eab12d357668"
+      }
+    ],
+    "MapArea Project": [
+      {
+        "optionDisplayValue": "IAAC",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "f4c51eaa-a6ca-48b9-a1fc-b0651da20509"
+      },
+      {
+        "optionDisplayValue": "DFO",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "a57d5eef-e482-4c05-bcd5-56a0f15b9f02"
+      },
+      {
+        "optionDisplayValue": "BC",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "ea4c0bdb-a63f-49a4-b14a-09c1560aad0b"
+      },
+      {
+        "optionDisplayValue": "TC",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "3af377be-801d-4ebf-9137-869b3080bfa5"
+      },
+      {
+        "optionDisplayValue": "CER",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "039fbd92-43c2-4805-b210-d65703712e37"
+      },
+      {
+        "optionDisplayValue": "CNSN",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "6478153c-829f-4649-bd52-41f63b41021f"
+      }
+    ],
+    "MapArea Monitor": [
+      {
+        "optionDisplayValue": "Air",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "e6cc3ae2-92b1-4df6-87ff-698a1cd5a7bd"
+      },
+      {
+        "optionDisplayValue": "Water",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "b6b6d5a6-bded-4b6e-9e8a-17f6e1b538dc"
+      }
+    ],
+    "Dev": [
+      {
+        "optionDisplayValue": "Energy 1",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "039fbd92-43c2-4805-b210-d65703712e37"
+      },
+      {
+        "optionDisplayValue": "Energy 2",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "40fbe40c-01cd-49d3-8add-0d20ed64c90d"
+      },
+      {
+        "optionDisplayValue": "Energy 3",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "0e76433c-7aeb-46dc-a019-11db10ee28dd"
+      },
+      {
+        "optionDisplayValue": "Forestry 1",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "9d00aa0a-a825-4804-b29b-1eff4f82a085"
+      },
+      {
+        "optionDisplayValue": "Forestry 2",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "d576e878-04f1-4c4f-8428-e16c371e9a3c"
+      },
+      {
+        "optionDisplayValue": "Forestry 3",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "ee1580ab-a23d-4f86-a09b-79763677eb47"
+      },
+      {
+        "optionDisplayValue": "Mining 1",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "488faf70-b50b-4749-ac1c-a1fd44e06f11"
+      },
+      {
+        "optionDisplayValue": "Mining 2",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "22b2db8a-dc12-47f2-9737-99d3da921751"
+      },
+      {
+        "optionDisplayValue": "Mining 3",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "000183ed-8864-42f0-ae43-c4313a860720"
+      },
+      {
+        "optionDisplayValue": "Fisheries 1",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "e0fabad5-9379-4077-87b9-5705f28c490b"
+      },
+      {
+        "optionDisplayValue": "Fisheries 2",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "a57d5eef-e482-4c05-bcd5-56a0f15b9f02"
+      },
+      {
+        "optionDisplayValue": "Fisheries 3",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "db177a8c-5d7d-49eb-8290-31e6a45d786c"
+      },
+      {
+        "optionDisplayValue": "Transportation 1",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "e218c8cb-5039-4706-b58f-d54c6c11a6fc"
+      },
+      {
+        "optionDisplayValue": "Transportation 2",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "c5c249c4-dea6-40a6-8fae-188a42030908"
+      },
+      {
+        "optionDisplayValue": "Transportation 3",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "3af377be-801d-4ebf-9137-869b3080bfa5"
+      },
+      {
+        "optionDisplayValue": "Agriculture 1",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "d765cc41-8ee0-4aca-be4b-084448e52a58"
+      },
+      {
+        "optionDisplayValue": "Agriculture 2",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "199e4ab6-832b-4434-ac39-e4887d7cc4e5"
+      }
+    ]
+  },
+  "dataTeam": {
+    "BC": [
+      {
+        "optionDisplayValue": "Human Cultural Economic",
+        "type": "ogcWms",
+        "accessPath": "https://openmaps.gov.bc.ca/geo/pub/WHSE_HUMAN_CULTURAL_ECONOMIC.MPI_ECON_MAJOR_PROJECTS_POINT/ows",
+        "layerId": "pub:WHSE_HUMAN_CULTURAL_ECONOMIC.MPI_ECON_MAJOR_PROJECTS_POINT"
+      }
+    ],
+    "CER": [
+      {
+        "optionDisplayValue": "Canada Energy Regulator Assesments (ESRI)",
+        "type": "esriDynamic",
+        "accessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/CER_Assessments_EN/MapServer",
+        "layerId": "0"
+      },
+      {
+        "optionDisplayValue": "Canada Energy Regulator Assesments (WMS)",
+        "type": "ogcWms",
+        "accessPath": "https://maps-cartes.services.geo.ca/server_serveur/services/NRCan/CER_Assessments_EN/MapServer/WMSServer",
+        "layerId": "0"
+      }
+    ],
+    "DFO": [
+      {
+        "optionDisplayValue": "Program Activity Tracking for Habitat System",
+        "type": "esriDynamic",
+        "accessPath": "https://gisp.dfo-mpo.gc.ca/arcgis/rest/services/FGP/PATH/MapServer/",
+        "layerId": "0"
+      }
+    ],
+    "IAAC": [
+      {
+        "optionDisplayValue": "Assessment Inventory (completed)",
+        "type": "esriDynamic",
+        "accessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/IAAC/assessment_inventory_en/MapServer",
+        "layerId": "0"
+      },
+      {
+        "optionDisplayValue": "Assessment Inventory (in progress)",
+        "type": "esriDynamic",
+        "accessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/IAAC/assessment_inventory_en/MapServer",
+        "layerId": "1"
+      },
+      {
+        "optionDisplayValue": "Assessment Inventory (terminated)",
+        "type": "esriDynamic",
+        "accessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/IAAC/assessment_inventory_en/MapServer",
+        "layerId": "2"
+      }
+    ],
+    "TC": [
+      {
+        "optionDisplayValue": "TC Assessments (WMS)",
+        "type": "ogcWms",
+        "accessPath": "https://maps-cartes.services.geo.ca/server_serveur/services/NRCan/TC_Assessments_EN/MapServer/WMSServer",
+        "layerId": "0"
+      },
+      {
+        "optionDisplayValue": "TC Assessments (ESRI)",
+        "type": "esriDynamic",
+        "accessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/TC_Assessments_EN/MapServer",
+        "layerId": "0"
+      }
+    ],
+    "900A": [
+      {
+        "optionDisplayValue": "Les 100 principaux projets d'exploration",
+        "type": "esriDynamic",
+        "accessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_fr/MapServer/",
+        "layerId": "0"
+      },
+      {
+        "optionDisplayValue": "900A (group layer)",
+        "type": "esriDynamic",
+        "accessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_fr/MapServer/",
+        "layerId": "1"
+      }
+    ]
+
+  }
+}

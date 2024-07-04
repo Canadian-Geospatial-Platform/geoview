@@ -12,7 +12,7 @@ export type GeoChartGeoCoreConfig = TypeJsonObject & {
   };
 }; // TypeJsonObject, because the definition is in the external package
 
-// #region GeoChart Config types
+// #region GeoChart type
 
 // The GeoChart Json object expected by GeoView
 export type GeoChartConfig = TypeJsonObject & {
@@ -33,8 +33,12 @@ export type GeoChartConfig = TypeJsonObject & {
 export class UUIDmapConfigReader {
   /**
    * Reads and parses Layers configs from uuid request result
-   * @param {TypeJsonObject} result the uuid request result
+   *
+   * @param {AxiosResponse<TypeJsonObject>} result the uuid request result
+   * @param {string} lang the language to use
+   *
    * @returns {TypeJsonObject[]} layers parsed from uuid result
+   * @private
    */
   static #getLayerConfigFromResponse(result: AxiosResponse<TypeJsonObject>, lang: string): TypeJsonObject[] {
     // If invalid response
@@ -50,7 +54,7 @@ export class UUIDmapConfigReader {
         const layer = data.layers[0];
 
         if (layer) {
-          const { layerType, layerEntries, name, url, id } = layer;
+          const { layerType, layerEntries, name, url, id, serverType, isTimeAware } = layer;
 
           const isFeature = (url as string).indexOf('FeatureServer') > -1;
 
@@ -61,6 +65,7 @@ export class UUIDmapConfigReader {
               isGeocore: true,
               metadataAccessPath: createLocalizedString(url as string),
               geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_DYNAMIC,
+              isTimeAware: isTimeAware as boolean,
             });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
@@ -72,24 +77,27 @@ export class UUIDmapConfigReader {
             );
             listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (isFeature) {
-            for (let j = 0; j < (layerEntries as TypeJsonArray).length; j++) {
-              const geoviewLayerConfig = Cast<TypeJsonObject>({
-                geoviewLayerId: `${id}`,
-                geoviewLayerName: createLocalizedString(name as string),
-                isGeocore: true,
-                metadataAccessPath: createLocalizedString(url as string),
-                geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_FEATURE,
-              });
-              (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
-                (item): TypeJsonObject => {
-                  return Cast<TypeJsonObject>({
-                    entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR,
-                    layerId: `${item.index}`,
-                  });
-                }
-              );
-              listOfGeoviewLayerConfig.push(geoviewLayerConfig);
-            }
+            // GV: esriFeature layers as they are returned by RCS don't have a layerEntries property. It is undefined.
+            // GV: Everything needed to create the geoview layer is in the URL.
+            // GV: The geoview layer created contains only one layer entry config in the list.
+            const serviceUrl = (url as string).split('/').slice(0, -1).join('/');
+            const layerId = (url as string).split('/').pop();
+
+            const geoviewLayerConfig = Cast<TypeJsonObject>({
+              geoviewLayerId: `${id}`,
+              geoviewLayerName: createLocalizedString(name as string),
+              isGeocore: true,
+              metadataAccessPath: createLocalizedString(serviceUrl as string),
+              geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_FEATURE,
+              isTimeAware: isTimeAware as boolean,
+            });
+            (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = [
+              Cast<TypeJsonObject>({
+                entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR,
+                layerId,
+              }),
+            ];
+            listOfGeoviewLayerConfig.push(geoviewLayerConfig);
           } else if (layerType === CV_CONST_LAYER_TYPES.ESRI_FEATURE) {
             const geoviewLayerConfig = Cast<TypeJsonObject>({
               geoviewLayerId: `${id}`,
@@ -97,6 +105,7 @@ export class UUIDmapConfigReader {
               isGeocore: true,
               metadataAccessPath: createLocalizedString(url as string),
               geoviewLayerType: CV_CONST_LAYER_TYPES.ESRI_FEATURE,
+              isTimeAware: isTimeAware as boolean,
             });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
@@ -113,12 +122,16 @@ export class UUIDmapConfigReader {
               geoviewLayerName: createLocalizedString(name as string),
               metadataAccessPath: createLocalizedString(url as string),
               geoviewLayerType: CV_CONST_LAYER_TYPES.WMS,
+              isTimeAware: isTimeAware as boolean,
             });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
                 return Cast<TypeJsonObject>({
                   entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR,
                   layerId: `${item.id}`,
+                  source: {
+                    serverType: serverType === undefined ? 'mapserver' : serverType,
+                  },
                 });
               }
             );
