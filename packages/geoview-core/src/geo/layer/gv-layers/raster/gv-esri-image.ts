@@ -17,6 +17,7 @@ import {
 } from '@/geo/map/map-schema-types';
 import { esriGetFieldType, esriGetFieldDomain } from '../utils';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { validateExtent } from '@/geo/utils/utilities';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from './abstract-gv-raster';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -248,6 +249,7 @@ export class GVEsriImage extends AbstractGVRaster {
       // Get the metadata projection
       const metadataProjection = this.getMetadataProjection();
       layerBounds = this.getMapViewer().convertExtentFromProjToMapProj(metadataExtent, metadataProjection);
+      layerBounds = validateExtent(layerBounds, this.getMapViewer().getProjection().getCode());
     }
 
     // Return the calculated layer bounds

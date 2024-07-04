@@ -8,6 +8,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { getLocalizedValue, getXMLHttpRequest } from '@/core/utils/utilities';
+import { validateExtent } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { TimeDimensionESRI, DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
@@ -353,16 +354,8 @@ export function commonProcessInitialSettings(
   // GV if (layerConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerConfig.initialSettings.minZoom = minScale;
   // GV if (layerConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerConfig.initialSettings.maxZoom = maxScale;
 
-  // TODO: Check - Why are we converting to the map projection in the pre-processing? It'd be better to standardize to 4326 here (or leave untouched), as it's part of the initial configuration and handle it later?
+  if (layerConfig.initialSettings?.extent) layerConfig.initialSettings.extent = validateExtent(layerConfig.initialSettings.extent);
 
-  if (layerConfig.initialSettings?.extent)
-    layerConfig.initialSettings.extent = Projection.transformExtent(
-      layerConfig.initialSettings.extent,
-      Projection.PROJECTION_NAMES.LNGLAT,
-      `EPSG:${MapEventProcessor.getMapState(layer.mapId).currentProjection}`
-    );
-
-  // TODO: Check - Here, we're *not* converting in the map projection in the pre-processing, but for some other layers we are (ogc-feature, wfs, ..?). Should be standardized.
   if (!layerConfig.initialSettings?.bounds) {
     const layerExtent = [
       layerMetadata.extent.xmin,
@@ -370,7 +363,12 @@ export function commonProcessInitialSettings(
       layerMetadata.extent.xmax,
       layerMetadata.extent.ymax,
     ] as Extent;
-    layerConfig.initialSettings!.bounds = layerExtent;
+    const latlonExtent = Projection.transformExtent(
+      layerExtent,
+      `EPSG:${layerMetadata.extent.spatialReference.wkid}`,
+      Projection.PROJECTION_NAMES.LNGLAT
+    );
+    layerConfig.initialSettings!.bounds = validateExtent(latlonExtent);
   }
 }
 

@@ -26,6 +26,7 @@ import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vect
 import { VectorLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { validateExtent } from '@/geo/utils/utilities';
 
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'WFS';
@@ -207,9 +208,7 @@ export class WFS extends AbstractGeoViewVector {
           return;
         }
 
-        if (layerConfig.initialSettings?.extent)
-          // TODO: Check - Why are we converting to the map projection in the pre-processing? It'd be better to standardize to 4326 here (or leave untouched), as it's part of the initial configuration and handle it later?
-          layerConfig.initialSettings.extent = this.getMapViewer().convertExtentLngLatToMapProj(layerConfig.initialSettings.extent);
+        if (layerConfig.initialSettings?.extent) layerConfig.initialSettings.extent = validateExtent(layerConfig.initialSettings.extent);
 
         if (!layerConfig.initialSettings?.bounds && foundMetadata['ows:WGS84BoundingBox']) {
           // TODO: Check - This additional processing seem valid, but is it at the right place? A bit confusing with the rest of the codebase.
@@ -218,12 +217,7 @@ export class WFS extends AbstractGeoViewVector {
           const upperCorner = (foundMetadata['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'] as string).split(' ');
           const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
 
-          // TODO: Check - Why are we converting to the map projection in the pre-processing? It'd be better to standardize to 4326 here (or leave untouched), as it's part of the initial configuration?
-          // TO.DOCONT: We're already making sure to project the settings in the map projection when we getBounds(). Seems we're doing work twice? Should be standardized so that the
-          // TO.DOCONT: layer.getBounds() are coherent between children classes. And should probably *not* reproject in the map projection during layer metadata pre-processing if we want to
-          // TO.DOCONT: be able to, possibly, fetch metadata information in a standalone manner, outside of a map.
-          // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-          layerConfig.initialSettings!.bounds = this.getMapViewer().convertExtentLngLatToMapProj(bounds);
+          layerConfig.initialSettings!.bounds = validateExtent(bounds);
         }
       }
     });

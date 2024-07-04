@@ -19,6 +19,7 @@ import {
 } from '@/geo/map/map-schema-types';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { Cast, toJsonObject } from '@/core/types/global-types';
+import { validateExtent } from '@/geo/utils/utilities';
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
@@ -272,9 +273,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
       layerConfig.initialSettings = defaultsDeep(layerConfig.initialSettings, metadataLayerConfigFound!.initialSettings);
 
       if (layerConfig.initialSettings?.extent)
-        // TODO: Check - Why are we converting to the map projection in the pre-processing? It'd be better to standardize to 4326 here (or leave untouched), as it's part of the initial configuration and handle it later?
         // eslint-disable-next-line no-param-reassign
-        layerConfig.initialSettings.extent = this.getMapViewer().convertExtentLngLatToMapProj(layerConfig.initialSettings.extent);
+        layerConfig.initialSettings.extent = validateExtent(layerConfig.initialSettings.extent);
     }
     return Promise.resolve(layerConfig);
   }

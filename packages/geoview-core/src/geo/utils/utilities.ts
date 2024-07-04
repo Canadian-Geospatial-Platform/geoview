@@ -411,8 +411,7 @@ export function getExtentIntersectionMaybe(extentA: Extent | undefined, extentB?
 }
 
 /**
- * Convert an extent to a polygon
- *
+ * Converts an extent to a polygon
  * @param {Extent} extent - The extent to convert
  * @returns {Polygon} The created polygon
  */
@@ -429,8 +428,7 @@ export function extentToPolygon(extent: Extent): Polygon {
 }
 
 /**
- * Convert an polygon to an extent
- *
+ * Converts a polygon to an extent
  * @param {Polygon} polygon - The polygon to convert
  * @returns {Extent} The created extent
  */
@@ -448,4 +446,35 @@ export function polygonToExtent(polygon: Polygon): Extent {
   }
   const extent: Extent = [minx, miny, maxx, maxy];
   return extent;
+}
+
+/**
+ * Checks validity of lat long extent and updates values if invalid.
+ * @param {Extent} extent - The extent to validate.
+ * @param {string} code - The projection code of the extent. Default EPSG:4326.
+ * @returns {Extent} The validated extent
+ */
+export function validateExtent(extent: Extent, code: string = 'EPSG:4326'): Extent {
+  // Max extents for projections
+  const maxExtents: Record<string, number[]> = {
+    'EPSG:4326': [-180, -90, 180, 90],
+    'EPSG:3857': [-20037508.3427892, -20037508.3427892, 20037508.3427892, 20037508.3427892],
+    'EPSG:3978': [-7192737.96, -3004297.73, 5183275.29, 4484204.83],
+  };
+
+  // Replace any invalid entries with maximum value
+  const minX = extent[0] < maxExtents[code][0] || extent[0] === -Infinity || Number.isNaN(extent[0]) ? maxExtents[code][0] : extent[0];
+  const minY = extent[1] < maxExtents[code][1] || extent[0] === -Infinity || Number.isNaN(extent[1]) ? maxExtents[code][1] : extent[1];
+  const maxX = extent[0] > maxExtents[code][2] || extent[0] === Infinity || Number.isNaN(extent[2]) ? maxExtents[code][2] : extent[2];
+  const maxY = extent[0] > maxExtents[code][3] || extent[0] === Infinity || Number.isNaN(extent[3]) ? maxExtents[code][3] : extent[3];
+
+  // Check the order
+  const validatedExtent: Extent = [
+    minX < maxX ? minX : maxX,
+    minY < maxY ? minY : maxY,
+    maxX > minX ? maxX : minX,
+    maxY > minY ? maxY : minY,
+  ];
+
+  return validatedExtent;
 }
