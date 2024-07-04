@@ -20,7 +20,7 @@ import {
   TypeBaseSourceVectorInitialConfig,
   layerEntryIsGroupLayer,
 } from '@/geo/map/map-schema-types';
-
+import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
 import { OgcFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
@@ -195,21 +195,17 @@ export class OgcFeature extends AbstractGeoViewVector {
             fr: foundCollection.description as string,
           };
 
-        if (layerConfig.initialSettings?.extent)
-          // TODO: Check - Why are we converting to the map projection in the pre-processing? It'd be better to standardize to 4326 here (or leave untouched), as it's part of the initial configuration and handle it later?
-          layerConfig.initialSettings.extent = this.getMapViewer().convertExtentLngLatToMapProj(layerConfig.initialSettings.extent);
+        layerConfig.initialSettings.extent = validateExtentWhenDefined(layerConfig.initialSettings.extent);
 
-        if (!layerConfig.initialSettings?.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
-          // TODO: Check - Why are we converting to the map projection in the pre-processing? It'd be better to standardize to 4326 here (or leave untouched), as it's part of the initial configuration?
-          // TO.DOCONT: We're already making sure to project the settings in the map projection when we getBounds(). Seems we're doing work twice? Should be standardized so that the
-          // TO.DOCONT: layer.getBounds() are coherent between children classes. And should probably *not* reproject in the map projection during layer metadata pre-processing if we want to
-          // TO.DOCONT: be able to, possibly, fetch metadata information in a standalone manner, outside of a map.
-          // layerConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
-          layerConfig.initialSettings!.bounds = this.getMapViewer().convertExtentFromProjToMapProj(
+        if (!layerConfig.initialSettings.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
+          const latlonExtent = Projection.transformExtent(
             foundCollection.extent.spatial.bbox[0] as number[],
-            Projection.getProjection(foundCollection.extent.spatial.crs as string)!
+            Projection.getProjection(foundCollection.extent.spatial.crs as string)!,
+            Projection.PROJECTION_NAMES.LNGLAT
           );
+          layerConfig.initialSettings.bounds = latlonExtent;
         }
+        layerConfig.initialSettings.bounds = validateExtentWhenDefined(layerConfig.initialSettings.bounds);
         return;
       }
 
