@@ -16,8 +16,8 @@ import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
+import { validateExtent, getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
-import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { TypeJsonObject } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -925,6 +925,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       // Get the metadata projection
       const metadataProjection = this.getMetadataProjection();
       layerBounds = this.getMapViewer().convertExtentFromProjToMapProj(metadataExtent, metadataProjection);
+      layerBounds = validateExtent(layerBounds, this.getMapViewer().getProjection().getCode());
     }
 
     // Return the calculated layer bounds
