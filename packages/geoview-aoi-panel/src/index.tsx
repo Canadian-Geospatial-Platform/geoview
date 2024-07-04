@@ -48,7 +48,7 @@ class AoiPanelPlugin extends AppBarPlugin {
   override onCreateButtonProps(): TypeIconButtonProps {
     // Button props
     return {
-      id: `${this.pluginProps.mapId}-AoiPanelButton`,
+      id: `aoi-panel`,
       tooltip: 'AoiPanel.title',
       tooltipPlacement: 'right',
       children: <AoiIcon />,
