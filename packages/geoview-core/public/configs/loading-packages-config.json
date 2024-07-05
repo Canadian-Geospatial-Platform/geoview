@@ -15,7 +15,15 @@
   "corePackages": [],
   "appBar": {
     "tabs": {
-      "core": ["basemap-panel", "aoi-panel"]
+      "core": ["geolocator",
+                "export",
+                "aoi-panel",
+                "guide",
+                "basemap-panel",
+                "details",
+                "legend",
+                "data-table",
+                "layers"]
     }
   }
 }

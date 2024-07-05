@@ -5,7 +5,7 @@
       "projection": 3978
     },
     "basemapOptions": {
-      "basemapId": "osm",
+      "basemapId": "transport",
       "shaded": false,
       "labeled": false
     },
