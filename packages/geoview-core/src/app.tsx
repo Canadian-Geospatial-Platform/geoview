@@ -108,11 +108,14 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
   if (mapElement.hasAttribute('data-geocore-keys')) {
     const geocoreKeys = mapElement.getAttribute('data-geocore-keys')?.split(',');
     geocoreKeys?.forEach((key: string) => {
-      mapConfig.map.listOfGeoviewLayerConfig.push({
+      // Create the geocore snippet as any because at this point it does not contain all the attributes for the type
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const layer: any = {
         geoviewLayerType: 'geoCore',
         geoviewLayerId: key,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      };
+
+      mapConfig.map.listOfGeoviewLayerConfig.push(layer);
     });
   }
 
