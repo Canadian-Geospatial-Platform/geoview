@@ -121,10 +121,7 @@ class BasemapPanelPlugin extends AppBarPlugin {
   /**
    * Function called when the plugin is removed, used for clean up
    */
-  override onRemoved(): void {
-    // reset basemaps array
-    this.mapViewer().basemap.basemaps = [];
-  }
+  override onRemoved(): void {}
 }
 
 export default BasemapPanelPlugin;
