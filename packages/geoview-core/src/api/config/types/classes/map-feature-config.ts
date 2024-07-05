@@ -83,7 +83,6 @@ export class MapFeatureConfig {
    * this version of the viewer.
    */
   schemaVersionUsed?: '1.0';
-  listOfGeoviewLayerConfig: any;
 
   /**
    * The class constructor
