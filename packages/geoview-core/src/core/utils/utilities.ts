@@ -12,11 +12,12 @@ import { TypeGuideObject } from '../stores/store-interface-and-intial-values/app
 
 /**
  * Create a localized string and set its "en" and "fr" properties to the same value.
- * @param {TypeLocalizedString} localizedString the localized string to process.
+ * @param {string | TypeJsonObject} value The value to assign to the en and fr properties.
+ *
  * @returns {TypeLocalizedString} The localized (en/fr) object
  */
-export function createLocalizedString(value: string): TypeLocalizedString {
-  return { en: value, fr: value };
+export function createLocalizedString(value: string | TypeJsonObject): TypeLocalizedString {
+  return { en: value as string, fr: value as string };
 }
 
 /**
