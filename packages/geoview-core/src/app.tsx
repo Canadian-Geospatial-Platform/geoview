@@ -104,9 +104,17 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
     mapConfig = await api.configApi.getConfigFromUrl(urlParam);
   }
 
-  // TODO: inject 'data-geocore-keys' inside the config for later processing by the configAPI
-  // TO.DOCONT: This injectioon can be done in api.configApi.getMapConfig with optional parameter keys
-  // TO.DOCONT: This will return the listOfGeoviewLAyer with a new entry: {'geoviewLayerType': 'geoCore','geoviewLayerId': '21b821cf-0f1c-40ee-8925-eab12d357668'},
+  // inject 'data-geocore-keys' inside the config for later processing by the configAPI
+  if (mapElement.hasAttribute('data-geocore-keys')) {
+    const geocoreKeys = mapElement.getAttribute('data-geocore-keys')?.split(',');
+    geocoreKeys?.forEach((key: string) => {
+      mapConfig.map.listOfGeoviewLayerConfig.push({
+        geoviewLayerType: 'geoCore',
+        geoviewLayerId: key,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+    });
+  }
 
   // add the map display language and the map id to config (extend the MapFeatureConfig)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -149,11 +157,6 @@ async function renderMap(mapElement: Element): Promise<void> {
     return new Promise<void>((resolve) => {
       // TODO: Refactor #1810 - Activate <React.StrictMode> here or in app-start.tsx?
       reactRoot[mapId].render(<AppStart mapFeaturesConfig={configuration} onMapViewerInit={(): void => resolve()} />);
-      // reactRoot[mapId].render(
-      //   <React.StrictMode>
-      //     <AppStart mapFeaturesConfig={configObj} />
-      //   </React.StrictMode>
-      // );
     });
   }
 
