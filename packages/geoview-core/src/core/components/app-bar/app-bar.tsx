@@ -338,7 +338,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
    */
   const { topGroupNames, bottomGroupNames } = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('APP-BAR - panels re oeder buttons');
+    logger.logTraceUseMemo('APP-BAR - panels reorder buttons');
 
     let buttonPanelGroupNames = Object.keys(buttonPanelGroups);
     buttonPanelGroupNames = enforceArrayOrder(buttonPanelGroupNames, CV_DEFAULT_APPBAR_TABS_ORDER);
