@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState, useMemo, Fragment } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -9,19 +9,24 @@ import ZoomOut from './buttons/zoom-out';
 import Fullscreen from './buttons/fullscreen';
 import Home from './buttons/home';
 import Location from './buttons/location';
+import { useMapLoaded } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 // import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { ButtonGroup, Box } from '@/ui';
+import { ButtonGroup, Box, IconButton } from '@/ui';
 // import { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
-import { NavBarApi } from '@/core/components';
+import { NavBarApi, NavBarCreatedEvent, NavBarRemovedEvent } from '@/core/components';
 // import { helpCloseAll, helpClosePanelById, helpOpenPanelById } from '@/core/components/app-bar/app-bar-helper';
 import { useUINavbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
+import { TypeButtonPanel } from '@/ui/panel/panel-types';
+import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 type NavBarProps = {
   api: NavBarApi;
 };
+
+type DefaultNavbar = 'fullScreen' | 'location' | 'home' | 'zoomIn' | 'zoomOut';
 
 /**
  * Create a nav-bar with buttons that can call functions or open custom panels
@@ -36,197 +41,208 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
   const { t } = useTranslation();
 
+  const defaultNavbar = useMemo(() => {
+    return { fullScreen: <Fullscreen />, location: <Location />, home: <Home />, zoomIn: <ZoomIn />, zoomOut: <ZoomOut /> };
+  }, []);
+
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  // internal state
-  const navBarRef = useRef<HTMLDivElement>(null);
-  // const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
-
+  const mapLoaded = useMapLoaded();
+  const geoviewElement = useAppGeoviewHTMLElement();
+  const shellContainer = geoviewElement.querySelector(`[id^="shell-${navBarApi.mapId}"]`) as HTMLElement;
   // get the expand or collapse from store
   const navBarComponents = useUINavbarComponents();
 
-  // #region REACT HOOKS
+  // internal state
+  const navBarRef = useRef<HTMLDivElement>(null);
+  const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
 
-  // const closePanelById = useCallback(
-  //   (buttonId: string, groupName: string | undefined) => {
-  //     // Log
-  //     logger.logTraceUseCallback('NAV-BAR - closePanelById', buttonId);
+  const [gridColumns, setGridColumns] = useState<Array<Array<Array<DefaultNavbar | TypeButtonPanel>>>>([[]]);
+  const totalColumns = useRef<number>(0);
 
-  //     // Redirect to helper
-  //     helpClosePanelById(mapId, buttonPanelGroups, buttonId, groupName, setButtonPanelGroups);
-  //   },
-  //   [buttonPanelGroups, mapId]
-  // );
+  useEffect(() => {
+    if (navBarRef.current && mapLoaded) {
+      //   const overviewMap = Array.from(shellContainer.getElementsByClassName('ol-overviewmap-map'));
+      //   if (overviewMap[1]) {
+      //     // set the max height of navbar container.
+      //     const { scrollTop } = document.documentElement;
+      //     const overViewMapBottom = overviewMap[1].getBoundingClientRect().bottom;
+      //     const navbarChildRef = Array.from(navBarRef.current.children)[totalColumns.current];
+      //     const navbarBottom = navbarChildRef.getBoundingClientRect().bottom;
+      //     const navbarTop = navbarChildRef.getBoundingClientRect().top;
+      //     navBarRef.current.style.maxHeight = `${scrollTop + navbarBottom - (scrollTop + overViewMapBottom) - 10}px`;
+      //     // Set the ref which tells if max height has been reached.
+      //     if (scrollTop + overViewMapBottom < scrollTop + navbarTop - 80) {
+      //       isMaxHeightReached.current = true;
+      //     } else {
+      //       isMaxHeightReached.current = false;
+      //     }
+      //   }
+    }
+  }, [buttonPanelGroups, mapLoaded, shellContainer]);
 
-  // const closeAll = useCallback(() => {
-  //   // Log
-  //   logger.logTraceUseCallback('NAV-BAR - closeAll');
+  useEffect(() => {
+    const row: (DefaultNavbar | TypeButtonPanel)[][][] = [];
 
-  //   // Redirect to helper
-  //   helpCloseAll(buttonPanelGroups, closePanelById);
-  // }, [buttonPanelGroups, closePanelById]);
+    const column: (DefaultNavbar | TypeButtonPanel)[][] = [['zoomIn', 'zoomOut']];
+    const navBarArr: DefaultNavbar[] = [];
 
-  // const openPanelById = useCallback(
-  //   (buttonId: string, groupName: string | undefined) => {
-  //     // Log
-  //     logger.logTraceUseCallback('NAV-BAR - openPanelById', buttonId);
+    if (navBarComponents.includes('fullscreen')) {
+      navBarArr.push('fullScreen');
+    }
+    if (navBarComponents.includes('location')) {
+      navBarArr.push('location');
+    }
+    if (navBarComponents.includes('home')) {
+      navBarArr.push('home');
+    }
 
-  //     // Redirect to helper
-  //     helpOpenPanelById(buttonPanelGroups, buttonId, groupName, setButtonPanelGroups, closeAll);
-  //   },
-  //   [buttonPanelGroups, closeAll]
-  // );
+    if (navBarArr.length) {
+      column.push(navBarArr);
+    }
 
-  // const handleButtonClicked = useCallback(
-  //   (buttonId: string, groupName: string) => {
-  //     // Log
-  //     logger.logTraceUseCallback('NAV-BAR - handleButtonClicked', buttonId);
+    Object.values(buttonPanelGroups).forEach((groupBtns) => {
+      const btns = Object.values(groupBtns);
+      row.unshift([btns]);
+    });
 
-  //     // Get the button panel
-  //     const buttonPanel = buttonPanelGroups[groupName][buttonId];
+    // debugger;
+    if (row[0]?.length) {
+      const indx = row.length - 1;
+      row[indx] = [...row[indx], ...column];
+    } else {
+      row[0] = [...column];
+    }
 
-  //     if (!buttonPanel.panel?.status) {
-  //       // Redirect
-  //       openPanelById(buttonId, groupName);
-  //     } else {
-  //       // Redirect
-  //       closePanelById(buttonId, groupName);
-  //     }
-  //   },
-  //   [buttonPanelGroups, closePanelById, openPanelById]
-  // );
+    setGridColumns(row);
+  }, [buttonPanelGroups, navBarComponents]);
 
-  // const handleAddButtonPanel = useCallback(
-  //   (sender: NavBarApi, event: NavBarCreatedEvent) => {
-  //     // Log
-  //     logger.logTraceUseCallback('NAV-BAR - handleAddButtonPanel', event);
+  const getGroupName = (navbarEvent: NavBarCreatedEvent, shellWrapper: HTMLElement): string => {
+    const overviewMap = Array.from(shellWrapper.getElementsByClassName('ol-overviewmap-map'));
 
-  //     setButtonPanelGroups({
-  //       ...buttonPanelGroups,
-  //       [event.group]: {
-  //         ...buttonPanelGroups[event.group],
-  //         [event.buttonPanelId]: event.buttonPanel,
-  //       },
-  //     });
-  //   },
-  //   [buttonPanelGroups]
-  // );
+    const { scrollTop } = document.documentElement;
+    const overViewMapBottom = overviewMap[1].getBoundingClientRect().bottom;
 
-  // const handleRemoveButtonPanel = useCallback(
-  //   (sender: NavBarApi, event: NavBarRemovedEvent) => {
-  //     // Log
-  //     logger.logTraceUseCallback('NAV-BAR - handleRemoveButtonPanel', event);
+    const navbarChildRef = Array.from(navBarRef.current!.children)[0];
+    const navbarTop = navbarChildRef.getBoundingClientRect().top;
 
-  //     setButtonPanelGroups((prevState) => {
-  //       const state = { ...prevState };
-  //       const group = state[event.group];
+    if (scrollTop + overViewMapBottom > scrollTop + navbarTop - 80) {
+      totalColumns.current += 1;
+    }
+    return `${navbarEvent.group}${totalColumns.current}`;
+  };
 
-  //       delete group[event.buttonPanelId];
+  const handleAddButtonPanel = useCallback(
+    (sender: NavBarApi, event: NavBarCreatedEvent) => {
+      // Log
+      logger.logTraceUseCallback('NAV-BAR - handleAddButtonPanel', event);
+      const groupName = getGroupName(event, shellContainer);
 
-  //       return state;
-  //     });
-  //   },
-  //   [setButtonPanelGroups]
-  // );
+      const d = {
+        [groupName]: {
+          ...buttonPanelGroups[groupName],
+          [event.buttonPanelId]: event.buttonPanel,
+        },
+      };
+
+      setButtonPanelGroups({
+        ...buttonPanelGroups,
+        ...d,
+      });
+    },
+    [buttonPanelGroups, shellContainer]
+  );
+  console.log('buttonPanelGroupsbuttonPanelGroups', buttonPanelGroups);
+  const handleRemoveButtonPanel = useCallback(
+    (sender: NavBarApi, event: NavBarRemovedEvent) => {
+      // Log
+      logger.logTraceUseCallback('NAV-BAR - handleRemoveButtonPanel', event);
+
+      setButtonPanelGroups((prevState) => {
+        const state = { ...prevState };
+        const group = state[event.group];
+
+        delete group[event.buttonPanelId];
+
+        return state;
+      });
+    },
+    [setButtonPanelGroups]
+  );
 
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('NAV-BAR - mount');
-    // TODO: it will be fixed in #2180
-    const dummyNavBarCreated = (): void => logger.logInfo('NavbarCreated');
+
     // Register NavBar created/removed handlers
-    navBarApi.onNavbarCreated(dummyNavBarCreated);
-    // navBarApi.onNavbarRemoved(handleRemoveButtonPanel);
+    navBarApi.onNavbarCreated(handleAddButtonPanel);
+    navBarApi.onNavbarRemoved(handleRemoveButtonPanel);
 
     return () => {
       // Unregister events
-      navBarApi.offNavbarCreated(dummyNavBarCreated);
-      // navBarApi.offNavbarRemoved(handleRemoveButtonPanel);
+      navBarApi.offNavbarCreated(handleAddButtonPanel);
+      navBarApi.offNavbarRemoved(handleRemoveButtonPanel);
     };
-    // }, [navBarApi, handleAddButtonPanel, handleRemoveButtonPanel]);
-  }, [navBarApi]);
+  }, [navBarApi, handleAddButtonPanel, handleRemoveButtonPanel]);
 
   // #endregion
+  // console.log('gridColumnsgridColumns', gridColumns);
 
   return (
-    /** TODO - KenChase Need to add styling for scenario when more buttons that can fit vertically occurs (or limit number of buttons that can be added) */
     <Box ref={navBarRef} sx={[sxClasses.navBarRef]}>
-      {/* TODO: it will be fixed in #2180 */}
-      {/* {Object.keys(buttonPanelGroups).map((groupName) => {
-        const buttonPanelGroup = buttonPanelGroups[groupName];
-
-        // display the panels in the list
-        const panels = Object.keys(buttonPanelGroup).map((buttonPanelKey) => {
-          const buttonPanel = buttonPanelGroup[buttonPanelKey];
-
-          return buttonPanel.panel ? <Panel key={buttonPanel.button.id} button={buttonPanel.button} panel={buttonPanel.panel} /> : null;
-        });
-
-        if (panels.length > 0) {
-          return <Box key={groupName}>{panels}</Box>;
-        }
-        return null;
-      })} */}
-      <Box sx={sxClasses.navBtnGroupContainer}>
-        {/* TODO: it will be fixed in #2180 */}
-        {/* {Object.keys(buttonPanelGroups).map((groupName) => {
-          const buttonPanelGroup = buttonPanelGroups[groupName];
-
-          // if not an empty object, only then render any HTML
-          if (Object.keys(buttonPanelGroup).length !== 0) {
+      {gridColumns.map((column, idx) => (
+        <Box sx={sxClasses.navBtnGroupContainer} key={`${idx.toString()}-column`} id={`${idx.toString()}-column`}>
+          {column.map((valuesArray, columnIdx) => {
             return (
               <ButtonGroup
-                key={groupName}
                 orientation="vertical"
                 aria-label={t('mapnav.arianavbar')!}
                 variant="contained"
                 sx={sxClasses.navBtnGroup}
+                key={`${columnIdx.toString()}-values`}
               >
-                {Object.keys(buttonPanelGroup).map((buttonPanelKey) => {
-                  const buttonPanel: TypeButtonPanel = buttonPanelGroup[buttonPanelKey];
-                  // eslint-disable-next-line no-nested-ternary
-                  return buttonPanel.button.visible ? (
-                    !buttonPanel.panel ? (
-                      <IconButton
-                        key={buttonPanel.button.id}
-                        id={buttonPanel.button.id}
-                        tooltip={buttonPanel.button.tooltip}
-                        tooltipPlacement={buttonPanel.button.tooltipPlacement}
-                        sx={sxClasses.navButton}
-                        onClick={buttonPanel.button.onClick}
-                      >
-                        {buttonPanel.button.children}
-                      </IconButton>
-                    ) : (
-                      <IconButton
-                        key={buttonPanel.button.id}
-                        id={buttonPanel.button.id}
-                        tooltip={buttonPanel.button.tooltip}
-                        tooltipPlacement={buttonPanel.button.tooltipPlacement}
-                        sx={sxClasses.navButton}
-                        onClick={() => handleButtonClicked(buttonPanel.button.id!, groupName)}
-                      >
-                        {buttonPanel.button.children}
-                      </IconButton>
-                    )
-                  ) : null;
+                {valuesArray.map((component, valuesIdx) => {
+                  if (typeof component === 'string') {
+                    return <Fragment key={`${valuesIdx.toString()}-component`}>{defaultNavbar[component]}</Fragment>;
+                  }
+                  const buttonPanel = component as TypeButtonPanel;
+                  if (!buttonPanel.button.visible) {
+                    return null;
+                  }
+                  return (
+                    <Fragment key={`${valuesIdx.toString()}-component`}>
+                      {!buttonPanel.panel ? (
+                        <IconButton
+                          key={buttonPanel.button.id}
+                          id={buttonPanel.button.id}
+                          tooltip={buttonPanel.button.tooltip}
+                          tooltipPlacement={buttonPanel.button.tooltipPlacement}
+                          sx={sxClasses.navButton}
+                          onClick={buttonPanel.button.onClick}
+                        >
+                          {buttonPanel.button.children}
+                        </IconButton>
+                      ) : (
+                        <IconButton
+                          key={buttonPanel.button.id}
+                          id={buttonPanel.button.id}
+                          tooltip={buttonPanel.button.tooltip}
+                          tooltipPlacement={buttonPanel.button.tooltipPlacement}
+                          sx={sxClasses.navButton}
+                          // onClick={(e) => handleClick(e, buttonPanel)}
+                        >
+                          {buttonPanel.button.children}
+                        </IconButton>
+                      )}
+                    </Fragment>
+                  );
                 })}
               </ButtonGroup>
             );
-          }
-          return null;
-        })} */}
-        <ButtonGroup orientation="vertical" aria-label={t('mapnav.arianavbar')!} variant="contained" sx={sxClasses.navBtnGroup}>
-          <ZoomIn />
-          <ZoomOut />
-        </ButtonGroup>
-        <ButtonGroup orientation="vertical" aria-label={t('mapnav.arianavbar')!} variant="contained" sx={sxClasses.navBtnGroup}>
-          {navBarComponents.includes('fullscreen') && <Fullscreen />}
-          {navBarComponents.includes('location') && <Location />}
-          {navBarComponents.includes('home') && <Home />}
-        </ButtonGroup>
-      </Box>
+          })}
+        </Box>
+      ))}
     </Box>
   );
 }

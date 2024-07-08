@@ -1,3 +1,4 @@
+//
 import { createContext, StrictMode, Suspense, useMemo } from 'react';
 
 import './translation/i18n';

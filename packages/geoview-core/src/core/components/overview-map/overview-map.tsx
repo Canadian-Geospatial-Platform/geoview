@@ -91,7 +91,7 @@ export function OverviewMap(props: OverwiewMapProps): JSX.Element {
     const toggleButton = document.createElement('div');
 
     const overviewMapControl = new OLOverviewMap({
-      className: `ol-overviewmap ol-custom-overviewmap`,
+      className: `ol-overviewmap ol-custom-overviewmap kamy`,
       layers: defaultBasemap?.layers.map((layer) => {
         // create a tile layer for this basemap layer
         const tileLayer = new TileLayer({

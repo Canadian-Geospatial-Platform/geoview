@@ -332,6 +332,9 @@ export function Shell(props: ShellProps): JSX.Element {
           {focusItem.activeElementId === 'layerDataTable' && <DataTableModal />}
           {/* Show Feature Detail Modal when detail icon is clicked in datatable each row */}
           {focusItem.activeElementId === 'featureDetailDataTable' && <FeatureDetailModal />}
+
+          {/* {focusItem.activeElementId === 'navbarModal' && <Modal>} */}
+
           {/* modal section end */}
           {Object.keys(components).map((key: string) => {
             return <Fragment key={key}>{components[key]}</Fragment>;
