@@ -12,6 +12,11 @@ export function LayersToolbar(): JSX.Element {
   const theme = useTheme();
   const { t } = useTranslation<string>();
 
+  const layerToolbarStyle = {
+    padding: '8px 18px 4px 8px',
+    '& .MuiButton-startIcon': { [theme.breakpoints.down('md')]: { margin: 0, padding: '0 0.25rem' } },
+  };
+
   // access store
   const displayState = useLayerDisplayState();
   const legendLayers = useLayerLegendLayers();
@@ -22,13 +27,7 @@ export function LayersToolbar(): JSX.Element {
   };
 
   return (
-    <Box
-      id="layers-toolbar"
-      sx={{
-        padding: '8px 18px 4px 8px',
-        '& .MuiButton-startIcon': { [theme.breakpoints.down('md')]: { margin: 0, padding: '0 0.25rem' } },
-      }}
-    >
+    <Box id="layers-toolbar" sx={layerToolbarStyle}>
       <ButtonGroup size="small" variant="outlined" aria-label="outlined button group">
         <Button
           makeResponsive
