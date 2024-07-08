@@ -4,6 +4,7 @@ import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 import { generateId } from '@/core/utils/utilities';
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Class to manage buttons on the app-bar
@@ -200,18 +201,19 @@ export class AppBarApi {
    * Removes an app-bar panel using an id
    *
    * @param {string} buttonPanelId - The id of the panel to remove
+   * @param {string} group - The button group name to delete from
    */
-  removeAppbarPanel(buttonPanelId: string): void {
-    // loop through groups of app-bar button panels
-    Object.keys(this.buttons).forEach((groupName) => {
-      const group = this.buttons[groupName];
-
+  removeAppbarPanel(buttonPanelId: string, group: string): void {
+    try {
       // delete the panel from the group
-      delete group[buttonPanelId];
+      delete this.buttons[group][buttonPanelId];
 
       // trigger an event that a panel has been removed to update the state and re-render
-      this.#emitAppBarRemoved({ buttonPanelId, group: groupName });
-    });
+      this.#emitAppBarRemoved({ buttonPanelId, group });
+    } catch (error) {
+      // Log
+      logger.logError(`Failed to get app bar panel button ${group}/${buttonPanelId}`);
+    }
   }
 
   /**

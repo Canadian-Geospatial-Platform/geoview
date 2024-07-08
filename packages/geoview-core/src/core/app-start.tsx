@@ -87,7 +87,6 @@ function AppStart(props: AppStartProps): JSX.Element {
       onMapViewerInit?.(mapViewer);
     });
 
-    // TODO: Refactor #1810 - Activate <React.StrictMode> here or in app.tsx?
     return (
       <I18nextProvider i18n={i18nInstance}>
         <MapContext.Provider value={mapContextValue}>

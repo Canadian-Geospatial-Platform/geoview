@@ -115,7 +115,9 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
     let name = '';
     let description = '';
 
-    if (basemapTypes.includes('transport')) {
+    if (basemapTypes.includes('osm')) {
+      name = getLocalizedMessage('basemapPanel.info.osm.name', language);
+    } else if (basemapTypes.includes('transport')) {
       name = getLocalizedMessage('basemapPanel.info.transport.name', language);
       description = getLocalizedMessage('basemapPanel.info.transport.description', language);
     } else if (basemapTypes.includes('simple')) {
@@ -123,8 +125,6 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
     } else if (basemapTypes.includes('shaded')) {
       name = getLocalizedMessage('basemapPanel.info.shaded.name', language);
       description = getLocalizedMessage('basemapPanel.info.shaded.description', language);
-    } else if (basemapTypes.includes('osm')) {
-      name = getLocalizedMessage('basemapPanel.info.osm.name', language);
     } else if (basemapTypes.includes('nogeom')) {
       name = getLocalizedMessage('basemapPanel.info.nogeom.name', language);
     }

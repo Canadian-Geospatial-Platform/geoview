@@ -8,6 +8,7 @@ import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
 import Feature, { FeatureLike } from 'ol/Feature';
 
+import { getUid } from 'ol/util';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { FilterNodeArrayType, NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
@@ -19,6 +20,7 @@ import { featureInfoGetFieldType } from '../utils';
 import { AbstractGVLayer } from '../abstract-gv-layer';
 import { AbstractGeoViewLayer } from '../../geoview-layers/abstract-geoview-layers';
 import { getLocalizedValue } from '@/core/utils/utilities';
+import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer vector type layer.
@@ -251,6 +253,37 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
     // Return the calculated layer bounds
     return sourceExtent;
+  }
+
+  /**
+   * Gets the extent of an array of features.
+   * @param {string} layerPath - The layer path.
+   * @param {string[]} objectIds - The uids of the features to calculate the extent from.
+   * @returns {Promise<Extent | undefined>} The extent of the features, if available.
+   */
+  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  override getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined> {
+    const features = (this.getOLLayer() as VectorLayer<Feature>).getSource()?.getFeatures();
+    // TODO Test performance on huge layer
+    const filteredFeatures = features?.filter((feature) => objectIds.includes(getUid(feature)));
+
+    if (filteredFeatures) {
+      // Determine max extent from features
+      let calculatedExtent: Extent | undefined;
+      filteredFeatures.forEach((feature) => {
+        const extent = feature.getGeometry()?.getExtent();
+
+        if (extent) {
+          // If calculatedExtent has not been defined, set it to extent
+          if (!calculatedExtent) calculatedExtent = extent;
+          else getMinOrMaxExtents(calculatedExtent, extent);
+        }
+      });
+
+      return Promise.resolve(calculatedExtent);
+    }
+    return Promise.resolve(undefined);
   }
 
   /**
