@@ -13,6 +13,11 @@ export const getSxClasses = (theme: Theme): any => ({
     padding: ' 0.5rem 0.5rem 0.5rem 1rem',
     borderTop: `0.2rem solid ${theme.palette.geoViewColor.primary.lighten(0.2, 0.4)}`,
     borderLeft: `0.2rem solid ${theme.palette.geoViewColor.primary.lighten(0.2, 0.4)}`,
+    '& .MuiButton-startIcon': {
+      [theme.breakpoints.down('md')]: {
+        margin: 0,
+      },
+    },
   },
   rightGridContent: {
     border: `2px solid ${theme.palette.geoViewColor.primary.main}`,

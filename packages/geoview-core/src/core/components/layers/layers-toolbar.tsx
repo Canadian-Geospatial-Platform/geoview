@@ -22,7 +22,13 @@ export function LayersToolbar(): JSX.Element {
   };
 
   return (
-    <Box id="layers-toolbar" sx={{ padding: '8px 18px 0px 18px' }}>
+    <Box
+      id="layers-toolbar"
+      sx={{
+        padding: '8px 18px 4px 8px',
+        '& .MuiButton-startIcon': { [theme.breakpoints.down('md')]: { margin: 0, padding: '0 0.25rem' } },
+      }}
+    >
       <ButtonGroup size="small" variant="outlined" aria-label="outlined button group">
         <Button
           makeResponsive
