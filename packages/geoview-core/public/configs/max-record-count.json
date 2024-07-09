@@ -27,6 +27,21 @@
             "layerId": "1"
           }
         ]
+      },
+      {
+        "geoviewLayerId": "completed",
+        "geoviewLayerName": {
+          "en": "Completed"
+        },
+        "geoviewLayerType": "esriDynamic",
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/IAAC/assessment_inventory_en/MapServer"
+        },
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
       }
     ]
   },
