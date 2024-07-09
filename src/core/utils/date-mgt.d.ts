@@ -1,7 +1,8 @@
+import { Dayjs } from 'dayjs';
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
-import { TypeLocalizedLanguages } from '@/geo/map/map-schema-types';
-import { TypeJsonObject } from '../types/global-types';
+import { TypeDisplayLanguage } from '@config/types/map-schema-types';
+import { TypeJsonObject } from '@/core/types/global-types';
 export type TypeDateFragments = [number[], number[], string[]];
 /** ******************************************************************************************************************************
  * Type used to define the date precision pattern to use.
@@ -44,27 +45,27 @@ export type TimeDimensionESRI = {
  * @exports
  * @class DateMgt
  */
-export declare class DateMgt {
+export declare abstract class DateMgt {
     #private;
     /**
      * Convert a UTC date to a local date
      * @param {Date | string} date date to use
      * @returns {string} local date
      */
-    convertToLocal(date: Date | string): string;
+    static convertToLocal(date: Date | string): string;
     /**
      * Format a date to specific format like 'YYYY-MM-DD'
      * @param {Date | string} date date to use
      * @param {string} format format of the date.
      * @returns {string} formatted date
      */
-    formatDate(date: Date | string, format: string): string;
+    static formatDate(date: Date | string, format: string): string;
     /**
      * Convert a date local to a UTC date
      * @param {Date | string} date date to use
-     * @returns {string} UTC date
+     * @returns {string} UTC date or empty string if invalid date (when field value is null)
      */
-    convertToUTC(date: Date | string): string;
+    static convertToUTC(date: Date | string): string;
     /**
      * Format a date to a pattern
      * @param {Date | string} date date to use
@@ -72,58 +73,59 @@ export declare class DateMgt {
      * @param {TimePrecision}timePattern the time precision pattern to use
      * @returns {string} formatted date
      */
-    format(date: Date | string, datePattern: DatePrecision, timePattern?: TimePrecision): string;
+    static format(date: Date | string, datePattern: DatePrecision, timePattern?: TimePrecision): string;
     /**
      * Convert a date to milliseconds
      * @param {Date | string} date date to use
      * @returns {number} date as milliseconds
      */
-    convertToMilliseconds(date: Date | string): number;
+    static convertToMilliseconds(date: Date | string): number;
     /**
      * Convert a milliseconds date to string date. Date format is YYYY-MM-DDTHH:mm:ss.
      * @param {number} date milliseconds date
      * @returns {string} date string
      */
-    convertMilisecondsToDate(date: number, dateFormat?: string): string;
+    static convertMilisecondsToDate(date: number, dateFormat?: string): string;
     /**
      * Extract pattern to use to format the date
      * @param {string} dateOGC date as an ISO 8601 date
      * @returns {string} the formatted date
      */
-    extractDateFormat(dateOGC: string): string;
+    static extractDateFormat(dateOGC: string): string;
     /**
      * Create the Geoview time dimension from ESRI dimension
      * @param {TimeDimensionESRI} timeDimensionESRI esri time dimension object
+     * @param {boolean} singleHandle true if it is ESRI Image
      *
      * @returns {TimeDimension} the Geoview time dimension
      */
-    createDimensionFromESRI(timeDimensionESRI: TimeDimensionESRI): TimeDimension;
+    static createDimensionFromESRI(timeDimensionESRI: TimeDimensionESRI, singleHandle?: boolean): TimeDimension;
     /**
      * Create the Geoview time dimension from OGC dimension
      * @param {TypeJsonObject | string} ogcTimeDimension The OGC time dimension object or string
      * @returns {TimeDimension} the Geoview time dimension
      */
-    createDimensionFromOGC(ogcTimeDimension: TypeJsonObject | string): TimeDimension;
+    static createDimensionFromOGC(ogcTimeDimension: TypeJsonObject | string): TimeDimension;
     /**
      * Create a range of date object from OGC time dimension following ISO 8601
      * @param {string} ogcTimeDimension OGC time dimension values following
      * @returns {RangeItems} array of date from the dimension
      */
-    createRangeOGC(ogcTimeDimensionValues: string): RangeItems;
+    static createRangeOGC(ogcTimeDimensionValues: string): RangeItems;
     /**
      * Create locale tooltip (fr-CA or en-CA)
      * @param date {string} date to use
      * @param locale {string} locale to use (fr-CA or en-CA)
      * @returns {string} locale tooltip
      */
-    createDateLocaleTooltip(date: string, locale: TypeLocalizedLanguages): string;
+    static createDateLocaleTooltip(date: string, locale: TypeDisplayLanguage): string;
     /**
      * Get the date fragments order. Normaly, the order is year followed by month followed by day.
      * @param dateFormat {string} The date format to be analyzed.
      * @returns {TypeDateFragments} array of index indicating the field position in the format. index 0 is for
      * year, 1 for month, 2 for day and 4 for time. A value of -1 indicates theat the fragment is missing.
      */
-    getDateFragmentsOrder(dateFormat?: string): TypeDateFragments;
+    static getDateFragmentsOrder(dateFormat?: string): TypeDateFragments;
     /**
      * Reorder the date to the ISO UTC format using the input section (index = 0) of the date fragments order provided.
      * This routine is used to convert the dates returned by the server to the internal ISO UTC format. It is also used
@@ -136,7 +138,7 @@ export declare class DateMgt {
      * @param reverseTimeZone {boolean} Flag indicating that we must change the time zone sign before the conversion.
      * @returns {string} The reformatted date string.
      */
-    applyInputDateFormat(date: string, dateFragmentsOrder?: TypeDateFragments, reverseTimeZone?: boolean): string;
+    static applyInputDateFormat(date: string, dateFragmentsOrder?: TypeDateFragments, reverseTimeZone?: boolean): string;
     /**
      * Reorder the ISO UTC date to the output format using the output section (index = 1) of the date fragments order provided.
      * The time zone is empty since all dates shown to the user are in UTC.
@@ -146,7 +148,7 @@ export declare class DateMgt {
      * @param reverseTimeZone {boolean} Flag indicating that we must change the time zone sign before the conversion.
      * @returns {string} The reformatted date string.
      */
-    applyOutputDateFormat(date: string, dateFragmentsOrder?: TypeDateFragments, reverseTimeZone?: boolean): string;
+    static applyOutputDateFormat(date: string, dateFragmentsOrder?: TypeDateFragments, reverseTimeZone?: boolean): string;
     /**
      * Deduce the date format using a date value.
      *
@@ -154,6 +156,12 @@ export declare class DateMgt {
      *
      * @returns {string} The date format.
      */
-    deduceDateFormat(dateString: string): string;
+    static deduceDateFormat(dateString: string): string;
+    /**
+     * Get dayjs date object for given date in number or string.
+     * @param {number | string} millseconds time in milliseconds or string
+     * @returns {Dayjs} dayjs date object
+     */
+    static getDayjsDate(date: number | string): Dayjs;
 }
 export {};

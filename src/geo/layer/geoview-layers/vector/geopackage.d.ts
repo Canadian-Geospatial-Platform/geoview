@@ -5,28 +5,22 @@ import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import { Feature } from 'ol';
 import initSqlJs from 'sql.js';
-import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
-import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeBaseLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { TypeLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
+import { GeoPackageLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geopackage-layer-config-entry';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 export interface TypeSourceGeoPackageInitialConfig extends TypeVectorSourceInitialConfig {
     format: 'GeoPackage';
 }
-export declare class TypeGeoPackageLayerEntryConfig extends TypeVectorLayerEntryConfig {
-    source: TypeSourceGeoPackageInitialConfig;
-    /**
-     * The class constructor.
-     * @param {TypeGeoPackageLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
-     */
-    constructor(layerConfig: TypeGeoPackageLayerEntryConfig);
-}
 export interface TypeGeoPackageLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
-    geoviewLayerType: 'GeoPackage';
-    listOfLayerEntryConfig: TypeGeoPackageLayerEntryConfig[];
+    geoviewLayerType: typeof CONST_LAYER_TYPES.GEOPACKAGE;
+    listOfLayerEntryConfig: GeoPackageLayerEntryConfig[];
 }
-interface sldsInterface {
+interface SldsInterface {
     [key: string | number]: string | number | Uint8Array;
 }
-interface layerData {
+interface LayerData {
     name: string;
     source: VectorSource<Feature>;
     properties: initSqlJs.ParamsObject | undefined;
@@ -53,7 +47,7 @@ export declare const layerConfigIsGeoPackage: (verifyIfLayer: TypeGeoviewLayerCo
  */
 export declare const geoviewLayerIsGeoPackage: (verifyIfGeoViewLayer: AbstractGeoViewLayer) => verifyIfGeoViewLayer is GeoPackage;
 /** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TypeGeoPackageLayerEntryConfig if the geoviewLayerType attribute
+ * type guard function that redefines a TypeLayerEntryConfig as a GeoPackageLayerEntryConfig if the geoviewLayerType attribute
  * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is GEOPACKAGE. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
@@ -62,7 +56,7 @@ export declare const geoviewLayerIsGeoPackage: (verifyIfGeoViewLayer: AbstractGe
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export declare const geoviewEntryIsGeoPackage: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is TypeGeoPackageLayerEntryConfig;
+export declare const geoviewEntryIsGeoPackage: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is GeoPackageLayerEntryConfig;
 /** ******************************************************************************************************************************
  * A class to add GeoPackage api feature layer.
  *
@@ -70,6 +64,7 @@ export declare const geoviewEntryIsGeoPackage: (verifyIfGeoViewEntry: TypeLayerE
  * @class GeoPackage
  */
 export declare class GeoPackage extends AbstractGeoViewVector {
+    #private;
     /** ***************************************************************************************************************************
      * Initialize layer
      *
@@ -87,61 +82,52 @@ export declare class GeoPackage extends AbstractGeoViewVector {
      * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
      * with a numeric layerId and creates a group entry when a layer is a group.
      *
-     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
+     * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
      */
-    protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void;
+    protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void;
     /** ***************************************************************************************************************************
      * Process recursively the list of layer Entries to create the layers and the layer groups.
      *
-     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries to process.
+     * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries to process.
      * @param {LayerGroup} layerGroup Optional layer group to use when we have many layers. The very first call to
      *  processListOfLayerEntryConfig must not provide a value for this parameter. It is defined for internal use.
      *
-     * @returns {Promise<BaseLayer | null>} The promise that the layers were processed.
+     * @returns {Promise<BaseLayer | undefined>} The promise that the layers were processed.
      */
-    processListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer | null>;
+    processListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[], layerGroup?: LayerGroup): Promise<BaseLayer | undefined>;
     /** ***************************************************************************************************************************
      * Create a source configuration for the vector layer.
      *
-     * @param {TypeBaseLayerEntryConfig} layerConfig The layer entry configuration.
+     * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
      * @param {SourceOptions} sourceOptions The source options (default: {}).
      * @param {ReadOptions} readOptions The read options (default: {}).
      */
-    protected extractGeopackageData(layerConfig: TypeBaseLayerEntryConfig, sourceOptions?: SourceOptions, readOptions?: ReadOptions): Promise<[layerData[], sldsInterface]>;
+    protected extractGeopackageData(layerConfig: AbstractBaseLayerEntryConfig, sourceOptions?: SourceOptions<Feature>, readOptions?: ReadOptions): Promise<[LayerData[], SldsInterface]>;
     /** ***************************************************************************************************************************
      * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
      *
-     * @param {TypeLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+     * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
      * @param {string | number | Uint8Array} sld The SLD style associated with the layer
-     *
-     * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
      */
-    protected processGeopackageStyle(layerConfig: TypeBaseLayerEntryConfig, sld: string | number | Uint8Array): void;
+    protected static processGeopackageStyle(layerConfig: AbstractBaseLayerEntryConfig, sld: string | number | Uint8Array): void;
     /** ***************************************************************************************************************************
      * This method creates a GeoView layer using the definition provided in the layerConfig parameter.
      *
-     * @param {TypeLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+     * @param {AbstractLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
      * @param {sldsInterface} sld The SLD style associated with the layers geopackage, if any
      *
-     * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
+     * @returns {Promise<BaseLayer | undefined>} The GeoView base layer that has been created.
      */
-    protected processOneGeopackageLayer(layerConfig: TypeBaseLayerEntryConfig, layerInfo: layerData, sld?: sldsInterface): Promise<BaseLayer | null>;
+    protected processOneGeopackageLayer(layerConfig: AbstractBaseLayerEntryConfig, layerInfo: LayerData, sld?: SldsInterface): Promise<BaseLayer | undefined>;
     /** ***************************************************************************************************************************
-     * This method creates all layers from a single geopackage
+     * This method creates all layers from a single geopackage.
      *
-     * @param {TypeLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+     * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
      * @param {LayerGroup} layerGroup Optional layer group for multiple layers.
      *
-     * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
+     * @returns {Promise<BaseLayer | undefined>} The GeoView base layer that has been created.
      */
-    protected processOneGeopackage(layerConfig: TypeBaseLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer | null>;
-    /** ***************************************************************************************************************************
-     * This method sets the outfields and aliasFields of the source feature info.
-     *
-     * @param {TypeJsonArray} fields An array of field names and its aliases.
-     * @param {TypeVectorLayerEntryConfig} layerConfig The vector layer entry to configure.
-     */
-    private processFeatureInfoConfig;
+    protected processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig, layerGroup?: LayerGroup): Promise<BaseLayer | undefined>;
     /** ***************************************************************************************************************************
      * Create a source configuration for the vector layer.
      *
@@ -149,6 +135,6 @@ export declare class GeoPackage extends AbstractGeoViewVector {
      *
      * @returns {Uint8Array} Uint8Array Subarray of inputted binary geoametry array.
      */
-    protected parseGpkgGeom(gpkgBinGeom: Uint8Array): Uint8Array;
+    protected static parseGpkgGeom(gpkgBinGeom: Uint8Array): Uint8Array;
 }
 export {};

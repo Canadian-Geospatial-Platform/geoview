@@ -4,7 +4,6 @@ import { StepperProps, StepLabelProps, StepContentProps, StepProps } from '@mui/
  * Custom MUI Stepper Props
  */
 interface TypeStepperProps extends StepperProps {
-    mapId?: string;
     steps: (TypeStep | null)[];
 }
 /**

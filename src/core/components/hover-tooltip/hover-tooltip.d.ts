@@ -4,4 +4,4 @@
  *
  * @returns {JSX.Element} the hover tooltip component
  */
-export declare function HoverTooltip(): JSX.Element;
+export declare function HoverTooltip(): JSX.Element | null;

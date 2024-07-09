@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from 'react';
-import { type MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
+import { TypeColumnFiltersState } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 export interface UseFilterRowsProps {
     layerPath: string;
 }
@@ -9,6 +9,6 @@ export interface UseFilterRowsProps {
  * @returns {Object}
  */
 export declare function useFilterRows({ layerPath }: UseFilterRowsProps): {
-    columnFilters: MRTColumnFiltersState;
-    setColumnFilters: Dispatch<SetStateAction<MRTColumnFiltersState>>;
+    columnFilters: TypeColumnFiltersState;
+    setColumnFilters: Dispatch<SetStateAction<TypeColumnFiltersState>>;
 };

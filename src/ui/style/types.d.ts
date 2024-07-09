@@ -2,12 +2,12 @@ declare const ColorKeyValues: number[];
 type ColorKey = (typeof ColorKeyValues)[number];
 type ColorRecord = Record<ColorKey, string>;
 export declare class GeoViewColorClass {
+    #private;
     main: string;
     isInverse: boolean;
     dark: ColorRecord;
     light: ColorRecord;
     constructor(mainColor: string, isInverse?: boolean);
-    private isValidColor;
     _main(opacity?: number): string;
     opacity(opacity: number): string;
     lighten(coefficient: number, opacity?: number): string;

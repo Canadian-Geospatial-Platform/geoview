@@ -1,4 +1,5 @@
-import { TypeDisplayTheme } from '@/geo/map/map-schema-types';
+import { Theme } from '@mui/material/styles';
+import { TypeDisplayTheme } from '@config/types/map-schema-types';
 declare module '@mui/material/styles/createPalette' {
     interface Palette {
         border: {
@@ -6,5 +7,5 @@ declare module '@mui/material/styles/createPalette' {
         };
     }
 }
-export declare const getTheme: (mode: TypeDisplayTheme) => import("@mui/material/styles").Theme;
-export declare const cgpvTheme: import("@mui/material/styles").Theme;
+export declare const getTheme: (mode: TypeDisplayTheme) => Theme;
+export declare const cgpvTheme: Theme;

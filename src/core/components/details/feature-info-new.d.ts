@@ -1,7 +1,7 @@
 /// <reference types="react" />
-import { TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
+import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 export interface TypeFeatureInfoProps {
-    features: TypeArrayOfFeatureInfoEntries;
+    features: TypeFeatureInfoEntry[] | undefined | null;
     currentFeatureIndex: number;
 }
 /**

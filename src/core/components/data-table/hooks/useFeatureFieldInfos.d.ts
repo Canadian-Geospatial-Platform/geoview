@@ -1,8 +1,8 @@
-import { TypeArrayOfLayerData } from '@/app';
-import { MappedLayerDataType } from '../data-panel';
+import { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { MappedLayerDataType } from '@/core/components/data-table/data-table-types';
 /**
  * Custom hook for caching the mapping of fieldInfos aka columns for data table.
- * @param {TypeArrayOfLayerData} layerData data from the query
+ * @param {TypeAllFeatureInfoResultSetEntry[]} layerData data from the query
  * @returns {MappedLayerDataType[]} layerData with columns.
  */
-export declare function useFeatureFieldInfos(layerData: TypeArrayOfLayerData): MappedLayerDataType[];
+export declare function useFeatureFieldInfos(layerData: TypeAllFeatureInfoResultSetEntry[]): MappedLayerDataType[];

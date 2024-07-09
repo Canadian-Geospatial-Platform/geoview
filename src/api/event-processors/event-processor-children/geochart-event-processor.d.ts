@@ -1,12 +1,18 @@
-import { TypeArrayOfLayerData, TypeJsonObject } from '@/core/types/global-types';
-import { IGeochartState } from '@/core/stores/store-interface-and-intial-values/geochart-state';
-import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '../abstract-event-processor';
+import { GeoviewStoreType } from '@/core/stores';
+import { GeoChartStoreByLayerPath, IGeochartState, TypeGeochartResultSetEntry } from '@/core/stores/store-interface-and-intial-values/geochart-state';
+import { GeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
+import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 /**
  * Event processor focusing on interacting with the geochart state in the store.
  */
 export declare class GeochartEventProcessor extends AbstractEventProcessor {
-    static batchedPropagationLayerDataArray: BatchedPropagationLayerDataArrayByMap;
-    static timeDelayBetweenPropagationsForBatch: number;
+    #private;
+    /**
+     * Overrides initialization of the GeoChart Event Processor
+     * @param {GeoviewStoreType} store The store associated with the GeoChart Event Processor
+     * @returns An array of the subscriptions callbacks which were created
+     */
+    protected onInitialize(store: GeoviewStoreType): Array<() => void> | void;
     /**
      * Shortcut to get the Geochart state for a given map id
      * @param {string} mapId The mapId
@@ -16,29 +22,32 @@ export declare class GeochartEventProcessor extends AbstractEventProcessor {
      */
     protected static getGeochartState(mapId: string): IGeochartState | undefined;
     /**
-     * Set the default layers from configuration.
+     * Get a specific state.
+     * @param {string} mapId - The mapId
+     * @param {'geochartChartsConfig' | 'layerDataArray' | 'layerDataArrayBatchLayerPathBypass' | 'selectedLayerPath'} state - The state to get
+     * @returns {string | TypeGeochartResultSetEntry[] | GeoChartStoreByLayerPath | undefined} The requested state
+     */
+    static getSingleGeochartState(mapId: string, state: 'geochartChartsConfig' | 'layerDataArray' | 'layerDataArrayBatchLayerPathBypass' | 'selectedLayerPath'): string | TypeGeochartResultSetEntry[] | GeoChartStoreByLayerPath | undefined;
+    /**
+     * Sets the default layers from configuration.
      * In the store, the GeoChart configurations are stored in an object with layerPath as its property name
      * (to retrieve the configuration per layer faster).
      *
      * @param {string} mapId the map id
-     * @param {TypeJsonObject} charts The array of JSON configuration for geochart
+     * @param {GeoChartConfig[]} charts The array of JSON configuration for GeoChart
      */
-    static setGeochartCharts(mapId: string, charts: TypeJsonObject[]): void;
+    static setGeochartCharts(mapId: string, charts: GeoChartConfig[]): void;
     /**
-     * Propagate feature info layer sets to the store and the also in a batched manner.
-     * @param {string} mapId The map id
-     * @param {string} layerDataArray The layer data array to propagate in the store
+     * Adds a GeoChart Configuration to the specified map id and layer path
+     * @param {string} mapId The map ID
+     * @param {string} layerPath The layer path
+     * @param {GeoChartConfig} chartConfig The Geochart Configuration
      */
-    static propagateArrayDataToStore(mapId: string, layerDataArray: TypeArrayOfLayerData): void;
+    static addGeochartChart(mapId: string, layerPath: string, chartConfig: GeoChartConfig): void;
     /**
-     * Propagate feature info layer sets to the store in a batched manner, every 'timeDelayBetweenPropagationsForBatch' millisecond.
-     * This is used to provide another 'layerDataArray', in the store, which updates less often so that we save a couple 'layerDataArray'
-     * update triggers in the components that are listening to the store array.
-     * The propagation can be bypassed using the store 'layerDataArrayBatchLayerPathBypass' state which tells the process to
-     * immediately batch out the array in the store for faster triggering of the state, for faster updating of the UI.
-     * @param {string} mapId The map id
-     * @param {string} layerDataArray The layer data array to batch on
-     * @returns {Promise<void>} Promise upon completion
+     * Removes a GeoChart Configuration at the specified map id and layer path
+     * @param {string} mapId The map ID
+     * @param {string} layerPath The layer path
      */
-    private static propagateFeatureInfoToStoreBatch;
+    static removeGeochartChart(mapId: string, layerPath: string): void;
 }

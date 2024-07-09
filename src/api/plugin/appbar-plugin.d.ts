@@ -1,6 +1,7 @@
 /// <reference types="react" />
-import { TypeButtonPanel, TypeIconButtonProps, TypePanelProps } from '@/core/types/cgpv-types';
+import { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import { AbstractPlugin } from './abstract-plugin';
+import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 /** ******************************************************************************************************************************
  * AppBar Plugin abstract class.
  */

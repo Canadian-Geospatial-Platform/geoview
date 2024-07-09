@@ -1,10 +1,14 @@
+import BaseLayer from 'ol/layer/Base';
 import { Extent } from 'ol/extent';
-import { AbstractGeoViewLayer, TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeImageStaticLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
+import { TypeLayerEntryConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
+import { ImageStaticLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
+import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
-    geoviewLayerType: 'imageStatic';
-    listOfLayerEntryConfig: TypeImageStaticLayerEntryConfig[];
+    geoviewLayerType: typeof CONST_LAYER_TYPES.IMAGE_STATIC;
+    listOfLayerEntryConfig: ImageStaticLayerEntryConfig[];
 }
 /** *****************************************************************************************************************************
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeImageStaticLayerConfig if the geoviewLayerType attribute of the
@@ -26,7 +30,7 @@ export declare const layerConfigIsImageStatic: (verifyIfLayer: TypeGeoviewLayerC
  */
 export declare const geoviewLayerIsImageStatic: (verifyIfGeoViewLayer: AbstractGeoViewLayer) => verifyIfGeoViewLayer is ImageStatic;
 /** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TypeImageStaticLayerEntryConfig if the geoviewLayerType attribute of the
+ * type guard function that redefines a TypeLayerEntryConfig as a ImageStaticLayerEntryConfig if the geoviewLayerType attribute of the
  * verifyIfGeoViewEntry.geoviewLayerConfig attribute is ImageStatic. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
@@ -35,7 +39,7 @@ export declare const geoviewLayerIsImageStatic: (verifyIfGeoViewLayer: AbstractG
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export declare const geoviewEntryIsImageStatic: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is TypeImageStaticLayerEntryConfig;
+export declare const geoviewEntryIsImageStatic: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is ImageStaticLayerEntryConfig;
 /** *****************************************************************************************************************************
  * A class to add image static layer.
  *
@@ -43,6 +47,7 @@ export declare const geoviewEntryIsImageStatic: (verifyIfGeoViewEntry: TypeLayer
  * @class ImageStatic
  */
 export declare class ImageStatic extends AbstractGeoViewRaster {
+    #private;
     /** ***************************************************************************************************************************
      * Initialize layer
      *
@@ -57,14 +62,6 @@ export declare class ImageStatic extends AbstractGeoViewRaster {
      */
     protected fetchServiceMetadata(): Promise<void>;
     /** ***************************************************************************************************************************
-     * Get the legend image of a layer.
-     *
-     * @param {TypeImageStaticLayerEntryConfig} layerConfig layer configuration.
-     *
-     * @returns {blob} image blob
-     */
-    private getLegendImage;
-    /** ***************************************************************************************************************************
      * Return the legend of the layer.This routine return null when the layerPath specified is not found. If the legend can't be
      * read, the legend property of the object returned will be null.
      *
@@ -77,35 +74,25 @@ export declare class ImageStatic extends AbstractGeoViewRaster {
      * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
      * extra configuration may be done here.
      *
-     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
+     * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
      *
-     * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
+     * @returns {TypeLayerEntryConfig[]} A new list of layer entries configuration with deleted error layers.
      */
-    protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void;
+    protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void;
     /** ****************************************************************************************************************************
      * This method creates a GeoView Image Static layer using the definition provided in the layerConfig parameter.
      *
-     * @param {TypeImageStaticLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+     * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
      *
-     * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
+     * @returns {Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
      */
-    processOneLayerEntry(layerConfig: TypeImageStaticLayerEntryConfig): Promise<TypeBaseRasterLayer | null>;
-    /** ***************************************************************************************************************************
-     * Get the bounds of the layer represented in the layerConfig pointed to by the cached layerPath, returns updated bounds
-     *
-     * @param {Extent | undefined} bounds The current bounding box to be adjusted.
-     * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
-     *
-     * @returns {Extent} The new layer bounding box.
-     */
-    protected getBounds(bounds: Extent, notUsed?: never): Extent | undefined;
+    protected processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined>;
     /** ***************************************************************************************************************************
      * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
      *
      * @param {string} layerPath The Layer path to the layer's configuration.
-     * @param {Extent | undefined} bounds The current bounding box to be adjusted.
      *
-     * @returns {Extent} The new layer bounding box.
+     * @returns {Extent | undefined} The new layer bounding box.
      */
-    protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined;
+    getBounds(layerPath: string): Extent | undefined;
 }

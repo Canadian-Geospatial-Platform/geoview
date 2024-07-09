@@ -6,6 +6,7 @@ type TypeChildren = ReactNode;
 export interface TypeTabPanelProps {
     index: number;
     value: number;
+    id: string;
     children?: TypeChildren;
 }
 /**

@@ -1,7 +1,7 @@
-import { Extent as OLExtent } from 'ol/interaction';
 import { ExtentEvent as OLExtentEvent } from 'ol/interaction/Extent';
-import { Interaction, InteractionOptions } from './interaction';
+import { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
+import { Interaction, InteractionOptions } from './interaction';
 /**
  * Supported options for extent interactions
  */
@@ -10,29 +10,39 @@ export type ExtentOptions = InteractionOptions & {
     pixelTolerance?: number;
 };
 /**
- * Class used for drawing extent on a map
- *
- * @exports
+ * Class used for drawing an extent on a map.
  * @class Extent
+ * @extends {Interaction}
+ * @exports
  */
 export declare class Extent extends Interaction {
-    ol_extent: OLExtent;
+    #private;
     /**
-     * Initialize Extent component
-     * @param {ExtentOptions} options object to configure the initialization of the Extent interaction
+     * Initializes an Extent component.
+     * @param {ExtentOptions} options - An object to configure the initialization of the Extent interaction.
      */
     constructor(options: ExtentOptions);
     /**
-     * Starts the interaction on the map
+     * Starts the interaction on the map.
      */
     startInteraction(): void;
     /**
-     * Stops the interaction on the map
+     * Stops the interaction on the map.
      */
     stopInteraction(): void;
     /**
-     * Handles when the extent has changed
-     * @param {OLExtentEvent} e object representing the Open Layers event from the interaction
+     * Registers an event handler for extent change events.
+     * @param {ExtentDelegate} callback - The callback to be executed whenever the event is emitted.
      */
-    onExtentChanged: (e: OLExtentEvent) => void;
+    onExtentChanged(callback: ExtentDelegate): void;
+    /**
+     * Unregisters an event handler for extent change events.
+     * @param {ExtentDelegate} callback - The callback to stop being called whenever the event is emitted.
+     */
+    offExtentChanged(callback: ExtentDelegate): void;
 }
+/**
+ * Define a delegate for the event handler function signature
+ */
+type ExtentDelegate = EventDelegateBase<Extent, OLExtentEvent, void>;
+export {};

@@ -1,5 +1,6 @@
 /// <reference types="react" />
 import './translation/i18n';
+import { MapViewer } from '@/geo/map/map-viewer';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 export declare const MapContext: import("react").Context<TypeMapContext>;
 /**
@@ -14,6 +15,7 @@ export type TypeMapContext = {
  */
 interface AppStartProps {
     mapFeaturesConfig: TypeMapFeaturesConfig;
+    onMapViewerInit?: (mapViewer: MapViewer) => void;
 }
 /**
  * Initialize the app with maps from inline html configs, url params

@@ -1,19 +1,16 @@
-import { type ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { LayerListEntry } from './layer-list';
+import { TypeContainerBox } from '@/core/types/global-types';
 interface LayoutProps {
     children?: ReactNode;
+    guideContentIds?: string[];
     layerList: LayerListEntry[];
     selectedLayerPath: string | undefined;
+    fullWidth?: boolean;
+    containerType?: TypeContainerBox;
     onLayerListClicked: (layer: LayerListEntry) => void;
     onIsEnlargeClicked?: (isEnlarge: boolean) => void;
-    fullWidth?: boolean;
+    onGuideIsOpen?: (isGuideOpen: boolean) => void;
 }
-export declare function Layout({ children, layerList, selectedLayerPath, onLayerListClicked, onIsEnlargeClicked, fullWidth }: LayoutProps): import("react").JSX.Element;
-export declare namespace Layout {
-    var defaultProps: {
-        children: null;
-        onIsEnlargeClicked: undefined;
-        fullWidth: boolean;
-    };
-}
+export declare function Layout({ children, guideContentIds, layerList, selectedLayerPath, onLayerListClicked, onIsEnlargeClicked, fullWidth, onGuideIsOpen, containerType, }: LayoutProps): JSX.Element;
 export {};

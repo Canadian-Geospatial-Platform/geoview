@@ -1,9 +1,9 @@
-import { Modify as OLModify } from 'ol/interaction';
 import { ModifyEvent as OLModifyEvent } from 'ol/interaction/Modify';
 import Collection from 'ol/Collection';
 import Feature from 'ol/Feature';
-import { Interaction, InteractionOptions } from './interaction';
+import { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
+import { Interaction, InteractionOptions } from './interaction';
 /**
  * Supported options for modify interactions
  */
@@ -13,34 +13,49 @@ export type ModifyOptions = InteractionOptions & {
     style?: TypeFeatureStyle;
 };
 /**
- * Class used for modifying features on a map
- *
- * @exports
+ * Class used for modifying features on a map.
  * @class Modify
+ * @extends {Interaction}
+ * @exports
  */
 export declare class Modify extends Interaction {
-    ol_modify: OLModify;
+    #private;
     /**
-     * Initialize Modify component
-     * @param {ModifyOptions} options object to configure the initialization of the Modify interaction
+     * Initializes a Modify component.
+     * @param {ModifyOptions} options - Object to configure the initialization of the Modify interaction.
      */
     constructor(options: ModifyOptions);
     /**
-     * Starts the interaction on the map
+     * Starts the interaction on the map.
      */
     startInteraction(): void;
     /**
-     * Stops the interaction on the map
+     * Stops the interaction on the map.
      */
     stopInteraction(): void;
     /**
-     * Handles when the modification has started
-     * @param {OLModifyEvent} e object representing the Open Layers event from the interaction
+     * Registers a callback handler for the modifystart event.
+     * @param {ModifyDelegate} callback - The callback to be executed whenever the event is emitted.
      */
-    onModifyStarted: (e: OLModifyEvent) => void;
+    onModifyStarted(callback: ModifyDelegate): void;
     /**
-     * Handles when the modification has ended
-     * @param {OLModifyEvent} e object representing the Open Layers event from the interaction
+     * Unregisters a callback handler for the modifystart event.
+     * @param {ModifyDelegate} callback - The callback to stop being called whenever the event is emitted.
      */
-    onModifyEnded: (e: OLModifyEvent) => void;
+    offModifyStarted(callback: ModifyDelegate): void;
+    /**
+     * Registers a callback handler for the modifyend event.
+     * @param {ModifyDelegate} callback - The callback to be executed whenever the event is emitted.
+     */
+    onModifyEnded(callback: ModifyDelegate): void;
+    /**
+     * Unregisters a callback handler for the modifyend event.
+     * @param {ModifyDelegate} callback - The callback to stop being called whenever the event is emitted.
+     */
+    offModifyEnded(callback: ModifyDelegate): void;
 }
+/**
+ * Define a delegate for the event handler function signature
+ */
+type ModifyDelegate = EventDelegateBase<Modify, OLModifyEvent, void>;
+export {};

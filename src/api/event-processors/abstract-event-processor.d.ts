@@ -1,13 +1,16 @@
-import { GeoviewStoreType } from '@/core/stores/geoview-store';
-import { IGeoviewState, TypeArrayOfLayerData } from '@/core/types/cgpv-types';
+import { GeoviewStoreType, IGeoviewState } from '@/core/stores/geoview-store';
+import { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { TypeFeatureInfoResultSetEntry, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { TypeGeochartResultSetEntry } from '@/core/stores/store-interface-and-intial-values/geochart-state';
+import { TypeResultSetEntry } from '@/geo/map/map-schema-types';
 /**
  * Holds the buffer, on a map basis, for the propagation in batch in the layer data array store
  */
-export type BatchedPropagationLayerDataArrayByMap = {
-    [mapId: string]: TypeArrayOfLayerData[];
+export type BatchedPropagationLayerDataArrayByMap<T extends TypeResultSetEntry> = {
+    [mapId: string]: T[][];
 };
 export declare abstract class AbstractEventProcessor {
-    private subscriptionArr;
+    #private;
     /**
      * Shortcut to get the store state for a given map id
      *
@@ -39,10 +42,10 @@ export declare abstract class AbstractEventProcessor {
      * The propagation can be bypassed using 'layerPathBypass' parameter which tells the process to
      * immediately batch out the array in the store for faster triggering of the state, for faster updating of the UI.
      * @param {string} mapId The map id
-     * @param {TypeArrayOfLayerData} layerDataArray The layer data array to hold in buffer during the batch
-     * @param {BatchedPropagationLayerDataArrayByMap} batchPropagationObject A reference to the BatchedPropagationLayerDataArrayByMap object used to hold all the layer data arrays in the buffer
+     * @param {T[]} layerDataArray The layer data array to hold in buffer during the batch
+     * @param {BatchedPropagationLayerDataArrayByMap<T>} batchPropagationObject A reference to the BatchedPropagationLayerDataArrayByMap object used to hold all the layer data arrays in the buffer
      * @param {number} timeDelayBetweenPropagations The delay between actual propagations in the store
-     * @param {(layerDataArray: TypeArrayOfLayerData) => void} onSetLayerDataArray The store action callback used to store the layerDataArray in the actual store
+     * @param {(layerDataArray: T[]) => void} onSetLayerDataArray The store action callback used to store the layerDataArray in the actual store
      * @param {string} traceProcessorIndication? Simple parameter for logging purposes
      * @param {string} layerPathBypass? Indicates a layer path which, when processed, should bypass the buffer period and immediately trigger an update to the store
      * @param {(layerPath: string) => void} onResetBypass? The store action callback used to reset the layerPathBypass value in the store.
@@ -51,5 +54,5 @@ export declare abstract class AbstractEventProcessor {
      *                                                     When no onResetBypass is specified, once the bypass occurs, all subsequent propagations happen immediately.
      * @returns {Promise<void>} Promise upon completion
      */
-    protected static helperPropagateArrayStoreBatch(mapId: string, layerDataArray: TypeArrayOfLayerData, batchPropagationObject: BatchedPropagationLayerDataArrayByMap, timeDelayBetweenPropagations: number, onSetLayerDataArray: (layerDataArray: TypeArrayOfLayerData) => void, traceProcessorIndication?: string, layerPathBypass?: string, onResetBypass?: (layerPath: string) => void): Promise<void>;
+    protected static helperPropagateArrayStoreBatch<T extends TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry | TypeGeochartResultSetEntry>(mapId: string, layerDataArray: T[], batchPropagationObject: BatchedPropagationLayerDataArrayByMap<T>, timeDelayBetweenPropagations: number, onSetLayerDataArray: (layerDataArray: T[]) => void, traceProcessorIndication?: string, layerPathBypass?: string, onResetBypass?: (layerPath: string) => void): Promise<void>;
 }

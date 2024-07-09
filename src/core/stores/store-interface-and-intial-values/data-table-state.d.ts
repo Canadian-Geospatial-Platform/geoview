@@ -1,36 +1,65 @@
-import { type MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
 import { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { TypeArrayOfLayerData } from '@/app';
-interface IMapDataTableStateActions {
-    setColumnFiltersEntry: (filtered: MRTColumnFiltersState, layerPath: string) => void;
-    setIsEnlargeDataTable: (isEnlarge: boolean) => void;
-    setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
-    setRowsFilteredEntry: (rows: number, layerPath: string) => void;
-    setRowSelectionsEntry: (rowSelection: Record<number, boolean>, layerPath: string) => void;
-    setSelectedLayerPath: (layerPath: string) => void;
-    setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
-    setLayersData: (layers: TypeArrayOfLayerData) => void;
-    applyMapFilters: (filterStrings: string) => void;
-}
-export interface IMapDataTableState {
-    columnFiltersRecord: Record<string, MRTColumnFiltersState>;
-    isEnlargeDataTable: boolean;
-    mapFilteredRecord: Record<string, boolean>;
-    rowsFilteredRecord: Record<string, number>;
-    rowSelectionsRecord: Record<string, Record<number, boolean>>;
+import { TypeFeatureInfoEntry, TypeLayerData, TypeResultSet, TypeResultSetEntry } from '@/geo/map/map-schema-types';
+type DataTableActions = IDataTableState['actions'];
+export interface IDataTableState {
+    allFeaturesDataArray: TypeAllFeatureInfoResultSetEntry[];
+    activeLayerData: TypeLayerData[];
+    layersDataTableSetting: Record<string, IDataTableSettings>;
     selectedLayerPath: string;
-    toolbarRowSelectedMessageRecord: Record<string, string>;
-    layersData: TypeArrayOfLayerData;
-    actions: IMapDataTableStateActions;
+    tableHeight: string;
+    selectedFeature: TypeFeatureInfoEntry | null;
+    actions: {
+        applyMapFilters: (filterStrings: string) => void;
+        setActiveLayersData: (layers: TypeLayerData[]) => void;
+        setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
+        setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
+        setRowsFilteredEntry: (rows: number, layerPath: string) => void;
+        setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
+        setTableHeight: (tableHeight: string) => void;
+        setSelectedLayerPath: (layerPath: string) => void;
+        triggerGetAllFeatureInfo: (layerPath: string) => Promise<TypeAllFeatureInfoResultSet | void>;
+        setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
+        setSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
+    };
+    setterActions: {
+        setActiveLayersData: (layers: TypeLayerData[]) => void;
+        setAllFeaturesDataArray: (allFeaturesDataArray: TypeAllFeatureInfoResultSetEntry[]) => void;
+        setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
+        setInitiallayerDataTableSetting: (layerPath: string) => void;
+        setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
+        setRowsFilteredEntry: (rows: number, layerPath: string) => void;
+        setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
+        setTableHeight: (tableHeight: string) => void;
+        setSelectedLayerPath: (layerPath: string) => void;
+        setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
+        setSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
+    };
 }
-export declare function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IMapDataTableState;
-export declare const useDataTableStoreSelectedLayerPath: () => string;
-export declare const useDataTableStoreIsEnlargeDataTable: () => boolean;
-export declare const useDataTableStoreToolbarRowSelectedMessageRecord: () => Record<string, string>;
-export declare const useDataTableStoreColumnFilteredRecord: () => Record<string, MRTColumnFiltersState>;
-export declare const useDataTableStoreRowSelectionsRecord: () => Record<string, Record<number, boolean>>;
-export declare const useDataTableStoreMapFilteredRecord: () => Record<string, boolean>;
-export declare const useDataTableStoreRowsFiltered: () => Record<string, number>;
-export declare const useDatatableStoreLayersData: () => TypeArrayOfLayerData;
-export declare const useDataTableStoreActions: () => IMapDataTableStateActions;
+/**
+ * Initializes an DataTable State and provide functions which use the get/set Zustand mechanisms.
+ * @param {TypeSetStore} set - The setter callback to be used by this state
+ * @param {TypeGetStore} get - The getter callback to be used by this state
+ * @returns {IDataTableState} - The initialized DataTable State
+ */
+export declare function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDataTableState;
+export type TypeColumnFiltersState = ColumnFilter[];
+export interface ColumnFilter {
+    id: string;
+    value: unknown;
+}
+interface IDataTableSettings {
+    columnFiltersRecord: TypeColumnFiltersState;
+    mapFilteredRecord: boolean;
+    rowsFilteredRecord: number;
+    toolbarRowSelectedMessageRecord: string;
+    globalFilterRecord: string;
+}
+export type TypeAllFeatureInfoResultSetEntry = TypeResultSetEntry & TypeLayerData;
+export type TypeAllFeatureInfoResultSet = TypeResultSet<TypeAllFeatureInfoResultSetEntry>;
+export declare const useDataTableAllFeaturesDataArray: () => TypeAllFeatureInfoResultSetEntry[];
+export declare const useDataTableSelectedLayerPath: () => string;
+export declare const useDataTableLayerSettings: () => Record<string, IDataTableSettings>;
+export declare const useDataTableTableHeight: () => string;
+export declare const useDataTableSelectedFeature: () => TypeFeatureInfoEntry | null;
+export declare const useDataTableStoreActions: () => DataTableActions;
 export {};

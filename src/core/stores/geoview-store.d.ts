@@ -2,9 +2,10 @@ import { IAppState } from './store-interface-and-intial-values/app-state';
 import { IFeatureInfoState } from './store-interface-and-intial-values/feature-info-state';
 import { ILayerState } from './store-interface-and-intial-values/layer-state';
 import { IMapState } from './store-interface-and-intial-values/map-state';
-import { IMapDataTableState } from './store-interface-and-intial-values/data-table-state';
+import { IDataTableState } from './store-interface-and-intial-values/data-table-state';
 import { ITimeSliderState } from './store-interface-and-intial-values/time-slider-state';
 import { IGeochartState } from './store-interface-and-intial-values/geochart-state';
+import { ISwiperState } from './store-interface-and-intial-values/swiper-state';
 import { IUIState } from './store-interface-and-intial-values/ui-state';
 import { TypeMapFeaturesConfig } from '@/core/types/global-types';
 export type TypeSetStore = (partial: IGeoviewState | Partial<IGeoviewState> | ((state: IGeoviewState) => IGeoviewState | Partial<IGeoviewState>), replace?: boolean | undefined) => void;
@@ -15,12 +16,13 @@ export interface IGeoviewState {
     setMapConfig: (config: TypeMapFeaturesConfig) => void;
     appState: IAppState;
     detailsState: IFeatureInfoState;
-    dataTableState: IMapDataTableState;
+    dataTableState: IDataTableState;
     layerState: ILayerState;
     mapState: IMapState;
     uiState: IUIState;
     geochartState: IGeochartState;
     timeSliderState: ITimeSliderState;
+    swiperState: ISwiperState;
 }
 export declare const geoviewStoreDefinition: (set: TypeSetStore, get: TypeGetStore) => IGeoviewState;
 export declare const geoviewStoreDefinitionWithSubscribeSelector: import("zustand").StateCreator<IGeoviewState, [], [["zustand/subscribeWithSelector", never]], IGeoviewState>;

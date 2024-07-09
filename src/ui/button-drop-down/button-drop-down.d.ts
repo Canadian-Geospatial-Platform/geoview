@@ -15,8 +15,3 @@ export type ButtonDropDownProps = ButtonGroupProps & {
  * @returns {JSX.Element} the created Button Drop Down element
  */
 export declare function ButtonDropDown(props: ButtonDropDownProps): JSX.Element;
-export declare namespace ButtonDropDown {
-    var defaultProps: {
-        onButtonClick: null;
-    };
-}

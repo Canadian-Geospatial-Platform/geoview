@@ -1,25 +1,6 @@
 import { OSM, XYZ } from 'ol/source';
 import { Extent } from 'ol/extent';
 /** ******************************************************************************************************************************
- *  Definition of the basemap options type.
- */
-export type TypeBasemapId = 'transport' | 'osm' | 'simple' | 'nogeom' | 'shaded';
-/** ******************************************************************************************************************************
- *  Definition of the basemap options type.
- */
-export declare const VALID_BASEMAP_ID: TypeBasemapId[];
-/** ******************************************************************************************************************************
- *  Definition of the basemap options type.
- */
-export type TypeBasemapOptions = {
-    /** Id of the basemap to use. */
-    basemapId: TypeBasemapId;
-    /** Enable or disable shaded basemap (if basemap id is set to shaded then this should be false). */
-    shaded: boolean;
-    /** Enable or disable basemap labels. */
-    labeled: boolean;
-};
-/** ******************************************************************************************************************************
  * interface used to define a new basemap.
  */
 export type TypeBasemapProps = {

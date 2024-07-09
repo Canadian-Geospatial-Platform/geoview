@@ -3,12 +3,13 @@ import i18next from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { API } from '@/api/api';
 import { MapViewer } from '@/geo/map/map-viewer';
-import { TypeJsonObject } from '@/core/types/global-types';
+import { TypeJsonObject, AnySchemaObject } from '@/core/types/global-types';
 /** ******************************************************************************************************************************
  * interface used by all plugins to define their options.
  */
 export type TypePluginOptions = {
     mapId: string;
+    viewer?: MapViewer;
 };
 /** ******************************************************************************************************************************
  * Plugin abstract base class.
@@ -16,9 +17,9 @@ export type TypePluginOptions = {
 export declare abstract class AbstractPlugin {
     pluginId: string;
     pluginProps: TypePluginOptions;
-    configObj?: TypeJsonObject;
-    api?: API;
-    react?: typeof React;
+    configObj: TypeJsonObject;
+    api: API;
+    react: typeof React;
     translate?: typeof i18next;
     useTheme?: typeof useTheme;
     /**
@@ -31,12 +32,20 @@ export declare abstract class AbstractPlugin {
      * Returns the MapViewer used by this Plugin
      * @returns MapViewer The MapViewer used by this Plugin
      */
-    map(): MapViewer | undefined;
+    mapViewer(): MapViewer;
     /**
      * Returns the language currently used by the 'translate' i18next component used by this Plugin
      * @returns string The language, 'en' (English) by default.
      */
     displayLanguage(): string;
+    /**
+     * Must override function to get the schema validator
+     */
+    abstract schema(): AnySchemaObject;
+    /**
+     * Must override function to get the default config
+     */
+    abstract defaultConfig(): TypeJsonObject;
     /**
      * Override this to do the actual adding
      */

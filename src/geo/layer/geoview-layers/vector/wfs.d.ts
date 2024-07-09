@@ -2,23 +2,17 @@ import { Options as SourceOptions } from 'ol/source/Vector';
 import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeBaseLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { TypeLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
+import { WfsLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
     format: 'WFS';
 }
-export declare class TypeWfsLayerEntryConfig extends TypeVectorLayerEntryConfig {
-    source: TypeSourceWFSVectorInitialConfig;
-    /**
-     * The class constructor.
-     * @param {TypeWfsLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
-     */
-    constructor(layerConfig: TypeWfsLayerEntryConfig);
-}
 export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geoviewLayerType'> {
-    geoviewLayerType: 'ogcWfs';
-    listOfLayerEntryConfig: TypeWfsLayerEntryConfig[];
+    geoviewLayerType: typeof CONST_LAYER_TYPES.WFS;
+    listOfLayerEntryConfig: WfsLayerEntryConfig[];
 }
 /** *****************************************************************************************************************************
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeWFSLayerConfig if the geoviewLayerType attribute of the
@@ -40,7 +34,7 @@ export declare const layerConfigIsWFS: (verifyIfLayer: TypeGeoviewLayerConfig) =
  */
 export declare const geoviewLayerIsWFS: (verifyIfGeoViewLayer: AbstractGeoViewLayer) => verifyIfGeoViewLayer is WFS;
 /** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TypeWfsLayerEntryConfig if the geoviewLayerType attribute of the
+ * type guard function that redefines a TypeLayerEntryConfig as a WfsLayerEntryConfig if the geoviewLayerType attribute of the
  * verifyIfGeoViewEntry.geoviewLayerConfig attribute is WFS. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
@@ -49,7 +43,7 @@ export declare const geoviewLayerIsWFS: (verifyIfGeoViewLayer: AbstractGeoViewLa
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export declare const geoviewEntryIsWFS: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is TypeWfsLayerEntryConfig;
+export declare const geoviewEntryIsWFS: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is WfsLayerEntryConfig;
 /** *****************************************************************************************************************************
  * A class to add WFS layer.
  *
@@ -57,8 +51,7 @@ export declare const geoviewEntryIsWFS: (verifyIfGeoViewEntry: TypeLayerEntryCon
  * @class WFS
  */
 export declare class WFS extends AbstractGeoViewVector {
-    /** private varibale holding wfs version. */
-    private version;
+    #private;
     /** ***************************************************************************************************************************
      * Initialize layer
      * @param {string} mapId the id of the map
@@ -69,11 +62,11 @@ export declare class WFS extends AbstractGeoViewVector {
      * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
      *
      * @param {string} fieldName field name for which we want to get the type.
-     * @param {TypeLayerEntryConfig} layerConfig layer configuration.
+     * @param {AbstractBaseLayerEntryConfig} layerConfig layer configuration.
      *
      * @returns {'string' | 'date' | 'number'} The type of the field.
      */
-    protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number';
+    protected getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number';
     /** ***************************************************************************************************************************
      * This method reads the service metadata from the metadataAccessPath.
      *
@@ -84,33 +77,26 @@ export declare class WFS extends AbstractGeoViewVector {
      * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined. If
      * necessary, additional code can be executed in the child method to complete the layer configuration.
      *
-     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
+     * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
      */
-    protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void;
+    protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void;
     /** ***************************************************************************************************************************
      * This method is used to process the layer's metadata. It will fill the empty outfields and aliasFields properties of the
      * layer's configuration.
      *
-     * @param {TypeVectorLayerEntryConfig} layerConfig The layer entry configuration to process.
+     * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
      *
-     * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
+     * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
      */
-    protected processLayerMetadata(layerConfig: TypeVectorLayerEntryConfig): Promise<TypeLayerEntryConfig>;
-    /** ***************************************************************************************************************************
-     * This method sets the outfields and aliasFields of the source feature info.
-     *
-     * @param {TypeJsonArray} fields An array of field names and its aliases.
-     * @param {TypeVectorLayerEntryConfig} layerConfig The vector layer entry to configure.
-     */
-    private processFeatureInfoConfig;
+    protected processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig>;
     /** ***************************************************************************************************************************
      * Create a source configuration for the vector layer.
      *
-     * @param {TypeBaseLayerEntryConfig} layerConfig The layer entry configuration.
+     * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
      * @param {SourceOptions} sourceOptions The source options (default: {}).
      * @param {ReadOptions} readOptions The read options (default: {}).
      *
      * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
      */
-    protected createVectorSource(layerConfig: TypeBaseLayerEntryConfig, sourceOptions?: SourceOptions, readOptions?: ReadOptions): VectorSource<Feature>;
+    protected createVectorSource(layerConfig: AbstractBaseLayerEntryConfig, sourceOptions?: SourceOptions<Feature>, readOptions?: ReadOptions): VectorSource<Feature>;
 }

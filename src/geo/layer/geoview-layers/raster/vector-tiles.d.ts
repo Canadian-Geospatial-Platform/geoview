@@ -1,20 +1,14 @@
+import BaseLayer from 'ol/layer/Base';
 import { Extent } from 'ol/extent';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeTileLayerEntryConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeTileGrid } from '@/geo/map/map-schema-types';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
+import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
+import { VectorTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 export type TypeSourceVectorTilesInitialConfig = TypeSourceTileInitialConfig;
-export declare class TypeVectorTilesLayerEntryConfig extends TypeTileLayerEntryConfig {
-    source: TypeSourceVectorTilesInitialConfig;
-    tileGrid: TypeTileGrid;
-    /**
-     * The class constructor.
-     * @param {TypeVectorTilesLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
-     */
-    constructor(layerConfig: TypeVectorTilesLayerEntryConfig);
-}
 export interface TypeVectorTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
-    geoviewLayerType: 'vectorTiles';
-    listOfLayerEntryConfig: TypeVectorTilesLayerEntryConfig[];
+    geoviewLayerType: typeof CONST_LAYER_TYPES.VECTOR_TILES;
+    listOfLayerEntryConfig: VectorTilesLayerEntryConfig[];
 }
 /** *****************************************************************************************************************************
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeVectorTilesConfig if the geoviewLayerType attribute of the
@@ -37,7 +31,7 @@ export declare const layerConfigIsVectorTiles: (verifyIfLayer: TypeGeoviewLayerC
  */
 export declare const geoviewLayerIsVectorTiles: (verifyIfGeoViewLayer: AbstractGeoViewLayer) => verifyIfGeoViewLayer is VectorTiles;
 /** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TypeVectorTilesLayerEntryConfig if the geoviewLayerType attribute
+ * type guard function that redefines a TypeLayerEntryConfig as a VectorTilesLayerEntryConfig if the geoviewLayerType attribute
  * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is VECTOR_TILES. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
@@ -46,7 +40,7 @@ export declare const geoviewLayerIsVectorTiles: (verifyIfGeoViewLayer: AbstractG
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export declare const geoviewEntryIsVectorTiles: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is TypeVectorTilesLayerEntryConfig;
+export declare const geoviewEntryIsVectorTiles: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is VectorTilesLayerEntryConfig;
 /** *****************************************************************************************************************************
  * a class to add vector-tiles layer
  *
@@ -69,55 +63,46 @@ export declare class VectorTiles extends AbstractGeoViewRaster {
      *
      * @returns {'string' | 'date' | 'number'} The type of the field.
      */
-    protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number';
+    protected getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number';
     /** ***************************************************************************************************************************
      * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
      * extra configuration may be done here.
      *
-     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
+     * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
      */
-    protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void;
+    protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void;
     /** ****************************************************************************************************************************
      * This method creates a GeoView VectorTiles layer using the definition provided in the layerConfig parameter.
      *
-     * @param {TypeVectorTilesLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+     * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
      *
-     * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
+     * @returns {Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
      */
-    protected processOneLayerEntry(layerConfig: TypeVectorTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null>;
+    protected processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined>;
     /** ***************************************************************************************************************************
      * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
      * initial settings, fields and aliases).
      *
-     * @param {TypeTileLayerEntryConfig} layerConfig The layer entry configuration to process.
+     * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
      *
-     * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
+     * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
      */
-    protected processLayerMetadata(layerConfig: TypeTileLayerEntryConfig): Promise<TypeLayerEntryConfig>;
-    /** ***************************************************************************************************************************
-     * Get the bounds of the layer represented in the layerConfig pointed to by the cached layerPath, returns updated bounds
-     *
-     * @param {Extent | undefined} bounds The current bounding box to be adjusted.
-     * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
-     *
-     * @returns {Extent} The new layer bounding box.
-     */
-    protected getBounds(bounds: Extent, notUsed?: never): Extent | undefined;
+    protected processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig>;
     /** ***************************************************************************************************************************
      * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
      *
      * @param {string} layerPath The Layer path to the layer's configuration.
-     * @param {Extent | undefined} bounds The current bounding box to be adjusted.
      *
-     * @returns {Extent} The new layer bounding box.
+     * @returns {Extent | undefined} The new layer bounding box.
      */
-    protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined;
-    addVectorTileLayer(): void;
+    getBounds(layerPath: string): Extent | undefined;
+    static addVectorTileLayer(): Promise<void>;
     /**
      * Set Vector Tile style
      *
      * @param {string} layerPath Path of layer to style.
      * @param {string} styleUrl The url of the styles to apply.
+     * @returns {Promise<unknown>}
      */
-    setVectorTileStyle(layerPath: string, styleUrl: string): void;
+    setVectorTileStyle(layerPath: string, styleUrl: string): Promise<unknown>;
 }

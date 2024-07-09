@@ -4,6 +4,7 @@ export type NotificationDetailsType = {
     notificationType: NotificationType;
     message: string;
     description?: string;
+    count: number;
 };
 export type NotificationType = 'success' | 'error' | 'info' | 'warning';
 /**

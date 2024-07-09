@@ -3,25 +3,30 @@ import { Root } from 'react-dom/client';
 import { i18n } from 'i18next';
 import OLMap from 'ol/Map';
 import View, { FitOptions } from 'ol/View';
+import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
+import { Projection as OLProjection, ProjectionLike } from 'ol/proj';
+import { TypeViewSettings, TypeInteraction, TypeValidMapProjectionCodes, TypeDisplayLanguage, TypeDisplayTheme } from '@config/types/map-schema-types';
 import { Basemap } from '@/geo/layer/basemap/basemap';
-import { Layer } from '@/geo/layer/layer';
+import { LayerApi } from '@/geo/layer/layer';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
-import { TypeClickMarker } from '@/app';
+import { TypeOrderedLayerInfo } from '@/app';
 import { TypeRecordOfPlugin } from '@/api/plugin/plugin-types';
-import { AppbarButtons } from '@/core/components/app-bar/app-bar-buttons';
-import { NavbarButtons } from '@/core/components/nav-bar/nav-bar-buttons';
+import { AppBarApi } from '@/core/components/app-bar/app-bar-api';
+import { NavBarApi } from '@/core/components/nav-bar/nav-bar-api';
 import { FooterBarApi } from '@/core/components/footer-bar/footer-bar-api';
-import { GeoviewRenderer } from '@/geo/renderer/geoview-renderer';
+import { StateApi } from '@/core/stores/state-api';
 import { Select } from '@/geo/interaction/select';
 import { Draw } from '@/geo/interaction/draw';
 import { Extent as ExtentInteraction } from '@/geo/interaction/extent';
 import { Modify } from '@/geo/interaction/modify';
 import { Snap } from '@/geo/interaction/snap';
 import { Translate } from '@/geo/interaction/translate';
+import { EventDelegateBase } from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
-import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings, TypeMapState, TypeDisplayTheme, TypeInteraction } from '@/geo/map/map-schema-types';
-import { TypeMapFeaturesConfig, TypeHTMLElement, TypeValidMapProjectionCodes, TypeJsonObject } from '@/core/types/global-types';
+import { TypeMapFeaturesConfig, TypeHTMLElement, TypeJsonObject } from '@/core/types/global-types';
+import { TypeClickMarker } from '@/core/components/click-marker/click-marker';
+import { Notifications } from '@/core/utils/notifications';
 /**
  * Class used to manage created maps
  *
@@ -29,136 +34,182 @@ import { TypeMapFeaturesConfig, TypeHTMLElement, TypeValidMapProjectionCodes, Ty
  * @class MapViewer
  */
 export declare class MapViewer {
-    createMapConfigHasRun: boolean;
+    #private;
     mapFeaturesConfig: TypeMapFeaturesConfig;
     mapId: string;
     map: OLMap;
     plugins: TypeRecordOfPlugin;
     overviewRoot: Root | undefined;
-    appBarButtons: AppbarButtons;
-    navBarButtons: NavbarButtons;
-    footerBar: FooterBarApi;
+    appBarApi: AppBarApi;
+    navBarApi: NavBarApi;
+    footerBarApi: FooterBarApi;
+    stateApi: StateApi;
     basemap: Basemap;
-    layer: Layer;
+    notifications: Notifications;
+    layer: LayerApi;
     modal: ModalApi;
-    geoviewRenderer: GeoviewRenderer;
-    readyCallbackHasRun: boolean;
-    private i18nInstance;
+    iconImageCacheSize: number;
+    get mapInit(): boolean;
+    get mapReady(): boolean;
+    get mapLayersProcessed(): boolean;
+    get mapLayersLoaded(): boolean;
     /**
-     * Add the map instance to the maps array in the api
-     *
+     * Constructor for a MapViewer, setting:
+     * - the mapId
+     * - the mapFeaturesConfig
+     * - i18n
+     * - AppBar, NavBar, FooterBar
+     * - modalApi
+     * - basemap
      * @param {TypeMapFeaturesConfig} mapFeaturesConfig map properties
      * @param {i18n} i18instance language instance
      */
     constructor(mapFeaturesConfig: TypeMapFeaturesConfig, i18instance: i18n);
     /**
-     * Set the layer added event listener and timeout function for the list of geoview layer configurations.
-     *
-     * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig The list of geoview layer configurations.
+     * Create an Open Layer map from configuration attached to the class
+     * @param {HTMLElement} mapElement - HTML element to create the map within
+     * @returns {OLMap} The OpenLayer map
      */
-    setLayerAddedListener4ThisListOfLayer(listOfGeoviewLayerConfig: TypeListOfGeoviewLayerConfig): void;
+    createMap(mapElement: HTMLElement): OLMap;
     /**
-     * Method used to test all geoview layers status flags to determine if all the metadata of the map are loaded.
-     * This doesn't mean that all the layers are loaded on the map, Only the metadata are read and processed.
-     *
-     * @returns true if all geoview layers on the map are loaded or detected as a load error.
+     * Initializes map, layer class and geometries
      */
-    mapIsReady(): boolean;
-    /**
-     * Function called when the map has been rendered and ready to be customized
-     */
-    mapReady(): void;
-    /**
-     * Initialize layers, basemap and projection
-     *
-     * @param cgpMap
-     */
-    initMap(cgpMap: OLMap): void;
+    initMap(): void;
     /**
      * Add a new custom component to the map
      *
-     * @param {string} mapComponentId an id to the new component
-     * @param {JSX.Element} component the component to add
+     * @param {string} mapComponentId - An id to the new component
+     * @param {JSX.Element} component - The component to add
      */
     addComponent(mapComponentId: string, component: JSX.Element): void;
     /**
      * Remove an existing custom component from the map
      *
-     * @param imapComponentIdd the id of the component to remove
+     * @param mapComponentId - The id of the component to remove
      */
     removeComponent(mapComponentId: string): void;
     /**
      * Add a localization ressource bundle for a supported language (fr, en). Then the new key added can be
      * access from the utilies function getLocalizesMessage to reuse in ui from outside the core viewer.
      *
-     * @param {TypeDisplayLanguage} language the language to add the ressoruce for (en, fr)
-     * @param {TypeJsonObject} translations the translation object to add
+     * @param {TypeDisplayLanguage} language - The language to add the ressoruce for (en, fr)
+     * @param {TypeJsonObject} translations - The translation object to add
      */
     addLocalizeRessourceBundle(language: TypeDisplayLanguage, translations: TypeJsonObject): void;
     /**
-     * Return the current display language
-     *
+     * Returns the current display language
      * @returns {TypeDisplayLanguage} The display language
      */
     getDisplayLanguage(): TypeDisplayLanguage;
     /**
-     * Return the current display theme
-     *
+     * Returns the current display theme
      * @returns {TypeDisplayTheme} The display theme
      */
     getDisplayTheme(): TypeDisplayTheme;
     /**
-     * Return the map current state information
-     *
+     * Returns the map current state information
      * @returns {TypeMapState} The map state
      */
     getMapState(): TypeMapState;
     /**
-     * Get the map viewSettings
-     *
+     * Gets the map viewSettings
      * @returns the map viewSettings
      */
     getView(): View;
     /**
+     * Gets the map projection
+     * @returns the map viewSettings
+     */
+    getProjection(): OLProjection;
+    /**
+     * Gets the ordered layer info.
+     * @returns {TypeOrderedLayerInfo[]} The ordered layer info
+     */
+    getMapLayerOrderInfo(): TypeOrderedLayerInfo[];
+    /**
      * set fullscreen / exit fullscreen
      *
-     * @param status toggle fullscreen or exit fullscreen status
-     * @param {HTMLElement} element the element to toggle fullscreen on
+     * @param status - Toggle fullscreen or exit fullscreen status
+     * @param {HTMLElement} element - The element to toggle fullscreen on
      */
-    setFullscreen(status: boolean, element: TypeHTMLElement): void;
+    static setFullscreen(status: boolean, element: TypeHTMLElement): void;
     /**
      * Set map to either dynamic or static
      *
-     * @param {TypeInteraction} interaction map interaction
+     * @param {TypeInteraction} interaction - Map interaction
      */
     setInteraction(interaction: TypeInteraction): void;
     /**
      * Set the display language of the map
      *
-     * @param {TypeDisplayLanguage} displayLanguage the language to use (en, fr)
-     * @param {boolean} resetLayer optional flag to ask viewer to reload layers with the new localize language
+     * @param {TypeDisplayLanguage} displayLanguage - The language to use (en, fr)
+     * @param {boolean} resetLayer - Optional flag to ask viewer to reload layers with the new localize language
+     * @returns {Promise<[void, void]>}
      */
-    setLanguage(displayLanguage: TypeDisplayLanguage, resetLayer?: boolean | false): void;
+    setLanguage(displayLanguage: TypeDisplayLanguage, resetLayer?: boolean | false): Promise<[void, void]>;
     /**
      * Set the display projection of the map
      *
-     * @param {TypeValidMapProjectionCodes} projectionCode the projection code (3978, 3857)
+     * @param {TypeValidMapProjectionCodes} projectionCode - The projection code (3978, 3857)
+     * @returns {Promise<void>}
      */
-    setProjection(projectionCode: TypeValidMapProjectionCodes): void;
+    setProjection(projectionCode: TypeValidMapProjectionCodes): Promise<void>;
+    /**
+     * Rotates the view to align it at the given degrees
+     *
+     * @param {number} degree - The degrees to rotate the map to
+     */
+    rotate(degree: number): void;
     /**
      * Set the display theme of the map
      *
-     * @param {TypeDisplayTheme} displayTheme the theme to use (geo.ca, light, dark)
+     * @param {TypeDisplayTheme} displayTheme - The theme to use (geo.ca, light, dark)
      */
     setTheme(displayTheme: TypeDisplayTheme): void;
     /**
-     * Set the map viewSettings
+     * Set the map viewSettings (coordinate values in lat/long)
      *
-     * @param {TypeMapView} mapView map viewSettings object
+     * @param {TypeViewSettings} mapView - Map viewSettings object
      */
     setView(mapView: TypeViewSettings): void;
     /**
-     * Loop through all geoview layers and refresh their respective source.
+     * Set the map center.
+     *
+     * @param {Coordinate} center - New center to use
+     */
+    setCenter(center: Coordinate): void;
+    /**
+     * Set the map zoom level.
+     *
+     * @param {number} zoom - New zoom level
+     */
+    setZoomLevel(zoom: number): void;
+    /**
+     * Set the minimum map zoom level.
+     *
+     * @param {number} zoom - New minimum zoom level
+     */
+    setMinZoomLevel(zoom: number): void;
+    /**
+     * Set the maximum map zoom level.
+     *
+     * @param {number} zoom - New maximum zoom level
+     */
+    setMaxZoomLevel(zoom: number): void;
+    /**
+     * Set map extent.
+     *
+     * @param {Extent} extent - New extent to zoom to.
+     */
+    setExtent(extent: Extent): Promise<void>;
+    /**
+     * Set the maximum extent of the map.
+     *
+     * @param {Extent} extent - New extent to use.
+     */
+    setMaxExtent(extent: Extent): void;
+    /**
+     * Loops through all geoview layers and refresh their respective source.
      * Use this function on projection change or other viewer modification who may affect rendering.
      *
      * @returns A Promise which resolves when the rendering is completed after the source(s) were changed.
@@ -170,7 +221,7 @@ export declare class MapViewer {
     clickMarkerIconHide(): void;
     /**
      * Show a marker on the map
-     * @param {TypeClickMarker} marker the marker to add
+     * @param {TypeClickMarker} marker - The marker to add
      */
     clickMarkerIconShow(marker: TypeClickMarker): void;
     /**
@@ -185,23 +236,29 @@ export declare class MapViewer {
      */
     remove(deleteContainer: boolean): HTMLElement;
     /**
-     * Reload a map from a config object stored in store
+     * Reload a map from a config object stored in store. It first remove then recreate the map.
      */
     reload(): void;
     /**
      * Zoom to the specified extent.
      *
-     * @param {Extent} extent The extent to zoom to.
-     * @param {FitOptions} options The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
+     * @param {Extent} extent - The extent to zoom to.
+     * @param {FitOptions} options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
      */
     zoomToExtent(extent: Extent, options?: FitOptions): Promise<void>;
+    /**
+     * Zoom to specified extent or coordinate provided in lnglat.
+     *
+     * @param {Extent | Coordinate} extent - The extent or coordinate to zoom to.
+     * @param {FitOptions} options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
+     */
+    zoomToLngLatExtentOrCoordinate(extent: Extent | Coordinate, options?: FitOptions): Promise<void>;
     /**
      * Fit the map to its boundaries. It is assumed that the boundaries use the map projection. If projectionCode is undefined,
      * the boundaries are used as is, otherwise they are reprojected from the specified projection code to the map projection.
      *
-     * @param {Extent} bounds bounding box to zoom to
-     * @param {string | number | undefined} projectionCode Optional projection code used by the bounds.
-     * @returns the bounds
+     * @param {Extent} bounds - Bounding box to zoom to
+     * @param {string | number | undefined} projectionCode - Optional projection code used by the bounds.
      */
     fitBounds(bounds?: Extent, projectionCode?: string | number | undefined): void;
     /**
@@ -218,19 +275,337 @@ export declare class MapViewer {
     initTranslateInteractions(): Translate;
     /**
      * Initializes drawing interactions on the given vector source
-     * @param geomGroupKey the geometry group key in which to hold the geometries
-     * @param type the type of geometry to draw (Polygon, LineString, Circle, etc)
-     * @param styles the styles for the drawing
+     * @param {string} geomGroupKey - The geometry group key in which to hold the geometries
+     * @param {string} type - The type of geometry to draw (Polygon, LineString, Circle, etc)
+     * @param {TypeFeatureStyle} styles - The styles for the drawing
      */
     initDrawInteractions(geomGroupKey: string, type: string, style: TypeFeatureStyle): Draw;
     /**
      * Initializes modifying interactions on the given vector source
-     * @param geomGroupKey the geometry group key in which to hold the geometries
+     * @param {string} geomGroupKey - The geometry group key in which to hold the geometries
      */
     initModifyInteractions(geomGroupKey: string): Modify;
     /**
      * Initializes snapping interactions on the given vector source
-     * @param geomGroupKey the geometry group key in which to hold the geometries
+     * @param {string} geomGroupKey - The geometry group key in which to hold the geometries
      */
     initSnapInteractions(geomGroupKey: string): Snap;
+    /**
+     * Check if north is visible. This is not a perfect solution and is more a work around
+     *
+     * @returns {boolean} true if visible, false otherwise
+     */
+    checkNorth(): boolean;
+    /**
+     * Get north arrow bearing. Angle use to rotate north arrow for non Web Mercator projection
+     * https://www.movable-type.co.uk/scripts/latlong.html
+     *
+     * @returns {string} the arrow angle
+     */
+    getNorthArrowAngle(): string;
+    /**
+     * Transforms coordinate from LngLat to the current projection of the map.
+     * @param {Coordinate} coordinate - The LngLat coordinate
+     * @returns {Coordinate} The coordinate in the map projection
+     */
+    convertCoordinateLngLatToMapProj(coordinate: Coordinate): Coordinate;
+    /**
+     * Transforms coordinate from current projection of the map to LngLat.
+     * @param {Coordinate} coordinate - The coordinate in map projection
+     * @returns {Coordinate} The coordinate in LngLat
+     */
+    convertCoordinateMapProjToLngLat(coordinate: Coordinate): Coordinate;
+    /**
+     * Transforms extent from LngLat to the current projection of the map.
+     * @param {Extent} extent - The LngLat extent
+     * @returns {Extent} The extent in the map projection
+     */
+    convertExtentLngLatToMapProj(extent: Extent): Extent;
+    /**
+     * Transforms extent from current projection of the map to LngLat.
+     * @param {Extent} extent - The extent in map projection
+     * @returns {Extent} The extent in LngLat
+     */
+    convertExtentMapProjToLngLat(extent: Extent): Extent;
+    /**
+     * Transforms coordinate from given projection to the current projection of the map.
+     * @param {Coordinate} coordinate - The given coordinate
+     * @param {ProjectionLike} fromProj - The projection of the given coordinate
+     * @returns {Coordinate} The coordinate in the map projection
+     */
+    convertCoordinateFromProjToMapProj(coordinate: Coordinate, fromProj: ProjectionLike): Coordinate;
+    /**
+     * Transforms coordinate from map projection to given projection.
+     * @param {Coordinate} coordinate - The given coordinate
+     * @param {ProjectionLike} toProj - The projection that should be output
+     * @returns {Coordinate} The coordinate in the map projection
+     */
+    convertCoordinateFromMapProjToProj(coordinate: Coordinate, toProj: ProjectionLike): Coordinate;
+    /**
+     * Transforms extent from given projection to the current projection of the map.
+     * @param {Extent} extent - The given extent
+     * @param {ProjectionLike} fromProj - The projection of the given extent
+     * @returns {Extent} The extent in the map projection
+     */
+    convertExtentFromProjToMapProj(extent: Extent, fromProj: ProjectionLike): Extent;
+    /**
+     * Transforms extent from map projection to given projection. If the projects are the same, the extent is simply returned.
+     * @param {Extent} extent - The given extent
+     * @param {ProjectionLike} toProj - The projection that should be output
+     * @returns {Extent} The extent in the map projection
+     */
+    convertExtentFromMapProjToProj(extent: Extent, toProj: ProjectionLike): Extent;
+    /**
+     * Registers a map init event callback.
+     * @param {MapInitDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onMapInit(callback: MapInitDelegate): void;
+    /**
+     * Unregisters a map init event callback.
+     * @param {MapInitDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapInit(callback: MapInitDelegate): void;
+    /**
+     * Registers a map ready event callback.
+     * @param {MapReadyDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onMapReady(callback: MapReadyDelegate): void;
+    /**
+     * Unregisters a map ready event callback.
+     * @param {MapReadyDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapReady(callback: MapReadyDelegate): void;
+    /**
+     * Registers a map layers processed event callback.
+     * @param {MapLayersProcessedDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onMapLayersProcessed(callback: MapLayersProcessedDelegate): void;
+    /**
+     * Unregisters a map layers processed event callback.
+     * @param {MapLayersProcessedDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapLayersProcessed(callback: MapLayersProcessedDelegate): void;
+    /**
+     * Registers a map layers loaded event callback.
+     * @param {MapLayersLoadedDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onMapLayersLoaded(callback: MapLayersLoadedDelegate): void;
+    /**
+     * Unregisters a map layers loaded event callback.
+     * @param {MapLayersLoadedDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapLayersLoaded(callback: MapLayersLoadedDelegate): void;
+    /**
+     * Registers a map move end event callback.
+     * @param {MapMoveEndDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onMapMoveEnd(callback: MapMoveEndDelegate): void;
+    /**
+     * Unregisters a map move end event callback.
+     * @param {MapMoveEndDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapMoveEnd(callback: MapMoveEndDelegate): void;
+    /**
+     * Registers a map pointer move event callback.
+     * @param {MapPointerMoveDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onMapPointerMove(callback: MapPointerMoveDelegate): void;
+    /**
+     * Unregisters a map pointer move event callback.
+     * @param {MapPointerMoveDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapPointerMove(callback: MapPointerMoveDelegate): void;
+    /**
+     * Registers a map single click event callback.
+     * @param {MapSingleClickDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onMapSingleClick(callback: MapSingleClickDelegate): void;
+    /**
+     * Unregisters a map single click end event callback.
+     * @param {MapSingleClickDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapSingleClick(callback: MapSingleClickDelegate): void;
+    /**
+     * Registers a map zoom end event callback.
+     * @param {MapZoomEndDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onMapZoomEnd(callback: MapZoomEndDelegate): void;
+    /**
+     * Unregisters a map zoom end event callback.
+     * @param {MapZoomEndDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapZoomEnd(callback: MapZoomEndDelegate): void;
+    /**
+     * Registers a map rotation event callback.
+     * @param {MapRotationDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onMapRotation(callback: MapRotationDelegate): void;
+    /**
+     * Unregisters a map rotation event callback.
+     * @param {MapRotationDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapRotation(callback: MapRotationDelegate): void;
+    /**
+     * Registers a map change size event callback.
+     * @param {MapChangeSizeDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onMapChangeSize(callback: MapChangeSizeDelegate): void;
+    /**
+     * Unregisters a map change size event callback.
+     * @param {MapChangeSizeDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapChangeSize(callback: MapChangeSizeDelegate): void;
+    /**
+     * Registers a component added event callback.
+     * @param {MapComponentAddedDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onMapComponentAdded(callback: MapComponentAddedDelegate): void;
+    /**
+     * Unregisters a component added event callback.
+     * @param {MapComponentAddedDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapComponentAdded(callback: MapComponentAddedDelegate): void;
+    /**
+     * Registers a component removed event callback.
+     * @param {MapComponentRemovedDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onMapComponentRemoved(callback: MapComponentRemovedDelegate): void;
+    /**
+     * Unregisters a component removed event callback.
+     * @param {MapComponentRemovedDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapComponentRemoved(callback: MapComponentRemovedDelegate): void;
+    /**
+     * Registers a component removed event callback.
+     * @param {MapComponentRemovedDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onMapLanguageChanged(callback: MapLanguageChangedDelegate): void;
+    /**
+     * Unregisters a component removed event callback.
+     * @param {MapComponentRemovedDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapLanguageChanged(callback: MapLanguageChangedDelegate): void;
 }
+/**
+ *  Definition of map state to attach to the map object for reference.
+ */
+export type TypeMapState = {
+    currentProjection: number;
+    currentZoom: number;
+    mapCenterCoordinates: Coordinate;
+    singleClickedPosition: TypeMapMouseInfo;
+    pointerPosition: TypeMapMouseInfo;
+};
+/**
+ * Type used to define the map mouse information
+ * */
+export type TypeMapMouseInfo = {
+    lnglat: Coordinate;
+    pixel: Coordinate;
+    projected: Coordinate;
+    dragging: boolean;
+};
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapInitDelegate = EventDelegateBase<MapViewer, undefined, void>;
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapReadyDelegate = EventDelegateBase<MapViewer, undefined, void>;
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapLayersProcessedDelegate = EventDelegateBase<MapViewer, undefined, void>;
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapLayersLoadedDelegate = EventDelegateBase<MapViewer, undefined, void>;
+/**
+ * Define an event for the delegate
+ */
+export type MapMoveEndEvent = {
+    lnglat: Coordinate;
+};
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapMoveEndDelegate = EventDelegateBase<MapViewer, MapMoveEndEvent, void>;
+/**
+ * Define an event for the delegate
+ */
+export type MapPointerMoveEvent = TypeMapMouseInfo;
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapPointerMoveDelegate = EventDelegateBase<MapViewer, MapPointerMoveEvent, void>;
+/**
+ * Define an event for the delegate
+ */
+export type MapSingleClickEvent = TypeMapMouseInfo;
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapSingleClickDelegate = EventDelegateBase<MapViewer, MapSingleClickEvent, void>;
+/**
+ * Define an event for the delegate
+ */
+export type MapZoomEndEvent = {
+    zoom: number;
+};
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapZoomEndDelegate = EventDelegateBase<MapViewer, MapZoomEndEvent, void>;
+/**
+ * Define an event for the delegate
+ */
+export type MapRotationEvent = {
+    rotation: number;
+};
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapRotationDelegate = EventDelegateBase<MapViewer, MapRotationEvent, void>;
+/**
+ * Define an event for the delegate
+ */
+export type MapChangeSizeEvent = {
+    size: [number, number];
+};
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapChangeSizeDelegate = EventDelegateBase<MapViewer, MapChangeSizeEvent, void>;
+/**
+ * Define an event for the delegate
+ */
+export type MapComponentAddedEvent = {
+    mapComponentId: string;
+    component: JSX.Element;
+};
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapComponentAddedDelegate = EventDelegateBase<MapViewer, MapComponentAddedEvent, void>;
+/**
+ * Define an event for the delegate
+ */
+export type MapComponentRemovedEvent = {
+    mapComponentId: string;
+};
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapComponentRemovedDelegate = EventDelegateBase<MapViewer, MapComponentRemovedEvent, void>;
+/**
+ * Define an event for the delegate
+ */
+export type MapLanguageChangedEvent = {
+    language: TypeDisplayLanguage;
+};
+/**
+ * Define a delegate for the event handler function signature
+ */
+type MapLanguageChangedDelegate = EventDelegateBase<MapViewer, MapLanguageChangedEvent, void>;
+export {};

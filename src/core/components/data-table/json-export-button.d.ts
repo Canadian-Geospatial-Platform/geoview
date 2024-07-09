@@ -1,5 +1,5 @@
 /// <reference types="react" />
-import { TypeFeatureInfoEntry } from '@/app';
+import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
 interface JSONExportButtonProps {
     features: TypeFeatureInfoEntry[];
     layerPath: string;

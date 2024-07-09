@@ -1,36 +1,39 @@
-import { TypeFeatureInfoResultsSet, EventType } from '@/api/events/payloads/get-feature-info-payload';
-import { IFeatureInfoState } from '@/core/stores';
-import { AbstractEventProcessor } from '../abstract-event-processor';
+import { EventType } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
+import { IFeatureInfoState, TypeFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { GeoviewStoreType } from '@/core/stores/geoview-store';
 /**
  * Event processor focusing on interacting with the feature info state in the store (currently called detailsState).
  */
 export declare class FeatureInfoEventProcessor extends AbstractEventProcessor {
-    private static batchedPropagationLayerDataArray;
-    private static timeDelayBetweenPropagationsForBatch;
+    #private;
+    /**
+     * Overrides initialization of the GeoChart Event Processor
+     * @param {GeoviewStoreType} store The store associated with the GeoChart Event Processor
+     * @returns An array of the subscriptions callbacks which were created
+     */
+    protected onInitialize(store: GeoviewStoreType): Array<() => void> | void;
     /**
      * Shortcut to get the Feature Info state for a given map id
-     * @param {string} mapId The mapId
+     * @param {string} mapId - The mapId
      * @returns {IFeatureInfoState} The Feature Info state
      */
     protected static getFeatureInfoState(mapId: string): IFeatureInfoState;
     /**
-     * Static method used to propagate feature info layer sets to the store
-     *
-     * @param {string} mapId The map identifier of the resul set modified.
-     * @param {string} layerPath The layer path that has changed.
-     * @param {EventType} eventType The event type that triggered the layer set update.
-     * @param {TypeFeatureInfoResultsSet} resultsSet The resul sets associated to the map.
+     * Deletes the specified layer path from the layer sets in the store.The update of the array will also trigger an update in a batched manner.
+     * @param {string} mapId - The map identifier
+     * @param {string} layerPath - The layer path to delete
+     * @returns {Promise<void>}
      */
-    static propagateFeatureInfoToStore(mapId: string, layerPath: string, eventType: EventType, resultsSet: TypeFeatureInfoResultsSet): void;
+    static deleteFeatureInfo(mapId: string, layerPath: string): void;
     /**
-     * Propagate feature info layer sets to the store in a batched manner, every 'timeDelayBetweenPropagationsForBatch' millisecond.
-     * This is used to provide another 'layerDataArray', in the store, which updates less often so that we save a couple 'layerDataArray'
-     * update triggers in the components that are listening to the store array.
-     * The propagation can be bypassed using the store 'layerDataArrayBatchLayerPathBypass' state which tells the process to
-     * immediately batch out the array in the store for faster triggering of the state, for faster updating of the UI.
-     * @param {string} mapId The map id
-     * @param {string} layerDataArray The layer data array to batch on
-     * @returns {Promise<void>} Promise upon completion
+     * Propagates feature info layer sets to the store. The update of the array will also trigger an update in a batched manner.
+     *
+     * @param {string} mapId - The map identifier of the modified result set.
+     * @param {string} layerPath - The layer path that has changed.
+     * @param {EventType} eventType - The event type that triggered the layer set update.
+     * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry being propagated.
+     * @returns {Promise<void>}
      */
-    private static propagateFeatureInfoToStoreBatch;
+    static propagateFeatureInfoToStore(mapId: string, eventType: EventType, resultSetEntry: TypeFeatureInfoResultSetEntry): Promise<void>;
 }

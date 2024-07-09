@@ -18,6 +18,7 @@ export type TypePluginStructure = {
     defaultConfig?: () => TypeJsonObject;
     added?: () => void;
     removed?: () => void;
+    onSelected?: () => void;
 };
 /** ******************************************************************************************************************************
  * Record of plugins.

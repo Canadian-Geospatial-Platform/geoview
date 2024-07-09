@@ -1,5 +1,7 @@
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
+import { Extent } from 'ol/extent';
+import { Projection as OLProjection } from 'ol/proj';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 /** *****************************************************************************************************************************
  * AbstractGeoViewRaster types
@@ -21,4 +23,20 @@ export type TypeBaseRasterLayer = BaseLayer | TypeRasterLayerGroup | TypeRasterL
  * features are placed.
  */
 export declare abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
+    /**
+     * Gets the source projection
+     * @param {string} layerPath - The layer path to get the source for
+     * @returns {OLProjection | undefined} The OpenLayer projection
+     */
+    getSourceProjection(layerPath: string): OLProjection | undefined;
+    /**
+     * Gets the metadata extent projection, if any.
+     * @returns {OLProjection | undefined} The OpenLayer projection
+     */
+    getMetadataProjection(): OLProjection | undefined;
+    /**
+     * Gets the metadata extent, if any.
+     * @returns {Extent | undefined} The OpenLayer projection
+     */
+    getMetadataExtent(): Extent | undefined;
 }

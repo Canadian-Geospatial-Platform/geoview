@@ -1,7 +1,7 @@
-import { Draw as OLDraw } from 'ol/interaction';
 import { DrawEvent as OLDrawEvent } from 'ol/interaction/Draw';
-import { Interaction, InteractionOptions } from './interaction';
+import { EventDelegateBase } from '@/api/events/event-helper';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
+import { Interaction, InteractionOptions } from './interaction';
 /**
  * Supported options for drawing interactions
  */
@@ -14,14 +14,15 @@ export type DrawOptions = InteractionOptions & {
 /**
  * Class used for drawing features on a map
  *
- * @exports
  * @class Draw
+ * @extends {Interaction}
+ * @exports
  */
 export declare class Draw extends Interaction {
-    ol_draw: OLDraw;
+    #private;
     /**
-     * Initialize Draw component
-     * @param {DrawOptions} options object to configure the initialization of the Draw interaction
+     * Initializes a Draw component.
+     * @param {DrawOptions} options - Object to configure the initialization of the Draw interaction.
      */
     constructor(options: DrawOptions);
     /**
@@ -33,18 +34,38 @@ export declare class Draw extends Interaction {
      */
     stopInteraction(): void;
     /**
-     * Handle when the drawing has started
-     * @param {OLDrawEvent} e object representing the Open Layers event from the interaction
+     * Registers a callback handler for the drawstart event.
+     * @param {DrawDelegate} callback - The callback to be executed whenever the event is emitted.
      */
-    onDrawStart: (e: OLDrawEvent) => void;
+    onDrawStart(callback: DrawDelegate): void;
     /**
-     * Handles when the drawing has ended
-     * @param {OLDrawEvent} e object representing the Open Layers event from the interaction
+     * Unregisters a callback handler for the drawstart event.
+     * @param {DrawDelegate} callback - The callback to stop being called whenever the event is emitted.
      */
-    onDrawEnd: (e: OLDrawEvent) => void;
+    offDrawStart(callback: DrawDelegate): void;
     /**
-     * Handles when the drawing has aborted
-     * @param {OLDrawEvent} e object representing the Open Layers event from the interaction
+     * Registers a callback handler for the drawend event.
+     * @param {DrawDelegate} callback - The callback to be executed whenever the event is emitted.
      */
-    onDrawAbort: (e: OLDrawEvent) => void;
+    onDrawEnd(callback: DrawDelegate): void;
+    /**
+     * Unregisters a callback handler for the drawend event.
+     * @param {DrawDelegate} callback - The callback to stop being called whenever the event is emitted.
+     */
+    offDrawEnd(callback: DrawDelegate): void;
+    /**
+     * Registers a callback handler for the drawabort event.
+     * @param {DrawDelegate} callback - The callback to be executed whenever the event is emitted.
+     */
+    onDrawAbort(callback: DrawDelegate): void;
+    /**
+     * Unregisters a callback handler for the drawabort event.
+     * @param {DrawDelegate} callback - The callback to stop being called whenever the event is emitted.
+     */
+    offDrawAbort(callback: DrawDelegate): void;
 }
+/**
+ * Define a delegate for the event handler function signature
+ */
+type DrawDelegate = EventDelegateBase<Draw, OLDrawEvent, void>;
+export {};

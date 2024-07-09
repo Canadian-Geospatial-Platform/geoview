@@ -1,3 +1,1 @@
-export declare function useLegendHelpers(): {
-    populateLegendStoreWithFakeData: () => void;
-};
+export declare function useLegendHelpers(): unknown;

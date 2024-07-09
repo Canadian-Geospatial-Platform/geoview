@@ -1,40 +1,5 @@
-import { ReactNode } from 'react';
-import { ModalModel } from './modal-model';
-/**
- * Both header and footer actions' properties interface
- */
-export interface ModalActionsType {
-    actionId: string;
-    content?: ReactNode;
-}
-/**
- * Modal header properties interface
- */
-export interface modalHeader {
-    title: string | undefined;
-    actions?: Array<ModalActionsType>;
-}
-/**
- * Modal footer properties interface
- */
-export interface modalFooter {
-    actions?: Array<ModalActionsType>;
-}
-/**
- * Properties definition of the modal
- */
-export type TypeModalProps = {
-    modalId?: string;
-    header?: modalHeader;
-    content: ReactNode | string;
-    footer?: modalFooter;
-    active?: boolean;
-    open?: () => void;
-    close?: () => void;
-    mapId?: string;
-    width?: string | number;
-    height?: string | number;
-};
+import { EventDelegateBase } from '@/api/events/event-helper';
+import { TypeModalProps } from './modal';
 /**
  * Class used to handle creating a new modal
  *
@@ -42,24 +7,55 @@ export type TypeModalProps = {
  * @class ModalApi
  */
 export declare class ModalApi {
-    mapId: string;
-    modals: Record<string, ModalModel>;
-    /**
-     * constructor to initiate the map id
-     *
-     * @param { string } mapId the id of the map where the modal is to be generated
-     */
-    constructor(mapId: string);
+    #private;
+    modals: Record<string, TypeModalProps>;
     /**
      * Function that creates the modal
      *
      * @param { TypeModalProps } modal the modal object of type TypeModalProps
      */
-    createModal: (modal: TypeModalProps) => void;
+    createModal: (modal: TypeModalProps) => string | undefined;
     /**
      * Function that deletes the modal by the id specified
      *
      * @param { string } id of the modal that is to be deleted
      */
     deleteModal: (modalId: string) => void;
+    openModal: (modalId: string) => void;
+    closeModal: (modalId: string) => void;
+    /**
+     * Registers a modal opened event handler.
+     * @param {ModalOpenedDelegate} callback The callback to be executed whenever the event is emitted
+     */
+    onModalOpened(callback: ModalOpenedDelegate): void;
+    /**
+     * Unregisters a modal opened an event handler.
+     * @param {ModalOpenedDelegate} callback The callback to stop being called whenever the event is emitted
+     */
+    offModalOpened(callback: ModalOpenedDelegate): void;
+    /**
+     * Registers a modal closed event handler.
+     * @param {ModalClosedDelegate} callback The callback to be executed whenever the event is emitted
+     */
+    onModalClosed(callback: ModalClosedDelegate): void;
+    /**
+     * Unregisters a modal closed event handler.
+     * @param {ModalClosedDelegate} callback The callback to stop being called whenever the event is emitted
+     */
+    offModalClosed(callback: ModalClosedDelegate): void;
 }
+/**
+ * Event interface for ModalEvent
+ */
+export type ModalEvent = {
+    modalId: string;
+};
+/**
+ * Define a delegate for the event handler function signature
+ */
+type ModalOpenedDelegate = EventDelegateBase<ModalApi, ModalEvent, void>;
+/**
+ * Define a delegate for the event handler function signature
+ */
+type ModalClosedDelegate = EventDelegateBase<ModalApi, ModalEvent, void>;
+export {};

@@ -1,4 +1,5 @@
 /// <reference types="react" />
+import { Theme } from '@mui/material';
 export declare const sxClasses: {
     root: {
         position: string;
@@ -38,7 +39,7 @@ export declare const sxClasses: {
         padding: number;
         paddingTop: number;
         '& .MuiInputLabel-formControl': {
-            fontSize: string;
+            fontSize: (theme: Theme) => any;
             marginTop: number;
         };
         '& .MuiSelect-select': {
@@ -66,15 +67,20 @@ export declare const sxClasses: {
     };
 };
 export declare const sxClassesList: {
+    listStyle: {
+        fontSize: (theme: Theme) => any;
+        whiteSpace: string;
+        overflow: string;
+        textOverflow: string;
+    };
     main: {
         whiteSpace: string;
         overflow: string;
         textOverflow: string;
         '& span': {
-            fontSize: string;
+            fontSize: (theme: Theme) => any;
             ':first-of-type': {
-                fontWeight: string;
-                fontSize: string;
+                fontSize: (theme: Theme) => any;
             };
         };
     };
