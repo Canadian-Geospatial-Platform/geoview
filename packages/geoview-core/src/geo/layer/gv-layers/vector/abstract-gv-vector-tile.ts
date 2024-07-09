@@ -4,6 +4,7 @@ import Feature from 'ol/Feature';
 import { Extent } from 'ol/extent';
 
 import { AbstractGVLayer } from '../abstract-gv-layer';
+import { validateExtent } from '@/geo/utils/utilities';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer vector tile type layer.
@@ -46,6 +47,7 @@ export abstract class AbstractGVVectorTile extends AbstractGVLayer {
     if (sourceExtent) {
       // Make sure we're in the map projection
       sourceExtent = this.getMapViewer().convertExtentFromProjToMapProj(sourceExtent, sourceProjection);
+      sourceExtent = validateExtent(sourceExtent, this.getMapViewer().getProjection().getCode());
     }
 
     // Return the calculated layer bounds

@@ -10,6 +10,7 @@ import {
   TypeDisplayLanguage,
   Extent,
 } from '@config/types/map-schema-types';
+import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 
 /**
  * Base type used to define a GeoView sublayer to display on the map. The sublayer can be a group or an abstract sublayer.
@@ -41,7 +42,7 @@ export abstract class EntryConfigBaseClass {
   attributions: string[];
 
   /** Bounds (in lat long) obtained from the metadata or calculated from the layers */
-  bounds: Extent;
+  bounds: Extent | undefined;
 
   /** The min scale that can be reach by the layer. */
   minScale: number;
@@ -82,7 +83,7 @@ export abstract class EntryConfigBaseClass {
     this.layerName = layerConfig.layerName ? normalizeLocalizedString(layerConfig.layerName)![this.#language]! : undefined;
     this.isLayerGroup = (layerConfig.isLayerGroup as boolean) || false;
     this.attributions = (layerConfig.attributions as string[]) || [];
-    this.bounds = layerConfig.bounds as Extent;
+    this.bounds = validateExtentWhenDefined(layerConfig.bounds as Extent);
     this.minScale = (layerConfig.minScale as number) || 0;
     this.maxScale = (layerConfig.minScale as number) || 0;
     this.entryType = this.getEntryType();

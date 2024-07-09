@@ -12,7 +12,7 @@ import { Cast, TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
 import { CONST_LAYER_TYPES, TypeWmsLegend, TypeWmsLegendStyle } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { xmlToJson, getLocalizedValue } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { getExtentIntersection } from '@/geo/utils/utilities';
+import { getExtentIntersection, validateExtentWhenDefined } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { TypeFeatureInfoEntry } from '@/geo/map/map-schema-types';
@@ -604,6 +604,9 @@ export class GVWMS extends AbstractGVRaster {
 
     // If both layer config had bounds and layer has real bounds, take the intersection between them
     if (layerConfigBounds && layerBounds) layerBounds = getExtentIntersection(layerBounds, layerConfigBounds);
+
+    // Validate
+    layerBounds = validateExtentWhenDefined(layerBounds, this.getMapViewer().getProjection().getCode());
 
     // Return the calculated bounds
     return layerBounds;

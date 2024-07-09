@@ -10,6 +10,7 @@ import Geometry from 'ol/geom/Geometry';
 
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { getLocalizedValue } from '@/core/utils/utilities';
+import { validateExtent, getMinOrMaxExtents } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
@@ -28,7 +29,6 @@ import {
 } from '@/geo/map/map-schema-types';
 import { esriGetFieldType, esriGetFieldDomain } from '../utils';
 import { AbstractGVRaster } from './abstract-gv-raster';
-import { getMinOrMaxExtents } from '@/geo/utils/utilities';
 
 type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
 type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];
@@ -667,6 +667,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // Get the metadata projection
       const metadataProjection = this.getMetadataProjection();
       layerBounds = this.getMapViewer().convertExtentFromProjToMapProj(metadataExtent, metadataProjection);
+      layerBounds = validateExtent(layerBounds, this.getMapViewer().getProjection().getCode());
     }
 
     // Return the calculated layer bounds
