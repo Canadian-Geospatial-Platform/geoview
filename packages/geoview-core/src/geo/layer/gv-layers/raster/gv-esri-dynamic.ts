@@ -132,7 +132,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
       let urlRoot = layerConfig.geoviewLayerConfig.metadataAccessPath![AppEventProcessor.getDisplayLanguage(this.getMapId())]!;
       if (!urlRoot.endsWith('/')) urlRoot += '/';
       // TODO: we put false so on heavy geometry, dynamic layer can load datatable. If not the featch fails.
-      // TODO.CONT: fix the zoom to feature who is disable for esri because geometry is not fetched #2215
       const url = `${urlRoot}${layerConfig.layerId}/query?where=1=1&outFields=*&f=json&returnGeometry=false`;
 
       const response = await fetch(url);
@@ -144,15 +143,42 @@ export class GVEsriDynamic extends AbstractGVRaster {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const features = jsonResponse.features.map((featureData: any) => {
           let geometry;
+
           if (featureData.geometry) {
             const coordinates = featureData.geometry.points ||
               featureData.geometry.paths ||
               featureData.geometry.rings || [featureData.geometry.x, featureData.geometry.y]; // MultiPoint or Line or Polygon or Point schema
             geometry = GeometryApi.createGeometryFromType(geometryType, coordinates);
           }
+
           const properties = featureData.attributes;
           return new Feature({ ...properties, geometry });
         });
+
+        // Check if there are additional features and get them
+        if (jsonResponse.exceededTransferLimit) {
+          // Get response json for additional features
+          const getAdditionalFeaturesArray = await this.#getAdditionalFeatures(layerConfig, url, features.length);
+          // Parse them and add features
+          getAdditionalFeaturesArray.forEach((responseJson) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const additionalFeatures: Feature[] = (responseJson as any).features.map((featureData: any) => {
+              let geometry;
+
+              if (featureData.geometry) {
+                const coordinates = featureData.geometry.points ||
+                  featureData.geometry.paths ||
+                  featureData.geometry.rings || [featureData.geometry.x, featureData.geometry.y]; // MultiPoint or Line or Polygon or Point schema
+                geometry = GeometryApi.createGeometryFromType(geometryType, coordinates);
+              }
+
+              const properties = featureData.attributes;
+              return new Feature({ ...properties, geometry });
+            });
+
+            features.push(...additionalFeatures);
+          });
+        }
 
         // Format and return the result
         return this.formatFeatureInfoResult(features, layerConfig);
@@ -165,6 +191,49 @@ export class GVEsriDynamic extends AbstractGVRaster {
       logger.logError('gv-esri-dynamic.getAllFeatureInfo()\n', error);
       return null;
     }
+  }
+
+  /** ***************************************************************************************************************************
+   * Fetch additional features from service with a max record count.
+   *
+   * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @param {string} url - The base url for the service.
+   * @param {number} maxRecordCount - The max record count from the service.
+   * @param {number} resultOffset - The current offset to use for the features.
+   * @returns {Promise<unknown[]>} An array of the response text for the features.
+   * @private
+   */
+  async #getAdditionalFeatures(
+    layerConfig: EsriDynamicLayerEntryConfig,
+    url: string,
+    maxRecordCount: number,
+    resultOffset?: number
+  ): Promise<unknown[]> {
+    const responseArray: unknown[] = [];
+    // Add resultOffset to layer query
+    const nextUrl = `${url}&resultOffset=${resultOffset || maxRecordCount}`;
+
+    try {
+      // Fetch response text and push to array
+      const response = await fetch(nextUrl);
+      const jsonResponse = await response.json();
+      responseArray.push(jsonResponse);
+
+      // Check if there are additional features to fetch
+      if (jsonResponse.exceededTransferLimit)
+        responseArray.push(
+          ...(await this.#getAdditionalFeatures(
+            layerConfig,
+            url,
+            maxRecordCount,
+            resultOffset ? resultOffset + maxRecordCount : 2 * maxRecordCount
+          ))
+        );
+    } catch (error) {
+      logger.logError(`Error loading additional features for ${layerConfig.layerPath} from ${nextUrl}`, error);
+    }
+
+    return responseArray;
   }
 
   /**
