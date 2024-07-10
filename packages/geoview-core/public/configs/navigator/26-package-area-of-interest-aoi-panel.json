@@ -1,0 +1,11 @@
+{
+    "aoiList": [
+    {
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Toronto_-_ON_-_CN_Tower_Turmkorb.jpg/1920px-Toronto_-_ON_-_CN_Tower_Turmkorb.jpg",
+      "aoiTitle": "CN Tower",
+      "extent": [-88, 54, -86, 55]
+    }
+  ],
+  "version": "1.0"
+}
+
