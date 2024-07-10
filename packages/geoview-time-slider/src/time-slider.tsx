@@ -477,6 +477,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
                   name: 'timeDelay',
                   onChange: (event) => handleTimeChange(event),
                 }}
+                sx={{ minHeight: '2rem', padding: 0 }}
               >
                 <option value={500}>0.5s</option>
                 <option value={750}>0.75s</option>

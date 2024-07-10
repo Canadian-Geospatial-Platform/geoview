@@ -420,7 +420,7 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
             </ExportButton>
           </Box>
           <Box sx={{ marginLeft: 'auto', maxWidth: '15rem', marginRight: '1rem' }}>
-            <MRTGlobalFilterTextField className="buttonOutline" table={table} />
+            <MRTGlobalFilterTextField className="buttonOutline" table={table} sx={{ '& input': { minHeight: '2.5rem', padding: 0 } }} />
           </Box>
         </Box>
       </Box>

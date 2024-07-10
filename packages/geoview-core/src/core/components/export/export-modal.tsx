@@ -168,7 +168,12 @@ export default function ExportModal(): JSX.Element {
               variant="standard"
               value={exportTitle}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setExportTitle(e.target.value)}
-              sx={{ paddingBottom: '1rem', minWidth: 300 }}
+              sx={{
+                paddingBottom: '1rem',
+                minWidth: 300,
+                '& input': { padding: 0, minHeight: '2.5rem' },
+                '& label + div': { marginTop: '0.5rem' },
+              }}
             />
           </Box>
           <Box ref={exportTitleRef} />

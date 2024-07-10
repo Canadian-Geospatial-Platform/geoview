@@ -30,6 +30,9 @@ export const getSxClasses = (theme: Theme): any => ({
     '& .MuiSvgIcon-root': {
       color: theme.palette.text.primary,
     },
+    '& select': {
+      height: '2.25rem',
+    },
   },
   label: {
     color: theme.palette.text.primary,

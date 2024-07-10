@@ -9,6 +9,9 @@ export const getSxClasses = (theme: Theme) =>
     },
     rightPanelContainer: {
       color: theme.palette.geoViewColor.textColor.main,
+      '& h1': {
+        fontSize: `${theme.palette.geoViewFontSize.xl} !important`,
+      },
     },
     footerGuideListItemText: {
       '&:hover': {
