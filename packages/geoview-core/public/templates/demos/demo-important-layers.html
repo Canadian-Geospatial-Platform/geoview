@@ -213,6 +213,14 @@
         cgpv.api.maps['mapWM'].setProjection(Number(document.getElementById('projections').value));
       }
 
+      async function addGeocoreNametoSelectOption(uuid, optionElement) {
+        const geoviewConfig = await cgpv.api.configApi.convertGeocoreToGeoview('en', {
+          geoviewLayerType: 'geoCore',
+          geoviewLayerId: uuid
+        });
+        optionElement.innerText = geoviewConfig ? geoviewConfig.geoviewLayerName.en : `WRONG - ${uuid}`;
+      }
+
       function initServiceDropDown(groupHasChanged) {
         const groupDropDown = document.getElementById('selectGroup');
         const subGroupDropDown = document.getElementById('selectSubGroup');
@@ -231,7 +239,7 @@
         importantLayersData[groupDropDown.value][subGroupDropDown.value].forEach((element, i) => {
           const optionElement = document.createElement('option');
           optionElement.value = `${i}`;
-          optionElement.innerText = element.optionDisplayValue;
+          optionElement.innerText = (element.type === 'geoCore' && element.optionDisplayValue === '') ? addGeocoreNametoSelectOption(element.layerId, optionElement) : element.optionDisplayValue;
           serviceDropDown.appendChild(optionElement);
         });
         initTableFields();
