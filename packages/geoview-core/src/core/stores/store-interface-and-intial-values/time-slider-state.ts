@@ -11,6 +11,7 @@ type TimeSliderActions = ITimeSliderState['actions'];
 
 export interface ITimeSliderState {
   timeSliderLayers: TimeSliderLayerSet;
+  selectedLayerPath: string;
 
   actions: {
     setTitle: (layerPath: string, title: string) => void;
@@ -19,6 +20,7 @@ export interface ITimeSliderState {
     setFiltering: (layerPath: string, filter: boolean) => void;
     setLocked: (layerPath: string, locked: boolean) => void;
     setReversed: (layerPath: string, locked: boolean) => void;
+    setSelectedLayerPath: (layerPath: string) => void;
     setDefaultValue: (layerPath: string, defaultValue: string) => void;
     setValues: (layerPath: string, values: number[]) => void;
   };
@@ -32,6 +34,7 @@ export interface ITimeSliderState {
     setFiltering: (layerPath: string, filter: boolean) => void;
     setLocked: (layerPath: string, locked: boolean) => void;
     setReversed: (layerPath: string, locked: boolean) => void;
+    setSelectedLayerPath: (layerPath: string) => void;
     setDefaultValue: (layerPath: string, defaultValue: string) => void;
     setValues: (layerPath: string, values: number[]) => void;
   };
@@ -48,6 +51,7 @@ export interface ITimeSliderState {
 export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore): ITimeSliderState {
   const init = {
     timeSliderLayers: {},
+    selectedLayerPath: '',
 
     // #region ACTIONS
 
@@ -76,6 +80,10 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
       setReversed(layerPath: string, reversed: boolean): void {
         // Redirect to setter
         get().timeSliderState.setterActions.setReversed(layerPath, reversed);
+      },
+      setSelectedLayerPath(layerPath: string): void {
+        // Redirect to setter
+        get().timeSliderState.setterActions.setSelectedLayerPath(layerPath);
       },
       setDefaultValue(layerPath: string, defaultValue: string): void {
         // Redirect to setter
@@ -167,6 +175,14 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
           },
         });
       },
+      setSelectedLayerPath(layerPath: string): void {
+        set({
+          timeSliderState: {
+            ...get().timeSliderState,
+            selectedLayerPath: layerPath,
+          },
+        });
+      },
       setDefaultValue(layerPath: string, defaultValue: string): void {
         const sliderLayers = get().timeSliderState.timeSliderLayers;
         sliderLayers[layerPath].defaultValue = defaultValue;
@@ -220,5 +236,6 @@ export interface TypeTimeSliderValues {
 // Layer state selectors
 // **********************************************************
 export const useTimeSliderLayers = (): TimeSliderLayerSet => useStore(useGeoViewStore(), (state) => state.timeSliderState.timeSliderLayers);
+export const useTimeSliderSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.timeSliderState.selectedLayerPath);
 
 export const useTimeSliderStoreActions = (): TimeSliderActions => useStore(useGeoViewStore(), (state) => state.timeSliderState.actions);

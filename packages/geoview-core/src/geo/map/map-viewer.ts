@@ -1151,6 +1151,10 @@ export class MapViewer {
     const mapContainer = document.getElementById(this.mapId)!;
     mapContainer.classList.remove('geoview-map');
 
+    // remove the dom element (remove rendered map and overview map)
+    if (this.overviewRoot) this.overviewRoot.unmount();
+    unmountMap(this.mapId);
+
     // unload all loaded plugins on the map
     Plugin.removePlugins(this.mapId)
       .then(() => {
@@ -1160,10 +1164,6 @@ export class MapViewer {
         } catch (err) {
           // Failed to remove layers, eat the exception and continue to remove the map
         }
-
-        // remove the dom element (remove rendered map and overview map)
-        if (this.overviewRoot) this.overviewRoot?.unmount();
-        unmountMap(this.mapId);
 
         // delete store and event processor
         removeGeoviewStore(this.mapId);
