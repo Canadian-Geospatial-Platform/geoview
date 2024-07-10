@@ -22,8 +22,3 @@ export type CheckboxListItem = {
  * @returns JSX.Element The Component
  */
 export declare function CheckboxList(props: CheckboxListProps): JSX.Element;
-export declare namespace CheckboxList {
-    var defaultProps: {
-        onChecked: null;
-    };
-}

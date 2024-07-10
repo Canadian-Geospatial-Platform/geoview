@@ -2,40 +2,16 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { useTheme } from '@mui/material/styles';
 import { useMediaQuery } from '@mui/material';
+import { TypeDisplayLanguage } from '@config/types/map-schema-types';
 import { API } from '@/api/api';
 import { logger } from '@/core/utils/logger';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
-import * as UI from '../../ui';
+import * as UI from '@/ui';
 import { AbstractPlugin } from '@/api/plugin/abstract-plugin';
-import { TypeDisplayLanguage, TypeMapFeaturesInstance } from '@/geo/map/map-schema-types';
-export * from 'zustand';
+import { TypeMapFeaturesInstance } from '@/geo/map/map-schema-types';
 export { getGeoViewStore } from '@/core/stores/stores-managers';
-export { isEqual } from 'lodash';
-export type { MutableRefObject, RefObject, Dispatch, SetStateAction } from 'react';
-export type { TypeArrayOfLayerData, TypeLayerData, TypeFeatureInfoEntry, TypeFeatureInfoEntryPartial } from '@/api/events/payloads';
-export type { TypeRegisteredLayers } from '@/geo/layer/layer';
-export type { ButtonPropsLayerPanel } from '@/ui/panel/panel-types';
-export type { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-export type { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-export type { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-export type { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-export type { TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeLayerEntryConfig, TypeDisplayLanguage, } from '@/geo/map/map-schema-types';
-export type { TypeValidMapProjectionCodes } from '@/geo/map/map-schema-types';
-export type { TypeBasemapOptions } from '@/geo/layer/basemap/basemap-types';
-export type { TypeViewSettings } from '@/geo/map/map-schema-types';
-export type { TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
-export type { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
-export type { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
-export type { TypePluginOptions } from '@/api/plugin/abstract-plugin';
 export type { SelectChangeEvent } from '@mui/material';
-export type { Coordinate } from 'ol/coordinate';
-export type { TypeAllQueriesDonePayload, MapMouseEventPayload, TypeArrayOfFeatureInfoEntries } from '@/api/events/payloads';
-export type { TypeTabs } from '@/ui/tabs/tabs';
-export { snackbarMessagePayload, mapViewProjectionPayload, PayloadBaseClass, payloadIsALayerConfig, payloadIsRemoveGeoViewLayer, payloadIsASnackbarMessage, payloadIsAMapMouseEvent, payloadIsAllQueriesDone, } from '@/api/events/payloads';
-export { geoviewLayerIsWMS } from '@/geo/layer/geoview-layers/raster/wms';
-export { geoviewLayerIsEsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
-export { geoviewLayerIsEsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
-export { AbstractPlugin } from '@/api/plugin/abstract-plugin';
+export type { AnySchemaObject } from 'ajv';
 /** ******************************************************************************************************************************
  * Definition of the map feature configuration according to what can be specified in the map div and in the schema for the
  * type extension TypeMapFeaturesInstance.
@@ -45,8 +21,6 @@ export interface TypeMapFeaturesConfig extends TypeMapFeaturesInstance {
     mapId: string;
     /** This attribute is not part of the schema. It is placed here to keep the 'data-lang' attribute of the HTML div of the map. */
     displayLanguage?: TypeDisplayLanguage;
-    /** If true, the ready callback 'cgpv.init(mapId)' is called with the mapId as a parameter when the map is ready */
-    triggerReadyCallback?: boolean;
 }
 /** ******************************************************************************************************************************
  *  Definition of a global Window type.
@@ -72,18 +46,17 @@ export interface TypeWindow extends Window {
  * Type used for exporting core.
  */
 export type TypeCGPV = {
-    init: TypeCallback;
+    init: CGPVInitCallback;
     api: API;
     react: typeof React;
     createRoot: typeof createRoot;
     ui: TypeCGPVUI;
     logger: typeof logger;
-    types: typeof import('./cgpv-types');
 };
 /** ******************************************************************************************************************************
  * Type used for a callback function.
  */
-export type TypeCallback = (callback: () => void) => void;
+export type CGPVInitCallback = (callbackMapsInit?: (mapId: string) => void, callbackMapsLayersLoaded?: (mapId: string) => void) => void;
 /** ******************************************************************************************************************************
  * Type used for exporting UI
  */
@@ -133,3 +106,7 @@ export interface TypeHTMLElement extends HTMLElement {
     msRequestFullscreen: () => void;
     mozRequestFullScreen: () => void;
 }
+/** ******************************************************************************************************************************
+ *  Definition of an Container where components are rendered.
+ */
+export type TypeContainerBox = 'appBar' | 'footerBar';

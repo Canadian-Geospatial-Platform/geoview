@@ -1,4 +1,3 @@
-import { Snap as OLSnap } from 'ol/interaction';
 import Collection from 'ol/Collection';
 import Feature from 'ol/Feature';
 import { Interaction, InteractionOptions } from './interaction';
@@ -10,24 +9,24 @@ export type SnapOptions = InteractionOptions & {
     features?: Collection<Feature>;
 };
 /**
- * Class used for snapping features on a map
- *
- * @exports
+ * Class used for snapping features on a map.
  * @class Snap
+ * @extends {Interaction}
+ * @exports
  */
 export declare class Snap extends Interaction {
-    ol_snap: OLSnap;
+    #private;
     /**
-     * initialize modify component
-     * @param {SnapOptions} options object to configure the initialization of the Snap interaction
+     * Initializes a Snap component.
+     * @param {SnapOptions} options - Object to configure the initialization of the Snap interaction.
      */
     constructor(options: SnapOptions);
     /**
-     * Starts the interaction on the map
+     * Starts the interaction on the map.
      */
     startInteraction(): void;
     /**
-     * Stops the interaction on the map
+     * Stops the interaction on the map.
      */
     stopInteraction(): void;
 }

@@ -1,5 +1,5 @@
 /// <reference types="react" />
-import { TypeTextFieldProps } from '../panel/panel-types';
+import { TypeTextFieldProps } from '@/ui/panel/panel-types';
 /**
  * Create a Material UI TextField component
  *

@@ -1,0 +1,33 @@
+import { TypeJsonObject } from '@/core/types/global-types';
+import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerEntryType, TypeStyleConfig, TypeVectorSourceFormats } from '../map/map-schema-types';
+import { TimeDimension } from '@/core/utils/date-mgt';
+export declare abstract class LayerMockup {
+    #private;
+    static getTop100Feature(): TypeGeoviewLayerConfig;
+    static getTop100Dynamic(): TypeGeoviewLayerConfig;
+    static getFeaturesInGroupLayer(): TypeGeoviewLayerConfig;
+    static configNonMetalMines(layerId: string, metadata: unknown, source: unknown, style: unknown): TypeLayerEntryConfig;
+    static configTop100Metadata(): TypeJsonObject;
+    static configTop100Source(format: TypeVectorSourceFormats | undefined): TypeJsonObject;
+    static configTop100Style(): TypeStyleConfig;
+    static configNonMetalMetadata(): TypeJsonObject;
+    static configNonMetalSource(): TypeJsonObject;
+    static configNonMetalStyle(): TypeJsonObject;
+    static configAirborneMetadata(): TypeJsonObject;
+    static configPolygonsMetadata(): TypeJsonObject;
+    static configLinesMetadata(): TypeJsonObject;
+    static configIconPointsMetadata(): TypeJsonObject;
+    static configPointsMetadata(): TypeJsonObject;
+    static configPoints1Metadata(): TypeJsonObject;
+    static configPoints2Metadata(): TypeJsonObject;
+    static configPoints3Metadata(): TypeJsonObject;
+    static configCESIMetadata(): TypeJsonObject;
+    static configTemporalTestBedMetadata(): TypeJsonObject;
+    static configHistoricalFloodMetadata(): TypeJsonObject;
+    static configHistoricalFloodTemporalDimension(): TimeDimension;
+    static configRadarMetadata(): TypeJsonObject;
+    static configRadarTemporalDimension(): TimeDimension;
+    static configMSIMetadata(): TypeJsonObject;
+    static configMSITemporalDimension(): TimeDimension;
+    static configLayerEntry(layerId: string, layerName: string, entryType: TypeLayerEntryType, metadata: unknown, source: unknown, style: unknown): TypeLayerEntryConfig;
+}

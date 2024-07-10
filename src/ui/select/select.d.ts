@@ -3,13 +3,13 @@ import { InputLabelProps, ListSubheaderProps, MenuItemProps, SelectProps, FormCo
 /**
  * Custom MUI Select properties
  */
-interface TypeSelectProps extends SelectProps {
-    mapId?: string;
+type TypeSelectProps = SelectProps & {
     fullWidth?: boolean;
     menuItems: TypeMenuItemProps[];
     inputLabel: InputLabelProps;
     formControlProps?: FormControlProps;
-}
+    container?: HTMLElement | null;
+};
 /**
  * Menu Item properties
  */

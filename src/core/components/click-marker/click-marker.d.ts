@@ -1,6 +1,6 @@
 /// <reference types="react" />
 import { Coordinate } from 'ol/coordinate';
-import { TypeJsonObject } from '@/app';
+import { TypeJsonObject } from '@/core/types/global-types';
 export type TypeClickMarker = {
     lnglat: Coordinate;
     symbology?: TypeJsonObject;

@@ -1,10 +1,12 @@
 /// <reference types="react" />
-import { TypeFieldEntry, TypeLayerData } from '@/app';
-export interface MappedLayerDataType extends TypeLayerData {
-    fieldInfos: Record<string, TypeFieldEntry | undefined>;
+import { TypeContainerBox } from '@/core/types/global-types';
+interface DataPanelType {
+    fullWidth?: boolean;
+    containerType?: TypeContainerBox;
 }
 /**
  * Build Data panel from map.
- * @return {ReactElement} Data table as react element.
+ * @returns {JSX.Element} Data table as react element.
  */
-export declare function Datapanel(): import("react").JSX.Element;
+export declare function Datapanel({ fullWidth, containerType }: DataPanelType): JSX.Element;
+export {};

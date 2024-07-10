@@ -1,9 +1,8 @@
 import { Extent } from 'ol/extent';
-import { XYZ } from 'ol/source';
-import TileLayer from 'ol/layer/Tile';
+import { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@config/types/map-schema-types';
+import { EventDelegateBase } from '@/app';
 import { TypeJsonObject } from '@/core/types/global-types';
-import { TypeBasemapProps, TypeBasemapOptions } from '@/geo/layer/basemap/basemap-types';
-import { TypeDisplayLanguage, TypeValidMapProjectionCodes } from '@/geo/map/map-schema-types';
+import { TypeBasemapProps } from '@/geo/layer/basemap/basemap-types';
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
  * can be filtered by projection (currently only WM and LCC projections are listed,
@@ -13,6 +12,8 @@ import { TypeDisplayLanguage, TypeValidMapProjectionCodes } from '@/geo/map/map-
  * @class Basemap
  */
 export declare class Basemap {
+    #private;
+    static REQUEST_DELAY_MAX: number;
     activeBasemap?: TypeBasemapProps;
     defaultOrigin?: number[];
     defaultResolutions?: number[];
@@ -31,35 +32,8 @@ export declare class Basemap {
      * basemap list
      */
     basemapsList: TypeJsonObject;
-    /**
-     * Get projection from basemap url
-     * Because OpenLayers can reproject on the fly raster, some like Shaded and Simple even if only available in 3978
-     * can be use in 3857. For this we need to make a difference between map projection and url use for the basemap
-     *
-     * @param {string} url basemap url
-     * @returns {number} projection code
-     */
-    private getProjectionFromUrl;
     setOverviewMap(): Promise<void>;
     getOverviewMap(): TypeBasemapProps | undefined;
-    /**
-     * Create empty basemap tilelayer to use as initial basemap while we load basemap
-     * so the viewer will not fails if basemap is not avialable
-     *
-     * @returns {TileLayer<XYZ>} return the created basemap
-     */
-    createEmptyBasemap(): TileLayer<XYZ>;
-    /**
-     * Create a basemap layer
-     *
-     * @param {string} basemapId the id of the layer
-     * @param {TypeJsonObject} basemapLayer the basemap layer url and json url
-     * @param {number} opacity the opacity to use for this layer
-     * @param {boolean} rest should we do a get request to get the info from the server
-     *
-     * @returns {TypeBasemapLayer} return the created basemap layer
-     */
-    private createBasemapLayer;
     /**
      * Create the core basemap and add the layers to it
      *
@@ -93,4 +67,25 @@ export declare class Basemap {
      * @param {TypeBasemapProps} basemap the basemap
      */
     setBasemap(basemap: TypeBasemapProps): void;
+    /**
+     * Registers a component removed event callback.
+     * @param {MapComponentRemovedDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onBasemapChanged(callback: BasemapChangedDelegate): void;
+    /**
+     * Unregisters a component removed event callback.
+     * @param {MapComponentRemovedDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapLanguageChanged(callback: BasemapChangedDelegate): void;
 }
+/**
+ * Define an event for the delegate
+ */
+export type BasemapChangedEvent = {
+    basemap: TypeBasemapProps;
+};
+/**
+ * Define a delegate for the event handler function signature
+ */
+type BasemapChangedDelegate = EventDelegateBase<Basemap, BasemapChangedEvent, void>;
+export {};

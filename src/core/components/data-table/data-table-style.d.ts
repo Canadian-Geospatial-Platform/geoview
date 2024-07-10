@@ -1,96 +1,91 @@
 import { Theme } from '@mui/material';
 export declare const getSxClasses: (theme: Theme) => {
-    dataPanel: {
-        background: string;
-        paddingBottom: string;
+    readonly dataPanel: {
+        readonly background: string;
+        readonly paddingBottom: "1rem";
     };
-    gridContainer: {
-        paddingLeft: string;
-        paddingRight: string;
+    readonly gridContainer: {
+        readonly paddingLeft: "1rem";
+        readonly paddingRight: "1rem";
     };
-    iconImage: {
-        padding: number;
-        borderRadius: number;
-        border: string;
-        borderColor: string;
-        boxShadow: number;
-        background: string;
-        objectFit: string;
-        width: string;
-        height: string;
+    readonly selectedRows: {
+        readonly transition: "box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms";
+        readonly fontWeight: 400;
+        readonly fontSize: any;
+        readonly linHeight: 1.43;
+        readonly letterSpacing: "0.01071em";
+        readonly display: "flex";
+        readonly padding: "6px";
     };
-    selectedRows: {
-        backgroundColor: string;
-        transition: string;
-        fontWeight: number;
-        fontSize: string;
-        linHeight: number;
-        letterSpacing: string;
-        display: string;
-        padding: string;
-        color: string;
+    readonly selectedRowsDirection: {
+        readonly display: "flex";
+        readonly flexDirection: "column";
     };
-    selectedRowsDirection: {
-        display: string;
-        flexDirection: string;
+    readonly tableCell: {
+        readonly whiteSpace: "nowrap";
+        readonly textOverflow: "ellipsis";
+        readonly overflow: "hidden";
     };
-    tableCell: {
-        whiteSpace: string;
-        textOverflow: string;
-        overflow: string;
-    };
-    dataTableWrapper: {
-        '& .MuiPaper-root': {
-            border: string;
-            borderRadius: string;
+    readonly dataTableWrapper: {
+        readonly '& .MuiTableContainer-root': {
+            readonly borderRadius: "6px";
         };
-        '& .MuiTableContainer-root': {
-            borderRadius: string;
-        };
-        '& .MuiToolbar-root ': {
-            borderRadius: string;
+        readonly '& .MuiToolbar-root ': {
+            readonly borderRadius: "6px";
         };
     };
-    filterMap: {
-        '& .Mui-checked': {
-            '& .MuiTouchRipple-root': {
-                color: string;
+    readonly filterMap: {
+        readonly '& .Mui-checked': {
+            readonly '& .MuiTouchRipple-root': {
+                readonly color: string;
             };
         };
-        '& .MuiTouchRipple-root': {
-            color: string;
+        readonly '& .MuiTouchRipple-root': {
+            readonly color: string;
         };
     };
-    tableHeadCell: {
-        '& .MuiCollapse-wrapperInner': {
-            '& .MuiBox-root': {
-                gridTemplateColumns: string;
+    readonly tableHeadCell: {
+        readonly '& .MuiCollapse-wrapperInner': {
+            readonly '& .MuiBox-root': {
+                readonly gridTemplateColumns: "1fr";
             };
         };
-        '& .MuiInput-root': {
-            fontSize: string;
-            '& .MuiSvgIcon-root': {
-                width: string;
-                height: string;
+        readonly '& .MuiInput-root': {
+            readonly fontSize: any;
+            readonly '& .MuiSvgIcon-root': {
+                readonly width: "0.75em";
+                readonly height: "0.75em";
             };
         };
-        '& .MuiBadge-root': {
-            marginLeft: string;
-            '>span': {
-                width: string;
+        readonly '& .MuiBadge-root': {
+            readonly marginLeft: "0.5rem";
+            readonly '>span': {
+                readonly width: "100%";
             };
-            svg: {
-                marginTop: string;
-                marginBottom: string;
+            readonly svg: {
+                readonly marginTop: "0.25rem";
+                readonly marginBottom: "0.25rem";
             };
-            '& .keyboard-focused': {
-                backgroundColor: string;
-                borderRadius: string;
-                border: string;
-                '> svg': {
-                    opacity: number;
+            readonly '& .keyboard-focused': {
+                readonly backgroundColor: "rgba(81, 91, 165, 0.08)";
+                readonly borderRadius: "50%";
+                readonly border: "1px solid black !important";
+                readonly '> svg': {
+                    readonly opacity: 1;
                 };
             };
         };
+    };
+    readonly dataTableInstructionsTitle: {
+        readonly fontSize: any;
+        readonly fontWeight: "600";
+        readonly lineHeight: "1.5em";
+    };
+    readonly dataTableInstructionsBody: {
+        readonly fontSize: any;
+    };
+    readonly rightPanelContainer: {
+        readonly overflowY: "auto";
+        readonly color: string;
     };
 };

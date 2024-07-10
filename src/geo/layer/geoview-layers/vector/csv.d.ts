@@ -2,28 +2,21 @@ import { Options as SourceOptions } from 'ol/source/Vector';
 import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import Feature from 'ol/Feature';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeBaseLayerEntryConfig } from '@/geo/map/map-schema-types';
+import { TypeLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig } from '@/geo/map/map-schema-types';
+import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
 export interface TypeSourceCSVInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
     format: 'CSV';
     separator?: ',';
 }
-export declare class TypeCsvLayerEntryConfig extends TypeVectorLayerEntryConfig {
-    source: TypeSourceCSVInitialConfig;
-    valueSeparator?: string | undefined;
-    /**
-     * The class constructor.
-     * @param {TypeCsvLayerEntryConfig} layerConfig The layer configuration we want to instanciate.
-     */
-    constructor(layerConfig: TypeCsvLayerEntryConfig);
-}
 export interface TypeCSVLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
-    geoviewLayerType: 'CSV';
-    listOfLayerEntryConfig: TypeCsvLayerEntryConfig[];
+    geoviewLayerType: typeof CONST_LAYER_TYPES.CSV;
+    listOfLayerEntryConfig: CsvLayerEntryConfig[];
 }
 /** *****************************************************************************************************************************
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeCSVLayerConfig if the geoviewLayerType attribute of the
+ * type guard function that redefines a CsvLayerEntryConfig as a TypeCSVLayerConfig if the geoviewLayerType attribute of the
  * verifyIfLayer parameter is CSV. The type ascention applies only to the true block of the if clause that use this
  * function.
  *
@@ -52,7 +45,7 @@ export declare const geoviewLayerIsCSV: (verifyIfGeoViewLayer: AbstractGeoViewLa
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export declare const geoviewEntryIsCSV: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is TypeCsvLayerEntryConfig;
+export declare const geoviewEntryIsCSV: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is CsvLayerEntryConfig;
 /** *****************************************************************************************************************************
  * Class used to add CSV layer to the map
  *
@@ -77,52 +70,25 @@ export declare class CSV extends AbstractGeoViewVector {
      * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
      * extra configuration may be done here.
      *
-     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
+     * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
      */
-    protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void;
+    protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void;
     /** ***************************************************************************************************************************
      * Metadata is processed when parsing the file.
      *
-     * @param {TypeVectorLayerEntryConfig} layerConfig The layer entry configuration to process.
+     * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
      *
-     * @returns {Promise<TypeLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
+     * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the vector layer configuration has its metadata processed.
      */
-    protected processLayerMetadata(layerConfig: TypeVectorLayerEntryConfig): Promise<TypeLayerEntryConfig>;
-    /** ***************************************************************************************************************************
-     * Converts csv to array of rows of separated values.
-     *
-     * @param {string} csvData The raw csv text.
-     * @param {string} separator The character used to separate the values.
-     *
-     * @returns {string[][]} An array of the rows of the csv, split by separator.
-     */
-    private csvStringToArray;
-    /** ***************************************************************************************************************************
-     * This method sets the outfields and aliasFields of the source feature info.
-     *
-     * @param {string[]} headers An array of field names.
-     * @param {string[]} firstRow The first row of data.
-     * @param {number[]} lonLatIndices The index of lon and lat in the array.
-     * @param {TypeVectorLayerEntryConfig} layerConfig The vector layer entry to configure.
-     */
-    private processFeatureInfoConfig;
-    /** ***************************************************************************************************************************
-     * Converts csv text to feature array.
-     *
-     * @param {string} csvData The data from the .csv file.
-     * @param {TypeVectorLayerEntryConfig} layerConfig The config of the layer.
-     *
-     * @returns {Feature[]} The array of features.
-     */
-    convertCsv(csvData: string, layerConfig: TypeVectorLayerEntryConfig): Feature[] | null;
+    protected processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig>;
     /** ***************************************************************************************************************************
      * Create a source configuration for the vector layer.
      *
-     * @param {TypeBaseLayerEntryConfig} layerConfig The layer entry configuration.
+     * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration.
      * @param {SourceOptions} sourceOptions The source options (default: {}).
      * @param {ReadOptions} readOptions The read options (default: {}).
      *
      * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
      */
-    protected createVectorSource(layerConfig: TypeBaseLayerEntryConfig, sourceOptions?: SourceOptions, readOptions?: ReadOptions): VectorSource<Feature>;
+    protected createVectorSource(layerConfig: AbstractBaseLayerEntryConfig, sourceOptions?: SourceOptions<Feature>, readOptions?: ReadOptions): VectorSource<Feature>;
 }

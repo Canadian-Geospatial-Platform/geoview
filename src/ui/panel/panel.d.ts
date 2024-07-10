@@ -1,12 +1,13 @@
 /// <reference types="react" />
-import { PanelApi } from '..';
-import { TypeIconButtonProps } from '../icon-button/icon-button-types';
+import { TypePanelProps } from '..';
+import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 /**
  * Interface for panel properties
  */
-type TypePanelAppProps = {
-    panel: PanelApi;
+export type TypePanelAppProps = {
+    panel: TypePanelProps;
     button: TypeIconButtonProps;
+    onGeneralCloseClicked?: () => void;
     onPanelOpened?: () => void;
     onPanelClosed?: () => void;
 };
@@ -17,10 +18,3 @@ type TypePanelAppProps = {
  * @returns {JSX.Element} the created Panel element
  */
 export declare function Panel(props: TypePanelAppProps): JSX.Element;
-export declare namespace Panel {
-    var defaultProps: {
-        onPanelOpened: null;
-        onPanelClosed: null;
-    };
-}
-export {};

@@ -1,13 +1,15 @@
+import BaseLayer from 'ol/layer/Base';
 import { Extent } from 'ol/extent';
-import { AbstractGeoViewLayer, TypeLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { AbstractGeoViewRaster, TypeBaseRasterLayer } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeEsriDynamicLayerEntryConfig, TypeEsriImageLayerEntryConfig } from '@/geo/map/map-schema-types';
-import { codedValueType, rangeDomainType } from '@/api/events/payloads';
-import { TypeEsriFeatureLayerEntryConfig } from '@/app';
-import { TypeJsonArray, TypeJsonObject } from '@/core/types/global-types';
-export interface TypeEsriImageLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
-    geoviewLayerType: 'esriImage';
-    listOfLayerEntryConfig: TypeEsriImageLayerEntryConfig[];
+import { TypeJsonObject } from '@/core/types/global-types';
+import { EsriImageLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
+import { TypeLayerEntryConfig, TypeGeoviewLayerConfig, codedValueType, rangeDomainType } from '@/geo/map/map-schema-types';
+import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
+    geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
+    listOfLayerEntryConfig: EsriImageLayerEntryConfig[];
 }
 /** ******************************************************************************************************************************
  * type guard function that redefines a TypeGeoviewLayerConfig as a TypeEsriImageLayerConfig if the geoviewLayerType attribute of
@@ -30,7 +32,7 @@ export declare const layerConfigIsEsriImage: (verifyIfLayer: TypeGeoviewLayerCon
  */
 export declare const geoviewLayerIsEsriImage: (verifyIfGeoViewLayer: AbstractGeoViewLayer) => verifyIfGeoViewLayer is EsriImage;
 /** ******************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TypeEsriImageLayerEntryConfig if the geoviewLayerType attribute
+ * type guard function that redefines a TypeLayerEntryConfig as a EsriImageLayerEntryConfig if the geoviewLayerType attribute
  * of the verifyIfGeoViewEntry.geoviewLayerConfig attribute is ESRI_IMAGE. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
@@ -39,7 +41,7 @@ export declare const geoviewLayerIsEsriImage: (verifyIfGeoViewLayer: AbstractGeo
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export declare const geoviewEntryIsEsriImage: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is TypeEsriImageLayerEntryConfig;
+export declare const geoviewEntryIsEsriImage: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is EsriImageLayerEntryConfig;
 /** ******************************************************************************************************************************
  * A class to add esri image layer.
  *
@@ -66,11 +68,11 @@ export declare class EsriImage extends AbstractGeoViewRaster {
      * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
      * extra configuration may be done here.
      *
-     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
+     * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
      *
-     * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
+     * @returns {TypeLayerEntryConfig[]} A new list of layer entries configuration with deleted error layers.
      */
-    protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): void;
+    protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeLayerEntryConfig[]): void;
     /** ***************************************************************************************************************************
      * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
      *
@@ -79,7 +81,7 @@ export declare class EsriImage extends AbstractGeoViewRaster {
      *
      * @returns {'string' | 'date' | 'number'} The type of the field.
      */
-    protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number';
+    protected getFieldType(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): 'string' | 'date' | 'number';
     /** ***************************************************************************************************************************
      * Return the domain of the specified field.
      *
@@ -88,66 +90,64 @@ export declare class EsriImage extends AbstractGeoViewRaster {
      *
      * @returns {null | codedValueType | rangeDomainType} The domain of the field.
      */
-    protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType;
+    protected getFieldDomain(fieldName: string, layerConfig: AbstractBaseLayerEntryConfig): null | codedValueType | rangeDomainType;
     /** ***************************************************************************************************************************
      * This method will create a Geoview temporal dimension if it exist in the service metadata
      * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
-     * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig} layerConfig The layer entry to configure
+     * @param {EsriImageLayerEntryConfig} layerConfig The layer entry to configure
      */
-    protected processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: TypeEsriImageLayerEntryConfig): void;
+    protected processTemporalDimension(esriTimeDimension: TypeJsonObject, layerConfig: EsriImageLayerEntryConfig): void;
     /** ***************************************************************************************************************************
      * This method verifies if the layer is queryable and sets the outfields and aliasFields of the source feature info.
      *
-     * @param {string} capabilities The capabilities that will say if the layer is queryable.
-     * @param {string} nameField The display field associated to the layer.
-     * @param {string} geometryFieldName The field name of the geometry property.
-     * @param {TypeJsonArray} fields An array of field names and its aliases.
-     * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig} layerConfig The layer entry to configure.
+     * @param {EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
      */
-    processFeatureInfoConfig: (capabilities: string, nameField: string, geometryFieldName: string, fields: TypeJsonArray, layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig) => void;
+    processFeatureInfoConfig(layerConfig: EsriImageLayerEntryConfig): void;
     /** ***************************************************************************************************************************
      * This method set the initial settings based on the service metadata. Priority is given to the layer configuration.
      *
-     * @param {boolean} visibility The metadata initial visibility of the layer.
-     * @param {number} minScale The metadata minScale of the layer.
-     * @param {number} maxScale The metadata maxScale of the layer.
-     * @param {TypeJsonObject} extent The metadata layer extent.
-     * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig} layerConfig The layer entry to configure.
+     * @param {EsriImage} this The ESRI layer instance pointer.
+     * @param {EsriImageLayerEntryConfig} layerConfig The layer entry to configure.
      */
-    processInitialSettings(visibility: boolean, minScale: number, maxScale: number, extent: TypeJsonObject, layerConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig | TypeEsriImageLayerEntryConfig): void;
+    processInitialSettings(layerConfig: EsriImageLayerEntryConfig): void;
     /** ***************************************************************************************************************************
      * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
      * initial settings, fields and aliases).
      *
-     * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
+     * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
      *
-     * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
+     * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
      */
-    protected processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<TypeLayerEntryConfig>;
+    protected processLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseLayerEntryConfig>;
     /** ****************************************************************************************************************************
      * This method creates a GeoView Esri Image layer using the definition provided in the layerConfig parameter.
      *
-     * @param {TypeEsriImageLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
+     * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
      *
-     * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
+     * @returns { Promise<BaseLayer | undefined>} The GeoView raster layer that has been created.
      */
-    protected processOneLayerEntry(layerConfig: TypeEsriImageLayerEntryConfig): Promise<TypeBaseRasterLayer | null>;
+    protected processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | undefined>;
+    /**
+     * Overrides when the layer gets in loaded status.
+     */
+    onLoaded(layerConfig: AbstractBaseLayerEntryConfig): void;
     /** ***************************************************************************************************************************
-     * Get the bounds of the layer represented in the layerConfig pointed to by the cached layerPath, returns updated bounds
+     * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter paramater is used alone to display
+     * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
+     * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
+     * is done.
      *
-     * @param {Extent | undefined} bounds The current bounding box to be adjusted.
-     * @param {never} notUsed This parameter must not be provided. It is there to allow overloading of the method signature.
-     *
-     * @returns {Extent} The new layer bounding box.
+     * @param {string} layerPath The layer path to the layer's configuration.
+     * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+     * @param {boolean} combineLegendFilter Flag used to combine the legend filter and the filter together (default: true)
      */
-    protected getBounds(bounds: Extent, notUsed?: never): Extent | undefined;
+    applyViewFilter(layerPath: string, filter: string, combineLegendFilter?: boolean): void;
     /** ***************************************************************************************************************************
      * Get the bounds of the layer represented in the layerConfig pointed to by the layerPath, returns updated bounds
      *
      * @param {string} layerPath The Layer path to the layer's configuration.
-     * @param {Extent | undefined} bounds The current bounding box to be adjusted.
      *
-     * @returns {Extent} The new layer bounding box.
+     * @returns {Extent | undefined} The new layer bounding box.
      */
-    protected getBounds(layerPath: string, bounds?: Extent): Extent | undefined;
+    getBounds(layerPath: string): Extent | undefined;
 }

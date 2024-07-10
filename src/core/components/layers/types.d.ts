@@ -1,8 +1,8 @@
 import { Extent } from 'ol/extent';
-import { TypeGeoviewLayerType, TypeStyleConfig, TypeStyleGeometry, TypeVisibilityFlags } from '@/geo';
-import { TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { TypeLayerControls } from '@config/types/map-schema-types';
+import { TypeLayerStatus, TypeStyleConfig, TypeStyleGeometry } from '@/geo/map/map-schema-types';
+import { TypeGeoviewLayerType } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 export type TypeLayersViewDisplayState = 'remove' | 'add' | 'order' | 'view';
-export type TypeLegendLayerIcons = TypeLegendLayerItem[];
 export type TypeLegendLayerItem = {
     geometryType?: TypeStyleGeometry;
     iconType?: 'simple' | 'list';
@@ -14,31 +14,26 @@ export type TypeLegendLayerItem = {
 export interface TypeLegendItem {
     geometryType: TypeStyleGeometry;
     name: string;
-    isVisible: TypeVisibilityFlags;
+    isVisible: boolean;
     icon: string | null;
-    default: boolean;
 }
 export interface TypeLegendLayer {
     bounds: Extent | undefined;
+    controls?: TypeLayerControls;
     layerId: string;
     layerPath: string;
     layerAttribution?: string[];
-    metadataAccessPath?: string;
-    order: number;
     layerName: string;
+    legendQueryStatus: string;
     type?: TypeGeoviewLayerType;
     styleConfig?: TypeStyleConfig | null;
     layerStatus?: TypeLayerStatus;
-    layerPhase?: string;
     querySent?: boolean;
-    isVisible: TypeVisibilityFlags;
     canToggle?: boolean;
-    icons?: TypeLegendLayerIcons;
+    icons: TypeLegendLayerItem[];
     items: TypeLegendItem[];
     children: TypeLegendLayer[];
     opacity?: number;
     opacityFromParent?: number;
     zoom?: number;
-    isRemovable?: boolean;
-    canSetOpacity?: boolean;
 }

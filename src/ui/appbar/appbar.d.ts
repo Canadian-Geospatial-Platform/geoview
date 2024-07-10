@@ -1,9 +1,9 @@
 /// <reference types="react" />
 import { AppBarProps } from '@mui/material';
 /**
- * Create a appbar component
+ * Create a AppBar component
  *
- * @param {AppBarProps} props appbar properties
- * @returns {JSX.Element} returns appbar component
+ * @param {AppBarProps} props AppBar properties
+ * @returns {JSX.Element} returns AppBar component
  */
-export declare function AppBar(props: AppBarProps): JSX.Element;
+export declare function AppBarUI(props: AppBarProps): JSX.Element;

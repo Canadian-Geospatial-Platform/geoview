@@ -21,6 +21,7 @@ type FocusItemProps = {
  * Tabs ui properties
  */
 export interface TypeTabsProps {
+    shellContainer?: HTMLElement;
     tabs: TypeTabs[];
     selectedTab?: number;
     boxProps?: BoxProps;

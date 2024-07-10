@@ -1,2 +1,7 @@
 /// <reference types="react" />
-export declare function LayersPanel(): import("react").JSX.Element;
+import { TypeContainerBox } from '@/core/types/global-types';
+interface TypeLayersPanel {
+    containerType?: TypeContainerBox;
+}
+export declare function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element;
+export {};

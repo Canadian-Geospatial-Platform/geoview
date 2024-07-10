@@ -1,8 +1,7 @@
 import { ReactNode } from 'react';
 import { TooltipProps, ButtonProps, TextFieldProps } from '@mui/material';
 import { TypeJsonValue } from '@/core/types/global-types';
-import { TypeIconButtonProps } from '../icon-button/icon-button-types';
-import { PanelApi } from './panel-api';
+import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 /** ******************************************************************************************************************************
  * Interface used to initialize a button panel.
  */
@@ -18,6 +17,8 @@ export type TypeButtonPanelProps = {
 export type TypePanelProps = {
     /** Panel id. */
     panelId?: string;
+    /** Panel group name. */
+    panelGroupName?: string;
     /** Panel type (app-bar, nav-bar). */
     type?: string;
     /** Panel open status (open/closed). */
@@ -32,8 +33,6 @@ export type TypePanelProps = {
     content?: ReactNode;
     /** Custom panel styles */
     panelStyles?: PanelStyles;
-    /** Handler callback triggered when a panel is fully opened */
-    onPanelOpened?: () => void;
 };
 export interface PanelStyles {
     /** Panel/Card Container style object */
@@ -99,8 +98,8 @@ export interface ButtonPropsLayerPanel {
 export type TypeButtonPanel = {
     /** Panel identifier. */
     buttonPanelId: string;
-    /** Pasnel API. */
-    panel?: PanelApi;
+    /** Panel props. */
+    panel?: TypePanelProps;
     /** Button used by the panel. */
     button: TypeIconButtonProps;
     /** Group name. */

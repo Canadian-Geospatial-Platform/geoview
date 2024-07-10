@@ -1,96 +1,23 @@
-import { MutableRefObject } from 'react';
+/// <reference types="react" />
 import { Root } from 'react-dom/client';
-import { Extent } from 'ol/extent';
-import { AbstractGeoViewLayer } from '@/app';
-import { TypeLocalizedString } from '@/geo/map/map-schema-types';
-import { TypeJsonArray, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { TypeDisplayLanguage, TypeLocalizedString } from '@config/types/map-schema-types';
+import { TypeJsonArray, TypeJsonObject, TypeJsonValue } from '@/core/types/global-types';
+import { TypeGuideObject } from '../stores/store-interface-and-intial-values/app-state';
+/**
+ * Create a localized string and set its "en" and "fr" properties to the same value.
+ * @param {string | TypeJsonObject} value The value to assign to the en and fr properties.
+ *
+ * @returns {TypeLocalizedString} The localized (en/fr) object
+ */
+export declare function createLocalizedString(value: string | TypeJsonObject): TypeLocalizedString;
 /**
  * Get the string associated to the current display language for localized object type.
  *
  * @param {TypeLocalizedString} localizedString the localized string to process.
- * @param {string} mapId the map identifier that holds the localized string.
  *
  * @returns {string} The string value according to the map display language,
  */
-export declare function getLocalizedValue(localizedString: TypeLocalizedString | undefined, mapId: string): string | undefined;
-/**
- * Create a localized string and set its "en" and "fr" properties to the same value.
- *
- * @param {TypeLocalizedString} localizedString the localized string to process.
- *
- * @returns {string} The string value according to the map display language,
- */
-export declare function createLocalizedString(value: string): TypeLocalizedString;
-/**
- * Generate a unique id if an id was not provided
- * @param {string} id an id to return if it was already passed
- * @returns {string} the generated id
- */
-export declare function generateId(id?: string | null): string;
-/**
- * Add a notification message
- *
- * @param {string} mapId the map to show the message for
- * @param {string} message the message string
- */
-export declare function addNotificationMessage(mapId: string, message: string): void;
-/**
- * Add a notification success
- *
- * @param {string} mapId the map to show the message for
- * @param {string} message the message string
- */
-export declare function addNotificationSuccess(mapId: string, message: string): void;
-/**
- * Add a notification warning
- *
- * @param {string} mapId the map to show the message for
- * @param {string} message the message string
- */
-export declare function addNotificationWarning(mapId: string, message: string): void;
-/**
- * Add a notification error
- *
- * @param {string} mapId the map to show the message for
- * @param {string} message the message string
- */
-export declare function addNotificationError(mapId: string, message: string): void;
-/**
- * Display a message in the snackbar
- *
- * @param {string} mapId the map to show the message for
- * @param {string} message the message string
- * @param {string} withNotification optional, indicates if the message should also be added as a notification, default true
- * @param {TypeJsonObject} button optional snackbar button
- */
-export declare function showMessage(mapId: string, message: string, withNotification?: boolean, button?: {}): void;
-/**
- * Display an success message in the snackbar
- *
- * @param {string} mapId the map to show the message for
- * @param {string} message the message string
- * @param {string} withNotification optional, indicates if the message should also be added as a notification, default true
- * @param {TypeJsonObject} button optional snackbar button
- */
-export declare function showSuccess(mapId: string, message: string, withNotification?: boolean, button?: {}): void;
-/**
- * Display an warning message in the snackbar
- *
- * @param {string} mapId the map to show the message for
- * @param {string} message the message string
- * @param {string} withNotification optional, indicates if the message should also be added as a notification, default true
- * @param {TypeJsonObject} button optional snackbar button
- */
-export declare function showWarning(mapId: string, message: string, withNotification?: boolean, button?: {}): void;
-/**
- * Display an error message in the snackbar
- *
- * @param {string} mapId the map to show the message for
- * @param {string} message the message string
- * @param {string} withNotification optional, indicates if the message should also be added as a notification, default true
- * @param {TypeJsonObject} button optional snackbar button
- */
-export declare function showError(mapId: string, message: string, withNotification?: boolean, button?: {}): void;
+export declare function getLocalizedValue(localizedString: TypeLocalizedString | undefined, language: TypeDisplayLanguage): string | undefined;
 /**
  * Return proper language Geoview localized values from map i18n instance
  *
@@ -98,13 +25,24 @@ export declare function showError(mapId: string, message: string, withNotificati
  * @param {string} localizedKey localize key to get
  * @returns {string} message with values replaced
  */
-export declare function getLocalizedMessage(mapId: string, localizedKey: string): string;
+export declare function getLocalizedMessage(localizedKey: string, language: TypeDisplayLanguage): string;
 /**
- * Take string and replace parameters from array of values
+ * Get the URL of main script cgpv-main so we can access the assets
+ * @returns {string} the URL of the main script
+ */
+export declare function getScriptAndAssetURL(): string;
+/**
+ * Generate a unique id if an id was not provided
+ * @param {string} id an id to return if it was already passed
+ * @returns {string} the generated id
+ */
+export declare function generateId(id?: string | null): string;
+/**
+ * Take string like "My string is __param__" and replace parameters (__param__) from array of values
  *
- * @param {string[]} params array of parameters to replace
- * @param {string} message original message
- * @returns {string} message with values replaced
+ * @param {TypeJsonValue[] | TypeJsonArray | string[]} params array of parameters to replace, i.e. ['short']
+ * @param {string} message original message, i.e. "My string is __param__"
+ * @returns {string} message with values replaced "My string is short"
  */
 export declare function replaceParams(params: TypeJsonValue[] | TypeJsonArray | string[], message: string): string;
 /**
@@ -146,7 +84,7 @@ export declare function addUiComponent(targetDivId: string, component: React.Rea
 /**
  * Sanitize HTML to remove threat
  *
- * @param {string} contentHtml HTML content to sanitize
+ * @param {string} contentHtml - HTML content to sanitize
  * @returns {string} sanitze HTLM or empty string if all dirty
  */
 export declare function sanitizeHtmlContent(contentHtml: string): string;
@@ -163,33 +101,14 @@ export declare function removeCommentsFromJSON(config: string): string;
  * @param {string} configObjStr Map config to parse
  * @returns {any} cleaned and parsed config object
  */
-export declare function parseJSONConfig(configObjStr: string): any;
+export declare function parseJSONConfig(configObjStr: string): unknown;
 /**
- * Get a valid configuration from a string configuration
- *
- * @param {string} configString String configuration
- * @returns {TypeMapFeaturesConfig} A valid configuration object
- */
-export declare function getValidConfigFromString(configString: string, mapDiv: HTMLElement): TypeMapFeaturesConfig;
 /**
- * Export the map as a PNG
- * @param {string} mapId Id of map to export
+ * Export the image data url as a PNG
+ * @param {string} datUrl the dataurl to be downloaded as png.
+ * @param {string} name name of exported file
  */
-export declare function exportPNG(mapId: string): void;
-/**
- * Disable scrolling on keydown space, so that screen doesnt scroll down.
- * when focus is set to map and arrows and enter keys are used to navigate the map
- * @param {KeyboardEvent} e - keyboard event like, tab, space
- * @param {MutableRefObject} elem - mutable reference object of html elements.
- */
-export declare const disableScrolling: (e: KeyboardEvent, elem: MutableRefObject<HTMLElement | undefined>) => void;
-/**
- * Determine if layer instance is a vector layer
- *
- * @param {AbstractGeoViewLayer} layer the layer to check
- * @returns {boolean} true if layer is a vector layer
- */
-export declare const isVectorLayer: (layer: AbstractGeoViewLayer) => boolean;
+export declare function exportPNG(dataUrl: string, name: string): void;
 /**
  * Find an object property by regex value
  * @param {TypeJsonObject} objectItem the object item
@@ -197,16 +116,6 @@ export declare const isVectorLayer: (layer: AbstractGeoViewLayer) => boolean;
  * @returns {TypeJsonObject | undefined} the object if it exist or undefined
  */
 export declare const findPropertyNameByRegex: (objectItem: TypeJsonObject, regex: RegExp) => TypeJsonObject | undefined;
-/**
- * Compare sets of extents of the same projection and return the smallest or largest set.
- * Extents must be in OpenLayers extent format - [minx, miny, maxx, maxy]
- *
- * @param {Extent} extentsA First set of extents
- * @param {Extent} extentsB Second set of extents
- * @param {string} minmax Decides whether to get smallest or largest extent
- * @returns {Extent} the smallest or largest set from the extents
- */
-export declare function getMinOrMaxExtents(extentsA: Extent, extentsB: Extent, minmax?: string): Extent;
 /**
  * Check string to see if it is an image
  *
@@ -225,13 +134,13 @@ export declare function stringify(str: unknown): unknown | string;
  * This generic function checks for a validity of something via the checkCallback() until it's found or until the timer runs out.
  * When the check callback returns true (or some found object), the doCallback() function is called with the found information.
  * If checkCallback wasn't found and timer expired, the failCallback() function is called.
- * @param checkCallback the function executed to verify a particular condition until it's passed
- * @param doCallback the function executed when checkCallback returns true or some object
- * @param failCallback the function executed when checkCallback has failed for too long (went over the timeout)
- * @param timeout the duration in milliseconds until the task is aborted (defaults to 10 seconds)
- * @param checkFrequency the frequency in milliseconds to callback for a check (defaults to 100 milliseconds)
+ * @param {function} checkCallback the function executed to verify a particular condition until it's passed
+ * @param {function} doCallback the function executed when checkCallback returns true or some object
+ * @param {function} failCallback the function executed when checkCallback has failed for too long (went over the timeout)
+ * @param {number} timeout the duration in milliseconds until the task is aborted (defaults to 10 seconds)
+ * @param {number} checkFrequency the frequency in milliseconds to callback for a check (defaults to 100 milliseconds)
  */
-export declare function whenThisThenThat<T>(checkCallback: () => T, doCallback: (value: T) => void, failCallback: (reason?: any) => void, timeout?: number, checkFrequency?: number): void;
+export declare function whenThisThenThat<T>(checkCallback: () => T, doCallback: (value: T) => void, failCallback: (reason?: unknown) => void, timeout?: number, checkFrequency?: number): void;
 /**
  * This asynchronous generic function checks for a validity of something via the checkCallback() until it's found or until the timer runs out.
  * This method returns a Promise which the developper can use to await or use .then().catch().finally() principles.
@@ -252,3 +161,10 @@ export declare const delay: (ms: number) => Promise<void>;
  * @returns {string} espaced string
  */
 export declare function escapeRegExp(text: string): string;
+/**
+ * Create guide object from .md file.
+ * @param {string} mapId - ID of map.
+ * @param {TypeDisplayLanguage} language - Language to use for guide.
+ * @returns {Promise<TypeGuideObject | undefined>} The guide object
+ */
+export declare function createGuideObject(mapId: string, language: TypeDisplayLanguage, assetsURL: string): Promise<TypeGuideObject | undefined>;

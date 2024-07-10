@@ -1,16 +1,17 @@
-/// <reference types="react" />
+import { RefObject } from 'react';
 interface UseFooterPanelHeightType {
-    footerPanelTab: 'layers' | 'details' | 'data-table' | 'legend' | 'default' | 'guide';
+    footerPanelTab: 'legend' | 'default';
+}
+interface UseFooterPanelHeightReturnType {
+    leftPanelRef: RefObject<HTMLDivElement>;
+    rightPanelRef: RefObject<HTMLDivElement>;
+    panelTitleRef: (node: HTMLDivElement) => void;
+    activeFooterBarTabId: string;
 }
 /**
  * Custom Hook to calculate the height of footer panel content when we set the map in fullscreen mode.
- * @param {'layers' | 'details' | 'datatable' | 'legend'} footerPanelTab type of footer tab.
- * @returns list of ref objects that are attached to DOM.
+ * @param {'legend' | 'default'} footerPanelTab type of footer tab.
+ * @returns {UseFooterPanelHeightReturnType} An object of ref objects that are attached to DOM.
  */
-export declare function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightType): {
-    leftPanelRef: import("react").RefObject<HTMLDivElement>;
-    rightPanelRef: import("react").RefObject<HTMLDivElement>;
-    panelTitleRef: import("react").RefObject<HTMLDivElement>;
-    tableHeight: number;
-};
+export declare function useFooterPanelHeight({ footerPanelTab }: UseFooterPanelHeightType): UseFooterPanelHeightReturnType;
 export {};

@@ -1,38 +1,36 @@
 import { Theme } from '@mui/material/styles';
 export declare const getSxClasses: (theme: Theme) => {
-    guideContainer: {
-        background: string;
-        paddingBottom: string;
-    };
-    rightPanelContainer: {
-        border: string;
-        borderRadius: string;
-        backgroundColor: string;
-        color: string;
-    };
-    footerGuideListItemText: {
-        '&:hover': {
-            cursor: string;
-        };
-        '& .MuiListItemText-primary': {
-            padding: string;
-            fontSize: string;
-            lineHeight: number;
-            fontWeight: string;
-            textTransform: string;
+    readonly guideContainer: {
+        readonly '& .responsive-layout-right-main-content': {
+            readonly backgroundColor: string;
         };
     };
-    footerGuideListItemCollapse: {
-        '& .MuiListItemText-primary': {
-            padding: string;
-            fontSize: string;
-            lineHeight: number;
-            whiteSpace: string;
+    readonly rightPanelContainer: {
+        readonly color: string;
+    };
+    readonly footerGuideListItemText: {
+        readonly '&:hover': {
+            readonly cursor: "pointer";
+        };
+        readonly '& .MuiListItemText-primary': {
+            readonly padding: "15px";
+            readonly fontSize: `${any} !important`;
+            readonly lineHeight: 1.5;
+            readonly fontWeight: "700";
+            readonly textTransform: "capitalize";
         };
     };
-    errorMessage: {
-        marginLeft: string;
-        marginTop: string;
-        marginBottom: string;
+    readonly footerGuideListItemCollapse: {
+        readonly '& .MuiListItemText-primary': {
+            readonly padding: "15px 15px 15px 30px";
+            readonly fontSize: `${any} !important`;
+            readonly lineHeight: 1.5;
+            readonly whiteSpace: "unset";
+        };
+    };
+    readonly errorMessage: {
+        readonly marginLeft: "60px";
+        readonly marginTop: "30px";
+        readonly marginBottom: "12px";
     };
 };

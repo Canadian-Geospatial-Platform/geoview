@@ -1,5 +1,5 @@
 /// <reference types="react" />
-import { TypeLegendLayer } from '../types';
+import { TypeLegendLayer } from '@/core/components/layers/types';
 interface DeleteUndoButtonProps {
     layer: TypeLegendLayer;
 }

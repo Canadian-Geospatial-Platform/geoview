@@ -1,3 +1,4 @@
+/// <reference types="node" />
 export declare const LOG_TRACE_DETAILED = 1;
 export declare const LOG_TRACE_USE_EFFECT_UNMOUNT = 2;
 export declare const LOG_TRACE_RENDER = 3;
@@ -12,164 +13,150 @@ export declare const LOG_INFO = 30;
 export declare const LOG_WARNING = 40;
 export declare const LOG_ERROR = 50;
 /**
- * The supported color codes for logging
- */
-type ColorCode = {
-    turquoise: string;
-    grey: string;
-    plum: string;
-    orchid: string;
-    darkorchid: string;
-    mediumorchid: string;
-    royalblue: string;
-    cornflowerblue: string;
-    dodgerblue: string;
-    darkorange: string;
-    yellowgreen: string;
-    green: string;
-};
-/**
- * A Log marker with various keys, used to track various timings
- */
-type LogMarker = {
-    [key: string]: Date;
-};
-/**
  * A Console Logger to help out logging information with levels of details.
  */
 export declare class ConsoleLogger {
+    #private;
     loggingLevel: number | number[];
     markers: LogMarker;
+    trackers: LogTracker;
+    trackerInterval: number;
     /**
      * Constructor
-     * @param logLevel? number Indicate the level of detail for the ConsoleLogger. The higher the number, the more detailed the log.
+     * @param {number | number[]} logLevel - Indicate the level of detail for the ConsoleLogger. The higher the number, the more detailed the log.
      */
     constructor(logLevel: number | number[]);
     /**
      * Logs tracing calls at the highest level of detail.
      * Only shows if LOG_ACTIVE is true.
-     * @param message unknown[] the messages to log
+     * @param {unknown[]} messages - The messages to log
      */
-    logTraceDetailed: (...message: unknown[]) => void;
+    logTraceDetailed(...messages: unknown[]): void;
     /**
-     * Logging function commonly used in the useEffects to track when a component is being unmounted.
+     * Logging function commonly used in the useEffects to log when a component is being unmounted.
      * Only shows if LOG_ACTIVE is true.
-     * @param message string useEffectFunction the useEffect function identifier
-     * @param message unknown[] the messages to log
+     * @param {string} useEffectFunction - The useEffect function identifier
+     * @param {unknown[]} messages - The messages to log
      */
-    logTraceUseEffectUnmount: (useEffectFunction: string, ...message: unknown[]) => void;
+    logTraceUseEffectUnmount(useEffectFunction: string, ...messages: unknown[]): void;
     /**
-     * Logging function commonly used in the rendering to track when a component is being rendered.
+     * Logging function commonly used in the rendering to log when a component is being rendered.
      * Only shows if LOG_ACTIVE is true.
-     * @param message string component the component being rendered
-     * @param message unknown[] the messages to log
+     * @param {string} component - The component being rendered
+     * @param {unknown[]} messages - The messages to log
      */
-    logTraceRender: (component: string, ...message: unknown[]) => void;
+    logTraceRender(component: string, ...messages: unknown[]): void;
     /**
-     * Logging function commonly used in the useMemo to track when a value is being memoized.
+     * Logging function commonly used in the useMemo to log when a value is being memoized.
      * Only shows if LOG_ACTIVE is true.
-     * @param message string useCallbackFunction the useCallback function identifier
-     * @param message unknown[] the messages to log
+     * @param {string} useMemoFunction - The useCallback function identifier
+     * @param {unknown[]} messages - The messages to log
      */
-    logTraceUseMemo: (useMemoFunction: string, ...message: unknown[]) => void;
+    logTraceUseMemo(useMemoFunction: string, ...messages: unknown[]): void;
     /**
-     * Logging function commonly used in the useCallback to track when a callback is being memoized.
+     * Logging function commonly used in the useCallback to log when a callback is being memoized.
      * Only shows if LOG_ACTIVE is true.
-     * @param message string useCallbackFunction the useCallback function identifier
-     * @param message unknown[] the messages to log
+     * @param {string} useCallbackFunction - The useCallback function identifier
+     * @param {unknown[]} messages - The messages to log
      */
-    logTraceUseCallback: (useCallbackFunction: string, ...message: unknown[]) => void;
+    logTraceUseCallback(useCallbackFunction: string, ...messages: unknown[]): void;
     /**
-     * Logging function commonly used in the useEffects to track when a component is being mounted.
+     * Logging function commonly used in the useEffects to log when a component is being mounted.
      * Only shows if LOG_ACTIVE is true.
-     * @param message string useEffectFunction the useEffect function identifier
-     * @param message unknown[] the messages to log
+     * @param {string} useEffectFunction - The useEffect function identifier
+     * @param {unknown[]} messages - The messages to log
      */
-    logTraceUseEffect: (useEffectFunction: string, ...message: unknown[]) => void;
+    logTraceUseEffect(useEffectFunction: string, ...messages: unknown[]): void;
     /**
-     * Logging function commonly used in the store subscriptions to track when a store has triggered a subscription.
+     * Logging function commonly used in the store subscriptions to log when a store has triggered a subscription.
      * Only shows if LOG_ACTIVE is true.
-     * @param message string storeSubscription the store subscription event that was raised
-     * @param message unknown[] the messages to log
+     * @param {string} storeSubscription - The store subscription event that was raised
+     * @param {unknown[]} messages - The messages to log
      */
-    logTraceCoreStoreSubscription: (storeSubscription: string, ...message: unknown[]) => void;
+    logTraceCoreStoreSubscription(storeSubscription: string, ...messages: unknown[]): void;
     /**
-     * Logging function commonly used in the API event handlers to track when the API has triggered an event.
+     * Logging function commonly used in the API event handlers to log when the API has triggered an event.
      * Only shows if LOG_ACTIVE is true.
-     * @param message string apiEvent the api event that was raised
-     * @param message unknown[] the messages to log
+     * @param {string} apiEvent - The api event that was raised
+     * @param {unknown[]} messages - The messages to log
      */
-    logTraceCoreAPIEvent: (apiEvent: string, ...message: unknown[]) => void;
+    logTraceCoreAPIEvent(apiEvent: string, ...messages: unknown[]): void;
     /**
      * Logs trace information for core processing.
      * Only shows if LOG_ACTIVE is true.
-     * @param message unknown[] the messages to log
+     * @param {unknown[]} messages - The messages to log
      */
-    logTraceCore: (...message: unknown[]) => void;
+    logTraceCore(...messages: unknown[]): void;
     /**
      * Logs debug information.
      * Only shows if LOG_ACTIVE is true.
-     * @param message unknown[] the messages to log
+     * @param {unknown[]} messages - The messages to log
      */
-    logDebug: (...message: unknown[]) => void;
+    logDebug(...messages: unknown[]): void;
     /**
-     * Start a time marker using the given marker key. Used to track timings.
-     * @param markerKey {string} the unique key for this marker tracker
+     * Starts a time marker using the given marker key. Used to log various specific execution timings.
+     * @param {string} markerKey - The unique key for this time marker
      */
-    logMarkerStart: (markerKey: string) => void;
+    logMarkerStart(markerKey: string): void;
     /**
      * Logs the time difference between 'now' and the original marker start.
      * Only shows if LOG_ACTIVE is true.
      * Priority level is the same as LOG_DEBUG.
-     * @param markerKey {string} the unique key for this marker tracker
-     * @param message unknown[] the messages to log
+     * @param {string} markerKey - The unique key for this execution timing marker
+     * @param {unknown[]} messages - The timing marker messages to log
      */
-    logMarkerCheck: (markerKey: string, ...message: unknown[]) => void;
+    logMarkerCheck(markerKey: string, ...messages: unknown[]): void;
+    /**
+     * Starts logging object(s) at every `trackerInterval`ms. Used to track object(s) modification timings.
+     * Only shows if LOG_ACTIVE is true.
+     * Priority level is the same as LOG_DEBUG.
+     * @param {string} trackerKey - The unique key for this object(s) tracker
+     * @param {() => T} callbackObject - The callback executed to retrieve the object
+     * @param {(prevObject: T, newObject: T) => boolean} callbackCheck? - Optionally specify how the equality comparison should happen to decide if we want to log
+     * @param {number} interval? - Optionally specify an interval to call the callback for
+     */
+    logTrackerStart<T>(trackerKey: string, callbackObject: () => T, callbackCheck?: (prevObject: T, newObject: T) => boolean, interval?: number): void;
+    /**
+     * Stops the object(s) tracker for the given tracker key
+     * @param {string} trackerKey - The unique key for this object(s) tracker
+     */
+    logTrackerStop(trackerKey: string): void;
+    /**
+     * Logs that a promise has been unresolved and crashed somewhere in the application
+     * @param {string} stackIndication - The call stack indications where the promise has crashed
+     * @param {unknown[]} messages - The messages to log
+     */
+    logPromiseFailed(stackIndication: string, ...messages: unknown[]): void;
     /**
      * Logs general flow of the application.
      * Shows all the time.
-     * @param message unknown[] the messages to log
+     * @param {unknown[]} messages - The messages to log
      */
-    logInfo: (...message: unknown[]) => void;
+    logInfo(...messages: unknown[]): void;
     /**
      * Logs warnings coming from the application.
      * Shows all the time.
-     * @param message unknown[] the messages to log
+     * @param {unknown[]} messages - The messages to log
      */
-    logWarning: (...message: unknown[]) => void;
+    logWarning(...messages: unknown[]): void;
     /**
      * Logs errors coming from the application.
      * Shows all the time.
-     * @param message unknown[] the messages to log
+     * @param {unknown[]} messages - The messages to log
      */
-    logError: (...message: unknown[]) => void;
-    /**
-     * Compares the provided level (number) with the logging level (number | number[]) to know if the log should appear or not.
-     * @param level number the level associated with the message to be logged.
-     * @returns boolean true if the log level indicates that it should appear
-     */
-    checkLevel: (level: number) => boolean;
-    /**
-     * Checks that the level is greater or equal to the application logging level.
-     * If level is valid, logs using console.log().
-     * @param level number the level associated with the message to be logged.
-     * @param message unknown[] the messages to log
-     */
-    logLevel: (level: number, header: string, color: keyof ColorCode, ...message: unknown[]) => void;
-    /**
-     * Checks that the level is greater or equal to the application logging level.
-     * If level is valid, logs using console.warn().
-     * @param level number the level associated with the message to be logged.
-     * @param message unknown[] the messages to log
-     */
-    warnLevel: (level: number, ...message: unknown[]) => void;
-    /**
-     * Checks that the level is greater or equal to the application logging level.
-     * If level is valid, logs using console.error().
-     * @param level number the level associated with the message to be logged.
-     * @param message unknown[] the messages to log
-     */
-    errorLevel: (level: number, ...message: unknown[]) => void;
+    logError(...messages: unknown[]): void;
 }
+/**
+ * A Log marker with various keys, used to log various specific execution timings
+ */
+type LogMarker = {
+    [key: string]: Date;
+};
+/**
+ * A Log tracker with various keys, used to log and track object modifications accross execution timings
+ */
+type LogTracker = {
+    [key: string]: NodeJS.Timeout;
+};
 export declare const logger: ConsoleLogger;
 export {};
