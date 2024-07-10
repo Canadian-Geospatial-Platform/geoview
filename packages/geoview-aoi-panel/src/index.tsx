@@ -5,7 +5,7 @@ import { TypeIconButtonProps } from 'geoview-core/src/ui/icon-button/icon-button
 import { TypePanelProps } from 'geoview-core/src/ui/panel/panel-types';
 import { AoiPanel } from './aoi-panel';
 import schema from '../schema.json';
-import defaultConfig from '../default-config-area-of-interest.json';
+import defaultConfig from '../default-config-aoi-panel.json';
 
 /**
  * Create a class for the plugin instance
