@@ -162,109 +162,907 @@
         "layerId": "b6b6d5a6-bded-4b6e-9e8a-17f6e1b538dc"
       }
     ],
-    "Dev": [
+    "Dev - Energy": [
       {
-        "optionDisplayValue": "Energy 1",
+        "optionDisplayValue": "",
         "type": "geoCore",
         "accessPath": "",
         "layerId": "039fbd92-43c2-4805-b210-d65703712e37"
       },
       {
-        "optionDisplayValue": "Energy 2",
+        "optionDisplayValue": "",
         "type": "geoCore",
         "accessPath": "",
         "layerId": "40fbe40c-01cd-49d3-8add-0d20ed64c90d"
       },
       {
-        "optionDisplayValue": "Energy 3",
+        "optionDisplayValue": "",
         "type": "geoCore",
         "accessPath": "",
         "layerId": "0e76433c-7aeb-46dc-a019-11db10ee28dd"
-      },
+      }
+    ],
+    "Dev - Forestry": [
       {
-        "optionDisplayValue": "Forestry 1",
+        "optionDisplayValue": "",
         "type": "geoCore",
         "accessPath": "",
         "layerId": "9d00aa0a-a825-4804-b29b-1eff4f82a085"
       },
       {
-        "optionDisplayValue": "Forestry 2",
+        "optionDisplayValue": "",
         "type": "geoCore",
         "accessPath": "",
         "layerId": "d576e878-04f1-4c4f-8428-e16c371e9a3c"
       },
       {
-        "optionDisplayValue": "Forestry 3",
+        "optionDisplayValue": "",
         "type": "geoCore",
         "accessPath": "",
         "layerId": "ee1580ab-a23d-4f86-a09b-79763677eb47"
-      },
+      }
+    ],
+    "Dev - Fisheries": [
       {
-        "optionDisplayValue": "Mining 1",
-        "type": "geoCore",
-        "accessPath": "",
-        "layerId": "488faf70-b50b-4749-ac1c-a1fd44e06f11"
-      },
-      {
-        "optionDisplayValue": "Mining 2",
-        "type": "geoCore",
-        "accessPath": "",
-        "layerId": "22b2db8a-dc12-47f2-9737-99d3da921751"
-      },
-      {
-        "optionDisplayValue": "Mining 3",
-        "type": "geoCore",
-        "accessPath": "",
-        "layerId": "000183ed-8864-42f0-ae43-c4313a860720"
-      },
-      {
-        "optionDisplayValue": "Fisheries 1",
+        "optionDisplayValue": "",
         "type": "geoCore",
         "accessPath": "",
         "layerId": "e0fabad5-9379-4077-87b9-5705f28c490b"
       },
       {
-        "optionDisplayValue": "Fisheries 2",
+        "optionDisplayValue": "",
         "type": "geoCore",
         "accessPath": "",
         "layerId": "a57d5eef-e482-4c05-bcd5-56a0f15b9f02"
       },
       {
-        "optionDisplayValue": "Fisheries 3",
+        "optionDisplayValue": "",
         "type": "geoCore",
         "accessPath": "",
         "layerId": "db177a8c-5d7d-49eb-8290-31e6a45d786c"
+      }
+    ],
+    "Dev - Mining": [
+      {
+        "optionDisplayValue": "",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "488faf70-b50b-4749-ac1c-a1fd44e06f11"
       },
       {
-        "optionDisplayValue": "Transportation 1",
+        "optionDisplayValue": "",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "22b2db8a-dc12-47f2-9737-99d3da921751"
+      },
+      {
+        "optionDisplayValue": "",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "000183ed-8864-42f0-ae43-c4313a860720"
+      }
+    ],
+    "Dev - Transportation": [
+      {
+        "optionDisplayValue": "",
         "type": "geoCore",
         "accessPath": "",
         "layerId": "e218c8cb-5039-4706-b58f-d54c6c11a6fc"
       },
       {
-        "optionDisplayValue": "Transportation 2",
+        "optionDisplayValue": "",
         "type": "geoCore",
         "accessPath": "",
         "layerId": "c5c249c4-dea6-40a6-8fae-188a42030908"
       },
       {
-        "optionDisplayValue": "Transportation 3",
+        "optionDisplayValue": "",
         "type": "geoCore",
         "accessPath": "",
         "layerId": "3af377be-801d-4ebf-9137-869b3080bfa5"
-      },
+      }
+    ],
+    "Dev - Agriculture": [
       {
-        "optionDisplayValue": "Agriculture 1",
+        "optionDisplayValue": "",
         "type": "geoCore",
         "accessPath": "",
         "layerId": "d765cc41-8ee0-4aca-be4b-084448e52a58"
       },
       {
-        "optionDisplayValue": "Agriculture 2",
+        "optionDisplayValue": "",
         "type": "geoCore",
         "accessPath": "",
         "layerId": "199e4ab6-832b-4434-ac39-e4887d7cc4e5"
       }
+    ],
+    "Temporal": [
+      {
+        "optionDisplayValue": "Floods in Canada - Archives - Footprints",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "74144824-206e-4cea-9fb9-72925a128189"
+      },
+      {
+        "optionDisplayValue": "Floods in Canada - Current Year - Product Footprints",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "b1afd8d2-6e14-4ec4-9a09-652221a6cb71"
+      },
+      {
+        "optionDisplayValue": "River Ice in Canada - Archive - Footprints",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "5e6b40bf-299f-4e05-87c8-d10b9c8210f9"
+      },
+      {
+        "optionDisplayValue": "River Ice in Canada - Current Year - Product Footprints",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "8ca6f047-ddef-43d7-81c2-47654f4c69bd"
+      },
+      {
+        "optionDisplayValue": "Accumulated Precipitation (mm)",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "708992ad-bc24-4d0d-a087-17b7b5fd4d4d"
+      },
+      {
+        "optionDisplayValue": "Blended Index - 1",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "b1c73404-1aee-4a59-ad5d-eda7db046676"
+      },
+      {
+        "optionDisplayValue": "Blended Index - 2",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "0bc9af0a-0bf5-4ca9-a10a-fcaf1cc326b9"
+      },
+      {
+        "optionDisplayValue": "Monthly areas of drought in Canada",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "292646cd-619f-4200-afb1-8b2c52f984a2"
+      },
+      {
+        "optionDisplayValue": "Crop (corn) heat units",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "07875f11-c342-4450-bdaa-0cdeaf43c0c9"
+      },
+      {
+        "optionDisplayValue": "Crop Health Indices - 1",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "84d1ff0d-4689-466c-b792-f860a1fb1603"
+      },
+      {
+        "optionDisplayValue": "Crop Health Indices - 2",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "7f835844-3774-4323-b20e-a898c9f20136"
+      },
+      {
+        "optionDisplayValue": "Crop Health Indices - 3",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "07fc840d-69de-4d23-af0d-51d6df042d8a"
+      },
+      {
+        "optionDisplayValue": "Versatile Soil Moisture Budget - 1",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "c62d2fa0-d3bc-4686-9e21-e1fbc6c56950"
+      },
+      {
+        "optionDisplayValue": "Dry Spell",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "87528e87-9246-49cf-b539-2dba941d4931"
+      },
+      {
+        "optionDisplayValue": "Growing Degree Days",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "c7b40829-bacb-4f67-a19b-e090b3d32992"
+      },
+      {
+        "optionDisplayValue": "Heat Wave",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "3e9cc0c9-7e59-478b-befb-a584674baa75"
+      },
+      {
+        "optionDisplayValue": "Maximum Temperature (°C)",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "2cf09706-d645-4f73-ad32-095b5330c356"
+      },
+      {
+        "optionDisplayValue": "Mean Temperature Difference From Normal",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "da88316e-ec63-4b8b-a1fc-1f06545a8500"
+      },
+      {
+        "optionDisplayValue": "Minimum Temperature (°C)",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "383f2c56-5927-45f8-8c95-cd7c336fc844"
+      },
+      {
+        "optionDisplayValue": "MODIS Albedo RGB 2000-2016",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "02fd8f1b-d5d5-6073-e107-28c038ddcc9c"
+      },
+      {
+        "optionDisplayValue": "Canada Landcover 2000-2011 19 Classes",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "ce05e6ef-cd61-74a2-a65b-bb98a5301287"
+      },
+      {
+        "optionDisplayValue": "Canada Landcover 2000-2011 25 Classes",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "39518dfa-bb8d-8a04-b36b-50b4310527a2"
+      },
+      {
+        "optionDisplayValue": "Palmer Drought Index",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "8b68118b-2f66-4a9a-9114-a8f1c8ec7e36"
+      },
+      {
+        "optionDisplayValue": "AVHRR Composite 1985-2013",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "9045136a-d6e7-a825-491d-ee5dc77a2620"
+      },
+      {
+        "optionDisplayValue": "MODIS Composite RGB 2000-2017",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "7c954356-a099-2925-5b00-023eb775b90f"
+      },
+      {
+        "optionDisplayValue": "Palmer Drought Index - 1",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "35b4153e-593f-47aa-91c0-c2f706382079"
+      },
+      {
+        "optionDisplayValue": "Palmer Drought Index - 2",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "719add0d-55f0-422f-928c-2092ab10f89b"
+      },
+      {
+        "optionDisplayValue": "Percent of Average Precipitation",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "eb07b3f2-55b4-4bf8-9d23-483ae872ca2c"
+      },
+      {
+        "optionDisplayValue": "Versatile Soil Moisture Budget - 2",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "ee7e9a50-f1cb-4cc0-87ad-6f0cc5227756"
+      },
+      {
+        "optionDisplayValue": "Biweekly Percent Saturated Surface Soil Moisture Anomalies",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "c0ea8c27-e62e-45bc-b64c-d475650d84a2"
+      },
+      {
+        "optionDisplayValue": "Precipitation Percentile",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "78b65ae0-fe1e-40ac-9d1d-ed4c7aaa0684"
+      },
+      {
+        "optionDisplayValue": "Standardized Precipitation Evapotranspiration Index (SPEI)",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "d765cc41-8ee0-4aca-be4b-084448e52a58"
+      },
+      {
+        "optionDisplayValue": "Standardized Precipitation Index (SPI)",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "4ae5b0d1-b811-4238-9aed-ce97363f51eb"
+      },
+      {
+        "optionDisplayValue": "Versatile Soil Moisture Budget - 3",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "efe9606f-df8b-47a1-a5a1-6933992885a7"
+      },
+      {
+        "optionDisplayValue": "Weekly Best-Quality Maximum - NDVI Anomalies",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "ea6b4be2-9826-47f3-a387-33ddf02592f4"
+      },
+      {
+        "optionDisplayValue": "Fraction of absorbed photosynthetically active radiation (fAPAR)",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "d708877c-56b8-4255-99e3-3c4abc54597d"
+      },
+      {
+        "optionDisplayValue": "Fraction of Vegetation Cover (fCOVER)",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "d7b177e0-274a-4be9-b69a-2030faf83c78"
+      },
+      {
+        "optionDisplayValue": "Leaf Area Index (LAI)",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "cf29bdb2-bbdb-48c3-b09f-118600801836"
+      },
+      {
+        "optionDisplayValue": "(NAPL) - Halifax, Nova Scotia (1947-1977)",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "4e8e3c6a-c961-4def-bdc7-f24823462818"
+      },
+      {
+        "optionDisplayValue": "(NAPL) - Markham, Ontario (1960-1974)",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "230f1f6d-353e-4d02-800b-368f4c48dc86"
+      },
+      {
+        "optionDisplayValue": "(NAPL) - Ottawa River, Ontario/Quebec (1950-2001)",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "f129611d-7ca1-418b-8390-ebac5adf958e"
+      },
+      {
+        "optionDisplayValue": "(NAPL) - Regina, Saskatchewan (1947-1967)",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "03ccfb5c-a06e-43e3-80fd-09d4f8f69703"
+      },
+      {
+        "optionDisplayValue": "(NAPL) - Ring of Fire, Ontario (1954-1976)",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "ed9b204b-590c-4b17-9703-f6e167acd6c6"
+      },
+      {
+        "optionDisplayValue": "(NAPL) - Salish Region, British Columbia (1950-1982)",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "f498bb69-3982-4b62-94db-4c0e0065bc17"
+      },
+      {
+        "optionDisplayValue": "(NAPL) - Tuktoyaktuk, Northwest Territories (1947-2004)",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "14686ac5-7f1e-400f-bb9e-4a84ed1abae7"
+      },
+      {
+        "optionDisplayValue": "Victoria, British Columbia (1932-1950)",
+        "type": "geoCore",
+        "accessPath": "",
+        "layerId": "d8627209-bda2-436f-b22b-0eb19fdc6660"
+      }
+    ],
+    "Cross-departamental - Air Quality": [
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "686a92e4-f9c5-4901-a4ba-40c601aec32e"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "10fe5551-bc87-488f-9c3d-8da28c727044"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "f6660f68-5e78-47b3-9306-9805e1d3d6e9"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "fd4573c5-1d38-448c-8761-cdfcb3c5695b"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "2606b1b4-c895-4d23-b466-ad3d64b6381e"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "aed50dbf-aa22-40e3-b500-b4f972f3cace"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "f7b42d5c-40b7-4b82-9b24-8d2011b9eef5"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "e6cc3ae2-92b1-4df6-87ff-698a1cd5a7bd"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "c63ee09d-dc19-46d7-b8f4-0494e15c62b4"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "317a24db-49c2-4b0d-bdfd-4de1334fae76"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "5f1b78ab-999a-41f0-82e9-351d236010ca"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "881a606b-69e0-473f-841d-aec9e2815e58"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "18810159-488e-4de4-b5ed-9e4e68d9a874"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "7796058d-507f-4b6d-b169-8c6af60c5916"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "979007bf-768f-451a-ae97-6ffeb644dd00"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "ecc29fa2-e235-4974-a86d-38da36e6238b"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "03865283-315d-45dc-85a1-99ef7da84f42"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "90d41cfd-cb17-4480-ac13-d6134f0048c8"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "105aba50-984c-4c5d-b41e-791455d20404"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "2d104c4d-c2c0-4dab-a7c4-9ddc2aa14774"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "d1082511-f5e6-46b1-8720-5ab7edf19e84"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "5a65ad7c-561a-466a-8375-8d876624df9d"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "4221c508-00c9-4011-aca6-b0a017fc90dc"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "756bc907-34bb-4b33-9a87-b3c1a6c3f292"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "fff64fdd-2b42-4b65-af59-16f89e3507b6"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "274ede77-27b9-46b8-96c8-4d7d4a706f08"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "22abff18-6f9d-4926-b7de-3a80c178bf95"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "e7a74960-8edb-4a89-8dea-88914ad60fc6"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "0a8f138e-2598-42a8-a7ad-0ebc09fdbc5e"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "61ace526-6cf4-42d4-a37d-aefb71866fb2"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "7c19adcb-aa44-4002-b998-b043dfcde817"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "21b821cf-0f1c-40ee-8925-eab12d357668"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "08551517-d095-40fe-88ad-0561901f9ac4"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "612ae428-3446-455b-8b3a-bd8e283e24d9"}
+    ],
+    "Cross-departamental - Climate Change": [
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "e55959c6-ee52-46e9-9fb2-ef993f040ea6"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "1f864766-7f7f-4be7-8292-295065c65c78"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "ee421d50-dffd-41fb-976c-5bbfec04b2dd"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "06be2cfe-d334-4f92-94ae-62a7615e9d28"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "4672733b-bbb6-4299-a57f-f19ab475ac11"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "dd5ef0d6-d588-4f4f-99e5-27c4bdfddf6a"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "b24173ce-d536-4aba-b0cb-b0838a63d415"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "5004eff1-6200-4c47-918f-b872e53260a3"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "57adb699-4c98-4694-8540-08625cab9ab9"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "6272b8c2-5c8b-408c-a8c8-95b27f5b59f6"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "5cc142ca-d9bf-43b3-8f90-3d14eac1cd7f"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "44d8225f-ffde-4c1a-b852-ca93df0729e3"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "8a7c6938-ac77-4afb-af36-a472f4d6693a"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "025fcebf-1b52-4013-9cd3-006ab1f00bf9"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "a97a4294-121e-488b-99d7-6136b933af89"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "0ce538f3-65c5-4b18-8c80-1459ebae66e1"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "6956a8f8-4cb0-43ce-a8a4-e678fab9ccdb"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "ebd1f2e6-b245-47dc-a094-d65cbfc81afd"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "60e7157a-72ed-4017-a8db-7a0e39553e7a"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "0aa0cd82-993b-48e8-9524-c651a4e5ddc9"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "3abbdf26-7a0d-4b33-b6be-cf5303167ff2"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "bbff6c5f-20df-4aea-843e-10ce4e49dbcf"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "92e3517a-9a18-4059-81d1-69c57c2eaa0c"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "08ed9d99-126a-42b8-a1c6-e46f130c213e"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "81ffd58c-c23e-4930-bc68-cdf9179b37a2"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "0933f0dc-3625-4583-828a-86d032e4b737"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "181332bf-d99e-4c21-b68a-fb8de254f551"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "23563e04-467a-496f-a71c-fb0aad0171a8"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "92297600-fa37-454a-b45e-a4516d4d4ee2"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "22b0166b-9db3-46b7-9baf-6584a3acc7b1"}
+    ],
+    "Cross-departamental - Content describing subject area": [
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "81560d1e-8394-4b51-8212-2bbe4d8a5ea2"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "59af1c96-fc8f-4fa0-b398-d65e953eadaa"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "e7dec0ae-f1dc-49ac-8230-5cb1a3b39c54"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "051c7034-c13b-49a9-9d4a-99b0b594d157"}
+    ],
+    "Cross-departamental - Energy": [
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "55438acb-aa67-407a-9fdb-1cb21eb24e28"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "65d3db23-b83c-4f49-ab93-65c59ee0e6aa"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "92dbea79-f644-4a62-b25e-8eb993ca0264"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "4f135486-3dec-446c-bae3-c6181d89daed"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "4cb8dbc2-e35d-48dc-8ab3-cf9a80ad8f7d"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "40fbe40c-01cd-49d3-8add-0d20ed64c90d"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "0e76433c-7aeb-46dc-a019-11db10ee28dd"}
+    ],
+    "Cross-departamental - Fish and Fish Habitat": [
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "c9c8788b-71c5-4d68-9038-14e2c18f6a05"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "771c0d61-6ecc-4e9a-9e50-76200dc7041d"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "ff98425c-6074-4931-8ae4-e42f073f8101"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "da63ecd4-0720-47b3-a447-d0b1a1716b76"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "bd632217-35f9-4d01-8e57-a6dbc454f236"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "3b723ef2-abd4-4722-abea-9a51258eae15"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "b665c14f-3d29-414b-b232-cba2a9c3cc55"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "18f71c8f-09a3-4d91-bd74-481d17260492"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "de50ac30-ab0d-4bf2-b9af-362977edde3a"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "6af357a3-3be1-47d5-9d1f-e4f809c4c903"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "502da2ef-bffa-4d9b-9e9c-a7425ff3c594"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "9a515ef8-0e2a-479e-9b25-55658eae30be"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "40381c35-4849-4f17-a8f3-707aa6a53a9d"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "1dcd28aa-99da-4f62-b157-15631379b170"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "75829a51-ef23-4e98-80c4-a6c24dc06858"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "1c5b9302-cfd8-4386-8b2e-26973e3c3468"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "2ece9991-62aa-4b7a-bd7d-4f8f1052cd21"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "be508ec9-44dc-439e-a2b5-1f8550c65672"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "3862c9fa-dbeb-4f00-ac03-c5da6551bf00"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "e0fabad5-9379-4077-87b9-5705f28c490b"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "1a560a12-9be1-49a4-971a-dbc80875a0d7"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "5fc1052f-54a7-4832-8afc-6c8b84090d1b"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "273df20a-47ae-42c0-bc58-01e451d4897a"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "71c25df1-0577-43f7-b9f8-95cc321e7cbc"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "fb1d1c3d-ba6e-4d0d-b629-f4f497edc10f"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "aca81811-4b08-4382-9af7-204e0b9d2448"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "13dbd6f9-c39f-44cb-8c05-4b11c224071c"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "44ef4d33-20b7-45fc-974c-d73a0a8fbae8"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "86ffa52e-b439-45d0-819f-0fc0b40c9bff"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "bf6287be-3fd1-db4d-60a4-7d80abc996cb"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "b989f5fb-e5f7-4230-a53a-bfcd69754496"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "1ac00a39-4770-443d-8a6b-9656c06df6a3"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "a57d5eef-e482-4c05-bcd5-56a0f15b9f02"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "35bbac7c-2e2f-4587-9108-f4aa1e862809"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "5cba47a9-8d3c-4dae-b3a7-16b193286719"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "06371757-0ba5-4bdb-9bf1-de4a67d18743"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "a45aa280-d8ca-4751-b8ac-655c90650eb1"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "2378a92c-a7ec-4f8d-846a-281b8afc5b20"}
+    ],
+    "Cross-departamental - Forestry": [
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "6433173f-bca8-44e6-be8e-3e8a19d3c299"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "a42bd5d6-83a7-4fb7-a257-389dcf7ea48d"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "08335b65-9857-4656-b7d5-14c91663126d"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "f49dde59-1c64-4824-a5e1-8d49b0b0038e"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "71b19b67-6f62-46f9-aac8-f52bc6e66c8e"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "79dcbe44-4a86-4ac0-8eec-135f80a9b843"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "eaf92ab8-c744-4f8f-a280-6987d4f6005e"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "d576e878-04f1-4c4f-8428-e16c371e9a3c"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "2bd45567-15af-4b5d-9290-1a894bc63233"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "1bf46651-95ee-428f-9b30-27a42d12b079"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "8abcbe96-44e7-406e-8e05-54b32a3554bc"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "9dd30694-5dfc-42a6-bc1a-1cbe17e9306d"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "1f1806b9-3927-496c-8c91-8789809f4472"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "6e1942ed-d4e6-4106-863a-5689b0238e1e"}
+    ],
+    "Cross-departamental - Freshwater": [
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "94e38a40-085a-4c8a-a7c4-5b46e03702c3"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "cc4b73c7-c16c-48eb-a069-642cafb5dec5"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "2bab2f9d-4e3e-e1bb-69c0-c50fb7dda347"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "fbae2040-a1bb-40cc-b0fe-51adc7f7ffe9"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "631c3d02-e456-4bcf-a272-e511a791edf0"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "bd632217-35f9-4d01-8e57-a6dbc454f236"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "d3881c4c-650d-4070-bf9b-1e00aabf0a1d"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "5095a5e0-e574-4769-84d3-acaac529399b"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "f182f1f8-9c9b-49e5-8702-9dd37093a768"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "bc57faf7-23e4-43fe-918a-e999936dbafa"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "b1c2dffa-c2ba-4d0e-b803-a483eef0f579"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "62de5952-a5eb-4859-b086-22a8ba8024b8"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "1a560a12-9be1-49a4-971a-dbc80875a0d7"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "64797286-3ca5-4202-9064-a7f790321e9e"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "51f20b1a-ab75-42de-809d-bf415a0f9c62"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "5ddfe481-229f-449a-96a1-4c361aa8f2be"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "e4731a85-ffca-4112-8caf-cb0a96905778"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "6b1408b4-ea09-4a6a-b5dd-3db3493e1218"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "fe83a604-aa5a-4e46-903c-685f8b0cc33c"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "fed6d845-b7ff-4512-8f5f-595420cc43e8"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "dd7d7ff3-9512-499a-ae55-56beedfbbf9c"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "a8b81f67-57b2-45f3-9a88-f9953d64f1a1"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "9d96e8c9-22fe-4ad2-b5e8-94a6991b744b"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "917b8854-64a5-41d6-ad7f-d0a3c0c3cb29"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "a4b190fe-e090-4e6d-881e-b87956c07977"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "0c121878-ac23-46f5-95df-eb9960753375"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "b989f5fb-e5f7-4230-a53a-bfcd69754496"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "a6e17b31-817b-408e-87cf-4cab5b6eb9f2"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "dfdb730d-e1af-4090-958c-ccf9f116a085"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "17bfc1bb-4849-4615-83a4-f7bd1dd21fd2"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "7ce06d85-7cc3-4ae3-a5c3-37d7c8d55b08"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "640ba2cf-e1e1-4618-84d6-874f0d657dd3"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "35bbac7c-2e2f-4587-9108-f4aa1e862809"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "0aa3fa53-43ef-451f-bb35-cfb43ebf06fb"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "e616864b-8991-42d1-a2f9-4d4402c32be8"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "8ce8abe1-d644-4134-baa9-389eebd63a05"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "b6abc000-a647-4a9a-a573-dc3575b0fc7f"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "ca0f10d2-2e3d-4c03-af01-d6072d3aa2c8"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "bd71df53-543d-4359-9d17-8f1bb3b5ab90"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "bf4c3e86-5c04-4f82-a606-92171e717efa"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "b6b6d5a6-bded-4b6e-9e8a-17f6e1b538dc"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "2a5c1689-c2f4-418c-adb8-a21fd67982fd"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "b2cec214-5616-4ca5-9cee-cc7689b5444f"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "f4ba8a8e-f70d-4187-a1e0-11393d280775"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "e8896575-1fb8-4e53-8acd-8579c3c055c2"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "d8805d53-40d6-4e13-bbc0-93677c0c9c7f"}
+    ],
+    "Cross-departamental - Geology": [
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "e3d12f96-9075-4384-90ae-4d7408df5fea"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "2544dc66-0680-40db-b595-efa0c64adf43"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "a303d195-98fd-44b3-8595-b1df1b865eb5"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "4422f4db-99c6-b758-e43d-33c12f082684"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "e6405791-c9b9-4246-a5ed-e5cf610075b5"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "37b59b8b-1c1c-4869-802f-c09571cc984b"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "0f674831-6fb6-4022-a144-8aef20ed230d"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "2c3672b6-4c17-4ff5-9861-29e2dd6d03b3"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "37aecae5-7783-4274-b595-df02aa003ac3"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "59682261-6088-4dc6-959d-0a4e4363c987"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "4baa66ad-aa29-4233-a6a8-7f5cbefb5ea8"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "d6407ecb-5989-1376-8b3b-a2c354275cf1"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "2854b1c2-ac15-5e8d-c76d-a0805c56d0b2"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "44cbbdc0-d33d-abe7-b08a-f5872bc0a48a"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "8ad80782-d468-44dc-af4f-ddf8ed44ce0a"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "dbe22a3d-0f34-40f5-a40b-83e68f9c3c37"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "cebc283f-bae1-4eae-a91f-a26480cd4e4a"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "4efad8d5-b7c7-4ea8-b95c-f41f76f24e63"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "a88f1437-f93f-42e8-9b44-6cdc2213a172"}
+    ],
+    "Cross-departamental - Human Health": [
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "471736af-e236-444a-9888-b4d99052c927"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "03865283-315d-45dc-85a1-99ef7da84f42"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "90d41cfd-cb17-4480-ac13-d6134f0048c8"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "5a65ad7c-561a-466a-8375-8d876624df9d"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "756bc907-34bb-4b33-9a87-b3c1a6c3f292"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "e7a74960-8edb-4a89-8dea-88914ad60fc6"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "61ace526-6cf4-42d4-a37d-aefb71866fb2"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "7c19adcb-aa44-4002-b998-b043dfcde817"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "c3a9b15d-3cd9-4548-96ee-031c9147f625"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "08551517-d095-40fe-88ad-0561901f9ac4"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "612ae428-3446-455b-8b3a-bd8e283e24d9"}
+    ],
+    "Cross-departamental - Indigenous Communities": [
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "522b07b9-78e2-4819-b736-ad9208eb1067"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "b6567c5c-8339-4055-99fa-63f92114d9e4"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "80e642cc-c153-4b6d-9b10-92f4d4aaff4e"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "82cad281-ff7d-47b3-b2ce-9f794257e86d"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "488faf70-b50b-4749-ac1c-a1fd44e06f11"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "3d52693e-39d1-4e7f-b4fa-b72ccb605006"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "f242b881-75e3-40bb-a148-63410b4ce2af"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "62155d6f-9167-4972-b77c-b90734b628dc"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "74e06f20-8db8-458b-870f-23596728ccc5"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "be54680b-ea62-46f3-aaa9-7644ed970aef"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "f281b150-0645-48e4-9c30-01f55f93f78e"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "0a309f2c-4f11-4ddb-bce1-e7ba6f8c20cf"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "73dbaaca-24b6-4c04-bd52-e7b7ab0c3d8f"}
+    ],
+    "Cross-departamental - Infrastructure and Development": [
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "b6fb8be7-f3eb-4995-8526-82ec53ec860e"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "3c3e2d24-e82c-4913-9640-c14b32264673"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "4bece602-04cf-4520-a512-9f4d8720b683"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "039fbd92-43c2-4805-b210-d65703712e37"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "c5c249c4-dea6-40a6-8fae-188a42030908"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "622a7f72-4a00-4f9e-b04f-af6551c77db3"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "f4c51eaa-a6ca-48b9-a1fc-b0651da20509"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "65d3db23-b83c-4f49-ab93-65c59ee0e6aa"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "fd4369a4-21fe-4070-914a-067474da0fd6"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "22b2db8a-dc12-47f2-9737-99d3da921751"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "e98ebcd8-5989-4924-85e1-7657d920b949"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "e218c8cb-5039-4706-b58f-d54c6c11a6fc"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "f49dde59-1c64-4824-a5e1-8d49b0b0038e"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "71b19b67-6f62-46f9-aac8-f52bc6e66c8e"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "6ab2803a-aace-4e60-83ed-44a7e0ccd1d8"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "f5f2db55-31e4-42fb-8c73-23e1c44de9b2"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "ea4c0bdb-a63f-49a4-b14a-09c1560aad0b"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "89d44ba6-7236-48ed-afab-f25a98c846ef"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "ae205683-0b6b-4049-a524-b5db92e16de6"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "fab53209-63be-4c61-8de4-3e3fceec4227"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "0a38cc68-c82d-4125-bbe8-2ad73c2cb7f7"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "c8719fa7-f09c-46fa-a928-f13dd3b613e5"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "4f135486-3dec-446c-bae3-c6181d89daed"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "4cb8dbc2-e35d-48dc-8ab3-cf9a80ad8f7d"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "40fbe40c-01cd-49d3-8add-0d20ed64c90d"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "29fd13f3-e7d5-4291-8560-69d405a64a3f"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "0e76433c-7aeb-46dc-a019-11db10ee28dd"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "9dd30694-5dfc-42a6-bc1a-1cbe17e9306d"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "52baeb21-9dc2-42f7-b944-8bbe4b4b66a0"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "fc586323-4f8d-4d64-a178-a74b254131bc"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "96a968f8-f9bb-4ff3-9109-1b523706eeef"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "3af377be-801d-4ebf-9137-869b3080bfa5"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "2dac78ba-8543-48a6-8f07-faeef56f9895"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "bf4c3e86-5c04-4f82-a606-92171e717efa"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "1b218b17-9732-4906-9805-14695e68dc25"}
+    ],
+    "Cross-departamental - Invasive Species": [
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "d9613096-b2fe-43b4-9be1-d82a3b805082"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "ce236f54-cce2-4abf-8947-10104a2ef6e1"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "31f841b6-a544-47f9-93fb-b111a46fc654"}
+    ],
+    "Cross-departamental - Land Cover": [
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "ee1580ab-a23d-4f86-a09b-79763677eb47"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "e98ebcd8-5989-4924-85e1-7657d920b949"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "68d87b4f-6e7d-9432-2a78-a5d8f0a86a11"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "c688b87f-e85f-4842-b0e1-a8f79ebf1133"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "4e615eae-b90c-420b-adee-2ca35896caf6"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "c2d9fb00-a540-44a7-8cd6-b175af755fdf"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "4baa66ad-aa29-4233-a6a8-7f5cbefb5ea8"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "808b84a1-6356-4103-a8e9-db46d5c20fcf"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "c8927d6e-2546-430f-805e-b403777b1668"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "6e1942ed-d4e6-4106-863a-5689b0238e1e"}
+    ],
+    "Cross-departamental - Land Disturbance": [
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "a71ab99c-6756-4e56-9d2e-2a63246a5e94"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "779f9b2d-d010-4ddc-b3b3-57a9ac7631b2"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "e3d12f96-9075-4384-90ae-4d7408df5fea"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "2544dc66-0680-40db-b595-efa0c64adf43"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "a303d195-98fd-44b3-8595-b1df1b865eb5"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "6433173f-bca8-44e6-be8e-3e8a19d3c299"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "fd4369a4-21fe-4070-914a-067474da0fd6"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "73111c78-298b-4be9-97f1-7aaa73cab477"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "62d63169-7739-4515-9178-8f628c32a9d4"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "0f674831-6fb6-4022-a144-8aef20ed230d"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "2c3672b6-4c17-4ff5-9861-29e2dd6d03b3"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "e7e53246-fe7e-4219-9c7c-b022a035da8f"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "ce236f54-cce2-4abf-8947-10104a2ef6e1"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "83d09a07-542a-4d52-97b2-2e475c808806"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "cdfc2d7b-c046-4bf0-90ac-4897232619e1"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "22c7cb44-1463-48f7-8e47-88857f207702"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "08335b65-9857-4656-b7d5-14c91663126d"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "eaf92ab8-c744-4f8f-a280-6987d4f6005e"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "5a316fdc-3237-4ace-831e-67b4ca26a248"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "85d6c4c2-6683-4d56-adf4-8cacef2676be"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "8e05f27c-8172-458b-8884-b8fe38b48217"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "49deb8b2-10a6-4b4a-ad7c-9cbc2eda260b"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "59682261-6088-4dc6-959d-0a4e4363c987"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "9edee77a-4cb9-4e64-bb37-c5e66a82108d"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "410457b9-ab46-4e5f-9e0b-242d6ea465fb"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "0b88062f-ebbe-46c6-ab19-54fd226e9aa7"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "cdab7073-728d-47f0-b967-51b96f5680c8"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "574c32db-aba7-4919-9c9f-c58398754173"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "9eb51c7b-5336-4b50-a9f8-a6791bad15a9"}
+    ],
+    "Cross-departamental - Marine": [
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "da63ecd4-0720-47b3-a447-d0b1a1716b76"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "631c3d02-e456-4bcf-a272-e511a791edf0"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "23d26c61-b119-42c0-aa41-bd06cd96a973"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "e6405791-c9b9-4246-a5ed-e5cf610075b5"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "e218c8cb-5039-4706-b58f-d54c6c11a6fc"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "de50ac30-ab0d-4bf2-b9af-362977edde3a"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "9a515ef8-0e2a-479e-9b25-55658eae30be"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "f612e2b4-5c67-46dc-9a84-1154c649ab4e"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "40381c35-4849-4f17-a8f3-707aa6a53a9d"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "23eb8b56-dac8-4efc-be7c-b8fa11ba62e9"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "8fafd919-fcbe-43a3-a911-3d9461273441"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "42478434-e0ac-4f40-a4ac-aec40f161a9c"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "9f43c64c-4cbc-4e54-8199-7765331445f3"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "273df20a-47ae-42c0-bc58-01e451d4897a"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "6ab2803a-aace-4e60-83ed-44a7e0ccd1d8"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "c094782e-0d6f-4cc0-b5a3-58908493a433"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "13dbd6f9-c39f-44cb-8c05-4b11c224071c"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "44769543-7a23-4991-a53f-c2cf7c7a946f"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "1c61d457-4d03-4f3a-9005-9aabb5a201bb"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "bf6287be-3fd1-db4d-60a4-7d80abc996cb"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "32bf34ea-d51f-46c9-9945-563989dfcc7b"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "a1e18963-25dd-4219-a33f-1a38c4971250"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "2d9cce9a-d634-4b49-879f-87c40c52acf2"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "29fd13f3-e7d5-4291-8560-69d405a64a3f"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "5cba47a9-8d3c-4dae-b3a7-16b193286719"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "44cbbdc0-d33d-abe7-b08a-f5872bc0a48a"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "2378a92c-a7ec-4f8d-846a-281b8afc5b20"}
+    ],
+    "Cross-departamental - Migratory Birds": [
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "87bf8597-4be4-4ec2-9ee3-797f5eafbd97"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "0a2dfadd-57eb-4d64-a56d-ff53c431aaaa"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "f612e2b4-5c67-46dc-9a84-1154c649ab4e"}
+    ],
+    "Cross-departamental - Mining": [
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "22b2db8a-dc12-47f2-9737-99d3da921751"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "488faf70-b50b-4749-ac1c-a1fd44e06f11"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "92dbea79-f644-4a62-b25e-8eb993ca0264"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "000183ed-8864-42f0-ae43-c4313a860720"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "d6407ecb-5989-1376-8b3b-a2c354275cf1"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "2854b1c2-ac15-5e8d-c76d-a0805c56d0b2"}
+    ],
+    "Cross-departamental - Oil and Gas": [
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "000183ed-8864-42f0-ae43-c4313a860720"}
+    ],
+    "Cross-departamental - Protected and Conserved Areas": [
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "1130248f-f1a3-4956-8b2e-38d29d3e4af7"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "2888ff57-a21c-448c-a4fa-570c4cabd956"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "6c343726-1e92-451a-876a-76e17d398a1c"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "68327529-c0d5-4fcb-b84e-f8d98a7f8612"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "5fb7cb08-f91e-4cb5-bd71-4cfd84db91e1"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "6f7d1a39-fea8-4578-b1d0-766d7e92ac7a"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "97415cb9-1a6f-4886-9212-d91097c9a23e"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "16738b0c-599b-4c0a-af73-1350a2e9292c"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "ec6a46e8-0f09-40b3-9a61-63736d295c22"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "d2d6057f-d7c4-45d9-9fd9-0a58370577e0"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "23eb8b56-dac8-4efc-be7c-b8fa11ba62e9"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "3862c9fa-dbeb-4f00-ac03-c5da6551bf00"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "79dcbe44-4a86-4ac0-8eec-135f80a9b843"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "44769543-7a23-4991-a53f-c2cf7c7a946f"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "e65187cf-065f-476c-9e09-3698f78c229f"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "1162f2bf-6a89-4432-b598-7763378cd552"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "15543ed6-2057-4f1f-88f9-d97b5c31e2c1"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "2ebfa295-c51a-467c-8c38-823f27ed2a15"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "32bf34ea-d51f-46c9-9945-563989dfcc7b"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "a1e18963-25dd-4219-a33f-1a38c4971250"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "2d9cce9a-d634-4b49-879f-87c40c52acf2"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "9e1507cd-f25c-4c64-995b-6563bf9d65bd"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "936b1a57-c7de-4f42-b032-5d97bc541fe6"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "c3d1771f-fa10-4a09-ba6e-dece0ceb5f37"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "936b1a57-c7de-4f42-b032-5d97bc541fe6"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "f04ea1cf-0821-4d65-8613-8dabfd1e94de"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "8abcbe96-44e7-406e-8e05-54b32a3554bc"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "6dc5dd56-bf09-409d-91a4-619203313301"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "b7859aed-bb3c-4abe-8a98-444c194b260f"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "ad303082-90ec-4685-9574-0cadc60f9588"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "2cfc28fa-8eeb-49ed-ac1b-df882abf3393"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "197ae47a-34db-479c-9383-7137a081e5e1"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "5feed893-f00e-41d6-8d61-0bb617bd46e5"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "b19ff409-ef71-4476-924e-b3bcf26a0127"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "c2fc0a99-075e-4fdc-b85d-a8a0d88af71c"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "7da4ce6d-4c7a-4eee-8206-3062c4e750f3"}
+    ],
+    "Cross-departamental - Socioeconomic": [
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "5c670585-97ed-4e6a-a607-30fab940ff88"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "883964ca-be79-4d0d-ba9e-68babe59624e"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "90db78e2-eda2-4b2c-ae2e-a474187f2bf8"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "56578f58-a775-44ea-9cc5-9bf7c78410e6"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "d576e878-04f1-4c4f-8428-e16c371e9a3c"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "2163f792-d105-4e80-8150-08b49fab20c0"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "ac2096a6-7b4a-464e-9e08-eca7873dd88c"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "f8f00123-7c83-44b5-ac9a-6200186bbc99"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "88c1689b-9327-406e-860b-3d0e2dd518fa"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "6c5b3145-ebac-4ccc-94ef-e33083ff948e"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "3fffdd62-41e7-443c-b607-8d5825e12600"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "e3c3c580-996a-4668-8bc5-6aa7c7dc4932"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "097e5d7b-c537-455c-8882-b4fc2874dd51"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "f38ca22a-2a3f-4e8a-86b5-e74f599e5cb6"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "cfab1711-3566-4481-aebf-292ef56b216a"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "7d1b24c4-dab7-46a6-8506-d8488b869913"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "a2093d3a-7597-456a-bacf-c6a7f319ddcb"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "d1aff64e-dbfe-45a6-af97-582b7f6418b9"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "472ef86d-7f7c-423b-a7d2-b6f92b79fd6d"}
+    ],
+    "Cross-departamental - Species at Risk": [
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "a71ab99c-6756-4e56-9d2e-2a63246a5e94"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "87bf8597-4be4-4ec2-9ee3-797f5eafbd97"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "d7c5aac7-4da7-4949-9670-3fd205ed03e2"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "4eb3e825-5b0f-45a3-8b8b-355188d24b71"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "e2424b6c-db0c-4996-9bc0-2ca2e6714d71"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "2b217585-f48d-4d9f-b7ba-746909ac35ca"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "9edf7410-365a-4197-989f-51cb1634efda"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "47caa405-be2b-4e9e-8f53-c478ade2ca74"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "db177a8c-5d7d-49eb-8290-31e6a45d786c"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "8fafd919-fcbe-43a3-a911-3d9461273441"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "e0fabad5-9379-4077-87b9-5705f28c490b"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "7aa0e611-2d9b-4ff3-be7e-aec3034bc211"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "c094782e-0d6f-4cc0-b5a3-58908493a433"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "47a60179-83aa-4750-ad59-5797da909748"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "9fd7d004-970c-11eb-a2f3-1860247f53e3"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "1dd31002-ccc8-4c30-9270-044241d20f25"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "6674ed8a-0b49-425f-be37-78d5acaabea3"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "fab53209-63be-4c61-8de4-3e3fceec4227"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "6c7e9bb6-17e1-4e41-b49c-23261c8eefbc"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "1ac00a39-4770-443d-8a6b-9656c06df6a3"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "c3d1771f-fa10-4a09-ba6e-dece0ceb5f37"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "d00f8e8c-40c4-435a-b790-980339ce3121"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "0e035e55-f257-458f-9a96-80c01c69d389"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "1bbd5131-8b34-4245-b999-3b4c4259d74f"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "b19ff409-ef71-4476-924e-b3bcf26a0127"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "c2fc0a99-075e-4fdc-b85d-a8a0d88af71c"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "7da4ce6d-4c7a-4eee-8206-3062c4e750f3"}
+    ],
+    "Cross-departamental - Water Quality": [
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "7add724f-8c71-44c3-bcad-0f5df7abc2ea"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "471736af-e236-444a-9888-b4d99052c927"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "13564ca4-e330-40a5-9521-bfb1be767147"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "f182f1f8-9c9b-49e5-8702-9dd37093a768"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "18f71c8f-09a3-4d91-bd74-481d17260492"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "9fddfda5-64bb-4b88-b018-a3053afdc334"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "5ddfe481-229f-449a-96a1-4c361aa8f2be"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "d6f6ddc7-fbc2-4264-aa30-fc3d5138a6b3"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "6ab784be-1197-4820-8bc2-fd20da32632c"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "94a51051-ad11-499a-b5f1-8c97b29f695c"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "67b44816-9764-4609-ace1-68dc1764e9ea"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "5bfddafa-795b-40c0-bcbf-cc0d7d94288c"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "28ec1eaa-2291-4152-9f57-1f5c91eea21a"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "334f4740-c9bd-4193-ba69-04c21443d2b6"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "eebd2686-22f0-446e-b375-6d090276919a"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "21d4ad44-713c-41fd-b708-f66eadd369de"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "15cd9dc7-756b-4d78-b01b-221880f1bf7f"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "036e5978-c82c-46f5-ac6b-158a876dc65a"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "5fcb2423-b384-447a-a52c-7f880f1b9b79"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "8ce8abe1-d644-4134-baa9-389eebd63a05"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "29ba2628-b6c5-4dda-8cfb-fca9852925a9"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "b6b6d5a6-bded-4b6e-9e8a-17f6e1b538dc"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "b1c2dffa-c2ba-4d0e-b803-a483eef0f579"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "e616864b-8991-42d1-a2f9-4d4402c32be8"}
+    ],
+    "Cross-departamental - Water Quantity": [
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "94e38a40-085a-4c8a-a7c4-5b46e03702c3"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "2bab2f9d-4e3e-e1bb-69c0-c50fb7dda347"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "fbae2040-a1bb-40cc-b0fe-51adc7f7ffe9"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "e61aea77-b71b-4c60-aa7b-8fbe5becebe8"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "62de5952-a5eb-4859-b086-22a8ba8024b8"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "099d69c5-1401-484d-9e19-c121ccb7977c"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "02c992bb-9692-4bff-9517-7a92b09676c7"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "fe83a604-aa5a-4e46-903c-685f8b0cc33c"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "917b8854-64a5-41d6-ad7f-d0a3c0c3cb29"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "0c121878-ac23-46f5-95df-eb9960753375"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "17bfc1bb-4849-4615-83a4-f7bd1dd21fd2"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "ebd1f2e6-b245-47dc-a094-d65cbfc81afd"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "60e7157a-72ed-4017-a8db-7a0e39553e7a"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "0aa0cd82-993b-48e8-9524-c651a4e5ddc9"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "3abbdf26-7a0d-4b33-b6be-cf5303167ff2"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "bbff6c5f-20df-4aea-843e-10ce4e49dbcf"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "92e3517a-9a18-4059-81d1-69c57c2eaa0c"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "08ed9d99-126a-42b8-a1c6-e46f130c213e"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "81ffd58c-c23e-4930-bc68-cdf9179b37a2"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "0933f0dc-3625-4583-828a-86d032e4b737"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "0aa3fa53-43ef-451f-bb35-cfb43ebf06fb"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "b6abc000-a647-4a9a-a573-dc3575b0fc7f"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "87b08750-4180-4d31-9414-a9470eba9b42"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "92297600-fa37-454a-b45e-a4516d4d4ee2"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "ca0f10d2-2e3d-4c03-af01-d6072d3aa2c8"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "2a5c1689-c2f4-418c-adb8-a21fd67982fd"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "b2cec214-5616-4ca5-9cee-cc7689b5444f"},
+      { "optionDisplayValue": "","type": "geoCore", "accessPath": "", "layerId": "f4ba8a8e-f70d-4187-a1e0-11393d280775"}
     ]
   },
   "dataTeam": {
