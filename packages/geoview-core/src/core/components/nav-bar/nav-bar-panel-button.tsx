@@ -47,6 +47,7 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
         tooltipPlacement={buttonPanel.button.tooltipPlacement}
         sx={sxClasses.navButton}
         onClick={(e) => handleClick(e)}
+        className={open ? 'highlighted' : ''}
       >
         {buttonPanel.button.children}
       </IconButton>
@@ -66,8 +67,13 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
         onClose={handleClose}
         // popover will be displayed when screen is in fullscreen mode.
         {...(isMapFullScreen && { container: shellContainer })}
+        sx={{
+          '& .MuiPopover-paper': {
+            transform: 'translateX(-8px) !important' // Adjust the value for desired spacing
+          },
+        }}
       >
-        <Box sx={{ width: `${buttonPanel.panel?.width ?? 300}px`, maxHeight: '500px', marginRight: '10px' }}>
+        <Box sx={{ width: `${buttonPanel.panel?.width ?? 300}px`, maxHeight: '500px' }}>
           <DialogTitle>{(buttonPanel.panel?.title as string) ?? ''}</DialogTitle>
           <DialogContent dividers>
             <Typography dangerouslySetInnerHTML={{ __html: buttonPanel?.panel?.content ?? '' }} />

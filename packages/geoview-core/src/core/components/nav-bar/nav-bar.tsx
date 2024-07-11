@@ -73,7 +73,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
       ...{ display: displayButtons },
       ...buttonPanelGroups,
     });
-  }, [navBarComponents, buttonPanelGroups]);
+  }, [navBarComponents]);
 
   const addButtonPanel = useCallback(
     (buttonPanel: TypeButtonPanel | DefaultNavbar, buttonId: string, group: string) => {
