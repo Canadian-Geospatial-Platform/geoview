@@ -75,15 +75,15 @@ export function NavBar(props: NavBarProps): JSX.Element {
     });
   }, [navBarComponents]);
 
-  const addButtonPanel = useCallback(
-    (buttonPanel: TypeButtonPanel | DefaultNavbar, buttonId: string, group: string) => {
+  const handleNavApiAddButtonPanel = useCallback(
+    (sender: NavBarApi, event: NavBarCreatedEvent) => {
       // Log
-      logger.logTraceUseCallback('NAV-BAR - addButtonPanel', { buttonPanel, buttonId, group });
+      logger.logTraceUseCallback('NAV-BAR - addButtonPanel');
 
       const d = {
-        [group]: {
-          [buttonId]: buttonPanel,
-          ...buttonPanelGroups[group],
+        [event.group]: {
+          [event.buttonPanelId]: event.buttonPanel,
+          ...buttonPanelGroups[event.group],
         },
       };
 
@@ -95,26 +95,15 @@ export function NavBar(props: NavBarProps): JSX.Element {
     [buttonPanelGroups]
   );
 
-  const removeButtonPanel = useCallback((buttonPanelId: string, groupId: string) => {
-    logger.logTraceUseCallback('NAV-BAR - handleRemoveButtonPanel');
-    setButtonPanelGroups((prevState) => {
-      const state = { ...prevState };
-      const group = state[groupId];
-      delete group[buttonPanelId];
-      return state;
-    });
-  }, []);
-
-  const handleNavApiAddButtonPanel = useCallback(
-    (sender: NavBarApi, event: NavBarCreatedEvent) => {
-      addButtonPanel(event.buttonPanel, event.buttonPanelId, event.group);
-    },
-    [buttonPanelGroups]
-  );
-
   const handleNavApiRemoveButtonPanel = useCallback(
     (sender: NavBarApi, event: NavBarRemovedEvent) => {
-      removeButtonPanel(event.buttonPanelId, event.group);
+      logger.logTraceUseCallback('NAV-BAR - handleRemoveButtonPanel');
+      setButtonPanelGroups((prevState) => {
+        const state = { ...prevState };
+        const group = state[event.group];
+        delete group[event.buttonPanelId];
+        return state;
+      });
     },
     [setButtonPanelGroups]
   );
