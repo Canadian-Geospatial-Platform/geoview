@@ -46,6 +46,7 @@ import {
   TypeClassBreakStyleConfig,
 } from '@/geo/map/map-schema-types';
 import { GeoViewLayerCreatedTwiceError } from '@/geo/layer/exceptions/layer-exceptions';
+import { validateExtent } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { getLegendStyles, getFeatureCanvas } from '@/geo/utils/renderer/geoview-renderer';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
@@ -1048,7 +1049,10 @@ export abstract class AbstractGeoViewLayer {
       else processGroupLayerBounds([layerConfig]);
 
       // TODO: Check - Are the bounds initially always 4326?
-      if (projectionCode && bounds) return Projection.transformExtent(bounds, `EPSG:4326`, `EPSG:${projectionCode}`);
+      if (projectionCode && bounds) {
+        bounds = validateExtent(bounds);
+        return Projection.transformExtent(bounds, Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${projectionCode}`);
+      }
     }
     return bounds;
   }

@@ -7,6 +7,7 @@ import { AppEventProcessor } from '@/api/event-processors/event-processor-childr
 import { XYZTilesLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { AbstractGVTile } from './abstract-gv-tile';
 import { featureInfoGetFieldType } from '../utils';
+import { validateExtent } from '@/geo/utils/utilities';
 
 /**
  * Manages a Tile<XYZ> layer.
@@ -89,6 +90,7 @@ export class GVXYZTiles extends AbstractGVTile {
     if (sourceExtent) {
       // Make sure we're in the map projection
       sourceExtent = this.getMapViewer().convertExtentFromProjToMapProj(sourceExtent, sourceProjection);
+      sourceExtent = validateExtent(sourceExtent, this.getMapViewer().getProjection().getCode());
     }
 
     // Return the calculated layer bounds
