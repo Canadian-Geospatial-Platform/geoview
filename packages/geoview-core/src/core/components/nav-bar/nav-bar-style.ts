@@ -5,11 +5,10 @@ import { Theme } from '@mui/material/styles';
 export const getSxClasses = (theme: Theme): any => ({
   navBarRef: {
     position: 'absolute',
-    right: theme.spacing(5),
-    // height: '600px',
-    // maxHeight: 'calc( 100% - 200px)',
+    right: theme.spacing(7),
+    padding: '6px',
     display: 'flex',
-    flexDirection: 'row',
+    flexDirection: 'column-reverse',
     marginRight: 0,
     zIndex: 150,
     pointerEvents: 'all',
@@ -17,22 +16,26 @@ export const getSxClasses = (theme: Theme): any => ({
     backgroundColor: 'transparent',
     transition: 'bottom 300ms ease-in-out',
     bottom: '6rem',
+    alignItems: 'flex-start',
+    flexWrap: 'wrap-reverse',
+    maxHeight: '60%',
+    gap: '15px',
   },
   navBtnGroupContainer: {
     display: 'flex',
     position: 'relative',
-    flexDirection: 'column',
     pointerEvents: 'auto',
-    justifyContent: 'end',
+    // justifyContent: 'end',
     overflowY: 'hidden',
     padding: 5,
+    flexDirection: 'column',
+    // flexWrap: 'wrap',
+    // maxHeight: '520px',
   },
   navBtnGroup: {
     borderRadius: theme.spacing(5),
     backgroundColor: theme.palette.geoViewColor.bgColor.light[500],
-    '&:not(:last-child)': {
-      marginBottom: theme.spacing(11),
-    },
+    
     '& .MuiButtonGroup-grouped:not(:last-child)': {
       borderColor: theme.palette.geoViewColor.bgColor.light[900],
     },

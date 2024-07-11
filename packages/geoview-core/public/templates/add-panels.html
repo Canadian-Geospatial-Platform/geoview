@@ -41,7 +41,7 @@
       <button class="add-appbar-panel-btn">Add Appbar Panel</button>
       <button class="add-navbar-panel-btn">Add Navbar Panel</button>
       <button class="add-navbar-button-btn">Add Navbar Button</button>
-      <button class="add-navbar-button-group-btn">Add Navbar Panel New Group</button>
+      <input type="text" id="navbar-button-group-name" placeholder="Enter group name" value="groupName1" />
     </div>
     <div
       id="mapWM"
@@ -82,6 +82,9 @@
           // get add panel button element for WM map
           var addAppbarPanelBtn = document.getElementsByClassName('add-appbar-panel-btn')[0];
 
+          // get the input for the group name
+          var navbarButtonGroupNameInput = document.getElementById('navbar-button-group-name');
+
           // add app-bar panel btn click event handler
           // button will open a panel on the app-bar
           addAppbarPanelBtn.addEventListener('click', function (e) {
@@ -108,6 +111,12 @@
           // add nav-bar panel btn click event handler
           // button will open a panel on the nav-bar
           addNavbarPanelBtn.addEventListener('click', function (e) {
+            const groupName = navbarButtonGroupNameInput.value;
+
+            if(groupName === '') {
+              alert('Enter a value group name');
+              return;
+            }
             const button = {
               tooltip: 'Test',
               children: cgpv.react.createElement(cgpv.ui.elements.AppsIcon),
@@ -115,13 +124,13 @@
             };
 
             const panel = {
-              title: 'Test',
-              content: `<div>Test content</div>`,
-              width: 200,
+              title: 'Panel Title',
+              content: `<div><p>Vestibulum in fringilla tortor. Aliquam placerat odio nec urna consequat tincidunt eu sit amet mauris.</p><p>Donec vestibulum tellus ex, a venenatis urna finibus quis. Sed venenatis nisi porttitor ex laoreet auctor. </p></div>`,
+              width: 400,
             };
 
             // call an api function to add a panel with a button
-            cgpv.api.maps['mapWM'].navBarApi.createNavbarButtonPanel(button, panel, null);
+            cgpv.api.maps['mapWM'].navBarApi.createNavbarButtonPanel(button, panel, groupName);
           });
 
           // get add nav-bar button element for WM map
@@ -130,42 +139,26 @@
           // add nav-bar button btn click event handler
           // button will call a function
           addNavbarButtonBtn.addEventListener('click', function (e) {
+            const groupName = navbarButtonGroupNameInput.value;
+
+            if(groupName === '') {
+              alert('Enter a value group name');
+              return;
+            }
+
             const button = {
-              tooltip: 'Test',
+              tooltip: `Test (${groupName})`,
               children: cgpv.react.createElement(cgpv.ui.elements.OpenInBrowserIcon),
               tooltipPlacement: 'left',
               onClick: function () {
-                alert('test function');
+                alert('You clicked on a navbar test button');
               },
             };
 
             // call an api function to add a panel with a button
-            cgpv.api.maps['mapWM'].navBarApi.createNavbarButton(button, null);
+            cgpv.api.maps['mapWM'].navBarApi.createNavbarButton(button, groupName);
           });
 
-          // get add nav-bar button group element for WM map
-          var addNavbarButtonGroupBtn = document.getElementsByClassName('add-navbar-button-group-btn')[0];
-
-          // add nav-bar button group btn click event handler
-          // button will add a button panel on the nav-bar in a new group
-          addNavbarButtonGroupBtn.addEventListener('click', function (e) {
-            const button = {
-              id: 'id',
-              tooltip: 'Group',
-              tooltipPlacement: 'left',
-              children: cgpv.react.createElement(cgpv.ui.elements.GroupIcon), // comment
-            };
-
-            const panel = {
-              panelId: 'panerId',
-              title: 'Group',
-              content: `<div>Test content</div>`,
-              width: 400,
-            };
-
-            // call an api function to add a new button panel in the nav-bar in a new group
-            cgpv.api.maps['mapWM'].navBarApi.createNavbarButtonPanel(button, panel, 'newGroup');
-          });
         }
       });
 
