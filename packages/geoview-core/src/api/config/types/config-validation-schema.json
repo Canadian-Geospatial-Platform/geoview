@@ -310,7 +310,7 @@
     },
     "TypeBasemapId": {
       "description": "Id of the basemap to use.",
-      "enum": ["transport", "osm", "simple", "nogeom", "shaded"],
+      "enum": ["transport", "osm", "simple", "nogeom", "shaded", "satellite"],
       "default": "transport"
     },
     "TypeInteraction": {

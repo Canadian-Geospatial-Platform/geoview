@@ -105,7 +105,7 @@ export const VALID_PROJECTION_CODES = [3978, 3857];
 /**
  *  Definition of the basemap options type.
  */
-export const CV_VALID_BASEMAP_ID: TypeBasemapId[] = ['transport', 'osm', 'simple', 'nogeom', 'shaded'];
+export const CV_VALID_BASEMAP_ID: TypeBasemapId[] = ['transport', 'osm', 'simple', 'nogeom', 'shaded', 'satellite'];
 
 /** default configuration if provided configuration is missing or wrong */
 // valid basemap ids
