@@ -95,26 +95,29 @@ export function NavBar(props: NavBarProps): JSX.Element {
     [buttonPanelGroups]
   );
 
-  const removeButtonPanel = useCallback(
-    (buttonPanelId: string, groupId: string) => {
-      logger.logTraceUseCallback('NAV-BAR - handleRemoveButtonPanel');
-      setButtonPanelGroups((prevState) => {
-        const state = { ...prevState };
-        const group = state[groupId];
-        delete group[buttonPanelId];
-        return state;
-      });
+  const removeButtonPanel = useCallback((buttonPanelId: string, groupId: string) => {
+    logger.logTraceUseCallback('NAV-BAR - handleRemoveButtonPanel');
+    setButtonPanelGroups((prevState) => {
+      const state = { ...prevState };
+      const group = state[groupId];
+      delete group[buttonPanelId];
+      return state;
+    });
+  }, []);
+
+  const handleNavApiAddButtonPanel = useCallback(
+    (sender: NavBarApi, event: NavBarCreatedEvent) => {
+      addButtonPanel(event.buttonPanel, event.buttonPanelId, event.group);
+    },
+    [buttonPanelGroups]
+  );
+
+  const handleNavApiRemoveButtonPanel = useCallback(
+    (sender: NavBarApi, event: NavBarRemovedEvent) => {
+      removeButtonPanel(event.buttonPanelId, event.group);
     },
     [setButtonPanelGroups]
   );
-
-  const handleNavApiAddButtonPanel = useCallback((sender: NavBarApi, event: NavBarCreatedEvent) => {
-    addButtonPanel(event.buttonPanel, event.buttonPanelId, event.group);
-  }, []);
-
-  const handleNavApiRemoveButtonPanel = useCallback((sender: NavBarApi, event: NavBarRemovedEvent) => {
-    removeButtonPanel(event.buttonPanelId, event.group);
-  }, []);
 
   useEffect(() => {
     // Log
