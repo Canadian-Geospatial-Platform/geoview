@@ -67,7 +67,7 @@ class AoiPanelPlugin extends AppBarPlugin {
   }
 
   override onCreateContent = (): JSX.Element => {
-    return <AoiPanel /* mapId={this.pluginProps.mapId} config={this.configObj || {}} */ />;
+    return <AoiPanel config={this.configObj || {}} />;
   };
 
   /**
