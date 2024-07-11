@@ -171,7 +171,6 @@ export default function ExportModal(): JSX.Element {
               sx={{
                 paddingBottom: '1rem',
                 minWidth: 300,
-                '& input': { padding: 0, minHeight: '2.5rem' },
                 '& label + div': { marginTop: '0.5rem' },
               }}
             />

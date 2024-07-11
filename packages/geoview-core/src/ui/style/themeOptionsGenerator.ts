@@ -389,6 +389,30 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
           },
         },
       },
+      MuiSelect: {
+        styleOverrides: {
+          select: {
+            minHeight: '2.25rem',
+            padding: '0 !important',
+          },
+        },
+      },
+      MuiNativeSelect: {
+        styleOverrides: {
+          select: {
+            minHeight: '2.25rem',
+            padding: '0 !important',
+          },
+        },
+      },
+      MuiInputBase: {
+        styleOverrides: {
+          input: {
+            minHeight: '2.5rem',
+            padding: '0 !important',
+          },
+        },
+      },
     },
     overrides: {
       button: {
