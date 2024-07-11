@@ -1142,16 +1142,21 @@ export class MapViewer {
   /**
    * Remove map
    *
-   * @param {boolean} deleteContainer true if we want to delete div from the page
-   * @returns {HTMLElement} return the HTML element
+   * @param {boolean} deleteContainer - True if we want to delete div from the page
+   * @returns {HTMLElement} The HTML element
    */
   remove(deleteContainer: boolean): HTMLElement {
-    // get the map container to unmount
-    // remove geoview-class if we need to reuse the div
+    // Get the map container to unmount
+    // Remove geoview-class if we need to reuse the div
     const mapContainer = document.getElementById(this.mapId)!;
     mapContainer.classList.remove('geoview-map');
 
-    // unload all loaded plugins on the map
+    // If this is done after plugin removal, it triggers a rerender, and the plugins can cause an error, depending on state
+    // Remove the dom element (remove rendered map and overview map)
+    if (this.overviewRoot) this.overviewRoot.unmount();
+    unmountMap(this.mapId);
+
+    // Unload all loaded plugins on the map
     Plugin.removePlugins(this.mapId)
       .then(() => {
         // Remove all layers
@@ -1161,17 +1166,13 @@ export class MapViewer {
           // Failed to remove layers, eat the exception and continue to remove the map
         }
 
-        // remove the dom element (remove rendered map and overview map)
-        if (this.overviewRoot) this.overviewRoot?.unmount();
-        unmountMap(this.mapId);
-
-        // delete store and event processor
+        // Delete store and event processor
         removeGeoviewStore(this.mapId);
 
-        // if deleteContainer, delete the HTML div
+        // If deleteContainer, delete the HTML div
         if (deleteContainer) mapContainer.remove();
 
-        // delete the map instance from the maps array, will delete attached plugins
+        // Delete the map instance from the maps array, will delete attached plugins
         // TODO: need a time out here because if not, map is deleted before everything is done on the map
         // TO.DOCONT: This whole sequence need to be async
         setTimeout(() => delete api.maps[this.mapId], 1000);
@@ -1180,7 +1181,7 @@ export class MapViewer {
         logger.logError(`Couldn't remove map in map-viewer`, error);
       });
 
-    // return the map container to be remove
+    // Return the map container to be remove
     return mapContainer;
   }
 
