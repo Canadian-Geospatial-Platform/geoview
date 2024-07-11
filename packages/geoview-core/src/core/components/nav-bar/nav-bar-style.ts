@@ -35,7 +35,7 @@ export const getSxClasses = (theme: Theme): any => ({
   navBtnGroup: {
     borderRadius: theme.spacing(5),
     backgroundColor: theme.palette.geoViewColor.bgColor.light[500],
-    
+
     '& .MuiButtonGroup-grouped:not(:last-child)': {
       borderColor: theme.palette.geoViewColor.bgColor.light[900],
     },

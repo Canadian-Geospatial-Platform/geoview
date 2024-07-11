@@ -43,16 +43,19 @@ export function NavBar(props: NavBarProps): JSX.Element {
   const navBarComponents = useUINavbarComponents();
 
   const defaultNavbar: Record<DefaultNavbar, JSX.Element> = {
-    fullScreen: <Fullscreen />, location: <Location />, home: <Home />, zoomIn: <ZoomIn />, zoomOut: <ZoomOut />
+    fullScreen: <Fullscreen />,
+    location: <Location />,
+    home: <Home />,
+    zoomIn: <ZoomIn />,
+    zoomOut: <ZoomOut />,
   };
 
   // internal state
   const navBarRef = useRef<HTMLDivElement>(null);
   const defaultButtonGroups: NavButtonGroups = {
-    'zoom': { "zoomIn": 'zoomIn', "zoomOut": 'zoomOut' },
+    zoom: { zoomIn: 'zoomIn', zoomOut: 'zoomOut' },
   };
   const [buttonPanelGroups, setButtonPanelGroups] = useState<NavButtonGroups>(defaultButtonGroups);
-
 
   useEffect(() => {
     let displayButtons: NavbarButtonGroup = {};
@@ -65,55 +68,53 @@ export function NavBar(props: NavBarProps): JSX.Element {
     if (navBarComponents.includes('home')) {
       displayButtons = { ...displayButtons, home: 'home' };
     }
-    
-    setButtonPanelGroups({
-      ...{ 'display': displayButtons },
-      ...buttonPanelGroups,
-    });
-
-  }, [navBarComponents]);
-
-  const addButtonPanel = useCallback((buttonPanel: TypeButtonPanel | DefaultNavbar, buttonId: string, group: string) => {
-    // Log
-    logger.logTraceUseCallback('NAV-BAR - addButtonPanel', { buttonPanel, buttonId, group });
-
-    const d = {
-      [group]: {
-        [buttonId]: buttonPanel,
-        ...buttonPanelGroups[group],
-      },
-    };
 
     setButtonPanelGroups({
+      ...{ display: displayButtons },
       ...buttonPanelGroups,
-      ...d,
     });
-  }, [buttonPanelGroups]);
+  }, [navBarComponents, buttonPanelGroups]);
 
-  const removeButtonPanel = useCallback((buttonPanelId: string, groupId: string) => {
-    logger.logTraceUseCallback('NAV-BAR - handleRemoveButtonPanel', event);
-    setButtonPanelGroups((prevState) => {
-      const state = { ...prevState };
-      const group = state[groupId];
-      delete group[buttonPanelId];
-      return state;
-    });
+  const addButtonPanel = useCallback(
+    (buttonPanel: TypeButtonPanel | DefaultNavbar, buttonId: string, group: string) => {
+      // Log
+      logger.logTraceUseCallback('NAV-BAR - addButtonPanel', { buttonPanel, buttonId, group });
 
-  }, []);
+      const d = {
+        [group]: {
+          [buttonId]: buttonPanel,
+          ...buttonPanelGroups[group],
+        },
+      };
 
-  const handleNavApiAddButtonPanel = useCallback(
-    (sender: NavBarApi, event: NavBarCreatedEvent) => {
-      addButtonPanel(event.buttonPanel, event.buttonPanelId, event.group);
+      setButtonPanelGroups({
+        ...buttonPanelGroups,
+        ...d,
+      });
     },
     [buttonPanelGroups]
   );
 
-  const handleNavApiRemoveButtonPanel = useCallback(
-    (sender: NavBarApi, event: NavBarRemovedEvent) => {
-      removeButtonPanel(event.buttonPanelId, event.group);
+  const removeButtonPanel = useCallback(
+    (buttonPanelId: string, groupId: string) => {
+      logger.logTraceUseCallback('NAV-BAR - handleRemoveButtonPanel');
+      setButtonPanelGroups((prevState) => {
+        const state = { ...prevState };
+        const group = state[groupId];
+        delete group[buttonPanelId];
+        return state;
+      });
     },
     [setButtonPanelGroups]
   );
+
+  const handleNavApiAddButtonPanel = useCallback((sender: NavBarApi, event: NavBarCreatedEvent) => {
+    addButtonPanel(event.buttonPanel, event.buttonPanelId, event.group);
+  }, []);
+
+  const handleNavApiRemoveButtonPanel = useCallback((sender: NavBarApi, event: NavBarRemovedEvent) => {
+    removeButtonPanel(event.buttonPanelId, event.group);
+  }, []);
 
   useEffect(() => {
     // Log
@@ -153,11 +154,9 @@ export function NavBar(props: NavBarProps): JSX.Element {
           </IconButton>
         ) : (
           <NavbarPanelButton buttonPanel={buttonPanel} />
-          
         )}
       </Fragment>
     );
-
   }
 
   function renderButtonPanelGroup(buttonPanelGroup: NavbarButtonGroup, groupName: string): JSX.Element | null {
@@ -185,7 +184,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
   return (
     <Box ref={navBarRef} sx={[sxClasses.navBarRef]}>
-      { Object.keys(buttonPanelGroups).map((key) =>  renderButtonPanelGroup(buttonPanelGroups[key], key) )}
+      {Object.keys(buttonPanelGroups).map((key) => renderButtonPanelGroup(buttonPanelGroups[key], key))}
     </Box>
   );
 }

@@ -1,4 +1,4 @@
-import { Fragment, useState, MouseEvent } from 'react';
+import { useState, MouseEvent } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { getSxClasses } from './nav-bar-style';
 import { Box, Popover, IconButton, DialogTitle, DialogContent, Typography } from '@/ui';
@@ -7,7 +7,7 @@ import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 
 interface NavbarPanelButtonType {
-  buttonPanel: TypeButtonPanel
+  buttonPanel: TypeButtonPanel;
 }
 
 /**
@@ -30,7 +30,7 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
 
   const id = open ? 'simple-popover' : undefined;
 
-  const handleClick = (event: MouseEvent<HTMLElement>, buttonPanel: TypeButtonPanel): void => {
+  const handleClick = (event: MouseEvent<HTMLElement>): void => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -39,14 +39,14 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
   };
 
   return (
-    <Fragment>
+    <>
       <IconButton
         key={buttonPanel.button.id}
         id={buttonPanel.button.id}
         tooltip={buttonPanel.button.tooltip}
         tooltipPlacement={buttonPanel.button.tooltipPlacement}
         sx={sxClasses.navButton}
-        onClick={(e) => handleClick(e, buttonPanel)}
+        onClick={(e) => handleClick(e)}
       >
         {buttonPanel.button.children}
       </IconButton>
@@ -70,10 +70,10 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
         <Box sx={{ width: `${buttonPanel.panel?.width ?? 300}px`, maxHeight: '500px', marginRight: '10px' }}>
           <DialogTitle>{(buttonPanel.panel?.title as string) ?? ''}</DialogTitle>
           <DialogContent dividers>
-          <Typography dangerouslySetInnerHTML={{ __html: (buttonPanel?.panel?.content ?? '') }} />
-          </DialogContent> 
+            <Typography dangerouslySetInnerHTML={{ __html: buttonPanel?.panel?.content ?? '' }} />
+          </DialogContent>
         </Box>
       </Popover>
-    </Fragment>
+    </>
   );
 }
