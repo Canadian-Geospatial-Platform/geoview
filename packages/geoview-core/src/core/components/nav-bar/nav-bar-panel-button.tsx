@@ -69,7 +69,7 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
         {...(isMapFullScreen && { container: shellContainer })}
         sx={{
           '& .MuiPopover-paper': {
-            transform: 'translateX(-8px) !important' // Adjust the value for desired spacing
+            transform: 'translateX(-8px) !important', // Adjust the value for desired spacing
           },
         }}
       >
