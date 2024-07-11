@@ -28,39 +28,38 @@ export class Basemap {
   // The maximum delay to wait before we abandon(?) a basemap
   static REQUEST_DELAY_MAX = 3000;
 
-  // active basemap
+  // Active basemap
   activeBasemap?: TypeBasemapProps;
 
-  // default origin
+  // Default origin
   defaultOrigin?: number[];
 
-  // default resolution
+  // Default resolution
   defaultResolutions?: number[];
 
-  // default extent
+  // Default extent
   defaultExtent?: Extent;
 
-  // default overview map layer
+  // Default overview map layer
   overviewMap?: TypeBasemapProps;
 
-  // the basemap options passed from the map config
+  // The basemap options passed from the map config
   basemapOptions: TypeBasemapOptions;
 
-  // the map id to be used in events
+  // The map id to be used in events
   mapId: string;
 
   /**
-   * initialize basemap
-   *
-   * @param {TypeBasemapOptions} basemapOptions optional basemap option properties, passed in from map config
-   * @param {string} mapId the map id
+   * Initialize basemap.
+   * @param {TypeBasemapOptions} basemapOptions - Optional basemap option properties, passed in from map config.
+   * @param {string} mapId - The map id.
    */
   constructor(basemapOptions: TypeBasemapOptions, mapId: string) {
     this.mapId = mapId;
 
     this.basemapOptions = basemapOptions;
 
-    // create the overview default basemap (no label, no shaded)
+    // Create the overview default basemap (no label, no shaded)
     this.setOverviewMap().catch((error) => {
       // Log
       logger.logPromiseFailed('setOverviewMap in constructor of layer/basemap', error);
@@ -68,7 +67,7 @@ export class Basemap {
   }
 
   /**
-   * basemap list
+   * Basemap list
    */
   basemapsList: TypeJsonObject = toJsonObject({
     3978: {
@@ -88,6 +87,10 @@ export class Basemap {
         url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/xxxx_TXT_3978/MapServer/WMTS/tile/1.0.0/xxxx_TXT_3978/default/default028mm/{z}/{y}/{x}.jpg',
         jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/xxxx_TXT_3978/MapServer?f=json',
       },
+      imagery: {
+        url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        jsonUrl: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/?f=json',
+      },
     },
     3857: {
       transport: {
@@ -106,6 +109,10 @@ export class Basemap {
         url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/xxxx_TXT_3857/MapServer/WMTS/tile/1.0.0/xxxx_TXT_3857/default/default028mm/{z}/{y}/{x}.jpg',
         jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/xxxx_TXT_3857/MapServer?f=json',
       },
+      imagery: {
+        url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        jsonUrl: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/?f=json',
+      },
     },
   });
 
@@ -113,13 +120,13 @@ export class Basemap {
   #onBasemapChangedHandlers: BasemapChangedDelegate[] = [];
 
   // #region PRIVATE UTILITY FUNCTIONS
+
   /**
    * Get projection from basemap url
    * Because OpenLayers can reproject on the fly raster, some like Shaded and Simple even if only available in 3978
    * can be use in 3857. For this we need to make a difference between map projection and url use for the basemap
-   *
-   * @param {string} url basemap url
-   * @returns {number} projection code
+   * @param {string} url - Basemap url
+   * @returns {number} Projection code
    * @private
    */
   static #getProjectionFromUrl(url: string): number {
@@ -152,14 +159,12 @@ export class Basemap {
   // #region CREATE BASEMAPS
 
   /**
-   * Create a basemap layer
-   *
-   * @param {string} basemapId the id of the layer
-   * @param {TypeJsonObject} basemapLayer the basemap layer url and json url
-   * @param {number} opacity the opacity to use for this layer
-   * @param {boolean} rest should we do a get request to get the info from the server
-   *
-   * @returns {TypeBasemapLayer} return the created basemap layer
+   * Create a basemap layer.
+   * @param {string} basemapId - The id of the layer.
+   * @param {TypeJsonObject} basemapLayer - The basemap layer url and json url.
+   * @param {number} opacity - The opacity to use for this layer.
+   * @param {boolean} rest - Should we do a get request to get the info from the server.
+   * @returns {TypeBasemapLayer} The created basemap layer.
    * @private
    */
   async #createBasemapLayer(
@@ -184,59 +189,57 @@ export class Basemap {
       });
     }
 
-    // should we do a get request to get the layer information from the server?
+    // Should we do a get request to get the layer information from the server?
     if (rest && (basemapLayer.jsonUrl as string)) {
       try {
-        // get info from server
+        // Get info from server
         // TODO: Check/Refactor - Document the necessity to explicitely reject after Basemap.REQUEST_DELAY_MAX
         const request = await requestBasemap(basemapLayer.jsonUrl as string, Basemap.REQUEST_DELAY_MAX);
 
         if (request) {
           const result = toJsonObject(request.data);
 
-          // get minimum scale
+          // Get minimum scale
           const minScale = result.minScale as number;
 
-          // get maximum scale
+          // Get maximum scale
           const maxScale = result.maxScale as number;
 
-          // get extent
+          // Get extent
           const fullExtent = toJsonObject(result.fullExtent);
 
-          // get the tile grid info
+          // Get the tile grid info
           const tileInfo = toJsonObject(result.tileInfo);
 
           const lods: TypeJsonObject = {};
 
-          // get resolutions and scale from tile grid info
+          // Get resolutions and scale from tile grid info
           (tileInfo.lods as TypeJsonArray)?.forEach((lod) => {
             const scale = lod.scale as number;
             const resolution = lod.resolution as number;
 
-            if (scale <= minScale && scale >= maxScale) {
-              resolutions.push(resolution);
+            resolutions.push(resolution);
 
-              lods[scale] = lod;
-            }
+            lods[scale] = lod;
           });
 
-          // set layer origin
+          // Set layer origin
           origin = [tileInfo?.origin?.x || 0, tileInfo?.origin?.y || 0] as number[];
 
           // set minimum zoom for this layer
-          minZoom = lods[minScale].level as number;
+          minZoom = lods[minScale] ? (lods[minScale].level as number) : 0;
 
-          // set max zoom for this layer
-          maxZoom = lods[maxScale].level as number;
+          // Set max zoom for this layer
+          maxZoom = lods[maxScale] ? (lods[maxScale].level as number) : 23;
 
-          // set extent for this layer
+          // Set extent for this layer
           extent = [fullExtent.xmin as number, fullExtent.ymin as number, fullExtent.xmax as number, fullExtent.ymax as number];
 
           // Because OpenLayers can reproject on the fly raster, some like Shaded and Simple even if only available in 3978
           // can be use in 3857. For this we need to make a difference between map projection and url use for the basemap
           urlProj = Basemap.#getProjectionFromUrl(basemapLayer.url as string);
 
-          // return a basemap layer
+          // Return a basemap layer
           return {
             basemapId,
             type: basemapId,
@@ -269,13 +272,11 @@ export class Basemap {
   }
 
   /**
-   * Create the core basemap and add the layers to it
-   *
-   * @param {TypeBasemapOptions} basemapOptions basemap options
-   * @param {TypeValidMapProjectionCodes} projection optional projection code
-   * @param {TypeDisplayLanguage} language optional language
-   *
-   * @return {Promise<TypeBasemapProps | undefined>} the core basemap
+   * Create the core basemap and add the layers to it.
+   * @param {TypeBasemapOptions} basemapOptions - Basemap options.
+   * @param {TypeValidMapProjectionCodes} projection - Optional projection code.
+   * @param {TypeDisplayLanguage} language - Optional language.
+   * @return {Promise<TypeBasemapProps | undefined>} The core basemap.
    */
   async createCoreBasemap(
     basemapOptions: TypeBasemapOptions,
@@ -292,17 +293,17 @@ export class Basemap {
     let minZoom = 0;
     let maxZoom = 17;
 
-    // check if projection is provided for the basemap creation
+    // Check if projection is provided for the basemap creation
     const projectionCode = projection === undefined ? MapEventProcessor.getMapState(this.mapId).currentProjection : projection;
 
-    // check if language is provided for the basemap creation
+    // Check if language is provided for the basemap creation
     const languageCode = language === undefined ? AppEventProcessor.getDisplayLanguage(this.mapId) : language;
 
-    // check if basemap options are provided for the basemap creation
+    // Check if basemap options are provided for the basemap creation
     const coreBasemapOptions = basemapOptions === undefined ? this.basemapOptions : basemapOptions;
 
     if (coreBasemapOptions) {
-      // create shaded layer
+      // Create shaded layer
       if (coreBasemapOptions.shaded && this.basemapsList[projectionCode].shaded) {
         const shadedLayer = await this.#createBasemapLayer('shaded', this.basemapsList[projectionCode].shaded, defaultOpacity, true);
         if (shadedLayer) {
@@ -311,7 +312,7 @@ export class Basemap {
         }
       }
 
-      // create transport layer
+      // Create transport layer
       if (coreBasemapOptions.basemapId === 'transport' && this.basemapsList[projectionCode].transport) {
         const transportLayer = await this.#createBasemapLayer(
           'transport',
@@ -323,7 +324,7 @@ export class Basemap {
           basemapLayers.push(transportLayer);
           basemaplayerTypes.push('transport');
 
-          // set default origin,extent,resolutions from layer
+          // Set default origin,extent,resolutions from layer
           defaultOrigin = transportLayer.origin;
           defaultExtent = transportLayer.extent;
           defaultResolutions = transportLayer.resolutions;
@@ -332,7 +333,7 @@ export class Basemap {
         }
       }
 
-      // create simple layer
+      // Create simple layer
       if (coreBasemapOptions.basemapId === 'simple' && this.basemapsList[projectionCode].simple) {
         const simpleLayer = await this.#createBasemapLayer(
           'simple',
@@ -345,7 +346,7 @@ export class Basemap {
           basemapLayers.push(simpleLayer);
           basemaplayerTypes.push('simple');
 
-          // set default origin,extent,resolutions from layer
+          // Set default origin,extent,resolutions from layer
           defaultOrigin = simpleLayer.origin;
           defaultExtent = simpleLayer.extent;
           defaultResolutions = simpleLayer.resolutions;
@@ -354,7 +355,7 @@ export class Basemap {
         }
       }
 
-      // create open street maps layer
+      // Create open street maps layer
       if (coreBasemapOptions.basemapId === 'osm') {
         basemapLayers.push({
           basemapId: 'osm',
@@ -370,9 +371,30 @@ export class Basemap {
         basemaplayerTypes.push('osm');
       }
 
-      // no geometry basemap layer
+      // No geometry basemap layer
       if (coreBasemapOptions.basemapId === 'nogeom') {
         basemaplayerTypes.push('nogeom');
+      }
+
+      // Create imagery layer
+      if (coreBasemapOptions.basemapId === 'imagery' && this.basemapsList[projectionCode].imagery) {
+        const imageryLayer = await this.#createBasemapLayer(
+          'imagery',
+          this.basemapsList[projectionCode].imagery,
+          coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
+          true
+        );
+        if (imageryLayer) {
+          basemapLayers.push(imageryLayer);
+          basemaplayerTypes.push('imagery');
+
+          // Set default origin,extent,resolutions from layer
+          defaultOrigin = imageryLayer.origin;
+          defaultExtent = imageryLayer.extent;
+          defaultResolutions = imageryLayer.resolutions;
+          minZoom = imageryLayer.minScale;
+          maxZoom = imageryLayer.maxScale;
+        }
       }
 
       if (basemapLayers.length && coreBasemapOptions.labeled) {
@@ -396,7 +418,7 @@ export class Basemap {
     }
 
     if (basemapLayers.length > 0 || (basemapLayers.length === 0 && coreBasemapOptions.basemapId === 'nogeom')) {
-      // id and type are derived from the basemap type composition (shaded, label, transport, simple)
+      // Id and type are derived from the basemap type composition (shaded, label, transport, simple)
       const basemap = {
         basemapId: basemaplayerTypes.join(''),
         layers: basemapLayers,
@@ -428,13 +450,11 @@ export class Basemap {
   }
 
   /**
-   * Create a custom basemap
-   *
-   * @param {TypeBasemapProps} basemapProps basemap properties
-   * @param {TypeValidMapProjectionCodes} projection projection code
-   * @param {TypeDisplayLanguage} language optional language
-   *
-   * @returns {TypeBasemapProps} the created custom basemap
+   * Create a custom basemap.
+   * @param {TypeBasemapProps} basemapProps - Basemap properties.
+   * @param {TypeValidMapProjectionCodes} projection - Projection code.
+   * @param {TypeDisplayLanguage} language - Optional language.
+   * @returns {TypeBasemapProps} The created custom basemap.
    */
   createCustomBasemap(
     basemapProps: TypeBasemapProps,
@@ -446,16 +466,16 @@ export class Basemap {
       fr: string;
     }
 
-    // extract bilangual sections
+    // Extract bilangual sections
     const name: bilingual = basemapProps.name as unknown as bilingual;
     const description: bilingual = basemapProps.description as unknown as bilingual;
     const thumbnailUrl: bilingual = basemapProps.thumbnailUrl as unknown as bilingual;
     const attribution: bilingual = basemapProps.attribution as unknown as bilingual;
 
-    // check if language is provided for the basemap creation
+    // Check if language is provided for the basemap creation
     const languageCode = language === undefined ? AppEventProcessor.getDisplayLanguage(this.mapId) : language;
 
-    // create the basemap properties
+    // Create the basemap properties
     const formatProps: TypeBasemapProps = { ...basemapProps };
     formatProps.name = languageCode === 'en' ? name.en : name.fr;
     formatProps.layers = basemapProps.layers.map((layer) => {
@@ -486,16 +506,15 @@ export class Basemap {
   // #endregion
 
   /**
-   * Load the default basemap that was passed in the map config
-   *
-   * @param {TypeValidMapProjectionCodes} projection optional projection code
-   * @param {TypeDisplayLanguage} language optional language
+   * Load the default basemap that was passed in the map config.
+   * @param {TypeValidMapProjectionCodes} projection - Optional projection code.
+   * @param {TypeDisplayLanguage} language - Optional language.
    */
   async loadDefaultBasemaps(projection?: TypeValidMapProjectionCodes, language?: TypeDisplayLanguage): Promise<void> {
     const basemap = await this.createCoreBasemap(MapEventProcessor.getBasemapOptions(this.mapId), projection, language);
 
     if (basemap) {
-      // info used by create custom basemap
+      // Info used by create custom basemap
       this.defaultOrigin = basemap?.defaultOrigin;
       this.defaultResolutions = basemap?.defaultResolutions;
       this.defaultExtent = basemap?.defaultExtent;
@@ -505,50 +524,49 @@ export class Basemap {
   }
 
   /**
-   * Set the current basemap and update the basemap layers on the map
-   *
-   * @param {TypeBasemapProps} basemap the basemap
+   * Set the current basemap and update the basemap layers on the map.
+   * @param {TypeBasemapProps} basemap - The basemap.
    */
   setBasemap(basemap: TypeBasemapProps): void {
-    // set active basemap
+    // Set active basemap
     this.activeBasemap = basemap;
 
-    // set store attribution for the selected basemap or empty string if not provided
+    // Set store attribution for the selected basemap or empty string if not provided
     MapEventProcessor.setMapAttribution(this.mapId, basemap ? basemap.attribution : ['']);
 
-    // update the basemap layers on the map
+    // Update the basemap layers on the map
     if (basemap?.layers) {
-      // remove previous basemaps
+      // Remove previous basemaps
       const layers = MapEventProcessor.getMapViewer(this.mapId).map.getAllLayers();
 
-      // loop through all layers on the map
+      // Loop through all layers on the map
       for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
         const layer = layers[layerIndex];
 
-        // get group id that this layer belongs to
+        // Get group id that this layer belongs to
         const layerId = layer.get('mapId');
 
-        // check if the group id matches basemap
+        // Check if the group id matches basemap
         if (layerId && layerId === 'basemap') {
-          // remove the basemap layer
+          // Remove the basemap layer
           MapEventProcessor.getMapViewer(this.mapId).map.removeLayer(layer);
         }
       }
 
-      // add basemap layers
+      // Add basemap layers
       basemap.layers.forEach((layer, index) => {
         const basemapLayer = new TileLayer({
           opacity: layer.opacity,
           source: layer.source,
         });
 
-        // set this basemap's group id to basemap
+        // Set this basemap's group id to basemap
         basemapLayer.set('mapId', 'basemap');
 
-        // add the basemap layer
+        // Add the basemap layer
         MapEventProcessor.getMapViewer(this.mapId).map.getLayers().insertAt(index, basemapLayer);
 
-        // render the layer
+        // Render the layer
         basemapLayer.changed();
       });
 
@@ -586,13 +604,13 @@ export class Basemap {
 }
 
 /**
- * Define an event for the delegate
+ * Define an event for the delegate.
  */
 export type BasemapChangedEvent = {
   basemap: TypeBasemapProps;
 };
 
 /**
- * Define a delegate for the event handler function signature
+ * Define a delegate for the event handler function signature.
  */
 type BasemapChangedDelegate = EventDelegateBase<Basemap, BasemapChangedEvent, void>;

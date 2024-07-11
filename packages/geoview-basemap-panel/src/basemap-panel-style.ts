@@ -58,7 +58,7 @@ export const getSxClasses = (theme): any => ({
         height: '100%',
         width: '100%',
         position: 'absolute',
-        backgroundColor: theme.palette.geoViewColor.grey.lighten(0.5, 0.85),
+        backgroundColor: theme.palette.geoViewColor.grey.lighten(0.5, 0.6),
         transition: 'all 0.3s ease-in-out',
       },
     },
