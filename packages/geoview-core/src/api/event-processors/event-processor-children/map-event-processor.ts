@@ -84,7 +84,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       (state) => state.mapState.orderedLayerInfo,
       (cur) => {
         // Log
-        logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - orderedLaterInfo', mapId, cur);
+        logger.logTraceCoreStoreSubscription('MAP EVENT PROCESSOR - orderedLayerInfo', mapId, cur);
 
         const curVisibleLayers = cur
           .map((layerInfo) => {

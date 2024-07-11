@@ -3,6 +3,8 @@ import { LayerListEntry, Layout } from 'geoview-core/src/core/components/common'
 import {
   TypeTimeSliderValues,
   useTimeSliderLayers,
+  useTimeSliderSelectedLayerPath,
+  useTimeSliderStoreActions,
 } from 'geoview-core/src/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useMapVisibleLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
 import { useLayerLegendLayers } from 'geoview-core/src/core/stores/store-interface-and-intial-values/layer-state';
@@ -29,27 +31,29 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const { mapId, configObj } = props;
   const { cgpv } = window as TypeWindow;
   const { react } = cgpv;
-  const { useState, useCallback, useMemo, useEffect } = react;
-
-  // internal state
-  const [selectedLayerPath, setSelectedLayerPath] = useState<string>();
+  const { useCallback, useMemo, useEffect } = react;
 
   // get values from store
   const visibleLayers = useMapVisibleLayers() as string[];
   const timeSliderLayers = useTimeSliderLayers();
+  const selectedLayerPath = useTimeSliderSelectedLayerPath();
+  const { setSelectedLayerPath } = useTimeSliderStoreActions();
   const legendLayers = useLayerLegendLayers();
 
   /**
    * handle Layer list when clicked on each layer.
    * @param {LayerListEntry} layer layer clicked by the user.
    */
-  const handleClickLayerList = useCallback((layer: LayerListEntry) => {
-    // Log
-    logger.logTraceUseCallback('TIME-SLIDER-PANEL - handleLayerList');
+  const handleClickLayerList = useCallback(
+    (layer: LayerListEntry) => {
+      // Log
+      logger.logTraceUseCallback('TIME-SLIDER-PANEL - handleLayerList');
 
-    // Set the layer path
-    setSelectedLayerPath(layer.layerPath);
-  }, []);
+      // Set the layer path
+      setSelectedLayerPath(layer.layerPath);
+    },
+    [setSelectedLayerPath]
+  );
 
   /**
    * Get dates for current filters
@@ -115,7 +119,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       // Clear the selected layer path
       setSelectedLayerPath('');
     }
-  }, [memoLayersList, selectedLayerPath]);
+  }, [memoLayersList, selectedLayerPath, setSelectedLayerPath]);
 
   const handleGuideIsOpen = useCallback(
     (guideIsOpen: boolean): void => {
