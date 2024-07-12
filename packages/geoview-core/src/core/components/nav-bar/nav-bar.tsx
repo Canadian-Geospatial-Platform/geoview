@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, Fragment, isValidElement } from 'react';
+import { useCallback, useEffect, useRef, useState, Fragment } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -21,7 +21,8 @@ type NavBarProps = {
   api: NavBarApi;
 };
 
-type NavbarButtonGroup = Record<string, TypeButtonPanel | JSX.Element>;
+type DefaultNavbar = 'fullScreen' | 'location' | 'home' | 'zoomIn' | 'zoomOut';
+type NavbarButtonGroup = Record<string, TypeButtonPanel | DefaultNavbar>;
 type NavButtonGroups = Record<string, NavbarButtonGroup>;
 
 /**
@@ -41,10 +42,18 @@ export function NavBar(props: NavBarProps): JSX.Element {
   // get the expand or collapse from store
   const navBarComponents = useUINavbarComponents();
 
+  const defaultNavbar: Record<DefaultNavbar, JSX.Element> = {
+    fullScreen: <Fullscreen />,
+    location: <Location />,
+    home: <Home />,
+    zoomIn: <ZoomIn />,
+    zoomOut: <ZoomOut />,
+  };
+
   // internal state
   const navBarRef = useRef<HTMLDivElement>(null);
   const defaultButtonGroups: NavButtonGroups = {
-    zoom: { zoomIn: <ZoomIn />, zoomOut: <ZoomOut /> },
+    zoom: { zoomIn: 'zoomIn', zoomOut: 'zoomOut' },
   };
   const [buttonPanelGroups, setButtonPanelGroups] = useState<NavButtonGroups>(defaultButtonGroups);
 
@@ -54,15 +63,15 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
     let displayButtons: NavbarButtonGroup = {};
     if (navBarComponents.includes('fullscreen')) {
-      displayButtons = { ...displayButtons, fullScreen: <Fullscreen /> };
+      displayButtons = { ...displayButtons, fullScreen: 'fullScreen' };
     }
 
     if (navBarComponents.includes('location')) {
-      displayButtons = { ...displayButtons, location: <Location /> };
+      displayButtons = { ...displayButtons, location: 'location' };
     }
 
     if (navBarComponents.includes('home')) {
-      displayButtons = { ...displayButtons, home: <Home /> };
+      displayButtons = { ...displayButtons, home: 'home' };
     }
 
     setButtonPanelGroups({
@@ -121,7 +130,11 @@ export function NavBar(props: NavBarProps): JSX.Element {
     };
   }, [navBarApi, handleNavApiAddButtonPanel, handleNavApiRemoveButtonPanel]);
 
-  function renderButtonPanel(buttonPanel: TypeButtonPanel, key: string): JSX.Element | null {
+  function renderButtonPanel(buttonPanel: TypeButtonPanel | DefaultNavbar, key: string): JSX.Element | null {
+    if (typeof buttonPanel === 'string') {
+      return <Fragment key={`${key}-component`}>{defaultNavbar[buttonPanel as DefaultNavbar]}</Fragment>;
+    }
+
     if (!buttonPanel.button.visible) {
       return null;
     }
@@ -160,10 +173,8 @@ export function NavBar(props: NavBarProps): JSX.Element {
           orientation="vertical"
         >
           {Object.keys(buttonPanelGroup).map((buttonPanelKey) => {
-            if (isValidElement(buttonPanelGroup[buttonPanelKey])) {
-              return <Fragment key={`${buttonPanelKey}-component`}>{buttonPanelGroup[buttonPanelKey] as JSX.Element}</Fragment>;
-            }
-            return renderButtonPanel(buttonPanelGroup[buttonPanelKey] as TypeButtonPanel, buttonPanelKey);
+            const buttonPanel: TypeButtonPanel | DefaultNavbar = buttonPanelGroup[buttonPanelKey];
+            return renderButtonPanel(buttonPanel, buttonPanelKey);
           })}
         </ButtonGroup>
       </Fragment>
