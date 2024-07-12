@@ -7,6 +7,7 @@ import { Extent } from 'geoview-core/src/api/config/types/map-schema-types';
 import { getSxClasses } from './area-of-interest-style';
 
 interface AoiPanelProps {
+  mapId: string;
   config: TypeAoiProps;
 }
 
@@ -26,32 +27,26 @@ type TypeAoiProps = {
 
 export function AoiPanel(props: AoiPanelProps): JSX.Element {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { config } = props;
+  const { mapId, config } = props;
   const aoiList = config.aoiList as AoiListItems;
 
   const { cgpv } = window;
-  // const myMap = cgpv.api.maps[mapId];
+  const { api, ui } = cgpv;
 
-  const { /* api, */ ui /* , react */ } = cgpv;
+  const myMap = api.maps[mapId];
   const { Card, Box } = ui.elements;
-
-  // const { useState } = react;
 
   const theme = ui.useTheme();
   const sxClasses = getSxClasses(theme);
 
-  // internal state and store values
-  // const language = useAppDisplayLanguage();
-
-  // #region PRIVATE UTILITY FUNCTIONS
-  // #endregion
   return (
-    <Box sx={sxClasses.basemapCard}>
+    <Box sx={sxClasses.aoiCard}>
       {aoiList.map((aoiItem: AoiItem, index) => {
         return (
           <Card
             tabIndex={0}
-            // onClick={() => setBasemap(basemap.basemapId as string)}
+            className="aoiCardThumbnail"
+            onClick={() => myMap.zoomToLngLatExtentOrCoordinate(aoiItem.extent)}
             // onKeyPress={() => setBasemap(basemap.basemapId as string)}
             // eslint-disable-next-line react/no-array-index-key
             key={index}
