@@ -6,6 +6,7 @@ import { useAppFullscreenActive, useAppGeoviewHTMLElement } from '@/core/stores/
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { logger } from '@/core/utils/logger';
+import { HtmlToReact } from '@/core/containers/html-to-react';
 
 interface NavbarPanelButtonType {
   buttonPanel: TypeButtonPanel;
@@ -80,7 +81,7 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
         <Box sx={{ width: `${buttonPanel.panel?.width ?? 300}px`, maxHeight: '500px' }}>
           <DialogTitle>{(buttonPanel.panel?.title as string) ?? ''}</DialogTitle>
           <DialogContent dividers>
-            <Typography dangerouslySetInnerHTML={{ __html: buttonPanel?.panel?.content ?? '' }} />
+            <HtmlToReact htmlContent={buttonPanel?.panel?.content ?? '' as any} />
           </DialogContent>
         </Box>
       </Popover>
