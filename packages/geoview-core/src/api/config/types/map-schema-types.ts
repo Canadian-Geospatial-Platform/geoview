@@ -31,9 +31,9 @@ export { MapFeatureConfig } from '@config/types/classes/map-feature-config';
 export type TypeDisplayTheme = 'dark' | 'light' | 'geo.ca';
 
 /** Valid values for the navBar array. */
-export type TypeValidNavBarProps = 'zoom' | 'fullscreen' | 'home' | 'location';
+export type TypeValidNavBarProps = 'zoom' | 'fullscreen' | 'home' | 'location' | 'basemap-select';
 
-/** Controls available on the navigation bar. Default = ['zoom', 'fullscreen', 'home']. */
+/** Controls available on the navigation bar. Default = ['zoom', 'fullscreen', 'home', 'basemap-select]. */
 export type TypeNavBarProps = TypeValidNavBarProps[];
 
 /** Supported footer bar tabs */

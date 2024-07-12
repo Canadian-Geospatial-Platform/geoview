@@ -30,6 +30,7 @@ export * from './layers/layers-panel';
 export * from './lightbox/lightbox';
 export * from './map/map';
 export * from './mouse-position/mouse-position';
+export * from './nav-bar/buttons/basemap-select';
 export * from './nav-bar/buttons/fullscreen';
 export * from './nav-bar/buttons/home';
 export * from './nav-bar/buttons/location';
