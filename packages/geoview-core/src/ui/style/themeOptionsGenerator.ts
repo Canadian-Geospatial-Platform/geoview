@@ -13,8 +13,10 @@ function tooltipsPopperContainer(): Element | null {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getButtonStyleOverrides = (geoViewColors: IGeoViewColors): any => ({
   '&.highlighted': {
-    backgroundColor: `${geoViewColors.primary.main}`,
-    color: `${geoViewColors.white}`,
+    '&:hover, &:active, &.active': {
+      backgroundColor: `${geoViewColors.primary.main}`,
+      color: `${geoViewColors.white}`,
+    },
   },
   '&.buttonOutline': {
     backgroundColor: 'transparent',

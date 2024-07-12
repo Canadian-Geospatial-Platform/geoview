@@ -1,8 +1,9 @@
-import { useState, MouseEvent } from 'react';
+import { useState } from 'react';
+import { ClickAwayListener } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { getSxClasses } from './nav-bar-style';
-import { Box, Popover, IconButton, DialogTitle, DialogContent } from '@/ui';
-import { useAppFullscreenActive, useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { Popper, IconButton, DialogTitle, DialogContent, Paper, Box } from '@/ui';
+import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { logger } from '@/core/utils/logger';
@@ -26,68 +27,67 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
 
   const mapId = useGeoViewMapId();
   const geoviewElement = useAppGeoviewHTMLElement();
-  const isMapFullScreen = useAppFullscreenActive();
 
   const shellContainer = geoviewElement.querySelector(`[id^="shell-${mapId}"]`) as HTMLElement;
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const open = Boolean(anchorEl);
+  const [open, setOpen] = useState(false);
 
-  const id = open ? 'simple-popover' : undefined;
-
-  const handleClick = (event: MouseEvent<HTMLElement>): void => {
-    setAnchorEl(event.currentTarget);
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>): void => {
+    if (open) {
+      setOpen(false);
+      setAnchorEl(null);
+    } else {
+      setAnchorEl(event.currentTarget);
+      setOpen(true);
+    }
   };
 
-  const handleClose = (): void => {
-    setAnchorEl(null);
+  const handleClickAway = (): void => {
+    if (open) {
+      setOpen(false);
+      setAnchorEl(null);
+    }
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const panelContent = (buttonPanel.panel?.content ?? '') as any;
 
   return (
-    <>
-      <IconButton
-        key={buttonPanel.button.id}
-        id={buttonPanel.button.id}
-        tooltip={buttonPanel.button.tooltip}
-        tooltipPlacement={buttonPanel.button.tooltipPlacement}
-        sx={sxClasses.navButton}
-        onClick={(e) => handleClick(e)}
-        className={open ? 'highlighted' : ''}
-      >
-        {buttonPanel.button.children}
-      </IconButton>
+    <ClickAwayListener key={buttonPanel.button.id} mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
+      <Box>
+        <IconButton
+          key={buttonPanel.button.id}
+          id={buttonPanel.button.id}
+          tooltip={buttonPanel.button.tooltip}
+          tooltipPlacement={buttonPanel.button.tooltipPlacement}
+          sx={sxClasses.navButton}
+          onClick={(e) => handleClick(e)}
+          className={open ? 'highlighted active' : ''}
+        >
+          {buttonPanel.button.children}
+        </IconButton>
 
-      <Popover
-        id={id}
-        open={open}
-        anchorEl={anchorEl}
-        anchorOrigin={{
-          vertical: 'center',
-          horizontal: 'left',
-        }}
-        transformOrigin={{
-          vertical: 'center',
-          horizontal: 'right',
-        }}
-        onClose={handleClose}
-        // popover will be displayed when screen is in fullscreen mode.
-        {...(isMapFullScreen && { container: shellContainer })}
-        sx={{
-          '& .MuiPopover-paper': {
-            transform: 'translateX(-8px) !important', // Adjust the value for desired spacing
-          },
-        }}
-      >
-        <Box sx={{ width: `${buttonPanel.panel?.width ?? 300}px`, maxHeight: '500px' }}>
-          <DialogTitle sx={sxClasses.popoverTitle}>{(buttonPanel.panel?.title as string) ?? ''}</DialogTitle>
-          <DialogContent>
-            <HtmlToReact htmlContent={panelContent} />
-          </DialogContent>
-        </Box>
-      </Popover>
-    </>
+        <Popper
+          open={open}
+          anchorEl={anchorEl}
+          placement="left-end"
+          onClose={handleClickAway}
+          container={shellContainer}
+          sx={{
+            '& .MuiPopover-paper': {
+              transform: 'translateX(-8px) !important', // Adjust the value for desired spacing
+            },
+          }}
+        >
+          <Paper sx={{ width: `${buttonPanel.panel?.width ?? 300}px`, maxHeight: '500px' }}>
+            <DialogTitle sx={sxClasses.popoverTitle}>{(buttonPanel.panel?.title as string) ?? ''}</DialogTitle>
+            <DialogContent>
+              <HtmlToReact htmlContent={panelContent} />
+            </DialogContent>
+          </Paper>
+        </Popper>
+      </Box>
+    </ClickAwayListener>
   );
 }
