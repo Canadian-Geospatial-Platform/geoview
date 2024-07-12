@@ -12,6 +12,15 @@ interface BaseMapPanelProps {
   config: TypeJsonObject;
 }
 
+// Tiles to use for thumbnails by projection
+const thumbnailYX = {
+  3857: ['91', '74'],
+  3978: ['285', '268'],
+};
+
+// Zoom to use for thumbnails
+const thumbnailZoom = '8';
+
 export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
   const { mapId, config } = props;
 
@@ -26,7 +35,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
   const theme = ui.useTheme();
   const sxClasses = getSxClasses(theme);
 
-  // internal state and store values
+  // Internal state and store values
   const [basemapList, setBasemapList] = useState<TypeBasemapProps[]>([]);
   const [activeBasemapId, setActiveBasemapId] = useState<string>('');
   const [canSwichProjection] = useState(config.canSwichProjection);
@@ -37,14 +46,13 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
   const language = useAppDisplayLanguage();
 
   // #region PRIVATE UTILITY FUNCTIONS
+
   /**
-   * Get basemap thumbnail url
-   *
-   * @param {string[]} basemapTypes basemap layer type (shaded, transport, label, simple)
-   * @param {TypeValidMapProjectionCodes} projection basemap projection
-   * @param {TypeDisplayLanguage} displayLanguage basemap language
-   *
-   * @returns {string[]} array of thumbnail urls
+   * Get basemap thumbnail url.
+   * @param {string[]} basemapTypes - Basemap layer type (shaded, transport, label, simple, imagery).
+   * @param {TypeValidMapProjectionCodes} projection - Basemap projection.
+   * @param {TypeDisplayLanguage} displayLanguage - Basemap language.
+   * @returns {string[]} Array of thumbnail urls.
    */
   function getThumbnailUrl(
     basemapTypes: string[],
@@ -60,9 +68,9 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
         if (myMap.basemap.basemapsList[projection].transport?.url) {
           thumbnailUrls.push(
             (myMap.basemap.basemapsList[projection].transport?.url as string)
-              .replace('{z}', '8')
-              .replace('{y}', projection === 3978 ? '285' : '91')
-              .replace('{x}', projection === 3978 ? '268' : '74')
+              .replace('{z}', thumbnailZoom)
+              .replace('{y}', projection === 3978 ? thumbnailYX[3978][0] : thumbnailYX[3857][0])
+              .replace('{x}', projection === 3978 ? thumbnailYX[3978][1] : thumbnailYX[3857][1])
           );
         }
       }
@@ -71,7 +79,10 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
         // Only available in 3978
         if (myMap.basemap.basemapsList[projection].simple?.url) {
           thumbnailUrls.push(
-            (myMap.basemap.basemapsList[projection].simple.url as string).replace('{z}', '8').replace('{y}', '285').replace('{x}', '268')
+            (myMap.basemap.basemapsList[projection].simple.url as string)
+              .replace('{z}', thumbnailZoom)
+              .replace('{y}', thumbnailYX[3978][0])
+              .replace('{x}', thumbnailYX[3978][1])
           );
         }
       }
@@ -80,7 +91,10 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
         // Only available in 3978
         if (myMap.basemap.basemapsList[projection].shaded?.url) {
           thumbnailUrls.push(
-            (myMap.basemap.basemapsList[projection].shaded.url as string).replace('{z}', '8').replace('{y}', '285').replace('{x}', '268')
+            (myMap.basemap.basemapsList[projection].shaded.url as string)
+              .replace('{z}', thumbnailZoom)
+              .replace('{y}', thumbnailYX[3978][0])
+              .replace('{x}', thumbnailYX[3978][1])
           );
         }
       }
@@ -90,9 +104,9 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
           thumbnailUrls.push(
             (myMap.basemap.basemapsList[projection].label.url as string)
               .replaceAll('xxxx', displayLanguage === 'en' ? 'CBMT' : 'CBCT')
-              .replace('{z}', '8')
-              .replace('{y}', projection === 3978 ? '285' : '91')
-              .replace('{x}', projection === 3978 ? '268' : '74')
+              .replace('{z}', thumbnailZoom)
+              .replace('{y}', projection === 3978 ? thumbnailYX[3978][0] : thumbnailYX[3857][0])
+              .replace('{x}', projection === 3978 ? thumbnailYX[3978][1] : thumbnailYX[3857][1])
           );
         }
       }
@@ -100,16 +114,26 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
       if (type === 'osm') {
         thumbnailUrls.push('https://tile.openstreetmap.org/0/0/0.png');
       }
+
+      if (type === 'imagery') {
+        if (myMap.basemap.basemapsList[projection].imagery?.url) {
+          thumbnailUrls.push(
+            (myMap.basemap.basemapsList[projection].imagery?.url as string)
+              .replace('{z}', thumbnailZoom)
+              .replace('{y}', projection === 3978 ? thumbnailYX[3978][0] : thumbnailYX[3857][0])
+              .replace('{x}', projection === 3978 ? thumbnailYX[3978][1] : thumbnailYX[3857][1])
+          );
+        }
+      }
     }
 
     return thumbnailUrls;
   }
 
   /**
-   * Get basemap information (name and description)
-   *
-   * @param {string[]} basemapTypes basemap layer type (shaded, transport, label, simple)
-   * @returns { name: string; description: string } array with information [name, description]
+   * Get basemap information (name and description).
+   * @param {string[]} basemapTypes - Basemap layer type (shaded, transport, label, simple).
+   * @returns { name: string; description: string } Array with information [name, description].
    */
   function getInfo(basemapTypes: string[]): { name: string; description: string } {
     let name = '';
@@ -127,6 +151,8 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
       description = getLocalizedMessage('basemapPanel.info.shaded.description', language);
     } else if (basemapTypes.includes('nogeom')) {
       name = getLocalizedMessage('basemapPanel.info.nogeom.name', language);
+    } else if (basemapTypes.includes('imagery')) {
+      name = getLocalizedMessage('basemapPanel.info.imagery.name', language);
     }
 
     if (basemapTypes.includes('label')) name = `${name} ${getLocalizedMessage('basemapPanel.info.label.name', language)}`;
@@ -136,15 +162,14 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
   // #endregion
 
   /**
-   * Update the basemap with the layers on the map
-   *
-   * @param {string} id update the basemap on the map
+   * Update the basemap with the layers on the map.
+   * @param {string} basemapId - The id to update the basemap on the map.
    */
   const setBasemap = (basemapId: string): void => {
-    // get basemap from id
+    // Get basemap from id
     const basemap = basemapList.find((item) => item.basemapId === basemapId);
 
-    // set the new basemap and update the active basemap variable
+    // Set the new basemap and update the active basemap variable
     if (basemap !== undefined) {
       myMap.basemap.setBasemap(basemap);
       setActiveBasemapId(basemapId);
@@ -152,78 +177,76 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
   };
 
   /**
-   *  Add basemaps from configuration for selected projection
-   *
-   * @param {number} projection the projection to create basemaps for
+   *  Add basemaps from configuration for selected projection.
+   * @param {number} projection - The projection to create basemaps for.
    * @returns {Promise<void>}
    */
   const createBasemapArray = async (projection: TypeValidMapProjectionCodes): Promise<void> => {
     const basemapsArray = toJsonObject(
       (config.supportedProjections as Array<TypeJsonObject>).find((obj: TypeJsonObject) => obj.projectionCode === projection)
     );
+
     let isInit = false;
 
-    // reset the basemaps array
+    // Reset the basemaps array
     setBasemapList([]);
 
-    // create the custom config basemap
-    for (let basemapIndex = 0; basemapIndex < (basemapsArray.customBasemaps.length as number); basemapIndex++) {
-      const customBasemap = basemapsArray.customBasemaps[basemapIndex] as TypeJsonObject;
-      const basemap = api.maps[mapId].basemap.createCustomBasemap(customBasemap as unknown as TypeBasemapProps, projection);
-      if (basemap) setBasemapList((prevArray) => [...prevArray, basemap]);
-
-      // custom basemap are provided set it by default (can't be set as basemap from geoview config)
-      if (basemap && basemapIndex === 0 && activeBasemapId === '') {
-        setBasemap(basemap.basemapId!);
-        isInit = true;
-      }
-    }
-
-    // create the core basemap
+    // Create the core basemaps
+    const coreBasemaps: TypeBasemapProps[] = [];
     for (let basemapIndex = 0; basemapIndex < (basemapsArray.coreBasemaps.length as number); basemapIndex++) {
-      const basemapOptions = basemapsArray.coreBasemaps[basemapIndex] as TypeJsonObject;
+      const basemapTypes = coreBasemaps.map((listedBasemap) => listedBasemap.type);
+      const basemapOptions = basemapsArray.coreBasemaps[basemapIndex] as TypeJsonObject as unknown as TypeBasemapOptions;
       // TODO: Check - Should probably move the await outside of the loop so that all core basemaps start processing in parallel?
       // TO.DOCONT: If doing so, be mindful of the isInit which seems to prioritize the first basemap in the list (and maybe why this await is in the loop?)
       // eslint-disable-next-line no-await-in-loop
-      const basemap = await api.maps[mapId].basemap.createCoreBasemap(basemapOptions as unknown as TypeBasemapOptions, projection);
-
-      if (basemap) {
-        // get thumbnail and info (name and description) for core basemap
+      const basemap = await api.maps[mapId].basemap.createCoreBasemap(basemapOptions, projection);
+      if (basemap && !basemapTypes.includes(basemap.type)) {
+        // Get thumbnail and info (name and description) for core basemap
         const { name, description } = getInfo(basemap.type.split('-'));
         basemap.thumbnailUrl = getThumbnailUrl(basemap.type.split('-'), storeProjection, language);
         basemap.name = name;
         basemap.description = description;
 
-        setBasemapList((prevArray) => [...prevArray, basemap]);
-      }
-
-      // set basemap if previously selected in previous projection
-      const id = `${basemapOptions.shaded ? 'shaded' : ''}${basemapOptions.id}${basemapOptions.labeled ? 'label' : ''}`;
-      if (basemap && id === activeBasemapId && !isInit) {
-        setBasemap(activeBasemapId);
-        isInit = true;
+        coreBasemaps.push(basemap);
       }
     }
 
-    // if previous basemap does not exist in previous projection, init first one
+    // Create the custom config basemap
+    const customBasemaps: TypeBasemapProps[] = [];
+    for (let basemapIndex = 0; basemapIndex < (basemapsArray.customBasemaps.length as number); basemapIndex++) {
+      const customBasemap = basemapsArray.customBasemaps[basemapIndex];
+      const basemap = api.maps[mapId].basemap.createCustomBasemap(customBasemap, projection);
+      const basemapTypes = customBasemaps.map((listedBasemap) => listedBasemap.type);
+      if (basemap && !basemapTypes.includes(basemap.type)) customBasemaps.push(basemap);
+    }
+
+    setBasemapList([...coreBasemaps, ...customBasemaps]);
+
+    // Set to previous basemap, if it is in new basemaps
+    const prevSetBaseMap = [...customBasemaps, ...coreBasemaps].filter((basemap) => basemap.basemapId === activeBasemapId);
+    if (prevSetBaseMap) {
+      setBasemap(activeBasemapId);
+      isInit = true;
+    }
+
+    // If previous basemap does not exist in current projection, init first one
     if (!isInit) setBasemap(basemapList[0] as unknown as string);
   };
 
   /**
-   * Set new projection view and basemap array
-   *
-   * @param {SelectChangeEvent} event select change element event
+   * Set new projection view and basemap array.
+   * @param {SelectChangeEvent} event - Select change element event.
    */
   const setSelectedProjection = (event: SelectChangeEvent<unknown>): void => {
     const projection = event.target.value as TypeValidMapProjectionCodes;
 
-    // set basemap to no geom to clean up the view
+    // Set basemap to no geom to clean up the view
     setBasemap('nogeom');
     setMapProjection(projection as TypeValidMapProjectionCodes);
 
     createBasemapArray(projection)
       .then(() => {
-        // emit an event to let know map view projection as changed
+        // Set projection through map viewer
         myMap.setProjection(projection);
       })
       .catch((error) => {
@@ -233,7 +256,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
   };
 
   /**
-   * load existing basemaps and create new basemaps
+   * Load existing basemaps and create new basemaps
    */
   useEffect(() => {
     createBasemapArray(mapProjection).catch((error) => {
