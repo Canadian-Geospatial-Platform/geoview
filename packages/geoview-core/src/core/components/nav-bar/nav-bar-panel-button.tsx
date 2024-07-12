@@ -5,17 +5,21 @@ import { Box, Popover, IconButton, DialogTitle, DialogContent, Typography } from
 import { useAppFullscreenActive, useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
+import { logger } from '@/core/utils/logger';
 
 interface NavbarPanelButtonType {
   buttonPanel: TypeButtonPanel;
 }
 
 /**
- * Navbar modal component
+ * Navbar popover component
  *
- * @returns {JSX.Element} the export modal component
+ * @returns {JSX.Element} the export popover component
  */
 export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType): JSX.Element {
+  // Log
+  logger.logTraceRender('components/nav-bar/nav-bar-panel-button');
+
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 

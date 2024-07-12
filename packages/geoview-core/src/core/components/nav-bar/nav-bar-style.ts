@@ -25,12 +25,9 @@ export const getSxClasses = (theme: Theme): any => ({
     display: 'flex',
     position: 'relative',
     pointerEvents: 'auto',
-    // justifyContent: 'end',
     overflowY: 'hidden',
     padding: 5,
     flexDirection: 'column',
-    // flexWrap: 'wrap',
-    // maxHeight: '520px',
   },
   navBtnGroup: {
     borderRadius: theme.spacing(5),

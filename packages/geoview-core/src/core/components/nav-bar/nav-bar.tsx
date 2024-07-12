@@ -58,13 +58,18 @@ export function NavBar(props: NavBarProps): JSX.Element {
   const [buttonPanelGroups, setButtonPanelGroups] = useState<NavButtonGroups>(defaultButtonGroups);
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('navBarComponents store value changed');
+
     let displayButtons: NavbarButtonGroup = {};
     if (navBarComponents.includes('fullscreen')) {
       displayButtons = { ...displayButtons, fullScreen: 'fullScreen' };
     }
+
     if (navBarComponents.includes('location')) {
       displayButtons = { ...displayButtons, location: 'location' };
     }
+
     if (navBarComponents.includes('home')) {
       displayButtons = { ...displayButtons, home: 'home' };
     }
@@ -80,7 +85,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
       // Log
       logger.logTraceUseCallback('NAV-BAR - addButtonPanel');
 
-      const d = {
+      const newGroupDetails = {
         [event.group]: {
           [event.buttonPanelId]: event.buttonPanel,
           ...buttonPanelGroups[event.group],
@@ -89,7 +94,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
       setButtonPanelGroups({
         ...buttonPanelGroups,
-        ...d,
+        ...newGroupDetails,
       });
     },
     [buttonPanelGroups]
@@ -97,7 +102,9 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
   const handleNavApiRemoveButtonPanel = useCallback(
     (sender: NavBarApi, event: NavBarRemovedEvent) => {
+      //Log
       logger.logTraceUseCallback('NAV-BAR - handleRemoveButtonPanel');
+
       setButtonPanelGroups((prevState) => {
         const state = { ...prevState };
         const group = state[event.group];
@@ -110,7 +117,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('NAV-BAR - mount');
+    logger.logTraceUseEffect('NAV-BAR API - mount');
 
     // Register NavBar created/removed handlers
     navBarApi.onNavbarCreated(handleNavApiAddButtonPanel);
