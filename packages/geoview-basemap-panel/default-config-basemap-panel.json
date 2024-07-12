@@ -16,6 +16,11 @@
           "labeled": false
         },
         {
+          "basemapId": "imagery",
+          "shaded": false,
+          "labeled": false
+        },
+        {
           "basemapId": "osm",
           "shaded": true,
           "labeled": false
@@ -49,6 +54,11 @@
         {
           "basemapId": "transport",
           "shaded": true,
+          "labeled": false
+        },
+        {
+          "basemapId": "imagery",
+          "shaded": false,
           "labeled": false
         },
         {
