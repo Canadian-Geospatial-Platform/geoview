@@ -46,7 +46,7 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
           <Card
             tabIndex={0}
             className="aoiCardThumbnail"
-            onClick={() => myMap.zoomToLngLatExtentOrCoordinate(aoiItem.extent, { padding: [10, 10, 10, 10], maxZoom: 15, duration: 150 })}
+            onClick={() => myMap.zoomToLngLatExtentOrCoordinate(aoiItem.extent, { maxZoom: 13 })}
             // onKeyPress={() => setBasemap(basemap.basemapId as string)}
             // eslint-disable-next-line react/no-array-index-key
             key={index}
