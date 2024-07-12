@@ -43,6 +43,9 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
     setAnchorEl(null);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const panelContent = (buttonPanel.panel?.content ?? '') as any;
+
   return (
     <>
       <IconButton
@@ -81,7 +84,7 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
         <Box sx={{ width: `${buttonPanel.panel?.width ?? 300}px`, maxHeight: '500px' }}>
           <DialogTitle sx={sxClasses.popoverTitle}>{(buttonPanel.panel?.title as string) ?? ''}</DialogTitle>
           <DialogContent>
-            <HtmlToReact htmlContent={(buttonPanel?.panel?.content ?? '') as string} />
+            <HtmlToReact htmlContent={panelContent} />
           </DialogContent>
         </Box>
       </Popover>
