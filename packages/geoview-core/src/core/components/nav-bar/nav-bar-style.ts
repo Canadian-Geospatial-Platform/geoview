@@ -69,4 +69,9 @@ export const getSxClasses = (theme: Theme): any => ({
       color: theme.palette.geoViewColor.bgColor.dark[950],
     },
   },
+  popoverTitle: {
+    fontSize: theme.palette.geoViewFontSize.default,
+    fontWeight: '700',
+    color: theme.palette.geoViewColor.textColor.main,
+  },
 });

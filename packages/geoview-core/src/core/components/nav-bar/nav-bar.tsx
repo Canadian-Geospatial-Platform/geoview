@@ -102,7 +102,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
   const handleNavApiRemoveButtonPanel = useCallback(
     (sender: NavBarApi, event: NavBarRemovedEvent) => {
-      //Log
+      // Log
       logger.logTraceUseCallback('NAV-BAR - handleRemoveButtonPanel');
 
       setButtonPanelGroups((prevState) => {

@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, MouseEvent } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { getSxClasses } from './nav-bar-style';
-import { Box, Popover, IconButton, DialogTitle, DialogContent, Typography } from '@/ui';
+import { Box, Popover, IconButton, DialogTitle, DialogContent } from '@/ui';
 import { useAppFullscreenActive, useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { TypeButtonPanel } from '@/ui/panel/panel-types';
@@ -79,9 +80,9 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
         }}
       >
         <Box sx={{ width: `${buttonPanel.panel?.width ?? 300}px`, maxHeight: '500px' }}>
-          <DialogTitle>{(buttonPanel.panel?.title as string) ?? ''}</DialogTitle>
+          <DialogTitle sx={sxClasses.popoverTitle}>{(buttonPanel.panel?.title as string) ?? ''}</DialogTitle>
           <DialogContent dividers>
-            <HtmlToReact htmlContent={buttonPanel?.panel?.content ?? '' as any} />
+            <HtmlToReact htmlContent={(buttonPanel?.panel?.content ?? '') as any} />
           </DialogContent>
         </Box>
       </Popover>
