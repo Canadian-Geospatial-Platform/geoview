@@ -21,7 +21,7 @@ export const getSxClasses = (theme: Theme): any => ({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '20px',
-    borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[300]}}`,
+    borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[100]}}`,
   },
   notificationsTitle: {
     fontSize: theme.palette.geoViewFontSize.default,

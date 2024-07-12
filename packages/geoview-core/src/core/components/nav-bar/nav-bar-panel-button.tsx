@@ -81,7 +81,7 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
       >
         <Box sx={{ width: `${buttonPanel.panel?.width ?? 300}px`, maxHeight: '500px' }}>
           <DialogTitle sx={sxClasses.popoverTitle}>{(buttonPanel.panel?.title as string) ?? ''}</DialogTitle>
-          <DialogContent dividers>
+          <DialogContent>
             <HtmlToReact htmlContent={(buttonPanel?.panel?.content ?? '') as any} />
           </DialogContent>
         </Box>
