@@ -53,7 +53,7 @@ export interface IMapState {
   setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
 
   actions: {
-    createBaseMapFromOptions: () => Promise<void>;
+    createBaseMapFromOptions: (basemapOptions: TypeBasemapOptions) => Promise<void>;
     getPixelFromCoordinate: (coord: Coordinate) => [number, number];
     getIndexFromOrderedLayerInfo: (layerPath: string) => number;
     getLegendCollapsedFromOrderedLayerInfo: (layerPath: string) => boolean;
@@ -64,6 +64,7 @@ export interface IMapState {
     addHighlightedFeature: (feature: TypeFeatureInfoEntry) => void;
     removeHighlightedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
     reorderLayer: (layerPath: string, move: number) => void;
+    resetBaseMap: () => Promise<void>;
     setLegendCollapsed: (layerPath: string, newValue?: boolean) => void;
     setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean) => void;
     setMapKeyboardPanInteractions: (panDelta: number) => void;
@@ -174,12 +175,13 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
     actions: {
       /**
-       * Resets the base map.
+       * Sets new base map from options.
+       * @param {TypeBasemapOptions} basemapOptions - The options for the new basemap
        * @returns {Promise<void>}
        */
-      createBaseMapFromOptions: (): Promise<void> => {
+      createBaseMapFromOptions: (basemapOptions: TypeBasemapOptions): Promise<void> => {
         // Redirect to processor
-        return MapEventProcessor.resetBasemap(get().mapId);
+        return MapEventProcessor.setBasemap(get().mapId, basemapOptions);
       },
 
       /**
@@ -275,6 +277,15 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       reorderLayer: (layerPath: string, move: number): void => {
         // Redirect to processor
         MapEventProcessor.reorderLayer(get().mapId, layerPath, move);
+      },
+
+      /**
+       * Resets the base map.
+       * @returns {Promise<void>}
+       */
+      resetBaseMap: (): Promise<void> => {
+        // Redirect to processor
+        return MapEventProcessor.resetBasemap(get().mapId);
       },
 
       /**

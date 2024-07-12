@@ -50,9 +50,6 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const panelContent = (buttonPanel.panel?.content ?? '') as any;
-
   return (
     <ClickAwayListener key={buttonPanel.button.id} mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
       <Box>
@@ -83,7 +80,11 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
           <Paper sx={{ width: `${buttonPanel.panel?.width ?? 300}px`, maxHeight: '500px' }}>
             <DialogTitle sx={sxClasses.popoverTitle}>{(buttonPanel.panel?.title as string) ?? ''}</DialogTitle>
             <DialogContent>
-              <HtmlToReact htmlContent={panelContent} />
+              {buttonPanel.panel?.convertHtmlContent ? (
+                <HtmlToReact htmlContent={buttonPanel.panel?.content as string} />
+              ) : (
+                buttonPanel.panel?.content
+              )}
             </DialogContent>
           </Paper>
         </Popper>

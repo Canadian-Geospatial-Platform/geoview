@@ -34,6 +34,8 @@ export type TypePanelProps = {
   title: string | TypeJsonValue;
   /** Panel body content. */
   content?: ReactNode;
+  /** Convert panel body content from HTML. */
+  convertHtmlContent?: boolean;
   /** Custom panel styles */
   panelStyles?: PanelStyles;
 };

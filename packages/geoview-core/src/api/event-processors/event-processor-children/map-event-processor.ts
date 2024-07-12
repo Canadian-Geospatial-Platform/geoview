@@ -672,6 +672,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return this.getMapViewer(mapId).basemap.loadDefaultBasemaps(projection, language);
   }
 
+  static async setBasemap(mapId: string, basemapOptions: TypeBasemapOptions): Promise<void> {
+    // Set basemap will use the current display language and projection and recreate the basemap
+    const language = AppEventProcessor.getDisplayLanguage(mapId);
+    const projection = this.getMapState(mapId).currentProjection as TypeValidMapProjectionCodes;
+    const basemap = await this.getMapViewer(mapId).basemap.createCoreBasemap(basemapOptions, projection, language);
+    if (basemap) this.getMapViewer(mapId).basemap.setBasemap(basemap);
+  }
+
   static setMapKeyboardPanInteractions(mapId: string, panDelta: number): void {
     const mapElement = this.getMapViewer(mapId).map;
 
