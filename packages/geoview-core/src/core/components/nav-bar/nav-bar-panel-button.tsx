@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, MouseEvent } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { getSxClasses } from './nav-bar-style';
@@ -82,7 +81,7 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
         <Box sx={{ width: `${buttonPanel.panel?.width ?? 300}px`, maxHeight: '500px' }}>
           <DialogTitle sx={sxClasses.popoverTitle}>{(buttonPanel.panel?.title as string) ?? ''}</DialogTitle>
           <DialogContent>
-            <HtmlToReact htmlContent={(buttonPanel?.panel?.content ?? '') as any} />
+            <HtmlToReact htmlContent={(buttonPanel?.panel?.content ?? '') as string} />
           </DialogContent>
         </Box>
       </Popover>

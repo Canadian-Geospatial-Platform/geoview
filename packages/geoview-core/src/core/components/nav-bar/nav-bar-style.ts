@@ -73,6 +73,6 @@ export const getSxClasses = (theme: Theme): any => ({
     fontSize: theme.palette.geoViewFontSize.default,
     fontWeight: '700',
     color: theme.palette.geoViewColor.textColor.main,
-    borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[100]}}`
+    borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[100]}}`,
   },
 });
