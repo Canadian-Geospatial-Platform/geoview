@@ -85,7 +85,7 @@ export const CV_GEOVIEW_SCHEMA_PATH: Record<LayerTypesKey, string> = {
   WMS: '',
 };
 export const CV_MAP_CONFIG_SCHEMA_PATH = 'https://cgpv/schema#/definitions/MapFeatureConfig';
-export const CV_LAYER_GROUP_SCHEMA_PATH = 'https://cgpv/schema#/definitions/TypeLayerGroupEntryConfig';
+export const CV_LAYER_GROUP_SCHEMA_PATH = 'https://cgpv/schema#/definitions/GroupLayerEntryConfig';
 
 /** Array of schema versions accepted by the viewer. */
 export const ACCEPTED_SCHEMA_VERSIONS: TypeValidVersions[] = ['1.0'];

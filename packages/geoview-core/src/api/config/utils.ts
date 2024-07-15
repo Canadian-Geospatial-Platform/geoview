@@ -1,4 +1,5 @@
 import Ajv from 'ajv';
+import addErrors from 'ajv-errors';
 import cloneDeep from 'lodash/cloneDeep';
 
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LAYER_TYPES } from '@config/types/config-constants';
@@ -51,8 +52,9 @@ export function isvalidComparedToInputSchema(schemaPath: string, targetObject: o
   // create a validator object
   const validator = new Ajv({
     strict: false,
-    allErrors: false,
+    allErrors: true,
   });
+  addErrors(validator);
 
   // initialize validator with schema file
   validator.compile(schema);
@@ -73,7 +75,7 @@ export function isvalidComparedToInputSchema(schemaPath: string, targetObject: o
         for (let j = 1; j < path.length; j++) {
           node = node[path[j]] as Record<string, unknown>;
         }
-        logger.logWarning('='.repeat(200), '\nSchema error: ', error, '\nObject affected: ', node);
+        logger.logWarning('='.repeat(200), `\nSchemaPath: ${schemaPath}`, '\nSchema error: ', error, '\nObject affected: ', node);
       }
       return false;
     }

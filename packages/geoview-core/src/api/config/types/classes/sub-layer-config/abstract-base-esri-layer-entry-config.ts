@@ -1,6 +1,8 @@
-import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
 import axios from 'axios';
-import { TypeJsonObject } from '../../config-types';
+
+import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
+import { TypeJsonObject } from '@config/types/config-types';
+
 import { logger } from '@/core/utils/logger';
 
 /**

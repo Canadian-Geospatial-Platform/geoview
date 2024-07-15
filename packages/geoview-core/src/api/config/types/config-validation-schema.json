@@ -375,7 +375,7 @@
         },
         "isTimeAware": {
           "type": "boolean",
-          "description": "Flag to mention if layer will use its time dimension if provided. Used to remove a layer from time enabled functions like time slider."
+          "description": "Flag to mention if layer will use its time dimension if provided (default: true). Used to remove a layer from time enabled functions like time slider."
         },
         "initialSettings": {
           "description": "Initial settings to apply to the GeoView layer at creation time.",
@@ -435,7 +435,7 @@
           }
         }
       },
-      "required": ["geoviewLayerId", "geoviewLayerName", "geoviewLayerType", "listOfLayerEntryConfig"]
+      "required": ["geoviewLayerType", "listOfLayerEntryConfig"]
     },
     "TypeListOfLayerEntryConfig": {
       "description": "The list of layer configurations. The AbstractGeoviewLayerConfig validation ends here. The only thing we need to verify for the moment is it must be an array of at least one element.",
@@ -751,6 +751,10 @@
       "description": "Base class from which we derive all the nodes (group and leaves) in the layer tree.",
       "type": "object",
       "properties": {
+        "isLayerGroup": {
+          "description": "Flag used to distinguish layer group nodes.",
+          "type": "boolean"
+        },
         "layerId": {
           "description": "The id of the layer to display on the map.",
           "type": "string"
@@ -799,34 +803,55 @@
         "initialSettings": {
           "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree.",
           "$ref": "#/definitions/TypeLayerInitialSettings"
+        },
+        "entryType": {
+          "description": "The node data type.",
+          "$ref": "#/definitions/TypeLayerEntryType"
         }
       },
       "if": {
         "properties": {
           "useInternalSchema": {
-            "description": "The useInternalSchema property is not defined by the user but by the viewer when we want to use the internal schema.",
+            "description": "The useInternalSchema property is not defined by the user but programmatically by the viewer when we want to use the internal schema.",
             "const": true
           }
         },
         "required": ["useInternalSchema"]
       },
       "then": {
+        "description": "Use Internal Schema",
         "properties": {
           "layerName": {
-            "description": "Used by the internal schema.",
+            "description": "The display name of the layer.",
             "type": "string"
+          },
+          "entryType": {
+            "description": "The node data type.",
+            "$ref": "#/definitions/TypeLayerEntryType"
           }
-        }
+        },
+        "required": ["entryType", "layerId", "layerName"]
       },
       "else": {
+        "description": "Use Input Schema",
         "properties": {
           "layerName": {
             "description": "Used by the input schema. The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information.",
             "$ref": "#/definitions/TypeLocalizedString"
+          },
+          "entryType": {
+            "description": "Input schema does not allow the user to specify the entryType property.",
+            "not": {},
+            "errorMessage": {
+              "not": "Property entryType is not allowed in user data."
+            }
           }
-        }
+        },
+        "required": ["layerId"]
       },
-      "required": ["layerId"]
+      "errorMessage": {
+        "if": "The data does not respect the EntryConfigBaseClass schema definition."
+      }
     },
     "AbstractBaseLayerEntryConfig": {
       "description": "Base class from which we derive all the leaf nodes in the layer tree.",
@@ -853,6 +878,28 @@
         }
       ]
     },
+    "GroupLayerEntryConfig": {
+      "description": "Class from which we derive all the layer group nodes in the layer tree.",
+      "type": "object",
+      "allOf": [
+        {
+          "description": "The parent class.",
+          "$ref": "#/definitions/EntryConfigBaseClass"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "entryType": {
+              "enum": ["group"]
+            },
+            "listOfLayerEntryConfig": {
+              "description": "The list of layer entry configurations to use from the GeoView layer group.",
+              "$ref": "#/definitions/TypeListOfLayerEntryConfig"
+            }
+          }
+        }
+      ]
+    },
     "EsriDynamicLayerEntryConfig": {
       "description": "Class from which we derive all the ESRI Dynamic leaf nodes in the layer tree.",
       "type": "object",
@@ -864,6 +911,16 @@
         {
           "type": "object",
           "properties": {
+            "layerId": {
+              "type": "string",
+              "pattern": "^[0-9]+$",
+              "errorMessage": {
+                "pattern": "The layer identifier (layerId) must be a numeric string."
+              }
+            },
+            "entryType": {
+              "enum": ["raster-tile"]
+            },
             "source": {
               "$ref": "#/definitions/TypeSourceEsriDynamicInitialConfig"
             },
@@ -885,6 +942,13 @@
         {
           "type": "object",
           "properties": {
+            "layerId": {
+              "type": "string",
+              "pattern": "^[0-9]+$",
+              "errorMessage": {
+                "pattern": "The layer identifier (layerId) must be a numeric string."
+              }
+            },
             "source": {
               "$ref": "#/definitions/TypeSourceEsriFeatureInitialConfig"
             },

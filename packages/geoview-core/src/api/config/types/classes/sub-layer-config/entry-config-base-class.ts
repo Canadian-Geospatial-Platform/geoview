@@ -1,8 +1,5 @@
-import defaultsDeep from 'lodash/defaultsDeep';
-
 import { TypeJsonObject } from '@config/types/config-types';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { normalizeLocalizedString } from '@config/utils';
 import {
   TypeGeoviewLayerType,
   TypeLayerEntryType,
@@ -10,7 +7,7 @@ import {
   TypeDisplayLanguage,
   Extent,
 } from '@config/types/map-schema-types';
-import { validateExtentWhenDefined } from '@/geo/utils/utilities';
+import { isvalidComparedToInputSchema } from '@/api/config/utils';
 
 /**
  * Base type used to define a GeoView sublayer to display on the map. The sublayer can be a group or an abstract sublayer.
@@ -18,7 +15,7 @@ import { validateExtentWhenDefined } from '@/geo/utils/utilities';
 export abstract class EntryConfigBaseClass {
   // GV: Only the public properties are serialized.
   /** The language used when interacting with this instance of MapFeatureConfig. */
-  #language;
+  // #language;
 
   /** The GeoView configuration that owns the configuration tree that contains this node. */
   #geoviewLayerConfigInstance: AbstractGeoviewLayerConfig;
@@ -39,16 +36,16 @@ export abstract class EntryConfigBaseClass {
   layerName?: string;
 
   /** Attributions obtained from the configuration or the metadata. */
-  attributions: string[];
+  attributions!: string[];
 
   /** Bounds (in lat long) obtained from the metadata or calculated from the layers */
   bounds: Extent | undefined;
 
   /** The min scale that can be reach by the layer. */
-  minScale: number;
+  minScale!: number;
 
   /** The max scale that can be reach by the layer. */
-  maxScale: number;
+  maxScale!: number;
 
   /** Layer entry data type. */
   entryType: TypeLayerEntryType;
@@ -57,12 +54,14 @@ export abstract class EntryConfigBaseClass {
    * Initial settings to apply to the GeoView layer entry at creation time. Initial settings are inherited from the parent in the
    * configuration tree.
    */
-  initialSettings: TypeLayerInitialSettings;
+  initialSettings!: TypeLayerInitialSettings;
 
   /**
-   * The class constructor.
+   * The class constructor use the sublayer configuration supplied by the user and runs a validation on it to find any errors that
+   * may have been made. It only initalizes the properties needed to query the layer metadata for leaf nodes or to create a the
+   * layer group.
+   *
    * @param {TypeJsonObject} layerConfig The sublayer configuration we want to instanciate.
-   * @param {TypeLayerInitialSettings | TypeJsonObject} initialSettings The initial settings inherited.
    * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
    * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The GeoView instance that owns the sublayer.
    * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
@@ -70,25 +69,34 @@ export abstract class EntryConfigBaseClass {
    */
   constructor(
     layerConfig: TypeJsonObject,
-    initialSettings: TypeLayerInitialSettings | TypeJsonObject,
     language: TypeDisplayLanguage,
     geoviewLayerConfig: AbstractGeoviewLayerConfig,
     parentNode?: EntryConfigBaseClass
   ) {
-    this.#language = language;
+    this.validateLayerConfig(layerConfig);
+    // this.#language = language;
     this.#geoviewLayerConfigInstance = geoviewLayerConfig;
     this.#parentNode = parentNode;
 
     this.layerId = layerConfig.layerId as string;
-    this.layerName = layerConfig.layerName ? normalizeLocalizedString(layerConfig.layerName)![this.#language]! : undefined;
+    this.layerName = layerConfig?.layerName?.[language] as string;
     this.isLayerGroup = (layerConfig.isLayerGroup as boolean) || false;
-    this.attributions = (layerConfig.attributions as string[]) || [];
-    this.bounds = validateExtentWhenDefined(layerConfig.bounds as Extent);
-    this.minScale = (layerConfig.minScale as number) || 0;
-    this.maxScale = (layerConfig.minScale as number) || 0;
     this.entryType = this.getEntryType();
-    this.initialSettings = defaultsDeep(layerConfig.initialSettings, initialSettings);
   }
+
+  /**
+   * Validate the node configuration using the schema associated to its layer type.
+   * @protected
+   */
+  protected validateLayerConfig(layerConfig: TypeJsonObject): void {
+    if (!isvalidComparedToInputSchema(this.schemaPath, layerConfig)) this.setErrorDetectedFlag();
+  }
+
+  /**
+   * Apply default value to undefined fields.
+   * @abstract
+   */
+  abstract applyDefaultValueToUndefinedFields(initialSettings: TypeLayerInitialSettings): void;
 
   /**
    * The getter method that returns the schemaPath property. Each geoview sublayer type knows what section of the schema must be
@@ -137,7 +145,6 @@ export abstract class EntryConfigBaseClass {
    */
   setErrorDetectedFlag(): void {
     this.#errorDetected = true;
-    this.#geoviewLayerConfigInstance.setErrorDetectedFlag();
   }
 
   /**
@@ -147,6 +154,15 @@ export abstract class EntryConfigBaseClass {
    */
   get errorDetected(): boolean {
     return this.#errorDetected;
+  }
+
+  /**
+   * The getter method that returns the parentNode.
+   *
+   * @returns {EntryConfigBaseClass | undefined} The parentNode property associated to the entry config.
+   */
+  get parentNode(): EntryConfigBaseClass | undefined {
+    return this.#parentNode;
   }
 
   /**
