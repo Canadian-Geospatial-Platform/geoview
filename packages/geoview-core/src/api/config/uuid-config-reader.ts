@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 
 import { TypeJsonObject, TypeJsonArray, Cast } from '@config/types/config-types';
-import { CV_CONST_LAYER_TYPES, CV_CONST_SUB_LAYER_TYPES } from '@config/types/config-constants';
+import { CV_CONST_LAYER_TYPES } from '@config/types/config-constants';
 import { createLocalizedString } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
@@ -42,8 +42,10 @@ export class UUIDmapConfigReader {
    */
   static #getLayerConfigFromResponse(result: AxiosResponse<TypeJsonObject>, lang: string): TypeJsonObject[] {
     // If invalid response
-    if (!result?.data || !result.data.reponse || !result.data.reponse.rcs || !result.data.reponse.rcs[lang])
-      throw new Error('Invalid response from GeoCore service');
+    if (!result?.data || !result.data.reponse || !result.data.reponse.rcs || !result.data.reponse.rcs[lang]) {
+      const errorMessage = result?.data?.errorMessage || '';
+      throw new Error(`Invalid response from GeoCore service\n${errorMessage}\n`);
+    }
     if (result.data.reponse.rcs[lang].length === 0) throw new Error('No layers returned by GeoCore service');
 
     const listOfGeoviewLayerConfig: TypeJsonObject[] = [];
@@ -70,7 +72,6 @@ export class UUIDmapConfigReader {
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
                 return Cast<TypeJsonObject>({
-                  entryType: CV_CONST_SUB_LAYER_TYPES.RASTER_IMAGE,
                   layerId: `${item.index}`,
                 });
               }
@@ -93,7 +94,6 @@ export class UUIDmapConfigReader {
             });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = [
               Cast<TypeJsonObject>({
-                entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR,
                 layerId,
               }),
             ];
@@ -110,7 +110,6 @@ export class UUIDmapConfigReader {
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
                 return Cast<TypeJsonObject>({
-                  entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR,
                   layerId: `${item.index}`,
                 });
               }
@@ -128,7 +127,6 @@ export class UUIDmapConfigReader {
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
                 return Cast<TypeJsonObject>({
-                  entryType: CV_CONST_SUB_LAYER_TYPES.RASTER_IMAGE,
                   layerId: `${item.id}`,
                   source: {
                     serverType: serverType === undefined ? 'mapserver' : serverType,
@@ -149,7 +147,6 @@ export class UUIDmapConfigReader {
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
                 return Cast<TypeJsonObject>({
-                  entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR,
                   layerId: `${item.id}`,
                   source: {
                     format: 'WFS',
@@ -171,7 +168,6 @@ export class UUIDmapConfigReader {
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
                 return Cast<TypeJsonObject>({
-                  entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR,
                   layerId: `${item.id}`,
                   source: {
                     format: 'featureAPI',
@@ -192,7 +188,6 @@ export class UUIDmapConfigReader {
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
                 return Cast<TypeJsonObject>({
-                  entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR,
                   layerId: `${item.id}`,
                   source: {
                     format: 'GeoJSON',
@@ -213,7 +208,6 @@ export class UUIDmapConfigReader {
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
                 return Cast<TypeJsonObject>({
-                  entryType: CV_CONST_SUB_LAYER_TYPES.RASTER_TILE,
                   layerId: `${item.id}`,
                 });
               }
@@ -231,7 +225,6 @@ export class UUIDmapConfigReader {
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
                 return Cast<TypeJsonObject>({
-                  entryType: CV_CONST_SUB_LAYER_TYPES.RASTER_TILE,
                   layerId: `${item.id}`,
                   tileGrid: item.tileGrid,
                   source: {
@@ -253,7 +246,6 @@ export class UUIDmapConfigReader {
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
                 return Cast<TypeJsonObject>({
-                  entryType: CV_CONST_SUB_LAYER_TYPES.VECTOR,
                   layerId: `${item.id}`,
                   source: {
                     format: 'GeoPackage',
@@ -273,7 +265,6 @@ export class UUIDmapConfigReader {
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = (layerEntries as TypeJsonArray).map(
               (item): TypeJsonObject => {
                 return Cast<TypeJsonObject>({
-                  entryType: CV_CONST_SUB_LAYER_TYPES.RASTER_IMAGE,
                   layerId: `${item.id}`,
                 });
               }
@@ -293,7 +284,6 @@ export class UUIDmapConfigReader {
             });
             (geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonObject[]) = [
               Cast<TypeJsonObject>({
-                entryType: CV_CONST_SUB_LAYER_TYPES.RASTER_IMAGE,
                 layerId: (url as string).split('/').slice(-2, -1)[0],
               }),
             ];

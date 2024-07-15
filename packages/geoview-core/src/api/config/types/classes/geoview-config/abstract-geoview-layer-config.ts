@@ -1,10 +1,9 @@
 import defaultsDeep from 'lodash/defaultsDeep';
 import cloneDeep from 'lodash/cloneDeep';
 
-import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
 import { Cast, TypeJsonObject, TypeJsonArray } from '@config/types/config-types';
 import { TypeGeoviewLayerType, TypeDisplayLanguage, TypeLayerInitialSettings } from '@config/types/map-schema-types';
-import { normalizeLocalizedString } from '@config/utils';
+import { isvalidComparedToInputSchema, normalizeLocalizedString } from '@config/utils';
 import { CV_DEFAULT_LAYER_INITIAL_SETTINGS } from '@config/types/config-constants';
 import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-layer-entry-config';
 import { layerEntryIsGroupLayer } from '@config/types/type-guards';
@@ -20,8 +19,8 @@ export abstract class AbstractGeoviewLayerConfig {
   /** The language used when interacting with this instance of MapFeatureConfig. */
   #language: TypeDisplayLanguage;
 
-  /** If the geoview layer is linked to a map config, we keep a reference to the map for message propagation */
-  #mapFeatureConfig?: MapFeatureConfig;
+  /** Cloned copy of the configuration as provided by the user when the constructor was called. */
+  #geoviewLayerConfig: TypeJsonObject;
 
   /** Flag used to indicate that errors were detected in the config provided. */
   #errorDetected = false;
@@ -39,7 +38,7 @@ export abstract class AbstractGeoviewLayerConfig {
    * The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this
    * information.
    */
-  geoviewLayerName: string;
+  geoviewLayerName!: string;
 
   /** A flag used to indicate that the layer is a GeoCore layer (default: false). When true, geoviewLayerId must be a geocoreId. */
   isGeocore: boolean;
@@ -58,51 +57,61 @@ export abstract class AbstractGeoviewLayerConfig {
 
   /**
    * Initial settings to apply to the GeoView layer at creation time.
-   * This attribute is allowed only if listOfLayerEntryConfig.length > 1.
    */
-  initialSettings: TypeLayerInitialSettings;
+  initialSettings!: TypeLayerInitialSettings;
 
   /** The layer entries to use from the GeoView layer. */
   listOfLayerEntryConfig: EntryConfigBaseClass[] = [];
 
   /**
-   * The class constructor.
+   * The class constructor saves a cloned copy of the Geoview configuration supplied by the user and runs a validation on it to
+   * find any errors that may have been made. It only initalizes the properties needed to query the service and layer metadata.
+   *
    * @param {TypeJsonObject} geoviewLayerConfig The layer configuration we want to instanciate.
    * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
-   * @param {MapFeatureConfig} mapFeatureConfig An optional mapFeatureConfig instance if the layer is part of it.
    */
-  constructor(geoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage, mapFeatureConfig?: MapFeatureConfig) {
-    this.#mapFeatureConfig = mapFeatureConfig;
+  constructor(geoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage) {
+    // Keep a copy of the configuration. It will be used later in the execution flow to overwrite values obtained from the metadata.
+    this.#geoviewLayerConfig = cloneDeep(geoviewLayerConfig);
+    this.#validateGeoviewConfig();
+
     this.#language = language;
 
+    // GV: GeoCore layers are processed by the configApi. GeoView layer instances do not recognize them as a valid geoView layer Type.
+    // GV: However, whe have the isGeocore flag to keep track of geocore layers that were converted to geoview layers.
     this.isGeocore = (geoviewLayerConfig.isGeocore as boolean) || false;
-    this.initialSettings = Cast<TypeLayerInitialSettings>(
-      defaultsDeep(geoviewLayerConfig.initialSettings, CV_DEFAULT_LAYER_INITIAL_SETTINGS)
-    );
     this.geoviewLayerId = (geoviewLayerConfig.geoviewLayerId || generateId()) as string;
-    this.geoviewLayerName = normalizeLocalizedString(geoviewLayerConfig?.geoviewLayerName)![this.#language]!;
     this.metadataAccessPath = normalizeLocalizedString(geoviewLayerConfig.metadataAccessPath)![this.#language]!;
-    this.serviceDateFormat = (geoviewLayerConfig.serviceDateFormat || 'DD/MM/YYYY HH:MM:SSZ') as string;
-    this.externalDateFormat = (geoviewLayerConfig.externalDateFormat || 'DD/MM/YYYY HH:MM:SSZ') as string;
-    // The top layer must be a layer group or a single leaf node.
-    const listOfLayerEntryConfig =
-      (geoviewLayerConfig?.listOfLayerEntryConfig as TypeJsonArray)?.length > 1
-        ? (this.listOfLayerEntryConfig = [
-            Cast<EntryConfigBaseClass>({
-              layerId: geoviewLayerConfig.geoviewLayerId,
-              initialSettings: this.initialSettings,
-              layerName: { ...(geoviewLayerConfig.geoviewLayerName as object) },
-              isLayerGroup: true,
-              listOfLayerEntryConfig: cloneDeep(geoviewLayerConfig.listOfLayerEntryConfig),
-            }),
-          ])
-        : cloneDeep(geoviewLayerConfig.listOfLayerEntryConfig);
 
-    this.isTimeAware = (geoviewLayerConfig.isTimeAware === undefined ? true : geoviewLayerConfig.isTimeAware) as boolean;
-    this.listOfLayerEntryConfig = (listOfLayerEntryConfig as TypeJsonArray)
+    // Validate the structure of the sublayer list and correct it if needed.
+    let jsonListOfLayerEntryConfig: TypeJsonArray;
+    switch ((geoviewLayerConfig?.listOfLayerEntryConfig as TypeJsonArray)?.length) {
+      case undefined:
+      case 0:
+        jsonListOfLayerEntryConfig = [];
+        break;
+      case 1:
+        // The top layer is a single leaf node.
+        jsonListOfLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray;
+        break;
+      default:
+        // We create a group because the node at the top of the layer tree cannot be an array.
+        jsonListOfLayerEntryConfig = [
+          Cast<TypeJsonObject>({
+            layerId: geoviewLayerConfig.geoviewLayerId,
+            layerName: { ...(geoviewLayerConfig.geoviewLayerName as object) },
+            isLayerGroup: true,
+            listOfLayerEntryConfig: geoviewLayerConfig.listOfLayerEntryConfig as TypeJsonArray,
+          }),
+        ];
+        break;
+    }
+
+    // Instanciate the sublayer list.
+    this.listOfLayerEntryConfig = jsonListOfLayerEntryConfig
       ?.map((subLayerConfig) => {
-        if (layerEntryIsGroupLayer(subLayerConfig)) return new GroupLayerEntryConfig(subLayerConfig, this.initialSettings, language, this);
-        return this.createLeafNode(subLayerConfig, this.initialSettings, language, this);
+        if (layerEntryIsGroupLayer(subLayerConfig)) return new GroupLayerEntryConfig(subLayerConfig, language, this);
+        return this.createLeafNode(subLayerConfig, language, this);
       })
       // When a sublayer cannot be created, the value returned is undefined. These values will be filtered.
       ?.filter((subLayerConfig) => {
@@ -111,17 +120,36 @@ export abstract class AbstractGeoviewLayerConfig {
   }
 
   /**
-   * Validate the object properties. Layer name and type must be set.
-   * @private
+   * Validate the geoview configuration using the schema associated to its layer type. The validation performed doesn't
+   * cover the content of the listOfLayerEntryConfig. This validation will be done by the sublayer instances.
    */
-  protected validate(): void {
-    this.#errorDetected =
-      this.#errorDetected || !this.geoviewLayerType || !this.geoviewLayerId || !this.geoviewLayerName || !this.metadataAccessPath;
-    if (!this.geoviewLayerType) throw new GeoviewLayerMandatoryError('LayerTypeMandatory', [this.geoviewLayerId, this.geoviewLayerType]);
-    if (!this.geoviewLayerId) throw new GeoviewLayerMandatoryError('LayerIdMandatory', [this.geoviewLayerType]);
-    if (!this.geoviewLayerName) throw new GeoviewLayerMandatoryError('LayerNameMandatory', [this.geoviewLayerId, this.geoviewLayerType]);
-    if (!this.metadataAccessPath)
+  #validateGeoviewConfig(): void {
+    if (
+      !isvalidComparedToInputSchema(this.geoviewLayerSchema, this.#geoviewLayerConfig) ||
+      !this.#geoviewLayerConfig.geoviewLayerType ||
+      !this.#geoviewLayerConfig.metadataAccessPath
+    )
+      this.setErrorDetectedFlag();
+
+    if (!this.#geoviewLayerConfig.geoviewLayerType)
+      throw new GeoviewLayerMandatoryError('LayerTypeMandatory', [this.geoviewLayerId, this.geoviewLayerType]);
+    if (!this.#geoviewLayerConfig.metadataAccessPath)
       throw new GeoviewLayerMandatoryError('MetadataAccessPathMandatory', [this.geoviewLayerId, this.geoviewLayerType]);
+  }
+
+  /**
+   * Apply default value to undefined fields.
+   *
+   */
+  applyDefaultValueToUndefinedFields(): void {
+    this.serviceDateFormat = this.serviceDateFormat || 'DD/MM/YYYY HH:MM:SSZ';
+    this.externalDateFormat = this.externalDateFormat || 'DD/MM/YYYY HH:MM:SSZ';
+    this.isTimeAware = this.isTimeAware !== undefined ? this.isTimeAware : true;
+
+    this.initialSettings = defaultsDeep(this.initialSettings, CV_DEFAULT_LAYER_INITIAL_SETTINGS);
+    this.listOfLayerEntryConfig.forEach((subLayer) => {
+      subLayer.applyDefaultValueToUndefinedFields(this.initialSettings);
+    });
   }
 
   /**
@@ -215,19 +243,16 @@ export abstract class AbstractGeoviewLayerConfig {
    */
   abstract createLeafNode(
     layerConfig: TypeJsonObject,
-    initialSettings: TypeLayerInitialSettings | TypeJsonObject,
     language: TypeDisplayLanguage,
     geoviewConfig: AbstractGeoviewLayerConfig,
     parentNode?: EntryConfigBaseClass
   ): EntryConfigBaseClass | undefined;
 
   /**
-   * Methode used to set the AbstractGeoviewLayerConfig error flag to true and the MapFeatureConfig error flag if the
-   * instance exists.
+   * Methode used to set the AbstractGeoviewLayerConfig error flag to true.
    */
   setErrorDetectedFlag(): void {
     this.#errorDetected = true;
-    this.#mapFeatureConfig?.setErrorDetectedFlag();
   }
 
   /**

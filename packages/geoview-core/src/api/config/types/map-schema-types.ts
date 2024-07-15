@@ -297,6 +297,7 @@ export type TypeLayerStates = {
 export { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 
 export { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
+export { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-layer-entry-config';
 /** Child classes derived from the AbstractBaseLayerEntryConfig. */
 export { EsriDynamicLayerEntryConfig } from '@config/types/classes/sub-layer-config/raster-leaf/esri-dynamic-layer-entry-config';
 export { EsriFeatureLayerEntryConfig } from '@config/types/classes/sub-layer-config/vector-leaf/esri-feature-layer-entry-config';

@@ -39,7 +39,6 @@ export class GeoviewLayerConfigError extends ConfigError {
 export class GeoviewLayerMandatoryError extends ConfigError {
   messageList: Record<string, string> = {
     LayerTypeMandatory: 'Property geoviewLayerType is mandatory for GeoView layer <=> of type <=>.',
-    LayerIdMandatory: 'Property geoviewLayerId is mandatory for GeoView layer of type <=>.',
     LayerNameMandatory: 'Property geoviewLayerName is mandatory for GeoView layer',
     MetadataAccessPathMandatory: 'Property metadataAccessPath is mandatory for GeoView layer',
   };
