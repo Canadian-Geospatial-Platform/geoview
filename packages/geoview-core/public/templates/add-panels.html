@@ -1,51 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Panels - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Add Panels - Canadian Geospatial Platform Viewer</title>
-  <link rel="shortcut icon" href="./favicon.ico" />
-  <meta name="msapplication-TileColor" content="#da532c" />
-  <meta name="msapplication-config" content="./img/browserconfig.xml" />
-  <meta name="theme-color" content="#ffffff" />
-  <meta name="msapplication-TileColor" content="#da532c" />
-  <meta name="theme-color" content="#ffffff" />
-  <link rel="stylesheet" href="css/style.css" />
-</head>
+  <body>
+    <div class="header-table">
+      <table>
+        <tbody>
+          <tr>
+            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
+            <td class="header-title">
+              <h1><strong>Add Panels</strong></h1>
+            </td>
+          </tr>
+          <tr>
+            <td><a href="./index.html">Main</a><br /></td>
+          </tr>
+        </tbody>
+      </table>
+      <table>
+        <tbody>
+          <tr>
+            <td>This page is used to showcase adding panels to the app-bar and adding panels and buttons to the navbar.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-<body>
-  <div class="header-table">
-    <table>
-      <tbody>
-        <tr>
-          <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-          <td class="header-title">
-            <h1><strong>Add Panels</strong></h1>
-          </td>
-        </tr>
-        <tr>
-          <td><a href="./index.html">Main</a><br /></td>
-        </tr>
-      </tbody>
-    </table>
-    <table>
-      <tbody>
-        <tr>
-          <td>This page is used to showcase adding panels to the app-bar and adding panels and buttons to the navbar.
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="toolbar">
-    <button class="add-appbar-panel-btn">Add Appbar Panel</button>
-    <button class="add-navbar-panel-btn">Add Navbar Panel</button>
-    <button class="add-navbar-button-btn">Add Navbar Button</button>
-    <input type="text" id="navbar-button-group-name" placeholder="Enter group name" value="groupName1" />
-  </div>
-  <div id="mapWM" class="geoview-map" data-lang="en" data-config="{
+    <div class="toolbar">
+      <button class="add-appbar-panel-btn">Add Appbar Panel</button>
+      <button class="add-navbar-panel-btn">Add Navbar Panel</button>
+      <button class="add-navbar-button-btn">Add Navbar Button</button>
+      <input type="text" id="navbar-button-group-name" placeholder="Enter group name" value="groupName1" />
+    </div>
+    <div
+      id="mapWM"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
         'map': {
           'interaction': 'dynamic',
           'viewSettings': {
@@ -66,106 +68,107 @@
         'components': ['overview-map'],
         'corePackages': [],
         'theme': 'geo.ca'
-      }"></div>
-  <p></p>
+      }"
+    ></div>
+    <p></p>
 
-  <button type="button" class="collapsible">Code Snippet</button>
-  <pre id="codeSnippet" class="panel"></pre>
+    <button type="button" class="collapsible">Code Snippet</button>
+    <pre id="codeSnippet" class="panel"></pre>
 
-  <script src="codedoc.js"></script>
-  <script>
-    // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-    cgpv.init((mapId) => {
-      if (mapId === 'mapWM') {
-        // get add panel button element for WM map
-        var addAppbarPanelBtn = document.getElementsByClassName('add-appbar-panel-btn')[0];
+    <script src="codedoc.js"></script>
+    <script>
+      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init((mapId) => {
+        if (mapId === 'mapWM') {
+          // get add panel button element for WM map
+          var addAppbarPanelBtn = document.getElementsByClassName('add-appbar-panel-btn')[0];
 
-        // get the input for the group name
-        var navbarButtonGroupNameInput = document.getElementById('navbar-button-group-name');
+          // get the input for the group name
+          var navbarButtonGroupNameInput = document.getElementById('navbar-button-group-name');
 
-        // add app-bar panel btn click event handler
-        // button will open a panel on the app-bar
-        addAppbarPanelBtn.addEventListener('click', function (e) {
-          const button = {
-            id: 'AppbarPanelButtonId',
-            tooltip: 'Test',
-            tooltipPlacement: 'right',
-            children: cgpv.react.createElement(cgpv.ui.elements.AppsIcon),
-          };
+          // add app-bar panel btn click event handler
+          // button will open a panel on the app-bar
+          addAppbarPanelBtn.addEventListener('click', function (e) {
+            const button = {
+              id: 'AppbarPanelButtonId',
+              tooltip: 'Test',
+              tooltipPlacement: 'right',
+              children: cgpv.react.createElement(cgpv.ui.elements.AppsIcon),
+            };
 
-          const panel = {
-            panelId: 'AppbarPanelId',
-            title: 'Test',
-            content: `<div>Test content</div>`,
-            width: 200,
-          };
+            const panel = {
+              panelId: 'AppbarPanelId',
+              title: 'Test',
+              content: `<div>Test content</div>`,
+              convertHtmlContent: true,
+              width: 200,
+            };
 
-          // call an api function to add a panel with a button in the default group
-          cgpv.api.maps['mapWM'].appBarApi.createAppbarPanel(button, panel, null);
-        });
+            // call an api function to add a panel with a button in the default group
+            cgpv.api.maps['mapWM'].appBarApi.createAppbarPanel(button, panel, null);
+          });
 
-        // get add nav-bar panel button element for WM map
-        var addNavbarPanelBtn = document.getElementsByClassName('add-navbar-panel-btn')[0];
-        // add nav-bar panel btn click event handler
-        // button will open a panel on the nav-bar
-        addNavbarPanelBtn.addEventListener('click', function (e) {
-          const groupName = navbarButtonGroupNameInput.value;
+          // get add nav-bar panel button element for WM map
+          var addNavbarPanelBtn = document.getElementsByClassName('add-navbar-panel-btn')[0];
+          // add nav-bar panel btn click event handler
+          // button will open a panel on the nav-bar
+          addNavbarPanelBtn.addEventListener('click', function (e) {
+            const groupName = navbarButtonGroupNameInput.value;
 
-          if (groupName === '') {
-            alert('Enter a value group name');
-            return;
-          }
-          const button = {
-            tooltip: 'Test',
-            children: cgpv.react.createElement(cgpv.ui.elements.AppsIcon),
-            tooltipPlacement: 'left',
-          };
+            if (groupName === '') {
+              alert('Enter a value group name');
+              return;
+            }
+            const button = {
+              tooltip: 'Test',
+              children: cgpv.react.createElement(cgpv.ui.elements.AppsIcon),
+              tooltipPlacement: 'left',
+            };
 
-          const panel = {
-            title: 'Panel Title',
-            content: `<div><p>Vestibulum in fringilla tortor. Aliquam placerat odio nec urna consequat tincidunt eu sit amet mauris.</p><p>Donec vestibulum tellus ex, a venenatis urna finibus quis. Sed venenatis nisi porttitor ex laoreet auctor. </p></div>`,
-            width: 400,
-          };
+            const panel = {
+              title: 'Panel Title',
+              content: `<div><p>Vestibulum in fringilla tortor. Aliquam placerat odio nec urna consequat tincidunt eu sit amet mauris.</p><p>Donec vestibulum tellus ex, a venenatis urna finibus quis. Sed venenatis nisi porttitor ex laoreet auctor. </p></div>`,
+              convertHtmlContent: true,
+              width: 400,
+            };
 
-          // call an api function to add a panel with a button
-          cgpv.api.maps['mapWM'].navBarApi.createNavbarButtonPanel(button, panel, groupName);
-        });
+            // call an api function to add a panel with a button
+            cgpv.api.maps['mapWM'].navBarApi.createNavbarButtonPanel(button, panel, groupName);
+          });
 
-        // get add nav-bar button element for WM map
-        var addNavbarButtonBtn = document.getElementsByClassName('add-navbar-button-btn')[0];
+          // get add nav-bar button element for WM map
+          var addNavbarButtonBtn = document.getElementsByClassName('add-navbar-button-btn')[0];
 
-        // add nav-bar button btn click event handler
-        // button will call a function
-        addNavbarButtonBtn.addEventListener('click', function (e) {
-          const groupName = navbarButtonGroupNameInput.value;
+          // add nav-bar button btn click event handler
+          // button will call a function
+          addNavbarButtonBtn.addEventListener('click', function (e) {
+            const groupName = navbarButtonGroupNameInput.value;
 
-          if (groupName === '') {
-            alert('Enter a value group name');
-            return;
-          }
+            if (groupName === '') {
+              alert('Enter a value group name');
+              return;
+            }
 
-          const button = {
-            tooltip: `Test (${groupName})`,
-            children: cgpv.react.createElement(cgpv.ui.elements.OpenInBrowserIcon),
-            tooltipPlacement: 'left',
-            onClick: function () {
-              alert('You clicked on a navbar test button');
-            },
-          };
+            const button = {
+              tooltip: `Test (${groupName})`,
+              children: cgpv.react.createElement(cgpv.ui.elements.OpenInBrowserIcon),
+              tooltipPlacement: 'left',
+              onClick: function () {
+                alert('You clicked on a navbar test button');
+              },
+            };
 
-          // call an api function to add a panel with a button
-          cgpv.api.maps['mapWM'].navBarApi.createNavbarButton(button, groupName);
-        });
+            // call an api function to add a panel with a button
+            cgpv.api.maps['mapWM'].navBarApi.createNavbarButton(button, groupName);
+          });
+        }
+      });
 
-      }
-    });
-
-    // create snippets
-    window.addEventListener('load', () => {
-      createCodeSnippet();
-      createConfigSnippet();
-    });
-  </script>
-</body>
-
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });
+    </script>
+  </body>
 </html>

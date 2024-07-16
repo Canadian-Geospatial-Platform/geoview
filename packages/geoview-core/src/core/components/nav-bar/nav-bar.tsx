@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 
+import BasemapSelect from './buttons/basemap-select';
 import ZoomIn from './buttons/zoom-in';
 import ZoomOut from './buttons/zoom-out';
 import Fullscreen from './buttons/fullscreen';
@@ -21,7 +22,7 @@ type NavBarProps = {
   api: NavBarApi;
 };
 
-type DefaultNavbar = 'fullScreen' | 'location' | 'home' | 'zoomIn' | 'zoomOut';
+type DefaultNavbar = 'fullScreen' | 'location' | 'home' | 'zoomIn' | 'zoomOut' | 'basemapSelect';
 type NavbarButtonGroup = Record<string, TypeButtonPanel | DefaultNavbar>;
 type NavButtonGroups = Record<string, NavbarButtonGroup>;
 
@@ -46,6 +47,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
     fullScreen: <Fullscreen />,
     location: <Location />,
     home: <Home />,
+    basemapSelect: <BasemapSelect />,
     zoomIn: <ZoomIn />,
     zoomOut: <ZoomOut />,
   };
@@ -74,10 +76,16 @@ export function NavBar(props: NavBarProps): JSX.Element {
       displayButtons = { ...displayButtons, home: 'home' };
     }
 
+    if (navBarComponents.includes('basemap-select')) {
+      displayButtons = { ...displayButtons, basemapSelect: 'basemapSelect' };
+    }
+
     setButtonPanelGroups({
       ...{ display: displayButtons },
       ...buttonPanelGroups,
     });
+    // If buttonPanelGroups is in the dependencies, it triggers endless rerenders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navBarComponents]);
 
   const handleNavApiAddButtonPanel = useCallback(
