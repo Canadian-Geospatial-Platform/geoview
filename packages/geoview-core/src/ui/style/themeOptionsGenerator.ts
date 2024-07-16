@@ -12,6 +12,12 @@ function tooltipsPopperContainer(): Element | null {
 // ? I doubt we want to define an explicit type for style properties?
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getButtonStyleOverrides = (geoViewColors: IGeoViewColors): any => ({
+  '&.highlighted': {
+    '&:hover, &:active, &.active': {
+      backgroundColor: `${geoViewColors.primary.main}`,
+      color: `${geoViewColors.white}`,
+    },
+  },
   '&.buttonOutline': {
     backgroundColor: 'transparent',
     border: `3px solid transparent`,

@@ -53,6 +53,10 @@ class BasemapPanelPlugin extends AppBarPlugin {
           osm: {
             name: 'Open Street Maps',
           },
+          imagery: {
+            name: 'Satellite Imagery',
+            description: `World Imagery provides one meter or better satellite and aerial imagery in many parts of the world and lower resolution satellite imagery worldwide.`,
+          },
           nogeom: {
             name: 'No geometry',
           },
@@ -81,6 +85,10 @@ class BasemapPanelPlugin extends AppBarPlugin {
           },
           osm: {
             name: 'Carte - Open Street Maps',
+          },
+          imagery: {
+            name: 'Imagerie satellite',
+            description: `World Imagery fournit des images aériennes et satellitaires d'un mètre ou plus dans de nombreuses régions du monde, ainsi que des images satellitaires à plus faible résolution dans le monde entier.`,
           },
           nogeom: {
             name: 'Pas de géométrie',

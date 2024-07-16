@@ -33,6 +33,7 @@ import {
   commonProcessTemporalDimension,
 } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { validateExtent } from '@/geo/utils/utilities';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
@@ -457,6 +458,7 @@ export class EsriImage extends AbstractGeoViewRaster {
       // Get the metadata projection
       const metadataProjection = this.getMetadataProjection();
       layerBounds = this.getMapViewer().convertExtentFromProjToMapProj(metadataExtent, metadataProjection);
+      layerBounds = validateExtent(layerBounds, this.getMapViewer().getProjection().getCode());
     }
 
     // Return the calculated layer bounds

@@ -59,6 +59,7 @@ td {
   justify-content: center;
   width: 100%;
   margin: 10px;
+  gap: 10px;
 }
 
 .index-header-title {

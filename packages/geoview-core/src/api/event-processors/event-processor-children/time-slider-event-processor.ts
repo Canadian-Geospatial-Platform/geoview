@@ -154,6 +154,17 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       reversed: undefined,
     };
   }
+
+  /**
+   * Sets the selected layer path
+   * @param {string} mapId - The map id of the state to act on
+   * @param {string} layerPath - The layer path to use
+   */
+  static setSelectedLayerPath(mapId: string, layerPath: string): void {
+    // Redirect
+    this.getTimesliderState(mapId)?.setterActions.setSelectedLayerPath(layerPath);
+  }
+
   // #endregion
 
   // **********************************************************

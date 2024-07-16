@@ -54,7 +54,6 @@ export default function Version(): JSX.Element {
       borderRadius: '5px',
       boxShadow: 2,
       marginLeft: '15px',
-      padding: '10px',
       '& a': {
         color: (theme: Theme) =>
           theme.palette.mode === 'light' ? theme.palette.secondary.contrastText : theme.palette.geoViewColor.primary.light[300],
@@ -64,10 +63,16 @@ export default function Version(): JSX.Element {
     versionsInfoTitle: {
       fontSize: (theme: Theme) => theme.palette.geoViewFontSize.default,
       fontWeight: '700',
-      padding: '10px',
+      padding: '20px',
       color: (theme: Theme) => theme.palette.geoViewColor.textColor.main,
-      borderBottom: (theme: Theme) => `1px solid ${theme.palette.geoViewColor.bgColor.dark[300]}}`,
+      borderBottom: (theme: Theme) => `1px solid ${theme.palette.geoViewColor.bgColor.dark[100]}}`,
       marginBottom: '10px',
+    },
+    versionInfoContent: {
+      padding: '20px',
+      gap: '5px',
+      display: 'flex',
+      flexDirection: 'column',
     },
   };
 
@@ -91,7 +96,7 @@ export default function Version(): JSX.Element {
             <Typography sx={sxClasses.versionsInfoTitle} component="h3">
               {t('appbar.version')}
             </Typography>
-            <Box sx={{ padding: '10px', gap: '5px', display: 'flex', flexDirection: 'column' }}>
+            <Box sx={sxClasses.versionInfoContent}>
               <Box sx={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: '6px' }}>
                 <SvgIcon viewBox="-4 -2 38 36">
                   <GeoCaIcon />

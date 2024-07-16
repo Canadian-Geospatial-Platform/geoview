@@ -1374,7 +1374,7 @@
       "required": ["basemapId", "shaded", "labeled"]
     },
     "TypeBasemapId": {
-      "enum": ["transport", "osm", "simple", "nogeom", "shaded"],
+      "enum": ["transport", "osm", "simple", "nogeom", "shaded", "imagery"],
       "default": "transport",
       "description": "Id of the basemap to use."
     },
