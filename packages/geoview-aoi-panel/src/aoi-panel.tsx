@@ -1,39 +1,61 @@
-// import { TypeBasemapProps } from 'geoview-core/src/geo/layer/basemap/basemap-types';
-// import { TypeJsonObject } from 'geoview-core/src/core/types/global-types';
-// import { useMapProjection } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
-// import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
-// import { TypeValidMapProjectionCodes, TypeDisplayLanguage } from 'geoview-core/src/api/config/types/map-schema-types';
-// import { logger } from 'geoview-core/src/core/utils/logger';
-// import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
-// import { getSxClasses } from './area-of-interest-style';
+import { Extent } from 'geoview-core/src/api/config/types/map-schema-types';
+import { getSxClasses } from './area-of-interest-style';
 
-/*
 interface AoiPanelProps {
   mapId: string;
-  config: TypeJsonObject;
+  config: TypeAoiProps;
 }
-*/
 
-export function AoiPanel(/* props: AoiPanelProps */): JSX.Element {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // const { mapId, config } = props;
+interface AoiItem {
+  aoiTitle: string;
+  imageUrl: string;
+  extent: Extent;
+}
 
-  // const { cgpv } = window;
-  // const myMap = cgpv.api.maps[mapId];
+type AoiListItems = AoiItem[];
 
-  // const { api, ui, react } = cgpv;
-  //  const { Select, Card, Box } = ui.elements;
+type TypeAoiProps = {
+  isOpen: boolean;
+  aoiList: AoiListItems;
+  version: string;
+};
 
-  // const { useState } = react;
+export function AoiPanel(props: AoiPanelProps): JSX.Element {
+  const { mapId, config } = props;
+  const aoiList = config.aoiList as AoiListItems;
 
-  // const theme = ui.useTheme();
-  // const sxClasses = getSxClasses(theme);
+  const { cgpv } = window;
+  const { api, ui } = cgpv;
 
-  // internal state and store values
-  // const language = useAppDisplayLanguage();
+  const myMap = api.maps[mapId];
+  const { Card, Box } = ui.elements;
 
-  // #region PRIVATE UTILITY FUNCTIONS
-  // #endregion
+  const theme = ui.useTheme();
+  const sxClasses = getSxClasses(theme);
 
-  return <div />;
+  return (
+    <Box sx={sxClasses.aoiCard}>
+      {aoiList.map((aoiItem: AoiItem, index) => {
+        return (
+          <Card
+            tabIndex={0}
+            className="aoiCardThumbnail"
+            onClick={() => myMap.zoomToLngLatExtentOrCoordinate(aoiItem.extent, { maxZoom: 14 })}
+            // eslint-disable-next-line react/no-array-index-key
+            key={index}
+            title={aoiItem.aoiTitle}
+            contentCard={
+              // eslint-disable-next-line react/jsx-no-useless-fragment
+              <>
+                {typeof aoiItem.imageUrl === 'string' && (
+                  // eslint-disable-next-line react/no-array-index-key
+                  <Box component="img" key={index} src={aoiItem.imageUrl} alt="" className="aoiCardThumbnail" />
+                )}
+              </>
+            }
+          />
+        );
+      })}
+    </Box>
+  );
 }
