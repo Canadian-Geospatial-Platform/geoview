@@ -50,7 +50,7 @@ export const getSxClasses = (theme): any => ({
         height: '100%',
         width: '100%',
         overflow: 'hidden',
-        border: '1px solid #ccc',
+        border: '1px solid theme.palette.geoViewColor.ccc',
         display: 'flex',
         align: 'center',
         objectFit: 'cover',
