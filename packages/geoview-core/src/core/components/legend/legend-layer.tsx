@@ -50,19 +50,23 @@ export function LegendLayerImage(props: LegendLayerImageProps): JSX.Element {
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    bgcolor: 'background.paper',
+    bgcolor: 'background.paper'
+  };
+
+  const imgStyle = {
+    width: '100%', 
+    transform: 'scale(2)',
     border: '2px solid #ccc',
     boxShadow: 24,
     borderRadius: 1,
-    p: 4,
-  };
+  }
 
   return (
     <>
       <Box component="img" alt="icon" src={imgSrc} sx={{ maxWidth: '100%', cursor: 'pointer' }} onClick={handleOpen} />
       <Modal open={open} onClose={handleClose} container={mapElem}>
         <Box sx={style}>
-          <Box component="img" alt="icon" src={imgSrc} sx={{ maxWidth: '100%', cursor: 'pointer' }} onClick={handleOpen} />
+          <Box component="img" alt="icon" src={imgSrc} sx={imgStyle} onClick={handleOpen} />
         </Box>
       </Modal>
     </>
