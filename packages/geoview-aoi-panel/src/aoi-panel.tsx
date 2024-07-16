@@ -1,9 +1,4 @@
-// import { TypeBasemapProps } from 'geoview-core/src/geo/layer/basemap/basemap-types';
-// import { useMapProjection } from 'geoview-core/src/core/stores/store-interface-and-intial-values/map-state';
-// import { useAppDisplayLanguage } from 'geoview-core/src/core/stores/store-interface-and-intial-values/app-state';
 import { Extent } from 'geoview-core/src/api/config/types/map-schema-types';
-// import { logger } from 'geoview-core/src/core/utils/logger';
-// import { getLocalizedMessage } from 'geoview-core/src/core/utils/utilities';
 import { getSxClasses } from './area-of-interest-style';
 
 interface AoiPanelProps {
@@ -26,7 +21,6 @@ type TypeAoiProps = {
 };
 
 export function AoiPanel(props: AoiPanelProps): JSX.Element {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { mapId, config } = props;
   const aoiList = config.aoiList as AoiListItems;
 
@@ -46,8 +40,7 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
           <Card
             tabIndex={0}
             className="aoiCardThumbnail"
-            onClick={() => myMap.zoomToLngLatExtentOrCoordinate(aoiItem.extent, { maxZoom: 13 })}
-            // onKeyPress={() => setBasemap(basemap.basemapId as string)}
+            onClick={() => myMap.zoomToLngLatExtentOrCoordinate(aoiItem.extent, { maxZoom: 14 })}
             // eslint-disable-next-line react/no-array-index-key
             key={index}
             title={aoiItem.aoiTitle}
