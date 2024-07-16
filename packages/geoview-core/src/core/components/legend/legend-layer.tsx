@@ -1,5 +1,6 @@
 import { Modal, useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
 import {
   Box,
   ListItem,
@@ -27,7 +28,6 @@ import { getSxClasses } from './legend-styles';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { logger } from '@/core/utils/logger';
 import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
-import { useState } from 'react';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 interface LegendLayerProps {
@@ -38,7 +38,7 @@ interface LegendLayerImageProps {
   imgSrc: string;
 }
 export function LegendLayerImage(props: LegendLayerImageProps): JSX.Element {
-
+  const { imgSrc } = props;
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -59,14 +59,10 @@ export function LegendLayerImage(props: LegendLayerImageProps): JSX.Element {
 
   return (
     <>
-      <Box component="img" alt="icon" src={props.imgSrc} sx={{ maxWidth: '100%', cursor: 'pointer' }} onClick={handleOpen}  />
-      <Modal
-        open={open}
-        onClose={handleClose}
-        container={mapElem}
-      >
+      <Box component="img" alt="icon" src={imgSrc} sx={{ maxWidth: '100%', cursor: 'pointer' }} onClick={handleOpen} />
+      <Modal open={open} onClose={handleClose} container={mapElem}>
         <Box sx={style}>
-          <Box component="img" alt="icon" src={props.imgSrc} sx={{ maxWidth: '100%', cursor: 'pointer' }} onClick={handleOpen}  />
+          <Box component="img" alt="icon" src={imgSrc} sx={{ maxWidth: '100%', cursor: 'pointer' }} onClick={handleOpen} />
         </Box>
       </Modal>
     </>
