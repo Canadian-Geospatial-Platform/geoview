@@ -74,7 +74,7 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
           placement="left-end"
           onClose={handleClickAway}
           container={shellContainer}
-          sx={{ marginRight: '5px !important'}}
+          sx={{ marginRight: '5px !important' }}
         >
           <Paper sx={{ width: `${buttonPanel.panel?.width ?? 300}px`, maxHeight: '500px' }}>
             <DialogTitle sx={sxClasses.popoverTitle}>{(buttonPanel.panel?.title as string) ?? ''}</DialogTitle>

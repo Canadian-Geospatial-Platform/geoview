@@ -1,6 +1,5 @@
-import { Modal, useTheme } from '@mui/material';
+import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
 import {
   Box,
   ListItem,
@@ -27,50 +26,11 @@ import { useMapStoreActions } from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { logger } from '@/core/utils/logger';
+import { LightboxSingleImage } from '../lightbox/lightbox';
 import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 interface LegendLayerProps {
   layer: TypeLegendLayer;
-}
-
-interface LegendLayerImageProps {
-  imgSrc: string;
-}
-export function LegendLayerImage(props: LegendLayerImageProps): JSX.Element {
-  const { imgSrc } = props;
-  const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-  const mapId = useGeoViewMapId();
-  const mapElem = document.getElementById(`shell-${mapId}`);
-
-  const style = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    bgcolor: 'background.paper'
-  };
-
-  const imgStyle = {
-    width: '100%', 
-    transform: 'scale(2)',
-    border: '2px solid #ccc',
-    boxShadow: 24,
-    borderRadius: 1,
-  }
-
-  return (
-    <>
-      <Box component="img" alt="icon" src={imgSrc} sx={{ maxWidth: '100%', cursor: 'pointer' }} onClick={handleOpen} />
-      <Modal open={open} onClose={handleClose} container={mapElem}>
-        <Box sx={style}>
-          <Box component="img" alt="icon" src={imgSrc} sx={imgStyle} onClick={handleOpen} />
-        </Box>
-      </Modal>
-    </>
-  );
 }
 
 export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
@@ -220,7 +180,7 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
     ) {
       return (
         <Collapse in={legendExpanded} sx={sxClasses.collapsibleContainer} timeout="auto">
-          <LegendLayerImage imgSrc={layer.icons[0].iconImage} />
+          <LightboxSingleImage imgSrc={layer.icons[0].iconImage} />
         </Collapse>
       );
     }

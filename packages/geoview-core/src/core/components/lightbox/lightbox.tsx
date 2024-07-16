@@ -8,6 +8,7 @@ import 'yet-another-react-lightbox/styles.css';
 
 import { CloseIcon, ArrowRightIcon, ArrowLeftIcon, DownloadIcon, Tooltip } from '@/ui';
 import { logger } from '@/core/utils/logger';
+import { Box } from '@/ui/layout';
 
 /**
  * Interface used for lightbox properties and slides
@@ -22,6 +23,25 @@ export interface LightBoxSlides {
   src: string;
   alt: string;
   downloadUrl: string;
+}
+
+export interface LightboxSingleImageProps {
+  imgSrc: string;
+  alt?: string;
+}
+
+export function LightboxSingleImage(props: LightboxSingleImageProps): JSX.Element {
+  const { imgSrc, alt = '' } = props;
+  const [isOpen, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  return (
+    <>
+      <Box component="img" alt={alt} src={imgSrc} sx={{ maxWidth: '100%', cursor: 'pointer' }} onClick={handleOpen} />
+      <Lightbox open={isOpen} close={handleClose} slides={[{ src: imgSrc }]} />
+    </>
+  );
 }
 
 /**
