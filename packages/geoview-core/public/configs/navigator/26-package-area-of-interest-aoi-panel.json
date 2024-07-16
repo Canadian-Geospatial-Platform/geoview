@@ -1,9 +1,15 @@
 {
-    "aoiList": [
+  "isOpen": true,
+  "aoiList": [
     {
-      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Toronto_-_ON_-_CN_Tower_Turmkorb.jpg/1920px-Toronto_-_ON_-_CN_Tower_Turmkorb.jpg",
+      "imageUrl": "https://encrypted-tbn1.gstatic.com/licensed-image?q=tbn:ANd9GcSbleN5tjC2Dilx77SCBJD9f3CxlnDEEGx5qY786BpVlu4JLzUd1ixjIOfO1WX5mJjUQLmSSg4JFuNWgqGZJZDV7LBH8y3QBz3KrjuHdg",
       "aoiTitle": "CN Tower",
-      "extent": [-88, 54, -86, 55]
+      "extent": [-79.3881, 43.6416, -79.3861, 43.6436]
+    },
+    {
+      "imageUrl": "https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcTCSU8D4pV4fY9MfYa6NZvpcMrCDhxE-ySOSzbxqSCC67_loNeJ9WI-2Ki7zCfU36M0Iwt7-4aw0y3_Vg8t_8sxo86xS6HVewQdYjOOXA",
+      "aoiTitle": "Parliament Hill",
+      "extent": [-75.7019, 45.4226, -75.6999, 45.4246]
     }
   ],
   "version": "1.0"
