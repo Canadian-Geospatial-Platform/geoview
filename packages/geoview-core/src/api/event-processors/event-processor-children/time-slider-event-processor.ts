@@ -15,6 +15,7 @@ import { MapEventProcessor } from './map-event-processor';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
+import { UIEventProcessor } from './ui-event-processor';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -85,6 +86,9 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
 
     const { defaultValue, field, filtering, minAndMax, values } = timeSliderLayer[layerPath];
     this.applyFilters(mapId, layerPath, defaultValue, field, filtering, minAndMax, values);
+
+    // Make sure tab is visible
+    UIEventProcessor.removeHiddenTab(mapId, 'time-slider');
   }
 
   /**
@@ -95,6 +99,10 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   static removeTimeSliderLayer(mapId: string, layerPath: string): void {
     // Redirect
     this.getTimesliderState(mapId)?.setterActions.removeTimeSliderLayer(layerPath);
+
+    // If there are no layers with time dimension, hide tab
+    if (!this.getTimesliderState(mapId) || !Object.keys(this.getTimesliderState(mapId)!.timeSliderLayers).length)
+      UIEventProcessor.addHiddenTab(mapId, 'time-slider');
   }
 
   /**

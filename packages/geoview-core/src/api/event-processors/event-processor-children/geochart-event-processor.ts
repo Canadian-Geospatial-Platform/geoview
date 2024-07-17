@@ -8,6 +8,7 @@ import { GeoChartConfig } from '@/core/utils/config/reader/uuid-config-reader';
 import { logger } from '@/core/utils/logger';
 
 import { AbstractEventProcessor, BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
+import { UIEventProcessor } from './ui-event-processor';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -120,8 +121,11 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
       });
     });
 
-    // set store charts config
+    // Set store charts config
     this.getGeochartState(mapId)?.setterActions.setGeochartCharts(chartData);
+
+    // If there is chart data, tab should not be hidden
+    if (Object.keys(chartData).length) UIEventProcessor.removeHiddenTab(mapId, 'geochart');
 
     // Log
     logger.logInfo('Added GeoChart configs for layer paths:', layerPaths);
@@ -144,6 +148,9 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
 
     // Update the layer data array in the store
     this.getGeochartState(mapId)!.setterActions.setGeochartCharts({ ...this.getGeochartState(mapId)?.geochartChartsConfig, ...toAdd });
+
+    // Make sure tab is not hidden
+    UIEventProcessor.removeHiddenTab(mapId, 'geochart');
 
     // Log
     logger.logInfo('Added GeoChart configs for layer path:', layerPath);
@@ -170,6 +177,9 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
 
       // Update the layer data array in the store
       this.getGeochartState(mapId)!.setterActions.setGeochartCharts({ ...chartConfigs });
+
+      // If there are no more geochart layers, hide tab
+      if (!Object.keys(this.getGeochartState(mapId)!.geochartChartsConfig).length) UIEventProcessor.addHiddenTab(mapId, 'geochart');
 
       // Log
       logger.logInfo('Removed GeoChart configs for layer path:', layerPath);

@@ -44,7 +44,8 @@ jobs:
           rm -r common
           rm -r packages
 
-          git config --global user.name $USER
+          git config --global user.email "damon.ulmi@nrcan-rncan.gc.ca"
+          git config --global user.name "Damon Ulmi"
 
           git add .
           git status

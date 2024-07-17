@@ -34,6 +34,10 @@ export class UIEventProcessor extends AbstractEventProcessor {
   static getCorePackageComponents(mapId: string): TypeMapCorePackages {
     return this.getUIState(mapId).corePackagesComponents;
   }
+
+  static getFooterBarIsCollapsed(mapId: string): boolean {
+    return this.getUIState(mapId).footerBarIsCollapsed;
+  }
   // #endregion
 
   // **********************************************************
@@ -41,6 +45,20 @@ export class UIEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // GV NEVER add a store action who does set state AND map action at a same time.
   // GV Review the action in store state to make sure
+  static addHiddenTab(mapId: string, tab: string): void {
+    if (!this.getUIState(mapId).hiddenTabs.includes(tab))
+      this.getUIState(mapId).setterActions.setHiddenTabs([...this.getUIState(mapId).hiddenTabs, tab]);
+  }
+
+  static removeHiddenTab(mapId: string, tab: string): void {
+    const curHiddenTabs = this.getUIState(mapId).hiddenTabs;
+    const tabIndex = curHiddenTabs.indexOf(tab);
+    if (tabIndex !== -1) {
+      curHiddenTabs.splice(tabIndex, 1);
+      this.getUIState(mapId).setterActions.setHiddenTabs(curHiddenTabs);
+    }
+  }
+
   static setActiveFooterBarTab(mapId: string, id: string): void {
     this.getUIState(mapId).setterActions.setActiveFooterBarTab(id);
   }
@@ -51,5 +69,9 @@ export class UIEventProcessor extends AbstractEventProcessor {
 
   static getActiveAppBarTab(mapId: string): ActiveAppBarTabType {
     return this.getUIState(mapId).activeAppBarTab;
+  }
+
+  static setFooterBarIsCollapsed(mapId: string, collapsed: boolean): void {
+    this.getUIState(mapId).setterActions.setFooterBarIsCollapsed(collapsed);
   }
 }
