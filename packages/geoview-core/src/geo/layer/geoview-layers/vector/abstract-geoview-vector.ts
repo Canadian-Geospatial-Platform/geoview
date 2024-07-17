@@ -515,7 +515,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   getFeaturesAsGeoJSON(layerPath: string): JSON {
     // Get map projection
-    const mapProjection: ProjectionLike = MapEventProcessor.getMapViewer(this.mapId).getProjection().getCode();
+    const mapProjection: ProjectionLike = this.getMapViewer().getProjection().getCode();
 
     const format = new FormatGeoJSON();
     const geoJsonStr = format.writeFeatures((this.getOLLayer(layerPath) as VectorLayer<Feature>).getSource()!.getFeatures(), {

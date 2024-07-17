@@ -227,9 +227,15 @@ function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded
           logger.logInfo('Map initialized', mapElement.getAttribute('id')!);
 
           // TODO: Fix this timeout issue when geoCore layer are use in config: https://github.com/Canadian-Geospatial-Platform/geoview/issues/2380
+          // Set a timeout value if one of thelaeyrs is a geoCore type
+          const mapId = mapElement.getAttribute('id')!;
+          const layerTypes = api.maps[mapId].mapFeaturesConfig.map.listOfGeoviewLayerConfig?.map((item) => item.geoviewLayerType) || [];
+          const geoCoreTimeout = layerTypes.includes('geoCore') ? 500 : 0;
+
+          // TODO: Fix this timeout issue when geoCore layer are use in config: https://github.com/Canadian-Geospatial-Platform/geoview/issues/2380
           setTimeout(() => {
             // Callback about it
-            const mapId = mapElement.getAttribute('id')!;
+            // const mapId = mapElement.getAttribute('id')!;
             callbackMapInit?.(mapId);
 
             // Register when the map viewer will have loaded layers
@@ -239,7 +245,7 @@ function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded
               // Callback for that particular map
               callbackMapLayersLoaded?.(mapViewerLoaded.mapId);
             });
-          }, 500);
+          }, geoCoreTimeout);
         })
         .catch((error) => {
           // Log

@@ -23,7 +23,6 @@ import { AbstractGVLayer } from '../abstract-gv-layer';
 import { AbstractGeoViewLayer } from '../../geoview-layers/abstract-geoview-layers';
 import { getLocalizedValue } from '@/core/utils/utilities';
 import { getMinOrMaxExtents } from '@/geo/utils/utilities';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer vector type layer.
@@ -295,7 +294,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    */
   getFeaturesAsGeoJSON(): JSON {
     // Get map projection
-    const mapProjection: ProjectionLike = MapEventProcessor.getMapViewer(this.getMapId()).getProjection().getCode();
+    const mapProjection: ProjectionLike = this.getMapViewer().getProjection().getCode();
 
     const format = new FormatGeoJSON();
     const geoJsonStr = format.writeFeatures((this.getOLLayer() as VectorLayer<Feature>).getSource()!.getFeatures(), {
