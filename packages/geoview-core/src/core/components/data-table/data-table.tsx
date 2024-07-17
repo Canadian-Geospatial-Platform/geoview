@@ -349,15 +349,17 @@ function DataTable({ data, layerPath, tableHeight = '500px' }: DataTableProps): 
           />
         ),
         ZOOM: (
-          <IconButton
-            color="primary"
-            // Function returns void promise instead of void, other work arounds led to more eslint issues
-            // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            onClick={() => handleZoomIn(feature)}
-            disabled={!feature.extent && feature.geoviewLayerType !== CONST_LAYER_TYPES.ESRI_DYNAMIC}
-          >
-            <ZoomInSearchIcon />
-          </IconButton>
+          <Box component="span">
+            <IconButton
+              color="primary"
+              // Function returns void promise instead of void, other work arounds led to more eslint issues
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
+              onClick={() => handleZoomIn(feature)}
+              disabled={!feature.extent && feature.geoviewLayerType !== CONST_LAYER_TYPES.ESRI_DYNAMIC}
+            >
+              <ZoomInSearchIcon />
+            </IconButton>
+          </Box>
         ),
         DETAILS: (
           <Box marginLeft="0.3rem">

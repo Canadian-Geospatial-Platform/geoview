@@ -1,5 +1,6 @@
 import { useTheme } from '@mui/material/styles';
 import { FormControl, InputLabel, NativeSelect } from '@mui/material';
+import { Box } from 'geoview-core/src/ui';
 import {
   useTimeSliderLayers,
   useTimeSliderStoreActions,
@@ -426,40 +427,50 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
                 {locked ? <LockIcon /> : <LockOpenIcon />}
               </IconButton>
             )}
-            <IconButton
-              className="buttonOutline"
-              aria-label={getLocalizedMessage('timeSlider.slider.back', displayLanguage) as string}
-              tooltip="timeSlider.slider.back"
-              tooltipPlacement="top"
-              disabled={isPlaying || !filtering}
-              onClick={() => handleBack()}
-            >
-              <ArrowLeftIcon />
-            </IconButton>
-            <IconButton
-              className="buttonOutline"
-              aria-label={
-                isPlaying
-                  ? (getLocalizedMessage('timeSlider.slider.pauseAnimation', displayLanguage) as string)
-                  : (getLocalizedMessage('timeSlider.slider.playAnimation', displayLanguage) as string)
-              }
-              tooltip={isPlaying ? 'timeSlider.slider.pauseAnimation' : 'timeSlider.slider.playAnimation'}
-              tooltipPlacement="top"
-              disabled={!filtering}
-              onClick={() => handlePlay()}
-            >
-              {!isPlaying ? <PlayArrowIcon /> : <PauseIcon />}
-            </IconButton>
-            <IconButton
-              className="buttonOutline"
-              aria-label={getLocalizedMessage('timeSlider.slider.forward', displayLanguage) as string}
-              tooltip="timeSlider.slider.forward"
-              tooltipPlacement="top"
-              disabled={isPlaying || !filtering}
-              onClick={() => handleForward()}
-            >
-              <ArrowRightIcon />
-            </IconButton>
+
+            <Box component="span">
+              <IconButton
+                className="buttonOutline"
+                aria-label={getLocalizedMessage('timeSlider.slider.back', displayLanguage) as string}
+                tooltip="timeSlider.slider.back"
+                tooltipPlacement="top"
+                disabled={isPlaying || !filtering}
+                onClick={() => handleBack()}
+              >
+                <ArrowLeftIcon />
+              </IconButton>
+            </Box>
+
+            <Box component="span">
+              <IconButton
+                className="buttonOutline"
+                aria-label={
+                  isPlaying
+                    ? (getLocalizedMessage('timeSlider.slider.pauseAnimation', displayLanguage) as string)
+                    : (getLocalizedMessage('timeSlider.slider.playAnimation', displayLanguage) as string)
+                }
+                tooltip={isPlaying ? 'timeSlider.slider.pauseAnimation' : 'timeSlider.slider.playAnimation'}
+                tooltipPlacement="top"
+                disabled={!filtering}
+                onClick={() => handlePlay()}
+              >
+                {!isPlaying ? <PlayArrowIcon /> : <PauseIcon />}
+              </IconButton>
+            </Box>
+
+            <Box component="span">
+              <IconButton
+                className="buttonOutline"
+                aria-label={getLocalizedMessage('timeSlider.slider.forward', displayLanguage) as string}
+                tooltip="timeSlider.slider.forward"
+                tooltipPlacement="top"
+                disabled={isPlaying || !filtering}
+                onClick={() => handleForward()}
+              >
+                <ArrowRightIcon />
+              </IconButton>
+            </Box>
+
             <IconButton
               className="buttonOutline"
               aria-label={getLocalizedMessage('timeSlider.slider.changeDirection', displayLanguage) as string}
@@ -469,24 +480,27 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
             >
               {reversed ? <SwitchRightIcon /> : <SwitchLeftIcon />}
             </IconButton>
-            <FormControl sx={{ width: '150px' }}>
-              <InputLabel variant="standard">{getLocalizedMessage('timeSlider.slider.timeDelay', displayLanguage)}</InputLabel>
-              <NativeSelect
-                defaultValue={delay}
-                inputProps={{
-                  name: 'timeDelay',
-                  onChange: (event) => handleTimeChange(event),
-                }}
-              >
-                <option value={500}>0.5s</option>
-                <option value={750}>0.75s</option>
-                <option value={1000}>1.0s</option>
-                <option value={1500}>1.5s</option>
-                <option value={2000}>2.0s</option>
-                <option value={3000}>3.0s</option>
-                <option value={5000}>5.0s</option>
-              </NativeSelect>
-            </FormControl>
+
+            <Box component="span" sx={{ paddingLeft: '10px' }}>
+              <FormControl sx={{ width: '150px' }}>
+                <InputLabel variant="standard">{getLocalizedMessage('timeSlider.slider.timeDelay', displayLanguage)}</InputLabel>
+                <NativeSelect
+                  defaultValue={delay}
+                  inputProps={{
+                    name: 'timeDelay',
+                    onChange: (event) => handleTimeChange(event),
+                  }}
+                >
+                  <option value={500}>0.5s</option>
+                  <option value={750}>0.75s</option>
+                  <option value={1000}>1.0s</option>
+                  <option value={1500}>1.5s</option>
+                  <option value={2000}>2.0s</option>
+                  <option value={3000}>3.0s</option>
+                  <option value={5000}>5.0s</option>
+                </NativeSelect>
+              </FormControl>
+            </Box>
           </div>
         </Grid>
         {description && (
