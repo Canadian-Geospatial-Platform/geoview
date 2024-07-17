@@ -1167,7 +1167,7 @@ export abstract class AbstractGeoViewLayer {
       const curVisible = this.getVisible(layerPath);
       olLayer.setVisible(layerVisibility);
       // olLayer.changed();
-      if (layerVisibility !== curVisible) this.#emitVisibleChanged({ visible: layerVisibility });
+      if (layerVisibility !== curVisible) this.#emitVisibleChanged({ layerPath, visible: layerVisibility });
     }
   }
 
@@ -1954,6 +1954,7 @@ type LegendQueriedDelegate = EventDelegateBase<AbstractGeoViewLayer, LegendQueri
  * Define an event for the delegate
  */
 export type VisibleChangedEvent = {
+  layerPath: string;
   visible: boolean;
 };
 

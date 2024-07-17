@@ -226,17 +226,20 @@ function init(callbackMapInit?: (mapId: string) => void, callbackMapLayersLoaded
           // Log
           logger.logInfo('Map initialized', mapElement.getAttribute('id')!);
 
-          // Callback about it
-          const mapId = mapElement.getAttribute('id')!;
-          callbackMapInit?.(mapId);
+          // TODO: Fix this timeout issue when geoCore layer are use in config: https://github.com/Canadian-Geospatial-Platform/geoview/issues/2380
+          setTimeout(() => {
+            // Callback about it
+            const mapId = mapElement.getAttribute('id')!;
+            callbackMapInit?.(mapId);
 
-          // Register when the map viewer will have loaded layers
-          api.maps[mapId].onMapLayersLoaded((mapViewerLoaded) => {
-            logger.logInfo('Map layers loaded', mapViewerLoaded.mapId);
+            // Register when the map viewer will have loaded layers
+            api.maps[mapId].onMapLayersLoaded((mapViewerLoaded) => {
+              logger.logInfo('Map layers loaded', mapViewerLoaded.mapId);
 
-            // Callback for that particular map
-            callbackMapLayersLoaded?.(mapViewerLoaded.mapId);
-          });
+              // Callback for that particular map
+              callbackMapLayersLoaded?.(mapViewerLoaded.mapId);
+            });
+          }, 500);
         })
         .catch((error) => {
           // Log

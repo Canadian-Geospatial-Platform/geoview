@@ -5,6 +5,7 @@ import { Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { VectorImage as VectorLayer } from 'ol/layer';
 import { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
+import { GeoJSON as FormatGeoJSON } from 'ol/format';
 import { all, bbox } from 'ol/loadingstrategy';
 import { ReadOptions } from 'ol/format/Feature';
 import BaseLayer from 'ol/layer/Base';
@@ -505,6 +506,24 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       return Promise.resolve(calculatedExtent);
     }
     return Promise.resolve(undefined);
+  }
+
+  /**
+   * Return the vector layer as a GeoJSON object
+   * @param {string} layerPath - Layer path to get GeoJSON
+   * @returns {JSON} Layer's features as GeoJSON
+   */
+  getFeaturesAsGeoJSON(layerPath: string): JSON {
+    // Get map projection
+    const mapProjection: ProjectionLike = MapEventProcessor.getMapViewer(this.mapId).getProjection().getCode();
+
+    const format = new FormatGeoJSON();
+    const geoJsonStr = format.writeFeatures((this.getOLLayer(layerPath) as VectorLayer<Feature>).getSource()!.getFeatures(), {
+      dataProjection: 'EPSG:4326', // Output projection,
+      featureProjection: mapProjection,
+    });
+
+    return JSON.parse(geoJsonStr);
   }
 
   /**
