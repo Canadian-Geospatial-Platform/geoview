@@ -17,22 +17,26 @@ export class UIEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId The mapId
    * @returns {IUIState} The UI state.
    */
-  protected static getUIState(mapId: string): IUIState {
+  protected static getUIStateProtected(mapId: string): IUIState {
     // Return the time slider state
     return super.getState(mapId).uiState;
   }
 
   // #region
   static getActiveFooterBarTab(mapId: string): string {
-    return this.getUIState(mapId).activeFooterBarTabId;
+    return this.getUIStateProtected(mapId).activeFooterBarTabId;
   }
 
   static getAppBarComponents(mapId: string): TypeValidAppBarCoreProps[] {
-    return this.getUIState(mapId).appBarComponents;
+    return this.getUIStateProtected(mapId).appBarComponents;
   }
 
   static getCorePackageComponents(mapId: string): TypeMapCorePackages {
-    return this.getUIState(mapId).corePackagesComponents;
+    return this.getUIStateProtected(mapId).corePackagesComponents;
+  }
+
+  static getFooterBarIsCollapsed(mapId: string): boolean {
+    return this.getUIStateProtected(mapId).footerBarIsCollapsed;
   }
   // #endregion
 
@@ -41,15 +45,33 @@ export class UIEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // GV NEVER add a store action who does set state AND map action at a same time.
   // GV Review the action in store state to make sure
+  static addHiddenTab(mapId: string, tab: string): void {
+    if (!this.getUIStateProtected(mapId).hiddenTabs.includes(tab))
+      this.getUIStateProtected(mapId).setterActions.setHiddenTabs([...this.getUIStateProtected(mapId).hiddenTabs, tab]);
+  }
+
+  static removeHiddenTab(mapId: string, tab: string): void {
+    const curHiddenTabs = this.getUIStateProtected(mapId).hiddenTabs;
+    const tabIndex = curHiddenTabs.indexOf(tab);
+    if (tabIndex !== -1) {
+      curHiddenTabs.splice(tabIndex, 1);
+      this.getUIStateProtected(mapId).setterActions.setHiddenTabs(curHiddenTabs);
+    }
+  }
+
   static setActiveFooterBarTab(mapId: string, id: string): void {
-    this.getUIState(mapId).setterActions.setActiveFooterBarTab(id);
+    this.getUIStateProtected(mapId).setterActions.setActiveFooterBarTab(id);
   }
 
   static setActiveAppBarTab(mapId: string, tabId: string, tabGroup: string, isOpen: boolean): void {
-    this.getUIState(mapId).setterActions.setActiveAppBarTab(tabId, tabGroup, isOpen);
+    this.getUIStateProtected(mapId).setterActions.setActiveAppBarTab(tabId, tabGroup, isOpen);
   }
 
   static getActiveAppBarTab(mapId: string): ActiveAppBarTabType {
-    return this.getUIState(mapId).activeAppBarTab;
+    return this.getUIStateProtected(mapId).activeAppBarTab;
+  }
+
+  static setFooterBarIsCollapsed(mapId: string, collapsed: boolean): void {
+    this.getUIStateProtected(mapId).setterActions.setFooterBarIsCollapsed(collapsed);
   }
 }
