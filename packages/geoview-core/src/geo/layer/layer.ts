@@ -148,7 +148,13 @@ export class LayerApi {
   #onLayerLoadedHandlers: LayerLoadedDelegate[] = [];
 
   // Keep all callback delegates references
+  #onLayerErrorHandlers: LayerErrorDelegate[] = [];
+
+  // Keep all callback delegates references
   #onLayerRemovedHandlers: LayerRemovedDelegate[] = [];
+
+  // Keep all callback delegates references
+  #onLayerVisibilityToggledHandlers: LayerVisibilityToggledDelegate[] = [];
 
   // Keep all callback delegates references
   #onLayerItemVisibilityToggledHandlers: LayerItemVisibilityToggledDelegate[] = [];
@@ -909,6 +915,8 @@ export class LayerApi {
 
         // TODO: find a more centralized way to trap error and display message
         api.maps[this.getMapId()].notifications.showError('validation.layer.loadfailed', [layer, this.getMapId()]);
+
+        this.#emitLayerError({ layerPath: layer });
       });
     }
 
@@ -1386,8 +1394,55 @@ export class LayerApi {
    * @param {boolean} newValue - The new value of visibility.
    */
   setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): void {
-    // Redirect to processor
-    MapEventProcessor.setOrToggleMapLayerVisibility(this.getMapId(), layerPath, newValue);
+    // Apply some visibility logic
+    const curOrderedLayerInfo = MapEventProcessor.getMapLayerOrder(this.getMapId());
+    const layerVisibility = MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(this.getMapId(), layerPath);
+    // Determine the outcome of the new visibility based on parameters
+    const newVisibility = newValue !== undefined ? newValue : !layerVisibility;
+    const layerInfos = curOrderedLayerInfo.filter((info: { layerPath: string }) => info.layerPath.startsWith(layerPath));
+    const parentLayerPathArray = layerPath.split('/');
+    parentLayerPathArray.pop();
+    const parentLayerPath = parentLayerPathArray.join('/');
+    const parentLayerInfo = curOrderedLayerInfo.find((info: { layerPath: string }) => info.layerPath === parentLayerPath);
+
+    layerInfos.forEach((layerInfo: { visible: boolean; layerPath: string }) => {
+      if (layerInfo) {
+        // If the new visibility is different than before
+        if (newVisibility !== layerVisibility) {
+          // Go for it
+          // eslint-disable-next-line no-param-reassign
+          layerInfo.visible = newVisibility;
+          this.getGeoviewLayerHybrid(layerInfo.layerPath)?.setVisible(layerInfo.visible, layerInfo.layerPath);
+          // Emit event
+          this.#emitLayerVisibilityToggled({ layerPath: layerInfo.layerPath, visibility: layerInfo.visible });
+        }
+      }
+    });
+
+    if (parentLayerInfo !== undefined) {
+      const parentLayerVisibility = MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(this.getMapId(), parentLayerPath);
+      if ((!layerVisibility || newValue) && parentLayerVisibility === false) {
+        if (parentLayerInfo) {
+          parentLayerInfo.visible = true;
+          this.getGeoviewLayerHybrid(parentLayerPath)?.setVisible(true, parentLayerPath);
+
+          // Emit event
+          this.#emitLayerVisibilityToggled({ layerPath: parentLayerPath, visibility: true });
+        }
+      }
+      const children = curOrderedLayerInfo.filter(
+        (info: { layerPath: string }) => info.layerPath.startsWith(parentLayerPath) && info.layerPath !== parentLayerPath
+      );
+      if (!children.some((child: { visible: boolean }) => child.visible === true)) {
+        this.setOrToggleLayerVisibility(parentLayerPath, false);
+
+        // Emit event
+        this.#emitLayerVisibilityToggled({ layerPath, visibility: false });
+      }
+    }
+
+    // Redirect to processor so we can update the store with setterActions
+    MapEventProcessor.setOrToggleMapLayerVisibilityState(this.getMapId(), curOrderedLayerInfo);
   }
 
   /**
@@ -1529,6 +1584,34 @@ export class LayerApi {
   }
 
   /**
+   * Emits an event to all handlers when the layer's features have been flag as error on the map.
+   * @param {LayerErrorEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerError(event: LayerErrorEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerErrorHandlers, event);
+  }
+
+  /**
+   * Registers a layer error event handler.
+   * @param {LayerErrorDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerError(callback: LayerErrorDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerErrorHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer error event handler.
+   * @param {LayerErrorDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerError(callback: LayerErrorDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerErrorHandlers, callback);
+  }
+
+  /**
    * Emits an event to all handlers.
    * @param {LayerRemovedEvent} event - The event to emit
    * @private
@@ -1554,6 +1637,33 @@ export class LayerApi {
   offLayerRemoved(callback: LayerRemovedDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerRemovedHandlers, callback);
+  }
+
+  /**
+   * Emits layer visibility toggled event.
+   * @param {LayerVisibilityToggledEvent} event - The event to emit
+   */
+  #emitLayerVisibilityToggled(event: LayerVisibilityToggledEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerVisibilityToggledHandlers, event);
+  }
+
+  /**
+   * Registers a layer visibility toggled event handler.
+   * @param {LayerVisibilityToggledDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerVisibilityToggled(callback: LayerVisibilityToggledDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerVisibilityToggledHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer  visibility toggled event handler.
+   * @param {LayerVisibilityToggledDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerVisibilityToggled(callback: LayerVisibilityToggledDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerVisibilityToggledHandlers, callback);
   }
 
   /**
@@ -1615,6 +1725,19 @@ export type LayerLoadedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
+type LayerErrorDelegate = EventDelegateBase<LayerApi, LayerErrorEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerErrorEvent = {
+  // The error layer
+  layerPath: string;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
 type LayerRemovedDelegate = EventDelegateBase<LayerApi, LayerRemovedEvent, void>;
 
 /**
@@ -1623,6 +1746,21 @@ type LayerRemovedDelegate = EventDelegateBase<LayerApi, LayerRemovedEvent, void>
 export type LayerRemovedEvent = {
   // The added layer
   layerPath: string;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerVisibilityToggledDelegate = EventDelegateBase<LayerApi, LayerVisibilityToggledEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerVisibilityToggledEvent = {
+  // The layer path of the affected layer
+  layerPath: string;
+  // The new visibility
+  visibility: boolean;
 };
 
 /**
