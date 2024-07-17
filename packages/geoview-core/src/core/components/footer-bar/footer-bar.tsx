@@ -119,8 +119,8 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         label: `${camelCase(tab)}.title`,
         icon: allTabs[tab]?.icon ?? '',
         content: allTabs[tab]?.content ?? '',
-      };
-    }) as unknown as TypeTabs[];
+      } as TypeTabs;
+    });
   }, [memoTabs, tabsList]);
 
   /**

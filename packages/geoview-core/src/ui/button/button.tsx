@@ -42,22 +42,24 @@ export function Button(props: ButtonProps): JSX.Element {
 
   return (
     <Tooltip title={t(tooltip || '')} placement={tooltipPlacement || 'bottom'} TransitionComponent={Fade}>
-      <MaterialButton
-        fullWidth={fullWidth}
-        id={id}
-        size={size || 'medium'}
-        sx={sx}
-        variant={variant || 'text'}
-        className={`${className || ''}`}
-        onClick={onClick}
-        autoFocus={autoFocus}
-        disabled={disabled}
-        disableRipple={disableRipple}
-        startIcon={startIcon}
-        endIcon={endIcon}
-      >
-        {!(makeResponsive && mobileView) ? children : null}
-      </MaterialButton>
+      <span>
+        <MaterialButton
+          fullWidth={fullWidth}
+          id={id}
+          size={size || 'medium'}
+          sx={sx}
+          variant={variant || 'text'}
+          className={`${className || ''}`}
+          onClick={onClick}
+          autoFocus={autoFocus}
+          disabled={disabled}
+          disableRipple={disableRipple}
+          startIcon={startIcon}
+          endIcon={endIcon}
+        >
+          {!(makeResponsive && mobileView) ? children : null}
+        </MaterialButton>
+      </span>
     </Tooltip>
   );
 }

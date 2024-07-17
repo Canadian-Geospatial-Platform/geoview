@@ -32,21 +32,23 @@ export function IconButton(props: TypeIconButtonProps): JSX.Element {
 
   function getMaterialIconButton(): JSX.Element {
     return (
-      <MaterialIconButton
-        id={id}
-        sx={sx}
-        aria-label={(t(ariaLabel as string) || t(tooltip as string)) as string}
-        style={style}
-        className={className}
-        onClick={onClick}
-        tabIndex={tabIndex}
-        size={size}
-        ref={iconRef}
-        disabled={disabled}
-        color={color}
-      >
-        {children && children}
-      </MaterialIconButton>
+      <span>
+        <MaterialIconButton
+          id={id}
+          sx={sx}
+          aria-label={(t(ariaLabel as string) || t(tooltip as string)) as string}
+          style={style}
+          className={className}
+          onClick={onClick}
+          tabIndex={tabIndex}
+          size={size}
+          ref={iconRef}
+          disabled={disabled}
+          color={color}
+        >
+          {children && children}
+        </MaterialIconButton>
+      </span>
     );
   }
 
