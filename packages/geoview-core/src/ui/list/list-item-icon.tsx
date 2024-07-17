@@ -7,10 +7,10 @@ import { ListItemIcon as MaterialListItemIcon, ListItemIconProps } from '@mui/ma
  * @returns {JSX.Element} the created List Item element
  */
 export function ListItemIcon(props: ListItemIconProps): JSX.Element {
-  const { children, className, style } = props;
+  const { children, className, style, ...rest } = props;
 
   return (
-    <MaterialListItemIcon className={className || ''} style={style || undefined}>
+    <MaterialListItemIcon className={className || ''} style={style || undefined} {...rest}>
       {children !== undefined && children}
     </MaterialListItemIcon>
   );

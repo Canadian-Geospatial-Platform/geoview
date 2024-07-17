@@ -26,7 +26,7 @@ const sxClasses = {
  * @returns {JSX.Element} the created List element
  */
 export const List = React.forwardRef<HTMLUListElement, TypeListProps>((props: TypeListProps, ref): JSX.Element => {
-  const { children, className, style, type, sx } = props;
+  const { children, className, style, type, sx, ...rest } = props;
 
   return (
     <MaterialList
@@ -35,6 +35,7 @@ export const List = React.forwardRef<HTMLUListElement, TypeListProps>((props: Ty
       className={className || ''}
       style={style || undefined}
       component={type || 'ul'}
+      {...rest}
     >
       {children !== undefined && children}
     </MaterialList>

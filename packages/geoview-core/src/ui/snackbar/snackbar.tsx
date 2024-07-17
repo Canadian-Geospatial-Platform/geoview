@@ -33,7 +33,7 @@ export function Snackbar(props: SnackBarProps): JSX.Element {
   logger.logTraceRender('ui/snackbar/snackbar', props);
 
   // Read props
-  const { snackBarId, open, message, type, button, onClose } = props;
+  const { snackBarId, open, message, type, button, onClose, ...rest } = props;
 
   const fadeInAnimation = useFadeIn();
   const AnimatedSnackbar = animated(MaterialSnackbar);
@@ -50,6 +50,7 @@ export function Snackbar(props: SnackBarProps): JSX.Element {
       open={open}
       autoHideDuration={6000}
       onClose={() => onClose?.()}
+      {...rest}
     >
       <Alert onClose={() => onClose?.()} severity={type} sx={{ width: '100%' }}>
         {message}
