@@ -1442,7 +1442,7 @@ export class LayerApi {
     }
 
     // Redirect to processor so we can update the store with setterActions
-    MapEventProcessor.setOrToggleMapLayerVisibilityState(this.getMapId(), curOrderedLayerInfo);
+    MapEventProcessor.setOrderedLayerInfoWithNoOrderChangeState(this.getMapId(), curOrderedLayerInfo);
   }
 
   /**
@@ -1744,7 +1744,7 @@ type LayerRemovedDelegate = EventDelegateBase<LayerApi, LayerRemovedEvent, void>
  * Define an event for the delegate
  */
 export type LayerRemovedEvent = {
-  // The added layer
+  // The remove layer
   layerPath: string;
 };
 

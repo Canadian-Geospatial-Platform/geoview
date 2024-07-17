@@ -554,7 +554,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapViewerLayerAPI(mapId).setOrToggleLayerVisibility(layerPath, newValue);
   }
 
-  static setOrToggleMapLayerVisibilityState(mapId: string, curOrderedLayerInfo: TypeOrderedLayerInfo[]): void {
+  static setOrderedLayerInfoWithNoOrderChangeState(mapId: string, curOrderedLayerInfo: TypeOrderedLayerInfo[]): void {
     // Redirect
     this.getMapStateProtected(mapId).setterActions.setOrderedLayerInfo([...curOrderedLayerInfo]);
   }

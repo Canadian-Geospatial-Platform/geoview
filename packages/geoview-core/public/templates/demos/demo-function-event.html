@@ -211,22 +211,22 @@
 
         // listen to layer visibility changed event (individual geoview layer)
         cgpv.api.maps.Map1.layer.getGeoviewLayer('uniqueValueId/1').onVisibleChanged((sender, payload) => {
-          cgpv.api.maps.Map1.notifications.addNotificationSuccess(`uniqueValueId/1 visibility set to ${payload.visible}`);
+          cgpv.api.maps.Map1.notifications.addNotificationSuccess(`uniqueValueId/1 visibility set to ${payload.visible} - individual`);
         });
 
         // listen to layer visibility changed event (individual geoview layer)
         cgpv.api.maps.Map1.layer.getGeoviewLayer('rcs.f4c51eaa-a6ca-48b9-a1fc-b0651da20509.en').onVisibleChanged((sender, payload) => {
-          cgpv.api.maps.Map1.notifications.addNotificationSuccess(`layer ${payload.layerPath} visibility set to ${payload.visible}`);
+          cgpv.api.maps.Map1.notifications.addNotificationSuccess(`layer ${payload.layerPath} visibility set to ${payload.visible} - individual`);
         });
 
         // listen to layer item visibility changed event (any layers)
         cgpv.api.maps.Map1.layer.onLayerVisibilityToggled((sender, payload) => {
-          cgpv.api.maps.Map1.notifications.addNotificationSuccess(`layer ${payload.layerPath} visibility set to ${payload.visibility}`);
+          cgpv.api.maps.Map1.notifications.addNotificationSuccess(`layer ${payload.layerPath} visibility set to ${payload.visibility} - global`);
         });
 
         // listen to layer item visibility changed event (any layers)
         cgpv.api.maps.Map1.layer.onLayerItemVisibilityToggled((sender, payload) => {
-          cgpv.api.maps.Map1.notifications.addNotificationSuccess(`${payload.itemName} on layer ${payload.layerPath} visibility set to ${payload.visibility}`);
+          cgpv.api.maps.Map1.notifications.addNotificationSuccess(`${payload.itemName} on layer ${payload.layerPath} visibility set to ${payload.visibility} - global`);
         });
 
         // listen to map zoom event
