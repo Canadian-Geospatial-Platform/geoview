@@ -10,6 +10,7 @@ import { Select, TypeMenuItemProps } from '@/ui/select/select';
 import { getSxClasses } from './tabs-style';
 import { TabPanel } from './tab-panel';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useUIHiddenTabs } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 /**
  * Type used for properties of each tab
@@ -84,6 +85,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
 
   // get store values and actions
   const mapSize = useMapSize();
+  const hiddenTabs = useUIHiddenTabs();
 
   // show/hide dropdown based on map size
   const initMobileDropdown = mapSize[0] !== 0 ? mapSize[0] < theme.breakpoints.values.sm : false;
@@ -197,7 +199,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
                     iconPosition="start"
                     id={`tab-${index}`}
                     onClick={() => handleClick(index)}
-                    sx={sxClasses.tab}
+                    sx={hiddenTabs.includes(tab.id) ? { display: 'none' } : sxClasses.tab}
                     {...tabProps}
                   />
                 );

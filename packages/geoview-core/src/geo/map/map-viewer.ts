@@ -826,7 +826,7 @@ export class MapViewer {
    * @returns {TypeOrderedLayerInfo[]} The ordered layer info
    */
   getMapLayerOrderInfo(): TypeOrderedLayerInfo[] {
-    return MapEventProcessor.getMapLayerOrder(this.mapId);
+    return MapEventProcessor.getMapOrderedLayerInfo(this.mapId);
   }
 
   /**
