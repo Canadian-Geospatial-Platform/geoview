@@ -614,7 +614,12 @@ export class MapViewer {
 
     // Zoom to extents of layers selected in config, if provided.
     if (this.mapFeaturesConfig.map.viewSettings.initialView?.layerIds) {
-      let layerExtents = this.layer.getExtentOfMultipleLayers(this.mapFeaturesConfig.map.viewSettings.initialView.layerIds);
+      // If the layerIds array is empty, use all layers
+      const layerIdsToZoomTo = this.mapFeaturesConfig.map.viewSettings.initialView.layerIds.length
+        ? this.mapFeaturesConfig.map.viewSettings.initialView.layerIds
+        : this.layer.getGeoviewLayerIds();
+
+      let layerExtents = this.layer.getExtentOfMultipleLayers(layerIdsToZoomTo);
 
       // If extents have infinity, use default instead
       if (layerExtents.includes(Infinity))
