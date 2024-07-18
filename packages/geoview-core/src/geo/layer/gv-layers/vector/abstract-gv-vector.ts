@@ -2,11 +2,13 @@ import BaseLayer from 'ol/layer/Base';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
+import { GeoJSON as FormatGeoJSON } from 'ol/format';
 import Style from 'ol/style/Style';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
 import Feature, { FeatureLike } from 'ol/Feature';
+import { ProjectionLike } from 'ol/proj';
 
 import { getUid } from 'ol/util';
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -284,6 +286,23 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       return Promise.resolve(calculatedExtent);
     }
     return Promise.resolve(undefined);
+  }
+
+  /**
+   * Return the vector layer as a GeoJSON object
+   * @returns {JSON} Layer's features as GeoJSON
+   */
+  getFeaturesAsGeoJSON(): JSON {
+    // Get map projection
+    const mapProjection: ProjectionLike = this.getMapViewer().getProjection().getCode();
+
+    const format = new FormatGeoJSON();
+    const geoJsonStr = format.writeFeatures((this.getOLLayer() as VectorLayer<Feature>).getSource()!.getFeatures(), {
+      dataProjection: 'EPSG:4326', // Output projection,
+      featureProjection: mapProjection,
+    });
+
+    return JSON.parse(geoJsonStr);
   }
 
   /**

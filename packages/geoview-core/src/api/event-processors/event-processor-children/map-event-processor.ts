@@ -550,43 +550,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   static setOrToggleMapLayerVisibility(mapId: string, layerPath: string, newValue?: boolean): void {
-    // Apply some visibility logic
-    const curOrderedLayerInfo = this.getMapStateProtected(mapId).orderedLayerInfo;
-    const layerVisibility = this.getMapVisibilityFromOrderedLayerInfo(mapId, layerPath);
-    // Determine the outcome of the new visibility based on parameters
-    const newVisibility = newValue !== undefined ? newValue : !layerVisibility;
-    const layerInfos = curOrderedLayerInfo.filter((info) => info.layerPath.startsWith(layerPath));
-    const parentLayerPathArray = layerPath.split('/');
-    parentLayerPathArray.pop();
-    const parentLayerPath = parentLayerPathArray.join('/');
-    const parentLayerInfo = curOrderedLayerInfo.find((info) => info.layerPath === parentLayerPath);
+    // Redirect to layerAPI
+    this.getMapViewerLayerAPI(mapId).setOrToggleLayerVisibility(layerPath, newValue);
+  }
 
-    layerInfos.forEach((layerInfo) => {
-      if (layerInfo) {
-        // If the new visibility is different than before
-        if (newVisibility !== layerVisibility) {
-          // Go for it
-          // eslint-disable-next-line no-param-reassign
-          layerInfo.visible = newVisibility;
-          this.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(layerInfo.layerPath)?.setVisible(layerInfo.visible, layerInfo.layerPath);
-        }
-      }
-    });
-
-    if (parentLayerInfo !== undefined) {
-      const parentLayerVisibility = this.getMapVisibilityFromOrderedLayerInfo(mapId, parentLayerPath);
-      if ((!layerVisibility || newValue) && parentLayerVisibility === false) {
-        if (parentLayerInfo) {
-          parentLayerInfo.visible = true;
-          this.getMapViewerLayerAPI(mapId).getGeoviewLayerHybrid(parentLayerPath)?.setVisible(true, parentLayerPath);
-        }
-      }
-      const children = curOrderedLayerInfo.filter(
-        (info) => info.layerPath.startsWith(parentLayerPath) && info.layerPath !== parentLayerPath
-      );
-      if (!children.some((child) => child.visible === true)) this.setOrToggleMapLayerVisibility(mapId, parentLayerPath, false);
-    }
-
+  static setOrderedLayerInfoWithNoOrderChangeState(mapId: string, curOrderedLayerInfo: TypeOrderedLayerInfo[]): void {
     // Redirect
     this.getMapStateProtected(mapId).setterActions.setOrderedLayerInfo([...curOrderedLayerInfo]);
   }
