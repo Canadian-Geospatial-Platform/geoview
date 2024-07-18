@@ -16,6 +16,7 @@
   },
   "mapnav": {
     "arianavbar": "Groupe de buttons vertical pour navigation sur la carte",
+    "basemap": "Changer la carte de base",
     "fullscreen": "Plein écran",
     "home": "Retour à la vue initiale",
     "zoomIn": "Zoom avant",
@@ -23,6 +24,14 @@
     "coordinates": "Basculer le format des coordonnées",
     "scale": "Basculer entre l'échelle et la résolution",
     "location": "Zoom sur ma position"
+  },
+  "basemaps": {
+    "select": "Choisir une carte de base",
+    "default": "Défaut",
+    "transport": "Transport",
+    "imagery": "Imagerie Satellitaire",
+    "simple": "Simple",
+    "nogeom": "Aucun"
   },
   "mapctrl": {
     "rotation": {

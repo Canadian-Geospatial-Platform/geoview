@@ -173,7 +173,7 @@ export const CV_DEFAULT_MAP_FEATURE_CONFIG = Cast<MapFeatureConfig>({
     extraOptions: {},
   },
   theme: 'geo.ca',
-  navBar: ['zoom', 'fullscreen', 'home'],
+  navBar: ['zoom', 'fullscreen', 'home', 'basemap-select'],
   footerBar: {
     tabs: {
       core: ['legend', 'layers', 'details', 'data-table'],

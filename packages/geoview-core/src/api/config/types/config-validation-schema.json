@@ -90,7 +90,7 @@
     "TypeValidNavBarProps": {
       "description": "Valid values for the navBar array.",
       "additionalProperties": false,
-      "enum": ["zoom", "fullscreen", "home", "location"]
+      "enum": ["zoom", "fullscreen", "home", "location", "basemap-select"]
     },
     "TypeNavBarProps": {
       "description": "Controls available on the navigation bar.",
@@ -100,7 +100,7 @@
       "items": {
         "$ref": "#/definitions/TypeValidNavBarProps"
       },
-      "default": ["zoom", "fullscreen", "home"],
+      "default": ["zoom", "fullscreen", "home", "basemap-select"],
       "minItems": 0
     },
     "TypeValidFooterBarTabsCoreProps": {
