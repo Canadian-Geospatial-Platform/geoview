@@ -178,7 +178,7 @@
     <script src="layerlib.js"></script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init((mapId) => {
+      cgpv.init(async (mapId) => {
           listenToLegendLayerSetChanges('HMap1-state', 'Map1');
 
         // Events=====================================================================================================================
@@ -192,6 +192,12 @@
           cgpv.api.maps.Map1.notifications.addNotificationSuccess(payload.layerPath + ' loaded');
         });
 
+        // listen to layer error events
+        cgpv.api.maps.Map1.layer.onLayerError((sender, payload) => {
+          // NOTE: The event added layer will be trigger first as the layer, even in error, has been added to ui 
+          cgpv.api.maps.Map1.notifications.addNotificationError(payload.layerPath + ' error');
+        });
+
         // listen to individual layer loaded event
         cgpv.api.maps.Map1.layer.getGeoviewLayer('nonmetalmines/5').onIndividualLayerLoaded((sender, payload) => {
           cgpv.api.maps.Map1.notifications.addNotificationSuccess('Nonmetal mines has finished loading');
@@ -203,14 +209,24 @@
           cgpv.api.maps.Map1.notifications.addNotificationSuccess(payload.layerPath + ' removed');
         });
 
-        // listen to layer visibility changed event
+        // listen to layer visibility changed event (individual geoview layer)
         cgpv.api.maps.Map1.layer.getGeoviewLayer('uniqueValueId/1').onVisibleChanged((sender, payload) => {
-          cgpv.api.maps.Map1.notifications.addNotificationSuccess(`uniqueValueId/1 visibility set to ${payload.visible}`);
+          cgpv.api.maps.Map1.notifications.addNotificationSuccess(`uniqueValueId/1 visibility set to ${payload.visible} - individual`);
         });
 
-        // listen to layer item visibility changed event
+        // listen to layer visibility changed event (individual geoview layer)
+        cgpv.api.maps.Map1.layer.getGeoviewLayer('rcs.f4c51eaa-a6ca-48b9-a1fc-b0651da20509.en').onVisibleChanged((sender, payload) => {
+          cgpv.api.maps.Map1.notifications.addNotificationSuccess(`layer ${payload.layerPath} visibility set to ${payload.visible} - individual`);
+        });
+
+        // listen to layer item visibility changed event (any layers)
+        cgpv.api.maps.Map1.layer.onLayerVisibilityToggled((sender, payload) => {
+          cgpv.api.maps.Map1.notifications.addNotificationSuccess(`layer ${payload.layerPath} visibility set to ${payload.visibility} - global`);
+        });
+
+        // listen to layer item visibility changed event (any layers)
         cgpv.api.maps.Map1.layer.onLayerItemVisibilityToggled((sender, payload) => {
-          cgpv.api.maps.Map1.notifications.addNotificationSuccess(`${payload.itemName} on layer ${payload.layerPath} visibility set to ${payload.visibility}`);
+          cgpv.api.maps.Map1.notifications.addNotificationSuccess(`${payload.itemName} on layer ${payload.layerPath} visibility set to ${payload.visibility} - global`);
         });
 
         // listen to map zoom event

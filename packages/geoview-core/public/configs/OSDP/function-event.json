@@ -11,6 +11,10 @@
     },
     "listOfGeoviewLayerConfig": [
       {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "f4c51eaa-a6ca-48b9-a1fc-b0651da20509"
+      },
+      {
         "geoviewLayerId": "airborne_radioactivity",
         "geoviewLayerName": {
           "en": "Airborne Radioactivity"
@@ -19,6 +23,17 @@
           "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer"
         },
         "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "errorId",
+        "geoviewLayerName": { "en": "uniqerrorLayerueValue" },
+        "metadataAccessPath": { "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer1/" },
+        "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
           {
             "layerId": "1"
