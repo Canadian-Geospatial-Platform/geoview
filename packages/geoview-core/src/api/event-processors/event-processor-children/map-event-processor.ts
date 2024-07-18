@@ -303,12 +303,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Gets the ordered layer info.
+   * Gets map layer paths in order.
    * @param {string} mapId - The map id
-   * @returns {TypeOrderedLayerInfo[]} The ordered layer info
+   * @returns {string[]} The ordered layer paths
    */
-  static getMapLayerOrder(mapId: string): TypeOrderedLayerInfo[] {
-    return this.getMapStateProtected(mapId).orderedLayerInfo;
+  static getMapLayerOrder(mapId: string): string[] {
+    return this.getMapStateProtected(mapId).orderedLayerInfo.map((orderedLayerInfo) => {
+      return orderedLayerInfo.layerPath;
+    });
   }
 
   static getMapState(mapId: string): TypeMapState {
@@ -453,6 +455,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // GV No need to save in the store, because this will trigger an event on MapViewer which will take care of updating the store
   }
 
+  /**
+   * Gets the ordered layer info.
+   * @param {string} mapId - The map id
+   * @returns {TypeOrderedLayerInfo[]} The ordered layer info
+   */
   static getMapOrderedLayerInfo(mapId: string): TypeOrderedLayerInfo[] {
     return this.getMapStateProtected(mapId).orderedLayerInfo;
   }

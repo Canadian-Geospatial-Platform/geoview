@@ -1395,17 +1395,17 @@ export class LayerApi {
    */
   setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): void {
     // Apply some visibility logic
-    const curOrderedLayerInfo = MapEventProcessor.getMapLayerOrder(this.getMapId());
+    const curOrderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(this.getMapId());
     const layerVisibility = MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(this.getMapId(), layerPath);
     // Determine the outcome of the new visibility based on parameters
     const newVisibility = newValue !== undefined ? newValue : !layerVisibility;
-    const layerInfos = curOrderedLayerInfo.filter((info: { layerPath: string }) => info.layerPath.startsWith(layerPath));
+    const layerInfos = curOrderedLayerInfo.filter((info: TypeOrderedLayerInfo) => info.layerPath.startsWith(layerPath));
     const parentLayerPathArray = layerPath.split('/');
     parentLayerPathArray.pop();
     const parentLayerPath = parentLayerPathArray.join('/');
-    const parentLayerInfo = curOrderedLayerInfo.find((info: { layerPath: string }) => info.layerPath === parentLayerPath);
+    const parentLayerInfo = curOrderedLayerInfo.find((info: TypeOrderedLayerInfo) => info.layerPath === parentLayerPath);
 
-    layerInfos.forEach((layerInfo: { visible: boolean; layerPath: string }) => {
+    layerInfos.forEach((layerInfo: TypeOrderedLayerInfo) => {
       if (layerInfo) {
         // If the new visibility is different than before
         if (newVisibility !== layerVisibility) {
@@ -1431,9 +1431,9 @@ export class LayerApi {
         }
       }
       const children = curOrderedLayerInfo.filter(
-        (info: { layerPath: string }) => info.layerPath.startsWith(parentLayerPath) && info.layerPath !== parentLayerPath
+        (info: TypeOrderedLayerInfo) => info.layerPath.startsWith(parentLayerPath) && info.layerPath !== parentLayerPath
       );
-      if (!children.some((child: { visible: boolean }) => child.visible === true)) {
+      if (!children.some((child: TypeOrderedLayerInfo) => child.visible === true)) {
         this.setOrToggleLayerVisibility(parentLayerPath, false);
 
         // Emit event
