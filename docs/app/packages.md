@@ -4,7 +4,7 @@
 
 The viewer allows loading packages to extend the viewer's functionalities.
 
-The viewer also supports few core packages such as a basemap panel, details panel, layers panel, overview map.
+The viewer also supports few core packages such as a area of interest, basemap panel, details panel, layers panel, overview map.
 
 You can see an example package [here](https://github.com/Canadian-Geospatial-Platform/geoview/tree/develop/packages/geoview-basemap-panel)
 
