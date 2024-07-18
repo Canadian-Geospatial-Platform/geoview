@@ -916,7 +916,7 @@ export class LayerApi {
         // TODO: find a more centralized way to trap error and display message
         api.maps[this.getMapId()].notifications.showError('validation.layer.loadfailed', [layer, this.getMapId()]);
 
-        this.#emitLayerError({ layerPath: layer });
+        this.#emitLayerError({ layerPath: layer, errorMessage: loggerMessage });
       });
     }
 
@@ -1733,6 +1733,8 @@ type LayerErrorDelegate = EventDelegateBase<LayerApi, LayerErrorEvent, void>;
 export type LayerErrorEvent = {
   // The error layer
   layerPath: string;
+
+  errorMessage: string;
 };
 
 /**
