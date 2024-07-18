@@ -25,24 +25,6 @@ export interface LightBoxSlides {
   downloadUrl: string;
 }
 
-export interface LightboxSingleImageProps {
-  imgSrc: string;
-  alt?: string;
-}
-
-export function LightboxSingleImage(props: LightboxSingleImageProps): JSX.Element {
-  const { imgSrc, alt = '' } = props;
-  const [isOpen, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
-  return (
-    <>
-      <Box component="img" alt={alt} src={imgSrc} sx={{ maxWidth: '100%', cursor: 'pointer' }} onClick={handleOpen} />
-      <Lightbox open={isOpen} close={handleClose} slides={[{ src: imgSrc }]} />
-    </>
-  );
-}
 
 /**
  * Create an element that displays a lightbox

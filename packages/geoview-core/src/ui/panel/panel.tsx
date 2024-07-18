@@ -120,7 +120,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
       const mapInfoHeight = mapInfo.getBoundingClientRect().height;
       panelContainerRef.current.style.height = `calc(100%  - ${mapInfoHeight}px)`;
     }
-  }, [mapInfoExpanded, mapSize, open]);
+  }, [mapInfoExpanded, mapSize, open, mapId]);
 
   // TODO: refactor - remove comment in tsx for production build facebook/create-react-app#9507
   return (
