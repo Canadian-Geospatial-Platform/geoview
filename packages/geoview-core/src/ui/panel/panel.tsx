@@ -118,7 +118,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     const mapInfo = document.getElementById(`${mapId}-mapInfo`);
     if (panelContainerRef.current && open && mapInfo) {
       const mapInfoHeight = mapInfo.getBoundingClientRect().height;
-      panelContainerRef.current.style.height = 'calc(100%  - ' + mapInfoHeight + 'px)';
+      panelContainerRef.current.style.height = `calc(100%  - ${mapInfoHeight}px)`;
     }
   }, [mapInfoExpanded, mapSize, open]);
 
