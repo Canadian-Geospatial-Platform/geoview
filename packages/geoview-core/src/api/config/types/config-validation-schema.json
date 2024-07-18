@@ -668,9 +668,8 @@
           }
         },
         "layerIds": {
-          "description": "ID(s) of layer(s) to use as initial map focus.",
+          "description": "Geoview layer ID(s) or layer path(s) of layer(s) to use as initial map focus. If empty, will use all layers.",
           "type": "array",
-          "minItems": 1,
           "items": {
             "type": "string"
           }
