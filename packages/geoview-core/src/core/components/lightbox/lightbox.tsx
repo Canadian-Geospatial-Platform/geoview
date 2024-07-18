@@ -8,7 +8,6 @@ import 'yet-another-react-lightbox/styles.css';
 
 import { CloseIcon, ArrowRightIcon, ArrowLeftIcon, DownloadIcon, Tooltip } from '@/ui';
 import { logger } from '@/core/utils/logger';
-import { Box } from '@/ui/layout';
 
 /**
  * Interface used for lightbox properties and slides
@@ -24,7 +23,6 @@ export interface LightBoxSlides {
   alt: string;
   downloadUrl: string;
 }
-
 
 /**
  * Create an element that displays a lightbox
