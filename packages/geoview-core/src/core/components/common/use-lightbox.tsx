@@ -3,7 +3,7 @@ import { Box } from '@/ui';
 import { LightBoxSlides, LightboxImg } from '@/core/components/lightbox/lightbox';
 
 interface UseLightBoxReturnType {
-  initLightBox: (images: string, alias: string, index: number | undefined) => void;
+  initLightBox: (images: string, alias: string, index: number | undefined, scale?: number) => void;
   LightBoxComponent: () => JSX.Element;
 }
 
@@ -15,6 +15,7 @@ export function useLightBox(): UseLightBoxReturnType {
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [slides, setSlides] = useState<LightBoxSlides[]>([]);
   const [slidesIndex, setSlidesIndex] = useState(0);
+  const [imgScale, setImgScale] = useState<number | undefined>();
 
   /**
    * Initialize lightbox with state.
@@ -22,7 +23,7 @@ export function useLightBox(): UseLightBoxReturnType {
    * @param {string} alias alt tag for the image.
    * @param {number | undefined} index index of the image which is displayed.
    */
-  const initLightBox = (images: string, alias: string, index: number | undefined): void => {
+  const initLightBox = (images: string, alias: string, index: number | undefined, scale?: number): void => {
     setIsLightBoxOpen(true);
     let slidesList = [];
     if (images.startsWith('data:image/png;base64')) {
@@ -33,6 +34,7 @@ export function useLightBox(): UseLightBoxReturnType {
     }
     setSlides(slidesList);
     setSlidesIndex(index ?? 0);
+    setImgScale(scale);
   };
 
   /**
@@ -45,6 +47,7 @@ export function useLightBox(): UseLightBoxReturnType {
         open={isLightBoxOpen}
         slides={slides}
         index={slidesIndex}
+        scale={imgScale}
         exited={() => {
           setIsLightBoxOpen(false);
           setSlides([]);
