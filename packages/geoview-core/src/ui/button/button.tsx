@@ -40,8 +40,8 @@ export function Button(props: ButtonProps): JSX.Element {
   const theme = useTheme();
   const mobileView = useMediaQuery(theme.breakpoints.down('md'));
 
-  return (
-    <Tooltip title={t(tooltip || '')} placement={tooltipPlacement || 'bottom'} TransitionComponent={Fade}>
+  function getMaterialButton(): JSX.Element {
+    return (
       <MaterialButton
         fullWidth={fullWidth}
         id={id}
@@ -58,6 +58,15 @@ export function Button(props: ButtonProps): JSX.Element {
       >
         {!(makeResponsive && mobileView) ? children : null}
       </MaterialButton>
+    );
+  }
+
+  if (disabled) {
+    return getMaterialButton();
+  }
+  return (
+    <Tooltip title={t((tooltip as string) || '') as string} placement={tooltipPlacement} TransitionComponent={Fade}>
+      {getMaterialButton()}
     </Tooltip>
   );
 }

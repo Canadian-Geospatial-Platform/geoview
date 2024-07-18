@@ -110,7 +110,7 @@ export class StateApi {
     // Apply some ordering logic
     const direction = move < 0 ? -1 : 1;
     let absoluteMoves = Math.abs(move);
-    const orderedLayers = [...MapEventProcessor.getMapLayerOrder(this.mapId)];
+    const orderedLayers = [...MapEventProcessor.getMapOrderedLayerInfo(this.mapId)];
     let startingIndex = -1;
     for (let i = 0; i < orderedLayers.length; i++) if (orderedLayers[i].layerPath === layerPath) startingIndex = i;
     const layerInfo = orderedLayers[startingIndex];
