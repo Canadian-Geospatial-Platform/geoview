@@ -27,7 +27,7 @@ import { getSxClasses } from './legend-styles';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { logger } from '@/core/utils/logger';
 import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
-import { useLightBox } from '../common';
+import { useLightBox } from '@/core/components/common';
 
 interface LegendLayerProps {
   layer: TypeLegendLayer;
