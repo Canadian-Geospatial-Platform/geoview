@@ -12,9 +12,10 @@ import { logger } from '@/core/utils/logger';
 
 import { TypeIconButtonProps } from '@/ui/icon-button/icon-button-types';
 import { getSxClasses } from './panel-style';
-import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIActiveTrapGeoView, useUIMapInfoExpanded } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { CV_DEFAULT_APPBAR_CORE } from '@/api/config/types/config-constants';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 /**
  * Interface for panel properties
@@ -47,7 +48,9 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
+  const mapId = useGeoViewMapId();
   const mapSize = useMapSize();
+  const mapInfoExpanded = useUIMapInfoExpanded();
 
   // internal state
   // set the active trap value for FocusTrap
@@ -68,7 +71,6 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     transition: `width ${theme.transitions.duration.standard}ms ease`,
     position: 'absolute',
     left: '64px',
-    height: '100%',
   };
 
   useEffect(() => {
@@ -108,6 +110,17 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
       panelContainerRef.current?.removeAttribute('style');
     }
   }, [mapSize, panelGroupName, open]);
+
+  /**
+   * Update the height of the panel when the mapInfo is expanded
+   */
+  useEffect(() => {
+    const mapInfo = document.getElementById(`${mapId}-mapInfo`);
+    if (panelContainerRef.current && open && mapInfo) {
+      const mapInfoHeight = mapInfo.getBoundingClientRect().height;
+      panelContainerRef.current.style.height = 'calc(100%  - ' + mapInfoHeight + 'px)';
+    }
+  }, [mapInfoExpanded, mapSize, open]);
 
   // TODO: refactor - remove comment in tsx for production build facebook/create-react-app#9507
   return (
