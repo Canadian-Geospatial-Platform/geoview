@@ -23,6 +23,34 @@ The installation process is not done using npm as in a traditional way. It invol
 
 The user can add its own configuration by creating a config file that will replace the default one used on the map. To do so the new config file must have the same file name as the config file used by the map and append the package name to it.
 
+The map config file could be named **myMap.json** and it content is something similar to the following:
+
+```
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    }
+  },
+  "theme": "geo.ca",
+  "components": ["north-arrow", "overview-map"],
+  "corePackages": [],
+  "appBar": {
+    "tabs": {
+      "core": ["aoi-panel"]
+    }
+  }
+}
+```
+
+The file containing the AOI must be named **myMap-aoi-panel.json** as described in the following section.
+
 ## How to link Area of Interests to a map
 
 ### Adding an Area of Interest
@@ -57,7 +85,11 @@ Where the definition of the different properties are as followed:
 
 ### Removing an Area of Interest
 
-The curent only way to remove the **AOI** is by manualy deleting the entry in the file for the concerned AOI.
+The curent only way to remove the **AOI** is by manualy deleting the entry in the file for the concerned AOI. However, if you want to delete the package from your project, you can use the API as follow:
+
+```
+cgpv.api.plugin.removePlugin('aoi-panel', 'myMap');
+```
 
 ### Links
 For more details, please refer to the official documentation or reach out to our support team. You can also try our [demo page](https://canadian-geospatial-platform.github.io/geoview/public/demos-navigator.html?config=./configs/navigator/26-package-area-of-interest.json)
