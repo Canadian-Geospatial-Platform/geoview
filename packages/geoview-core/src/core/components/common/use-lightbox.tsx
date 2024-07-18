@@ -24,7 +24,12 @@ export function useLightBox(): UseLightBoxReturnType {
    */
   const initLightBox = (images: string, alias: string, index: number | undefined): void => {
     setIsLightBoxOpen(true);
-    const slidesList = images.split(';').map((item) => ({ src: item, alt: alias, downloadUrl: item }));
+    let slidesList = [];
+    if(images.startsWith('data:image/png;base64')) { // special case - check if image is base64 and its a single image
+      slidesList = [{ src: images, alt: alias, downloadUrl: '' }];
+    } else {
+      slidesList = images.split(';').map((item) => ({ src: item, alt: alias, downloadUrl: item }));
+    }
     setSlides(slidesList);
     setSlidesIndex(index ?? 0);
   };

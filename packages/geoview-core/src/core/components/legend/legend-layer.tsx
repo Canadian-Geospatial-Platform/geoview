@@ -26,8 +26,8 @@ import { useMapStoreActions } from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { logger } from '@/core/utils/logger';
-import { LightboxSingleImage } from '../lightbox/lightbox';
 import { CV_CONST_LAYER_TYPES } from '@/api/config/types/config-constants';
+import { useLightBox } from '../common';
 
 interface LegendLayerProps {
   layer: TypeLegendLayer;
@@ -40,6 +40,8 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+
+  const { initLightBox, LightBoxComponent } = useLightBox();
 
   // Get store actions
   const highlightedLayer = useLayerHighlightedLayer();
@@ -178,9 +180,14 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
       layer.icons[0].iconImage &&
       layer.icons[0].iconImage !== 'no data'
     ) {
+      const imgSrc = layer.icons[0].iconImage;
       return (
         <Collapse in={legendExpanded} sx={sxClasses.collapsibleContainer} timeout="auto">
-          <LightboxSingleImage imgSrc={layer.icons[0].iconImage} />
+          <Box 
+            component="img"
+            src={imgSrc} sx={{ maxWidth: '100%', cursor: 'pointer' }} 
+            onClick={() => initLightBox(imgSrc, "", 0)}
+          />
         </Collapse>
       );
     }
@@ -225,6 +232,7 @@ export function LegendLayer({ layer }: LegendLayerProps): JSX.Element {
       </ListItem>
 
       {renderCollapsible()}
+      <LightBoxComponent />
     </Box>
   );
 }
