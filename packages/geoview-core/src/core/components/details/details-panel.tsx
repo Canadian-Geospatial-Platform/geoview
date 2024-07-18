@@ -417,6 +417,8 @@ export function DetailsPanel({ fullWidth = false }: DetailsPanelType): JSX.Eleme
     // Log
     logger.logTraceUseMemo('DETAILS-PANEL - order layer status processing.');
 
+    if (!arrayOfLayerDataBatch || arrayOfLayerDataBatch?.length === 0) return () => false;
+
     return () => !!arrayOfLayerDataBatch?.every((layer) => layer.queryStatus === LAYER_STATUS.PROCESSING);
   }, [arrayOfLayerDataBatch]);
 

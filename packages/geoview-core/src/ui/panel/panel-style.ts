@@ -5,7 +5,7 @@ import { Theme } from '@mui/material/styles';
 export const getSxClasses = (theme: Theme): any => ({
   panelContainer: {
     backgroundColor: theme.palette.geoViewColor?.bgColor.main,
-    height: 'calc(100% - 35px)',
+    height: 'calc(100%)',
     borderRadius: 0,
     flexDirection: 'column',
     [theme.breakpoints.down('sm')]: {

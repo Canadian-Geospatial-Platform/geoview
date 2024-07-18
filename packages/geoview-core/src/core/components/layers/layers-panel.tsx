@@ -6,7 +6,7 @@ import { LayersToolbar } from './layers-toolbar';
 import { LayerDetails } from './right-panel/layer-details';
 import { LeftPanel } from './left-panel/left-panel';
 import { logger } from '@/core/utils/logger';
-import { ResponsiveGridLayout, ResponsiveGridLayoutExposedMethods } from '../common/responsive-grid-layout';
+import { ResponsiveGridLayout, ResponsiveGridLayoutExposedMethods } from '@/core/components/common/responsive-grid-layout';
 import { Typography } from '@/ui/typography/typography';
 import { TypeContainerBox } from '@/core/types/global-types';
 
