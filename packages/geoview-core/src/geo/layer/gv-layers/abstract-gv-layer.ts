@@ -591,7 +591,7 @@ export abstract class AbstractGVLayer {
   setVisible(layerVisibility: boolean): void {
     const curVisible = this.getVisible();
     this.getOLLayer().setVisible(layerVisibility);
-    if (layerVisibility !== curVisible) this.#emitVisibleChanged({ visible: layerVisibility });
+    if (layerVisibility !== curVisible) this.#emitVisibleChanged({ layerPath: this.getLayerPath(), visible: layerVisibility });
   }
 
   /**
@@ -1187,6 +1187,8 @@ type LegendQueriedDelegate = EventDelegateBase<AbstractGVLayer, LegendQueriedEve
  * Define an event for the delegate
  */
 export type VisibleChangedEvent = {
+  // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
+  layerPath: string;
   visible: boolean;
 };
 
