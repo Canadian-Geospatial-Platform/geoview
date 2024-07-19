@@ -43,13 +43,13 @@ The map config file could be named **myMap.json** and it content is something si
   "corePackages": [],
   "appBar": {
     "tabs": {
-      "core": ["aoi-panel"]
+      "core": ["aoi-panel"] // This is were Geoview knows it needs to load the package
     }
   }
 }
 ```
 
-The file containing the AOI must be named **myMap-aoi-panel.json** as described in the following section.
+The file containing the AOI must use the following patern: "config file name"-aoi-panel.json (i.e.: myMapId-aoi-panel.json where myMapId is the ID of the map).
 
 ## How to link Area of Interests to a map
 
