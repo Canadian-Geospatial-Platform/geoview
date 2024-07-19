@@ -7,6 +7,7 @@ import { NotificationDetailsType } from '@/core/components/notifications/notific
 import { TypeHTMLElement, TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { getScriptAndAssetURL } from '@/core/utils/utilities';
+import { VALID_DISPLAY_LANGUAGE } from '@/api/config/types/config-constants';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with AppEventProcessor vs AppState
 
@@ -72,10 +73,13 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
 
     // initialize default stores section from config information when store receive configuration file
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
+      const lang = VALID_DISPLAY_LANGUAGE.includes(geoviewConfig.displayLanguage as TypeDisplayLanguage)
+        ? geoviewConfig.displayLanguage
+        : 'en';
       set({
         appState: {
           ...get().appState,
-          displayLanguage: geoviewConfig.displayLanguage as TypeDisplayLanguage,
+          displayLanguage: lang as TypeDisplayLanguage,
           displayTheme: geoviewConfig.theme || 'geo.ca',
           geolocatorServiceURL: geoviewConfig.serviceUrls?.geolocator,
           geoviewHTMLElement: document.getElementById(get().mapId)!,

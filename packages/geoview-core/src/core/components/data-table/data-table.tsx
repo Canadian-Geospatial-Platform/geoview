@@ -48,7 +48,7 @@ import { getSxClasses } from './data-table-style';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
-import { useLightBox } from '../common';
+import { useLightBox } from '@/core/components/common';
 import { NUMBER_FILTER, DATE_FILTER, STRING_FILTER } from '@/core/utils/constant';
 import { DataTableProps, ColumnsType } from './data-table-types';
 import { VALID_DISPLAY_LANGUAGE } from '@/api/config/types/config-constants';

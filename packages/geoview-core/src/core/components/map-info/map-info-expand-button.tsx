@@ -63,6 +63,7 @@ export function MapInfoExpandButton(): JSX.Element {
 
       mapInfo.style.transition = 'max-height 300ms ease-out';
       mapInfo.style.maxHeight = '25px';
+      mapInfo.style.height = '25px';
     }
 
     // set map info collapsed

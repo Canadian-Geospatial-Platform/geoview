@@ -10,7 +10,7 @@ import { logger } from '@/core/utils/logger';
 import { TypeFieldEntry } from '@/geo/map/map-schema-types';
 
 import { getSxClasses } from './details-style';
-import { useLightBox } from '../common';
+import { useLightBox } from '@/core/components/common';
 
 interface FeatureInfoTableProps {
   featureInfoList: TypeFieldEntry[];

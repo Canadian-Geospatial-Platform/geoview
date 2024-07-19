@@ -5,6 +5,7 @@ import { Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { VectorImage as VectorLayer } from 'ol/layer';
 import { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
+import { GeoJSON as FormatGeoJSON } from 'ol/format';
 import { all, bbox } from 'ol/loadingstrategy';
 import { ReadOptions } from 'ol/format/Feature';
 import BaseLayer from 'ol/layer/Base';
@@ -206,6 +207,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
              is not a number, we assume it is provided as an ISO UTC string. If not, the result is unpredictable.
           */
           if (features) {
+            features.forEach((feature) => {
+              const featureId = feature.get('OBJECTID') ? feature.get('OBJECTID') : getUid(feature);
+              feature.setId(featureId);
+            });
             // If there's no feature info, build it from features
             if (!layerConfig.source?.featureInfo && features.length > 0) {
               // Grab first feature as example
@@ -485,26 +490,44 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   override getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined> {
-    const features = (this.getOLLayer(layerPath) as VectorLayer<Feature>).getSource()?.getFeatures();
-    // TODO Test performance on huge layer
-    const filteredFeatures = features?.filter((feature) => objectIds.includes(getUid(feature)));
+    // Get array of features
+    const requestedFeatures = objectIds.map((id) => (this.getOLLayer(layerPath) as VectorLayer<Feature>).getSource()?.getFeatureById(id));
 
-    if (filteredFeatures) {
+    if (requestedFeatures) {
       // Determine max extent from features
       let calculatedExtent: Extent | undefined;
-      filteredFeatures.forEach((feature) => {
-        const extent = feature.getGeometry()?.getExtent();
-
-        if (extent) {
-          // If extent has not been defined, set it to extent
-          if (!calculatedExtent) calculatedExtent = extent;
-          else getMinOrMaxExtents(calculatedExtent, extent);
+      requestedFeatures.forEach((feature) => {
+        if (feature?.getGeometry()) {
+          const extent = feature.getGeometry()?.getExtent();
+          if (extent) {
+            // If calculatedExtent has not been defined, set it to extent
+            if (!calculatedExtent) calculatedExtent = extent;
+            else getMinOrMaxExtents(calculatedExtent, extent);
+          }
         }
       });
 
       return Promise.resolve(calculatedExtent);
     }
     return Promise.resolve(undefined);
+  }
+
+  /**
+   * Return the vector layer as a GeoJSON object
+   * @param {string} layerPath - Layer path to get GeoJSON
+   * @returns {JSON} Layer's features as GeoJSON
+   */
+  getFeaturesAsGeoJSON(layerPath: string): JSON {
+    // Get map projection
+    const mapProjection: ProjectionLike = this.getMapViewer().getProjection().getCode();
+
+    const format = new FormatGeoJSON();
+    const geoJsonStr = format.writeFeatures((this.getOLLayer(layerPath) as VectorLayer<Feature>).getSource()!.getFeatures(), {
+      dataProjection: 'EPSG:4326', // Output projection,
+      featureProjection: mapProjection,
+    });
+
+    return JSON.parse(geoJsonStr);
   }
 
   /**

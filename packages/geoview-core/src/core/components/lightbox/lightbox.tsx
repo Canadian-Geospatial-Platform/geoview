@@ -17,6 +17,7 @@ export interface LightboxProps {
   slides: LightBoxSlides[];
   index: number;
   exited: () => void;
+  scale?: number;
 }
 export interface LightBoxSlides {
   src: string;
@@ -34,7 +35,7 @@ export function LightboxImg(props: LightboxProps): JSX.Element {
   // Log
   logger.logTraceRender('components/lightbox/lightbox');
 
-  const { open, slides, index, exited } = props;
+  const { open, slides, index, exited, scale = 1 } = props;
 
   const { t } = useTranslation<string>();
 
@@ -54,7 +55,11 @@ export function LightboxImg(props: LightboxProps): JSX.Element {
 
   return (
     <Lightbox
-      styles={{ root: { width: '90%', height: '90%', margin: 'auto' }, container: { backgroundColor: 'rgba(0, 0, 0, .9)' } }}
+      styles={{
+        root: { width: '90%', height: '90%', margin: 'auto' },
+        container: { backgroundColor: 'rgba(0, 0, 0, .9)' },
+        slide: { transform: `scale(${scale})` },
+      }}
       open={isOpen}
       close={() => setIsOpen(false)}
       slides={slides}
