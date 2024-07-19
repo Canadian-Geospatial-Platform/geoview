@@ -46,7 +46,6 @@ import {
   TypeClassBreakStyleConfig,
 } from '@/geo/map/map-schema-types';
 import { GeoViewLayerCreatedTwiceError } from '@/geo/layer/exceptions/layer-exceptions';
-import { Projection } from '@/geo/utils/projection';
 import { getLegendStyles, getFeatureCanvas } from '@/geo/utils/renderer/geoview-renderer';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { LayerApi } from '../layer';

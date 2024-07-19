@@ -107,19 +107,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   abstract getBounds(layerPath: string): Extent | undefined;
 
   /**
-   * Overridable function that gets the extent of an array of features.
-   * @param {string} layerPath - The layer path
-   * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
-   * @returns {Promise<Extent | undefined>} The extent of the features, if available
-   */
-  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined> {
-    logger.logError(`Feature geometry for ${objectIds} is unavailable from ${layerPath}`);
-    return Promise.resolve(undefined);
-  }
-
-  /**
    * Initializes the GVLayer. This function checks if the source is ready and if so it calls onLoaded() to pursue initialization of the layer.
    * If the source isn't ready, it registers to the source ready event to pursue initialization of the layer once its source is ready.
    */
@@ -240,7 +227,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     this.getLayerConfig().layerStatus = 'loaded';
 
     // Emit event
-    this.#emitIndividualLayerLoaded({ layerPath: this.#layerConfig.layerPath });
+    this.#emitIndividualLayerLoaded({ layerPath: this.getLayerPath() });
 
     // Now that the layer is loaded, set its visibility correctly (had to be done in the loaded event, not before, per prior note in pre-refactor)
     this.setVisible(this.getLayerConfig().initialSettings?.states?.visible !== false);
@@ -881,21 +868,6 @@ export type LayerFilterAppliedEvent = {
   layerPath: string;
   // The filter
   filter: string;
-};
-
-/**
- * Define a delegate for the event handler function signature
- */
-type LayerOpacityChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerOpacityChangedEvent, void>;
-
-/**
- * Define an event for the delegate
- */
-export type LayerOpacityChangedEvent = {
-  // The layer path of the affected layer
-  layerPath: string;
-  // The filter
-  opacity: number;
 };
 
 /**

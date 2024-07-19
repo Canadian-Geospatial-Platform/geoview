@@ -6,16 +6,17 @@ import {
   TypeTimeSliderValues,
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { getLocalizedValue } from '@/core/utils/utilities';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { TypeFeatureInfoLayerConfig, TypeLayerEntryConfig, layerEntryIsGroupLayer } from '@/geo/map/map-schema-types';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import { AppEventProcessor } from './app-event-processor';
 import { MapEventProcessor } from './map-event-processor';
+import { UIEventProcessor } from './ui-event-processor';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState

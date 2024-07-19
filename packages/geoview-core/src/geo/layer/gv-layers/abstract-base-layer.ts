@@ -4,6 +4,7 @@ import { Extent, TypeLocalizedString } from '@/api/config/types/map-schema-types
 import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { ConfigBaseClass } from '@/core/utils/config/validation-classes/config-base-class';
 import { TypeLayerStatus } from '@/geo/map/map-schema-types';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Abstract Base Layer managing an OpenLayer layer, including a layer group.
@@ -140,6 +141,19 @@ export abstract class AbstractBaseLayer {
    */
   setExtent(layerExtent: Extent): void {
     this.getOLLayer().setExtent(layerExtent);
+  }
+
+  /**
+   * Overridable function that gets the extent of an array of features.
+   * @param {string} layerPath - The layer path
+   * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
+   * @returns {Promise<Extent | undefined>} The extent of the features, if available
+   */
+  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined> {
+    logger.logError(`Feature geometry for ${objectIds} is unavailable from ${layerPath}`);
+    return Promise.resolve(undefined);
   }
 
   /**
