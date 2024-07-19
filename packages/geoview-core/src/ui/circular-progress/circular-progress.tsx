@@ -22,14 +22,14 @@ interface TypeCircularProgressProps extends CircularProgressProps {
  * @returns {JSX.Element} the created Circular Progress element
  */
 export function CircularProgress(props: TypeCircularProgressProps): JSX.Element {
-  const { style = {}, isLoaded, sx = {} } = props;
+  const { style = {}, isLoaded, sx = {}, ...rest } = props;
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
   return !isLoaded ? (
     <Box sx={{ ...sxClasses.loading, ...sx }} style={{ ...style }}>
-      <MaterialCircularProgress sx={sxClasses.progress} />
+      <MaterialCircularProgress sx={sxClasses.progress} {...rest} />
     </Box>
   ) : (
     // eslint-disable-next-line react/jsx-no-useless-fragment

@@ -23,7 +23,7 @@ export interface TypeDrawerProps extends DrawerProps {
  * @returns {JSX.Element} the created Drawer element
  */
 export function Drawer(props: TypeDrawerProps): JSX.Element {
-  const { variant, status, className, style, children } = props;
+  const { variant, status, className, style, children, ...rest } = props;
 
   const { t } = useTranslation<string>();
 
@@ -55,6 +55,7 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
         paper: className,
       }}
       style={style || undefined}
+      {...rest}
     >
       <Box sx={sxClasses.toolbar}>
         <IconButton

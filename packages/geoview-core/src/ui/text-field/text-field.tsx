@@ -13,7 +13,7 @@ import { TypeTextFieldProps } from '@/ui/panel/panel-types';
  * @returns {JSX.Element} the text field ui component
  */
 export function TextField(props: TypeTextFieldProps): JSX.Element {
-  const { tooltip, tooltipPlacement } = props;
+  const { tooltip, tooltipPlacement, ...rest } = props;
 
   const { t } = useTranslation<string>();
 
@@ -22,7 +22,7 @@ export function TextField(props: TypeTextFieldProps): JSX.Element {
 
   return (
     <Tooltip title={t((tooltip as string) || '') as string} placement={tooltipPlacement} TransitionComponent={Fade} ref={textRef}>
-      <MaterialTextField {...props} />
+      <MaterialTextField {...props} {...rest} />
     </Tooltip>
   );
 }
