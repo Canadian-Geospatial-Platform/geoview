@@ -10,7 +10,6 @@ import { Pixel } from 'ol/pixel';
 import Feature, { FeatureLike } from 'ol/Feature';
 import { ProjectionLike } from 'ol/proj';
 
-import { getUid } from 'ol/util';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { FilterNodeArrayType, NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
@@ -266,20 +265,20 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   override getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined> {
-    const features = (this.getOLLayer() as VectorLayer<Feature>).getSource()?.getFeatures();
-    // TODO Test performance on huge layer
-    const filteredFeatures = features?.filter((feature) => objectIds.includes(getUid(feature)));
+    // Get array of features
+    const requestedFeatures = objectIds.map((id) => this.getOLLayer().getSource()?.getFeatureById(id));
 
-    if (filteredFeatures) {
+    if (requestedFeatures) {
       // Determine max extent from features
       let calculatedExtent: Extent | undefined;
-      filteredFeatures.forEach((feature) => {
-        const extent = feature.getGeometry()?.getExtent();
-
-        if (extent) {
-          // If calculatedExtent has not been defined, set it to extent
-          if (!calculatedExtent) calculatedExtent = extent;
-          else getMinOrMaxExtents(calculatedExtent, extent);
+      requestedFeatures.forEach((feature) => {
+        if (feature?.getGeometry()) {
+          const extent = feature.getGeometry()?.getExtent();
+          if (extent) {
+            // If calculatedExtent has not been defined, set it to extent
+            if (!calculatedExtent) calculatedExtent = extent;
+            else getMinOrMaxExtents(calculatedExtent, extent);
+          }
         }
       });
 

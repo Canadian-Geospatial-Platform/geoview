@@ -207,6 +207,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
              is not a number, we assume it is provided as an ISO UTC string. If not, the result is unpredictable.
           */
           if (features) {
+            features.forEach((feature) => {
+              const featureId = feature.get('OBJECTID') ? feature.get('OBJECTID') : getUid(feature);
+              feature.setId(featureId);
+            });
             // If there's no feature info, build it from features
             if (!layerConfig.source?.featureInfo && features.length > 0) {
               // Grab first feature as example
@@ -486,20 +490,20 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   override getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined> {
-    const features = (this.getOLLayer(layerPath) as VectorLayer<Feature>).getSource()?.getFeatures();
-    // TODO Test performance on huge layer
-    const filteredFeatures = features?.filter((feature) => objectIds.includes(getUid(feature)));
+    // Get array of features
+    const requestedFeatures = objectIds.map((id) => (this.getOLLayer(layerPath) as VectorLayer<Feature>).getSource()?.getFeatureById(id));
 
-    if (filteredFeatures) {
+    if (requestedFeatures) {
       // Determine max extent from features
       let calculatedExtent: Extent | undefined;
-      filteredFeatures.forEach((feature) => {
-        const extent = feature.getGeometry()?.getExtent();
-
-        if (extent) {
-          // If extent has not been defined, set it to extent
-          if (!calculatedExtent) calculatedExtent = extent;
-          else getMinOrMaxExtents(calculatedExtent, extent);
+      requestedFeatures.forEach((feature) => {
+        if (feature?.getGeometry()) {
+          const extent = feature.getGeometry()?.getExtent();
+          if (extent) {
+            // If calculatedExtent has not been defined, set it to extent
+            if (!calculatedExtent) calculatedExtent = extent;
+            else getMinOrMaxExtents(calculatedExtent, extent);
+          }
         }
       });
 
