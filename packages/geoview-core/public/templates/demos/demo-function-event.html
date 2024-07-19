@@ -153,6 +153,10 @@
           cgpv.api.maps.Map1.plugins['swiper'].activateForLayer('nonmetalmines/5')
           cgpv.api.maps.Map1.plugins['swiper'].deActivateForLayer('nonmetalmines/5')
         </li>
+        <li><button id="Calc-dist">Calculate distance</button>
+          <input type="text" id="Dist-geom" placeholder="Enter coordinates" value="[[-75.6792, 45.3540],[-71.3000, 46.7693]]" style="width: 600px"><br />
+          cgpv.api.utilities.geo.calculateDistance(coordinates[], 'EPSG:4326', outProj)
+        </li>
       </ul>
       <h3>Events that will generate notifications:</h3>
       <ul>
@@ -555,6 +559,23 @@
         cgpv.api.maps.Map1.plugins['swiper'].deActivateForLayer('nonmetalmines/5');
       });
 
+      // Calculate distance Button================================================================================================
+      // find the button element by ID
+      const calculateDistanceButton = document.getElementById('Calc-dist');
+
+      // add an event listener when a button is clicked
+      calculateDistanceButton.addEventListener('click', () => {
+        // get the input for the group name
+        const geometryString = document.getElementById('Dist-geom');
+        const geom = geometryString.value.replace('],[', ';').replace('[[', '').replace(']]', '').split(';');
+        const arr = []
+        geom.forEach(point => {
+          const coords = point.split(',');
+          arr.push([parseFloat(coords[0]), parseFloat(coords[1])]);
+        })
+        console.log(cgpv.api.utilities.geo.calculateDistance(arr, 'EPSG:4326', 'EPSG:3857'));
+      });
+  
       // create snippets
       window.addEventListener('load', () => {
         createCodeSnippet();
