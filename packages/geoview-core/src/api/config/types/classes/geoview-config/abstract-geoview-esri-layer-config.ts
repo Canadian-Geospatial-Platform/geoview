@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { Cast, TypeJsonObject } from '@config/types/config-types';
+import { Cast, toJsonObject, TypeJsonObject, TypeJsonArray } from '@config/types/config-types';
 import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { TypeDisplayLanguage, TypeStyleGeometry } from '@config/types/map-schema-types';
@@ -11,7 +11,6 @@ import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-confi
 
 import { getXMLHttpRequest } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { TypeJsonArray } from '@/app';
 
 /** The ESRI dynamic geoview layer class. */
 export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLayerConfig {
@@ -60,12 +59,25 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
   override async fetchServiceMetadata(): Promise<void> {
     const metadataString = await getXMLHttpRequest(`${this.metadataAccessPath}?f=json`);
     if (metadataString !== '{}') {
-      const jsonMetadata = JSON.parse(metadataString) as TypeJsonObject;
+      let jsonMetadata: TypeJsonObject;
+      try {
+        // On rare occasions, the value returned is not a JSON string, but rather an HTML string, which is an error.
+        jsonMetadata = JSON.parse(metadataString);
+      } catch (error) {
+        jsonMetadata = toJsonObject({ error });
+      }
+      // Other than the error generated above, if the returned JSON object is valid and contains the error property, something went wrong
       if ('error' in jsonMetadata) {
+        // In the event of a service metadata reading error, we report the geoview layer and all its sublayers as being in error.
         this.setErrorDetectedFlag();
+        this.#setErrorDetectedFlagForAllLayers(this.listOfLayerEntryConfig);
         logger.logError(`Error detected while reading ESRI metadata for geoview layer ${this.geoviewLayerId}.`, jsonMetadata.error);
       } else {
         this.metadata = jsonMetadata;
+
+        // Define a recursive function to process the listOfLayerEntryConfig. The goal is to process each valid sublayer, searching the
+        // service's metadata to verify the layer's existence and determine whether it is a layer group, in order to determine the node's
+        // final structure. If it is a layer group, it will be created.
         const processListOfLayerEntryConfig = (listOfLayerEntryConfig: EntryConfigBaseClass[]): void => {
           listOfLayerEntryConfig.forEach((subLayer, i) => {
             if (!subLayer.errorDetected) {
@@ -82,12 +94,14 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
             }
           });
         };
+
+        // Call the function defined above.
         processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
-        await this.#fetchListOfLayerMetadata(this.metadataLayerTree);
         this.metadataLayerTree = this.createLayerTree();
       }
     } else {
       this.setErrorDetectedFlag();
+      this.#setErrorDetectedFlagForAllLayers(this.listOfLayerEntryConfig);
       logger.logError(`Error detected while reading ESRI metadata for geoview layer ${this.geoviewLayerId}. An empty object was returned.`);
     }
   }
@@ -197,15 +211,16 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
   async #fetchListOfLayerMetadata(listOfLayerEntryConfig: EntryConfigBaseClass[]): Promise<void> {
     const listOfLayerMetadata: Promise<TypeJsonObject | void>[] = [];
     listOfLayerEntryConfig.forEach((subLayerConfig) => {
-      if (layerEntryIsGroupLayer(subLayerConfig)) {
-        listOfLayerMetadata.push(this.#fetchListOfLayerMetadata(subLayerConfig.listOfLayerEntryConfig));
-      } else if (layerEntryIsAbstractBaseLayerEntryConfig(subLayerConfig)) {
-        listOfLayerMetadata.push(subLayerConfig.fetchLayerMetadata());
+      if (!subLayerConfig.errorDetected) {
+        if (layerEntryIsGroupLayer(subLayerConfig)) {
+          listOfLayerMetadata.push(this.#fetchListOfLayerMetadata(subLayerConfig.listOfLayerEntryConfig));
+        } else if (layerEntryIsAbstractBaseLayerEntryConfig(subLayerConfig)) {
+          listOfLayerMetadata.push(subLayerConfig.fetchLayerMetadata());
+        }
       }
     });
 
-    const result = await Promise.allSettled(listOfLayerMetadata);
-    logger.logInfo('fetchListOfLayerMetadata done', result);
+    await Promise.allSettled(listOfLayerMetadata);
   }
 
   /** ***************************************************************************************************************************

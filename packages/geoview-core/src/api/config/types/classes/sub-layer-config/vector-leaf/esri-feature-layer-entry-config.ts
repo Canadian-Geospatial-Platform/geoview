@@ -2,7 +2,12 @@ import { defaultsDeep } from 'lodash';
 
 import { CV_CONST_SUB_LAYER_TYPES, CV_CONST_LEAF_LAYER_SCHEMA_PATH } from '@config/types/config-constants';
 import { AbstractBaseEsriLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-esri-layer-entry-config';
-import { TypeStyleConfig, TypeLayerEntryType, TypeSourceEsriFeatureInitialConfig } from '@config/types/map-schema-types';
+import {
+  TypeStyleConfig,
+  TypeLayerEntryType,
+  TypeSourceEsriFeatureInitialConfig,
+  TypeLayerInitialSettings,
+} from '@config/types/map-schema-types';
 
 /**
  * The ESRI feature geoview sublayer class.
@@ -24,13 +29,13 @@ export class EsriFeatureLayerEntryConfig extends AbstractBaseEsriLayerEntryConfi
   }
 
   /**
-   * This method is the last to be called in the sequence of configuration parameter assignment according to the preceding rules,
-   * the first being the assignment of user parameters and the second the assignment of metadata. Configuration parameters that
-   * already have a value are not changed when a subsequent assignment phase takes place. In other words, default value assignment
-   * does not change an already initialized metadata parameter, and metadata assignment does not change the value of a user-supplied
-   * parameter.
+   * Apply default value to undefined fields. The default values to be used for the initialSettings are
+   * inherited from the object that owns this sublayer instance.
+   *
+   * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited by the parent container.
    */
-  protected applyDefaultsValues(): void {
+  override applyDefaultValueToUndefinedFields(initialSettings: TypeLayerInitialSettings): void {
+    super.applyDefaultValueToUndefinedFields(initialSettings);
     this.source = defaultsDeep(this.source, { maxRecordCount: 0, format: 'EsriJSON', featureInfo: { queryable: false } });
   }
 

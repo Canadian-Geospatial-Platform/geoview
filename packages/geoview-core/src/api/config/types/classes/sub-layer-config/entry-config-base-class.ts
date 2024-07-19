@@ -1,3 +1,5 @@
+import defaultsDeep from 'lodash/defaultsDeep';
+
 import { TypeJsonObject } from '@config/types/config-types';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import {
@@ -36,10 +38,20 @@ export abstract class EntryConfigBaseClass {
   layerName?: string;
 
   /** Attributions obtained from the configuration or the metadata. */
-  attributions!: string[];
+  attributions: string[] = [];
 
   /** Bounds (in lat long) obtained from the metadata or calculated from the layers */
   bounds: Extent | undefined;
+
+  /** Layer entry data type. */
+  entryType: TypeLayerEntryType;
+
+  // GV NOTE START ****************************************************************************************************
+  // The following attributes use the 'definite assignment assertion' (! after the property name) to indicate that
+  // these properties will not be null or undefined when used. They are not initialized by the constructor but rather
+  // by the metadata processing methods or ultimately by the applyDefaultValueToUndefinedFields method executed
+  // following metadata processing. I'm writing them here, simply, explicitly, to make it clear that this
+  // EntryConfigBaseClass class owns (and expects) these attributes.
 
   /** The min scale that can be reach by the layer. */
   minScale!: number;
@@ -47,14 +59,13 @@ export abstract class EntryConfigBaseClass {
   /** The max scale that can be reach by the layer. */
   maxScale!: number;
 
-  /** Layer entry data type. */
-  entryType: TypeLayerEntryType;
-
   /**
    * Initial settings to apply to the GeoView layer entry at creation time. Initial settings are inherited from the parent in the
    * configuration tree.
    */
   initialSettings!: TypeLayerInitialSettings;
+
+  // GV NOTE END *****************************************************************************************************
 
   /**
    * The class constructor use the sublayer configuration supplied by the user and runs a validation on it to find any errors that
@@ -93,10 +104,16 @@ export abstract class EntryConfigBaseClass {
   }
 
   /**
-   * Apply default value to undefined fields.
-   * @abstract
+   * Apply default value to undefined fields. The default values to be used for the initialSettings are
+   * inherited from the object that owns this sublayer instance.
+   *
+   * @param {TypeLayerInitialSettings} initialSettings The initial settings inherited by the parent container.
    */
-  abstract applyDefaultValueToUndefinedFields(initialSettings: TypeLayerInitialSettings): void;
+  applyDefaultValueToUndefinedFields(initialSettings: TypeLayerInitialSettings): void {
+    this.initialSettings = defaultsDeep(this.initialSettings, initialSettings);
+    this.minScale = this.minScale || 0;
+    this.maxScale = this.maxScale || 0;
+  }
 
   /**
    * The getter method that returns the schemaPath property. Each geoview sublayer type knows what section of the schema must be

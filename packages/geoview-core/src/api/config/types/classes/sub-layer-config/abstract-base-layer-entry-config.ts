@@ -1,12 +1,5 @@
-import defaultsDeep from 'lodash/defaultsDeep';
-
 import { TypeJsonObject } from '@config/types/config-types';
-import {
-  TypeBaseSourceInitialConfig,
-  TypeTemporalDimension,
-  TypeStyleGeometry,
-  TypeLayerInitialSettings,
-} from '@config/types/map-schema-types';
+import { TypeBaseSourceInitialConfig, TypeTemporalDimension, TypeStyleGeometry } from '@config/types/map-schema-types';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 
 /**
@@ -17,20 +10,13 @@ export abstract class AbstractBaseLayerEntryConfig extends EntryConfigBaseClass 
   #metadata: TypeJsonObject = {};
 
   /** The geometry type of the leaf node. */
-  geometryType!: TypeStyleGeometry;
+  geometryType?: TypeStyleGeometry;
 
   /** Source settings to apply to the GeoView vector layer source at creation time. */
   source?: TypeBaseSourceInitialConfig;
 
   /** Optional temporal dimension. */
   temporalDimension?: TypeTemporalDimension;
-
-  /**
-   * Apply default value to undefined fields.
-   */
-  override applyDefaultValueToUndefinedFields(initialSettings: TypeLayerInitialSettings): void {
-    this.initialSettings = defaultsDeep(this.initialSettings, initialSettings);
-  }
 
   /**
    * Fetch the layer metadata from the metadataAccessPath and store it in a private variable of the sub-layer.

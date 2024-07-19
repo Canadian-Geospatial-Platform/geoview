@@ -55,13 +55,20 @@ export abstract class AbstractGeoviewLayerConfig {
   /** Boolean indicating if the layer should be included in time awareness functions such as the Time Slider. True by default. */
   isTimeAware: boolean | undefined;
 
-  /**
-   * Initial settings to apply to the GeoView layer at creation time.
-   */
-  initialSettings!: TypeLayerInitialSettings;
-
   /** The layer entries to use from the GeoView layer. */
   listOfLayerEntryConfig: EntryConfigBaseClass[] = [];
+
+  // GV NOTE START ****************************************************************************************************
+  // The following attribute uses the 'definite assignment assertion' (! after the property name) to indicate that
+  // it will not be null or undefined when used. It is not initialized by the constructor but rather by the metadata
+  // processing methods or ultimately by the applyDefaultValueToUndefinedFields method executed following metadata
+  // processing. I'm writing it here, simply, explicitly, to make it clear that this AbstractGeoviewLayerConfig class
+  // owns (and expects) this attribute.
+
+  /** Initial settings to apply to the GeoView layer at creation time. */
+  initialSettings!: TypeLayerInitialSettings;
+
+  // GV NOTE END *****************************************************************************************************
 
   /**
    * The class constructor saves a cloned copy of the Geoview configuration supplied by the user and runs a validation on it to
@@ -139,7 +146,6 @@ export abstract class AbstractGeoviewLayerConfig {
 
   /**
    * Apply default value to undefined fields.
-   *
    */
   applyDefaultValueToUndefinedFields(): void {
     this.serviceDateFormat = this.serviceDateFormat || 'DD/MM/YYYY HH:MM:SSZ';

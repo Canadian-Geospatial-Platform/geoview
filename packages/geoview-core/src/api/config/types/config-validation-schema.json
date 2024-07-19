@@ -435,7 +435,7 @@
           }
         }
       },
-      "required": ["geoviewLayerType", "listOfLayerEntryConfig"]
+      "required": ["geoviewLayerType", "metadataAccessPath", "listOfLayerEntryConfig"]
     },
     "TypeListOfLayerEntryConfig": {
       "description": "The list of layer configurations. The AbstractGeoviewLayerConfig validation ends here. The only thing we need to verify for the moment is it must be an array of at least one element.",

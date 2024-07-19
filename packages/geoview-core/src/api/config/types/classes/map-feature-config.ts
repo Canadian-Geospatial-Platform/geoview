@@ -108,9 +108,7 @@ export class MapFeatureConfig {
     );
     this.map.listOfGeoviewLayerConfig = (gvMap.listOfGeoviewLayerConfig as TypeJsonArray)
       .map((geoviewLayerConfig) => {
-        const returnValue = MapFeatureConfig.nodeFactory(geoviewLayerConfig, this.#language);
-        if (returnValue === undefined) this.#errorDetected = true;
-        return returnValue;
+        return MapFeatureConfig.nodeFactory(geoviewLayerConfig, this.#language);
       })
       .filter((layerConfig) => {
         return layerConfig;
