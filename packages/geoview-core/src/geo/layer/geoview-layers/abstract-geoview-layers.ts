@@ -1286,6 +1286,10 @@ export abstract class AbstractGeoViewLayer {
 
       // Will be executed when we have to use a default canvas for a particular feature
       const callbackToFetchDataUrl = (): Promise<string | null> => {
+        // TODO: Fix - Don't take 'iconImage' below, it's always the same image...
+        // TO.DOCONT: Use this.style.fields and this.style.[Geom].fields and this.style.[Geom].uniqueValueStyleInfo with a combination of the 'featureNeedingItsCanvas' to determine the style image
+        // TO.DOCONT: Also, get rid of 'genericLegendInfo' and 'semaphore' variables once code is rewritten to use the 'featureNeedingItsCanvas'
+
         // Make sure one task at a time in this
         return semaphore.withLock(async () => {
           // Only execute this once in the callback. After this, once the semaphore is unlocked, it's either a string or null for as long as we're formatting
@@ -1320,6 +1324,7 @@ export abstract class AbstractGeoViewLayer {
               this.getStyle(layerConfig.layerPath)!,
               layerConfig.filterEquation,
               layerConfig.legendFilterIsOff,
+              true,
               callbackToFetchDataUrl
             )
               .then((canvas) => {
