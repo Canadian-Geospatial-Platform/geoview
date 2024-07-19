@@ -4,7 +4,7 @@
 
 The viewer allows loading packages to extend the viewer's functionalities.
 
-The viewer also supports few core packages such as a basemap panel, details panel, layers panel, overview map.
+The viewer also supports few core packages such as a area of interest, basemap panel, geoChart,swiper, time-slider.
 
 You can see an example package [here](https://github.com/Canadian-Geospatial-Platform/geoview/tree/develop/packages/geoview-basemap-panel)
 
@@ -211,4 +211,4 @@ The viewer is bundled with core packages, you can load them by passing their id 
 ></div>
 ```
 
-Available package ids `basemap-panel`, `swiper`, `time-slider`, `geochart`
+Available package ids `aoi-panel`, `basemap-panel`, `swiper`, `time-slider`, `geochart`
