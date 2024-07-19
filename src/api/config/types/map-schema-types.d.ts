@@ -20,8 +20,8 @@ export { MapFeatureConfig } from '@config/types/classes/map-feature-config';
 /** Supported geoview themes. */
 export type TypeDisplayTheme = 'dark' | 'light' | 'geo.ca';
 /** Valid values for the navBar array. */
-export type TypeValidNavBarProps = 'zoom' | 'fullscreen' | 'home' | 'location';
-/** Controls available on the navigation bar. Default = ['zoom', 'fullscreen', 'home']. */
+export type TypeValidNavBarProps = 'zoom' | 'fullscreen' | 'home' | 'location' | 'basemap-select';
+/** Controls available on the navigation bar. Default = ['zoom', 'fullscreen', 'home', 'basemap-select]. */
 export type TypeNavBarProps = TypeValidNavBarProps[];
 /** Supported footer bar tabs */
 export type TypeValidFooterBarTabsCoreProps = 'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart' | 'guide';
@@ -119,7 +119,7 @@ export type TypeBasemapOptions = {
     labeled: boolean;
 };
 /** Definition of the basemap options type. */
-export type TypeBasemapId = 'transport' | 'osm' | 'simple' | 'nogeom' | 'shaded';
+export type TypeBasemapId = 'transport' | 'osm' | 'simple' | 'nogeom' | 'shaded' | 'imagery';
 /** Definition of the valid map interactiom values. If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar). */
 export type TypeInteraction = 'static' | 'dynamic';
 /** Definition of the view settings. */
@@ -166,7 +166,7 @@ export type TypeMapViewSettings = {
      * Option to set initial view by extent.
      * Called with [minX, minY, maxX, maxY] extent coordinates. */
     extent?: Extent;
-    /** Geoview layer ID(s) or layer path(s) of layer(s) to use as initial map focus. */
+    /** Geoview layer ID(s) or layer path(s) of layer(s) to use as initial map focus. If empty, will use all layers. */
     layerIds?: string[];
 };
 /** Type used to define valid projection codes. */
@@ -231,6 +231,7 @@ export type TypeLayerStates = {
 };
 export { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 export { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
+export { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-layer-entry-config';
 /** Child classes derived from the AbstractBaseLayerEntryConfig. */
 export { EsriDynamicLayerEntryConfig } from '@config/types/classes/sub-layer-config/raster-leaf/esri-dynamic-layer-entry-config';
 export { EsriFeatureLayerEntryConfig } from '@config/types/classes/sub-layer-config/vector-leaf/esri-feature-layer-entry-config';

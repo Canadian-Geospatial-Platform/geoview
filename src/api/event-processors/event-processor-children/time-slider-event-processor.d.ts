@@ -38,6 +38,12 @@ export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
      */
     static getInitialTimeSliderValues(mapId: string, layerConfig: TypeLayerEntryConfig): TypeTimeSliderValues | undefined;
     /**
+     * Sets the selected layer path
+     * @param {string} mapId - The map id of the state to act on
+     * @param {string} layerPath - The layer path to use
+     */
+    static setSelectedLayerPath(mapId: string, layerPath: string): void;
+    /**
      * Filter the layer provided in the layerPath variable according to current states (filtering and values)
      *
      * @param {string} mapId - The id of the map

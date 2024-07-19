@@ -20,7 +20,7 @@ interface ProgressbarProps {
  * @param {ProgressbarProps} props the properties passed to the element
  * @returns {JSX.Element} the created element
  */
-export declare function ProgressBar({ className, variant, value }: ProgressbarProps): JSX.Element;
+export declare function ProgressBar({ className, variant, value, ...rest }: ProgressbarProps): JSX.Element;
 export {};
 /**
  * Example of usage by application code

@@ -22,49 +22,42 @@ export declare class Basemap {
     basemapOptions: TypeBasemapOptions;
     mapId: string;
     /**
-     * initialize basemap
-     *
-     * @param {TypeBasemapOptions} basemapOptions optional basemap option properties, passed in from map config
-     * @param {string} mapId the map id
+     * Initialize basemap.
+     * @param {TypeBasemapOptions} basemapOptions - Optional basemap option properties, passed in from map config.
+     * @param {string} mapId - The map id.
      */
     constructor(basemapOptions: TypeBasemapOptions, mapId: string);
     /**
-     * basemap list
+     * Basemap list
      */
     basemapsList: TypeJsonObject;
     setOverviewMap(): Promise<void>;
     getOverviewMap(): TypeBasemapProps | undefined;
     /**
-     * Create the core basemap and add the layers to it
-     *
-     * @param {TypeBasemapOptions} basemapOptions basemap options
-     * @param {TypeValidMapProjectionCodes} projection optional projection code
-     * @param {TypeDisplayLanguage} language optional language
-     *
-     * @return {Promise<TypeBasemapProps | undefined>} the core basemap
+     * Create the core basemap and add the layers to it.
+     * @param {TypeBasemapOptions} basemapOptions - Basemap options.
+     * @param {TypeValidMapProjectionCodes} projection - Optional projection code.
+     * @param {TypeDisplayLanguage} language - Optional language.
+     * @return {Promise<TypeBasemapProps | undefined>} The core basemap.
      */
     createCoreBasemap(basemapOptions: TypeBasemapOptions, projection?: TypeValidMapProjectionCodes, language?: TypeDisplayLanguage): Promise<TypeBasemapProps | undefined>;
     /**
-     * Create a custom basemap
-     *
-     * @param {TypeBasemapProps} basemapProps basemap properties
-     * @param {TypeValidMapProjectionCodes} projection projection code
-     * @param {TypeDisplayLanguage} language optional language
-     *
-     * @returns {TypeBasemapProps} the created custom basemap
+     * Create a custom basemap.
+     * @param {TypeBasemapProps} basemapProps - Basemap properties.
+     * @param {TypeValidMapProjectionCodes} projection - Projection code.
+     * @param {TypeDisplayLanguage} language - Optional language.
+     * @returns {TypeBasemapProps} The created custom basemap.
      */
     createCustomBasemap(basemapProps: TypeBasemapProps, projection: TypeValidMapProjectionCodes, language?: TypeDisplayLanguage): TypeBasemapProps;
     /**
-     * Load the default basemap that was passed in the map config
-     *
-     * @param {TypeValidMapProjectionCodes} projection optional projection code
-     * @param {TypeDisplayLanguage} language optional language
+     * Load the default basemap that was passed in the map config.
+     * @param {TypeValidMapProjectionCodes} projection - Optional projection code.
+     * @param {TypeDisplayLanguage} language - Optional language.
      */
     loadDefaultBasemaps(projection?: TypeValidMapProjectionCodes, language?: TypeDisplayLanguage): Promise<void>;
     /**
-     * Set the current basemap and update the basemap layers on the map
-     *
-     * @param {TypeBasemapProps} basemap the basemap
+     * Set the current basemap and update the basemap layers on the map.
+     * @param {TypeBasemapProps} basemap - The basemap.
      */
     setBasemap(basemap: TypeBasemapProps): void;
     /**
@@ -79,13 +72,13 @@ export declare class Basemap {
     offMapLanguageChanged(callback: BasemapChangedDelegate): void;
 }
 /**
- * Define an event for the delegate
+ * Define an event for the delegate.
  */
 export type BasemapChangedEvent = {
     basemap: TypeBasemapProps;
 };
 /**
- * Define a delegate for the event handler function signature
+ * Define a delegate for the event handler function signature.
  */
 type BasemapChangedDelegate = EventDelegateBase<Basemap, BasemapChangedEvent, void>;
 export {};

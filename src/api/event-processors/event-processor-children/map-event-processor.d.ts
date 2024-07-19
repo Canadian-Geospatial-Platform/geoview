@@ -70,11 +70,11 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static highlightBBox(mapId: string, extent: Extent, isLayerHighlight?: boolean): void;
     static getMapInteraction(mapId: string): TypeInteraction;
     /**
-     * Gets the ordered layer info.
+     * Gets map layer paths in order.
      * @param {string} mapId - The map id
-     * @returns {TypeOrderedLayerInfo[]} The ordered layer info
+     * @returns {string[]} The ordered layer paths
      */
-    static getMapLayerOrder(mapId: string): TypeOrderedLayerInfo[];
+    static getMapLayerOrder(mapId: string): string[];
     static getMapState(mapId: string): TypeMapState;
     static setMapAttribution(mapId: string, attribution: string[]): void;
     static setMapLoaded(mapId: string, mapLoaded: boolean): void;
@@ -88,6 +88,11 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static setProjection(mapId: string, projectionCode: TypeValidMapProjectionCodes): Promise<void>;
     static rotate(mapId: string, rotation: number): void;
     static zoom(mapId: string, zoom: number, duration?: number): void;
+    /**
+     * Gets the ordered layer info.
+     * @param {string} mapId - The map id
+     * @returns {TypeOrderedLayerInfo[]} The ordered layer info
+     */
     static getMapOrderedLayerInfo(mapId: string): TypeOrderedLayerInfo[];
     static getMapIndexFromOrderedLayerInfo(mapId: string, layerPath: string): number;
     static getMapLegendCollapsedFromOrderedLayerInfo(mapId: string, layerPath: string): boolean;
@@ -108,6 +113,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static setMapLayerQueryable(mapId: string, layerPath: string, queryable: boolean): void;
     static setMapLegendCollapsed(mapId: string, layerPath: string, collapsed?: boolean): void;
     static setOrToggleMapLayerVisibility(mapId: string, layerPath: string, newValue?: boolean): void;
+    static setOrderedLayerInfoWithNoOrderChangeState(mapId: string, curOrderedLayerInfo: TypeOrderedLayerInfo[]): void;
     static reorderLayer(mapId: string, layerPath: string, move: number): void;
     /**
      * Replace a layer in the orderedLayerInfo array.
@@ -136,6 +142,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static removeOrderedLayerInfo(mapId: string, layerPath: string): void;
     static createOverviewMapBasemap(mapId: string): TypeBasemapProps | undefined;
     static resetBasemap(mapId: string): Promise<void>;
+    static setBasemap(mapId: string, basemapOptions: TypeBasemapOptions): Promise<void>;
     static setMapKeyboardPanInteractions(mapId: string, panDelta: number): void;
     /**
      * Set the React root overview map element so it can be destroy if the map element is destroyed

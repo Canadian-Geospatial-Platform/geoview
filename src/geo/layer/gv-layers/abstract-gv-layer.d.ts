@@ -432,6 +432,7 @@ type LegendQueriedDelegate = EventDelegateBase<AbstractGVLayer, LegendQueriedEve
  * Define an event for the delegate
  */
 export type VisibleChangedEvent = {
+    layerPath: string;
     visible: boolean;
 };
 /**

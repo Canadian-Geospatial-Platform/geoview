@@ -297,6 +297,16 @@ export declare class LayerApi {
      */
     offLayerLoaded(callback: LayerLoadedDelegate): void;
     /**
+     * Registers a layer error event handler.
+     * @param {LayerErrorDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onLayerError(callback: LayerErrorDelegate): void;
+    /**
+     * Unregisters a layer error event handler.
+     * @param {LayerErrorDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offLayerError(callback: LayerErrorDelegate): void;
+    /**
      * Registers a layer removed event handler.
      * @param {LayerRemovedDelegate} callback - The callback to be executed whenever the event is emitted
      */
@@ -306,6 +316,16 @@ export declare class LayerApi {
      * @param {LayerRemovedDelegate} callback - The callback to stop being called whenever the event is emitted
      */
     offLayerRemoved(callback: LayerRemovedDelegate): void;
+    /**
+     * Registers a layer visibility toggled event handler.
+     * @param {LayerVisibilityToggledDelegate} callback - The callback to be executed whenever the event is emitted
+     */
+    onLayerVisibilityToggled(callback: LayerVisibilityToggledDelegate): void;
+    /**
+     * Unregisters a layer  visibility toggled event handler.
+     * @param {LayerVisibilityToggledDelegate} callback - The callback to stop being called whenever the event is emitted
+     */
+    offLayerVisibilityToggled(callback: LayerVisibilityToggledDelegate): void;
     /**
      * Registers a layer item visibility toggled event handler.
      * @param {LayerItemVisibilityToggledDelegate} callback - The callback to be executed whenever the event is emitted
@@ -341,12 +361,34 @@ export type LayerLoadedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
+type LayerErrorDelegate = EventDelegateBase<LayerApi, LayerErrorEvent, void>;
+/**
+ * Define an event for the delegate
+ */
+export type LayerErrorEvent = {
+    layerPath: string;
+    errorMessage: string;
+};
+/**
+ * Define a delegate for the event handler function signature
+ */
 type LayerRemovedDelegate = EventDelegateBase<LayerApi, LayerRemovedEvent, void>;
 /**
  * Define an event for the delegate
  */
 export type LayerRemovedEvent = {
     layerPath: string;
+};
+/**
+ * Define a delegate for the event handler function signature
+ */
+type LayerVisibilityToggledDelegate = EventDelegateBase<LayerApi, LayerVisibilityToggledEvent, void>;
+/**
+ * Define an event for the delegate
+ */
+export type LayerVisibilityToggledEvent = {
+    layerPath: string;
+    visibility: boolean;
 };
 /**
  * Define a delegate for the event handler function signature

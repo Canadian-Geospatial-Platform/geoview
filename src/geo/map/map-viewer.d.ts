@@ -231,8 +231,8 @@ export declare class MapViewer {
     /**
      * Remove map
      *
-     * @param {boolean} deleteContainer true if we want to delete div from the page
-     * @returns {HTMLElement} return the HTML element
+     * @param {boolean} deleteContainer - True if we want to delete div from the page
+     * @returns {HTMLElement} The HTML element
      */
     remove(deleteContainer: boolean): HTMLElement;
     /**

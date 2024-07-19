@@ -1,6 +1,6 @@
 /// <reference types="react" />
 interface UseLightBoxReturnType {
-    initLightBox: (images: string, alias: string, index: number | undefined) => void;
+    initLightBox: (images: string, alias: string, index: number | undefined, scale?: number) => void;
     LightBoxComponent: () => JSX.Element;
 }
 /**

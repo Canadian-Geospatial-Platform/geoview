@@ -1,4 +1,3 @@
-import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
 import { TypeJsonObject } from '@config/types/config-types';
 import { TypeGeoviewLayerType, TypeDisplayLanguage, TypeLayerInitialSettings } from '@config/types/map-schema-types';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
@@ -24,25 +23,22 @@ export declare abstract class AbstractGeoviewLayerConfig {
     externalDateFormat: string | undefined;
     /** Boolean indicating if the layer should be included in time awareness functions such as the Time Slider. True by default. */
     isTimeAware: boolean | undefined;
-    /**
-     * Initial settings to apply to the GeoView layer at creation time.
-     * This attribute is allowed only if listOfLayerEntryConfig.length > 1.
-     */
-    initialSettings: TypeLayerInitialSettings;
     /** The layer entries to use from the GeoView layer. */
     listOfLayerEntryConfig: EntryConfigBaseClass[];
+    /** Initial settings to apply to the GeoView layer at creation time. */
+    initialSettings: TypeLayerInitialSettings;
     /**
-     * The class constructor.
+     * The class constructor saves a cloned copy of the Geoview configuration supplied by the user and runs a validation on it to
+     * find any errors that may have been made. It only initalizes the properties needed to query the service and layer metadata.
+     *
      * @param {TypeJsonObject} geoviewLayerConfig The layer configuration we want to instanciate.
      * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
-     * @param {MapFeatureConfig} mapFeatureConfig An optional mapFeatureConfig instance if the layer is part of it.
      */
-    constructor(geoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage, mapFeatureConfig?: MapFeatureConfig);
+    constructor(geoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage);
     /**
-     * Validate the object properties. Layer name and type must be set.
-     * @private
+     * Apply default value to undefined fields.
      */
-    protected validate(): void;
+    applyDefaultValueToUndefinedFields(): void;
     /**
      * Get the service metadata from the metadataAccessPath and store it in a private variable of the geoview layer.
      * The benifit of using a private #metadata is that it is invisible to the schema validation and JSON serialization.
@@ -114,10 +110,9 @@ export declare abstract class AbstractGeoviewLayerConfig {
      * @returns {EntryConfigBaseClass | undefined} The sublayer instance or undefined if there is an error.
      * @abstract
      */
-    abstract createLeafNode(layerConfig: TypeJsonObject, initialSettings: TypeLayerInitialSettings | TypeJsonObject, language: TypeDisplayLanguage, geoviewConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass): EntryConfigBaseClass | undefined;
+    abstract createLeafNode(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, geoviewConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass): EntryConfigBaseClass | undefined;
     /**
-     * Methode used to set the AbstractGeoviewLayerConfig error flag to true and the MapFeatureConfig error flag if the
-     * instance exists.
+     * Methode used to set the AbstractGeoviewLayerConfig error flag to true.
      */
     setErrorDetectedFlag(): void;
     /**
