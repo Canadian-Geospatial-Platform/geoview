@@ -1569,12 +1569,15 @@ export function getAndCreateFeatureStyle(
   return undefined;
 }
 
+const CANVAS_RECYCLING: { [styleAsJsonString: string]: HTMLCanvasElement } = {};
+
 /** ***************************************************************************************************************************
  * This method gets the canvas icon from the style of the feature using the layer entry config.
  * @param {Feature} feature - The feature that need its canvas icon to be defined.
  * @param {TypeStyleConfig} style - The style to use
  * @param {FilterNodeArrayType} filterEquation - Filter equation associated to the layer.
  * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
+ * @param {boolean} useRecycling - Special parameter to optimize canvas creation time when functions is called multiple times.
  * @param {() => Promise<string | null>} callbackForDataUrl - An optional callback to execute when struggling to build a canvas and have to use a data url to make one
  * @returns {Promise<HTMLCanvasElement>} The canvas icon associated to the feature or a default empty canvas.
  */
@@ -1583,6 +1586,7 @@ export async function getFeatureCanvas(
   style: TypeStyleConfig,
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean,
+  useRecycling?: boolean,
   callbackForDataUrl?: () => Promise<string | null>
 ): Promise<HTMLCanvasElement> {
   // The canvas that will be returned (if calculated successfully)
@@ -1613,7 +1617,22 @@ export async function getFeatureCanvas(
         } else if (geometryType === 'LineString') {
           canvas = createLineStringCanvas(featureStyle);
         } else {
-          canvas = createPolygonCanvas(featureStyle);
+          // eslint-disable-next-line no-lonely-if
+          if (useRecycling) {
+            // Stringify to compare styles with each others
+            const strokeAsString = JSON.stringify(featureStyle.getStroke());
+            const fillAsString = JSON.stringify(featureStyle.getFill());
+            const featureAsString = strokeAsString + fillAsString;
+
+            // If no other style like it has been processed so far
+            if (!CANVAS_RECYCLING[featureAsString]) {
+              // Keep it as template
+              CANVAS_RECYCLING[featureAsString] = createPolygonCanvas(featureStyle);
+            }
+            canvas = CANVAS_RECYCLING[featureAsString];
+          } else {
+            canvas = createPolygonCanvas(featureStyle);
+          }
         }
       }
     }
