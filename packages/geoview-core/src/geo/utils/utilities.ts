@@ -5,21 +5,24 @@ import { ReadOptions } from 'ol/format/Feature';
 import Geometry from 'ol/geom/Geometry';
 import { Style, Stroke, Fill, Circle } from 'ol/style';
 import { Color } from 'ol/color';
-import { getArea as getAreaOL } from 'ol/sphere';
+import { getArea as getAreaOL, getLength as getLengthOL } from 'ol/sphere';
 import { Extent } from 'ol/extent';
 import XYZ from 'ol/source/XYZ';
 import TileLayer from 'ol/layer/Tile';
+import { LineString, Polygon } from 'ol/geom';
 
-import { Polygon } from 'ol/geom';
 import { Cast, TypeJsonObject } from '@/core/types/global-types';
 import { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { xmlToJson } from '@/core/utils/utilities';
+import { Projection } from '@/geo/utils/projection';
 
 import { CONST_LAYER_TYPES, TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { TypeStyleConfig } from '@/geo/map/map-schema-types';
 
 import { TypeBasemapLayer } from '../layer/basemap/basemap-types';
+import { ProjectionLike } from 'ol/proj';
+import { Coordinate } from 'ol/coordinate';
 
 /**
  * Interface used for css style declarations
@@ -167,15 +170,6 @@ export function geojsonToGeometry(geojson: string, readOptions: ReadOptions): Ge
     return format.readGeometry(geojson, readOptions);
   }
   return null;
-}
-
-/**
- * Gets the area of a given geometry
- * @param {Geometry} geometry the geometry to calculate the area
- * @returns the area of the given geometry
- */
-export function getArea(geometry: Geometry): number {
-  return getAreaOL(geometry);
 }
 
 /**
@@ -489,4 +483,35 @@ export function validateExtentWhenDefined(extent: Extent | undefined, code: stri
   // Validate extent if it is defined
   if (extent) return validateExtent(extent, code);
   return undefined;
+}
+
+/**
+ * Gets the area of a given geometry
+ * @param {Geometry} geometry the geometry to calculate the area
+ * @returns the area of the given geometry
+ */
+export function getArea(geometry: Geometry): number {
+  // Note that the geometry.getLength() and geometry.getArea() methods return measures of projected (planar) geometries.
+  // These can be very different than on-the-ground measures in certain situations — in northern and southern latitudes
+  // using Web Mercator for example. For better results, use the functions in the ol/sphere module.
+  return getAreaOL(geometry);
+}
+
+/**
+ * Gets the length of a given geometry
+ * @param {Geometry} geometry the geometry to calculate the length
+ * @returns the length of the given geometry
+ */
+export function getLength(geometry: Geometry): number {
+  // Note that the geometry.getLength() and geometry.getArea() methods return measures of projected (planar) geometries.
+  // These can be very different than on-the-ground measures in certain situations — in northern and southern latitudes
+  // using Web Mercator for example. For better results, use the functions in the ol/sphere module.
+  return getLengthOL(geometry);
+}
+
+export function calculateDistance(coordinates: Coordinate[], inProj: string, outProj: string): number {
+  const arr = Projection.transformPoints(coordinates, inProj, outProj);
+
+  const geom = new LineString(arr);
+  return Math.round((getLength(geom) / 1000) * 100) / 100;
 }
