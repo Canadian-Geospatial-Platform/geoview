@@ -192,11 +192,6 @@ If you need a new Icon that does not extist in packages/geoview-core/src/ui/icon
 CropOriginal as AoiIcon,CropOriginal as AoiIcon,
 ```
 
-
-
-
-
-
 ### Run Rush Commands:
 
 - After updating rush.json, run rush update to update the monorepo's dependencies and integrate the new package.
