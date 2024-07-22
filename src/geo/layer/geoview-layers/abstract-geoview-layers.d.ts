@@ -708,6 +708,7 @@ type LegendQueriedDelegate = EventDelegateBase<AbstractGeoViewLayer, LegendQueri
  * Define an event for the delegate
  */
 export type VisibleChangedEvent = {
+    layerPath: string;
     visible: boolean;
 };
 /**

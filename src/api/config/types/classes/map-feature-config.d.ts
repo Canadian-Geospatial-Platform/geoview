@@ -75,5 +75,5 @@ export declare class MapFeatureConfig {
      * @returns {AbstractGeoviewLayerConfig | undefined} The GeoView layer instance or undefined if there is an error.
      * @static
      */
-    static nodeFactory(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, mapFeatureConfig?: MapFeatureConfig): AbstractGeoviewLayerConfig | undefined;
+    static nodeFactory(layerConfig: TypeJsonObject, language: TypeDisplayLanguage): AbstractGeoviewLayerConfig | undefined;
 }

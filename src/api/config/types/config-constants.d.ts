@@ -19,7 +19,7 @@ export declare const CV_CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLaye
 export declare const CV_CONST_LEAF_LAYER_SCHEMA_PATH: Record<LayerTypesKey, string>;
 export declare const CV_GEOVIEW_SCHEMA_PATH: Record<LayerTypesKey, string>;
 export declare const CV_MAP_CONFIG_SCHEMA_PATH = "https://cgpv/schema#/definitions/MapFeatureConfig";
-export declare const CV_LAYER_GROUP_SCHEMA_PATH = "https://cgpv/schema#/definitions/TypeLayerGroupEntryConfig";
+export declare const CV_LAYER_GROUP_SCHEMA_PATH = "https://cgpv/schema#/definitions/GroupLayerEntryConfig";
 /** Array of schema versions accepted by the viewer. */
 export declare const ACCEPTED_SCHEMA_VERSIONS: TypeValidVersions[];
 /** Constante mainly use for language validation. */

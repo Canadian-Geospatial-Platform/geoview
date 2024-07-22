@@ -7,11 +7,15 @@ export declare class UIEventProcessor extends AbstractEventProcessor {
      * @param {string} mapId The mapId
      * @returns {IUIState} The UI state.
      */
-    protected static getUIState(mapId: string): IUIState;
+    protected static getUIStateProtected(mapId: string): IUIState;
     static getActiveFooterBarTab(mapId: string): string;
     static getAppBarComponents(mapId: string): TypeValidAppBarCoreProps[];
     static getCorePackageComponents(mapId: string): TypeMapCorePackages;
+    static getFooterBarIsCollapsed(mapId: string): boolean;
+    static hideTab(mapId: string, tab: string): void;
+    static showTab(mapId: string, tab: string): void;
     static setActiveFooterBarTab(mapId: string, id: string): void;
     static setActiveAppBarTab(mapId: string, tabId: string, tabGroup: string, isOpen: boolean): void;
     static getActiveAppBarTab(mapId: string): ActiveAppBarTabType;
+    static setFooterBarIsCollapsed(mapId: string, collapsed: boolean): void;
 }

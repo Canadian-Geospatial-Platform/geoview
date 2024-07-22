@@ -92,6 +92,11 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      */
     getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined>;
     /**
+     * Return the vector layer as a GeoJSON object
+     * @returns {JSON} Layer's features as GeoJSON
+     */
+    getFeaturesAsGeoJSON(): JSON;
+    /**
      * Calculates a style for the given feature, based on the layer current style and options.
      * @param {AbstractGeoViewLayer | AbstractGVLayer} layer - The layer on which to work for the style.
      * @param {FeatureLike} feature - Feature that need its style to be defined.

@@ -14,6 +14,7 @@ export interface IUIState {
     appBarComponents: TypeValidAppBarCoreProps[];
     corePackagesComponents: TypeMapCorePackages;
     focusITem: FocusItemProps;
+    hiddenTabs: string[];
     mapInfoExpanded: boolean;
     navBarComponents: TypeNavBarProps;
     footerPanelResizeValue: number;
@@ -21,8 +22,10 @@ export interface IUIState {
     footerBarIsCollapsed: boolean;
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     actions: {
+        hideTab: (tab: string) => void;
         closeModal: () => void;
         openModal: (uiFocus: FocusItemProps) => void;
+        showTab: (tab: string) => void;
         setActiveFooterBarTab: (id: string) => void;
         setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean) => void;
         setActiveTrapGeoView: (active: boolean) => void;
@@ -37,6 +40,7 @@ export interface IUIState {
         setActiveAppBarTab: (tabId: string, tabGroup: string, isOpen: boolean) => void;
         setActiveTrapGeoView: (active: boolean) => void;
         setFooterPanelResizeValue: (value: number) => void;
+        setHiddenTabs: (hiddenTabs: string[]) => void;
         setMapInfoExpanded: (expanded: boolean) => void;
         setFooterBarIsCollapsed: (collapsed: boolean) => void;
     };
@@ -60,6 +64,7 @@ export declare const useUIAppbarComponents: () => TypeValidAppBarCoreProps[];
 export declare const useUICorePackagesComponents: () => TypeMapCorePackages;
 export declare const useUIFooterPanelResizeValue: () => number;
 export declare const useUIFooterPanelResizeValues: () => number[];
+export declare const useUIHiddenTabs: () => string[];
 export declare const useUIMapInfoExpanded: () => boolean;
 export declare const useUINavbarComponents: () => TypeNavBarProps;
 export declare const useUIFooterBarIsCollapsed: () => boolean;

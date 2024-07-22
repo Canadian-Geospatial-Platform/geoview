@@ -38,7 +38,7 @@ export interface IMapState {
     zoom: number;
     setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
     actions: {
-        createBaseMapFromOptions: () => Promise<void>;
+        createBasemapFromOptions: (basemapOptions: TypeBasemapOptions) => Promise<void>;
         getPixelFromCoordinate: (coord: Coordinate) => [number, number];
         getIndexFromOrderedLayerInfo: (layerPath: string) => number;
         getLegendCollapsedFromOrderedLayerInfo: (layerPath: string) => boolean;
@@ -49,6 +49,7 @@ export interface IMapState {
         addHighlightedFeature: (feature: TypeFeatureInfoEntry) => void;
         removeHighlightedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
         reorderLayer: (layerPath: string, move: number) => void;
+        resetBasemap: () => Promise<void>;
         setLegendCollapsed: (layerPath: string, newValue?: boolean) => void;
         setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean) => void;
         setMapKeyboardPanInteractions: (panDelta: number) => void;

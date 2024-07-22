@@ -132,6 +132,12 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      */
     getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined>;
     /**
+     * Return the vector layer as a GeoJSON object
+     * @param {string} layerPath - Layer path to get GeoJSON
+     * @returns {JSON} Layer's features as GeoJSON
+     */
+    getFeaturesAsGeoJSON(layerPath: string): JSON;
+    /**
      * Overrides when the layer gets in loaded status.
      */
     onLoaded(layerConfig: AbstractBaseLayerEntryConfig): void;

@@ -1,7 +1,7 @@
 import { CV_CONFIG_GEOCORE_TYPE } from '@config/types/config-constants';
 import { TypeJsonObject, TypeJsonArray } from '@config/types/config-types';
 import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
-import { AbstractGeoviewLayerConfig, TypeDisplayLanguage, TypeGeoviewLayerType } from '@config/types/map-schema-types';
+import { AbstractGeoviewLayerConfig, EntryConfigBaseClass, TypeDisplayLanguage, TypeGeoviewLayerType } from '@config/types/map-schema-types';
 /**
  * The API class that create configuration object. It is used to validate and read the service and layer metadata.
  * @exports
@@ -13,7 +13,8 @@ export declare class ConfigApi {
     static lastLayerConfigCreated?: AbstractGeoviewLayerConfig;
     /** Static property that contains the last object instanciated by the ConfigApi.createMapConfig call */
     static lastMapConfigCreated?: MapFeatureConfig;
-    /**
+    static devMode: boolean;
+    /** ***************************************************************************************************************************
      * Function used to validate the GeoCore UUIDs.
      *
      * @param {string} uuid The UUID to validate.
@@ -22,6 +23,14 @@ export declare class ConfigApi {
      * @static
      */
     static isValidUUID(uuid: string): boolean;
+    /** ***************************************************************************************************************************
+     * Attempt to determine the layer type based on the URL format.
+     *
+     * @param {string} url The URL of the service for which we want to guess the GeoView layer type.
+     *
+     * @returns {string | undefined} The GeoView layer type or undefined if it cannot be guessed.
+     */
+    static guessLayerType(url: string): string | undefined;
     /**
      * Get a map feature config from url parameters.
      * @param {string} urlStringParams The url parameters.
@@ -72,8 +81,8 @@ export declare class ConfigApi {
      */
     static validateMapConfig(mapConfig: string | TypeJsonObject, language: TypeDisplayLanguage): MapFeatureConfig;
     /**
-     * Create the map feature configuration instance using the json string or the json object provided by the user. When the user
-     * doesn't provide a value for a field that is covered by a default value, the default is used.
+     * Create the map feature configuration instance using the json string or the json object provided by the user.
+     * All GeoCore entries found in the config are translated to their corresponding Geoview configuration.
      *
      * @param {string | TypeJsonObject} mapConfig The map feature configuration to instanciate.
      * @param {TypeDisplayLanguage} language The language of the map feature config we want to produce.
@@ -87,9 +96,23 @@ export declare class ConfigApi {
      *
      * @param {string} serviceAccessString The service access string (a URL or a layer identifier).
      * @param {TypeGeoviewLayerType | CV_CONFIG_GEOCORE_TYPE} layerType The GeoView layer type or 'geoCore'.
+     * @param {TypeJsonArray} listOfLayerId Optionnal list of layer ids (default []).
+     * @param {TypeDisplayLanguage} language Optional display language (default: en).
      *
      * @returns {AbstractGeoviewLayerConfig | undefined} The layer configuration or undefined if there is an error.
      * @static
      */
-    static createLayerConfig(serviceAccessString: string, layerType: TypeGeoviewLayerType | typeof CV_CONFIG_GEOCORE_TYPE, language?: TypeDisplayLanguage): Promise<AbstractGeoviewLayerConfig | undefined>;
+    static createLayerConfig(serviceAccessString: string, layerType: TypeGeoviewLayerType | typeof CV_CONFIG_GEOCORE_TYPE, listOfLayerId?: TypeJsonArray, language?: TypeDisplayLanguage): Promise<AbstractGeoviewLayerConfig | undefined>;
+    /**
+     * Create the layer tree from the service metadata.
+     *
+     * @param {string} serviceAccessString The service access string (a URL or a layer identifier).
+     * @param {TypeGeoviewLayerType | CV_CONFIG_GEOCORE_TYPE} layerType The GeoView layer type or 'geoCore'.
+     * @param {TypeJsonArray} listOfLayerId Optionnal list of layer ids (default []).
+     * @param {TypeDisplayLanguage} language Optional display language (default: en).
+     *
+     * @returns {EntryConfigBaseClass[]} The metadata layer tree.
+     * @static
+     */
+    static createMetadataLayerTree(serviceAccessString: string, layerType: TypeGeoviewLayerType | typeof CV_CONFIG_GEOCORE_TYPE, listOfLayerId?: TypeJsonArray, language?: TypeDisplayLanguage): Promise<EntryConfigBaseClass[]>;
 }

@@ -13,13 +13,16 @@ export declare class GroupLayerEntryConfig extends EntryConfigBaseClass {
     /**
      * The class constructor.
      * @param {TypeJsonObject} layerConfig The sublayer configuration we want to instanciate.
-     * @param {TypeLayerInitialSettings | TypeJsonObject} initialSettings The initial settings inherited.
      * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
      * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The GeoView instance that owns the sublayer.
      * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
      * @constructor
      */
-    constructor(layerConfig: TypeJsonObject, initialSettings: TypeLayerInitialSettings | TypeJsonObject, language: TypeDisplayLanguage, geoviewLayerConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass);
+    constructor(layerConfig: TypeJsonObject, language: TypeDisplayLanguage, geoviewLayerConfig: AbstractGeoviewLayerConfig, parentNode?: EntryConfigBaseClass);
+    /**
+     * Apply default value to undefined fields.
+     */
+    applyDefaultValueToUndefinedFields(initialSettings: TypeLayerInitialSettings): void;
     /**
      * @protected
      * The getter method that returns the schemaPath property. Each geoview sublayer type knows what section of the schema must be
