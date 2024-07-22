@@ -191,7 +191,7 @@ export abstract class AbstractLayerSet {
 
     // Wait a maximum of 20 seconds for the layer to get to loaded state so that it can get registered, otherwise another attempt will have to be made
     // This await is important when devs call this method directly to register ad-hoc layers.
-    await whenThisThen(() => layer.getLayerConfig(layerPath)?.layerStatus === 'loaded', 20000);
+    await whenThisThen(() => layer.getLayerStatus(layerPath) === 'loaded', 20000);
 
     // If the layer is already registered, skip it, we don't register twice
     if (this.#registeredLayerLayerPaths.includes(layerPath)) return;
@@ -245,12 +245,12 @@ export abstract class AbstractLayerSet {
     if (!(layerPath in this.resultSet)) {
       this.resultSet[layerPath] = {
         layerPath,
-        layerStatus: layer.getLayerConfig(layerPath)!.layerStatus,
+        layerStatus: layer.getLayerStatus(layerPath),
         layerName,
       };
     } else {
       // Already there, update it
-      this.resultSet[layerPath].layerStatus = layer.getLayerConfig(layerPath)!.layerStatus;
+      this.resultSet[layerPath].layerStatus = layer.getLayerStatus(layerPath);
       this.resultSet[layerPath].layerName = layerName;
     }
 

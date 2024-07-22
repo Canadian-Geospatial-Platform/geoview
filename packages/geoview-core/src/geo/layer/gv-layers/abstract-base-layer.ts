@@ -97,11 +97,14 @@ export abstract class AbstractBaseLayer {
   }
 
   /**
-   * Gets the layer configuration status
+   * Gets the layer status
    * @returns The layer status
    */
-  getLayerConfigStatus(): TypeLayerStatus {
-    return this.#layerConfig.layerStatus;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getLayerStatus(layerPath: string): TypeLayerStatus {
+    // TODO: Refactor - After layers refactoring, remove the layerPath parameter here (gotta keep it in the signature for now for the layers-set active switch)
+    // Take the layer status from the config
+    return this.getLayerConfig()!.layerStatus;
   }
 
   /**

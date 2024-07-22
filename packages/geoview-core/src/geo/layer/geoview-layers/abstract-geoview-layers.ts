@@ -1046,7 +1046,7 @@ export abstract class AbstractGeoViewLayer {
   //     // TODO: Check - Are the bounds initially always 4326?
   //     if (projectionCode && bounds) {
   //       bounds = validateExtent(bounds);
-  //       return Projection.transformExtent(bounds, `EPSG:4326`, `EPSG:${projectionCode}`);
+  //       return Projection.transformExtent(bounds, Projection.PROJECTION_NAMES.LNGLAT, `EPSG:${projectionCode}`);
   //     }
   //   }
   //   return bounds;
