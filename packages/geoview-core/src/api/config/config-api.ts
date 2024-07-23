@@ -1,7 +1,7 @@
 import cloneDeep from 'lodash/cloneDeep';
 
 import { CV_DEFAULT_MAP_FEATURE_CONFIG, CV_CONFIG_GEOCORE_TYPE, CV_CONST_LAYER_TYPES } from '@config/types/config-constants';
-import { Cast, TypeJsonValue, TypeJsonObject, toJsonObject, TypeJsonArray } from '@config/types/config-types';
+import { TypeJsonValue, TypeJsonObject, toJsonObject, TypeJsonArray, Cast } from '@config/types/config-types';
 import { MapFeatureConfig } from '@config/types/classes/map-feature-config';
 import { UUIDmapConfigReader } from '@config/uuid-config-reader';
 import {
@@ -104,7 +104,7 @@ export class ConfigApi {
         const key = param[0];
         const value = param[1] as TypeJsonValue;
 
-        obj[key] = Cast<TypeJsonObject>(value);
+        obj[key] = value as TypeJsonObject;
       }
     }
 
@@ -134,11 +134,11 @@ export class ConfigApi {
             const value: string = prop[1];
 
             if (prop[1] === 'true') {
-              obj[key] = Cast<TypeJsonObject>(true);
+              obj[key] = true as TypeJsonObject;
             } else if (prop[1] === 'false') {
-              obj[key] = Cast<TypeJsonObject>(false);
+              obj[key] = false as TypeJsonObject;
             } else {
-              obj[key] = Cast<TypeJsonObject>(value);
+              obj[key] = value as TypeJsonObject;
             }
           }
         }
@@ -434,7 +434,6 @@ export class ConfigApi {
       // will be executed to try to correct the problem in the best possible way.
       ConfigApi.lastMapConfigCreated = new MapFeatureConfig(providedMapFeatureConfig!, language);
       if (errorDetected) ConfigApi.lastMapConfigCreated.setErrorDetectedFlag();
-      await ConfigApi.lastMapConfigCreated.fetchAllServiceMetadata();
     } catch (error) {
       // If we get here, it is because the user provided a string config that cannot be translated to a json object,
       // or the config doesn't have the mandatory map property or the listOfGeoviewLayerConfig is defined but is not
@@ -473,7 +472,7 @@ export class ConfigApi {
     if (layerType === CV_CONFIG_GEOCORE_TYPE) {
       try {
         const layerConfig = { geoviewLayerId: serviceAccessString, geoviewLayerType: layerType };
-        geoviewLayerConfig = (await ConfigApi.convertGeocoreToGeoview(language, Cast<TypeJsonObject>(layerConfig))) as TypeJsonObject;
+        geoviewLayerConfig = (await ConfigApi.convertGeocoreToGeoview(language, toJsonObject(layerConfig))) as TypeJsonObject;
         // if the conversion returned an undefined GeoView configuration or throw an error,
         // we return undefined to signal that we cannot create the GeoView layer.
         if (!geoviewLayerConfig) return undefined;
@@ -483,7 +482,7 @@ export class ConfigApi {
       }
     } else {
       // Create a GeoView Json configuration object.
-      geoviewLayerConfig = Cast<TypeJsonObject>({
+      geoviewLayerConfig = toJsonObject({
         geoviewLayerId: generateId(),
         geoviewLayerName: { en: 'unknown', fr: 'inconnu' },
         geoviewLayerType: layerType,
@@ -512,7 +511,7 @@ export class ConfigApi {
    */
   static async createMetadataLayerTree(
     serviceAccessString: string,
-    layerType: TypeGeoviewLayerType | typeof CV_CONFIG_GEOCORE_TYPE,
+    layerType: TypeGeoviewLayerType,
     listOfLayerId: TypeJsonArray = [],
     language: TypeDisplayLanguage = 'en'
   ): Promise<EntryConfigBaseClass[]> {

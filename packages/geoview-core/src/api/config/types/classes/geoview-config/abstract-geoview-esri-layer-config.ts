@@ -1,7 +1,4 @@
-import axios from 'axios';
-
-import { Cast, toJsonObject, TypeJsonObject, TypeJsonArray } from '@config/types/config-types';
-import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
+import { toJsonObject, TypeJsonObject, TypeJsonArray } from '@config/types/config-types';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
 import { TypeDisplayLanguage, TypeStyleGeometry } from '@config/types/map-schema-types';
 import { layerEntryIsAbstractBaseLayerEntryConfig, layerEntryIsGroupLayer } from '@config/types/type-guards';
@@ -36,7 +33,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
         this.setErrorDetectedFlag();
         logger.logError('When an ESRI metadataAccessPath ends with a layer index, the listOfLayerEntryConfig must be  empty.');
       }
-      this.listOfLayerEntryConfig = [this.createLeafNode(Cast<TypeJsonObject>({ layerId: lastPathItem }), language, this)!];
+      this.listOfLayerEntryConfig = [this.createLeafNode(toJsonObject({ layerId: lastPathItem }), language, this)!];
     }
   }
 
@@ -97,7 +94,10 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
 
         // Call the function defined above.
         processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
-        this.metadataLayerTree = this.createLayerTree();
+        // When a list of layer entries is specified, the layer tree is the same as the resulting listOfLayerEntryConfig of the geoview instance.
+        // Otherwise, a layer tree is built using all the layers that compose the metadata.
+        this.metadataLayerTree = this.listOfLayerEntryConfig.length ? this.listOfLayerEntryConfig : this.createLayerTree();
+        await this.#fetchListOfLayerMetadata(this.listOfLayerEntryConfig);
       }
     } else {
       this.setErrorDetectedFlag();
@@ -122,7 +122,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
     if (layers.length === 1)
       return [
         this.createLeafNode(
-          Cast<TypeJsonObject>({
+          toJsonObject({
             layerId: layers[0].id.toString(),
             layerName: { en: layers[0].name, fr: layers[0].name },
             geometryType: AbstractGeoviewEsriLayerConfig.convertEsriGeometryTypeToOLGeometryType(layers[0].geometryType as string),
@@ -151,7 +151,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
 
     // if the layerFound is not a group layer, create a leaf.
     if (layerFound && layerFound.type !== 'Group Layer') {
-      const layerConfig = Cast<TypeJsonObject>({
+      const layerConfig = toJsonObject({
         layerId: layerFound.id.toString(),
         layerName: { en: layerFound.name, fr: layerFound.name },
         geometryType: AbstractGeoviewEsriLayerConfig.convertEsriGeometryTypeToOLGeometryType(layerFound.geometryType as string),
@@ -180,7 +180,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
         if (layer.type === 'Group Layer') accumulator.push(this.#createGroupNode(layer.id as number, layer.name as string));
         else {
           accumulator.push(
-            Cast<TypeJsonObject>({
+            toJsonObject({
               layerId: layer.id.toString(),
               layerName: { en: layer.name, fr: layer.name },
               geometryType: AbstractGeoviewEsriLayerConfig.convertEsriGeometryTypeToOLGeometryType(layer.geometryType as string),
@@ -191,7 +191,7 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
       return accumulator;
     }, [] as TypeJsonObject[]);
 
-    return Cast<TypeJsonObject>({
+    return toJsonObject({
       layerId: parentId === -1 ? groupName : `${parentId}`,
       initialSettings: this.initialSettings,
       layerName: { en: groupName, fr: groupName },
@@ -211,77 +211,14 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
   async #fetchListOfLayerMetadata(listOfLayerEntryConfig: EntryConfigBaseClass[]): Promise<void> {
     const listOfLayerMetadata: Promise<TypeJsonObject | void>[] = [];
     listOfLayerEntryConfig.forEach((subLayerConfig) => {
-      if (!subLayerConfig.errorDetected) {
-        if (layerEntryIsGroupLayer(subLayerConfig)) {
-          listOfLayerMetadata.push(this.#fetchListOfLayerMetadata(subLayerConfig.listOfLayerEntryConfig));
-        } else if (layerEntryIsAbstractBaseLayerEntryConfig(subLayerConfig)) {
-          listOfLayerMetadata.push(subLayerConfig.fetchLayerMetadata());
-        }
+      if (layerEntryIsGroupLayer(subLayerConfig)) {
+        listOfLayerMetadata.push(this.#fetchListOfLayerMetadata(subLayerConfig.listOfLayerEntryConfig));
+      } else if (layerEntryIsAbstractBaseLayerEntryConfig(subLayerConfig)) {
+        listOfLayerMetadata.push(subLayerConfig.fetchLayerMetadata());
       }
     });
 
     await Promise.allSettled(listOfLayerMetadata);
-  }
-
-  /** ***************************************************************************************************************************
-   * This method is used to process the metadata of the sub-layers. It will fill the empty properties of the configuration
-   * (renderer, initial settings, fields and aliases).
-   *
-   * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
-   *
-   * @returns {Promise<TypeJsonObject>} A promise that resolve when the JSON metadata are read..
-   */
-  async fetchEsriLayerMetadata(subLayerConfig: AbstractBaseLayerEntryConfig): Promise<TypeJsonObject> {
-    const serviceUrlFragments = this.metadataAccessPath.split('/');
-    // The test convert to number and back to string because parseInt('10a', 10) returns 10, but '10a' is not a number
-    const endingIsNumeric = parseInt(serviceUrlFragments.slice(-1)[0], 10).toString() === serviceUrlFragments.slice(-1)[0];
-    const serviceUrl = endingIsNumeric ? `${serviceUrlFragments.slice(0, -1).join('/')}/` : this.metadataAccessPath;
-
-    const queryUrl = serviceUrl.endsWith('/') ? `${serviceUrl}${subLayerConfig.layerId}` : `${serviceUrl}/${subLayerConfig.layerId}`;
-
-    try {
-      const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=json`);
-      if ('error' in data) logger.logError('Error detected while reading layer metadata.', data.error);
-      else return data;
-    } catch (error) {
-      logger.logError('Error detected in fetchEsriLayerMetadata while reading ESRI metadata.', error);
-    }
-    subLayerConfig.setErrorDetectedFlag();
-    return {};
-
-    /*
-      try {
-        const { data } = await axios.get<TypeJsonObject>(`${queryUrl}?f=pjson`);
-        if (data?.error) {
-          layerConfig.layerStatus = 'error';
-          throw new Error(`Error code = ${data.error.code}, ${data.error.message}`);
-        }
-        layer.setLayerMetadata(layerPath, data);
-        // The following line allow the type ascention of the type guard functions on the second line below
-        const EsriLayerConfig = layerConfig;
-        if (geoviewEntryIsEsriDynamic(EsriLayerConfig) || geoviewEntryIsEsriFeature(EsriLayerConfig)) {
-          if (!EsriLayerConfig.style) {
-            const renderer = Cast<EsriBaseRenderer>(data.drawingInfo?.renderer);
-            if (renderer) EsriLayerConfig.style = getStyleFromEsriRenderer(renderer);
-          }
-          layer.processFeatureInfoConfig(
-            layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig
-          );
-          layer.processInitialSettings(layerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig);
-        }
-        commonProcessTemporalDimension(
-          layer,
-          data.timeInfo as TypeJsonObject,
-          EsriLayerConfig as EsriDynamicLayerEntryConfig & EsriFeatureLayerEntryConfig & EsriImageLayerEntryConfig,
-          layer.type === CONST_LAYER_TYPES.ESRI_IMAGE
-        );
-      } catch (error) {
-        layerConfig.layerStatus = 'error';
-        logger.logError('Error in commonProcessLayerMetadata', layerConfig, error);
-      }
-    }
-    return layerConfig;
-    */
   }
 
   /**
