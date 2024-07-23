@@ -353,7 +353,7 @@ export class MapViewer {
       const degreeRotation = this.getNorthArrowAngle();
 
       // Get the north visibility
-      const isNorthVisible = this.checkNorth();
+      const isNorthVisible = this.getNorthVisibility();
 
       // Get the scale information
       const scale = await MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
@@ -1242,45 +1242,45 @@ export class MapViewer {
 
   // #endregion
 
-  /**
-   * Fit the map to its boundaries. It is assumed that the boundaries use the map projection. If projectionCode is undefined,
-   * the boundaries are used as is, otherwise they are reprojected from the specified projection code to the map projection.
-   *
-   * @param {Extent} bounds - Bounding box to zoom to
-   * @param {string | number | undefined} projectionCode - Optional projection code used by the bounds.
-   */
-  // TODO: only use in the layers panel package... see if still needed and if it is the right place
-  fitBounds(bounds?: Extent, projectionCode: string | number | undefined = undefined): void {
-    let mapBounds: Extent | undefined;
-    if (bounds) {
-      const { currentProjection } = this.getMapState();
-      mapBounds = projectionCode
-        ? Projection.transformExtent(bounds, `EPSG:${projectionCode}`, Projection.PROJECTIONS[currentProjection], 20)
-        : Projection.transformExtent(bounds, Projection.PROJECTIONS[currentProjection], Projection.PROJECTIONS[currentProjection], 25);
-    } else {
-      this.layer.getGeoviewLayerIds().forEach((geoviewLayerId) => {
-        // TODO Refactor - Layers refactoring. There needs to be a getMetadataBounds (new layers and new config) to complete the full layers migration.
-        // TO.DOCONT: Johann: Need on both, config extract bounds from metadata and layers do it again at the end from features for vector and compound bound for group
-        if (!mapBounds) mapBounds = this.layer.getGeoviewLayer(geoviewLayerId)?.getMetadataBounds(geoviewLayerId);
-        else {
-          const newMapBounds = this.layer.getGeoviewLayer(geoviewLayerId)?.getMetadataBounds(geoviewLayerId);
-          if (newMapBounds) {
-            mapBounds = [
-              Math.min(newMapBounds[0], mapBounds[0]),
-              Math.min(newMapBounds[1], mapBounds[1]),
-              Math.max(newMapBounds[2], mapBounds[2]),
-              Math.max(newMapBounds[3], mapBounds[3]),
-            ];
-          }
-        }
-      });
-    }
+  // TODO: Obsolete - Delete? Commenting out for now
+  // /**
+  //  * Fit the map to its boundaries. It is assumed that the boundaries use the map projection. If projectionCode is undefined,
+  //  * the boundaries are used as is, otherwise they are reprojected from the specified projection code to the map projection.
+  //  *
+  //  * @param {Extent} bounds - Bounding box to zoom to
+  //  * @param {string | number | undefined} projectionCode - Optional projection code used by the bounds.
+  //  */
+  // fitBounds(bounds?: Extent, projectionCode: string | number | undefined = undefined): void {
+  //   let mapBounds: Extent | undefined;
+  //   if (bounds) {
+  //     const { currentProjection } = this.getMapState();
+  //     mapBounds = projectionCode
+  //       ? Projection.transformExtent(bounds, `EPSG:${projectionCode}`, Projection.PROJECTIONS[currentProjection], 20)
+  //       : Projection.transformExtent(bounds, Projection.PROJECTIONS[currentProjection], Projection.PROJECTIONS[currentProjection], 25);
+  //   } else {
+  //     this.layer.getGeoviewLayerIds().forEach((geoviewLayerId) => {
+  //       // TODO Refactor - Layers refactoring. There needs to be a getMetadataBounds (new layers and new config) to complete the full layers migration.
+  //       // TO.DOCONT: Johann: Need on both, config extract bounds from metadata and layers do it again at the end from features for vector and compound bound for group
+  //       if (!mapBounds) mapBounds = this.layer.getGeoviewLayer(geoviewLayerId)?.getMetadataBounds(geoviewLayerId);
+  //       else {
+  //         const newMapBounds = this.layer.getGeoviewLayer(geoviewLayerId)?.getMetadataBounds(geoviewLayerId);
+  //         if (newMapBounds) {
+  //           mapBounds = [
+  //             Math.min(newMapBounds[0], mapBounds[0]),
+  //             Math.min(newMapBounds[1], mapBounds[1]),
+  //             Math.max(newMapBounds[2], mapBounds[2]),
+  //             Math.max(newMapBounds[3], mapBounds[3]),
+  //           ];
+  //         }
+  //       }
+  //     });
+  //   }
 
-    if (mapBounds) {
-      this.getView().fit(mapBounds, { size: this.map.getSize() });
-      this.getView().setZoom(this.getView().getZoom()! - 0.15);
-    }
-  }
+  //   if (mapBounds) {
+  //     this.getView().fit(mapBounds, { size: this.map.getSize() });
+  //     this.getView().setZoom(this.getView().getZoom()! - 0.15);
+  //   }
+  // }
 
   // #region MAP INTERACTIONS
 
@@ -1375,11 +1375,11 @@ export class MapViewer {
   // #endregion
 
   /**
-   * Check if north is visible. This is not a perfect solution and is more a work around
+   * Gets if north is visible. This is not a perfect solution and is more a work around
    *
    * @returns {boolean} true if visible, false otherwise
    */
-  checkNorth(): boolean {
+  getNorthVisibility(): boolean {
     // Check the container value for top middle of the screen
     // Convert this value to a lat long coordinate
     const pointXY = [this.map.getSize()![0] / 2, 1];

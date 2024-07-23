@@ -6,6 +6,7 @@ import { AbstractLayerSet, PropagationType } from './abstract-layer-set';
 import { TypeLegend, TypeLegendResultSet, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractGeoViewLayer, LayerStyleChangedEvent } from '../geoview-layers/abstract-geoview-layers';
 import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
+import { AbstractBaseLayer } from '../gv-layers/abstract-base-layer';
 import { LayerApi } from '../layer';
 
 /**
@@ -43,12 +44,12 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when an all-feature-info-layer-set wants to check for condition to register a layer in its set.
-   * @param {AbstractGeoViewLayer | AbstractGVLayer} layer - The layer
+   * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
    * @param {string} layerPath - The layer path
    * @returns {boolean} True when the layer should be registered to this legends-layer-set
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected override onRegisterLayerCheck(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): boolean {
+  protected override onRegisterLayerCheck(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): boolean {
     // Always register layers for the legends-layer-set, because we want 'the box' in the UI to show the layer status progression
     return true;
   }
@@ -70,15 +71,18 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a legends-layer-set wants to register a layer in its set.
-   * @param {AbstractGeoViewLayer} layer - The layer
+   * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
    */
-  protected override onRegisterLayer(layer: AbstractGeoViewLayer, layerPath: string): void {
+  protected override onRegisterLayer(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): void {
     // TODO: Refactor - After layers refactoring, remove the layerPath parameter here
     // Call parent
     super.onRegisterLayer(layer, layerPath);
 
-    // Register handler on layer style change
-    layer.onLayerStyleChanged(this.#boundHandleLayerStyleChanged);
+    // If regular layer
+    if (layer instanceof AbstractGeoViewLayer || layer instanceof AbstractGVLayer) {
+      // Register handler on layer style change
+      layer.onLayerStyleChanged(this.#boundHandleLayerStyleChanged);
+    }
   }
 
   /**
@@ -140,6 +144,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
     if (
       layer &&
       layerConfig &&
+      (layer instanceof AbstractGeoViewLayer || layer instanceof AbstractGVLayer) &&
       this.resultSet[layerPath].legendQueryStatus !== 'querying' &&
       (this.#legendShouldBeQueried(layerConfig) || forced)
     ) {

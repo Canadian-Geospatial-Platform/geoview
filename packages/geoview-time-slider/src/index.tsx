@@ -3,7 +3,6 @@ import { TimeDimension, DateMgt } from 'geoview-core/src/core/utils/date-mgt';
 import { TypeTabs } from 'geoview-core/src/ui/tabs/tabs';
 import { TimeSliderIcon } from 'geoview-core/src/ui';
 import { FooterPlugin } from 'geoview-core/src/api/plugin/footer-plugin';
-import { MapEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/map-event-processor';
 import { TimeSliderEventProcessor } from 'geoview-core/src/api/event-processors/event-processor-children/time-slider-event-processor';
 
 import { TimeSliderPanel } from './time-slider-panel';
@@ -125,24 +124,22 @@ class TimeSliderPlugin extends FooterPlugin {
         // TO.DOCONT: the later will override the plugin settings (can be tested by adding fake delays).
         // TO.DOCONT: If this Plugin has temporal dimension settings, for various layers, those should be set in synch with the layers
         // TO.DOCONT: using event listeners, not at Plugin creation.
-        MapEventProcessor.getMapViewerLayerAPI(this.pluginProps.mapId)
-          .getGeoviewLayerHybrid(obj.layerPaths[0])
-          .setTemporalDimension(obj.layerPaths[0], timeDimension);
+        this.mapViewer().layer.getGeoviewLayerHybrid(obj.layerPaths[0])?.setTemporalDimension(obj.layerPaths[0], timeDimension);
       }
 
       // Set override default value under time dimension if applicable
       if (obj.defaultValue) {
         const layerPath = obj.layerPaths[0];
-        const timeDimension = MapEventProcessor.getMapViewerLayerAPI(this.pluginProps.mapId)
-          .getGeoviewLayerHybrid(layerPath)
-          .getTemporalDimension(layerPath);
+        const timeDimension = this.mapViewer().layer.getGeoviewLayerHybrid(layerPath)?.getTemporalDimension(layerPath);
 
-        MapEventProcessor.getMapViewerLayerAPI(this.pluginProps.mapId)
-          .getGeoviewLayerHybrid(layerPath)
-          .setTemporalDimension(layerPath, {
-            ...timeDimension,
-            default: obj.defaultValue,
-          });
+        if (timeDimension) {
+          this.mapViewer()
+            .layer.getGeoviewLayerHybrid(layerPath)
+            ?.setTemporalDimension(layerPath, {
+              ...timeDimension,
+              default: obj.defaultValue,
+            });
+        }
       }
     });
 
@@ -159,25 +156,38 @@ class TimeSliderPlugin extends FooterPlugin {
    * Overrides the addition of the TimeSlider Footer Plugin to make sure to set the time slider configs in the store and apply filters.
    */
   override onAdd(): void {
-    // Wait for the layers to be processed so that their 'layerTemporalDimension' information is set
-    this.mapViewer().onMapLayersProcessed(() => {
-      // Now the layerTemporalDimension should be good on the layers
-      const orderedLayerPaths = this.mapViewer().layer.getLayerEntryConfigIds();
-      const initialTimeSliderLayerPaths = this.#filterTimeSliderLayers(orderedLayerPaths);
-
-      if (initialTimeSliderLayerPaths) {
-        initialTimeSliderLayerPaths.forEach((layerPath) => {
-          // Get the config
-          const layerConfig = this.mapViewer().layer.getLayerEntryConfig(layerPath);
-
-          // Check and add time slider layer when needed
-          TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.pluginProps.mapId, layerConfig);
-        });
-      }
-    });
+    // If map layers are all 'loaded' already
+    if (this.mapViewer().mapLayersLoaded) {
+      // Layers are already 'loaded', initialize the time slider plugin
+      this.initTimeSliderPlugin();
+    } else {
+      // Wait for the layers to be 'loaded' so that their 'layerTemporalDimension' information is set ('techhnically, it's 'processed', but putting 'loaded' to better support layers migration)
+      this.mapViewer().onMapLayersLoaded(() => {
+        // Initialize the time slider plugin once all layers are 'loaded'
+        this.initTimeSliderPlugin();
+      });
+    }
 
     // Call parent
     super.onAdd();
+  }
+
+  /**
+   * Initializes the Time Slider Plugin once the layers are all 'processed'.
+   */
+  initTimeSliderPlugin(): void {
+    // Now the layerTemporalDimension should be good on the layers
+    const orderedLayerPaths = this.mapViewer().layer.getLayerEntryConfigIds();
+    const initialTimeSliderLayerPaths = this.#filterTimeSliderLayers(orderedLayerPaths);
+    if (initialTimeSliderLayerPaths) {
+      initialTimeSliderLayerPaths.forEach((layerPath) => {
+        // Get the config
+        const layerConfig = this.mapViewer().layer.getLayerEntryConfig(layerPath);
+
+        // Check and add time slider layer when needed
+        TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.pluginProps.mapId, layerConfig);
+      });
+    }
   }
 
   /**
@@ -189,9 +199,10 @@ class TimeSliderPlugin extends FooterPlugin {
    * @private
    */
   #filterTimeSliderLayers(layerPaths: string[]): string[] {
-    const filteredLayerPaths = layerPaths.filter((layerPath) =>
-      this.mapViewer().layer.getGeoviewLayerHybrid(layerPath).getTemporalDimension(layerPath)
-    );
+    const filteredLayerPaths = layerPaths.filter((layerPath) => {
+      // Return the temporal dimension for the layer if any
+      return this.mapViewer().layer.getGeoviewLayerHybrid(layerPath)?.getTemporalDimension(layerPath);
+    });
     return filteredLayerPaths;
   }
 }

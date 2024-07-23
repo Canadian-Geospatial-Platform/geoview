@@ -37,7 +37,7 @@ export class GVWFS extends AbstractGVVector {
    * @returns {'string' | 'date' | 'number'} The type of the field.
    */
   protected override getFieldType(fieldName: string): 'string' | 'date' | 'number' {
-    const fieldDefinitions = this.getLayerConfig().getMetadata() as TypeJsonArray;
+    const fieldDefinitions = this.getLayerConfig().getLayerMetadata() as TypeJsonArray;
     const fieldDefinition = fieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
     if (!fieldDefinition) return 'string';
     const fieldEntryType = (fieldDefinition.type as string).split(':').slice(-1)[0] as string;

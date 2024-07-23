@@ -1,12 +1,9 @@
-import BaseLayer, { Options } from 'ol/layer/Base';
+import { Options } from 'ol/layer/Base';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
 import { Extent } from 'ol/extent';
 import Feature from 'ol/Feature';
-import TileLayer from 'ol/layer/Tile';
-import VectorTileLayer from 'ol/layer/VectorTile';
-import BaseVectorLayer from 'ol/layer/BaseVector';
-import ImageLayer from 'ol/layer/Image';
+import { Layer } from 'ol/layer';
 import Source from 'ol/source/Source';
 import { shared as iconImageCache } from 'ol/style/IconImageCache';
 
@@ -24,8 +21,6 @@ import EventHelper, { EventDelegateBase } from '@/api/events/event-helper';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import {
   TypeStyleConfig,
-  TypeLayerStatusSimplified,
-  TypeLayerStatus,
   TypeFeatureInfoEntry,
   codedValueType,
   rangeDomainType,
@@ -39,34 +34,20 @@ import { getLegendStyles, getFeatureCanvas } from '@/geo/utils/renderer/geoview-
 import { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { MapViewer } from '@/geo/map/map-viewer';
+import { AbstractBaseLayer } from './abstract-base-layer';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
  */
-export abstract class AbstractGVLayer {
+export abstract class AbstractGVLayer extends AbstractBaseLayer {
   // The default hit tolerance the query should be using
   static DEFAULT_HIT_TOLERANCE: number = 4;
 
   // The default hit tolerance
   hitTolerance: number = AbstractGVLayer.DEFAULT_HIT_TOLERANCE;
 
-  // The map id
-  #mapId: string;
-
-  // The OpenLayer layer // '!' is used here, because the children constructors are supposed to create the olLayer.
-  protected olLayer!: BaseLayer;
-
   // The OpenLayer source
   #olSource: Source;
-
-  // The layer configuration
-  #layerConfig: AbstractBaseLayerEntryConfig;
-
-  // The layer status
-  #layerStatus: TypeLayerStatusSimplified;
-
-  // The layer name
-  #layerName: TypeLocalizedString | undefined;
 
   /** Style to apply to the vector layer. */
   #style?: TypeStyleConfig;
@@ -84,9 +65,6 @@ export abstract class AbstractGVLayer {
   #isTimeAware: boolean = true;
 
   // Keep all callback delegates references
-  #onLayerNameChangedHandlers: LayerNameChangedDelegate[] = [];
-
-  // Keep all callback delegates references
   #onLayerStyleChangedHandlers: LayerStyleChangedDelegate[] = [];
 
   // Keep all callback delegate references
@@ -96,13 +74,7 @@ export abstract class AbstractGVLayer {
   #onLegendQueriedHandlers: LegendQueriedDelegate[] = [];
 
   // Keep all callback delegate references
-  #onVisibleChangedHandlers: VisibleChangedDelegate[] = [];
-
-  // Keep all callback delegate references
   #onLayerFilterAppliedHandlers: LayerFilterAppliedDelegate[] = [];
-
-  // Keep all callback delegate references
-  #onLayerOpacityChangedHandlers: LayerOpacityChangedDelegate[] = [];
 
   // Keep all callback delegates references
   #onIndividualLayerLoadedHandlers: IndividualLayerLoadedDelegate[] = [];
@@ -114,11 +86,8 @@ export abstract class AbstractGVLayer {
    * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration.
    */
   protected constructor(mapId: string, olSource: Source, layerConfig: AbstractBaseLayerEntryConfig) {
-    this.#mapId = mapId;
+    super(mapId, layerConfig);
     this.#olSource = olSource;
-    this.#layerConfig = layerConfig;
-    this.#layerName = layerConfig.layerName;
-    this.#layerStatus = 'loading';
 
     // Keep the date formatting information
     this.#serverDateFragmentsOrder = layerConfig.geoviewLayerConfig.serviceDateFormat
@@ -138,61 +107,15 @@ export abstract class AbstractGVLayer {
   abstract getBounds(layerPath: string): Extent | undefined;
 
   /**
-   * Overridable function that gets the extent of an array of features.
-   * @param {string} layerPath - The layer path
-   * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
-   * @returns {Promise<Extent | undefined>} The extent of the features, if available
-   */
-  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  getExtentFromFeatures(layerPath: string, objectIds: string[]): Promise<Extent | undefined> {
-    logger.logError(`Feature geometry for ${objectIds} is unavailable from ${layerPath}`);
-    return Promise.resolve(undefined);
-  }
-
-  /**
    * Initializes the GVLayer. This function checks if the source is ready and if so it calls onLoaded() to pursue initialization of the layer.
    * If the source isn't ready, it registers to the source ready event to pursue initialization of the layer once its source is ready.
    */
   init(): void {
-    // Depending on the instance
-    let listenerName;
-    if (this.olLayer instanceof ImageLayer) {
-      listenerName = 'image';
-    } else if (this.olLayer instanceof VectorTileLayer || this.olLayer instanceof TileLayer) {
-      listenerName = 'tile';
-    } else if (this.olLayer instanceof BaseVectorLayer) {
-      listenerName = 'features';
-    } else {
-      // Unsupported
-      throw new Error(`Unsupported OpenLayer type: ${this.olLayer.constructor.name}`);
-    }
-
-    // Get the source state
-    const sourceState = this.#olSource.getState();
-
-    // Check if OpenLayer is loaded, else register an event
-    if (sourceState === 'ready') {
-      // Already loaded
-      this.onLoaded();
-    } else if (sourceState === 'error') {
-      // Already in error
-      this.onError();
-    } else {
-      // Activation of the load end listeners
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (this.#olSource as any).once(`${listenerName}loadend`, this.onLoaded.bind(this));
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (this.#olSource as any).once(`${listenerName}loaderror`, this.onError.bind(this));
-    }
-  }
-
-  /**
-   * Gets the Map Id
-   * @returns The Map id
-   */
-  getMapId(): string {
-    return this.#mapId;
+    // Activation of the load end/error listeners
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (this.#olSource as any).once(['featuresloadend', 'imageloadend', 'tileloadend'], this.onLoaded.bind(this));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (this.#olSource as any).once(['featuresloaderror', 'imageloaderror', 'tileloaderror'], this.onError.bind(this));
   }
 
   /**
@@ -206,11 +129,12 @@ export abstract class AbstractGVLayer {
   }
 
   /**
-   * Gets the OpenLayers Layer
-   * @returns The OpenLayers Layer
+   * Overrides the get of the OpenLayers Layer
+   * @returns {Layer} The OpenLayers Layer
    */
-  getOLLayer(): BaseLayer {
-    return this.olLayer;
+  override getOLLayer(): Layer {
+    // Call parent and cast
+    return super.getOLLayer() as Layer;
   }
 
   /**
@@ -225,68 +149,8 @@ export abstract class AbstractGVLayer {
    * Gets the layer configuration associated with the layer.
    * @returns {AbstractBaseLayerEntryConfig} The layer configuration
    */
-  getLayerConfig(): AbstractBaseLayerEntryConfig {
-    return this.#layerConfig;
-  }
-
-  /**
-   * Gets the layer path associated with the layer.
-   * @returns {string} The layer path
-   */
-  getLayerPath(): string {
-    return this.#layerConfig.layerPath;
-  }
-
-  /**
-   * Gets the Geoview layer id.
-   * @returns {string} The geoview layer id
-   */
-  getGeoviewLayerId(): string {
-    return this.#layerConfig.geoviewLayerConfig.geoviewLayerId;
-  }
-
-  /**
-   * Gets the geoview layer name.
-   * @returns {AbstractBaseLayerEntryConfig} The layer name
-   */
-  getGeoviewLayerName(): TypeLocalizedString | undefined {
-    return this.#layerConfig.geoviewLayerConfig.geoviewLayerName;
-  }
-
-  /**
-   * Gets the layer status
-   * @returns The layer status
-   */
-  getLayerStatus(): TypeLayerStatusSimplified {
-    return this.#layerStatus;
-  }
-
-  /**
-   * Gets the layer configuration status
-   * @returns The layer status
-   */
-  getLayerConfigStatus(): TypeLayerStatus {
-    return this.#layerConfig.layerStatus;
-  }
-
-  /**
-   * Gets the layer name
-   * @returns The layer status
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getLayerName(layerPath: string): TypeLocalizedString | undefined {
-    // TODO: Refactor - After layers refactoring, remove the layerPath parameter here (gotta keep it in the signature for now for the layers-set active switch)
-    return this.#layerName;
-  }
-
-  /**
-   * Sets the layer name
-   * @param {TypeLocalizedString | undefined} name - The layer name
-   */
-  setLayerName(layerPath: string, name: TypeLocalizedString | undefined): void {
-    // TODO: Refactor - After layers refactoring, remove the layerPath parameter here (gotta keep it in the signature for now for the layers-set active switch)
-    this.#layerName = name;
-    this.#emitLayerNameChanged({ layerPath, layerName: name });
+  override getLayerConfig(): AbstractBaseLayerEntryConfig {
+    return super.getLayerConfig() as AbstractBaseLayerEntryConfig;
   }
 
   /**
@@ -313,7 +177,7 @@ export abstract class AbstractGVLayer {
    * Gets the layer attributions
    * @returns {string[]} The layer attributions
    */
-  getAttributions(): string[] {
+  override getAttributions(): string[] {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const attributionsAsRead = this.getOLSource().getAttributions()?.({} as any); // This looks very weird, but it's as documented in OpenLayers..
 
@@ -360,16 +224,13 @@ export abstract class AbstractGVLayer {
    */
   protected onLoaded(): void {
     // Set the layer config status to loaded to keep mirroring the AbstractGeoViewLayer for now
-    this.#layerConfig.layerStatus = 'loaded';
-
-    // Set the layer status to loaded for the layer
-    this.#layerStatus = 'loaded';
+    this.getLayerConfig().layerStatus = 'loaded';
 
     // Emit event
-    this.#emitIndividualLayerLoaded({ layerPath: this.#layerConfig.layerPath });
+    this.#emitIndividualLayerLoaded({ layerPath: this.getLayerPath() });
 
     // Now that the layer is loaded, set its visibility correctly (had to be done in the loaded event, not before, per prior note in pre-refactor)
-    this.setVisible(this.#layerConfig.initialSettings?.states?.visible !== false);
+    this.setVisible(this.getLayerConfig().initialSettings?.states?.visible !== false);
   }
 
   /**
@@ -377,10 +238,7 @@ export abstract class AbstractGVLayer {
    */
   protected onError(): void {
     // Set the layer config status to error to keep mirroring the AbstractGeoViewLayer for now
-    this.#layerConfig.layerStatus = 'error';
-
-    // Set the layer status to error for the layer
-    this.#layerStatus = 'error';
+    this.getLayerConfig().layerStatus = 'error';
   }
 
   /**
@@ -538,92 +396,6 @@ export abstract class AbstractGVLayer {
     // Log
     logger.logWarning(`getFieldType is not implemented for ${fieldName} on layer path ${this.getLayerPath()}`);
     return 'string';
-  }
-
-  /**
-   * Returns the extent of the layer or undefined if it will be visible regardless of extent. The layer extent is an array of
-   * numbers representing an extent: [minx, miny, maxx, maxy].
-   * The extent is used to clip the data displayed on the map.
-   * @returns {Extent | undefined} The layer extent.
-   */
-  getExtent(): Extent | undefined {
-    return this.getOLLayer().getExtent();
-  }
-
-  /**
-   * Sets the extent of the layer. Use undefined if it will be visible regardless of extent. The layer extent is an array of
-   * numbers representing an extent: [minx, miny, maxx, maxy].
-   * @param {Extent} layerExtent The extent to assign to the layer.
-   */
-  setExtent(layerExtent: Extent): void {
-    this.getOLLayer().setExtent(layerExtent);
-  }
-
-  /**
-   * Gets the opacity of the layer (between 0 and 1).
-   * @returns {number} The opacity of the layer.
-   */
-  getOpacity(): number {
-    return this.getOLLayer().getOpacity();
-  }
-
-  /**
-   * Sets the opacity of the layer (between 0 and 1).
-   * @param {number} layerOpacity The opacity of the layer.
-   */
-  setOpacity(layerOpacity: number): void {
-    this.getOLLayer().setOpacity(layerOpacity);
-    this.#emitLayerOpacityChanged({ layerPath: this.getLayerPath(), opacity: layerOpacity });
-  }
-
-  /**
-   * Gets the visibility of the layer (true or false).
-   * @returns {boolean} The visibility of the layer.
-   */
-  getVisible(): boolean {
-    return this.getOLLayer().getVisible();
-  }
-
-  /**
-   * Sets the visibility of the layer (true or false).
-   * @param {boolean} layerVisibility The visibility of the layer.
-   */
-  setVisible(layerVisibility: boolean): void {
-    const curVisible = this.getVisible();
-    this.getOLLayer().setVisible(layerVisibility);
-    if (layerVisibility !== curVisible) this.#emitVisibleChanged({ layerPath: this.getLayerPath(), visible: layerVisibility });
-  }
-
-  /**
-   * Gets the min zoom of the layer.
-   * @returns {number} The min zoom of the layer.
-   */
-  getMinZoom(): number {
-    return this.getOLLayer().getMinZoom();
-  }
-
-  /**
-   * Sets the min zoom of the layer.
-   * @param {number} minZoom The min zoom of the layer.
-   */
-  setMinZoom(minZoom: number): void {
-    this.getOLLayer().setMinZoom(minZoom);
-  }
-
-  /**
-   * Gets the max zoom of the layer.
-   * @returns {number} The max zoom of the layer.
-   */
-  getMaxZoom(): number {
-    return this.getOLLayer().getMaxZoom();
-  }
-
-  /**
-   * Sets the max zoom of the layer.
-   * @param {number} maxZoom The max zoom of the layer.
-   */
-  setMaxZoom(maxZoom: number): void {
-    this.getOLLayer().setMaxZoom(maxZoom);
   }
 
   /**
@@ -907,34 +679,6 @@ export abstract class AbstractGVLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {LayerNameChangedEvent} event - The event to emit
-   * @private
-   */
-  #emitLayerNameChanged(event: LayerNameChangedEvent): void {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerNameChangedHandlers, event);
-  }
-
-  /**
-   * Registers a layer name changed event handler.
-   * @param {LayerNameChangedDelegate} callback - The callback to be executed whenever the event is emitted
-   */
-  onLayerNameChanged(callback: LayerNameChangedDelegate): void {
-    // Register the event handler
-    EventHelper.onEvent(this.#onLayerNameChangedHandlers, callback);
-  }
-
-  /**
-   * Unregisters a layer name changed event handler.
-   * @param {LayerNameChangedDelegate} callback - The callback to stop being called whenever the event is emitted
-   */
-  offLayerNameChanged(callback: LayerNameChangedDelegate): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onLayerNameChangedHandlers, callback);
-  }
-
-  /**
-   * Emits an event to all handlers.
    * @param {LegendQueryingEvent} event The event to emit
    * @private
    */
@@ -990,34 +734,6 @@ export abstract class AbstractGVLayer {
   }
 
   /**
-   * Emits an event to all handlers.
-   * @param {VisibleChangedEvent} event The event to emit
-   * @private
-   */
-  #emitVisibleChanged(event: VisibleChangedEvent): void {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onVisibleChangedHandlers, event);
-  }
-
-  /**
-   * Registers a visible changed event handler.
-   * @param {VisibleChangedDelegate} callback The callback to be executed whenever the event is emitted
-   */
-  onVisibleChanged(callback: VisibleChangedDelegate): void {
-    // Register the event handler
-    EventHelper.onEvent(this.#onVisibleChangedHandlers, callback);
-  }
-
-  /**
-   * Unregisters a visible changed event handler.
-   * @param {VisibleChangedDelegate} callback The callback to stop being called whenever the event is emitted
-   */
-  offVisibleChanged(callback: VisibleChangedDelegate): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onVisibleChangedHandlers, callback);
-  }
-
-  /**
    * Emits filter applied event.
    * @param {FilterAppliedEvent} event - The event to emit
    * @private
@@ -1043,34 +759,6 @@ export abstract class AbstractGVLayer {
   offLayerFilterApplied(callback: LayerFilterAppliedDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerFilterAppliedHandlers, callback);
-  }
-
-  /**
-   * Emits opacity changed event.
-   * @param {LayerOpacityChangedEvent} event - The event to emit
-   * @private
-   */
-  #emitLayerOpacityChanged(event: LayerOpacityChangedEvent): void {
-    // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerOpacityChangedHandlers, event);
-  }
-
-  /**
-   * Registers an opacity changed event handler.
-   * @param {LayerOpacityChangedDelegate} callback - The callback to be executed whenever the event is emitted
-   */
-  onLayerOpacityChanged(callback: LayerOpacityChangedDelegate): void {
-    // Register the event handler
-    EventHelper.onEvent(this.#onLayerOpacityChangedHandlers, callback);
-  }
-
-  /**
-   * Unregisters an opacity changed event handler.
-   * @param {LayerOpacityChangedDelegate} callback - The callback to stop being called whenever the event is emitted
-   */
-  offLayerOpacityChanged(callback: LayerOpacityChangedDelegate): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onLayerOpacityChangedHandlers, callback);
   }
 
   /**
@@ -1130,22 +818,6 @@ export abstract class AbstractGVLayer {
 }
 
 /**
- * Define an event for the delegate.
- */
-export type LayerNameChangedEvent = {
-  // The new layer name.
-  layerName?: TypeLocalizedString;
-  // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
-  // The layer path.
-  layerPath: string;
-};
-
-/**
- * Define a delegate for the event handler function signature.
- */
-type LayerNameChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerNameChangedEvent, void>;
-
-/**
  * Define a delegate for the event handler function signature
  */
 type LayerStyleChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerStyleChangedEvent, void>;
@@ -1184,20 +856,6 @@ export type LegendQueriedEvent = {
 type LegendQueriedDelegate = EventDelegateBase<AbstractGVLayer, LegendQueriedEvent, void>;
 
 /**
- * Define an event for the delegate
- */
-export type VisibleChangedEvent = {
-  // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
-  layerPath: string;
-  visible: boolean;
-};
-
-/**
- * Define a delegate for the event handler function signature
- */
-type VisibleChangedDelegate = EventDelegateBase<AbstractGVLayer, VisibleChangedEvent, void>;
-
-/**
  * Define a delegate for the event handler function signature
  */
 type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGVLayer, LayerFilterAppliedEvent, void>;
@@ -1210,21 +868,6 @@ export type LayerFilterAppliedEvent = {
   layerPath: string;
   // The filter
   filter: string;
-};
-
-/**
- * Define a delegate for the event handler function signature
- */
-type LayerOpacityChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerOpacityChangedEvent, void>;
-
-/**
- * Define an event for the delegate
- */
-export type LayerOpacityChangedEvent = {
-  // The layer path of the affected layer
-  layerPath: string;
-  // The filter
-  opacity: number;
 };
 
 /**

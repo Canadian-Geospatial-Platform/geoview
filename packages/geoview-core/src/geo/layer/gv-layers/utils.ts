@@ -25,7 +25,7 @@ export function featureInfoGetFieldType(
   fieldName: string,
   language: TypeDisplayLanguage
 ): 'string' | 'date' | 'number' {
-  const fieldDefinitions = layerConfig.getMetadata()!.source.featureInfo;
+  const fieldDefinitions = layerConfig.getLayerMetadata()!.source.featureInfo;
   const fieldIndex = getLocalizedValue(Cast<TypeLocalizedString>(fieldDefinitions.outfields), language)?.split(',').indexOf(fieldName);
   if (!fieldIndex || fieldIndex === -1) return 'string';
   return (fieldDefinitions.fieldTypes as string).split(',')[fieldIndex!] as 'string' | 'date' | 'number';
@@ -41,7 +41,7 @@ export function esriGetFieldType(
   layerConfig: EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig,
   fieldName: string
 ): 'string' | 'date' | 'number' {
-  const esriFieldDefinitions = layerConfig.getMetadata()?.fields as TypeJsonArray;
+  const esriFieldDefinitions = layerConfig.getLayerMetadata()?.fields as TypeJsonArray;
   const fieldDefinition = esriFieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
   if (!fieldDefinition) return 'string';
   const esriFieldType = fieldDefinition.type as string;
@@ -65,7 +65,7 @@ export function esriGetFieldDomain(
   layerConfig: EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig,
   fieldName: string
 ): codedValueType | rangeDomainType | null {
-  const esriFieldDefinitions = layerConfig.getMetadata()?.fields as TypeJsonArray;
+  const esriFieldDefinitions = layerConfig.getLayerMetadata()?.fields as TypeJsonArray;
   const fieldDefinition = esriFieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
   return fieldDefinition ? Cast<codedValueType | rangeDomainType>(fieldDefinition.domain) : null;
 }

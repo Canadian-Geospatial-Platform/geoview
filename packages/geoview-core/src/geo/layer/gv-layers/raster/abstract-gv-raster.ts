@@ -29,7 +29,7 @@ export abstract class AbstractGVRaster extends AbstractGVLayer {
    * @returns {OLProjection | undefined} The OpenLayer projection
    */
   getMetadataProjection(): OLProjection | undefined {
-    return Projection.getProjection(`EPSG:${this.getLayerConfig().getMetadata()?.fullExtent?.spatialReference?.wkid}`) || undefined;
+    return Projection.getProjection(`EPSG:${this.getLayerConfig().getServiceMetadata()?.fullExtent?.spatialReference?.wkid}`) || undefined;
   }
 
   /**
@@ -38,7 +38,7 @@ export abstract class AbstractGVRaster extends AbstractGVLayer {
    */
   getMetadataExtent(): Extent | undefined {
     // TODO: Layers refactoring. Johann: This should be converted to geoview schema in config
-    const metadata = this.getLayerConfig().getMetadata();
+    const metadata = this.getLayerConfig().getServiceMetadata();
     if (metadata?.fullExtent) {
       return [
         metadata?.fullExtent.xmin as number,
