@@ -1,7 +1,5 @@
 import { useRef } from 'react';
 
-import { useTranslation } from 'react-i18next';
-
 import { useTheme } from '@mui/material';
 import { ArrowUpIcon, IconButton } from '@/ui';
 import { getSxClasses } from './map-info-style';
@@ -13,8 +11,6 @@ import { useMapRotation, useMapStoreActions } from '@/core/stores/store-interfac
  * @returns {JSX.Element} the rotation buttons
  */
 export function MapInfoRotationButton(): JSX.Element {
-  const { t } = useTranslation<string>();
-
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
   const tooltipAndAria = 'mapctrl.rotation.resetRotation';
@@ -32,7 +28,6 @@ export function MapInfoRotationButton(): JSX.Element {
       tooltipPlacement="top"
       tooltip={tooltipAndAria}
       aria-label={tooltipAndAria}
-      title={t('mapctrl.rotation.resetRotation')!}
       onClick={() => setRotation(0)}
     >
       <ArrowUpIcon ref={iconRef} sx={sxClasses.rotationButton.rotationIcon} style={{ transform: `rotate(${mapRotation}rad)` }} />
