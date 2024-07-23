@@ -17,7 +17,7 @@ import { isvalidComparedToInputSchema } from '@/api/config/utils';
 export abstract class EntryConfigBaseClass {
   // GV: Only the public properties are serialized.
   /** The language used when interacting with this instance of MapFeatureConfig. */
-  // #language;
+  #language;
 
   /** The GeoView configuration that owns the configuration tree that contains this node. */
   #geoviewLayerConfigInstance: AbstractGeoviewLayerConfig;
@@ -85,12 +85,12 @@ export abstract class EntryConfigBaseClass {
     parentNode?: EntryConfigBaseClass
   ) {
     this.validateLayerConfig(layerConfig);
-    // this.#language = language;
+    this.#language = language;
     this.#geoviewLayerConfigInstance = geoviewLayerConfig;
     this.#parentNode = parentNode;
 
     this.layerId = layerConfig.layerId as string;
-    this.layerName = layerConfig?.layerName?.[language] as string;
+    this.layerName = layerConfig?.layerName?.[this.#language] as string;
     this.isLayerGroup = (layerConfig.isLayerGroup as boolean) || false;
     this.entryType = this.getEntryType();
   }
