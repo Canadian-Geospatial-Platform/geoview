@@ -78,6 +78,7 @@ export function CustomStepper(props: TypeCustomStepperProps): JSX.Element {
     backButtonText,
     nextButtonText,
     resetButtonText,
+    ...rest
   } = props;
 
   const theme = useTheme();
@@ -198,6 +199,7 @@ export function CustomStepper(props: TypeCustomStepperProps): JSX.Element {
         // eslint-disable-next-line no-nested-ternary
         alternativeLabel={stepsOrientation === 'horizontal' ? (alternativeLabel !== undefined ? alternativeLabel : true) : false}
         nonLinear={nonLinear || buttonedLabels || false}
+        {...rest}
       >
         {steps?.map((step: any, index: number) => {
           return (

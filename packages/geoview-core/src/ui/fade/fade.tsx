@@ -7,7 +7,11 @@ import { Fade as MaterialFade, FadeProps } from '@mui/material';
  * @returns {JSX.Element} the created Fade element
  */
 export function Fade(props: FadeProps): JSX.Element {
-  const { in: fadeIn, children } = props;
+  const { in: fadeIn, children, ...rest } = props;
 
-  return <MaterialFade in={fadeIn}>{children && children}</MaterialFade>;
+  return (
+    <MaterialFade in={fadeIn} {...rest}>
+      {children && children}
+    </MaterialFade>
+  );
 }

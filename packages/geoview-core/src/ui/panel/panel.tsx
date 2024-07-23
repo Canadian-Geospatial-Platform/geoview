@@ -39,7 +39,7 @@ export type TypePanelAppProps = {
  * @returns {JSX.Element} the created Panel element
  */
 export function Panel(props: TypePanelAppProps): JSX.Element {
-  const { panel, button, onPanelOpened, onPanelClosed, onGeneralCloseClicked } = props;
+  const { panel, button, onPanelOpened, onPanelClosed, onGeneralCloseClicked, ...rest } = props;
   const { status: open = false, panelStyles, panelGroupName } = panel;
 
   const { t } = useTranslation<string>();
@@ -145,6 +145,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
             }
           }}
           {...{ 'data-id': button.id }}
+          {...rest}
         >
           <CardHeader
             sx={panelStyles?.panelCardHeader ? { ...panelStyles.panelCardHeader } : {}}

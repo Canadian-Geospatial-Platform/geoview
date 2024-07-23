@@ -2,6 +2,7 @@ import { DataTableEventProcessor } from '@/api/event-processors/event-processor-
 import { QueryType } from '@/geo/map/map-schema-types';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGVLayer } from '../gv-layers/abstract-gv-layer';
+import { AbstractBaseLayer } from '../gv-layers/abstract-base-layer';
 import { WMS } from '../geoview-layers/raster/wms';
 import { GVWMS } from '../gv-layers/raster/gv-wms';
 import { AbstractLayerSet, PropagationType } from './abstract-layer-set';
@@ -22,10 +23,10 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
-   * @param {AbstractGeoViewLayer | AbstractGVLayer} layer - The layer
+   * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
    * @returns {boolean} True when the layer should be registered to this all-feature-info-layer-set.
    */
-  protected override onRegisterLayerCheck(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): boolean {
+  protected override onRegisterLayerCheck(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): boolean {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     // Return if the layer is of queryable type and source is queryable
     return (
@@ -39,9 +40,9 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when an all-feature-info-layer-set wants to register a layer in its set.
-   * @param {AbstractGeoViewLayer | AbstractGVLayer} layer - The layer
+   * @param {AbstractGeoViewLayer | AbstractBaseLayer} layer - The layer
    */
-  protected override onRegisterLayer(layer: AbstractGeoViewLayer | AbstractGVLayer, layerPath: string): void {
+  protected override onRegisterLayer(layer: AbstractGeoViewLayer | AbstractBaseLayer, layerPath: string): void {
     // TODO: Refactor - Layers refactoring. Remove the layerPath parameter once hybrid work is done
     // Call parent
     super.onRegisterLayer(layer, layerPath);
@@ -109,7 +110,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
       const layer = this.layerApi.getGeoviewLayerHybrid(layerPath);
 
       // If layer was found
-      if (layer) {
+      if (layer && (layer instanceof AbstractGeoViewLayer || layer instanceof AbstractGVLayer)) {
         // If state is not queryable
         if (!AbstractLayerSet.isStateQueryable(layer, layerPath)) return Promise.resolve();
 

@@ -18,7 +18,7 @@ interface TypeCardMediaProps extends CardMediaProps {
  * @returns {JSX.Element} the created Card Media element
  */
 export function CardMedia(props: TypeCardMediaProps): JSX.Element {
-  const { sx, src, alt, click, keyDown } = props;
+  const { sx, src, alt, click, keyDown, ...rest } = props;
 
-  return <MaterialCardMedia component="img" sx={sx} alt={alt} src={src} tabIndex={0} onClick={click} onKeyDown={keyDown} />;
+  return <MaterialCardMedia component="img" sx={sx} alt={alt} src={src} tabIndex={0} onClick={click} onKeyDown={keyDown} {...rest} />;
 }

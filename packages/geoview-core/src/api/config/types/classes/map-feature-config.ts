@@ -37,6 +37,7 @@ import {
 } from '@config/types/map-schema-types';
 
 import { logger } from '@/core//utils/logger';
+import { ConfigApi } from '../../config-api';
 
 /**
  * The map feature configuration class.
@@ -107,9 +108,7 @@ export class MapFeatureConfig {
     );
     this.map.listOfGeoviewLayerConfig = (gvMap.listOfGeoviewLayerConfig as TypeJsonArray)
       .map((geoviewLayerConfig) => {
-        const returnValue = MapFeatureConfig.nodeFactory(geoviewLayerConfig, this.#language, this);
-        if (returnValue === undefined) this.#errorDetected = true;
-        return returnValue;
+        return MapFeatureConfig.nodeFactory(geoviewLayerConfig, this.#language);
       })
       .filter((layerConfig) => {
         return layerConfig;
@@ -187,18 +186,14 @@ export class MapFeatureConfig {
    * @returns {AbstractGeoviewLayerConfig | undefined} The GeoView layer instance or undefined if there is an error.
    * @static
    */
-  static nodeFactory(
-    layerConfig: TypeJsonObject,
-    language: TypeDisplayLanguage,
-    mapFeatureConfig?: MapFeatureConfig
-  ): AbstractGeoviewLayerConfig | undefined {
+  static nodeFactory(layerConfig: TypeJsonObject, language: TypeDisplayLanguage): AbstractGeoviewLayerConfig | undefined {
     switch (layerConfig.geoviewLayerType) {
       // case CONST_LAYER_TYPES.CSV:
       //   return new CsvLayerConfig(layerConfig);
       case CV_CONST_LAYER_TYPES.ESRI_DYNAMIC:
-        return new EsriDynamicLayerConfig(layerConfig, language, mapFeatureConfig);
+        return new EsriDynamicLayerConfig(layerConfig, language);
       case CV_CONST_LAYER_TYPES.ESRI_FEATURE:
-        return new EsriFeatureLayerConfig(layerConfig, language, mapFeatureConfig);
+        return new EsriFeatureLayerConfig(layerConfig, language);
       // case CONST_LAYER_TYPES.ESRI_IMAGE:
       //   return new EsriImageLayerConfig(layerConfig);
       // case CONST_LAYER_TYPES.GEOJSON:
@@ -216,8 +211,9 @@ export class MapFeatureConfig {
       // case CONST_LAYER_TYPES.WMS:
       //   return new WmsLayerConfig(layerConfig);
       default:
-      // TODO: Restore this error message when we have converted our code to the new framework.
-      // logger.logError(`Invalid GeoView layerType (${layerConfig.geoviewLayerType}).`);
+        // TODO: Restore the commented line and remove the next line when we have converted our code to the new framework.
+        // logger.logError(`Invalid GeoView layerType (${layerConfig.geoviewLayerType}).`);
+        if (ConfigApi.devMode) logger.logError(`Invalid GeoView layerType (${layerConfig.geoviewLayerType}).`);
     }
     return undefined;
   }

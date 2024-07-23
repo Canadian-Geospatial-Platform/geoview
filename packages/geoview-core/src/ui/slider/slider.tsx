@@ -183,6 +183,7 @@ export function Slider(props: SliderProps): JSX.Element {
   // TODO: better implement WCAG on slider
   return (
     <MaterialSlider
+      {...properties}
       id={containerId}
       sx={{ ...(!properties.className ? sxClasses.slider : {}) }}
       className={properties.className !== undefined ? properties.className : ''}

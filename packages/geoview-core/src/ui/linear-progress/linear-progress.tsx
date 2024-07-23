@@ -22,8 +22,8 @@ interface ProgressbarProps {
  * @param {ProgressbarProps} props the properties passed to the element
  * @returns {JSX.Element} the created element
  */
-export function ProgressBar({ className = '', variant = 'indeterminate', value = 0 }: ProgressbarProps): JSX.Element {
-  return <LinearProgressBar variant={variant} value={value} className={className} />;
+export function ProgressBar({ className = '', variant = 'indeterminate', value = 0, ...rest }: ProgressbarProps): JSX.Element {
+  return <LinearProgressBar variant={variant} value={value} className={className} {...rest} />;
 }
 
 /**

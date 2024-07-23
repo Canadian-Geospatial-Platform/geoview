@@ -1,12 +1,12 @@
 import axios from 'axios';
 
-import { Cast, TypeJsonObject } from '@config/types/config-types';
+import { Cast, toJsonObject, TypeJsonObject, TypeJsonArray } from '@config/types/config-types';
 import { AbstractBaseLayerEntryConfig } from '@config/types/classes/sub-layer-config/abstract-base-layer-entry-config';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
-import { TypeStyleGeometry } from '@config/types/map-schema-types';
+import { TypeDisplayLanguage, TypeStyleGeometry } from '@config/types/map-schema-types';
 import { layerEntryIsAbstractBaseLayerEntryConfig, layerEntryIsGroupLayer } from '@config/types/type-guards';
 import { GroupLayerEntryConfig } from '@config/types/classes/sub-layer-config/group-layer-entry-config';
-import { GeoviewLayerInvalidParameterError } from '@config/types/classes/config-exceptions';
+import { ConfigError, GeoviewLayerInvalidParameterError } from '@config/types/classes/config-exceptions';
 import { EntryConfigBaseClass } from '@/api/config/types/classes/sub-layer-config/entry-config-base-class';
 
 import { getXMLHttpRequest } from '@/core/utils/utilities';
@@ -14,6 +14,32 @@ import { logger } from '@/core/utils/logger';
 
 /** The ESRI dynamic geoview layer class. */
 export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLayerConfig {
+  /**
+   * The class constructor.
+   *
+   * @param {TypeJsonObject} geoviewLayerConfig The layer configuration we want to instanciate.
+   * @param {TypeDisplayLanguage} language The initial language to use when interacting with the map feature configuration.
+   */
+  constructor(geoviewLayerConfig: TypeJsonObject, language: TypeDisplayLanguage) {
+    super(geoviewLayerConfig, language);
+    const metadataAccessPathItems = this.metadataAccessPath.split('/');
+    const pathItemLength = metadataAccessPathItems.length;
+    const lastPathItem = metadataAccessPathItems[pathItemLength - 1];
+    // GV: Important - Testing for NaN after parseInt is not a good way to check whether a string is a number, as parseInt('1a2', 10)
+    // GV: returns 1 instead of NaN. To be detected as NaN, the string passed to parseInt must not begin with a number.
+    // GV: Regex /^\d+$/ is used instead to check whether a string is a number.
+    if (/^\d+$/.test(lastPathItem)) {
+      // The metadataAccessPath ends with a layer index. It is therefore a path to a data layer rather than a path to service metadata.
+      // We therefore need to correct the configuration by separating the layer index and the path to the service metadata.
+      this.metadataAccessPath = metadataAccessPathItems.slice(0, -1).join('/');
+      if (this.listOfLayerEntryConfig.length) {
+        this.setErrorDetectedFlag();
+        logger.logError('When an ESRI metadataAccessPath ends with a layer index, the listOfLayerEntryConfig must be  empty.');
+      }
+      this.listOfLayerEntryConfig = [this.createLeafNode(Cast<TypeJsonObject>({ layerId: lastPathItem }), language, this)!];
+    }
+  }
+
   /**
    * Sets the error flag for all layers in the provided list of layer entries.
    *
@@ -31,91 +57,132 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
    * Get the service metadata from the metadataAccessPath and store it in a protected property of the geoview layer.
    */
   override async fetchServiceMetadata(): Promise<void> {
-    const serviceUrlFragments = this.metadataAccessPath.split('/');
-    // The test convert to number and back to string because parseInt('10a', 10) returns 10, but '10a' is not a number
-    const endingIsNumeric = parseInt(serviceUrlFragments.slice(-1)[0], 10).toString() === serviceUrlFragments.slice(-1)[0];
-    const serviceUrl = endingIsNumeric ? `${serviceUrlFragments.slice(0, -1).join('/')}/` : this.metadataAccessPath;
-    const layerId = endingIsNumeric ? parseInt(serviceUrlFragments.slice(-1)[0], 10) : undefined;
-
-    const metadataString = await getXMLHttpRequest(`${serviceUrl}?f=json`);
+    const metadataString = await getXMLHttpRequest(`${this.metadataAccessPath}?f=json`);
     if (metadataString !== '{}') {
-      const jsonMetadata = JSON.parse(metadataString) as TypeJsonObject;
+      let jsonMetadata: TypeJsonObject;
+      try {
+        // On rare occasions, the value returned is not a JSON string, but rather an HTML string, which is an error.
+        jsonMetadata = JSON.parse(metadataString);
+      } catch (error) {
+        jsonMetadata = toJsonObject({ error });
+      }
+      // Other than the error generated above, if the returned JSON object is valid and contains the error property, something went wrong
       if ('error' in jsonMetadata) {
+        // In the event of a service metadata reading error, we report the geoview layer and all its sublayers as being in error.
         this.setErrorDetectedFlag();
+        this.#setErrorDetectedFlagForAllLayers(this.listOfLayerEntryConfig);
         logger.logError(`Error detected while reading ESRI metadata for geoview layer ${this.geoviewLayerId}.`, jsonMetadata.error);
       } else {
         this.metadata = jsonMetadata;
-        // this.#validateListOfLayerEntryConfig(this.listOfLayerEntryConfig);
-        this.metadataLayerTree = this.createLayerTree(this.metadata.layers as TypeJsonObject[], layerId);
-        logger.logInfo(this.metadataLayerTree);
-        await this.#fetchListOfLayerMetadata(this.metadataLayerTree);
-        logger.logInfo(this.metadata);
+
+        // Define a recursive function to process the listOfLayerEntryConfig. The goal is to process each valid sublayer, searching the
+        // service's metadata to verify the layer's existence and determine whether it is a layer group, in order to determine the node's
+        // final structure. If it is a layer group, it will be created.
+        const processListOfLayerEntryConfig = (listOfLayerEntryConfig: EntryConfigBaseClass[]): void => {
+          listOfLayerEntryConfig.forEach((subLayer, i) => {
+            if (!subLayer.errorDetected) {
+              if (layerEntryIsGroupLayer(subLayer)) processListOfLayerEntryConfig(subLayer.listOfLayerEntryConfig);
+              else {
+                try {
+                  // eslint-disable-next-line no-param-reassign
+                  listOfLayerEntryConfig[i] = this.#createLayerEntryNode(parseInt(subLayer.layerId, 10), subLayer.parentNode);
+                } catch (error) {
+                  listOfLayerEntryConfig[i].setErrorDetectedFlag();
+                  logger.logError((error as ConfigError).message, error);
+                }
+              }
+            }
+          });
+        };
+
+        // Call the function defined above.
+        processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
+        this.metadataLayerTree = this.createLayerTree();
       }
     } else {
       this.setErrorDetectedFlag();
+      this.#setErrorDetectedFlagForAllLayers(this.listOfLayerEntryConfig);
       logger.logError(`Error detected while reading ESRI metadata for geoview layer ${this.geoviewLayerId}. An empty object was returned.`);
     }
   }
 
   /**
-   * Create the layer tree from the service metadata.
+   * Create the layer tree using the service metadata.
    *
-   * @param {TypeJsonObject[]} layersFromMetadata The layers found in the metadata.
-   * @param {number} layerId An optional layer id to use for the tree creation.
-   *
-   * @returns {EntryConfigBaseClass[]} The layer tree created from the metadata.
+   * @returns {TypeJsonObject[]} The layer tree created from the metadata.
    * @protected
    */
-  protected createLayerTree(layers: TypeJsonObject[], layerId?: number): EntryConfigBaseClass[] {
-    let layerFound = layerId !== undefined && layers.find((layer) => layer.id === layerId);
-    if (layerId !== undefined && !layerFound) {
-      this.setErrorDetectedFlag();
-      throw new GeoviewLayerInvalidParameterError('LayerIdNotFound', [layerId?.toString()]);
+  protected createLayerTree(): EntryConfigBaseClass[] {
+    const layers = this.metadata.layers as TypeJsonArray;
+    if (layers.length > 1) {
+      const groupName = this.metadata.mapName as string;
+      return [new GroupLayerEntryConfig(this.#createGroupNode(-1, groupName), this.language, this)];
     }
 
-    // if there is only one layer in the array, it must be a leaf node.
-    if (layers.length === 1) [layerFound] = layers;
+    if (layers.length === 1)
+      return [
+        this.createLeafNode(
+          Cast<TypeJsonObject>({
+            layerId: layers[0].id.toString(),
+            layerName: { en: layers[0].name, fr: layers[0].name },
+            geometryType: AbstractGeoviewEsriLayerConfig.convertEsriGeometryTypeToOLGeometryType(layers[0].geometryType as string),
+          }),
+          this.language,
+          this
+        )!,
+      ];
+
+    return [];
+  }
+
+  /**
+   * Create a layer entry node for a specific layerId using the service metadata.
+   *
+   * @param {number} layerId The layer id to use for the subLayer creation.
+   *
+   * @returns {EntryConfigBaseClass[]} The subLayer created from the metadata.
+   */
+  #createLayerEntryNode(layerId: number, parentNode: EntryConfigBaseClass | undefined): EntryConfigBaseClass {
+    const layers = this.metadata.layers as TypeJsonObject[];
+    const layerFound = layerId !== undefined && layers.find((layer) => layer.id === layerId);
+    if (!layerFound) {
+      throw new GeoviewLayerInvalidParameterError('LayerIdNotFound', [layerId?.toString()]);
+    }
 
     // if the layerFound is not a group layer, create a leaf.
     if (layerFound && layerFound.type !== 'Group Layer') {
       const layerConfig = Cast<TypeJsonObject>({
         layerId: layerFound.id.toString(),
-        layerName: { en: layerFound.name },
+        layerName: { en: layerFound.name, fr: layerFound.name },
         geometryType: AbstractGeoviewEsriLayerConfig.convertEsriGeometryTypeToOLGeometryType(layerFound.geometryType as string),
       });
-      return [this.createLeafNode(layerConfig, this.initialSettings, this.language, this)!];
+      return this.createLeafNode(layerConfig, this.language, this, parentNode)!;
     }
 
-    // Create the layer tree from the array of layers
-    let jsonConfig = this.#createGroupNode(
-      layers,
-      layerFound ? parseInt(layerFound.id as string, 10) : -1,
-      (layerFound ? layerFound?.name : this.metadata.mapName) as string
-    );
-    // If the list of layer config of the root node contains only one node, use it as the root node
-    if (jsonConfig?.listOfLayerEntryConfig?.length === 1) [jsonConfig] = jsonConfig.listOfLayerEntryConfig as TypeJsonObject[];
-    return [new GroupLayerEntryConfig(jsonConfig, this.initialSettings, this.language, this)];
+    // Create the layer group from the array of layers
+    const jsonConfig = this.#createGroupNode(parseInt(layerFound.id as string, 10), layerFound?.name as string);
+    return new GroupLayerEntryConfig(jsonConfig, this.language, this, parentNode);
   }
 
   /**
    * Create a group node for a specific layer id.
    *
-   * @param {TypeJsonObject[]} layers The layers found in the metadata.
    * @param {number} parentId The layer id of the parent node.
    * @param {string} groupName The name to assign to the group node.
    *
    * @returns {TypeJsonObject} A json configuration that can be used to create the group node.
    * @private
    */
-  #createGroupNode = (layers: TypeJsonObject[], parentId: number, groupName: string): TypeJsonObject => {
+  #createGroupNode = (parentId: number, groupName: string): TypeJsonObject => {
+    const layers = this.metadata.layers as TypeJsonObject[];
     const listOfLayerEntryConfig = layers.reduce((accumulator, layer) => {
       if (layer.parentLayerId === parentId) {
-        if (layer.type === 'Group Layer') accumulator.push(this.#createGroupNode(layers, layer.id as number, layer.name as string));
+        if (layer.type === 'Group Layer') accumulator.push(this.#createGroupNode(layer.id as number, layer.name as string));
         else {
           accumulator.push(
             Cast<TypeJsonObject>({
               layerId: layer.id.toString(),
-              layerName: { en: layer.name },
+              layerName: { en: layer.name, fr: layer.name },
               geometryType: AbstractGeoviewEsriLayerConfig.convertEsriGeometryTypeToOLGeometryType(layer.geometryType as string),
             })
           );
@@ -125,9 +192,9 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
     }, [] as TypeJsonObject[]);
 
     return Cast<TypeJsonObject>({
-      layerId: parentId === -1 ? groupName : parentId,
+      layerId: parentId === -1 ? groupName : `${parentId}`,
       initialSettings: this.initialSettings,
-      layerName: { en: groupName },
+      layerName: { en: groupName, fr: groupName },
       isLayerGroup: true,
       listOfLayerEntryConfig,
     });
@@ -143,19 +210,17 @@ export abstract class AbstractGeoviewEsriLayerConfig extends AbstractGeoviewLaye
    */
   async #fetchListOfLayerMetadata(listOfLayerEntryConfig: EntryConfigBaseClass[]): Promise<void> {
     const listOfLayerMetadata: Promise<TypeJsonObject | void>[] = [];
-    const listOfGroupFlag: boolean[] = [];
     listOfLayerEntryConfig.forEach((subLayerConfig) => {
-      if (layerEntryIsGroupLayer(subLayerConfig)) {
-        listOfGroupFlag.push(true);
-        listOfLayerMetadata.push(this.#fetchListOfLayerMetadata(subLayerConfig.listOfLayerEntryConfig));
-      } else if (layerEntryIsAbstractBaseLayerEntryConfig(subLayerConfig)) {
-        listOfGroupFlag.push(false);
-        listOfLayerMetadata.push(subLayerConfig.fetchLayerMetadata());
+      if (!subLayerConfig.errorDetected) {
+        if (layerEntryIsGroupLayer(subLayerConfig)) {
+          listOfLayerMetadata.push(this.#fetchListOfLayerMetadata(subLayerConfig.listOfLayerEntryConfig));
+        } else if (layerEntryIsAbstractBaseLayerEntryConfig(subLayerConfig)) {
+          listOfLayerMetadata.push(subLayerConfig.fetchLayerMetadata());
+        }
       }
     });
 
-    const result = await Promise.allSettled(listOfLayerMetadata);
-    logger.logInfo('listOfLayerMetadata', result);
+    await Promise.allSettled(listOfLayerMetadata);
   }
 
   /** ***************************************************************************************************************************

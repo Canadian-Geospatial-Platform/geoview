@@ -4,6 +4,7 @@ import Collection from 'ol/Collection';
 import { ImageArcGISRest, ImageWMS, Source, VectorTile, XYZ } from 'ol/source';
 import Static from 'ol/source/ImageStatic';
 import VectorSource from 'ol/source/Vector';
+import LayerGroup from 'ol/layer/Group';
 
 import { GeoCore } from '@/geo/layer/other/geocore';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
@@ -56,6 +57,7 @@ import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor
 import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
 import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
 import { AbstractBaseLayerEntryConfig } from '@/core/utils/config/validation-classes/abstract-base-layer-entry-config';
+import { AbstractBaseLayer } from './gv-layers/abstract-base-layer';
 import { AbstractGVLayer } from './gv-layers/abstract-gv-layer';
 import { GVEsriDynamic } from './gv-layers/raster/gv-esri-dynamic';
 import { GVEsriImage } from './gv-layers/raster/gv-esri-image';
@@ -68,6 +70,7 @@ import { GVOGCFeature } from './gv-layers/vector/gv-ogc-feature';
 import { GVVectorTiles } from './gv-layers/vector/gv-vector-tiles';
 import { GVWFS } from './gv-layers/vector/gv-wfs';
 import { GVCSV } from './gv-layers/vector/gv-csv';
+import { GVGroupLayer } from './gv-layers/gv-group-layer';
 import { EsriFeatureLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/core/utils/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { GeoJSONLayerEntryConfig } from '@/core/utils/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
@@ -83,6 +86,7 @@ import { CsvLayerEntryConfig } from '@/core/utils/config/validation-classes/vect
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { TypeLegendItem } from '@/core/components/layers/types';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
+import { GroupLayerEntryConfig } from '@/core/utils/config/validation-classes/group-layer-entry-config';
 
 export type GeoViewLayerAddedResult = {
   layer: AbstractGeoViewLayer;
@@ -133,7 +137,7 @@ export class LayerApi {
   #olLayers: { [layerPath: string]: BaseLayer } = {};
 
   // Dictionary holding all the new GVLayers
-  #gvLayers: { [layerPath: string]: AbstractGVLayer } = {};
+  #gvLayers: { [layerPath: string]: AbstractBaseLayer } = {};
 
   /** used to keep a reference of highlighted layer */
   #highlightedLayer: { layerPath?: string; originalOpacity?: number } = {
@@ -233,7 +237,7 @@ export class LayerApi {
    * Temporary new function for migration purposes, replacing getGeoviewLayers
    * @returns The list of new Geoview Layers
    */
-  getGeoviewLayersNew(): AbstractGVLayer[] {
+  getGeoviewLayersNew(): AbstractBaseLayer[] {
     return Object.values(this.#gvLayers);
   }
 
@@ -242,7 +246,7 @@ export class LayerApi {
    * @param {string} layerPath - The layer path
    * @returns The new Geoview Layer
    */
-  getGeoviewLayerNew(layerPath: string): AbstractGVLayer | undefined {
+  getGeoviewLayerNew(layerPath: string): AbstractBaseLayer | undefined {
     return this.#gvLayers[layerPath];
   }
 
@@ -265,7 +269,7 @@ export class LayerApi {
    * @param {string} layerPath - The layer path
    * @returns The new Geoview Layer
    */
-  getGeoviewLayersHybrid(): AbstractGeoViewLayer[] | AbstractGVLayer[] {
+  getGeoviewLayersHybrid(): AbstractGeoViewLayer[] | AbstractBaseLayer[] {
     // TODO: Refactor - This function will be replaced to jump to the new layer classes model
     // If new mode
     if (LayerApi.LAYERS_HYBRID_MODE) return this.getGeoviewLayersNew();
@@ -279,7 +283,7 @@ export class LayerApi {
    * @param {string} layerPath - The layer path
    * @returns The new Geoview Layer or the old Geoview Layer
    */
-  getGeoviewLayerHybrid(layerPath: string): AbstractGeoViewLayer | AbstractGVLayer | undefined {
+  getGeoviewLayerHybrid(layerPath: string): AbstractGeoViewLayer | AbstractBaseLayer | undefined {
     // TODO: Refactor - This function will be replaced to jump to the new layer classes model
     // If new mode
     if (LayerApi.LAYERS_HYBRID_MODE) return this.getGeoviewLayerNew(layerPath);
@@ -669,7 +673,7 @@ export class LayerApi {
           if (gvLayer) return gvLayer.getOLLayer();
         }
 
-        // Don't provie any layer, working in old mode
+        // Don't provide any layer, working in old mode
         return undefined;
       });
 
@@ -681,6 +685,15 @@ export class LayerApi {
         // Keep a reference
         // This is tempting to put in the onLayerRequesting handler, but this one here also traps the LayerGroups
         this.#olLayers[event.config.layerPath] = event.layer;
+
+        // If new layers mode, create the corresponding GVLayer
+        if (LayerApi.LAYERS_HYBRID_MODE) {
+          // If group layer was created
+          if (event.layer instanceof LayerGroup && event.config instanceof GroupLayerEntryConfig) {
+            // Create the GV Group Layer
+            this.#createGVGroupLayer(this.getMapId(), event.layer, event.config);
+          }
+        }
       });
 
       // Create a promise about the layer will be on the map
@@ -792,98 +805,104 @@ export class LayerApi {
     mapId: string,
     geoviewLayer: AbstractGeoViewLayer,
     olSource: Source,
-    config: ConfigBaseClass,
+    layerConfig: ConfigBaseClass,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     extraConfig?: any
   ): AbstractGVLayer | undefined {
     // If new mode
     let metadata;
+    let layerMetadata;
     let timeDimension;
     let style;
     if (LayerApi.LAYERS_HYBRID_MODE) {
       // Get the metadata and the time dimension information as processed
-      metadata = geoviewLayer.getLayerMetadata(config.layerPath);
-      timeDimension = geoviewLayer.getTemporalDimension(config.layerPath);
-      style = geoviewLayer.getStyle(config.layerPath);
+      metadata = geoviewLayer.metadata;
+      layerMetadata = geoviewLayer.getLayerMetadata(layerConfig.layerPath);
+      timeDimension = geoviewLayer.getTemporalDimension(layerConfig.layerPath);
+      style = geoviewLayer.getStyle(layerConfig.layerPath);
 
       // HACK: INJECT CONFIGURATION STUFF PRETENDNG THEY WERE PROCESSED
       // GV Keep this code commented in the source base for now
-      // if (config.layerPath === 'esriFeatureLYR5/0') {
+      // if (layerConfig.layerPath === 'esriFeatureLYR5/0') {
       //   metadata = LayerMockup.configTop100Metadata();
-      // } else if (config.layerPath === 'nonmetalmines/5') {
+      // } else if (layerConfig.layerPath === 'nonmetalmines/5') {
       //   metadata = LayerMockup.configNonMetalMetadata();
-      // } else if (config.layerPath === 'airborne_radioactivity/1') {
+      // } else if (layerConfig.layerPath === 'airborne_radioactivity/1') {
       //   metadata = LayerMockup.configAirborneMetadata();
-      // } else if (config.layerPath === 'geojsonLYR1/geojsonLYR1/polygons.json') {
+      // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/polygons.json') {
       //   metadata = LayerMockup.configPolygonsMetadata();
-      // } else if (config.layerPath === 'geojsonLYR1/geojsonLYR1/lines.json') {
+      // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/lines.json') {
       //   metadata = LayerMockup.configLinesMetadata();
-      // } else if (config.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/icon_points.json') {
+      // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/icon_points.json') {
       //   metadata = LayerMockup.configIconPointsMetadata();
-      // } else if (config.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points.json') {
+      // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points.json') {
       //   metadata = LayerMockup.configPointsMetadata();
-      // } else if (config.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points_1.json') {
+      // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points_1.json') {
       //   metadata = LayerMockup.configPoints1Metadata();
-      // } else if (config.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points_2.json') {
+      // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points_2.json') {
       //   metadata = LayerMockup.configPoints2Metadata();
-      // } else if (config.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points_3.json') {
+      // } else if (layerConfig.layerPath === 'geojsonLYR1/geojsonLYR1/point-feature-group/points_3.json') {
       //   metadata = LayerMockup.configPoints3Metadata();
-      // } else if (config.layerPath === 'historical-flood/0') {
+      // } else if (layerConfig.layerPath === 'historical-flood/0') {
       //   metadata = LayerMockup.configHistoricalFloodMetadata();
       //   timeDimension = LayerMockup.configHistoricalFloodTemporalDimension();
-      // } else if (config.layerPath === 'uniqueValueId/1') {
+      // } else if (layerConfig.layerPath === 'uniqueValueId/1') {
       //   metadata = LayerMockup.configCESIMetadata();
       //   // timeDimension = LayerMockup.configHistoricalFloodTemporalDimension();
-      // } else if (config.layerPath === 'esriFeatureLYR1/0') {
+      // } else if (layerConfig.layerPath === 'esriFeatureLYR1/0') {
       //   metadata = LayerMockup.configTemporalTestBedMetadata();
       //   // timeDimension = LayerMockup.configHistoricalFloodTemporalDimension();
-      // } else if (config.layerPath === 'wmsLYR1-spatiotemporel/RADAR_1KM_RSNO') {
+      // } else if (layerConfig.layerPath === 'wmsLYR1-spatiotemporel/RADAR_1KM_RSNO') {
       //   metadata = LayerMockup.configRadarMetadata();
       //   timeDimension = LayerMockup.configRadarTemporalDimension();
-      // } else if (config.layerPath === 'MSI/msi-94-or-more') {
+      // } else if (layerConfig.layerPath === 'MSI/msi-94-or-more') {
       //   metadata = LayerMockup.configMSIMetadata();
       //   timeDimension = LayerMockup.configMSITemporalDimension();
       // }
 
       // If good config
-      if (config instanceof AbstractBaseLayerEntryConfig) {
+      if (layerConfig instanceof AbstractBaseLayerEntryConfig) {
         // If any metadata
-        if (metadata) config.setMetadata(metadata);
+        if (metadata) layerConfig.setServiceMetadata(metadata);
+        if (layerMetadata) layerConfig.setLayerMetadata(layerMetadata);
       }
     }
 
     // Create the right GV Layer based on the OLLayer and config type
     let gvLayer;
-    if (olSource instanceof ImageArcGISRest && config instanceof EsriDynamicLayerEntryConfig)
-      gvLayer = new GVEsriDynamic(mapId, olSource, config);
-    else if (olSource instanceof ImageArcGISRest && config instanceof EsriImageLayerEntryConfig)
-      gvLayer = new GVEsriImage(mapId, olSource, config);
-    else if (olSource instanceof Static && config instanceof ImageStaticLayerEntryConfig)
-      gvLayer = new GVImageStatic(mapId, olSource, config);
-    else if (olSource instanceof ImageWMS && config instanceof OgcWmsLayerEntryConfig)
-      gvLayer = new GVWMS(mapId, olSource, config, extraConfig.layerCapabilities);
-    else if (olSource instanceof VectorSource && config instanceof EsriFeatureLayerEntryConfig)
-      gvLayer = new GVEsriFeature(mapId, olSource, config);
-    else if (olSource instanceof VectorSource && config instanceof GeoJSONLayerEntryConfig)
-      gvLayer = new GVGeoJSON(mapId, olSource, config);
-    else if (olSource instanceof VectorSource && config instanceof OgcFeatureLayerEntryConfig)
-      gvLayer = new GVOGCFeature(mapId, olSource, config);
-    else if (olSource instanceof VectorSource && config instanceof WfsLayerEntryConfig) gvLayer = new GVWFS(mapId, olSource, config);
-    else if (olSource instanceof VectorSource && config instanceof CsvLayerEntryConfig) gvLayer = new GVCSV(mapId, olSource, config);
-    else if (olSource instanceof VectorTile && config instanceof VectorTilesLayerEntryConfig)
-      gvLayer = new GVVectorTiles(mapId, olSource, config);
-    else if (olSource instanceof XYZ && config instanceof XYZTilesLayerEntryConfig) gvLayer = new GVXYZTiles(mapId, olSource, config);
+    if (olSource instanceof ImageArcGISRest && layerConfig instanceof EsriDynamicLayerEntryConfig)
+      gvLayer = new GVEsriDynamic(mapId, olSource, layerConfig);
+    else if (olSource instanceof ImageArcGISRest && layerConfig instanceof EsriImageLayerEntryConfig)
+      gvLayer = new GVEsriImage(mapId, olSource, layerConfig);
+    else if (olSource instanceof Static && layerConfig instanceof ImageStaticLayerEntryConfig)
+      gvLayer = new GVImageStatic(mapId, olSource, layerConfig);
+    else if (olSource instanceof ImageWMS && layerConfig instanceof OgcWmsLayerEntryConfig)
+      gvLayer = new GVWMS(mapId, olSource, layerConfig, extraConfig.layerCapabilities);
+    else if (olSource instanceof VectorSource && layerConfig instanceof EsriFeatureLayerEntryConfig)
+      gvLayer = new GVEsriFeature(mapId, olSource, layerConfig);
+    else if (olSource instanceof VectorSource && layerConfig instanceof GeoJSONLayerEntryConfig)
+      gvLayer = new GVGeoJSON(mapId, olSource, layerConfig);
+    else if (olSource instanceof VectorSource && layerConfig instanceof OgcFeatureLayerEntryConfig)
+      gvLayer = new GVOGCFeature(mapId, olSource, layerConfig);
+    else if (olSource instanceof VectorSource && layerConfig instanceof WfsLayerEntryConfig)
+      gvLayer = new GVWFS(mapId, olSource, layerConfig);
+    else if (olSource instanceof VectorSource && layerConfig instanceof CsvLayerEntryConfig)
+      gvLayer = new GVCSV(mapId, olSource, layerConfig);
+    else if (olSource instanceof VectorTile && layerConfig instanceof VectorTilesLayerEntryConfig)
+      gvLayer = new GVVectorTiles(mapId, olSource, layerConfig);
+    else if (olSource instanceof XYZ && layerConfig instanceof XYZTilesLayerEntryConfig)
+      gvLayer = new GVXYZTiles(mapId, olSource, layerConfig);
 
     // If created
     if (gvLayer) {
       // Keep track
-      this.#gvLayers[config.layerPath] = gvLayer;
+      this.#gvLayers[layerConfig.layerPath] = gvLayer;
 
       // If any time dimension to inject
       if (timeDimension) gvLayer.setTemporalDimension(timeDimension);
 
       // If any style to inject
-      if (style) gvLayer.setStyle(config.layerPath, style);
+      if (style) gvLayer.setStyle(layerConfig.layerPath, style);
 
       // Initialize the layer, triggering the loaded/error status
       gvLayer.init();
@@ -893,8 +912,27 @@ export class LayerApi {
     }
 
     // Couldn't create it
-    logger.logError(`Unsupported GVLayer for ${config.layerPath}`);
+    logger.logError(`Unsupported GVLayer for ${layerConfig.layerPath}`);
     return undefined;
+  }
+
+  /**
+   * Creates a GVLayer based on the provided OLLayer and layer config.
+   * @param mapId - The map id
+   * @param geoviewLayer - The GeoView layer (just to retrieve config-calculated information from it)
+   * @param olLayer - The OpenLayer layer
+   * @param config - The layer config
+   * @returns A new GV Layer which is kept track of in LayerApi and initialized
+   */
+  #createGVGroupLayer(mapId: string, olLayerGroup: LayerGroup, layerConfig: GroupLayerEntryConfig): GVGroupLayer | undefined {
+    // Create the GV Group Layer
+    const gvGroupLayer = new GVGroupLayer(mapId, olLayerGroup, layerConfig);
+
+    // Keep track
+    this.#gvLayers[layerConfig.layerPath] = gvGroupLayer;
+
+    // Return the GV Group Layer
+    return gvGroupLayer;
   }
 
   /**
@@ -996,7 +1034,7 @@ export class LayerApi {
       const geoviewLayer = this.getGeoviewLayerHybrid(layerConfig.layerPath);
 
       // If the layer is loaded AND flag is true to use time dimension, continue
-      if (geoviewLayer && geoviewLayer.getIsTimeAware()) {
+      if ((geoviewLayer instanceof AbstractGeoViewLayer || geoviewLayer instanceof AbstractGVLayer) && geoviewLayer.getIsTimeAware()) {
         // Check and add time slider layer when needed
         TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.getMapId(), layerConfig);
       }
@@ -1351,19 +1389,22 @@ export class LayerApi {
       MapEventProcessor.setOrToggleMapLayerVisibility(this.getMapId(), layerPath, true);
     }
 
-    // Assign value to registered layer. This is use by applyFilter function to set visibility
-    // TODO: check if we need to refactor to centralize attribute setting....
-    // TODO: know issue when we toggle a default visibility item https://github.com/Canadian-Geospatial-Platform/geoview/issues/1564
-    if (layer?.getStyle(layerPath)?.[item.geometryType]?.styleType === 'classBreaks') {
-      const geometryStyleConfig = layer.getStyle(layerPath)![item.geometryType] as TypeClassBreakStyleConfig;
-      const classBreakStyleInfo = geometryStyleConfig.classBreakStyleInfo.find((styleInfo) => styleInfo.label === item.name);
-      if (classBreakStyleInfo) classBreakStyleInfo.visible = visibility;
-      else geometryStyleConfig.defaultVisible = visibility;
-    } else if (layer?.getStyle(layerPath)?.[item.geometryType]?.styleType === 'uniqueValue') {
-      const geometryStyleConfig = layer.getStyle(layerPath)![item.geometryType] as TypeUniqueValueStyleConfig;
-      const uniqueStyleInfo = geometryStyleConfig.uniqueValueStyleInfo.find((styleInfo) => styleInfo.label === item.name);
-      if (uniqueStyleInfo) uniqueStyleInfo.visible = visibility;
-      else geometryStyleConfig.defaultVisible = visibility;
+    // If the layer is a regular layer (not a group)
+    if (layer instanceof AbstractGeoViewLayer || layer instanceof AbstractGVLayer) {
+      // Assign value to registered layer. This is use by applyFilter function to set visibility
+      // TODO: check if we need to refactor to centralize attribute setting....
+      // TODO: know issue when we toggle a default visibility item https://github.com/Canadian-Geospatial-Platform/geoview/issues/1564
+      if (layer?.getStyle(layerPath)?.[item.geometryType]?.styleType === 'classBreaks') {
+        const geometryStyleConfig = layer.getStyle(layerPath)![item.geometryType] as TypeClassBreakStyleConfig;
+        const classBreakStyleInfo = geometryStyleConfig.classBreakStyleInfo.find((styleInfo) => styleInfo.label === item.name);
+        if (classBreakStyleInfo) classBreakStyleInfo.visible = visibility;
+        else geometryStyleConfig.defaultVisible = visibility;
+      } else if (layer?.getStyle(layerPath)?.[item.geometryType]?.styleType === 'uniqueValue') {
+        const geometryStyleConfig = layer.getStyle(layerPath)![item.geometryType] as TypeUniqueValueStyleConfig;
+        const uniqueStyleInfo = geometryStyleConfig.uniqueValueStyleInfo.find((styleInfo) => styleInfo.label === item.name);
+        if (uniqueStyleInfo) uniqueStyleInfo.visible = visibility;
+        else geometryStyleConfig.defaultVisible = visibility;
+      }
     }
 
     // Update the legend layers if necessary
@@ -1516,8 +1557,11 @@ export class LayerApi {
   #gatherAllBoundsRec(layerConfig: ConfigBaseClass, bounds: Extent[]): void {
     // If a leaf
     if (!layerEntryIsGroupLayer(layerConfig)) {
+      // Get the layer
+      const layer = this.getGeoviewLayerHybrid(layerConfig.layerPath) as AbstractGeoViewLayer | AbstractGVLayer;
+
       // Get the bounds of the layer
-      const calculatedBounds = this.getGeoviewLayerHybrid(layerConfig.layerPath)?.getBounds(layerConfig.layerPath);
+      const calculatedBounds = layer.getBounds(layerConfig.layerPath);
       if (calculatedBounds) bounds.push(calculatedBounds);
     } else {
       // Is a group

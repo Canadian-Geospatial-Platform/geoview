@@ -1,3 +1,5 @@
+import defaultsDeep from 'lodash/defaultsDeep';
+
 import { CV_CONST_SUB_LAYER_TYPES, CV_LAYER_GROUP_SCHEMA_PATH } from '@config/types/config-constants';
 import { TypeJsonArray, TypeJsonObject } from '@config/types/config-types';
 import { AbstractGeoviewLayerConfig } from '@config/types/classes/geoview-config/abstract-geoview-layer-config';
@@ -18,7 +20,6 @@ export class GroupLayerEntryConfig extends EntryConfigBaseClass {
   /**
    * The class constructor.
    * @param {TypeJsonObject} layerConfig The sublayer configuration we want to instanciate.
-   * @param {TypeLayerInitialSettings | TypeJsonObject} initialSettings The initial settings inherited.
    * @param {TypeDisplayLanguage} language The initial language to use when interacting with the geoview layer.
    * @param {AbstractGeoviewLayerConfig} geoviewLayerConfig The GeoView instance that owns the sublayer.
    * @param {EntryConfigBaseClass} parentNode The The parent node that owns this layer or undefined if it is the root layer.
@@ -26,21 +27,29 @@ export class GroupLayerEntryConfig extends EntryConfigBaseClass {
    */
   constructor(
     layerConfig: TypeJsonObject,
-    initialSettings: TypeLayerInitialSettings | TypeJsonObject,
     language: TypeDisplayLanguage,
     geoviewLayerConfig: AbstractGeoviewLayerConfig,
     parentNode?: EntryConfigBaseClass
   ) {
-    super(layerConfig, initialSettings, language, geoviewLayerConfig, parentNode);
+    super(layerConfig, language, geoviewLayerConfig, parentNode);
     this.listOfLayerEntryConfig = (layerConfig.listOfLayerEntryConfig as TypeJsonArray)
       .map((subLayerConfig) => {
-        if (layerEntryIsGroupLayer(subLayerConfig))
-          return new GroupLayerEntryConfig(subLayerConfig, initialSettings, language, geoviewLayerConfig, this);
-        return geoviewLayerConfig.createLeafNode(subLayerConfig, initialSettings, language, geoviewLayerConfig, this);
+        if (layerEntryIsGroupLayer(subLayerConfig)) return new GroupLayerEntryConfig(subLayerConfig, language, geoviewLayerConfig, this);
+        return geoviewLayerConfig.createLeafNode(subLayerConfig, language, geoviewLayerConfig, this);
       })
       .filter((subLayerConfig) => {
         return subLayerConfig;
       }) as EntryConfigBaseClass[];
+  }
+
+  /**
+   * Apply default value to undefined fields.
+   */
+  override applyDefaultValueToUndefinedFields(initialSettings: TypeLayerInitialSettings): void {
+    this.initialSettings = defaultsDeep(this.initialSettings, initialSettings);
+    this.listOfLayerEntryConfig.forEach((subLayer) => {
+      subLayer.applyDefaultValueToUndefinedFields(this.initialSettings);
+    });
   }
 
   /**
