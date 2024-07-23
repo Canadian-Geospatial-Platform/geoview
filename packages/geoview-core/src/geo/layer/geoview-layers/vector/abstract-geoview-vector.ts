@@ -178,34 +178,37 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           if (layerConfig.schemaTag === CONST_LAYER_TYPES.CSV) {
             // Convert the CSV to features
             features = AbstractGeoViewVector.convertCsv(this.mapId, xhr.responseText, layerConfig as VectorLayerEntryConfig);
+          } else if (layerConfig.schemaTag === CONST_LAYER_TYPES.ESRI_FEATURE) {
+            // Fetch the features text array
+            const esriFeaturesArray = await AbstractGeoViewVector.getEsriFeatures(
+              layerConfig.layerPath,
+              url as string,
+              JSON.parse(xhr.responseText).count,
+              this.getLayerMetadata(layerConfig.layerPath)?.maxRecordCount as number | undefined
+            );
+
+            // Convert to features
+            features = [];
+            esriFeaturesArray.forEach((responseText: string) => {
+              features!.push(
+                ...(vectorSource.getFormat()!.readFeatures(responseText, {
+                  ...readOptions,
+                  featureProjection: projection,
+                  extent,
+                }) as Feature[])
+              );
+            });
           } else {
             features = vectorSource.getFormat()!.readFeatures(xhr.responseText, {
               ...readOptions,
               featureProjection: projection,
               extent,
             }) as Feature[];
-
-            // ESRI Feature layer response will have exceededTransferLimit property set to true if there are more features
-            // GV Some layers will return XML, skip
-            if (xhr.responseText.search('<?xml ') === -1 && JSON.parse(xhr.responseText).exceededTransferLimit) {
-              // Get response text for additional features
-              const getAdditionalFeaturesArray = await this.#getAdditionalFeatures(layerConfig, url! as string, features.length);
-              // Add them to features
-              getAdditionalFeaturesArray.forEach((responseText: string) => {
-                features!.push(
-                  ...(vectorSource.getFormat()!.readFeatures(responseText, {
-                    ...readOptions,
-                    featureProjection: projection,
-                    extent,
-                  }) as Feature[])
-                );
-              });
-            }
           }
           /* For vector layers, all fields of type date must be specified in milliseconds (number) that has elapsed since the epoch,
-             which is defined as the midnight at the beginning of January 1, 1970, UTC (equivalent to the UNIX epoch). If the date type
-             is not a number, we assume it is provided as an ISO UTC string. If not, the result is unpredictable.
-          */
+               which is defined as the midnight at the beginning of January 1, 1970, UTC (equivalent to the UNIX epoch). If the date type
+               is not a number, we assume it is provided as an ISO UTC string. If not, the result is unpredictable.
+            */
           if (features) {
             features.forEach((feature) => {
               const featureId = feature.get('OBJECTID') ? feature.get('OBJECTID') : getUid(feature);
@@ -268,44 +271,64 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Fetch additional features from ESRI Feature services with a max record count.
+   * Fetch features from ESRI Feature services with query and feature limits.
    *
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration.
+   * @param {string} layerPath - The layer path of the layer.
    * @param {string} url - The base url for the service.
-   * @param {number} maxRecordCount - The max record count from the service.
-   * @param {number} resultOffset - The current offset to use for the features.
+   * @param {number} featureCount - The number of features in the layer.
+   * @param {number} maxRecordCount - The max features per query from the service.
+   * @param {number} featureLimit - The maximum number of features to fetch per query.
+   * @param {number} queryLimit - The maximum number of queries to run at once.
    * @returns {Promise<string[]>} An array of the response text for the features.
    * @private
    */
+  // GV: featureLimit and queryLimit ideals vary with the service, 500/10 was a good middle ground for large layers tested
+  // TODO: Add options for featureLimit and queryLimit to config
   // TODO: Will need to move with createVectorSource
-  async #getAdditionalFeatures(
-    layerConfig: AbstractBaseLayerEntryConfig,
+  static getEsriFeatures(
+    layerPath: string,
     url: string,
-    maxRecordCount: number,
-    resultOffset?: number
+    featureCount: number,
+    maxRecordCount?: number,
+    featureLimit: number = 500,
+    queryLimit: number = 10
   ): Promise<string[]> {
-    const responseTextArray: string[] = [];
-    // Add resultOffset to layer query
-    const nextUrl = `${url}&resultOffset=${resultOffset || maxRecordCount}`;
-    try {
-      // Fetch response text and push to array
-      const response = await fetch(nextUrl);
-      const responseText = await response.text();
-      responseTextArray.push(responseText);
-      // Check if there are additional features to fetch
-      if (JSON.parse(responseText).exceededTransferLimit)
-        responseTextArray.push(
-          ...(await this.#getAdditionalFeatures(
-            layerConfig,
-            url,
-            maxRecordCount,
-            resultOffset ? resultOffset + maxRecordCount : 2 * maxRecordCount
-          ))
-        );
-    } catch (error) {
-      logger.logError(`Error loading additional features for ${layerConfig.layerPath} from ${nextUrl}`, error);
+    // Update url
+    const baseUrl = url.replace('&where=1%3D1&returnCountOnly=true', `&outfields=*`);
+    const featureFetchLimit = maxRecordCount && maxRecordCount < featureLimit ? maxRecordCount : featureLimit;
+
+    // Create array of url's to call
+    const urlArray: string[] = [];
+    for (let i = 0; i < featureCount; i += featureFetchLimit) {
+      urlArray.push(`${baseUrl}&where=OBJECTID+<=+${i + featureFetchLimit}&resultOffset=${i}`);
     }
-    return responseTextArray;
+
+    const promises: Promise<string>[] = [];
+    let currentIndex = 0;
+
+    // Gets the next set of features, and reruns on completion
+    const fetchNext = (): void => {
+      if (currentIndex >= urlArray.length) return;
+
+      // Get next url and update index
+      const currentUrl = urlArray[currentIndex];
+      currentIndex++;
+
+      // Fetch from current url and initiate next fetch when complete
+      try {
+        const result = fetch(currentUrl).then((response) => response.text());
+        promises.push(result);
+      } catch (error) {
+        logger.logError(`Error loading features for ${layerPath} from ${currentUrl}`, error);
+      } finally {
+        fetchNext();
+      }
+    };
+
+    // Start fetching queryLimit number of times
+    for (let i = 0; i < queryLimit; i++) fetchNext();
+
+    return Promise.all(promises);
   }
 
   /** ***************************************************************************************************************************
