@@ -67,15 +67,15 @@ export const getSxClasses = (theme: Theme): any => ({
     },
     height: 'calc(100% - 64px)',
     opacity: 0,
-      animation: 'fadein 500ms ease-in-out forwards',
-      animationDelay: '500ms',
-      '@keyframes fadein': {
-        from: {
-          opacity: 0,
-        },
-        to: {
-          opacity: 1,
-        },
+    animation: 'fadein 500ms ease-in-out forwards',
+    animationDelay: '400ms',
+    '@keyframes fadein': {
+      from: {
+        opacity: 0,
       },
+      to: {
+        opacity: 1,
+      },
+    },
   },
 });
