@@ -1,5 +1,6 @@
 import { ReactElement } from 'react';
 import { FocusTrap } from '@/ui';
+import { logger } from '@/core/utils/logger';
 
 interface FocusTrapContainerType {
   children: ReactElement;
@@ -13,5 +14,8 @@ interface FocusTrapContainerType {
  * @returns {JSX.Element}
  */
 export function FocusTrapContainer({ children, open }: FocusTrapContainerType): JSX.Element {
+  // Log
+  logger.logTraceRender('component/common/FocusTrapContainer');
+
   return <FocusTrap open={open}>{children}</FocusTrap>;
 }
