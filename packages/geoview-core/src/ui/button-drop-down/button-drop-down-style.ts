@@ -5,7 +5,7 @@ import { Theme } from '@mui/material/styles';
 export const getSxClasses = (theme: Theme): any => ({
   buttonDropDown: {
     display: 'flex',
-    fontSize: theme?.typography?.fontSize,
+    //fontSize: theme?.typography?.fontSize,
     height: 50,
   },
   buttonText: {},
