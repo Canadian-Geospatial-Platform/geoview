@@ -2,7 +2,7 @@
 import { CSSProperties } from 'react';
 
 import { useTheme } from '@mui/material/styles';
-import { CircularProgress as MaterialCircularProgress, CircularProgressProps, Box } from '@mui/material';
+import { CircularProgress as MaterialCircularProgress, CircularProgressProps, Box, Fade } from '@mui/material';
 
 import { getSxClasses } from './circular-progress-style';
 
@@ -27,12 +27,11 @@ export function CircularProgress(props: TypeCircularProgressProps): JSX.Element 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  return !isLoaded ? (
-    <Box sx={{ ...sxClasses.loading, ...sx }} style={{ ...style }}>
-      <MaterialCircularProgress sx={sxClasses.progress} {...rest} />
-    </Box>
-  ) : (
-    // eslint-disable-next-line react/jsx-no-useless-fragment
-    <></>
-  );
+  return (
+    <Fade in={!isLoaded} timeout={500} mountOnEnter unmountOnExit>
+      <Box sx={{ ...sxClasses.loading, ...sx }} style={{ ...style }}>
+        <MaterialCircularProgress sx={sxClasses.progress} {...rest} />
+      </Box>
+    </Fade>
+  )
 }
